@@ -136,7 +136,7 @@ public class WorldUpgrader {
 									LOGGER.warn("Chunk {} has invalid position {}", chunkPos, chunkPos2);
 								}
 
-								boolean bl3 = i < SharedConstants.getCurrentVersion().getWorldVersion();
+								boolean bl3 = i < SharedConstants.getCurrentVersion().getDataVersion().getVersion();
 								if (this.eraseCache) {
 									bl3 = bl3 || compoundTag2.contains("Heightmaps");
 									compoundTag2.remove("Heightmaps");

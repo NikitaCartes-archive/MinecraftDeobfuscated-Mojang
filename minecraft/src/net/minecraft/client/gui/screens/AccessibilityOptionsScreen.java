@@ -22,15 +22,16 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 			options.chatOpacity(),
 			options.chatLineSpacing(),
 			options.chatDelay(),
-			options.autoJump(),
+			options.notificationDisplayTime(),
 			options.toggleCrouch(),
 			options.toggleSprint(),
 			options.screenEffectScale(),
 			options.fovEffectScale(),
-			options.darkMojangStudiosBackground(),
-			options.hideLightningFlash(),
 			options.darknessEffectScale(),
-			options.panoramaSpeed()
+			options.hideLightningFlash(),
+			options.autoJump(),
+			options.panoramaSpeed(),
+			options.darkMojangStudiosBackground()
 		};
 	}
 

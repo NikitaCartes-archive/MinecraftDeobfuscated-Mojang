@@ -13,6 +13,8 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleAnimate(ClientboundAnimatePacket clientboundAnimatePacket);
 
+	void handleHurtAnimation(ClientboundHurtAnimationPacket clientboundHurtAnimationPacket);
+
 	void handleAwardStats(ClientboundAwardStatsPacket clientboundAwardStatsPacket);
 
 	void handleAddOrRemoveRecipes(ClientboundRecipePacket clientboundRecipePacket);
@@ -212,4 +214,6 @@ public interface ClientGamePacketListener extends PacketListener {
 	void handleCustomChatCompletions(ClientboundCustomChatCompletionsPacket clientboundCustomChatCompletionsPacket);
 
 	void handleEnabledFeatures(ClientboundUpdateEnabledFeaturesPacket clientboundUpdateEnabledFeaturesPacket);
+
+	void handleBundlePacket(ClientboundBundlePacket clientboundBundlePacket);
 }

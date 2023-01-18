@@ -20,6 +20,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -28,7 +29,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class FillBiomeCommand {
-	private static final int MAX_FILL_AREA = 32768;
 	public static final SimpleCommandExceptionType ERROR_NOT_LOADED = new SimpleCommandExceptionType(Component.translatable("argument.pos.unloaded"));
 	private static final Dynamic2CommandExceptionType ERROR_VOLUME_TOO_LARGE = new Dynamic2CommandExceptionType(
 		(object, object2) -> Component.translatable("commands.fillbiome.toobig", object, object2)
@@ -106,15 +106,16 @@ public class FillBiomeCommand {
 		BlockPos blockPos4 = quantize(blockPos2);
 		BoundingBox boundingBox = BoundingBox.fromCorners(blockPos3, blockPos4);
 		int i = boundingBox.getXSpan() * boundingBox.getYSpan() * boundingBox.getZSpan();
-		if (i > 32768) {
-			throw ERROR_VOLUME_TOO_LARGE.create(32768, i);
+		int j = commandSourceStack.getLevel().getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
+		if (i > j) {
+			throw ERROR_VOLUME_TOO_LARGE.create(j, i);
 		} else {
 			ServerLevel serverLevel = commandSourceStack.getLevel();
 			List<ChunkAccess> list = new ArrayList();
 
-			for (int j = SectionPos.blockToSectionCoord(boundingBox.minZ()); j <= SectionPos.blockToSectionCoord(boundingBox.maxZ()); j++) {
-				for (int k = SectionPos.blockToSectionCoord(boundingBox.minX()); k <= SectionPos.blockToSectionCoord(boundingBox.maxX()); k++) {
-					ChunkAccess chunkAccess = serverLevel.getChunk(k, j, ChunkStatus.FULL, false);
+			for (int k = SectionPos.blockToSectionCoord(boundingBox.minZ()); k <= SectionPos.blockToSectionCoord(boundingBox.maxZ()); k++) {
+				for (int l = SectionPos.blockToSectionCoord(boundingBox.minX()); l <= SectionPos.blockToSectionCoord(boundingBox.maxX()); l++) {
+					ChunkAccess chunkAccess = serverLevel.getChunk(l, k, ChunkStatus.FULL, false);
 					if (chunkAccess == null) {
 						throw ERROR_NOT_LOADED.create();
 					}

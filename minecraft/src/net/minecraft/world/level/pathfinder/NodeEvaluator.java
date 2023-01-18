@@ -53,7 +53,7 @@ public abstract class NodeEvaluator {
 
 	public abstract int getNeighbors(Node[] nodes, Node node);
 
-	public abstract BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob, int l, int m, int n, boolean bl, boolean bl2);
+	public abstract BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob);
 
 	public abstract BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k);
 

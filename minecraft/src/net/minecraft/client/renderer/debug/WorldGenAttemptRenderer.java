@@ -37,7 +37,6 @@ public class WorldGenAttemptRenderer implements DebugRenderer.SimpleDebugRendere
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.disableTexture();
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -63,6 +62,5 @@ public class WorldGenAttemptRenderer implements DebugRenderer.SimpleDebugRendere
 		}
 
 		tesselator.end();
-		RenderSystem.enableTexture();
 	}
 }

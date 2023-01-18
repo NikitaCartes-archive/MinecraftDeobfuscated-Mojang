@@ -35,7 +35,6 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		LevelAccessor levelAccessor = this.minecraft.level;
 		RenderSystem.disableBlend();
-		RenderSystem.disableTexture();
 		RenderSystem.enableDepthTest();
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		BlockPos blockPos = new BlockPos(d, 0.0, f);
@@ -77,7 +76,6 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		tesselator.end();
-		RenderSystem.enableTexture();
 	}
 
 	private Vector3f getColor(Heightmap.Types types) {

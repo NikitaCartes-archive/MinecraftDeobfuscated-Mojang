@@ -64,6 +64,15 @@ public class EditWorldScreen extends Screen {
 
 	@Override
 	protected void init() {
+		this.renameButton = Button.builder(Component.translatable("selectWorld.edit.save"), buttonx -> this.onRename())
+			.bounds(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20)
+			.build();
+		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 38, 200, 20, Component.translatable("selectWorld.enterName"));
+		LevelSummary levelSummary = this.levelAccess.getSummary();
+		String string = levelSummary == null ? "" : levelSummary.getLevelName();
+		this.nameEdit.setValue(string);
+		this.nameEdit.setResponder(stringx -> this.renameButton.active = !stringx.trim().isEmpty());
+		this.addWidget(this.nameEdit);
 		Button button = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.edit.resetIcon"), buttonx -> {
 			this.levelAccess.getIconFile().ifPresent(path -> FileUtils.deleteQuietly(path.toFile()));
 			buttonx.active = false;
@@ -156,21 +165,11 @@ public class EditWorldScreen extends Screen {
 				.bounds(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20)
 				.build()
 		);
-		this.renameButton = this.addRenderableWidget(
-			Button.builder(Component.translatable("selectWorld.edit.save"), buttonx -> this.onRename())
-				.bounds(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20)
-				.build()
-		);
+		this.addRenderableWidget(this.renameButton);
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.callback.accept(false)).bounds(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20).build()
 		);
 		button.active = this.levelAccess.getIconFile().filter(path -> Files.isRegularFile(path, new LinkOption[0])).isPresent();
-		LevelSummary levelSummary = this.levelAccess.getSummary();
-		String string = levelSummary == null ? "" : levelSummary.getLevelName();
-		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 38, 200, 20, Component.translatable("selectWorld.enterName"));
-		this.nameEdit.setValue(string);
-		this.nameEdit.setResponder(stringx -> this.renameButton.active = !stringx.trim().isEmpty());
-		this.addWidget(this.nameEdit);
 		this.setInitialFocus(this.nameEdit);
 	}
 

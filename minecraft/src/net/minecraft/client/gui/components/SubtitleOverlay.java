@@ -50,11 +50,12 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 			Vec3 vec34 = vec32.cross(vec33);
 			int i = 0;
 			int j = 0;
+			double d = this.minecraft.options.notificationDisplayTime().get();
 			Iterator<SubtitleOverlay.Subtitle> iterator = this.subtitles.iterator();
 
 			while (iterator.hasNext()) {
 				SubtitleOverlay.Subtitle subtitle = (SubtitleOverlay.Subtitle)iterator.next();
-				if (subtitle.getTime() + 3000L <= Util.getMillis()) {
+				if ((double)subtitle.getTime() + 3000.0 * d <= (double)Util.getMillis()) {
 					iterator.remove();
 				} else {
 					j = Math.max(j, this.minecraft.font.width(subtitle.getText()));
@@ -67,15 +68,15 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 				int k = 255;
 				Component component = subtitle.getText();
 				Vec3 vec35 = subtitle.getLocation().subtract(vec3).normalize();
-				double d = -vec34.dot(vec35);
-				double e = -vec32.dot(vec35);
-				boolean bl = e > 0.5;
+				double e = -vec34.dot(vec35);
+				double f = -vec32.dot(vec35);
+				boolean bl = f > 0.5;
 				int l = j / 2;
 				int m = 9;
 				int n = m / 2;
-				float f = 1.0F;
+				float g = 1.0F;
 				int o = this.minecraft.font.width(component);
-				int p = Mth.floor(Mth.clampedLerp(255.0F, 75.0F, (float)(Util.getMillis() - subtitle.getTime()) / 3000.0F));
+				int p = Mth.floor(Mth.clampedLerp(255.0F, 75.0F, (float)(Util.getMillis() - subtitle.getTime()) / (float)(3000.0 * d)));
 				int q = p << 16 | p << 8 | p;
 				poseStack.pushPose();
 				poseStack.translate(
@@ -88,9 +89,9 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 				RenderSystem.enableBlend();
 				int r = q + -16777216;
 				if (!bl) {
-					if (d > 0.0) {
+					if (e > 0.0) {
 						drawString(poseStack, this.minecraft.font, ">", l - this.minecraft.font.width(">"), -n, r);
-					} else if (d < 0.0) {
+					} else if (e < 0.0) {
 						drawString(poseStack, this.minecraft.font, "<", -l, -n, r);
 					}
 				}

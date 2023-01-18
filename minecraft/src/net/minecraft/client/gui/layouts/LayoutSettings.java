@@ -1,4 +1,4 @@
-package net.minecraft.client.gui.components;
+package net.minecraft.client.gui.layouts;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

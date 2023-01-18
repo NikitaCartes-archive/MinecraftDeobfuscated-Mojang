@@ -1,6 +1,5 @@
 package net.minecraft.network;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
@@ -9,11 +8,17 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.network.protocol.BundleDelimiterPacket;
+import net.minecraft.network.protocol.BundlePacket;
+import net.minecraft.network.protocol.BundlerInfo;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -27,6 +32,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -46,6 +52,7 @@ import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
+import net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
@@ -185,7 +192,7 @@ import net.minecraft.network.protocol.status.ServerboundStatusRequestPacket;
 import net.minecraft.util.VisibleForDebug;
 import org.slf4j.Logger;
 
-public enum ConnectionProtocol {
+public enum ConnectionProtocol implements BundlerInfo.Provider {
 	HANDSHAKING(
 		-1, protocol().addFlow(PacketFlow.SERVERBOUND, new ConnectionProtocol.PacketSet().addPacket(ClientIntentionPacket.class, ClientIntentionPacket::new))
 	),
@@ -195,6 +202,7 @@ public enum ConnectionProtocol {
 			.addFlow(
 				PacketFlow.CLIENTBOUND,
 				new ConnectionProtocol.PacketSet()
+					.withBundlePacket(ClientboundBundlePacket.class, ClientboundBundlePacket::new)
 					.addPacket(ClientboundAddEntityPacket.class, ClientboundAddEntityPacket::new)
 					.addPacket(ClientboundAddExperienceOrbPacket.class, ClientboundAddExperienceOrbPacket::new)
 					.addPacket(ClientboundAddPlayerPacket.class, ClientboundAddPlayerPacket::new)
@@ -225,6 +233,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundForgetLevelChunkPacket.class, ClientboundForgetLevelChunkPacket::new)
 					.addPacket(ClientboundGameEventPacket.class, ClientboundGameEventPacket::new)
 					.addPacket(ClientboundHorseScreenOpenPacket.class, ClientboundHorseScreenOpenPacket::new)
+					.addPacket(ClientboundHurtAnimationPacket.class, ClientboundHurtAnimationPacket::new)
 					.addPacket(ClientboundInitializeBorderPacket.class, ClientboundInitializeBorderPacket::new)
 					.addPacket(ClientboundKeepAlivePacket.class, ClientboundKeepAlivePacket::new)
 					.addPacket(ClientboundLevelChunkWithLightPacket.class, ClientboundLevelChunkWithLightPacket::new)
@@ -312,6 +321,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundChatAckPacket.class, ServerboundChatAckPacket::new)
 					.addPacket(ServerboundChatCommandPacket.class, ServerboundChatCommandPacket::new)
 					.addPacket(ServerboundChatPacket.class, ServerboundChatPacket::new)
+					.addPacket(ServerboundChatSessionUpdatePacket.class, ServerboundChatSessionUpdatePacket::new)
 					.addPacket(ServerboundClientCommandPacket.class, ServerboundClientCommandPacket::new)
 					.addPacket(ServerboundClientInformationPacket.class, ServerboundClientInformationPacket::new)
 					.addPacket(ServerboundCommandSuggestionPacket.class, ServerboundCommandSuggestionPacket::new)
@@ -338,7 +348,6 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundPlayerCommandPacket.class, ServerboundPlayerCommandPacket::new)
 					.addPacket(ServerboundPlayerInputPacket.class, ServerboundPlayerInputPacket::new)
 					.addPacket(ServerboundPongPacket.class, ServerboundPongPacket::new)
-					.addPacket(ServerboundChatSessionUpdatePacket.class, ServerboundChatSessionUpdatePacket::new)
 					.addPacket(ServerboundRecipeBookChangeSettingsPacket.class, ServerboundRecipeBookChangeSettingsPacket::new)
 					.addPacket(ServerboundRecipeBookSeenRecipePacket.class, ServerboundRecipeBookSeenRecipePacket::new)
 					.addPacket(ServerboundRenameItemPacket.class, ServerboundRenameItemPacket::new)
@@ -396,6 +405,7 @@ public enum ConnectionProtocol {
 			)
 	);
 
+	public static final int NOT_REGISTERED = -1;
 	private static final int MIN_PROTOCOL_ID = -1;
 	private static final int MAX_PROTOCOL_ID = 2;
 	private static final ConnectionProtocol[] LOOKUP = new ConnectionProtocol[4];
@@ -412,9 +422,13 @@ public enum ConnectionProtocol {
 		this.flows = protocolBuilder.flows;
 	}
 
-	@Nullable
-	public Integer getPacketId(PacketFlow packetFlow, Packet<?> packet) {
+	public int getPacketId(PacketFlow packetFlow, Packet<?> packet) {
 		return ((ConnectionProtocol.PacketSet)this.flows.get(packetFlow)).getId(packet.getClass());
+	}
+
+	@Override
+	public BundlerInfo getBundlerInfo(PacketFlow packetFlow) {
+		return ((ConnectionProtocol.PacketSet)this.flows.get(packetFlow)).bundlerInfo();
 	}
 
 	@VisibleForDebug
@@ -443,6 +457,7 @@ public enum ConnectionProtocol {
 		return i >= -1 && i <= 2 ? LOOKUP[i - -1] : null;
 	}
 
+	@Nullable
 	public static ConnectionProtocol getProtocolForPacket(Packet<?> packet) {
 		return (ConnectionProtocol)PROTOCOL_BY_PACKET.get(packet.getClass());
 	}
@@ -457,18 +472,17 @@ public enum ConnectionProtocol {
 			LOOKUP[i - -1] = connectionProtocol;
 			connectionProtocol.flows
 				.forEach(
-					(packetFlow, packetSet) -> packetSet.getAllPackets()
-							.forEach(
-								class_ -> {
-									if (PROTOCOL_BY_PACKET.containsKey(class_) && PROTOCOL_BY_PACKET.get(class_) != connectionProtocol) {
-										throw new IllegalStateException(
-											"Packet " + class_ + " is already assigned to protocol " + PROTOCOL_BY_PACKET.get(class_) + " - can't reassign to " + connectionProtocol
-										);
-									} else {
-										PROTOCOL_BY_PACKET.put(class_, connectionProtocol);
-									}
+					(packetFlow, packetSet) -> packetSet.listAllPackets(
+							class_ -> {
+								if (PROTOCOL_BY_PACKET.containsKey(class_) && PROTOCOL_BY_PACKET.get(class_) != connectionProtocol) {
+									throw new IllegalStateException(
+										"Packet " + class_ + " is already assigned to protocol " + PROTOCOL_BY_PACKET.get(class_) + " - can't reassign to " + connectionProtocol
+									);
+								} else {
+									PROTOCOL_BY_PACKET.put(class_, connectionProtocol);
 								}
-							)
+							}
+						)
 				);
 		}
 	}
@@ -479,6 +493,8 @@ public enum ConnectionProtocol {
 			new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> object2IntOpenHashMap.defaultReturnValue(-1)
 		);
 		private final List<Function<FriendlyByteBuf, ? extends Packet<T>>> idToDeserializer = Lists.<Function<FriendlyByteBuf, ? extends Packet<T>>>newArrayList();
+		private BundlerInfo bundlerInfo = BundlerInfo.EMPTY;
+		private final Set<Class<? extends Packet<T>>> extraClasses = new HashSet();
 
 		public <P extends Packet<T>> ConnectionProtocol.PacketSet<T> addPacket(Class<P> class_, Function<FriendlyByteBuf, P> function) {
 			int i = this.idToDeserializer.size();
@@ -493,10 +509,20 @@ public enum ConnectionProtocol {
 			}
 		}
 
-		@Nullable
-		public Integer getId(Class<?> class_) {
-			int i = this.classToId.getInt(class_);
-			return i == -1 ? null : i;
+		public <P extends BundlePacket<T>> ConnectionProtocol.PacketSet<T> withBundlePacket(Class<P> class_, Function<Iterable<Packet<T>>, P> function) {
+			if (this.bundlerInfo != BundlerInfo.EMPTY) {
+				throw new IllegalStateException("Bundle packet already configured");
+			} else {
+				BundleDelimiterPacket<T> bundleDelimiterPacket = new BundleDelimiterPacket<>();
+				this.addPacket((Class<P>)BundleDelimiterPacket.class, friendlyByteBuf -> bundleDelimiterPacket);
+				this.bundlerInfo = BundlerInfo.createForPacket(class_, function, bundleDelimiterPacket);
+				this.extraClasses.add(class_);
+				return this;
+			}
+		}
+
+		public int getId(Class<?> class_) {
+			return this.classToId.getInt(class_);
 		}
 
 		@Nullable
@@ -505,8 +531,13 @@ public enum ConnectionProtocol {
 			return function != null ? (Packet)function.apply(friendlyByteBuf) : null;
 		}
 
-		public Iterable<Class<? extends Packet<?>>> getAllPackets() {
-			return Iterables.unmodifiableIterable(this.classToId.keySet());
+		public void listAllPackets(Consumer<Class<? extends Packet<?>>> consumer) {
+			this.classToId.keySet().stream().filter(class_ -> class_ != BundleDelimiterPacket.class).forEach(consumer);
+			this.extraClasses.forEach(consumer);
+		}
+
+		public BundlerInfo bundlerInfo() {
+			return this.bundlerInfo;
 		}
 	}
 

@@ -1,11 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Ops;
@@ -20,7 +16,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -202,21 +197,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
 		int k = row(12) + 20;
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.setShaderTexture(0, OPTIONS_BACKGROUND);
+		RenderSystem.setShaderColor(0.25F, 0.25F, 0.25F, 1.0F);
+		blit(poseStack, 0, k, 0.0F, 0.0F, this.width, this.height - k, 32, 32);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		float g = 32.0F;
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.vertex(0.0, (double)this.height, 0.0).uv(0.0F, (float)(this.height - k) / 32.0F + 0.0F).color(64, 64, 64, 255).endVertex();
-		bufferBuilder.vertex((double)this.width, (double)this.height, 0.0)
-			.uv((float)this.width / 32.0F, (float)(this.height - k) / 32.0F + 0.0F)
-			.color(64, 64, 64, 255)
-			.endVertex();
-		bufferBuilder.vertex((double)this.width, (double)k, 0.0).uv((float)this.width / 32.0F, 0.0F).color(64, 64, 64, 255).endVertex();
-		bufferBuilder.vertex(0.0, (double)k, 0.0).uv(0.0F, 0.0F).color(64, 64, 64, 255).endVertex();
-		tesselator.end();
 		if (this.serverData != null && this.serverData.players != null) {
 			this.font
 				.draw(
@@ -249,7 +233,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	void drawRemoveIcon(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
 		RenderSystem.setShaderTexture(0, CROSS_ICON_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 7.0F : 0.0F;
 		GuiComponent.blit(poseStack, i, j, 0.0F, f, 8, 7, 8, 14);
 		if (bl) {
@@ -261,7 +244,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	void drawOpped(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
 		RenderSystem.setShaderTexture(0, OP_ICON_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 8.0F : 0.0F;
 		GuiComponent.blit(poseStack, i, j, 0.0F, f, 8, 8, 8, 16);
 		if (bl) {
@@ -273,7 +255,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	void drawNormal(PoseStack poseStack, int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < row(12) + 20 && l > row(1);
 		RenderSystem.setShaderTexture(0, USER_ICON_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = bl ? 8.0F : 0.0F;
 		GuiComponent.blit(poseStack, i, j, 0.0F, f, 8, 8, 8, 16);
 		if (bl) {
@@ -313,10 +294,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 			}
 
 			RealmsPlayerScreen.this.drawRemoveIcon(poseStack, RealmsPlayerScreen.this.column1X + RealmsPlayerScreen.this.columnWidth - 22, j + 2, k, l);
-			RealmsTextureManager.withBoundFace(playerInfo.getUuid(), () -> {
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-				PlayerFaceRenderer.draw(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8);
-			});
+			RealmsTextureManager.withBoundFace(playerInfo.getUuid(), () -> PlayerFaceRenderer.draw(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8));
 		}
 
 		@Override
@@ -338,11 +316,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		@Override
 		public int getRowWidth() {
 			return (int)((double)this.width * 1.0);
-		}
-
-		@Override
-		public boolean isFocused() {
-			return RealmsPlayerScreen.this.getFocused() == this;
 		}
 
 		@Override

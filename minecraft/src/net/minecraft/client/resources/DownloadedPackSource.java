@@ -80,7 +80,7 @@ public class DownloadedPackSource implements RepositorySource {
 			"X-Minecraft-Version-ID",
 			SharedConstants.getCurrentVersion().getId(),
 			"X-Minecraft-Pack-Format",
-			String.valueOf(PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion())),
+			String.valueOf(SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES)),
 			"User-Agent",
 			"Minecraft Java/" + SharedConstants.getCurrentVersion().getName()
 		);

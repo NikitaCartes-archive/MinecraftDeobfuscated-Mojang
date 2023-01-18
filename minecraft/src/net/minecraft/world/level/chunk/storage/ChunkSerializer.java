@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -25,6 +24,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -301,8 +301,7 @@ public class ChunkSerializer {
 
 	public static CompoundTag write(ServerLevel serverLevel, ChunkAccess chunkAccess) {
 		ChunkPos chunkPos = chunkAccess.getPos();
-		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+		CompoundTag compoundTag = NbtUtils.addCurrentDataVersion(new CompoundTag());
 		compoundTag.putInt("xPos", chunkPos.x);
 		compoundTag.putInt("yPos", chunkAccess.getMinSection());
 		compoundTag.putInt("zPos", chunkPos.z);

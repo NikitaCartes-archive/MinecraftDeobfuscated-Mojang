@@ -83,11 +83,6 @@
 		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/71.1/icu4j-71.1.jar"
 	},
 	{
-		"sha1sum": "bfa589b0bd71588fa7e594640114b0cda0cff5f6",
-		"name": "javabridge-2.0.25.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/javabridge/2.0.25/javabridge-2.0.25.jar"
-	},
-	{
 		"sha1sum": "1227f9e0666314f9de41477e3ec277e542ed7f7b",
 		"name": "java-objc-bridge-1.1.jar",
 		"url": "https://libraries.minecraft.net/ca/weblite/java-objc-bridge/1.1/java-objc-bridge-1.1.jar"

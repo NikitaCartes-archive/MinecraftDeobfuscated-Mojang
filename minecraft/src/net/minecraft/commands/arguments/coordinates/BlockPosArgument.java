@@ -16,6 +16,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
 public class BlockPosArgument implements ArgumentType<Coordinates> {
@@ -29,18 +30,27 @@ public class BlockPosArgument implements ArgumentType<Coordinates> {
 	}
 
 	public static BlockPos getLoadedBlockPos(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		BlockPos blockPos = commandContext.<Coordinates>getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
-		if (!commandContext.getSource().getLevel().hasChunkAt(blockPos)) {
+		ServerLevel serverLevel = commandContext.getSource().getLevel();
+		return getLoadedBlockPos(commandContext, serverLevel, string);
+	}
+
+	public static BlockPos getLoadedBlockPos(CommandContext<CommandSourceStack> commandContext, ServerLevel serverLevel, String string) throws CommandSyntaxException {
+		BlockPos blockPos = getBlockPos(commandContext, string);
+		if (!serverLevel.hasChunkAt(blockPos)) {
 			throw ERROR_NOT_LOADED.create();
-		} else if (!commandContext.getSource().getLevel().isInWorldBounds(blockPos)) {
+		} else if (!serverLevel.isInWorldBounds(blockPos)) {
 			throw ERROR_OUT_OF_WORLD.create();
 		} else {
 			return blockPos;
 		}
 	}
 
+	public static BlockPos getBlockPos(CommandContext<CommandSourceStack> commandContext, String string) {
+		return commandContext.<Coordinates>getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
+	}
+
 	public static BlockPos getSpawnablePos(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		BlockPos blockPos = commandContext.<Coordinates>getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
+		BlockPos blockPos = getBlockPos(commandContext, string);
 		if (!Level.isInSpawnableBounds(blockPos)) {
 			throw ERROR_OUT_OF_BOUNDS.create();
 		} else {

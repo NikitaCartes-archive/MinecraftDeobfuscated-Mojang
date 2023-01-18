@@ -48,6 +48,11 @@ public class LevelLoadingScreen extends Screen {
 	}
 
 	@Override
+	protected boolean shouldNarrateNavigation() {
+		return false;
+	}
+
+	@Override
 	public void removed() {
 		this.done = true;
 		this.triggerImmediateNarration(true);

@@ -118,7 +118,6 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 		int p = 0;
 		if (hasUnreadNews) {
 			RenderSystem.setShaderTexture(0, NEWS_ICON_LOCATION);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			poseStack.pushPose();
 			poseStack.scale(0.4F, 0.4F, 0.4F);
 			GuiComponent.blit(poseStack, (int)((double)(n + 2 - p) * 2.5), (int)((double)o * 2.5), 0.0F, 0.0F, 40, 40, 40, 40);
@@ -128,14 +127,12 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 
 		if (k != 0) {
 			RenderSystem.setShaderTexture(0, INVITE_ICON_LOCATION);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(poseStack, n - p, o - 6, 0.0F, 0.0F, 15, 25, 31, 25);
 			p += 16;
 		}
 
 		if (trialAvailable) {
 			RenderSystem.setShaderTexture(0, TRIAL_ICON_LOCATION);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			int q = 0;
 			if ((Util.getMillis() / 800L & 1L) == 1L) {
 				q = 8;

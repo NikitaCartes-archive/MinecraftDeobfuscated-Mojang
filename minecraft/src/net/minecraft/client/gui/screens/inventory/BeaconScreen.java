@@ -123,7 +123,6 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, BEACON_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
@@ -256,7 +255,6 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		public void renderButton(PoseStack poseStack, int i, int j, float f) {
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, BeaconScreen.BEACON_LOCATION);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = 219;
 			int l = 0;
 			if (!this.active) {

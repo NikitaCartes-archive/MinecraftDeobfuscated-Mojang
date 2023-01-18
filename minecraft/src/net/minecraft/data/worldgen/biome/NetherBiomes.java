@@ -49,7 +49,7 @@ public class NetherBiomes {
 			.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, NetherPlacements.SPRING_CLOSED);
 		BiomeDefaultFeatures.addNetherDefaultOres(builder);
 		return new Biome.BiomeBuilder()
-			.precipitation(Biome.Precipitation.NONE)
+			.hasPrecipitation(false)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(
@@ -97,7 +97,7 @@ public class NetherBiomes {
 			.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, OrePlacements.ORE_SOUL_SAND);
 		BiomeDefaultFeatures.addNetherDefaultOres(builder);
 		return new Biome.BiomeBuilder()
-			.precipitation(Biome.Precipitation.NONE)
+			.hasPrecipitation(false)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(
@@ -144,7 +144,7 @@ public class NetherBiomes {
 			.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, OrePlacements.ORE_QUARTZ_DELTAS);
 		BiomeDefaultFeatures.addAncientDebris(builder);
 		return new Biome.BiomeBuilder()
-			.precipitation(Biome.Precipitation.NONE)
+			.hasPrecipitation(false)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(
@@ -187,7 +187,7 @@ public class NetherBiomes {
 			.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, NetherPlacements.CRIMSON_FOREST_VEGETATION);
 		BiomeDefaultFeatures.addNetherDefaultOres(builder);
 		return new Biome.BiomeBuilder()
-			.precipitation(Biome.Precipitation.NONE)
+			.hasPrecipitation(false)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(
@@ -231,7 +231,7 @@ public class NetherBiomes {
 			.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, NetherPlacements.TWISTING_VINES);
 		BiomeDefaultFeatures.addNetherDefaultOres(builder);
 		return new Biome.BiomeBuilder()
-			.precipitation(Biome.Precipitation.NONE)
+			.hasPrecipitation(false)
 			.temperature(2.0F)
 			.downfall(0.0F)
 			.specialEffects(

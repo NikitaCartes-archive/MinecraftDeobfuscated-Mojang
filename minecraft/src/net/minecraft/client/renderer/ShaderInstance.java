@@ -393,7 +393,6 @@ public class ShaderInstance implements Shader, AutoCloseable {
 				int k = Uniform.glGetUniformLocation(this.programId, string);
 				Uniform.uploadInteger(k, j);
 				RenderSystem.activeTexture(33984 + j);
-				RenderSystem.enableTexture();
 				Object object = this.samplerMap.get(string);
 				int l = -1;
 				if (object instanceof RenderTarget) {

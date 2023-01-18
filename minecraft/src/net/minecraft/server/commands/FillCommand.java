@@ -20,6 +20,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -27,7 +28,6 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class FillCommand {
-	private static final int MAX_FILL_AREA = 32768;
 	private static final Dynamic2CommandExceptionType ERROR_AREA_TOO_LARGE = new Dynamic2CommandExceptionType(
 		(object, object2) -> Component.translatable("commands.fill.toobig", object, object2)
 	);
@@ -135,12 +135,13 @@ public class FillCommand {
 		CommandSourceStack commandSourceStack, BoundingBox boundingBox, BlockInput blockInput, FillCommand.Mode mode, @Nullable Predicate<BlockInWorld> predicate
 	) throws CommandSyntaxException {
 		int i = boundingBox.getXSpan() * boundingBox.getYSpan() * boundingBox.getZSpan();
-		if (i > 32768) {
-			throw ERROR_AREA_TOO_LARGE.create(32768, i);
+		int j = commandSourceStack.getLevel().getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
+		if (i > j) {
+			throw ERROR_AREA_TOO_LARGE.create(j, i);
 		} else {
 			List<BlockPos> list = Lists.<BlockPos>newArrayList();
 			ServerLevel serverLevel = commandSourceStack.getLevel();
-			int j = 0;
+			int k = 0;
 
 			for (BlockPos blockPos : BlockPos.betweenClosed(
 				boundingBox.minX(), boundingBox.minY(), boundingBox.minZ(), boundingBox.maxX(), boundingBox.maxY(), boundingBox.maxZ()
@@ -152,7 +153,7 @@ public class FillCommand {
 						Clearable.tryClear(blockEntity);
 						if (blockInput2.place(serverLevel, blockPos, 2)) {
 							list.add(blockPos.immutable());
-							j++;
+							k++;
 						}
 					}
 				}
@@ -163,11 +164,11 @@ public class FillCommand {
 				serverLevel.blockUpdated(blockPosx, block);
 			}
 
-			if (j == 0) {
+			if (k == 0) {
 				throw ERROR_FAILED.create();
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.fill.success", j), true);
-				return j;
+				commandSourceStack.sendSuccess(Component.translatable("commands.fill.success", k), true);
+				return k;
 			}
 		}
 	}

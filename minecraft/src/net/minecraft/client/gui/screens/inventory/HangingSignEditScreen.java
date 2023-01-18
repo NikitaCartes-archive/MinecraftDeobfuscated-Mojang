@@ -32,7 +32,6 @@ public class HangingSignEditScreen extends AbstractSignEditScreen {
 	protected void renderSignBackground(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, BlockState blockState) {
 		poseStack.translate(0.0F, -13.0F, 0.0F);
 		RenderSystem.setShaderTexture(0, this.texture);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		poseStack.scale(4.0F, 4.0F, 1.0F);
 		blit(poseStack, -8, -8, 0.0F, 0.0F, 16, 16, 16, 16);
 	}

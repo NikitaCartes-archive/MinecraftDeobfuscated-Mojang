@@ -39,13 +39,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.Nullable;
 import net.minecraft.FileUtil;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.nbt.visitors.SkipFields;
@@ -56,7 +56,6 @@ import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.Level;
@@ -112,13 +111,13 @@ public class LevelStorageSource {
 		Dynamic<T> dynamic2 = dynamic.get("WorldGenSettings").orElseEmptyMap();
 
 		for (String string : OLD_SETTINGS_KEYS) {
-			Optional<? extends Dynamic<?>> optional = dynamic.get(string).result();
+			Optional<Dynamic<T>> optional = dynamic.get(string).result();
 			if (optional.isPresent()) {
 				dynamic2 = dynamic2.set(string, (Dynamic<?>)optional.get());
 			}
 		}
 
-		Dynamic<T> dynamic3 = dataFixer.update(References.WORLD_GEN_SETTINGS, dynamic2, i, SharedConstants.getCurrentVersion().getWorldVersion());
+		Dynamic<T> dynamic3 = DataFixTypes.WORLD_GEN_SETTINGS.updateToCurrentVersion(dataFixer, dynamic2, i);
 		return WorldGenSettings.CODEC.parse(dynamic3);
 	}
 
@@ -218,10 +217,8 @@ public class LevelStorageSource {
 		try {
 			if (readLightweightData(path) instanceof CompoundTag compoundTag) {
 				CompoundTag compoundTag2 = compoundTag.getCompound("Data");
-				int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-				Dynamic<Tag> dynamic = dataFixer.update(
-					DataFixTypes.LEVEL.getType(), new Dynamic<>(NbtOps.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion()
-				);
+				int i = NbtUtils.getDataVersion(compoundTag2, -1);
+				Dynamic<?> dynamic = DataFixTypes.LEVEL.updateToCurrentVersion(dataFixer, new Dynamic<>(NbtOps.INSTANCE, compoundTag2), i);
 				return readDataConfig(dynamic);
 			}
 		} catch (Exception var7) {
@@ -245,10 +242,8 @@ public class LevelStorageSource {
 			CompoundTag compoundTag2 = compoundTag.getCompound("Data");
 			CompoundTag compoundTag3 = compoundTag2.contains("Player", 10) ? compoundTag2.getCompound("Player") : null;
 			compoundTag2.remove("Player");
-			int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-			Dynamic<Tag> dynamic = dataFixer.update(
-				DataFixTypes.LEVEL.getType(), new Dynamic<>(dynamicOps, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion()
-			);
+			int i = NbtUtils.getDataVersion(compoundTag2, -1);
+			Dynamic<?> dynamic = DataFixTypes.LEVEL.updateToCurrentVersion(dataFixer, new Dynamic<>(dynamicOps, compoundTag2), i);
 			WorldGenSettings worldGenSettings = readWorldGenSettings(dynamic, dataFixer, i).getOrThrow(false, Util.prefix("WorldGenSettings: ", LOGGER::error));
 			LevelVersion levelVersion = LevelVersion.parse(dynamic);
 			LevelSettings levelSettings = LevelSettings.parse(dynamic, worldDataConfiguration);
@@ -266,10 +261,8 @@ public class LevelStorageSource {
 			try {
 				if (readLightweightData(path) instanceof CompoundTag compoundTag) {
 					CompoundTag compoundTag2 = compoundTag.getCompound("Data");
-					int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-					Dynamic<Tag> dynamic = dataFixer.update(
-						DataFixTypes.LEVEL.getType(), new Dynamic<>(NbtOps.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion()
-					);
+					int i = NbtUtils.getDataVersion(compoundTag2, -1);
+					Dynamic<?> dynamic = DataFixTypes.LEVEL.updateToCurrentVersion(dataFixer, new Dynamic<>(NbtOps.INSTANCE, compoundTag2), i);
 					LevelVersion levelVersion = LevelVersion.parse(dynamic);
 					int j = levelVersion.levelDataVersion();
 					if (j == 19132 || j == 19133) {
@@ -293,7 +286,7 @@ public class LevelStorageSource {
 		};
 	}
 
-	private static FeatureFlagSet parseFeatureFlagsFromSummary(Dynamic<Tag> dynamic) {
+	private static FeatureFlagSet parseFeatureFlagsFromSummary(Dynamic<?> dynamic) {
 		Set<ResourceLocation> set = (Set<ResourceLocation>)dynamic.get("enabled_features")
 			.asStream()
 			.flatMap(dynamicx -> dynamicx.asString().result().map(ResourceLocation::tryParse).stream())

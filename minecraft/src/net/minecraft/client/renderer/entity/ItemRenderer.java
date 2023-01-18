@@ -4,14 +4,10 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import com.mojang.math.MatrixUtil;
 import java.util.List;
@@ -26,10 +22,10 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -286,7 +282,6 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		PoseStack poseStack = RenderSystem.getModelViewStack();
 		poseStack.pushPose();
 		poseStack.translate((float)i, (float)j, 100.0F + this.blitOffset);
@@ -376,16 +371,12 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 			if (itemStack.isBarVisible()) {
 				RenderSystem.disableDepthTest();
-				RenderSystem.disableTexture();
-				RenderSystem.disableBlend();
-				Tesselator tesselator = Tesselator.getInstance();
-				BufferBuilder bufferBuilder = tesselator.getBuilder();
 				int k = itemStack.getBarWidth();
 				int l = itemStack.getBarColor();
-				this.fillRect(bufferBuilder, i + 2, j + 13, 13, 2, 0, 0, 0, 255);
-				this.fillRect(bufferBuilder, i + 2, j + 13, k, 1, l >> 16 & 0xFF, l >> 8 & 0xFF, l & 0xFF, 255);
-				RenderSystem.enableBlend();
-				RenderSystem.enableTexture();
+				int m = i + 2;
+				int n = j + 13;
+				GuiComponent.fill(poseStack, m, n, m + 13, n + 2, -16777216);
+				GuiComponent.fill(poseStack, m, n, m + k, n + 1, l | 0xFF000000);
 				RenderSystem.enableDepthTest();
 			}
 
@@ -393,26 +384,12 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			float f = localPlayer == null ? 0.0F : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), Minecraft.getInstance().getFrameTime());
 			if (f > 0.0F) {
 				RenderSystem.disableDepthTest();
-				RenderSystem.disableTexture();
-				RenderSystem.enableBlend();
-				RenderSystem.defaultBlendFunc();
-				Tesselator tesselator2 = Tesselator.getInstance();
-				BufferBuilder bufferBuilder2 = tesselator2.getBuilder();
-				this.fillRect(bufferBuilder2, i, j + Mth.floor(16.0F * (1.0F - f)), 16, Mth.ceil(16.0F * f), 255, 255, 255, 127);
-				RenderSystem.enableTexture();
+				int m = j + Mth.floor(16.0F * (1.0F - f));
+				int n = m + Mth.ceil(16.0F * f);
+				GuiComponent.fill(poseStack, i, m, i + 16, n, Integer.MAX_VALUE);
 				RenderSystem.enableDepthTest();
 			}
 		}
-	}
-
-	private void fillRect(BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o, int p) {
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		bufferBuilder.vertex((double)(i + 0), (double)(j + 0), 0.0).color(m, n, o, p).endVertex();
-		bufferBuilder.vertex((double)(i + 0), (double)(j + l), 0.0).color(m, n, o, p).endVertex();
-		bufferBuilder.vertex((double)(i + k), (double)(j + l), 0.0).color(m, n, o, p).endVertex();
-		bufferBuilder.vertex((double)(i + k), (double)(j + 0), 0.0).color(m, n, o, p).endVertex();
-		BufferUploader.drawWithShader(bufferBuilder.end());
 	}
 
 	@Override

@@ -255,11 +255,15 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
 	}
 
 	public void copyArea(BoundingBox boundingBox, Vec3i vec3i) {
+		this.copyAreaFrom(this, boundingBox, vec3i);
+	}
+
+	public void copyAreaFrom(LevelTicks<T> levelTicks, BoundingBox boundingBox, Vec3i vec3i) {
 		List<ScheduledTick<T>> list = new ArrayList();
 		Predicate<ScheduledTick<T>> predicate = scheduledTick -> boundingBox.isInside(scheduledTick.pos());
-		this.alreadyRunThisTick.stream().filter(predicate).forEach(list::add);
-		this.toRunThisTick.stream().filter(predicate).forEach(list::add);
-		this.forContainersInArea(boundingBox, (lx, levelChunkTicks) -> levelChunkTicks.getAll().filter(predicate).forEach(list::add));
+		levelTicks.alreadyRunThisTick.stream().filter(predicate).forEach(list::add);
+		levelTicks.toRunThisTick.stream().filter(predicate).forEach(list::add);
+		levelTicks.forContainersInArea(boundingBox, (lx, levelChunkTicks) -> levelChunkTicks.getAll().filter(predicate).forEach(list::add));
 		LongSummaryStatistics longSummaryStatistics = list.stream().mapToLong(ScheduledTick::subTickOrder).summaryStatistics();
 		long l = longSummaryStatistics.getMin();
 		long m = longSummaryStatistics.getMax();

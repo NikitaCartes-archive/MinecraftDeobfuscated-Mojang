@@ -1,15 +1,9 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -37,12 +31,11 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 				&& d <= (double)(this.getX() + this.width + 8)
 				&& e >= (double)this.getY()
 				&& e < (double)(this.getY() + this.height);
-			this.setFocused(bl || bl2);
 			if (bl2 && i == 0) {
 				this.scrolling = true;
 				return true;
 			} else {
-				return false;
+				return bl || bl2;
 			}
 		}
 	}
@@ -105,7 +98,7 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 
 	protected void renderDecorations(PoseStack poseStack) {
 		if (this.scrollbarVisible()) {
-			this.renderScrollBar();
+			this.renderScrollBar(poseStack);
 		}
 	}
 
@@ -139,25 +132,14 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 		fill(poseStack, this.getX() + 1, this.getY() + 1, this.getX() + this.width - 1, this.getY() + this.height - 1, -16777216);
 	}
 
-	private void renderScrollBar() {
+	private void renderScrollBar(PoseStack poseStack) {
 		int i = this.getScrollBarHeight();
 		int j = this.getX() + this.width;
 		int k = this.getX() + this.width + 8;
 		int l = Math.max(this.getY(), (int)this.scrollAmount * (this.height - i) / this.getMaxScrollAmount() + this.getY());
 		int m = l + i;
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		bufferBuilder.vertex((double)j, (double)m, 0.0).color(128, 128, 128, 255).endVertex();
-		bufferBuilder.vertex((double)k, (double)m, 0.0).color(128, 128, 128, 255).endVertex();
-		bufferBuilder.vertex((double)k, (double)l, 0.0).color(128, 128, 128, 255).endVertex();
-		bufferBuilder.vertex((double)j, (double)l, 0.0).color(128, 128, 128, 255).endVertex();
-		bufferBuilder.vertex((double)j, (double)(m - 1), 0.0).color(192, 192, 192, 255).endVertex();
-		bufferBuilder.vertex((double)(k - 1), (double)(m - 1), 0.0).color(192, 192, 192, 255).endVertex();
-		bufferBuilder.vertex((double)(k - 1), (double)l, 0.0).color(192, 192, 192, 255).endVertex();
-		bufferBuilder.vertex((double)j, (double)l, 0.0).color(192, 192, 192, 255).endVertex();
-		tesselator.end();
+		fill(poseStack, j, l, k, m, -8355712);
+		fill(poseStack, j, l, k - 1, m - 1, -4144960);
 	}
 
 	protected boolean withinContentAreaTopBottom(int i, int j) {

@@ -34,7 +34,7 @@ public class GameNarrator {
 		String string = component.getString();
 		if (this.getStatus().shouldNarrateSystem() && !string.isEmpty()) {
 			this.logNarratedMessage(string);
-			this.narrator.say(string, true);
+			this.narrator.say(string, false);
 		}
 	}
 

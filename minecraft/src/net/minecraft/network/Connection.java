@@ -11,6 +11,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -33,6 +34,7 @@ import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.BundlerInfo;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
@@ -96,6 +98,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 
 	public void setProtocol(ConnectionProtocol connectionProtocol) {
 		this.channel.attr(ATTRIBUTE_PROTOCOL).set(connectionProtocol);
+		this.channel.attr(BundlerInfo.BUNDLER_PROVIDER).set(connectionProtocol);
 		this.channel.config().setAutoRead(true);
 		LOGGER.debug("Enabled auto read");
 	}
@@ -178,6 +181,10 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		ConnectionProtocol connectionProtocol2 = this.getCurrentProtocol();
 		this.sentPackets++;
 		if (connectionProtocol2 != connectionProtocol) {
+			if (connectionProtocol == null) {
+				throw new IllegalStateException("Encountered packet without set protocol: " + packet);
+			}
+
 			LOGGER.debug("Disabled auto read");
 			this.channel.config().setAutoRead(false);
 		}
@@ -290,31 +297,30 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 			lazyLoadedValue = NETWORK_WORKER_GROUP;
 		}
 
-		new Bootstrap()
-			.group(lazyLoadedValue.get())
-			.handler(
-				new ChannelInitializer<Channel>() {
-					@Override
-					protected void initChannel(Channel channel) {
-						try {
-							channel.config().setOption(ChannelOption.TCP_NODELAY, true);
-						} catch (ChannelException var3) {
-						}
-
-						channel.pipeline()
-							.addLast("timeout", new ReadTimeoutHandler(30))
-							.addLast("splitter", new Varint21FrameDecoder())
-							.addLast("decoder", new PacketDecoder(PacketFlow.CLIENTBOUND))
-							.addLast("prepender", new Varint21LengthFieldPrepender())
-							.addLast("encoder", new PacketEncoder(PacketFlow.SERVERBOUND))
-							.addLast("packet_handler", connection);
-					}
+		new Bootstrap().group(lazyLoadedValue.get()).handler(new ChannelInitializer<Channel>() {
+			@Override
+			protected void initChannel(Channel channel) {
+				try {
+					channel.config().setOption(ChannelOption.TCP_NODELAY, true);
+				} catch (ChannelException var3) {
 				}
-			)
-			.channel(class_)
-			.connect(inetSocketAddress.getAddress(), inetSocketAddress.getPort())
-			.syncUninterruptibly();
+
+				ChannelPipeline channelPipeline = channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30));
+				Connection.configureSerialization(channelPipeline, PacketFlow.CLIENTBOUND);
+				channelPipeline.addLast("packet_handler", connection);
+			}
+		}).channel(class_).connect(inetSocketAddress.getAddress(), inetSocketAddress.getPort()).syncUninterruptibly();
 		return connection;
+	}
+
+	public static void configureSerialization(ChannelPipeline channelPipeline, PacketFlow packetFlow) {
+		PacketFlow packetFlow2 = packetFlow.getOpposite();
+		channelPipeline.addLast("splitter", new Varint21FrameDecoder())
+			.addLast("decoder", new PacketDecoder(packetFlow))
+			.addLast("prepender", new Varint21LengthFieldPrepender())
+			.addLast("encoder", new PacketEncoder(packetFlow2))
+			.addLast("unbundler", new PacketBundleUnpacker(packetFlow2))
+			.addLast("bundler", new PacketBundlePacker(packetFlow));
 	}
 
 	public static Connection connectToLocalServer(SocketAddress socketAddress) {
@@ -322,7 +328,8 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		new Bootstrap().group(LOCAL_WORKER_GROUP.get()).handler(new ChannelInitializer<Channel>() {
 			@Override
 			protected void initChannel(Channel channel) {
-				channel.pipeline().addLast("packet_handler", connection);
+				ChannelPipeline channelPipeline = channel.pipeline();
+				channelPipeline.addLast("packet_handler", connection);
 			}
 		}).channel(LocalChannel.class).connect(socketAddress).syncUninterruptibly();
 		return connection;

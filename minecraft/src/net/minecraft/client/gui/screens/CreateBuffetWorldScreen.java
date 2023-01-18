@@ -70,7 +70,7 @@ public class CreateBuffetWorldScreen extends Screen {
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderDirtBackground(0);
+		this.renderDirtBackground(poseStack);
 		this.list.render(poseStack, i, j, f);
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
 		drawCenteredString(poseStack, this.font, BIOME_SELECT_INFO, this.width / 2, 28, 10526880);
@@ -94,11 +94,6 @@ public class CreateBuffetWorldScreen extends Screen {
 				.map(reference -> new CreateBuffetWorldScreen.BiomeList.Entry(reference))
 				.sorted(Comparator.comparing(entry -> entry.name.getString(), collator))
 				.forEach(entry -> this.addEntry(entry));
-		}
-
-		@Override
-		protected boolean isFocused() {
-			return CreateBuffetWorldScreen.this.getFocused() == this;
 		}
 
 		public void setSelected(@Nullable CreateBuffetWorldScreen.BiomeList.Entry entry) {

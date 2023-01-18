@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -21,23 +22,21 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.Entity;
 
 public class TranslatableContents implements ComponentContents {
-	private static final Object[] NO_ARGS = new Object[0];
+	public static final Object[] NO_ARGS = new Object[0];
 	private static final FormattedText TEXT_PERCENT = FormattedText.of("%");
 	private static final FormattedText TEXT_NULL = FormattedText.of("null");
 	private final String key;
+	@Nullable
+	private final String fallback;
 	private final Object[] args;
 	@Nullable
 	private Language decomposedWith;
 	private List<FormattedText> decomposedParts = ImmutableList.of();
 	private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
-	public TranslatableContents(String string) {
+	public TranslatableContents(String string, @Nullable String string2, Object[] objects) {
 		this.key = string;
-		this.args = NO_ARGS;
-	}
-
-	public TranslatableContents(String string, Object... objects) {
-		this.key = string;
+		this.fallback = string2;
 		this.args = objects;
 	}
 
@@ -45,7 +44,7 @@ public class TranslatableContents implements ComponentContents {
 		Language language = Language.getInstance();
 		if (language != this.decomposedWith) {
 			this.decomposedWith = language;
-			String string = language.getOrDefault(this.key);
+			String string = this.fallback != null ? language.getOrDefault(this.key, this.fallback) : language.getOrDefault(this.key);
 
 			try {
 				Builder<FormattedText> builder = ImmutableList.builder();
@@ -107,17 +106,15 @@ public class TranslatableContents implements ComponentContents {
 	}
 
 	private FormattedText getArgument(int i) {
-		if (i < 0) {
-			throw new TranslatableFormatException(this, i);
-		} else if (i >= this.args.length) {
-			return Component.EMPTY;
-		} else {
+		if (i >= 0 && i < this.args.length) {
 			Object object = this.args[i];
 			if (object instanceof Component) {
 				return (Component)object;
 			} else {
 				return object == null ? TEXT_NULL : FormattedText.of(object.toString());
 			}
+		} else {
+			throw new TranslatableFormatException(this, i);
 		}
 	}
 
@@ -162,7 +159,7 @@ public class TranslatableContents implements ComponentContents {
 			}
 		}
 
-		return MutableComponent.create(new TranslatableContents(this.key, objects));
+		return MutableComponent.create(new TranslatableContents(this.key, this.fallback, objects));
 	}
 
 	public boolean equals(Object object) {
@@ -170,7 +167,8 @@ public class TranslatableContents implements ComponentContents {
 			return true;
 		} else {
 			if (object instanceof TranslatableContents translatableContents
-				&& this.key.equals(translatableContents.key)
+				&& Objects.equals(this.key, translatableContents.key)
+				&& Objects.equals(this.fallback, translatableContents.fallback)
 				&& Arrays.equals(this.args, translatableContents.args)) {
 				return true;
 			}
@@ -180,16 +178,28 @@ public class TranslatableContents implements ComponentContents {
 	}
 
 	public int hashCode() {
-		int i = this.key.hashCode();
+		int i = Objects.hashCode(this.key);
+		i = 31 * i + Objects.hashCode(this.fallback);
 		return 31 * i + Arrays.hashCode(this.args);
 	}
 
 	public String toString() {
-		return "translation{key='" + this.key + "', args=" + Arrays.toString(this.args) + "}";
+		return "translation{key='"
+			+ this.key
+			+ "'"
+			+ (this.fallback != null ? ", fallback='" + this.fallback + "'" : "")
+			+ ", args="
+			+ Arrays.toString(this.args)
+			+ "}";
 	}
 
 	public String getKey() {
 		return this.key;
+	}
+
+	@Nullable
+	public String getFallback() {
+		return this.fallback;
 	}
 
 	public Object[] getArgs() {

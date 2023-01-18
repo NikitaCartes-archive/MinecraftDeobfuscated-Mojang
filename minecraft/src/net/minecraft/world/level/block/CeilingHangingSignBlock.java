@@ -101,7 +101,7 @@ public class CeilingHangingSignBlock extends SignBlock {
 			}
 		}
 
-		int i = !bl2 ? RotationSegment.convertToSegment(direction) : RotationSegment.convertToSegment(blockPlaceContext.getRotation());
+		int i = !bl2 ? RotationSegment.convertToSegment(direction.getOpposite()) : RotationSegment.convertToSegment(blockPlaceContext.getRotation() + 180.0F);
 		return this.defaultBlockState()
 			.setValue(ATTACHED, Boolean.valueOf(bl2))
 			.setValue(ROTATION, Integer.valueOf(i))

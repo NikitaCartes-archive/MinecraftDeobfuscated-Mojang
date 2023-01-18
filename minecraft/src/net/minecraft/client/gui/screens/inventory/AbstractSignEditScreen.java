@@ -3,12 +3,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,7 +11,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -194,20 +188,10 @@ public abstract class AbstractSignEditScreen extends Screen {
 					int t = this.minecraft.font.width(string.substring(0, r)) - this.minecraft.font.width(string) / 2;
 					int u = Math.min(s, t);
 					int v = Math.max(s, t);
-					Tesselator tesselator = Tesselator.getInstance();
-					BufferBuilder bufferBuilder = tesselator.getBuilder();
-					RenderSystem.setShader(GameRenderer::getPositionColorShader);
-					RenderSystem.disableTexture();
 					RenderSystem.enableColorLogicOp();
 					RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-					bufferBuilder.vertex(matrix4f, (float)u, (float)(m + this.sign.getTextLineHeight()), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferBuilder.vertex(matrix4f, (float)v, (float)(m + this.sign.getTextLineHeight()), 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferBuilder.vertex(matrix4f, (float)v, (float)m, 0.0F).color(0, 0, 255, 255).endVertex();
-					bufferBuilder.vertex(matrix4f, (float)u, (float)m, 0.0F).color(0, 0, 255, 255).endVertex();
-					BufferUploader.drawWithShader(bufferBuilder.end());
+					fill(poseStack, u, m, v, m + this.sign.getTextLineHeight(), -16776961);
 					RenderSystem.disableColorLogicOp();
-					RenderSystem.enableTexture();
 				}
 			}
 		}

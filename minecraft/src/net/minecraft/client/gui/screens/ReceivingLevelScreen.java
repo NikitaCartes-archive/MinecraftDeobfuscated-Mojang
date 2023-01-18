@@ -25,8 +25,13 @@ public class ReceivingLevelScreen extends Screen {
 	}
 
 	@Override
+	protected boolean shouldNarrateNavigation() {
+		return false;
+	}
+
+	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderDirtBackground(0);
+		this.renderDirtBackground(poseStack);
 		drawCenteredString(poseStack, this.font, DOWNLOADING_TERRAIN_TEXT, this.width / 2, this.height / 2 - 50, 16777215);
 		super.render(poseStack, i, j, f);
 	}
@@ -50,6 +55,12 @@ public class ReceivingLevelScreen extends Screen {
 				this.oneTickSkipped = this.loadingPacketsReceived;
 			}
 		}
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.getNarrator().sayNow(Component.translatable("narrator.ready_to_play"));
+		super.onClose();
 	}
 
 	public void loadingPacketsReceived() {

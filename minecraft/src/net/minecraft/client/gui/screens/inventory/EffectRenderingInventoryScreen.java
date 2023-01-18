@@ -10,6 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.effect.MobEffect;
@@ -41,7 +42,6 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		int l = this.width - k;
 		Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
 		if (!collection.isEmpty() && l >= 32) {
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			boolean bl = l >= 120;
 			int m = 33;
 			if (collection.size() > 5) {
@@ -78,7 +78,6 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		int k = this.topPos;
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			if (bl) {
 				this.blit(poseStack, i, k, 0, 166, 120, 32);
 			} else {
@@ -117,7 +116,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 	private Component getEffectName(MobEffectInstance mobEffectInstance) {
 		MutableComponent mutableComponent = mobEffectInstance.getEffect().getDisplayName().copy();
 		if (mobEffectInstance.getAmplifier() >= 1 && mobEffectInstance.getAmplifier() <= 9) {
-			mutableComponent.append(" ").append(Component.translatable("enchantment.level." + (mobEffectInstance.getAmplifier() + 1)));
+			mutableComponent.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + (mobEffectInstance.getAmplifier() + 1)));
 		}
 
 		return mutableComponent;

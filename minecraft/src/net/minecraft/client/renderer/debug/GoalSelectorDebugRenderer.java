@@ -40,7 +40,6 @@ public class GoalSelectorDebugRenderer implements DebugRenderer.SimpleDebugRende
 		Camera camera = this.minecraft.gameRenderer.getMainCamera();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.disableTexture();
 		BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
 		this.goalSelectors.forEach((integer, list) -> {
 			for (int i = 0; i < list.size(); i++) {
@@ -55,7 +54,6 @@ public class GoalSelectorDebugRenderer implements DebugRenderer.SimpleDebugRende
 			}
 		});
 		RenderSystem.enableDepthTest();
-		RenderSystem.enableTexture();
 	}
 
 	@Environment(EnvType.CLIENT)

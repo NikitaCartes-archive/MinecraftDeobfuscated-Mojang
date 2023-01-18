@@ -146,11 +146,19 @@ public interface Component extends Message, FormattedText {
 	}
 
 	static MutableComponent translatable(String string) {
-		return MutableComponent.create(new TranslatableContents(string));
+		return MutableComponent.create(new TranslatableContents(string, null, TranslatableContents.NO_ARGS));
 	}
 
 	static MutableComponent translatable(String string, Object... objects) {
-		return MutableComponent.create(new TranslatableContents(string, objects));
+		return MutableComponent.create(new TranslatableContents(string, null, objects));
+	}
+
+	static MutableComponent translatableWithFallback(String string, @Nullable String string2) {
+		return MutableComponent.create(new TranslatableContents(string, string2, TranslatableContents.NO_ARGS));
+	}
+
+	static MutableComponent translatableWithFallback(String string, @Nullable String string2, Object... objects) {
+		return MutableComponent.create(new TranslatableContents(string, string2, objects));
 	}
 
 	static MutableComponent empty() {
@@ -232,6 +240,7 @@ public interface Component extends Message, FormattedText {
 					mutableComponent = string.isEmpty() ? Component.empty() : Component.literal(string);
 				} else if (jsonObject.has("translate")) {
 					String string = GsonHelper.getAsString(jsonObject, "translate");
+					String string2 = GsonHelper.getAsString(jsonObject, "fallback", null);
 					if (jsonObject.has("with")) {
 						JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "with");
 						Object[] objects = new Object[jsonArray.size()];
@@ -240,9 +249,9 @@ public interface Component extends Message, FormattedText {
 							objects[i] = unwrapTextArgument(this.deserialize(jsonArray.get(i), type, jsonDeserializationContext));
 						}
 
-						mutableComponent = Component.translatable(string, objects);
+						mutableComponent = Component.translatableWithFallback(string, string2, objects);
 					} else {
-						mutableComponent = Component.translatable(string);
+						mutableComponent = Component.translatableWithFallback(string, string2);
 					}
 				} else if (jsonObject.has("score")) {
 					JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "score");
@@ -345,6 +354,11 @@ public interface Component extends Message, FormattedText {
 				jsonObject.addProperty("text", literalContents.text());
 			} else if (componentContents instanceof TranslatableContents translatableContents) {
 				jsonObject.addProperty("translate", translatableContents.getKey());
+				String string = translatableContents.getFallback();
+				if (string != null) {
+					jsonObject.addProperty("fallback", string);
+				}
+
 				if (translatableContents.getArgs().length > 0) {
 					JsonArray jsonArray2 = new JsonArray();
 

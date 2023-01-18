@@ -7,9 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Collections;
@@ -34,7 +32,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -494,14 +491,6 @@ public final class NbtUtils {
 		return stringBuilder;
 	}
 
-	public static CompoundTag update(DataFixer dataFixer, DataFixTypes dataFixTypes, CompoundTag compoundTag, int i) {
-		return update(dataFixer, dataFixTypes, compoundTag, i, SharedConstants.getCurrentVersion().getWorldVersion());
-	}
-
-	public static CompoundTag update(DataFixer dataFixer, DataFixTypes dataFixTypes, CompoundTag compoundTag, int i, int j) {
-		return (CompoundTag)dataFixer.update(dataFixTypes.getType(), new Dynamic<>(NbtOps.INSTANCE, compoundTag), i, j).getValue();
-	}
-
 	public static Component toPrettyComponent(Tag tag) {
 		return new TextComponentTagVisitor("", 0).visit(tag);
 	}
@@ -662,5 +651,19 @@ public final class NbtUtils {
 
 		compoundTag.putString("Name", string2);
 		return compoundTag;
+	}
+
+	public static CompoundTag addCurrentDataVersion(CompoundTag compoundTag) {
+		int i = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
+		return addDataVersion(compoundTag, i);
+	}
+
+	public static CompoundTag addDataVersion(CompoundTag compoundTag, int i) {
+		compoundTag.putInt("DataVersion", i);
+		return compoundTag;
+	}
+
+	public static int getDataVersion(CompoundTag compoundTag, int i) {
+		return compoundTag.contains("DataVersion", 99) ? compoundTag.getInt("DataVersion") : i;
 	}
 }

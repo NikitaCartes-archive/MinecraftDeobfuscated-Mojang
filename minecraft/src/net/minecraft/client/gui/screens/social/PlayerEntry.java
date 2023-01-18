@@ -196,7 +196,6 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 
 		if (this.hasDraftReport && this.reportButton != null) {
 			RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(poseStack, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 182.0F, 24.0F, 15, 15, 256, 256);
 		}
 	}

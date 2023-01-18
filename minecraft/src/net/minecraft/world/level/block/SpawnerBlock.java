@@ -62,7 +62,7 @@ public class SpawnerBlock extends BaseEntityBlock {
 		} else {
 			list.add(CommonComponents.EMPTY);
 			list.add(Component.translatable("block.minecraft.spawner.desc1").withStyle(ChatFormatting.GRAY));
-			list.add(Component.literal(" ").append(Component.translatable("block.minecraft.spawner.desc2").withStyle(ChatFormatting.BLUE)));
+			list.add(CommonComponents.space().append(Component.translatable("block.minecraft.spawner.desc2").withStyle(ChatFormatting.BLUE)));
 		}
 	}
 

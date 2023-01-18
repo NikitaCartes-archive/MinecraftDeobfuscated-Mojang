@@ -8,7 +8,6 @@ import com.mojang.serialization.DynamicOps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderOwner;
@@ -24,8 +23,7 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
 	private final Codec<Either<TagKey<E>, List<Holder<E>>>> registryAwareCodec;
 
 	private static <E> Codec<List<Holder<E>>> homogenousList(Codec<Holder<E>> codec, boolean bl) {
-		Function<List<Holder<E>>, DataResult<List<Holder<E>>>> function = ExtraCodecs.ensureHomogenous(Holder::kind);
-		Codec<List<Holder<E>>> codec2 = codec.listOf().flatXmap(function, function);
+		Codec<List<Holder<E>>> codec2 = ExtraCodecs.validate(codec.listOf(), ExtraCodecs.ensureHomogenous(Holder::kind));
 		return bl
 			? codec2
 			: Codec.either(codec2, codec)

@@ -71,7 +71,6 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 			m -= 2;
 		}
 
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		this.blit(poseStack, m, this.getY(), k, l, this.width, this.height);
 		RenderSystem.enableDepthTest();
 		this.renderIcon(minecraft.getItemRenderer());

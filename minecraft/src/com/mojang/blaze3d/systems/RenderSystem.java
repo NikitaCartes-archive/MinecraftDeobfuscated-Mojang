@@ -311,16 +311,6 @@ public class RenderSystem {
 		GlStateManager._activeTexture(i);
 	}
 
-	public static void enableTexture() {
-		assertOnRenderThread();
-		GlStateManager._enableTexture();
-	}
-
-	public static void disableTexture() {
-		assertOnRenderThread();
-		GlStateManager._disableTexture();
-	}
-
 	public static void texParameter(int i, int j, int k) {
 		GlStateManager._texParameter(i, j, k);
 	}
@@ -557,7 +547,6 @@ public class RenderSystem {
 
 	public static void setupDefaultState(int i, int j, int k, int l) {
 		assertInInitPhase();
-		GlStateManager._enableTexture();
 		GlStateManager._clearDepth(1.0);
 		GlStateManager._enableDepthTest();
 		GlStateManager._depthFunc(515);
@@ -766,10 +755,6 @@ public class RenderSystem {
 	public static ShaderInstance getShader() {
 		assertOnRenderThread();
 		return shader;
-	}
-
-	public static int getTextureId(int i) {
-		return GlStateManager._getTextureId(i);
 	}
 
 	public static void setShaderTexture(int i, ResourceLocation resourceLocation) {

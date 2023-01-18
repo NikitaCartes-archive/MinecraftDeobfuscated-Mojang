@@ -682,7 +682,7 @@ public final class ItemStack {
 
 						if (bl) {
 							list.add(
-								Component.literal(" ")
+								CommonComponents.space()
 									.append(
 										Component.translatable(
 											"attribute.modifier.equals." + attributeModifier.getOperation().toValue(),

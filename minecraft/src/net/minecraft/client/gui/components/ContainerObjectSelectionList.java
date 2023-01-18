@@ -5,35 +5,84 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.navigation.ScreenAxis;
+import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class ContainerObjectSelectionList<E extends ContainerObjectSelectionList.Entry<E>> extends AbstractSelectionList<E> {
-	private boolean hasFocus;
-
 	public ContainerObjectSelectionList(Minecraft minecraft, int i, int j, int k, int l, int m) {
 		super(minecraft, i, j, k, l, m);
 	}
 
+	@Nullable
 	@Override
-	public boolean changeFocus(boolean bl) {
-		this.hasFocus = super.changeFocus(bl);
-		if (this.hasFocus) {
-			this.ensureVisible(this.getFocused());
-		}
+	public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+		if (this.getItemCount() == 0) {
+			return null;
+		} else if (!(focusNavigationEvent instanceof FocusNavigationEvent.ArrowNavigation arrowNavigation)) {
+			return super.nextFocusPath(focusNavigationEvent);
+		} else {
+			E entry = this.getFocused();
+			if (arrowNavigation.direction().getAxis() == ScreenAxis.HORIZONTAL && entry != null) {
+				return ComponentPath.path(this, entry.nextFocusPath(focusNavigationEvent));
+			} else {
+				ScreenDirection screenDirection = arrowNavigation.direction();
+				int i;
+				if (entry == null) {
+					switch (screenDirection) {
+						case LEFT:
+							i = Integer.MAX_VALUE;
+							screenDirection = ScreenDirection.DOWN;
+							break;
+						case RIGHT:
+							i = 0;
+							screenDirection = ScreenDirection.DOWN;
+							break;
+						default:
+							i = 0;
+					}
+				} else {
+					i = entry.children().indexOf(entry.getFocused());
+				}
 
-		return this.hasFocus;
+				E entry2 = entry;
+
+				ComponentPath componentPath;
+				do {
+					entry2 = this.nextEntry(screenDirection, entryx -> !entryx.children().isEmpty(), entry2);
+					if (entry2 == null) {
+						return null;
+					}
+
+					componentPath = entry2.focusPathAtIndex(arrowNavigation, i);
+				} while (componentPath == null);
+
+				return ComponentPath.path(this, componentPath);
+			}
+		}
+	}
+
+	@Override
+	public void setFocused(@Nullable GuiEventListener guiEventListener) {
+		super.setFocused(guiEventListener);
+		if (guiEventListener == null) {
+			this.setSelected(null);
+		}
 	}
 
 	@Override
 	public NarratableEntry.NarrationPriority narrationPriority() {
-		return this.hasFocus ? NarratableEntry.NarrationPriority.FOCUSED : super.narrationPriority();
+		return this.isFocused() ? NarratableEntry.NarrationPriority.FOCUSED : super.narrationPriority();
 	}
 
 	@Override
@@ -77,7 +126,20 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
 		}
 
 		@Override
+		public boolean mouseClicked(double d, double e, int i) {
+			return ContainerEventHandler.super.mouseClicked(d, e, i);
+		}
+
+		@Override
 		public void setFocused(@Nullable GuiEventListener guiEventListener) {
+			if (this.focused != null) {
+				this.focused.setFocused(false);
+			}
+
+			if (guiEventListener != null) {
+				guiEventListener.setFocused(true);
+			}
+
 			this.focused = guiEventListener;
 		}
 
@@ -85,6 +147,43 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
 		@Override
 		public GuiEventListener getFocused() {
 			return this.focused;
+		}
+
+		@Nullable
+		public ComponentPath focusPathAtIndex(FocusNavigationEvent focusNavigationEvent, int i) {
+			if (this.children().isEmpty()) {
+				return null;
+			} else {
+				ComponentPath componentPath = ((GuiEventListener)this.children().get(Math.min(i, this.children().size() - 1))).nextFocusPath(focusNavigationEvent);
+				return ComponentPath.path(this, componentPath);
+			}
+		}
+
+		@Nullable
+		@Override
+		public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+			if (focusNavigationEvent instanceof FocusNavigationEvent.ArrowNavigation arrowNavigation) {
+				int i = switch (arrowNavigation.direction()) {
+					case LEFT -> -1;
+					case RIGHT -> 1;
+					case UP, DOWN -> 0;
+				};
+				if (i == 0) {
+					return null;
+				}
+
+				int j = Mth.clamp(i + this.children().indexOf(this.getFocused()), 0, this.children().size() - 1);
+
+				for (int k = j; k >= 0 && k < this.children().size(); k += i) {
+					GuiEventListener guiEventListener = (GuiEventListener)this.children().get(k);
+					ComponentPath componentPath = guiEventListener.nextFocusPath(focusNavigationEvent);
+					if (componentPath != null) {
+						return ComponentPath.path(this, componentPath);
+					}
+				}
+			}
+
+			return ContainerEventHandler.super.nextFocusPath(focusNavigationEvent);
 		}
 
 		public abstract List<? extends NarratableEntry> narratables();

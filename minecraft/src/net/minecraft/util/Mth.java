@@ -11,8 +11,6 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.math.NumberUtils;
 
 public class Mth {
-	private static final int BIG_ENOUGH_INT = 1024;
-	private static final float BIG_ENOUGH_FLOAT = 1024.0F;
 	private static final long UUID_VERSION = 61440L;
 	private static final long UUID_VERSION_TYPE_4 = 16384L;
 	private static final long UUID_VARIANT = -4611686018427387904L;
@@ -41,11 +39,6 @@ public class Mth {
 	private static final double[] ASIN_TAB = new double[257];
 	private static final double[] COS_TAB = new double[257];
 
-	public static float truncate(float f, float g) {
-		float h = (float)Math.pow(10.0, (double)g);
-		return (float)((int)(f * h)) / h;
-	}
-
 	public static float sin(float f) {
 		return SIN[(int)(f * 10430.378F) & 65535];
 	}
@@ -63,10 +56,6 @@ public class Mth {
 		return f < (float)i ? i - 1 : i;
 	}
 
-	public static int fastFloor(double d) {
-		return (int)(d + 1024.0) - 1024;
-	}
-
 	public static int floor(double d) {
 		int i = (int)d;
 		return d < (double)i ? i - 1 : i;
@@ -75,10 +64,6 @@ public class Mth {
 	public static long lfloor(double d) {
 		long l = (long)d;
 		return d < (double)l ? l - 1L : l;
-	}
-
-	public static int absFloor(double d) {
-		return (int)(d >= 0.0 ? d : -d + 1.0);
 	}
 
 	public static float abs(float f) {
@@ -99,44 +84,16 @@ public class Mth {
 		return d > (double)i ? i + 1 : i;
 	}
 
-	public static byte clamp(byte b, byte c, byte d) {
-		if (b < c) {
-			return c;
-		} else {
-			return b > d ? d : b;
-		}
-	}
-
 	public static int clamp(int i, int j, int k) {
-		if (i < j) {
-			return j;
-		} else {
-			return i > k ? k : i;
-		}
-	}
-
-	public static long clamp(long l, long m, long n) {
-		if (l < m) {
-			return m;
-		} else {
-			return l > n ? n : l;
-		}
+		return Math.min(Math.max(i, j), k);
 	}
 
 	public static float clamp(float f, float g, float h) {
-		if (f < g) {
-			return g;
-		} else {
-			return f > h ? h : f;
-		}
+		return f < g ? g : Math.min(f, h);
 	}
 
 	public static double clamp(double d, double e, double f) {
-		if (d < e) {
-			return e;
-		} else {
-			return d > f ? f : d;
-		}
+		return d < e ? e : Math.min(d, f);
 	}
 
 	public static double clampedLerp(double d, double e, double f) {
@@ -164,10 +121,10 @@ public class Mth {
 			e = -e;
 		}
 
-		return d > e ? d : e;
+		return Math.max(d, e);
 	}
 
-	public static int intFloorDiv(int i, int j) {
+	public static int floorDiv(int i, int j) {
 		return Math.floorDiv(i, j);
 	}
 
@@ -181,16 +138,6 @@ public class Mth {
 
 	public static double nextDouble(RandomSource randomSource, double d, double e) {
 		return d >= e ? d : randomSource.nextDouble() * (e - d) + d;
-	}
-
-	public static double average(long[] ls) {
-		long l = 0L;
-
-		for (long m : ls) {
-			l += m;
-		}
-
-		return (double)l / (double)ls.length;
 	}
 
 	public static boolean equal(float f, float g) {
@@ -213,8 +160,8 @@ public class Mth {
 		return (d % e + e) % e;
 	}
 
-	public static boolean isDivisionInteger(int i, int j) {
-		return i / j * j == i;
+	public static boolean isMultipleOf(int i, int j) {
+		return i % j == 0;
 	}
 
 	public static int wrapDegrees(int i) {
@@ -284,22 +231,6 @@ public class Mth {
 		return NumberUtils.toInt(string, i);
 	}
 
-	public static int getInt(String string, int i, int j) {
-		return Math.max(j, getInt(string, i));
-	}
-
-	public static double getDouble(String string, double d) {
-		try {
-			return Double.parseDouble(string);
-		} catch (Throwable var4) {
-			return d;
-		}
-	}
-
-	public static double getDouble(String string, double d, double e) {
-		return Math.max(e, getDouble(string, d));
-	}
-
 	public static int smallestEncompassingPowerOfTwo(int i) {
 		int j = i - 1;
 		j |= j >> 1;
@@ -324,35 +255,7 @@ public class Mth {
 	}
 
 	public static int color(float f, float g, float h) {
-		return color(floor(f * 255.0F), floor(g * 255.0F), floor(h * 255.0F));
-	}
-
-	public static int color(int i, int j, int k) {
-		int l = (i << 8) + j;
-		return (l << 8) + k;
-	}
-
-	public static int colorMultiply(int i, int j) {
-		int k = (i & 0xFF0000) >> 16;
-		int l = (j & 0xFF0000) >> 16;
-		int m = (i & 0xFF00) >> 8;
-		int n = (j & 0xFF00) >> 8;
-		int o = (i & 0xFF) >> 0;
-		int p = (j & 0xFF) >> 0;
-		int q = (int)((float)k * (float)l / 255.0F);
-		int r = (int)((float)m * (float)n / 255.0F);
-		int s = (int)((float)o * (float)p / 255.0F);
-		return i & 0xFF000000 | q << 16 | r << 8 | s;
-	}
-
-	public static int colorMultiply(int i, float f, float g, float h) {
-		int j = (i & 0xFF0000) >> 16;
-		int k = (i & 0xFF00) >> 8;
-		int l = (i & 0xFF) >> 0;
-		int m = (int)((float)j * f);
-		int n = (int)((float)k * g);
-		int o = (int)((float)l * h);
-		return i & 0xFF000000 | m << 16 | n << 8 | o;
+		return FastColor.ARGB32.color(0, floor(f * 255.0F), floor(g * 255.0F), floor(h * 255.0F));
 	}
 
 	public static float frac(float f) {
@@ -363,22 +266,12 @@ public class Mth {
 		return d - (double)lfloor(d);
 	}
 
-	public static Vec3 catmullRomSplinePos(Vec3 vec3, Vec3 vec32, Vec3 vec33, Vec3 vec34, double d) {
-		double e = ((-d + 2.0) * d - 1.0) * d * 0.5;
-		double f = ((3.0 * d - 5.0) * d * d + 2.0) * 0.5;
-		double g = ((-3.0 * d + 4.0) * d + 1.0) * d * 0.5;
-		double h = (d - 1.0) * d * d * 0.5;
-		return new Vec3(
-			vec3.x * e + vec32.x * f + vec33.x * g + vec34.x * h,
-			vec3.y * e + vec32.y * f + vec33.y * g + vec34.y * h,
-			vec3.z * e + vec32.z * f + vec33.z * g + vec34.z * h
-		);
-	}
-
+	@Deprecated
 	public static long getSeed(Vec3i vec3i) {
 		return getSeed(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 	}
 
+	@Deprecated
 	public static long getSeed(int i, int j, int k) {
 		long l = (long)(i * 3129871) ^ (long)k * 116129781L ^ (long)j;
 		l = l * l * 42317861L + l * 11L;
@@ -491,14 +384,15 @@ public class Mth {
 		}
 	}
 
-	public static float fastInvSqrt(float f) {
-		float g = 0.5F * f;
-		int i = Float.floatToIntBits(f);
-		i = 1597463007 - (i >> 1);
-		f = Float.intBitsToFloat(i);
-		return f * (1.5F - g * f * f);
+	public static float invSqrt(float f) {
+		return org.joml.Math.invsqrt(f);
 	}
 
+	public static double invSqrt(double d) {
+		return org.joml.Math.invsqrt(d);
+	}
+
+	@Deprecated
 	public static double fastInvSqrt(double d) {
 		double e = 0.5 * d;
 		long l = Double.doubleToRawLongBits(d);
@@ -559,10 +453,7 @@ public class Mth {
 				throw new RuntimeException("Something went wrong when converting from HSV to RGB. Input was " + f + ", " + g + ", " + h);
 		}
 
-		int q = clamp((int)(n * 255.0F), 0, 255);
-		int r = clamp((int)(o * 255.0F), 0, 255);
-		int s = clamp((int)(p * 255.0F), 0, 255);
-		return q << 16 | r << 8 | s;
+		return FastColor.ARGB32.color(0, clamp((int)(n * 255.0F), 0, 255), clamp((int)(o * 255.0F), 0, 255), clamp((int)(p * 255.0F), 0, 255));
 	}
 
 	public static int murmurHash3Mixer(int i) {
@@ -571,82 +462,6 @@ public class Mth {
 		i ^= i >>> 13;
 		i *= -1028477387;
 		return i ^ i >>> 16;
-	}
-
-	public static long murmurHash3Mixer(long l) {
-		l ^= l >>> 33;
-		l *= -49064778989728563L;
-		l ^= l >>> 33;
-		l *= -4265267296055464877L;
-		return l ^ l >>> 33;
-	}
-
-	public static double[] cumulativeSum(double... ds) {
-		double d = 0.0;
-
-		for (double e : ds) {
-			d += e;
-		}
-
-		for (int i = 0; i < ds.length; i++) {
-			ds[i] /= d;
-		}
-
-		for (int i = 0; i < ds.length; i++) {
-			ds[i] += i == 0 ? 0.0 : ds[i - 1];
-		}
-
-		return ds;
-	}
-
-	public static int getRandomForDistributionIntegral(RandomSource randomSource, double[] ds) {
-		double d = randomSource.nextDouble();
-
-		for (int i = 0; i < ds.length; i++) {
-			if (d < ds[i]) {
-				return i;
-			}
-		}
-
-		return ds.length;
-	}
-
-	public static double[] binNormalDistribution(double d, double e, double f, int i, int j) {
-		double[] ds = new double[j - i + 1];
-		int k = 0;
-
-		for (int l = i; l <= j; l++) {
-			ds[k] = Math.max(0.0, d * StrictMath.exp(-((double)l - f) * ((double)l - f) / (2.0 * e * e)));
-			k++;
-		}
-
-		return ds;
-	}
-
-	public static double[] binBiModalNormalDistribution(double d, double e, double f, double g, double h, double i, int j, int k) {
-		double[] ds = new double[k - j + 1];
-		int l = 0;
-
-		for (int m = j; m <= k; m++) {
-			ds[l] = Math.max(
-				0.0, d * StrictMath.exp(-((double)m - f) * ((double)m - f) / (2.0 * e * e)) + g * StrictMath.exp(-((double)m - i) * ((double)m - i) / (2.0 * h * h))
-			);
-			l++;
-		}
-
-		return ds;
-	}
-
-	public static double[] binLogDistribution(double d, double e, int i, int j) {
-		double[] ds = new double[j - i + 1];
-		int k = 0;
-
-		for (int l = i; l <= j; l++) {
-			ds[k] = Math.max(d * StrictMath.log((double)l) + e, 0.0);
-			k++;
-		}
-
-		return ds;
 	}
 
 	public static int binarySearch(int i, int j, IntPredicate intPredicate) {
@@ -706,38 +521,6 @@ public class Mth {
 		return g + f * wrapDegrees(h - g);
 	}
 
-	public static float diffuseLight(float f, float g, float h) {
-		return Math.min(f * f * 0.6F + g * g * ((3.0F + g) / 4.0F) + h * h * 0.8F, 1.0F);
-	}
-
-	@Deprecated
-	public static float rotlerp(float f, float g, float h) {
-		float i = g - f;
-
-		while (i < -180.0F) {
-			i += 360.0F;
-		}
-
-		while (i >= 180.0F) {
-			i -= 360.0F;
-		}
-
-		return f + h * i;
-	}
-
-	@Deprecated
-	public static float rotWrap(double d) {
-		while (d >= 180.0) {
-			d -= 360.0;
-		}
-
-		while (d < -180.0) {
-			d += 360.0;
-		}
-
-		return (float)d;
-	}
-
 	public static float triangleWave(float f, float g) {
 		return (Math.abs(f % g - g * 0.5F) - g * 0.25F) / (g * 0.25F);
 	}
@@ -756,10 +539,6 @@ public class Mth {
 
 	public static long square(long l) {
 		return l * l;
-	}
-
-	public static float cube(float f) {
-		return f * f * f;
 	}
 
 	public static double clampedMap(double d, double e, double f, double g, double h) {

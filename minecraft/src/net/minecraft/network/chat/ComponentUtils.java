@@ -136,7 +136,8 @@ public class ComponentUtils {
 	public static boolean isTranslationResolvable(@Nullable Component component) {
 		if (component != null && component.getContents() instanceof TranslatableContents translatableContents) {
 			String string = translatableContents.getKey();
-			return Language.getInstance().has(string);
+			String string2 = translatableContents.getFallback();
+			return string2 != null || Language.getInstance().has(string);
 		} else {
 			return true;
 		}

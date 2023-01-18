@@ -68,7 +68,7 @@ public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity>
 		BlockState blockState = skullBlockEntity.getBlockState();
 		boolean bl = blockState.getBlock() instanceof WallSkullBlock;
 		Direction direction = bl ? blockState.getValue(WallSkullBlock.FACING) : null;
-		int k = bl ? RotationSegment.convertToSegment(direction) : (Integer)blockState.getValue(SkullBlock.ROTATION);
+		int k = bl ? RotationSegment.convertToSegment(direction.getOpposite()) : (Integer)blockState.getValue(SkullBlock.ROTATION);
 		float h = RotationSegment.convertToDegrees(k);
 		SkullBlock.Type type = ((AbstractSkullBlock)blockState.getBlock()).getType();
 		SkullModelBase skullModelBase = (SkullModelBase)this.modelByType.get(type);

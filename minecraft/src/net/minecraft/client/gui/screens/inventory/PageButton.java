@@ -25,7 +25,6 @@ public class PageButton extends Button {
 	@Override
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, BookViewScreen.BOOK_LOCATION);
 		int k = 0;
 		int l = 192;

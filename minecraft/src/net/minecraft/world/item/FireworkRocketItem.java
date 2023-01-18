@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ByIdMap;
@@ -86,7 +87,7 @@ public class FireworkRocketItem extends Item {
 			if (compoundTag.contains("Flight", 99)) {
 				list.add(
 					Component.translatable("item.minecraft.firework_rocket.flight")
-						.append(" ")
+						.append(CommonComponents.SPACE)
 						.append(String.valueOf(compoundTag.getByte("Flight")))
 						.withStyle(ChatFormatting.GRAY)
 				);

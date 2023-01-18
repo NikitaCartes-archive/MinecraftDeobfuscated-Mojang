@@ -5,7 +5,6 @@ import com.mojang.logging.LogUtils;
 import java.io.File;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.player.inventory.Hotbar;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -38,24 +37,20 @@ public class HotbarManager {
 				return;
 			}
 
-			if (!compoundTag.contains("DataVersion", 99)) {
-				compoundTag.putInt("DataVersion", 1343);
-			}
+			int i = NbtUtils.getDataVersion(compoundTag, 1343);
+			compoundTag = DataFixTypes.HOTBAR.updateToCurrentVersion(this.fixerUpper, compoundTag, i);
 
-			compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.HOTBAR, compoundTag, compoundTag.getInt("DataVersion"));
-
-			for (int i = 0; i < 9; i++) {
-				this.hotbars[i].fromTag(compoundTag.getList(String.valueOf(i), 10));
+			for (int j = 0; j < 9; j++) {
+				this.hotbars[j].fromTag(compoundTag.getList(String.valueOf(j), 10));
 			}
-		} catch (Exception var3) {
-			LOGGER.error("Failed to load creative mode options", (Throwable)var3);
+		} catch (Exception var4) {
+			LOGGER.error("Failed to load creative mode options", (Throwable)var4);
 		}
 	}
 
 	public void save() {
 		try {
-			CompoundTag compoundTag = new CompoundTag();
-			compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+			CompoundTag compoundTag = NbtUtils.addCurrentDataVersion(new CompoundTag());
 
 			for (int i = 0; i < 9; i++) {
 				compoundTag.put(String.valueOf(i), this.get(i).createTag());

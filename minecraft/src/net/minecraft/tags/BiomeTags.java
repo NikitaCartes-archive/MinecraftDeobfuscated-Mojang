@@ -58,17 +58,21 @@ public class BiomeTags {
 	public static final TagKey<Biome> HAS_CLOSER_WATER_FOG = create("has_closer_water_fog");
 	public static final TagKey<Biome> WATER_ON_MAP_OUTLINES = create("water_on_map_outlines");
 	public static final TagKey<Biome> PRODUCES_CORALS_FROM_BONEMEAL = create("produces_corals_from_bonemeal");
+	public static final TagKey<Biome> INCREASED_FIRE_BURNOUT = create("increased_fire_burnout");
+	public static final TagKey<Biome> SNOW_GOLEM_MELTS = create("snow_golem_melts");
 	public static final TagKey<Biome> WITHOUT_ZOMBIE_SIEGES = create("without_zombie_sieges");
 	public static final TagKey<Biome> WITHOUT_PATROL_SPAWNS = create("without_patrol_spawns");
 	public static final TagKey<Biome> WITHOUT_WANDERING_TRADER_SPAWNS = create("without_wandering_trader_spawns");
 	public static final TagKey<Biome> SPAWNS_COLD_VARIANT_FROGS = create("spawns_cold_variant_frogs");
 	public static final TagKey<Biome> SPAWNS_WARM_VARIANT_FROGS = create("spawns_warm_variant_frogs");
-	public static final TagKey<Biome> ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS = create("only_allows_snow_and_gold_rabbits");
+	public static final TagKey<Biome> SPAWNS_GOLD_RABBITS = create("spawns_gold_rabbits");
+	public static final TagKey<Biome> SPAWNS_WHITE_RABBITS = create("spawns_white_rabbits");
 	public static final TagKey<Biome> REDUCED_WATER_AMBIENT_SPAWNS = create("reduce_water_ambient_spawns");
 	public static final TagKey<Biome> ALLOWS_TROPICAL_FISH_SPAWNS_AT_ANY_HEIGHT = create("allows_tropical_fish_spawns_at_any_height");
 	public static final TagKey<Biome> POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS = create("polar_bears_spawn_on_alternate_blocks");
 	public static final TagKey<Biome> MORE_FREQUENT_DROWNED_SPAWNS = create("more_frequent_drowned_spawns");
 	public static final TagKey<Biome> ALLOWS_SURFACE_SLIME_SPAWNS = create("allows_surface_slime_spawns");
+	public static final TagKey<Biome> SPAWNS_SNOW_FOXES = create("spawns_snow_foxes");
 
 	private BiomeTags() {
 	}

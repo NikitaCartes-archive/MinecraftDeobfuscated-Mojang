@@ -1,12 +1,11 @@
 package net.minecraft.server.commands;
 
+import com.google.common.net.InetAddresses;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -18,9 +17,6 @@ import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.IpBanListEntry;
 
 public class BanIpCommands {
-	public static final Pattern IP_ADDRESS_PATTERN = Pattern.compile(
-		"^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$"
-	);
 	private static final SimpleCommandExceptionType ERROR_INVALID_IP = new SimpleCommandExceptionType(Component.translatable("commands.banip.invalid"));
 	private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.banip.failed"));
 
@@ -44,8 +40,7 @@ public class BanIpCommands {
 	}
 
 	private static int banIpOrName(CommandSourceStack commandSourceStack, String string, @Nullable Component component) throws CommandSyntaxException {
-		Matcher matcher = IP_ADDRESS_PATTERN.matcher(string);
-		if (matcher.matches()) {
+		if (InetAddresses.isInetAddress(string)) {
 			return banIp(commandSourceStack, string, component);
 		} else {
 			ServerPlayer serverPlayer = commandSourceStack.getServer().getPlayerList().getPlayerByName(string);

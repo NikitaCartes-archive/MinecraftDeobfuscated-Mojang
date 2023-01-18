@@ -1,10 +1,10 @@
 package net.minecraft.server.commands;
 
+import com.google.common.net.InetAddresses;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import java.util.regex.Matcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -32,8 +32,7 @@ public class PardonIpCommand {
 	}
 
 	private static int unban(CommandSourceStack commandSourceStack, String string) throws CommandSyntaxException {
-		Matcher matcher = BanIpCommands.IP_ADDRESS_PATTERN.matcher(string);
-		if (!matcher.matches()) {
+		if (!InetAddresses.isInetAddress(string)) {
 			throw ERROR_INVALID.create();
 		} else {
 			IpBanList ipBanList = commandSourceStack.getServer().getPlayerList().getIpBans();

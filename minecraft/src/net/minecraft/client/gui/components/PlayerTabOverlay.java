@@ -18,10 +18,10 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -75,12 +75,19 @@ public class PlayerTabOverlay extends GuiComponent {
 		if (this.visible != bl) {
 			this.healthStates.clear();
 			this.visible = bl;
+			if (bl) {
+				Component component = ComponentUtils.formatList(this.getPlayerInfos(), Component.literal(", "), this::getNameForDisplay);
+				this.minecraft.getNarrator().sayNow(Component.translatable("multiplayer.player.list.narration", component));
+			}
 		}
 	}
 
+	private List<PlayerInfo> getPlayerInfos() {
+		return this.minecraft.player.connection.getListedOnlinePlayers().stream().sorted(PLAYER_COMPARATOR).limit(80L).toList();
+	}
+
 	public void render(PoseStack poseStack, int i, Scoreboard scoreboard, @Nullable Objective objective) {
-		ClientPacketListener clientPacketListener = this.minecraft.player.connection;
-		List<PlayerInfo> list = clientPacketListener.getListedOnlinePlayers().stream().sorted(PLAYER_COMPARATOR).limit(80L).toList();
+		List<PlayerInfo> list = this.getPlayerInfos();
 		int j = 0;
 		int k = 0;
 
@@ -161,7 +168,6 @@ public class PlayerTabOverlay extends GuiComponent {
 			int x = q + t * p + t * 5;
 			int y = r + w * 9;
 			fill(poseStack, x, y, x + p, y + 8, u);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			if (v < list.size()) {
@@ -204,7 +210,6 @@ public class PlayerTabOverlay extends GuiComponent {
 	}
 
 	protected void renderPingIcon(PoseStack poseStack, int i, int j, int k, PlayerInfo playerInfo) {
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
 		int l = 0;
 		int m;

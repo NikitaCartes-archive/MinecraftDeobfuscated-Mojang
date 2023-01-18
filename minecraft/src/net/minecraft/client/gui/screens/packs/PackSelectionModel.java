@@ -64,6 +64,8 @@ public class PackSelectionModel {
 
 		PackCompatibility getCompatibility();
 
+		String getId();
+
 		Component getTitle();
 
 		Component getDescription();
@@ -121,6 +123,11 @@ public class PackSelectionModel {
 		@Override
 		public PackCompatibility getCompatibility() {
 			return this.pack.getCompatibility();
+		}
+
+		@Override
+		public String getId() {
+			return this.pack.getId();
 		}
 
 		@Override

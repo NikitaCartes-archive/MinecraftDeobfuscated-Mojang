@@ -545,7 +545,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		if (selectedTab.getType() == CreativeModeTab.Type.SEARCH) {
 			this.searchBox.setVisible(true);
 			this.searchBox.setCanLoseFocus(false);
-			this.searchBox.setFocus(true);
+			this.searchBox.setFocused(true);
 			if (creativeModeTab2 != creativeModeTab) {
 				this.searchBox.setValue("");
 			}
@@ -554,7 +554,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		} else {
 			this.searchBox.setVisible(false);
 			this.searchBox.setCanLoseFocus(true);
-			this.searchBox.setFocus(false);
+			this.searchBox.setFocused(false);
 			this.searchBox.setValue("");
 		}
 
@@ -621,7 +621,6 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 			this.renderTooltip(poseStack, TRASH_SLOT_TOOLTIP, i, j);
 		}
 
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		this.renderTooltip(poseStack, i, j);
 	}
 
@@ -660,8 +659,6 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
 		for (CreativeModeTab creativeModeTab : CreativeModeTabs.tabs()) {
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, CREATIVE_TABS_LOCATION);
@@ -674,7 +671,6 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		RenderSystem.setShaderTexture(0, new ResourceLocation("textures/gui/container/creative_inventory/tab_" + selectedTab.getBackgroundSuffix()));
 		this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 		this.searchBox.render(poseStack, i, j, f);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		int k = this.leftPos + 175;
 		int l = this.topPos + 18;
 		int m = l + 112;

@@ -206,10 +206,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			RealmsPendingInvitesScreen.this.font
 				.draw(poseStack, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), (float)(i + 38), (float)(j + 24), 7105644);
 			RowButton.drawButtonsInRow(poseStack, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
-			RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> {
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-				PlayerFaceRenderer.draw(poseStack, i, j, 32);
-			});
+			RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> PlayerFaceRenderer.draw(poseStack, i, j, 32));
 		}
 
 		@Override
@@ -231,7 +228,6 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			@Override
 			protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
 				RenderSystem.setShaderTexture(0, RealmsPendingInvitesScreen.ACCEPT_ICON_LOCATION);
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				float f = bl ? 19.0F : 0.0F;
 				GuiComponent.blit(poseStack, i, j, f, 0.0F, 18, 18, 37, 18);
 				if (bl) {
@@ -254,7 +250,6 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			@Override
 			protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
 				RenderSystem.setShaderTexture(0, RealmsPendingInvitesScreen.REJECT_ICON_LOCATION);
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				float f = bl ? 19.0F : 0.0F;
 				GuiComponent.blit(poseStack, i, j, f, 0.0F, 18, 18, 37, 18);
 				if (bl) {
@@ -287,11 +282,6 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		@Override
 		public int getRowWidth() {
 			return 260;
-		}
-
-		@Override
-		public boolean isFocused() {
-			return RealmsPendingInvitesScreen.this.getFocused() == this;
 		}
 
 		@Override

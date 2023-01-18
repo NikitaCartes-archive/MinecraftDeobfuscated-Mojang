@@ -112,7 +112,7 @@ public class ArgumentTypeInfos {
 		register(registry, "float_range", RangeArgument.Floats.class, SingletonArgumentInfo.contextFree(RangeArgument::floatRange));
 		register(registry, "dimension", DimensionArgument.class, SingletonArgumentInfo.contextFree(DimensionArgument::dimension));
 		register(registry, "gamemode", GameModeArgument.class, SingletonArgumentInfo.contextFree(GameModeArgument::gameMode));
-		register(registry, "time", TimeArgument.class, SingletonArgumentInfo.contextFree(TimeArgument::time));
+		register(registry, "time", TimeArgument.class, new TimeArgument.Info());
 		register(registry, "resource_or_tag", fixClassType(ResourceOrTagArgument.class), new ResourceOrTagArgument.Info());
 		register(registry, "resource_or_tag_key", fixClassType(ResourceOrTagKeyArgument.class), new ResourceOrTagKeyArgument.Info());
 		register(registry, "resource", fixClassType(ResourceArgument.class), new ResourceArgument.Info());

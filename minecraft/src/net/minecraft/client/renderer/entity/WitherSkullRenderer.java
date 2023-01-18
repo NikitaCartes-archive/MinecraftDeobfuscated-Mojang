@@ -43,7 +43,7 @@ public class WitherSkullRenderer extends EntityRenderer<WitherSkull> {
 	public void render(WitherSkull witherSkull, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		float h = Mth.rotlerp(witherSkull.yRotO, witherSkull.getYRot(), g);
+		float h = Mth.rotLerp(g, witherSkull.yRotO, witherSkull.getYRot());
 		float j = Mth.lerp(g, witherSkull.xRotO, witherSkull.getXRot());
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(witherSkull)));
 		this.model.setupAnim(0.0F, h, j);

@@ -1,35 +1,41 @@
 package net.minecraft.client.gui.components;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarrationSupplier;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public abstract class ObjectSelectionList<E extends ObjectSelectionList.Entry<E>> extends AbstractSelectionList<E> {
 	private static final Component USAGE_NARRATION = Component.translatable("narration.selection.usage");
-	private boolean inFocus;
 
 	public ObjectSelectionList(Minecraft minecraft, int i, int j, int k, int l, int m) {
 		super(minecraft, i, j, k, l, m);
 	}
 
+	@Nullable
 	@Override
-	public boolean changeFocus(boolean bl) {
-		if (!this.inFocus && this.getItemCount() == 0) {
-			return false;
-		} else {
-			this.inFocus = !this.inFocus;
-			if (this.inFocus && this.getSelected() == null && this.getItemCount() > 0) {
-				this.moveSelection(AbstractSelectionList.SelectionDirection.DOWN);
-			} else if (this.inFocus && this.getSelected() != null) {
-				this.refreshSelection();
+	public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+		if (this.getItemCount() == 0) {
+			return null;
+		} else if (this.isFocused() && focusNavigationEvent instanceof FocusNavigationEvent.ArrowNavigation arrowNavigation) {
+			E entry = this.nextEntry(arrowNavigation.direction());
+			return entry != null ? ComponentPath.path(this, ComponentPath.leaf(entry)) : null;
+		} else if (!this.isFocused()) {
+			E entry2 = this.getSelected();
+			if (entry2 == null) {
+				entry2 = this.nextEntry(focusNavigationEvent.getVerticalDirectionForInitialFocus());
 			}
 
-			return this.inFocus;
+			return entry2 == null ? null : ComponentPath.path(this, ComponentPath.leaf(entry2));
+		} else {
+			return null;
 		}
 	}
 
@@ -54,11 +60,6 @@ public abstract class ObjectSelectionList<E extends ObjectSelectionList.Entry<E>
 
 	@Environment(EnvType.CLIENT)
 	public abstract static class Entry<E extends ObjectSelectionList.Entry<E>> extends AbstractSelectionList.Entry<E> implements NarrationSupplier {
-		@Override
-		public boolean changeFocus(boolean bl) {
-			return false;
-		}
-
 		public abstract Component getNarration();
 
 		@Override

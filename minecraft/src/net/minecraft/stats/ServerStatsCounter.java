@@ -78,19 +78,15 @@ public class ServerStatsCounter extends StatsCounter {
 		try {
 			JsonReader jsonReader = new JsonReader(new StringReader(string));
 
-			label51: {
+			label47: {
 				try {
 					jsonReader.setLenient(false);
 					JsonElement jsonElement = Streams.parse(jsonReader);
 					if (!jsonElement.isJsonNull()) {
 						CompoundTag compoundTag = fromJson(jsonElement.getAsJsonObject());
-						if (!compoundTag.contains("DataVersion", 99)) {
-							compoundTag.putInt("DataVersion", 1343);
-						}
-
-						compoundTag = NbtUtils.update(dataFixer, DataFixTypes.STATS, compoundTag, compoundTag.getInt("DataVersion"));
+						compoundTag = DataFixTypes.STATS.updateToCurrentVersion(dataFixer, compoundTag, NbtUtils.getDataVersion(compoundTag, 1343));
 						if (!compoundTag.contains("stats", 10)) {
-							break label51;
+							break label47;
 						}
 
 						CompoundTag compoundTag2 = compoundTag.getCompound("stats");
@@ -98,7 +94,7 @@ public class ServerStatsCounter extends StatsCounter {
 
 						while (true) {
 							if (!var7.hasNext()) {
-								break label51;
+								break label47;
 							}
 
 							String string2 = (String)var7.next();
@@ -185,7 +181,7 @@ public class ServerStatsCounter extends StatsCounter {
 
 		JsonObject jsonObject2 = new JsonObject();
 		jsonObject2.add("stats", jsonObject);
-		jsonObject2.addProperty("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+		jsonObject2.addProperty("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
 		return jsonObject2.toString();
 	}
 

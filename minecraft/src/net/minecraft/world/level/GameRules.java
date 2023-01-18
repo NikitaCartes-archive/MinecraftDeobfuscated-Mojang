@@ -99,6 +99,9 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.IntegerValue> RULE_MAX_COMMAND_CHAIN_LENGTH = register(
 		"maxCommandChainLength", GameRules.Category.MISC, GameRules.IntegerValue.create(65536)
 	);
+	public static final GameRules.Key<GameRules.IntegerValue> RULE_COMMAND_MODIFICATION_BLOCK_LIMIT = register(
+		"commandModificationBlockLimit", GameRules.Category.MISC, GameRules.IntegerValue.create(32768)
+	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_ANNOUNCE_ADVANCEMENTS = register(
 		"announceAdvancements", GameRules.Category.CHAT, GameRules.BooleanValue.create(true)
 	);

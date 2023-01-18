@@ -28,7 +28,6 @@ public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		Level level = this.minecraft.level;
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.disableTexture();
 		BlockPos blockPos = new BlockPos(d, e, f);
 		LongSet longSet = new LongOpenHashSet();
 
@@ -52,7 +51,5 @@ public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 				DebugRenderer.renderFloatingText(String.valueOf(i), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, j);
 			}
 		}
-
-		RenderSystem.enableTexture();
 	}
 }

@@ -17,6 +17,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.level.pathfinder.Path;
@@ -231,7 +232,7 @@ public abstract class PathNavigation {
 		double e = Math.abs(this.mob.getY() - (double)vec3i.getY());
 		double f = Math.abs(this.mob.getZ() - ((double)vec3i.getZ() + 0.5));
 		boolean bl = d < (double)this.maxDistanceToWaypoint && f < (double)this.maxDistanceToWaypoint && e < 1.0;
-		if (bl || this.mob.canCutCorner(this.path.getNextNode().type) && this.shouldTargetNextNodeInDirection(vec3)) {
+		if (bl || this.canCutCorner(this.path.getNextNode().type) && this.shouldTargetNextNodeInDirection(vec3)) {
 			this.path.advance();
 		}
 
@@ -350,6 +351,10 @@ public abstract class PathNavigation {
 
 	protected boolean canMoveDirectly(Vec3 vec3, Vec3 vec32) {
 		return false;
+	}
+
+	public boolean canCutCorner(BlockPathTypes blockPathTypes) {
+		return blockPathTypes != BlockPathTypes.DANGER_FIRE && blockPathTypes != BlockPathTypes.DANGER_OTHER && blockPathTypes != BlockPathTypes.WALKABLE_DOOR;
 	}
 
 	protected static boolean isClearForMovementBetween(Mob mob, Vec3 vec3, Vec3 vec32, boolean bl) {

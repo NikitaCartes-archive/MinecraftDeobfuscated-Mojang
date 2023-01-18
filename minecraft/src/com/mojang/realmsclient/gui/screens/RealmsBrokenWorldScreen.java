@@ -73,7 +73,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 	@Override
 	public Component getNarrationMessage() {
 		return ComponentUtils.formatList(
-			(Collection<? extends Component>)Stream.concat(Stream.of(this.title), Stream.of(this.message)).collect(Collectors.toList()), Component.literal(" ")
+			(Collection<? extends Component>)Stream.concat(Stream.of(this.title), Stream.of(this.message)).collect(Collectors.toList()), CommonComponents.SPACE
 		);
 	}
 
@@ -309,5 +309,6 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 
 		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 80, 80, 80, 80);
 		drawCenteredString(poseStack, this.font, string, i + 40, j + 66, 16777215);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 }

@@ -29,21 +29,18 @@ public class ClientLanguage extends Language {
 		this.defaultRightToLeft = bl;
 	}
 
-	public static ClientLanguage loadFrom(ResourceManager resourceManager, List<LanguageInfo> list) {
+	public static ClientLanguage loadFrom(ResourceManager resourceManager, List<String> list, boolean bl) {
 		Map<String, String> map = Maps.<String, String>newHashMap();
-		boolean bl = false;
 
-		for (LanguageInfo languageInfo : list) {
-			bl |= languageInfo.isBidirectional();
-			String string = languageInfo.getCode();
+		for (String string : list) {
 			String string2 = String.format(Locale.ROOT, "lang/%s.json", string);
 
 			for (String string3 : resourceManager.getNamespaces()) {
 				try {
 					ResourceLocation resourceLocation = new ResourceLocation(string3, string2);
 					appendFrom(string, resourceManager.getResourceStack(resourceLocation), map);
-				} catch (Exception var11) {
-					LOGGER.warn("Skipped language file: {}:{} ({})", string3, string2, var11.toString());
+				} catch (Exception var10) {
+					LOGGER.warn("Skipped language file: {}:{} ({})", string3, string2, var10.toString());
 				}
 			}
 		}
@@ -80,8 +77,8 @@ public class ClientLanguage extends Language {
 	}
 
 	@Override
-	public String getOrDefault(String string) {
-		return (String)this.storage.getOrDefault(string, string);
+	public String getOrDefault(String string, String string2) {
+		return (String)this.storage.getOrDefault(string, string2);
 	}
 
 	@Override

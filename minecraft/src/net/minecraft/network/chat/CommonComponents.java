@@ -12,12 +12,18 @@ public class CommonComponents {
 	public static final Component GUI_YES = Component.translatable("gui.yes");
 	public static final Component GUI_NO = Component.translatable("gui.no");
 	public static final Component GUI_PROCEED = Component.translatable("gui.proceed");
+	public static final Component GUI_CONTINUE = Component.translatable("gui.continue");
 	public static final Component GUI_BACK = Component.translatable("gui.back");
 	public static final Component GUI_ACKNOWLEDGE = Component.translatable("gui.acknowledge");
 	public static final Component CONNECT_FAILED = Component.translatable("connect.failed");
 	public static final Component NEW_LINE = Component.literal("\n");
 	public static final Component NARRATION_SEPARATOR = Component.literal(". ");
 	public static final Component ELLIPSIS = Component.literal("...");
+	public static final Component SPACE = space();
+
+	public static MutableComponent space() {
+		return Component.literal(" ");
+	}
 
 	public static MutableComponent days(long l) {
 		return Component.translatable("gui.days", l);

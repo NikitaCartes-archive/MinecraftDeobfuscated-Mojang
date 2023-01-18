@@ -41,7 +41,7 @@ public class MatrixUtil {
 	private static Pair<Float, Float> approxGivensQuat(float f, float g, float h) {
 		float i = 2.0F * (f - h);
 		if (G * g * g < i * i) {
-			float k = Mth.fastInvSqrt(g * g + i * i);
+			float k = Mth.invSqrt(g * g + i * i);
 			return Pair.of(k * g, k * i);
 		} else {
 			return Pair.of(SS, CS);
@@ -58,7 +58,7 @@ public class MatrixUtil {
 			j = k;
 		}
 
-		float k = Mth.fastInvSqrt(j * j + i * i);
+		float k = Mth.invSqrt(j * j + i * i);
 		j *= k;
 		i *= k;
 		return Pair.of(i, j);

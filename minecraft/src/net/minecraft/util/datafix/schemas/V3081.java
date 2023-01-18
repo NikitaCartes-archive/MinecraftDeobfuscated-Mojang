@@ -12,26 +12,16 @@ public class V3081 extends NamespacedSchema {
 		super(i, schema);
 	}
 
-	protected static void registerMob(Schema schema, Map<String, Supplier<TypeTemplate>> map, String string) {
-		schema.register(map, string, (Supplier<TypeTemplate>)(() -> V100.equipment(schema)));
+	@Override
+	public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
+		Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
 		schema.register(
 			map,
 			"minecraft:warden",
 			(Supplier<TypeTemplate>)(() -> DSL.optionalFields(
-					"ArmorItems",
-					DSL.list(References.ITEM_STACK.in(schema)),
-					"HandItems",
-					DSL.list(References.ITEM_STACK.in(schema)),
-					"listener",
-					DSL.optionalFields("event", DSL.optionalFields("game_event", References.GAME_EVENT_NAME.in(schema)))
+					"listener", DSL.optionalFields("event", DSL.optionalFields("game_event", References.GAME_EVENT_NAME.in(schema))), V100.equipment(schema)
 				))
 		);
-	}
-
-	@Override
-	public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
-		Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-		registerMob(schema, map, "minecraft:warden");
 		return map;
 	}
 }

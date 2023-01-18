@@ -58,7 +58,7 @@ public class PopupScreen extends Screen {
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderDirtBackground(0);
+		this.renderDirtBackground(poseStack);
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.contentTop - 9 * 2, -1);
 		this.messageLines.renderCentered(poseStack, this.width / 2, this.contentTop);
 		super.render(poseStack, i, j, f);

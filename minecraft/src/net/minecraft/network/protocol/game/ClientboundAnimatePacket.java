@@ -6,7 +6,6 @@ import net.minecraft.world.entity.Entity;
 
 public class ClientboundAnimatePacket implements Packet<ClientGamePacketListener> {
 	public static final int SWING_MAIN_HAND = 0;
-	public static final int HURT = 1;
 	public static final int WAKE_UP = 2;
 	public static final int SWING_OFF_HAND = 3;
 	public static final int CRITICAL_HIT = 4;

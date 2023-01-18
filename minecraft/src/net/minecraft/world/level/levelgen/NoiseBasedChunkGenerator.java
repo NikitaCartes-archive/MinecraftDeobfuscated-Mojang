@@ -164,8 +164,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		NoiseSettings noiseSettings = this.settings.value().noiseSettings().clampToHeightAccessor(levelHeightAccessor);
 		int k = noiseSettings.getCellHeight();
 		int l = noiseSettings.minY();
-		int m = Mth.intFloorDiv(l, k);
-		int n = Mth.intFloorDiv(noiseSettings.height(), k);
+		int m = Mth.floorDiv(l, k);
+		int n = Mth.floorDiv(noiseSettings.height(), k);
 		if (n <= 0) {
 			return OptionalInt.empty();
 		} else {
@@ -323,8 +323,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	) {
 		NoiseSettings noiseSettings = this.settings.value().noiseSettings().clampToHeightAccessor(chunkAccess.getHeightAccessorForGeneration());
 		int i = noiseSettings.minY();
-		int j = Mth.intFloorDiv(i, noiseSettings.getCellHeight());
-		int k = Mth.intFloorDiv(noiseSettings.height(), noiseSettings.getCellHeight());
+		int j = Mth.floorDiv(i, noiseSettings.getCellHeight());
+		int k = Mth.floorDiv(noiseSettings.height(), noiseSettings.getCellHeight());
 		if (k <= 0) {
 			return CompletableFuture.completedFuture(chunkAccess);
 		} else {

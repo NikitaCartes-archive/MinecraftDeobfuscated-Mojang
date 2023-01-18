@@ -95,9 +95,8 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 		this.minecraft.player.getInventory().fillStackedContents(this.stackedContents);
 		this.menu.fillCraftSlotsStackedContents(this.stackedContents);
 		String string = this.searchBox != null ? this.searchBox.getValue() : "";
-		this.searchBox = new EditBox(this.minecraft.font, i + 25, j + 14, 80, 9 + 5, Component.translatable("itemGroup.search"));
+		this.searchBox = new EditBox(this.minecraft.font, i + 26, j + 14, 79, 9 + 3, Component.translatable("itemGroup.search"));
 		this.searchBox.setMaxLength(50);
-		this.searchBox.setBordered(false);
 		this.searchBox.setVisible(true);
 		this.searchBox.setTextColor(16777215);
 		this.searchBox.setValue(string);
@@ -132,11 +131,6 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 
 	private void updateFilterButtonTooltip() {
 		this.filterButton.setTooltip(this.filterButton.isStateTriggered() ? Tooltip.create(this.getRecipeFilterName()) : Tooltip.create(ALL_RECIPES_TOOLTIP));
-	}
-
-	@Override
-	public boolean changeFocus(boolean bl) {
-		return false;
 	}
 
 	protected void initFilterButtonTextures() {
@@ -258,7 +252,6 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 			poseStack.translate(0.0F, 0.0F, 100.0F);
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = (this.width - 147) / 2 - this.xOffset;
 			int l = (this.height - 166) / 2;
 			this.blit(poseStack, k, l, 1, 1, 147, 166);
@@ -390,7 +383,7 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 			return true;
 		} else if (this.minecraft.options.keyChat.matches(i, j) && !this.searchBox.isFocused()) {
 			this.ignoreTextInput = true;
-			this.searchBox.setFocus(true);
+			this.searchBox.setFocused(true);
 			return true;
 		} else {
 			return false;
@@ -422,6 +415,15 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 		return false;
 	}
 
+	@Override
+	public void setFocused(boolean bl) {
+	}
+
+	@Override
+	public boolean isFocused() {
+		return false;
+	}
+
 	private void checkSearchStringUpdate() {
 		String string = this.searchBox.getValue().toLowerCase(Locale.ROOT);
 		this.pirateSpeechForThePeople(string);
@@ -434,13 +436,14 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 	private void pirateSpeechForThePeople(String string) {
 		if ("excitedze".equals(string)) {
 			LanguageManager languageManager = this.minecraft.getLanguageManager();
+			String string2 = "en_pt";
 			LanguageInfo languageInfo = languageManager.getLanguage("en_pt");
-			if (languageManager.getSelected().compareTo(languageInfo) == 0) {
+			if (languageInfo == null || languageManager.getSelected().equals("en_pt")) {
 				return;
 			}
 
-			languageManager.setSelected(languageInfo);
-			this.minecraft.options.languageCode = languageInfo.getCode();
+			languageManager.setSelected("en_pt");
+			this.minecraft.options.languageCode = "en_pt";
 			this.minecraft.reloadResourcePacks();
 			this.minecraft.options.save();
 		}

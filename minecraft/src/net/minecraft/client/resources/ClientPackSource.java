@@ -26,7 +26,7 @@ import net.minecraft.server.packs.repository.PackSource;
 @Environment(EnvType.CLIENT)
 public class ClientPackSource extends BuiltInPackSource {
 	private static final PackMetadataSection VERSION_METADATA_SECTION = new PackMetadataSection(
-		Component.translatable("resourcePack.vanilla.description"), PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion())
+		Component.translatable("resourcePack.vanilla.description"), SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES)
 	);
 	private static final BuiltInMetadata BUILT_IN_METADATA = BuiltInMetadata.of(PackMetadataSection.TYPE, VERSION_METADATA_SECTION);
 	private static final Component VANILLA_NAME = Component.translatable("resourcePack.vanilla.name");

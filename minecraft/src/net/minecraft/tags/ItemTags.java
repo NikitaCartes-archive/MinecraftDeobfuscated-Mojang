@@ -86,6 +86,7 @@ public final class ItemTags {
 	public static final TagKey<Item> COMPASSES = bind("compasses");
 	public static final TagKey<Item> HANGING_SIGNS = bind("hanging_signs");
 	public static final TagKey<Item> CREEPER_IGNITERS = bind("creeper_igniters");
+	public static final TagKey<Item> NOTE_BLOCK_TOP_INSTRUMENTS = bind("noteblock_top_instruments");
 
 	private ItemTags() {
 	}

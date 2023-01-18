@@ -2,12 +2,7 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.Unit;
 import com.mojang.realmsclient.client.FileDownload;
@@ -24,7 +19,6 @@ import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
@@ -34,6 +28,10 @@ import org.slf4j.Logger;
 public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final ReentrantLock DOWNLOAD_LOCK = new ReentrantLock();
+	private static final int BAR_WIDTH = 200;
+	private static final int BAR_TOP = 80;
+	private static final int BAR_BOTTOM = 95;
+	private static final int BAR_BORDER = 1;
 	private final Screen lastScreen;
 	private final WorldDownload worldDownload;
 	private final Component downloadTitle;
@@ -77,7 +75,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		this.cancelButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
 			this.cancelled = true;
 			this.backButtonClicked();
-		}).bounds(this.width / 2 - 100, this.height - 42, 200, 20).build());
+		}).bounds((this.width - 200) / 2, this.height - 42, 200, 20).build());
 		this.checkDownloadSize();
 	}
 
@@ -180,24 +178,10 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private void drawProgressBar(PoseStack poseStack) {
 		double d = Math.min((double)this.downloadStatus.bytesWritten / (double)this.downloadStatus.totalBytes, 1.0);
 		this.progress = String.format(Locale.ROOT, "%.1f", d * 100.0);
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.disableTexture();
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		double e = (double)(this.width / 2 - 100);
-		double f = 0.5;
-		bufferBuilder.vertex(e - 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
-		bufferBuilder.vertex(e + 200.0 * d + 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
-		bufferBuilder.vertex(e + 200.0 * d + 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
-		bufferBuilder.vertex(e - 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
-		bufferBuilder.vertex(e, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
-		bufferBuilder.vertex(e + 200.0 * d, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
-		bufferBuilder.vertex(e + 200.0 * d, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
-		bufferBuilder.vertex(e, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
-		tesselator.end();
-		RenderSystem.enableTexture();
+		int i = (this.width - 200) / 2;
+		int j = i + (int)Math.round(200.0 * d);
+		fill(poseStack, i - 1, 79, j + 1, 175, -2501934);
+		fill(poseStack, i, 80, j, 95, -8355712);
 		drawCenteredString(poseStack, this.font, this.progress + " %", this.width / 2, 84, 16777215);
 	}
 

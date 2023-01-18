@@ -170,7 +170,6 @@ public abstract class LivingEntity extends Entity {
 	public int removeStingerTime;
 	public int hurtTime;
 	public int hurtDuration;
-	public float hurtDir;
 	public int deathTime;
 	public float oAttackAnim;
 	public float attackAnim;
@@ -1080,7 +1079,6 @@ public abstract class LivingEntity extends Entity {
 				f *= 0.75F;
 			}
 
-			this.hurtDir = 0.0F;
 			Entity entity2 = damageSource.getEntity();
 			if (entity2 != null) {
 				if (entity2 instanceof LivingEntity && !damageSource.isNoAggro()) {
@@ -1135,10 +1133,7 @@ public abstract class LivingEntity extends Entity {
 						d = (Math.random() - Math.random()) * 0.01;
 					}
 
-					this.hurtDir = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI - (double)this.getYRot());
 					this.knockback(0.4F, d, e);
-				} else {
-					this.hurtDir = (float)((int)(Math.random() * 2.0) * 180);
 				}
 			}
 
@@ -1421,6 +1416,10 @@ public abstract class LivingEntity extends Entity {
 			: this.position();
 	}
 
+	public float getHurtDir() {
+		return 0.0F;
+	}
+
 	public LivingEntity.Fallsounds getFallSounds() {
 		return new LivingEntity.Fallsounds(SoundEvents.GENERIC_SMALL_FALL, SoundEvents.GENERIC_BIG_FALL);
 	}
@@ -1513,10 +1512,9 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	@Override
-	public void animateHurt() {
+	public void animateHurt(float f) {
 		this.hurtDuration = 10;
 		this.hurtTime = this.hurtDuration;
-		this.hurtDir = 0.0F;
 	}
 
 	public int getArmorValue() {
@@ -1580,18 +1578,18 @@ public abstract class LivingEntity extends Entity {
 		if (!this.isInvulnerableTo(damageSource)) {
 			f = this.getDamageAfterArmorAbsorb(damageSource, f);
 			f = this.getDamageAfterMagicAbsorb(damageSource, f);
-			float var8 = Math.max(f - this.getAbsorptionAmount(), 0.0F);
-			this.setAbsorptionAmount(this.getAbsorptionAmount() - (f - var8));
-			float h = f - var8;
-			if (h > 0.0F && h < 3.4028235E37F && damageSource.getEntity() instanceof ServerPlayer) {
-				((ServerPlayer)damageSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(h * 10.0F));
+			float var9 = Math.max(f - this.getAbsorptionAmount(), 0.0F);
+			this.setAbsorptionAmount(this.getAbsorptionAmount() - (f - var9));
+			float h = f - var9;
+			if (h > 0.0F && h < 3.4028235E37F && damageSource.getEntity() instanceof ServerPlayer serverPlayer) {
+				serverPlayer.awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(h * 10.0F));
 			}
 
-			if (var8 != 0.0F) {
+			if (var9 != 0.0F) {
 				float i = this.getHealth();
-				this.setHealth(i - var8);
-				this.getCombatTracker().recordDamage(damageSource, i, var8);
-				this.setAbsorptionAmount(this.getAbsorptionAmount() - var8);
+				this.getCombatTracker().recordDamage(damageSource, i, var9);
+				this.setHealth(i - var9);
+				this.setAbsorptionAmount(this.getAbsorptionAmount() - var9);
 				this.gameEvent(GameEvent.ENTITY_DAMAGE);
 			}
 		}
@@ -1674,7 +1672,6 @@ public abstract class LivingEntity extends Entity {
 				this.invulnerableTime = 20;
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
-				this.hurtDir = 0.0F;
 				if (b == 33) {
 					this.playSound(SoundEvents.THORNS_HIT, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 				}
@@ -3132,6 +3129,11 @@ public abstract class LivingEntity extends Entity {
 			(double)entityDimensions.height,
 			(double)(entityDimensions.width / 2.0F)
 		);
+	}
+
+	@Override
+	public boolean canChangeDimensions() {
+		return super.canChangeDimensions() && !this.isSleeping();
 	}
 
 	public Optional<BlockPos> getSleepingPos() {

@@ -30,7 +30,7 @@ public class YieldJobSite {
 						(memoryAccessor, memoryAccessor2, memoryAccessor3, memoryAccessor4, memoryAccessor5) -> (serverLevel, villager, l) -> {
 								if (villager.isBaby()) {
 									return false;
-								} else if (villager.getVillagerData().getProfession() == VillagerProfession.NONE) {
+								} else if (villager.getVillagerData().getProfession() != VillagerProfession.NONE) {
 									return false;
 								} else {
 									BlockPos blockPos = instance.<GlobalPos>get(memoryAccessor).pos();

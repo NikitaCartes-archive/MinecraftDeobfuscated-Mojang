@@ -7,6 +7,10 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DirectJoinServerScreen;
@@ -25,6 +29,10 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class JoinMultiplayerScreen extends Screen {
+	public static final int BUTTON_ROW_WIDTH = 308;
+	public static final int TOP_ROW_BUTTON_WIDTH = 100;
+	public static final int LOWER_ROW_BUTTON_WIDTH = 74;
+	public static final int FOOTER_HEIGHT = 64;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final ServerStatusPinger pinger = new ServerStatusPinger();
 	private final Screen lastScreen;
@@ -59,8 +67,8 @@ public class JoinMultiplayerScreen extends Screen {
 			try {
 				this.lanServerDetector = new LanServerDetection.LanServerDetector(this.lanServerList);
 				this.lanServerDetector.start();
-			} catch (Exception var2) {
-				LOGGER.warn("Unable to start LAN server detection: {}", var2.getMessage());
+			} catch (Exception var9) {
+				LOGGER.warn("Unable to start LAN server detection: {}", var9.getMessage());
 			}
 
 			this.serverSelectionList = new ServerSelectionList(this, this.minecraft, this.width, this.height, 32, this.height - 64, 36);
@@ -69,19 +77,17 @@ public class JoinMultiplayerScreen extends Screen {
 
 		this.addWidget(this.serverSelectionList);
 		this.selectButton = this.addRenderableWidget(
-			Button.builder(Component.translatable("selectServer.select"), button -> this.joinSelectedServer())
-				.bounds(this.width / 2 - 154, this.height - 52, 100, 20)
-				.build()
+			Button.builder(Component.translatable("selectServer.select"), buttonx -> this.joinSelectedServer()).width(100).build()
 		);
-		this.addRenderableWidget(Button.builder(Component.translatable("selectServer.direct"), button -> {
+		Button button = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.direct"), buttonx -> {
 			this.editingServer = new ServerData(I18n.get("selectServer.defaultName"), "", false);
 			this.minecraft.setScreen(new DirectJoinServerScreen(this, this::directJoinCallback, this.editingServer));
-		}).bounds(this.width / 2 - 50, this.height - 52, 100, 20).build());
-		this.addRenderableWidget(Button.builder(Component.translatable("selectServer.add"), button -> {
+		}).width(100).build());
+		Button button2 = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.add"), buttonx -> {
 			this.editingServer = new ServerData(I18n.get("selectServer.defaultName"), "", false);
 			this.minecraft.setScreen(new EditServerScreen(this, this::addServerCallback, this.editingServer));
-		}).bounds(this.width / 2 + 4 + 50, this.height - 52, 100, 20).build());
-		this.editButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.edit"), button -> {
+		}).width(100).build());
+		this.editButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.edit"), buttonx -> {
 			ServerSelectionList.Entry entry = this.serverSelectionList.getSelected();
 			if (entry instanceof ServerSelectionList.OnlineServerEntry) {
 				ServerData serverData = ((ServerSelectionList.OnlineServerEntry)entry).getServerData();
@@ -89,8 +95,8 @@ public class JoinMultiplayerScreen extends Screen {
 				this.editingServer.copyFrom(serverData);
 				this.minecraft.setScreen(new EditServerScreen(this, this::editServerCallback, this.editingServer));
 			}
-		}).bounds(this.width / 2 - 154, this.height - 28, 70, 20).build());
-		this.deleteButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.delete"), button -> {
+		}).width(74).build());
+		this.deleteButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.delete"), buttonx -> {
 			ServerSelectionList.Entry entry = this.serverSelectionList.getSelected();
 			if (entry instanceof ServerSelectionList.OnlineServerEntry) {
 				String string = ((ServerSelectionList.OnlineServerEntry)entry).getServerData().name;
@@ -102,17 +108,25 @@ public class JoinMultiplayerScreen extends Screen {
 					this.minecraft.setScreen(new ConfirmScreen(this::deleteCallback, component, component2, component3, component4));
 				}
 			}
-		}).bounds(this.width / 2 - 74, this.height - 28, 70, 20).build());
-		this.addRenderableWidget(
-			Button.builder(Component.translatable("selectServer.refresh"), button -> this.refreshServerList())
-				.bounds(this.width / 2 + 4, this.height - 28, 70, 20)
-				.build()
+		}).width(74).build());
+		Button button3 = this.addRenderableWidget(
+			Button.builder(Component.translatable("selectServer.refresh"), buttonx -> this.refreshServerList()).width(74).build()
 		);
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
-				.bounds(this.width / 2 + 4 + 76, this.height - 28, 75, 20)
-				.build()
-		);
+		Button button4 = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.minecraft.setScreen(this.lastScreen)).width(74).build());
+		GridLayout gridLayout = new GridLayout();
+		GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(1);
+		LinearLayout linearLayout = rowHelper.addChild(new LinearLayout(308, 20, LinearLayout.Orientation.HORIZONTAL));
+		linearLayout.addChild(this.selectButton);
+		linearLayout.addChild(button);
+		linearLayout.addChild(button2);
+		rowHelper.addChild(SpacerElement.height(4));
+		LinearLayout linearLayout2 = rowHelper.addChild(new LinearLayout(308, 20, LinearLayout.Orientation.HORIZONTAL));
+		linearLayout2.addChild(this.editButton);
+		linearLayout2.addChild(this.deleteButton);
+		linearLayout2.addChild(button3);
+		linearLayout2.addChild(button4);
+		gridLayout.arrangeElements();
+		FrameLayout.centerInRectangle(gridLayout, 0, this.height - 64, this.width, 64);
 		this.onSelectedChange();
 	}
 

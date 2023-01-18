@@ -1,9 +1,9 @@
 package net.minecraft.network.protocol.game;
 
-import java.util.EnumSet;
 import java.util.Set;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.entity.RelativeMovement;
 
 public class ClientboundPlayerPositionPacket implements Packet<ClientGamePacketListener> {
 	private final double x;
@@ -11,13 +11,11 @@ public class ClientboundPlayerPositionPacket implements Packet<ClientGamePacketL
 	private final double z;
 	private final float yRot;
 	private final float xRot;
-	private final Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeArguments;
+	private final Set<RelativeMovement> relativeArguments;
 	private final int id;
 	private final boolean dismountVehicle;
 
-	public ClientboundPlayerPositionPacket(
-		double d, double e, double f, float g, float h, Set<ClientboundPlayerPositionPacket.RelativeArgument> set, int i, boolean bl
-	) {
+	public ClientboundPlayerPositionPacket(double d, double e, double f, float g, float h, Set<RelativeMovement> set, int i, boolean bl) {
 		this.x = d;
 		this.y = e;
 		this.z = f;
@@ -34,7 +32,7 @@ public class ClientboundPlayerPositionPacket implements Packet<ClientGamePacketL
 		this.z = friendlyByteBuf.readDouble();
 		this.yRot = friendlyByteBuf.readFloat();
 		this.xRot = friendlyByteBuf.readFloat();
-		this.relativeArguments = ClientboundPlayerPositionPacket.RelativeArgument.unpack(friendlyByteBuf.readUnsignedByte());
+		this.relativeArguments = RelativeMovement.unpack(friendlyByteBuf.readUnsignedByte());
 		this.id = friendlyByteBuf.readVarInt();
 		this.dismountVehicle = friendlyByteBuf.readBoolean();
 	}
@@ -46,7 +44,7 @@ public class ClientboundPlayerPositionPacket implements Packet<ClientGamePacketL
 		friendlyByteBuf.writeDouble(this.z);
 		friendlyByteBuf.writeFloat(this.yRot);
 		friendlyByteBuf.writeFloat(this.xRot);
-		friendlyByteBuf.writeByte(ClientboundPlayerPositionPacket.RelativeArgument.pack(this.relativeArguments));
+		friendlyByteBuf.writeByte(RelativeMovement.pack(this.relativeArguments));
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeBoolean(this.dismountVehicle);
 	}
@@ -83,53 +81,7 @@ public class ClientboundPlayerPositionPacket implements Packet<ClientGamePacketL
 		return this.dismountVehicle;
 	}
 
-	public Set<ClientboundPlayerPositionPacket.RelativeArgument> getRelativeArguments() {
+	public Set<RelativeMovement> getRelativeArguments() {
 		return this.relativeArguments;
-	}
-
-	public static enum RelativeArgument {
-		X(0),
-		Y(1),
-		Z(2),
-		Y_ROT(3),
-		X_ROT(4);
-
-		public static final Set<ClientboundPlayerPositionPacket.RelativeArgument> ALL = Set.of(values());
-		public static final Set<ClientboundPlayerPositionPacket.RelativeArgument> ROTATION = Set.of(X_ROT, Y_ROT);
-		private final int bit;
-
-		private RelativeArgument(int j) {
-			this.bit = j;
-		}
-
-		private int getMask() {
-			return 1 << this.bit;
-		}
-
-		private boolean isSet(int i) {
-			return (i & this.getMask()) == this.getMask();
-		}
-
-		public static Set<ClientboundPlayerPositionPacket.RelativeArgument> unpack(int i) {
-			Set<ClientboundPlayerPositionPacket.RelativeArgument> set = EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class);
-
-			for (ClientboundPlayerPositionPacket.RelativeArgument relativeArgument : values()) {
-				if (relativeArgument.isSet(i)) {
-					set.add(relativeArgument);
-				}
-			}
-
-			return set;
-		}
-
-		public static int pack(Set<ClientboundPlayerPositionPacket.RelativeArgument> set) {
-			int i = 0;
-
-			for (ClientboundPlayerPositionPacket.RelativeArgument relativeArgument : set) {
-				i |= relativeArgument.getMask();
-			}
-
-			return i;
-		}
 	}
 }

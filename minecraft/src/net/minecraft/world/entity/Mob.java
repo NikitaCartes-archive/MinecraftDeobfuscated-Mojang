@@ -165,13 +165,6 @@ public abstract class Mob extends LivingEntity {
 		this.pathfindingMalus.put(blockPathTypes, f);
 	}
 
-	public boolean canCutCorner(BlockPathTypes blockPathTypes) {
-		return blockPathTypes != BlockPathTypes.DANGER_FIRE
-			&& blockPathTypes != BlockPathTypes.DANGER_CACTUS
-			&& blockPathTypes != BlockPathTypes.DANGER_OTHER
-			&& blockPathTypes != BlockPathTypes.WALKABLE_DOOR;
-	}
-
 	protected BodyRotationControl createBodyControl() {
 		return new BodyRotationControl(this);
 	}

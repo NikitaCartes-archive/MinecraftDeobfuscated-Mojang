@@ -142,6 +142,9 @@ public class ExtraCodecs {
 					return gameProfile;
 				})
 	);
+	public static final Codec<String> NON_EMPTY_STRING = validate(
+		Codec.STRING, string -> string.isEmpty() ? DataResult.error("Expected non-empty string") : DataResult.success(string)
+	);
 
 	public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
 		return new ExtraCodecs.XorCodec<>(codec, codec2);
@@ -249,46 +252,32 @@ public class ExtraCodecs {
 		});
 	}
 
-	private static <N extends Number & Comparable<N>> Function<N, DataResult<N>> checkRangeWithMessage(N number, N number2, Function<N, String> function) {
-		return number3 -> ((Comparable)number3).compareTo(number) >= 0 && ((Comparable)number3).compareTo(number2) <= 0
-				? DataResult.success(number3)
-				: DataResult.error((String)function.apply(number3));
+	public static <T> Codec<T> validate(Codec<T> codec, Function<T, DataResult<T>> function) {
+		return codec.flatXmap(function, function);
 	}
 
 	private static Codec<Integer> intRangeWithMessage(int i, int j, Function<Integer, String> function) {
-		Function<Integer, DataResult<Integer>> function2 = checkRangeWithMessage(i, j, function);
-		return Codec.INT.flatXmap(function2, function2);
-	}
-
-	private static <N extends Number & Comparable<N>> Function<N, DataResult<N>> checkRangeMinExclusiveWithMessage(
-		N number, N number2, Function<N, String> function
-	) {
-		return number3 -> ((Comparable)number3).compareTo(number) > 0 && ((Comparable)number3).compareTo(number2) <= 0
-				? DataResult.success(number3)
-				: DataResult.error((String)function.apply(number3));
+		return validate(
+			Codec.INT,
+			integer -> integer.compareTo(i) >= 0 && integer.compareTo(j) <= 0 ? DataResult.success(integer) : DataResult.error((String)function.apply(integer))
+		);
 	}
 
 	private static Codec<Float> floatRangeMinExclusiveWithMessage(float f, float g, Function<Float, String> function) {
-		Function<Float, DataResult<Float>> function2 = checkRangeMinExclusiveWithMessage(f, g, function);
-		return Codec.FLOAT.flatXmap(function2, function2);
-	}
-
-	public static <T> Function<List<T>, DataResult<List<T>>> nonEmptyListCheck() {
-		return list -> list.isEmpty() ? DataResult.error("List must have contents") : DataResult.success(list);
+		return validate(
+			Codec.FLOAT, float_ -> float_.compareTo(f) > 0 && float_.compareTo(g) <= 0 ? DataResult.success(float_) : DataResult.error((String)function.apply(float_))
+		);
 	}
 
 	public static <T> Codec<List<T>> nonEmptyList(Codec<List<T>> codec) {
-		return codec.flatXmap(nonEmptyListCheck(), nonEmptyListCheck());
-	}
-
-	public static <T> Function<HolderSet<T>, DataResult<HolderSet<T>>> nonEmptyHolderSetCheck() {
-		return holderSet -> holderSet.unwrap().right().filter(List::isEmpty).isPresent()
-				? DataResult.error("List must have contents")
-				: DataResult.success(holderSet);
+		return validate(codec, list -> list.isEmpty() ? DataResult.error("List must have contents") : DataResult.success(list));
 	}
 
 	public static <T> Codec<HolderSet<T>> nonEmptyHolderSet(Codec<HolderSet<T>> codec) {
-		return codec.flatXmap(nonEmptyHolderSetCheck(), nonEmptyHolderSetCheck());
+		return validate(
+			codec,
+			holderSet -> holderSet.unwrap().right().filter(List::isEmpty).isPresent() ? DataResult.error("List must have contents") : DataResult.success(holderSet)
+		);
 	}
 
 	public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> supplier) {
@@ -376,6 +365,17 @@ public class ExtraCodecs {
 
 	private static DataResult<Pair<Optional<UUID>, Optional<String>>> mapGameProfileToIdName(GameProfile gameProfile) {
 		return DataResult.success(Pair.of(Optional.ofNullable(gameProfile.getId()), Optional.ofNullable(gameProfile.getName())));
+	}
+
+	public static Codec<String> sizeLimitedString(int i, int j) {
+		return validate(Codec.STRING, string -> {
+			int k = string.length();
+			if (k < i) {
+				return DataResult.error("String \"" + string + "\" is too short: " + k + ", expected range [" + i + "-" + j + "]");
+			} else {
+				return k > j ? DataResult.error("String \"" + string + "\" is too long: " + k + ", expected range [" + i + "-" + j + "]") : DataResult.success(string);
+			}
+		});
 	}
 
 	static final class EitherCodec<F, S> implements Codec<Either<F, S>> {

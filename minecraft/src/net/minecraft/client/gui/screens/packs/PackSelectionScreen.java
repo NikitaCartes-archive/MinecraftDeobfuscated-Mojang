@@ -26,6 +26,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -133,10 +134,26 @@ public class PackSelectionScreen extends Screen {
 
 	private void updateList(TransferableSelectionList transferableSelectionList, Stream<PackSelectionModel.Entry> stream) {
 		transferableSelectionList.children().clear();
+		TransferableSelectionList.PackEntry packEntry = transferableSelectionList.getSelected();
+		String string = packEntry == null ? "" : packEntry.getPackId();
 		transferableSelectionList.setSelected(null);
-		stream.forEach(
-			entry -> transferableSelectionList.children().add(new TransferableSelectionList.PackEntry(this.minecraft, transferableSelectionList, this, entry))
-		);
+		stream.forEach(entry -> {
+			TransferableSelectionList.PackEntry packEntryx = new TransferableSelectionList.PackEntry(this.minecraft, transferableSelectionList, entry);
+			transferableSelectionList.children().add(packEntryx);
+			if (entry.getId().equals(string)) {
+				transferableSelectionList.setSelected(packEntryx);
+			}
+		});
+	}
+
+	public void updateFocus(PackSelectionModel.Entry entry, TransferableSelectionList transferableSelectionList) {
+		TransferableSelectionList transferableSelectionList2 = this.selectedPackList == transferableSelectionList ? this.availablePackList : this.selectedPackList;
+		this.changeFocus(ComponentPath.path(transferableSelectionList2.getFirstElement(), transferableSelectionList2, this));
+	}
+
+	public void clearSelected() {
+		this.selectedPackList.setSelected(null);
+		this.availablePackList.setSelected(null);
 	}
 
 	private void reload() {
@@ -148,7 +165,7 @@ public class PackSelectionScreen extends Screen {
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderDirtBackground(0);
+		this.renderDirtBackground(poseStack);
 		this.availablePackList.render(poseStack, i, j, f);
 		this.selectedPackList.render(poseStack, i, j, f);
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);

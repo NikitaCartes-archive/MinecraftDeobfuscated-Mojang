@@ -282,20 +282,15 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 
 	private BlockPathTypes getCachedBlockPathType(int i, int j, int k) {
 		return this.pathTypeByPosCache
-			.computeIfAbsent(
-				BlockPos.asLong(i, j, k),
-				(Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(
-						this.level, i, j, k, this.mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors()
-					))
-			);
+			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(this.level, i, j, k, this.mob)));
 	}
 
 	@Override
-	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob, int l, int m, int n, boolean bl, boolean bl2) {
+	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob) {
 		EnumSet<BlockPathTypes> enumSet = EnumSet.noneOf(BlockPathTypes.class);
 		BlockPathTypes blockPathTypes = BlockPathTypes.BLOCKED;
 		BlockPos blockPos = mob.blockPosition();
-		blockPathTypes = super.getBlockPathTypes(blockGetter, i, j, k, l, m, n, bl, bl2, enumSet, blockPathTypes, blockPos);
+		blockPathTypes = super.getBlockPathTypes(blockGetter, i, j, k, enumSet, blockPathTypes, blockPos);
 		if (enumSet.contains(BlockPathTypes.FENCE)) {
 			return BlockPathTypes.FENCE;
 		} else {
@@ -323,8 +318,6 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 			BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
 			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || blockPathTypes2 == BlockPathTypes.LAVA) {
 				blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
-			} else if (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS) {
-				blockPathTypes = BlockPathTypes.DAMAGE_CACTUS;
 			} else if (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER) {
 				blockPathTypes = BlockPathTypes.DAMAGE_OTHER;
 			} else if (blockPathTypes2 == BlockPathTypes.COCOA) {

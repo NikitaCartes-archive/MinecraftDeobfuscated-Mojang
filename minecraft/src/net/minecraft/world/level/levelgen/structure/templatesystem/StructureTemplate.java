@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderGetter;
@@ -651,8 +650,7 @@ public class StructureTemplate {
 
 		compoundTag.put("entities", listTag4);
 		compoundTag.put("size", this.newIntegerList(this.size.getX(), this.size.getY(), this.size.getZ()));
-		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
-		return compoundTag;
+		return NbtUtils.addCurrentDataVersion(compoundTag);
 	}
 
 	public void load(HolderGetter<Block> holderGetter, CompoundTag compoundTag) {

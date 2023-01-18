@@ -240,7 +240,15 @@ public class SpreadPlayersCommand {
 				position = positions[j++];
 			}
 
-			entity.teleportToWithTicket((double)Mth.floor(position.x) + 0.5, (double)position.getSpawnY(serverLevel, i), (double)Mth.floor(position.z) + 0.5);
+			entity.teleportTo(
+				serverLevel,
+				(double)Mth.floor(position.x) + 0.5,
+				(double)position.getSpawnY(serverLevel, i),
+				(double)Mth.floor(position.z) + 0.5,
+				Set.of(),
+				entity.getYRot(),
+				entity.getXRot()
+			);
 			double e = Double.MAX_VALUE;
 
 			for (SpreadPlayersCommand.Position position2 : positions) {

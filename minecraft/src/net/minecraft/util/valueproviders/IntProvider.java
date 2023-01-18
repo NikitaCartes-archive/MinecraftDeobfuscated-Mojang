@@ -3,8 +3,8 @@ package net.minecraft.util.valueproviders;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import java.util.function.Function;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 
 public abstract class IntProvider {
@@ -19,16 +19,18 @@ public abstract class IntProvider {
 	public static final Codec<IntProvider> POSITIVE_CODEC = codec(1, Integer.MAX_VALUE);
 
 	public static Codec<IntProvider> codec(int i, int j) {
-		Function<IntProvider, DataResult<IntProvider>> function = intProvider -> {
-			if (intProvider.getMinValue() < i) {
-				return DataResult.error("Value provider too low: " + i + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
-			} else {
-				return intProvider.getMaxValue() > j
-					? DataResult.error("Value provider too high: " + j + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]")
-					: DataResult.success(intProvider);
+		return ExtraCodecs.validate(
+			CODEC,
+			intProvider -> {
+				if (intProvider.getMinValue() < i) {
+					return DataResult.error("Value provider too low: " + i + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
+				} else {
+					return intProvider.getMaxValue() > j
+						? DataResult.error("Value provider too high: " + j + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]")
+						: DataResult.success(intProvider);
+				}
 			}
-		};
-		return CODEC.flatXmap(function, function);
+		);
 	}
 
 	public abstract int sample(RandomSource randomSource);

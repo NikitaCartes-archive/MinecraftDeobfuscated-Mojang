@@ -106,10 +106,10 @@ public class RealmsWorldSlotButton extends Button {
 				if (bl) {
 					component = CommonComponents.EMPTY;
 				} else {
-					component = Component.literal(" ").append(string).append(" ").append(realmsServer.minigameName);
+					component = CommonComponents.space().append(string).append(CommonComponents.SPACE).append(realmsServer.minigameName);
 				}
 			} else {
-				component = Component.literal(" ").append(string);
+				component = CommonComponents.space().append(string);
 			}
 
 			Component component2;
@@ -184,8 +184,6 @@ public class RealmsWorldSlotButton extends Button {
 
 		if (bl) {
 			RenderSystem.setShaderColor(0.56F, 0.56F, 0.56F, 1.0F);
-		} else {
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		}
 
 		blit(poseStack, i + 3, j + 3, 0.0F, 0.0F, 74, 74, 74, 74);
@@ -200,6 +198,7 @@ public class RealmsWorldSlotButton extends Button {
 		}
 
 		blit(poseStack, i, j, 0.0F, 0.0F, 80, 80, 80, 80);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (bl) {
 			this.renderCheckMark(poseStack, i, j);
 		}
@@ -209,7 +208,6 @@ public class RealmsWorldSlotButton extends Button {
 
 	private void renderCheckMark(PoseStack poseStack, int i, int j) {
 		RenderSystem.setShaderTexture(0, CHECK_MARK_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		blit(poseStack, i + 67, j + 4, 0.0F, 0.0F, 9, 8, 9, 8);

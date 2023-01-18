@@ -9,6 +9,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.TimeArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.protocol.Packet;
@@ -76,11 +77,11 @@ public class TitleCommand {
 						.then(
 							Commands.literal("times")
 								.then(
-									Commands.argument("fadeIn", IntegerArgumentType.integer(0))
+									Commands.argument("fadeIn", TimeArgument.time())
 										.then(
-											Commands.argument("stay", IntegerArgumentType.integer(0))
+											Commands.argument("stay", TimeArgument.time())
 												.then(
-													Commands.argument("fadeOut", IntegerArgumentType.integer(0))
+													Commands.argument("fadeOut", TimeArgument.time())
 														.executes(
 															commandContext -> setTimes(
 																	commandContext.getSource(),

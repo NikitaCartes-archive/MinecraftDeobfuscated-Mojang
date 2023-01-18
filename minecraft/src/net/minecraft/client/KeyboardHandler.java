@@ -27,6 +27,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -91,7 +92,12 @@ public class KeyboardHandler {
 		this.minecraft
 			.gui
 			.getChat()
-			.addMessage(Component.empty().append(Component.translatable("debug.prefix").withStyle(chatFormatting, ChatFormatting.BOLD)).append(" ").append(component));
+			.addMessage(
+				Component.empty()
+					.append(Component.translatable("debug.prefix").withStyle(chatFormatting, ChatFormatting.BOLD))
+					.append(CommonComponents.SPACE)
+					.append(component)
+			);
 	}
 
 	private void debugFeedbackComponent(Component component) {
@@ -315,6 +321,7 @@ public class KeyboardHandler {
 				this.debugCrashKeyReportedCount = 0L;
 			}
 
+			this.minecraft.setLastInputType(i == 258 ? InputType.KEYBOARD_TAB : InputType.KEYBOARD_OTHER);
 			Screen screen = this.minecraft.screen;
 			if (k == 1 && (!(this.minecraft.screen instanceof KeyBindsScreen) || ((KeyBindsScreen)screen).lastKeySelection <= Util.getMillis() - 20L)) {
 				if (this.minecraft.options.keyFullscreen.matches(i, j)) {

@@ -3,11 +3,7 @@ package net.minecraft.client.gui.components;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
@@ -19,11 +15,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.navigation.ScreenDirection;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -90,6 +88,10 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		this.selected = entry;
 	}
 
+	public E getFirstElement() {
+		return (E)this.children.get(0);
+	}
+
 	public void setRenderBackground(boolean bl) {
 		this.renderBackground = bl;
 	}
@@ -110,10 +112,11 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 	protected final void clearEntries() {
 		this.children.clear();
+		this.selected = null;
 	}
 
 	protected void replaceEntries(Collection<E> collection) {
-		this.children.clear();
+		this.clearEntries();
 		this.children.addAll(collection);
 	}
 
@@ -181,7 +184,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	protected void clickedHeader(int i, int j) {
 	}
 
-	protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
+	protected void renderHeader(PoseStack poseStack, int i, int j) {
 	}
 
 	protected void renderBackground(PoseStack poseStack) {
@@ -195,117 +198,58 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		this.renderBackground(poseStack);
 		int k = this.getScrollbarPosition();
 		int l = k + 6;
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		this.hovered = this.isMouseOver((double)i, (double)j) ? this.getEntryAtPosition((double)i, (double)j) : null;
 		if (this.renderBackground) {
 			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
+			RenderSystem.setShaderColor(0.125F, 0.125F, 0.125F, 1.0F);
+			int m = 32;
+			blit(poseStack, this.x0, this.y0, (float)this.x1, (float)(this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			float g = 32.0F;
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-			bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0)
-				.uv((float)this.x0 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
-				.color(32, 32, 32, 255)
-				.endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0)
-				.uv((float)this.x1 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
-				.color(32, 32, 32, 255)
-				.endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0)
-				.uv((float)this.x1 / 32.0F, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0F)
-				.color(32, 32, 32, 255)
-				.endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0)
-				.uv((float)this.x0 / 32.0F, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0F)
-				.color(32, 32, 32, 255)
-				.endVertex();
-			tesselator.end();
 		}
 
 		int m = this.getRowLeft();
 		int n = this.y0 + 4 - (int)this.getScrollAmount();
 		if (this.renderHeader) {
-			this.renderHeader(poseStack, m, n, tesselator);
+			this.renderHeader(poseStack, m, n);
 		}
 
 		this.renderList(poseStack, i, j, f);
 		if (this.renderTopAndBottom) {
-			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
 			RenderSystem.enableDepthTest();
 			RenderSystem.depthFunc(519);
-			float h = 32.0F;
-			int o = -100;
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-			bufferBuilder.vertex((double)this.x0, (double)this.y0, -100.0).uv(0.0F, (float)this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
-			bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.y0, -100.0)
-				.uv((float)this.width / 32.0F, (float)this.y0 / 32.0F)
-				.color(64, 64, 64, 255)
-				.endVertex();
-			bufferBuilder.vertex((double)(this.x0 + this.width), 0.0, -100.0).uv((float)this.width / 32.0F, 0.0F).color(64, 64, 64, 255).endVertex();
-			bufferBuilder.vertex((double)this.x0, 0.0, -100.0).uv(0.0F, 0.0F).color(64, 64, 64, 255).endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)this.height, -100.0).uv(0.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).endVertex();
-			bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.height, -100.0)
-				.uv((float)this.width / 32.0F, (float)this.height / 32.0F)
-				.color(64, 64, 64, 255)
-				.endVertex();
-			bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.y1, -100.0)
-				.uv((float)this.width / 32.0F, (float)this.y1 / 32.0F)
-				.color(64, 64, 64, 255)
-				.endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)this.y1, -100.0).uv(0.0F, (float)this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
-			tesselator.end();
+			int o = 32;
+			int p = -100;
+			RenderSystem.setShaderColor(0.25F, 0.25F, 0.25F, 1.0F);
+			blit(poseStack, this.x0, 0, -100, 0.0F, 0.0F, this.width, this.y0, 32, 32);
+			blit(poseStack, this.x0, this.y1, -100, 0.0F, (float)this.y1, this.width, this.height - this.y1, 32, 32);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.depthFunc(515);
 			RenderSystem.disableDepthTest();
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(
 				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
 			);
-			RenderSystem.disableTexture();
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-			int p = 4;
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-			bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).color(0, 0, 0, 0).endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)(this.y0 + 4), 0.0).color(0, 0, 0, 0).endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)this.x1, (double)(this.y1 - 4), 0.0).color(0, 0, 0, 0).endVertex();
-			bufferBuilder.vertex((double)this.x0, (double)(this.y1 - 4), 0.0).color(0, 0, 0, 0).endVertex();
-			tesselator.end();
+			int q = 4;
+			this.fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
+			this.fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
 		}
 
-		int q = this.getMaxScroll();
-		if (q > 0) {
-			RenderSystem.disableTexture();
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-			int o = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
-			o = Mth.clamp(o, 32, this.y1 - this.y0 - 8);
-			int p = (int)this.getScrollAmount() * (this.y1 - this.y0 - o) / q + this.y0;
-			if (p < this.y0) {
-				p = this.y0;
+		int o = this.getMaxScroll();
+		if (o > 0) {
+			int p = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+			p = Mth.clamp(p, 32, this.y1 - this.y0 - 8);
+			int q = (int)this.getScrollAmount() * (this.y1 - this.y0 - p) / o + this.y0;
+			if (q < this.y0) {
+				q = this.y0;
 			}
 
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-			bufferBuilder.vertex((double)k, (double)this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)(p + o), 0.0).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)(p + o), 0.0).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)p, 0.0).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)p, 0.0).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)(p + o - 1), 0.0).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)(l - 1), (double)(p + o - 1), 0.0).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)(l - 1), (double)p, 0.0).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)p, 0.0).color(192, 192, 192, 255).endVertex();
-			tesselator.end();
+			fill(poseStack, k, this.y0, l, this.y1, -16777216);
+			fill(poseStack, k, q, l, q + p, -8355712);
+			fill(poseStack, k, q, l - 1, q + p - 1, -4144960);
 		}
 
 		this.renderDecorations(poseStack, i, j);
-		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 	}
 
@@ -363,6 +307,11 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			E entry = this.getEntryAtPosition(d, e);
 			if (entry != null) {
 				if (entry.mouseClicked(d, e, i)) {
+					E entry2 = this.getFocused();
+					if (entry2 != entry && entry2 instanceof ContainerEventHandler containerEventHandler) {
+						containerEventHandler.setFocused(null);
+					}
+
 					this.setFocused(entry);
 					this.setDragging(true);
 					return true;
@@ -415,55 +364,52 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (super.keyPressed(i, j, k)) {
-			return true;
-		} else if (i == 264) {
-			this.moveSelection(AbstractSelectionList.SelectionDirection.DOWN);
-			return true;
-		} else if (i == 265) {
-			this.moveSelection(AbstractSelectionList.SelectionDirection.UP);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-		this.moveSelection(selectionDirection, entry -> true);
-	}
-
-	protected void refreshSelection() {
-		E entry = this.getSelected();
-		if (entry != null) {
+	public void setFocused(@Nullable GuiEventListener guiEventListener) {
+		super.setFocused(guiEventListener);
+		int i = this.children.indexOf(guiEventListener);
+		if (i >= 0) {
+			E entry = (E)this.children.get(i);
 			this.setSelected(entry);
-			this.ensureVisible(entry);
+			if (this.minecraft.getLastInputType().isKeyboard()) {
+				this.ensureVisible(entry);
+			}
 		}
 	}
 
-	protected boolean moveSelection(AbstractSelectionList.SelectionDirection selectionDirection, Predicate<E> predicate) {
-		int i = selectionDirection == AbstractSelectionList.SelectionDirection.UP ? -1 : 1;
-		if (!this.children().isEmpty()) {
-			int j = this.children().indexOf(this.getSelected());
+	@Nullable
+	protected E nextEntry(ScreenDirection screenDirection) {
+		return this.nextEntry(screenDirection, entry -> true);
+	}
 
-			while (true) {
-				int k = Mth.clamp(j + i, 0, this.getItemCount() - 1);
-				if (j == k) {
-					break;
+	@Nullable
+	protected E nextEntry(ScreenDirection screenDirection, Predicate<E> predicate) {
+		return this.nextEntry(screenDirection, predicate, this.getSelected());
+	}
+
+	@Nullable
+	protected E nextEntry(ScreenDirection screenDirection, Predicate<E> predicate, @Nullable E entry) {
+		int i = switch (screenDirection) {
+			case RIGHT, LEFT -> 0;
+			case UP -> -1;
+			case DOWN -> 1;
+		};
+		if (!this.children().isEmpty() && i != 0) {
+			int j;
+			if (entry == null) {
+				j = i > 0 ? 0 : this.children().size() - 1;
+			} else {
+				j = this.children().indexOf(entry) + i;
+			}
+
+			for (int k = j; k >= 0 && k < this.children.size(); k += i) {
+				E entry2 = (E)this.children().get(k);
+				if (predicate.test(entry2)) {
+					return entry2;
 				}
-
-				E entry = (E)this.children().get(k);
-				if (predicate.test(entry)) {
-					this.setSelected(entry);
-					this.ensureVisible(entry);
-					return true;
-				}
-
-				j = k;
 			}
 		}
 
-		return false;
+		return null;
 	}
 
 	@Override
@@ -515,12 +461,8 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return this.y0 + 4 - (int)this.getScrollAmount() + i * this.itemHeight + this.headerHeight;
 	}
 
-	private int getRowBottom(int i) {
+	protected int getRowBottom(int i) {
 		return this.getRowTop(i) + this.itemHeight;
-	}
-
-	protected boolean isFocused() {
-		return false;
 	}
 
 	@Override
@@ -566,10 +508,24 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		}
 	}
 
+	@Override
+	public ScreenRectangle getRectangle() {
+		return new ScreenRectangle(this.x0, this.y0, this.x1 - this.x0, this.y1 - this.y0);
+	}
+
 	@Environment(EnvType.CLIENT)
-	public abstract static class Entry<E extends AbstractSelectionList.Entry<E>> implements GuiEventListener {
+	protected abstract static class Entry<E extends AbstractSelectionList.Entry<E>> implements GuiEventListener {
 		@Deprecated
 		AbstractSelectionList<E> list;
+
+		@Override
+		public void setFocused(boolean bl) {
+		}
+
+		@Override
+		public boolean isFocused() {
+			return this.list.getFocused() == this;
+		}
 
 		public abstract void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f);
 
@@ -577,12 +533,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		public boolean isMouseOver(double d, double e) {
 			return Objects.equals(this.list.getEntryAtPosition(d, e), this);
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	protected static enum SelectionDirection {
-		UP,
-		DOWN;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -2,11 +2,7 @@ package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -17,12 +13,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -354,7 +351,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 		} else {
 			boolean bl = d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);
 			if (this.canLoseFocus) {
-				this.setFocus(bl);
+				this.setFocused(bl);
 			}
 
 			if (this.isFocused() && bl && i == 0) {
@@ -370,10 +367,6 @@ public class EditBox extends AbstractWidget implements Renderable {
 				return false;
 			}
 		}
-	}
-
-	public void setFocus(boolean bl) {
-		this.setFocused(bl);
 	}
 
 	@Override
@@ -434,12 +427,12 @@ public class EditBox extends AbstractWidget implements Renderable {
 
 			if (m != l) {
 				int r = n + this.font.width(string.substring(0, m));
-				this.renderHighlight(q, o - 1, r - 1, o + 1 + 9);
+				this.renderHighlight(poseStack, q, o - 1, r - 1, o + 1 + 9);
 			}
 		}
 	}
 
-	private void renderHighlight(int i, int j, int k, int l) {
+	private void renderHighlight(PoseStack poseStack, int i, int j, int k, int l) {
 		if (i < k) {
 			int m = i;
 			i = k;
@@ -460,22 +453,10 @@ public class EditBox extends AbstractWidget implements Renderable {
 			i = this.getX() + this.width;
 		}
 
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.setShader(GameRenderer::getPositionShader);
-		RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
-		RenderSystem.disableTexture();
 		RenderSystem.enableColorLogicOp();
 		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-		bufferBuilder.vertex((double)i, (double)l, 0.0).endVertex();
-		bufferBuilder.vertex((double)k, (double)l, 0.0).endVertex();
-		bufferBuilder.vertex((double)k, (double)j, 0.0).endVertex();
-		bufferBuilder.vertex((double)i, (double)j, 0.0).endVertex();
-		tesselator.end();
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		fill(poseStack, i, j, k, l, -16776961);
 		RenderSystem.disableColorLogicOp();
-		RenderSystem.enableTexture();
 	}
 
 	public void setMaxLength(int i) {
@@ -510,9 +491,10 @@ public class EditBox extends AbstractWidget implements Renderable {
 		this.textColorUneditable = i;
 	}
 
+	@Nullable
 	@Override
-	public boolean changeFocus(boolean bl) {
-		return this.visible && this.isEditable ? super.changeFocus(bl) : false;
+	public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+		return this.visible && this.isEditable ? super.nextFocusPath(focusNavigationEvent) : null;
 	}
 
 	@Override
@@ -525,9 +507,12 @@ public class EditBox extends AbstractWidget implements Renderable {
 	}
 
 	@Override
-	protected void onFocusedChanged(boolean bl) {
-		if (bl) {
-			this.frame = 0;
+	public void setFocused(boolean bl) {
+		if (this.canLoseFocus || bl) {
+			super.setFocused(bl);
+			if (bl) {
+				this.frame = 0;
+			}
 		}
 	}
 

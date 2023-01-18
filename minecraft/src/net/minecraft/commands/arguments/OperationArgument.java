@@ -76,7 +76,7 @@ public class OperationArgument implements ArgumentType<OperationArgument.Operati
 					if (j == 0) {
 						throw ERROR_DIVIDE_BY_ZERO.create();
 					} else {
-						return Mth.intFloorDiv(i, j);
+						return Mth.floorDiv(i, j);
 					}
 				};
 			case "%=":

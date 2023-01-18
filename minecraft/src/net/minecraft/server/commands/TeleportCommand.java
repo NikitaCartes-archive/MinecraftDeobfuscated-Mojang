@@ -20,15 +20,13 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -160,7 +158,7 @@ public class TeleportCommand {
 				entity.getX(),
 				entity.getY(),
 				entity.getZ(),
-				EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class),
+				EnumSet.noneOf(RelativeMovement.class),
 				entity.getYRot(),
 				entity.getXRot(),
 				null
@@ -188,29 +186,29 @@ public class TeleportCommand {
 	) throws CommandSyntaxException {
 		Vec3 vec3 = coordinates.getPosition(commandSourceStack);
 		Vec2 vec2 = coordinates2 == null ? null : coordinates2.getRotation(commandSourceStack);
-		Set<ClientboundPlayerPositionPacket.RelativeArgument> set = EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class);
+		Set<RelativeMovement> set = EnumSet.noneOf(RelativeMovement.class);
 		if (coordinates.isXRelative()) {
-			set.add(ClientboundPlayerPositionPacket.RelativeArgument.X);
+			set.add(RelativeMovement.X);
 		}
 
 		if (coordinates.isYRelative()) {
-			set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y);
+			set.add(RelativeMovement.Y);
 		}
 
 		if (coordinates.isZRelative()) {
-			set.add(ClientboundPlayerPositionPacket.RelativeArgument.Z);
+			set.add(RelativeMovement.Z);
 		}
 
 		if (coordinates2 == null) {
-			set.add(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT);
-			set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT);
+			set.add(RelativeMovement.X_ROT);
+			set.add(RelativeMovement.Y_ROT);
 		} else {
 			if (coordinates2.isXRelative()) {
-				set.add(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT);
+				set.add(RelativeMovement.X_ROT);
 			}
 
 			if (coordinates2.isYRelative()) {
-				set.add(ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT);
+				set.add(RelativeMovement.Y_ROT);
 			}
 		}
 
@@ -254,7 +252,7 @@ public class TeleportCommand {
 		double d,
 		double e,
 		double f,
-		Set<ClientboundPlayerPositionPacket.RelativeArgument> set,
+		Set<RelativeMovement> set,
 		float g,
 		float h,
 		@Nullable TeleportCommand.LookAt lookAt
@@ -265,53 +263,19 @@ public class TeleportCommand {
 		} else {
 			float i = Mth.wrapDegrees(g);
 			float j = Mth.wrapDegrees(h);
-			if (entity instanceof ServerPlayer) {
-				ChunkPos chunkPos = new ChunkPos(new BlockPos(d, e, f));
-				serverLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, entity.getId());
-				entity.stopRiding();
-				if (((ServerPlayer)entity).isSleeping()) {
-					((ServerPlayer)entity).stopSleepInBed(true, true);
+			if (entity.teleportTo(serverLevel, d, e, f, set, i, j)) {
+				if (lookAt != null) {
+					lookAt.perform(commandSourceStack, entity);
 				}
 
-				if (serverLevel == entity.level) {
-					((ServerPlayer)entity).connection.teleport(d, e, f, i, j, set);
-				} else {
-					((ServerPlayer)entity).teleportTo(serverLevel, d, e, f, i, j);
+				if (!(entity instanceof LivingEntity livingEntity) || !livingEntity.isFallFlying()) {
+					entity.setDeltaMovement(entity.getDeltaMovement().multiply(1.0, 0.0, 1.0));
+					entity.setOnGround(true);
 				}
 
-				entity.setYHeadRot(i);
-			} else {
-				float k = Mth.clamp(j, -90.0F, 90.0F);
-				if (serverLevel == entity.level) {
-					entity.moveTo(d, e, f, i, k);
-					entity.setYHeadRot(i);
-				} else {
-					entity.unRide();
-					Entity entity2 = entity;
-					entity = entity.getType().create(serverLevel);
-					if (entity == null) {
-						return;
-					}
-
-					entity.restoreFrom(entity2);
-					entity.moveTo(d, e, f, i, k);
-					entity.setYHeadRot(i);
-					entity2.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
-					serverLevel.addDuringTeleport(entity);
+				if (entity instanceof PathfinderMob pathfinderMob) {
+					pathfinderMob.getNavigation().stop();
 				}
-			}
-
-			if (lookAt != null) {
-				lookAt.perform(commandSourceStack, entity);
-			}
-
-			if (!(entity instanceof LivingEntity) || !((LivingEntity)entity).isFallFlying()) {
-				entity.setDeltaMovement(entity.getDeltaMovement().multiply(1.0, 0.0, 1.0));
-				entity.setOnGround(true);
-			}
-
-			if (entity instanceof PathfinderMob) {
-				((PathfinderMob)entity).getNavigation().stop();
 			}
 		}
 	}

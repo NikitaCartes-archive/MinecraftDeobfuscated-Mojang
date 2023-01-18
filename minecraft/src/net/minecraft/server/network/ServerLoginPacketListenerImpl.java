@@ -44,7 +44,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 	private static final RandomSource RANDOM = RandomSource.create();
 	private final byte[] challenge;
 	final MinecraftServer server;
-	public final Connection connection;
+	final Connection connection;
 	ServerLoginPacketListenerImpl.State state = ServerLoginPacketListenerImpl.State.HELLO;
 	private int tick;
 	@Nullable
@@ -78,8 +78,8 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 	}
 
 	@Override
-	public Connection getConnection() {
-		return this.connection;
+	public boolean isAcceptingMessages() {
+		return this.connection.isConnected();
 	}
 
 	public void disconnect(Component component) {

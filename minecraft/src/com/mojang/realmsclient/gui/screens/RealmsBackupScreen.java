@@ -257,11 +257,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 		}
 
 		@Override
-		public boolean isFocused() {
-			return RealmsBackupScreen.this.getFocused() == this;
-		}
-
-		@Override
 		public int getMaxPosition() {
 			return this.getItemCount() * 36;
 		}
@@ -370,7 +365,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 		private void drawRestore(PoseStack poseStack, int i, int j, int k, int l) {
 			boolean bl = k >= i && k <= i + 12 && l >= j && l <= j + 14 && l < RealmsBackupScreen.this.height - 15 && l > 32;
 			RenderSystem.setShaderTexture(0, RealmsBackupScreen.RESTORE_ICON_LOCATION);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			poseStack.pushPose();
 			poseStack.scale(0.5F, 0.5F, 0.5F);
 			float f = bl ? 28.0F : 0.0F;
@@ -384,7 +378,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 		private void drawInfo(PoseStack poseStack, int i, int j, int k, int l) {
 			boolean bl = k >= i && k <= i + 8 && l >= j && l <= j + 8 && l < RealmsBackupScreen.this.height - 15 && l > 32;
 			RenderSystem.setShaderTexture(0, RealmsBackupScreen.PLUS_ICON_LOCATION);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			poseStack.pushPose();
 			poseStack.scale(0.5F, 0.5F, 0.5F);
 			float f = bl ? 15.0F : 0.0F;

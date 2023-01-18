@@ -73,6 +73,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -155,14 +157,10 @@ import org.slf4j.Logger;
 
 public class ServerLevel extends Level implements WorldGenLevel {
 	public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
-	private static final int MIN_RAIN_DELAY_TIME = 12000;
-	private static final int MAX_RAIN_DELAY_TIME = 180000;
-	private static final int MIN_RAIN_TIME = 12000;
-	private static final int MAX_RAIN_TIME = 24000;
-	private static final int MIN_THUNDER_DELAY_TIME = 12000;
-	private static final int MAX_THUNDER_DELAY_TIME = 180000;
-	private static final int MIN_THUNDER_TIME = 3600;
-	private static final int MAX_THUNDER_TIME = 15600;
+	public static final IntProvider RAIN_DELAY = UniformInt.of(12000, 180000);
+	public static final IntProvider RAIN_DURATION = UniformInt.of(12000, 24000);
+	private static final IntProvider THUNDER_DELAY = UniformInt.of(12000, 180000);
+	public static final IntProvider THUNDER_DURATION = UniformInt.of(3600, 15600);
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int EMPTY_TIME_NO_TICK = 300;
 	private static final int MAX_SCHEDULED_TICKS_PER_TICK = 65536;
@@ -467,13 +465,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					}
 				}
 
-				BlockState blockState = this.getBlockState(blockPos2);
-				Biome.Precipitation precipitation = biome.getPrecipitation();
-				if (precipitation == Biome.Precipitation.RAIN && biome.coldEnoughToSnow(blockPos2)) {
-					precipitation = Biome.Precipitation.SNOW;
+				Biome.Precipitation precipitation = biome.getPrecipitationAt(blockPos2);
+				if (precipitation != Biome.Precipitation.NONE) {
+					BlockState blockState3 = this.getBlockState(blockPos2);
+					blockState3.getBlock().handlePrecipitation(blockState3, this, blockPos2, precipitation);
 				}
-
-				blockState.getBlock().handlePrecipitation(blockState, this, blockPos2, precipitation);
 			}
 		}
 
@@ -486,12 +482,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					for (int m = 0; m < i; m++) {
 						BlockPos blockPos3 = this.getBlockRandomPos(j, n, k, 15);
 						profilerFiller.push("randomTick");
-						BlockState blockState3 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - n, blockPos3.getZ() - k);
-						if (blockState3.isRandomlyTicking()) {
-							blockState3.randomTick(this, blockPos3, this.random);
+						BlockState blockState4 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - n, blockPos3.getZ() - k);
+						if (blockState4.isRandomlyTicking()) {
+							blockState4.randomTick(this, blockPos3, this.random);
 						}
 
-						FluidState fluidState = blockState3.getFluidState();
+						FluidState fluidState = blockState4.getFluidState();
 						if (fluidState.isRandomlyTicking()) {
 							fluidState.randomTick(this, blockPos3, this.random);
 						}
@@ -596,9 +592,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 							bl2 = !bl2;
 						}
 					} else if (bl2) {
-						j = Mth.randomBetweenInclusive(this.random, 3600, 15600);
+						j = THUNDER_DURATION.sample(this.random);
 					} else {
-						j = Mth.randomBetweenInclusive(this.random, 12000, 180000);
+						j = THUNDER_DELAY.sample(this.random);
 					}
 
 					if (k > 0) {
@@ -606,9 +602,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 							bl3 = !bl3;
 						}
 					} else if (bl3) {
-						k = Mth.randomBetweenInclusive(this.random, 12000, 24000);
+						k = RAIN_DURATION.sample(this.random);
 					} else {
-						k = Mth.randomBetweenInclusive(this.random, 12000, 180000);
+						k = RAIN_DELAY.sample(this.random);
 					}
 				}
 

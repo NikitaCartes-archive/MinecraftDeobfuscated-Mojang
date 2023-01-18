@@ -221,7 +221,7 @@ public class BlendingData {
 			d = f;
 		}
 
-		int l = this.getCellYIndex(Mth.intFloorDiv(k, 8));
+		int l = this.getCellYIndex(Mth.floorDiv(k, 8));
 		if (l >= 0 && l < ds.length - 1) {
 			double e = ((double)k + 0.5) % 8.0 / 8.0;
 			double f = (1.0 - e) / e;

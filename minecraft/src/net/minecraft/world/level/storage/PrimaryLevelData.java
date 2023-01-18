@@ -149,7 +149,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	) {
 		this(
 			null,
-			SharedConstants.getCurrentVersion().getWorldVersion(),
+			SharedConstants.getCurrentVersion().getDataVersion().getVersion(),
 			null,
 			false,
 			0,
@@ -181,8 +181,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		);
 	}
 
-	public static PrimaryLevelData parse(
-		Dynamic<Tag> dynamic,
+	public static <T> PrimaryLevelData parse(
+		Dynamic<T> dynamic,
 		DataFixer dataFixer,
 		int i,
 		@Nullable CompoundTag compoundTag,
@@ -193,10 +193,11 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		Lifecycle lifecycle
 	) {
 		long l = dynamic.get("Time").asLong(0L);
-		CompoundTag compoundTag2 = (CompoundTag)dynamic.get("DragonFight")
-			.result()
-			.map(Dynamic::getValue)
-			.orElseGet(() -> dynamic.get("DimensionData").get("1").get("DragonFight").orElseEmptyMap().getValue());
+		CompoundTag compoundTag2 = (CompoundTag)((Dynamic)dynamic.get("DragonFight")
+				.result()
+				.orElseGet(() -> dynamic.get("DimensionData").get("1").get("DragonFight").orElseEmptyMap()))
+			.convert(NbtOps.INSTANCE)
+			.getValue();
 		return new PrimaryLevelData(
 			dataFixer,
 			i,
@@ -257,7 +258,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag3.putBoolean("Snapshot", !SharedConstants.getCurrentVersion().isStable());
 		compoundTag3.putString("Series", SharedConstants.getCurrentVersion().getDataVersion().getSeries());
 		compoundTag.put("Version", compoundTag3);
-		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+		NbtUtils.addCurrentDataVersion(compoundTag);
 		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, registryAccess);
 		WorldGenSettings.encode(dynamicOps, this.worldOptions, registryAccess)
 			.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error))
@@ -337,12 +338,12 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 
 	private void updatePlayerTag() {
 		if (!this.upgradedPlayerTag && this.loadedPlayerTag != null) {
-			if (this.playerDataVersion < SharedConstants.getCurrentVersion().getWorldVersion()) {
+			if (this.playerDataVersion < SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
 				if (this.fixerUpper == null) {
 					throw (NullPointerException)Util.pauseInIde(new NullPointerException("Fixer Upper not set inside LevelData, and the player tag is not upgraded."));
 				}
 
-				this.loadedPlayerTag = NbtUtils.update(this.fixerUpper, DataFixTypes.PLAYER, this.loadedPlayerTag, this.playerDataVersion);
+				this.loadedPlayerTag = DataFixTypes.PLAYER.updateToCurrentVersion(this.fixerUpper, this.loadedPlayerTag, this.playerDataVersion);
 			}
 
 			this.upgradedPlayerTag = true;

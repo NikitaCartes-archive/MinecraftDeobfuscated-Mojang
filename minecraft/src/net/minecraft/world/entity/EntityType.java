@@ -592,10 +592,14 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	}
 
 	public static <T extends Entity> Consumer<T> createDefaultStackConfig(ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player) {
-		Consumer<T> consumer = entity -> {
-		};
-		consumer = appendCustomNameConfig(consumer, itemStack);
-		return appendCustomEntityStackConfig(consumer, serverLevel, itemStack, player);
+		return appendDefaultStackConfig(entity -> {
+		}, serverLevel, itemStack, player);
+	}
+
+	public static <T extends Entity> Consumer<T> appendDefaultStackConfig(
+		Consumer<T> consumer, ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player
+	) {
+		return appendCustomEntityStackConfig(appendCustomNameConfig(consumer, itemStack), serverLevel, itemStack, player);
 	}
 
 	public static <T extends Entity> Consumer<T> appendCustomNameConfig(Consumer<T> consumer, ItemStack itemStack) {

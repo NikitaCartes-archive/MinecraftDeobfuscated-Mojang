@@ -9,6 +9,7 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.net.SocketAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -141,6 +142,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
@@ -186,7 +188,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	private static final int NO_BLOCK_UPDATES_TO_ACK = -1;
 	private static final int TRACKED_MESSAGE_DISCONNECT_THRESHOLD = 4096;
 	private static final Component CHAT_VALIDATION_FAILED = Component.translatable("multiplayer.disconnect.chat_validation_failed");
-	public final Connection connection;
+	private final Connection connection;
 	private final MinecraftServer server;
 	public ServerPlayer player;
 	private int tickCount;
@@ -331,8 +333,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	}
 
 	@Override
-	public Connection getConnection() {
-		return this.connection;
+	public boolean isAcceptingMessages() {
+		return this.connection.isConnected();
 	}
 
 	private boolean isSingleplayerOwner() {
@@ -347,7 +349,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 
 	private <T, R> CompletableFuture<R> filterTextPacket(T object, BiFunction<TextFilter, T, CompletableFuture<R>> biFunction) {
 		return ((CompletableFuture)biFunction.apply(this.player.getTextFilter(), object)).thenApply(objectx -> {
-			if (!this.getConnection().isConnected()) {
+			if (!this.isAcceptingMessages()) {
 				LOGGER.debug("Ignoring packet due to disconnection");
 				throw new CancellationException("disconnected");
 			} else {
@@ -995,16 +997,16 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 		this.teleport(d, e, f, g, h, Collections.emptySet(), false);
 	}
 
-	public void teleport(double d, double e, double f, float g, float h, Set<ClientboundPlayerPositionPacket.RelativeArgument> set) {
+	public void teleport(double d, double e, double f, float g, float h, Set<RelativeMovement> set) {
 		this.teleport(d, e, f, g, h, set, false);
 	}
 
-	public void teleport(double d, double e, double f, float g, float h, Set<ClientboundPlayerPositionPacket.RelativeArgument> set, boolean bl) {
-		double i = set.contains(ClientboundPlayerPositionPacket.RelativeArgument.X) ? this.player.getX() : 0.0;
-		double j = set.contains(ClientboundPlayerPositionPacket.RelativeArgument.Y) ? this.player.getY() : 0.0;
-		double k = set.contains(ClientboundPlayerPositionPacket.RelativeArgument.Z) ? this.player.getZ() : 0.0;
-		float l = set.contains(ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT) ? this.player.getYRot() : 0.0F;
-		float m = set.contains(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT) ? this.player.getXRot() : 0.0F;
+	public void teleport(double d, double e, double f, float g, float h, Set<RelativeMovement> set, boolean bl) {
+		double i = set.contains(RelativeMovement.X) ? this.player.getX() : 0.0;
+		double j = set.contains(RelativeMovement.Y) ? this.player.getY() : 0.0;
+		double k = set.contains(RelativeMovement.Z) ? this.player.getZ() : 0.0;
+		float l = set.contains(RelativeMovement.Y_ROT) ? this.player.getYRot() : 0.0F;
+		float m = set.contains(RelativeMovement.X_ROT) ? this.player.getXRot() : 0.0F;
 		this.awaitingPositionFromClient = new Vec3(d, e, f);
 		if (++this.awaitingTeleport == Integer.MAX_VALUE) {
 			this.awaitingTeleport = 0;
@@ -1496,6 +1498,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 
 	public void sendDisguisedChatMessage(Component component, ChatType.Bound bound) {
 		this.send(new ClientboundDisguisedChatPacket(component, bound.toNetwork(this.player.level.registryAccess())));
+	}
+
+	public SocketAddress getRemoteAddress() {
+		return this.connection.getRemoteAddress();
 	}
 
 	@Override

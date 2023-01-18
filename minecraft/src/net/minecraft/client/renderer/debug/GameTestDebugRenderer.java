@@ -38,7 +38,6 @@ public class GameTestDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
 		RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 0.75F);
-		RenderSystem.disableTexture();
 		DebugRenderer.renderFilledBox(blockPos, 0.02F, marker.getR(), marker.getG(), marker.getB(), marker.getA());
 		if (!marker.text.isEmpty()) {
 			double d = (double)blockPos.getX() + 0.5;
@@ -47,7 +46,7 @@ public class GameTestDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
 			DebugRenderer.renderFloatingText(marker.text, d, e, f, -1, 0.01F, true, 0.0F, true);
 		}
 
-		RenderSystem.enableTexture();
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.disableBlend();
 	}
 

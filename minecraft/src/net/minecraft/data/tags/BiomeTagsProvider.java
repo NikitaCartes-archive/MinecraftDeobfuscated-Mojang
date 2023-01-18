@@ -198,11 +198,55 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 			.addTag(BiomeTags.IS_NETHER)
 			.addTag(BiomeTags.IS_BADLANDS)
 			.add(Biomes.MANGROVE_SWAMP);
-		this.tag(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS).add(Biomes.DESERT);
+		this.tag(BiomeTags.SPAWNS_GOLD_RABBITS).add(Biomes.DESERT);
+		this.tag(BiomeTags.SPAWNS_WHITE_RABBITS)
+			.add(Biomes.SNOWY_PLAINS)
+			.add(Biomes.ICE_SPIKES)
+			.add(Biomes.FROZEN_OCEAN)
+			.add(Biomes.SNOWY_TAIGA)
+			.add(Biomes.FROZEN_RIVER)
+			.add(Biomes.SNOWY_BEACH)
+			.add(Biomes.FROZEN_PEAKS)
+			.add(Biomes.JAGGED_PEAKS)
+			.add(Biomes.SNOWY_SLOPES)
+			.add(Biomes.GROVE);
 		this.tag(BiomeTags.REDUCED_WATER_AMBIENT_SPAWNS).addTag(BiomeTags.IS_RIVER);
 		this.tag(BiomeTags.ALLOWS_TROPICAL_FISH_SPAWNS_AT_ANY_HEIGHT).add(Biomes.LUSH_CAVES);
 		this.tag(BiomeTags.POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS).add(Biomes.FROZEN_OCEAN).add(Biomes.DEEP_FROZEN_OCEAN);
 		this.tag(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS).addTag(BiomeTags.IS_RIVER);
 		this.tag(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS).add(Biomes.SWAMP).add(Biomes.MANGROVE_SWAMP);
+		this.tag(BiomeTags.SPAWNS_SNOW_FOXES)
+			.add(Biomes.SNOWY_PLAINS)
+			.add(Biomes.ICE_SPIKES)
+			.add(Biomes.FROZEN_OCEAN)
+			.add(Biomes.SNOWY_TAIGA)
+			.add(Biomes.FROZEN_RIVER)
+			.add(Biomes.SNOWY_BEACH)
+			.add(Biomes.FROZEN_PEAKS)
+			.add(Biomes.JAGGED_PEAKS)
+			.add(Biomes.SNOWY_SLOPES)
+			.add(Biomes.GROVE);
+		this.tag(BiomeTags.INCREASED_FIRE_BURNOUT)
+			.add(Biomes.BAMBOO_JUNGLE)
+			.add(Biomes.MUSHROOM_FIELDS)
+			.add(Biomes.MANGROVE_SWAMP)
+			.add(Biomes.SNOWY_SLOPES)
+			.add(Biomes.FROZEN_PEAKS)
+			.add(Biomes.JAGGED_PEAKS)
+			.add(Biomes.SWAMP)
+			.add(Biomes.JUNGLE);
+		this.tag(BiomeTags.SNOW_GOLEM_MELTS)
+			.add(Biomes.BADLANDS)
+			.add(Biomes.BASALT_DELTAS)
+			.add(Biomes.CRIMSON_FOREST)
+			.add(Biomes.DESERT)
+			.add(Biomes.ERODED_BADLANDS)
+			.add(Biomes.NETHER_WASTES)
+			.add(Biomes.SAVANNA)
+			.add(Biomes.SAVANNA_PLATEAU)
+			.add(Biomes.SOUL_SAND_VALLEY)
+			.add(Biomes.WARPED_FOREST)
+			.add(Biomes.WINDSWEPT_SAVANNA)
+			.add(Biomes.WOODED_BADLANDS);
 	}
 }

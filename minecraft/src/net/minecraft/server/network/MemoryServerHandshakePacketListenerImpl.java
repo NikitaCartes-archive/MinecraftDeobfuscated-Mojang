@@ -26,7 +26,7 @@ public class MemoryServerHandshakePacketListenerImpl implements ServerHandshakeP
 	}
 
 	@Override
-	public Connection getConnection() {
-		return this.connection;
+	public boolean isAcceptingMessages() {
+		return this.connection.isConnected();
 	}
 }

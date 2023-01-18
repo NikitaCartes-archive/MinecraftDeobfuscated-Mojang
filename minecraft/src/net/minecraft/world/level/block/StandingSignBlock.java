@@ -32,7 +32,7 @@ public class StandingSignBlock extends SignBlock {
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
 		return this.defaultBlockState()
-			.setValue(ROTATION, Integer.valueOf(RotationSegment.convertToSegment(blockPlaceContext.getRotation())))
+			.setValue(ROTATION, Integer.valueOf(RotationSegment.convertToSegment(blockPlaceContext.getRotation() + 180.0F)))
 			.setValue(WATERLOGGED, Boolean.valueOf(fluidState.getType() == Fluids.WATER));
 	}
 

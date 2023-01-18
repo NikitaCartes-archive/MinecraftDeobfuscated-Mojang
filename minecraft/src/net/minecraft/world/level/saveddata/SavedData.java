@@ -3,9 +3,9 @@ package net.minecraft.world.level.saveddata;
 import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
-import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtUtils;
 import org.slf4j.Logger;
 
 public abstract class SavedData {
@@ -30,7 +30,7 @@ public abstract class SavedData {
 		if (this.isDirty()) {
 			CompoundTag compoundTag = new CompoundTag();
 			compoundTag.put("data", this.save(new CompoundTag()));
-			compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+			NbtUtils.addCurrentDataVersion(compoundTag);
 
 			try {
 				NbtIo.writeCompressed(compoundTag, file);

@@ -13,7 +13,7 @@ public class V3203 extends NamespacedSchema {
 	@Override
 	public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
 		Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-		schema.registerSimple(map, "minecraft:camel");
+		schema.register(map, "minecraft:camel", (Supplier<TypeTemplate>)(() -> V100.equipment(schema)));
 		return map;
 	}
 }

@@ -42,10 +42,11 @@ public class CommandBlockEntity extends BlockEntity {
 
 		@Override
 		public CommandSourceStack createCommandSourceStack() {
+			Direction direction = CommandBlockEntity.this.getBlockState().getValue(CommandBlock.FACING);
 			return new CommandSourceStack(
 				this,
 				Vec3.atCenterOf(CommandBlockEntity.this.worldPosition),
-				Vec2.ZERO,
+				new Vec2(0.0F, direction.toYRot()),
 				this.getLevel(),
 				2,
 				this.getName().getString(),

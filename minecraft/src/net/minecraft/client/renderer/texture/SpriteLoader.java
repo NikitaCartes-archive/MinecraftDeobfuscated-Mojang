@@ -158,7 +158,7 @@ public class SpriteLoader {
 		}
 
 		FrameSize frameSize = animationMetadataSection.calculateFrameSize(nativeImage.getWidth(), nativeImage.getHeight());
-		if (Mth.isDivisionInteger(nativeImage.getWidth(), frameSize.width()) && Mth.isDivisionInteger(nativeImage.getHeight(), frameSize.height())) {
+		if (Mth.isMultipleOf(nativeImage.getWidth(), frameSize.width()) && Mth.isMultipleOf(nativeImage.getHeight(), frameSize.height())) {
 			return new SpriteContents(resourceLocation, frameSize, nativeImage, animationMetadataSection);
 		} else {
 			LOGGER.error(

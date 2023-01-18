@@ -10,6 +10,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -183,7 +184,7 @@ public class FireBlock extends BaseFireBlock {
 					}
 				}
 
-				boolean bl2 = serverLevel.isHumidAt(blockPos);
+				boolean bl2 = serverLevel.getBiome(blockPos).is(BiomeTags.INCREASED_FIRE_BURNOUT);
 				int k = bl2 ? -50 : 0;
 				this.checkBurnOut(serverLevel, blockPos.east(), 300 + k, randomSource, i);
 				this.checkBurnOut(serverLevel, blockPos.west(), 300 + k, randomSource, i);

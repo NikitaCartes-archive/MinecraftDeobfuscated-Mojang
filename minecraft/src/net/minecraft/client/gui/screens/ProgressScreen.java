@@ -29,6 +29,11 @@ public class ProgressScreen extends Screen implements ProgressListener {
 	}
 
 	@Override
+	protected boolean shouldNarrateNavigation() {
+		return false;
+	}
+
+	@Override
 	public void progressStartNoAbort(Component component) {
 		this.progressStart(component);
 	}

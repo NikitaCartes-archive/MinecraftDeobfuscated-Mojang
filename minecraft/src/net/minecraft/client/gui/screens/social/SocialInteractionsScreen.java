@@ -47,8 +47,8 @@ public class SocialInteractionsScreen extends Screen {
 	private static final int BG_WIDTH = 236;
 	private static final int SEARCH_HEIGHT = 16;
 	private static final int MARGIN_Y = 64;
+	public static final int SEARCH_START = 72;
 	public static final int LIST_START = 88;
-	public static final int SEARCH_START = 78;
 	private static final int IMAGE_WIDTH = 238;
 	private static final int BUTTON_HEIGHT = 20;
 	private static final int ITEM_HEIGHT = 36;
@@ -119,7 +119,7 @@ public class SocialInteractionsScreen extends Screen {
 			Button.builder(TAB_BLOCKED, button -> this.showPage(SocialInteractionsScreen.Page.BLOCKED)).bounds(k - i + 1, 45, i, 20).build()
 		);
 		String string = this.searchBox != null ? this.searchBox.getValue() : "";
-		this.searchBox = new EditBox(this.font, this.marginX() + 28, 78, 196, 16, SEARCH_HINT) {
+		this.searchBox = new EditBox(this.font, this.marginX() + 29, 75, 198, 13, SEARCH_HINT) {
 			@Override
 			protected MutableComponent createNarrationMessage() {
 				return !SocialInteractionsScreen.this.searchBox.getValue().isEmpty() && SocialInteractionsScreen.this.socialInteractionsPlayerList.isEmpty()
@@ -128,7 +128,6 @@ public class SocialInteractionsScreen extends Screen {
 			}
 		};
 		this.searchBox.setMaxLength(16);
-		this.searchBox.setBordered(false);
 		this.searchBox.setVisible(true);
 		this.searchBox.setTextColor(16777215);
 		this.searchBox.setValue(string);
@@ -218,11 +217,11 @@ public class SocialInteractionsScreen extends Screen {
 		if (!this.socialInteractionsPlayerList.isEmpty()) {
 			this.socialInteractionsPlayerList.render(poseStack, i, j, f);
 		} else if (!this.searchBox.getValue().isEmpty()) {
-			drawCenteredString(poseStack, this.minecraft.font, EMPTY_SEARCH, this.width / 2, (78 + this.listEnd()) / 2, -1);
+			drawCenteredString(poseStack, this.minecraft.font, EMPTY_SEARCH, this.width / 2, (72 + this.listEnd()) / 2, -1);
 		} else if (this.page == SocialInteractionsScreen.Page.HIDDEN) {
-			drawCenteredString(poseStack, this.minecraft.font, EMPTY_HIDDEN, this.width / 2, (78 + this.listEnd()) / 2, -1);
+			drawCenteredString(poseStack, this.minecraft.font, EMPTY_HIDDEN, this.width / 2, (72 + this.listEnd()) / 2, -1);
 		} else if (this.page == SocialInteractionsScreen.Page.BLOCKED) {
-			drawCenteredString(poseStack, this.minecraft.font, EMPTY_BLOCKED, this.width / 2, (78 + this.listEnd()) / 2, -1);
+			drawCenteredString(poseStack, this.minecraft.font, EMPTY_BLOCKED, this.width / 2, (72 + this.listEnd()) / 2, -1);
 		}
 
 		this.searchBox.render(poseStack, i, j, f);

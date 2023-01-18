@@ -37,5 +37,7 @@ public class UpdateOneTwentyItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.BOATS).add(Items.BAMBOO_RAFT);
 		this.tag(ItemTags.BOOKSHELF_BOOKS).add(Items.BOOK, Items.WRITTEN_BOOK, Items.ENCHANTED_BOOK, Items.WRITABLE_BOOK);
 		this.tag(ItemTags.NON_FLAMMABLE_WOOD).add(Items.WARPED_HANGING_SIGN, Items.CRIMSON_HANGING_SIGN);
+		this.tag(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS)
+			.add(Items.ZOMBIE_HEAD, Items.SKELETON_SKULL, Items.CREEPER_HEAD, Items.DRAGON_HEAD, Items.WITHER_SKELETON_SKULL, Items.PIGLIN_HEAD, Items.PLAYER_HEAD);
 	}
 }

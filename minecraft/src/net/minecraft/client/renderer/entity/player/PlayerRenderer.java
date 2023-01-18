@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
 import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -158,7 +159,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 				Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
 				super.renderNameTag(
 					abstractClientPlayer,
-					Component.literal(Integer.toString(score.getScore())).append(" ").append(objective.getDisplayName()),
+					Component.literal(Integer.toString(score.getScore())).append(CommonComponents.SPACE).append(objective.getDisplayName()),
 					poseStack,
 					multiBufferSource,
 					i

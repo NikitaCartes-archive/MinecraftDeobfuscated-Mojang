@@ -1757,11 +1757,15 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 				this.setPose(Pose.STANDING);
 				this.vehicle = entity;
-				this.vehicle.addPassenger(this);
-				entity.getIndirectPassengersStream()
-					.filter(entityx -> entityx instanceof ServerPlayer)
-					.forEach(entityx -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)entityx));
-				return true;
+				if (!this.vehicle.addPassenger(this)) {
+					this.vehicle = null;
+					return false;
+				} else {
+					entity.getIndirectPassengersStream()
+						.filter(entityx -> entityx instanceof ServerPlayer)
+						.forEach(entityx -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)entityx));
+					return true;
+				}
 			} else {
 				return false;
 			}
@@ -1790,15 +1794,11 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		}
 	}
 
-	public boolean allowsDismounting(Entity entity) {
-		return true;
-	}
-
 	public void stopRiding() {
 		this.removeVehicle();
 	}
 
-	protected void addPassenger(Entity entity) {
+	protected boolean addPassenger(Entity entity) {
 		if (entity.getVehicle() != this) {
 			throw new IllegalStateException("Use x.startRiding(y), not y.addPassenger(x)");
 		} else {
@@ -1806,7 +1806,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				this.passengers = ImmutableList.of(entity);
 			} else {
 				List<Entity> list = Lists.<Entity>newArrayList(this.passengers);
-				if (!this.level.isClientSide && entity instanceof Player && !(this.getControllingPassenger() instanceof Player)) {
+				if (!this.level.isClientSide && entity instanceof Player && !(this.getFirstPassenger() instanceof Player)) {
 					list.add(0, entity);
 				} else {
 					list.add(entity);
@@ -1814,6 +1814,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 				this.passengers = ImmutableList.copyOf(list);
 			}
+
+			return true;
 		}
 	}
 
@@ -1928,7 +1930,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		}
 	}
 
-	public void animateHurt() {
+	public void animateHurt(float f) {
 	}
 
 	public Iterable<ItemStack> getHandSlots() {
@@ -2382,7 +2384,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public boolean canChangeDimensions() {
-		return true;
+		return !this.isPassenger() && !this.isVehicle();
 	}
 
 	public float getBlockExplosionResistance(
@@ -2489,6 +2491,28 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			this.level.getChunk(chunkPos.x, chunkPos.z);
 			this.teleportTo(d, e, f);
 		}
+	}
+
+	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h) {
+		float i = Mth.clamp(h, -90.0F, 90.0F);
+		if (serverLevel == this.level) {
+			this.moveTo(d, e, f, g, i);
+			this.setYHeadRot(g);
+		} else {
+			this.unRide();
+			Entity entity = this.getType().create(serverLevel);
+			if (entity == null) {
+				return false;
+			}
+
+			entity.restoreFrom(this);
+			entity.moveTo(d, e, f, g, i);
+			entity.setYHeadRot(g);
+			this.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+			serverLevel.addDuringTeleport(entity);
+		}
+
+		return true;
 	}
 
 	public void dismountTo(double d, double e, double f) {
@@ -3108,6 +3132,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		} else {
 			this.xRot = f;
 		}
+	}
+
+	public boolean canSprint() {
+		return false;
 	}
 
 	public final boolean isRemoved() {

@@ -74,7 +74,6 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, this.texture);
 		int k = this.leftPos;
 		int l = this.topPos;

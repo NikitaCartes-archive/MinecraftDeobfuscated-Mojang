@@ -27,7 +27,6 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 0.75F);
-		RenderSystem.disableTexture();
 		RenderSystem.lineWidth(6.0F);
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-10, -10, -10), blockPos.offset(10, 10, 10))) {
@@ -65,7 +64,7 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}
 		}
 
-		RenderSystem.enableTexture();
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.disableBlend();
 	}
 }

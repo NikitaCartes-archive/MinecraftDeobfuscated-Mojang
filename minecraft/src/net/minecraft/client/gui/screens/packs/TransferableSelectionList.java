@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.packs;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -26,18 +25,18 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 	static final Component INCOMPATIBLE_TITLE = Component.translatable("pack.incompatible");
 	static final Component INCOMPATIBLE_CONFIRM_TITLE = Component.translatable("pack.incompatible.confirm.title");
 	private final Component title;
-	private final Screen screen;
+	final PackSelectionScreen screen;
 
-	public TransferableSelectionList(Minecraft minecraft, Screen screen, int i, int j, Component component) {
+	public TransferableSelectionList(Minecraft minecraft, PackSelectionScreen packSelectionScreen, int i, int j, Component component) {
 		super(minecraft, i, j, 32, j - 55 + 4, 36);
-		this.screen = screen;
+		this.screen = packSelectionScreen;
 		this.title = component;
 		this.centerListVertically = false;
 		this.setRenderHeader(true, (int)(9.0F * 1.5F));
 	}
 
 	@Override
-	protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
+	protected void renderHeader(PoseStack poseStack, int i, int j) {
 		Component component = Component.empty().append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
 		this.minecraft
 			.font
@@ -55,8 +54,28 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 	}
 
 	@Override
-	protected boolean isFocused() {
-		return this.screen.getFocused() == this;
+	public boolean keyPressed(int i, int j, int k) {
+		if (this.getSelected() != null) {
+			switch (i) {
+				case 32:
+				case 257:
+					this.getSelected().keyboardSelection();
+					return true;
+				default:
+					if (Screen.hasShiftDown()) {
+						switch (i) {
+							case 264:
+								this.getSelected().keyboardMoveDown();
+								return true;
+							case 265:
+								this.getSelected().keyboardMoveUp();
+								return true;
+						}
+					}
+			}
+		}
+
+		return super.keyPressed(i, j, k);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -72,16 +91,14 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		private static final String TOO_LONG_NAME_SUFFIX = "...";
 		private final TransferableSelectionList parent;
 		protected final Minecraft minecraft;
-		protected final Screen screen;
 		private final PackSelectionModel.Entry pack;
 		private final FormattedCharSequence nameDisplayCache;
 		private final MultiLineLabel descriptionDisplayCache;
 		private final FormattedCharSequence incompatibleNameDisplayCache;
 		private final MultiLineLabel incompatibleDescriptionDisplayCache;
 
-		public PackEntry(Minecraft minecraft, TransferableSelectionList transferableSelectionList, Screen screen, PackSelectionModel.Entry entry) {
+		public PackEntry(Minecraft minecraft, TransferableSelectionList transferableSelectionList, PackSelectionModel.Entry entry) {
 			this.minecraft = minecraft;
-			this.screen = screen;
 			this.pack = entry;
 			this.parent = transferableSelectionList;
 			this.nameDisplayCache = cacheName(minecraft, entry.getTitle());
@@ -113,21 +130,18 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			PackCompatibility packCompatibility = this.pack.getCompatibility();
 			if (!packCompatibility.isCompatible()) {
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
 			}
 
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, this.pack.getIconTexture());
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
 			MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
-			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get() || bl)) {
+			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get() || bl || this.parent.getSelected() == this && this.parent.isFocused())) {
 				RenderSystem.setShaderTexture(0, TransferableSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 				int p = n - k;
 				int q = o - j;
 				if (!this.pack.getCompatibility().isCompatible()) {
@@ -172,8 +186,34 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 			multiLineLabel.renderLeftAligned(poseStack, k + 32 + 2, j + 12, 10, 8421504);
 		}
 
+		public String getPackId() {
+			return this.pack.getId();
+		}
+
 		private boolean showHoverOverlay() {
 			return !this.pack.isFixedPosition() || !this.pack.isRequired();
+		}
+
+		public void keyboardSelection() {
+			if (this.pack.canSelect() && this.pack.getCompatibility().isCompatible()) {
+				this.pack.select();
+				this.parent.screen.updateFocus(this.pack, this.parent);
+			} else if (this.pack.canUnselect()) {
+				this.pack.unselect();
+				this.parent.screen.updateFocus(this.pack, this.parent);
+			}
+		}
+
+		public void keyboardMoveUp() {
+			if (this.pack.canMoveUp()) {
+				this.pack.moveUp();
+			}
+		}
+
+		public void keyboardMoveDown() {
+			if (this.pack.canMoveDown()) {
+				this.pack.moveDown();
+			}
 		}
 
 		@Override
@@ -181,6 +221,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 			double f = d - (double)this.parent.getRowLeft();
 			double g = e - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
 			if (this.showHoverOverlay() && f <= 32.0) {
+				this.parent.screen.clearSelected();
 				if (this.pack.canSelect()) {
 					PackCompatibility packCompatibility = this.pack.getCompatibility();
 					if (packCompatibility.isCompatible()) {
@@ -188,7 +229,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 					} else {
 						Component component = packCompatibility.getConfirmation();
 						this.minecraft.setScreen(new ConfirmScreen(bl -> {
-							this.minecraft.setScreen(this.screen);
+							this.minecraft.setScreen(this.parent.screen);
 							if (bl) {
 								this.pack.select();
 							}

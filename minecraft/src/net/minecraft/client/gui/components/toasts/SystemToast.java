@@ -69,7 +69,6 @@ public class SystemToast implements Toast {
 		}
 
 		RenderSystem.setShaderTexture(0, TEXTURE);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		int i = this.width();
 		if (i == 160 && this.messageLines.size() <= 1) {
 			toastComponent.blit(poseStack, 0, 0, 0, 64, i, this.height());
@@ -96,7 +95,9 @@ public class SystemToast implements Toast {
 			}
 		}
 
-		return l - this.lastChanged < this.id.displayTime ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;
+		return (double)(l - this.lastChanged) < (double)this.id.displayTime * toastComponent.getNotificationDisplayTimeMultiplier()
+			? Toast.Visibility.SHOW
+			: Toast.Visibility.HIDE;
 	}
 
 	private void renderBackgroundRow(PoseStack poseStack, ToastComponent toastComponent, int i, int j, int k, int l) {

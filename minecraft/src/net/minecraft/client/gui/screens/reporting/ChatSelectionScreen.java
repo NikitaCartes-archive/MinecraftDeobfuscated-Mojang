@@ -15,11 +15,11 @@ import net.minecraft.Util;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
 import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
@@ -204,36 +204,27 @@ public class ChatSelectionScreen extends Screen {
 			}
 		}
 
-		@Override
-		protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-			if (!this.moveSelectableSelection(selectionDirection) && selectionDirection == AbstractSelectionList.SelectionDirection.UP) {
-				ChatSelectionScreen.this.onReachedScrollTop();
-				this.moveSelectableSelection(selectionDirection);
-			}
+		@Nullable
+		protected ChatSelectionScreen.ChatSelectionList.Entry nextEntry(ScreenDirection screenDirection) {
+			return this.nextEntry(screenDirection, ChatSelectionScreen.ChatSelectionList.Entry::canSelect);
 		}
 
-		private boolean moveSelectableSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-			return this.moveSelection(selectionDirection, ChatSelectionScreen.ChatSelectionList.Entry::canSelect);
+		public void setSelected(@Nullable ChatSelectionScreen.ChatSelectionList.Entry entry) {
+			super.setSelected(entry);
+			ChatSelectionScreen.ChatSelectionList.Entry entry2 = this.nextEntry(ScreenDirection.UP);
+			if (entry2 == null) {
+				ChatSelectionScreen.this.onReachedScrollTop();
+			}
 		}
 
 		@Override
 		public boolean keyPressed(int i, int j, int k) {
 			ChatSelectionScreen.ChatSelectionList.Entry entry = this.getSelected();
-			if (entry != null && entry.keyPressed(i, j, k)) {
-				return true;
-			} else {
-				this.setFocused(null);
-				return super.keyPressed(i, j, k);
-			}
+			return entry != null && entry.keyPressed(i, j, k) ? true : super.keyPressed(i, j, k);
 		}
 
 		public int getFooterTop() {
 			return this.y1 + 9;
-		}
-
-		@Override
-		protected boolean isFocused() {
-			return ChatSelectionScreen.this.getFocused() == this;
 		}
 
 		@Environment(EnvType.CLIENT)

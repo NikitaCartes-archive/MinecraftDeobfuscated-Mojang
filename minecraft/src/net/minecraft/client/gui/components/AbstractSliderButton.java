@@ -4,17 +4,29 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.InputType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSliderButton extends AbstractWidget {
+	private static final ResourceLocation SLIDER_LOCATION = new ResourceLocation("textures/gui/slider.png");
+	private static final int HEIGHT = 20;
+	private static final int HANDLE_HALF_WIDTH = 4;
+	private static final int HANDLE_WIDTH = 8;
+	private static final int TEXTURE_WIDTH = 200;
+	private static final int BACKGROUND = 0;
+	private static final int BACKGROUND_FOCUSED = 1;
+	private static final int HANDLE = 2;
+	private static final int HANDLE_FOCUSED = 3;
 	protected double value;
+	private boolean canChangeValue;
 
 	public AbstractSliderButton(int i, int j, int k, int l, Component component, double d) {
 		super(i, j, k, l, component);
@@ -22,8 +34,19 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	}
 
 	@Override
-	protected int getYImage(boolean bl) {
-		return 0;
+	protected ResourceLocation getTextureLocation() {
+		return SLIDER_LOCATION;
+	}
+
+	@Override
+	protected int getTextureY() {
+		int i = this.isFocused() && !this.canChangeValue ? 1 : 0;
+		return i * 20;
+	}
+
+	private int getHandleTextureY() {
+		int i = !this.isHovered && !this.canChangeValue ? 2 : 3;
+		return i * 20;
 	}
 
 	@Override
@@ -45,11 +68,10 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 
 	@Override
 	protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
-		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		int k = (this.isHoveredOrFocused() ? 2 : 1) * 20;
-		this.blit(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 0, 46 + k, 4, 20);
-		this.blit(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)) + 4, this.getY(), 196, 46 + k, 4, 20);
+		RenderSystem.setShaderTexture(0, this.getTextureLocation());
+		int k = this.getHandleTextureY();
+		this.blit(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 0, k, 4, 20);
+		this.blit(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)) + 4, this.getY(), 196, k, 4, 20);
 	}
 
 	@Override
@@ -58,14 +80,35 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		boolean bl = i == 263;
-		if (bl || i == 262) {
-			float f = bl ? -1.0F : 1.0F;
-			this.setValue(this.value + (double)(f / (float)(this.width - 8)));
+	public void setFocused(boolean bl) {
+		super.setFocused(bl);
+		if (!bl) {
+			this.canChangeValue = false;
+		} else {
+			InputType inputType = Minecraft.getInstance().getLastInputType();
+			if (inputType == InputType.MOUSE || inputType == InputType.KEYBOARD_TAB) {
+				this.canChangeValue = true;
+			}
 		}
+	}
 
-		return false;
+	@Override
+	public boolean keyPressed(int i, int j, int k) {
+		if (i != 32 && i != 257 && i != 335) {
+			if (this.canChangeValue) {
+				boolean bl = i == 263;
+				if (bl || i == 262) {
+					float f = bl ? -1.0F : 1.0F;
+					this.setValue(this.value + (double)(f / (float)(this.width - 8)));
+					return true;
+				}
+			}
+
+			return false;
+		} else {
+			this.canChangeValue = !this.canChangeValue;
+			return true;
+		}
 	}
 
 	private void setValueFromMouse(double d) {

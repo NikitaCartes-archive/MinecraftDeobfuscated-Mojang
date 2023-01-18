@@ -383,9 +383,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 	private static Rabbit.Variant getRandomRabbitVariant(LevelAccessor levelAccessor, BlockPos blockPos) {
 		Holder<Biome> holder = levelAccessor.getBiome(blockPos);
 		int i = levelAccessor.getRandom().nextInt(100);
-		if (holder.value().getPrecipitation() == Biome.Precipitation.SNOW) {
+		if (holder.is(BiomeTags.SPAWNS_WHITE_RABBITS)) {
 			return i < 80 ? Rabbit.Variant.WHITE : Rabbit.Variant.WHITE_SPLOTCHED;
-		} else if (holder.is(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS)) {
+		} else if (holder.is(BiomeTags.SPAWNS_GOLD_RABBITS)) {
 			return Rabbit.Variant.GOLD;
 		} else {
 			return i < 50 ? Rabbit.Variant.BROWN : (i < 90 ? Rabbit.Variant.SALT : Rabbit.Variant.BLACK);

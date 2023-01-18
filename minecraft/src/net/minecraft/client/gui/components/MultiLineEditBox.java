@@ -2,11 +2,7 @@ package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,9 +12,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class MultiLineEditBox extends AbstractScrollWidget {
@@ -204,23 +198,10 @@ public class MultiLineEditBox extends AbstractScrollWidget {
 	}
 
 	private void renderHighlight(PoseStack poseStack, int i, int j, int k, int l) {
-		Matrix4f matrix4f = poseStack.last().pose();
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.setShader(GameRenderer::getPositionShader);
-		RenderSystem.setShaderColor(0.0F, 0.0F, 1.0F, 1.0F);
-		RenderSystem.disableTexture();
 		RenderSystem.enableColorLogicOp();
 		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-		bufferBuilder.vertex(matrix4f, (float)i, (float)l, 0.0F).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)k, (float)l, 0.0F).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)k, (float)j, 0.0F).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)j, 0.0F).endVertex();
-		tesselator.end();
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		fill(poseStack, i, j, k, l, -16776961);
 		RenderSystem.disableColorLogicOp();
-		RenderSystem.enableTexture();
 	}
 
 	private void scrollToCursor() {

@@ -83,15 +83,14 @@ public class CombatTracker {
 				if (combatEntry.getSource() == DamageSource.FALL || combatEntry.getSource() == DamageSource.OUT_OF_WORLD) {
 					component3 = Component.translatable("death.fell.accident." + this.getFallLocation(combatEntry), this.mob.getDisplayName());
 				} else if (component2 != null && !component2.equals(component)) {
-					Entity entity2 = combatEntry.getSource().getEntity();
-					ItemStack itemStack = entity2 instanceof LivingEntity ? ((LivingEntity)entity2).getMainHandItem() : ItemStack.EMPTY;
+					ItemStack itemStack = combatEntry.getSource().getEntity() instanceof LivingEntity livingEntity ? livingEntity.getMainHandItem() : ItemStack.EMPTY;
 					if (!itemStack.isEmpty() && itemStack.hasCustomHoverName()) {
 						component3 = Component.translatable("death.fell.assist.item", this.mob.getDisplayName(), component2, itemStack.getDisplayName());
 					} else {
 						component3 = Component.translatable("death.fell.assist", this.mob.getDisplayName(), component2);
 					}
 				} else if (component != null) {
-					ItemStack itemStack2 = entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem() : ItemStack.EMPTY;
+					ItemStack itemStack2 = entity instanceof LivingEntity livingEntity2 ? livingEntity2.getMainHandItem() : ItemStack.EMPTY;
 					if (!itemStack2.isEmpty() && itemStack2.hasCustomHoverName()) {
 						component3 = Component.translatable("death.fell.finish.item", this.mob.getDisplayName(), component, itemStack2.getDisplayName());
 					} else {
@@ -116,14 +115,14 @@ public class CombatTracker {
 		float g = 0.0F;
 
 		for (CombatEntry combatEntry : this.entries) {
-			if (combatEntry.getSource().getEntity() instanceof Player && (player == null || combatEntry.getDamage() > g)) {
+			if (combatEntry.getSource().getEntity() instanceof Player player2 && (player == null || combatEntry.getDamage() > g)) {
 				g = combatEntry.getDamage();
-				player = (Player)combatEntry.getSource().getEntity();
+				player = player2;
 			}
 
-			if (combatEntry.getSource().getEntity() instanceof LivingEntity && (livingEntity == null || combatEntry.getDamage() > f)) {
+			if (combatEntry.getSource().getEntity() instanceof LivingEntity livingEntity2 && (livingEntity == null || combatEntry.getDamage() > f)) {
 				f = combatEntry.getDamage();
-				livingEntity = (LivingEntity)combatEntry.getSource().getEntity();
+				livingEntity = livingEntity2;
 			}
 		}
 

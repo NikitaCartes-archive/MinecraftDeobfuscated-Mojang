@@ -34,7 +34,6 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		double g = (double)this.minecraft.level.getMinBuildHeight() - e;
 		double h = (double)this.minecraft.level.getMaxBuildHeight() - e;
-		RenderSystem.disableTexture();
 		RenderSystem.disableBlend();
 		ChunkPos chunkPos = entity.chunkPosition();
 		double i = (double)chunkPos.getMinBlockX() - d;
@@ -114,6 +113,5 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		tesselator.end();
 		RenderSystem.lineWidth(1.0F);
 		RenderSystem.enableBlend();
-		RenderSystem.enableTexture();
 	}
 }

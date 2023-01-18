@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 public interface PacketListener {
 	void onDisconnect(Component component);
 
-	Connection getConnection();
+	boolean isAcceptingMessages();
 
 	default boolean shouldPropagateHandlingExceptions() {
 		return true;

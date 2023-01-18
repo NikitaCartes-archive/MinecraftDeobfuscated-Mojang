@@ -355,11 +355,10 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	}
 
 	@Override
-	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob, int l, int m, int n, boolean bl, boolean bl2) {
+	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob) {
 		EnumSet<BlockPathTypes> enumSet = EnumSet.noneOf(BlockPathTypes.class);
 		BlockPathTypes blockPathTypes = BlockPathTypes.BLOCKED;
-		BlockPos blockPos = mob.blockPosition();
-		blockPathTypes = this.getBlockPathTypes(blockGetter, i, j, k, l, m, n, bl, bl2, enumSet, blockPathTypes, blockPos);
+		blockPathTypes = this.getBlockPathTypes(blockGetter, i, j, k, enumSet, blockPathTypes, mob.blockPosition());
 		if (enumSet.contains(BlockPathTypes.FENCE)) {
 			return BlockPathTypes.FENCE;
 		} else if (enumSet.contains(BlockPathTypes.UNPASSABLE_RAIL)) {
@@ -377,33 +376,24 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				}
 			}
 
-			return blockPathTypes == BlockPathTypes.OPEN && mob.getPathfindingMalus(blockPathTypes2) == 0.0F && l <= 1 ? BlockPathTypes.OPEN : blockPathTypes2;
+			return blockPathTypes == BlockPathTypes.OPEN && mob.getPathfindingMalus(blockPathTypes2) == 0.0F && this.entityWidth <= 1
+				? BlockPathTypes.OPEN
+				: blockPathTypes2;
 		}
 	}
 
 	public BlockPathTypes getBlockPathTypes(
-		BlockGetter blockGetter,
-		int i,
-		int j,
-		int k,
-		int l,
-		int m,
-		int n,
-		boolean bl,
-		boolean bl2,
-		EnumSet<BlockPathTypes> enumSet,
-		BlockPathTypes blockPathTypes,
-		BlockPos blockPos
+		BlockGetter blockGetter, int i, int j, int k, EnumSet<BlockPathTypes> enumSet, BlockPathTypes blockPathTypes, BlockPos blockPos
 	) {
-		for (int o = 0; o < l; o++) {
-			for (int p = 0; p < m; p++) {
-				for (int q = 0; q < n; q++) {
-					int r = o + i;
-					int s = p + j;
-					int t = q + k;
-					BlockPathTypes blockPathTypes2 = this.getBlockPathType(blockGetter, r, s, t);
-					blockPathTypes2 = this.evaluateBlockPathType(blockGetter, bl, bl2, blockPos, blockPathTypes2);
-					if (o == 0 && p == 0 && q == 0) {
+		for (int l = 0; l < this.entityWidth; l++) {
+			for (int m = 0; m < this.entityHeight; m++) {
+				for (int n = 0; n < this.entityDepth; n++) {
+					int o = l + i;
+					int p = m + j;
+					int q = n + k;
+					BlockPathTypes blockPathTypes2 = this.getBlockPathType(blockGetter, o, p, q);
+					blockPathTypes2 = this.evaluateBlockPathType(blockGetter, blockPos, blockPathTypes2);
+					if (l == 0 && m == 0 && n == 0) {
 						blockPathTypes = blockPathTypes2;
 					}
 
@@ -415,12 +405,13 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		return blockPathTypes;
 	}
 
-	protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, boolean bl, boolean bl2, BlockPos blockPos, BlockPathTypes blockPathTypes) {
-		if (blockPathTypes == BlockPathTypes.DOOR_WOOD_CLOSED && bl && bl2) {
+	protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, BlockPos blockPos, BlockPathTypes blockPathTypes) {
+		boolean bl = this.canPassDoors();
+		if (blockPathTypes == BlockPathTypes.DOOR_WOOD_CLOSED && this.canOpenDoors() && bl) {
 			blockPathTypes = BlockPathTypes.WALKABLE_DOOR;
 		}
 
-		if (blockPathTypes == BlockPathTypes.DOOR_OPEN && !bl2) {
+		if (blockPathTypes == BlockPathTypes.DOOR_OPEN && !bl) {
 			blockPathTypes = BlockPathTypes.BLOCKED;
 		}
 
@@ -428,10 +419,6 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			&& !(blockGetter.getBlockState(blockPos).getBlock() instanceof BaseRailBlock)
 			&& !(blockGetter.getBlockState(blockPos.below()).getBlock() instanceof BaseRailBlock)) {
 			blockPathTypes = BlockPathTypes.UNPASSABLE_RAIL;
-		}
-
-		if (blockPathTypes == BlockPathTypes.LEAVES) {
-			blockPathTypes = BlockPathTypes.BLOCKED;
 		}
 
 		return blockPathTypes;
@@ -443,12 +430,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 
 	protected BlockPathTypes getCachedBlockType(Mob mob, int i, int j, int k) {
 		return this.pathTypesByPosCache
-			.computeIfAbsent(
-				BlockPos.asLong(i, j, k),
-				(Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(
-						this.level, i, j, k, mob, this.entityWidth, this.entityHeight, this.entityDepth, this.canOpenDoors(), this.canPassDoors()
-					))
-			);
+			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(this.level, i, j, k, mob)));
 	}
 
 	@Override
@@ -471,10 +453,6 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				: BlockPathTypes.OPEN;
 			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE) {
 				blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
-			}
-
-			if (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS) {
-				blockPathTypes = BlockPathTypes.DAMAGE_CACTUS;
 			}
 
 			if (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER) {
@@ -508,11 +486,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 					if (l != 0 || n != 0) {
 						mutableBlockPos.set(i + l, j + m, k + n);
 						BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
-						if (blockState.is(Blocks.CACTUS)) {
-							return BlockPathTypes.DANGER_CACTUS;
-						}
-
-						if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
+						if (blockState.is(Blocks.CACTUS) || blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 							return BlockPathTypes.DANGER_OTHER;
 						}
 
@@ -541,9 +515,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			return BlockPathTypes.TRAPDOOR;
 		} else if (blockState.is(Blocks.POWDER_SNOW)) {
 			return BlockPathTypes.POWDER_SNOW;
-		} else if (blockState.is(Blocks.CACTUS)) {
-			return BlockPathTypes.DAMAGE_CACTUS;
-		} else if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
+		} else if (blockState.is(Blocks.CACTUS) || blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 			return BlockPathTypes.DAMAGE_OTHER;
 		} else if (blockState.is(Blocks.HONEY_BLOCK)) {
 			return BlockPathTypes.STICKY_HONEY;

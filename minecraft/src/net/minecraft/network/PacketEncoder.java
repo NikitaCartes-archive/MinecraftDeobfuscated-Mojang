@@ -23,35 +23,35 @@ public class PacketEncoder extends MessageToByteEncoder<Packet<?>> {
 		if (connectionProtocol == null) {
 			throw new RuntimeException("ConnectionProtocol unknown: " + packet);
 		} else {
-			Integer integer = connectionProtocol.getPacketId(this.flow, packet);
+			int i = connectionProtocol.getPacketId(this.flow, packet);
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug(
 					Connection.PACKET_SENT_MARKER,
 					"OUT: [{}:{}] {}",
 					channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get(),
-					integer,
+					i,
 					packet.getClass().getName()
 				);
 			}
 
-			if (integer == null) {
+			if (i == -1) {
 				throw new IOException("Can't serialize unregistered packet");
 			} else {
 				FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(byteBuf);
-				friendlyByteBuf.writeVarInt(integer);
+				friendlyByteBuf.writeVarInt(i);
 
 				try {
-					int i = friendlyByteBuf.writerIndex();
+					int j = friendlyByteBuf.writerIndex();
 					packet.write(friendlyByteBuf);
-					int j = friendlyByteBuf.writerIndex() - i;
-					if (j > 8388608) {
-						throw new IllegalArgumentException("Packet too big (is " + j + ", should be less than 8388608): " + packet);
+					int k = friendlyByteBuf.writerIndex() - j;
+					if (k > 8388608) {
+						throw new IllegalArgumentException("Packet too big (is " + k + ", should be less than 8388608): " + packet);
 					} else {
-						int k = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId();
-						JvmProfiler.INSTANCE.onPacketSent(k, integer, channelHandlerContext.channel().remoteAddress(), j);
+						int l = channelHandlerContext.channel().attr(Connection.ATTRIBUTE_PROTOCOL).get().getId();
+						JvmProfiler.INSTANCE.onPacketSent(l, i, channelHandlerContext.channel().remoteAddress(), k);
 					}
 				} catch (Throwable var10) {
-					LOGGER.error("Error receiving packet {}", integer, var10);
+					LOGGER.error("Error receiving packet {}", i, var10);
 					if (packet.isSkippable()) {
 						throw new SkipPacketException(var10);
 					} else {
