@@ -121,12 +121,12 @@ WorldData {
     }
 
     public PrimaryLevelData(LevelSettings levelSettings, WorldOptions worldOptions, SpecialWorldProperty specialWorldProperty, Lifecycle lifecycle) {
-        this(null, SharedConstants.getCurrentVersion().getWorldVersion(), null, false, 0, 0, 0, 0.0f, 0L, 0L, 19133, 0, 0, false, 0, false, false, false, WorldBorder.DEFAULT_SETTINGS, 0, 0, null, Sets.newLinkedHashSet(), new TimerQueue<MinecraftServer>(TimerCallbacks.SERVER_CALLBACKS), null, new CompoundTag(), levelSettings.copy(), worldOptions, specialWorldProperty, lifecycle);
+        this(null, SharedConstants.getCurrentVersion().getDataVersion().getVersion(), null, false, 0, 0, 0, 0.0f, 0L, 0L, 19133, 0, 0, false, 0, false, false, false, WorldBorder.DEFAULT_SETTINGS, 0, 0, null, Sets.newLinkedHashSet(), new TimerQueue<MinecraftServer>(TimerCallbacks.SERVER_CALLBACKS), null, new CompoundTag(), levelSettings.copy(), worldOptions, specialWorldProperty, lifecycle);
     }
 
-    public static PrimaryLevelData parse(Dynamic<Tag> dynamic2, DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion, SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle) {
+    public static <T> PrimaryLevelData parse(Dynamic<T> dynamic2, DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion, SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle) {
         long l = dynamic2.get("Time").asLong(0L);
-        CompoundTag compoundTag2 = (CompoundTag)dynamic2.get("DragonFight").result().map(Dynamic::getValue).orElseGet(() -> (Tag)dynamic2.get("DimensionData").get("1").get("DragonFight").orElseEmptyMap().getValue());
+        CompoundTag compoundTag2 = (CompoundTag)dynamic2.get("DragonFight").result().orElseGet(() -> dynamic2.get("DimensionData").get("1").get("DragonFight").orElseEmptyMap()).convert(NbtOps.INSTANCE).getValue();
         return new PrimaryLevelData(dataFixer, i, compoundTag, dynamic2.get("WasModded").asBoolean(false), dynamic2.get("SpawnX").asInt(0), dynamic2.get("SpawnY").asInt(0), dynamic2.get("SpawnZ").asInt(0), dynamic2.get("SpawnAngle").asFloat(0.0f), l, dynamic2.get("DayTime").asLong(l), levelVersion.levelDataVersion(), dynamic2.get("clearWeatherTime").asInt(0), dynamic2.get("rainTime").asInt(0), dynamic2.get("raining").asBoolean(false), dynamic2.get("thunderTime").asInt(0), dynamic2.get("thundering").asBoolean(false), dynamic2.get("initialized").asBoolean(true), dynamic2.get("DifficultyLocked").asBoolean(false), WorldBorder.Settings.read(dynamic2, WorldBorder.DEFAULT_SETTINGS), dynamic2.get("WanderingTraderSpawnDelay").asInt(0), dynamic2.get("WanderingTraderSpawnChance").asInt(0), dynamic2.get("WanderingTraderId").read(UUIDUtil.CODEC).result().orElse(null), dynamic2.get("ServerBrands").asStream().flatMap(dynamic -> dynamic.asString().result().stream()).collect(Collectors.toCollection(Sets::newLinkedHashSet)), new TimerQueue<MinecraftServer>(TimerCallbacks.SERVER_CALLBACKS, dynamic2.get("ScheduledEvents").asStream()), (CompoundTag)dynamic2.get("CustomBossEvents").orElseEmptyMap().getValue(), compoundTag2, levelSettings, worldOptions, specialWorldProperty, lifecycle);
     }
 
@@ -152,7 +152,7 @@ WorldData {
         compoundTag3.putBoolean("Snapshot", !SharedConstants.getCurrentVersion().isStable());
         compoundTag3.putString("Series", SharedConstants.getCurrentVersion().getDataVersion().getSeries());
         compoundTag.put("Version", compoundTag3);
-        compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+        NbtUtils.addCurrentDataVersion(compoundTag);
         RegistryOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, registryAccess);
         WorldGenSettings.encode(dynamicOps, this.worldOptions, registryAccess).resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).ifPresent(tag -> compoundTag.put(WORLD_GEN_SETTINGS, (Tag)tag));
         compoundTag.putInt("GameType", this.settings.gameType().getId());
@@ -228,11 +228,11 @@ WorldData {
         if (this.upgradedPlayerTag || this.loadedPlayerTag == null) {
             return;
         }
-        if (this.playerDataVersion < SharedConstants.getCurrentVersion().getWorldVersion()) {
+        if (this.playerDataVersion < SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
             if (this.fixerUpper == null) {
                 throw Util.pauseInIde(new NullPointerException("Fixer Upper not set inside LevelData, and the player tag is not upgraded."));
             }
-            this.loadedPlayerTag = NbtUtils.update(this.fixerUpper, DataFixTypes.PLAYER, this.loadedPlayerTag, this.playerDataVersion);
+            this.loadedPlayerTag = DataFixTypes.PLAYER.updateToCurrentVersion(this.fixerUpper, this.loadedPlayerTag, this.playerDataVersion);
         }
         this.upgradedPlayerTag = true;
     }

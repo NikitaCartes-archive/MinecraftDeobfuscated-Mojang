@@ -23,7 +23,7 @@ extends Screen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(poseStack);
         GenericDirtMessageScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }

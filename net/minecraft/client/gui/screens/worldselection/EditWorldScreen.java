@@ -69,6 +69,15 @@ extends Screen {
 
     @Override
     protected void init() {
+        this.renameButton = Button.builder(Component.translatable("selectWorld.edit.save"), button -> this.onRename()).bounds(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20).build();
+        this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 38, 200, 20, Component.translatable("selectWorld.enterName"));
+        LevelSummary levelSummary = this.levelAccess.getSummary();
+        String string2 = levelSummary == null ? "" : levelSummary.getLevelName();
+        this.nameEdit.setValue(string2);
+        this.nameEdit.setResponder(string -> {
+            this.renameButton.active = !string.trim().isEmpty();
+        });
+        this.addWidget(this.nameEdit);
         Button button2 = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.edit.resetIcon"), button -> {
             this.levelAccess.getIconFile().ifPresent(path -> FileUtils.deleteQuietly(path.toFile()));
             button.active = false;
@@ -118,17 +127,9 @@ extends Screen {
             dataResult2.error().ifPresent(partialResult -> LOGGER.error("Error exporting world settings: {}", partialResult));
             this.minecraft.getToasts().addToast(SystemToast.multiline(this.minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component2, component));
         }).bounds(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20).build());
-        this.renameButton = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.edit.save"), button -> this.onRename()).bounds(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20).build());
+        this.addRenderableWidget(this.renameButton);
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)).bounds(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20).build());
         button2.active = this.levelAccess.getIconFile().filter(path -> Files.isRegularFile(path, new LinkOption[0])).isPresent();
-        LevelSummary levelSummary = this.levelAccess.getSummary();
-        String string2 = levelSummary == null ? "" : levelSummary.getLevelName();
-        this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 38, 200, 20, Component.translatable("selectWorld.enterName"));
-        this.nameEdit.setValue(string2);
-        this.nameEdit.setResponder(string -> {
-            this.renameButton.active = !string.trim().isEmpty();
-        });
-        this.addWidget(this.nameEdit);
         this.setInitialFocus(this.nameEdit);
     }
 

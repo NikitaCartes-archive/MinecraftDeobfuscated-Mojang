@@ -50,7 +50,7 @@ TickablePacketListener {
     private static final RandomSource RANDOM = RandomSource.create();
     private final byte[] challenge;
     final MinecraftServer server;
-    public final Connection connection;
+    final Connection connection;
     State state = State.HELLO;
     private int tick;
     @Nullable
@@ -81,8 +81,8 @@ TickablePacketListener {
     }
 
     @Override
-    public Connection getConnection() {
-        return this.connection;
+    public boolean isAcceptingMessages() {
+        return this.connection.isConnected();
     }
 
     public void disconnect(Component component) {

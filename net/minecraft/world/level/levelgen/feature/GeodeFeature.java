@@ -110,10 +110,10 @@ extends Feature<GeodeConfiguration> {
             double s = 0.0;
             double t = 0.0;
             for (Pair pair : list) {
-                s += Mth.fastInvSqrt(blockPos3.distSqr((Vec3i)pair.getFirst()) + (double)((Integer)pair.getSecond()).intValue()) + r;
+                s += Mth.invSqrt(blockPos3.distSqr((Vec3i)pair.getFirst()) + (double)((Integer)pair.getSecond()).intValue()) + r;
             }
             for (BlockPos blockPos4 : list2) {
-                t += Mth.fastInvSqrt(blockPos3.distSqr(blockPos4) + (double)geodeCrackSettings.crackPointOffset) + r;
+                t += Mth.invSqrt(blockPos3.distSqr(blockPos4) + (double)geodeCrackSettings.crackPointOffset) + r;
             }
             if (s < h) continue;
             if (bl && t >= l && s < e) {

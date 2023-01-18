@@ -14,8 +14,8 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CenteredStringWidget;
-import net.minecraft.client.gui.components.FrameWidget;
-import net.minecraft.client.gui.components.GridWidget;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.OptionsScreen;
@@ -71,13 +71,13 @@ extends Screen {
     }
 
     private void createPauseMenu() {
-        GridWidget gridWidget = new GridWidget();
-        gridWidget.defaultCellSetting().padding(4, 4, 4, 0);
-        GridWidget.RowHelper rowHelper = gridWidget.createRowHelper(2);
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.defaultCellSetting().padding(4, 4, 4, 0);
+        GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(2);
         rowHelper.addChild(Button.builder(RETURN_TO_GAME, button -> {
             this.minecraft.setScreen(null);
             this.minecraft.mouseHandler.grabMouse();
-        }).width(204).build(), 2, gridWidget.newCellSettings().paddingTop(50));
+        }).width(204).build(), 2, gridLayout.newCellSettings().paddingTop(50));
         rowHelper.addChild(this.openScreenButton(ADVANCEMENTS, () -> new AdvancementsScreen(this.minecraft.player.connection.getAdvancements())));
         rowHelper.addChild(this.openScreenButton(STATS, () -> new StatsScreen(this, this.minecraft.player.getStats())));
         rowHelper.addChild(this.openLinkButton(SEND_FEEDBACK, SharedConstants.getCurrentVersion().isStable() ? URL_FEEDBACK_RELEASE : URL_FEEDBACK_SNAPSHOT));
@@ -93,9 +93,9 @@ extends Screen {
             button.active = false;
             this.minecraft.getReportingContext().draftReportHandled(this.minecraft, this, this::onDisconnect, true);
         }).width(204).build(), 2);
-        gridWidget.pack();
-        FrameWidget.alignInRectangle(gridWidget, 0, 0, this.width, this.height, 0.5f, 0.25f);
-        this.addRenderableWidget(gridWidget);
+        gridLayout.arrangeElements();
+        FrameLayout.alignInRectangle(gridLayout, 0, 0, this.width, this.height, 0.5f, 0.25f);
+        gridLayout.visitWidgets(this::addRenderableWidget);
     }
 
     private void onDisconnect() {
@@ -130,7 +130,6 @@ extends Screen {
         super.render(poseStack, i, j, f);
         if (this.showPauseMenu && this.minecraft != null && this.minecraft.getReportingContext().hasDraftReport() && this.disconnectButton != null) {
             RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             this.blit(poseStack, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 182, 24, 15, 15);
         }
     }

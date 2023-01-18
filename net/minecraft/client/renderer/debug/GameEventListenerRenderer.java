@@ -59,7 +59,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         Vec3 vec32 = new Vec3(d, 0.0, f);
         this.trackedGameEvents.removeIf(TrackedGameEvent::isExpired);
         this.trackedListeners.removeIf(trackedListener -> trackedListener.isExpired(level, vec32));
-        RenderSystem.disableTexture();
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -110,7 +109,6 @@ implements DebugRenderer.SimpleDebugRenderer {
             DebugRenderer.renderFloatingText(trackedGameEvent.gameEvent.getName(), vec322.x, vec322.y + (double)0.85f, vec322.z, -7564911, 0.0075f);
         }
         RenderSystem.depthMask(true);
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 

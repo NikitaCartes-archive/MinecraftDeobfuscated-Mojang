@@ -3,10 +3,12 @@
  */
 package net.minecraft.util.datafix.schemas;
 
+import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.templates.TypeTemplate;
 import java.util.Map;
 import java.util.function.Supplier;
+import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 import net.minecraft.util.datafix.schemas.V100;
 
@@ -16,15 +18,11 @@ extends NamespacedSchema {
         super(i, schema);
     }
 
-    protected static void registerMob(Schema schema, Map<String, Supplier<TypeTemplate>> map, String string) {
-        schema.register(map, string, () -> V100.equipment(schema));
-    }
-
     @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-        V2688.registerMob(schema, map, "minecraft:glow_squid");
-        schema.registerSimple(map, "minecraft:glow_item_frame");
+        schema.register(map, "minecraft:glow_squid", () -> V100.equipment(schema));
+        schema.register(map, "minecraft:glow_item_frame", (String string) -> DSL.optionalFields("Item", References.ITEM_STACK.in(schema)));
         return map;
     }
 }

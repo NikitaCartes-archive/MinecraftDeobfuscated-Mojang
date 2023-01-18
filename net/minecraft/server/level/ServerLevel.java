@@ -81,6 +81,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -169,14 +171,10 @@ public class ServerLevel
 extends Level
 implements WorldGenLevel {
     public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
-    private static final int MIN_RAIN_DELAY_TIME = 12000;
-    private static final int MAX_RAIN_DELAY_TIME = 180000;
-    private static final int MIN_RAIN_TIME = 12000;
-    private static final int MAX_RAIN_TIME = 24000;
-    private static final int MIN_THUNDER_DELAY_TIME = 12000;
-    private static final int MAX_THUNDER_DELAY_TIME = 180000;
-    private static final int MIN_THUNDER_TIME = 3600;
-    private static final int MAX_THUNDER_TIME = 15600;
+    public static final IntProvider RAIN_DELAY = UniformInt.of(12000, 180000);
+    public static final IntProvider RAIN_DURATION = UniformInt.of(12000, 24000);
+    private static final IntProvider THUNDER_DELAY = UniformInt.of(12000, 180000);
+    public static final IntProvider THUNDER_DURATION = UniformInt.of(3600, 15600);
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final int EMPTY_TIME_NO_TICK = 300;
     private static final int MAX_SCHEDULED_TICKS_PER_TICK = 65536;
@@ -377,6 +375,7 @@ implements WorldGenLevel {
     }
 
     public void tickChunk(LevelChunk levelChunk, int i) {
+        int m;
         BlockPos blockPos;
         ChunkPos chunkPos = levelChunk.getPos();
         boolean bl = this.isRaining();
@@ -411,12 +410,12 @@ implements WorldGenLevel {
                 this.setBlockAndUpdate(blockPos2, Blocks.ICE.defaultBlockState());
             }
             if (bl) {
-                BlockState blockState;
+                Biome.Precipitation precipitation;
                 int l = this.getGameRules().getInt(GameRules.RULE_SNOW_ACCUMULATION_HEIGHT);
                 if (l > 0 && biome.shouldSnow(this, blockPos)) {
-                    blockState = this.getBlockState(blockPos);
+                    BlockState blockState = this.getBlockState(blockPos);
                     if (blockState.is(Blocks.SNOW)) {
-                        int m = blockState.getValue(SnowLayerBlock.LAYERS);
+                        m = blockState.getValue(SnowLayerBlock.LAYERS);
                         if (m < Math.min(l, 8)) {
                             BlockState blockState2 = (BlockState)blockState.setValue(SnowLayerBlock.LAYERS, m + 1);
                             Block.pushEntitiesUp(blockState, blockState2, this, blockPos);
@@ -426,12 +425,10 @@ implements WorldGenLevel {
                         this.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState());
                     }
                 }
-                blockState = this.getBlockState(blockPos2);
-                Biome.Precipitation precipitation = biome.getPrecipitation();
-                if (precipitation == Biome.Precipitation.RAIN && biome.coldEnoughToSnow(blockPos2)) {
-                    precipitation = Biome.Precipitation.SNOW;
+                if ((precipitation = biome.getPrecipitationAt(blockPos2)) != Biome.Precipitation.NONE) {
+                    BlockState blockState3 = this.getBlockState(blockPos2);
+                    blockState3.getBlock().handlePrecipitation(blockState3, this, blockPos2, precipitation);
                 }
-                blockState.getBlock().handlePrecipitation(blockState, this, blockPos2, precipitation);
             }
         }
         profilerFiller.popPush("tickBlocks");
@@ -439,15 +436,15 @@ implements WorldGenLevel {
             for (LevelChunkSection levelChunkSection : levelChunk.getSections()) {
                 if (!levelChunkSection.isRandomlyTicking()) continue;
                 int n = levelChunkSection.bottomBlockY();
-                for (int m = 0; m < i; ++m) {
+                for (m = 0; m < i; ++m) {
                     FluidState fluidState;
                     BlockPos blockPos3 = this.getBlockRandomPos(j, n, k, 15);
                     profilerFiller.push("randomTick");
-                    BlockState blockState3 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - n, blockPos3.getZ() - k);
-                    if (blockState3.isRandomlyTicking()) {
-                        blockState3.randomTick(this, blockPos3, this.random);
+                    BlockState blockState4 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - n, blockPos3.getZ() - k);
+                    if (blockState4.isRandomlyTicking()) {
+                        blockState4.randomTick(this, blockPos3, this.random);
                     }
-                    if ((fluidState = blockState3.getFluidState()).isRandomlyTicking()) {
+                    if ((fluidState = blockState4.getFluidState()).isRandomlyTicking()) {
                         fluidState.randomTick(this, blockPos3, this.random);
                     }
                     profilerFiller.pop();
@@ -533,14 +530,14 @@ implements WorldGenLevel {
                             bl2 = !bl2;
                         }
                     } else {
-                        j = bl2 ? Mth.randomBetweenInclusive(this.random, 3600, 15600) : Mth.randomBetweenInclusive(this.random, 12000, 180000);
+                        j = bl2 ? THUNDER_DURATION.sample(this.random) : THUNDER_DELAY.sample(this.random);
                     }
                     if (k > 0) {
                         if (--k == 0) {
                             bl3 = !bl3;
                         }
                     } else {
-                        k = bl3 ? Mth.randomBetweenInclusive(this.random, 12000, 24000) : Mth.randomBetweenInclusive(this.random, 12000, 180000);
+                        k = bl3 ? RAIN_DURATION.sample(this.random) : RAIN_DELAY.sample(this.random);
                     }
                 }
                 this.serverLevelData.setThunderTime(j);

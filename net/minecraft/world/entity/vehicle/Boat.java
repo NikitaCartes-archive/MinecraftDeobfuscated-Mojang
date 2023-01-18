@@ -228,7 +228,7 @@ implements VariantHolder<Type> {
     }
 
     @Override
-    public void animateHurt() {
+    public void animateHurt(float f) {
         this.setHurtDir(-this.getHurtDir());
         this.setHurtTime(10);
         this.setDamage(this.getDamage() * 11.0f);

@@ -84,7 +84,6 @@ extends AbstractContainerScreen<EnchantmentMenu> {
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         Lighting.setupForFlatItems();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, ENCHANTING_TABLE_LOCATION);
         int k = (this.width - this.imageWidth) / 2;
         int l = (this.height - this.imageHeight) / 2;
@@ -108,8 +107,8 @@ extends AbstractContainerScreen<EnchantmentMenu> {
         poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
         float o = Mth.lerp(f, this.oFlip, this.flip) + 0.25f;
         float p = Mth.lerp(f, this.oFlip, this.flip) + 0.75f;
-        o = (o - (float)Mth.fastFloor(o)) * 1.6f - 0.3f;
-        p = (p - (float)Mth.fastFloor(p)) * 1.6f - 0.3f;
+        o = (o - (float)Mth.floor(o)) * 1.6f - 0.3f;
+        p = (p - (float)Mth.floor(p)) * 1.6f - 0.3f;
         if (o < 0.0f) {
             o = 0.0f;
         }
@@ -131,7 +130,6 @@ extends AbstractContainerScreen<EnchantmentMenu> {
         RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
         RenderSystem.restoreProjectionMatrix();
         Lighting.setupFor3DItems();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         EnchantmentNames.getInstance().initSeed(((EnchantmentMenu)this.menu).getEnchantmentSeed());
         int q = ((EnchantmentMenu)this.menu).getGoldCount();
         for (int r = 0; r < 3; ++r) {
@@ -141,7 +139,6 @@ extends AbstractContainerScreen<EnchantmentMenu> {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, ENCHANTING_TABLE_LOCATION);
             int u = ((EnchantmentMenu)this.menu).costs[r];
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             if (u == 0) {
                 this.blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
                 continue;

@@ -197,11 +197,6 @@ extends RealmsScreen {
         }
 
         @Override
-        public boolean isFocused() {
-            return RealmsPendingInvitesScreen.this.getFocused() == this;
-        }
-
-        @Override
         public void renderBackground(PoseStack poseStack) {
             RealmsPendingInvitesScreen.this.renderBackground(poseStack);
         }
@@ -253,10 +248,7 @@ extends RealmsScreen {
             RealmsPendingInvitesScreen.this.font.draw(poseStack, pendingInvite.worldOwnerName, (float)(i + 38), (float)(j + 12), 0x6C6C6C);
             RealmsPendingInvitesScreen.this.font.draw(poseStack, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), (float)(i + 38), (float)(j + 24), 0x6C6C6C);
             RowButton.drawButtonsInRow(poseStack, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
-            RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> {
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                PlayerFaceRenderer.draw(poseStack, i, j, 32);
-            });
+            RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> PlayerFaceRenderer.draw(poseStack, i, j, 32));
         }
 
         @Override
@@ -275,7 +267,6 @@ extends RealmsScreen {
             @Override
             protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
                 RenderSystem.setShaderTexture(0, ACCEPT_ICON_LOCATION);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 float f = bl ? 19.0f : 0.0f;
                 GuiComponent.blit(poseStack, i, j, f, 0.0f, 18, 18, 37, 18);
                 if (bl) {
@@ -299,7 +290,6 @@ extends RealmsScreen {
             @Override
             protected void draw(PoseStack poseStack, int i, int j, boolean bl) {
                 RenderSystem.setShaderTexture(0, REJECT_ICON_LOCATION);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 float f = bl ? 19.0f : 0.0f;
                 GuiComponent.blit(poseStack, i, j, f, 0.0f, 18, 18, 37, 18);
                 if (bl) {

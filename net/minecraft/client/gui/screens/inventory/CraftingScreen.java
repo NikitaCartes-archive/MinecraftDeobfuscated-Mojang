@@ -73,7 +73,6 @@ implements RecipeUpdateListener {
     @Override
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, CRAFTING_TABLE_LOCATION);
         int k = this.leftPos;
         int l = (this.height - this.imageHeight) / 2;

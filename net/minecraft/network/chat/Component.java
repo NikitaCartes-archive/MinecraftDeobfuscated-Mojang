@@ -147,11 +147,19 @@ FormattedText {
     }
 
     public static MutableComponent translatable(String string) {
-        return MutableComponent.create(new TranslatableContents(string));
+        return MutableComponent.create(new TranslatableContents(string, null, TranslatableContents.NO_ARGS));
     }
 
     public static MutableComponent translatable(String string, Object ... objects) {
-        return MutableComponent.create(new TranslatableContents(string, objects));
+        return MutableComponent.create(new TranslatableContents(string, null, objects));
+    }
+
+    public static MutableComponent translatableWithFallback(String string, @Nullable String string2) {
+        return MutableComponent.create(new TranslatableContents(string, string2, TranslatableContents.NO_ARGS));
+    }
+
+    public static MutableComponent translatableWithFallback(String string, @Nullable String string2, Object ... objects) {
+        return MutableComponent.create(new TranslatableContents(string, string2, objects));
     }
 
     public static MutableComponent empty() {
@@ -224,18 +232,16 @@ FormattedText {
                     mutableComponent = string.isEmpty() ? Component.empty() : Component.literal(string);
                 } else if (jsonObject.has("translate")) {
                     string = GsonHelper.getAsString(jsonObject, "translate");
+                    String string2 = GsonHelper.getAsString(jsonObject, "fallback", null);
                     if (jsonObject.has("with")) {
-                        void var9_17;
                         JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "with");
-                        Object[] objects = new Object[jsonArray.size()];
-                        boolean bl = false;
-                        while (var9_17 < objects.length) {
-                            objects[var9_17] = Serializer.unwrapTextArgument(this.deserialize(jsonArray.get((int)var9_17), type, jsonDeserializationContext));
-                            ++var9_17;
+                        Object[] objectArray = new Object[jsonArray.size()];
+                        for (int i = 0; i < objectArray.length; ++i) {
+                            objectArray[i] = Serializer.unwrapTextArgument(this.deserialize(jsonArray.get(i), type, jsonDeserializationContext));
                         }
-                        mutableComponent = Component.translatable(string, objects);
+                        mutableComponent = Component.translatableWithFallback(string, string2, objectArray);
                     } else {
-                        mutableComponent = Component.translatable(string);
+                        mutableComponent = Component.translatableWithFallback(string, string2);
                     }
                 } else if (jsonObject.has("score")) {
                     JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "score");
@@ -247,7 +253,7 @@ FormattedText {
                 } else if (jsonObject.has("keybind")) {
                     mutableComponent = Component.keybind(GsonHelper.getAsString(jsonObject, "keybind"));
                 } else {
-                    void var9_21;
+                    void var9_20;
                     if (!jsonObject.has("nbt")) throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
                     string = GsonHelper.getAsString(jsonObject, "nbt");
                     Optional<Component> optional2 = this.parseSeparator(type, jsonDeserializationContext, jsonObject);
@@ -260,7 +266,7 @@ FormattedText {
                         if (!jsonObject.has("storage")) throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
                         StorageDataSource storageDataSource = new StorageDataSource(new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")));
                     }
-                    mutableComponent = Component.nbt(string, bl, optional2, (DataSource)var9_21);
+                    mutableComponent = Component.nbt(string, bl, optional2, (DataSource)var9_20);
                 }
                 if (jsonObject.has("extra")) {
                     JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "extra");
@@ -341,6 +347,10 @@ FormattedText {
             } else if (componentContents instanceof TranslatableContents) {
                 TranslatableContents translatableContents = (TranslatableContents)componentContents;
                 jsonObject.addProperty("translate", translatableContents.getKey());
+                String string = translatableContents.getFallback();
+                if (string != null) {
+                    jsonObject.addProperty("fallback", string);
+                }
                 if (translatableContents.getArgs().length <= 0) return jsonObject;
                 JsonArray jsonArray2 = new JsonArray();
                 for (Object object : translatableContents.getArgs()) {

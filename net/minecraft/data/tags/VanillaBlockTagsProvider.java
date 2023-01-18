@@ -150,7 +150,7 @@ extends IntrinsicHolderTagsProvider<Block> {
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.GEODE_INVALID_BLOCKS)).add(Blocks.BEDROCK, Blocks.WATER, Blocks.LAVA, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.ANIMALS_SPAWNABLE_ON)).add(Blocks.GRASS_BLOCK);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.AXOLOTLS_SPAWNABLE_ON)).add(Blocks.CLAY);
-        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.GOATS_SPAWNABLE_ON)).add(Blocks.STONE, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.PACKED_ICE, Blocks.GRAVEL);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.GOATS_SPAWNABLE_ON)).addTag((TagKey)BlockTags.ANIMALS_SPAWNABLE_ON)).add(Blocks.STONE, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.PACKED_ICE, Blocks.GRAVEL);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.MOOSHROOMS_SPAWNABLE_ON)).add(Blocks.MYCELIUM);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.PARROTS_SPAWNABLE_ON)).add(Blocks.GRASS_BLOCK, Blocks.AIR).addTag((TagKey)BlockTags.LEAVES)).addTag((TagKey)BlockTags.LOGS);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.POLAR_BEARS_SPAWNABLE_ON_ALTERNATE)).add(Blocks.ICE);

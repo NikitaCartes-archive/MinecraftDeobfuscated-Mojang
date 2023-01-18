@@ -6,11 +6,11 @@ package net.minecraft.core;
 import com.google.common.base.MoreObjects;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -23,17 +23,13 @@ implements Comparable<Vec3i> {
     private int y;
     private int z;
 
-    private static Function<Vec3i, DataResult<Vec3i>> checkOffsetAxes(int i) {
-        return vec3i -> {
+    public static Codec<Vec3i> offsetCodec(int i) {
+        return ExtraCodecs.validate(CODEC, vec3i -> {
             if (Math.abs(vec3i.getX()) < i && Math.abs(vec3i.getY()) < i && Math.abs(vec3i.getZ()) < i) {
                 return DataResult.success(vec3i);
             }
             return DataResult.error("Position out of range, expected at most " + i + ": " + vec3i);
-        };
-    }
-
-    public static Codec<Vec3i> offsetCodec(int i) {
-        return CODEC.flatXmap(Vec3i.checkOffsetAxes(i), Vec3i.checkOffsetAxes(i));
+        });
     }
 
     public Vec3i(int i, int j, int k) {

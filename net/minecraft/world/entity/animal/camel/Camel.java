@@ -61,6 +61,7 @@ RiderShieldingMount,
 Saddleable {
     public static final Ingredient TEMPTATION_ITEM = Ingredient.of(Items.CACTUS);
     public static final int DASH_COOLDOWN_TICKS = 55;
+    public static final int MAX_HEAD_Y_ROT = 30;
     private static final float RUNNING_SPEED_BONUS = 0.1f;
     private static final float DASH_VERTICAL_MOMENTUM = 1.4285f;
     private static final float DASH_HORIZONTAL_MOMENTUM = 22.2222f;
@@ -91,17 +92,17 @@ Saddleable {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putBoolean("IsSitting", this.getPose() == Pose.SITTING);
         compoundTag.putLong("LastPoseTick", this.entityData.get(LAST_POSE_CHANGE_TICK));
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        if (compoundTag.getBoolean("IsSitting")) {
+        long l = compoundTag.getLong("LastPoseTick");
+        if (l < 0L) {
             this.setPose(Pose.SITTING);
         }
-        this.resetLastPoseChangeTick(compoundTag.getLong("LastPoseTick"));
+        this.resetLastPoseChangeTick(l);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -112,13 +113,13 @@ Saddleable {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DASH, false);
-        this.entityData.define(LAST_POSE_CHANGE_TICK, -52L);
+        this.entityData.define(LAST_POSE_CHANGE_TICK, 0L);
     }
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         CamelAi.initMemories(this, serverLevelAccessor.getRandom());
-        this.entityData.set(LAST_POSE_CHANGE_TICK, serverLevelAccessor.getLevel().getGameTime() - 52L);
+        this.resetLastPoseChangeTickToFullStand(serverLevelAccessor.getLevel().getGameTime());
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
@@ -177,6 +178,9 @@ Saddleable {
         if (this.level.isClientSide()) {
             this.setupAnimationStates();
         }
+        if (this.refuseToMove()) {
+            this.clampHeadRotationToBody(this, 30.0f);
+        }
     }
 
     private void setupAnimationStates() {
@@ -186,35 +190,23 @@ Saddleable {
         } else {
             --this.idleAnimationTimeout;
         }
-        switch (this.getPose()) {
-            case STANDING: {
-                this.sitAnimationState.stop();
+        if (this.isCamelSitting()) {
+            this.walkAnimationState.stop();
+            this.sitUpAnimationState.stop();
+            this.dashAnimationState.stop();
+            if (this.isSittingDown()) {
+                this.sitAnimationState.startIfStopped(this.tickCount);
                 this.sitPoseAnimationState.stop();
-                this.dashAnimationState.animateWhen(this.isDashing(), this.tickCount);
-                this.sitUpAnimationState.animateWhen(this.isInPoseTransition(), this.tickCount);
-                this.walkAnimationState.animateWhen((this.onGround || this.hasControllingPassenger()) && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6, this.tickCount);
-                break;
-            }
-            case SITTING: {
-                this.walkAnimationState.stop();
-                this.sitUpAnimationState.stop();
-                this.dashAnimationState.stop();
-                if (this.isSittingDown()) {
-                    this.sitAnimationState.startIfStopped(this.tickCount);
-                    this.sitPoseAnimationState.stop();
-                    break;
-                }
+            } else {
                 this.sitAnimationState.stop();
                 this.sitPoseAnimationState.startIfStopped(this.tickCount);
-                break;
             }
-            default: {
-                this.walkAnimationState.stop();
-                this.sitAnimationState.stop();
-                this.sitPoseAnimationState.stop();
-                this.sitUpAnimationState.stop();
-                this.dashAnimationState.stop();
-            }
+        } else {
+            this.sitAnimationState.stop();
+            this.sitPoseAnimationState.stop();
+            this.dashAnimationState.animateWhen(this.isDashing(), this.tickCount);
+            this.sitUpAnimationState.animateWhen(this.isInPoseTransition(), this.tickCount);
+            this.walkAnimationState.animateWhen((this.onGround || this.hasControllingPassenger()) && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6, this.tickCount);
         }
     }
 
@@ -231,7 +223,7 @@ Saddleable {
     }
 
     public boolean refuseToMove() {
-        return this.isPoseSitting() || this.isInPoseTransition();
+        return this.isCamelSitting() || this.isInPoseTransition();
     }
 
     @Override
@@ -243,7 +235,7 @@ Saddleable {
     @Override
     protected boolean mountIgnoresControllerInput(LivingEntity livingEntity) {
         boolean bl = this.isInPoseTransition();
-        if (this.isPoseSitting() && !bl && livingEntity.zza > 0.0f) {
+        if (this.isCamelSitting() && !bl && livingEntity.zza > 0.0f) {
             this.standUp();
         }
         return this.refuseToMove() || super.mountIgnoresControllerInput(livingEntity);
@@ -260,6 +252,11 @@ Saddleable {
             return;
         }
         super.onPlayerJump(i);
+    }
+
+    @Override
+    public boolean canSprint() {
+        return true;
     }
 
     @Override
@@ -349,7 +346,7 @@ Saddleable {
 
     @Override
     protected void onLeashDistance(float f) {
-        if (f > 6.0f && this.isPoseSitting() && !this.isInPoseTransition()) {
+        if (f > 6.0f && this.isCamelSitting() && !this.isInPoseTransition()) {
             this.standUp();
         }
     }
@@ -446,13 +443,12 @@ Saddleable {
     }
 
     private double getBodyAnchorAnimationYOffset(boolean bl, float f) {
-        boolean bl3;
         double d = this.getPassengersRidingOffset();
         float g = this.getScale() * 1.43f;
         float h = g - this.getScale() * 0.2f;
         float i = g - h;
         boolean bl2 = this.isInPoseTransition();
-        boolean bl4 = bl3 = this.getPose() == Pose.SITTING;
+        boolean bl3 = this.isCamelSitting();
         if (bl2) {
             float l;
             int k;
@@ -465,11 +461,11 @@ Saddleable {
                 k = bl ? 24 : 32;
                 l = bl ? 0.6f : 0.35f;
             }
-            float m = (float)this.getPoseTime() + f;
-            boolean bl42 = m < (float)k;
-            float n2 = bl42 ? m / (float)k : (m - (float)k) / (float)(j - k);
+            float m = Mth.clamp((float)this.getPoseTime() + f, 0.0f, (float)j);
+            boolean bl4 = m < (float)k;
+            float n2 = bl4 ? m / (float)k : (m - (float)k) / (float)(j - k);
             float o = g - l * h;
-            d += bl3 ? (double)Mth.lerp(n2, bl42 ? g : o, bl42 ? o : i) : (double)Mth.lerp(n2, bl42 ? i - g : i - o, bl42 ? i - o : 0.0f);
+            d += bl3 ? (double)Mth.lerp(n2, bl4 ? g : o, bl4 ? o : i) : (double)Mth.lerp(n2, bl4 ? i - g : i - o, bl4 ? i - o : 0.0f);
         }
         if (bl3 && !bl2) {
             d += (double)i;
@@ -484,7 +480,7 @@ Saddleable {
 
     @Override
     public double getPassengersRidingOffset() {
-        return this.getDimensions((Pose)this.getPose()).height - (this.isBaby() ? 0.35f : 0.6f);
+        return this.getDimensions((Pose)(this.isCamelSitting() ? Pose.SITTING : Pose.STANDING)).height - (this.isBaby() ? 0.35f : 0.6f);
     }
 
     @Override
@@ -503,6 +499,19 @@ Saddleable {
         float i = f + h - g;
         entity.setYRot(i);
         entity.setYHeadRot(i);
+    }
+
+    private void clampHeadRotationToBody(Entity entity, float f) {
+        float g = entity.getYHeadRot();
+        float h = Mth.wrapDegrees(this.yBodyRot - g);
+        float i = Mth.clamp(Mth.wrapDegrees(this.yBodyRot - g), -f, f);
+        float j = g + h - i;
+        entity.setYHeadRot(j);
+    }
+
+    @Override
+    public int getMaxHeadYRot() {
+        return 30;
     }
 
     @Override
@@ -527,44 +536,30 @@ Saddleable {
         DebugPackets.sendEntityBrain(this);
     }
 
-    public boolean isPoseSitting() {
-        return this.getPose() == Pose.SITTING;
+    public boolean isCamelSitting() {
+        return this.entityData.get(LAST_POSE_CHANGE_TICK) < 0L;
     }
 
     public boolean isInPoseTransition() {
         long l = this.getPoseTime();
-        return switch (this.getPose()) {
-            case Pose.STANDING -> {
-                if (l < 52L) {
-                    yield true;
-                }
-                yield false;
-            }
-            case Pose.SITTING -> {
-                if (l < 40L) {
-                    yield true;
-                }
-                yield false;
-            }
-            default -> false;
-        };
+        return l < (long)(this.isCamelSitting() ? 40 : 52);
     }
 
     private boolean isSittingDown() {
-        return this.getPose() == Pose.SITTING && this.getPoseTime() < 40L;
+        return this.isCamelSitting() && this.getPoseTime() < 40L;
     }
 
     public void sitDown() {
-        if (this.hasPose(Pose.SITTING)) {
+        if (this.isCamelSitting()) {
             return;
         }
         this.playSound(SoundEvents.CAMEL_SIT, 1.0f, 1.0f);
         this.setPose(Pose.SITTING);
-        this.resetLastPoseChangeTick(this.level.getGameTime());
+        this.resetLastPoseChangeTick(-this.level.getGameTime());
     }
 
     public void standUp() {
-        if (this.hasPose(Pose.STANDING)) {
+        if (!this.isCamelSitting()) {
             return;
         }
         this.playSound(SoundEvents.CAMEL_STAND, 1.0f, 1.0f);
@@ -574,7 +569,7 @@ Saddleable {
 
     public void standUpPanic() {
         this.setPose(Pose.STANDING);
-        this.resetLastPoseChangeTick(this.level.getGameTime() - 52L);
+        this.resetLastPoseChangeTickToFullStand(this.level.getGameTime());
     }
 
     @VisibleForTesting
@@ -582,8 +577,12 @@ Saddleable {
         this.entityData.set(LAST_POSE_CHANGE_TICK, l);
     }
 
+    private void resetLastPoseChangeTickToFullStand(long l) {
+        this.resetLastPoseChangeTick(Math.max(0L, l - 52L - 1L));
+    }
+
     public long getPoseTime() {
-        return this.level.getGameTime() - this.entityData.get(LAST_POSE_CHANGE_TICK);
+        return this.level.getGameTime() - Math.abs(this.entityData.get(LAST_POSE_CHANGE_TICK));
     }
 
     @Override

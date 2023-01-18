@@ -44,7 +44,6 @@ extends AbstractContainerScreen<CartographyTableMenu> {
         Integer integer;
         this.renderBackground(poseStack);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, BG_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;

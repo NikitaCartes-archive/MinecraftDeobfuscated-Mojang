@@ -61,7 +61,7 @@ extends Screen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(poseStack);
         PopupScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.contentTop - this.font.lineHeight * 2, -1);
         this.messageLines.renderCentered(poseStack, this.width / 2, this.contentTop);
         super.render(poseStack, i, j, f);

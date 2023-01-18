@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -147,7 +148,7 @@ public class SpreadPlayersCommand {
             } else {
                 position = positions[j++];
             }
-            entity.teleportToWithTicket((double)Mth.floor(position.x) + 0.5, position.getSpawnY(serverLevel, i), (double)Mth.floor(position.z) + 0.5);
+            entity.teleportTo(serverLevel, (double)Mth.floor(position.x) + 0.5, position.getSpawnY(serverLevel, i), (double)Mth.floor(position.z) + 0.5, Set.of(), entity.getYRot(), entity.getXRot());
             double e = Double.MAX_VALUE;
             for (Position position2 : positions) {
                 if (position == position2) continue;

@@ -186,7 +186,6 @@ extends Entity {
     public int removeStingerTime;
     public int hurtTime;
     public int hurtDuration;
-    public float hurtDir;
     public int deathTime;
     public float oAttackAnim;
     public float attackAnim;
@@ -954,6 +953,7 @@ extends Entity {
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         boolean bl3;
+        Entity entity2;
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
@@ -1003,9 +1003,7 @@ extends Entity {
             this.hurtHelmet(damageSource, f);
             f *= 0.75f;
         }
-        this.hurtDir = 0.0f;
-        Entity entity2 = damageSource.getEntity();
-        if (entity2 != null) {
+        if ((entity2 = damageSource.getEntity()) != null) {
             Wolf wolf;
             if (entity2 instanceof LivingEntity && !damageSource.isNoAggro()) {
                 this.setLastHurtByMob((LivingEntity)entity2);
@@ -1038,10 +1036,7 @@ extends Entity {
                     d = (Math.random() - Math.random()) * 0.01;
                     e = (Math.random() - Math.random()) * 0.01;
                 }
-                this.hurtDir = (float)(Mth.atan2(e, d) * 57.2957763671875 - (double)this.getYRot());
                 this.knockback(0.4f, d, e);
-            } else {
-                this.hurtDir = (int)(Math.random() * 2.0) * 180;
             }
         }
         if (this.isDeadOrDying()) {
@@ -1285,6 +1280,10 @@ extends Entity {
         return this.position();
     }
 
+    public float getHurtDir() {
+        return 0.0f;
+    }
+
     public Fallsounds getFallSounds() {
         return new Fallsounds(SoundEvents.GENERIC_SMALL_FALL, SoundEvents.GENERIC_BIG_FALL);
     }
@@ -1370,9 +1369,8 @@ extends Entity {
     }
 
     @Override
-    public void animateHurt() {
+    public void animateHurt(float f) {
         this.hurtTime = this.hurtDuration = 10;
-        this.hurtDir = 0.0f;
     }
 
     public int getArmorValue() {
@@ -1426,6 +1424,7 @@ extends Entity {
     }
 
     protected void actuallyHurt(DamageSource damageSource, float f) {
+        Entity entity;
         if (this.isInvulnerableTo(damageSource)) {
             return;
         }
@@ -1434,15 +1433,16 @@ extends Entity {
         f = Math.max(f - this.getAbsorptionAmount(), 0.0f);
         this.setAbsorptionAmount(this.getAbsorptionAmount() - (g - f));
         float h = g - f;
-        if (h > 0.0f && h < 3.4028235E37f && damageSource.getEntity() instanceof ServerPlayer) {
-            ((ServerPlayer)damageSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(h * 10.0f));
+        if (h > 0.0f && h < 3.4028235E37f && (entity = damageSource.getEntity()) instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer)entity;
+            serverPlayer.awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(h * 10.0f));
         }
         if (f == 0.0f) {
             return;
         }
         float i = this.getHealth();
-        this.setHealth(i - f);
         this.getCombatTracker().recordDamage(damageSource, i, f);
+        this.setHealth(i - f);
         this.setAbsorptionAmount(this.getAbsorptionAmount() - f);
         this.gameEvent(GameEvent.ENTITY_DAMAGE);
     }
@@ -1530,7 +1530,6 @@ extends Entity {
                 this.animationSpeed = 1.5f;
                 this.invulnerableTime = 20;
                 this.hurtTime = this.hurtDuration = 10;
-                this.hurtDir = 0.0f;
                 if (b == 33) {
                     this.playSound(SoundEvents.THORNS_HIT, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
                 }
@@ -2828,6 +2827,11 @@ extends Entity {
     public AABB getLocalBoundsForPose(Pose pose) {
         EntityDimensions entityDimensions = this.getDimensions(pose);
         return new AABB(-entityDimensions.width / 2.0f, 0.0, -entityDimensions.width / 2.0f, entityDimensions.width / 2.0f, entityDimensions.height, entityDimensions.width / 2.0f);
+    }
+
+    @Override
+    public boolean canChangeDimensions() {
+        return super.canChangeDimensions() && !this.isSleeping();
     }
 
     public Optional<BlockPos> getSleepingPos() {

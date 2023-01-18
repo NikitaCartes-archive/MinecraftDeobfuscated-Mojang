@@ -52,7 +52,7 @@ extends ThrowableItemProjectile {
             Entity entity = this.getOwner();
             if (entity instanceof ServerPlayer) {
                 ServerPlayer serverPlayer = (ServerPlayer)entity;
-                if (serverPlayer.connection.getConnection().isConnected() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {
+                if (serverPlayer.connection.isAcceptingMessages() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {
                     Endermite endermite;
                     if (this.random.nextFloat() < 0.05f && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && (endermite = EntityType.ENDERMITE.create(this.level)) != null) {
                         endermite.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());

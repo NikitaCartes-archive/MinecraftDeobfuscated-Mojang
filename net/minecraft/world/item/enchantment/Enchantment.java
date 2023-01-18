@@ -9,6 +9,7 @@ import java.util.Map;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -103,7 +104,7 @@ public abstract class Enchantment {
             mutableComponent.withStyle(ChatFormatting.GRAY);
         }
         if (i != 1 || this.getMaxLevel() != 1) {
-            mutableComponent.append(" ").append(Component.translatable("enchantment.level." + i));
+            mutableComponent.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + i));
         }
         return mutableComponent;
     }

@@ -126,6 +126,7 @@ SpectatorMenuItem {
             RenderSystem.setShaderTexture(0, this.iconSkin);
             RenderSystem.setShaderColor(f, f, f, (float)i / 255.0f);
             PlayerFaceRenderer.draw(poseStack, 2, 2, 12);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
 
         @Override

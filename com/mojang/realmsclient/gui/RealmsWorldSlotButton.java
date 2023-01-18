@@ -102,7 +102,7 @@ extends Button {
         if (action == Action.NOTHING) {
             return Pair.of(null, Component.literal(string));
         }
-        Component component = bl2 ? (bl ? CommonComponents.EMPTY : Component.literal(" ").append(string).append(" ").append(realmsServer.minigameName)) : Component.literal(" ").append(string);
+        Component component = bl2 ? (bl ? CommonComponents.EMPTY : CommonComponents.space().append(string).append(CommonComponents.SPACE).append(realmsServer.minigameName)) : CommonComponents.space().append(string);
         Component component2 = action == Action.JOIN ? SLOT_ACTIVE_TOOLTIP : (bl2 ? SWITCH_TO_MINIGAME_SLOT_TOOLTIP : SWITCH_TO_WORLD_SLOT_TOOLTIP);
         MutableComponent component3 = component2.copy().append(component);
         return Pair.of(component2, component3);
@@ -138,8 +138,6 @@ extends Button {
         }
         if (bl) {
             RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);
-        } else {
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
         RealmsWorldSlotButton.blit(poseStack, i + 3, j + 3, 0.0f, 0.0f, 74, 74, 74, 74);
         RenderSystem.setShaderTexture(0, SLOT_FRAME_LOCATION);
@@ -152,6 +150,7 @@ extends Button {
             RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);
         }
         RealmsWorldSlotButton.blit(poseStack, i, j, 0.0f, 0.0f, 80, 80, 80, 80);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         if (bl) {
             this.renderCheckMark(poseStack, i, j);
         }
@@ -160,7 +159,6 @@ extends Button {
 
     private void renderCheckMark(PoseStack poseStack, int i, int j) {
         RenderSystem.setShaderTexture(0, CHECK_MARK_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RealmsWorldSlotButton.blit(poseStack, i + 67, j + 4, 0.0f, 0.0f, 9, 8, 9, 8);

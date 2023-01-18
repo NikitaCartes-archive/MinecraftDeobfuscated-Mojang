@@ -26,7 +26,7 @@ public class YieldJobSite {
             if (villager2.isBaby()) {
                 return false;
             }
-            if (villager2.getVillagerData().getProfession() == VillagerProfession.NONE) {
+            if (villager2.getVillagerData().getProfession() != VillagerProfession.NONE) {
                 return false;
             }
             BlockPos blockPos = ((GlobalPos)instance.get(memoryAccessor)).pos();

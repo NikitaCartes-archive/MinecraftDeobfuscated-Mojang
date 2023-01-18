@@ -188,7 +188,6 @@ extends ContainerObjectSelectionList.Entry<PlayerEntry> {
         }
         if (this.hasDraftReport && this.reportButton != null) {
             RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 182.0f, 24.0f, 15, 15, 256, 256);
         }
     }

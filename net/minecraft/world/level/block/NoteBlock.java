@@ -11,11 +11,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -93,6 +95,10 @@ extends Block {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        ItemStack itemStack;
+        if (NoteBlock.isFeatureFlagEnabled(level) && (itemStack = player.getItemInHand(interactionHand)).is(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS) && blockHitResult.getDirection() == Direction.UP) {
+            return InteractionResult.PASS;
+        }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

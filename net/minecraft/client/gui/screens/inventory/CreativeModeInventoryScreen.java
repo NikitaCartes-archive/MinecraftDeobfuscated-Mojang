@@ -514,7 +514,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         if (selectedTab.getType() == CreativeModeTab.Type.SEARCH) {
             this.searchBox.setVisible(true);
             this.searchBox.setCanLoseFocus(false);
-            this.searchBox.setFocus(true);
+            this.searchBox.setFocused(true);
             if (creativeModeTab2 != creativeModeTab) {
                 this.searchBox.setValue("");
             }
@@ -522,7 +522,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         } else {
             this.searchBox.setVisible(false);
             this.searchBox.setCanLoseFocus(true);
-            this.searchBox.setFocus(false);
+            this.searchBox.setFocused(false);
             this.searchBox.setValue("");
         }
         this.scrollOffs = 0.0f;
@@ -579,7 +579,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         if (this.destroyItemSlot != null && selectedTab.getType() == CreativeModeTab.Type.INVENTORY && this.isHovering(this.destroyItemSlot.x, this.destroyItemSlot.y, 16, 16, i, j)) {
             this.renderTooltip(poseStack, TRASH_SLOT_TOOLTIP, i, j);
         }
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.renderTooltip(poseStack, i, j);
     }
 
@@ -614,7 +613,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
 
     @Override
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         for (CreativeModeTab creativeModeTab : CreativeModeTabs.tabs()) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, CREATIVE_TABS_LOCATION);
@@ -625,7 +623,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         RenderSystem.setShaderTexture(0, new ResourceLocation(GUI_CREATIVE_TAB_PREFIX + selectedTab.getBackgroundSuffix()));
         this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         this.searchBox.render(poseStack, i, j, f);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         int k = this.leftPos + 175;
         int l = this.topPos + 18;
         int m = l + 112;

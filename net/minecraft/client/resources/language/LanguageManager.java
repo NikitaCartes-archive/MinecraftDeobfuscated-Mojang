@@ -4,15 +4,14 @@
 package net.minecraft.client.resources.language;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,6 +23,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
@@ -31,10 +31,9 @@ public class LanguageManager
 implements ResourceManagerReloadListener {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final String DEFAULT_LANGUAGE_CODE = "en_us";
-    private static final LanguageInfo DEFAULT_LANGUAGE = new LanguageInfo("en_us", "US", "English", false);
+    private static final LanguageInfo DEFAULT_LANGUAGE = new LanguageInfo("US", "English", false);
     private Map<String, LanguageInfo> languages = ImmutableMap.of("en_us", DEFAULT_LANGUAGE);
     private String currentCode;
-    private LanguageInfo currentLanguage = DEFAULT_LANGUAGE;
 
     public LanguageManager(String string) {
         this.currentCode = string;
@@ -44,11 +43,9 @@ implements ResourceManagerReloadListener {
         HashMap map = Maps.newHashMap();
         stream.forEach(packResources -> {
             try {
-                LanguageMetadataSection languageMetadataSection = packResources.getMetadataSection(LanguageMetadataSection.SERIALIZER);
+                LanguageMetadataSection languageMetadataSection = packResources.getMetadataSection(LanguageMetadataSection.TYPE);
                 if (languageMetadataSection != null) {
-                    for (LanguageInfo languageInfo : languageMetadataSection.getLanguages()) {
-                        map.putIfAbsent(languageInfo.getCode(), languageInfo);
-                    }
+                    languageMetadataSection.languages().forEach(map::putIfAbsent);
                 }
             } catch (IOException | RuntimeException exception) {
                 LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", (Object)packResources.packId(), (Object)exception);
@@ -59,31 +56,33 @@ implements ResourceManagerReloadListener {
 
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
+        LanguageInfo languageInfo;
         this.languages = LanguageManager.extractLanguages(resourceManager.listPacks());
-        LanguageInfo languageInfo = this.languages.getOrDefault(DEFAULT_LANGUAGE_CODE, DEFAULT_LANGUAGE);
-        this.currentLanguage = this.languages.getOrDefault(this.currentCode, languageInfo);
-        ArrayList<LanguageInfo> list = Lists.newArrayList(languageInfo);
-        if (this.currentLanguage != languageInfo) {
-            list.add(this.currentLanguage);
+        ArrayList<String> list = new ArrayList<String>(2);
+        boolean bl = DEFAULT_LANGUAGE.bidirectional();
+        list.add(DEFAULT_LANGUAGE_CODE);
+        if (!this.currentCode.equals(DEFAULT_LANGUAGE_CODE) && (languageInfo = this.languages.get(this.currentCode)) != null) {
+            list.add(this.currentCode);
+            bl = languageInfo.bidirectional();
         }
-        ClientLanguage clientLanguage = ClientLanguage.loadFrom(resourceManager, list);
+        ClientLanguage clientLanguage = ClientLanguage.loadFrom(resourceManager, list, bl);
         I18n.setLanguage(clientLanguage);
         Language.inject(clientLanguage);
     }
 
-    public void setSelected(LanguageInfo languageInfo) {
-        this.currentCode = languageInfo.getCode();
-        this.currentLanguage = languageInfo;
+    public void setSelected(String string) {
+        this.currentCode = string;
     }
 
-    public LanguageInfo getSelected() {
-        return this.currentLanguage;
+    public String getSelected() {
+        return this.currentCode;
     }
 
-    public SortedSet<LanguageInfo> getLanguages() {
-        return Sets.newTreeSet(this.languages.values());
+    public SortedMap<String, LanguageInfo> getLanguages() {
+        return new TreeMap<String, LanguageInfo>(this.languages);
     }
 
+    @Nullable
     public LanguageInfo getLanguage(String string) {
         return this.languages.get(string);
     }

@@ -6,6 +6,7 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -42,7 +43,7 @@ extends RealmsScreen {
     }
 
     private Component[] getMessages() {
-        if (this.minecraft.getGame().getVersion().isStable()) {
+        if (SharedConstants.getCurrentVersion().isStable()) {
             return INCOMPATIBLE_MESSAGES;
         }
         return INCOMPATIBLE_MESSAGES_SNAPSHOT;

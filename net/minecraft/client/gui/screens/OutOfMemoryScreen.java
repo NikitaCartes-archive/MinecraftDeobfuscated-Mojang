@@ -19,7 +19,7 @@ extends Screen {
     private MultiLineLabel message = MultiLineLabel.EMPTY;
 
     public OutOfMemoryScreen() {
-        super(Component.translatable("outOfMemory.error"));
+        super(Component.translatable("outOfMemory.title"));
     }
 
     @Override

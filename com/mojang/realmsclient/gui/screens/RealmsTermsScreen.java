@@ -29,7 +29,7 @@ extends RealmsScreen {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Component TITLE = Component.translatable("mco.terms.title");
     private static final Component TERMS_STATIC_TEXT = Component.translatable("mco.terms.sentence.1");
-    private static final Component TERMS_LINK_TEXT = Component.literal(" ").append(Component.translatable("mco.terms.sentence.2").withStyle(Style.EMPTY.withUnderlined(true)));
+    private static final Component TERMS_LINK_TEXT = CommonComponents.space().append(Component.translatable("mco.terms.sentence.2").withStyle(Style.EMPTY.withUnderlined(true)));
     private final Screen lastScreen;
     private final RealmsMainScreen mainScreen;
     private final RealmsServer realmsServer;
@@ -81,7 +81,7 @@ extends RealmsScreen {
 
     @Override
     public Component getNarrationMessage() {
-        return CommonComponents.joinForNarration(super.getNarrationMessage(), TERMS_STATIC_TEXT).append(" ").append(TERMS_LINK_TEXT);
+        return CommonComponents.joinForNarration(super.getNarrationMessage(), TERMS_STATIC_TEXT).append(CommonComponents.SPACE).append(TERMS_LINK_TEXT);
     }
 
     @Override

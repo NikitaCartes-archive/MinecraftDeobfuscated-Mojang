@@ -118,6 +118,7 @@ extends Overlay {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, o);
         LoadingOverlay.blit(poseStack, n - u, s - t, u, (int)d, -0.0625f, 0.0f, 120, 60, 120, 120);
         LoadingOverlay.blit(poseStack, n, s - t, u, (int)d, 0.0625f, 60.0f, 120, 60, 120, 120);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
         int v = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.8325);

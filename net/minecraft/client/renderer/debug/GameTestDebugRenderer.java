@@ -41,7 +41,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         RenderSystem.setShaderColor(0.0f, 1.0f, 0.0f, 0.75f);
-        RenderSystem.disableTexture();
         DebugRenderer.renderFilledBox(blockPos, 0.02f, marker.getR(), marker.getG(), marker.getB(), marker.getA());
         if (!marker.text.isEmpty()) {
             double d = (double)blockPos.getX() + 0.5;
@@ -49,7 +48,7 @@ implements DebugRenderer.SimpleDebugRenderer {
             double f = (double)blockPos.getZ() + 0.5;
             DebugRenderer.renderFloatingText(marker.text, d, e, f, -1, 0.01f, true, 0.0f, true);
         }
-        RenderSystem.enableTexture();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();
     }
 

@@ -56,7 +56,7 @@ import org.slf4j.Logger;
 public class ServerStatusPinger {
     static final Splitter SPLITTER = Splitter.on('\u0000').limit(6);
     static final Logger LOGGER = LogUtils.getLogger();
-    private static final Component CANT_CONNECT_MESSAGE = Component.translatable("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
+    private static final Component CANT_CONNECT_MESSAGE = Component.translatable("multiplayer.status.cannot_connect").withStyle(style -> style.withColor(-65536));
     private final List<Connection> connections = Collections.synchronizedList(Lists.newArrayList());
 
     public void pingServer(final ServerData serverData, final Runnable runnable) throws UnknownHostException {
@@ -71,7 +71,7 @@ public class ServerStatusPinger {
         this.connections.add(connection);
         serverData.motd = Component.translatable("multiplayer.status.pinging");
         serverData.ping = -1L;
-        serverData.playerList = null;
+        serverData.playerList = Collections.emptyList();
         connection.setListener(new ClientStatusPacketListener(){
             private boolean success;
             private boolean receivedPing;
@@ -95,6 +95,7 @@ public class ServerStatusPinger {
                 }
                 if (serverStatus.getPlayers() != null) {
                     serverData.status = ServerStatusPinger.formatPlayerCount(serverStatus.getPlayers().getNumPlayers(), serverStatus.getPlayers().getMaxPlayers());
+                    serverData.players = serverStatus.getPlayers();
                     ArrayList<Component> list = Lists.newArrayList();
                     GameProfile[] gameProfiles = serverStatus.getPlayers().getSample();
                     if (gameProfiles != null && gameProfiles.length > 0) {
@@ -143,8 +144,8 @@ public class ServerStatusPinger {
             }
 
             @Override
-            public Connection getConnection() {
-                return connection;
+            public boolean isAcceptingMessages() {
+                return connection.isConnected();
             }
         });
         try {
@@ -218,6 +219,7 @@ public class ServerStatusPinger {
                             serverData.version = Component.literal(string2);
                             serverData.motd = Component.literal(string3);
                             serverData.status = ServerStatusPinger.formatPlayerCount(j, k);
+                            serverData.players = new ServerStatus.Players(k, j);
                         }
                         channelHandlerContext.close();
                     }

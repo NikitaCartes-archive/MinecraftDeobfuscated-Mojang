@@ -132,8 +132,8 @@ extends AgeableListModel<T> {
     @Override
     public void prepareMobModel(T abstractHorse, float f, float g, float h) {
         super.prepareMobModel(abstractHorse, f, g, h);
-        float i = Mth.rotlerp(((AbstractHorse)abstractHorse).yBodyRotO, ((AbstractHorse)abstractHorse).yBodyRot, h);
-        float j = Mth.rotlerp(((AbstractHorse)abstractHorse).yHeadRotO, ((AbstractHorse)abstractHorse).yHeadRot, h);
+        float i = Mth.rotLerp(h, ((AbstractHorse)abstractHorse).yBodyRotO, ((AbstractHorse)abstractHorse).yBodyRot);
+        float j = Mth.rotLerp(h, ((AbstractHorse)abstractHorse).yHeadRotO, ((AbstractHorse)abstractHorse).yHeadRot);
         float k = Mth.lerp(h, ((AbstractHorse)abstractHorse).xRotO, ((Entity)abstractHorse).getXRot());
         float l = j - i;
         float m = k * ((float)Math.PI / 180);

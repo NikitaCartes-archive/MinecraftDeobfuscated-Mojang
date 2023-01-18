@@ -27,6 +27,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
@@ -938,7 +939,7 @@ implements VariantHolder<Type> {
             if (!Fox.this.isFaceplanted()) {
                 Vec3 vec3 = Fox.this.getDeltaMovement();
                 if (vec3.y * vec3.y < (double)0.03f && Fox.this.getXRot() != 0.0f) {
-                    Fox.this.setXRot(Mth.rotlerp(Fox.this.getXRot(), 0.0f, 0.2f));
+                    Fox.this.setXRot(Mth.rotLerp(0.2f, Fox.this.getXRot(), 0.0f));
                 } else {
                     double d = vec3.horizontalDistance();
                     double e = Math.signum(-vec3.y) * Math.acos(d / vec3.length()) * 57.2957763671875;
@@ -1389,7 +1390,7 @@ implements VariantHolder<Type> {
         }
 
         public static Type byBiome(Holder<Biome> holder) {
-            return holder.value().getPrecipitation() == Biome.Precipitation.SNOW ? SNOW : RED;
+            return holder.is(BiomeTags.SPAWNS_SNOW_FOXES) ? SNOW : RED;
         }
 
         static {

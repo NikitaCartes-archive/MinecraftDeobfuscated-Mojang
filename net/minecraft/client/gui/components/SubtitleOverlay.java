@@ -52,10 +52,11 @@ implements SoundEventListener {
         Vec3 vec34 = vec32.cross(vec33);
         int i = 0;
         int j = 0;
+        double d = this.minecraft.options.notificationDisplayTime().get();
         Iterator<Subtitle> iterator = this.subtitles.iterator();
         while (iterator.hasNext()) {
             Subtitle subtitle = iterator.next();
-            if (subtitle.getTime() + 3000L <= Util.getMillis()) {
+            if ((double)subtitle.getTime() + 3000.0 * d <= (double)Util.getMillis()) {
                 iterator.remove();
                 continue;
             }
@@ -66,15 +67,15 @@ implements SoundEventListener {
             int k = 255;
             Component component = subtitle.getText();
             Vec3 vec35 = subtitle.getLocation().subtract(vec3).normalize();
-            double d = -vec34.dot(vec35);
-            double e = -vec32.dot(vec35);
-            boolean bl = e > 0.5;
+            double e = -vec34.dot(vec35);
+            double f = -vec32.dot(vec35);
+            boolean bl = f > 0.5;
             int l = j / 2;
             int m = this.minecraft.font.lineHeight;
             int n = m / 2;
-            float f = 1.0f;
+            float g = 1.0f;
             int o = this.minecraft.font.width(component);
-            int p = Mth.floor(Mth.clampedLerp(255.0f, 75.0f, (float)(Util.getMillis() - subtitle.getTime()) / 3000.0f));
+            int p = Mth.floor(Mth.clampedLerp(255.0f, 75.0f, (float)(Util.getMillis() - subtitle.getTime()) / (float)(3000.0 * d)));
             int q = p << 16 | p << 8 | p;
             poseStack.pushPose();
             poseStack.translate((float)this.minecraft.getWindow().getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.getWindow().getGuiScaledHeight() - 35) - (float)(i * (m + 1)) * 1.0f, 0.0f);
@@ -83,9 +84,9 @@ implements SoundEventListener {
             RenderSystem.enableBlend();
             int r = q + -16777216;
             if (!bl) {
-                if (d > 0.0) {
+                if (e > 0.0) {
                     SubtitleOverlay.drawString(poseStack, this.minecraft.font, ">", l - this.minecraft.font.width(">"), -n, r);
-                } else if (d < 0.0) {
+                } else if (e < 0.0) {
                     SubtitleOverlay.drawString(poseStack, this.minecraft.font, "<", -l, -n, r);
                 }
             }

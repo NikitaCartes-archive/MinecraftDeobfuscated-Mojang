@@ -74,10 +74,10 @@ import net.minecraft.Util;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.CloudStatus;
-import net.minecraft.client.Game;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.HotbarManager;
+import net.minecraft.client.InputType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.MouseHandler;
@@ -96,6 +96,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.font.FontManager;
+import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.BanNoticeScreen;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -301,6 +302,7 @@ implements WindowEventHandler {
     private final HotbarManager hotbarManager;
     public final MouseHandler mouseHandler;
     public final KeyboardHandler keyboardHandler;
+    private InputType lastInputType = InputType.NONE;
     public final File gameDirectory;
     private final String launchedVersion;
     private final String versionType;
@@ -335,7 +337,6 @@ implements WindowEventHandler {
     private final PaintingTextureManager paintingTextures;
     private final MobEffectTextureManager mobEffectTextures;
     private final ToastComponent toast;
-    private final Game game = new Game(this);
     private final Tutorial tutorial;
     private final PlayerSocialManager playerSocialManager;
     private final EntityModelSet entityModels;
@@ -579,6 +580,10 @@ implements WindowEventHandler {
                 }
                 this.setScreen(new TitleScreen(true));
             }, this.multiplayerBan()));
+        } else if (this.options.onboardAccessibility) {
+            this.setScreen(new AccessibilityOnboardingScreen(this.options));
+            this.options.onboardAccessibility = false;
+            this.options.save();
         } else {
             this.setScreen(new TitleScreen(true));
         }
@@ -1004,7 +1009,6 @@ implements WindowEventHandler {
         this.mainRenderTarget.bindWrite(true);
         FogRenderer.setupNoFog();
         this.profiler.push("display");
-        RenderSystem.enableTexture();
         RenderSystem.enableCull();
         this.profiler.pop();
         if (!this.noRender) {
@@ -1281,7 +1285,6 @@ implements WindowEventHandler {
         poseStack2.translate(0.0f, 0.0f, -2000.0f);
         RenderSystem.applyModelViewMatrix();
         RenderSystem.lineWidth(1.0f);
-        RenderSystem.disableTexture();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         int i = 160;
@@ -1329,7 +1332,6 @@ implements WindowEventHandler {
         }
         DecimalFormat decimalFormat = new DecimalFormat("##0.00");
         decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
-        RenderSystem.enableTexture();
         String string = ProfileResults.demanglePath(resultField.name);
         Object string2 = "";
         if (!"unspecified".equals(string)) {
@@ -1831,7 +1833,6 @@ implements WindowEventHandler {
             this.downloadedPackSource.clearServerPack();
             this.gui.onDisconnected();
             this.isLocalServer = false;
-            this.game.onLeaveGameSession();
         }
         this.level = null;
         this.updateLevelInEngines(null);
@@ -2064,7 +2065,7 @@ implements WindowEventHandler {
             });
         }
         if (languageManager != null) {
-            systemReport.setDetail("Current Language", () -> languageManager.getSelected().toString());
+            systemReport.setDetail("Current Language", () -> languageManager.getSelected());
         }
         systemReport.setDetail("CPU", GlUtil::getCpuInfo);
         return systemReport;
@@ -2437,10 +2438,6 @@ implements WindowEventHandler {
         return this.profiler;
     }
 
-    public Game getGame() {
-        return this.game;
-    }
-
     @Nullable
     public StoringChunkProgressListener getProgressListener() {
         return this.progressListener.get();
@@ -2494,6 +2491,14 @@ implements WindowEventHandler {
 
     public SignatureValidator getServiceSignatureValidator() {
         return this.serviceSignatureValidator;
+    }
+
+    public InputType getLastInputType() {
+        return this.lastInputType;
+    }
+
+    public void setLastInputType(InputType inputType) {
+        this.lastInputType = inputType;
     }
 
     public GameNarrator getNarrator() {

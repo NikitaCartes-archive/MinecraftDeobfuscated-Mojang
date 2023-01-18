@@ -43,14 +43,14 @@ implements AutoCloseable {
 
     public CompoundTag upgradeChunkTag(ResourceKey<Level> resourceKey, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag, Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional) {
         int i = ChunkStorage.getVersion(compoundTag);
-        if (i < 1493 && (compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, i, 1493)).getCompound("Level").getBoolean("hasLegacyStructureData")) {
+        if (i < 1493 && (compoundTag = DataFixTypes.CHUNK.update(this.fixerUpper, compoundTag, i, 1493)).getCompound("Level").getBoolean("hasLegacyStructureData")) {
             LegacyStructureDataHandler legacyStructureDataHandler = this.getLegacyStructureHandler(resourceKey, supplier);
             compoundTag = legacyStructureDataHandler.updateFromLegacy(compoundTag);
         }
         ChunkStorage.injectDatafixingContext(compoundTag, resourceKey, optional);
-        compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, Math.max(1493, i));
-        if (i < SharedConstants.getCurrentVersion().getWorldVersion()) {
-            compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+        compoundTag = DataFixTypes.CHUNK.updateToCurrentVersion(this.fixerUpper, compoundTag, Math.max(1493, i));
+        if (i < SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
+            NbtUtils.addCurrentDataVersion(compoundTag);
         }
         compoundTag.remove("__context");
         return compoundTag;
@@ -81,7 +81,7 @@ implements AutoCloseable {
     }
 
     public static int getVersion(CompoundTag compoundTag) {
-        return compoundTag.contains("DataVersion", 99) ? compoundTag.getInt("DataVersion") : -1;
+        return NbtUtils.getDataVersion(compoundTag, -1);
     }
 
     public CompletableFuture<Optional<CompoundTag>> read(ChunkPos chunkPos) {

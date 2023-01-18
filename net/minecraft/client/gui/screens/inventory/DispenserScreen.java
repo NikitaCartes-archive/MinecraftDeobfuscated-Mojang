@@ -39,7 +39,6 @@ extends AbstractContainerScreen<DispenserMenu> {
     @Override
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, CONTAINER_LOCATION);
         int k = (this.width - this.imageWidth) / 2;
         int l = (this.height - this.imageHeight) / 2;

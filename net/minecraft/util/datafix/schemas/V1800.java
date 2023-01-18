@@ -18,14 +18,10 @@ extends NamespacedSchema {
         super(i, schema);
     }
 
-    protected static void registerMob(Schema schema, Map<String, Supplier<TypeTemplate>> map, String string) {
-        schema.register(map, string, () -> V100.equipment(schema));
-    }
-
     @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-        V1800.registerMob(schema, map, "minecraft:panda");
+        schema.register(map, "minecraft:panda", () -> V100.equipment(schema));
         schema.register(map, "minecraft:pillager", (String string) -> DSL.optionalFields("Inventory", DSL.list(References.ITEM_STACK.in(schema)), V100.equipment(schema)));
         return map;
     }

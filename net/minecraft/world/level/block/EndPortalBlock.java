@@ -44,7 +44,7 @@ extends BaseEntityBlock {
 
     @Override
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-        if (level instanceof ServerLevel && !entity.isPassenger() && !entity.isVehicle() && entity.canChangeDimensions() && Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ())), blockState.getShape(level, blockPos), BooleanOp.AND)) {
+        if (level instanceof ServerLevel && entity.canChangeDimensions() && Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ())), blockState.getShape(level, blockPos), BooleanOp.AND)) {
             ResourceKey<Level> resourceKey = level.dimension() == Level.END ? Level.OVERWORLD : Level.END;
             ServerLevel serverLevel = ((ServerLevel)level).getServer().getLevel(resourceKey);
             if (serverLevel == null) {

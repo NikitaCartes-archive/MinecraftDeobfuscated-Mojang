@@ -3,23 +3,23 @@
  */
 package net.minecraft;
 
-import com.mojang.bridge.game.GameVersion;
+import java.util.Date;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.storage.DataVersion;
 
-public interface WorldVersion
-extends GameVersion {
-    @Override
-    @Deprecated
-    default public int getWorldVersion() {
-        return this.getDataVersion().getVersion();
-    }
-
-    @Override
-    @Deprecated
-    default public String getSeriesId() {
-        return this.getDataVersion().getSeries();
-    }
-
+public interface WorldVersion {
     public DataVersion getDataVersion();
+
+    public String getId();
+
+    public String getName();
+
+    public int getProtocolVersion();
+
+    public int getPackVersion(PackType var1);
+
+    public Date getBuildTime();
+
+    public boolean isStable();
 }
 

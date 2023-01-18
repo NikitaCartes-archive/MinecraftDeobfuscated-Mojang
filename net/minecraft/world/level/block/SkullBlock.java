@@ -48,7 +48,7 @@ extends AbstractSkullBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return (BlockState)this.defaultBlockState().setValue(ROTATION, RotationSegment.convertToSegment(blockPlaceContext.getRotation() + 180.0f));
+        return (BlockState)this.defaultBlockState().setValue(ROTATION, RotationSegment.convertToSegment(blockPlaceContext.getRotation()));
     }
 
     @Override

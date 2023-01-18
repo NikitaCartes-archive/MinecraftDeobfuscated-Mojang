@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LavaSlimeModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.core.BlockPos;
@@ -32,6 +33,12 @@ extends MobRenderer<MagmaCube, LavaSlimeModel<MagmaCube>> {
     @Override
     public ResourceLocation getTextureLocation(MagmaCube magmaCube) {
         return MAGMACUBE_LOCATION;
+    }
+
+    @Override
+    public void render(MagmaCube magmaCube, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        this.shadowRadius = 0.25f * (float)magmaCube.getSize();
+        super.render(magmaCube, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

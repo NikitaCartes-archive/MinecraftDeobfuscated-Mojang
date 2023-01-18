@@ -145,7 +145,6 @@ implements ClientAdvancements.Listener {
     }
 
     public void renderWindow(PoseStack poseStack, int i, int j) {
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableBlend();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, WINDOW_LOCATION);
@@ -165,7 +164,6 @@ implements ClientAdvancements.Listener {
     }
 
     private void renderTooltips(PoseStack poseStack, int i, int j, int k, int l) {
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.selectedTab != null) {
             PoseStack poseStack2 = RenderSystem.getModelViewStack();
             poseStack2.pushPose();

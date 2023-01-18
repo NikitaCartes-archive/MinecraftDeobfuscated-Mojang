@@ -13,9 +13,9 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CenteredStringWidget;
-import net.minecraft.client.gui.components.FrameWidget;
-import net.minecraft.client.gui.components.GridWidget;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.telemetry.TelemetryEventWidget;
@@ -49,31 +49,31 @@ extends Screen {
 
     @Override
     protected void init() {
-        FrameWidget frameWidget = new FrameWidget(0, 0, this.width, this.height);
-        frameWidget.defaultChildLayoutSetting().padding(8);
-        frameWidget.setMinHeight(this.height);
-        GridWidget gridWidget = frameWidget.addChild(new GridWidget(), frameWidget.newChildLayoutSettings().align(0.5f, 0.0f));
-        gridWidget.defaultCellSetting().alignHorizontallyCenter().paddingBottom(8);
-        GridWidget.RowHelper rowHelper = gridWidget.createRowHelper(1);
+        FrameLayout frameLayout = new FrameLayout(0, 0, this.width, this.height);
+        frameLayout.defaultChildLayoutSetting().padding(8);
+        frameLayout.setMinHeight(this.height);
+        GridLayout gridLayout = frameLayout.addChild(new GridLayout(), frameLayout.newChildLayoutSettings().align(0.5f, 0.0f));
+        gridLayout.defaultCellSetting().alignHorizontallyCenter().paddingBottom(8);
+        GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(1);
         rowHelper.addChild(new CenteredStringWidget(this.getTitle(), this.font));
         rowHelper.addChild(MultiLineTextWidget.createCentered(this.width - 16, this.font, DESCRIPTION));
-        GridWidget gridWidget2 = this.twoButtonContainer(Button.builder(BUTTON_GIVE_FEEDBACK, this::openFeedbackLink).build(), Button.builder(BUTTON_SHOW_DATA, this::openDataFolder).build());
-        rowHelper.addChild(gridWidget2);
-        GridWidget gridWidget3 = this.twoButtonContainer(this.createTelemetryButton(), Button.builder(CommonComponents.GUI_DONE, this::openLastScreen).build());
-        frameWidget.addChild(gridWidget3, frameWidget.newChildLayoutSettings().align(0.5f, 1.0f));
-        gridWidget.pack();
-        frameWidget.pack();
-        this.telemetryEventWidget = new TelemetryEventWidget(0, 0, this.width - 40, gridWidget3.getY() - (gridWidget2.getY() + gridWidget2.getHeight()) - 16, this.minecraft.font);
+        GridLayout gridLayout2 = this.twoButtonContainer(Button.builder(BUTTON_GIVE_FEEDBACK, this::openFeedbackLink).build(), Button.builder(BUTTON_SHOW_DATA, this::openDataFolder).build());
+        rowHelper.addChild(gridLayout2);
+        GridLayout gridLayout3 = this.twoButtonContainer(this.createTelemetryButton(), Button.builder(CommonComponents.GUI_DONE, this::openLastScreen).build());
+        frameLayout.addChild(gridLayout3, frameLayout.newChildLayoutSettings().align(0.5f, 1.0f));
+        frameLayout.arrangeElements();
+        this.telemetryEventWidget = new TelemetryEventWidget(0, 0, this.width - 40, gridLayout3.getY() - (gridLayout2.getY() + gridLayout2.getHeight()) - 16, this.minecraft.font);
         this.telemetryEventWidget.setScrollAmount(this.savedScroll);
         this.telemetryEventWidget.setOnScrolledListener(d -> {
             this.savedScroll = d;
         });
         this.setInitialFocus(this.telemetryEventWidget);
         rowHelper.addChild(this.telemetryEventWidget);
-        gridWidget.pack();
-        frameWidget.pack();
-        FrameWidget.alignInRectangle(frameWidget, 0, 0, this.width, this.height, 0.5f, 0.0f);
-        this.addRenderableWidget(frameWidget);
+        frameLayout.arrangeElements();
+        FrameLayout.alignInRectangle(frameLayout, 0, 0, this.width, this.height, 0.5f, 0.0f);
+        frameLayout.visitWidgets(guiEventListener -> {
+            AbstractWidget cfr_ignored_0 = (AbstractWidget)this.addRenderableWidget(guiEventListener);
+        });
     }
 
     private AbstractWidget createTelemetryButton() {
@@ -107,17 +107,16 @@ extends Screen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(poseStack);
         super.render(poseStack, i, j, f);
     }
 
-    private GridWidget twoButtonContainer(AbstractWidget abstractWidget, AbstractWidget abstractWidget2) {
-        GridWidget gridWidget = new GridWidget();
-        gridWidget.defaultCellSetting().alignHorizontallyCenter().paddingHorizontal(4);
-        gridWidget.addChild(abstractWidget, 0, 0);
-        gridWidget.addChild(abstractWidget2, 0, 1);
-        gridWidget.pack();
-        return gridWidget;
+    private GridLayout twoButtonContainer(AbstractWidget abstractWidget, AbstractWidget abstractWidget2) {
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.defaultCellSetting().alignHorizontallyCenter().paddingHorizontal(4);
+        gridLayout.addChild(abstractWidget, 0, 0);
+        gridLayout.addChild(abstractWidget2, 0, 1);
+        return gridLayout;
     }
 }
 

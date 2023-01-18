@@ -147,19 +147,13 @@ extends RealmsScreen {
         RenderSystem.setShaderTexture(0, resourceLocation);
         if (bl) {
             RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);
-        } else {
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         }
         GuiComponent.blit(poseStack, i + 2, j + 14, 0.0f, 0.0f, 56, 56, 56, 56);
         RenderSystem.setShaderTexture(0, SLOT_FRAME_LOCATION);
-        if (bl) {
-            RenderSystem.setShaderColor(0.56f, 0.56f, 0.56f, 1.0f);
-        } else {
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        }
         GuiComponent.blit(poseStack, i, j + 12, 0.0f, 0.0f, 60, 60, 60, 60);
         int k = bl ? 0xA0A0A0 : 0xFFFFFF;
         RealmsResetWorldScreen.drawCenteredString(poseStack, this.font, component, i + 30, j, k);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     private void startTask(LongRunningTask longRunningTask) {

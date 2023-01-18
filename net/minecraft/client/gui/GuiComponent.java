@@ -65,37 +65,39 @@ public abstract class GuiComponent {
     }
 
     public static void fill(PoseStack poseStack, int i, int j, int k, int l, int m) {
-        GuiComponent.innerFill(poseStack.last().pose(), i, j, k, l, m);
+        GuiComponent.fill(poseStack, i, j, k, l, 0, m);
     }
 
-    private static void innerFill(Matrix4f matrix4f, int i, int j, int k, int l, int m) {
-        int n;
+    public static void fill(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+        GuiComponent.innerFill(poseStack.last().pose(), i, j, k, l, m, n);
+    }
+
+    private static void innerFill(Matrix4f matrix4f, int i, int j, int k, int l, int m, int n) {
+        int o;
         if (i < k) {
-            n = i;
+            o = i;
             i = k;
-            k = n;
+            k = o;
         }
         if (j < l) {
-            n = j;
+            o = j;
             j = l;
-            l = n;
+            l = o;
         }
-        float f = (float)(m >> 24 & 0xFF) / 255.0f;
-        float g = (float)(m >> 16 & 0xFF) / 255.0f;
-        float h = (float)(m >> 8 & 0xFF) / 255.0f;
-        float o = (float)(m & 0xFF) / 255.0f;
+        float f = (float)(n >> 24 & 0xFF) / 255.0f;
+        float g = (float)(n >> 16 & 0xFF) / 255.0f;
+        float h = (float)(n >> 8 & 0xFF) / 255.0f;
+        float p = (float)(n & 0xFF) / 255.0f;
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.vertex(matrix4f, i, l, 0.0f).color(g, h, o, f).endVertex();
-        bufferBuilder.vertex(matrix4f, k, l, 0.0f).color(g, h, o, f).endVertex();
-        bufferBuilder.vertex(matrix4f, k, j, 0.0f).color(g, h, o, f).endVertex();
-        bufferBuilder.vertex(matrix4f, i, j, 0.0f).color(g, h, o, f).endVertex();
+        bufferBuilder.vertex(matrix4f, i, l, m).color(g, h, p, f).endVertex();
+        bufferBuilder.vertex(matrix4f, k, l, m).color(g, h, p, f).endVertex();
+        bufferBuilder.vertex(matrix4f, k, j, m).color(g, h, p, f).endVertex();
+        bufferBuilder.vertex(matrix4f, i, j, m).color(g, h, p, f).endVertex();
         BufferUploader.drawWithShader(bufferBuilder.end());
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
@@ -104,7 +106,6 @@ public abstract class GuiComponent {
     }
 
     protected static void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o) {
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -114,7 +115,6 @@ public abstract class GuiComponent {
         GuiComponent.fillGradient(poseStack.last().pose(), bufferBuilder, i, j, k, l, o, m, n);
         tesselator.end();
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
 
     protected static void fillGradient(Matrix4f matrix4f, BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o) {

@@ -221,7 +221,11 @@ implements PowerableMob {
             this.level.playSound(player2, this.getX(), this.getY(), this.getZ(), soundEvent, this.getSoundSource(), 1.0f, this.random.nextFloat() * 0.4f + 0.8f);
             if (!this.level.isClientSide) {
                 this.ignite();
-                itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
+                if (!itemStack.isDamageableItem()) {
+                    itemStack.shrink(1);
+                } else {
+                    itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
+                }
             }
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }

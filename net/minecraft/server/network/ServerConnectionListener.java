@@ -15,6 +15,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.MultithreadEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -37,12 +38,8 @@ import java.util.concurrent.TimeUnit;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.network.Connection;
-import net.minecraft.network.PacketDecoder;
-import net.minecraft.network.PacketEncoder;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.RateKickingConnection;
-import net.minecraft.network.Varint21FrameDecoder;
-import net.minecraft.network.Varint21LengthFieldPrepender;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.PacketFlow;
@@ -95,11 +92,12 @@ public class ServerConnectionListener {
                     } catch (ChannelException channelException) {
                         // empty catch block
                     }
-                    channel.pipeline().addLast("timeout", (ChannelHandler)new ReadTimeoutHandler(30)).addLast("legacy_query", (ChannelHandler)new LegacyQueryHandler(ServerConnectionListener.this)).addLast("splitter", (ChannelHandler)new Varint21FrameDecoder()).addLast("decoder", (ChannelHandler)new PacketDecoder(PacketFlow.SERVERBOUND)).addLast("prepender", (ChannelHandler)new Varint21LengthFieldPrepender()).addLast("encoder", (ChannelHandler)new PacketEncoder(PacketFlow.CLIENTBOUND));
+                    ChannelPipeline channelPipeline = channel.pipeline().addLast("timeout", (ChannelHandler)new ReadTimeoutHandler(30)).addLast("legacy_query", (ChannelHandler)new LegacyQueryHandler(ServerConnectionListener.this));
+                    Connection.configureSerialization(channelPipeline, PacketFlow.SERVERBOUND);
                     int i = ServerConnectionListener.this.server.getRateLimitPacketsPerSecond();
                     Connection connection = i > 0 ? new RateKickingConnection(i) : new Connection(PacketFlow.SERVERBOUND);
                     ServerConnectionListener.this.connections.add(connection);
-                    channel.pipeline().addLast("packet_handler", (ChannelHandler)connection);
+                    channelPipeline.addLast("packet_handler", (ChannelHandler)connection);
                     connection.setListener(new ServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
                 }
             }).group(lazyLoadedValue.get()).localAddress(inetAddress, i)).bind().syncUninterruptibly());
@@ -120,7 +118,8 @@ public class ServerConnectionListener {
                     Connection connection = new Connection(PacketFlow.SERVERBOUND);
                     connection.setListener(new MemoryServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
                     ServerConnectionListener.this.connections.add(connection);
-                    channel.pipeline().addLast("packet_handler", (ChannelHandler)connection);
+                    ChannelPipeline channelPipeline = channel.pipeline();
+                    channelPipeline.addLast("packet_handler", (ChannelHandler)connection);
                 }
             }).group(SERVER_EVENT_GROUP.get()).localAddress(LocalAddress.ANY)).bind().syncUninterruptibly();
             this.channels.add(channelFuture);

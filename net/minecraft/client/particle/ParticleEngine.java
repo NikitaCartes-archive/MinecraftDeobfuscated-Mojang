@@ -410,7 +410,6 @@ implements PreparableReloadListener {
             Iterable iterable = this.particles.get(particleRenderType);
             if (iterable == null) continue;
             RenderSystem.setShader(GameRenderer::getParticleShader);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferBuilder = tesselator.getBuilder();
             particleRenderType.begin(bufferBuilder, this.textureManager);

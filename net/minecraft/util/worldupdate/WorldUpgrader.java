@@ -130,7 +130,7 @@ public class WorldUpgrader {
                             if (!chunkPos2.equals(chunkPos)) {
                                 LOGGER.warn("Chunk {} has invalid position {}", (Object)chunkPos, (Object)chunkPos2);
                             }
-                            boolean bl4 = bl3 = i < SharedConstants.getCurrentVersion().getWorldVersion();
+                            boolean bl4 = bl3 = i < SharedConstants.getCurrentVersion().getDataVersion().getVersion();
                             if (this.eraseCache) {
                                 bl3 = bl3 || compoundTag2.contains("Heightmaps");
                                 compoundTag2.remove("Heightmaps");

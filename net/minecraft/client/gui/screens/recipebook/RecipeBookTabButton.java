@@ -73,7 +73,6 @@ extends StateSwitchingButton {
         if (this.isStateTriggered) {
             m -= 2;
         }
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.blit(poseStack, m, this.getY(), k, l, this.width, this.height);
         RenderSystem.enableDepthTest();
         this.renderIcon(minecraft.getItemRenderer());

@@ -68,7 +68,7 @@ extends MobRenderer<Guardian, GuardianModel> {
         LivingEntity livingEntity = guardian.getActiveAttackTarget();
         if (livingEntity != null) {
             float h = guardian.getAttackAnimationScale(g);
-            float j = (float)guardian.level.getGameTime() + g;
+            float j = guardian.getClientSideAttackTime() + g;
             float k = j * 0.5f % 1.0f;
             float l = guardian.getEyeHeight();
             poseStack.pushPose();

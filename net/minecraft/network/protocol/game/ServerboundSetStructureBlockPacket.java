@@ -57,9 +57,9 @@ implements Packet<ServerGamePacketListener> {
         this.mode = friendlyByteBuf.readEnum(StructureMode.class);
         this.name = friendlyByteBuf.readUtf();
         int i = 48;
-        this.offset = new BlockPos(Mth.clamp((int)friendlyByteBuf.readByte(), -48, 48), Mth.clamp((int)friendlyByteBuf.readByte(), -48, 48), Mth.clamp((int)friendlyByteBuf.readByte(), -48, 48));
+        this.offset = new BlockPos(Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48));
         int j = 48;
-        this.size = new Vec3i(Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48), Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48), Mth.clamp((int)friendlyByteBuf.readByte(), 0, 48));
+        this.size = new Vec3i(Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48));
         this.mirror = friendlyByteBuf.readEnum(Mirror.class);
         this.rotation = friendlyByteBuf.readEnum(Rotation.class);
         this.data = friendlyByteBuf.readUtf(128);

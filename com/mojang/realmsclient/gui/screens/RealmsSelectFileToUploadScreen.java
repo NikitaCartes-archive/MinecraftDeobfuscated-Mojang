@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.CommonComponents;
@@ -34,7 +33,7 @@ public class RealmsSelectFileToUploadScreen
 extends RealmsScreen {
     private static final Logger LOGGER = LogUtils.getLogger();
     static final Component WORLD_TEXT = Component.translatable("selectWorld.world");
-    static final Component HARDCORE_TEXT = Component.translatable("mco.upload.hardcore").withStyle(ChatFormatting.DARK_RED);
+    static final Component HARDCORE_TEXT = Component.translatable("mco.upload.hardcore").withStyle(style -> style.withColor(-65536));
     static final Component CHEATS_TEXT = Component.translatable("selectWorld.cheats");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat();
     private final RealmsResetWorldScreen lastScreen;
@@ -133,11 +132,6 @@ extends RealmsScreen {
         @Override
         public int getMaxPosition() {
             return RealmsSelectFileToUploadScreen.this.levelList.size() * 36;
-        }
-
-        @Override
-        public boolean isFocused() {
-            return RealmsSelectFileToUploadScreen.this.getFocused() == this;
         }
 
         @Override

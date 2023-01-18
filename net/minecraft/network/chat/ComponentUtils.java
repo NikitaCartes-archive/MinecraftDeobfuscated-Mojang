@@ -144,7 +144,8 @@ public class ComponentUtils {
         if (component != null && (componentContents = component.getContents()) instanceof TranslatableContents) {
             TranslatableContents translatableContents = (TranslatableContents)componentContents;
             String string = translatableContents.getKey();
-            return Language.getInstance().has(string);
+            String string2 = translatableContents.getFallback();
+            return string2 != null || Language.getInstance().has(string);
         }
         return true;
     }

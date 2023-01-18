@@ -9,6 +9,10 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DirectJoinServerScreen;
@@ -31,6 +35,10 @@ import org.slf4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class JoinMultiplayerScreen
 extends Screen {
+    public static final int BUTTON_ROW_WIDTH = 308;
+    public static final int TOP_ROW_BUTTON_WIDTH = 100;
+    public static final int LOWER_ROW_BUTTON_WIDTH = 74;
+    public static final int FOOTER_HEIGHT = 64;
     private static final Logger LOGGER = LogUtils.getLogger();
     private final ServerStatusPinger pinger = new ServerStatusPinger();
     private final Screen lastScreen;
@@ -71,15 +79,15 @@ extends Screen {
             this.serverSelectionList.updateOnlineServers(this.servers);
         }
         this.addWidget(this.serverSelectionList);
-        this.selectButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.select"), button -> this.joinSelectedServer()).bounds(this.width / 2 - 154, this.height - 52, 100, 20).build());
-        this.addRenderableWidget(Button.builder(Component.translatable("selectServer.direct"), button -> {
+        this.selectButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.select"), button -> this.joinSelectedServer()).width(100).build());
+        Button button2 = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.direct"), button -> {
             this.editingServer = new ServerData(I18n.get("selectServer.defaultName", new Object[0]), "", false);
             this.minecraft.setScreen(new DirectJoinServerScreen(this, this::directJoinCallback, this.editingServer));
-        }).bounds(this.width / 2 - 50, this.height - 52, 100, 20).build());
-        this.addRenderableWidget(Button.builder(Component.translatable("selectServer.add"), button -> {
+        }).width(100).build());
+        Button button22 = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.add"), button -> {
             this.editingServer = new ServerData(I18n.get("selectServer.defaultName", new Object[0]), "", false);
             this.minecraft.setScreen(new EditServerScreen(this, this::addServerCallback, this.editingServer));
-        }).bounds(this.width / 2 + 4 + 50, this.height - 52, 100, 20).build());
+        }).width(100).build());
         this.editButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.edit"), button -> {
             ServerSelectionList.Entry entry = (ServerSelectionList.Entry)this.serverSelectionList.getSelected();
             if (entry instanceof ServerSelectionList.OnlineServerEntry) {
@@ -88,7 +96,7 @@ extends Screen {
                 this.editingServer.copyFrom(serverData);
                 this.minecraft.setScreen(new EditServerScreen(this, this::editServerCallback, this.editingServer));
             }
-        }).bounds(this.width / 2 - 154, this.height - 28, 70, 20).build());
+        }).width(74).build());
         this.deleteButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.delete"), button -> {
             String string;
             ServerSelectionList.Entry entry = (ServerSelectionList.Entry)this.serverSelectionList.getSelected();
@@ -99,9 +107,23 @@ extends Screen {
                 Component component4 = CommonComponents.GUI_CANCEL;
                 this.minecraft.setScreen(new ConfirmScreen(this::deleteCallback, component, component2, component3, component4));
             }
-        }).bounds(this.width / 2 - 74, this.height - 28, 70, 20).build());
-        this.addRenderableWidget(Button.builder(Component.translatable("selectServer.refresh"), button -> this.refreshServerList()).bounds(this.width / 2 + 4, this.height - 28, 70, 20).build());
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 4 + 76, this.height - 28, 75, 20).build());
+        }).width(74).build());
+        Button button3 = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.refresh"), button -> this.refreshServerList()).width(74).build());
+        Button button4 = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)).width(74).build());
+        GridLayout gridLayout = new GridLayout();
+        GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(1);
+        LinearLayout linearLayout = rowHelper.addChild(new LinearLayout(308, 20, LinearLayout.Orientation.HORIZONTAL));
+        linearLayout.addChild(this.selectButton);
+        linearLayout.addChild(button2);
+        linearLayout.addChild(button22);
+        rowHelper.addChild(SpacerElement.height(4));
+        LinearLayout linearLayout2 = rowHelper.addChild(new LinearLayout(308, 20, LinearLayout.Orientation.HORIZONTAL));
+        linearLayout2.addChild(this.editButton);
+        linearLayout2.addChild(this.deleteButton);
+        linearLayout2.addChild(button3);
+        linearLayout2.addChild(button4);
+        gridLayout.arrangeElements();
+        FrameLayout.centerInRectangle(gridLayout, 0, this.height - 64, this.width, 64);
         this.onSelectedChange();
     }
 

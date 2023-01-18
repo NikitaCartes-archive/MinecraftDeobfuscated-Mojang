@@ -5,6 +5,10 @@ package net.minecraft.client.gui.components.events;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public interface GuiEventListener {
@@ -41,12 +45,29 @@ public interface GuiEventListener {
         return false;
     }
 
-    default public boolean changeFocus(boolean bl) {
-        return false;
+    @Nullable
+    default public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+        return null;
     }
 
     default public boolean isMouseOver(double d, double e) {
         return false;
+    }
+
+    public void setFocused(boolean var1);
+
+    public boolean isFocused();
+
+    @Nullable
+    default public ComponentPath getCurrentFocusPath() {
+        if (this.isFocused()) {
+            return ComponentPath.leaf(this);
+        }
+        return null;
+    }
+
+    default public ScreenRectangle getRectangle() {
+        return ScreenRectangle.empty();
     }
 }
 

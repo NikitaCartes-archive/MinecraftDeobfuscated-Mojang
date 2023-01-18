@@ -184,7 +184,7 @@ public class BlendingData {
             ds[l] = (d + e + f) / 15.0;
             d = f;
         }
-        l = this.getCellYIndex(Mth.intFloorDiv(k, 8));
+        l = this.getCellYIndex(Mth.floorDiv(k, 8));
         if (l >= 0 && l < ds.length - 1) {
             e = ((double)k + 0.5) % 8.0 / 8.0;
             f = (1.0 - e) / e;

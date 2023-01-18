@@ -90,6 +90,7 @@ public final class ItemTags {
     public static final TagKey<Item> COMPASSES = ItemTags.bind("compasses");
     public static final TagKey<Item> HANGING_SIGNS = ItemTags.bind("hanging_signs");
     public static final TagKey<Item> CREEPER_IGNITERS = ItemTags.bind("creeper_igniters");
+    public static final TagKey<Item> NOTE_BLOCK_TOP_INSTRUMENTS = ItemTags.bind("noteblock_top_instruments");
 
     private ItemTags() {
     }

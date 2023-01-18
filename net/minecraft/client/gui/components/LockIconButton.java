@@ -39,7 +39,6 @@ extends Button {
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, Button.WIDGETS_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         Icon icon = !this.active ? (this.locked ? Icon.LOCKED_DISABLED : Icon.UNLOCKED_DISABLED) : (this.isHoveredOrFocused() ? (this.locked ? Icon.LOCKED_HOVER : Icon.UNLOCKED_HOVER) : (this.locked ? Icon.LOCKED : Icon.UNLOCKED));
         this.blit(poseStack, this.getX(), this.getY(), icon.getX(), icon.getY(), this.width, this.height);
     }

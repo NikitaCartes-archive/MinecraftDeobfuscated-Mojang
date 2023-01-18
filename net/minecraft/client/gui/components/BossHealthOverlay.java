@@ -41,7 +41,6 @@ extends GuiComponent {
         for (LerpingBossEvent lerpingBossEvent : this.events.values()) {
             int k = i / 2 - 91;
             int l = j;
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.setShaderTexture(0, GUI_BARS_LOCATION);
             this.drawBar(poseStack, k, l, lerpingBossEvent);
             Component component = lerpingBossEvent.getName();

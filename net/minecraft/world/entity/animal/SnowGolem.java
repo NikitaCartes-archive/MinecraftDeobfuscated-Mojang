@@ -11,6 +11,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -38,7 +39,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -99,24 +99,21 @@ RangedAttackMob {
     public void aiStep() {
         super.aiStep();
         if (!this.level.isClientSide) {
-            int k;
-            int j;
-            int i = Mth.floor(this.getX());
-            BlockPos blockPos = new BlockPos(i, j = Mth.floor(this.getY()), k = Mth.floor(this.getZ()));
-            Biome biome = this.level.getBiome(blockPos).value();
-            if (biome.shouldSnowGolemBurn(blockPos)) {
+            if (this.level.getBiome(this.blockPosition()).is(BiomeTags.SNOW_GOLEM_MELTS)) {
                 this.hurt(DamageSource.ON_FIRE, 1.0f);
             }
             if (!this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
                 return;
             }
             BlockState blockState = Blocks.SNOW.defaultBlockState();
-            for (int l = 0; l < 4; ++l) {
-                i = Mth.floor(this.getX() + (double)((float)(l % 2 * 2 - 1) * 0.25f));
-                BlockPos blockPos2 = new BlockPos(i, j = Mth.floor(this.getY()), k = Mth.floor(this.getZ() + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25f)));
-                if (!this.level.getBlockState(blockPos2).isAir() || !blockState.canSurvive(this.level, blockPos2)) continue;
-                this.level.setBlockAndUpdate(blockPos2, blockState);
-                this.level.gameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Context.of(this, blockState));
+            for (int i = 0; i < 4; ++i) {
+                int l;
+                int k;
+                int j = Mth.floor(this.getX() + (double)((float)(i % 2 * 2 - 1) * 0.25f));
+                BlockPos blockPos = new BlockPos(j, k = Mth.floor(this.getY()), l = Mth.floor(this.getZ() + (double)((float)(i / 2 % 2 * 2 - 1) * 0.25f)));
+                if (!this.level.getBlockState(blockPos).isAir() || !blockState.canSurvive(this.level, blockPos)) continue;
+                this.level.setBlockAndUpdate(blockPos, blockState);
+                this.level.gameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(this, blockState));
             }
         }
     }

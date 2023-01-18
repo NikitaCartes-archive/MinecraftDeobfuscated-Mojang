@@ -198,7 +198,6 @@ extends GuiComponent {
         int o = this.width - n;
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableBlend();
         int p = j + this.y;
         int q = bl ? i + this.x - this.width + 26 + 6 : i + this.x;

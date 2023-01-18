@@ -15,6 +15,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -34,6 +35,7 @@ import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
+import net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
@@ -121,6 +123,8 @@ extends PacketListener {
     public void handleAddPlayer(ClientboundAddPlayerPacket var1);
 
     public void handleAnimate(ClientboundAnimatePacket var1);
+
+    public void handleHurtAnimation(ClientboundHurtAnimationPacket var1);
 
     public void handleAwardStats(ClientboundAwardStatsPacket var1);
 
@@ -321,5 +325,7 @@ extends PacketListener {
     public void handleCustomChatCompletions(ClientboundCustomChatCompletionsPacket var1);
 
     public void handleEnabledFeatures(ClientboundUpdateEnabledFeaturesPacket var1);
+
+    public void handleBundlePacket(ClientboundBundlePacket var1);
 }
 

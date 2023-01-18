@@ -16,14 +16,10 @@ extends NamespacedSchema {
         super(i, schema);
     }
 
-    protected static void registerMob(Schema schema, Map<String, Supplier<TypeTemplate>> map, String string) {
-        schema.register(map, string, () -> V100.equipment(schema));
-    }
-
     @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-        V1904.registerMob(schema, map, "minecraft:cat");
+        schema.register(map, "minecraft:cat", () -> V100.equipment(schema));
         return map;
     }
 }

@@ -94,7 +94,7 @@ extends RealmsScreen {
     static final Component SUBSCRIPTION_RENEW_TEXT = Component.translatable("mco.selectServer.expiredRenew");
     static final Component TRIAL_EXPIRED_TEXT = Component.translatable("mco.selectServer.expiredTrial");
     static final Component SUBSCRIPTION_CREATE_TEXT = Component.translatable("mco.selectServer.expiredSubscribe");
-    static final Component SELECT_MINIGAME_PREFIX = Component.translatable("mco.selectServer.minigame").append(" ");
+    static final Component SELECT_MINIGAME_PREFIX = Component.translatable("mco.selectServer.minigame").append(CommonComponents.SPACE);
     private static final Component POPUP_TEXT = Component.translatable("mco.selectServer.popup");
     private static final Component SERVER_EXPIRED_TOOLTIP = Component.translatable("mco.selectServer.expired");
     private static final Component SERVER_EXPIRES_SOON_TOOLTIP = Component.translatable("mco.selectServer.expires.soon");
@@ -215,14 +215,17 @@ extends RealmsScreen {
             this.minecraft.setConnectedToRealms(false);
         }
         this.showingPopup = false;
-        this.addButtons();
+        this.addTopButtons();
         this.realmSelectionList = new RealmSelectionList();
         if (lastScrollYPosition != -1) {
             this.realmSelectionList.setScrollAmount(lastScrollYPosition);
         }
         this.addWidget(this.realmSelectionList);
         this.realmsSelectionListAdded = true;
-        this.magicalSpecialHackyFocus(this.realmSelectionList);
+        this.setInitialFocus(this.realmSelectionList);
+        this.addMiddleButtons();
+        this.addBottomButtons();
+        this.updateButtonStates(null);
         this.formattedPopup = MultiLineLabel.create(this.font, (FormattedText)POPUP_TEXT, 100);
         RealmsNewsManager realmsNewsManager = this.minecraft.realmsDataFetcher().newsManager;
         this.hasUnreadNews = realmsNewsManager.hasUnreadNews();
@@ -239,22 +242,15 @@ extends RealmsScreen {
         return checkedParentalConsent && hasParentalConsent;
     }
 
-    public void addButtons() {
-        this.leaveButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.leave"), button -> this.leaveClicked(this.getSelectedServer())).bounds(this.width / 2 - 190, this.height - 32, 90, 20).build());
-        this.configureButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.configure"), button -> this.configureClicked(this.getSelectedServer())).bounds(this.width / 2 - 190, this.height - 32, 90, 20).build());
-        this.playButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.play"), button -> this.play(this.getSelectedServer(), this)).bounds(this.width / 2 - 93, this.height - 32, 90, 20).build());
-        this.backButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> {
-            if (!this.justClosedPopup) {
-                this.minecraft.setScreen(this.lastScreen);
-            }
-        }).bounds(this.width / 2 + 4, this.height - 32, 90, 20).build());
-        this.renewButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.expiredRenew"), button -> this.onRenew(this.getSelectedServer())).bounds(this.width / 2 + 100, this.height - 32, 90, 20).build());
+    public void addTopButtons() {
+        this.pendingInvitesButton = this.addRenderableWidget(new PendingInvitesButton());
         this.newsButton = this.addRenderableWidget(new NewsButton());
         this.showPopupButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.purchase"), button -> {
             this.popupOpenedByUser = !this.popupOpenedByUser;
         }).bounds(this.width - 90, 6, 80, 20).build());
-        this.pendingInvitesButton = this.addRenderableWidget(new PendingInvitesButton());
-        this.closeButton = this.addRenderableWidget(new CloseButton());
+    }
+
+    public void addMiddleButtons() {
         this.createTrialButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.trial"), button -> {
             if (!this.trialsAvailable || this.createdTrial) {
                 return;
@@ -263,7 +259,19 @@ extends RealmsScreen {
             this.minecraft.setScreen(this.lastScreen);
         }).bounds(this.width / 2 + 52, this.popupY0() + 137 - 20, 98, 20).build());
         this.buyARealmButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.buy"), button -> Util.getPlatform().openUri("https://aka.ms/BuyJavaRealms")).bounds(this.width / 2 + 52, this.popupY0() + 160 - 20, 98, 20).build());
-        this.updateButtonStates(null);
+        this.closeButton = this.addRenderableWidget(new CloseButton());
+    }
+
+    public void addBottomButtons() {
+        this.configureButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.configure"), button -> this.configureClicked(this.getSelectedServer())).bounds(this.width / 2 - 190, this.height - 32, 90, 20).build());
+        this.leaveButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.leave"), button -> this.leaveClicked(this.getSelectedServer())).bounds(this.width / 2 - 190, this.height - 32, 90, 20).build());
+        this.playButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.play"), button -> this.play(this.getSelectedServer(), this)).bounds(this.width / 2 - 93, this.height - 32, 90, 20).build());
+        this.backButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> {
+            if (!this.justClosedPopup) {
+                this.minecraft.setScreen(this.lastScreen);
+            }
+        }).bounds(this.width / 2 + 4, this.height - 32, 90, 20).build());
+        this.renewButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.expiredRenew"), button -> this.onRenew(this.getSelectedServer())).bounds(this.width / 2 + 100, this.height - 32, 90, 20).build());
     }
 
     void updateButtonStates(@Nullable RealmsServer realmsServer) {
@@ -673,7 +681,6 @@ extends RealmsScreen {
         super.render(poseStack, i, j, f);
         if (this.trialsAvailable && !this.createdTrial && this.shouldShowPopup()) {
             RenderSystem.setShaderTexture(0, TRIAL_ICON_LOCATION);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             int k = 8;
             int l = 8;
             int m = 0;
@@ -687,7 +694,6 @@ extends RealmsScreen {
     private void drawRealmsLogo(PoseStack poseStack, int i, int j) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, LOGO_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.pushPose();
         poseStack.scale(0.5f, 0.5f, 0.5f);
         GuiComponent.blit(poseStack, i * 2, j * 2 - 5, 0.0f, 0.0f, 200, 50, 200, 50);
@@ -739,7 +745,6 @@ extends RealmsScreen {
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 310, 166, 310, 166);
         if (!teaserImages.isEmpty()) {
             RenderSystem.setShaderTexture(0, teaserImages.get(this.carouselIndex));
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, i + 7, j + 7, 0.0f, 0.0f, 195, 152, 195, 152);
             if (this.carouselTick % 95 < 5) {
                 if (!this.hasSwitchedCarouselImage) {
@@ -781,7 +786,6 @@ extends RealmsScreen {
             this.fillGradient(poseStack, k - 2, l + 17, k + 18, l + 18, n, n);
         }
         RenderSystem.setShaderTexture(0, INVITE_ICON_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         boolean bl52 = bl2 && bl;
         float g = bl52 ? 16.0f : 0.0f;
         GuiComponent.blit(poseStack, k, l - 6, g, 0.0f, 15, 25, 31, 25);
@@ -790,7 +794,6 @@ extends RealmsScreen {
             o = (Math.min(m, 6) - 1) * 8;
             p = (int)(Math.max(0.0f, Math.max(Mth.sin((float)(10 + this.animTick) * 0.57f), Mth.cos((float)this.animTick * 0.35f))) * -6.0f);
             RenderSystem.setShaderTexture(0, INVITATION_ICONS_LOCATION);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             float h = bl3 ? 8.0f : 0.0f;
             GuiComponent.blit(poseStack, k + 4, l + 4 + p, o, h, 8, 8, 48, 16);
         }
@@ -846,7 +849,6 @@ extends RealmsScreen {
 
     void drawExpired(PoseStack poseStack, int i, int j, int k, int l) {
         RenderSystem.setShaderTexture(0, EXPIRED_ICON_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
             this.setTooltipForNextRenderPass(SERVER_EXPIRED_TOOLTIP);
@@ -855,7 +857,6 @@ extends RealmsScreen {
 
     void drawExpiring(PoseStack poseStack, int i, int j, int k, int l, int m) {
         RenderSystem.setShaderTexture(0, EXPIRES_SOON_ICON_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.animTick % 20 < 10) {
             GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 20, 28);
         } else {
@@ -874,7 +875,6 @@ extends RealmsScreen {
 
     void drawOpen(PoseStack poseStack, int i, int j, int k, int l) {
         RenderSystem.setShaderTexture(0, ON_ICON_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
             this.setTooltipForNextRenderPass(SERVER_OPEN_TOOLTIP);
@@ -883,7 +883,6 @@ extends RealmsScreen {
 
     void drawClose(PoseStack poseStack, int i, int j, int k, int l) {
         RenderSystem.setShaderTexture(0, OFF_ICON_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
             this.setTooltipForNextRenderPass(SERVER_CLOSED_TOOLTIP);
@@ -896,7 +895,6 @@ extends RealmsScreen {
             bl = true;
         }
         RenderSystem.setShaderTexture(0, LEAVE_ICON_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         float f = bl ? 28.0f : 0.0f;
         GuiComponent.blit(poseStack, i, j, f, 0.0f, 28, 28, 56, 28);
         if (bl) {
@@ -911,7 +909,6 @@ extends RealmsScreen {
             bl = true;
         }
         RenderSystem.setShaderTexture(0, CONFIGURE_LOCATION);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         float f = bl ? 28.0f : 0.0f;
         GuiComponent.blit(poseStack, i, j, f, 0.0f, 28, 28, 56, 28);
         if (bl) {
@@ -926,9 +923,7 @@ extends RealmsScreen {
             bl4 = true;
         }
         RenderSystem.setShaderTexture(0, NEWS_LOCATION);
-        if (bl3) {
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        } else {
+        if (!bl3) {
             RenderSystem.setShaderColor(0.5f, 0.5f, 0.5f, 1.0f);
         }
         boolean bl5 = bl3 && bl2;
@@ -937,17 +932,16 @@ extends RealmsScreen {
         if (bl4 && bl3) {
             this.setTooltipForNextRenderPass(NEWS_TOOLTIP);
         }
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         if (bl && bl3) {
             int m = bl4 ? 0 : (int)(Math.max(0.0f, Math.max(Mth.sin((float)(10 + this.animTick) * 0.57f), Mth.cos((float)this.animTick * 0.35f))) * -6.0f);
             RenderSystem.setShaderTexture(0, INVITATION_ICONS_LOCATION);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, k + 10, l + 2 + m, 40.0f, 0.0f, 8, 8, 48, 16);
         }
     }
 
     private void renderLocal(PoseStack poseStack) {
         String string = "LOCAL!";
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.pushPose();
         poseStack.translate(this.width / 2 - 25, 20.0f, 0.0f);
         poseStack.mulPose(Axis.ZP.rotationDegrees(-20.0f));
@@ -958,7 +952,6 @@ extends RealmsScreen {
 
     private void renderStage(PoseStack poseStack) {
         String string = "STAGE!";
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.pushPose();
         poseStack.translate(this.width / 2 - 25, 20.0f, 0.0f);
         poseStack.mulPose(Axis.ZP.rotationDegrees(-20.0f));
@@ -991,11 +984,6 @@ extends RealmsScreen {
     extends RealmsObjectSelectionList<Entry> {
         public RealmSelectionList() {
             super(RealmsMainScreen.this.width, RealmsMainScreen.this.height, 32, RealmsMainScreen.this.height - 40, 36);
-        }
-
-        @Override
-        public boolean isFocused() {
-            return RealmsMainScreen.this.getFocused() == this;
         }
 
         @Override
@@ -1077,6 +1065,23 @@ extends RealmsScreen {
     }
 
     @Environment(value=EnvType.CLIENT)
+    class PendingInvitesButton
+    extends Button {
+        public PendingInvitesButton() {
+            super(RealmsMainScreen.this.width / 2 + 47, 6, 22, 22, CommonComponents.EMPTY, RealmsMainScreen.this::pendingButtonPress, DEFAULT_NARRATION);
+        }
+
+        public void tick() {
+            this.setMessage(RealmsMainScreen.this.numberOfPendingInvites == 0 ? NO_PENDING_INVITES_TEXT : PENDING_INVITES_TEXT);
+        }
+
+        @Override
+        public void renderButton(PoseStack poseStack, int i, int j, float f) {
+            RealmsMainScreen.this.drawInvitationPendingIcon(poseStack, i, j, this.getX(), this.getY(), this.isHoveredOrFocused(), this.active);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
     class NewsButton
     extends Button {
         public NewsButton() {
@@ -1106,23 +1111,6 @@ extends RealmsScreen {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class PendingInvitesButton
-    extends Button {
-        public PendingInvitesButton() {
-            super(RealmsMainScreen.this.width / 2 + 47, 6, 22, 22, CommonComponents.EMPTY, RealmsMainScreen.this::pendingButtonPress, DEFAULT_NARRATION);
-        }
-
-        public void tick() {
-            this.setMessage(RealmsMainScreen.this.numberOfPendingInvites == 0 ? NO_PENDING_INVITES_TEXT : PENDING_INVITES_TEXT);
-        }
-
-        @Override
-        public void renderButton(PoseStack poseStack, int i, int j, float f) {
-            RealmsMainScreen.this.drawInvitationPendingIcon(poseStack, i, j, this.getX(), this.getY(), this.isHoveredOrFocused(), this.active);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     class CloseButton
     extends Button {
         public CloseButton() {
@@ -1132,7 +1120,6 @@ extends RealmsScreen {
         @Override
         public void renderButton(PoseStack poseStack, int i, int j, float f) {
             RenderSystem.setShaderTexture(0, CROSS_ICON_LOCATION);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             float g = this.isHoveredOrFocused() ? 12.0f : 0.0f;
             CloseButton.blit(poseStack, this.getX(), this.getY(), 0.0f, g, 12, 12, 12, 24);
             if (this.isMouseOver(i, j)) {
@@ -1236,7 +1223,6 @@ extends RealmsScreen {
         private void renderLegacy(RealmsServer realmsServer, PoseStack poseStack, int i, int j, int k, int l) {
             if (realmsServer.state == RealmsServer.State.UNINITIALIZED) {
                 RenderSystem.setShaderTexture(0, WORLDICON_LOCATION);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 GuiComponent.blit(poseStack, i + 10, j + 6, 0.0f, 0.0f, 40, 20, 40, 20);
                 float f = 0.5f + (1.0f + Mth.sin((float)RealmsMainScreen.this.animTick * 0.25f)) * 0.25f;
                 int m = 0xFF000000 | (int)(127.0f * f) << 16 | (int)(255.0f * f) << 8 | (int)(127.0f * f);
@@ -1269,7 +1255,6 @@ extends RealmsScreen {
             if (RealmsMainScreen.this.isSelfOwnedServer(realmsServer) && realmsServer.expired) {
                 Component component2;
                 Component component;
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 RenderSystem.enableBlend();
                 RenderSystem.setShaderTexture(0, BUTTON_LOCATION);
                 RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -1313,10 +1298,7 @@ extends RealmsScreen {
                 }
             }
             RealmsMainScreen.this.font.draw(poseStack, realmsServer.getName(), (float)(i + 2), (float)(j + 1), 0xFFFFFF);
-            RealmsTextureManager.withBoundFace(realmsServer.ownerUUID, () -> {
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-                PlayerFaceRenderer.draw(poseStack, i - 36, j, 32);
-            });
+            RealmsTextureManager.withBoundFace(realmsServer.ownerUUID, () -> PlayerFaceRenderer.draw(poseStack, i - 36, j, 32));
         }
 
         @Override

@@ -48,17 +48,17 @@ extends Item {
         }
         if (level instanceof ServerLevel) {
             ServerLevel serverLevel = (ServerLevel)level;
-            Consumer<ArmorStand> consumer = EntityType.appendCustomEntityStackConfig(armorStand -> {}, serverLevel, itemStack, useOnContext.getPlayer());
-            ArmorStand armorStand2 = EntityType.ARMOR_STAND.create(serverLevel, itemStack.getTag(), consumer, blockPos, MobSpawnType.SPAWN_EGG, true, true);
-            if (armorStand2 == null) {
+            Consumer consumer = EntityType.createDefaultStackConfig(serverLevel, itemStack, useOnContext.getPlayer());
+            ArmorStand armorStand = EntityType.ARMOR_STAND.create(serverLevel, itemStack.getTag(), consumer, blockPos, MobSpawnType.SPAWN_EGG, true, true);
+            if (armorStand == null) {
                 return InteractionResult.FAIL;
             }
             float f = (float)Mth.floor((Mth.wrapDegrees(useOnContext.getRotation() - 180.0f) + 22.5f) / 45.0f) * 45.0f;
-            armorStand2.moveTo(armorStand2.getX(), armorStand2.getY(), armorStand2.getZ(), f, 0.0f);
-            this.randomizePose(armorStand2, level.random);
-            serverLevel.addFreshEntityWithPassengers(armorStand2);
-            level.playSound(null, armorStand2.getX(), armorStand2.getY(), armorStand2.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75f, 0.8f);
-            armorStand2.gameEvent(GameEvent.ENTITY_PLACE, useOnContext.getPlayer());
+            armorStand.moveTo(armorStand.getX(), armorStand.getY(), armorStand.getZ(), f, 0.0f);
+            this.randomizePose(armorStand, level.random);
+            serverLevel.addFreshEntityWithPassengers(armorStand);
+            level.playSound(null, armorStand.getX(), armorStand.getY(), armorStand.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75f, 0.8f);
+            armorStand.gameEvent(GameEvent.ENTITY_PLACE, useOnContext.getPlayer());
         }
         itemStack.shrink(1);
         return InteractionResult.sidedSuccess(level.isClientSide);

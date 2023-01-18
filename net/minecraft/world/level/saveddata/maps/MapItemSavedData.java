@@ -86,7 +86,7 @@ extends SavedData {
         ResourceKey<Level> resourceKey = DimensionType.parseLegacy(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("dimension"))).resultOrPartial(LOGGER::error).orElseThrow(() -> new IllegalArgumentException("Invalid map dimension: " + compoundTag.get("dimension")));
         int i = compoundTag.getInt("xCenter");
         int j = compoundTag.getInt("zCenter");
-        byte b = (byte)Mth.clamp((int)compoundTag.getByte("scale"), 0, 4);
+        byte b = (byte)Mth.clamp(compoundTag.getByte("scale"), 0, 4);
         boolean bl = !compoundTag.contains("trackingPosition", 1) || compoundTag.getBoolean("trackingPosition");
         boolean bl2 = compoundTag.getBoolean("unlimitedTracking");
         boolean bl3 = compoundTag.getBoolean("locked");

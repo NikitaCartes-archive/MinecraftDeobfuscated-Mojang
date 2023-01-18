@@ -202,7 +202,6 @@ public class DebugRenderer {
         poseStack.translate((float)(d - j), (float)(e - k) + 0.07f, (float)(f - l));
         poseStack.mulPoseMatrix(new Matrix4f().rotation(camera.rotation()));
         poseStack.scale(g, -g, g);
-        RenderSystem.enableTexture();
         if (bl2) {
             RenderSystem.disableDepthTest();
         } else {
@@ -215,7 +214,6 @@ public class DebugRenderer {
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         font.drawInBatch(string, m -= h / g, 0.0f, i, false, Transformation.identity().getMatrix(), (MultiBufferSource)bufferSource, bl2, 0, 0xF000F0);
         bufferSource.endBatch();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableDepthTest();
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();

@@ -5,7 +5,6 @@ package net.minecraft.client.gui.screens.packs;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,6 +16,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionModel;
+import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -33,11 +33,11 @@ extends ObjectSelectionList<PackEntry> {
     static final Component INCOMPATIBLE_TITLE = Component.translatable("pack.incompatible");
     static final Component INCOMPATIBLE_CONFIRM_TITLE = Component.translatable("pack.incompatible.confirm.title");
     private final Component title;
-    private final Screen screen;
+    final PackSelectionScreen screen;
 
-    public TransferableSelectionList(Minecraft minecraft, Screen screen, int i, int j, Component component) {
+    public TransferableSelectionList(Minecraft minecraft, PackSelectionScreen packSelectionScreen, int i, int j, Component component) {
         super(minecraft, i, j, 32, j - 55 + 4, 36);
-        this.screen = screen;
+        this.screen = packSelectionScreen;
         this.title = component;
         this.centerListVertically = false;
         Objects.requireNonNull(minecraft.font);
@@ -45,7 +45,7 @@ extends ObjectSelectionList<PackEntry> {
     }
 
     @Override
-    protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
+    protected void renderHeader(PoseStack poseStack, int i, int j) {
         MutableComponent component = Component.empty().append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
         this.minecraft.font.draw(poseStack, component, (float)(i + this.width / 2 - this.minecraft.font.width(component) / 2), (float)Math.min(this.y0 + 3, j), 0xFFFFFF);
     }
@@ -61,8 +61,29 @@ extends ObjectSelectionList<PackEntry> {
     }
 
     @Override
-    protected boolean isFocused() {
-        return this.screen.getFocused() == this;
+    public boolean keyPressed(int i, int j, int k) {
+        if (this.getSelected() != null) {
+            switch (i) {
+                case 32: 
+                case 257: {
+                    ((PackEntry)this.getSelected()).keyboardSelection();
+                    return true;
+                }
+            }
+            if (Screen.hasShiftDown()) {
+                switch (i) {
+                    case 265: {
+                        ((PackEntry)this.getSelected()).keyboardMoveUp();
+                        return true;
+                    }
+                    case 264: {
+                        ((PackEntry)this.getSelected()).keyboardMoveDown();
+                        return true;
+                    }
+                }
+            }
+        }
+        return super.keyPressed(i, j, k);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -79,16 +100,14 @@ extends ObjectSelectionList<PackEntry> {
         private static final String TOO_LONG_NAME_SUFFIX = "...";
         private final TransferableSelectionList parent;
         protected final Minecraft minecraft;
-        protected final Screen screen;
         private final PackSelectionModel.Entry pack;
         private final FormattedCharSequence nameDisplayCache;
         private final MultiLineLabel descriptionDisplayCache;
         private final FormattedCharSequence incompatibleNameDisplayCache;
         private final MultiLineLabel incompatibleDescriptionDisplayCache;
 
-        public PackEntry(Minecraft minecraft, TransferableSelectionList transferableSelectionList, Screen screen, PackSelectionModel.Entry entry) {
+        public PackEntry(Minecraft minecraft, TransferableSelectionList transferableSelectionList, PackSelectionModel.Entry entry) {
             this.minecraft = minecraft;
-            this.screen = screen;
             this.pack = entry;
             this.parent = transferableSelectionList;
             this.nameDisplayCache = PackEntry.cacheName(minecraft, entry.getTitle());
@@ -119,20 +138,17 @@ extends ObjectSelectionList<PackEntry> {
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             PackCompatibility packCompatibility = this.pack.getCompatibility();
             if (!packCompatibility.isCompatible()) {
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
             }
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, this.pack.getIconTexture());
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
             FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
             MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
-            if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get().booleanValue() || bl)) {
+            if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get().booleanValue() || bl || this.parent.getSelected() == this && this.parent.isFocused())) {
                 RenderSystem.setShaderTexture(0, ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 int p = n - k;
                 int q = o - j;
                 if (!this.pack.getCompatibility().isCompatible()) {
@@ -173,8 +189,34 @@ extends ObjectSelectionList<PackEntry> {
             multiLineLabel.renderLeftAligned(poseStack, k + 32 + 2, j + 12, 10, 0x808080);
         }
 
+        public String getPackId() {
+            return this.pack.getId();
+        }
+
         private boolean showHoverOverlay() {
             return !this.pack.isFixedPosition() || !this.pack.isRequired();
+        }
+
+        public void keyboardSelection() {
+            if (this.pack.canSelect() && this.pack.getCompatibility().isCompatible()) {
+                this.pack.select();
+                this.parent.screen.updateFocus(this.pack, this.parent);
+            } else if (this.pack.canUnselect()) {
+                this.pack.unselect();
+                this.parent.screen.updateFocus(this.pack, this.parent);
+            }
+        }
+
+        public void keyboardMoveUp() {
+            if (this.pack.canMoveUp()) {
+                this.pack.moveUp();
+            }
+        }
+
+        public void keyboardMoveDown() {
+            if (this.pack.canMoveDown()) {
+                this.pack.moveDown();
+            }
         }
 
         @Override
@@ -182,6 +224,7 @@ extends ObjectSelectionList<PackEntry> {
             double f = d - (double)this.parent.getRowLeft();
             double g = e - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
             if (this.showHoverOverlay() && f <= 32.0) {
+                this.parent.screen.clearSelected();
                 if (this.pack.canSelect()) {
                     PackCompatibility packCompatibility = this.pack.getCompatibility();
                     if (packCompatibility.isCompatible()) {
@@ -189,7 +232,7 @@ extends ObjectSelectionList<PackEntry> {
                     } else {
                         Component component = packCompatibility.getConfirmation();
                         this.minecraft.setScreen(new ConfirmScreen(bl -> {
-                            this.minecraft.setScreen(this.screen);
+                            this.minecraft.setScreen(this.parent.screen);
                             if (bl) {
                                 this.pack.select();
                             }

@@ -22,6 +22,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.reporting.ChatSelectionLogFiller;
 import net.minecraft.client.multiplayer.chat.ChatTrustLevel;
@@ -204,15 +205,18 @@ extends Screen {
         }
 
         @Override
-        protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-            if (!this.moveSelectableSelection(selectionDirection) && selectionDirection == AbstractSelectionList.SelectionDirection.UP) {
-                ChatSelectionScreen.this.onReachedScrollTop();
-                this.moveSelectableSelection(selectionDirection);
-            }
+        @Nullable
+        protected Entry nextEntry(ScreenDirection screenDirection) {
+            return this.nextEntry(screenDirection, Entry::canSelect);
         }
 
-        private boolean moveSelectableSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-            return this.moveSelection(selectionDirection, Entry::canSelect);
+        @Override
+        public void setSelected(@Nullable Entry entry) {
+            super.setSelected(entry);
+            Entry entry2 = this.nextEntry(ScreenDirection.UP);
+            if (entry2 == null) {
+                ChatSelectionScreen.this.onReachedScrollTop();
+            }
         }
 
         @Override
@@ -221,7 +225,6 @@ extends Screen {
             if (entry != null && entry.keyPressed(i, j, k)) {
                 return true;
             }
-            this.setFocused(null);
             return super.keyPressed(i, j, k);
         }
 
@@ -230,8 +233,9 @@ extends Screen {
         }
 
         @Override
-        protected boolean isFocused() {
-            return ChatSelectionScreen.this.getFocused() == this;
+        @Nullable
+        protected /* synthetic */ AbstractSelectionList.Entry nextEntry(ScreenDirection screenDirection) {
+            return this.nextEntry(screenDirection);
         }
 
         @Environment(value=EnvType.CLIENT)
@@ -322,7 +326,7 @@ extends Screen {
             @Override
             public boolean mouseClicked(double d, double e, int i) {
                 if (i == 0) {
-                    ChatSelectionList.this.setSelected(null);
+                    ChatSelectionList.this.setSelected((Entry)null);
                     return this.toggleReport();
                 }
                 return false;

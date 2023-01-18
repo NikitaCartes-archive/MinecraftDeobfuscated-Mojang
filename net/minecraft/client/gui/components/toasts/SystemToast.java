@@ -70,7 +70,6 @@ implements Toast {
             this.changed = false;
         }
         RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.width();
         if (i == 160 && this.messageLines.size() <= 1) {
             toastComponent.blit(poseStack, 0, 0, 0, 64, i, this.height());
@@ -92,7 +91,7 @@ implements Toast {
                 toastComponent.getMinecraft().font.draw(poseStack, this.messageLines.get(j), 18.0f, (float)(18 + j * 12), -1);
             }
         }
-        return l - this.lastChanged < this.id.displayTime ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;
+        return (double)(l - this.lastChanged) < (double)this.id.displayTime * toastComponent.getNotificationDisplayTimeMultiplier() ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;
     }
 
     private void renderBackgroundRow(PoseStack poseStack, ToastComponent toastComponent, int i, int j, int k, int l) {

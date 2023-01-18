@@ -75,7 +75,6 @@ implements RecipeUpdateListener {
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         int m;
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, this.texture);
         int k = this.leftPos;
         int l = this.topPos;

@@ -22,6 +22,7 @@ import net.minecraft.commands.arguments.coordinates.LocalCoordinates;
 import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
 public class BlockPosArgument
@@ -36,18 +37,27 @@ implements ArgumentType<Coordinates> {
     }
 
     public static BlockPos getLoadedBlockPos(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        BlockPos blockPos = commandContext.getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
-        if (!commandContext.getSource().getLevel().hasChunkAt(blockPos)) {
+        ServerLevel serverLevel = commandContext.getSource().getLevel();
+        return BlockPosArgument.getLoadedBlockPos(commandContext, serverLevel, string);
+    }
+
+    public static BlockPos getLoadedBlockPos(CommandContext<CommandSourceStack> commandContext, ServerLevel serverLevel, String string) throws CommandSyntaxException {
+        BlockPos blockPos = BlockPosArgument.getBlockPos(commandContext, string);
+        if (!serverLevel.hasChunkAt(blockPos)) {
             throw ERROR_NOT_LOADED.create();
         }
-        if (!commandContext.getSource().getLevel().isInWorldBounds(blockPos)) {
+        if (!serverLevel.isInWorldBounds(blockPos)) {
             throw ERROR_OUT_OF_WORLD.create();
         }
         return blockPos;
     }
 
+    public static BlockPos getBlockPos(CommandContext<CommandSourceStack> commandContext, String string) {
+        return commandContext.getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
+    }
+
     public static BlockPos getSpawnablePos(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        BlockPos blockPos = commandContext.getArgument(string, Coordinates.class).getBlockPos(commandContext.getSource());
+        BlockPos blockPos = BlockPosArgument.getBlockPos(commandContext, string);
         if (!Level.isInSpawnableBounds(blockPos)) {
             throw ERROR_OUT_OF_BOUNDS.create();
         }

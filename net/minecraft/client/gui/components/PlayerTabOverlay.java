@@ -21,10 +21,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -79,7 +79,15 @@ extends GuiComponent {
         if (this.visible != bl) {
             this.healthStates.clear();
             this.visible = bl;
+            if (bl) {
+                MutableComponent component = ComponentUtils.formatList(this.getPlayerInfos(), Component.literal(", "), this::getNameForDisplay);
+                this.minecraft.getNarrator().sayNow(Component.translatable("multiplayer.player.list.narration", component));
+            }
         }
+    }
+
+    private List<PlayerInfo> getPlayerInfos() {
+        return this.minecraft.player.connection.getListedOnlinePlayers().stream().sorted(PLAYER_COMPARATOR).limit(80L).toList();
     }
 
     public void render(PoseStack poseStack, int i, Scoreboard scoreboard, @Nullable Objective objective) {
@@ -88,8 +96,7 @@ extends GuiComponent {
         boolean bl;
         int m;
         int l;
-        ClientPacketListener clientPacketListener = this.minecraft.player.connection;
-        List<PlayerInfo> list = clientPacketListener.getListedOnlinePlayers().stream().sorted(PLAYER_COMPARATOR).limit(80L).toList();
+        List<PlayerInfo> list = this.getPlayerInfos();
         int j = 0;
         int k = 0;
         for (PlayerInfo playerInfo2 : list) {
@@ -147,7 +154,6 @@ extends GuiComponent {
             int x = q + t * p + t * 5;
             int y = r + w * 9;
             PlayerTabOverlay.fill(poseStack, x, y, x + p, y + 8, n2);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             if (v >= list.size()) continue;
@@ -178,7 +184,6 @@ extends GuiComponent {
     }
 
     protected void renderPingIcon(PoseStack poseStack, int i, int j, int k, PlayerInfo playerInfo) {
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
         boolean l = false;
         int m = playerInfo.getLatency() < 0 ? 5 : (playerInfo.getLatency() < 150 ? 0 : (playerInfo.getLatency() < 300 ? 1 : (playerInfo.getLatency() < 600 ? 2 : (playerInfo.getLatency() < 1000 ? 3 : 4))));

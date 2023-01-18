@@ -33,7 +33,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -193,19 +192,9 @@ extends ObjectSelectionList<Entry> {
     }
 
     @Override
-    protected boolean isFocused() {
-        return this.screen.getFocused() == this;
-    }
-
-    @Override
     public void setSelected(@Nullable Entry entry) {
         super.setSelected(entry);
         this.screen.updateButtonStatus(entry != null && entry.isSelectable());
-    }
-
-    @Override
-    protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-        this.moveSelection(selectionDirection, Entry::isSelectable);
     }
 
     public Optional<WorldListEntry> getSelectedOpt() {
@@ -316,7 +305,6 @@ extends ObjectSelectionList<Entry> {
             this.minecraft.font.draw(poseStack, string2, (float)(k + 32 + 3), (float)(j + this.minecraft.font.lineHeight + 3), 0x808080);
             this.minecraft.font.draw(poseStack, component, (float)(k + 32 + 3), (float)(j + this.minecraft.font.lineHeight + this.minecraft.font.lineHeight + 3), 0x808080);
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.setShaderTexture(0, this.icon != null ? this.iconLocation : ICON_MISSING);
             RenderSystem.enableBlend();
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
@@ -326,7 +314,6 @@ extends ObjectSelectionList<Entry> {
                 RenderSystem.setShaderTexture(0, ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 int p = n - k;
                 boolean bl2 = p < 32;
                 int n2 = q = bl2 ? 32 : 0;
@@ -375,7 +362,7 @@ extends ObjectSelectionList<Entry> {
                 return true;
             }
             this.lastClickTime = Util.getMillis();
-            return false;
+            return true;
         }
 
         public void joinWorld() {

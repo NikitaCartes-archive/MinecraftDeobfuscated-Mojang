@@ -13,16 +13,20 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class KeyBindsList
@@ -78,8 +82,9 @@ extends ContainerObjectSelectionList<Entry> {
         }
 
         @Override
-        public boolean changeFocus(boolean bl) {
-            return false;
+        @Nullable
+        public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+            return null;
         }
 
         @Override
@@ -101,6 +106,10 @@ extends ContainerObjectSelectionList<Entry> {
                     narrationElementOutput.add(NarratedElementType.TITLE, CategoryEntry.this.name);
                 }
             });
+        }
+
+        @Override
+        void onMappingChanged() {
         }
     }
 
@@ -126,7 +135,9 @@ extends ContainerObjectSelectionList<Entry> {
             this.resetButton = Button.builder(Component.translatable("controls.reset"), button -> {
                 ((KeyBindsList)KeyBindsList.this).minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
                 KeyMapping.resetMapping();
+                this.onMappingChanged();
             }).bounds(0, 0, 50, 20).createNarration(supplier -> Component.translatable("narrator.controls.reset", component)).build();
+            this.onMappingChanged();
         }
 
         @Override
@@ -135,7 +146,6 @@ extends ContainerObjectSelectionList<Entry> {
             ((KeyBindsList)KeyBindsList.this).minecraft.font.draw(poseStack, this.name, (float)(k + 90 - KeyBindsList.this.maxNameWidth), (float)(j + m / 2 - ((KeyBindsList)KeyBindsList.this).minecraft.font.lineHeight / 2), 0xFFFFFF);
             this.resetButton.setX(k + 190);
             this.resetButton.setY(j);
-            this.resetButton.active = !this.key.isDefault();
             this.resetButton.render(poseStack, n, o, f);
             this.changeButton.setX(k + 105);
             this.changeButton.setY(j);
@@ -149,9 +159,14 @@ extends ContainerObjectSelectionList<Entry> {
                 }
             }
             if (bl2) {
-                this.changeButton.setMessage(Component.literal("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.YELLOW)).append(" <").withStyle(ChatFormatting.YELLOW));
+                this.changeButton.setMessage(Component.literal("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.WHITE, ChatFormatting.UNDERLINE)).append(" <").withStyle(ChatFormatting.YELLOW));
             } else if (bl3) {
-                this.changeButton.setMessage(this.changeButton.getMessage().copy().withStyle(ChatFormatting.RED));
+                this.changeButton.setMessage(Component.literal("[ ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.WHITE)).append(" ]").withStyle(ChatFormatting.RED));
+            }
+            if (bl3) {
+                int p = 3;
+                int q = this.changeButton.getX() - 6;
+                GuiComponent.fill(poseStack, q, j + 2, q + 3, j + m + 2, ChatFormatting.RED.getColor() | 0xFF000000);
             }
             this.changeButton.render(poseStack, n, o, f);
         }
@@ -178,11 +193,17 @@ extends ContainerObjectSelectionList<Entry> {
         public boolean mouseReleased(double d, double e, int i) {
             return this.changeButton.mouseReleased(d, e, i) || this.resetButton.mouseReleased(d, e, i);
         }
+
+        @Override
+        void onMappingChanged() {
+            this.resetButton.active = !this.key.isDefault();
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
     public static abstract class Entry
     extends ContainerObjectSelectionList.Entry<Entry> {
+        abstract void onMappingChanged();
     }
 }
 

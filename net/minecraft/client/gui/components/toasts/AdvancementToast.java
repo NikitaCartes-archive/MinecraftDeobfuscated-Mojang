@@ -22,6 +22,7 @@ import net.minecraft.util.Mth;
 @Environment(value=EnvType.CLIENT)
 public class AdvancementToast
 implements Toast {
+    public static final int DISPLAY_TIME = 5000;
     private final Advancement advancement;
     private boolean playedSound;
 
@@ -33,7 +34,6 @@ implements Toast {
     public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         DisplayInfo displayInfo = this.advancement.getDisplay();
         toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
         if (displayInfo != null) {
@@ -65,7 +65,7 @@ implements Toast {
                 }
             }
             toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(displayInfo.getIcon(), 8, 8);
-            return l >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
+            return (double)l >= 5000.0 * toastComponent.getNotificationDisplayTimeMultiplier() ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
         }
         return Toast.Visibility.HIDE;
     }

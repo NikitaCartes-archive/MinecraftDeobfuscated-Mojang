@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.InputType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,6 +49,7 @@ public class MouseHandler {
         if (l != this.minecraft.getWindow().getWindow()) {
             return;
         }
+        this.minecraft.setLastInputType(InputType.MOUSE);
         boolean bl2 = bl = j == 1;
         if (Minecraft.ON_OSX && i == 0) {
             if (bl) {

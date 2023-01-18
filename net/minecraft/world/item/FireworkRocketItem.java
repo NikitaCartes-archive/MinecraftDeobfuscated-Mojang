@@ -11,6 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ByIdMap;
@@ -85,7 +86,7 @@ extends Item {
             return;
         }
         if (compoundTag.contains(TAG_FLIGHT, 99)) {
-            list.add(Component.translatable("item.minecraft.firework_rocket.flight").append(" ").append(String.valueOf(compoundTag.getByte(TAG_FLIGHT))).withStyle(ChatFormatting.GRAY));
+            list.add(Component.translatable("item.minecraft.firework_rocket.flight").append(CommonComponents.SPACE).append(String.valueOf(compoundTag.getByte(TAG_FLIGHT))).withStyle(ChatFormatting.GRAY));
         }
         if (!(listTag = compoundTag.getList(TAG_EXPLOSIONS, 10)).isEmpty()) {
             for (int i = 0; i < listTag.size(); ++i) {

@@ -6,11 +6,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -400,7 +396,6 @@ extends Screen {
         this.renderBackground(poseStack);
         this.setFocused(null);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, BookViewScreen.BOOK_LOCATION);
         int k = (this.width - 192) / 2;
         int l = 2;
@@ -422,7 +417,7 @@ extends Screen {
             for (LineInfo lineInfo : displayCache.lines) {
                 this.font.draw(poseStack, lineInfo.asComponent, (float)lineInfo.x, (float)lineInfo.y, -16777216);
             }
-            this.renderHighlight(displayCache.selection);
+            this.renderHighlight(poseStack, displayCache.selection);
             this.renderCursor(poseStack, displayCache.cursor, displayCache.cursorAtEnd);
         }
         super.render(poseStack, i, j, f);
@@ -439,28 +434,17 @@ extends Screen {
         }
     }
 
-    private void renderHighlight(Rect2i[] rect2is) {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionShader);
-        RenderSystem.setShaderColor(0.0f, 0.0f, 255.0f, 255.0f);
-        RenderSystem.disableTexture();
+    private void renderHighlight(PoseStack poseStack, Rect2i[] rect2is) {
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
         for (Rect2i rect2i : rect2is) {
             int i = rect2i.getX();
             int j = rect2i.getY();
             int k = i + rect2i.getWidth();
             int l = j + rect2i.getHeight();
-            bufferBuilder.vertex(i, l, 0.0).endVertex();
-            bufferBuilder.vertex(k, l, 0.0).endVertex();
-            bufferBuilder.vertex(k, j, 0.0).endVertex();
-            bufferBuilder.vertex(i, j, 0.0).endVertex();
+            BookEditScreen.fill(poseStack, i, j, k, l, -16776961);
         }
-        tesselator.end();
         RenderSystem.disableColorLogicOp();
-        RenderSystem.enableTexture();
     }
 
     private Pos2i convertScreenToLocal(Pos2i pos2i) {

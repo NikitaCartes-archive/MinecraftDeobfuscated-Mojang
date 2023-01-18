@@ -46,7 +46,6 @@ extends Screen {
     @Override
     public void renderBackground(PoseStack poseStack) {
         super.renderBackground(poseStack);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.setShaderTexture(0, DEMO_BACKGROUND_LOCATION);
         int i = (this.width - 248) / 2;
         int j = (this.height - 166) / 2;

@@ -5,11 +5,7 @@ package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -19,14 +15,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -351,7 +348,7 @@ implements Renderable {
         }
         boolean bl2 = bl = d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);
         if (this.canLoseFocus) {
-            this.setFocus(bl);
+            this.setFocused(bl);
         }
         if (this.isFocused() && bl && i == 0) {
             int j = Mth.floor(d) - this.getX();
@@ -363,10 +360,6 @@ implements Renderable {
             return true;
         }
         return false;
-    }
-
-    public void setFocus(boolean bl) {
-        this.setFocused(bl);
     }
 
     @Override
@@ -422,11 +415,11 @@ implements Renderable {
         }
         if (m != l) {
             int r = n + this.font.width(string.substring(0, m));
-            this.renderHighlight(q, o - 1, r - 1, o + 1 + this.font.lineHeight);
+            this.renderHighlight(poseStack, q, o - 1, r - 1, o + 1 + this.font.lineHeight);
         }
     }
 
-    private void renderHighlight(int i, int j, int k, int l) {
+    private void renderHighlight(PoseStack poseStack, int i, int j, int k, int l) {
         int m;
         if (i < k) {
             m = i;
@@ -444,22 +437,10 @@ implements Renderable {
         if (i > this.getX() + this.width) {
             i = this.getX() + this.width;
         }
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionShader);
-        RenderSystem.setShaderColor(0.0f, 0.0f, 1.0f, 1.0f);
-        RenderSystem.disableTexture();
         RenderSystem.enableColorLogicOp();
         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(i, l, 0.0).endVertex();
-        bufferBuilder.vertex(k, l, 0.0).endVertex();
-        bufferBuilder.vertex(k, j, 0.0).endVertex();
-        bufferBuilder.vertex(i, j, 0.0).endVertex();
-        tesselator.end();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        EditBox.fill(poseStack, i, j, k, l, -16776961);
         RenderSystem.disableColorLogicOp();
-        RenderSystem.enableTexture();
     }
 
     public void setMaxLength(int i) {
@@ -495,11 +476,12 @@ implements Renderable {
     }
 
     @Override
-    public boolean changeFocus(boolean bl) {
+    @Nullable
+    public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
         if (!this.visible || !this.isEditable) {
-            return false;
+            return null;
         }
-        return super.changeFocus(bl);
+        return super.nextFocusPath(focusNavigationEvent);
     }
 
     @Override
@@ -508,7 +490,11 @@ implements Renderable {
     }
 
     @Override
-    protected void onFocusedChanged(boolean bl) {
+    public void setFocused(boolean bl) {
+        if (!this.canLoseFocus && !bl) {
+            return;
+        }
+        super.setFocused(bl);
         if (bl) {
             this.frame = 0;
         }

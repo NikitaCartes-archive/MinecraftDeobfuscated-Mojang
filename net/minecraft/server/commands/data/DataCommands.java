@@ -15,6 +15,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +44,7 @@ public class DataCommands {
     private static final DynamicCommandExceptionType ERROR_GET_NON_EXISTENT = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.get.unknown", object));
     private static final SimpleCommandExceptionType ERROR_MULTIPLE_TAGS = new SimpleCommandExceptionType(Component.translatable("commands.data.get.multiple"));
     private static final DynamicCommandExceptionType ERROR_EXPECTED_OBJECT = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.expected_object", object));
+    private static final DynamicCommandExceptionType ERROR_EXPECTED_VALUE = new DynamicCommandExceptionType(object -> Component.translatable("commands.data.modify.expected_value", object));
     public static final List<Function<String, DataProvider>> ALL_PROVIDERS = ImmutableList.of(EntityDataAccessor.PROVIDER, BlockDataAccessor.PROVIDER, StorageDataAccessor.PROVIDER);
     public static final List<DataProvider> TARGET_PROVIDERS = ALL_PROVIDERS.stream().map(function -> (DataProvider)function.apply("target")).collect(ImmutableList.toImmutableList());
     public static final List<DataProvider> SOURCE_PROVIDERS = ALL_PROVIDERS.stream().map(function -> (DataProvider)function.apply("source")).collect(ImmutableList.toImmutableList());
@@ -80,21 +82,30 @@ public class DataCommands {
         commandDispatcher.register(literalArgumentBuilder);
     }
 
+    private static String getAsText(Tag tag) throws CommandSyntaxException {
+        if (tag.getType().isValue()) {
+            return tag.getAsString();
+        }
+        throw ERROR_EXPECTED_VALUE.create(tag);
+    }
+
+    private static List<Tag> stringifyTagList(List<Tag> list, Function<String, String> function) throws CommandSyntaxException {
+        ArrayList<Tag> list2 = new ArrayList<Tag>(list.size());
+        for (Tag tag : list) {
+            String string = DataCommands.getAsText(tag);
+            list2.add(StringTag.valueOf(function.apply(string)));
+        }
+        return list2;
+    }
+
     private static ArgumentBuilder<CommandSourceStack, ?> decorateModification(BiConsumer<ArgumentBuilder<CommandSourceStack, ?>, DataManipulatorDecorator> biConsumer) {
         LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal("modify");
         for (DataProvider dataProvider : TARGET_PROVIDERS) {
             dataProvider.wrap(literalArgumentBuilder, argumentBuilder -> {
                 RequiredArgumentBuilder<CommandSourceStack, NbtPathArgument.NbtPath> argumentBuilder2 = Commands.argument("targetPath", NbtPathArgument.nbtPath());
                 for (DataProvider dataProvider2 : SOURCE_PROVIDERS) {
-                    biConsumer.accept(argumentBuilder2, dataManipulator -> dataProvider2.wrap(Commands.literal("from"), argumentBuilder -> ((ArgumentBuilder)argumentBuilder.executes(commandContext -> {
-                        List<Tag> list = Collections.singletonList(dataProvider2.access(commandContext).getData());
-                        return DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, list);
-                    })).then(Commands.argument("sourcePath", NbtPathArgument.nbtPath()).executes(commandContext -> {
-                        DataAccessor dataAccessor = dataProvider2.access(commandContext);
-                        NbtPathArgument.NbtPath nbtPath = NbtPathArgument.getPath(commandContext, "sourcePath");
-                        List<Tag> list = nbtPath.get(dataAccessor.getData());
-                        return DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, list);
-                    }))));
+                    biConsumer.accept(argumentBuilder2, dataManipulator -> dataProvider2.wrap(Commands.literal("from"), argumentBuilder -> ((ArgumentBuilder)argumentBuilder.executes(commandContext -> DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, DataCommands.getSingletonSource(commandContext, dataProvider2)))).then(Commands.argument("sourcePath", NbtPathArgument.nbtPath()).executes(commandContext -> DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, DataCommands.resolveSourcePath(commandContext, dataProvider2))))));
+                    biConsumer.accept(argumentBuilder2, dataManipulator -> dataProvider2.wrap(Commands.literal("string"), argumentBuilder -> ((ArgumentBuilder)argumentBuilder.executes(commandContext -> DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, DataCommands.stringifyTagList(DataCommands.getSingletonSource(commandContext, dataProvider2), string -> string)))).then(((RequiredArgumentBuilder)Commands.argument("sourcePath", NbtPathArgument.nbtPath()).executes(commandContext -> DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, DataCommands.stringifyTagList(DataCommands.resolveSourcePath(commandContext, dataProvider2), string -> string)))).then(((RequiredArgumentBuilder)Commands.argument("start", IntegerArgumentType.integer(0)).executes(commandContext -> DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, DataCommands.stringifyTagList(DataCommands.resolveSourcePath(commandContext, dataProvider2), string -> string.substring(IntegerArgumentType.getInteger(commandContext, "start")))))).then(Commands.argument("end", IntegerArgumentType.integer(0)).executes(commandContext -> DataCommands.manipulateData(commandContext, dataProvider, dataManipulator, DataCommands.stringifyTagList(DataCommands.resolveSourcePath(commandContext, dataProvider2), string -> string.substring(IntegerArgumentType.getInteger(commandContext, "start"), IntegerArgumentType.getInteger(commandContext, "end"))))))))));
                 }
                 biConsumer.accept(argumentBuilder2, dataManipulator -> Commands.literal("value").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("value", NbtTagArgument.nbtTag()).executes(commandContext -> {
                     List<Tag> list = Collections.singletonList(NbtTagArgument.getNbtTag(commandContext, "value"));
@@ -104,6 +115,17 @@ public class DataCommands {
             });
         }
         return literalArgumentBuilder;
+    }
+
+    private static List<Tag> getSingletonSource(CommandContext<CommandSourceStack> commandContext, DataProvider dataProvider) throws CommandSyntaxException {
+        DataAccessor dataAccessor = dataProvider.access(commandContext);
+        return Collections.singletonList(dataAccessor.getData());
+    }
+
+    private static List<Tag> resolveSourcePath(CommandContext<CommandSourceStack> commandContext, DataProvider dataProvider) throws CommandSyntaxException {
+        DataAccessor dataAccessor = dataProvider.access(commandContext);
+        NbtPathArgument.NbtPath nbtPath = NbtPathArgument.getPath(commandContext, "sourcePath");
+        return nbtPath.get(dataAccessor.getData());
     }
 
     private static int manipulateData(CommandContext<CommandSourceStack> commandContext, DataProvider dataProvider, DataManipulator dataManipulator, List<Tag> list) throws CommandSyntaxException {

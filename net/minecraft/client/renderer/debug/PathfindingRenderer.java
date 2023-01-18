@@ -66,10 +66,8 @@ implements DebugRenderer.SimpleDebugRenderer {
     public static void renderPath(Path path, float f, boolean bl, boolean bl2, double d, double e, double g) {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.disableTexture();
         RenderSystem.lineWidth(6.0f);
         PathfindingRenderer.doRenderPath(path, f, bl, bl2, d, e, g);
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 

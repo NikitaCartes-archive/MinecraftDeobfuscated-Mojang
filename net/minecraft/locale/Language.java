@@ -47,8 +47,8 @@ public abstract class Language {
         return new Language(){
 
             @Override
-            public String getOrDefault(String string) {
-                return map.getOrDefault(string, string);
+            public String getOrDefault(String string, String string2) {
+                return map.getOrDefault(string, string2);
             }
 
             @Override
@@ -84,7 +84,11 @@ public abstract class Language {
         instance = language;
     }
 
-    public abstract String getOrDefault(String var1);
+    public String getOrDefault(String string) {
+        return this.getOrDefault(string, string);
+    }
+
+    public abstract String getOrDefault(String var1, String var2);
 
     public abstract boolean has(String var1);
 

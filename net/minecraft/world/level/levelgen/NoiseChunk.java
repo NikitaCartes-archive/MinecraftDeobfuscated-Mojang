@@ -106,8 +106,8 @@ DensityFunction.FunctionContext {
         this.cellWidth = noiseSettings.getCellWidth();
         this.cellHeight = noiseSettings.getCellHeight();
         this.cellCountXZ = i;
-        this.cellCountY = Mth.intFloorDiv(noiseSettings.height(), this.cellHeight);
-        this.cellNoiseMinY = Mth.intFloorDiv(noiseSettings.minY(), this.cellHeight);
+        this.cellCountY = Mth.floorDiv(noiseSettings.height(), this.cellHeight);
+        this.cellNoiseMinY = Mth.floorDiv(noiseSettings.minY(), this.cellHeight);
         this.firstCellX = Math.floorDiv(j, this.cellWidth);
         this.firstCellZ = Math.floorDiv(k, this.cellWidth);
         this.interpolators = Lists.newArrayList();

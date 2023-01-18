@@ -118,7 +118,7 @@ public class CamelAi {
 
         @Override
         protected void start(ServerLevel serverLevel, Camel camel, long l) {
-            if (camel.isPoseSitting()) {
+            if (camel.isCamelSitting()) {
                 camel.standUp();
             } else if (!camel.isPanicking()) {
                 camel.sitDown();

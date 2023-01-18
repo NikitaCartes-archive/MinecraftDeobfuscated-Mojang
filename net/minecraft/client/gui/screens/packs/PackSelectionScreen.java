@@ -29,8 +29,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -134,8 +136,26 @@ extends Screen {
 
     private void updateList(TransferableSelectionList transferableSelectionList, Stream<PackSelectionModel.Entry> stream) {
         transferableSelectionList.children().clear();
+        TransferableSelectionList.PackEntry packEntry = (TransferableSelectionList.PackEntry)transferableSelectionList.getSelected();
+        String string = packEntry == null ? "" : packEntry.getPackId();
         transferableSelectionList.setSelected(null);
-        stream.forEach(entry -> transferableSelectionList.children().add(new TransferableSelectionList.PackEntry(this.minecraft, transferableSelectionList, this, (PackSelectionModel.Entry)entry)));
+        stream.forEach(entry -> {
+            TransferableSelectionList.PackEntry packEntry = new TransferableSelectionList.PackEntry(this.minecraft, transferableSelectionList, (PackSelectionModel.Entry)entry);
+            transferableSelectionList.children().add(packEntry);
+            if (entry.getId().equals(string)) {
+                transferableSelectionList.setSelected(packEntry);
+            }
+        });
+    }
+
+    public void updateFocus(PackSelectionModel.Entry entry, TransferableSelectionList transferableSelectionList) {
+        TransferableSelectionList transferableSelectionList2 = this.selectedPackList == transferableSelectionList ? this.availablePackList : this.selectedPackList;
+        this.changeFocus(ComponentPath.path(transferableSelectionList2.getFirstElement(), new ContainerEventHandler[]{transferableSelectionList2, this}));
+    }
+
+    public void clearSelected() {
+        this.selectedPackList.setSelected(null);
+        this.availablePackList.setSelected(null);
     }
 
     private void reload() {
@@ -147,7 +167,7 @@ extends Screen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(poseStack);
         this.availablePackList.render(poseStack, i, j, f);
         this.selectedPackList.render(poseStack, i, j, f);
         PackSelectionScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);

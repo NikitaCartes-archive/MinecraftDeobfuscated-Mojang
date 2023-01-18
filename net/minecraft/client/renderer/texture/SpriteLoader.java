@@ -117,12 +117,12 @@ public class SpriteLoader {
             return null;
         }
         FrameSize frameSize = animationMetadataSection.calculateFrameSize(nativeImage.getWidth(), nativeImage.getHeight());
-        if (!Mth.isDivisionInteger(nativeImage.getWidth(), frameSize.width()) || !Mth.isDivisionInteger(nativeImage.getHeight(), frameSize.height())) {
-            LOGGER.error("Image {} size {},{} is not multiple of frame size {},{}", resourceLocation, nativeImage.getWidth(), nativeImage.getHeight(), frameSize.width(), frameSize.height());
-            nativeImage.close();
-            return null;
+        if (Mth.isMultipleOf(nativeImage.getWidth(), frameSize.width()) && Mth.isMultipleOf(nativeImage.getHeight(), frameSize.height())) {
+            return new SpriteContents(resourceLocation, frameSize, nativeImage, animationMetadataSection);
         }
-        return new SpriteContents(resourceLocation, frameSize, nativeImage, animationMetadataSection);
+        LOGGER.error("Image {} size {},{} is not multiple of frame size {},{}", resourceLocation, nativeImage.getWidth(), nativeImage.getHeight(), frameSize.width(), frameSize.height());
+        nativeImage.close();
+        return null;
     }
 
     private Map<ResourceLocation, TextureAtlasSprite> getStitchedSprites(Stitcher<SpriteContents> stitcher) {

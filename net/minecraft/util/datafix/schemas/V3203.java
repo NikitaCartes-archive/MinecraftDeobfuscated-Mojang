@@ -8,6 +8,7 @@ import com.mojang.datafixers.types.templates.TypeTemplate;
 import java.util.Map;
 import java.util.function.Supplier;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
+import net.minecraft.util.datafix.schemas.V100;
 
 public class V3203
 extends NamespacedSchema {
@@ -18,7 +19,7 @@ extends NamespacedSchema {
     @Override
     public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
         Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
-        schema.registerSimple(map, "minecraft:camel");
+        schema.register(map, "minecraft:camel", () -> V100.equipment(schema));
         return map;
     }
 }

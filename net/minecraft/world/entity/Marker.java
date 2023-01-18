@@ -45,8 +45,14 @@ extends Entity {
     }
 
     @Override
-    protected void addPassenger(Entity entity) {
+    protected boolean canAddPassenger(Entity entity) {
+        return false;
+    }
+
+    @Override
+    protected boolean addPassenger(Entity entity) {
         entity.stopRiding();
+        return false;
     }
 
     @Override

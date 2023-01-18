@@ -273,15 +273,15 @@ extends EntityRenderer<EnderDragon> {
             float p = -12.0f;
             float q = 1.5f;
             double[] ds = this.entity.getLatencyPos(6, this.a);
-            float r = Mth.rotWrap(this.entity.getLatencyPos(5, this.a)[0] - this.entity.getLatencyPos(10, this.a)[0]);
-            float s = Mth.rotWrap(this.entity.getLatencyPos(5, this.a)[0] + (double)(r / 2.0f));
+            float r = Mth.wrapDegrees((float)(this.entity.getLatencyPos(5, this.a)[0] - this.entity.getLatencyPos(10, this.a)[0]));
+            float s = Mth.wrapDegrees((float)(this.entity.getLatencyPos(5, this.a)[0] + (double)(r / 2.0f)));
             float t = l * ((float)Math.PI * 2);
             for (int u = 0; u < 5; ++u) {
                 double[] es = this.entity.getLatencyPos(5 - u, this.a);
                 v = (float)Math.cos((float)u * 0.45f + t) * 0.15f;
-                this.neck.yRot = Mth.rotWrap(es[0] - ds[0]) * ((float)Math.PI / 180) * 1.5f;
+                this.neck.yRot = Mth.wrapDegrees((float)(es[0] - ds[0])) * ((float)Math.PI / 180) * 1.5f;
                 this.neck.xRot = v + this.entity.getHeadPartYOffset(u, ds, es) * ((float)Math.PI / 180) * 1.5f * 5.0f;
-                this.neck.zRot = -Mth.rotWrap(es[0] - (double)s) * ((float)Math.PI / 180) * 1.5f;
+                this.neck.zRot = -Mth.wrapDegrees((float)(es[0] - (double)s)) * ((float)Math.PI / 180) * 1.5f;
                 this.neck.y = o;
                 this.neck.z = p;
                 this.neck.x = n;
@@ -294,9 +294,9 @@ extends EntityRenderer<EnderDragon> {
             this.head.z = p;
             this.head.x = n;
             double[] fs = this.entity.getLatencyPos(0, this.a);
-            this.head.yRot = Mth.rotWrap(fs[0] - ds[0]) * ((float)Math.PI / 180);
-            this.head.xRot = Mth.rotWrap(this.entity.getHeadPartYOffset(6, ds, fs)) * ((float)Math.PI / 180) * 1.5f * 5.0f;
-            this.head.zRot = -Mth.rotWrap(fs[0] - (double)s) * ((float)Math.PI / 180);
+            this.head.yRot = Mth.wrapDegrees((float)(fs[0] - ds[0])) * ((float)Math.PI / 180);
+            this.head.xRot = Mth.wrapDegrees(this.entity.getHeadPartYOffset(6, ds, fs)) * ((float)Math.PI / 180) * 1.5f * 5.0f;
+            this.head.zRot = -Mth.wrapDegrees((float)(fs[0] - (double)s)) * ((float)Math.PI / 180);
             this.head.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, k);
             poseStack.pushPose();
             poseStack.translate(0.0f, 1.0f, 0.0f);
@@ -324,9 +324,9 @@ extends EntityRenderer<EnderDragon> {
             ds = this.entity.getLatencyPos(11, this.a);
             for (int x = 0; x < 12; ++x) {
                 fs = this.entity.getLatencyPos(12 + x, this.a);
-                this.neck.yRot = (Mth.rotWrap(fs[0] - ds[0]) * 1.5f + 180.0f) * ((float)Math.PI / 180);
+                this.neck.yRot = (Mth.wrapDegrees((float)(fs[0] - ds[0])) * 1.5f + 180.0f) * ((float)Math.PI / 180);
                 this.neck.xRot = (v += Mth.sin((float)x * 0.45f + t) * 0.05f) + (float)(fs[1] - ds[1]) * ((float)Math.PI / 180) * 1.5f * 5.0f;
-                this.neck.zRot = Mth.rotWrap(fs[0] - (double)s) * ((float)Math.PI / 180) * 1.5f;
+                this.neck.zRot = Mth.wrapDegrees((float)(fs[0] - (double)s)) * ((float)Math.PI / 180) * 1.5f;
                 this.neck.y = o;
                 this.neck.z = p;
                 this.neck.x = n;

@@ -26,8 +26,6 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.Monster;
@@ -35,7 +33,6 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -44,8 +41,6 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.PathFinder;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -69,6 +64,7 @@ extends Raider {
         super((EntityType<? extends Raider>)entityType, level);
         this.maxUpStep = 1.0f;
         this.xpReward = 20;
+        this.setPathfindingMalus(BlockPathTypes.LEAVES, 0.0f);
     }
 
     @Override
@@ -118,11 +114,6 @@ extends Raider {
     @Override
     public SoundEvent getCelebrateSound() {
         return SoundEvents.RAVAGER_CELEBRATE;
-    }
-
-    @Override
-    protected PathNavigation createNavigation(Level level) {
-        return new RavagerNavigation(this, level);
     }
 
     @Override
@@ -337,33 +328,6 @@ extends Raider {
         protected double getAttackReachSqr(LivingEntity livingEntity) {
             float f = Ravager.this.getBbWidth() - 0.1f;
             return f * 2.0f * (f * 2.0f) + livingEntity.getBbWidth();
-        }
-    }
-
-    static class RavagerNavigation
-    extends GroundPathNavigation {
-        public RavagerNavigation(Mob mob, Level level) {
-            super(mob, level);
-        }
-
-        @Override
-        protected PathFinder createPathFinder(int i) {
-            this.nodeEvaluator = new RavagerNodeEvaluator();
-            return new PathFinder(this.nodeEvaluator, i);
-        }
-    }
-
-    static class RavagerNodeEvaluator
-    extends WalkNodeEvaluator {
-        RavagerNodeEvaluator() {
-        }
-
-        @Override
-        protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, boolean bl, boolean bl2, BlockPos blockPos, BlockPathTypes blockPathTypes) {
-            if (blockPathTypes == BlockPathTypes.LEAVES) {
-                return BlockPathTypes.OPEN;
-            }
-            return super.evaluateBlockPathType(blockGetter, bl, bl2, blockPos, blockPathTypes);
         }
     }
 }

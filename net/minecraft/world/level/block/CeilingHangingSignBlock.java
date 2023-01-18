@@ -96,7 +96,7 @@ extends SignBlock {
                 bl2 = false;
             }
         }
-        int i = !bl2 ? RotationSegment.convertToSegment(direction) : RotationSegment.convertToSegment(blockPlaceContext.getRotation());
+        int i = !bl2 ? RotationSegment.convertToSegment(direction.getOpposite()) : RotationSegment.convertToSegment(blockPlaceContext.getRotation() + 180.0f);
         return (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(ATTACHED, bl2)).setValue(ROTATION, i)).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
     }
 

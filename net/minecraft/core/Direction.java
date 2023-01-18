@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -390,7 +391,7 @@ public enum Direction implements StringRepresentable
 
     static {
         CODEC = StringRepresentable.fromEnum(Direction::values);
-        VERTICAL_CODEC = CODEC.flatXmap(Direction::verifyVertical, Direction::verifyVertical);
+        VERTICAL_CODEC = ExtraCodecs.validate(CODEC, Direction::verifyVertical);
         VALUES = Direction.values();
         BY_3D_DATA = (Direction[])Arrays.stream(VALUES).sorted(Comparator.comparingInt(direction -> direction.data3d)).toArray(Direction[]::new);
         BY_2D_DATA = (Direction[])Arrays.stream(VALUES).filter(direction -> direction.getAxis().isHorizontal()).sorted(Comparator.comparingInt(direction -> direction.data2d)).toArray(Direction[]::new);

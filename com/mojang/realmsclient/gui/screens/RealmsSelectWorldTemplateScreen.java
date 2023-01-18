@@ -365,11 +365,6 @@ extends RealmsScreen {
             RealmsSelectWorldTemplateScreen.this.renderBackground(poseStack);
         }
 
-        @Override
-        public boolean isFocused() {
-            return RealmsSelectWorldTemplateScreen.this.getFocused() == this;
-        }
-
         public boolean isEmpty() {
             return this.getItemCount() == 0;
         }
@@ -410,10 +405,8 @@ extends RealmsScreen {
 
         private void drawImage(PoseStack poseStack, int i, int j, int k, int l, WorldTemplate worldTemplate) {
             RealmsTextureManager.bindWorldTemplate(worldTemplate.id, worldTemplate.image);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, i + 1, j + 1, 0.0f, 0.0f, 38, 38, 38, 38);
             RenderSystem.setShaderTexture(0, SLOT_FRAME_LOCATION);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 40, 40, 40, 40);
         }
 
@@ -438,13 +431,11 @@ extends RealmsScreen {
             }
             if (!bl3) {
                 RenderSystem.setShaderTexture(0, LINK_ICON);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 float f = bl ? 15.0f : 0.0f;
                 GuiComponent.blit(poseStack, i + m, j, f, 0.0f, 15, 15, 30, 15);
             }
             if (!"".equals(string2)) {
                 RenderSystem.setShaderTexture(0, TRAILER_ICON);
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 int n = i + m + (bl3 ? 0 : 17);
                 float g = bl2 ? 15.0f : 0.0f;
                 GuiComponent.blit(poseStack, n, j, g, 0.0f, 15, 15, 30, 15);

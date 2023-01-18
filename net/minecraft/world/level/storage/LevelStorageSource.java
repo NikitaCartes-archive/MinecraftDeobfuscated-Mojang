@@ -44,13 +44,13 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import net.minecraft.FileUtil;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.visitors.FieldSelector;
@@ -62,7 +62,6 @@ import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.Level;
@@ -113,7 +112,7 @@ public class LevelStorageSource {
             if (!optional.isPresent()) continue;
             dynamic2 = dynamic2.set(string, optional.get());
         }
-        Dynamic<T> dynamic3 = dataFixer.update(References.WORLD_GEN_SETTINGS, dynamic2, i, SharedConstants.getCurrentVersion().getWorldVersion());
+        Dynamic<T> dynamic3 = DataFixTypes.WORLD_GEN_SETTINGS.updateToCurrentVersion(dataFixer, dynamic2, i);
         return WorldGenSettings.CODEC.parse(dynamic3);
     }
 
@@ -197,8 +196,8 @@ public class LevelStorageSource {
             if (tag instanceof CompoundTag) {
                 CompoundTag compoundTag = (CompoundTag)tag;
                 CompoundTag compoundTag2 = compoundTag.getCompound(TAG_DATA);
-                int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-                Dynamic<CompoundTag> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion());
+                int i = NbtUtils.getDataVersion(compoundTag2, -1);
+                Dynamic<CompoundTag> dynamic = DataFixTypes.LEVEL.updateToCurrentVersion(dataFixer, new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag2), i);
                 return LevelStorageSource.readDataConfig(dynamic);
             }
         } catch (Exception exception) {
@@ -218,8 +217,8 @@ public class LevelStorageSource {
             CompoundTag compoundTag2 = compoundTag.getCompound(TAG_DATA);
             CompoundTag compoundTag3 = compoundTag2.contains("Player", 10) ? compoundTag2.getCompound("Player") : null;
             compoundTag2.remove("Player");
-            int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-            Dynamic<Tag> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<CompoundTag>(dynamicOps, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion());
+            int i = NbtUtils.getDataVersion(compoundTag2, -1);
+            Dynamic<CompoundTag> dynamic = DataFixTypes.LEVEL.updateToCurrentVersion((DataFixer)dataFixer, new Dynamic<CompoundTag>(dynamicOps, compoundTag2), i);
             WorldGenSettings worldGenSettings = LevelStorageSource.readWorldGenSettings(dynamic, dataFixer, i).getOrThrow(false, Util.prefix("WorldGenSettings: ", LOGGER::error));
             LevelVersion levelVersion = LevelVersion.parse(dynamic);
             LevelSettings levelSettings = LevelSettings.parse(dynamic, worldDataConfiguration);
@@ -235,10 +234,10 @@ public class LevelStorageSource {
             try {
                 Tag tag = LevelStorageSource.readLightweightData(path);
                 if (tag instanceof CompoundTag) {
+                    int i;
                     CompoundTag compoundTag = (CompoundTag)tag;
                     CompoundTag compoundTag2 = compoundTag.getCompound(TAG_DATA);
-                    int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-                    Dynamic<Tag> dynamic = dataFixer.update(DataFixTypes.LEVEL.getType(), new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion());
+                    Dynamic<CompoundTag> dynamic = DataFixTypes.LEVEL.updateToCurrentVersion((DataFixer)dataFixer, new Dynamic<CompoundTag>(NbtOps.INSTANCE, compoundTag2), i = NbtUtils.getDataVersion(compoundTag2, -1));
                     LevelVersion levelVersion = LevelVersion.parse(dynamic);
                     int j = levelVersion.levelDataVersion();
                     if (j == 19132 || j == 19133) {
@@ -261,7 +260,7 @@ public class LevelStorageSource {
         };
     }
 
-    private static FeatureFlagSet parseFeatureFlagsFromSummary(Dynamic<Tag> dynamic2) {
+    private static FeatureFlagSet parseFeatureFlagsFromSummary(Dynamic<?> dynamic2) {
         Set<ResourceLocation> set = dynamic2.get("enabled_features").asStream().flatMap(dynamic -> dynamic.asString().result().map(ResourceLocation::tryParse).stream()).collect(Collectors.toSet());
         return FeatureFlags.REGISTRY.fromNames(set, resourceLocation -> {});
     }

@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -34,6 +35,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -45,6 +47,9 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.ScreenNarrationCollector;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.navigation.ScreenDirection;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
@@ -129,19 +134,79 @@ implements Renderable {
 
     @Override
     public boolean keyPressed(int i, int j, int k) {
+        FocusNavigationEvent.TabNavigation focusNavigationEvent;
         if (i == 256 && this.shouldCloseOnEsc()) {
             this.onClose();
             return true;
         }
-        if (i == 258) {
-            boolean bl;
-            boolean bl2 = bl = !Screen.hasShiftDown();
-            if (!this.changeFocus(bl)) {
-                this.changeFocus(bl);
-            }
-            return false;
+        if (super.keyPressed(i, j, k)) {
+            return true;
         }
-        return super.keyPressed(i, j, k);
+        switch (i) {
+            case 263: {
+                Record record = this.createArrowEvent(ScreenDirection.LEFT);
+                break;
+            }
+            case 262: {
+                Record record = this.createArrowEvent(ScreenDirection.RIGHT);
+                break;
+            }
+            case 265: {
+                Record record = this.createArrowEvent(ScreenDirection.UP);
+                break;
+            }
+            case 264: {
+                Record record = this.createArrowEvent(ScreenDirection.DOWN);
+                break;
+            }
+            case 258: {
+                Record record = this.createTabEvent();
+                break;
+            }
+            default: {
+                Record record = focusNavigationEvent = null;
+            }
+        }
+        if (focusNavigationEvent != null) {
+            ComponentPath componentPath = super.nextFocusPath(focusNavigationEvent);
+            if (componentPath == null && focusNavigationEvent instanceof FocusNavigationEvent.TabNavigation) {
+                this.clearFocus();
+                componentPath = super.nextFocusPath(focusNavigationEvent);
+            }
+            if (componentPath != null) {
+                this.changeFocus(componentPath);
+            }
+        }
+        return false;
+    }
+
+    private FocusNavigationEvent.TabNavigation createTabEvent() {
+        boolean bl = !Screen.hasShiftDown();
+        return new FocusNavigationEvent.TabNavigation(bl);
+    }
+
+    private FocusNavigationEvent.ArrowNavigation createArrowEvent(ScreenDirection screenDirection) {
+        return new FocusNavigationEvent.ArrowNavigation(screenDirection);
+    }
+
+    protected void setInitialFocus(GuiEventListener guiEventListener) {
+        ComponentPath componentPath = ComponentPath.path(this, guiEventListener.nextFocusPath(new FocusNavigationEvent.InitialFocus()));
+        if (componentPath != null) {
+            this.changeFocus(componentPath);
+        }
+    }
+
+    private void clearFocus() {
+        ComponentPath componentPath = this.getCurrentFocusPath();
+        if (componentPath != null) {
+            componentPath.applyFocus(false);
+        }
+    }
+
+    @VisibleForTesting
+    protected void changeFocus(ComponentPath componentPath) {
+        this.clearFocus();
+        componentPath.applyFocus(true);
     }
 
     public boolean shouldCloseOnEsc() {
@@ -248,12 +313,10 @@ implements Renderable {
         Matrix4f matrix4f2 = poseStack.last().pose();
         TooltipRenderUtil.renderTooltipBackground((matrix4f, bufferBuilder, i, j, k, l, m, n, o) -> GuiComponent.fillGradient(matrix4f, bufferBuilder, i, j, k, l, m, n, o), matrix4f2, bufferBuilder2, n2, o2, m2, p, 400);
         RenderSystem.enableDepthTest();
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         BufferUploader.drawWithShader(bufferBuilder2.end());
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0f, 0.0f, 400.0f);
         int r = o2;
@@ -370,7 +433,7 @@ implements Renderable {
 
     protected void rebuildWidgets() {
         this.clearWidgets();
-        this.setFocused(null);
+        this.clearFocus();
         this.init();
     }
 
@@ -389,30 +452,19 @@ implements Renderable {
     }
 
     public void renderBackground(PoseStack poseStack) {
-        this.renderBackground(poseStack, 0);
-    }
-
-    public void renderBackground(PoseStack poseStack, int i) {
         if (this.minecraft.level != null) {
             this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
         } else {
-            this.renderDirtBackground(i);
+            this.renderDirtBackground(poseStack);
         }
     }
 
-    public void renderDirtBackground(int i) {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+    public void renderDirtBackground(PoseStack poseStack) {
         RenderSystem.setShaderTexture(0, BACKGROUND_LOCATION);
+        RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1.0f);
+        int i = 32;
+        Screen.blit(poseStack, 0, 0, 0, 0.0f, 0.0f, this.width, this.height, 32, 32);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        float f = 32.0f;
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(0.0, this.height, 0.0).uv(0.0f, (float)this.height / 32.0f + (float)i).color(64, 64, 64, 255).endVertex();
-        bufferBuilder.vertex(this.width, this.height, 0.0).uv((float)this.width / 32.0f, (float)this.height / 32.0f + (float)i).color(64, 64, 64, 255).endVertex();
-        bufferBuilder.vertex(this.width, 0.0, 0.0).uv((float)this.width / 32.0f, i).color(64, 64, 64, 255).endVertex();
-        bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, i).color(64, 64, 64, 255).endVertex();
-        tesselator.end();
     }
 
     public boolean isPauseScreen() {
@@ -546,9 +598,15 @@ implements Renderable {
         }
     }
 
+    protected boolean shouldNarrateNavigation() {
+        return true;
+    }
+
     protected void updateNarrationState(NarrationElementOutput narrationElementOutput) {
         narrationElementOutput.add(NarratedElementType.TITLE, this.getNarrationMessage());
-        narrationElementOutput.add(NarratedElementType.USAGE, USAGE_NARRATION);
+        if (this.shouldNarrateNavigation()) {
+            narrationElementOutput.add(NarratedElementType.USAGE, USAGE_NARRATION);
+        }
         this.updateNarratedWidget(narrationElementOutput);
     }
 
@@ -616,6 +674,11 @@ implements Renderable {
         for (AbstractWidget abstractWidget : abstractWidgets) {
             abstractWidget.visible = false;
         }
+    }
+
+    @Override
+    public ScreenRectangle getRectangle() {
+        return new ScreenRectangle(0, 0, this.width, this.height);
     }
 
     static {

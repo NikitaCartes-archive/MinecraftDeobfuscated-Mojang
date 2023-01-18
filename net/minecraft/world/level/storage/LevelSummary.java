@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.WorldVersion;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.StringUtil;
@@ -154,7 +155,7 @@ implements Comparable<LevelSummary> {
         if (!this.isCompatible()) {
             return Component.translatable("selectWorld.incompatible_series").withStyle(ChatFormatting.RED);
         }
-        MutableComponent mutableComponent2 = mutableComponent = this.isHardcore() ? Component.empty().append(Component.translatable("gameMode.hardcore").withStyle(ChatFormatting.DARK_RED)) : Component.translatable("gameMode." + this.getGameMode().getName());
+        MutableComponent mutableComponent2 = mutableComponent = this.isHardcore() ? Component.empty().append(Component.translatable("gameMode.hardcore").withStyle(style -> style.withColor(-65536))) : Component.translatable("gameMode." + this.getGameMode().getName());
         if (this.hasCheats()) {
             mutableComponent.append(", ").append(Component.translatable("selectWorld.cheats"));
         }
@@ -162,7 +163,7 @@ implements Comparable<LevelSummary> {
             mutableComponent.append(", ").append(Component.translatable("selectWorld.experimental").withStyle(ChatFormatting.YELLOW));
         }
         MutableComponent mutableComponent22 = this.getWorldVersionName();
-        MutableComponent mutableComponent3 = Component.literal(", ").append(Component.translatable("selectWorld.version")).append(" ");
+        MutableComponent mutableComponent3 = Component.literal(", ").append(Component.translatable("selectWorld.version")).append(CommonComponents.SPACE);
         if (this.markVersionInList()) {
             mutableComponent3.append(mutableComponent22.withStyle(this.askToOpenWorld() ? ChatFormatting.RED : ChatFormatting.ITALIC));
         } else {

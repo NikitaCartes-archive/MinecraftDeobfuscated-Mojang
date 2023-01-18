@@ -77,7 +77,7 @@ extends RealmsScreen {
 
     @Override
     public Component getNarrationMessage() {
-        return ComponentUtils.formatList(Stream.concat(Stream.of(this.title), Stream.of(this.message)).collect(Collectors.toList()), Component.literal(" "));
+        return ComponentUtils.formatList(Stream.concat(Stream.of(this.title), Stream.of(this.message)).collect(Collectors.toList()), CommonComponents.SPACE);
     }
 
     private void addButtons() {
@@ -250,6 +250,7 @@ extends RealmsScreen {
         }
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 80, 80, 80, 80);
         RealmsBrokenWorldScreen.drawCenteredString(poseStack, this.font, string, i + 40, j + 66, 0xFFFFFF);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 }
 

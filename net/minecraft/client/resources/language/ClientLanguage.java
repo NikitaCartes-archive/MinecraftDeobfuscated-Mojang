@@ -15,7 +15,6 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.language.FormattedBidiReorder;
-import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
@@ -36,12 +35,9 @@ extends Language {
         this.defaultRightToLeft = bl;
     }
 
-    public static ClientLanguage loadFrom(ResourceManager resourceManager, List<LanguageInfo> list) {
+    public static ClientLanguage loadFrom(ResourceManager resourceManager, List<String> list, boolean bl) {
         HashMap<String, String> map = Maps.newHashMap();
-        boolean bl = false;
-        for (LanguageInfo languageInfo : list) {
-            bl |= languageInfo.isBidirectional();
-            String string = languageInfo.getCode();
+        for (String string : list) {
             String string2 = String.format(Locale.ROOT, "lang/%s.json", string);
             for (String string3 : resourceManager.getNamespaces()) {
                 try {
@@ -72,8 +68,8 @@ extends Language {
     }
 
     @Override
-    public String getOrDefault(String string) {
-        return this.storage.getOrDefault(string, string);
+    public String getOrDefault(String string, String string2) {
+        return this.storage.getOrDefault(string, string2);
     }
 
     @Override

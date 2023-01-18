@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -25,23 +26,21 @@ import org.jetbrains.annotations.Nullable;
 
 public class TranslatableContents
 implements ComponentContents {
-    private static final Object[] NO_ARGS = new Object[0];
+    public static final Object[] NO_ARGS = new Object[0];
     private static final FormattedText TEXT_PERCENT = FormattedText.of("%");
     private static final FormattedText TEXT_NULL = FormattedText.of("null");
     private final String key;
+    @Nullable
+    private final String fallback;
     private final Object[] args;
     @Nullable
     private Language decomposedWith;
     private List<FormattedText> decomposedParts = ImmutableList.of();
     private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
-    public TranslatableContents(String string) {
+    public TranslatableContents(String string, @Nullable String string2, Object[] objects) {
         this.key = string;
-        this.args = NO_ARGS;
-    }
-
-    public TranslatableContents(String string, Object ... objects) {
-        this.key = string;
+        this.fallback = string2;
         this.args = objects;
     }
 
@@ -51,7 +50,7 @@ implements ComponentContents {
             return;
         }
         this.decomposedWith = language;
-        String string = language.getOrDefault(this.key);
+        String string = this.fallback != null ? language.getOrDefault(this.key, this.fallback) : language.getOrDefault(this.key);
         try {
             ImmutableList.Builder builder = ImmutableList.builder();
             this.decomposeTemplate(string, builder::add);
@@ -103,11 +102,8 @@ implements ComponentContents {
     }
 
     private FormattedText getArgument(int i) {
-        if (i < 0) {
+        if (i < 0 || i >= this.args.length) {
             throw new TranslatableFormatException(this, i);
-        }
-        if (i >= this.args.length) {
-            return Component.EMPTY;
         }
         Object object = this.args[i];
         if (object instanceof Component) {
@@ -145,7 +141,7 @@ implements ComponentContents {
             Object object = this.args[j];
             objects[j] = object instanceof Component ? ComponentUtils.updateForEntity(commandSourceStack, (Component)object, entity, i) : object;
         }
-        return MutableComponent.create(new TranslatableContents(this.key, objects));
+        return MutableComponent.create(new TranslatableContents(this.key, this.fallback, objects));
     }
 
     /*
@@ -158,23 +154,30 @@ implements ComponentContents {
         }
         if (!(object instanceof TranslatableContents)) return false;
         TranslatableContents translatableContents = (TranslatableContents)object;
-        if (!this.key.equals(translatableContents.key)) return false;
+        if (!Objects.equals(this.key, translatableContents.key)) return false;
+        if (!Objects.equals(this.fallback, translatableContents.fallback)) return false;
         if (!Arrays.equals(this.args, translatableContents.args)) return false;
         return true;
     }
 
     public int hashCode() {
-        int i = this.key.hashCode();
+        int i = Objects.hashCode(this.key);
+        i = 31 * i + Objects.hashCode(this.fallback);
         i = 31 * i + Arrays.hashCode(this.args);
         return i;
     }
 
     public String toString() {
-        return "translation{key='" + this.key + "', args=" + Arrays.toString(this.args) + "}";
+        return "translation{key='" + this.key + "'" + (String)(this.fallback != null ? ", fallback='" + this.fallback + "'" : "") + ", args=" + Arrays.toString(this.args) + "}";
     }
 
     public String getKey() {
         return this.key;
+    }
+
+    @Nullable
+    public String getFallback() {
+        return this.fallback;
     }
 
     public Object[] getArgs() {

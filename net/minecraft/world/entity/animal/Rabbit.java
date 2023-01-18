@@ -378,10 +378,10 @@ implements VariantHolder<Variant> {
     private static Variant getRandomRabbitVariant(LevelAccessor levelAccessor, BlockPos blockPos) {
         Holder<Biome> holder = levelAccessor.getBiome(blockPos);
         int i = levelAccessor.getRandom().nextInt(100);
-        if (holder.value().getPrecipitation() == Biome.Precipitation.SNOW) {
+        if (holder.is(BiomeTags.SPAWNS_WHITE_RABBITS)) {
             return i < 80 ? Variant.WHITE : Variant.WHITE_SPLOTCHED;
         }
-        if (holder.is(BiomeTags.ONLY_ALLOWS_SNOW_AND_GOLD_RABBITS)) {
+        if (holder.is(BiomeTags.SPAWNS_GOLD_RABBITS)) {
             return Variant.GOLD;
         }
         return i < 50 ? Variant.BROWN : (i < 90 ? Variant.SALT : Variant.BLACK);

@@ -63,7 +63,7 @@ public class DimensionDataStorage {
         try {
             File file = this.getDataFile(string);
             if (file.exists()) {
-                CompoundTag compoundTag = this.readTagFromDisk(string, SharedConstants.getCurrentVersion().getWorldVersion());
+                CompoundTag compoundTag = this.readTagFromDisk(string, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
                 return (T)((SavedData)function.apply(compoundTag.getCompound("data")));
             }
         } catch (Exception exception) {
@@ -89,8 +89,8 @@ public class DimensionDataStorage {
                         compoundTag2 = NbtIo.read(dataInputStream);
                     }
                 }
-                int j = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : 1343;
-                compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.SAVED_DATA, compoundTag2, j, i);
+                int j = NbtUtils.getDataVersion(compoundTag2, 1343);
+                compoundTag = DataFixTypes.SAVED_DATA.update(this.fixerUpper, compoundTag2, j, i);
             }
             return compoundTag;
         }

@@ -80,6 +80,7 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -1684,7 +1685,10 @@ CommandSource {
         }
         this.setPose(Pose.STANDING);
         this.vehicle = entity2;
-        this.vehicle.addPassenger(this);
+        if (!this.vehicle.addPassenger(this)) {
+            this.vehicle = null;
+            return false;
+        }
         entity2.getIndirectPassengersStream().filter(entity -> entity instanceof ServerPlayer).forEach(entity -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)entity));
         return true;
     }
@@ -1711,15 +1715,11 @@ CommandSource {
         }
     }
 
-    public boolean allowsDismounting(Entity entity) {
-        return true;
-    }
-
     public void stopRiding() {
         this.removeVehicle();
     }
 
-    protected void addPassenger(Entity entity) {
+    protected boolean addPassenger(Entity entity) {
         if (entity.getVehicle() != this) {
             throw new IllegalStateException("Use x.startRiding(y), not y.addPassenger(x)");
         }
@@ -1727,13 +1727,14 @@ CommandSource {
             this.passengers = ImmutableList.of(entity);
         } else {
             ArrayList<Entity> list = Lists.newArrayList(this.passengers);
-            if (!this.level.isClientSide && entity instanceof Player && !(this.getControllingPassenger() instanceof Player)) {
+            if (!this.level.isClientSide && entity instanceof Player && !(this.getFirstPassenger() instanceof Player)) {
                 list.add(0, entity);
             } else {
                 list.add(entity);
             }
             this.passengers = ImmutableList.copyOf(list);
         }
+        return true;
     }
 
     protected void removePassenger(Entity entity) {
@@ -1840,7 +1841,7 @@ CommandSource {
         }
     }
 
-    public void animateHurt() {
+    public void animateHurt(float f) {
     }
 
     public Iterable<ItemStack> getHandSlots() {
@@ -2248,7 +2249,7 @@ CommandSource {
     }
 
     public boolean canChangeDimensions() {
-        return true;
+        return !this.isPassenger() && !this.isVehicle();
     }
 
     public float getBlockExplosionResistance(Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState, float f) {
@@ -2349,6 +2350,27 @@ CommandSource {
         ((ServerLevel)this.level).getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 0, this.getId());
         this.level.getChunk(chunkPos.x, chunkPos.z);
         this.teleportTo(d, e, f);
+    }
+
+    public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h) {
+        float i = Mth.clamp(h, -90.0f, 90.0f);
+        if (serverLevel == this.level) {
+            this.moveTo(d, e, f, g, i);
+            this.setYHeadRot(g);
+        } else {
+            this.unRide();
+            Object entity = this.getType().create(serverLevel);
+            if (entity != null) {
+                ((Entity)entity).restoreFrom(this);
+                ((Entity)entity).moveTo(d, e, f, g, i);
+                ((Entity)entity).setYHeadRot(g);
+                this.setRemoved(RemovalReason.CHANGED_DIMENSION);
+                serverLevel.addDuringTeleport((Entity)entity);
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void dismountTo(double d, double e, double f) {
@@ -2938,6 +2960,10 @@ CommandSource {
             return;
         }
         this.xRot = f;
+    }
+
+    public boolean canSprint() {
+        return false;
     }
 
     public final boolean isRemoved() {

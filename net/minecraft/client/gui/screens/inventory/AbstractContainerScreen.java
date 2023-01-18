@@ -105,9 +105,7 @@ implements MenuAccess<T> {
         poseStack2.pushPose();
         poseStack2.translate(k, l, 0.0f);
         RenderSystem.applyModelViewMatrix();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.hoveredSlot = null;
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         for (int m = 0; m < ((AbstractContainerMenu)this.menu).slots.size(); ++m) {
             Slot slot = ((AbstractContainerMenu)this.menu).slots.get(m);
             if (slot.isActive()) {

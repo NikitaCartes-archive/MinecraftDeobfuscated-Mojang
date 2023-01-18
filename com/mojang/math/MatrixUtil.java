@@ -28,7 +28,7 @@ public class MatrixUtil {
         float j = g;
         float i = 2.0f * (f - h);
         if (G * j * j < i * i) {
-            float k = Mth.fastInvSqrt(j * j + i * i);
+            float k = Mth.invSqrt(j * j + i * i);
             return Pair.of(Float.valueOf(k * j), Float.valueOf(k * i));
         }
         return Pair.of(Float.valueOf(SS), Float.valueOf(CS));
@@ -44,7 +44,7 @@ public class MatrixUtil {
             i = j;
             j = k;
         }
-        k = Mth.fastInvSqrt(j * j + i * i);
+        k = Mth.invSqrt(j * j + i * i);
         return Pair.of(Float.valueOf(i *= k), Float.valueOf(j *= k));
     }
 

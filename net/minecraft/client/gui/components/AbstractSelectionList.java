@@ -6,11 +6,7 @@ package net.minecraft.client.gui.components;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
@@ -22,11 +18,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.navigation.ScreenDirection;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -94,6 +92,10 @@ NarratableEntry {
         this.selected = entry;
     }
 
+    public E getFirstElement() {
+        return (E)((Entry)this.children.get(0));
+    }
+
     public void setRenderBackground(boolean bl) {
         this.renderBackground = bl;
     }
@@ -113,10 +115,11 @@ NarratableEntry {
 
     protected final void clearEntries() {
         this.children.clear();
+        this.selected = null;
     }
 
     protected void replaceEntries(Collection<E> collection) {
-        this.children.clear();
+        this.clearEntries();
         this.children.addAll(collection);
     }
 
@@ -185,7 +188,7 @@ NarratableEntry {
     protected void clickedHeader(int i, int j) {
     }
 
-    protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
+    protected void renderHeader(PoseStack poseStack, int i, int j) {
     }
 
     protected void renderBackground(PoseStack poseStack) {
@@ -199,92 +202,55 @@ NarratableEntry {
         int q;
         int p;
         int o;
+        int m;
         this.renderBackground(poseStack);
         int k = this.getScrollbarPosition();
         int l = k + 6;
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         this.hovered = this.isMouseOver(i, j) ? this.getEntryAtPosition(i, j) : null;
         Object v0 = this.hovered;
         if (this.renderBackground) {
             RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
+            RenderSystem.setShaderColor(0.125f, 0.125f, 0.125f, 1.0f);
+            m = 32;
+            AbstractSelectionList.blit(poseStack, this.x0, this.y0, this.x1, this.y1 + (int)this.getScrollAmount(), this.x1 - this.x0, this.y1 - this.y0, 32, 32);
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            float g = 32.0f;
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(this.x0, this.y1, 0.0).uv((float)this.x0 / 32.0f, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0f).color(32, 32, 32, 255).endVertex();
-            bufferBuilder.vertex(this.x1, this.y1, 0.0).uv((float)this.x1 / 32.0f, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0f).color(32, 32, 32, 255).endVertex();
-            bufferBuilder.vertex(this.x1, this.y0, 0.0).uv((float)this.x1 / 32.0f, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0f).color(32, 32, 32, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.y0, 0.0).uv((float)this.x0 / 32.0f, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0f).color(32, 32, 32, 255).endVertex();
-            tesselator.end();
         }
-        int m = this.getRowLeft();
+        m = this.getRowLeft();
         int n = this.y0 + 4 - (int)this.getScrollAmount();
         if (this.renderHeader) {
-            this.renderHeader(poseStack, m, n, tesselator);
+            this.renderHeader(poseStack, m, n);
         }
         this.renderList(poseStack, i, j, f);
         if (this.renderTopAndBottom) {
-            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
             RenderSystem.enableDepthTest();
             RenderSystem.depthFunc(519);
-            float h = 32.0f;
-            o = -100;
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(this.x0, this.y0, -100.0).uv(0.0f, (float)this.y0 / 32.0f).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0 + this.width, this.y0, -100.0).uv((float)this.width / 32.0f, (float)this.y0 / 32.0f).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0 + this.width, 0.0, -100.0).uv((float)this.width / 32.0f, 0.0f).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0, 0.0, -100.0).uv(0.0f, 0.0f).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.height, -100.0).uv(0.0f, (float)this.height / 32.0f).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0 + this.width, this.height, -100.0).uv((float)this.width / 32.0f, (float)this.height / 32.0f).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0 + this.width, this.y1, -100.0).uv((float)this.width / 32.0f, (float)this.y1 / 32.0f).color(64, 64, 64, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.y1, -100.0).uv(0.0f, (float)this.y1 / 32.0f).color(64, 64, 64, 255).endVertex();
-            tesselator.end();
+            o = 32;
+            p = -100;
+            RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1.0f);
+            AbstractSelectionList.blit(poseStack, this.x0, 0, -100, 0.0f, 0.0f, this.width, this.y0, 32, 32);
+            AbstractSelectionList.blit(poseStack, this.x0, this.y1, -100, 0.0f, this.y1, this.width, this.height - this.y1, 32, 32);
+            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.depthFunc(515);
             RenderSystem.disableDepthTest();
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-            RenderSystem.disableTexture();
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            p = 4;
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(this.x0, this.y0 + 4, 0.0).color(0, 0, 0, 0).endVertex();
-            bufferBuilder.vertex(this.x1, this.y0 + 4, 0.0).color(0, 0, 0, 0).endVertex();
-            bufferBuilder.vertex(this.x1, this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(this.x0, this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(this.x1, this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(this.x1, this.y1 - 4, 0.0).color(0, 0, 0, 0).endVertex();
-            bufferBuilder.vertex(this.x0, this.y1 - 4, 0.0).color(0, 0, 0, 0).endVertex();
-            tesselator.end();
+            q = 4;
+            this.fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
+            this.fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
         }
-        if ((q = this.getMaxScroll()) > 0) {
-            RenderSystem.disableTexture();
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            o = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
-            o = Mth.clamp(o, 32, this.y1 - this.y0 - 8);
-            p = (int)this.getScrollAmount() * (this.y1 - this.y0 - o) / q + this.y0;
-            if (p < this.y0) {
-                p = this.y0;
+        if ((o = this.getMaxScroll()) > 0) {
+            p = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+            p = Mth.clamp(p, 32, this.y1 - this.y0 - 8);
+            q = (int)this.getScrollAmount() * (this.y1 - this.y0 - p) / o + this.y0;
+            if (q < this.y0) {
+                q = this.y0;
             }
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            bufferBuilder.vertex(k, this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(l, this.y1, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(l, this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(k, this.y0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(k, p + o, 0.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(l, p + o, 0.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(l, p, 0.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(k, p, 0.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(k, p + o - 1, 0.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(l - 1, p + o - 1, 0.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(l - 1, p, 0.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(k, p, 0.0).color(192, 192, 192, 255).endVertex();
-            tesselator.end();
+            AbstractSelectionList.fill(poseStack, k, this.y0, l, this.y1, -16777216);
+            AbstractSelectionList.fill(poseStack, k, q, l, q + p, -8355712);
+            AbstractSelectionList.fill(poseStack, k, q, l - 1, q + p - 1, -4144960);
         }
         this.renderDecorations(poseStack, i, j);
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
@@ -341,6 +307,11 @@ NarratableEntry {
         E entry = this.getEntryAtPosition(d, e);
         if (entry != null) {
             if (entry.mouseClicked(d, e, i)) {
+                GuiEventListener entry2 = this.getFocused();
+                if (entry2 != entry && entry2 instanceof ContainerEventHandler) {
+                    ContainerEventHandler containerEventHandler = (ContainerEventHandler)entry2;
+                    containerEventHandler.setFocused(null);
+                }
                 this.setFocused((GuiEventListener)entry);
                 this.setDragging(true);
                 return true;
@@ -389,50 +360,57 @@ NarratableEntry {
     }
 
     @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (super.keyPressed(i, j, k)) {
-            return true;
-        }
-        if (i == 264) {
-            this.moveSelection(SelectionDirection.DOWN);
-            return true;
-        }
-        if (i == 265) {
-            this.moveSelection(SelectionDirection.UP);
-            return true;
-        }
-        return false;
-    }
-
-    protected void moveSelection(SelectionDirection selectionDirection) {
-        this.moveSelection(selectionDirection, entry -> true);
-    }
-
-    protected void refreshSelection() {
-        E entry = this.getSelected();
-        if (entry != null) {
+    public void setFocused(@Nullable GuiEventListener guiEventListener) {
+        super.setFocused(guiEventListener);
+        int i = this.children.indexOf(guiEventListener);
+        if (i >= 0) {
+            Entry entry = (Entry)this.children.get(i);
             this.setSelected(entry);
-            this.ensureVisible(entry);
-        }
-    }
-
-    protected boolean moveSelection(SelectionDirection selectionDirection, Predicate<E> predicate) {
-        int i;
-        int n = i = selectionDirection == SelectionDirection.UP ? -1 : 1;
-        if (!this.children().isEmpty()) {
-            int k;
-            int j = this.children().indexOf(this.getSelected());
-            while (j != (k = Mth.clamp(j + i, 0, this.getItemCount() - 1))) {
-                Entry entry = (Entry)this.children().get(k);
-                if (predicate.test(entry)) {
-                    this.setSelected(entry);
-                    this.ensureVisible(entry);
-                    return true;
-                }
-                j = k;
+            if (this.minecraft.getLastInputType().isKeyboard()) {
+                this.ensureVisible(entry);
             }
         }
-        return false;
+    }
+
+    @Nullable
+    protected E nextEntry(ScreenDirection screenDirection) {
+        return (E)this.nextEntry(screenDirection, entry -> true);
+    }
+
+    @Nullable
+    protected E nextEntry(ScreenDirection screenDirection, Predicate<E> predicate) {
+        return this.nextEntry(screenDirection, predicate, this.getSelected());
+    }
+
+    @Nullable
+    protected E nextEntry(ScreenDirection screenDirection, Predicate<E> predicate, @Nullable E entry) {
+        int i;
+        switch (screenDirection) {
+            default: {
+                throw new IncompatibleClassChangeError();
+            }
+            case RIGHT: 
+            case LEFT: {
+                int n = 0;
+                break;
+            }
+            case UP: {
+                int n = -1;
+                break;
+            }
+            case DOWN: {
+                int n = i = 1;
+            }
+        }
+        if (!this.children().isEmpty() && i != 0) {
+            int j = entry == null ? (i > 0 ? 0 : this.children().size() - 1) : this.children().indexOf(entry) + i;
+            for (int k = j; k >= 0 && k < this.children.size(); k += i) {
+                Entry entry2 = (Entry)this.children().get(k);
+                if (!predicate.test(entry2)) continue;
+                return (E)entry2;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -481,12 +459,8 @@ NarratableEntry {
         return this.y0 + 4 - (int)this.getScrollAmount() + i * this.itemHeight + this.headerHeight;
     }
 
-    private int getRowBottom(int i) {
+    protected int getRowBottom(int i) {
         return this.getRowTop(i) + this.itemHeight;
-    }
-
-    protected boolean isFocused() {
-        return false;
     }
 
     @Override
@@ -532,6 +506,11 @@ NarratableEntry {
         if (list.size() > 1 && (i = list.indexOf(entry)) != -1) {
             narrationElementOutput.add(NarratedElementType.POSITION, (Component)Component.translatable("narrator.position.list", i + 1, list.size()));
         }
+    }
+
+    @Override
+    public ScreenRectangle getRectangle() {
+        return new ScreenRectangle(this.x0, this.y0, this.x1 - this.x0, this.y1 - this.y0);
     }
 
     @Override
@@ -598,10 +577,22 @@ NarratableEntry {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static abstract class Entry<E extends Entry<E>>
+    protected static abstract class Entry<E extends Entry<E>>
     implements GuiEventListener {
         @Deprecated
         AbstractSelectionList<E> list;
+
+        protected Entry() {
+        }
+
+        @Override
+        public void setFocused(boolean bl) {
+        }
+
+        @Override
+        public boolean isFocused() {
+            return this.list.getFocused() == this;
+        }
 
         public abstract void render(PoseStack var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, boolean var9, float var10);
 
@@ -609,13 +600,6 @@ NarratableEntry {
         public boolean isMouseOver(double d, double e) {
             return Objects.equals(this.list.getEntryAtPosition(d, e), this);
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    protected static enum SelectionDirection {
-        UP,
-        DOWN;
-
     }
 }
 

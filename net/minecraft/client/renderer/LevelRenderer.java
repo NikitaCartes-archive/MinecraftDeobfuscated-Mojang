@@ -307,7 +307,6 @@ AutoCloseable {
         int m = -1;
         float n = (float)this.ticks + f;
         RenderSystem.setShader(GameRenderer::getParticleShader);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int o = k - l; o <= k + l; ++o) {
             for (int p = i - l; p <= i + l; ++p) {
@@ -319,7 +318,7 @@ AutoCloseable {
                 double s = (double)this.rainSizeZ[q] * 0.5;
                 mutableBlockPos.set((double)p, e, (double)o);
                 Biome biome = level.getBiome(mutableBlockPos).value();
-                if (biome.getPrecipitation() == Biome.Precipitation.NONE) continue;
+                if (!biome.hasPrecipitation()) continue;
                 int t = level.getHeight(Heightmap.Types.MOTION_BLOCKING, p, o);
                 int u = j - l;
                 int v = j + l;
@@ -335,7 +334,8 @@ AutoCloseable {
                 if (u == v) continue;
                 RandomSource randomSource = RandomSource.create(p * p * 3121 + p * 45238971 ^ o * o * 418711 + o * 13761);
                 mutableBlockPos.set(p, u, o);
-                if (biome.warmEnoughToRain(mutableBlockPos)) {
+                Biome.Precipitation precipitation = biome.getPrecipitationAt(mutableBlockPos);
+                if (precipitation == Biome.Precipitation.RAIN) {
                     if (m != 0) {
                         if (m >= 0) {
                             tesselator.end();
@@ -358,6 +358,7 @@ AutoCloseable {
                     bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5).uv(0.0f, (float)v * 0.25f + y).color(1.0f, 1.0f, 1.0f, ac).uv2(ad).endVertex();
                     continue;
                 }
+                if (precipitation != Biome.Precipitation.SNOW) continue;
                 if (m != 1) {
                     if (m >= 0) {
                         tesselator.end();
@@ -404,11 +405,11 @@ AutoCloseable {
         Vec3i blockPos2 = null;
         int i = (int)(100.0f * f * f) / (this.minecraft.options.particles().get() == ParticleStatus.DECREASED ? 2 : 1);
         for (int j = 0; j < i; ++j) {
+            Biome biome;
+            int l;
             int k = randomSource.nextInt(21) - 10;
-            int l = randomSource.nextInt(21) - 10;
-            BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l));
-            Biome biome = levelReader.getBiome(blockPos3).value();
-            if (blockPos3.getY() <= levelReader.getMinBuildHeight() || blockPos3.getY() > blockPos.getY() + 10 || blockPos3.getY() < blockPos.getY() - 10 || biome.getPrecipitation() != Biome.Precipitation.RAIN || !biome.warmEnoughToRain(blockPos3)) continue;
+            BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l = randomSource.nextInt(21) - 10));
+            if (blockPos3.getY() <= levelReader.getMinBuildHeight() || blockPos3.getY() > blockPos.getY() + 10 || blockPos3.getY() < blockPos.getY() - 10 || (biome = levelReader.getBiome(blockPos3).value()).getPrecipitationAt(blockPos3) != Biome.Precipitation.RAIN) continue;
             blockPos2 = blockPos3.below();
             if (this.minecraft.options.particles().get() == ParticleStatus.MINIMAL) break;
             double d = randomSource.nextDouble();
@@ -1363,7 +1364,6 @@ AutoCloseable {
             RenderSystem.disableCull();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            RenderSystem.disableTexture();
             for (RenderChunkInfo renderChunkInfo : this.renderChunksInFrustum) {
                 int i;
                 ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
@@ -1443,11 +1443,9 @@ AutoCloseable {
             RenderSystem.depthMask(true);
             RenderSystem.disableBlend();
             RenderSystem.enableCull();
-            RenderSystem.enableTexture();
         }
         if (this.capturedFrustum != null) {
             RenderSystem.disableCull();
-            RenderSystem.disableTexture();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.lineWidth(5.0f);
@@ -1468,7 +1466,6 @@ AutoCloseable {
             RenderSystem.depthMask(false);
             RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
             bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             this.addFrustumVertex(bufferBuilder, 0);
             this.addFrustumVertex(bufferBuilder, 1);
             this.addFrustumVertex(bufferBuilder, 1);
@@ -1499,7 +1496,6 @@ AutoCloseable {
             RenderSystem.depthMask(true);
             RenderSystem.disableBlend();
             RenderSystem.enableCull();
-            RenderSystem.enableTexture();
             RenderSystem.lineWidth(1.0f);
         }
     }
@@ -1583,7 +1579,6 @@ AutoCloseable {
             poseStack.popPose();
         }
         RenderSystem.depthMask(true);
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
@@ -1609,7 +1604,6 @@ AutoCloseable {
         if (this.minecraft.level.effects().skyType() != DimensionSpecialEffects.SkyType.NORMAL) {
             return;
         }
-        RenderSystem.disableTexture();
         Vec3 vec3 = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getPosition(), f);
         float g = (float)vec3.x;
         float h = (float)vec3.y;
@@ -1627,7 +1621,6 @@ AutoCloseable {
         float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(f), f);
         if (fs != null) {
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            RenderSystem.disableTexture();
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
             poseStack.pushPose();
             poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
@@ -1650,7 +1643,6 @@ AutoCloseable {
             BufferUploader.drawWithShader(bufferBuilder.end());
             poseStack.popPose();
         }
-        RenderSystem.enableTexture();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         poseStack.pushPose();
         j = 1.0f - this.level.getRainLevel(f);
@@ -1682,7 +1674,6 @@ AutoCloseable {
         bufferBuilder.vertex(matrix4f3, l, -100.0f, -l).uv(u, p).endVertex();
         bufferBuilder.vertex(matrix4f3, -l, -100.0f, -l).uv(q, p).endVertex();
         BufferUploader.drawWithShader(bufferBuilder.end());
-        RenderSystem.disableTexture();
         float v = this.level.getStarBrightness(f) * j;
         if (v > 0.0f) {
             RenderSystem.setShaderColor(v, v, v, v);
@@ -1695,7 +1686,6 @@ AutoCloseable {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableBlend();
         poseStack.popPose();
-        RenderSystem.disableTexture();
         RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
         double d = this.minecraft.player.getEyePosition((float)f).y - this.level.getLevelData().getHorizonHeight(this.level);
         if (d < 0.0) {
@@ -1706,12 +1696,7 @@ AutoCloseable {
             VertexBuffer.unbind();
             poseStack.popPose();
         }
-        if (this.level.effects().hasGround()) {
-            RenderSystem.setShaderColor(g * 0.2f + 0.04f, h * 0.2f + 0.04f, i * 0.6f + 0.1f, 1.0f);
-        } else {
-            RenderSystem.setShaderColor(g, h, i, 1.0f);
-        }
-        RenderSystem.enableTexture();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.depthMask(true);
     }
 
@@ -1791,7 +1776,6 @@ AutoCloseable {
             VertexBuffer.unbind();
         }
         poseStack.popPose();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
     }
@@ -2027,6 +2011,7 @@ AutoCloseable {
         RenderSystem.disableBlend();
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.depthMask(true);
     }
 

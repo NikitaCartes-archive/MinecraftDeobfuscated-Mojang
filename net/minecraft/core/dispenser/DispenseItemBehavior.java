@@ -6,6 +6,7 @@ package net.minecraft.core.dispenser;
 import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
@@ -220,12 +221,12 @@ public interface DispenseItemBehavior {
             public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
                 Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
                 BlockPos blockPos = blockSource.getPos().relative(direction);
-                ServerLevel level = blockSource.getLevel();
-                ArmorStand armorStand = new ArmorStand(level, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
-                EntityType.updateCustomEntityTag(level, null, armorStand, itemStack.getTag());
-                armorStand.setYRot(direction.toYRot());
-                level.addFreshEntity(armorStand);
-                itemStack.shrink(1);
+                ServerLevel serverLevel = blockSource.getLevel();
+                Consumer<ArmorStand> consumer = EntityType.appendDefaultStackConfig(armorStand -> armorStand.setYRot(direction.toYRot()), serverLevel, itemStack, null);
+                ArmorStand armorStand2 = EntityType.ARMOR_STAND.spawn(serverLevel, itemStack.getTag(), consumer, blockPos, MobSpawnType.DISPENSER, false, false);
+                if (armorStand2 != null) {
+                    itemStack.shrink(1);
+                }
                 return itemStack;
             }
         });

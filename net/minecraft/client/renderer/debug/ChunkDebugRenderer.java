@@ -52,7 +52,6 @@ implements DebugRenderer.SimpleDebugRenderer {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.lineWidth(2.0f);
-            RenderSystem.disableTexture();
             RenderSystem.depthMask(false);
             Map map = this.data.serverData.getNow(null);
             double h = this.minecraft.gameRenderer.getMainCamera().getPosition().y * 0.85;
@@ -70,7 +69,6 @@ implements DebugRenderer.SimpleDebugRenderer {
                 }
             }
             RenderSystem.depthMask(true);
-            RenderSystem.enableTexture();
             RenderSystem.disableBlend();
         }
     }

@@ -757,7 +757,7 @@ implements AutoCloseable {
             }
             g /= (float)livingEntity.hurtDuration;
             g = Mth.sin(g * g * g * g * (float)Math.PI);
-            h = livingEntity.hurtDir;
+            h = livingEntity.getHurtDir();
             poseStack.mulPose(Axis.YP.rotationDegrees(-h));
             poseStack.mulPose(Axis.ZP.rotationDegrees(-g * 14.0f));
             poseStack.mulPose(Axis.YP.rotationDegrees(h));
@@ -862,7 +862,6 @@ implements AutoCloseable {
             if (this.postEffect != null && this.effectActive) {
                 RenderSystem.disableBlend();
                 RenderSystem.disableDepthTest();
-                RenderSystem.enableTexture();
                 RenderSystem.resetTextureMatrix();
                 this.postEffect.process(f);
             }

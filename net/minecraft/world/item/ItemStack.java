@@ -658,7 +658,7 @@ public final class ItemStack {
                     }
                     double e = attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? d * 100.0 : (entry.getKey().equals(Attributes.KNOCKBACK_RESISTANCE) ? d * 10.0 : d);
                     if (bl) {
-                        list.add(Component.literal(" ").append(Component.translatable("attribute.modifier.equals." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), Component.translatable(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.DARK_GREEN));
+                        list.add(CommonComponents.space().append(Component.translatable("attribute.modifier.equals." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), Component.translatable(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.DARK_GREEN));
                         continue;
                     }
                     if (d > 0.0) {

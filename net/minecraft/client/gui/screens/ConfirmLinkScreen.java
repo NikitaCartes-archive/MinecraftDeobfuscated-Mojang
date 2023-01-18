@@ -42,7 +42,7 @@ extends ConfirmScreen {
     }
 
     protected static MutableComponent confirmMessage(boolean bl, String string) {
-        return ConfirmLinkScreen.confirmMessage(bl).append(" ").append(Component.literal(string));
+        return ConfirmLinkScreen.confirmMessage(bl).append(CommonComponents.SPACE).append(Component.literal(string));
     }
 
     protected static MutableComponent confirmMessage(boolean bl) {

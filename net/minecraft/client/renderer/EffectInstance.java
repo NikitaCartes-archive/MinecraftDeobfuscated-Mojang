@@ -213,7 +213,6 @@ AutoCloseable {
         for (int i = 0; i < this.samplerLocations.size(); ++i) {
             if (this.samplerMap.get(this.samplerNames.get(i)) == null) continue;
             GlStateManager._activeTexture(33984 + i);
-            GlStateManager._disableTexture();
             GlStateManager._bindTexture(0);
         }
     }
@@ -232,7 +231,6 @@ AutoCloseable {
             IntSupplier intSupplier = this.samplerMap.get(string);
             if (intSupplier == null) continue;
             RenderSystem.activeTexture(33984 + i);
-            RenderSystem.enableTexture();
             int j = intSupplier.getAsInt();
             if (j == -1) continue;
             RenderSystem.bindTexture(j);

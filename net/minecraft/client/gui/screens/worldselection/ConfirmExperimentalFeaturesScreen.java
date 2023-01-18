@@ -126,11 +126,6 @@ extends Screen {
             public int getRowWidth() {
                 return this.width * 3 / 4;
             }
-
-            @Override
-            public boolean isFocused() {
-                return DetailsScreen.this.getFocused() == this;
-            }
         }
 
         @Environment(value=EnvType.CLIENT)

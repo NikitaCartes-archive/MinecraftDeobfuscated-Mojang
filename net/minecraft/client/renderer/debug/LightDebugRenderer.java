@@ -32,7 +32,6 @@ implements DebugRenderer.SimpleDebugRenderer {
         ClientLevel level = this.minecraft.level;
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.disableTexture();
         BlockPos blockPos = new BlockPos(d, e, f);
         LongOpenHashSet longSet = new LongOpenHashSet();
         for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-10, -10, -10), blockPos.offset(10, 10, 10))) {
@@ -46,7 +45,6 @@ implements DebugRenderer.SimpleDebugRenderer {
             if (i == 15) continue;
             DebugRenderer.renderFloatingText(String.valueOf(i), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, j);
         }
-        RenderSystem.enableTexture();
     }
 }
 

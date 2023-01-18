@@ -138,11 +138,6 @@ extends Screen {
         }
 
         @Override
-        protected boolean isFocused() {
-            return CreateFlatWorldScreen.this.getFocused() == this;
-        }
-
-        @Override
         protected int getScrollbarPosition() {
             return this.width - 70;
         }
@@ -215,7 +210,6 @@ extends Screen {
             }
 
             private void blitSlotBg(PoseStack poseStack, int i, int j) {
-                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
                 RenderSystem.setShaderTexture(0, GuiComponent.STATS_ICON_LOCATION);
                 GuiComponent.blit(poseStack, i, j, CreateFlatWorldScreen.this.getBlitOffset(), 0.0f, 0.0f, 18, 18, 128, 128);
             }

@@ -486,7 +486,11 @@ extends LivingEntity {
     }
 
     private void brokenByPlayer(DamageSource damageSource) {
-        Block.popResource(this.level, this.blockPosition(), new ItemStack(Items.ARMOR_STAND));
+        ItemStack itemStack = new ItemStack(Items.ARMOR_STAND);
+        if (this.hasCustomName()) {
+            itemStack.setHoverName(this.getCustomName());
+        }
+        Block.popResource(this.level, this.blockPosition(), itemStack);
         this.brokenByAnything(damageSource);
     }
 

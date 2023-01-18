@@ -135,6 +135,7 @@ import net.minecraft.util.datafix.fixes.ObjectiveDisplayNameFix;
 import net.minecraft.util.datafix.fixes.ObjectiveRenderTypeFix;
 import net.minecraft.util.datafix.fixes.OminousBannerBlockEntityRenameFix;
 import net.minecraft.util.datafix.fixes.OminousBannerRenameFix;
+import net.minecraft.util.datafix.fixes.OptionsAccessibilityOnboardFix;
 import net.minecraft.util.datafix.fixes.OptionsAddTextBackgroundFix;
 import net.minecraft.util.datafix.fixes.OptionsAmbientOcclusionFix;
 import net.minecraft.util.datafix.fixes.OptionsForceVBOFix;
@@ -267,7 +268,7 @@ public class DataFixers {
     }
 
     private static synchronized DataFixer createFixerUpper() {
-        DataFixerBuilder dataFixerBuilder = new DataFixerBuilder(SharedConstants.getCurrentVersion().getWorldVersion());
+        DataFixerBuilder dataFixerBuilder = new DataFixerBuilder(SharedConstants.getCurrentVersion().getDataVersion().getVersion());
         DataFixers.addFixers(dataFixerBuilder);
         boolean bl = switch (SharedConstants.DATAFIXER_OPTIMIZATION_OPTION) {
             case DataFixerOptimizationOption.UNINITIALIZED_OPTIMIZED -> true;
@@ -741,6 +742,8 @@ public class DataFixers {
         dataFixerBuilder.addFixer(new ItemStackSpawnEggFix(schema175, false, "minecraft:pig_spawn_egg"));
         Schema schema176 = dataFixerBuilder.addSchema(3214, SAME_NAMESPACED);
         dataFixerBuilder.addFixer(new OptionsAmbientOcclusionFix(schema176));
+        Schema schema177 = dataFixerBuilder.addSchema(3319, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new OptionsAccessibilityOnboardFix(schema177));
     }
 
     private static UnaryOperator<String> createRenamer(Map<String, String> map) {

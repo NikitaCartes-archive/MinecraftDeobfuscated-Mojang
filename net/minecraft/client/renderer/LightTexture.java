@@ -67,7 +67,6 @@ implements AutoCloseable {
         this.minecraft.getTextureManager().bindForSetup(this.lightTextureLocation);
         RenderSystem.texParameter(3553, 10241, 9729);
         RenderSystem.texParameter(3553, 10240, 9729);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     private float getDarknessGamma(float f) {

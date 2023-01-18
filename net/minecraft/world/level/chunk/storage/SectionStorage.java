@@ -138,8 +138,8 @@ implements AutoCloseable {
             int k;
             Dynamic<T> dynamic2 = new Dynamic<T>(dynamicOps, object2);
             int j = SectionStorage.getVersion(dynamic2);
-            boolean bl = j != (k = SharedConstants.getCurrentVersion().getWorldVersion());
-            Dynamic<T> dynamic22 = this.fixerUpper.update(this.type.getType(), dynamic2, j, k);
+            boolean bl = j != (k = SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+            Dynamic<T> dynamic22 = this.type.update(this.fixerUpper, dynamic2, j, k);
             OptionalDynamic<T> optionalDynamic = dynamic22.get(SECTIONS_TAG);
             for (int l = this.levelHeightAccessor.getMinSection(); l < this.levelHeightAccessor.getMaxSection(); ++l) {
                 long m = SectionStorage.getKey(chunkPos, l);
@@ -177,7 +177,7 @@ implements AutoCloseable {
             String string = Integer.toString(i);
             dataResult.resultOrPartial(LOGGER::error).ifPresent(object -> map.put(dynamicOps.createString(string), object));
         }
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString(SECTIONS_TAG), dynamicOps.createMap(map), dynamicOps.createString("DataVersion"), dynamicOps.createInt(SharedConstants.getCurrentVersion().getWorldVersion()))));
+        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString(SECTIONS_TAG), dynamicOps.createMap(map), dynamicOps.createString("DataVersion"), dynamicOps.createInt(SharedConstants.getCurrentVersion().getDataVersion().getVersion()))));
     }
 
     private static long getKey(ChunkPos chunkPos, int i) {
