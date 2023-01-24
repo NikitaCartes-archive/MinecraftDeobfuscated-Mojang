@@ -52,7 +52,7 @@ extends AbstractContainerScreen<HorseInventoryMenu> {
                 this.blit(poseStack, k + 7, l + 35, 0, this.imageHeight + 54, 18, 18);
             }
         }
-        InventoryScreen.renderEntityInInventory(k + 51, l + 60, 17, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.horse);
+        InventoryScreen.renderEntityInInventoryFollowsMouse(k + 51, l + 60, 17, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.horse);
     }
 
     @Override

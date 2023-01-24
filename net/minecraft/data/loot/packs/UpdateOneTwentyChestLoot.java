@@ -1,0 +1,41 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.data.loot.packs;
+
+import java.util.function.BiConsumer;
+import net.minecraft.data.loot.LootTableSubProvider;
+import net.minecraft.data.loot.packs.VanillaChestLoot;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.EmptyLootItem;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+
+public class UpdateOneTwentyChestLoot
+implements LootTableSubProvider {
+    @Override
+    public void generate(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
+        biConsumer.accept(BuiltInLootTables.PILLAGER_OUTPOST, VanillaChestLoot.pillagerOutpostLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(4)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.DESERT_PYRAMID, VanillaChestLoot.desertPyramidLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(8)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.SHIPWRECK_MAP, VanillaChestLoot.shipwreckMapLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(8)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.SHIPWRECK_SUPPLY, VanillaChestLoot.shipwreckSupplyLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(8)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.SHIPWRECK_TREASURE, VanillaChestLoot.shipwreckTreasureLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(8)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.JUNGLE_TEMPLE, VanillaChestLoot.jungleTempleLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(4)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.ANCIENT_CITY, VanillaChestLoot.ancientCityLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.STRONGHOLD_CORRIDOR, VanillaChestLoot.strongholdCorridorLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.STRONGHOLD_LIBRARY, VanillaChestLoot.strongholdCorridorLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(10)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.WOODLAND_MANSION, VanillaChestLoot.woodlandMansionLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.BASTION_HOGLIN_STABLE, VanillaChestLoot.bastionBridgeLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))).withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(30)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.BASTION_BRIDGE, VanillaChestLoot.bastionBridgeLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))).withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(30)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.BASTION_OTHER, VanillaChestLoot.bastionOtherLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))).withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(30)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.BASTION_TREASURE, VanillaChestLoot.bastionTreasureLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))).withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.NETHER_BRIDGE, VanillaChestLoot.netherBridgeLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        biConsumer.accept(BuiltInLootTables.END_CITY_TREASURE, VanillaChestLoot.endCityTreasureLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(20)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+    }
+}
+

@@ -191,7 +191,8 @@ public class Explosion {
             entity.hurt(this.getDamageSource(), (int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0));
             double ad = ac;
             if (entity instanceof LivingEntity) {
-                ad = ProtectionEnchantment.getExplosionKnockbackAfterDampener((LivingEntity)entity, ac);
+                LivingEntity livingEntity = (LivingEntity)entity;
+                ad = ProtectionEnchantment.getExplosionKnockbackAfterDampener(livingEntity, ac);
             }
             entity.setDeltaMovement(entity.getDeltaMovement().add(x * ad, y * ad, z * ad));
             if (!(entity instanceof Player) || (player = (Player)entity).isSpectator() || player.isCreative() && player.getAbilities().flying) continue;

@@ -29,7 +29,7 @@ extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 
     public PiglinRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation, ModelLayerLocation modelLayerLocation2, ModelLayerLocation modelLayerLocation3, boolean bl) {
         super(context, PiglinRenderer.createModel(context.getModelSet(), modelLayerLocation, bl), 0.5f, 1.0019531f, 1.0f, 1.0019531f);
-        this.addLayer(new HumanoidArmorLayer(this, new HumanoidModel(context.bakeLayer(modelLayerLocation2)), new HumanoidModel(context.bakeLayer(modelLayerLocation3))));
+        this.addLayer(new HumanoidArmorLayer(this, new HumanoidModel(context.bakeLayer(modelLayerLocation2)), new HumanoidModel(context.bakeLayer(modelLayerLocation3)), context.getModelManager()));
     }
 
     private static PiglinModel<Mob> createModel(EntityModelSet entityModelSet, ModelLayerLocation modelLayerLocation, boolean bl) {

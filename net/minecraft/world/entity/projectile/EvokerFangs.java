@@ -13,11 +13,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public class EvokerFangs
-extends Entity {
+extends Entity
+implements TraceableEntity {
     public static final int ATTACK_DURATION = 20;
     public static final int LIFE_OFFSET = 2;
     public static final int ATTACK_TRIGGER_TICKS = 14;
@@ -51,6 +53,7 @@ extends Entity {
         this.ownerUUID = livingEntity == null ? null : livingEntity.getUUID();
     }
 
+    @Override
     @Nullable
     public LivingEntity getOwner() {
         Entity entity;
@@ -146,6 +149,12 @@ extends Entity {
             return 1.0f;
         }
         return 1.0f - ((float)i - f) / 20.0f;
+    }
+
+    @Override
+    @Nullable
+    public /* synthetic */ Entity getOwner() {
+        return this.getOwner();
     }
 }
 

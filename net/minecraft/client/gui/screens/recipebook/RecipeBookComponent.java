@@ -453,7 +453,7 @@ RecipeShownListener {
     }
 
     public void setupGhostRecipe(Recipe<?> recipe, List<Slot> list) {
-        ItemStack itemStack = recipe.getResultItem();
+        ItemStack itemStack = recipe.getResultItem(this.minecraft.level.registryAccess());
         this.ghostRecipe.setRecipe(recipe);
         this.ghostRecipe.addIngredient(Ingredient.of(itemStack), list.get((int)0).x, list.get((int)0).y);
         this.placeRecipe(this.menu.getGridWidth(), this.menu.getGridHeight(), this.menu.getResultSlotIndex(), recipe, recipe.getIngredients().iterator(), 0);

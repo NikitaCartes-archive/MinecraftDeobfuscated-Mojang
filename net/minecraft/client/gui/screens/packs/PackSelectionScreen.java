@@ -148,7 +148,7 @@ extends Screen {
         });
     }
 
-    public void updateFocus(PackSelectionModel.Entry entry, TransferableSelectionList transferableSelectionList) {
+    public void updateFocus(TransferableSelectionList transferableSelectionList) {
         TransferableSelectionList transferableSelectionList2 = this.selectedPackList == transferableSelectionList ? this.availablePackList : this.selectedPackList;
         this.changeFocus(ComponentPath.path(transferableSelectionList2.getFirstElement(), new ContainerEventHandler[]{transferableSelectionList2, this}));
     }

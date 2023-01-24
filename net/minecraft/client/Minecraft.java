@@ -510,7 +510,7 @@ implements WindowEventHandler {
         this.resourceManager.registerReloadListener(this.blockEntityRenderDispatcher);
         BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer = new BlockEntityWithoutLevelRenderer(this.blockEntityRenderDispatcher, this.entityModels);
         this.resourceManager.registerReloadListener(blockEntityWithoutLevelRenderer);
-        this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
+        this.itemRenderer = new ItemRenderer(this, this.textureManager, this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
         this.resourceManager.registerReloadListener(this.itemRenderer);
         this.renderBuffers = new RenderBuffers();
         this.playerSocialManager = new PlayerSocialManager(this, this.userApiService);
@@ -719,7 +719,7 @@ implements WindowEventHandler {
     private void createSearchTrees() {
         this.searchRegistry.register(SearchRegistry.CREATIVE_NAMES, list -> new FullTextSearchTree<ItemStack>(itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL.asCreative()).stream().map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), itemStack -> Stream.of(BuiltInRegistries.ITEM.getKey(itemStack.getItem())), (List<ItemStack>)list));
         this.searchRegistry.register(SearchRegistry.CREATIVE_TAGS, list -> new IdSearchTree<ItemStack>(itemStack -> itemStack.getTags().map(TagKey::location), (List<ItemStack>)list));
-        this.searchRegistry.register(SearchRegistry.RECIPE_COLLECTIONS, list -> new FullTextSearchTree<RecipeCollection>(recipeCollection -> recipeCollection.getRecipes().stream().flatMap(recipe -> recipe.getResultItem().getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()).map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItem().getItem())), (List<RecipeCollection>)list));
+        this.searchRegistry.register(SearchRegistry.RECIPE_COLLECTIONS, list -> new FullTextSearchTree<RecipeCollection>(recipeCollection -> recipeCollection.getRecipes().stream().flatMap(recipe -> recipe.getResultItem(recipeCollection.registryAccess()).getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()).map(component -> ChatFormatting.stripFormatting(component.getString()).trim()).filter(string -> !string.isEmpty()), recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItem(recipeCollection.registryAccess()).getItem())), (List<RecipeCollection>)list));
         CreativeModeTabs.searchTab().setSearchTreeBuilder(list -> {
             this.populateSearchTree(SearchRegistry.CREATIVE_NAMES, (List)list);
             this.populateSearchTree(SearchRegistry.CREATIVE_TAGS, (List)list);

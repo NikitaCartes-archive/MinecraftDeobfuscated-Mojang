@@ -36,6 +36,7 @@ import net.minecraft.data.recipes.packs.BundleRecipeProvider;
 import net.minecraft.data.recipes.packs.UpdateOneTwentyRecipeProvider;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
 import net.minecraft.data.registries.RegistriesDatapackGenerator;
+import net.minecraft.data.registries.UpdateOneTwentyRegistries;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.data.structures.SnbtToNbt;
@@ -132,13 +133,15 @@ public class Main {
         packGenerator2 = dataGenerator.getBuiltinDatapack(bl2, "bundle");
         packGenerator2.addProvider(BundleRecipeProvider::new);
         packGenerator2.addProvider(packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE)));
-        packGenerator2 = dataGenerator.getBuiltinDatapack(bl2, "update_1_20");
-        packGenerator2.addProvider(UpdateOneTwentyRecipeProvider::new);
-        tagsProvider = packGenerator2.addProvider(Main.bindRegistries(UpdateOneTwentyBlockTagsProvider::new, completableFuture));
-        packGenerator2.addProvider(packOutput -> new UpdateOneTwentyItemTagsProvider(packOutput, completableFuture, tagsProvider));
-        packGenerator2.addProvider(UpdateOneTwentyLootTableProvider::create);
-        packGenerator2.addProvider(Main.bindRegistries(UpdateOneTwentyVanillaAdvancementProvider::create, completableFuture));
-        packGenerator2.addProvider(packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.update_1_20.description"), FeatureFlagSet.of(FeatureFlags.UPDATE_1_20)));
+        CompletableFuture<HolderLookup.Provider> completableFuture2 = CompletableFuture.supplyAsync(UpdateOneTwentyRegistries::createLookup, Util.backgroundExecutor());
+        DataGenerator.PackGenerator packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "update_1_20");
+        packGenerator3.addProvider(UpdateOneTwentyRecipeProvider::new);
+        TagsProvider tagsProvider2 = packGenerator3.addProvider(Main.bindRegistries(UpdateOneTwentyBlockTagsProvider::new, completableFuture));
+        packGenerator3.addProvider(packOutput -> new UpdateOneTwentyItemTagsProvider(packOutput, completableFuture, tagsProvider2));
+        packGenerator3.addProvider(UpdateOneTwentyLootTableProvider::create);
+        packGenerator3.addProvider(Main.bindRegistries(UpdateOneTwentyVanillaAdvancementProvider::create, completableFuture));
+        packGenerator3.addProvider(Main.bindRegistries(RegistriesDatapackGenerator::new, completableFuture2));
+        packGenerator3.addProvider(packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.update_1_20.description"), FeatureFlagSet.of(FeatureFlags.UPDATE_1_20)));
         return dataGenerator;
     }
 }

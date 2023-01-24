@@ -73,6 +73,7 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.DigDurabilityEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -608,6 +609,9 @@ public final class ItemStack {
             this.getItem().appendHoverText(this, player == null ? null : player.level, list, tooltipFlag);
         }
         if (this.hasTag()) {
+            if (ItemStack.shouldShowInTooltip(i, TooltipPart.UPGRADES) && player != null) {
+                ArmorTrim.appendUpgradeHoverText(this, player.level.registryAccess(), list);
+            }
             if (ItemStack.shouldShowInTooltip(i, TooltipPart.ENCHANTMENTS)) {
                 ItemStack.appendEnchantmentNames(list, this.getEnchantmentTags());
             }
@@ -915,7 +919,8 @@ public final class ItemStack {
         CAN_DESTROY,
         CAN_PLACE,
         ADDITIONAL,
-        DYE;
+        DYE,
+        UPGRADES;
 
         private final int mask = 1 << this.ordinal();
 

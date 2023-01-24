@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.inventory;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ItemCombinerMenuSlotDefinition;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
@@ -19,24 +21,14 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class ItemCombinerMenu
 extends AbstractContainerMenu {
-    public static final int INPUT_SLOT = 0;
-    public static final int ADDITIONAL_SLOT = 1;
-    public static final int RESULT_SLOT = 2;
-    private static final int INV_SLOT_START = 3;
-    private static final int INV_SLOT_END = 30;
-    private static final int USE_ROW_SLOT_START = 30;
-    private static final int USE_ROW_SLOT_END = 39;
-    protected final ResultContainer resultSlots = new ResultContainer();
-    protected final Container inputSlots = new SimpleContainer(2){
-
-        @Override
-        public void setChanged() {
-            super.setChanged();
-            ItemCombinerMenu.this.slotsChanged(this);
-        }
-    };
+    private static final int INVENTORY_SLOTS_PER_ROW = 9;
+    private static final int INVENTORY_SLOTS_PER_COLUMN = 3;
     protected final ContainerLevelAccess access;
     protected final Player player;
+    protected final Container inputSlots;
+    private final List<Integer> inputSlotIndexes;
+    protected final ResultContainer resultSlots = new ResultContainer();
+    private final int resultSlotIndex;
 
     protected abstract boolean mayPickup(Player var1, boolean var2);
 
@@ -46,12 +38,31 @@ extends AbstractContainerMenu {
 
     public ItemCombinerMenu(@Nullable MenuType<?> menuType, int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
         super(menuType, i);
-        int j;
         this.access = containerLevelAccess;
         this.player = inventory.player;
-        this.addSlot(new Slot(this.inputSlots, 0, 27, 47));
-        this.addSlot(new Slot(this.inputSlots, 1, 76, 47));
-        this.addSlot(new Slot(this.resultSlots, 2, 134, 47){
+        ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition = this.createInputSlotDefinitions();
+        this.inputSlots = this.createContainer(itemCombinerMenuSlotDefinition.getNumOfInputSlots());
+        this.inputSlotIndexes = itemCombinerMenuSlotDefinition.getInputSlotIndexes();
+        this.resultSlotIndex = itemCombinerMenuSlotDefinition.getResultSlotIndex();
+        this.createInputSlots(itemCombinerMenuSlotDefinition);
+        this.createResultSlot(itemCombinerMenuSlotDefinition);
+        this.createInventorySlots(inventory);
+    }
+
+    private void createInputSlots(ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition) {
+        for (final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
+            this.addSlot(new Slot(this.inputSlots, slotDefinition.slotIndex(), slotDefinition.x(), slotDefinition.y()){
+
+                @Override
+                public boolean mayPlace(ItemStack itemStack) {
+                    return slotDefinition.mayPlace().test(itemStack);
+                }
+            });
+        }
+    }
+
+    private void createResultSlot(ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition) {
+        this.addSlot(new Slot(this.resultSlots, itemCombinerMenuSlotDefinition.getResultSlot().slotIndex(), itemCombinerMenuSlotDefinition.getResultSlot().x(), itemCombinerMenuSlotDefinition.getResultSlot().y()){
 
             @Override
             public boolean mayPlace(ItemStack itemStack) {
@@ -68,17 +79,34 @@ extends AbstractContainerMenu {
                 ItemCombinerMenu.this.onTake(player, itemStack);
             }
         });
-        for (j = 0; j < 3; ++j) {
-            for (int k = 0; k < 9; ++k) {
-                this.addSlot(new Slot(inventory, k + j * 9 + 9, 8 + k * 18, 84 + j * 18));
+    }
+
+    private void createInventorySlots(Inventory inventory) {
+        int i;
+        for (i = 0; i < 3; ++i) {
+            for (int j = 0; j < 9; ++j) {
+                this.addSlot(new Slot(inventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
             }
         }
-        for (j = 0; j < 9; ++j) {
-            this.addSlot(new Slot(inventory, j, 8 + j * 18, 142));
+        for (i = 0; i < 9; ++i) {
+            this.addSlot(new Slot(inventory, i, 8 + i * 18, 142));
         }
     }
 
     public abstract void createResult();
+
+    protected abstract ItemCombinerMenuSlotDefinition createInputSlotDefinitions();
+
+    private SimpleContainer createContainer(int i) {
+        return new SimpleContainer(i){
+
+            @Override
+            public void setChanged() {
+                super.setChanged();
+                ItemCombinerMenu.this.slotsChanged(this);
+            }
+        };
+    }
 
     @Override
     public void slotsChanged(Container container) {
@@ -104,32 +132,23 @@ extends AbstractContainerMenu {
         }, true);
     }
 
-    protected boolean shouldQuickMoveToAdditionalSlot(ItemStack itemStack) {
-        return false;
-    }
-
     @Override
     public ItemStack quickMoveStack(Player player, int i) {
         ItemStack itemStack = ItemStack.EMPTY;
         Slot slot = (Slot)this.slots.get(i);
         if (slot != null && slot.hasItem()) {
+            int l;
             ItemStack itemStack2 = slot.getItem();
             itemStack = itemStack2.copy();
-            if (i == 2) {
-                if (!this.moveItemStackTo(itemStack2, 3, 39, true)) {
+            int j = this.getInventorySlotStart();
+            int k = this.getUseRowEnd();
+            if (i == this.getResultSlot()) {
+                if (!this.moveItemStackTo(itemStack2, j, k, true)) {
                     return ItemStack.EMPTY;
                 }
                 slot.onQuickCraft(itemStack2, itemStack);
-            } else if (i == 0 || i == 1) {
-                if (!this.moveItemStackTo(itemStack2, 3, 39, false)) {
-                    return ItemStack.EMPTY;
-                }
-            } else if (i >= 3 && i < 39) {
-                int j;
-                int n = j = this.shouldQuickMoveToAdditionalSlot(itemStack) ? 1 : 0;
-                if (!this.moveItemStackTo(itemStack2, j, 2, false)) {
-                    return ItemStack.EMPTY;
-                }
+            } else if (this.inputSlotIndexes.contains(i) ? !this.moveItemStackTo(itemStack2, j, k, false) : (this.canMoveIntoInputSlots(itemStack2) && i >= this.getInventorySlotStart() && i < this.getUseRowEnd() ? !this.moveItemStackTo(itemStack2, l = this.getSlotToQuickMoveTo(itemStack), l + 1, false) : (i >= this.getInventorySlotStart() && i < this.getInventorySlotEnd() ? !this.moveItemStackTo(itemStack2, this.getUseRowStart(), this.getUseRowEnd(), false) : i >= this.getUseRowStart() && i < this.getUseRowEnd() && !this.moveItemStackTo(itemStack2, this.getInventorySlotStart(), this.getInventorySlotEnd(), false)))) {
+                return ItemStack.EMPTY;
             }
             if (itemStack2.isEmpty()) {
                 slot.set(ItemStack.EMPTY);
@@ -142,6 +161,34 @@ extends AbstractContainerMenu {
             slot.onTake(player, itemStack2);
         }
         return itemStack;
+    }
+
+    protected boolean canMoveIntoInputSlots(ItemStack itemStack) {
+        return true;
+    }
+
+    public int getSlotToQuickMoveTo(ItemStack itemStack) {
+        return this.inputSlots.isEmpty() ? 0 : this.inputSlotIndexes.get(0);
+    }
+
+    public int getResultSlot() {
+        return this.resultSlotIndex;
+    }
+
+    private int getInventorySlotStart() {
+        return this.getResultSlot() + 1;
+    }
+
+    private int getInventorySlotEnd() {
+        return this.getInventorySlotStart() + 27;
+    }
+
+    private int getUseRowStart() {
+        return this.getInventorySlotEnd();
+    }
+
+    private int getUseRowEnd() {
+        return this.getUseRowStart() + 9;
     }
 }
 

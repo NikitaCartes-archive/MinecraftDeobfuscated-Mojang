@@ -1089,7 +1089,7 @@ implements AutoCloseable {
         poseStack.mulPose(Axis.XP.rotationDegrees(6.0f * Mth.cos(g * 8.0f)));
         poseStack.mulPose(Axis.ZP.rotationDegrees(6.0f * Mth.cos(g * 8.0f)));
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
-        this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, 0);
+        this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, this.minecraft.level, 0);
         poseStack.popPose();
         bufferSource.endBatch();
         RenderSystem.enableCull();

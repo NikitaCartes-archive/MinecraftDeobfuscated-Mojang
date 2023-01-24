@@ -37,7 +37,7 @@ extends EntityRenderer<FireworkRocketEntity> {
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0f));
             poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
         }
-        this.itemRenderer.renderStatic(fireworkRocketEntity.getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, fireworkRocketEntity.getId());
+        this.itemRenderer.renderStatic(fireworkRocketEntity.getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, fireworkRocketEntity.level, fireworkRocketEntity.getId());
         poseStack.popPose();
         super.render(fireworkRocketEntity, f, g, poseStack, multiBufferSource, i);
     }

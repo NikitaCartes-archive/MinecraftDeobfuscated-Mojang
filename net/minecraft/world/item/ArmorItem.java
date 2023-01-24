@@ -5,8 +5,10 @@ package net.minecraft.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.UUID;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
@@ -37,7 +39,12 @@ import org.jetbrains.annotations.Nullable;
 public class ArmorItem
 extends Item
 implements Wearable {
-    private static final UUID[] ARMOR_MODIFIER_UUID_PER_SLOT = new UUID[]{UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"), UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"), UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"), UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150")};
+    private static final EnumMap<Type, UUID> ARMOR_MODIFIER_UUID_PER_TYPE = Util.make(new EnumMap(Type.class), enumMap -> {
+        enumMap.put(Type.BOOTS, UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"));
+        enumMap.put(Type.LEGGINGS, UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"));
+        enumMap.put(Type.CHESTPLATE, UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"));
+        enumMap.put(Type.HELMET, UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150"));
+    });
     public static final DispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior(){
 
         @Override
@@ -45,7 +52,7 @@ implements Wearable {
             return ArmorItem.dispenseArmor(blockSource, itemStack) ? itemStack : super.execute(blockSource, itemStack);
         }
     };
-    protected final EquipmentSlot slot;
+    protected final Type type;
     private final int defense;
     private final float toughness;
     protected final float knockbackResistance;
@@ -69,16 +76,16 @@ implements Wearable {
         return true;
     }
 
-    public ArmorItem(ArmorMaterial armorMaterial, EquipmentSlot equipmentSlot, Item.Properties properties) {
-        super(properties.defaultDurability(armorMaterial.getDurabilityForSlot(equipmentSlot)));
+    public ArmorItem(ArmorMaterial armorMaterial, Type type, Item.Properties properties) {
+        super(properties.defaultDurability(armorMaterial.getDurabilityForType(type)));
         this.material = armorMaterial;
-        this.slot = equipmentSlot;
-        this.defense = armorMaterial.getDefenseForSlot(equipmentSlot);
+        this.type = type;
+        this.defense = armorMaterial.getDefenseForType(type);
         this.toughness = armorMaterial.getToughness();
         this.knockbackResistance = armorMaterial.getKnockbackResistance();
         DispenserBlock.registerBehavior(this, DISPENSE_ITEM_BEHAVIOR);
         ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        UUID uUID = ARMOR_MODIFIER_UUID_PER_SLOT[equipmentSlot.getIndex()];
+        UUID uUID = ARMOR_MODIFIER_UUID_PER_TYPE.get((Object)type);
         builder.put(Attributes.ARMOR, new AttributeModifier(uUID, "Armor modifier", (double)this.defense, AttributeModifier.Operation.ADDITION));
         builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uUID, "Armor toughness", (double)this.toughness, AttributeModifier.Operation.ADDITION));
         if (armorMaterial == ArmorMaterials.NETHERITE) {
@@ -87,8 +94,12 @@ implements Wearable {
         this.defaultModifiers = builder.build();
     }
 
+    public Type getType() {
+        return this.type;
+    }
+
     public EquipmentSlot getSlot() {
-        return this.slot;
+        return this.type.getSlot();
     }
 
     @Override
@@ -123,7 +134,7 @@ implements Wearable {
 
     @Override
     public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-        if (equipmentSlot == this.slot) {
+        if (equipmentSlot == this.type.getSlot()) {
             return this.defaultModifiers;
         }
         return super.getDefaultAttributeModifiers(equipmentSlot);
@@ -141,6 +152,29 @@ implements Wearable {
     @Nullable
     public SoundEvent getEquipSound() {
         return this.getMaterial().getEquipSound();
+    }
+
+    public static enum Type {
+        HELMET(EquipmentSlot.HEAD, "helmet"),
+        CHESTPLATE(EquipmentSlot.CHEST, "chestplate"),
+        LEGGINGS(EquipmentSlot.LEGS, "leggings"),
+        BOOTS(EquipmentSlot.FEET, "boots");
+
+        private final EquipmentSlot slot;
+        private final String name;
+
+        private Type(EquipmentSlot equipmentSlot, String string2) {
+            this.slot = equipmentSlot;
+            this.name = string2;
+        }
+
+        public EquipmentSlot getSlot() {
+            return this.slot;
+        }
+
+        public String getName() {
+            return this.name;
+        }
     }
 }
 

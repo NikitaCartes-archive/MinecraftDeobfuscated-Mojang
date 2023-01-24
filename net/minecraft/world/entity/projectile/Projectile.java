@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -26,7 +27,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Projectile
-extends Entity {
+extends Entity
+implements TraceableEntity {
     @Nullable
     private UUID ownerUUID;
     @Nullable
@@ -45,6 +47,7 @@ extends Entity {
         }
     }
 
+    @Override
     @Nullable
     public Entity getOwner() {
         if (this.cachedOwner != null && !this.cachedOwner.isRemoved()) {

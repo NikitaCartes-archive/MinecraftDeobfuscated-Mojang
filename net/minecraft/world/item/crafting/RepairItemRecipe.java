@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -41,7 +42,7 @@ extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer craftingContainer) {
+    public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
         ItemStack itemStack3;
         ItemStack itemStack;
         ArrayList<ItemStack> list = Lists.newArrayList();

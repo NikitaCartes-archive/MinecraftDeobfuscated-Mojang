@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 
 public interface FeatureElement {
-    public static final Set<ResourceKey<? extends Registry<? extends FeatureElement>>> FILTERED_REGISTRIES = Set.of(Registries.ITEM, Registries.BLOCK, Registries.ENTITY_TYPE);
+    public static final Set<ResourceKey<? extends Registry<? extends FeatureElement>>> FILTERED_REGISTRIES = Set.of(Registries.ITEM, Registries.BLOCK, Registries.ENTITY_TYPE, Registries.MENU);
 
     public FeatureFlagSet requiredFeatures();
 

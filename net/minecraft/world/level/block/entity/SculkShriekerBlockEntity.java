@@ -121,7 +121,7 @@ implements VibrationListener.VibrationListenerConfig {
             serverPlayer2 = (ServerPlayer)entity2;
             return serverPlayer2;
         }
-        if (entity instanceof ItemEntity && (entity2 = (itemEntity = (ItemEntity)entity).getThrowingEntity()) instanceof ServerPlayer) {
+        if (entity instanceof ItemEntity && (entity2 = (itemEntity = (ItemEntity)entity).getOwner()) instanceof ServerPlayer) {
             serverPlayer2 = (ServerPlayer)entity2;
             return serverPlayer2;
         }

@@ -49,7 +49,7 @@ public class GiveCommand {
                     itemEntity = serverPlayer.drop(itemStack, false);
                     if (itemEntity == null) continue;
                     itemEntity.setNoPickUpDelay();
-                    itemEntity.setOwner(serverPlayer.getUUID());
+                    itemEntity.setTarget(serverPlayer.getUUID());
                     continue;
                 }
                 itemStack.setCount(1);

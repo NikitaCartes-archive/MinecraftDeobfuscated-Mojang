@@ -14,7 +14,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
 import net.minecraft.client.renderer.texture.atlas.SpriteSources;
-import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -25,7 +24,6 @@ public class SingleFile
 implements SpriteSource {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final Codec<SingleFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.fieldOf("resource")).forGetter(singleFile -> singleFile.resourceId), ResourceLocation.CODEC.optionalFieldOf("sprite").forGetter(singleFile -> singleFile.spriteId)).apply((Applicative<SingleFile, ?>)instance, SingleFile::new));
-    private final FileToIdConverter TEXTURE_ID_CONVERTER = new FileToIdConverter("textures", ".png");
     private final ResourceLocation resourceId;
     private final Optional<ResourceLocation> spriteId;
 
@@ -36,7 +34,7 @@ implements SpriteSource {
 
     @Override
     public void run(ResourceManager resourceManager, SpriteSource.Output output) {
-        ResourceLocation resourceLocation = this.TEXTURE_ID_CONVERTER.idToFile(this.resourceId);
+        ResourceLocation resourceLocation = TEXTURE_ID_CONVERTER.idToFile(this.resourceId);
         Optional<Resource> optional = resourceManager.getResource(resourceLocation);
         if (optional.isPresent()) {
             output.add(this.spriteId.orElse(this.resourceId), optional.get());

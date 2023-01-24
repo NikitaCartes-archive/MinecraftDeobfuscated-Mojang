@@ -104,7 +104,7 @@ extends EntityRenderer<T> {
             } else {
                 int l = this.getLightVal(itemFrame, 0xF000F0, i);
                 poseStack.scale(0.5f, 0.5f, 0.5f);
-                this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, l, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, ((Entity)itemFrame).getId());
+                this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, l, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, ((ItemFrame)itemFrame).level, ((Entity)itemFrame).getId());
             }
         }
         poseStack.popPose();

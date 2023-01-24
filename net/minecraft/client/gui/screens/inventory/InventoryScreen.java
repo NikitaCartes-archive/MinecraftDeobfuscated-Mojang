@@ -25,6 +25,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.Slot;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 @Environment(value=EnvType.CLIENT)
@@ -104,24 +105,15 @@ implements RecipeUpdateListener {
         int k = this.leftPos;
         int l = this.topPos;
         this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
-        InventoryScreen.renderEntityInInventory(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
+        InventoryScreen.renderEntityInInventoryFollowsMouse(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
     }
 
-    public static void renderEntityInInventory(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
+    public static void renderEntityInInventoryFollowsMouse(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
         float h = (float)Math.atan(f / 40.0f);
         float l = (float)Math.atan(g / 40.0f);
-        PoseStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.pushPose();
-        poseStack.translate(i, j, 1050.0f);
-        poseStack.scale(1.0f, 1.0f, -1.0f);
-        RenderSystem.applyModelViewMatrix();
-        PoseStack poseStack2 = new PoseStack();
-        poseStack2.translate(0.0f, 0.0f, 1000.0f);
-        poseStack2.scale(k, k, k);
         Quaternionf quaternionf = new Quaternionf().rotateZ((float)Math.PI);
         Quaternionf quaternionf2 = new Quaternionf().rotateX(l * 20.0f * ((float)Math.PI / 180));
         quaternionf.mul(quaternionf2);
-        poseStack2.mulPose(quaternionf);
         float m = livingEntity.yBodyRot;
         float n = livingEntity.getYRot();
         float o = livingEntity.getXRot();
@@ -132,20 +124,35 @@ implements RecipeUpdateListener {
         livingEntity.setXRot(-l * 20.0f);
         livingEntity.yHeadRot = livingEntity.getYRot();
         livingEntity.yHeadRotO = livingEntity.getYRot();
-        Lighting.setupForEntityInInventory();
-        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        quaternionf2.conjugate();
-        entityRenderDispatcher.overrideCameraOrientation(quaternionf2);
-        entityRenderDispatcher.setRenderShadow(false);
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, poseStack2, bufferSource, 0xF000F0));
-        bufferSource.endBatch();
-        entityRenderDispatcher.setRenderShadow(true);
+        InventoryScreen.renderEntityInInventory(i, j, k, quaternionf, quaternionf2, livingEntity);
         livingEntity.yBodyRot = m;
         livingEntity.setYRot(n);
         livingEntity.setXRot(o);
         livingEntity.yHeadRotO = p;
         livingEntity.yHeadRot = q;
+    }
+
+    public static void renderEntityInInventory(int i, int j, int k, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity) {
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
+        poseStack.translate(i, j, 1050.0f);
+        poseStack.scale(1.0f, 1.0f, -1.0f);
+        RenderSystem.applyModelViewMatrix();
+        PoseStack poseStack2 = new PoseStack();
+        poseStack2.translate(0.0f, 0.0f, 1000.0f);
+        poseStack2.scale(k, k, k);
+        poseStack2.mulPose(quaternionf);
+        Lighting.setupForEntityInInventory();
+        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        if (quaternionf2 != null) {
+            quaternionf2.conjugate();
+            entityRenderDispatcher.overrideCameraOrientation(quaternionf2);
+        }
+        entityRenderDispatcher.setRenderShadow(false);
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, poseStack2, bufferSource, 0xF000F0));
+        bufferSource.endBatch();
+        entityRenderDispatcher.setRenderShadow(true);
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();

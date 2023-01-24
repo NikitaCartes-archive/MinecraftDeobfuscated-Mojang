@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ItemOverrides {
     public static final ItemOverrides EMPTY = new ItemOverrides();
+    public static final float NO_OVERRIDE = Float.NEGATIVE_INFINITY;
     private final BakedOverride[] overrides;
     private final ResourceLocation[] properties;
 

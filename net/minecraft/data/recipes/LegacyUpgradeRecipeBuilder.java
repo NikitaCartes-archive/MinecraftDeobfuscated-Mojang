@@ -20,7 +20,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.jetbrains.annotations.Nullable;
 
-public class UpgradeRecipeBuilder {
+@Deprecated(forRemoval=true)
+public class LegacyUpgradeRecipeBuilder {
     private final Ingredient base;
     private final Ingredient addition;
     private final RecipeCategory category;
@@ -28,7 +29,7 @@ public class UpgradeRecipeBuilder {
     private final Advancement.Builder advancement = Advancement.Builder.advancement();
     private final RecipeSerializer<?> type;
 
-    public UpgradeRecipeBuilder(RecipeSerializer<?> recipeSerializer, Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
+    public LegacyUpgradeRecipeBuilder(RecipeSerializer<?> recipeSerializer, Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
         this.category = recipeCategory;
         this.type = recipeSerializer;
         this.base = ingredient;
@@ -36,11 +37,11 @@ public class UpgradeRecipeBuilder {
         this.result = item;
     }
 
-    public static UpgradeRecipeBuilder smithing(Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
-        return new UpgradeRecipeBuilder(RecipeSerializer.SMITHING, ingredient, ingredient2, recipeCategory, item);
+    public static LegacyUpgradeRecipeBuilder smithing(Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
+        return new LegacyUpgradeRecipeBuilder(RecipeSerializer.SMITHING, ingredient, ingredient2, recipeCategory, item);
     }
 
-    public UpgradeRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
+    public LegacyUpgradeRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
         this.advancement.addCriterion(string, criterionTriggerInstance);
         return this;
     }

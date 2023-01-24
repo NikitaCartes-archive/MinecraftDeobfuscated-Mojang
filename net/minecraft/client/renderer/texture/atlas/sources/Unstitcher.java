@@ -9,12 +9,8 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -22,9 +18,9 @@ import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
 import net.minecraft.client.renderer.texture.atlas.SpriteSources;
+import net.minecraft.client.renderer.texture.atlas.sources.LazyLoadedImage;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
-import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -36,7 +32,6 @@ import org.slf4j.Logger;
 public class Unstitcher
 implements SpriteSource {
     static final Logger LOGGER = LogUtils.getLogger();
-    private final FileToIdConverter TEXTURE_ID_CONVERTER = new FileToIdConverter("textures", ".png");
     public static final Codec<Unstitcher> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.fieldOf("resource")).forGetter(unstitcher -> unstitcher.resource), ((MapCodec)ExtraCodecs.nonEmptyList(Region.CODEC.listOf()).fieldOf("regions")).forGetter(unstitcher -> unstitcher.regions), Codec.DOUBLE.optionalFieldOf("divisor_x", 1.0).forGetter(unstitcher -> unstitcher.xDivisor), Codec.DOUBLE.optionalFieldOf("divisor_y", 1.0).forGetter(unstitcher -> unstitcher.yDivisor)).apply((Applicative<Unstitcher, ?>)instance, Unstitcher::new));
     private final ResourceLocation resource;
     private final List<Region> regions;
@@ -52,7 +47,7 @@ implements SpriteSource {
 
     @Override
     public void run(ResourceManager resourceManager, SpriteSource.Output output) {
-        ResourceLocation resourceLocation = this.TEXTURE_ID_CONVERTER.idToFile(this.resource);
+        ResourceLocation resourceLocation = TEXTURE_ID_CONVERTER.idToFile(this.resource);
         Optional<Resource> optional = resourceManager.getResource(resourceLocation);
         if (optional.isPresent()) {
             LazyLoadedImage lazyLoadedImage = new LazyLoadedImage(resourceLocation, optional.get(), this.regions.size());
@@ -67,50 +62,6 @@ implements SpriteSource {
     @Override
     public SpriteSourceType type() {
         return SpriteSources.UNSTITCHER;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class LazyLoadedImage {
-        private final ResourceLocation id;
-        private final Resource resource;
-        private final AtomicReference<NativeImage> image = new AtomicReference();
-        private final AtomicInteger referenceCount;
-
-        LazyLoadedImage(ResourceLocation resourceLocation, Resource resource, int i) {
-            this.id = resourceLocation;
-            this.resource = resource;
-            this.referenceCount = new AtomicInteger(i);
-        }
-
-        /*
-         * WARNING - Removed try catching itself - possible behaviour change.
-         */
-        public NativeImage get() throws IOException {
-            NativeImage nativeImage = this.image.get();
-            if (nativeImage == null) {
-                LazyLoadedImage lazyLoadedImage = this;
-                synchronized (lazyLoadedImage) {
-                    nativeImage = this.image.get();
-                    if (nativeImage == null) {
-                        try (InputStream inputStream = this.resource.open();){
-                            nativeImage = NativeImage.read(inputStream);
-                            this.image.set(nativeImage);
-                        } catch (IOException iOException) {
-                            throw new IOException("Failed to load image " + this.id, iOException);
-                        }
-                    }
-                }
-            }
-            return nativeImage;
-        }
-
-        public void release() {
-            NativeImage nativeImage;
-            int i = this.referenceCount.decrementAndGet();
-            if (i <= 0 && (nativeImage = (NativeImage)this.image.getAndSet(null)) != null) {
-                nativeImage.close();
-            }
-        }
     }
 
     @Environment(value=EnvType.CLIENT)

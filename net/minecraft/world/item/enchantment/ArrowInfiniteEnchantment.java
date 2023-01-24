@@ -25,11 +25,6 @@ extends Enchantment {
     }
 
     @Override
-    public int getMaxLevel() {
-        return 1;
-    }
-
-    @Override
     public boolean checkCompatibility(Enchantment enchantment) {
         if (enchantment instanceof MendingEnchantment) {
             return false;

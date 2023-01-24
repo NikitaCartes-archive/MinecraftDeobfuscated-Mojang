@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 
@@ -64,6 +65,10 @@ public interface EntityRendererProvider<T extends Entity> {
 
         public EntityModelSet getModelSet() {
             return this.modelSet;
+        }
+
+        public ModelManager getModelManager() {
+            return this.blockRenderDispatcher.getBlockModelShaper().getModelManager();
         }
 
         public ModelPart bakeLayer(ModelLayerLocation modelLayerLocation) {

@@ -91,6 +91,9 @@ public final class ItemTags {
     public static final TagKey<Item> HANGING_SIGNS = ItemTags.bind("hanging_signs");
     public static final TagKey<Item> CREEPER_IGNITERS = ItemTags.bind("creeper_igniters");
     public static final TagKey<Item> NOTE_BLOCK_TOP_INSTRUMENTS = ItemTags.bind("noteblock_top_instruments");
+    public static final TagKey<Item> TRIMMABLE_ARMOR = ItemTags.bind("trimmable_armor");
+    public static final TagKey<Item> TRIM_MATERIALS = ItemTags.bind("trim_materials");
+    public static final TagKey<Item> TRIM_TEMPLATES = ItemTags.bind("trim_templates");
 
     private ItemTags() {
     }

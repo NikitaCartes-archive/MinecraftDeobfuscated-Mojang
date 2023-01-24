@@ -5,6 +5,7 @@ package net.minecraft.world.item.crafting;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
@@ -49,7 +50,7 @@ extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer craftingContainer) {
+    public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
         ArrayList<Integer> list = Lists.newArrayList();
         ItemStack itemStack = null;
         for (int i = 0; i < craftingContainer.getContainerSize(); ++i) {

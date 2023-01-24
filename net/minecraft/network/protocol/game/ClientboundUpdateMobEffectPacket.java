@@ -4,6 +4,7 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -49,7 +50,7 @@ implements Packet<ClientGamePacketListener> {
         this.effectAmplifier = friendlyByteBuf2.readByte();
         this.effectDurationTicks = friendlyByteBuf2.readVarInt();
         this.flags = friendlyByteBuf2.readByte();
-        this.factorData = (MobEffectInstance.FactorData)friendlyByteBuf2.readNullable(friendlyByteBuf -> friendlyByteBuf.readWithCodec(MobEffectInstance.FactorData.CODEC));
+        this.factorData = (MobEffectInstance.FactorData)friendlyByteBuf2.readNullable(friendlyByteBuf -> friendlyByteBuf.readWithCodec(NbtOps.INSTANCE, MobEffectInstance.FactorData.CODEC));
     }
 
     @Override
@@ -59,7 +60,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf2.writeByte(this.effectAmplifier);
         friendlyByteBuf2.writeVarInt(this.effectDurationTicks);
         friendlyByteBuf2.writeByte(this.flags);
-        friendlyByteBuf2.writeNullable(this.factorData, (friendlyByteBuf, factorData) -> friendlyByteBuf.writeWithCodec(MobEffectInstance.FactorData.CODEC, factorData));
+        friendlyByteBuf2.writeNullable(this.factorData, (friendlyByteBuf, factorData) -> friendlyByteBuf.writeWithCodec(NbtOps.INSTANCE, MobEffectInstance.FactorData.CODEC, factorData));
     }
 
     @Override

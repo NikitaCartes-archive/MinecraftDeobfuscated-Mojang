@@ -80,7 +80,7 @@ extends AbstractContainerScreen<StonecutterMenu> {
                 int p = k + o % 4 * 16;
                 int q = l + o / 4 * 18 + 2;
                 if (i < p || i >= p + 16 || j < q || j >= q + 18) continue;
-                this.renderTooltip(poseStack, list.get(n).getResultItem(), i, j);
+                this.renderTooltip(poseStack, list.get(n).getResultItem(this.minecraft.level.registryAccess()), i, j);
             }
         }
     }
@@ -108,7 +108,7 @@ extends AbstractContainerScreen<StonecutterMenu> {
             int n = i + m % 4 * 16;
             int o = m / 4;
             int p = j + o * 18 + 2;
-            this.minecraft.getItemRenderer().renderAndDecorateItem(list.get(l).getResultItem(), n, p);
+            this.minecraft.getItemRenderer().renderAndDecorateItem(list.get(l).getResultItem(this.minecraft.level.registryAccess()), n, p);
         }
     }
 

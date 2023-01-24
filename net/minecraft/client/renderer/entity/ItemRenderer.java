@@ -75,12 +75,14 @@ implements ResourceManagerReloadListener {
     private static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
     public static final ModelResourceLocation SPYGLASS_IN_HAND_MODEL = ModelResourceLocation.vanilla("spyglass_in_hand", "inventory");
     public float blitOffset;
+    private final Minecraft minecraft;
     private final ItemModelShaper itemModelShaper;
     private final TextureManager textureManager;
     private final ItemColors itemColors;
     private final BlockEntityWithoutLevelRenderer blockEntityRenderer;
 
-    public ItemRenderer(TextureManager textureManager, ModelManager modelManager, ItemColors itemColors, BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer) {
+    public ItemRenderer(Minecraft minecraft, TextureManager textureManager, ModelManager modelManager, ItemColors itemColors, BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer) {
+        this.minecraft = minecraft;
         this.textureManager = textureManager;
         this.itemModelShaper = new ItemModelShaper(modelManager);
         this.blockEntityRenderer = blockEntityWithoutLevelRenderer;
@@ -201,8 +203,8 @@ implements ResourceManagerReloadListener {
         return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
     }
 
-    public void renderStatic(ItemStack itemStack, ItemTransforms.TransformType transformType, int i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource, int k) {
-        this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, null, i, j, k);
+    public void renderStatic(ItemStack itemStack, ItemTransforms.TransformType transformType, int i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource, @Nullable Level level, int k) {
+        this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, level, i, j, k);
     }
 
     public void renderStatic(@Nullable LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, @Nullable Level level, int i, int j, int k) {
@@ -231,7 +233,7 @@ implements ResourceManagerReloadListener {
         poseStack.scale(16.0f, 16.0f, 16.0f);
         RenderSystem.applyModelViewMatrix();
         PoseStack poseStack2 = new PoseStack();
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
         boolean bl2 = bl = !bakedModel.usesBlockLight();
         if (bl) {
             Lighting.setupForFlatItems();
@@ -247,34 +249,34 @@ implements ResourceManagerReloadListener {
     }
 
     public void renderAndDecorateItem(ItemStack itemStack, int i, int j) {
-        this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, 0);
+        this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, 0);
     }
 
     public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k) {
-        this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k);
+        this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, k);
     }
 
     public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k, int l) {
-        this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k, l);
+        this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, k, l);
     }
 
     public void renderAndDecorateFakeItem(ItemStack itemStack, int i, int j) {
-        this.tryRenderGuiItem(null, itemStack, i, j, 0);
+        this.tryRenderGuiItem(null, this.minecraft.level, itemStack, i, j, 0);
     }
 
     public void renderAndDecorateItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
-        this.tryRenderGuiItem(livingEntity, itemStack, i, j, k);
+        this.tryRenderGuiItem(livingEntity, livingEntity.level, itemStack, i, j, k);
     }
 
-    private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
-        this.tryRenderGuiItem(livingEntity, itemStack, i, j, k, 0);
+    private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k) {
+        this.tryRenderGuiItem(livingEntity, level, itemStack, i, j, k, 0);
     }
 
-    private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k, int l) {
+    private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k, int l) {
         if (itemStack.isEmpty()) {
             return;
         }
-        BakedModel bakedModel = this.getModel(itemStack, null, livingEntity, k);
+        BakedModel bakedModel = this.getModel(itemStack, level, livingEntity, k);
         this.blitOffset = bakedModel.isGui3d() ? this.blitOffset + 50.0f + (float)l : this.blitOffset + 50.0f;
         try {
             this.renderGuiItem(itemStack, i, j, bakedModel);
@@ -320,7 +322,7 @@ implements ResourceManagerReloadListener {
             GuiComponent.fill(poseStack, m, n, m + k, n + 1, l | 0xFF000000);
             RenderSystem.enableDepthTest();
         }
-        float f2 = f = (localPlayer = Minecraft.getInstance().player) == null ? 0.0f : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), Minecraft.getInstance().getFrameTime());
+        float f2 = f = (localPlayer = this.minecraft.player) == null ? 0.0f : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), this.minecraft.getFrameTime());
         if (f > 0.0f) {
             RenderSystem.disableDepthTest();
             m = j + Mth.floor(16.0f * (1.0f - f));

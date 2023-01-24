@@ -10,12 +10,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(value=EnvType.CLIENT)
 public interface SpriteSource {
+    public static final FileToIdConverter TEXTURE_ID_CONVERTER = new FileToIdConverter("textures", ".png");
+
     public void run(ResourceManager var1, Output var2);
 
     public SpriteSourceType type();

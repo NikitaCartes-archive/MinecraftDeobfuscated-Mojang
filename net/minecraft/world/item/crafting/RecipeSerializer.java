@@ -16,6 +16,7 @@ import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.FireworkRocketRecipe;
 import net.minecraft.world.item.crafting.FireworkStarFadeRecipe;
 import net.minecraft.world.item.crafting.FireworkStarRecipe;
+import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
 import net.minecraft.world.item.crafting.MapCloningRecipe;
 import net.minecraft.world.item.crafting.MapExtendingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
@@ -28,11 +29,12 @@ import net.minecraft.world.item.crafting.SimpleCookingSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import net.minecraft.world.item.crafting.SmithingTrimRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.item.crafting.SuspiciousStewRecipe;
 import net.minecraft.world.item.crafting.TippedArrowRecipe;
-import net.minecraft.world.item.crafting.UpgradeRecipe;
 
 public interface RecipeSerializer<T extends Recipe<?>> {
     public static final RecipeSerializer<ShapedRecipe> SHAPED_RECIPE = RecipeSerializer.register("crafting_shaped", new ShapedRecipe.Serializer());
@@ -55,7 +57,9 @@ public interface RecipeSerializer<T extends Recipe<?>> {
     public static final RecipeSerializer<SmokingRecipe> SMOKING_RECIPE = RecipeSerializer.register("smoking", new SimpleCookingSerializer<SmokingRecipe>(SmokingRecipe::new, 100));
     public static final RecipeSerializer<CampfireCookingRecipe> CAMPFIRE_COOKING_RECIPE = RecipeSerializer.register("campfire_cooking", new SimpleCookingSerializer<CampfireCookingRecipe>(CampfireCookingRecipe::new, 100));
     public static final RecipeSerializer<StonecutterRecipe> STONECUTTER = RecipeSerializer.register("stonecutting", new SingleItemRecipe.Serializer<StonecutterRecipe>(StonecutterRecipe::new));
-    public static final RecipeSerializer<UpgradeRecipe> SMITHING = RecipeSerializer.register("smithing", new UpgradeRecipe.Serializer());
+    public static final RecipeSerializer<LegacyUpgradeRecipe> SMITHING = RecipeSerializer.register("smithing", new LegacyUpgradeRecipe.Serializer());
+    public static final RecipeSerializer<SmithingTransformRecipe> SMITHING_TRANSFORM = RecipeSerializer.register("smithing_transform", new SmithingTransformRecipe.Serializer());
+    public static final RecipeSerializer<SmithingTrimRecipe> SMITHING_TRIM = RecipeSerializer.register("smithing_trim", new SmithingTrimRecipe.Serializer());
 
     public T fromJson(ResourceLocation var1, JsonObject var2);
 

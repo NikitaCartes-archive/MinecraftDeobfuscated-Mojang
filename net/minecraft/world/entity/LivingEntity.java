@@ -2459,10 +2459,9 @@ extends Entity {
     }
 
     public void onItemPickup(ItemEntity itemEntity) {
-        Player player;
-        Player player2 = player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
-        if (player instanceof ServerPlayer) {
-            CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)player, itemEntity.getItem(), this);
+        Entity entity = itemEntity.getOwner();
+        if (entity instanceof ServerPlayer) {
+            CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)entity, itemEntity.getItem(), this);
         }
     }
 

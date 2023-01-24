@@ -18,6 +18,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
@@ -35,11 +36,11 @@ extends RecipeBook {
     private Map<RecipeBookCategories, List<RecipeCollection>> collectionsByTab = ImmutableMap.of();
     private List<RecipeCollection> allCollections = ImmutableList.of();
 
-    public void setupCollections(Iterable<Recipe<?>> iterable) {
+    public void setupCollections(Iterable<Recipe<?>> iterable, RegistryAccess registryAccess) {
         Map<RecipeBookCategories, List<List<Recipe<?>>>> map = ClientRecipeBook.categorizeAndGroupRecipes(iterable);
         HashMap map2 = Maps.newHashMap();
         ImmutableList.Builder builder = ImmutableList.builder();
-        map.forEach((recipeBookCategories, list) -> map2.put(recipeBookCategories, (List)list.stream().map(RecipeCollection::new).peek(builder::add).collect(ImmutableList.toImmutableList())));
+        map.forEach((recipeBookCategories, list2) -> map2.put(recipeBookCategories, (List)list2.stream().map(list -> new RecipeCollection(registryAccess, (List<Recipe<?>>)list)).peek(builder::add).collect(ImmutableList.toImmutableList())));
         RecipeBookCategories.AGGREGATE_CATEGORIES.forEach((recipeBookCategories2, list) -> map2.put(recipeBookCategories2, (List)list.stream().flatMap(recipeBookCategories -> ((List)map2.getOrDefault(recipeBookCategories, ImmutableList.of())).stream()).collect(ImmutableList.toImmutableList())));
         this.collectionsByTab = ImmutableMap.copyOf(map2);
         this.allCollections = builder.build();

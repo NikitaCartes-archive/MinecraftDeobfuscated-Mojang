@@ -55,7 +55,7 @@ implements Clearable {
             bl = true;
             int n = i;
             campfireBlockEntity.cookingProgress[n] = campfireBlockEntity.cookingProgress[n] + 1;
-            if (campfireBlockEntity.cookingProgress[i] < campfireBlockEntity.cookingTime[i] || !(itemStack2 = campfireBlockEntity.quickCheck.getRecipeFor(container = new SimpleContainer(itemStack), level).map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container)).orElse(itemStack)).isItemEnabled(level.enabledFeatures())) continue;
+            if (campfireBlockEntity.cookingProgress[i] < campfireBlockEntity.cookingTime[i] || !(itemStack2 = campfireBlockEntity.quickCheck.getRecipeFor(container = new SimpleContainer(itemStack), level).map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container, level.registryAccess())).orElse(itemStack)).isItemEnabled(level.enabledFeatures())) continue;
             Containers.dropItemStack(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), itemStack2);
             campfireBlockEntity.items.set(i, ItemStack.EMPTY);
             level.sendBlockUpdated(blockPos, blockState, blockState, 3);

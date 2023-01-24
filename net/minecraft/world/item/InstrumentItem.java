@@ -93,7 +93,7 @@ extends Item {
     private Optional<? extends Holder<Instrument>> getInstrument(ItemStack itemStack) {
         ResourceLocation resourceLocation;
         CompoundTag compoundTag = itemStack.getTag();
-        if (compoundTag != null && compoundTag.contains(TAG_INSTRUMENT, 28) && (resourceLocation = ResourceLocation.tryParse(compoundTag.getString(TAG_INSTRUMENT))) != null) {
+        if (compoundTag != null && compoundTag.contains(TAG_INSTRUMENT, 8) && (resourceLocation = ResourceLocation.tryParse(compoundTag.getString(TAG_INSTRUMENT))) != null) {
             return BuiltInRegistries.INSTRUMENT.getHolder(ResourceKey.create(Registries.INSTRUMENT, resourceLocation));
         }
         Iterator<Holder<Instrument>> iterator = BuiltInRegistries.INSTRUMENT.getTagOrEmpty(this.instruments).iterator();

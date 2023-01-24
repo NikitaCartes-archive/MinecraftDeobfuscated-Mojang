@@ -9,10 +9,14 @@ import java.util.Set;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -21,8 +25,10 @@ import org.jetbrains.annotations.Nullable;
 
 public record ClientboundLoginPacket(int playerId, boolean hardcore, GameType gameType, @Nullable GameType previousGameType, Set<ResourceKey<Level>> levels, RegistryAccess.Frozen registryHolder, ResourceKey<DimensionType> dimensionType, ResourceKey<Level> dimension, long seed, int maxPlayers, int chunkRadius, int simulationDistance, boolean reducedDebugInfo, boolean showDeathScreen, boolean isDebug, boolean isFlat, Optional<GlobalPos> lastDeathLocation) implements Packet<ClientGamePacketListener>
 {
+    private static final RegistryOps<Tag> BUILTIN_CONTEXT_OPS = RegistryOps.create(NbtOps.INSTANCE, RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
+
     public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf2) {
-        this(friendlyByteBuf2.readInt(), friendlyByteBuf2.readBoolean(), GameType.byId(friendlyByteBuf2.readByte()), GameType.byNullableId(friendlyByteBuf2.readByte()), friendlyByteBuf2.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> friendlyByteBuf.readResourceKey(Registries.DIMENSION)), friendlyByteBuf2.readWithCodec(RegistrySynchronization.NETWORK_CODEC).freeze(), friendlyByteBuf2.readResourceKey(Registries.DIMENSION_TYPE), friendlyByteBuf2.readResourceKey(Registries.DIMENSION), friendlyByteBuf2.readLong(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readOptional(FriendlyByteBuf::readGlobalPos));
+        this(friendlyByteBuf2.readInt(), friendlyByteBuf2.readBoolean(), GameType.byId(friendlyByteBuf2.readByte()), GameType.byNullableId(friendlyByteBuf2.readByte()), friendlyByteBuf2.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> friendlyByteBuf.readResourceKey(Registries.DIMENSION)), friendlyByteBuf2.readWithCodec(BUILTIN_CONTEXT_OPS, RegistrySynchronization.NETWORK_CODEC).freeze(), friendlyByteBuf2.readResourceKey(Registries.DIMENSION_TYPE), friendlyByteBuf2.readResourceKey(Registries.DIMENSION), friendlyByteBuf2.readLong(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readVarInt(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readBoolean(), friendlyByteBuf2.readOptional(FriendlyByteBuf::readGlobalPos));
     }
 
     @Override
@@ -32,7 +38,7 @@ public record ClientboundLoginPacket(int playerId, boolean hardcore, GameType ga
         friendlyByteBuf.writeByte(this.gameType.getId());
         friendlyByteBuf.writeByte(GameType.getNullableId(this.previousGameType));
         friendlyByteBuf.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
-        friendlyByteBuf.writeWithCodec(RegistrySynchronization.NETWORK_CODEC, this.registryHolder);
+        friendlyByteBuf.writeWithCodec(BUILTIN_CONTEXT_OPS, RegistrySynchronization.NETWORK_CODEC, this.registryHolder);
         friendlyByteBuf.writeResourceKey(this.dimensionType);
         friendlyByteBuf.writeResourceKey(this.dimension);
         friendlyByteBuf.writeLong(this.seed);

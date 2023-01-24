@@ -91,7 +91,7 @@ extends SimpleJsonResourceReloadListener {
     }
 
     public <C extends Container, T extends Recipe<C>> List<T> getRecipesFor(RecipeType<T> recipeType, C container, Level level) {
-        return this.byType(recipeType).values().stream().filter(recipe -> recipe.matches(container, level)).sorted(Comparator.comparing(recipe -> recipe.getResultItem().getDescriptionId())).collect(Collectors.toList());
+        return this.byType(recipeType).values().stream().filter(recipe -> recipe.matches(container, level)).sorted(Comparator.comparing(recipe -> recipe.getResultItem(level.registryAccess()).getDescriptionId())).collect(Collectors.toList());
     }
 
     private <C extends Container, T extends Recipe<C>> Map<ResourceLocation, T> byType(RecipeType<T> recipeType) {

@@ -52,7 +52,7 @@ extends EntityRenderer<T> {
         poseStack.scale(this.scale, this.scale, this.scale);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0f));
-        this.itemRenderer.renderStatic(((ItemSupplier)entity).getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, ((Entity)entity).getId());
+        this.itemRenderer.renderStatic(((ItemSupplier)entity).getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, ((Entity)entity).level, ((Entity)entity).getId());
         poseStack.popPose();
         super.render(entity, f, g, poseStack, multiBufferSource, i);
     }

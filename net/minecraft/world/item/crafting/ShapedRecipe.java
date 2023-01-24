@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -71,7 +72,7 @@ implements CraftingRecipe {
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(RegistryAccess registryAccess) {
         return this.result;
     }
 
@@ -116,8 +117,8 @@ implements CraftingRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer craftingContainer) {
-        return this.getResultItem().copy();
+    public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+        return this.getResultItem(registryAccess).copy();
     }
 
     public int getWidth() {

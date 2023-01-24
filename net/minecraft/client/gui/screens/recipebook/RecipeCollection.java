@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
@@ -18,26 +19,32 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(value=EnvType.CLIENT)
 public class RecipeCollection {
+    private final RegistryAccess registryAccess;
     private final List<Recipe<?>> recipes;
     private final boolean singleResultItem;
     private final Set<Recipe<?>> craftable = Sets.newHashSet();
     private final Set<Recipe<?>> fitsDimensions = Sets.newHashSet();
     private final Set<Recipe<?>> known = Sets.newHashSet();
 
-    public RecipeCollection(List<Recipe<?>> list) {
+    public RecipeCollection(RegistryAccess registryAccess, List<Recipe<?>> list) {
+        this.registryAccess = registryAccess;
         this.recipes = ImmutableList.copyOf(list);
-        this.singleResultItem = list.size() <= 1 ? true : RecipeCollection.allRecipesHaveSameResult(list);
+        this.singleResultItem = list.size() <= 1 ? true : RecipeCollection.allRecipesHaveSameResult(registryAccess, list);
     }
 
-    private static boolean allRecipesHaveSameResult(List<Recipe<?>> list) {
+    private static boolean allRecipesHaveSameResult(RegistryAccess registryAccess, List<Recipe<?>> list) {
         int i = list.size();
-        ItemStack itemStack = list.get(0).getResultItem();
+        ItemStack itemStack = list.get(0).getResultItem(registryAccess);
         for (int j = 1; j < i; ++j) {
-            ItemStack itemStack2 = list.get(j).getResultItem();
+            ItemStack itemStack2 = list.get(j).getResultItem(registryAccess);
             if (ItemStack.isSame(itemStack, itemStack2) && ItemStack.tagMatches(itemStack, itemStack2)) continue;
             return false;
         }
         return true;
+    }
+
+    public RegistryAccess registryAccess() {
+        return this.registryAccess;
     }
 
     public boolean hasKnownRecipes() {

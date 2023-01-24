@@ -1,0 +1,111 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.item.armortrim;
+
+import com.google.common.base.Suppliers;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.armortrim.TrimMaterial;
+import net.minecraft.world.item.armortrim.TrimPattern;
+import org.slf4j.Logger;
+
+public class ArmorTrim {
+    public static final Codec<ArmorTrim> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)TrimMaterial.CODEC.fieldOf("material")).forGetter(ArmorTrim::material), ((MapCodec)TrimPattern.CODEC.fieldOf("pattern")).forGetter(ArmorTrim::pattern)).apply((Applicative<ArmorTrim, ?>)instance, ArmorTrim::new));
+    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final String TAG_TRIM_ID = "Trim";
+    private static final Component UPGRADE_TITLE = Component.translatable(Util.makeDescriptionId("item", new ResourceLocation("smithing_template.upgrade"))).withStyle(ChatFormatting.GRAY);
+    private final Holder<TrimMaterial> material;
+    private final Holder<TrimPattern> pattern;
+    private final Supplier<ResourceLocation> innerTexture;
+    private final Supplier<ResourceLocation> outerTexture;
+
+    public ArmorTrim(Holder<TrimMaterial> holder, Holder<TrimPattern> holder2) {
+        this.material = holder;
+        this.pattern = holder2;
+        this.innerTexture = Suppliers.memoize(() -> {
+            ResourceLocation resourceLocation = ((TrimPattern)holder2.value()).assetId();
+            String string = ((TrimMaterial)holder.value()).assetName();
+            return resourceLocation.withPath(string2 -> "trims/models/armor/" + string2 + "_leggings_" + string);
+        });
+        this.outerTexture = Suppliers.memoize(() -> {
+            ResourceLocation resourceLocation = ((TrimPattern)holder2.value()).assetId();
+            String string = ((TrimMaterial)holder.value()).assetName();
+            return resourceLocation.withPath(string2 -> "trims/models/armor/" + string2 + "_" + string);
+        });
+    }
+
+    public boolean hasPatternAndMaterial(Holder<TrimPattern> holder, Holder<TrimMaterial> holder2) {
+        return holder == this.pattern && holder2 == this.material;
+    }
+
+    public Holder<TrimPattern> pattern() {
+        return this.pattern;
+    }
+
+    public Holder<TrimMaterial> material() {
+        return this.material;
+    }
+
+    public ResourceLocation innerTexture() {
+        return this.innerTexture.get();
+    }
+
+    public ResourceLocation outerTexture() {
+        return this.outerTexture.get();
+    }
+
+    public boolean equals(Object object) {
+        if (!(object instanceof ArmorTrim)) {
+            return false;
+        }
+        ArmorTrim armorTrim = (ArmorTrim)object;
+        return armorTrim.pattern == this.pattern && armorTrim.material == this.material;
+    }
+
+    public static boolean setTrim(RegistryAccess registryAccess, ItemStack itemStack, ArmorTrim armorTrim) {
+        if (itemStack.is(ItemTags.TRIMMABLE_ARMOR)) {
+            itemStack.getOrCreateTag().put(TAG_TRIM_ID, CODEC.encodeStart(RegistryOps.create(NbtOps.INSTANCE, registryAccess), armorTrim).result().orElseThrow());
+            return true;
+        }
+        return false;
+    }
+
+    public static Optional<ArmorTrim> getTrim(RegistryAccess registryAccess, ItemStack itemStack) {
+        if (itemStack.is(ItemTags.TRIMMABLE_ARMOR) && itemStack.getTag() != null && itemStack.getTag().contains(TAG_TRIM_ID)) {
+            CompoundTag compoundTag = itemStack.getTagElement(TAG_TRIM_ID);
+            ArmorTrim armorTrim = CODEC.parse(RegistryOps.create(NbtOps.INSTANCE, registryAccess), compoundTag).resultOrPartial(LOGGER::error).orElse(null);
+            return Optional.ofNullable(armorTrim);
+        }
+        return Optional.empty();
+    }
+
+    public static void appendUpgradeHoverText(ItemStack itemStack, RegistryAccess registryAccess, List<Component> list) {
+        Optional<ArmorTrim> optional = ArmorTrim.getTrim(registryAccess, itemStack);
+        if (optional.isPresent()) {
+            ArmorTrim armorTrim = optional.get();
+            list.add(UPGRADE_TITLE);
+            list.add(CommonComponents.space().append(armorTrim.pattern().value().copyWithStyle(armorTrim.material())));
+            list.add(CommonComponents.space().append(armorTrim.material().value().description()));
+        }
+    }
+}
+

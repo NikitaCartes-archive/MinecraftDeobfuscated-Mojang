@@ -1573,9 +1573,8 @@ extends Player {
 
     @Override
     public void onItemPickup(ItemEntity itemEntity) {
-        Entity entity;
         super.onItemPickup(itemEntity);
-        Entity entity2 = entity = itemEntity.getThrower() != null ? this.getLevel().getEntity(itemEntity.getThrower()) : null;
+        Entity entity = itemEntity.getOwner();
         if (entity != null) {
             CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.trigger(this, itemEntity.getItem(), entity);
         }

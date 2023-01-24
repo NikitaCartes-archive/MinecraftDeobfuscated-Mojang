@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.item.crafting;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -42,7 +43,7 @@ extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer craftingContainer) {
+    public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
         int i = 0;
         ItemStack itemStack = ItemStack.EMPTY;
         for (int j = 0; j < craftingContainer.getContainerSize(); ++j) {

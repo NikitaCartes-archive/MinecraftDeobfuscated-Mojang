@@ -11,7 +11,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.LegacySmithingMenu;
 import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CraftingTableBlock;
@@ -29,7 +31,7 @@ extends CraftingTableBlock {
 
     @Override
     public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
-        return new SimpleMenuProvider((i, inventory, player) -> new SmithingMenu(i, inventory, ContainerLevelAccess.create(level, blockPos)), CONTAINER_TITLE);
+        return new SimpleMenuProvider((i, inventory, player) -> level.enabledFeatures().contains(FeatureFlags.UPDATE_1_20) ? new SmithingMenu(i, inventory, ContainerLevelAccess.create(level, blockPos)) : new LegacySmithingMenu(i, inventory, ContainerLevelAccess.create(level, blockPos)), CONTAINER_TITLE);
     }
 
     @Override

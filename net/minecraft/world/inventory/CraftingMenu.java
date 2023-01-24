@@ -75,7 +75,7 @@ extends RecipeBookMenu<CraftingContainer> {
         ServerPlayer serverPlayer = (ServerPlayer)player;
         ItemStack itemStack = ItemStack.EMPTY;
         Optional<CraftingRecipe> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, level);
-        if (optional.isPresent() && resultContainer.setRecipeUsed(level, serverPlayer, craftingRecipe = optional.get()) && (itemStack2 = craftingRecipe.assemble(craftingContainer)).isItemEnabled(level.enabledFeatures())) {
+        if (optional.isPresent() && resultContainer.setRecipeUsed(level, serverPlayer, craftingRecipe = optional.get()) && (itemStack2 = craftingRecipe.assemble(craftingContainer, level.registryAccess())).isItemEnabled(level.enabledFeatures())) {
             itemStack = itemStack2;
         }
         resultContainer.setItem(0, itemStack);

@@ -342,7 +342,7 @@ implements Shearable {
         DyeColor dyeColor = ((Sheep)animal).getColor();
         DyeColor dyeColor2 = ((Sheep)animal2).getColor();
         CraftingContainer craftingContainer = Sheep.makeContainer(dyeColor, dyeColor2);
-        return this.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, this.level).map(craftingRecipe -> craftingRecipe.assemble(craftingContainer)).map(ItemStack::getItem).filter(DyeItem.class::isInstance).map(DyeItem.class::cast).map(DyeItem::getDyeColor).orElseGet(() -> this.level.random.nextBoolean() ? dyeColor : dyeColor2);
+        return this.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, this.level).map(craftingRecipe -> craftingRecipe.assemble(craftingContainer, this.level.registryAccess())).map(ItemStack::getItem).filter(DyeItem.class::isInstance).map(DyeItem.class::cast).map(DyeItem::getDyeColor).orElseGet(() -> this.level.random.nextBoolean() ? dyeColor : dyeColor2);
     }
 
     private static CraftingContainer makeContainer(DyeColor dyeColor, DyeColor dyeColor2) {

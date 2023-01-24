@@ -38,11 +38,17 @@ public abstract class EntityLootSubProvider
 implements LootTableSubProvider {
     protected static final EntityPredicate.Builder ENTITY_ON_FIRE = EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setOnFire(true).build());
     private static final Set<EntityType<?>> SPECIAL_LOOT_TABLE_TYPES = ImmutableSet.of(EntityType.PLAYER, EntityType.ARMOR_STAND, EntityType.IRON_GOLEM, EntityType.SNOW_GOLEM, EntityType.VILLAGER);
-    private final FeatureFlagSet enabledFeatures;
+    private final FeatureFlagSet allowed;
+    private final FeatureFlagSet required;
     private final Map<EntityType<?>, Map<ResourceLocation, LootTable.Builder>> map = Maps.newHashMap();
 
     protected EntityLootSubProvider(FeatureFlagSet featureFlagSet) {
-        this.enabledFeatures = featureFlagSet;
+        this(featureFlagSet, featureFlagSet);
+    }
+
+    protected EntityLootSubProvider(FeatureFlagSet featureFlagSet, FeatureFlagSet featureFlagSet2) {
+        this.allowed = featureFlagSet;
+        this.required = featureFlagSet2;
     }
 
     protected static LootTable.Builder createSheepTable(ItemLike itemLike) {
@@ -57,13 +63,13 @@ implements LootTableSubProvider {
         HashSet set = Sets.newHashSet();
         BuiltInRegistries.ENTITY_TYPE.holders().forEach(reference -> {
             EntityType entityType = (EntityType)reference.value();
-            if (!entityType.isEnabled(this.enabledFeatures)) {
+            if (!entityType.isEnabled(this.allowed)) {
                 return;
             }
             if (EntityLootSubProvider.canHaveLootTable(entityType)) {
                 Map<ResourceLocation, LootTable.Builder> map = this.map.remove(entityType);
                 ResourceLocation resourceLocation2 = entityType.getDefaultLootTable();
-                if (!(resourceLocation2.equals(BuiltInLootTables.EMPTY) || map != null && map.containsKey(resourceLocation2))) {
+                if (!(resourceLocation2.equals(BuiltInLootTables.EMPTY) || !entityType.isEnabled(this.required) || map != null && map.containsKey(resourceLocation2))) {
                     throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceLocation2, reference.key().location()));
                 }
                 if (map != null) {

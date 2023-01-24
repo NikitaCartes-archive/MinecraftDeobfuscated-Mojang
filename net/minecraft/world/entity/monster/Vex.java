@@ -15,6 +15,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -46,7 +48,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Vex
-extends Monster {
+extends Monster
+implements TraceableEntity {
     public static final float FLAP_DEGREES_PER_TICK = 45.836624f;
     public static final int TICKS_PER_FLAP = Mth.ceil(3.9269907f);
     protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Vex.class, EntityDataSerializers.BYTE);
@@ -140,6 +143,7 @@ extends Monster {
         }
     }
 
+    @Override
     @Nullable
     public Mob getOwner() {
         return this.owner;
@@ -220,6 +224,12 @@ extends Monster {
     @Override
     public double getMyRidingOffset() {
         return 0.4;
+    }
+
+    @Override
+    @Nullable
+    public /* synthetic */ Entity getOwner() {
+        return this.getOwner();
     }
 
     class VexMoveControl

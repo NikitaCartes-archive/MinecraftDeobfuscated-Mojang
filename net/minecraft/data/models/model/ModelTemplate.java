@@ -44,22 +44,32 @@ public class ModelTemplate {
     }
 
     public ResourceLocation create(ResourceLocation resourceLocation, TextureMapping textureMapping, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer) {
+        return this.create(resourceLocation, textureMapping, biConsumer, this::createBaseTemplate);
+    }
+
+    public ResourceLocation create(ResourceLocation resourceLocation, TextureMapping textureMapping, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer, JsonFactory jsonFactory) {
         Map<TextureSlot, ResourceLocation> map = this.createMap(textureMapping);
-        biConsumer.accept(resourceLocation, () -> {
-            JsonObject jsonObject = new JsonObject();
-            this.model.ifPresent(resourceLocation -> jsonObject.addProperty("parent", resourceLocation.toString()));
-            if (!map.isEmpty()) {
-                JsonObject jsonObject2 = new JsonObject();
-                map.forEach((textureSlot, resourceLocation) -> jsonObject2.addProperty(textureSlot.getId(), resourceLocation.toString()));
-                jsonObject.add("textures", jsonObject2);
-            }
-            return jsonObject;
-        });
+        biConsumer.accept(resourceLocation, () -> jsonFactory.create(resourceLocation, map));
         return resourceLocation;
+    }
+
+    public JsonObject createBaseTemplate(ResourceLocation resourceLocation2, Map<TextureSlot, ResourceLocation> map) {
+        JsonObject jsonObject = new JsonObject();
+        this.model.ifPresent(resourceLocation -> jsonObject.addProperty("parent", resourceLocation.toString()));
+        if (!map.isEmpty()) {
+            JsonObject jsonObject2 = new JsonObject();
+            map.forEach((textureSlot, resourceLocation) -> jsonObject2.addProperty(textureSlot.getId(), resourceLocation.toString()));
+            jsonObject.add("textures", jsonObject2);
+        }
+        return jsonObject;
     }
 
     private Map<TextureSlot, ResourceLocation> createMap(TextureMapping textureMapping) {
         return Streams.concat(this.requiredSlots.stream(), textureMapping.getForced()).collect(ImmutableMap.toImmutableMap(Function.identity(), textureMapping::get));
+    }
+
+    public static interface JsonFactory {
+        public JsonObject create(ResourceLocation var1, Map<TextureSlot, ResourceLocation> var2);
     }
 }
 

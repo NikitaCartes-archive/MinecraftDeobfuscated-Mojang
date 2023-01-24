@@ -27,13 +27,15 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.LegacyUpgradeRecipeBuilder;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
-import net.minecraft.data.recipes.UpgradeRecipeBuilder;
+import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
+import net.minecraft.data.recipes.SmithingTrimRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -109,8 +111,17 @@ implements DataProvider {
         }
     }
 
+    @Deprecated
+    protected static void legacyNetheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, RecipeCategory recipeCategory, Item item2) {
+        LegacyUpgradeRecipeBuilder.smithing(Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2).unlocks("has_netherite_ingot", RecipeProvider.has(Items.NETHERITE_INGOT)).save(consumer, RecipeProvider.getItemName(item2) + "_smithing");
+    }
+
     protected static void netheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, RecipeCategory recipeCategory, Item item2) {
-        UpgradeRecipeBuilder.smithing(Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2).unlocks("has_netherite_ingot", RecipeProvider.has(Items.NETHERITE_INGOT)).save(consumer, RecipeProvider.getItemName(item2) + "_smithing");
+        SmithingTransformRecipeBuilder.smithing(Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2).unlocks("has_netherite_ingot", RecipeProvider.has(Items.NETHERITE_INGOT)).save(consumer, RecipeProvider.getItemName(item2) + "_smithing");
+    }
+
+    protected static void trimSmithing(Consumer<FinishedRecipe> consumer, Item item) {
+        SmithingTrimRecipeBuilder.smithingTrim(Ingredient.of(item), Ingredient.of(ItemTags.TRIMMABLE_ARMOR), Ingredient.of(ItemTags.TRIM_MATERIALS), RecipeCategory.MISC).unlocks("has_smithing_trim_template", RecipeProvider.has(item)).save(consumer, RecipeProvider.getItemName(item) + "_smithing_trim");
     }
 
     protected static void twoByTwoPacker(Consumer<FinishedRecipe> consumer, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
@@ -306,6 +317,14 @@ implements DataProvider {
     private static void nineBlockStorageRecipes(Consumer<FinishedRecipe> consumer, RecipeCategory recipeCategory, ItemLike itemLike, RecipeCategory recipeCategory2, ItemLike itemLike2, String string, @Nullable String string2, String string3, @Nullable String string4) {
         ShapelessRecipeBuilder.shapeless(recipeCategory, itemLike, 9).requires(itemLike2).group(string4).unlockedBy(RecipeProvider.getHasName(itemLike2), RecipeProvider.has(itemLike2)).save(consumer, new ResourceLocation(string3));
         ShapedRecipeBuilder.shaped(recipeCategory2, itemLike2).define(Character.valueOf('#'), itemLike).pattern("###").pattern("###").pattern("###").group(string2).unlockedBy(RecipeProvider.getHasName(itemLike), RecipeProvider.has(itemLike)).save(consumer, new ResourceLocation(string));
+    }
+
+    protected static void copySmithingTemplate(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2).define(Character.valueOf('#'), Items.DIAMOND).define(Character.valueOf('C'), tagKey).define(Character.valueOf('S'), itemLike).pattern("#S#").pattern("#C#").pattern("###").unlockedBy(RecipeProvider.getHasName(itemLike), RecipeProvider.has(itemLike)).save(consumer);
+    }
+
+    protected static void copySmithingTemplate(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2).define(Character.valueOf('#'), Items.DIAMOND).define(Character.valueOf('C'), itemLike2).define(Character.valueOf('S'), itemLike).pattern("#S#").pattern("#C#").pattern("###").unlockedBy(RecipeProvider.getHasName(itemLike), RecipeProvider.has(itemLike)).save(consumer);
     }
 
     protected static void cookRecipes(Consumer<FinishedRecipe> consumer, String string, RecipeSerializer<? extends AbstractCookingRecipe> recipeSerializer, int i) {
