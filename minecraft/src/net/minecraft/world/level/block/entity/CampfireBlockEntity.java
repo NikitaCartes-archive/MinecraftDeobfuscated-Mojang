@@ -49,7 +49,7 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 					Container container = new SimpleContainer(itemStack);
 					ItemStack itemStack2 = (ItemStack)campfireBlockEntity.quickCheck
 						.getRecipeFor(container, level)
-						.map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container))
+						.map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container, level.registryAccess()))
 						.orElse(itemStack);
 					if (itemStack2.isItemEnabled(level.enabledFeatures())) {
 						Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack2);

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -37,7 +38,7 @@ public class RepairItemRecipe extends CustomRecipe {
 		return list.size() == 2;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer) {
+	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		List<ItemStack> list = Lists.<ItemStack>newArrayList();
 
 		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {

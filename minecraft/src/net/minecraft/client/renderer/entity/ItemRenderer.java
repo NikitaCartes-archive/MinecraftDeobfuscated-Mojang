@@ -72,14 +72,20 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	private static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
 	public static final ModelResourceLocation SPYGLASS_IN_HAND_MODEL = ModelResourceLocation.vanilla("spyglass_in_hand", "inventory");
 	public float blitOffset;
+	private final Minecraft minecraft;
 	private final ItemModelShaper itemModelShaper;
 	private final TextureManager textureManager;
 	private final ItemColors itemColors;
 	private final BlockEntityWithoutLevelRenderer blockEntityRenderer;
 
 	public ItemRenderer(
-		TextureManager textureManager, ModelManager modelManager, ItemColors itemColors, BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer
+		Minecraft minecraft,
+		TextureManager textureManager,
+		ModelManager modelManager,
+		ItemColors itemColors,
+		BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer
 	) {
+		this.minecraft = minecraft;
 		this.textureManager = textureManager;
 		this.itemModelShaper = new ItemModelShaper(modelManager);
 		this.blockEntityRenderer = blockEntityWithoutLevelRenderer;
@@ -250,9 +256,16 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	public void renderStatic(
-		ItemStack itemStack, ItemTransforms.TransformType transformType, int i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource, int k
+		ItemStack itemStack,
+		ItemTransforms.TransformType transformType,
+		int i,
+		int j,
+		PoseStack poseStack,
+		MultiBufferSource multiBufferSource,
+		@Nullable Level level,
+		int k
 	) {
-		this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, null, i, j, k);
+		this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, level, i, j, k);
 	}
 
 	public void renderStatic(
@@ -290,7 +303,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		poseStack.scale(16.0F, 16.0F, 16.0F);
 		RenderSystem.applyModelViewMatrix();
 		PoseStack poseStack2 = new PoseStack();
-		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+		MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
 		boolean bl = !bakedModel.usesBlockLight();
 		if (bl) {
 			Lighting.setupForFlatItems();
@@ -308,38 +321,38 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	public void renderAndDecorateItem(ItemStack itemStack, int i, int j) {
-		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, 0);
+		this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, 0);
 	}
 
 	public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k) {
-		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k);
+		this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, k);
 	}
 
 	public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k, int l) {
-		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j, k, l);
+		this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, k, l);
 	}
 
 	public void renderAndDecorateFakeItem(ItemStack itemStack, int i, int j) {
-		this.tryRenderGuiItem(null, itemStack, i, j, 0);
+		this.tryRenderGuiItem(null, this.minecraft.level, itemStack, i, j, 0);
 	}
 
 	public void renderAndDecorateItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
-		this.tryRenderGuiItem(livingEntity, itemStack, i, j, k);
+		this.tryRenderGuiItem(livingEntity, livingEntity.level, itemStack, i, j, k);
 	}
 
-	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
-		this.tryRenderGuiItem(livingEntity, itemStack, i, j, k, 0);
+	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k) {
+		this.tryRenderGuiItem(livingEntity, level, itemStack, i, j, k, 0);
 	}
 
-	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k, int l) {
+	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k, int l) {
 		if (!itemStack.isEmpty()) {
-			BakedModel bakedModel = this.getModel(itemStack, null, livingEntity, k);
+			BakedModel bakedModel = this.getModel(itemStack, level, livingEntity, k);
 			this.blitOffset = bakedModel.isGui3d() ? this.blitOffset + 50.0F + (float)l : this.blitOffset + 50.0F;
 
 			try {
 				this.renderGuiItem(itemStack, i, j, bakedModel);
-			} catch (Throwable var11) {
-				CrashReport crashReport = CrashReport.forThrowable(var11, "Rendering item");
+			} catch (Throwable var12) {
+				CrashReport crashReport = CrashReport.forThrowable(var12, "Rendering item");
 				CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
 				crashReportCategory.setDetail("Item Type", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getItem())));
 				crashReportCategory.setDetail("Item Damage", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getDamageValue())));
@@ -380,8 +393,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				RenderSystem.enableDepthTest();
 			}
 
-			LocalPlayer localPlayer = Minecraft.getInstance().player;
-			float f = localPlayer == null ? 0.0F : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), Minecraft.getInstance().getFrameTime());
+			LocalPlayer localPlayer = this.minecraft.player;
+			float f = localPlayer == null ? 0.0F : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), this.minecraft.getFrameTime());
 			if (f > 0.0F) {
 				RenderSystem.disableDepthTest();
 				int m = j + Mth.floor(16.0F * (1.0F - f));

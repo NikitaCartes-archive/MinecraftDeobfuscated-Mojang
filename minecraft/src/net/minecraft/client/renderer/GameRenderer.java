@@ -1322,7 +1322,9 @@ public class GameRenderer implements AutoCloseable {
 			MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
 			this.minecraft
 				.getItemRenderer()
-				.renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, 0);
+				.renderStatic(
+					this.itemActivationItem, ItemTransforms.TransformType.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, this.minecraft.level, 0
+				);
 			poseStack.popPose();
 			bufferSource.endBatch();
 			RenderSystem.enableCull();

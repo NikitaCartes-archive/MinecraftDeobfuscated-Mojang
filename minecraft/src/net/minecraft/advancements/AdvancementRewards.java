@@ -72,7 +72,7 @@ public class AdvancementRewards {
 					ItemEntity itemEntity = serverPlayer.drop(itemStack, false);
 					if (itemEntity != null) {
 						itemEntity.setNoPickUpDelay();
-						itemEntity.setOwner(serverPlayer.getUUID());
+						itemEntity.setTarget(serverPlayer.getUUID());
 					}
 				}
 			}

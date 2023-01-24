@@ -351,7 +351,7 @@ public class Sheep extends Animal implements Shearable {
 		return (DyeColor)this.level
 			.getRecipeManager()
 			.getRecipeFor(RecipeType.CRAFTING, craftingContainer, this.level)
-			.map(craftingRecipe -> craftingRecipe.assemble(craftingContainer))
+			.map(craftingRecipe -> craftingRecipe.assemble(craftingContainer, this.level.registryAccess()))
 			.map(ItemStack::getItem)
 			.filter(DyeItem.class::isInstance)
 			.map(DyeItem.class::cast)

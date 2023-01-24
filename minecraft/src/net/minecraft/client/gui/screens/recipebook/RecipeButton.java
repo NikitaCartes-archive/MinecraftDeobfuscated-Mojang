@@ -92,7 +92,7 @@ public class RecipeButton extends AbstractWidget {
 		this.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
 		List<Recipe<?>> list = this.getOrderedRecipes();
 		this.currentIndex = Mth.floor(this.time / 30.0F) % list.size();
-		ItemStack itemStack = ((Recipe)list.get(this.currentIndex)).getResultItem();
+		ItemStack itemStack = ((Recipe)list.get(this.currentIndex)).getResultItem(this.collection.registryAccess());
 		int m = 4;
 		if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
 			minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.getX() + m + 1, this.getY() + m + 1, 0, 10);
@@ -125,7 +125,7 @@ public class RecipeButton extends AbstractWidget {
 	}
 
 	public List<Component> getTooltipText(Screen screen) {
-		ItemStack itemStack = ((Recipe)this.getOrderedRecipes().get(this.currentIndex)).getResultItem();
+		ItemStack itemStack = ((Recipe)this.getOrderedRecipes().get(this.currentIndex)).getResultItem(this.collection.registryAccess());
 		List<Component> list = Lists.<Component>newArrayList(screen.getTooltipFromItem(itemStack));
 		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
 			list.add(MORE_RECIPES_TOOLTIP);
@@ -136,7 +136,7 @@ public class RecipeButton extends AbstractWidget {
 
 	@Override
 	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-		ItemStack itemStack = ((Recipe)this.getOrderedRecipes().get(this.currentIndex)).getResultItem();
+		ItemStack itemStack = ((Recipe)this.getOrderedRecipes().get(this.currentIndex)).getResultItem(this.collection.registryAccess());
 		narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narration.recipe", itemStack.getHoverName()));
 		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
 			narrationElementOutput.add(

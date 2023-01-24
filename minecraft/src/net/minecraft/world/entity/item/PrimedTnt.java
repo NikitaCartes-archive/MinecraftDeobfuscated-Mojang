@@ -12,9 +12,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.level.Level;
 
-public class PrimedTnt extends Entity {
+public class PrimedTnt extends Entity implements TraceableEntity {
 	private static final EntityDataAccessor<Integer> DATA_FUSE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.INT);
 	private static final int DEFAULT_FUSE_TIME = 80;
 	@Nullable

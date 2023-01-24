@@ -1,6 +1,7 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -11,11 +12,11 @@ import net.minecraft.world.level.block.Blocks;
 public interface Recipe<C extends Container> {
 	boolean matches(C container, Level level);
 
-	ItemStack assemble(C container);
+	ItemStack assemble(C container, RegistryAccess registryAccess);
 
 	boolean canCraftInDimensions(int i, int j);
 
-	ItemStack getResultItem();
+	ItemStack getResultItem(RegistryAccess registryAccess);
 
 	default NonNullList<ItemStack> getRemainingItems(C container) {
 		NonNullList<ItemStack> nonNullList = NonNullList.withSize(container.getContainerSize(), ItemStack.EMPTY);

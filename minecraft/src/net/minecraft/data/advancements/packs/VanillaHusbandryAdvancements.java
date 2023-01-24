@@ -2,8 +2,10 @@ package net.minecraft.data.advancements.packs;
 
 import com.google.common.collect.BiMap;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.FrameType;
@@ -45,7 +47,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 
 public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
-	private static final EntityType<?>[] BREEDABLE_ANIMALS = new EntityType[]{
+	public static final List<EntityType<?>> BREEDABLE_ANIMALS = List.of(
 		EntityType.HORSE,
 		EntityType.DONKEY,
 		EntityType.MULE,
@@ -66,8 +68,8 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		EntityType.STRIDER,
 		EntityType.GOAT,
 		EntityType.AXOLOTL
-	};
-	private static final EntityType<?>[] INDIRECTLY_BREEDABLE_ANIMALS = new EntityType[]{EntityType.TURTLE, EntityType.FROG};
+	);
+	public static final List<EntityType<?>> INDIRECTLY_BREEDABLE_ANIMALS = List.of(EntityType.TURTLE, EntityType.FROG);
 	private static final Item[] FISH = new Item[]{Items.COD, Items.TROPICAL_FISH, Items.PUFFERFISH, Items.SALMON};
 	private static final Item[] FISH_BUCKETS = new Item[]{Items.COD_BUCKET, Items.TROPICAL_FISH_BUCKET, Items.PUFFERFISH_BUCKET, Items.SALMON_BUCKET};
 	private static final Item[] EDIBLE_ITEMS = new Item[]{
@@ -118,7 +120,19 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 
 	@Override
 	public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
-		Advancement advancement = this.createRoot(consumer);
+		Advancement advancement = Advancement.Builder.advancement()
+			.display(
+				Blocks.HAY_BLOCK,
+				Component.translatable("advancements.husbandry.root.title"),
+				Component.translatable("advancements.husbandry.root.description"),
+				new ResourceLocation("textures/gui/advancements/backgrounds/husbandry.png"),
+				FrameType.TASK,
+				false,
+				false,
+				false
+			)
+			.addCriterion("consumed_item", ConsumeItemTrigger.TriggerInstance.usedItem())
+			.save(consumer, "husbandry/root");
 		Advancement advancement2 = Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(
@@ -138,8 +152,22 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.addCriterion("beetroots", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.BEETROOTS))
 			.addCriterion("nether_wart", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.NETHER_WART))
 			.save(consumer, "husbandry/plant_seed");
-		Advancement advancement3 = this.createBreedAnAnimalAdvancement(advancement, consumer);
-		this.createBreedAllAnimalsAdvancement(advancement3, consumer);
+		Advancement advancement3 = Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.WHEAT,
+				Component.translatable("advancements.husbandry.breed_an_animal.title"),
+				Component.translatable("advancements.husbandry.breed_an_animal.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.requirements(RequirementsStrategy.OR)
+			.addCriterion("bred", BredAnimalsTrigger.TriggerInstance.bredAnimals())
+			.save(consumer, "husbandry/breed_an_animal");
+		createBreedAllAnimalsAdvancement(advancement3, consumer, BREEDABLE_ANIMALS.stream(), INDIRECTLY_BREEDABLE_ANIMALS.stream());
 		this.addFood(Advancement.Builder.advancement())
 			.parent(advancement2)
 			.display(
@@ -462,42 +490,10 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.save(consumer, "husbandry/allay_deliver_cake_to_note_block");
 	}
 
-	Advancement createRoot(Consumer<Advancement> consumer) {
-		return Advancement.Builder.advancement()
-			.display(
-				Blocks.HAY_BLOCK,
-				Component.translatable("advancements.husbandry.root.title"),
-				Component.translatable("advancements.husbandry.root.description"),
-				new ResourceLocation("textures/gui/advancements/backgrounds/husbandry.png"),
-				FrameType.TASK,
-				false,
-				false,
-				false
-			)
-			.addCriterion("consumed_item", ConsumeItemTrigger.TriggerInstance.usedItem())
-			.save(consumer, "husbandry/root");
-	}
-
-	Advancement createBreedAnAnimalAdvancement(Advancement advancement, Consumer<Advancement> consumer) {
-		return Advancement.Builder.advancement()
-			.parent(advancement)
-			.display(
-				Items.WHEAT,
-				Component.translatable("advancements.husbandry.breed_an_animal.title"),
-				Component.translatable("advancements.husbandry.breed_an_animal.description"),
-				null,
-				FrameType.TASK,
-				true,
-				true,
-				false
-			)
-			.requirements(RequirementsStrategy.OR)
-			.addCriterion("bred", BredAnimalsTrigger.TriggerInstance.bredAnimals())
-			.save(consumer, "husbandry/breed_an_animal");
-	}
-
-	Advancement createBreedAllAnimalsAdvancement(Advancement advancement, Consumer<Advancement> consumer) {
-		return this.addBreedable(Advancement.Builder.advancement())
+	public static Advancement createBreedAllAnimalsAdvancement(
+		Advancement advancement, Consumer<Advancement> consumer, Stream<EntityType<?>> stream, Stream<EntityType<?>> stream2
+	) {
+		return addBreedable(Advancement.Builder.advancement(), stream, stream2)
 			.parent(advancement)
 			.display(
 				Items.GOLDEN_CARROT,
@@ -538,22 +534,20 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		return builder;
 	}
 
-	Advancement.Builder addBreedable(Advancement.Builder builder) {
-		for (EntityType<?> entityType : this.getBreedableAnimals()) {
-			builder.addCriterion(
-				EntityType.getKey(entityType).toString(), BredAnimalsTrigger.TriggerInstance.bredAnimals(EntityPredicate.Builder.entity().of(entityType))
-			);
-		}
-
-		for (EntityType<?> entityType : this.getIndirectlyBreedableAnimals()) {
-			builder.addCriterion(
-				EntityType.getKey(entityType).toString(),
-				BredAnimalsTrigger.TriggerInstance.bredAnimals(
-					EntityPredicate.Builder.entity().of(entityType).build(), EntityPredicate.Builder.entity().of(entityType).build(), EntityPredicate.ANY
+	private static Advancement.Builder addBreedable(Advancement.Builder builder, Stream<EntityType<?>> stream, Stream<EntityType<?>> stream2) {
+		stream.forEach(
+			entityType -> builder.addCriterion(
+					EntityType.getKey(entityType).toString(), BredAnimalsTrigger.TriggerInstance.bredAnimals(EntityPredicate.Builder.entity().of(entityType))
 				)
-			);
-		}
-
+		);
+		stream2.forEach(
+			entityType -> builder.addCriterion(
+					EntityType.getKey(entityType).toString(),
+					BredAnimalsTrigger.TriggerInstance.bredAnimals(
+						EntityPredicate.Builder.entity().of(entityType).build(), EntityPredicate.Builder.entity().of(entityType).build(), EntityPredicate.ANY
+					)
+				)
+		);
 		return builder;
 	}
 
@@ -592,13 +586,5 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 					)
 			);
 		return builder;
-	}
-
-	public EntityType<?>[] getBreedableAnimals() {
-		return BREEDABLE_ANIMALS;
-	}
-
-	public EntityType<?>[] getIndirectlyBreedableAnimals() {
-		return INDIRECTLY_BREEDABLE_ANIMALS;
 	}
 }

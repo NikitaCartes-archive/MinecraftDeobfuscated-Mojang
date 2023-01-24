@@ -103,7 +103,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 			.values()
 			.stream()
 			.filter(recipe -> recipe.matches(container, level))
-			.sorted(Comparator.comparing(recipe -> recipe.getResultItem().getDescriptionId()))
+			.sorted(Comparator.comparing(recipe -> recipe.getResultItem(level.registryAccess()).getDescriptionId()))
 			.collect(Collectors.toList());
 	}
 

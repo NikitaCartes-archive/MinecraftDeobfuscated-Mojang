@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -254,7 +255,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 			}
 
 			int i = abstractFurnaceBlockEntity.getMaxStackSize();
-			if (!abstractFurnaceBlockEntity.isLit() && canBurn(recipe, abstractFurnaceBlockEntity.items, i)) {
+			if (!abstractFurnaceBlockEntity.isLit() && canBurn(level.registryAccess(), recipe, abstractFurnaceBlockEntity.items, i)) {
 				abstractFurnaceBlockEntity.litTime = abstractFurnaceBlockEntity.getBurnDuration(itemStack);
 				abstractFurnaceBlockEntity.litDuration = abstractFurnaceBlockEntity.litTime;
 				if (abstractFurnaceBlockEntity.isLit()) {
@@ -270,12 +271,12 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 				}
 			}
 
-			if (abstractFurnaceBlockEntity.isLit() && canBurn(recipe, abstractFurnaceBlockEntity.items, i)) {
+			if (abstractFurnaceBlockEntity.isLit() && canBurn(level.registryAccess(), recipe, abstractFurnaceBlockEntity.items, i)) {
 				abstractFurnaceBlockEntity.cookingProgress++;
 				if (abstractFurnaceBlockEntity.cookingProgress == abstractFurnaceBlockEntity.cookingTotalTime) {
 					abstractFurnaceBlockEntity.cookingProgress = 0;
 					abstractFurnaceBlockEntity.cookingTotalTime = getTotalCookTime(level, abstractFurnaceBlockEntity);
-					if (burn(recipe, abstractFurnaceBlockEntity.items, i)) {
+					if (burn(level.registryAccess(), recipe, abstractFurnaceBlockEntity.items, i)) {
 						abstractFurnaceBlockEntity.setRecipeUsed(recipe);
 					}
 
@@ -299,9 +300,9 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 	}
 
-	private static boolean canBurn(@Nullable Recipe<?> recipe, NonNullList<ItemStack> nonNullList, int i) {
+	private static boolean canBurn(RegistryAccess registryAccess, @Nullable Recipe<?> recipe, NonNullList<ItemStack> nonNullList, int i) {
 		if (!nonNullList.get(0).isEmpty() && recipe != null) {
-			ItemStack itemStack = recipe.getResultItem();
+			ItemStack itemStack = recipe.getResultItem(registryAccess);
 			if (itemStack.isEmpty()) {
 				return false;
 			} else {
@@ -319,10 +320,10 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 	}
 
-	private static boolean burn(@Nullable Recipe<?> recipe, NonNullList<ItemStack> nonNullList, int i) {
-		if (recipe != null && canBurn(recipe, nonNullList, i)) {
+	private static boolean burn(RegistryAccess registryAccess, @Nullable Recipe<?> recipe, NonNullList<ItemStack> nonNullList, int i) {
+		if (recipe != null && canBurn(registryAccess, recipe, nonNullList, i)) {
 			ItemStack itemStack = nonNullList.get(0);
-			ItemStack itemStack2 = recipe.getResultItem();
+			ItemStack itemStack2 = recipe.getResultItem(registryAccess);
 			ItemStack itemStack3 = nonNullList.get(2);
 			if (itemStack3.isEmpty()) {
 				nonNullList.set(2, itemStack2.copy());

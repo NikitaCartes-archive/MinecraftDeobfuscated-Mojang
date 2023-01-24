@@ -1,6 +1,7 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.BannerItem;
@@ -59,7 +60,7 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 		return itemStack != null && itemStack2 != null;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer) {
+	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
 			ItemStack itemStack = craftingContainer.getItem(i);
 			if (!itemStack.isEmpty()) {

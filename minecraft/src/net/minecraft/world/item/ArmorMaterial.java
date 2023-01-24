@@ -1,13 +1,12 @@
 package net.minecraft.world.item;
 
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.crafting.Ingredient;
 
 public interface ArmorMaterial {
-	int getDurabilityForSlot(EquipmentSlot equipmentSlot);
+	int getDurabilityForType(ArmorItem.Type type);
 
-	int getDefenseForSlot(EquipmentSlot equipmentSlot);
+	int getDefenseForType(ArmorItem.Type type);
 
 	int getEnchantmentValue();
 
@@ -20,4 +19,6 @@ public interface ArmorMaterial {
 	float getToughness();
 
 	float getKnockbackResistance();
+
+	boolean canHaveTrims();
 }

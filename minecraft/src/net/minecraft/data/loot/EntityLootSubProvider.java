@@ -35,11 +35,17 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 	private static final Set<EntityType<?>> SPECIAL_LOOT_TABLE_TYPES = ImmutableSet.of(
 		EntityType.PLAYER, EntityType.ARMOR_STAND, EntityType.IRON_GOLEM, EntityType.SNOW_GOLEM, EntityType.VILLAGER
 	);
-	private final FeatureFlagSet enabledFeatures;
+	private final FeatureFlagSet allowed;
+	private final FeatureFlagSet required;
 	private final Map<EntityType<?>, Map<ResourceLocation, LootTable.Builder>> map = Maps.<EntityType<?>, Map<ResourceLocation, LootTable.Builder>>newHashMap();
 
 	protected EntityLootSubProvider(FeatureFlagSet featureFlagSet) {
-		this.enabledFeatures = featureFlagSet;
+		this(featureFlagSet, featureFlagSet);
+	}
+
+	protected EntityLootSubProvider(FeatureFlagSet featureFlagSet, FeatureFlagSet featureFlagSet2) {
+		this.allowed = featureFlagSet;
+		this.required = featureFlagSet2;
 	}
 
 	protected static LootTable.Builder createSheepTable(ItemLike itemLike) {
@@ -59,11 +65,11 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 			.forEach(
 				reference -> {
 					EntityType<?> entityType = (EntityType<?>)reference.value();
-					if (entityType.isEnabled(this.enabledFeatures)) {
+					if (entityType.isEnabled(this.allowed)) {
 						if (canHaveLootTable(entityType)) {
 							Map<ResourceLocation, LootTable.Builder> map = (Map<ResourceLocation, LootTable.Builder>)this.map.remove(entityType);
 							ResourceLocation resourceLocation = entityType.getDefaultLootTable();
-							if (!resourceLocation.equals(BuiltInLootTables.EMPTY) && (map == null || !map.containsKey(resourceLocation))) {
+							if (!resourceLocation.equals(BuiltInLootTables.EMPTY) && entityType.isEnabled(this.required) && (map == null || !map.containsKey(resourceLocation))) {
 								throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceLocation, reference.key().location()));
 							}
 

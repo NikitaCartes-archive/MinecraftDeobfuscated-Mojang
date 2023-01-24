@@ -1,6 +1,7 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -40,7 +41,7 @@ public class BookCloningRecipe extends CustomRecipe {
 		return !itemStack.isEmpty() && itemStack.hasTag() && i > 0;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer) {
+	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		int i = 0;
 		ItemStack itemStack = ItemStack.EMPTY;
 

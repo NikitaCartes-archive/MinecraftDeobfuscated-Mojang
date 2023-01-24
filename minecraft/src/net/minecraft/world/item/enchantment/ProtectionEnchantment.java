@@ -68,7 +68,7 @@ public class ProtectionEnchantment extends Enchantment {
 	public static double getExplosionKnockbackAfterDampener(LivingEntity livingEntity, double d) {
 		int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.BLAST_PROTECTION, livingEntity);
 		if (i > 0) {
-			d -= (double)Mth.floor(d * (double)((float)i * 0.15F));
+			d *= Mth.clamp(1.0 - (double)i * 0.15, 0.0, 1.0);
 		}
 
 		return d;

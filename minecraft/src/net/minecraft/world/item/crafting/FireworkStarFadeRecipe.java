@@ -2,6 +2,7 @@ package net.minecraft.world.item.crafting;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
@@ -43,7 +44,7 @@ public class FireworkStarFadeRecipe extends CustomRecipe {
 		return bl2 && bl;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer) {
+	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		List<Integer> list = Lists.<Integer>newArrayList();
 		ItemStack itemStack = null;
 

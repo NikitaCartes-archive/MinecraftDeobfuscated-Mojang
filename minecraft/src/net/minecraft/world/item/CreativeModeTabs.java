@@ -1367,6 +1367,18 @@ public class CreativeModeTabs {
 			output.accept(Items.MOJANG_BANNER_PATTERN);
 			output.accept(Items.GLOBE_BANNER_PATTERN);
 			output.accept(Items.PIGLIN_BANNER_PATTERN);
+			output.accept(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+			output.accept(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE);
+			output.accept(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE);
 			output.accept(Items.EXPERIENCE_BOTTLE);
 			Set<EnchantmentCategory> set = EnumSet.allOf(EnchantmentCategory.class);
 			generateEnchantmentBookTypesOnlyMaxLevel(output, set, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);

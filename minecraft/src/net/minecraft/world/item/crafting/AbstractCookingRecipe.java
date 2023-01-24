@@ -1,6 +1,7 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -42,7 +43,7 @@ public abstract class AbstractCookingRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public ItemStack assemble(Container container) {
+	public ItemStack assemble(Container container, RegistryAccess registryAccess) {
 		return this.result.copy();
 	}
 
@@ -63,7 +64,7 @@ public abstract class AbstractCookingRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public ItemStack getResultItem() {
+	public ItemStack getResultItem(RegistryAccess registryAccess) {
 		return this.result;
 	}
 

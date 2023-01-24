@@ -20,6 +20,7 @@ import net.minecraft.client.gui.screens.inventory.FurnaceScreen;
 import net.minecraft.client.gui.screens.inventory.GrindstoneScreen;
 import net.minecraft.client.gui.screens.inventory.HopperScreen;
 import net.minecraft.client.gui.screens.inventory.LecternScreen;
+import net.minecraft.client.gui.screens.inventory.LegacySmithingScreen;
 import net.minecraft.client.gui.screens.inventory.LoomScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
@@ -100,6 +101,7 @@ public class MenuScreens {
 		register(MenuType.LOOM, LoomScreen::new);
 		register(MenuType.MERCHANT, MerchantScreen::new);
 		register(MenuType.SHULKER_BOX, ShulkerBoxScreen::new);
+		register(MenuType.LEGACY_SMITHING, LegacySmithingScreen::new);
 		register(MenuType.SMITHING, SmithingScreen::new);
 		register(MenuType.SMOKER, SmokerScreen::new);
 		register(MenuType.CARTOGRAPHY_TABLE, CartographyTableScreen::new);

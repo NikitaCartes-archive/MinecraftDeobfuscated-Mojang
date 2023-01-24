@@ -8,6 +8,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 
@@ -66,6 +67,10 @@ public interface EntityRendererProvider<T extends Entity> {
 
 		public EntityModelSet getModelSet() {
 			return this.modelSet;
+		}
+
+		public ModelManager getModelManager() {
+			return this.blockRenderDispatcher.getBlockModelShaper().getModelManager();
 		}
 
 		public ModelPart bakeLayer(ModelLayerLocation modelLayerLocation) {

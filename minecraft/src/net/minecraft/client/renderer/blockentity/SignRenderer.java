@@ -1,7 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -26,6 +25,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -158,11 +158,15 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 
 	static int getDarkColor(SignBlockEntity signBlockEntity) {
 		int i = signBlockEntity.getColor().getTextColor();
-		double d = 0.4;
-		int j = (int)((double)NativeImage.getR(i) * 0.4);
-		int k = (int)((double)NativeImage.getG(i) * 0.4);
-		int l = (int)((double)NativeImage.getB(i) * 0.4);
-		return i == DyeColor.BLACK.getTextColor() && signBlockEntity.hasGlowingText() ? -988212 : NativeImage.combine(0, l, k, j);
+		if (i == DyeColor.BLACK.getTextColor() && signBlockEntity.hasGlowingText()) {
+			return -988212;
+		} else {
+			double d = 0.4;
+			int j = (int)((double)FastColor.ARGB32.red(i) * 0.4);
+			int k = (int)((double)FastColor.ARGB32.green(i) * 0.4);
+			int l = (int)((double)FastColor.ARGB32.blue(i) * 0.4);
+			return FastColor.ARGB32.color(0, j, k, l);
+		}
 	}
 
 	public static SignRenderer.SignModel createSignModel(EntityModelSet entityModelSet, WoodType woodType) {

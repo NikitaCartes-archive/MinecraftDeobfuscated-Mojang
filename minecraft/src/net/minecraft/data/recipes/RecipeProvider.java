@@ -138,10 +138,27 @@ public abstract class RecipeProvider implements DataProvider {
 		}
 	}
 
-	protected static void netheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, RecipeCategory recipeCategory, Item item2) {
-		UpgradeRecipeBuilder.smithing(Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2)
+	@Deprecated
+	protected static void legacyNetheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, RecipeCategory recipeCategory, Item item2) {
+		LegacyUpgradeRecipeBuilder.smithing(Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2)
 			.unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT))
 			.save(consumer, getItemName(item2) + "_smithing");
+	}
+
+	protected static void netheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, RecipeCategory recipeCategory, Item item2) {
+		SmithingTransformRecipeBuilder.smithing(
+				Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2
+			)
+			.unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT))
+			.save(consumer, getItemName(item2) + "_smithing");
+	}
+
+	protected static void trimSmithing(Consumer<FinishedRecipe> consumer, Item item) {
+		SmithingTrimRecipeBuilder.smithingTrim(
+				Ingredient.of(item), Ingredient.of(ItemTags.TRIMMABLE_ARMOR), Ingredient.of(ItemTags.TRIM_MATERIALS), RecipeCategory.MISC
+			)
+			.unlocks("has_smithing_trim_template", has(item))
+			.save(consumer, getItemName(item) + "_smithing_trim");
 	}
 
 	protected static void twoByTwoPacker(Consumer<FinishedRecipe> consumer, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
@@ -515,6 +532,30 @@ public abstract class RecipeProvider implements DataProvider {
 			.group(string2)
 			.unlockedBy(getHasName(itemLike), has(itemLike))
 			.save(consumer, new ResourceLocation(string));
+	}
+
+	protected static void copySmithingTemplate(Consumer<FinishedRecipe> consumer, ItemLike itemLike, TagKey<Item> tagKey) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2)
+			.define('#', Items.DIAMOND)
+			.define('C', tagKey)
+			.define('S', itemLike)
+			.pattern("#S#")
+			.pattern("#C#")
+			.pattern("###")
+			.unlockedBy(getHasName(itemLike), has(itemLike))
+			.save(consumer);
+	}
+
+	protected static void copySmithingTemplate(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2)
+			.define('#', Items.DIAMOND)
+			.define('C', itemLike2)
+			.define('S', itemLike)
+			.pattern("#S#")
+			.pattern("#C#")
+			.pattern("###")
+			.unlockedBy(getHasName(itemLike), has(itemLike))
+			.save(consumer);
 	}
 
 	protected static void cookRecipes(Consumer<FinishedRecipe> consumer, String string, RecipeSerializer<? extends AbstractCookingRecipe> recipeSerializer, int i) {

@@ -195,24 +195,39 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		}
 
 		public void keyboardSelection() {
-			if (this.pack.canSelect() && this.pack.getCompatibility().isCompatible()) {
-				this.pack.select();
-				this.parent.screen.updateFocus(this.pack, this.parent);
+			if (this.pack.canSelect() && this.handlePackSelection()) {
+				this.parent.screen.updateFocus(this.parent);
 			} else if (this.pack.canUnselect()) {
 				this.pack.unselect();
-				this.parent.screen.updateFocus(this.pack, this.parent);
+				this.parent.screen.updateFocus(this.parent);
 			}
 		}
 
-		public void keyboardMoveUp() {
+		void keyboardMoveUp() {
 			if (this.pack.canMoveUp()) {
 				this.pack.moveUp();
 			}
 		}
 
-		public void keyboardMoveDown() {
+		void keyboardMoveDown() {
 			if (this.pack.canMoveDown()) {
 				this.pack.moveDown();
+			}
+		}
+
+		private boolean handlePackSelection() {
+			if (this.pack.getCompatibility().isCompatible()) {
+				this.pack.select();
+				return true;
+			} else {
+				Component component = this.pack.getCompatibility().getConfirmation();
+				this.minecraft.setScreen(new ConfirmScreen(bl -> {
+					this.minecraft.setScreen(this.parent.screen);
+					if (bl) {
+						this.pack.select();
+					}
+				}, TransferableSelectionList.INCOMPATIBLE_CONFIRM_TITLE, component));
+				return false;
 			}
 		}
 
@@ -223,19 +238,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 			if (this.showHoverOverlay() && f <= 32.0) {
 				this.parent.screen.clearSelected();
 				if (this.pack.canSelect()) {
-					PackCompatibility packCompatibility = this.pack.getCompatibility();
-					if (packCompatibility.isCompatible()) {
-						this.pack.select();
-					} else {
-						Component component = packCompatibility.getConfirmation();
-						this.minecraft.setScreen(new ConfirmScreen(bl -> {
-							this.minecraft.setScreen(this.parent.screen);
-							if (bl) {
-								this.pack.select();
-							}
-						}, TransferableSelectionList.INCOMPATIBLE_CONFIRM_TITLE, component));
-					}
-
+					this.handlePackSelection();
 					return true;
 				}
 

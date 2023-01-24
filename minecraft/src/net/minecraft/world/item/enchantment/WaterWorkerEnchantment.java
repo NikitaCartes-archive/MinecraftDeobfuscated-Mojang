@@ -16,9 +16,4 @@ public class WaterWorkerEnchantment extends Enchantment {
 	public int getMaxCost(int i) {
 		return this.getMinCost(i) + 40;
 	}
-
-	@Override
-	public int getMaxLevel() {
-		return 1;
-	}
 }

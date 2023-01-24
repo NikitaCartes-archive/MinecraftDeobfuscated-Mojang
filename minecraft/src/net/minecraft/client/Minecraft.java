@@ -507,7 +507,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager.registerReloadListener(this.blockEntityRenderDispatcher);
 		BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer = new BlockEntityWithoutLevelRenderer(this.blockEntityRenderDispatcher, this.entityModels);
 		this.resourceManager.registerReloadListener(blockEntityWithoutLevelRenderer);
-		this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
+		this.itemRenderer = new ItemRenderer(this, this.textureManager, this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
 		this.resourceManager.registerReloadListener(this.itemRenderer);
 		this.renderBuffers = new RenderBuffers();
 		this.playerSocialManager = new PlayerSocialManager(this, this.userApiService);
@@ -758,10 +758,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				list -> new FullTextSearchTree(
 						recipeCollection -> recipeCollection.getRecipes()
 								.stream()
-								.flatMap(recipe -> recipe.getResultItem().getTooltipLines(null, TooltipFlag.Default.NORMAL).stream())
+								.flatMap(recipe -> recipe.getResultItem(recipeCollection.registryAccess()).getTooltipLines(null, TooltipFlag.Default.NORMAL).stream())
 								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
 								.filter(string -> !string.isEmpty()),
-						recipeCollection -> recipeCollection.getRecipes().stream().map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItem().getItem())),
+						recipeCollection -> recipeCollection.getRecipes()
+								.stream()
+								.map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItem(recipeCollection.registryAccess()).getItem())),
 						list
 					)
 			);

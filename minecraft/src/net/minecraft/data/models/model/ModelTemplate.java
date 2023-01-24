@@ -44,23 +44,38 @@ public class ModelTemplate {
 	public ResourceLocation create(
 		ResourceLocation resourceLocation, TextureMapping textureMapping, BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer
 	) {
-		Map<TextureSlot, ResourceLocation> map = this.createMap(textureMapping);
-		biConsumer.accept(resourceLocation, (Supplier)() -> {
-			JsonObject jsonObject = new JsonObject();
-			this.model.ifPresent(resourceLocationx -> jsonObject.addProperty("parent", resourceLocationx.toString()));
-			if (!map.isEmpty()) {
-				JsonObject jsonObject2 = new JsonObject();
-				map.forEach((textureSlot, resourceLocationx) -> jsonObject2.addProperty(textureSlot.getId(), resourceLocationx.toString()));
-				jsonObject.add("textures", jsonObject2);
-			}
+		return this.create(resourceLocation, textureMapping, biConsumer, this::createBaseTemplate);
+	}
 
-			return jsonObject;
-		});
+	public ResourceLocation create(
+		ResourceLocation resourceLocation,
+		TextureMapping textureMapping,
+		BiConsumer<ResourceLocation, Supplier<JsonElement>> biConsumer,
+		ModelTemplate.JsonFactory jsonFactory
+	) {
+		Map<TextureSlot, ResourceLocation> map = this.createMap(textureMapping);
+		biConsumer.accept(resourceLocation, (Supplier)() -> jsonFactory.create(resourceLocation, map));
 		return resourceLocation;
+	}
+
+	public JsonObject createBaseTemplate(ResourceLocation resourceLocation, Map<TextureSlot, ResourceLocation> map) {
+		JsonObject jsonObject = new JsonObject();
+		this.model.ifPresent(resourceLocationx -> jsonObject.addProperty("parent", resourceLocationx.toString()));
+		if (!map.isEmpty()) {
+			JsonObject jsonObject2 = new JsonObject();
+			map.forEach((textureSlot, resourceLocationx) -> jsonObject2.addProperty(textureSlot.getId(), resourceLocationx.toString()));
+			jsonObject.add("textures", jsonObject2);
+		}
+
+		return jsonObject;
 	}
 
 	private Map<TextureSlot, ResourceLocation> createMap(TextureMapping textureMapping) {
 		return (Map<TextureSlot, ResourceLocation>)Streams.concat(this.requiredSlots.stream(), textureMapping.getForced())
 			.collect(ImmutableMap.toImmutableMap(Function.identity(), textureMapping::get));
+	}
+
+	public interface JsonFactory {
+		JsonObject create(ResourceLocation resourceLocation, Map<TextureSlot, ResourceLocation> map);
 	}
 }

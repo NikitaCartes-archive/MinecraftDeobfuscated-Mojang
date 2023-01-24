@@ -107,7 +107,9 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 				int l = this.getLightVal(itemFrame, 15728880, i);
 				poseStack.scale(0.5F, 0.5F, 0.5F);
 				this.itemRenderer
-					.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, l, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, itemFrame.getId());
+					.renderStatic(
+						itemStack, ItemTransforms.TransformType.FIXED, l, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, itemFrame.level, itemFrame.getId()
+					);
 			}
 		}
 

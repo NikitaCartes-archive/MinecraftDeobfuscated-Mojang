@@ -8,6 +8,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufInputStream;
@@ -56,7 +57,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -107,14 +107,14 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	@Deprecated
-	public <T> T readWithCodec(Codec<T> codec) {
+	public <T> T readWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec) {
 		CompoundTag compoundTag = this.readAnySizeNbt();
-		return Util.getOrThrow(codec.parse(NbtOps.INSTANCE, compoundTag), string -> new DecoderException("Failed to decode: " + string + " " + compoundTag));
+		return Util.getOrThrow(codec.parse(dynamicOps, compoundTag), string -> new DecoderException("Failed to decode: " + string + " " + compoundTag));
 	}
 
 	@Deprecated
-	public <T> void writeWithCodec(Codec<T> codec, T object) {
-		Tag tag = Util.getOrThrow(codec.encodeStart(NbtOps.INSTANCE, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
+	public <T> void writeWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec, T object) {
+		Tag tag = Util.getOrThrow(codec.encodeStart(dynamicOps, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
 		this.writeNbt((CompoundTag)tag);
 	}
 

@@ -18,11 +18,6 @@ public class VanishingCurseEnchantment extends Enchantment {
 	}
 
 	@Override
-	public int getMaxLevel() {
-		return 1;
-	}
-
-	@Override
 	public boolean isTreasureOnly() {
 		return true;
 	}

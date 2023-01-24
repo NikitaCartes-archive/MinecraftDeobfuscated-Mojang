@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.Util;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -95,7 +96,7 @@ public class FireworkStarRecipe extends CustomRecipe {
 		return bl && bl2;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer) {
+	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		ItemStack itemStack = new ItemStack(Items.FIREWORK_STAR);
 		CompoundTag compoundTag = itemStack.getOrCreateTagElement("Explosion");
 		FireworkRocketItem.Shape shape = FireworkRocketItem.Shape.SMALL_BALL;
@@ -127,7 +128,7 @@ public class FireworkStarRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem() {
+	public ItemStack getResultItem(RegistryAccess registryAccess) {
 		return new ItemStack(Items.FIREWORK_STAR);
 	}
 

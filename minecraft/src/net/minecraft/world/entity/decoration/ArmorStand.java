@@ -634,7 +634,7 @@ public class ArmorStand extends LivingEntity {
 		return (this.entityData.get(DATA_CLIENT_FLAGS) & 1) != 0;
 	}
 
-	private void setShowArms(boolean bl) {
+	public void setShowArms(boolean bl) {
 		this.entityData.set(DATA_CLIENT_FLAGS, this.setBit(this.entityData.get(DATA_CLIENT_FLAGS), 4, bl));
 	}
 
@@ -642,7 +642,7 @@ public class ArmorStand extends LivingEntity {
 		return (this.entityData.get(DATA_CLIENT_FLAGS) & 4) != 0;
 	}
 
-	private void setNoBasePlate(boolean bl) {
+	public void setNoBasePlate(boolean bl) {
 		this.entityData.set(DATA_CLIENT_FLAGS, this.setBit(this.entityData.get(DATA_CLIENT_FLAGS), 8, bl));
 	}
 

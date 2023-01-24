@@ -14,7 +14,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
-public class UpgradeRecipeBuilder {
+public class SmithingTransformRecipeBuilder {
+	private final Ingredient template;
 	private final Ingredient base;
 	private final Ingredient addition;
 	private final RecipeCategory category;
@@ -22,19 +23,24 @@ public class UpgradeRecipeBuilder {
 	private final Advancement.Builder advancement = Advancement.Builder.advancement();
 	private final RecipeSerializer<?> type;
 
-	public UpgradeRecipeBuilder(RecipeSerializer<?> recipeSerializer, Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
+	public SmithingTransformRecipeBuilder(
+		RecipeSerializer<?> recipeSerializer, Ingredient ingredient, Ingredient ingredient2, Ingredient ingredient3, RecipeCategory recipeCategory, Item item
+	) {
 		this.category = recipeCategory;
 		this.type = recipeSerializer;
-		this.base = ingredient;
-		this.addition = ingredient2;
+		this.template = ingredient;
+		this.base = ingredient2;
+		this.addition = ingredient3;
 		this.result = item;
 	}
 
-	public static UpgradeRecipeBuilder smithing(Ingredient ingredient, Ingredient ingredient2, RecipeCategory recipeCategory, Item item) {
-		return new UpgradeRecipeBuilder(RecipeSerializer.SMITHING, ingredient, ingredient2, recipeCategory, item);
+	public static SmithingTransformRecipeBuilder smithing(
+		Ingredient ingredient, Ingredient ingredient2, Ingredient ingredient3, RecipeCategory recipeCategory, Item item
+	) {
+		return new SmithingTransformRecipeBuilder(RecipeSerializer.SMITHING_TRANSFORM, ingredient, ingredient2, ingredient3, recipeCategory, item);
 	}
 
-	public UpgradeRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
+	public SmithingTransformRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
 		this.advancement.addCriterion(string, criterionTriggerInstance);
 		return this;
 	}
@@ -51,9 +57,10 @@ public class UpgradeRecipeBuilder {
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
 			.requirements(RequirementsStrategy.OR);
 		consumer.accept(
-			new UpgradeRecipeBuilder.Result(
+			new SmithingTransformRecipeBuilder.Result(
 				resourceLocation,
 				this.type,
+				this.template,
 				this.base,
 				this.addition,
 				this.result,
@@ -69,35 +76,19 @@ public class UpgradeRecipeBuilder {
 		}
 	}
 
-	public static class Result implements FinishedRecipe {
-		private final ResourceLocation id;
-		private final Ingredient base;
-		private final Ingredient addition;
-		private final Item result;
-		private final Advancement.Builder advancement;
-		private final ResourceLocation advancementId;
-		private final RecipeSerializer<?> type;
-
-		public Result(
-			ResourceLocation resourceLocation,
-			RecipeSerializer<?> recipeSerializer,
-			Ingredient ingredient,
-			Ingredient ingredient2,
-			Item item,
-			Advancement.Builder builder,
-			ResourceLocation resourceLocation2
-		) {
-			this.id = resourceLocation;
-			this.type = recipeSerializer;
-			this.base = ingredient;
-			this.addition = ingredient2;
-			this.result = item;
-			this.advancement = builder;
-			this.advancementId = resourceLocation2;
-		}
-
+	public static record Result(
+		ResourceLocation id,
+		RecipeSerializer<?> type,
+		Ingredient template,
+		Ingredient base,
+		Ingredient addition,
+		Item result,
+		Advancement.Builder advancement,
+		ResourceLocation advancementId
+	) implements FinishedRecipe {
 		@Override
 		public void serializeRecipeData(JsonObject jsonObject) {
+			jsonObject.add("template", this.template.toJson());
 			jsonObject.add("base", this.base.toJson());
 			jsonObject.add("addition", this.addition.toJson());
 			JsonObject jsonObject2 = new JsonObject();

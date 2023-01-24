@@ -48,7 +48,8 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			new HumanoidArmorLayer<>(
 				this,
 				new HumanoidModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)),
-				new HumanoidModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR))
+				new HumanoidModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR)),
+				context.getModelManager()
 			)
 		);
 		this.addLayer(new PlayerItemInHandLayer<>(this, context.getItemInHandRenderer()));

@@ -5,6 +5,7 @@ import com.mojang.text2speech.Narrator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.AccessibilityOnboardingTextWidget;
@@ -24,6 +25,7 @@ public class AccessibilityOnboardingScreen extends Screen {
 	private final PanoramaRenderer panorama = new PanoramaRenderer(TitleScreen.CUBE_MAP);
 	private final LogoRenderer logoRenderer;
 	private final Options options;
+	private final boolean narratorAvailable;
 	private boolean hasNarrated;
 	private float timer;
 	@Nullable
@@ -33,6 +35,7 @@ public class AccessibilityOnboardingScreen extends Screen {
 		super(Component.translatable("accessibility.onboarding.screen.title"));
 		this.options = options;
 		this.logoRenderer = new LogoRenderer(true);
+		this.narratorAvailable = Minecraft.getInstance().getNarrator().isActive();
 	}
 
 	@Override
@@ -46,8 +49,12 @@ public class AccessibilityOnboardingScreen extends Screen {
 		this.textWidget = new AccessibilityOnboardingTextWidget(this.font, this.title, this.width);
 		rowHelper.addChild(this.textWidget, rowHelper.newCellSettings().padding(16));
 		AbstractWidget abstractWidget = this.options.narrator().createButton(this.options, 0, 0, 150);
+		abstractWidget.active = this.narratorAvailable;
 		rowHelper.addChild(abstractWidget);
-		this.setInitialFocus(abstractWidget);
+		if (this.narratorAvailable) {
+			this.setInitialFocus(abstractWidget);
+		}
+
 		rowHelper.addChild(
 			Button.builder(
 					Component.translatable("options.accessibility.title"),
@@ -88,7 +95,7 @@ public class AccessibilityOnboardingScreen extends Screen {
 	}
 
 	private void handleInitialNarrationDelay() {
-		if (!this.hasNarrated) {
+		if (!this.hasNarrated && this.narratorAvailable) {
 			if (this.timer < 40.0F) {
 				this.timer++;
 			} else {

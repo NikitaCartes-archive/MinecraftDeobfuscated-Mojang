@@ -10,26 +10,34 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.DyeableArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.armortrim.ArmorTrim;
 
 @Environment(EnvType.CLIENT)
 public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T, M> {
 	private static final Map<String, ResourceLocation> ARMOR_LOCATION_CACHE = Maps.<String, ResourceLocation>newHashMap();
 	private final A innerModel;
 	private final A outerModel;
+	private final TextureAtlas armorTrimAtlas;
 
-	public HumanoidArmorLayer(RenderLayerParent<T, M> renderLayerParent, A humanoidModel, A humanoidModel2) {
+	public HumanoidArmorLayer(RenderLayerParent<T, M> renderLayerParent, A humanoidModel, A humanoidModel2, ModelManager modelManager) {
 		super(renderLayerParent);
 		this.innerModel = humanoidModel;
 		this.outerModel = humanoidModel2;
+		this.armorTrimAtlas = modelManager.getAtlas(Sheets.ARMOR_TRIMS_SHEET);
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
@@ -41,8 +49,7 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 
 	private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T livingEntity, EquipmentSlot equipmentSlot, int i, A humanoidModel) {
 		ItemStack itemStack = livingEntity.getItemBySlot(equipmentSlot);
-		if (itemStack.getItem() instanceof ArmorItem) {
-			ArmorItem armorItem = (ArmorItem)itemStack.getItem();
+		if (itemStack.getItem() instanceof ArmorItem armorItem) {
 			if (armorItem.getSlot() == equipmentSlot) {
 				this.getParentModel().copyPropertiesTo(humanoidModel);
 				this.setPartVisibility(humanoidModel, equipmentSlot);
@@ -57,6 +64,10 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 					this.renderModel(poseStack, multiBufferSource, i, armorItem, bl2, humanoidModel, bl, 1.0F, 1.0F, 1.0F, "overlay");
 				} else {
 					this.renderModel(poseStack, multiBufferSource, i, armorItem, bl2, humanoidModel, bl, 1.0F, 1.0F, 1.0F, null);
+					if (livingEntity.level.enabledFeatures().contains(FeatureFlags.UPDATE_1_20)) {
+						ArmorTrim.getTrim(livingEntity.level.registryAccess(), itemStack)
+							.ifPresent(armorTrim -> this.renderTrim(poseStack, multiBufferSource, i, armorTrim, bl2, humanoidModel, bl, 1.0F, 1.0F, 1.0F));
+					}
 				}
 			}
 		}
@@ -101,6 +112,14 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 		VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(
 			multiBufferSource, RenderType.armorCutoutNoCull(this.getArmorLocation(armorItem, bl2, string)), false, bl
 		);
+		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0F);
+	}
+
+	private void renderTrim(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorTrim armorTrim, boolean bl, A humanoidModel, boolean bl2, float f, float g, float h
+	) {
+		TextureAtlasSprite textureAtlasSprite = this.armorTrimAtlas.getSprite(bl2 ? armorTrim.innerTexture() : armorTrim.outerTexture());
+		VertexConsumer vertexConsumer = textureAtlasSprite.wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, Sheets.armorTrimsSheet(), true, bl));
 		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0F);
 	}
 

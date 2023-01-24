@@ -38,7 +38,7 @@ public class CampfireRenderer implements BlockEntityRenderer<CampfireBlockEntity
 				poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 				poseStack.translate(-0.3125F, -0.3125F, 0.0F);
 				poseStack.scale(0.375F, 0.375F, 0.375F);
-				this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, j, poseStack, multiBufferSource, k + l);
+				this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, j, poseStack, multiBufferSource, campfireBlockEntity.getLevel(), k + l);
 				poseStack.popPose();
 			}
 		}

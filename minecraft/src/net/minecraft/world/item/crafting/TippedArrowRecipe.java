@@ -1,5 +1,6 @@
 package net.minecraft.world.item.crafting;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -37,7 +38,7 @@ public class TippedArrowRecipe extends CustomRecipe {
 		}
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer) {
+	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		ItemStack itemStack = craftingContainer.getItem(1 + craftingContainer.getWidth());
 		if (!itemStack.is(Items.LINGERING_POTION)) {
 			return ItemStack.EMPTY;

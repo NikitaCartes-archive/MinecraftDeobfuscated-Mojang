@@ -22,7 +22,9 @@ public class SkeletonRenderer extends HumanoidMobRenderer<AbstractSkeleton, Skel
 	) {
 		super(context, new SkeletonModel<>(context.bakeLayer(modelLayerLocation)), 0.5F);
 		this.addLayer(
-			new HumanoidArmorLayer<>(this, new SkeletonModel(context.bakeLayer(modelLayerLocation2)), new SkeletonModel(context.bakeLayer(modelLayerLocation3)))
+			new HumanoidArmorLayer<>(
+				this, new SkeletonModel(context.bakeLayer(modelLayerLocation2)), new SkeletonModel(context.bakeLayer(modelLayerLocation3)), context.getModelManager()
+			)
 		);
 	}
 

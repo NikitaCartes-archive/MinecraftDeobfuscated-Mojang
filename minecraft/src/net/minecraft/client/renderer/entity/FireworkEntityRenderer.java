@@ -38,6 +38,7 @@ public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity>
 				OverlayTexture.NO_OVERLAY,
 				poseStack,
 				multiBufferSource,
+				fireworkRocketEntity.level,
 				fireworkRocketEntity.getId()
 			);
 		poseStack.popPose();

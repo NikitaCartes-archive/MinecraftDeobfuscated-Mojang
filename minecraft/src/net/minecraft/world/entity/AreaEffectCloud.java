@@ -28,7 +28,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.PushReaction;
 import org.slf4j.Logger;
 
-public class AreaEffectCloud extends Entity {
+public class AreaEffectCloud extends Entity implements TraceableEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int TIME_BETWEEN_APPLICATIONS = 5;
 	private static final EntityDataAccessor<Float> DATA_RADIUS = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.FLOAT);

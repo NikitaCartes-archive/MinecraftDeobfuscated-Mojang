@@ -14,7 +14,7 @@ import net.minecraft.world.inventory.ItemCombinerMenu;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
-public class ItemCombinerScreen<T extends ItemCombinerMenu> extends AbstractContainerScreen<T> implements ContainerListener {
+public abstract class ItemCombinerScreen<T extends ItemCombinerMenu> extends AbstractContainerScreen<T> implements ContainerListener {
 	private final ResourceLocation menuResource;
 
 	public ItemCombinerScreen(T itemCombinerMenu, Inventory inventory, Component component, ResourceLocation resourceLocation) {
@@ -54,14 +54,11 @@ public class ItemCombinerScreen<T extends ItemCombinerMenu> extends AbstractCont
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, this.menuResource);
-		int k = (this.width - this.imageWidth) / 2;
-		int l = (this.height - this.imageHeight) / 2;
-		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
-		this.blit(poseStack, k + 59, l + 20, 0, this.imageHeight + (this.menu.getSlot(0).hasItem() ? 0 : 16), 110, 16);
-		if ((this.menu.getSlot(0).hasItem() || this.menu.getSlot(1).hasItem()) && !this.menu.getSlot(2).hasItem()) {
-			this.blit(poseStack, k + 99, l + 45, this.imageWidth, 0, 28, 21);
-		}
+		this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+		this.renderErrorIcon(poseStack, this.leftPos, this.topPos);
 	}
+
+	protected abstract void renderErrorIcon(PoseStack poseStack, int i, int j);
 
 	@Override
 	public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {

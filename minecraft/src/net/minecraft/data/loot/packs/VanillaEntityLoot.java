@@ -220,47 +220,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.11F, 0.02F))
 				)
 		);
-		this.add(
-			EntityType.ELDER_GUARDIAN,
-			LootTable.lootTable()
-				.withPool(
-					LootPool.lootPool()
-						.setRolls(ConstantValue.exactly(1.0F))
-						.add(
-							LootItem.lootTableItem(Items.PRISMARINE_SHARD)
-								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
-								.apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)))
-						)
-				)
-				.withPool(
-					LootPool.lootPool()
-						.setRolls(ConstantValue.exactly(1.0F))
-						.add(
-							LootItem.lootTableItem(Items.COD)
-								.setWeight(3)
-								.apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)))
-								.apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))
-						)
-						.add(LootItem.lootTableItem(Items.PRISMARINE_CRYSTALS).setWeight(2).apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))
-						.add(EmptyLootItem.emptyItem())
-				)
-				.withPool(
-					LootPool.lootPool()
-						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Blocks.WET_SPONGE))
-						.when(LootItemKilledByPlayerCondition.killedByPlayer())
-				)
-				.withPool(
-					LootPool.lootPool()
-						.setRolls(ConstantValue.exactly(1.0F))
-						.add(
-							LootTableReference.lootTableReference(BuiltInLootTables.FISHING_FISH)
-								.apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))
-						)
-						.when(LootItemKilledByPlayerCondition.killedByPlayer())
-						.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.025F, 0.01F))
-				)
-		);
+		this.add(EntityType.ELDER_GUARDIAN, elderGuardianLootTable());
 		this.add(EntityType.ENDER_DRAGON, LootTable.lootTable());
 		this.add(
 			EntityType.ENDERMAN,
@@ -1109,5 +1069,46 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.025F, 0.01F))
 				)
 		);
+	}
+
+	public static LootTable.Builder elderGuardianLootTable() {
+		return LootTable.lootTable()
+			.withPool(
+				LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(
+						LootItem.lootTableItem(Items.PRISMARINE_SHARD)
+							.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
+							.apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)))
+					)
+			)
+			.withPool(
+				LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(
+						LootItem.lootTableItem(Items.COD)
+							.setWeight(3)
+							.apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)))
+							.apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))
+					)
+					.add(LootItem.lootTableItem(Items.PRISMARINE_CRYSTALS).setWeight(2).apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))
+					.add(EmptyLootItem.emptyItem())
+			)
+			.withPool(
+				LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(LootItem.lootTableItem(Blocks.WET_SPONGE))
+					.when(LootItemKilledByPlayerCondition.killedByPlayer())
+			)
+			.withPool(
+				LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(
+						LootTableReference.lootTableReference(BuiltInLootTables.FISHING_FISH)
+							.apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))
+					)
+					.when(LootItemKilledByPlayerCondition.killedByPlayer())
+					.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.025F, 0.01F))
+			);
 	}
 }

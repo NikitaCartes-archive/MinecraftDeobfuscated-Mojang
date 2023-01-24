@@ -14,6 +14,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
@@ -29,13 +30,14 @@ public class ClientRecipeBook extends RecipeBook {
 	private Map<RecipeBookCategories, List<RecipeCollection>> collectionsByTab = ImmutableMap.of();
 	private List<RecipeCollection> allCollections = ImmutableList.of();
 
-	public void setupCollections(Iterable<Recipe<?>> iterable) {
+	public void setupCollections(Iterable<Recipe<?>> iterable, RegistryAccess registryAccess) {
 		Map<RecipeBookCategories, List<List<Recipe<?>>>> map = categorizeAndGroupRecipes(iterable);
 		Map<RecipeBookCategories, List<RecipeCollection>> map2 = Maps.<RecipeBookCategories, List<RecipeCollection>>newHashMap();
 		Builder<RecipeCollection> builder = ImmutableList.builder();
 		map.forEach(
 			(recipeBookCategories, list) -> map2.put(
-					recipeBookCategories, (List)list.stream().map(RecipeCollection::new).peek(builder::add).collect(ImmutableList.toImmutableList())
+					recipeBookCategories,
+					(List)list.stream().map(listx -> new RecipeCollection(registryAccess, listx)).peek(builder::add).collect(ImmutableList.toImmutableList())
 				)
 		);
 		RecipeBookCategories.AGGREGATE_CATEGORIES

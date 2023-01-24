@@ -7,9 +7,13 @@ import javax.annotation.Nullable;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -34,6 +38,10 @@ public record ClientboundLoginPacket(
 	boolean isFlat,
 	Optional<GlobalPos> lastDeathLocation
 ) implements Packet<ClientGamePacketListener> {
+	private static final RegistryOps<Tag> BUILTIN_CONTEXT_OPS = RegistryOps.create(
+		NbtOps.INSTANCE, RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)
+	);
+
 	public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(
 			friendlyByteBuf.readInt(),
@@ -41,7 +49,7 @@ public record ClientboundLoginPacket(
 			GameType.byId(friendlyByteBuf.readByte()),
 			GameType.byNullableId(friendlyByteBuf.readByte()),
 			friendlyByteBuf.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBufx -> friendlyByteBufx.readResourceKey(Registries.DIMENSION)),
-			friendlyByteBuf.readWithCodec(RegistrySynchronization.NETWORK_CODEC).freeze(),
+			friendlyByteBuf.readWithCodec(BUILTIN_CONTEXT_OPS, RegistrySynchronization.NETWORK_CODEC).freeze(),
 			friendlyByteBuf.readResourceKey(Registries.DIMENSION_TYPE),
 			friendlyByteBuf.readResourceKey(Registries.DIMENSION),
 			friendlyByteBuf.readLong(),
@@ -63,7 +71,7 @@ public record ClientboundLoginPacket(
 		friendlyByteBuf.writeByte(this.gameType.getId());
 		friendlyByteBuf.writeByte(GameType.getNullableId(this.previousGameType));
 		friendlyByteBuf.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
-		friendlyByteBuf.writeWithCodec(RegistrySynchronization.NETWORK_CODEC, this.registryHolder);
+		friendlyByteBuf.writeWithCodec(BUILTIN_CONTEXT_OPS, RegistrySynchronization.NETWORK_CODEC, this.registryHolder);
 		friendlyByteBuf.writeResourceKey(this.dimensionType);
 		friendlyByteBuf.writeResourceKey(this.dimension);
 		friendlyByteBuf.writeLong(this.seed);

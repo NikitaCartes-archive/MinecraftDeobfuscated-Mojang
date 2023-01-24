@@ -17,6 +17,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 public class AnvilMenu extends ItemCombinerMenu {
+	public static final int INPUT_SLOT = 0;
+	public static final int ADDITIONAL_SLOT = 1;
+	public static final int RESULT_SLOT = 2;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final boolean DEBUG_COST = false;
 	public static final int MAX_NAME_LENGTH = 50;
@@ -30,6 +33,10 @@ public class AnvilMenu extends ItemCombinerMenu {
 	private static final int COST_REPAIR_SACRIFICE = 2;
 	private static final int COST_INCOMPATIBLE_PENALTY = 1;
 	private static final int COST_RENAME = 1;
+	private static final int INPUT_SLOT_X_PLACEMENT = 27;
+	private static final int ADDITIONAL_SLOT_X_PLACEMENT = 76;
+	private static final int RESULT_SLOT_X_PLACEMENT = 134;
+	private static final int SLOT_Y_PLACEMENT = 47;
 
 	public AnvilMenu(int i, Inventory inventory) {
 		this(i, inventory, ContainerLevelAccess.NULL);
@@ -38,6 +45,15 @@ public class AnvilMenu extends ItemCombinerMenu {
 	public AnvilMenu(int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
 		super(MenuType.ANVIL, i, inventory, containerLevelAccess);
 		this.addDataSlot(this.cost);
+	}
+
+	@Override
+	protected ItemCombinerMenuSlotDefinition createInputSlotDefinitions() {
+		return ItemCombinerMenuSlotDefinition.create()
+			.withSlot(0, 27, 47, itemStack -> true)
+			.withSlot(1, 76, 47, itemStack -> true)
+			.withResultSlot(2, 134, 47)
+			.build();
 	}
 
 	@Override

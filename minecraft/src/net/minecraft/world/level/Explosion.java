@@ -208,8 +208,8 @@ public class Explosion {
 						double ac = (1.0 - w) * ab;
 						entity.hurt(this.getDamageSource(), (float)((int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0)));
 						double ad = ac;
-						if (entity instanceof LivingEntity) {
-							ad = ProtectionEnchantment.getExplosionKnockbackAfterDampener((LivingEntity)entity, ac);
+						if (entity instanceof LivingEntity livingEntity) {
+							ad = ProtectionEnchantment.getExplosionKnockbackAfterDampener(livingEntity, ac);
 						}
 
 						entity.setDeltaMovement(entity.getDeltaMovement().add(x * ad, y * ad, z * ad));

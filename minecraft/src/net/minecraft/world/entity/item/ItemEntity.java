@@ -3,7 +3,6 @@ package net.minecraft.world.entity.item;
 import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -20,6 +19,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +28,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 
-public class ItemEntity extends Entity {
+public class ItemEntity extends Entity implements TraceableEntity {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(ItemEntity.class, EntityDataSerializers.ITEM_STACK);
 	private static final int LIFETIME = 6000;
 	private static final int INFINITE_PICKUP_DELAY = 32767;
@@ -39,7 +39,7 @@ public class ItemEntity extends Entity {
 	@Nullable
 	private UUID thrower;
 	@Nullable
-	private UUID owner;
+	private UUID target;
 	public final float bobOffs;
 
 	public ItemEntity(EntityType<? extends ItemEntity> entityType, Level level) {
@@ -72,8 +72,10 @@ public class ItemEntity extends Entity {
 		return this.getItem().is(ItemTags.DAMPENS_VIBRATIONS);
 	}
 
-	public Entity getThrowingEntity() {
-		return Util.mapNullable(this.getThrower(), this.level::getPlayerByUUID);
+	@Nullable
+	@Override
+	public Entity getOwner() {
+		return this.thrower != null && this.level instanceof ServerLevel serverLevel ? serverLevel.getEntity(this.thrower) : null;
 	}
 
 	@Override
@@ -190,7 +192,7 @@ public class ItemEntity extends Entity {
 	private void tryToMerge(ItemEntity itemEntity) {
 		ItemStack itemStack = this.getItem();
 		ItemStack itemStack2 = itemEntity.getItem();
-		if (Objects.equals(this.getOwner(), itemEntity.getOwner()) && areMergable(itemStack, itemStack2)) {
+		if (Objects.equals(this.target, itemEntity.target) && areMergable(itemStack, itemStack2)) {
 			if (itemStack2.getCount() < itemStack.getCount()) {
 				merge(this, itemStack, itemEntity, itemStack2);
 			} else {
@@ -264,12 +266,12 @@ public class ItemEntity extends Entity {
 		compoundTag.putShort("Health", (short)this.health);
 		compoundTag.putShort("Age", (short)this.age);
 		compoundTag.putShort("PickupDelay", (short)this.pickupDelay);
-		if (this.getThrower() != null) {
-			compoundTag.putUUID("Thrower", this.getThrower());
+		if (this.thrower != null) {
+			compoundTag.putUUID("Thrower", this.thrower);
 		}
 
-		if (this.getOwner() != null) {
-			compoundTag.putUUID("Owner", this.getOwner());
+		if (this.target != null) {
+			compoundTag.putUUID("Owner", this.target);
 		}
 
 		if (!this.getItem().isEmpty()) {
@@ -286,7 +288,7 @@ public class ItemEntity extends Entity {
 		}
 
 		if (compoundTag.hasUUID("Owner")) {
-			this.owner = compoundTag.getUUID("Owner");
+			this.target = compoundTag.getUUID("Owner");
 		}
 
 		if (compoundTag.hasUUID("Thrower")) {
@@ -306,7 +308,7 @@ public class ItemEntity extends Entity {
 			ItemStack itemStack = this.getItem();
 			Item item = itemStack.getItem();
 			int i = itemStack.getCount();
-			if (this.pickupDelay == 0 && (this.owner == null || this.owner.equals(player.getUUID())) && player.getInventory().add(itemStack)) {
+			if (this.pickupDelay == 0 && (this.target == null || this.target.equals(player.getUUID())) && player.getInventory().add(itemStack)) {
 				player.take(this, i);
 				if (itemStack.isEmpty()) {
 					this.discard();
@@ -357,18 +359,8 @@ public class ItemEntity extends Entity {
 		}
 	}
 
-	@Nullable
-	public UUID getOwner() {
-		return this.owner;
-	}
-
-	public void setOwner(@Nullable UUID uUID) {
-		this.owner = uUID;
-	}
-
-	@Nullable
-	public UUID getThrower() {
-		return this.thrower;
+	public void setTarget(@Nullable UUID uUID) {
+		this.target = uUID;
 	}
 
 	public void setThrower(@Nullable UUID uUID) {
