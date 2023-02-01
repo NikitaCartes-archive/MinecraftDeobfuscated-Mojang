@@ -38,7 +38,7 @@ public interface PresetEditor {
 			HolderGetter<PlacedFeature> holderGetter3 = registryAccess.lookupOrThrow(Registries.PLACED_FEATURE);
 			return new CreateFlatWorldScreen(
 				createWorldScreen,
-				flatLevelGeneratorSettings -> createWorldScreen.worldGenSettingsComponent.updateSettings(flatWorldConfigurator(flatLevelGeneratorSettings)),
+				flatLevelGeneratorSettings -> createWorldScreen.getUiState().updateDimensions(flatWorldConfigurator(flatLevelGeneratorSettings)),
 				chunkGenerator instanceof FlatLevelSource
 					? ((FlatLevelSource)chunkGenerator).settings()
 					: FlatLevelGeneratorSettings.getDefault(holderGetter, holderGetter2, holderGetter3)
@@ -46,7 +46,7 @@ public interface PresetEditor {
 		},
 		Optional.of(WorldPresets.SINGLE_BIOME_SURFACE),
 		(PresetEditor)(createWorldScreen, worldCreationContext) -> new CreateBuffetWorldScreen(
-				createWorldScreen, worldCreationContext, holder -> createWorldScreen.worldGenSettingsComponent.updateSettings(fixedBiomeConfigurator(holder))
+				createWorldScreen, worldCreationContext, holder -> createWorldScreen.getUiState().updateDimensions(fixedBiomeConfigurator(holder))
 			)
 	);
 

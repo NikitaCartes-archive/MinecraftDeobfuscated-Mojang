@@ -55,7 +55,6 @@ public class TitleScreen extends Screen {
 	public static final Component COPYRIGHT_TEXT = Component.literal("Copyright Mojang AB. Do not distribute!");
 	public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
 	private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
-	private static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");
 	@Nullable
 	private String splash;
 	private Button resetDemoButton;
@@ -163,7 +162,7 @@ public class TitleScreen extends Screen {
 				0,
 				0,
 				20,
-				ACCESSIBILITY_TEXTURE,
+				Button.ACCESSIBILITY_TEXTURE,
 				32,
 				64,
 				button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)),

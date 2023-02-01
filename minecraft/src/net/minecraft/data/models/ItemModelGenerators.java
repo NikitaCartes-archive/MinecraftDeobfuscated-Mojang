@@ -6,10 +6,8 @@ import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.models.model.ModelLocationUtils;
 import net.minecraft.data.models.model.ModelTemplate;
@@ -18,6 +16,7 @@ import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -25,16 +24,16 @@ import net.minecraft.world.item.Items;
 public class ItemModelGenerators {
 	public static final ResourceLocation TRIM_TYPE_PREDICATE_ID = new ResourceLocation("trim_type");
 	private static final List<ItemModelGenerators.TrimModelData> GENERATED_TRIM_MODELS = List.of(
-		new ItemModelGenerators.TrimModelData("quartz", 0.1F, Optional.empty()),
-		new ItemModelGenerators.TrimModelData("iron", 0.2F, Optional.of(ArmorMaterials.IRON)),
-		new ItemModelGenerators.TrimModelData("netherite", 0.3F, Optional.of(ArmorMaterials.NETHERITE)),
-		new ItemModelGenerators.TrimModelData("redstone", 0.4F, Optional.empty()),
-		new ItemModelGenerators.TrimModelData("copper", 0.5F, Optional.empty()),
-		new ItemModelGenerators.TrimModelData("gold", 0.6F, Optional.of(ArmorMaterials.GOLD)),
-		new ItemModelGenerators.TrimModelData("emerald", 0.7F, Optional.empty()),
-		new ItemModelGenerators.TrimModelData("diamond", 0.8F, Optional.of(ArmorMaterials.DIAMOND)),
-		new ItemModelGenerators.TrimModelData("lapis", 0.9F, Optional.empty()),
-		new ItemModelGenerators.TrimModelData("amethyst", 1.0F, Optional.empty())
+		new ItemModelGenerators.TrimModelData("quartz", 0.1F, Map.of()),
+		new ItemModelGenerators.TrimModelData("iron", 0.2F, Map.of(ArmorMaterials.IRON, "iron_darker")),
+		new ItemModelGenerators.TrimModelData("netherite", 0.3F, Map.of(ArmorMaterials.NETHERITE, "netherite_darker")),
+		new ItemModelGenerators.TrimModelData("redstone", 0.4F, Map.of()),
+		new ItemModelGenerators.TrimModelData("copper", 0.5F, Map.of()),
+		new ItemModelGenerators.TrimModelData("gold", 0.6F, Map.of(ArmorMaterials.GOLD, "gold_darker")),
+		new ItemModelGenerators.TrimModelData("emerald", 0.7F, Map.of()),
+		new ItemModelGenerators.TrimModelData("diamond", 0.8F, Map.of(ArmorMaterials.DIAMOND, "diamond_darker")),
+		new ItemModelGenerators.TrimModelData("lapis", 0.9F, Map.of()),
+		new ItemModelGenerators.TrimModelData("amethyst", 1.0F, Map.of())
 	);
 	private final BiConsumer<ResourceLocation, Supplier<JsonElement>> output;
 
@@ -69,31 +68,29 @@ public class ItemModelGenerators {
 	}
 
 	private void generateLayeredItem(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, ResourceLocation resourceLocation3) {
-		ModelTemplates.LAYERED_ITEM.create(resourceLocation, TextureMapping.layered(resourceLocation2, resourceLocation3), this.output);
+		ModelTemplates.TWO_LAYERED_ITEM.create(resourceLocation, TextureMapping.layered(resourceLocation2, resourceLocation3), this.output);
+	}
+
+	private void generateLayeredItem(
+		ResourceLocation resourceLocation, ResourceLocation resourceLocation2, ResourceLocation resourceLocation3, ResourceLocation resourceLocation4
+	) {
+		ModelTemplates.THREE_LAYERED_ITEM.create(resourceLocation, TextureMapping.layered(resourceLocation2, resourceLocation3, resourceLocation4), this.output);
 	}
 
 	private ResourceLocation getItemModelForTrimMaterial(ResourceLocation resourceLocation, String string) {
 		return resourceLocation.withSuffix("_" + string + "_trim");
 	}
 
-	private List<ItemModelGenerators.TrimModelData> getCompatibleTrimModels(ArmorItem armorItem) {
-		return (List<ItemModelGenerators.TrimModelData>)GENERATED_TRIM_MODELS.stream()
-			.filter(trimModelData -> trimModelData.incompatibleArmorMaterial().isEmpty() || trimModelData.incompatibleArmorMaterial().get() != armorItem.getMaterial())
-			.collect(Collectors.toList());
-	}
-
-	private JsonObject generateBaseArmorTrimTemplate(
-		ResourceLocation resourceLocation, Map<TextureSlot, ResourceLocation> map, List<ItemModelGenerators.TrimModelData> list
-	) {
-		JsonObject jsonObject = ModelTemplates.LAYERED_ITEM.createBaseTemplate(resourceLocation, map);
+	private JsonObject generateBaseArmorTrimTemplate(ResourceLocation resourceLocation, Map<TextureSlot, ResourceLocation> map, ArmorMaterial armorMaterial) {
+		JsonObject jsonObject = ModelTemplates.TWO_LAYERED_ITEM.createBaseTemplate(resourceLocation, map);
 		JsonArray jsonArray = new JsonArray();
 
-		for (ItemModelGenerators.TrimModelData trimModelData : list) {
+		for (ItemModelGenerators.TrimModelData trimModelData : GENERATED_TRIM_MODELS) {
 			JsonObject jsonObject2 = new JsonObject();
 			JsonObject jsonObject3 = new JsonObject();
 			jsonObject3.addProperty(TRIM_TYPE_PREDICATE_ID.getPath(), trimModelData.itemModelIndex());
 			jsonObject2.add("predicate", jsonObject3);
-			jsonObject2.addProperty("model", this.getItemModelForTrimMaterial(resourceLocation, trimModelData.name()).toString());
+			jsonObject2.addProperty("model", this.getItemModelForTrimMaterial(resourceLocation, trimModelData.name(armorMaterial)).toString());
 			jsonArray.add(jsonObject2);
 		}
 
@@ -102,20 +99,37 @@ public class ItemModelGenerators {
 	}
 
 	private void generateArmorTrims(ArmorItem armorItem) {
-		List<ItemModelGenerators.TrimModelData> list = this.getCompatibleTrimModels(armorItem);
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(armorItem);
-		ModelTemplates.FLAT_ITEM
-			.create(
-				resourceLocation,
-				TextureMapping.layer0(TextureMapping.getItemTexture(armorItem)),
-				this.output,
-				(resourceLocationx, map) -> this.generateBaseArmorTrimTemplate(resourceLocationx, map, list)
-			);
+		ResourceLocation resourceLocation2 = TextureMapping.getItemTexture(armorItem);
+		ResourceLocation resourceLocation3 = TextureMapping.getItemTexture(armorItem, "_overlay");
+		if (armorItem.getMaterial() == ArmorMaterials.LEATHER) {
+			ModelTemplates.TWO_LAYERED_ITEM
+				.create(
+					resourceLocation,
+					TextureMapping.layered(resourceLocation2, resourceLocation3),
+					this.output,
+					(resourceLocationx, map) -> this.generateBaseArmorTrimTemplate(resourceLocationx, map, armorItem.getMaterial())
+				);
+		} else {
+			ModelTemplates.FLAT_ITEM
+				.create(
+					resourceLocation,
+					TextureMapping.layer0(resourceLocation2),
+					this.output,
+					(resourceLocationx, map) -> this.generateBaseArmorTrimTemplate(resourceLocationx, map, armorItem.getMaterial())
+				);
+		}
 
-		for (ItemModelGenerators.TrimModelData trimModelData : list) {
-			ResourceLocation resourceLocation2 = this.getItemModelForTrimMaterial(resourceLocation, trimModelData.name());
-			String string = armorItem.getType().getName() + "_trim_" + trimModelData.name();
-			this.generateLayeredItem(resourceLocation2, TextureMapping.getItemTexture(armorItem), new ResourceLocation(string).withPrefix("trims/items/"));
+		for (ItemModelGenerators.TrimModelData trimModelData : GENERATED_TRIM_MODELS) {
+			String string = trimModelData.name(armorItem.getMaterial());
+			ResourceLocation resourceLocation4 = this.getItemModelForTrimMaterial(resourceLocation, string);
+			String string2 = armorItem.getType().getName() + "_trim_" + string;
+			ResourceLocation resourceLocation5 = new ResourceLocation(string2).withPrefix("trims/items/");
+			if (armorItem.getMaterial() == ArmorMaterials.LEATHER) {
+				this.generateLayeredItem(resourceLocation4, resourceLocation2, resourceLocation3, resourceLocation5);
+			} else {
+				this.generateLayeredItem(resourceLocation4, resourceLocation2, resourceLocation5);
+			}
 		}
 	}
 
@@ -363,15 +377,15 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_APPLE, ModelTemplates.FLAT_ITEM);
 
 		for (Item item : BuiltInRegistries.ITEM) {
-			if (item instanceof ArmorItem) {
-				ArmorItem armorItem = (ArmorItem)item;
-				if (armorItem.getMaterial().canHaveTrims()) {
-					this.generateArmorTrims(armorItem);
-				}
+			if (item instanceof ArmorItem armorItem) {
+				this.generateArmorTrims(armorItem);
 			}
 		}
 	}
 
-	static record TrimModelData(String name, float itemModelIndex, Optional<ArmorMaterials> incompatibleArmorMaterial) {
+	static record TrimModelData(String name, float itemModelIndex, Map<ArmorMaterial, String> overrideArmorMaterials) {
+		public String name(ArmorMaterial armorMaterial) {
+			return (String)this.overrideArmorMaterials.getOrDefault(armorMaterial, this.name);
+		}
 	}
 }

@@ -257,4 +257,51 @@ public abstract class GuiComponent {
 	public void setBlitOffset(int i) {
 		this.blitOffset = i;
 	}
+
+	public void blitNineSliced(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
+		this.blitNineSliced(poseStack, i, j, k, l, m, m, m, m, n, o, p, q);
+	}
+
+	public void blitNineSliced(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r, int s, int t) {
+		if (k == q && l == r) {
+			this.blit(poseStack, i, j, s, t, k, l);
+		} else if (l == r) {
+			this.blit(poseStack, i, j, s, t, m, l);
+			this.blitRepeating(poseStack, i + m, j, k - o - m, l, s + m, t, q - o - m, r);
+			this.blit(poseStack, i + k - o, j, s + q - o, t, o, l);
+		} else if (k == q) {
+			this.blit(poseStack, i, j, s, t, k, n);
+			this.blitRepeating(poseStack, i, j + n, k, l - p - n, s, t + n, q, r - p - n);
+			this.blit(poseStack, i, j + l - p, s, t + r - p, k, p);
+		} else {
+			this.blit(poseStack, i, j, s, t, m, n);
+			this.blitRepeating(poseStack, i + m, j, k - o - m, n, s + m, t, q - o - m, r);
+			this.blit(poseStack, i + k - o, j, s + q - o, t, o, n);
+			this.blit(poseStack, i, j + l - p, s, t + r - p, m, p);
+			this.blitRepeating(poseStack, i + m, j + l - p, k - o - m, p, s + m, t + r - p, q - o - m, r);
+			this.blit(poseStack, i + k - o, j + l - p, s + q - o, t + r - p, o, p);
+			this.blitRepeating(poseStack, i, j + n, m, l - p - n, s, t + n, q, r - p - n);
+			this.blitRepeating(poseStack, i + m, j + n, k - o - m, l - p - n, s + m, t + n, q - o - m, r - p - n);
+			this.blitRepeating(poseStack, i + k - o, j + n, m, l - p - n, s + q - o, t + n, q, r - p - n);
+		}
+	}
+
+	public void blitRepeating(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p) {
+		int q = 0;
+
+		while (q < k) {
+			int r = i + q;
+			int s = Math.min(o, k - q);
+			int t = 0;
+
+			while (t < l) {
+				int u = j + t;
+				int v = Math.min(p, l - t);
+				this.blit(poseStack, r, u, m, n, s, v);
+				t += p;
+			}
+
+			q += o;
+		}
+	}
 }

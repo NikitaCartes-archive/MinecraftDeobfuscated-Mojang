@@ -134,9 +134,11 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 				if (livingEntity.isAffectedByPotions()) {
 					double d = this.distanceToSqr(livingEntity);
 					if (d < 16.0) {
-						double e = 1.0 - Math.sqrt(d) / 4.0;
+						double e;
 						if (livingEntity == entity) {
 							e = 1.0;
+						} else {
+							e = 1.0 - Math.sqrt(d) / 4.0;
 						}
 
 						for (MobEffectInstance mobEffectInstance : list) {
@@ -144,11 +146,12 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 							if (mobEffect.isInstantenous()) {
 								mobEffect.applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance.getAmplifier(), e);
 							} else {
-								int i = (int)(e * (double)mobEffectInstance.getDuration() + 0.5);
-								if (i > 20) {
-									livingEntity.addEffect(
-										new MobEffectInstance(mobEffect, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()), entity2
-									);
+								int i = mobEffectInstance.mapDuration(ix -> (int)(e * (double)ix + 0.5));
+								MobEffectInstance mobEffectInstance2 = new MobEffectInstance(
+									mobEffect, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()
+								);
+								if (!mobEffectInstance2.endsWithin(20)) {
+									livingEntity.addEffect(mobEffectInstance2, entity2);
 								}
 							}
 						}

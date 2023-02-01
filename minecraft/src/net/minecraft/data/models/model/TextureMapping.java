@@ -338,6 +338,10 @@ public class TextureMapping {
 		return new TextureMapping().put(TextureSlot.LAYER0, resourceLocation).put(TextureSlot.LAYER1, resourceLocation2);
 	}
 
+	public static TextureMapping layered(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, ResourceLocation resourceLocation3) {
+		return new TextureMapping().put(TextureSlot.LAYER0, resourceLocation).put(TextureSlot.LAYER1, resourceLocation2).put(TextureSlot.LAYER2, resourceLocation3);
+	}
+
 	public static ResourceLocation getBlockTexture(Block block) {
 		ResourceLocation resourceLocation = BuiltInRegistries.BLOCK.getKey(block);
 		return resourceLocation.withPrefix("block/");

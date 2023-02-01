@@ -10,6 +10,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.AccessibilityOnboardingTextWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CommonButtons;
 import net.minecraft.client.gui.components.LogoRenderer;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -40,14 +41,15 @@ public class AccessibilityOnboardingScreen extends Screen {
 
 	@Override
 	public void init() {
-		FrameLayout frameLayout = new FrameLayout();
+		int i = this.initTitleYPos();
+		FrameLayout frameLayout = FrameLayout.withMinDimensions(this.width, this.height - i);
 		frameLayout.defaultChildLayoutSetting().alignVerticallyTop().padding(4);
-		frameLayout.setMinDimensions(this.width, this.height - this.initTitleYPos());
 		GridLayout gridLayout = frameLayout.addChild(new GridLayout());
 		gridLayout.defaultCellSetting().alignHorizontallyCenter().padding(4);
 		GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(1);
+		rowHelper.defaultCellSetting().padding(2);
 		this.textWidget = new AccessibilityOnboardingTextWidget(this.font, this.title, this.width);
-		rowHelper.addChild(this.textWidget, rowHelper.newCellSettings().padding(16));
+		rowHelper.addChild(this.textWidget, rowHelper.newCellSettings().paddingBottom(16));
 		AbstractWidget abstractWidget = this.options.narrator().createButton(this.options, 0, 0, 150);
 		abstractWidget.active = this.narratorAvailable;
 		rowHelper.addChild(abstractWidget);
@@ -55,19 +57,13 @@ public class AccessibilityOnboardingScreen extends Screen {
 			this.setInitialFocus(abstractWidget);
 		}
 
-		rowHelper.addChild(
-			Button.builder(
-					Component.translatable("options.accessibility.title"),
-					button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(new TitleScreen(true), this.minecraft.options))
-				)
-				.build()
-		);
+		rowHelper.addChild(CommonButtons.accessibilityTextAndImage(this.minecraft, this));
+		rowHelper.addChild(CommonButtons.languageTextAndImage(this.minecraft, this));
 		frameLayout.addChild(
-			Button.builder(CommonComponents.GUI_CONTINUE, button -> this.minecraft.setScreen(new TitleScreen(true, this.logoRenderer))).build(),
-			frameLayout.newChildLayoutSettings().alignVerticallyBottom().padding(8)
+			Button.builder(CommonComponents.GUI_CONTINUE, button -> this.onClose()).build(), frameLayout.newChildLayoutSettings().alignVerticallyBottom().padding(8)
 		);
 		frameLayout.arrangeElements();
-		FrameLayout.alignInRectangle(frameLayout, 0, this.initTitleYPos(), this.width, this.height, 0.5F, 0.0F);
+		FrameLayout.alignInRectangle(frameLayout, 0, i, this.width, this.height, 0.5F, 0.0F);
 		frameLayout.visitWidgets(this::addRenderableWidget);
 	}
 
@@ -77,7 +73,7 @@ public class AccessibilityOnboardingScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		this.minecraft.getNarrator().clear();
+		Narrator.getNarrator().clear();
 		this.minecraft.setScreen(new TitleScreen(true, this.logoRenderer));
 	}
 

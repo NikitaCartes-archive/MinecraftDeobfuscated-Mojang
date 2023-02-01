@@ -36,7 +36,7 @@ public class MultiLineTextWidget extends AbstractWidget {
 	}
 
 	@Override
-	public void renderButton(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
 		if (this.centered) {
 			this.multiLineLabel.renderCentered(poseStack, this.getX() + this.getWidth() / 2, this.getY(), this.lineHeight, 16777215);
 		} else {

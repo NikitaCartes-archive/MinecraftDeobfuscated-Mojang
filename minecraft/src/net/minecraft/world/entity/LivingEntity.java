@@ -174,9 +174,7 @@ public abstract class LivingEntity extends Entity {
 	public float oAttackAnim;
 	public float attackAnim;
 	protected int attackStrengthTicker;
-	public float animationSpeedOld;
-	public float animationSpeed;
-	public float animationPosition;
+	public final WalkAnimationState walkAnimation = new WalkAnimationState();
 	public final int invulnerableDuration = 20;
 	public final float timeOffs;
 	public final float rotA;
@@ -1056,7 +1054,7 @@ public abstract class LivingEntity extends Entity {
 				bl = true;
 			}
 
-			this.animationSpeed = 1.5F;
+			this.walkAnimation.setSpeed(1.5F);
 			boolean bl2 = true;
 			if ((float)this.invulnerableTime > 10.0F) {
 				if (f <= this.lastHurt) {
@@ -1668,7 +1666,7 @@ public abstract class LivingEntity extends Entity {
 			case 37:
 			case 44:
 			case 57:
-				this.animationSpeed = 1.5F;
+				this.walkAnimation.setSpeed(1.5F);
 				this.invulnerableTime = 20;
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
@@ -2157,21 +2155,17 @@ public abstract class LivingEntity extends Entity {
 			}
 		}
 
-		this.calculateEntityAnimation(this, this instanceof FlyingAnimal);
+		this.calculateEntityAnimation(this instanceof FlyingAnimal);
 	}
 
-	public void calculateEntityAnimation(LivingEntity livingEntity, boolean bl) {
-		livingEntity.animationSpeedOld = livingEntity.animationSpeed;
-		double d = livingEntity.getX() - livingEntity.xo;
-		double e = bl ? livingEntity.getY() - livingEntity.yo : 0.0;
-		double f = livingEntity.getZ() - livingEntity.zo;
-		float g = (float)Math.sqrt(d * d + e * e + f * f) * 4.0F;
-		if (g > 1.0F) {
-			g = 1.0F;
-		}
+	public void calculateEntityAnimation(boolean bl) {
+		float f = (float)Mth.length(this.getX() - this.xo, bl ? this.getY() - this.yo : 0.0, this.getZ() - this.zo);
+		this.updateWalkAnimation(f);
+	}
 
-		livingEntity.animationSpeed = livingEntity.animationSpeed + (g - livingEntity.animationSpeed) * 0.4F;
-		livingEntity.animationPosition = livingEntity.animationPosition + livingEntity.animationSpeed;
+	protected void updateWalkAnimation(float f) {
+		float g = Math.min(f * 4.0F, 1.0F);
+		this.walkAnimation.update(g, 0.4F);
 	}
 
 	public Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {

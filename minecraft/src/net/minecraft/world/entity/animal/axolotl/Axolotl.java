@@ -427,9 +427,8 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 
 	public void applySupportingEffects(Player player) {
 		MobEffectInstance mobEffectInstance = player.getEffect(MobEffects.REGENERATION);
-		int i = mobEffectInstance != null ? mobEffectInstance.getDuration() : 0;
-		if (i < 2400) {
-			i = Math.min(2400, 100 + i);
+		if (mobEffectInstance != null && mobEffectInstance.endsWithin(2399)) {
+			int i = Math.min(2400, 100 + mobEffectInstance.getDuration());
 			player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, i, 0), this);
 		}
 

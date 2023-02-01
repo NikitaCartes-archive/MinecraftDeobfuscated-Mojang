@@ -91,7 +91,7 @@ public class PalettedPermutations implements SpriteSource {
 			for (int i = 0; i < is.length; i++) {
 				int j = is[i];
 				if (FastColor.ABGR32.alpha(j) != 0) {
-					int2IntMap.put(FastColor.ABGR32.bgr(j), js[i]);
+					int2IntMap.put(FastColor.ABGR32.transparent(j), js[i]);
 				}
 			}
 
@@ -100,8 +100,8 @@ public class PalettedPermutations implements SpriteSource {
 				if (jx == 0) {
 					return ix;
 				} else {
-					int k = FastColor.ABGR32.bgr(ix);
-					int l = int2IntMap.getOrDefault(k, k);
+					int k = FastColor.ABGR32.transparent(ix);
+					int l = int2IntMap.getOrDefault(k, FastColor.ABGR32.opaque(k));
 					int m = FastColor.ABGR32.alpha(l);
 					return FastColor.ABGR32.color(jx * m / 255, l);
 				}

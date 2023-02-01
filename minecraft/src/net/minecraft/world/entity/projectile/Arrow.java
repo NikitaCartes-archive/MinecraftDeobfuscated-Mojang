@@ -180,7 +180,7 @@ public class Arrow extends AbstractArrow {
 			livingEntity.addEffect(
 				new MobEffectInstance(
 					mobEffectInstance.getEffect(),
-					Math.max(mobEffectInstance.getDuration() / 8, 1),
+					Math.max(mobEffectInstance.mapDuration(i -> i / 8), 1),
 					mobEffectInstance.getAmplifier(),
 					mobEffectInstance.isAmbient(),
 					mobEffectInstance.isVisible()

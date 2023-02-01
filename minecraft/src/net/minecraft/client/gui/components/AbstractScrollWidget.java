@@ -79,7 +79,7 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 	}
 
 	@Override
-	public void renderButton(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
 		if (this.visible) {
 			this.renderBackground(poseStack);
 			enableScissor(this.getX() + 1, this.getY() + 1, this.getX() + this.width - 1, this.getY() + this.height - 1);

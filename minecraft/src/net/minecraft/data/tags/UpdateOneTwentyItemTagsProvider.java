@@ -60,6 +60,10 @@ public class UpdateOneTwentyItemTagsProvider extends ItemTagsProvider {
 			.add(Items.CHAINMAIL_CHESTPLATE)
 			.add(Items.CHAINMAIL_LEGGINGS)
 			.add(Items.CHAINMAIL_BOOTS)
+			.add(Items.LEATHER_HELMET)
+			.add(Items.LEATHER_CHESTPLATE)
+			.add(Items.LEATHER_LEGGINGS)
+			.add(Items.LEATHER_BOOTS)
 			.add(Items.TURTLE_HELMET);
 		this.tag(ItemTags.TRIM_MATERIALS)
 			.add(Items.IRON_INGOT)

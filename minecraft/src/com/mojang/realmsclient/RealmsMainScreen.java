@@ -1086,7 +1086,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int i, int j, float f) {
+		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
 			RenderSystem.setShaderTexture(0, RealmsMainScreen.CROSS_ICON_LOCATION);
 			float g = this.isHoveredOrFocused() ? 12.0F : 0.0F;
 			blit(poseStack, this.getX(), this.getY(), 0.0F, g, 12, 12, 12, 24);
@@ -1133,7 +1133,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int i, int j, float f) {
+		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
 			RealmsMainScreen.this.renderNews(poseStack, i, j, RealmsMainScreen.this.hasUnreadNews, this.getX(), this.getY(), this.isHoveredOrFocused(), this.active);
 		}
 	}
@@ -1149,7 +1149,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int i, int j, float f) {
+		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
 			RealmsMainScreen.this.drawInvitationPendingIcon(poseStack, i, j, this.getX(), this.getY(), this.isHoveredOrFocused(), this.active);
 		}
 	}

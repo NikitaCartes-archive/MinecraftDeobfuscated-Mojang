@@ -20,7 +20,6 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	private static final int HEIGHT = 20;
 	private static final int HANDLE_HALF_WIDTH = 4;
 	private static final int HANDLE_WIDTH = 8;
-	private static final int TEXTURE_WIDTH = 200;
 	private static final int BACKGROUND = 0;
 	private static final int BACKGROUND_FOCUSED = 1;
 	private static final int HANDLE = 2;
@@ -70,8 +69,7 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
 		RenderSystem.setShaderTexture(0, this.getTextureLocation());
 		int k = this.getHandleTextureY();
-		this.blit(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 0, k, 4, 20);
-		this.blit(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)) + 4, this.getY(), 196, k, 4, 20);
+		this.blitNineSliced(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, 20, 4, 200, 20, 0, k);
 	}
 
 	@Override

@@ -182,7 +182,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier {
 			}
 		}
 
-		this.calculateEntityAnimation(this, false);
+		this.calculateEntityAnimation(false);
 	}
 
 	@Override

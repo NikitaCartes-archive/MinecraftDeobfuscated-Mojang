@@ -82,6 +82,8 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	@Nullable
 	public final Uniform LIGHT1_DIRECTION;
 	@Nullable
+	public final Uniform GLINT_ALPHA;
+	@Nullable
 	public final Uniform FOG_START;
 	@Nullable
 	public final Uniform FOG_END;
@@ -210,6 +212,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		this.COLOR_MODULATOR = this.getUniform("ColorModulator");
 		this.LIGHT0_DIRECTION = this.getUniform("Light0_Direction");
 		this.LIGHT1_DIRECTION = this.getUniform("Light1_Direction");
+		this.GLINT_ALPHA = this.getUniform("GlintAlpha");
 		this.FOG_START = this.getUniform("FogStart");
 		this.FOG_END = this.getUniform("FogEnd");
 		this.FOG_COLOR = this.getUniform("FogColor");

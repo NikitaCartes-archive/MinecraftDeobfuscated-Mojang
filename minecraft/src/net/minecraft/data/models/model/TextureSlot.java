@@ -38,6 +38,7 @@ public final class TextureSlot {
 	public static final TextureSlot TORCH = create("torch");
 	public static final TextureSlot LAYER0 = create("layer0");
 	public static final TextureSlot LAYER1 = create("layer1");
+	public static final TextureSlot LAYER2 = create("layer2");
 	public static final TextureSlot LIT_LOG = create("lit_log");
 	public static final TextureSlot CANDLE = create("candle");
 	public static final TextureSlot INSIDE = create("inside");

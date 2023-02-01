@@ -106,8 +106,6 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 	public final AnimationState jumpAnimationState = new AnimationState();
 	public final AnimationState croakAnimationState = new AnimationState();
 	public final AnimationState tongueAnimationState = new AnimationState();
-	public final AnimationState walkAnimationState = new AnimationState();
-	public final AnimationState swimAnimationState = new AnimationState();
 	public final AnimationState swimIdleAnimationState = new AnimationState();
 
 	public Frog(EntityType<? extends Animal> entityType, Level level) {
@@ -191,14 +189,6 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 		return true;
 	}
 
-	private boolean isMovingOnLand() {
-		return this.onGround && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6 && !this.isInWaterOrBubble();
-	}
-
-	private boolean isMovingInWater() {
-		return this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6 && this.isInWaterOrBubble();
-	}
-
 	@Override
 	protected void customServerAiStep() {
 		this.level.getProfiler().push("frogBrain");
@@ -213,22 +203,7 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 	@Override
 	public void tick() {
 		if (this.level.isClientSide()) {
-			if (this.isMovingOnLand()) {
-				this.walkAnimationState.startIfStopped(this.tickCount);
-			} else {
-				this.walkAnimationState.stop();
-			}
-
-			if (this.isMovingInWater()) {
-				this.swimIdleAnimationState.stop();
-				this.swimAnimationState.startIfStopped(this.tickCount);
-			} else if (this.isInWaterOrBubble()) {
-				this.swimAnimationState.stop();
-				this.swimIdleAnimationState.startIfStopped(this.tickCount);
-			} else {
-				this.swimAnimationState.stop();
-				this.swimIdleAnimationState.stop();
-			}
+			this.swimIdleAnimationState.animateWhen(this.isInWaterOrBubble() && !this.walkAnimation.isMoving(), this.tickCount);
 		}
 
 		super.tick();
@@ -258,6 +233,18 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 		}
 
 		super.onSyncedDataUpdated(entityDataAccessor);
+	}
+
+	@Override
+	protected void updateWalkAnimation(float f) {
+		float g;
+		if (this.jumpAnimationState.isStarted()) {
+			g = 0.0F;
+		} else {
+			g = Math.min(f * 25.0F, 1.0F);
+		}
+
+		this.walkAnimation.update(g, 0.4F);
 	}
 
 	@Nullable

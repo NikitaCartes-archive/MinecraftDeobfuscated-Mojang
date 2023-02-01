@@ -43,7 +43,6 @@ public class SocialInteractionsScreen extends Screen {
 	private static final Component BLOCKING_HINT = Component.translatable("gui.socialInteractions.blocking_hint");
 	private static final String BLOCK_LINK = "https://aka.ms/javablocking";
 	private static final int BG_BORDER_SIZE = 8;
-	private static final int BG_UNITS = 16;
 	private static final int BG_WIDTH = 236;
 	private static final int SEARCH_HEIGHT = 16;
 	private static final int MARGIN_Y = 64;
@@ -74,12 +73,8 @@ public class SocialInteractionsScreen extends Screen {
 		return Math.max(52, this.height - 128 - 16);
 	}
 
-	private int backgroundUnits() {
-		return this.windowHeight() / 16;
-	}
-
 	private int listEnd() {
-		return 80 + this.backgroundUnits() * 16 - 8;
+		return 80 + this.windowHeight() - 8;
 	}
 
 	private int marginX() {
@@ -109,7 +104,7 @@ public class SocialInteractionsScreen extends Screen {
 		int j = this.socialInteractionsPlayerList.getRowLeft();
 		int k = this.socialInteractionsPlayerList.getRowRight();
 		int l = this.font.width(BLOCKING_HINT) + 40;
-		int m = 64 + 16 * this.backgroundUnits();
+		int m = 64 + this.windowHeight();
 		int n = (this.width - l) / 2 + 3;
 		this.allButton = this.addRenderableWidget(Button.builder(TAB_ALL, button -> this.showPage(SocialInteractionsScreen.Page.ALL)).bounds(j, 45, i, 20).build());
 		this.hiddenButton = this.addRenderableWidget(
@@ -195,14 +190,7 @@ public class SocialInteractionsScreen extends Screen {
 		int i = this.marginX() + 3;
 		super.renderBackground(poseStack);
 		RenderSystem.setShaderTexture(0, SOCIAL_INTERACTIONS_LOCATION);
-		this.blit(poseStack, i, 64, 1, 1, 236, 8);
-		int j = this.backgroundUnits();
-
-		for (int k = 0; k < j; k++) {
-			this.blit(poseStack, i, 72 + 16 * k, 1, 10, 236, 16);
-		}
-
-		this.blit(poseStack, i, 72 + 16 * j, 1, 27, 236, 8);
+		this.blitNineSliced(poseStack, i, 64, 236, this.windowHeight() + 16, 8, 236, 34, 1, 1);
 		this.blit(poseStack, i + 10, 76, 243, 1, 12, 12);
 	}
 

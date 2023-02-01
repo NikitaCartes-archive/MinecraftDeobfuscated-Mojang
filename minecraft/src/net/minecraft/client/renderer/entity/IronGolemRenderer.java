@@ -27,9 +27,9 @@ public class IronGolemRenderer extends MobRenderer<IronGolem, IronGolemModel<Iro
 
 	protected void setupRotations(IronGolem ironGolem, PoseStack poseStack, float f, float g, float h) {
 		super.setupRotations(ironGolem, poseStack, f, g, h);
-		if (!((double)ironGolem.animationSpeed < 0.01)) {
+		if (!((double)ironGolem.walkAnimation.speed() < 0.01)) {
 			float i = 13.0F;
-			float j = ironGolem.animationPosition - ironGolem.animationSpeed * (1.0F - h) + 6.0F;
+			float j = ironGolem.walkAnimation.position(h) + 6.0F;
 			float k = (Math.abs(j % 13.0F - 6.5F) - 3.25F) / 3.25F;
 			poseStack.mulPose(Axis.ZP.rotationDegrees(6.5F * k));
 		}

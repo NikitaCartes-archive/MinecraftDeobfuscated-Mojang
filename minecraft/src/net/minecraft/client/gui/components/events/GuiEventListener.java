@@ -4,11 +4,12 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.components.TabOrderedElement;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 
 @Environment(EnvType.CLIENT)
-public interface GuiEventListener {
+public interface GuiEventListener extends TabOrderedElement {
 	long DOUBLE_CLICK_THRESHOLD_MS = 250L;
 
 	default void mouseMoved(double d, double e) {

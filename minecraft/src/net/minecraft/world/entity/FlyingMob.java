@@ -49,7 +49,7 @@ public abstract class FlyingMob extends Mob {
 			}
 		}
 
-		this.calculateEntityAnimation(this, false);
+		this.calculateEntityAnimation(false);
 	}
 
 	@Override

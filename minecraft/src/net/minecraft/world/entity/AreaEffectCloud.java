@@ -227,7 +227,7 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 					list.add(
 						new MobEffectInstance(
 							mobEffectInstance.getEffect(),
-							mobEffectInstance.getDuration() / 4,
+							mobEffectInstance.mapDuration(i -> i / 4),
 							mobEffectInstance.getAmplifier(),
 							mobEffectInstance.isAmbient(),
 							mobEffectInstance.isVisible()

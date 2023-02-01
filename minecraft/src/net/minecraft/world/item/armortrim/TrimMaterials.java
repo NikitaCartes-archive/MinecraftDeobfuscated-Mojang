@@ -1,5 +1,6 @@
 package net.minecraft.world.item.armortrim;
 
+import java.util.Map;
 import java.util.Optional;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -31,16 +32,16 @@ public class TrimMaterials {
 	}
 
 	public static void nextUpdate(BootstapContext<TrimMaterial> bootstapContext) {
-		register(bootstapContext, QUARTZ, Items.QUARTZ, Style.EMPTY.withColor(14931140), 0.1F, Optional.empty());
-		register(bootstapContext, IRON, Items.IRON_INGOT, Style.EMPTY.withColor(15527148), 0.2F, Optional.of(ArmorMaterials.IRON));
-		register(bootstapContext, NETHERITE, Items.NETHERITE_INGOT, Style.EMPTY.withColor(6445145), 0.3F, Optional.of(ArmorMaterials.NETHERITE));
-		register(bootstapContext, REDSTONE, Items.REDSTONE, Style.EMPTY.withColor(9901575), 0.4F, Optional.empty());
-		register(bootstapContext, COPPER, Items.COPPER_INGOT, Style.EMPTY.withColor(11823181), 0.5F, Optional.empty());
-		register(bootstapContext, GOLD, Items.GOLD_INGOT, Style.EMPTY.withColor(14594349), 0.6F, Optional.of(ArmorMaterials.GOLD));
-		register(bootstapContext, EMERALD, Items.EMERALD, Style.EMPTY.withColor(1155126), 0.7F, Optional.empty());
-		register(bootstapContext, DIAMOND, Items.DIAMOND, Style.EMPTY.withColor(7269586), 0.8F, Optional.of(ArmorMaterials.DIAMOND));
-		register(bootstapContext, LAPIS, Items.LAPIS_LAZULI, Style.EMPTY.withColor(4288151), 0.9F, Optional.empty());
-		register(bootstapContext, AMETHYST, Items.AMETHYST_SHARD, Style.EMPTY.withColor(10116294), 1.0F, Optional.empty());
+		register(bootstapContext, QUARTZ, Items.QUARTZ, Style.EMPTY.withColor(14931140), 0.1F);
+		register(bootstapContext, IRON, Items.IRON_INGOT, Style.EMPTY.withColor(15527148), 0.2F, Map.of(ArmorMaterials.IRON, "iron_darker"));
+		register(bootstapContext, NETHERITE, Items.NETHERITE_INGOT, Style.EMPTY.withColor(6445145), 0.3F, Map.of(ArmorMaterials.NETHERITE, "netherite_darker"));
+		register(bootstapContext, REDSTONE, Items.REDSTONE, Style.EMPTY.withColor(9901575), 0.4F);
+		register(bootstapContext, COPPER, Items.COPPER_INGOT, Style.EMPTY.withColor(11823181), 0.5F);
+		register(bootstapContext, GOLD, Items.GOLD_INGOT, Style.EMPTY.withColor(14594349), 0.6F, Map.of(ArmorMaterials.GOLD, "gold_darker"));
+		register(bootstapContext, EMERALD, Items.EMERALD, Style.EMPTY.withColor(1155126), 0.7F);
+		register(bootstapContext, DIAMOND, Items.DIAMOND, Style.EMPTY.withColor(7269586), 0.8F, Map.of(ArmorMaterials.DIAMOND, "diamond_darker"));
+		register(bootstapContext, LAPIS, Items.LAPIS_LAZULI, Style.EMPTY.withColor(4288151), 0.9F);
+		register(bootstapContext, AMETHYST, Items.AMETHYST_SHARD, Style.EMPTY.withColor(10116294), 1.0F);
 	}
 
 	public static Optional<Holder.Reference<TrimMaterial>> getFromIngredient(RegistryAccess registryAccess, ItemStack itemStack) {
@@ -50,15 +51,15 @@ public class TrimMaterials {
 			.findFirst();
 	}
 
+	private static void register(BootstapContext<TrimMaterial> bootstapContext, ResourceKey<TrimMaterial> resourceKey, Item item, Style style, float f) {
+		register(bootstapContext, resourceKey, item, style, f, Map.of());
+	}
+
 	private static void register(
-		BootstapContext<TrimMaterial> bootstapContext, ResourceKey<TrimMaterial> resourceKey, Item item, Style style, float f, Optional<ArmorMaterials> optional
+		BootstapContext<TrimMaterial> bootstapContext, ResourceKey<TrimMaterial> resourceKey, Item item, Style style, float f, Map<ArmorMaterials, String> map
 	) {
 		TrimMaterial trimMaterial = TrimMaterial.create(
-			resourceKey.location().getPath(),
-			item,
-			f,
-			optional,
-			Component.translatable(Util.makeDescriptionId("trim_material", resourceKey.location())).withStyle(style)
+			resourceKey.location().getPath(), item, f, Component.translatable(Util.makeDescriptionId("trim_material", resourceKey.location())).withStyle(style), map
 		);
 		bootstapContext.register(resourceKey, trimMaterial);
 	}

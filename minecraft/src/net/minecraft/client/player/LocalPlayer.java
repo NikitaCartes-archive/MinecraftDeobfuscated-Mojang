@@ -844,7 +844,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			this.isInsidePortal = false;
-		} else if (this.hasEffect(MobEffects.CONFUSION) && this.getEffect(MobEffects.CONFUSION).getDuration() > 60) {
+		} else if (this.hasEffect(MobEffects.CONFUSION) && !this.getEffect(MobEffects.CONFUSION).endsWithin(60)) {
 			this.portalTime += 0.006666667F;
 			if (this.portalTime > 1.0F) {
 				this.portalTime = 1.0F;

@@ -39,7 +39,7 @@ public interface ItemSteerable {
 					this.travelWithInput(new Vec3(0.0, 0.0, 1.0));
 					mob.lerpSteps = 0;
 				} else {
-					mob.calculateEntityAnimation(mob, false);
+					mob.calculateEntityAnimation(false);
 					mob.setDeltaMovement(Vec3.ZERO);
 				}
 

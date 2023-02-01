@@ -46,9 +46,9 @@ public class AccessibilityOnboardingTextWidget extends MultiLineTextWidget {
 	}
 
 	@Override
-	public void renderButton(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
 		this.renderBg(poseStack, Minecraft.getInstance(), i, j);
-		super.renderButton(poseStack, i, j, f);
+		super.renderWidget(poseStack, i, j, f);
 	}
 
 	@Override

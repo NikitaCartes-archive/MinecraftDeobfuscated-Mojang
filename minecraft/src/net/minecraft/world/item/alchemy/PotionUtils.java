@@ -180,7 +180,7 @@ public class PotionUtils {
 					);
 				}
 
-				if (mobEffectInstance.getDuration() > 20) {
+				if (!mobEffectInstance.endsWithin(20)) {
 					mutableComponent = Component.translatable("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
 				}
 

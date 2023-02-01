@@ -9,6 +9,7 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.EmptyLootItem;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
@@ -20,8 +21,8 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(4))
-						.add(LootItem.lootTableItem(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
+						.add(EmptyLootItem.emptyItem().setWeight(3))
+						.add(LootItem.lootTableItem(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
 				)
 		);
 		biConsumer.accept(
@@ -30,8 +31,8 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(8))
-						.add(LootItem.lootTableItem(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
+						.add(EmptyLootItem.emptyItem().setWeight(6))
+						.add(LootItem.lootTableItem(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
 				)
 		);
 		biConsumer.accept(
@@ -40,8 +41,8 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(8))
-						.add(LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
+						.add(EmptyLootItem.emptyItem().setWeight(5))
+						.add(LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
 				)
 		);
 		biConsumer.accept(
@@ -50,8 +51,8 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(8))
-						.add(LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
+						.add(EmptyLootItem.emptyItem().setWeight(5))
+						.add(LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
 				)
 		);
 		biConsumer.accept(
@@ -60,8 +61,8 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(8))
-						.add(LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
+						.add(EmptyLootItem.emptyItem().setWeight(5))
+						.add(LootItem.lootTableItem(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
 				)
 		);
 		biConsumer.accept(
@@ -70,8 +71,8 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(4))
-						.add(LootItem.lootTableItem(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
+						.add(EmptyLootItem.emptyItem().setWeight(2))
+						.add(LootItem.lootTableItem(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))
 				)
 		);
 		biConsumer.accept(
@@ -80,7 +81,7 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(19))
 						.add(LootItem.lootTableItem(Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 		);
@@ -90,19 +91,14 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(9))
 						.add(LootItem.lootTableItem(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 		);
 		biConsumer.accept(
 			BuiltInLootTables.STRONGHOLD_LIBRARY,
-			VanillaChestLoot.strongholdCorridorLootTable()
-				.withPool(
-					LootPool.lootPool()
-						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(10))
-						.add(LootItem.lootTableItem(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
-				)
+			VanillaChestLoot.strongholdLibraryLootTable()
+				.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1)))
 		);
 		biConsumer.accept(
 			BuiltInLootTables.WOODLAND_MANSION,
@@ -110,7 +106,7 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(1))
 						.add(LootItem.lootTableItem(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 		);
@@ -120,13 +116,13 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(11))
 						.add(LootItem.lootTableItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(30))
+						.add(EmptyLootItem.emptyItem().setWeight(9))
 						.add(LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1))
 				)
 		);
@@ -136,13 +132,13 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(11))
 						.add(LootItem.lootTableItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(30))
+						.add(EmptyLootItem.emptyItem().setWeight(9))
 						.add(LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1))
 				)
 		);
@@ -152,13 +148,13 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(11))
 						.add(LootItem.lootTableItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(30))
+						.add(EmptyLootItem.emptyItem().setWeight(9))
 						.add(LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1))
 				)
 		);
@@ -168,7 +164,7 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(11))
 						.add(LootItem.lootTableItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 				.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1)))
@@ -179,7 +175,7 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(14))
 						.add(LootItem.lootTableItem(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 		);
@@ -189,7 +185,7 @@ public class UpdateOneTwentyChestLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(EmptyLootItem.emptyItem().setWeight(20))
+						.add(EmptyLootItem.emptyItem().setWeight(14))
 						.add(LootItem.lootTableItem(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 				)
 		);

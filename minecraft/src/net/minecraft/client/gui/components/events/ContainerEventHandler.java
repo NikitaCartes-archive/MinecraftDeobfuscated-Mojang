@@ -2,6 +2,7 @@ package net.minecraft.client.gui.components.events;
 
 import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
@@ -137,7 +138,8 @@ public interface ContainerEventHandler extends GuiEventListener {
 	private ComponentPath handleTabNavigation(FocusNavigationEvent.TabNavigation tabNavigation) {
 		boolean bl = tabNavigation.forward();
 		GuiEventListener guiEventListener = this.getFocused();
-		List<? extends GuiEventListener> list = this.children();
+		List<? extends GuiEventListener> list = new ArrayList(this.children());
+		Collections.sort(list, Comparator.comparingInt(guiEventListenerx -> guiEventListenerx.getTabOrderGroup()));
 		int i = list.indexOf(guiEventListener);
 		int j;
 		if (guiEventListener != null && i >= 0) {

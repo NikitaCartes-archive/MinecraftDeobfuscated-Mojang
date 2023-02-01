@@ -19,6 +19,4 @@ public interface ArmorMaterial {
 	float getToughness();
 
 	float getKnockbackResistance();
-
-	boolean canHaveTrims();
 }

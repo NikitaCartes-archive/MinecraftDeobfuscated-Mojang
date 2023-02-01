@@ -2,6 +2,7 @@ package net.minecraft.world.effect;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -11,9 +12,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public final class MobEffectUtil {
-	public static String formatDuration(MobEffectInstance mobEffectInstance, float f) {
-		int i = Mth.floor((float)mobEffectInstance.getDuration() * f);
-		return StringUtil.formatTickDuration(i);
+	public static Component formatDuration(MobEffectInstance mobEffectInstance, float f) {
+		if (mobEffectInstance.isInfiniteDuration()) {
+			return Component.translatable("effect.duration.infinite");
+		} else {
+			int i = Mth.floor((float)mobEffectInstance.getDuration() * f);
+			return Component.literal(StringUtil.formatTickDuration(i));
+		}
 	}
 
 	public static boolean hasDigSpeed(LivingEntity livingEntity) {
@@ -49,7 +54,7 @@ public final class MobEffectUtil {
 					&& (
 						!serverPlayer.hasEffect(mobEffect)
 							|| serverPlayer.getEffect(mobEffect).getAmplifier() < mobEffectInstance.getAmplifier()
-							|| serverPlayer.getEffect(mobEffect).getDuration() < i
+							|| serverPlayer.getEffect(mobEffect).endsWithin(i - 1)
 					)
 		);
 		list.forEach(serverPlayer -> serverPlayer.addEffect(new MobEffectInstance(mobEffectInstance), entity));

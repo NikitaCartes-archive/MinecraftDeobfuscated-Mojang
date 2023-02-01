@@ -66,7 +66,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 				}
 
 				if (mobEffectInstance != null) {
-					List<Component> list = List.of(this.getEffectName(mobEffectInstance), Component.literal(MobEffectUtil.formatDuration(mobEffectInstance, 1.0F)));
+					List<Component> list = List.of(this.getEffectName(mobEffectInstance), MobEffectUtil.formatDuration(mobEffectInstance, 1.0F));
 					this.renderTooltip(poseStack, list, Optional.empty(), i, j);
 				}
 			}
@@ -107,8 +107,8 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			Component component = this.getEffectName(mobEffectInstance);
 			this.font.drawShadow(poseStack, component, (float)(i + 10 + 18), (float)(k + 6), 16777215);
-			String string = MobEffectUtil.formatDuration(mobEffectInstance, 1.0F);
-			this.font.drawShadow(poseStack, string, (float)(i + 10 + 18), (float)(k + 6 + 10), 8355711);
+			Component component2 = MobEffectUtil.formatDuration(mobEffectInstance, 1.0F);
+			this.font.drawShadow(poseStack, component2, (float)(i + 10 + 18), (float)(k + 6 + 10), 8355711);
 			k += j;
 		}
 	}

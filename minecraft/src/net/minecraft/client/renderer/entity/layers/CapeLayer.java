@@ -49,7 +49,7 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 					- Mth.lerp((double)h, abstractClientPlayer.yo, abstractClientPlayer.getY());
 				double m = Mth.lerp((double)h, abstractClientPlayer.zCloakO, abstractClientPlayer.zCloak)
 					- Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.getZ());
-				float n = abstractClientPlayer.yBodyRotO + (abstractClientPlayer.yBodyRot - abstractClientPlayer.yBodyRotO);
+				float n = Mth.rotLerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
 				double o = (double)Mth.sin(n * (float) (Math.PI / 180.0));
 				double p = (double)(-Mth.cos(n * (float) (Math.PI / 180.0)));
 				float q = (float)e * 10.0F;

@@ -105,6 +105,45 @@ public class EffectCommands {
 														)
 												)
 										)
+										.then(
+											Commands.literal("infinite")
+												.executes(
+													commandContext -> giveEffect(
+															commandContext.getSource(),
+															EntityArgument.getEntities(commandContext, "targets"),
+															ResourceArgument.getMobEffect(commandContext, "effect"),
+															-1,
+															0,
+															true
+														)
+												)
+												.then(
+													Commands.argument("amplifier", IntegerArgumentType.integer(0, 255))
+														.executes(
+															commandContext -> giveEffect(
+																	commandContext.getSource(),
+																	EntityArgument.getEntities(commandContext, "targets"),
+																	ResourceArgument.getMobEffect(commandContext, "effect"),
+																	-1,
+																	IntegerArgumentType.getInteger(commandContext, "amplifier"),
+																	true
+																)
+														)
+														.then(
+															Commands.argument("hideParticles", BoolArgumentType.bool())
+																.executes(
+																	commandContext -> giveEffect(
+																			commandContext.getSource(),
+																			EntityArgument.getEntities(commandContext, "targets"),
+																			ResourceArgument.getMobEffect(commandContext, "effect"),
+																			-1,
+																			IntegerArgumentType.getInteger(commandContext, "amplifier"),
+																			!BoolArgumentType.getBool(commandContext, "hideParticles")
+																		)
+																)
+														)
+												)
+										)
 								)
 						)
 				)
@@ -120,6 +159,8 @@ public class EffectCommands {
 		if (integer != null) {
 			if (mobEffect.isInstantenous()) {
 				k = integer;
+			} else if (integer == -1) {
+				k = -1;
 			} else {
 				k = integer * 20;
 			}

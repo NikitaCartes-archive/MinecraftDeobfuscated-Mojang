@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -84,6 +85,10 @@ public class FrameLayout extends AbstractLayout {
 
 	public static void centerInRectangle(LayoutElement layoutElement, int i, int j, int k, int l) {
 		alignInRectangle(layoutElement, i, j, k, l, 0.5F, 0.5F);
+	}
+
+	public static void centerInRectangle(LayoutElement layoutElement, ScreenRectangle screenRectangle) {
+		centerInRectangle(layoutElement, screenRectangle.position().x(), screenRectangle.position().y(), screenRectangle.width(), screenRectangle.height());
 	}
 
 	public static void alignInRectangle(LayoutElement layoutElement, int i, int j, int k, int l, float f, float g) {

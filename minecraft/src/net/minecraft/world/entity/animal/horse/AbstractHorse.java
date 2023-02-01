@@ -752,17 +752,15 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				if (this.isControlledByLocalInstance()) {
 					this.setSpeed(this.getDrivenMovementSpeed(livingEntity));
 					super.travel(new Vec3((double)f, vec3.y, (double)g));
-				} else if (livingEntity instanceof Player) {
-					this.setDeltaMovement(this.getX() - this.xOld, this.getY() - this.yOld, this.getZ() - this.zOld);
+				} else {
+					this.calculateEntityAnimation(false);
+					this.tryCheckInsideBlocks();
 				}
 
 				if (this.onGround) {
 					this.playerJumpPendingScale = 0.0F;
 					this.setIsJumping(false);
 				}
-
-				this.calculateEntityAnimation(this, false);
-				this.tryCheckInsideBlocks();
 			} else {
 				this.flyingSpeed = 0.02F;
 				super.travel(vec3);

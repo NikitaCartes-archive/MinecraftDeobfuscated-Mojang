@@ -1,23 +1,12 @@
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
-import com.google.gson.stream.JsonWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.DataResult.PartialResult;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
@@ -28,13 +17,9 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.server.WorldStem;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -44,7 +29,6 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class EditWorldScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Gson WORLD_GEN_SETTINGS_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create();
 	private static final Component NAME_LABEL = Component.translatable("selectWorld.enterName");
 	private Button renameButton;
 	private final BooleanConsumer callback;
@@ -109,60 +93,6 @@ public class EditWorldScreen extends Screen {
 						this.minecraft.setScreen(OptimizeWorldScreen.create(this.minecraft, this.callback, this.minecraft.getFixerUpper(), this.levelAccess, bl2));
 					}, Component.translatable("optimizeWorld.confirm.title"), Component.translatable("optimizeWorld.confirm.description"), true)))
 				.bounds(this.width / 2 - 100, this.height / 4 + 96 + 5, 200, 20)
-				.build()
-		);
-		this.addRenderableWidget(
-			Button.builder(
-					Component.translatable("selectWorld.edit.export_worldgen_settings"),
-					buttonx -> {
-						DataResult<String> dataResult2;
-						try (WorldStem worldStem = this.minecraft.createWorldOpenFlows().loadWorldStem(this.levelAccess, false)) {
-							RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
-							DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, frozen);
-							DataResult<JsonElement> dataResult = WorldGenSettings.encode(dynamicOps, worldStem.worldData().worldGenOptions(), frozen);
-							dataResult2 = dataResult.flatMap(jsonElement -> {
-								Path path = this.levelAccess.getLevelPath(LevelResource.ROOT).resolve("worldgen_settings_export.json");
-
-								try {
-									JsonWriter jsonWriter = WORLD_GEN_SETTINGS_GSON.newJsonWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8));
-
-									try {
-										WORLD_GEN_SETTINGS_GSON.toJson(jsonElement, jsonWriter);
-									} catch (Throwable var7) {
-										if (jsonWriter != null) {
-											try {
-												jsonWriter.close();
-											} catch (Throwable var6x) {
-												var7.addSuppressed(var6x);
-											}
-										}
-
-										throw var7;
-									}
-
-									if (jsonWriter != null) {
-										jsonWriter.close();
-									}
-								} catch (JsonIOException | IOException var8) {
-									return DataResult.error("Error writing file: " + var8.getMessage());
-								}
-
-								return DataResult.success(path.toString());
-							});
-						} catch (Exception var9) {
-							LOGGER.warn("Could not parse level data", (Throwable)var9);
-							dataResult2 = DataResult.error("Could not parse level data: " + var9.getMessage());
-						}
-
-						Component component = Component.literal(dataResult2.get().map(Function.identity(), PartialResult::message));
-						Component component2 = Component.translatable(
-							dataResult2.result().isPresent() ? "selectWorld.edit.export_worldgen_settings.success" : "selectWorld.edit.export_worldgen_settings.failure"
-						);
-						dataResult2.error().ifPresent(partialResult -> LOGGER.error("Error exporting world settings: {}", partialResult));
-						this.minecraft.getToasts().addToast(SystemToast.multiline(this.minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component2, component));
-					}
-				)
-				.bounds(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20)
 				.build()
 		);
 		this.addRenderableWidget(this.renameButton);

@@ -22,22 +22,30 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.components.tabs.GridLayoutTab;
+import net.minecraft.client.gui.components.tabs.TabManager;
+import net.minecraft.client.gui.components.tabs.TabNavigationBar;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -45,6 +53,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -60,6 +69,7 @@ import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -70,44 +80,32 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class CreateWorldScreen extends Screen {
+	private static final int GROUP_BOTTOM = 1;
+	private static final int TAB_COLUMN_WIDTH = 210;
+	private static final int FOOTER_HEIGHT = 36;
+	private static final int TEXT_INDENT = 1;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String TEMP_WORLD_PREFIX = "mcworld-";
-	private static final Component GAME_MODEL_LABEL = Component.translatable("selectWorld.gameMode");
-	private static final Component SEED_LABEL = Component.translatable("selectWorld.enterSeed");
-	private static final Component SEED_INFO = Component.translatable("selectWorld.seedInfo");
-	private static final Component NAME_LABEL = Component.translatable("selectWorld.enterName");
-	private static final Component OUTPUT_DIR_INFO = Component.translatable("selectWorld.resultFolder");
-	private static final Component COMMANDS_INFO = Component.translatable("selectWorld.allowCommands.info");
+	static final Component GAME_MODEL_LABEL = Component.translatable("selectWorld.gameMode");
+	static final Component NAME_LABEL = Component.translatable("selectWorld.enterName");
+	static final Component ALLOW_CHEATS_INFO = Component.translatable("selectWorld.allowCommands.info");
 	private static final Component PREPARING_WORLD_DATA = Component.translatable("createWorld.preparing");
+	private static final int HORIZONTAL_BUTTON_SPACING = 10;
+	private static final int VERTICAL_BUTTON_SPACING = 8;
+	final WorldCreationUiState uiState;
+	private final TabManager tabManager = new TabManager(this::addRenderableWidget, guiEventListener -> this.removeWidget(guiEventListener));
 	@Nullable
 	private final Screen lastScreen;
-	private EditBox nameEdit;
-	String resultFolder;
-	private CreateWorldScreen.SelectedGameMode gameMode = CreateWorldScreen.SelectedGameMode.SURVIVAL;
 	@Nullable
-	private CreateWorldScreen.SelectedGameMode oldGameMode;
-	private Difficulty difficulty = Difficulty.NORMAL;
-	private boolean commands;
-	private boolean commandsChanged;
-	public boolean hardCore;
-	protected WorldDataConfiguration dataConfiguration;
+	private String resultFolder;
 	@Nullable
 	private Path tempDataPackDir;
 	@Nullable
 	private PackRepository tempDataPackRepository;
-	private boolean worldGenSettingsVisible;
-	private Button createButton;
-	private CycleButton<CreateWorldScreen.SelectedGameMode> modeButton;
-	private CycleButton<Difficulty> difficultyButton;
-	private Button moreOptionsButton;
-	private Button gameRulesButton;
-	private Button dataPacksButton;
-	private CycleButton<Boolean> commandsButton;
-	private Component gameModeHelp1;
-	private Component gameModeHelp2;
-	private String initName;
-	private GameRules gameRules = new GameRules();
-	public final WorldGenSettingsComponent worldGenSettingsComponent;
+	@Nullable
+	private GridLayout bottomButtons;
+	@Nullable
+	private TabNavigationBar tabNavigationBar;
 
 	public static void openFresh(Minecraft minecraft, @Nullable Screen screen) {
 		queueLoadScreen(minecraft, PREPARING_WORLD_DATA);
@@ -132,13 +130,7 @@ public class CreateWorldScreen extends Screen {
 			minecraft
 		);
 		minecraft.managedBlock(completableFuture::isDone);
-		minecraft.setScreen(
-			new CreateWorldScreen(
-				screen,
-				WorldDataConfiguration.DEFAULT,
-				new WorldGenSettingsComponent((WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL), OptionalLong.empty())
-			)
-		);
+		minecraft.setScreen(new CreateWorldScreen(screen, (WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL), OptionalLong.empty()));
 	}
 
 	public static CreateWorldScreen createFromExisting(
@@ -146,144 +138,97 @@ public class CreateWorldScreen extends Screen {
 	) {
 		CreateWorldScreen createWorldScreen = new CreateWorldScreen(
 			screen,
-			worldCreationContext.dataConfiguration(),
-			new WorldGenSettingsComponent(
-				worldCreationContext,
-				WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()),
-				OptionalLong.of(worldCreationContext.options().seed())
-			)
+			worldCreationContext,
+			WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()),
+			OptionalLong.of(worldCreationContext.options().seed())
 		);
-		createWorldScreen.initName = levelSettings.levelName();
-		createWorldScreen.commands = levelSettings.allowCommands();
-		createWorldScreen.commandsChanged = true;
-		createWorldScreen.difficulty = levelSettings.difficulty();
-		createWorldScreen.gameRules.assignFrom(levelSettings.gameRules(), null);
+		createWorldScreen.uiState.setName(levelSettings.levelName());
+		createWorldScreen.uiState.setAllowCheats(levelSettings.allowCommands());
+		createWorldScreen.uiState.setDifficulty(levelSettings.difficulty());
+		createWorldScreen.uiState.getGameRules().assignFrom(levelSettings.gameRules(), null);
 		if (levelSettings.hardcore()) {
-			createWorldScreen.gameMode = CreateWorldScreen.SelectedGameMode.HARDCORE;
+			createWorldScreen.uiState.setGameMode(WorldCreationUiState.SelectedGameMode.HARDCORE);
 		} else if (levelSettings.gameType().isSurvival()) {
-			createWorldScreen.gameMode = CreateWorldScreen.SelectedGameMode.SURVIVAL;
+			createWorldScreen.uiState.setGameMode(WorldCreationUiState.SelectedGameMode.SURVIVAL);
 		} else if (levelSettings.gameType().isCreative()) {
-			createWorldScreen.gameMode = CreateWorldScreen.SelectedGameMode.CREATIVE;
+			createWorldScreen.uiState.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE);
 		}
 
 		createWorldScreen.tempDataPackDir = path;
 		return createWorldScreen;
 	}
 
-	private CreateWorldScreen(@Nullable Screen screen, WorldDataConfiguration worldDataConfiguration, WorldGenSettingsComponent worldGenSettingsComponent) {
+	private CreateWorldScreen(
+		@Nullable Screen screen, WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional, OptionalLong optionalLong
+	) {
 		super(Component.translatable("selectWorld.create"));
 		this.lastScreen = screen;
-		this.initName = I18n.get("selectWorld.newWorld");
-		this.dataConfiguration = worldDataConfiguration;
-		this.worldGenSettingsComponent = worldGenSettingsComponent;
+		this.uiState = new WorldCreationUiState(worldCreationContext, optional, optionalLong);
+	}
+
+	public WorldCreationUiState getUiState() {
+		return this.uiState;
 	}
 
 	@Override
 	public void tick() {
-		this.nameEdit.tick();
-		this.worldGenSettingsComponent.tick();
+		this.tabManager.tickCurrent();
 	}
 
 	@Override
 	protected void init() {
-		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, Component.translatable("selectWorld.enterName")) {
-			@Override
-			protected MutableComponent createNarrationMessage() {
-				return CommonComponents.joinForNarration(super.createNarrationMessage(), Component.translatable("selectWorld.resultFolder"))
-					.append(CommonComponents.SPACE)
-					.append(CreateWorldScreen.this.resultFolder);
+		this.updateResultFolder(this.uiState.getName());
+		this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width)
+			.addTabs(new CreateWorldScreen.GameTab(), new CreateWorldScreen.WorldTab(), new CreateWorldScreen.MoreTab())
+			.build();
+		this.tabNavigationBar.visitWidgets(this::addRenderableWidget);
+		this.uiState.addListener(worldCreationUiState -> {
+			if (worldCreationUiState.nameChanged()) {
+				this.updateResultFolder(worldCreationUiState.getName());
 			}
-		};
-		this.nameEdit.setValue(this.initName);
-		this.nameEdit.setResponder(string -> {
-			this.initName = string;
-			this.createButton.active = !this.nameEdit.getValue().isEmpty();
-			this.updateResultFolder();
 		});
-		this.addWidget(this.nameEdit);
-		int i = this.width / 2 - 155;
-		int j = this.width / 2 + 5;
-		this.modeButton = this.addRenderableWidget(
-			CycleButton.<CreateWorldScreen.SelectedGameMode>builder(CreateWorldScreen.SelectedGameMode::getDisplayName)
-				.withValues(CreateWorldScreen.SelectedGameMode.SURVIVAL, CreateWorldScreen.SelectedGameMode.HARDCORE, CreateWorldScreen.SelectedGameMode.CREATIVE)
-				.withInitialValue(this.gameMode)
-				.withCustomNarration(
-					cycleButton -> AbstractWidget.wrapDefaultNarrationMessage(cycleButton.getMessage())
-							.append(CommonComponents.NARRATION_SEPARATOR)
-							.append(this.gameModeHelp1)
-							.append(CommonComponents.SPACE)
-							.append(this.gameModeHelp2)
-				)
-				.create(i, 100, 150, 20, GAME_MODEL_LABEL, (cycleButton, selectedGameMode) -> this.setGameMode(selectedGameMode))
-		);
-		this.difficultyButton = this.addRenderableWidget(
-			CycleButton.<Difficulty>builder(Difficulty::getDisplayName)
-				.withValues(Difficulty.values())
-				.withInitialValue(this.getEffectiveDifficulty())
-				.create(j, 100, 150, 20, Component.translatable("options.difficulty"), (cycleButton, difficulty) -> this.difficulty = difficulty)
-		);
-		this.commandsButton = this.addRenderableWidget(
-			CycleButton.onOffBuilder(this.commands && !this.hardCore)
-				.withCustomNarration(
-					cycleButton -> CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), Component.translatable("selectWorld.allowCommands.info"))
-				)
-				.create(i, 151, 150, 20, Component.translatable("selectWorld.allowCommands"), (cycleButton, boolean_) -> {
-					this.commandsChanged = true;
-					this.commands = boolean_;
-				})
-		);
-		this.dataPacksButton = this.addRenderableWidget(
-			Button.builder(Component.translatable("selectWorld.dataPacks"), button -> this.openDataPackSelectionScreen()).bounds(j, 151, 150, 20).build()
-		);
-		this.gameRulesButton = this.addRenderableWidget(
-			Button.builder(
-					Component.translatable("selectWorld.gameRules"), button -> this.minecraft.setScreen(new EditGameRulesScreen(this.gameRules.copy(), optional -> {
-							this.minecraft.setScreen(this);
-							optional.ifPresent(gameRules -> this.gameRules = gameRules);
-						}))
-				)
-				.bounds(i, 185, 150, 20)
-				.build()
-		);
-		this.worldGenSettingsComponent.init(this, this.minecraft, this.font);
-		this.moreOptionsButton = this.addRenderableWidget(
-			Button.builder(Component.translatable("selectWorld.moreWorldOptions"), button -> this.toggleWorldGenSettingsVisibility()).bounds(j, 185, 150, 20).build()
-		);
-		this.createButton = this.addRenderableWidget(
-			Button.builder(Component.translatable("selectWorld.create"), button -> this.onCreate()).bounds(i, this.height - 28, 150, 20).build()
-		);
-		this.createButton.active = !this.initName.isEmpty();
-		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.popScreen()).bounds(j, this.height - 28, 150, 20).build());
-		this.refreshWorldGenSettingsVisibility();
-		this.setInitialFocus(this.nameEdit);
-		this.setGameMode(this.gameMode);
-		this.updateResultFolder();
+		this.bottomButtons = new GridLayout().columnSpacing(10);
+		GridLayout.RowHelper rowHelper = this.bottomButtons.createRowHelper(2);
+		Button button = rowHelper.addChild(Button.builder(Component.translatable("selectWorld.create"), buttonx -> this.onCreate()).build());
+		this.uiState.addListener(worldCreationUiState -> button.active = !this.uiState.getName().isEmpty());
+		rowHelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.popScreen()).build());
+		this.bottomButtons.visitWidgets(abstractWidget -> {
+			abstractWidget.setTabOrderGroup(1);
+			this.addRenderableWidget(abstractWidget);
+		});
+		this.tabNavigationBar.setInitialTab(0);
+		this.uiState.onChanged();
+		this.repositionElements();
 	}
 
-	private Difficulty getEffectiveDifficulty() {
-		return this.gameMode == CreateWorldScreen.SelectedGameMode.HARDCORE ? Difficulty.HARD : this.difficulty;
+	@Override
+	public void repositionElements() {
+		if (this.tabNavigationBar != null && this.bottomButtons != null) {
+			this.tabNavigationBar.setWidth(this.width);
+			this.tabNavigationBar.arrangeElements();
+			this.bottomButtons.arrangeElements();
+			FrameLayout.centerInRectangle(this.bottomButtons, 0, this.height - 36, this.width, 36);
+			int i = this.tabNavigationBar.getY() + this.tabNavigationBar.getHeight();
+			ScreenRectangle screenRectangle = new ScreenRectangle(0, i, this.width, this.bottomButtons.getY() - i);
+			this.tabManager.setTabArea(screenRectangle);
+		}
 	}
 
-	private void updateGameModeHelp() {
-		this.gameModeHelp1 = Component.translatable("selectWorld.gameMode." + this.gameMode.name + ".line1");
-		this.gameModeHelp2 = Component.translatable("selectWorld.gameMode." + this.gameMode.name + ".line2");
-	}
-
-	private void updateResultFolder() {
-		this.resultFolder = this.nameEdit.getValue().trim();
+	private void updateResultFolder(String string) {
+		this.resultFolder = string.trim();
 		if (this.resultFolder.isEmpty()) {
 			this.resultFolder = "World";
 		}
 
 		try {
 			this.resultFolder = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), this.resultFolder, "");
-		} catch (Exception var4) {
+		} catch (Exception var5) {
 			this.resultFolder = "World";
 
 			try {
 				this.resultFolder = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), this.resultFolder, "");
-			} catch (Exception var3) {
-				throw new RuntimeException("Could not create save folder", var3);
+			} catch (Exception var4) {
+				throw new RuntimeException("Could not create save folder", var4);
 			}
 		}
 	}
@@ -293,7 +238,7 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private void onCreate() {
-		WorldCreationContext worldCreationContext = this.worldGenSettingsComponent.settings();
+		WorldCreationContext worldCreationContext = this.uiState.getSettings();
 		WorldDimensions.Complete complete = worldCreationContext.selectedDimensions().bake(worldCreationContext.datapackDimensions());
 		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = worldCreationContext.worldgenRegistries()
 			.replaceFrom(RegistryLayer.DIMENSIONS, complete.dimensionsRegistryAccess());
@@ -313,10 +258,9 @@ public class CreateWorldScreen extends Screen {
 		if (!optional.isEmpty()) {
 			this.removeTempDataPackDir();
 			boolean bl = specialWorldProperty == PrimaryLevelData.SpecialWorldProperty.DEBUG;
-			WorldCreationContext worldCreationContext = this.worldGenSettingsComponent.settings();
-			WorldOptions worldOptions = this.worldGenSettingsComponent.createFinalOptions(bl, this.hardCore);
+			WorldCreationContext worldCreationContext = this.uiState.getSettings();
 			LevelSettings levelSettings = this.createLevelSettings(bl);
-			WorldData worldData = new PrimaryLevelData(levelSettings, worldOptions, specialWorldProperty, lifecycle);
+			WorldData worldData = new PrimaryLevelData(levelSettings, worldCreationContext.options(), specialWorldProperty, lifecycle);
 			this.minecraft
 				.createWorldOpenFlows()
 				.createLevelFromExistingSettings(
@@ -326,84 +270,22 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private LevelSettings createLevelSettings(boolean bl) {
-		String string = this.nameEdit.getValue().trim();
+		String string = this.uiState.getName().trim();
 		if (bl) {
 			GameRules gameRules = new GameRules();
 			gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false, null);
 			return new LevelSettings(string, GameType.SPECTATOR, false, Difficulty.PEACEFUL, true, gameRules, WorldDataConfiguration.DEFAULT);
 		} else {
 			return new LevelSettings(
-				string, this.gameMode.gameType, this.hardCore, this.getEffectiveDifficulty(), this.commands && !this.hardCore, this.gameRules, this.dataConfiguration
+				string,
+				this.uiState.getGameMode().gameType,
+				this.uiState.isHardcore(),
+				this.uiState.getDifficulty(),
+				this.uiState.isAllowCheats(),
+				this.uiState.getGameRules(),
+				this.uiState.getSettings().dataConfiguration()
 			);
 		}
-	}
-
-	private void toggleWorldGenSettingsVisibility() {
-		this.setWorldGenSettingsVisible(!this.worldGenSettingsVisible);
-	}
-
-	private void setGameMode(CreateWorldScreen.SelectedGameMode selectedGameMode) {
-		if (!this.commandsChanged) {
-			this.commands = selectedGameMode == CreateWorldScreen.SelectedGameMode.CREATIVE;
-			this.commandsButton.setValue(this.commands);
-		}
-
-		if (selectedGameMode == CreateWorldScreen.SelectedGameMode.HARDCORE) {
-			this.hardCore = true;
-			this.commandsButton.active = false;
-			this.commandsButton.setValue(false);
-			this.worldGenSettingsComponent.switchToHardcore();
-			this.difficultyButton.setValue(Difficulty.HARD);
-			this.difficultyButton.active = false;
-		} else {
-			this.hardCore = false;
-			this.commandsButton.active = true;
-			this.commandsButton.setValue(this.commands);
-			this.worldGenSettingsComponent.switchOutOfHardcode();
-			this.difficultyButton.setValue(this.difficulty);
-			this.difficultyButton.active = true;
-		}
-
-		this.gameMode = selectedGameMode;
-		this.updateGameModeHelp();
-	}
-
-	public void refreshWorldGenSettingsVisibility() {
-		this.setWorldGenSettingsVisible(this.worldGenSettingsVisible);
-	}
-
-	private void setWorldGenSettingsVisible(boolean bl) {
-		this.worldGenSettingsVisible = bl;
-		this.modeButton.visible = !bl;
-		this.difficultyButton.visible = !bl;
-		if (this.worldGenSettingsComponent.isDebug()) {
-			this.dataPacksButton.visible = false;
-			this.modeButton.active = false;
-			if (this.oldGameMode == null) {
-				this.oldGameMode = this.gameMode;
-			}
-
-			this.setGameMode(CreateWorldScreen.SelectedGameMode.DEBUG);
-			this.commandsButton.visible = false;
-		} else {
-			this.modeButton.active = true;
-			if (this.oldGameMode != null) {
-				this.setGameMode(this.oldGameMode);
-			}
-
-			this.commandsButton.visible = !bl;
-			this.dataPacksButton.visible = !bl;
-		}
-
-		this.worldGenSettingsComponent.setVisibility(bl);
-		this.nameEdit.setVisible(!bl);
-		if (bl) {
-			this.moreOptionsButton.setMessage(CommonComponents.GUI_DONE);
-		} else {
-			this.moreOptionsButton.setMessage(Component.translatable("selectWorld.moreWorldOptions"));
-		}
-
-		this.gameRulesButton.visible = !bl;
 	}
 
 	@Override
@@ -420,11 +302,7 @@ public class CreateWorldScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		if (this.worldGenSettingsVisible) {
-			this.setWorldGenSettingsVisible(false);
-		} else {
-			this.popScreen();
-		}
+		this.popScreen();
 	}
 
 	public void popScreen() {
@@ -435,29 +313,6 @@ public class CreateWorldScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, -1);
-		if (this.worldGenSettingsVisible) {
-			drawString(poseStack, this.font, SEED_LABEL, this.width / 2 - 100, 47, -6250336);
-			drawString(poseStack, this.font, SEED_INFO, this.width / 2 - 100, 85, -6250336);
-			this.worldGenSettingsComponent.render(poseStack, i, j, f);
-		} else {
-			drawString(poseStack, this.font, NAME_LABEL, this.width / 2 - 100, 47, -6250336);
-			drawString(
-				poseStack,
-				this.font,
-				Component.empty().append(OUTPUT_DIR_INFO).append(CommonComponents.SPACE).append(this.resultFolder),
-				this.width / 2 - 100,
-				85,
-				-6250336
-			);
-			this.nameEdit.render(poseStack, i, j, f);
-			drawString(poseStack, this.font, this.gameModeHelp1, this.width / 2 - 150, 122, -6250336);
-			drawString(poseStack, this.font, this.gameModeHelp2, this.width / 2 - 150, 134, -6250336);
-			if (this.commandsButton.visible) {
-				drawString(poseStack, this.font, COMMANDS_INFO, this.width / 2 - 150, 172, -6250336);
-			}
-		}
-
 		super.render(poseStack, i, j, f);
 	}
 
@@ -486,8 +341,8 @@ public class CreateWorldScreen extends Screen {
 		return this.tempDataPackDir;
 	}
 
-	private void openDataPackSelectionScreen() {
-		Pair<Path, PackRepository> pair = this.getDataPackSelectionSettings();
+	void openDataPackSelectionScreen(WorldDataConfiguration worldDataConfiguration) {
+		Pair<Path, PackRepository> pair = this.getDataPackSelectionSettings(worldDataConfiguration);
 		if (pair != null) {
 			this.minecraft
 				.setScreen(new PackSelectionScreen(this, pair.getSecond(), this::tryApplyNewDataPacks, pair.getFirst(), Component.translatable("dataPack.title")));
@@ -500,17 +355,17 @@ public class CreateWorldScreen extends Screen {
 			.stream()
 			.filter(string -> !list.contains(string))
 			.collect(ImmutableList.toImmutableList());
-		WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(new DataPackConfig(list, list2), this.dataConfiguration.enabledFeatures());
-		if (list.equals(this.dataConfiguration.dataPacks().getEnabled())) {
-			this.dataConfiguration = worldDataConfiguration;
-		} else {
+		WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(
+			new DataPackConfig(list, list2), this.uiState.getSettings().dataConfiguration().enabledFeatures()
+		);
+		if (!this.uiState.tryUpdateDataConfiguration(worldDataConfiguration)) {
 			FeatureFlagSet featureFlagSet = packRepository.getRequestedFeatureFlags();
 			if (FeatureFlags.isExperimental(featureFlagSet)) {
 				this.minecraft.tell(() -> this.minecraft.setScreen(new ConfirmExperimentalFeaturesScreen(packRepository.getSelectedPacks(), bl -> {
 						if (bl) {
 							this.applyNewPackConfig(packRepository, worldDataConfiguration);
 						} else {
-							this.openDataPackSelectionScreen();
+							this.openDataPackSelectionScreen(this.uiState.getSettings().dataConfiguration());
 						}
 					})));
 			} else {
@@ -530,7 +385,7 @@ public class CreateWorldScreen extends Screen {
 					} else if (dataLoadContext.datapackWorldgen().registryOrThrow(Registries.BIOME).size() == 0) {
 						throw new IllegalStateException("Needs at least one biome continue");
 					} else {
-						WorldCreationContext worldCreationContext = this.worldGenSettingsComponent.settings();
+						WorldCreationContext worldCreationContext = this.uiState.getSettings();
 						DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, worldCreationContext.worldgenLoadContext());
 						DataResult<JsonElement> dataResult = WorldGenSettings.encode(dynamicOps, worldCreationContext.options(), worldCreationContext.selectedDimensions())
 							.setLifecycle(Lifecycle.stable());
@@ -551,11 +406,7 @@ public class CreateWorldScreen extends Screen {
 				Util.backgroundExecutor(),
 				this.minecraft
 			)
-			.thenAcceptAsync(worldCreationContext -> {
-				this.dataConfiguration = worldCreationContext.dataConfiguration();
-				this.worldGenSettingsComponent.updateSettings(worldCreationContext);
-				this.rebuildWidgets();
-			}, this.minecraft)
+			.thenAcceptAsync(this.uiState::setSettings, this.minecraft)
 			.handle(
 				(void_, throwable) -> {
 					if (throwable != null) {
@@ -567,10 +418,9 @@ public class CreateWorldScreen extends Screen {
 											new ConfirmScreen(
 												bl -> {
 													if (bl) {
-														this.openDataPackSelectionScreen();
+														this.openDataPackSelectionScreen(this.uiState.getSettings().dataConfiguration());
 													} else {
-														this.dataConfiguration = WorldDataConfiguration.DEFAULT;
-														this.minecraft.setScreen(this);
+														this.openDataPackSelectionScreen(WorldDataConfiguration.DEFAULT);
 													}
 												},
 												Component.translatable("dataPack.validation.failed"),
@@ -733,7 +583,7 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	@Nullable
-	private Pair<Path, PackRepository> getDataPackSelectionSettings() {
+	private Pair<Path, PackRepository> getDataPackSelectionSettings(WorldDataConfiguration worldDataConfiguration) {
 		Path path = this.getTempDataPackDir();
 		if (path != null) {
 			if (this.tempDataPackRepository == null) {
@@ -741,7 +591,7 @@ public class CreateWorldScreen extends Screen {
 				this.tempDataPackRepository.reload();
 			}
 
-			this.tempDataPackRepository.setSelected(this.dataConfiguration.dataPacks().getEnabled());
+			this.tempDataPackRepository.setSelected(worldDataConfiguration.dataPacks().getEnabled());
 			return Pair.of(path, this.tempDataPackRepository);
 		} else {
 			return null;
@@ -753,24 +603,192 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static enum SelectedGameMode {
-		SURVIVAL("survival", GameType.SURVIVAL),
-		HARDCORE("hardcore", GameType.SURVIVAL),
-		CREATIVE("creative", GameType.CREATIVE),
-		DEBUG("spectator", GameType.SPECTATOR);
+	class GameTab extends GridLayoutTab {
+		private static final Component TITLE = Component.translatable("createWorld.tab.game.title");
+		private static final Component ALLOW_CHEATS = Component.translatable("selectWorld.allowCommands");
+		private final EditBox nameEdit;
 
-		final String name;
-		final GameType gameType;
-		private final Component displayName;
-
-		private SelectedGameMode(String string2, GameType gameType) {
-			this.name = string2;
-			this.gameType = gameType;
-			this.displayName = Component.translatable("selectWorld.gameMode." + string2);
+		GameTab() {
+			super(TITLE);
+			GridLayout.RowHelper rowHelper = this.layout.rowSpacing(8).createRowHelper(1);
+			LayoutSettings layoutSettings = rowHelper.newCellSettings();
+			GridLayout.RowHelper rowHelper2 = new GridLayout().rowSpacing(4).createRowHelper(1);
+			rowHelper2.addChild(new StringWidget(CreateWorldScreen.NAME_LABEL, CreateWorldScreen.this.minecraft.font), rowHelper2.newCellSettings().paddingLeft(1));
+			this.nameEdit = rowHelper2.addChild(
+				new EditBox(CreateWorldScreen.this.font, 0, 0, 208, 20, Component.translatable("selectWorld.enterName")), rowHelper2.newCellSettings().padding(1)
+			);
+			this.nameEdit.setValue(CreateWorldScreen.this.uiState.getName());
+			this.nameEdit.setResponder(CreateWorldScreen.this.uiState::setName);
+			CreateWorldScreen.this.setInitialFocus(this.nameEdit);
+			rowHelper.addChild(rowHelper2.getGrid(), rowHelper.newCellSettings().alignHorizontallyCenter());
+			CycleButton<WorldCreationUiState.SelectedGameMode> cycleButton = rowHelper.addChild(
+				CycleButton.<WorldCreationUiState.SelectedGameMode>builder(selectedGameMode -> selectedGameMode.displayName)
+					.withValues(WorldCreationUiState.SelectedGameMode.SURVIVAL, WorldCreationUiState.SelectedGameMode.HARDCORE, WorldCreationUiState.SelectedGameMode.CREATIVE)
+					.create(
+						0, 0, 210, 20, CreateWorldScreen.GAME_MODEL_LABEL, (cycleButtonx, selectedGameMode) -> CreateWorldScreen.this.uiState.setGameMode(selectedGameMode)
+					),
+				layoutSettings
+			);
+			CreateWorldScreen.this.uiState.addListener(worldCreationUiState -> {
+				cycleButton.setValue(worldCreationUiState.getGameMode());
+				cycleButton.active = !worldCreationUiState.isDebug();
+				cycleButton.setTooltip(Tooltip.create(worldCreationUiState.getGameMode().getInfo()));
+			});
+			CycleButton<Difficulty> cycleButton2 = rowHelper.addChild(
+				CycleButton.<Difficulty>builder(Difficulty::getDisplayName)
+					.withValues(Difficulty.values())
+					.create(
+						0, 0, 210, 20, Component.translatable("options.difficulty"), (cycleButtonx, difficulty) -> CreateWorldScreen.this.uiState.setDifficulty(difficulty)
+					),
+				layoutSettings
+			);
+			CreateWorldScreen.this.uiState.addListener(worldCreationUiState -> {
+				cycleButton2.setValue(CreateWorldScreen.this.uiState.getDifficulty());
+				cycleButton2.active = !CreateWorldScreen.this.uiState.isHardcore();
+				cycleButton2.setTooltip(Tooltip.create(CreateWorldScreen.this.uiState.getDifficulty().getInfo()));
+			});
+			CycleButton<Boolean> cycleButton3 = rowHelper.addChild(
+				CycleButton.onOffBuilder()
+					.withTooltip(boolean_ -> Tooltip.create(CreateWorldScreen.ALLOW_CHEATS_INFO))
+					.create(0, 0, 210, 20, ALLOW_CHEATS, (cycleButtonx, boolean_) -> CreateWorldScreen.this.uiState.setAllowCheats(boolean_))
+			);
+			CreateWorldScreen.this.uiState.addListener(worldCreationUiState -> {
+				cycleButton3.setValue(CreateWorldScreen.this.uiState.isAllowCheats());
+				cycleButton3.active = !CreateWorldScreen.this.uiState.isDebug() && !CreateWorldScreen.this.uiState.isHardcore();
+			});
 		}
 
-		public Component getDisplayName() {
-			return this.displayName;
+		@Override
+		public void tick() {
+			this.nameEdit.tick();
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	class MoreTab extends GridLayoutTab {
+		private static final Component TITLE = Component.translatable("createWorld.tab.more.title");
+		private static final Component GAME_RULES_LABEL = Component.translatable("selectWorld.gameRules");
+		private static final Component DATA_PACKS_LABEL = Component.translatable("selectWorld.dataPacks");
+
+		MoreTab() {
+			super(TITLE);
+			GridLayout.RowHelper rowHelper = this.layout.rowSpacing(8).createRowHelper(1);
+			rowHelper.addChild(Button.builder(GAME_RULES_LABEL, button -> this.openGameRulesScreen()).width(210).build());
+			rowHelper.addChild(
+				Button.builder(
+						DATA_PACKS_LABEL, button -> CreateWorldScreen.this.openDataPackSelectionScreen(CreateWorldScreen.this.uiState.getSettings().dataConfiguration())
+					)
+					.width(210)
+					.build()
+			);
+		}
+
+		private void openGameRulesScreen() {
+			CreateWorldScreen.this.minecraft.setScreen(new EditGameRulesScreen(CreateWorldScreen.this.uiState.getGameRules().copy(), optional -> {
+				CreateWorldScreen.this.minecraft.setScreen(CreateWorldScreen.this);
+				optional.ifPresent(CreateWorldScreen.this.uiState::setGameRules);
+			}));
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	class WorldTab extends GridLayoutTab {
+		private static final Component TITLE = Component.translatable("createWorld.tab.world.title");
+		private static final Component AMPLIFIED_HELP_TEXT = Component.translatable("generator.minecraft.amplified.info");
+		private static final Component GENERATE_STRUCTURES = Component.translatable("selectWorld.mapFeatures");
+		private static final Component GENERATE_STRUCTURES_INFO = Component.translatable("selectWorld.mapFeatures.info");
+		private static final Component BONUS_CHEST = Component.translatable("selectWorld.bonusItems");
+		private static final Component SEED_LABEL = Component.translatable("selectWorld.enterSeed");
+		static final Component SEED_EMPTY_HINT = Component.translatable("selectWorld.seedInfo").withStyle(ChatFormatting.DARK_GRAY);
+		private static final int WORLD_TAB_WIDTH = 310;
+		private final EditBox seedEdit;
+		private final Button customizeTypeButton;
+
+		WorldTab() {
+			super(TITLE);
+			GridLayout.RowHelper rowHelper = this.layout.columnSpacing(10).rowSpacing(8).createRowHelper(2);
+			CycleButton<WorldCreationUiState.WorldTypeEntry> cycleButton = rowHelper.addChild(
+				CycleButton.<WorldCreationUiState.WorldTypeEntry>builder(WorldCreationUiState.WorldTypeEntry::describePreset)
+					.withValues(this.createWorldTypeValueSupplier())
+					.withCustomNarration(CreateWorldScreen.WorldTab::createTypeButtonNarration)
+					.create(
+						0,
+						0,
+						150,
+						20,
+						Component.translatable("selectWorld.mapType"),
+						(cycleButtonx, worldTypeEntry) -> CreateWorldScreen.this.uiState.setWorldType(worldTypeEntry)
+					)
+			);
+			cycleButton.setValue(CreateWorldScreen.this.uiState.getWorldType());
+			CreateWorldScreen.this.uiState.addListener(worldCreationUiState -> {
+				WorldCreationUiState.WorldTypeEntry worldTypeEntry = worldCreationUiState.getWorldType();
+				cycleButton.setValue(worldTypeEntry);
+				if (worldTypeEntry.isAmplified()) {
+					cycleButton.setTooltip(Tooltip.create(AMPLIFIED_HELP_TEXT));
+				} else {
+					cycleButton.setTooltip(null);
+				}
+
+				cycleButton.active = CreateWorldScreen.this.uiState.getWorldType().preset() != null;
+			});
+			this.customizeTypeButton = rowHelper.addChild(Button.builder(Component.translatable("selectWorld.customizeType"), button -> this.openPresetEditor()).build());
+			CreateWorldScreen.this.uiState
+				.addListener(worldCreationUiState -> this.customizeTypeButton.active = !worldCreationUiState.isDebug() && worldCreationUiState.getPresetEditor() != null);
+			GridLayout.RowHelper rowHelper2 = new GridLayout().rowSpacing(4).createRowHelper(1);
+			rowHelper2.addChild(new StringWidget(SEED_LABEL, CreateWorldScreen.this.font).alignLeft());
+			this.seedEdit = rowHelper2.addChild(new EditBox(CreateWorldScreen.this.font, 0, 0, 308, 20, Component.translatable("selectWorld.enterSeed")) {
+				@Override
+				protected MutableComponent createNarrationMessage() {
+					return super.createNarrationMessage().append(CommonComponents.NARRATION_SEPARATOR).append(CreateWorldScreen.WorldTab.SEED_EMPTY_HINT);
+				}
+			}, rowHelper.newCellSettings().padding(1));
+			this.seedEdit.setHint(SEED_EMPTY_HINT);
+			this.seedEdit.setValue(CreateWorldScreen.this.uiState.getSeed());
+			this.seedEdit.setResponder(string -> CreateWorldScreen.this.uiState.setSeed(this.seedEdit.getValue()));
+			rowHelper.addChild(rowHelper2.getGrid(), 2);
+			SwitchGrid.Builder builder = SwitchGrid.builder(310).withPaddingLeft(1);
+			builder.addSwitch(GENERATE_STRUCTURES, CreateWorldScreen.this.uiState::isGenerateStructures, CreateWorldScreen.this.uiState::setGenerateStructures)
+				.withIsActiveCondition(() -> !CreateWorldScreen.this.uiState.isDebug())
+				.withInfo(GENERATE_STRUCTURES_INFO);
+			builder.addSwitch(BONUS_CHEST, CreateWorldScreen.this.uiState::isBonusChest, CreateWorldScreen.this.uiState::setBonusChest)
+				.withIsActiveCondition(() -> !CreateWorldScreen.this.uiState.isHardcore() && !CreateWorldScreen.this.uiState.isDebug());
+			SwitchGrid switchGrid = builder.build(layoutElement -> rowHelper.addChild(layoutElement, 2));
+			CreateWorldScreen.this.uiState.addListener(worldCreationUiState -> switchGrid.refreshStates());
+		}
+
+		private void openPresetEditor() {
+			PresetEditor presetEditor = CreateWorldScreen.this.uiState.getPresetEditor();
+			if (presetEditor != null) {
+				CreateWorldScreen.this.minecraft.setScreen(presetEditor.createEditScreen(CreateWorldScreen.this, CreateWorldScreen.this.uiState.getSettings()));
+			}
+		}
+
+		private CycleButton.ValueListSupplier<WorldCreationUiState.WorldTypeEntry> createWorldTypeValueSupplier() {
+			return new CycleButton.ValueListSupplier<WorldCreationUiState.WorldTypeEntry>() {
+				@Override
+				public List<WorldCreationUiState.WorldTypeEntry> getSelectedList() {
+					return CycleButton.DEFAULT_ALT_LIST_SELECTOR.getAsBoolean()
+						? CreateWorldScreen.this.uiState.getAltPresetList()
+						: CreateWorldScreen.this.uiState.getNormalPresetList();
+				}
+
+				@Override
+				public List<WorldCreationUiState.WorldTypeEntry> getDefaultList() {
+					return CreateWorldScreen.this.uiState.getNormalPresetList();
+				}
+			};
+		}
+
+		private static MutableComponent createTypeButtonNarration(CycleButton<WorldCreationUiState.WorldTypeEntry> cycleButton) {
+			return cycleButton.getValue().isAmplified()
+				? CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), AMPLIFIED_HELP_TEXT)
+				: cycleButton.createDefaultNarrationMessage();
+		}
+
+		@Override
+		public void tick() {
+			this.seedEdit.tick();
 		}
 	}
 }
