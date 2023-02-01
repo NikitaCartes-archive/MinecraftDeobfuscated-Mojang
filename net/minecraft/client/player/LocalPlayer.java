@@ -798,7 +798,7 @@ extends AbstractClientPlayer {
                 this.portalTime = 1.0f;
             }
             this.isInsidePortal = false;
-        } else if (this.hasEffect(MobEffects.CONFUSION) && this.getEffect(MobEffects.CONFUSION).getDuration() > 60) {
+        } else if (this.hasEffect(MobEffects.CONFUSION) && !this.getEffect(MobEffects.CONFUSION).endsWithin(60)) {
             this.portalTime += 0.006666667f;
             if (this.portalTime > 1.0f) {
                 this.portalTime = 1.0f;

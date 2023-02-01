@@ -411,6 +411,7 @@ extends GuiComponent {
         ArrayList<Runnable> list = Lists.newArrayListWithExpectedSize(collection.size());
         RenderSystem.setShaderTexture(0, AbstractContainerScreen.INVENTORY_LOCATION);
         for (MobEffectInstance mobEffectInstance : Ordering.natural().reverse().sortedCopy(collection)) {
+            int n;
             MobEffect mobEffect = mobEffectInstance.getEffect();
             if (!mobEffectInstance.showIcon()) continue;
             int k = this.screenWidth;
@@ -429,13 +430,14 @@ extends GuiComponent {
                 this.blit(poseStack, k, l, 165, 166, 24, 24);
             } else {
                 this.blit(poseStack, k, l, 141, 166, 24, 24);
-                if (mobEffectInstance.getDuration() <= 200) {
-                    int m = 10 - mobEffectInstance.getDuration() / 20;
-                    f = Mth.clamp((float)mobEffectInstance.getDuration() / 10.0f / 5.0f * 0.5f, 0.0f, 0.5f) + Mth.cos((float)mobEffectInstance.getDuration() * (float)Math.PI / 5.0f) * Mth.clamp((float)m / 10.0f * 0.25f, 0.0f, 0.25f);
+                if (mobEffectInstance.endsWithin(200)) {
+                    int m = mobEffectInstance.getDuration();
+                    n = 10 - m / 20;
+                    f = Mth.clamp((float)m / 10.0f / 5.0f * 0.5f, 0.0f, 0.5f) + Mth.cos((float)m * (float)Math.PI / 5.0f) * Mth.clamp((float)n / 10.0f * 0.25f, 0.0f, 0.25f);
                 }
             }
             TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(mobEffect);
-            int n = k;
+            n = k;
             int o = l;
             float g = f;
             list.add(() -> {

@@ -5,11 +5,13 @@ package net.minecraft.client.gui.narration;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.components.TabOrderedElement;
 import net.minecraft.client.gui.narration.NarrationSupplier;
 
 @Environment(value=EnvType.CLIENT)
 public interface NarratableEntry
-extends NarrationSupplier {
+extends TabOrderedElement,
+NarrationSupplier {
     public NarrationPriority narrationPriority();
 
     default public boolean isActive() {

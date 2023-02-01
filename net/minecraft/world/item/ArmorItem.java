@@ -14,7 +14,6 @@ import net.minecraft.core.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -118,18 +117,7 @@ implements Wearable {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-        ItemStack itemStack = player.getItemInHand(interactionHand);
-        EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
-        ItemStack itemStack2 = player.getItemBySlot(equipmentSlot);
-        if (itemStack2.isEmpty()) {
-            player.setItemSlot(equipmentSlot, itemStack.copy());
-            if (!level.isClientSide()) {
-                player.awardStat(Stats.ITEM_USED.get(this));
-            }
-            itemStack.setCount(0);
-            return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
-        }
-        return InteractionResultHolder.fail(itemStack);
+        return this.swapWithEquipmentSlot(this, level, player, interactionHand);
     }
 
     @Override

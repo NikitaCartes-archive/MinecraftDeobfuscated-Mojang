@@ -104,8 +104,8 @@ implements RenderLayerParent<T, M> {
         n = 0.0f;
         float o = 0.0f;
         if (!((Entity)livingEntity).isPassenger() && ((LivingEntity)livingEntity).isAlive()) {
-            n = Mth.lerp(g, ((LivingEntity)livingEntity).animationSpeedOld, ((LivingEntity)livingEntity).animationSpeed);
-            o = ((LivingEntity)livingEntity).animationPosition - ((LivingEntity)livingEntity).animationSpeed * (1.0f - g);
+            n = ((LivingEntity)livingEntity).walkAnimation.speed(g);
+            o = ((LivingEntity)livingEntity).walkAnimation.position(g);
             if (((LivingEntity)livingEntity).isBaby()) {
                 o *= 3.0f;
             }

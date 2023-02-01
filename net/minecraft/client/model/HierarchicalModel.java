@@ -50,6 +50,12 @@ extends EntityModel<E> {
         this.animate(animationState, animationDefinition, f, 1.0f);
     }
 
+    protected void animateWalk(AnimationDefinition animationDefinition, float f, float g, float h, float i) {
+        long l = (long)(f * 50.0f * h);
+        float j = Math.min(g * i, 1.0f);
+        KeyframeAnimations.animate(this, animationDefinition, l, j, ANIMATION_VECTOR_CACHE);
+    }
+
     protected void animate(AnimationState animationState2, AnimationDefinition animationDefinition, float f, float g) {
         animationState2.updateTime(f, g);
         animationState2.ifStarted(animationState -> KeyframeAnimations.animate(this, animationDefinition, animationState.getAccumulatedTime(), 1.0f, ANIMATION_VECTOR_CACHE));

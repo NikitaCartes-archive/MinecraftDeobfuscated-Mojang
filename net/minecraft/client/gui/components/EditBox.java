@@ -363,7 +363,7 @@ implements Renderable {
     }
 
     @Override
-    public void renderButton(PoseStack poseStack, int i, int j, float f) {
+    public void renderWidget(PoseStack poseStack, int i, int j, float f) {
         int k;
         if (!this.isVisible()) {
             return;

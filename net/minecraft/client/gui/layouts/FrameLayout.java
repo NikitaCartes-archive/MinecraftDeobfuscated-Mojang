@@ -11,6 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.layouts.AbstractLayout;
 import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.layouts.LayoutSettings;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
@@ -88,6 +89,10 @@ extends AbstractLayout {
 
     public static void centerInRectangle(LayoutElement layoutElement, int i, int j, int k, int l) {
         FrameLayout.alignInRectangle(layoutElement, i, j, k, l, 0.5f, 0.5f);
+    }
+
+    public static void centerInRectangle(LayoutElement layoutElement, ScreenRectangle screenRectangle) {
+        FrameLayout.centerInRectangle(layoutElement, screenRectangle.position().x(), screenRectangle.position().y(), screenRectangle.width(), screenRectangle.height());
     }
 
     public static void alignInRectangle(LayoutElement layoutElement, int i, int j, int k, int l, float f, float g) {

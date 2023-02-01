@@ -177,7 +177,7 @@ extends AbstractArrow {
         super.doPostHurtEffects(livingEntity);
         Entity entity = this.getEffectSource();
         for (MobEffectInstance mobEffectInstance : this.potion.getEffects()) {
-            livingEntity.addEffect(new MobEffectInstance(mobEffectInstance.getEffect(), Math.max(mobEffectInstance.getDuration() / 8, 1), mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()), entity);
+            livingEntity.addEffect(new MobEffectInstance(mobEffectInstance.getEffect(), Math.max(mobEffectInstance.mapDuration(i -> i / 8), 1), mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()), entity);
         }
         if (!this.effects.isEmpty()) {
             for (MobEffectInstance mobEffectInstance : this.effects) {

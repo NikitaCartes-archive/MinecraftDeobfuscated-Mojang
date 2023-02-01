@@ -5,6 +5,7 @@ package net.minecraft.client.gui.components.events;
 
 import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
@@ -144,16 +145,17 @@ extends GuiEventListener {
         Supplier<GuiEventListener> supplier;
         BooleanSupplier booleanSupplier;
         boolean bl = tabNavigation.forward();
-        GuiEventListener guiEventListener = this.getFocused();
-        List<? extends GuiEventListener> list = this.children();
-        int i = list.indexOf(guiEventListener);
-        int j = guiEventListener != null && i >= 0 ? i + (bl ? 1 : 0) : (bl ? 0 : list.size());
-        ListIterator<? extends GuiEventListener> listIterator = list.listIterator(j);
+        GuiEventListener guiEventListener2 = this.getFocused();
+        ArrayList<? extends GuiEventListener> list = new ArrayList<GuiEventListener>(this.children());
+        Collections.sort(list, Comparator.comparingInt(guiEventListener -> guiEventListener.getTabOrderGroup()));
+        int i = list.indexOf(guiEventListener2);
+        int j = guiEventListener2 != null && i >= 0 ? i + (bl ? 1 : 0) : (bl ? 0 : list.size());
+        ListIterator listIterator = list.listIterator(j);
         BooleanSupplier booleanSupplier2 = bl ? listIterator::hasNext : (booleanSupplier = listIterator::hasPrevious);
         Supplier<GuiEventListener> supplier2 = bl ? listIterator::next : (supplier = listIterator::previous);
         while (booleanSupplier.getAsBoolean()) {
-            GuiEventListener guiEventListener2 = supplier.get();
-            ComponentPath componentPath = guiEventListener2.nextFocusPath(tabNavigation);
+            GuiEventListener guiEventListener22 = supplier.get();
+            ComponentPath componentPath = guiEventListener22.nextFocusPath(tabNavigation);
             if (componentPath == null) continue;
             return ComponentPath.path(this, componentPath);
         }

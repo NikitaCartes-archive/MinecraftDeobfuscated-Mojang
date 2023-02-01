@@ -83,6 +83,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.RiderShieldingMount;
 import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.WalkAnimationState;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -190,9 +191,7 @@ extends Entity {
     public float oAttackAnim;
     public float attackAnim;
     protected int attackStrengthTicker;
-    public float animationSpeedOld;
-    public float animationSpeed;
-    public float animationPosition;
+    public final WalkAnimationState walkAnimation = new WalkAnimationState();
     public final int invulnerableDuration = 20;
     public final float timeOffs;
     public final float rotA;
@@ -984,7 +983,7 @@ extends Entity {
             }
             bl = true;
         }
-        this.animationSpeed = 1.5f;
+        this.walkAnimation.setSpeed(1.5f);
         boolean bl2 = true;
         if ((float)this.invulnerableTime > 10.0f) {
             if (f <= this.lastHurt) {
@@ -1527,7 +1526,7 @@ extends Entity {
             case 57: {
                 DamageSource damageSource;
                 SoundEvent soundEvent;
-                this.animationSpeed = 1.5f;
+                this.walkAnimation.setSpeed(1.5f);
                 this.invulnerableTime = 20;
                 this.hurtTime = this.hurtDuration = 10;
                 if (b == 33) {
@@ -1949,20 +1948,17 @@ extends Entity {
                 }
             }
         }
-        this.calculateEntityAnimation(this, this instanceof FlyingAnimal);
+        this.calculateEntityAnimation(this instanceof FlyingAnimal);
     }
 
-    public void calculateEntityAnimation(LivingEntity livingEntity, boolean bl) {
-        double f;
-        double e;
-        livingEntity.animationSpeedOld = livingEntity.animationSpeed;
-        double d = livingEntity.getX() - livingEntity.xo;
-        float g = (float)Math.sqrt(d * d + (e = bl ? livingEntity.getY() - livingEntity.yo : 0.0) * e + (f = livingEntity.getZ() - livingEntity.zo) * f) * 4.0f;
-        if (g > 1.0f) {
-            g = 1.0f;
-        }
-        livingEntity.animationSpeed += (g - livingEntity.animationSpeed) * 0.4f;
-        livingEntity.animationPosition += livingEntity.animationSpeed;
+    public void calculateEntityAnimation(boolean bl) {
+        float f = (float)Mth.length(this.getX() - this.xo, bl ? this.getY() - this.yo : 0.0, this.getZ() - this.zo);
+        this.updateWalkAnimation(f);
+    }
+
+    protected void updateWalkAnimation(float f) {
+        float g = Math.min(f * 4.0f, 1.0f);
+        this.walkAnimation.update(g, 0.4f);
     }
 
     public Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {

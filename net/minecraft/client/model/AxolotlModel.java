@@ -90,7 +90,7 @@ extends AgeableListModel<T> {
             this.saveAnimationValues(axolotl);
             return;
         }
-        boolean bl2 = bl = ((Entity)axolotl).getDeltaMovement().horizontalDistanceSqr() > 1.0E-7 || ((Entity)axolotl).getXRot() != ((Axolotl)axolotl).xRotO || ((Entity)axolotl).getYRot() != ((Axolotl)axolotl).yRotO || ((Axolotl)axolotl).xOld != ((Entity)axolotl).getX() || ((Axolotl)axolotl).zOld != ((Entity)axolotl).getZ();
+        boolean bl2 = bl = g > 1.0E-5f || ((Entity)axolotl).getXRot() != ((Axolotl)axolotl).xRotO || ((Entity)axolotl).getYRot() != ((Axolotl)axolotl).yRotO;
         if (((Entity)axolotl).isInWaterOrBubble()) {
             if (bl) {
                 this.setupSwimmingAnimation(h, j);

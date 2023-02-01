@@ -1310,6 +1310,9 @@ AutoCloseable {
         if (shaderInstance.COLOR_MODULATOR != null) {
             shaderInstance.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
         }
+        if (shaderInstance.GLINT_ALPHA != null) {
+            shaderInstance.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
+        }
         if (shaderInstance.FOG_START != null) {
             shaderInstance.FOG_START.set(RenderSystem.getShaderFogStart());
         }

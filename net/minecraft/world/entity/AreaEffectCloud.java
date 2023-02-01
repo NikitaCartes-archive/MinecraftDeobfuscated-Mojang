@@ -169,7 +169,7 @@ implements TraceableEntity {
                 boolean bl;
                 block19: {
                     float g;
-                    int i;
+                    int i2;
                     super.tick();
                     bl = this.isWaiting();
                     f = this.getRadius();
@@ -179,13 +179,13 @@ implements TraceableEntity {
                     }
                     ParticleOptions particleOptions = this.getParticle();
                     if (bl) {
-                        i = 2;
+                        i2 = 2;
                         g = 0.2f;
                     } else {
-                        i = Mth.ceil((float)Math.PI * f * f);
+                        i2 = Mth.ceil((float)Math.PI * f * f);
                         g = f;
                     }
-                    for (int j = 0; j < i; ++j) {
+                    for (int j = 0; j < i2; ++j) {
                         double p;
                         double o;
                         double n;
@@ -234,7 +234,7 @@ implements TraceableEntity {
                 this.victims.entrySet().removeIf(entry -> this.tickCount >= (Integer)entry.getValue());
                 list = Lists.newArrayList();
                 for (MobEffectInstance mobEffectInstance : this.potion.getEffects()) {
-                    list.add(new MobEffectInstance(mobEffectInstance.getEffect(), mobEffectInstance.getDuration() / 4, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()));
+                    list.add(new MobEffectInstance(mobEffectInstance.getEffect(), mobEffectInstance.mapDuration(i -> i / 4), mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()));
                 }
                 list.addAll(this.effects);
                 if (!list.isEmpty()) break block21;

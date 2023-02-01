@@ -720,15 +720,14 @@ Saddleable {
         if (this.isControlledByLocalInstance()) {
             this.setSpeed(this.getDrivenMovementSpeed(livingEntity));
             super.travel(new Vec3(f, vec3.y, g));
-        } else if (livingEntity instanceof Player) {
-            this.setDeltaMovement(this.getX() - this.xOld, this.getY() - this.yOld, this.getZ() - this.zOld);
+        } else {
+            this.calculateEntityAnimation(false);
+            this.tryCheckInsideBlocks();
         }
         if (this.onGround) {
             this.playerJumpPendingScale = 0.0f;
             this.setIsJumping(false);
         }
-        this.calculateEntityAnimation(this, false);
-        this.tryCheckInsideBlocks();
     }
 
     protected float getDrivenMovementSpeed(LivingEntity livingEntity) {

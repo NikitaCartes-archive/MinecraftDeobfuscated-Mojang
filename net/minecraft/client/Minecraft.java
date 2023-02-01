@@ -449,6 +449,7 @@ implements WindowEventHandler {
         this.toast = new ToastComponent(this);
         this.gameThread = Thread.currentThread();
         this.options = new Options(this, this.gameDirectory);
+        RenderSystem.setShaderGlintAlpha(this.options.glintStrength().get());
         this.running = true;
         this.tutorial = new Tutorial(this, this.options);
         this.hotbarManager = new HotbarManager(this.gameDirectory, this.fixerUpper);

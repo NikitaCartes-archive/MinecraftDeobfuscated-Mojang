@@ -40,7 +40,7 @@ extends OptionsSubScreen {
     private final int oldMipmaps;
 
     private static OptionInstance<?>[] options(Options options) {
-        return new OptionInstance[]{options.graphicsMode(), options.renderDistance(), options.prioritizeChunkUpdates(), options.simulationDistance(), options.ambientOcclusion(), options.framerateLimit(), options.enableVsync(), options.bobView(), options.guiScale(), options.attackIndicator(), options.gamma(), options.cloudStatus(), options.fullscreen(), options.particles(), options.mipmapLevels(), options.entityShadows(), options.screenEffectScale(), options.entityDistanceScaling(), options.fovEffectScale(), options.showAutosaveIndicator()};
+        return new OptionInstance[]{options.graphicsMode(), options.renderDistance(), options.prioritizeChunkUpdates(), options.simulationDistance(), options.ambientOcclusion(), options.framerateLimit(), options.enableVsync(), options.bobView(), options.guiScale(), options.attackIndicator(), options.gamma(), options.cloudStatus(), options.fullscreen(), options.particles(), options.mipmapLevels(), options.entityShadows(), options.screenEffectScale(), options.entityDistanceScaling(), options.fovEffectScale(), options.showAutosaveIndicator(), options.glintSpeed(), options.glintStrength()};
     }
 
     public VideoSettingsScreen(Screen screen, Options options) {

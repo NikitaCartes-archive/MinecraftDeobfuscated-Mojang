@@ -137,19 +137,17 @@ implements ItemSupplier {
             for (LivingEntity livingEntity : list2) {
                 double d;
                 if (!livingEntity.isAffectedByPotions() || !((d = this.distanceToSqr(livingEntity)) < 16.0)) continue;
-                double e = 1.0 - Math.sqrt(d) / 4.0;
-                if (livingEntity == entity) {
-                    e = 1.0;
-                }
+                double e = livingEntity == entity ? 1.0 : 1.0 - Math.sqrt(d) / 4.0;
                 for (MobEffectInstance mobEffectInstance : list) {
                     MobEffect mobEffect = mobEffectInstance.getEffect();
                     if (mobEffect.isInstantenous()) {
                         mobEffect.applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance.getAmplifier(), e);
                         continue;
                     }
-                    int i = (int)(e * (double)mobEffectInstance.getDuration() + 0.5);
-                    if (i <= 20) continue;
-                    livingEntity.addEffect(new MobEffectInstance(mobEffect, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()), entity2);
+                    int i2 = mobEffectInstance.mapDuration(i -> (int)(e * (double)i + 0.5));
+                    MobEffectInstance mobEffectInstance2 = new MobEffectInstance(mobEffect, i2, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible());
+                    if (mobEffectInstance2.endsWithin(20)) continue;
+                    livingEntity.addEffect(mobEffectInstance2, entity2);
                 }
             }
         }

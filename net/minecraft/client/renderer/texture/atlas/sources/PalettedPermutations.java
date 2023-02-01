@@ -79,15 +79,15 @@ implements SpriteSource {
         for (int i2 = 0; i2 < is.length; ++i2) {
             int j = is[i2];
             if (FastColor.ABGR32.alpha(j) == 0) continue;
-            int2IntMap.put(FastColor.ABGR32.bgr(j), js[i2]);
+            int2IntMap.put(FastColor.ABGR32.transparent(j), js[i2]);
         }
         return i -> {
             int j = FastColor.ABGR32.alpha(i);
             if (j == 0) {
                 return i;
             }
-            int k = FastColor.ABGR32.bgr(i);
-            int l = int2IntMap.getOrDefault(k, k);
+            int k = FastColor.ABGR32.transparent(i);
+            int l = int2IntMap.getOrDefault(k, FastColor.ABGR32.opaque(k));
             int m = FastColor.ABGR32.alpha(l);
             return FastColor.ABGR32.color(j * m / 255, l);
         };

@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -21,6 +20,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -40,6 +41,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.TabOrderedElement;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -84,6 +86,7 @@ implements Renderable {
     private final List<NarratableEntry> narratables = Lists.newArrayList();
     @Nullable
     protected Minecraft minecraft;
+    private boolean initialized;
     protected ItemRenderer itemRenderer;
     public int width;
     public int height;
@@ -281,29 +284,26 @@ implements Renderable {
 
     private void renderTooltipInternal(PoseStack poseStack, List<ClientTooltipComponent> list, int i2, int j2, ClientTooltipPositioner clientTooltipPositioner) {
         ClientTooltipComponent clientTooltipComponent2;
-        int s;
-        int m2;
+        int t;
         if (list.isEmpty()) {
             return;
         }
         int k2 = 0;
         int l2 = list.size() == 1 ? -2 : 0;
         for (ClientTooltipComponent clientTooltipComponent : list) {
-            m2 = clientTooltipComponent.getWidth(this.font);
+            int m2 = clientTooltipComponent.getWidth(this.font);
             if (m2 > k2) {
                 k2 = m2;
             }
             l2 += clientTooltipComponent.getHeight();
         }
-        int n2 = i2 + 12;
-        int o2 = j2 - 12;
-        m2 = k2;
-        int p = l2;
-        Vector2ic vector2ic = clientTooltipPositioner.positionTooltip(this, n2, o2, m2, p);
-        n2 = vector2ic.x();
-        o2 = vector2ic.y();
+        int n2 = k2;
+        int o2 = l2;
+        Vector2ic vector2ic = clientTooltipPositioner.positionTooltip(this, i2, j2, n2, o2);
+        int p = vector2ic.x();
+        int q = vector2ic.y();
         poseStack.pushPose();
-        int q = 400;
+        int r = 400;
         float f = this.itemRenderer.blitOffset;
         this.itemRenderer.blitOffset = 400.0f;
         Tesselator tesselator = Tesselator.getInstance();
@@ -311,7 +311,7 @@ implements Renderable {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferBuilder2.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         Matrix4f matrix4f2 = poseStack.last().pose();
-        TooltipRenderUtil.renderTooltipBackground((matrix4f, bufferBuilder, i, j, k, l, m, n, o) -> GuiComponent.fillGradient(matrix4f, bufferBuilder, i, j, k, l, m, n, o), matrix4f2, bufferBuilder2, n2, o2, m2, p, 400);
+        TooltipRenderUtil.renderTooltipBackground((matrix4f, bufferBuilder, i, j, k, l, m, n, o) -> GuiComponent.fillGradient(matrix4f, bufferBuilder, i, j, k, l, m, n, o), matrix4f2, bufferBuilder2, p, q, n2, o2, 400);
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -319,19 +319,19 @@ implements Renderable {
         RenderSystem.disableBlend();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0f, 0.0f, 400.0f);
-        int r = o2;
-        for (s = 0; s < list.size(); ++s) {
-            clientTooltipComponent2 = list.get(s);
-            clientTooltipComponent2.renderText(this.font, n2, r, matrix4f2, bufferSource);
-            r += clientTooltipComponent2.getHeight() + (s == 0 ? 2 : 0);
+        int s = q;
+        for (t = 0; t < list.size(); ++t) {
+            clientTooltipComponent2 = list.get(t);
+            clientTooltipComponent2.renderText(this.font, p, s, matrix4f2, bufferSource);
+            s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
         }
         bufferSource.endBatch();
         poseStack.popPose();
-        r = o2;
-        for (s = 0; s < list.size(); ++s) {
-            clientTooltipComponent2 = list.get(s);
-            clientTooltipComponent2.renderImage(this.font, n2, r, poseStack, this.itemRenderer, 400);
-            r += clientTooltipComponent2.getHeight() + (s == 0 ? 2 : 0);
+        s = q;
+        for (t = 0; t < list.size(); ++t) {
+            clientTooltipComponent2 = list.get(t);
+            clientTooltipComponent2.renderImage(this.font, p, s, poseStack, this.itemRenderer, 400);
+            s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
         }
         this.itemRenderer.blitOffset = f;
     }
@@ -426,7 +426,12 @@ implements Renderable {
         this.font = minecraft.font;
         this.width = i;
         this.height = j;
-        this.rebuildWidgets();
+        if (!this.initialized) {
+            this.init();
+        } else {
+            this.repositionElements();
+        }
+        this.initialized = true;
         this.triggerImmediateNarration(false);
         this.suppressNarration(NARRATE_SUPPRESS_AFTER_INIT_TIME);
     }
@@ -514,8 +519,14 @@ implements Renderable {
         return i == 65 && Screen.hasControlDown() && !Screen.hasShiftDown() && !Screen.hasAltDown();
     }
 
+    protected void repositionElements() {
+        this.rebuildWidgets();
+    }
+
     public void resize(Minecraft minecraft, int i, int j) {
-        this.init(minecraft, i, j);
+        this.width = i;
+        this.height = j;
+        this.repositionElements();
     }
 
     public static void wrapScreenError(Runnable runnable, String string, String string2) {
@@ -611,14 +622,15 @@ implements Renderable {
     }
 
     protected void updateNarratedWidget(NarrationElementOutput narrationElementOutput) {
-        ImmutableList immutableList = this.narratables.stream().filter(NarratableEntry::isActive).collect(ImmutableList.toImmutableList());
-        NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(immutableList, this.lastNarratable);
+        List list = this.narratables.stream().filter(NarratableEntry::isActive).collect(Collectors.toList());
+        Collections.sort(list, Comparator.comparingInt(TabOrderedElement::getTabOrderGroup));
+        NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, this.lastNarratable);
         if (narratableSearchResult != null) {
             if (narratableSearchResult.priority.isTerminal()) {
                 this.lastNarratable = narratableSearchResult.entry;
             }
-            if (immutableList.size() > 1) {
-                narrationElementOutput.add(NarratedElementType.POSITION, (Component)Component.translatable("narrator.position.screen", narratableSearchResult.index + 1, immutableList.size()));
+            if (list.size() > 1) {
+                narrationElementOutput.add(NarratedElementType.POSITION, (Component)Component.translatable("narrator.position.screen", narratableSearchResult.index + 1, list.size()));
                 if (narratableSearchResult.priority == NarratableEntry.NarrationPriority.FOCUSED) {
                     narrationElementOutput.add(NarratedElementType.USAGE, (Component)Component.translatable("narration.component_list.usage"));
                 }

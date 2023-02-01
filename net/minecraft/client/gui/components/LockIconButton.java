@@ -36,7 +36,7 @@ extends Button {
     }
 
     @Override
-    public void renderButton(PoseStack poseStack, int i, int j, float f) {
+    public void renderWidget(PoseStack poseStack, int i, int j, float f) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, Button.WIDGETS_LOCATION);
         Icon icon = !this.active ? (this.locked ? Icon.LOCKED_DISABLED : Icon.UNLOCKED_DISABLED) : (this.isHoveredOrFocused() ? (this.locked ? Icon.LOCKED_HOVER : Icon.UNLOCKED_HOVER) : (this.locked ? Icon.LOCKED : Icon.UNLOCKED));

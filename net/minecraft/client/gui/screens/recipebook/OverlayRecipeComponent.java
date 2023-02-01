@@ -38,6 +38,7 @@ GuiEventListener {
     private static final int MAX_ROW = 4;
     private static final int MAX_ROW_LARGE = 5;
     private static final float ITEM_RENDER_SCALE = 0.375f;
+    public static final int BUTTON_SIZE = 25;
     private final List<OverlayRecipeButton> recipeButtons = Lists.newArrayList();
     private boolean isVisible;
     private int x;
@@ -50,10 +51,10 @@ GuiEventListener {
     boolean isFurnaceMenu;
 
     public void init(Minecraft minecraft, RecipeCollection recipeCollection, int i, int j, int k, int l, float f) {
-        float u;
         float t;
         float s;
         float r;
+        float q;
         float h;
         this.minecraft = minecraft;
         this.collection = recipeCollection;
@@ -69,29 +70,28 @@ GuiEventListener {
         int p = (int)Math.ceil((float)n / (float)o);
         this.x = i;
         this.y = j;
-        int q = 25;
         float g = this.x + Math.min(n, o) * 25;
         if (g > (h = (float)(k + 50))) {
             this.x = (int)((float)this.x - f * (float)((int)((g - h) / f)));
         }
-        if ((r = (float)(this.y + p * 25)) > (s = (float)(l + 50))) {
-            this.y = (int)((float)this.y - f * (float)Mth.ceil((r - s) / f));
+        if ((q = (float)(this.y + p * 25)) > (r = (float)(l + 50))) {
+            this.y = (int)((float)this.y - f * (float)Mth.ceil((q - r) / f));
         }
-        if ((t = (float)this.y) < (u = (float)(l - 100))) {
-            this.y = (int)((float)this.y - f * (float)Mth.ceil((t - u) / f));
+        if ((s = (float)this.y) < (t = (float)(l - 100))) {
+            this.y = (int)((float)this.y - f * (float)Mth.ceil((s - t) / f));
         }
         this.isVisible = true;
         this.recipeButtons.clear();
-        for (int v = 0; v < n; ++v) {
-            boolean bl2 = v < m;
-            Recipe recipe = bl2 ? list.get(v) : (Recipe)list2.get(v - m);
-            int w = this.x + 4 + 25 * (v % o);
-            int x = this.y + 5 + 25 * (v / o);
+        for (int u = 0; u < n; ++u) {
+            boolean bl2 = u < m;
+            Recipe recipe = bl2 ? list.get(u) : (Recipe)list2.get(u - m);
+            int v = this.x + 4 + 25 * (u % o);
+            int w = this.y + 5 + 25 * (u / o);
             if (this.isFurnaceMenu) {
-                this.recipeButtons.add(new OverlaySmeltingRecipeButton(w, x, recipe, bl2));
+                this.recipeButtons.add(new OverlaySmeltingRecipeButton(v, w, recipe, bl2));
                 continue;
             }
-            this.recipeButtons.add(new OverlayRecipeButton(w, x, recipe, bl2));
+            this.recipeButtons.add(new OverlayRecipeButton(v, w, recipe, bl2));
         }
         this.lastRecipeClicked = null;
     }
@@ -136,42 +136,13 @@ GuiEventListener {
         int k = this.recipeButtons.size() <= 16 ? 4 : 5;
         int l = Math.min(this.recipeButtons.size(), k);
         int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
-        int n = 24;
-        int o = 4;
-        int p = 82;
-        int q = 208;
-        this.nineInchSprite(poseStack, l, m, 24, 4, 82, 208);
+        int n = 4;
+        this.blitNineSliced(poseStack, this.x, this.y, l * 25 + 8, m * 25 + 8, 4, 32, 32, 82, 208);
         RenderSystem.disableBlend();
         for (OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
             overlayRecipeButton.render(poseStack, i, j, f);
         }
         poseStack.popPose();
-    }
-
-    private void nineInchSprite(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
-        this.blit(poseStack, this.x, this.y, m, n, l, l);
-        this.blit(poseStack, this.x + l * 2 + i * k, this.y, m + k + l, n, l, l);
-        this.blit(poseStack, this.x, this.y + l * 2 + j * k, m, n + k + l, l, l);
-        this.blit(poseStack, this.x + l * 2 + i * k, this.y + l * 2 + j * k, m + k + l, n + k + l, l, l);
-        for (int o = 0; o < i; ++o) {
-            this.blit(poseStack, this.x + l + o * k, this.y, m + l, n, k, l);
-            this.blit(poseStack, this.x + l + (o + 1) * k, this.y, m + l, n, l, l);
-            for (int p = 0; p < j; ++p) {
-                if (o == 0) {
-                    this.blit(poseStack, this.x, this.y + l + p * k, m, n + l, l, k);
-                    this.blit(poseStack, this.x, this.y + l + (p + 1) * k, m, n + l, l, l);
-                }
-                this.blit(poseStack, this.x + l + o * k, this.y + l + p * k, m + l, n + l, k, k);
-                this.blit(poseStack, this.x + l + (o + 1) * k, this.y + l + p * k, m + l, n + l, l, k);
-                this.blit(poseStack, this.x + l + o * k, this.y + l + (p + 1) * k, m + l, n + l, k, l);
-                this.blit(poseStack, this.x + l + (o + 1) * k - 1, this.y + l + (p + 1) * k - 1, m + l, n + l, l + 1, l + 1);
-                if (o != i - 1) continue;
-                this.blit(poseStack, this.x + l * 2 + i * k, this.y + l + p * k, m + k + l, n + l, l, k);
-                this.blit(poseStack, this.x + l * 2 + i * k, this.y + l + (p + 1) * k, m + k + l, n + l, l, l);
-            }
-            this.blit(poseStack, this.x + l + o * k, this.y + l * 2 + j * k, m + l, n + k + l, k, l);
-            this.blit(poseStack, this.x + l + (o + 1) * k, this.y + l * 2 + j * k, m + l, n + k + l, l, l);
-        }
     }
 
     public void setVisible(boolean bl) {
@@ -241,7 +212,7 @@ GuiEventListener {
         }
 
         @Override
-        public void renderButton(PoseStack poseStack, int i, int j, float f) {
+        public void renderWidget(PoseStack poseStack, int i, int j, float f) {
             int l;
             RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
             int k = 152;

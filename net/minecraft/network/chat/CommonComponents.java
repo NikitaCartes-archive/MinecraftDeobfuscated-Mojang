@@ -55,8 +55,14 @@ public class CommonComponents {
         return Component.translatable("options.generic_value", component, component2);
     }
 
-    public static MutableComponent joinForNarration(Component component, Component component2) {
-        return Component.empty().append(component).append(NARRATION_SEPARATOR).append(component2);
+    public static MutableComponent joinForNarration(Component ... components) {
+        MutableComponent mutableComponent = Component.empty();
+        for (int i = 0; i < components.length; ++i) {
+            mutableComponent.append(components[i]);
+            if (i == components.length - 1) continue;
+            mutableComponent.append(NARRATION_SEPARATOR);
+        }
+        return mutableComponent;
     }
 
     public static Component joinLines(Component ... components) {

@@ -163,7 +163,7 @@ implements InventoryCarrier {
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.91f));
             }
         }
-        this.calculateEntityAnimation(this, false);
+        this.calculateEntityAnimation(false);
     }
 
     @Override

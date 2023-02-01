@@ -69,7 +69,7 @@ extends AbstractContainerScreen<T> {
                 n += m;
             }
             if (mobEffectInstance != null) {
-                List<Component> list = List.of(this.getEffectName(mobEffectInstance), Component.literal(MobEffectUtil.formatDuration(mobEffectInstance, 1.0f)));
+                List<Component> list = List.of(this.getEffectName(mobEffectInstance), MobEffectUtil.formatDuration(mobEffectInstance, 1.0f));
                 this.renderTooltip(poseStack, list, Optional.empty(), i, j);
             }
         }
@@ -105,8 +105,8 @@ extends AbstractContainerScreen<T> {
         for (MobEffectInstance mobEffectInstance : iterable) {
             Component component = this.getEffectName(mobEffectInstance);
             this.font.drawShadow(poseStack, component, (float)(i + 10 + 18), (float)(k + 6), 0xFFFFFF);
-            String string = MobEffectUtil.formatDuration(mobEffectInstance, 1.0f);
-            this.font.drawShadow(poseStack, string, (float)(i + 10 + 18), (float)(k + 6 + 10), 0x7F7F7F);
+            Component component2 = MobEffectUtil.formatDuration(mobEffectInstance, 1.0f);
+            this.font.drawShadow(poseStack, component2, (float)(i + 10 + 18), (float)(k + 6 + 10), 0x7F7F7F);
             k += j;
         }
     }

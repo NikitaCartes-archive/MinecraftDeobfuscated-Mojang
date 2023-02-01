@@ -39,7 +39,7 @@ extends AbstractClientPlayer {
     @Override
     public void tick() {
         super.tick();
-        this.calculateEntityAnimation(this, false);
+        this.calculateEntityAnimation(false);
     }
 
     @Override

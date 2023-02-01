@@ -6,12 +6,14 @@ package net.minecraft.client.gui.components.events;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.components.TabOrderedElement;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public interface GuiEventListener {
+public interface GuiEventListener
+extends TabOrderedElement {
     public static final long DOUBLE_CLICK_THRESHOLD_MS = 250L;
 
     default public void mouseMoved(double d, double e) {

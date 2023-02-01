@@ -12,8 +12,8 @@ import net.minecraft.Util;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.CenteredStringWidget;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -55,7 +55,7 @@ extends Screen {
         GridLayout gridLayout = frameLayout.addChild(new GridLayout(), frameLayout.newChildLayoutSettings().align(0.5f, 0.0f));
         gridLayout.defaultCellSetting().alignHorizontallyCenter().paddingBottom(8);
         GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(1);
-        rowHelper.addChild(new CenteredStringWidget(this.getTitle(), this.font));
+        rowHelper.addChild(new StringWidget(this.getTitle(), this.font));
         rowHelper.addChild(MultiLineTextWidget.createCentered(this.width - 16, this.font, DESCRIPTION));
         GridLayout gridLayout2 = this.twoButtonContainer(Button.builder(BUTTON_GIVE_FEEDBACK, this::openFeedbackLink).build(), Button.builder(BUTTON_SHOW_DATA, this::openDataFolder).build());
         rowHelper.addChild(gridLayout2);

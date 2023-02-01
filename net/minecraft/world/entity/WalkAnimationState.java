@@ -1,0 +1,43 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.entity;
+
+import net.minecraft.util.Mth;
+
+public class WalkAnimationState {
+    private float speedOld;
+    private float speed;
+    private float position;
+
+    public void setSpeed(float f) {
+        this.speed = f;
+    }
+
+    public void update(float f, float g) {
+        this.speedOld = this.speed;
+        this.speed += (f - this.speed) * g;
+        this.position = this.isMoving() ? (this.position += this.speed) : 0.0f;
+    }
+
+    public float speed() {
+        return this.speed;
+    }
+
+    public float speed(float f) {
+        return Mth.lerp(f, this.speedOld, this.speed);
+    }
+
+    public float position() {
+        return this.position;
+    }
+
+    public float position(float f) {
+        return this.position - this.speed * (1.0f - f);
+    }
+
+    public boolean isMoving() {
+        return this.speed > 1.0E-5f;
+    }
+}
+

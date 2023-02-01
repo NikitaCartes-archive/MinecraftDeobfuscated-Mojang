@@ -170,7 +170,7 @@ public class PotionUtils {
                 if (mobEffectInstance.getAmplifier() > 0) {
                     mutableComponent = Component.translatable("potion.withAmplifier", mutableComponent, Component.translatable("potion.potency." + mobEffectInstance.getAmplifier()));
                 }
-                if (mobEffectInstance.getDuration() > 20) {
+                if (!mobEffectInstance.endsWithin(20)) {
                     mutableComponent = Component.translatable("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
                 }
                 list2.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));

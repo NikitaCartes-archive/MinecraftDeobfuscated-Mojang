@@ -222,7 +222,7 @@ extends Screen {
         }
 
         @Override
-        public void renderButton(PoseStack poseStack, int i, int j, float f) {
+        public void renderWidget(PoseStack poseStack, int i, int j, float f) {
             Minecraft minecraft = Minecraft.getInstance();
             this.drawSlot(poseStack, minecraft.getTextureManager());
             this.icon.drawIcon(GameModeSwitcherScreen.this.itemRenderer, this.getX() + 5, this.getY() + 5);

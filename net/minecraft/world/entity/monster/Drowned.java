@@ -246,6 +246,11 @@ implements RangedAttackMob {
         }
     }
 
+    @Override
+    public boolean isVisuallySwimming() {
+        return this.isSwimming();
+    }
+
     protected boolean closeToNextPos() {
         double d;
         BlockPos blockPos;

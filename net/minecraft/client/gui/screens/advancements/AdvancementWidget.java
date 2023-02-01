@@ -204,9 +204,9 @@ extends GuiComponent {
         int r = 32 + this.description.size() * this.minecraft.font.lineHeight;
         if (!this.description.isEmpty()) {
             if (bl2) {
-                this.render9Sprite(poseStack, q, p + 26 - r, this.width, r, 10, 200, 26, 0, 52);
+                this.blitNineSliced(poseStack, q, p + 26 - r, this.width, r, 10, 200, 26, 0, 52);
             } else {
-                this.render9Sprite(poseStack, q, p, this.width, r, 10, 200, 26, 0, 52);
+                this.blitNineSliced(poseStack, q, p, this.width, r, 10, 200, 26, 0, 52);
             }
         }
         this.blit(poseStack, q, p, 0, advancementWidgetType.getIndex() * 26, n, 26);
@@ -233,30 +233,6 @@ extends GuiComponent {
             }
         }
         this.minecraft.getItemRenderer().renderAndDecorateFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
-    }
-
-    protected void render9Sprite(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
-        this.blit(poseStack, i, j, p, q, m, m);
-        this.renderRepeating(poseStack, i + m, j, k - m - m, m, p + m, q, n - m - m, o);
-        this.blit(poseStack, i + k - m, j, p + n - m, q, m, m);
-        this.blit(poseStack, i, j + l - m, p, q + o - m, m, m);
-        this.renderRepeating(poseStack, i + m, j + l - m, k - m - m, m, p + m, q + o - m, n - m - m, o);
-        this.blit(poseStack, i + k - m, j + l - m, p + n - m, q + o - m, m, m);
-        this.renderRepeating(poseStack, i, j + m, m, l - m - m, p, q + m, n, o - m - m);
-        this.renderRepeating(poseStack, i + m, j + m, k - m - m, l - m - m, p + m, q + m, n - m - m, o - m - m);
-        this.renderRepeating(poseStack, i + k - m, j + m, m, l - m - m, p + n - m, q + m, n, o - m - m);
-    }
-
-    protected void renderRepeating(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p) {
-        for (int q = 0; q < k; q += o) {
-            int r = i + q;
-            int s = Math.min(o, k - q);
-            for (int t = 0; t < l; t += p) {
-                int u = j + t;
-                int v = Math.min(p, l - t);
-                this.blit(poseStack, r, u, m, n, s, v);
-            }
-        }
     }
 
     public boolean isMouseOver(int i, int j, int k, int l) {

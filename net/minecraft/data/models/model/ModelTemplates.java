@@ -132,7 +132,8 @@ public class ModelTemplates {
     public static final ModelTemplate FLAT_ITEM = ModelTemplates.createItem("generated", TextureSlot.LAYER0);
     public static final ModelTemplate FLAT_HANDHELD_ITEM = ModelTemplates.createItem("handheld", TextureSlot.LAYER0);
     public static final ModelTemplate FLAT_HANDHELD_ROD_ITEM = ModelTemplates.createItem("handheld_rod", TextureSlot.LAYER0);
-    public static final ModelTemplate LAYERED_ITEM = ModelTemplates.createItem("generated", TextureSlot.LAYER0, TextureSlot.LAYER1);
+    public static final ModelTemplate TWO_LAYERED_ITEM = ModelTemplates.createItem("generated", TextureSlot.LAYER0, TextureSlot.LAYER1);
+    public static final ModelTemplate THREE_LAYERED_ITEM = ModelTemplates.createItem("generated", TextureSlot.LAYER0, TextureSlot.LAYER1, TextureSlot.LAYER2);
     public static final ModelTemplate SHULKER_BOX_INVENTORY = ModelTemplates.createItem("template_shulker_box", TextureSlot.PARTICLE);
     public static final ModelTemplate BED_INVENTORY = ModelTemplates.createItem("template_bed", TextureSlot.PARTICLE);
     public static final ModelTemplate BANNER_INVENTORY = ModelTemplates.createItem("template_banner", new TextureSlot[0]);

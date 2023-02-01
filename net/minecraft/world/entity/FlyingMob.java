@@ -53,7 +53,7 @@ extends Mob {
                 this.setDeltaMovement(this.getDeltaMovement().scale(f));
             }
         }
-        this.calculateEntityAnimation(this, false);
+        this.calculateEntityAnimation(false);
     }
 
     @Override
