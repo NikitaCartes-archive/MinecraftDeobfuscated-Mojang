@@ -1,13 +1,11 @@
 package net.minecraft.client.gui.layouts;
 
-import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractLayout implements LayoutElement {
+public abstract class AbstractLayout implements Layout {
 	private int x;
 	private int y;
 	protected int width;
@@ -18,21 +16,6 @@ public abstract class AbstractLayout implements LayoutElement {
 		this.y = j;
 		this.width = k;
 		this.height = l;
-	}
-
-	protected abstract void visitChildren(Consumer<LayoutElement> consumer);
-
-	public void arrangeElements() {
-		this.visitChildren(layoutElement -> {
-			if (layoutElement instanceof AbstractLayout abstractLayout) {
-				abstractLayout.arrangeElements();
-			}
-		});
-	}
-
-	@Override
-	public void visitWidgets(Consumer<AbstractWidget> consumer) {
-		this.visitChildren(layoutElement -> layoutElement.visitWidgets(consumer));
 	}
 
 	@Override

@@ -32,11 +32,13 @@ import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
+import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -118,7 +120,9 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				"killed_ghast",
 				KilledTrigger.TriggerInstance.playerKilledEntity(
 					EntityPredicate.Builder.entity().of(EntityType.GHAST),
-					DamageSourcePredicate.Builder.damageType().isProjectile(true).direct(EntityPredicate.Builder.entity().of(EntityType.FIREBALL))
+					DamageSourcePredicate.Builder.damageType()
+						.tag(TagPredicate.is(DamageTypeTags.IS_PROJECTILE))
+						.direct(EntityPredicate.Builder.entity().of(EntityType.FIREBALL))
 				)
 			)
 			.save(consumer, "nether/return_to_sender");

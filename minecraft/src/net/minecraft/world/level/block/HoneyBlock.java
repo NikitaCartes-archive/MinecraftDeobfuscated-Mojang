@@ -6,7 +6,6 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -47,7 +46,7 @@ public class HoneyBlock extends HalfTransparentBlock {
 			level.broadcastEntityEvent(entity, (byte)54);
 		}
 
-		if (entity.causeFallDamage(f, 0.2F, DamageSource.FALL)) {
+		if (entity.causeFallDamage(f, 0.2F, level.damageSources().fall())) {
 			entity.playSound(this.soundType.getFallSound(), this.soundType.getVolume() * 0.5F, this.soundType.getPitch() * 0.75F);
 		}
 	}

@@ -5,7 +5,6 @@ import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
@@ -14,6 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
@@ -61,7 +61,7 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 		int k = this.getRenderAmount(itemStack);
 		float h = 0.25F;
 		float l = Mth.sin(((float)itemEntity.getAge() + g) / 10.0F + itemEntity.bobOffs) * 0.1F + 0.1F;
-		float m = bakedModel.getTransforms().getTransform(ItemTransforms.TransformType.GROUND).scale.y();
+		float m = bakedModel.getTransforms().getTransform(ItemDisplayContext.GROUND).scale.y();
 		poseStack.translate(0.0F, l + 0.25F * m, 0.0F);
 		float n = itemEntity.getSpin(g);
 		poseStack.mulPose(Axis.YP.rotation(n));
@@ -90,7 +90,7 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 				}
 			}
 
-			this.itemRenderer.render(itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY, bakedModel);
+			this.itemRenderer.render(itemStack, ItemDisplayContext.GROUND, false, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY, bakedModel);
 			poseStack.popPose();
 			if (!bl) {
 				poseStack.translate(0.0F * o, 0.0F * p, 0.09375F * q);

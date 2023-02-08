@@ -5,13 +5,13 @@ import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.item.ItemDisplayContext;
 
 @Environment(EnvType.CLIENT)
 public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityRenderer<T> {
@@ -44,9 +44,7 @@ public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityR
 			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
 			poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 			this.itemRenderer
-				.renderStatic(
-					entity.getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, entity.level, entity.getId()
-				);
+				.renderStatic(entity.getItem(), ItemDisplayContext.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, entity.level, entity.getId());
 			poseStack.popPose();
 			super.render(entity, f, g, poseStack, multiBufferSource, i);
 		}

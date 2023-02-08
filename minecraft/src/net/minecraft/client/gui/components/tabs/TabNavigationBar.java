@@ -11,10 +11,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class TabNavigationBar extends GridLayout {
+	private static final int NO_TAB = -1;
 	private int width;
 	private final TabManager tabManager;
 	private final ImmutableList<Tab> tabs;
@@ -64,12 +67,46 @@ public class TabNavigationBar extends GridLayout {
 		this.tabManager.setCurrentTab(tab);
 	}
 
-	public void setInitialTab(Tab tab) {
+	public void selectTab(Tab tab) {
 		this.selectTab(Optional.ofNullable(this.tabButtons.get(tab)), tab);
 	}
 
-	public void setInitialTab(int i) {
-		this.setInitialTab((Tab)this.tabs.get(i));
+	public void selectTab(int i) {
+		this.selectTab((Tab)this.tabs.get(i));
+	}
+
+	public boolean keyPressed(int i) {
+		if (Screen.hasControlDown()) {
+			int j = this.getNextTabIndex(i);
+			if (j != -1) {
+				this.selectTab(Mth.clamp(j, 0, this.tabs.size() - 1));
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private int getNextTabIndex(int i) {
+		if (i >= 49 && i <= 57) {
+			return i - 49;
+		} else {
+			if (i == 258) {
+				int j = this.currentTabIndex();
+				if (j != -1) {
+					int k = Screen.hasShiftDown() ? j - 1 : j + 1;
+					return Math.floorMod(k, this.tabs.size());
+				}
+			}
+
+			return -1;
+		}
+	}
+
+	private int currentTabIndex() {
+		Tab tab = this.tabManager.getCurrentTab();
+		int i = this.tabs.indexOf(tab);
+		return i != -1 ? i : -1;
 	}
 
 	@Environment(EnvType.CLIENT)

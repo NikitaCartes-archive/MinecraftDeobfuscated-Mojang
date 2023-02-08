@@ -9,7 +9,10 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.Proxy;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -17,6 +20,7 @@ import java.util.function.BooleanSupplier;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import joptsimple.util.PathConverter;
 import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.SharedConstants;
@@ -77,13 +81,19 @@ public class Main {
 		OptionSpec<Integer> optionSpec12 = optionParser.accepts("port").withRequiredArg().<Integer>ofType(Integer.class).defaultsTo(-1);
 		OptionSpec<String> optionSpec13 = optionParser.accepts("serverId").withRequiredArg();
 		OptionSpec<Void> optionSpec14 = optionParser.accepts("jfrProfile");
-		OptionSpec<String> optionSpec15 = optionParser.nonOptions();
+		OptionSpec<Path> optionSpec15 = optionParser.accepts("pidFile").withRequiredArg().withValuesConvertedBy(new PathConverter());
+		OptionSpec<String> optionSpec16 = optionParser.nonOptions();
 
 		try {
 			OptionSet optionSet = optionParser.parse(strings);
 			if (optionSet.has(optionSpec8)) {
 				optionParser.printHelpOn(System.err);
 				return;
+			}
+
+			Path path = optionSet.valueOf(optionSpec15);
+			if (path != null) {
+				writePidFile(path);
 			}
 
 			CrashReport.preload();
@@ -94,13 +104,13 @@ public class Main {
 			Bootstrap.bootStrap();
 			Bootstrap.validate();
 			Util.startTimerHackThread();
-			Path path = Paths.get("server.properties");
-			DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path);
+			Path path2 = Paths.get("server.properties");
+			DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path2);
 			dedicatedServerSettings.forceSave();
-			Path path2 = Paths.get("eula.txt");
-			Eula eula = new Eula(path2);
+			Path path3 = Paths.get("eula.txt");
+			Eula eula = new Eula(path3);
 			if (optionSet.has(optionSpec2)) {
-				LOGGER.info("Initialized '{}' and '{}'", path.toAbsolutePath(), path2.toAbsolutePath());
+				LOGGER.info("Initialized '{}' and '{}'", path2.toAbsolutePath(), path3.toAbsolutePath());
 				return;
 			}
 
@@ -184,9 +194,9 @@ public class Main {
 							)
 					)
 					.get();
-			} catch (Exception var35) {
+			} catch (Exception var37) {
 				LOGGER.warn(
-					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var35
+					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var37
 				);
 				return;
 			}
@@ -207,7 +217,7 @@ public class Main {
 					dedicatedServerx.setPort(optionSet.valueOf(optionSpec12));
 					dedicatedServerx.setDemo(optionSet.has(optionSpec3));
 					dedicatedServerx.setId(optionSet.valueOf(optionSpec13));
-					boolean blx = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec15).contains("nogui");
+					boolean blx = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec16).contains("nogui");
 					if (blx && !GraphicsEnvironment.isHeadless()) {
 						dedicatedServerx.showGui();
 					}
@@ -222,8 +232,17 @@ public class Main {
 			};
 			thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 			Runtime.getRuntime().addShutdownHook(thread);
-		} catch (Exception var36) {
-			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var36);
+		} catch (Exception var38) {
+			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var38);
+		}
+	}
+
+	private static void writePidFile(Path path) {
+		try {
+			long l = ProcessHandle.current().pid();
+			Files.writeString(path, Long.toString(l));
+		} catch (IOException var3) {
+			throw new UncheckedIOException(var3);
 		}
 	}
 

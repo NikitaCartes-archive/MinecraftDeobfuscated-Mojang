@@ -1,18 +1,14 @@
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
@@ -34,13 +30,8 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		LevelAccessor levelAccessor = this.minecraft.level;
-		RenderSystem.disableBlend();
-		RenderSystem.enableDepthTest();
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
 		BlockPos blockPos = new BlockPos(d, 0.0, f);
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int i = -2; i <= 2; i++) {
 			for (int j = -2; j <= 2; j++) {
@@ -57,7 +48,8 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 							int n = SectionPos.sectionToBlockCoord(chunkPos.z, l);
 							float g = (float)((double)((float)levelAccessor.getHeight(types, m, n) + (float)types.ordinal() * 0.09375F) - e);
 							LevelRenderer.addChainedFilledBoxVertices(
-								bufferBuilder,
+								poseStack,
+								vertexConsumer,
 								(double)((float)m + 0.25F) - d,
 								(double)g,
 								(double)((float)n + 0.25F) - f,
@@ -74,26 +66,16 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 				}
 			}
 		}
-
-		tesselator.end();
 	}
 
 	private Vector3f getColor(Heightmap.Types types) {
-		switch (types) {
-			case WORLD_SURFACE_WG:
-				return new Vector3f(1.0F, 1.0F, 0.0F);
-			case OCEAN_FLOOR_WG:
-				return new Vector3f(1.0F, 0.0F, 1.0F);
-			case WORLD_SURFACE:
-				return new Vector3f(0.0F, 0.7F, 0.0F);
-			case OCEAN_FLOOR:
-				return new Vector3f(0.0F, 0.0F, 0.5F);
-			case MOTION_BLOCKING:
-				return new Vector3f(0.0F, 0.3F, 0.3F);
-			case MOTION_BLOCKING_NO_LEAVES:
-				return new Vector3f(0.0F, 0.5F, 0.5F);
-			default:
-				return new Vector3f(0.0F, 0.0F, 0.0F);
-		}
+		return switch (types) {
+			case WORLD_SURFACE_WG -> new Vector3f(1.0F, 1.0F, 0.0F);
+			case OCEAN_FLOOR_WG -> new Vector3f(1.0F, 0.0F, 1.0F);
+			case WORLD_SURFACE -> new Vector3f(0.0F, 0.7F, 0.0F);
+			case OCEAN_FLOOR -> new Vector3f(0.0F, 0.0F, 0.5F);
+			case MOTION_BLOCKING -> new Vector3f(0.0F, 0.3F, 0.3F);
+			case MOTION_BLOCKING_NO_LEAVES -> new Vector3f(0.0F, 0.5F, 0.5F);
+		};
 	}
 }

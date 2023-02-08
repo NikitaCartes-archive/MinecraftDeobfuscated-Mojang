@@ -37,6 +37,7 @@ import net.minecraft.client.model.GoatModel;
 import net.minecraft.client.model.GuardianModel;
 import net.minecraft.client.model.HoglinModel;
 import net.minecraft.client.model.HorseModel;
+import net.minecraft.client.model.HumanoidArmorModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.IllagerModel;
 import net.minecraft.client.model.IronGolemModel;
@@ -112,9 +113,9 @@ public class LayerDefinitions {
 	public static Map<ModelLayerLocation, LayerDefinition> createRoots() {
 		Builder<ModelLayerLocation, LayerDefinition> builder = ImmutableMap.builder();
 		LayerDefinition layerDefinition = LayerDefinition.create(HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F), 64, 64);
-		LayerDefinition layerDefinition2 = LayerDefinition.create(HumanoidModel.createMesh(OUTER_ARMOR_DEFORMATION, 0.0F), 64, 32);
-		LayerDefinition layerDefinition3 = LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(1.02F), 0.0F), 64, 32);
-		LayerDefinition layerDefinition4 = LayerDefinition.create(HumanoidModel.createMesh(INNER_ARMOR_DEFORMATION, 0.0F), 64, 32);
+		LayerDefinition layerDefinition2 = LayerDefinition.create(HumanoidArmorModel.createBodyLayer(OUTER_ARMOR_DEFORMATION), 64, 32);
+		LayerDefinition layerDefinition3 = LayerDefinition.create(HumanoidArmorModel.createBodyLayer(new CubeDeformation(1.02F)), 64, 32);
+		LayerDefinition layerDefinition4 = LayerDefinition.create(HumanoidArmorModel.createBodyLayer(INNER_ARMOR_DEFORMATION), 64, 32);
 		LayerDefinition layerDefinition5 = MinecartModel.createBodyLayer();
 		LayerDefinition layerDefinition6 = SkullModel.createMobHeadLayer();
 		LayerDefinition layerDefinition7 = LayerDefinition.create(HorseModel.createBodyMesh(CubeDeformation.NONE), 64, 64);

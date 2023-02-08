@@ -224,7 +224,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		boolean bl = entity.hurt(DamageSource.sting(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
+		boolean bl = entity.hurt(this.damageSources().sting(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
 		if (bl) {
 			this.doEnchantDamageEffects(this, entity);
 			if (entity instanceof LivingEntity) {
@@ -356,13 +356,13 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		}
 
 		if (this.underWaterTicks > 20) {
-			this.hurt(DamageSource.DROWN, 1.0F);
+			this.hurt(this.damageSources().drown(), 1.0F);
 		}
 
 		if (bl) {
 			this.timeSinceSting++;
 			if (this.timeSinceSting % 5 == 0 && this.random.nextInt(Mth.clamp(1200 - this.timeSinceSting, 1, 1200)) == 0) {
-				this.hurt(DamageSource.GENERIC, this.getHealth());
+				this.hurt(this.damageSources().generic(), this.getHealth());
 			}
 		}
 

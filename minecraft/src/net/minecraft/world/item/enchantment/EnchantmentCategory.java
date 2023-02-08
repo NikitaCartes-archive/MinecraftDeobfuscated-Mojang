@@ -5,12 +5,12 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.Vanishable;
-import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.block.Block;
 
 public enum EnchantmentCategory {
@@ -23,25 +23,41 @@ public enum EnchantmentCategory {
 	ARMOR_FEET {
 		@Override
 		public boolean canEnchant(Item item) {
-			return item instanceof ArmorItem && ((ArmorItem)item).getSlot() == EquipmentSlot.FEET;
+			if (item instanceof ArmorItem armorItem && armorItem.getEquipmentSlot() == EquipmentSlot.FEET) {
+				return true;
+			}
+
+			return false;
 		}
 	},
 	ARMOR_LEGS {
 		@Override
 		public boolean canEnchant(Item item) {
-			return item instanceof ArmorItem && ((ArmorItem)item).getSlot() == EquipmentSlot.LEGS;
+			if (item instanceof ArmorItem armorItem && armorItem.getEquipmentSlot() == EquipmentSlot.LEGS) {
+				return true;
+			}
+
+			return false;
 		}
 	},
 	ARMOR_CHEST {
 		@Override
 		public boolean canEnchant(Item item) {
-			return item instanceof ArmorItem && ((ArmorItem)item).getSlot() == EquipmentSlot.CHEST;
+			if (item instanceof ArmorItem armorItem && armorItem.getEquipmentSlot() == EquipmentSlot.CHEST) {
+				return true;
+			}
+
+			return false;
 		}
 	},
 	ARMOR_HEAD {
 		@Override
 		public boolean canEnchant(Item item) {
-			return item instanceof ArmorItem && ((ArmorItem)item).getSlot() == EquipmentSlot.HEAD;
+			if (item instanceof ArmorItem armorItem && armorItem.getEquipmentSlot() == EquipmentSlot.HEAD) {
+				return true;
+			}
+
+			return false;
 		}
 	},
 	WEAPON {
@@ -83,7 +99,7 @@ public enum EnchantmentCategory {
 	WEARABLE {
 		@Override
 		public boolean canEnchant(Item item) {
-			return item instanceof Wearable || Block.byItem(item) instanceof Wearable;
+			return item instanceof Equipable || Block.byItem(item) instanceof Equipable;
 		}
 	},
 	CROSSBOW {

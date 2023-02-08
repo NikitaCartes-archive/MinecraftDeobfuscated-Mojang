@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.ItemLike;
@@ -97,9 +98,9 @@ public class CreativeModeTab {
 		return this.type;
 	}
 
-	public void buildContents(FeatureFlagSet featureFlagSet, boolean bl) {
-		CreativeModeTab.ItemDisplayBuilder itemDisplayBuilder = new CreativeModeTab.ItemDisplayBuilder(this, featureFlagSet);
-		this.displayItemsGenerator.accept(featureFlagSet, itemDisplayBuilder, bl);
+	public void buildContents(CreativeModeTab.ItemDisplayParameters itemDisplayParameters) {
+		CreativeModeTab.ItemDisplayBuilder itemDisplayBuilder = new CreativeModeTab.ItemDisplayBuilder(this, itemDisplayParameters.enabledFeatures);
+		this.displayItemsGenerator.accept(itemDisplayParameters, itemDisplayBuilder);
 		this.displayItems = itemDisplayBuilder.tabContents;
 		this.displayItemsSearchTab = itemDisplayBuilder.searchTabContents;
 		this.rebuildSearchTree();
@@ -128,7 +129,7 @@ public class CreativeModeTab {
 	}
 
 	public static class Builder {
-		private static final CreativeModeTab.DisplayItemsGenerator EMPTY_GENERATOR = (featureFlagSet, output, bl) -> {
+		private static final CreativeModeTab.DisplayItemsGenerator EMPTY_GENERATOR = (itemDisplayParameters, output) -> {
 		};
 		private final CreativeModeTab.Row row;
 		private final int column;
@@ -200,8 +201,9 @@ public class CreativeModeTab {
 		}
 	}
 
+	@FunctionalInterface
 	public interface DisplayItemsGenerator {
-		void accept(FeatureFlagSet featureFlagSet, CreativeModeTab.Output output, boolean bl);
+		void accept(CreativeModeTab.ItemDisplayParameters itemDisplayParameters, CreativeModeTab.Output output);
 	}
 
 	static class ItemDisplayBuilder implements CreativeModeTab.Output {
@@ -244,6 +246,13 @@ public class CreativeModeTab {
 					}
 				}
 			}
+		}
+	}
+
+	public static record ItemDisplayParameters(FeatureFlagSet enabledFeatures, boolean hasPermissions, HolderLookup.Provider holders) {
+
+		public boolean needsUpdate(FeatureFlagSet featureFlagSet, boolean bl, HolderLookup.Provider provider) {
+			return !this.enabledFeatures.equals(featureFlagSet) || this.hasPermissions != bl || this.holders != provider;
 		}
 	}
 

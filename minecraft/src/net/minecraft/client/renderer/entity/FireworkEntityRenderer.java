@@ -5,11 +5,11 @@ import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemDisplayContext;
 
 @Environment(EnvType.CLIENT)
 public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity> {
@@ -33,7 +33,7 @@ public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity>
 		this.itemRenderer
 			.renderStatic(
 				fireworkRocketEntity.getItem(),
-				ItemTransforms.TransformType.GROUND,
+				ItemDisplayContext.GROUND,
 				i,
 				OverlayTexture.NO_OVERLAY,
 				poseStack,

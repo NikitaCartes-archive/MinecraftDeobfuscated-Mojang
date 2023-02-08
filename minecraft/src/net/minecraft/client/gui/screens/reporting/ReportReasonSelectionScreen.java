@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Optionull;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -47,7 +48,7 @@ public class ReportReasonSelectionScreen extends Screen {
 		this.reasonSelectionList = new ReportReasonSelectionScreen.ReasonSelectionList(this.minecraft);
 		this.reasonSelectionList.setRenderBackground(false);
 		this.addWidget(this.reasonSelectionList);
-		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Util.mapNullable(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
+		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Optionull.map(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
 		this.reasonSelectionList.setSelected(entry);
 		int i = this.width / 2 - 150 - 5;
 		this.addRenderableWidget(Button.builder(READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {

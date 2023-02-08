@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -15,7 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -70,7 +72,7 @@ public class RespawnAnchorBlock extends Block {
 		if (interactionHand == InteractionHand.MAIN_HAND && !isRespawnFuel(itemStack) && isRespawnFuel(player.getItemInHand(InteractionHand.OFF_HAND))) {
 			return InteractionResult.PASS;
 		} else if (isRespawnFuel(itemStack) && canBeCharged(blockState)) {
-			charge(level, blockPos, blockState);
+			charge(player, level, blockPos, blockState);
 			if (!player.getAbilities().instabuild) {
 				itemStack.shrink(1);
 			}
@@ -147,15 +149,17 @@ public class RespawnAnchorBlock extends Block {
 			}
 		};
 		Vec3 vec3 = blockPos.getCenter();
-		level.explode(null, DamageSource.badRespawnPointExplosion(vec3), explosionDamageCalculator, vec3, 5.0F, true, Level.ExplosionInteraction.BLOCK);
+		level.explode(null, level.damageSources().badRespawnPointExplosion(vec3), explosionDamageCalculator, vec3, 5.0F, true, Level.ExplosionInteraction.BLOCK);
 	}
 
 	public static boolean canSetSpawn(Level level) {
 		return level.dimensionType().respawnAnchorWorks();
 	}
 
-	public static void charge(Level level, BlockPos blockPos, BlockState blockState) {
-		level.setBlock(blockPos, blockState.setValue(CHARGE, Integer.valueOf((Integer)blockState.getValue(CHARGE) + 1)), 3);
+	public static void charge(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState) {
+		BlockState blockState2 = blockState.setValue(CHARGE, Integer.valueOf((Integer)blockState.getValue(CHARGE) + 1));
+		level.setBlock(blockPos, blockState2, 3);
+		level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState2));
 		level.playSound(
 			null,
 			(double)blockPos.getX() + 0.5,

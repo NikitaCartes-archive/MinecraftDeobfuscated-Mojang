@@ -92,7 +92,7 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 		super.aiStep();
 		if (!this.level.isClientSide) {
 			if (this.level.getBiome(this.blockPosition()).is(BiomeTags.SNOW_GOLEM_MELTS)) {
-				this.hurt(DamageSource.ON_FIRE, 1.0F);
+				this.hurt(this.damageSources().onFire(), 1.0F);
 			}
 
 			if (!this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {

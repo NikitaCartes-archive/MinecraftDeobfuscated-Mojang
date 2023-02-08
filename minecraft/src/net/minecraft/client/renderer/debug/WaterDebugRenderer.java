@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,16 +23,14 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		BlockPos blockPos = this.minecraft.player.blockPosition();
 		LevelReader levelReader = this.minecraft.player.level;
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 0.75F);
-		RenderSystem.lineWidth(6.0F);
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-10, -10, -10), blockPos.offset(10, 10, 10))) {
 			FluidState fluidState = levelReader.getFluidState(blockPos2);
 			if (fluidState.is(FluidTags.WATER)) {
 				double g = (double)((float)blockPos2.getY() + fluidState.getHeight(levelReader, blockPos2));
 				DebugRenderer.renderFilledBox(
+					poseStack,
+					multiBufferSource,
 					new AABB(
 							(double)((float)blockPos2.getX() + 0.01F),
 							(double)((float)blockPos2.getY() + 0.01F),
@@ -43,10 +40,10 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 							(double)((float)blockPos2.getZ() + 0.99F)
 						)
 						.move(-d, -e, -f),
+					0.0F,
 					1.0F,
-					1.0F,
-					1.0F,
-					0.2F
+					0.0F,
+					0.15F
 				);
 			}
 		}
@@ -55,6 +52,8 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			FluidState fluidState = levelReader.getFluidState(blockPos2x);
 			if (fluidState.is(FluidTags.WATER)) {
 				DebugRenderer.renderFloatingText(
+					poseStack,
+					multiBufferSource,
 					String.valueOf(fluidState.getAmount()),
 					(double)blockPos2x.getX() + 0.5,
 					(double)((float)blockPos2x.getY() + fluidState.getHeight(levelReader, blockPos2x)),
@@ -63,8 +62,5 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 				);
 			}
 		}
-
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.disableBlend();
 	}
 }

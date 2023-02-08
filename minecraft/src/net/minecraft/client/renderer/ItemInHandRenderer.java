@@ -11,7 +11,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -22,6 +21,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -121,7 +121,7 @@ public class ItemInHandRenderer {
 	public void renderItem(
 		LivingEntity livingEntity,
 		ItemStack itemStack,
-		ItemTransforms.TransformType transformType,
+		ItemDisplayContext itemDisplayContext,
 		boolean bl,
 		PoseStack poseStack,
 		MultiBufferSource multiBufferSource,
@@ -132,14 +132,14 @@ public class ItemInHandRenderer {
 				.renderStatic(
 					livingEntity,
 					itemStack,
-					transformType,
+					itemDisplayContext,
 					bl,
 					poseStack,
 					multiBufferSource,
 					livingEntity.level,
 					i,
 					OverlayTexture.NO_OVERLAY,
-					livingEntity.getId() + transformType.ordinal()
+					livingEntity.getId() + itemDisplayContext.ordinal()
 				);
 		}
 	}
@@ -419,7 +419,7 @@ public class ItemInHandRenderer {
 				this.renderItem(
 					abstractClientPlayer,
 					itemStack,
-					bl3 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND,
+					bl3 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
 					!bl3,
 					poseStack,
 					multiBufferSource,
@@ -507,7 +507,7 @@ public class ItemInHandRenderer {
 				this.renderItem(
 					abstractClientPlayer,
 					itemStack,
-					bl2 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND,
+					bl2 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
 					!bl2,
 					poseStack,
 					multiBufferSource,

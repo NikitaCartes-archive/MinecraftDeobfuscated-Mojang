@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -62,7 +63,7 @@ public class MinecartTNT extends AbstractMinecart {
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow && abstractArrow.isOnFire()) {
-			DamageSource damageSource2 = DamageSource.explosion(this, damageSource.getEntity());
+			DamageSource damageSource2 = this.damageSources().explosion(this, damageSource.getEntity());
 			this.explode(damageSource2, abstractArrow.getDeltaMovement().lengthSqr());
 		}
 
@@ -72,7 +73,7 @@ public class MinecartTNT extends AbstractMinecart {
 	@Override
 	public void destroy(DamageSource damageSource) {
 		double d = this.getDeltaMovement().horizontalDistanceSqr();
-		if (!damageSource.isFire() && !damageSource.isExplosion() && !(d >= 0.01F)) {
+		if (!damageSource.is(DamageTypeTags.IS_FIRE) && !damageSource.is(DamageTypeTags.IS_EXPLOSION) && !(d >= 0.01F)) {
 			super.destroy(damageSource);
 		} else {
 			if (this.fuse < 0) {

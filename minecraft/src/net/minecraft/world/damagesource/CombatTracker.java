@@ -5,8 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -17,6 +22,9 @@ import net.minecraft.world.level.block.state.BlockState;
 public class CombatTracker {
 	public static final int RESET_DAMAGE_STATUS_TIME = 100;
 	public static final int RESET_COMBAT_STATUS_TIME = 300;
+	private static final Style INTENTIONAL_GAME_DESIGN_STYLE = Style.EMPTY
+		.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://bugs.mojang.com/browse/MCPE-28723"))
+		.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("MCPE-28723")));
 	private final List<CombatEntry> entries = Lists.<CombatEntry>newArrayList();
 	private final LivingEntity mob;
 	private int lastDamageTime;
@@ -76,14 +84,17 @@ public class CombatTracker {
 			CombatEntry combatEntry = this.getMostSignificantFall();
 			CombatEntry combatEntry2 = (CombatEntry)this.entries.get(this.entries.size() - 1);
 			Component component = combatEntry2.getAttackerName();
-			Entity entity = combatEntry2.getSource().getEntity();
+			DamageSource damageSource = combatEntry2.getSource();
+			Entity entity = damageSource.getEntity();
+			DeathMessageType deathMessageType = damageSource.type().deathMessageType();
 			Component component3;
-			if (combatEntry != null && combatEntry2.getSource() == DamageSource.FALL) {
+			if (combatEntry != null && deathMessageType == DeathMessageType.FALL_VARIANTS) {
 				Component component2 = combatEntry.getAttackerName();
-				if (combatEntry.getSource() == DamageSource.FALL || combatEntry.getSource() == DamageSource.OUT_OF_WORLD) {
+				DamageSource damageSource2 = combatEntry.getSource();
+				if (damageSource2.is(DamageTypeTags.IS_FALL) || damageSource2.is(DamageTypeTags.ALWAYS_MOST_SIGNIFICANT_FALL)) {
 					component3 = Component.translatable("death.fell.accident." + this.getFallLocation(combatEntry), this.mob.getDisplayName());
 				} else if (component2 != null && !component2.equals(component)) {
-					ItemStack itemStack = combatEntry.getSource().getEntity() instanceof LivingEntity livingEntity ? livingEntity.getMainHandItem() : ItemStack.EMPTY;
+					ItemStack itemStack = damageSource2.getEntity() instanceof LivingEntity livingEntity ? livingEntity.getMainHandItem() : ItemStack.EMPTY;
 					if (!itemStack.isEmpty() && itemStack.hasCustomHoverName()) {
 						component3 = Component.translatable("death.fell.assist.item", this.mob.getDisplayName(), component2, itemStack.getDisplayName());
 					} else {
@@ -100,7 +111,13 @@ public class CombatTracker {
 					component3 = Component.translatable("death.fell.killer", this.mob.getDisplayName());
 				}
 			} else {
-				component3 = combatEntry2.getSource().getLocalizedDeathMessage(this.mob);
+				if (deathMessageType == DeathMessageType.INTENTIONAL_GAME_DESIGN) {
+					String string = "death.attack." + damageSource.getMsgId();
+					Component component4 = ComponentUtils.wrapInSquareBrackets(Component.translatable(string + ".link")).withStyle(INTENTIONAL_GAME_DESIGN_STYLE);
+					return Component.translatable(string + ".message", this.mob.getDisplayName(), component4);
+				}
+
+				component3 = damageSource.getLocalizedDeathMessage(this.mob);
 			}
 
 			return component3;
@@ -139,16 +156,17 @@ public class CombatTracker {
 		for (int i = 0; i < this.entries.size(); i++) {
 			CombatEntry combatEntry3 = (CombatEntry)this.entries.get(i);
 			CombatEntry combatEntry4 = i > 0 ? (CombatEntry)this.entries.get(i - 1) : null;
-			if ((combatEntry3.getSource() == DamageSource.FALL || combatEntry3.getSource() == DamageSource.OUT_OF_WORLD)
-				&& combatEntry3.getFallDistance() > 0.0F
-				&& (combatEntry == null || combatEntry3.getFallDistance() > g)) {
+			DamageSource damageSource = combatEntry3.getSource();
+			boolean bl = damageSource.is(DamageTypeTags.ALWAYS_MOST_SIGNIFICANT_FALL);
+			float h = bl ? Float.MAX_VALUE : combatEntry3.getFallDistance();
+			if ((damageSource.is(DamageTypeTags.IS_FALL) || bl) && h > 0.0F && (combatEntry == null || h > g)) {
 				if (i > 0) {
 					combatEntry = combatEntry4;
 				} else {
 					combatEntry = combatEntry3;
 				}
 
-				g = combatEntry3.getFallDistance();
+				g = h;
 			}
 
 			if (combatEntry3.getLocation() != null && (combatEntry2 == null || combatEntry3.getDamage() > f)) {

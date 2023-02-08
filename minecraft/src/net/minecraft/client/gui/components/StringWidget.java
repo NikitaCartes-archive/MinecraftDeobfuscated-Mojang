@@ -4,13 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
-public class StringWidget extends AbstractWidget {
-	private int color = 16777215;
-	private final Font font;
+public class StringWidget extends AbstractStringWidget {
 	private float alignX = 0.5F;
 
 	public StringWidget(Component component, Font font) {
@@ -22,13 +19,12 @@ public class StringWidget extends AbstractWidget {
 	}
 
 	public StringWidget(int i, int j, int k, int l, Component component, Font font) {
-		super(i, j, k, l, component);
-		this.font = font;
+		super(i, j, k, l, component, font);
 		this.active = false;
 	}
 
-	public StringWidget color(int i) {
-		this.color = i;
+	public StringWidget setColor(int i) {
+		super.setColor(i);
 		return this;
 	}
 
@@ -50,14 +46,11 @@ public class StringWidget extends AbstractWidget {
 	}
 
 	@Override
-	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-	}
-
-	@Override
 	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
 		Component component = this.getMessage();
-		int k = this.getX() + Math.round(this.alignX * (float)(this.getWidth() - this.font.width(component)));
+		Font font = this.getFont();
+		int k = this.getX() + Math.round(this.alignX * (float)(this.getWidth() - font.width(component)));
 		int l = this.getY() + (this.getHeight() - 9) / 2;
-		drawString(poseStack, this.font, component, k, l, this.color);
+		drawString(poseStack, font, component, k, l, this.getColor());
 	}
 }

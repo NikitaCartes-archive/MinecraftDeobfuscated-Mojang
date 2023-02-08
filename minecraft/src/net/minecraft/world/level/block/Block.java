@@ -25,7 +25,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -387,7 +386,7 @@ public class Block extends BlockBehaviour implements ItemLike {
 	}
 
 	public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
-		entity.causeFallDamage(f, 1.0F, DamageSource.FALL);
+		entity.causeFallDamage(f, 1.0F, entity.damageSources().fall());
 	}
 
 	public void updateEntityAfterFallOn(BlockGetter blockGetter, Entity entity) {

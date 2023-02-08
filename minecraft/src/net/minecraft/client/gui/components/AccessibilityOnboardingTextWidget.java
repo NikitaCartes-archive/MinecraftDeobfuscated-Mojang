@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class AccessibilityOnboardingTextWidget extends MultiLineTextWidget {
-	private final Component message;
 	private static final int BORDER_COLOR_FOCUSED = -1;
 	private static final int BORDER_COLOR = -6250336;
 	private static final int BACKGROUND_COLOR = 1426063360;
@@ -20,22 +19,23 @@ public class AccessibilityOnboardingTextWidget extends MultiLineTextWidget {
 	private static final int BORDER = 1;
 
 	public AccessibilityOnboardingTextWidget(Font font, Component component, int i) {
-		super(MultiLineLabel.create(font, component, i), font, component, true);
-		this.message = component;
+		super(component, font);
+		this.setMaxWidth(i);
+		this.setCentered(true);
 		this.active = true;
 	}
 
 	@Override
 	protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-		narrationElementOutput.add(NarratedElementType.TITLE, this.message);
+		narrationElementOutput.add(NarratedElementType.TITLE, this.getMessage());
 	}
 
 	@Override
 	protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
 		int k = this.getX() - 3;
 		int l = this.getY() - 3;
-		int m = this.getX() + this.width + 3;
-		int n = this.getY() + this.height + 3;
+		int m = this.getX() + this.getWidth() + 3;
+		int n = this.getY() + this.getHeight() + 3;
 		int o = this.isFocused() ? -1 : -6250336;
 		fill(poseStack, k - 1, l - 1, k, n + 1, o);
 		fill(poseStack, m, l - 1, m + 1, n + 1, o);

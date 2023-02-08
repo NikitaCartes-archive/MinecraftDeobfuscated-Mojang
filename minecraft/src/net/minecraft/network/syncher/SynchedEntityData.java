@@ -185,6 +185,8 @@ public class SynchedEntityData {
 		} finally {
 			this.lock.writeLock().unlock();
 		}
+
+		this.entity.onSyncedDataUpdated(list);
 	}
 
 	private <T> void assignValue(SynchedEntityData.DataItem<T> dataItem, SynchedEntityData.DataValue<?> dataValue) {

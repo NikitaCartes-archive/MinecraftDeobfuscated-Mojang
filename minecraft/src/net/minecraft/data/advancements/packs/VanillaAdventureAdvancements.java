@@ -28,6 +28,7 @@ import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
+import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.advancements.critereon.TargetBlockTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
@@ -40,6 +41,7 @@ import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
@@ -234,7 +236,11 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				"shot_arrow",
 				PlayerHurtEntityTrigger.TriggerInstance.playerHurtEntity(
 					DamagePredicate.Builder.damageInstance()
-						.type(DamageSourcePredicate.Builder.damageType().isProjectile(true).direct(EntityPredicate.Builder.entity().of(EntityTypeTags.ARROWS)))
+						.type(
+							DamageSourcePredicate.Builder.damageType()
+								.tag(TagPredicate.is(DamageTypeTags.IS_PROJECTILE))
+								.direct(EntityPredicate.Builder.entity().of(EntityTypeTags.ARROWS))
+						)
 				)
 			)
 			.save(consumer, "adventure/shoot_arrow");
@@ -254,7 +260,11 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				"shot_trident",
 				PlayerHurtEntityTrigger.TriggerInstance.playerHurtEntity(
 					DamagePredicate.Builder.damageInstance()
-						.type(DamageSourcePredicate.Builder.damageType().isProjectile(true).direct(EntityPredicate.Builder.entity().of(EntityType.TRIDENT)))
+						.type(
+							DamageSourcePredicate.Builder.damageType()
+								.tag(TagPredicate.is(DamageTypeTags.IS_PROJECTILE))
+								.direct(EntityPredicate.Builder.entity().of(EntityType.TRIDENT))
+						)
 				)
 			)
 			.save(consumer, "adventure/throw_trident");
@@ -305,7 +315,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				"killed_skeleton",
 				KilledTrigger.TriggerInstance.playerKilledEntity(
 					EntityPredicate.Builder.entity().of(EntityType.SKELETON).distance(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(50.0))),
-					DamageSourcePredicate.Builder.damageType().isProjectile(true)
+					DamageSourcePredicate.Builder.damageType().tag(TagPredicate.is(DamageTypeTags.IS_PROJECTILE))
 				)
 			)
 			.save(consumer, "adventure/sniper_duel");

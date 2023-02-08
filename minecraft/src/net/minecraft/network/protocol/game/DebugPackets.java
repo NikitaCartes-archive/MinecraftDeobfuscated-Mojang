@@ -25,7 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.Container;
 import net.minecraft.world.Nameable;
-import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -243,8 +243,8 @@ public class DebugPackets {
 			return getShortDescription(serverLevel, ((GlobalPos)object).pos());
 		} else if (object instanceof BlockPosTracker) {
 			return getShortDescription(serverLevel, ((BlockPosTracker)object).currentBlockPosition());
-		} else if (object instanceof EntityDamageSource) {
-			Entity entity = ((EntityDamageSource)object).getEntity();
+		} else if (object instanceof DamageSource) {
+			Entity entity = ((DamageSource)object).getEntity();
 			return entity == null ? object.toString() : getShortDescription(serverLevel, entity);
 		} else if (!(object instanceof Collection)) {
 			return object.toString();

@@ -239,6 +239,7 @@ import net.minecraft.util.datafix.schemas.V3083;
 import net.minecraft.util.datafix.schemas.V3202;
 import net.minecraft.util.datafix.schemas.V3203;
 import net.minecraft.util.datafix.schemas.V3204;
+import net.minecraft.util.datafix.schemas.V3325;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1042,6 +1043,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new OptionsAccessibilityOnboardFix(schema177));
 		Schema schema178 = dataFixerBuilder.addSchema(3322, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new EffectDurationFix(schema178));
+		Schema schema179 = dataFixerBuilder.addSchema(3325, V3325::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema179, "Added displays", References.ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

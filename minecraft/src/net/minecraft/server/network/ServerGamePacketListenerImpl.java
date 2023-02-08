@@ -1690,7 +1690,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 			boolean bl2 = serverboundSetCreativeModeSlotPacket.getSlotNum() >= 1 && serverboundSetCreativeModeSlotPacket.getSlotNum() <= 45;
 			boolean bl3 = itemStack.isEmpty() || itemStack.getDamageValue() >= 0 && itemStack.getCount() <= 64 && !itemStack.isEmpty();
 			if (bl2 && bl3) {
-				this.player.inventoryMenu.getSlot(serverboundSetCreativeModeSlotPacket.getSlotNum()).set(itemStack);
+				this.player.inventoryMenu.getSlot(serverboundSetCreativeModeSlotPacket.getSlotNum()).setByPlayer(itemStack);
 				this.player.inventoryMenu.broadcastChanges();
 			} else if (bl && bl3 && this.dropSpamTickCount < 200) {
 				this.dropSpamTickCount += 20;

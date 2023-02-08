@@ -251,7 +251,7 @@ public class LoomMenu extends AbstractContainerMenu {
 			}
 
 			if (itemStack2.isEmpty()) {
-				slot.set(ItemStack.EMPTY);
+				slot.setByPlayer(ItemStack.EMPTY);
 			} else {
 				slot.setChanged();
 			}

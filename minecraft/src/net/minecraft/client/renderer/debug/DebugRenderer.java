@@ -1,12 +1,7 @@
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Transformation;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -15,9 +10,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -121,50 +116,52 @@ public class DebugRenderer {
 		}
 	}
 
-	public static void renderFilledBox(BlockPos blockPos, BlockPos blockPos2, float f, float g, float h, float i) {
+	public static void renderFilledBox(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos, BlockPos blockPos2, float f, float g, float h, float i
+	) {
 		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 		if (camera.isInitialized()) {
 			Vec3 vec3 = camera.getPosition().reverse();
 			AABB aABB = new AABB(blockPos, blockPos2).move(vec3);
-			renderFilledBox(aABB, f, g, h, i);
+			renderFilledBox(poseStack, multiBufferSource, aABB, f, g, h, i);
 		}
 	}
 
-	public static void renderFilledBox(BlockPos blockPos, float f, float g, float h, float i, float j) {
+	public static void renderFilledBox(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos, float f, float g, float h, float i, float j) {
 		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 		if (camera.isInitialized()) {
 			Vec3 vec3 = camera.getPosition().reverse();
 			AABB aABB = new AABB(blockPos).move(vec3).inflate((double)f);
-			renderFilledBox(aABB, g, h, i, j);
+			renderFilledBox(poseStack, multiBufferSource, aABB, g, h, i, j);
 		}
 	}
 
-	public static void renderFilledBox(AABB aABB, float f, float g, float h, float i) {
-		renderFilledBox(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, f, g, h, i);
+	public static void renderFilledBox(PoseStack poseStack, MultiBufferSource multiBufferSource, AABB aABB, float f, float g, float h, float i) {
+		renderFilledBox(poseStack, multiBufferSource, aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, f, g, h, i);
 	}
 
-	public static void renderFilledBox(double d, double e, double f, double g, double h, double i, float j, float k, float l, float m) {
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-		LevelRenderer.addChainedFilledBoxVertices(bufferBuilder, d, e, f, g, h, i, j, k, l, m);
-		tesselator.end();
+	public static void renderFilledBox(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, double g, double h, double i, float j, float k, float l, float m
+	) {
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
+		LevelRenderer.addChainedFilledBoxVertices(poseStack, vertexConsumer, d, e, f, g, h, i, j, k, l, m);
 	}
 
-	public static void renderFloatingText(String string, int i, int j, int k, int l) {
-		renderFloatingText(string, (double)i + 0.5, (double)j + 0.5, (double)k + 0.5, l);
+	public static void renderFloatingText(PoseStack poseStack, MultiBufferSource multiBufferSource, String string, int i, int j, int k, int l) {
+		renderFloatingText(poseStack, multiBufferSource, string, (double)i + 0.5, (double)j + 0.5, (double)k + 0.5, l);
 	}
 
-	public static void renderFloatingText(String string, double d, double e, double f, int i) {
-		renderFloatingText(string, d, e, f, i, 0.02F);
+	public static void renderFloatingText(PoseStack poseStack, MultiBufferSource multiBufferSource, String string, double d, double e, double f, int i) {
+		renderFloatingText(poseStack, multiBufferSource, string, d, e, f, i, 0.02F);
 	}
 
-	public static void renderFloatingText(String string, double d, double e, double f, int i, float g) {
-		renderFloatingText(string, d, e, f, i, g, true, 0.0F, false);
+	public static void renderFloatingText(PoseStack poseStack, MultiBufferSource multiBufferSource, String string, double d, double e, double f, int i, float g) {
+		renderFloatingText(poseStack, multiBufferSource, string, d, e, f, i, g, true, 0.0F, false);
 	}
 
-	public static void renderFloatingText(String string, double d, double e, double f, int i, float g, boolean bl, float h, boolean bl2) {
+	public static void renderFloatingText(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, String string, double d, double e, double f, int i, float g, boolean bl, float h, boolean bl2
+	) {
 		Minecraft minecraft = Minecraft.getInstance();
 		Camera camera = minecraft.gameRenderer.getMainCamera();
 		if (camera.isInitialized() && minecraft.getEntityRenderDispatcher().options != null) {
@@ -172,28 +169,14 @@ public class DebugRenderer {
 			double j = camera.getPosition().x;
 			double k = camera.getPosition().y;
 			double l = camera.getPosition().z;
-			PoseStack poseStack = RenderSystem.getModelViewStack();
 			poseStack.pushPose();
 			poseStack.translate((float)(d - j), (float)(e - k) + 0.07F, (float)(f - l));
 			poseStack.mulPoseMatrix(new Matrix4f().rotation(camera.rotation()));
-			poseStack.scale(g, -g, g);
-			if (bl2) {
-				RenderSystem.disableDepthTest();
-			} else {
-				RenderSystem.enableDepthTest();
-			}
-
-			RenderSystem.depthMask(true);
-			poseStack.scale(-1.0F, 1.0F, 1.0F);
-			RenderSystem.applyModelViewMatrix();
+			poseStack.scale(-g, -g, g);
 			float m = bl ? (float)(-font.width(string)) / 2.0F : 0.0F;
 			m -= h / g;
-			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-			font.drawInBatch(string, m, 0.0F, i, false, Transformation.identity().getMatrix(), bufferSource, bl2, 0, 15728880);
-			bufferSource.endBatch();
-			RenderSystem.enableDepthTest();
+			font.drawInBatch(string, m, 0.0F, i, false, poseStack.last().pose(), multiBufferSource, bl2, 0, 15728880);
 			poseStack.popPose();
-			RenderSystem.applyModelViewMatrix();
 		}
 	}
 

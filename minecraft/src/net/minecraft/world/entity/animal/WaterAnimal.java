@@ -3,7 +3,6 @@ package net.minecraft.world.entity.animal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
@@ -51,7 +50,7 @@ public abstract class WaterAnimal extends PathfinderMob {
 			this.setAirSupply(i - 1);
 			if (this.getAirSupply() == -20) {
 				this.setAirSupply(0);
-				this.hurt(DamageSource.DROWN, 2.0F);
+				this.hurt(this.damageSources().drown(), 2.0F);
 			}
 		} else {
 			this.setAirSupply(300);

@@ -13,7 +13,6 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.nbt.CompoundTag;
@@ -25,6 +24,7 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
@@ -69,7 +69,7 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 
 			this.getParentModel().getHead().translateAndRotate(poseStack);
 			if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
-				float m = 1.1875F;
+				float n = 1.1875F;
 				poseStack.scale(1.1875F, -1.1875F, -1.1875F);
 				if (bl) {
 					poseStack.translate(0.0F, 0.0625F, 0.0F);
@@ -88,9 +88,9 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(type);
 				RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
 				SkullBlockRenderer.renderSkull(null, 180.0F, f, poseStack, multiBufferSource, i, skullModelBase, renderType);
-			} else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
+			} else if (!(item instanceof ArmorItem armorItem) || armorItem.getEquipmentSlot() != EquipmentSlot.HEAD) {
 				translateToHead(poseStack, bl);
-				this.itemInHandRenderer.renderItem(livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
+				this.itemInHandRenderer.renderItem(livingEntity, itemStack, ItemDisplayContext.HEAD, false, poseStack, multiBufferSource, i);
 			}
 
 			poseStack.popPose();

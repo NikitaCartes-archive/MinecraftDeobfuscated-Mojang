@@ -16,6 +16,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -34,6 +35,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -106,11 +108,14 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	private final WorldBorder worldBorder;
 	private final BiomeManager biomeManager;
 	private final ResourceKey<Level> dimension;
+	private final RegistryAccess registryAccess;
+	private final DamageSources damageSources;
 	private long subTickCount;
 
 	protected Level(
 		WritableLevelData writableLevelData,
 		ResourceKey<Level> resourceKey,
+		RegistryAccess registryAccess,
 		Holder<DimensionType> holder,
 		Supplier<ProfilerFiller> supplier,
 		boolean bl,
@@ -146,6 +151,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.biomeManager = new BiomeManager(this, l);
 		this.isDebug = bl2;
 		this.neighborUpdater = new CollectingNeighborUpdater(this, i);
+		this.registryAccess = registryAccess;
+		this.damageSources = new DamageSources(registryAccess);
 	}
 
 	@Override
@@ -790,6 +797,9 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public void broadcastEntityEvent(Entity entity, byte b) {
 	}
 
+	public void broadcastDamageEvent(Entity entity, DamageSource damageSource) {
+	}
+
 	public void blockEvent(BlockPos blockPos, Block block, int i, int j) {
 		this.getBlockState(blockPos).triggerEvent(this, blockPos, i, j);
 	}
@@ -989,6 +999,15 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	@Override
 	public long nextSubTickCount() {
 		return this.subTickCount++;
+	}
+
+	@Override
+	public RegistryAccess registryAccess() {
+		return this.registryAccess;
+	}
+
+	public DamageSources damageSources() {
+		return this.damageSources;
 	}
 
 	public static enum ExplosionInteraction {

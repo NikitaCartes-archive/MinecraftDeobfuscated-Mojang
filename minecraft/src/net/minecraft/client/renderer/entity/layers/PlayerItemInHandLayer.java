@@ -9,12 +9,12 @@ import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -33,7 +33,7 @@ public class PlayerItemInHandLayer<T extends Player, M extends EntityModel<T> & 
 	protected void renderArmWithItem(
 		LivingEntity livingEntity,
 		ItemStack itemStack,
-		ItemTransforms.TransformType transformType,
+		ItemDisplayContext itemDisplayContext,
 		HumanoidArm humanoidArm,
 		PoseStack poseStack,
 		MultiBufferSource multiBufferSource,
@@ -42,7 +42,7 @@ public class PlayerItemInHandLayer<T extends Player, M extends EntityModel<T> & 
 		if (itemStack.is(Items.SPYGLASS) && livingEntity.getUseItem() == itemStack && livingEntity.swingTime == 0) {
 			this.renderArmWithSpyglass(livingEntity, itemStack, humanoidArm, poseStack, multiBufferSource, i);
 		} else {
-			super.renderArmWithItem(livingEntity, itemStack, transformType, humanoidArm, poseStack, multiBufferSource, i);
+			super.renderArmWithItem(livingEntity, itemStack, itemDisplayContext, humanoidArm, poseStack, multiBufferSource, i);
 		}
 	}
 
@@ -58,7 +58,7 @@ public class PlayerItemInHandLayer<T extends Player, M extends EntityModel<T> & 
 		CustomHeadLayer.translateToHead(poseStack, false);
 		boolean bl = humanoidArm == HumanoidArm.LEFT;
 		poseStack.translate((bl ? -2.5F : 2.5F) / 16.0F, -0.0625F, 0.0F);
-		this.itemInHandRenderer.renderItem(livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
+		this.itemInHandRenderer.renderItem(livingEntity, itemStack, ItemDisplayContext.HEAD, false, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}
 }

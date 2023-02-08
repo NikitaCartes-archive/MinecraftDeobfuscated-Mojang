@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -98,15 +99,21 @@ public class LeashFenceKnotEntity extends HangingEntity {
 				}
 			}
 
+			boolean bl2 = false;
 			if (!bl) {
 				this.discard();
 				if (player.getAbilities().instabuild) {
-					for (Mob mobx : list) {
-						if (mobx.isLeashed() && mobx.getLeashHolder() == this) {
-							mobx.dropLeash(true, false);
+					for (Mob mob2 : list) {
+						if (mob2.isLeashed() && mob2.getLeashHolder() == this) {
+							mob2.dropLeash(true, false);
+							bl2 = true;
 						}
 					}
 				}
+			}
+
+			if (bl || bl2) {
+				this.gameEvent(GameEvent.BLOCK_ATTACH, player);
 			}
 
 			return InteractionResult.CONSUME;

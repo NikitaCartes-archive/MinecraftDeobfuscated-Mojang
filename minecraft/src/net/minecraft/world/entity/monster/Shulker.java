@@ -16,6 +16,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -434,7 +435,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 		} else {
 			if ((double)this.getHealth() < (double)this.getMaxHealth() * 0.5 && this.random.nextInt(4) == 0) {
 				this.teleportSomewhere();
-			} else if (damageSource.isProjectile()) {
+			} else if (damageSource.is(DamageTypeTags.IS_PROJECTILE)) {
 				Entity entity = damageSource.getDirectEntity();
 				if (entity != null && entity.getType() == EntityType.SHULKER_BULLET) {
 					this.hitByShulkerBullet();

@@ -38,7 +38,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 				if (this.stackedContents.canCraft(recipe, null)) {
 					this.handleRecipeClicked(recipe, bl);
 				} else {
-					this.clearGrid(true);
+					this.clearGrid();
 					serverPlayer.connection.send(new ClientboundPlaceGhostRecipePacket(serverPlayer.containerMenu.containerId, recipe));
 				}
 
@@ -47,7 +47,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 		}
 	}
 
-	protected void clearGrid(boolean bl) {
+	protected void clearGrid() {
 		for (int i = 0; i < this.menu.getSize(); i++) {
 			if (this.menu.shouldMoveToInventory(i)) {
 				ItemStack itemStack = this.menu.getSlot(i).getItem().copy();
@@ -86,7 +86,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 			}
 
 			if (this.stackedContents.canCraft(recipe, intList, k)) {
-				this.clearGrid(false);
+				this.clearGrid();
 				this.placeRecipe(this.menu.getGridWidth(), this.menu.getGridHeight(), this.menu.getResultSlotIndex(), recipe, intList.iterator(), k);
 			}
 		}

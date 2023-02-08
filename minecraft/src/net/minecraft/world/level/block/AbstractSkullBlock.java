@@ -2,7 +2,8 @@ package net.minecraft.world.level.block;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.Wearable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 
-public abstract class AbstractSkullBlock extends BaseEntityBlock implements Wearable {
+public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equipable {
 	private final SkullBlock.Type type;
 
 	public AbstractSkullBlock(SkullBlock.Type type, BlockBehaviour.Properties properties) {
@@ -49,5 +50,10 @@ public abstract class AbstractSkullBlock extends BaseEntityBlock implements Wear
 	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
+	}
+
+	@Override
+	public EquipmentSlot getEquipmentSlot() {
+		return EquipmentSlot.HEAD;
 	}
 }

@@ -55,6 +55,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TurtleEggBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
@@ -336,7 +337,7 @@ public class Turtle extends Animal {
 
 	@Override
 	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
-		this.hurt(DamageSource.LIGHTNING_BOLT, Float.MAX_VALUE);
+		this.hurt(this.damageSources().lightningBolt(), Float.MAX_VALUE);
 	}
 
 	static class TurtleBreedGoal extends BreedGoal {
@@ -508,9 +509,10 @@ public class Turtle extends Animal {
 				} else if (this.turtle.layEggCounter > this.adjustedTickDelay(200)) {
 					Level level = this.turtle.level;
 					level.playSound(null, blockPos, SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
-					level.setBlock(
-						this.blockPos.above(), Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, Integer.valueOf(this.turtle.random.nextInt(4) + 1)), 3
-					);
+					BlockPos blockPos2 = this.blockPos.above();
+					BlockState blockState = Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, Integer.valueOf(this.turtle.random.nextInt(4) + 1));
+					level.setBlock(blockPos2, blockState, 3);
+					level.gameEvent(GameEvent.BLOCK_PLACE, blockPos2, GameEvent.Context.of(this.turtle, blockState));
 					this.turtle.setHasEgg(false);
 					this.turtle.setLayingEgg(false);
 					this.turtle.setInLoveTime(600);

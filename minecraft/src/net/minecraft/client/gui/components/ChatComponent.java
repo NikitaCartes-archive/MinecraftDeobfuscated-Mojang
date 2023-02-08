@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
@@ -189,7 +189,7 @@ public class ChatComponent extends GuiComponent {
 
 	private void logChatMessage(Component component, @Nullable GuiMessageTag guiMessageTag) {
 		String string = component.getString().replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n");
-		String string2 = Util.mapNullable(guiMessageTag, GuiMessageTag::logTag);
+		String string2 = Optionull.map(guiMessageTag, GuiMessageTag::logTag);
 		if (string2 != null) {
 			LOGGER.info("[{}] [CHAT] {}", string2, string);
 		} else {

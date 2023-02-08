@@ -15,6 +15,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
@@ -22,6 +24,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
@@ -89,6 +92,8 @@ public class RenderSystem {
 	private static String apiDescription = "Unknown";
 	@Nullable
 	private static ShaderInstance shader;
+	private static final AtomicLong pollEventsWaitStart = new AtomicLong();
+	private static final AtomicBoolean pollingEvents = new AtomicBoolean(false);
 
 	public static void initRenderThread() {
 		if (renderThread == null && gameThread != Thread.currentThread()) {
@@ -161,12 +166,23 @@ public class RenderSystem {
 		recordingQueue.add(renderCall);
 	}
 
-	public static void flipFrame(long l) {
+	private static void pollEvents() {
+		pollEventsWaitStart.set(Util.getMillis());
+		pollingEvents.set(true);
 		GLFW.glfwPollEvents();
+		pollingEvents.set(false);
+	}
+
+	public static boolean isFrozenAtPollEvents() {
+		return pollingEvents.get() && Util.getMillis() - pollEventsWaitStart.get() > 200L;
+	}
+
+	public static void flipFrame(long l) {
+		pollEvents();
 		replayQueue();
 		Tesselator.getInstance().getBuilder().clear();
 		GLFW.glfwSwapBuffers(l);
-		GLFW.glfwPollEvents();
+		pollEvents();
 	}
 
 	public static void replayQueue() {

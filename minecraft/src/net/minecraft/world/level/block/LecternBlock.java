@@ -13,6 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -149,10 +150,10 @@ public class LecternBlock extends BaseEntityBlock {
 		return new LecternBlockEntity(blockPos, blockState);
 	}
 
-	public static boolean tryPlaceBook(@Nullable Player player, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+	public static boolean tryPlaceBook(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
 		if (!(Boolean)blockState.getValue(HAS_BOOK)) {
 			if (!level.isClientSide) {
-				placeBook(player, level, blockPos, blockState, itemStack);
+				placeBook(entity, level, blockPos, blockState, itemStack);
 			}
 
 			return true;
@@ -161,17 +162,18 @@ public class LecternBlock extends BaseEntityBlock {
 		}
 	}
 
-	private static void placeBook(@Nullable Player player, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+	private static void placeBook(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
 		if (level.getBlockEntity(blockPos) instanceof LecternBlockEntity lecternBlockEntity) {
 			lecternBlockEntity.setBook(itemStack.split(1));
-			resetBookState(level, blockPos, blockState, true);
+			resetBookState(entity, level, blockPos, blockState, true);
 			level.playSound(null, blockPos, SoundEvents.BOOK_PUT, SoundSource.BLOCKS, 1.0F, 1.0F);
-			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 		}
 	}
 
-	public static void resetBookState(Level level, BlockPos blockPos, BlockState blockState, boolean bl) {
-		level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)).setValue(HAS_BOOK, Boolean.valueOf(bl)), 3);
+	public static void resetBookState(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, boolean bl) {
+		BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(false)).setValue(HAS_BOOK, Boolean.valueOf(bl));
+		level.setBlock(blockPos, blockState2, 3);
+		level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState2));
 		updateBelow(level, blockPos, blockState);
 	}
 

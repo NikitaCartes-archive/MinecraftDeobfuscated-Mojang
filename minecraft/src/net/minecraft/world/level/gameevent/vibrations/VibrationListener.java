@@ -43,9 +43,11 @@ public class VibrationListener implements GameEventListener {
 			object2IntOpenHashMap.put(GameEvent.ENTITY_SHAKE, 6);
 			object2IntOpenHashMap.put(GameEvent.BLOCK_CHANGE, 6);
 			object2IntOpenHashMap.put(GameEvent.NOTE_BLOCK_PLAY, 6);
+			object2IntOpenHashMap.put(GameEvent.ENTITY_DISMOUNT, 6);
 			object2IntOpenHashMap.put(GameEvent.PROJECTILE_SHOOT, 7);
 			object2IntOpenHashMap.put(GameEvent.DRINK, 7);
 			object2IntOpenHashMap.put(GameEvent.PRIME_FUSE, 7);
+			object2IntOpenHashMap.put(GameEvent.ENTITY_MOUNT, 7);
 			object2IntOpenHashMap.put(GameEvent.PROJECTILE_LAND, 8);
 			object2IntOpenHashMap.put(GameEvent.EAT, 8);
 			object2IntOpenHashMap.put(GameEvent.ENTITY_INTERACT, 8);

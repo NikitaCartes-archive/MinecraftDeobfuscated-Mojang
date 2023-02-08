@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.HumanoidArmorModel;
 import net.minecraft.client.model.PiglinModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -36,7 +36,10 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 		super(context, createModel(context.getModelSet(), modelLayerLocation, bl), 0.5F, 1.0019531F, 1.0F, 1.0019531F);
 		this.addLayer(
 			new HumanoidArmorLayer<>(
-				this, new HumanoidModel(context.bakeLayer(modelLayerLocation2)), new HumanoidModel(context.bakeLayer(modelLayerLocation3)), context.getModelManager()
+				this,
+				new HumanoidArmorModel(context.bakeLayer(modelLayerLocation2)),
+				new HumanoidArmorModel(context.bakeLayer(modelLayerLocation3)),
+				context.getModelManager()
 			)
 		);
 	}

@@ -1334,17 +1334,13 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			}
 		}
 
-		PoseStack poseStack2 = RenderSystem.getModelViewStack();
-		poseStack2.pushPose();
-		poseStack2.mulPoseMatrix(poseStack.last().pose());
-		RenderSystem.applyModelViewMatrix();
 		this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
-		poseStack2.popPose();
+		bufferSource.endLastBatch();
+		PoseStack poseStack2 = RenderSystem.getModelViewStack();
 		RenderSystem.applyModelViewMatrix();
 		bufferSource.endBatch(Sheets.translucentCullBlockSheet());
 		bufferSource.endBatch(Sheets.bannerSheet());
 		bufferSource.endBatch(Sheets.shieldSheet());
-		bufferSource.endBatch(Sheets.armorTrimsSheet());
 		bufferSource.endBatch(RenderType.armorGlint());
 		bufferSource.endBatch(RenderType.armorEntityGlint());
 		bufferSource.endBatch(RenderType.glint());
@@ -1417,11 +1413,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			RenderSystem.depthMask(true);
 		}
 
-		this.renderDebug(camera);
-		RenderSystem.depthMask(true);
-		RenderSystem.disableBlend();
 		poseStack2.popPose();
 		RenderSystem.applyModelViewMatrix();
+		this.renderDebug(poseStack, bufferSource, camera);
+		bufferSource.endLastBatch();
+		RenderSystem.depthMask(true);
+		RenderSystem.disableBlend();
 		FogRenderer.setupNoFog();
 	}
 
@@ -1545,30 +1542,20 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		renderType.clearRenderState();
 	}
 
-	private void renderDebug(Camera camera) {
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+	private void renderDebug(PoseStack poseStack, MultiBufferSource multiBufferSource, Camera camera) {
 		if (this.minecraft.chunkPath || this.minecraft.chunkVisibility) {
 			double d = camera.getPosition().x();
 			double e = camera.getPosition().y();
 			double f = camera.getPosition().z();
-			RenderSystem.depthMask(true);
-			RenderSystem.disableCull();
-			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
 
 			for (LevelRenderer.RenderChunkInfo renderChunkInfo : this.renderChunksInFrustum) {
 				ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
 				BlockPos blockPos = renderChunk.getOrigin();
-				PoseStack poseStack = RenderSystem.getModelViewStack();
 				poseStack.pushPose();
 				poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - f);
-				RenderSystem.applyModelViewMatrix();
-				RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+				Matrix4f matrix4f = poseStack.last().pose();
 				if (this.minecraft.chunkPath) {
-					bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-					RenderSystem.lineWidth(5.0F);
+					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 					int i = renderChunkInfo.step == 0 ? 0 : Mth.hsvToRgb((float)renderChunkInfo.step / 50.0F, 0.9F, 0.9F);
 					int j = i >> 16 & 0xFF;
 					int k = i >> 8 & 0xFF;
@@ -1577,25 +1564,20 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					for (int m = 0; m < DIRECTIONS.length; m++) {
 						if (renderChunkInfo.hasSourceDirection(m)) {
 							Direction direction = DIRECTIONS[m];
-							bufferBuilder.vertex(8.0, 8.0, 8.0)
+							vertexConsumer.vertex(matrix4f, 8.0F, 8.0F, 8.0F)
 								.color(j, k, l, 255)
 								.normal((float)direction.getStepX(), (float)direction.getStepY(), (float)direction.getStepZ())
 								.endVertex();
-							bufferBuilder.vertex((double)(8 - 16 * direction.getStepX()), (double)(8 - 16 * direction.getStepY()), (double)(8 - 16 * direction.getStepZ()))
+							vertexConsumer.vertex(matrix4f, (float)(8 - 16 * direction.getStepX()), (float)(8 - 16 * direction.getStepY()), (float)(8 - 16 * direction.getStepZ()))
 								.color(j, k, l, 255)
 								.normal((float)direction.getStepX(), (float)direction.getStepY(), (float)direction.getStepZ())
 								.endVertex();
 						}
 					}
-
-					tesselator.end();
-					RenderSystem.lineWidth(1.0F);
 				}
 
 				if (this.minecraft.chunkVisibility && !renderChunk.getCompiledChunk().hasNoRenderableLayers()) {
-					bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-					RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
-					RenderSystem.lineWidth(5.0F);
+					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 					int i = 0;
 
 					for (Direction direction2 : DIRECTIONS) {
@@ -1603,11 +1585,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 							boolean bl = renderChunk.getCompiledChunk().facesCanSeeEachother(direction2, direction3);
 							if (!bl) {
 								i++;
-								bufferBuilder.vertex((double)(8 + 8 * direction2.getStepX()), (double)(8 + 8 * direction2.getStepY()), (double)(8 + 8 * direction2.getStepZ()))
+								vertexConsumer.vertex(matrix4f, (float)(8 + 8 * direction2.getStepX()), (float)(8 + 8 * direction2.getStepY()), (float)(8 + 8 * direction2.getStepZ()))
 									.color(255, 0, 0, 255)
 									.normal((float)direction2.getStepX(), (float)direction2.getStepY(), (float)direction2.getStepZ())
 									.endVertex();
-								bufferBuilder.vertex((double)(8 + 8 * direction3.getStepX()), (double)(8 + 8 * direction3.getStepY()), (double)(8 + 8 * direction3.getStepZ()))
+								vertexConsumer.vertex(matrix4f, (float)(8 + 8 * direction3.getStepX()), (float)(8 + 8 * direction3.getStepY()), (float)(8 + 8 * direction3.getStepZ()))
 									.color(255, 0, 0, 255)
 									.normal((float)direction3.getStepX(), (float)direction3.getStepY(), (float)direction3.getStepZ())
 									.endVertex();
@@ -1615,129 +1597,104 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						}
 					}
 
-					tesselator.end();
-					RenderSystem.lineWidth(1.0F);
-					RenderSystem.setShader(GameRenderer::getPositionColorShader);
 					if (i > 0) {
-						bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+						VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.debugQuads());
 						float g = 0.5F;
 						float h = 0.2F;
-						bufferBuilder.vertex(0.5, 15.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 15.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 15.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 15.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 0.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 0.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 0.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 0.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 15.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 15.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 0.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 0.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 0.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 0.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 15.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 15.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 0.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 0.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 15.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 15.5, 0.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 15.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 15.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(15.5, 0.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						bufferBuilder.vertex(0.5, 0.5, 15.5).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
-						tesselator.end();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 15.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 15.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 15.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 15.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 0.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 0.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 0.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 0.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 15.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 15.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 0.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 0.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 0.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 0.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 15.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 15.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 0.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 0.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 15.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 15.5F, 0.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 15.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 15.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 15.5F, 0.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
+						vertexConsumer2.vertex(matrix4f, 0.5F, 0.5F, 15.5F).color(0.9F, 0.9F, 0.0F, 0.2F).endVertex();
 					}
 				}
 
 				poseStack.popPose();
-				RenderSystem.applyModelViewMatrix();
 			}
-
-			RenderSystem.depthMask(true);
-			RenderSystem.disableBlend();
-			RenderSystem.enableCull();
 		}
 
 		if (this.capturedFrustum != null) {
-			RenderSystem.disableCull();
-			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
-			RenderSystem.lineWidth(5.0F);
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
-			PoseStack poseStack2 = RenderSystem.getModelViewStack();
-			poseStack2.pushPose();
-			poseStack2.translate(
+			poseStack.pushPose();
+			poseStack.translate(
 				(float)(this.frustumPos.x - camera.getPosition().x),
 				(float)(this.frustumPos.y - camera.getPosition().y),
 				(float)(this.frustumPos.z - camera.getPosition().z)
 			);
-			RenderSystem.applyModelViewMatrix();
-			RenderSystem.depthMask(true);
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-			this.addFrustumQuad(bufferBuilder, 0, 1, 2, 3, 0, 1, 1);
-			this.addFrustumQuad(bufferBuilder, 4, 5, 6, 7, 1, 0, 0);
-			this.addFrustumQuad(bufferBuilder, 0, 1, 5, 4, 1, 1, 0);
-			this.addFrustumQuad(bufferBuilder, 2, 3, 7, 6, 0, 0, 1);
-			this.addFrustumQuad(bufferBuilder, 0, 4, 7, 3, 0, 1, 0);
-			this.addFrustumQuad(bufferBuilder, 1, 5, 6, 2, 1, 0, 1);
-			tesselator.end();
-			RenderSystem.depthMask(false);
-			RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
-			bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-			this.addFrustumVertex(bufferBuilder, 0);
-			this.addFrustumVertex(bufferBuilder, 1);
-			this.addFrustumVertex(bufferBuilder, 1);
-			this.addFrustumVertex(bufferBuilder, 2);
-			this.addFrustumVertex(bufferBuilder, 2);
-			this.addFrustumVertex(bufferBuilder, 3);
-			this.addFrustumVertex(bufferBuilder, 3);
-			this.addFrustumVertex(bufferBuilder, 0);
-			this.addFrustumVertex(bufferBuilder, 4);
-			this.addFrustumVertex(bufferBuilder, 5);
-			this.addFrustumVertex(bufferBuilder, 5);
-			this.addFrustumVertex(bufferBuilder, 6);
-			this.addFrustumVertex(bufferBuilder, 6);
-			this.addFrustumVertex(bufferBuilder, 7);
-			this.addFrustumVertex(bufferBuilder, 7);
-			this.addFrustumVertex(bufferBuilder, 4);
-			this.addFrustumVertex(bufferBuilder, 0);
-			this.addFrustumVertex(bufferBuilder, 4);
-			this.addFrustumVertex(bufferBuilder, 1);
-			this.addFrustumVertex(bufferBuilder, 5);
-			this.addFrustumVertex(bufferBuilder, 2);
-			this.addFrustumVertex(bufferBuilder, 6);
-			this.addFrustumVertex(bufferBuilder, 3);
-			this.addFrustumVertex(bufferBuilder, 7);
-			tesselator.end();
-			poseStack2.popPose();
-			RenderSystem.applyModelViewMatrix();
-			RenderSystem.depthMask(true);
-			RenderSystem.disableBlend();
-			RenderSystem.enableCull();
-			RenderSystem.lineWidth(1.0F);
+			Matrix4f matrix4f2 = poseStack.last().pose();
+			VertexConsumer vertexConsumer3 = multiBufferSource.getBuffer(RenderType.debugQuads());
+			this.addFrustumQuad(vertexConsumer3, matrix4f2, 0, 1, 2, 3, 0, 1, 1);
+			this.addFrustumQuad(vertexConsumer3, matrix4f2, 4, 5, 6, 7, 1, 0, 0);
+			this.addFrustumQuad(vertexConsumer3, matrix4f2, 0, 1, 5, 4, 1, 1, 0);
+			this.addFrustumQuad(vertexConsumer3, matrix4f2, 2, 3, 7, 6, 0, 0, 1);
+			this.addFrustumQuad(vertexConsumer3, matrix4f2, 0, 4, 7, 3, 0, 1, 0);
+			this.addFrustumQuad(vertexConsumer3, matrix4f2, 1, 5, 6, 2, 1, 0, 1);
+			VertexConsumer vertexConsumer4 = multiBufferSource.getBuffer(RenderType.lines());
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 0);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 1);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 1);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 2);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 2);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 3);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 3);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 0);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 4);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 5);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 5);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 6);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 6);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 7);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 7);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 4);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 0);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 4);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 1);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 5);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 2);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 6);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 3);
+			this.addFrustumVertex(vertexConsumer4, matrix4f2, 7);
+			poseStack.popPose();
 		}
 	}
 
-	private void addFrustumVertex(VertexConsumer vertexConsumer, int i) {
-		vertexConsumer.vertex((double)this.frustumPoints[i].x(), (double)this.frustumPoints[i].y(), (double)this.frustumPoints[i].z())
+	private void addFrustumVertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, int i) {
+		vertexConsumer.vertex(matrix4f, this.frustumPoints[i].x(), this.frustumPoints[i].y(), this.frustumPoints[i].z())
 			.color(0, 0, 0, 255)
 			.normal(0.0F, 0.0F, -1.0F)
 			.endVertex();
 	}
 
-	private void addFrustumQuad(VertexConsumer vertexConsumer, int i, int j, int k, int l, int m, int n, int o) {
+	private void addFrustumQuad(VertexConsumer vertexConsumer, Matrix4f matrix4f, int i, int j, int k, int l, int m, int n, int o) {
 		float f = 0.25F;
-		vertexConsumer.vertex((double)this.frustumPoints[i].x(), (double)this.frustumPoints[i].y(), (double)this.frustumPoints[i].z())
+		vertexConsumer.vertex(matrix4f, this.frustumPoints[i].x(), this.frustumPoints[i].y(), this.frustumPoints[i].z())
 			.color((float)m, (float)n, (float)o, 0.25F)
 			.endVertex();
-		vertexConsumer.vertex((double)this.frustumPoints[j].x(), (double)this.frustumPoints[j].y(), (double)this.frustumPoints[j].z())
+		vertexConsumer.vertex(matrix4f, this.frustumPoints[j].x(), this.frustumPoints[j].y(), this.frustumPoints[j].z())
 			.color((float)m, (float)n, (float)o, 0.25F)
 			.endVertex();
-		vertexConsumer.vertex((double)this.frustumPoints[k].x(), (double)this.frustumPoints[k].y(), (double)this.frustumPoints[k].z())
+		vertexConsumer.vertex(matrix4f, this.frustumPoints[k].x(), this.frustumPoints[k].y(), this.frustumPoints[k].z())
 			.color((float)m, (float)n, (float)o, 0.25F)
 			.endVertex();
-		vertexConsumer.vertex((double)this.frustumPoints[l].x(), (double)this.frustumPoints[l].y(), (double)this.frustumPoints[l].z())
+		vertexConsumer.vertex(matrix4f, this.frustumPoints[l].x(), this.frustumPoints[l].y(), this.frustumPoints[l].z())
 			.color((float)m, (float)n, (float)o, 0.25F)
 			.endVertex();
 	}
@@ -2503,38 +2460,45 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	public static void addChainedFilledBoxVertices(
-		BufferBuilder bufferBuilder, double d, double e, double f, double g, double h, double i, float j, float k, float l, float m
+		PoseStack poseStack, VertexConsumer vertexConsumer, double d, double e, double f, double g, double h, double i, float j, float k, float l, float m
 	) {
-		bufferBuilder.vertex(d, e, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, e, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, e, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, e, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, h, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, h, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, h, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, e, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, h, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, e, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, e, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, e, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, h, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, h, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, h, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, e, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, h, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, e, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, e, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, e, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, e, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, e, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, e, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, h, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, h, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(d, h, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, h, f).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, h, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, h, i).color(j, k, l, m).endVertex();
-		bufferBuilder.vertex(g, h, i).color(j, k, l, m).endVertex();
+		addChainedFilledBoxVertices(poseStack, vertexConsumer, (float)d, (float)e, (float)f, (float)g, (float)h, (float)i, j, k, l, m);
+	}
+
+	public static void addChainedFilledBoxVertices(
+		PoseStack poseStack, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k, float l, float m, float n, float o
+	) {
+		Matrix4f matrix4f = poseStack.last().pose();
+		vertexConsumer.vertex(matrix4f, f, g, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, j, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, j, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, j, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, j, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, g, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, g, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, g, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, j, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, j, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, j, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, g, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, j, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, g, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, g, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, g, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, j, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, j, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, f, j, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, j, h).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, j, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, j, k).color(l, m, n, o).endVertex();
+		vertexConsumer.vertex(matrix4f, i, j, k).color(l, m, n, o).endVertex();
 	}
 
 	public void blockChanged(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, BlockState blockState2, int i) {

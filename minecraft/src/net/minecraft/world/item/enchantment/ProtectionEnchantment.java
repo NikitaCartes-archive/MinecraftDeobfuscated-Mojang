@@ -1,5 +1,6 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -30,18 +31,18 @@ public class ProtectionEnchantment extends Enchantment {
 
 	@Override
 	public int getDamageProtection(int i, DamageSource damageSource) {
-		if (damageSource.isBypassInvul()) {
+		if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return 0;
 		} else if (this.type == ProtectionEnchantment.Type.ALL) {
 			return i;
-		} else if (this.type == ProtectionEnchantment.Type.FIRE && damageSource.isFire()) {
+		} else if (this.type == ProtectionEnchantment.Type.FIRE && damageSource.is(DamageTypeTags.IS_FIRE)) {
 			return i * 2;
-		} else if (this.type == ProtectionEnchantment.Type.FALL && damageSource.isFall()) {
+		} else if (this.type == ProtectionEnchantment.Type.FALL && damageSource.is(DamageTypeTags.IS_FALL)) {
 			return i * 3;
-		} else if (this.type == ProtectionEnchantment.Type.EXPLOSION && damageSource.isExplosion()) {
+		} else if (this.type == ProtectionEnchantment.Type.EXPLOSION && damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
 			return i * 2;
 		} else {
-			return this.type == ProtectionEnchantment.Type.PROJECTILE && damageSource.isProjectile() ? i * 2 : 0;
+			return this.type == ProtectionEnchantment.Type.PROJECTILE && damageSource.is(DamageTypeTags.IS_PROJECTILE) ? i * 2 : 0;
 		}
 	}
 

@@ -18,6 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -352,12 +353,7 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public boolean canBeHurtBy(DamageSource damageSource) {
-		return !this.isFireResistant || !damageSource.isFire();
-	}
-
-	@Nullable
-	public SoundEvent getEquipSound() {
-		return null;
+		return !this.isFireResistant || !damageSource.is(DamageTypeTags.IS_FIRE);
 	}
 
 	public boolean canFitInsideContainerItems() {

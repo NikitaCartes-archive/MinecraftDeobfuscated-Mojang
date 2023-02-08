@@ -27,7 +27,9 @@ public class GameEvent {
 	public static final GameEvent ELYTRA_GLIDE = register("elytra_glide");
 	public static final GameEvent ENTITY_DAMAGE = register("entity_damage");
 	public static final GameEvent ENTITY_DIE = register("entity_die");
+	public static final GameEvent ENTITY_DISMOUNT = register("entity_dismount");
 	public static final GameEvent ENTITY_INTERACT = register("entity_interact");
+	public static final GameEvent ENTITY_MOUNT = register("entity_mount");
 	public static final GameEvent ENTITY_PLACE = register("entity_place");
 	public static final GameEvent ENTITY_ROAR = register("entity_roar");
 	public static final GameEvent ENTITY_SHAKE = register("entity_shake");

@@ -1,7 +1,6 @@
 package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +37,6 @@ public class GoalSelectorDebugRenderer implements DebugRenderer.SimpleDebugRende
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Camera camera = this.minecraft.gameRenderer.getMainCamera();
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
 		BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
 		this.goalSelectors.forEach((integer, list) -> {
 			for (int i = 0; i < list.size(); i++) {
@@ -49,11 +46,10 @@ public class GoalSelectorDebugRenderer implements DebugRenderer.SimpleDebugRende
 					double ex = (double)debugGoal.pos.getY() + 2.0 + (double)i * 0.25;
 					double fx = (double)debugGoal.pos.getZ() + 0.5;
 					int j = debugGoal.isRunning ? -16711936 : -3355444;
-					DebugRenderer.renderFloatingText(debugGoal.name, dx, ex, fx, j);
+					DebugRenderer.renderFloatingText(poseStack, multiBufferSource, debugGoal.name, dx, ex, fx, j);
 				}
 			}
 		});
-		RenderSystem.enableDepthTest();
 	}
 
 	@Environment(EnvType.CLIENT)

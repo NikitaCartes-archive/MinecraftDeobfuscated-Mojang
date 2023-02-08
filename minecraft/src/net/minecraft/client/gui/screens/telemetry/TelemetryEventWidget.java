@@ -151,12 +151,12 @@ public class TelemetryEventWidget extends AbstractScrollWidget {
 		}
 
 		public void addLine(Font font, Component component, int i) {
-			this.helper.addChild(MultiLineTextWidget.create(this.width, font, component), this.helper.newCellSettings().paddingBottom(i));
+			this.helper.addChild(new MultiLineTextWidget(component, font).setMaxWidth(this.width), this.helper.newCellSettings().paddingBottom(i));
 			this.narration.append(component).append("\n");
 		}
 
 		public void addHeader(Font font, Component component) {
-			this.helper.addChild(MultiLineTextWidget.createCentered(this.width - 64, font, component), this.alignHeader);
+			this.helper.addChild(new MultiLineTextWidget(component, font).setMaxWidth(this.width - 64).setCentered(true), this.alignHeader);
 			this.narration.append(component).append("\n");
 		}
 

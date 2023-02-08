@@ -51,7 +51,7 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 	private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T livingEntity, EquipmentSlot equipmentSlot, int i, A humanoidModel) {
 		ItemStack itemStack = livingEntity.getItemBySlot(equipmentSlot);
 		if (itemStack.getItem() instanceof ArmorItem armorItem) {
-			if (armorItem.getSlot() == equipmentSlot) {
+			if (armorItem.getEquipmentSlot() == equipmentSlot) {
 				this.getParentModel().copyPropertiesTo(humanoidModel);
 				this.setPartVisibility(humanoidModel, equipmentSlot);
 				boolean bl = this.usesInnerModel(equipmentSlot);

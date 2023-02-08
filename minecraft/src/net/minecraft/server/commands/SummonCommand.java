@@ -72,7 +72,7 @@ public class SummonCommand {
 		);
 	}
 
-	private static int spawnEntity(
+	public static Entity createEntity(
 		CommandSourceStack commandSourceStack, Holder.Reference<EntityType<?>> reference, Vec3 vec3, CompoundTag compoundTag, boolean bl
 	) throws CommandSyntaxException {
 		BlockPos blockPos = new BlockPos(vec3);
@@ -99,10 +99,17 @@ public class SummonCommand {
 				if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {
 					throw ERROR_DUPLICATE_UUID.create();
 				} else {
-					commandSourceStack.sendSuccess(Component.translatable("commands.summon.success", entity.getDisplayName()), true);
-					return 1;
+					return entity;
 				}
 			}
 		}
+	}
+
+	private static int spawnEntity(
+		CommandSourceStack commandSourceStack, Holder.Reference<EntityType<?>> reference, Vec3 vec3, CompoundTag compoundTag, boolean bl
+	) throws CommandSyntaxException {
+		Entity entity = createEntity(commandSourceStack, reference, vec3, compoundTag, bl);
+		commandSourceStack.sendSuccess(Component.translatable("commands.summon.success", entity.getDisplayName()), true);
+		return 1;
 	}
 }

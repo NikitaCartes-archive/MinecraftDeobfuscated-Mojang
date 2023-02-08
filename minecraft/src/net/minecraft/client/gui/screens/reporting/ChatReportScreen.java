@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.components.MultiLineLabel;
@@ -100,7 +100,7 @@ public class ChatReportScreen extends Screen {
 					this.onReportChanged();
 				}))).bounds(this.contentLeft(), this.selectChatTop(), 280, 20).build()
 		);
-		Component component2 = Util.mapNullable(reportReason, ReportReason::title, SELECT_REASON);
+		Component component2 = Optionull.mapOrDefault(reportReason, ReportReason::title, SELECT_REASON);
 		this.addRenderableWidget(
 			Button.builder(component2, button -> this.minecraft.setScreen(new ReportReasonSelectionScreen(this, this.reportBuilder.reason(), reportReasonx -> {
 					this.reportBuilder.setReason(reportReasonx);
@@ -134,7 +134,7 @@ public class ChatReportScreen extends Screen {
 	private void onReportChanged() {
 		this.cannotBuildReason = this.reportBuilder.checkBuildable();
 		this.sendButton.active = this.cannotBuildReason == null;
-		this.sendButton.setTooltip(Util.mapNullable(this.cannotBuildReason, cannotBuildReason -> Tooltip.create(cannotBuildReason.message())));
+		this.sendButton.setTooltip(Optionull.map(this.cannotBuildReason, cannotBuildReason -> Tooltip.create(cannotBuildReason.message())));
 	}
 
 	private void sendReport() {

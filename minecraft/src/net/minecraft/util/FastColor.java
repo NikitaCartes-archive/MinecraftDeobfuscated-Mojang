@@ -59,5 +59,13 @@ public class FastColor {
 		public static int multiply(int i, int j) {
 			return color(alpha(i) * alpha(j) / 255, red(i) * red(j) / 255, green(i) * green(j) / 255, blue(i) * blue(j) / 255);
 		}
+
+		public static int lerp(float f, int i, int j) {
+			int k = Mth.lerp(f, alpha(i), alpha(j));
+			int l = Mth.lerp(f, red(i), red(j));
+			int m = Mth.lerp(f, green(i), green(j));
+			int n = Mth.lerp(f, blue(i), blue(j));
+			return color(k, l, m, n);
+		}
 	}
 }

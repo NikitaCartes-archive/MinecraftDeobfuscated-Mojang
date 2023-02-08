@@ -147,7 +147,7 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 				}
 			} else if (this.canMoveIntoInputSlots(itemStack2) && i >= this.getInventorySlotStart() && i < this.getUseRowEnd()) {
 				int l = this.getSlotToQuickMoveTo(itemStack);
-				if (!this.moveItemStackTo(itemStack2, l, l + 1, false)) {
+				if (!this.moveItemStackTo(itemStack2, l, this.getResultSlot(), false)) {
 					return ItemStack.EMPTY;
 				}
 			} else if (i >= this.getInventorySlotStart() && i < this.getInventorySlotEnd()) {
@@ -161,7 +161,7 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 			}
 
 			if (itemStack2.isEmpty()) {
-				slot.set(ItemStack.EMPTY);
+				slot.setByPlayer(ItemStack.EMPTY);
 			} else {
 				slot.setChanged();
 			}

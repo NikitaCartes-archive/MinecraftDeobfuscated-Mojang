@@ -145,7 +145,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 			}
 
 			if (itemStack2.isEmpty()) {
-				slot.set(ItemStack.EMPTY);
+				slot.setByPlayer(ItemStack.EMPTY);
 			} else {
 				slot.setChanged();
 			}

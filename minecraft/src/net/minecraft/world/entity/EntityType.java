@@ -163,6 +163,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final String ENTITY_TAG = "EntityTag";
 	private final Holder.Reference<EntityType<?>> builtInRegistryHolder = BuiltInRegistries.ENTITY_TYPE.createIntrusiveHolder(this);
 	private static final float MAGIC_HORSE_WIDTH = 1.3964844F;
+	private static final int DISPLAY_TRACKING_RANGE = 10;
 	public static final EntityType<Allay> ALLAY = register(
 		"allay", EntityType.Builder.of(Allay::new, MobCategory.CREATURE).sized(0.35F, 0.6F).clientTrackingRange(8).updateInterval(2)
 	);
@@ -187,6 +188,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<Bee> BEE = register("bee", EntityType.Builder.of(Bee::new, MobCategory.CREATURE).sized(0.7F, 0.6F).clientTrackingRange(8));
 	public static final EntityType<Blaze> BLAZE = register(
 		"blaze", EntityType.Builder.of(Blaze::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.8F).clientTrackingRange(8)
+	);
+	public static final EntityType<Display.BlockDisplay> BLOCK_DISPLAY = register(
+		"block_display", EntityType.Builder.of(Display.BlockDisplay::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(10).ticking(false)
 	);
 	public static final EntityType<Boat> BOAT = register(
 		"boat", EntityType.Builder.<Boat>of(Boat::new, MobCategory.MISC).sized(1.375F, 0.5625F).clientTrackingRange(10)
@@ -292,6 +296,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<ItemEntity> ITEM = register(
 		"item", EntityType.Builder.<ItemEntity>of(ItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20)
 	);
+	public static final EntityType<Display.ItemDisplay> ITEM_DISPLAY = register(
+		"item_display", EntityType.Builder.of(Display.ItemDisplay::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(10).ticking(false)
+	);
 	public static final EntityType<ItemFrame> ITEM_FRAME = register(
 		"item_frame", EntityType.Builder.<ItemFrame>of(ItemFrame::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE)
 	);
@@ -320,7 +327,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"magma_cube", EntityType.Builder.of(MagmaCube::new, MobCategory.MONSTER).fireImmune().sized(2.04F, 2.04F).clientTrackingRange(8)
 	);
 	public static final EntityType<Marker> MARKER = register(
-		"marker", EntityType.Builder.of(Marker::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(0)
+		"marker", EntityType.Builder.of(Marker::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(0).ticking(false)
 	);
 	public static final EntityType<Minecart> MINECART = register(
 		"minecart", EntityType.Builder.<Minecart>of(Minecart::new, MobCategory.MISC).sized(0.98F, 0.7F).clientTrackingRange(8)
@@ -441,6 +448,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<Tadpole> TADPOLE = register(
 		"tadpole", EntityType.Builder.of(Tadpole::new, MobCategory.CREATURE).sized(Tadpole.HITBOX_WIDTH, Tadpole.HITBOX_HEIGHT).clientTrackingRange(10)
 	);
+	public static final EntityType<Display.TextDisplay> TEXT_DISPLAY = register(
+		"text_display", EntityType.Builder.of(Display.TextDisplay::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(10).ticking(false)
+	);
 	public static final EntityType<ThrownEgg> EGG = register(
 		"egg", EntityType.Builder.<ThrownEgg>of(ThrownEgg::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
 	);
@@ -526,6 +536,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	private final boolean canSpawnFarFromPlayer;
 	private final int clientTrackingRange;
 	private final int updateInterval;
+	private final boolean ticking;
 	@Nullable
 	private String descriptionId;
 	@Nullable
@@ -558,6 +569,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		EntityDimensions entityDimensions,
 		int i,
 		int j,
+		boolean bl5,
 		FeatureFlagSet featureFlagSet
 	) {
 		this.factory = entityFactory;
@@ -570,6 +582,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		this.dimensions = entityDimensions;
 		this.clientTrackingRange = i;
 		this.updateInterval = j;
+		this.ticking = bl5;
 		this.requiredFeatures = featureFlagSet;
 	}
 
@@ -863,6 +876,10 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		return this.updateInterval;
 	}
 
+	public boolean isTicking() {
+		return this.ticking;
+	}
+
 	public boolean trackDeltas() {
 		return this != PLAYER
 			&& this != LLAMA_SPIT
@@ -905,6 +922,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		private boolean canSpawnFarFromPlayer;
 		private int clientTrackingRange = 5;
 		private int updateInterval = 3;
+		private boolean ticking = true;
 		private EntityDimensions dimensions = EntityDimensions.scalable(0.6F, 1.8F);
 		private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
@@ -962,6 +980,11 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			return this;
 		}
 
+		public EntityType.Builder<T> ticking(boolean bl) {
+			this.ticking = bl;
+			return this;
+		}
+
 		public EntityType.Builder<T> requiredFeatures(FeatureFlag... featureFlags) {
 			this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
 			return this;
@@ -983,6 +1006,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 				this.dimensions,
 				this.clientTrackingRange,
 				this.updateInterval,
+				this.ticking,
 				this.requiredFeatures
 			);
 		}

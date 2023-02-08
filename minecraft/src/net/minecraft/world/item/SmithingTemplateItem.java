@@ -67,6 +67,7 @@ public class SmithingTemplateItem extends Item {
 	private static final ResourceLocation EMPTY_SLOT_EMERALD = new ResourceLocation("item/empty_slot_emerald");
 	private static final ResourceLocation EMPTY_SLOT_DIAMOND = new ResourceLocation("item/empty_slot_diamond");
 	private static final ResourceLocation EMPTY_SLOT_LAPIS_LAZULI = new ResourceLocation("item/empty_slot_lapis_lazuli");
+	private static final ResourceLocation EMPTY_SLOT_AMETHYST_SHARD = new ResourceLocation("item/empty_slot_amethyst_shard");
 	private final Component appliesTo;
 	private final Component ingredients;
 	private final Component upgradeDescription;
@@ -127,7 +128,9 @@ public class SmithingTemplateItem extends Item {
 	}
 
 	private static List<ResourceLocation> createTrimmableMaterialIconList() {
-		return List.of(EMPTY_SLOT_INGOT, EMPTY_SLOT_REDSTONE_DUST, EMPTY_SLOT_LAPIS_LAZULI, EMPTY_SLOT_QUARTZ, EMPTY_SLOT_DIAMOND, EMPTY_SLOT_EMERALD);
+		return List.of(
+			EMPTY_SLOT_INGOT, EMPTY_SLOT_REDSTONE_DUST, EMPTY_SLOT_LAPIS_LAZULI, EMPTY_SLOT_QUARTZ, EMPTY_SLOT_DIAMOND, EMPTY_SLOT_EMERALD, EMPTY_SLOT_AMETHYST_SHARD
+		);
 	}
 
 	private static List<ResourceLocation> createNetheriteUpgradeIconList() {

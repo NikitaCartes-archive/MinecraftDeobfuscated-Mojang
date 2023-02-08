@@ -8,10 +8,10 @@ import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
@@ -35,8 +35,8 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 				poseStack.scale(0.5F, 0.5F, 0.5F);
 			}
 
-			this.renderArmWithItem(livingEntity, itemStack2, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT, poseStack, multiBufferSource, i);
-			this.renderArmWithItem(livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT, poseStack, multiBufferSource, i);
+			this.renderArmWithItem(livingEntity, itemStack2, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT, poseStack, multiBufferSource, i);
+			this.renderArmWithItem(livingEntity, itemStack, ItemDisplayContext.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT, poseStack, multiBufferSource, i);
 			poseStack.popPose();
 		}
 	}
@@ -44,7 +44,7 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 	protected void renderArmWithItem(
 		LivingEntity livingEntity,
 		ItemStack itemStack,
-		ItemTransforms.TransformType transformType,
+		ItemDisplayContext itemDisplayContext,
 		HumanoidArm humanoidArm,
 		PoseStack poseStack,
 		MultiBufferSource multiBufferSource,
@@ -57,7 +57,7 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 			poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 			boolean bl = humanoidArm == HumanoidArm.LEFT;
 			poseStack.translate((float)(bl ? -1 : 1) / 16.0F, 0.125F, -0.625F);
-			this.itemInHandRenderer.renderItem(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, i);
+			this.itemInHandRenderer.renderItem(livingEntity, itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i);
 			poseStack.popPose();
 		}
 	}

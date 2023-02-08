@@ -16,6 +16,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -387,16 +388,16 @@ public class ArmorStand extends LivingEntity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.level.isClientSide || this.isRemoved()) {
 			return false;
-		} else if (DamageSource.OUT_OF_WORLD.equals(damageSource)) {
+		} else if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			this.kill();
 			return false;
 		} else if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
 			return false;
-		} else if (damageSource.isExplosion()) {
+		} else if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
 			this.brokenByAnything(damageSource);
 			this.kill();
 			return false;
-		} else if (DamageSource.IN_FIRE.equals(damageSource)) {
+		} else if (damageSource.is(DamageTypeTags.IGNITES_ARMOR_STANDS)) {
 			if (this.isOnFire()) {
 				this.causeDamage(damageSource, 0.15F);
 			} else {
@@ -404,7 +405,7 @@ public class ArmorStand extends LivingEntity {
 			}
 
 			return false;
-		} else if (DamageSource.ON_FIRE.equals(damageSource) && this.getHealth() > 0.5F) {
+		} else if (damageSource.is(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5F) {
 			this.causeDamage(damageSource, 4.0F);
 			return false;
 		} else {
@@ -413,26 +414,30 @@ public class ArmorStand extends LivingEntity {
 			boolean bl3 = "player".equals(damageSource.getMsgId());
 			if (!bl3 && !bl) {
 				return false;
-			} else if (damageSource.getEntity() instanceof Player && !((Player)damageSource.getEntity()).getAbilities().mayBuild) {
-				return false;
-			} else if (damageSource.isCreativePlayer()) {
-				this.playBrokenSound();
-				this.showBreakingParticles();
-				this.kill();
-				return bl2;
 			} else {
-				long l = this.level.getGameTime();
-				if (l - this.lastHit > 5L && !bl) {
-					this.level.broadcastEntityEvent(this, (byte)32);
-					this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
-					this.lastHit = l;
-				} else {
-					this.brokenByPlayer(damageSource);
-					this.showBreakingParticles();
-					this.kill();
+				if (damageSource.getEntity() instanceof Player player && !player.getAbilities().mayBuild) {
+					return false;
 				}
 
-				return true;
+				if (damageSource.isCreativePlayer()) {
+					this.playBrokenSound();
+					this.showBreakingParticles();
+					this.kill();
+					return bl2;
+				} else {
+					long l = this.level.getGameTime();
+					if (l - this.lastHit > 5L && !bl) {
+						this.level.broadcastEntityEvent(this, (byte)32);
+						this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
+						this.lastHit = l;
+					} else {
+						this.brokenByPlayer(damageSource);
+						this.showBreakingParticles();
+						this.kill();
+					}
+
+					return true;
+				}
 			}
 		}
 	}

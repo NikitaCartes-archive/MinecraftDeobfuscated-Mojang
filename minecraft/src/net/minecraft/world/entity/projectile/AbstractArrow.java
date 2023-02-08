@@ -320,9 +320,9 @@ public abstract class AbstractArrow extends Projectile {
 		Entity entity2 = this.getOwner();
 		DamageSource damageSource;
 		if (entity2 == null) {
-			damageSource = DamageSource.arrow(this, this);
+			damageSource = this.damageSources().arrow(this, this);
 		} else {
-			damageSource = DamageSource.arrow(this, entity2);
+			damageSource = this.damageSources().arrow(this, entity2);
 			if (entity2 instanceof LivingEntity) {
 				((LivingEntity)entity2).setLastHurtMob(entity);
 			}

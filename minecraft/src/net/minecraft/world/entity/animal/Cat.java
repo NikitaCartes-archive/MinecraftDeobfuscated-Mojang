@@ -252,7 +252,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		return entity.hurt(DamageSource.mobAttack(this), this.getAttackDamage());
+		return entity.hurt(this.damageSources().mobAttack(this), this.getAttackDamage());
 	}
 
 	@Override

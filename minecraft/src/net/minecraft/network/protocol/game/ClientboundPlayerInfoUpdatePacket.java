@@ -7,7 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.RemoteChatSession;
@@ -151,7 +151,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 				serverPlayer.latency,
 				serverPlayer.gameMode.getGameModeForPlayer(),
 				serverPlayer.getTabListDisplayName(),
-				Util.mapNullable(serverPlayer.getChatSession(), RemoteChatSession::asData)
+				Optionull.map(serverPlayer.getChatSession(), RemoteChatSession::asData)
 			);
 		}
 	}

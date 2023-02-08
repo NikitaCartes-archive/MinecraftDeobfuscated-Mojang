@@ -2,7 +2,6 @@ package net.minecraft.world.entity;
 
 public class EntityEvent {
 	public static final byte JUMP = 1;
-	public static final byte HURT = 2;
 	public static final byte DEATH = 3;
 	public static final byte START_ATTACKING = 4;
 	public static final byte STOP_ATTACKING = 5;
@@ -33,18 +32,14 @@ public class EntityEvent {
 	public static final byte SHIELD_DISABLED = 30;
 	public static final byte FISHING_ROD_REEL_IN = 31;
 	public static final byte ARMORSTAND_WOBBLE = 32;
-	public static final byte THORNED = 33;
 	public static final byte STOP_OFFER_FLOWER = 34;
 	public static final byte TALISMAN_ACTIVATE = 35;
-	public static final byte DROWNED = 36;
-	public static final byte BURNED = 37;
 	public static final byte DOLPHIN_LOOKING_FOR_TREASURE = 38;
 	public static final byte RAVAGER_STUNNED = 39;
 	public static final byte TRUSTING_FAILED = 40;
 	public static final byte TRUSTING_SUCCEEDED = 41;
 	public static final byte VILLAGER_SWEAT = 42;
 	public static final byte BAD_OMEN_TRIGGERED = 43;
-	public static final byte POKED = 44;
 	public static final byte FOX_EAT = 45;
 	public static final byte TELEPORT = 46;
 	public static final byte MAINHAND_BREAK = 47;
@@ -57,7 +52,6 @@ public class EntityEvent {
 	public static final byte HONEY_JUMP = 54;
 	public static final byte SWAP_HANDS = 55;
 	public static final byte CANCEL_SHAKE_WETNESS = 56;
-	public static final byte FROZEN = 57;
 	public static final byte START_RAM = 58;
 	public static final byte END_RAM = 59;
 	public static final byte POOF = 60;

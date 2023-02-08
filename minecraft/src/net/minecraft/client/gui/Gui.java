@@ -208,7 +208,7 @@ public class Gui extends GuiComponent {
 				this.renderExperienceBar(poseStack, i);
 			}
 
-			if (this.minecraft.options.heldItemTooltips && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
+			if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
 				this.renderSelectedItemName(poseStack);
 			} else if (this.minecraft.player.isSpectator()) {
 				this.spectatorGui.renderTooltip(poseStack);

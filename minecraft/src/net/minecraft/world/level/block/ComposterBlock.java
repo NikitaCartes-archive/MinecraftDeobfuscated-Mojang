@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.WorldlyContainerHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -219,7 +221,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (i < 8 && COMPOSTABLES.containsKey(itemStack.getItem())) {
 			if (i < 7 && !level.isClientSide) {
-				BlockState blockState2 = addItem(blockState, level, blockPos, itemStack);
+				BlockState blockState2 = addItem(player, blockState, level, blockPos, itemStack);
 				level.levelEvent(1500, blockPos, blockState != blockState2 ? 1 : 0);
 				player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
 				if (!player.getAbilities().instabuild) {
@@ -229,17 +231,17 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else if (i == 8) {
-			extractProduce(blockState, level, blockPos);
+			extractProduce(player, blockState, level, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}
 	}
 
-	public static BlockState insertItem(BlockState blockState, ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
+	public static BlockState insertItem(Entity entity, BlockState blockState, ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
 		int i = (Integer)blockState.getValue(LEVEL);
 		if (i < 7 && COMPOSTABLES.containsKey(itemStack.getItem())) {
-			BlockState blockState2 = addItem(blockState, serverLevel, blockPos, itemStack);
+			BlockState blockState2 = addItem(entity, blockState, serverLevel, blockPos, itemStack);
 			itemStack.shrink(1);
 			return blockState2;
 		} else {
@@ -247,7 +249,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		}
 	}
 
-	public static BlockState extractProduce(BlockState blockState, Level level, BlockPos blockPos) {
+	public static BlockState extractProduce(Entity entity, BlockState blockState, Level level, BlockPos blockPos) {
 		if (!level.isClientSide) {
 			float f = 0.7F;
 			double d = (double)(level.random.nextFloat() * 0.7F) + 0.15F;
@@ -260,18 +262,19 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 			level.addFreshEntity(itemEntity);
 		}
 
-		BlockState blockState2 = empty(blockState, level, blockPos);
+		BlockState blockState2 = empty(entity, blockState, level, blockPos);
 		level.playSound(null, blockPos, SoundEvents.COMPOSTER_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
 		return blockState2;
 	}
 
-	static BlockState empty(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
+	static BlockState empty(@Nullable Entity entity, BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
 		BlockState blockState2 = blockState.setValue(LEVEL, Integer.valueOf(0));
 		levelAccessor.setBlock(blockPos, blockState2, 3);
+		levelAccessor.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState2));
 		return blockState2;
 	}
 
-	static BlockState addItem(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
+	static BlockState addItem(@Nullable Entity entity, BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
 		int i = (Integer)blockState.getValue(LEVEL);
 		float f = COMPOSTABLES.getFloat(itemStack.getItem());
 		if ((i != 0 || !(f > 0.0F)) && !(levelAccessor.getRandom().nextDouble() < (double)f)) {
@@ -280,6 +283,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 			int j = i + 1;
 			BlockState blockState2 = blockState.setValue(LEVEL, Integer.valueOf(j));
 			levelAccessor.setBlock(blockPos, blockState2, 3);
+			levelAccessor.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState2));
 			if (j == 7) {
 				levelAccessor.scheduleTick(blockPos, blockState.getBlock(), 20);
 			}
@@ -385,7 +389,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 			ItemStack itemStack = this.getItem(0);
 			if (!itemStack.isEmpty()) {
 				this.changed = true;
-				BlockState blockState = ComposterBlock.addItem(this.state, this.level, this.pos, itemStack);
+				BlockState blockState = ComposterBlock.addItem(null, this.state, this.level, this.pos, itemStack);
 				this.level.levelEvent(1500, this.pos, blockState != this.state ? 1 : 0);
 				this.removeItemNoUpdate(0);
 			}
@@ -427,7 +431,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 
 		@Override
 		public void setChanged() {
-			ComposterBlock.empty(this.state, this.level, this.pos);
+			ComposterBlock.empty(null, this.state, this.level, this.pos);
 			this.changed = true;
 		}
 	}

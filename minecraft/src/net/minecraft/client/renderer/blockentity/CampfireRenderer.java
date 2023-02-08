@@ -5,10 +5,10 @@ import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
@@ -38,7 +38,7 @@ public class CampfireRenderer implements BlockEntityRenderer<CampfireBlockEntity
 				poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 				poseStack.translate(-0.3125F, -0.3125F, 0.0F);
 				poseStack.scale(0.375F, 0.375F, 0.375F);
-				this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, j, poseStack, multiBufferSource, campfireBlockEntity.getLevel(), k + l);
+				this.itemRenderer.renderStatic(itemStack, ItemDisplayContext.FIXED, i, j, poseStack, multiBufferSource, campfireBlockEntity.getLevel(), k + l);
 				poseStack.popPose();
 			}
 		}

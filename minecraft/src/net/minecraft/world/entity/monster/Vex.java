@@ -85,7 +85,7 @@ public class Vex extends Monster implements TraceableEntity {
 		this.setNoGravity(true);
 		if (this.hasLimitedLife && --this.limitedLifeTicks <= 0) {
 			this.limitedLifeTicks = 20;
-			this.hurt(DamageSource.STARVE, 1.0F);
+			this.hurt(this.damageSources().starve(), 1.0F);
 		}
 	}
 

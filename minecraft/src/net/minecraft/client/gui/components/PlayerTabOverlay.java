@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiComponent;
@@ -36,7 +36,7 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 @Environment(EnvType.CLIENT)
 public class PlayerTabOverlay extends GuiComponent {
 	private static final Comparator<PlayerInfo> PLAYER_COMPARATOR = Comparator.comparingInt(playerInfo -> playerInfo.getGameMode() == GameType.SPECTATOR ? 1 : 0)
-		.thenComparing(playerInfo -> Util.mapNullable(playerInfo.getTeam(), PlayerTeam::getName, ""))
+		.thenComparing(playerInfo -> Optionull.mapOrDefault(playerInfo.getTeam(), PlayerTeam::getName, ""))
 		.thenComparing(playerInfo -> playerInfo.getProfile().getName(), String::compareToIgnoreCase);
 	public static final int MAX_ROWS_PER_COL = 20;
 	public static final int HEART_EMPTY_CONTAINER = 16;

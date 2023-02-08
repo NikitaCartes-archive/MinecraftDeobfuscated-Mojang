@@ -28,6 +28,9 @@ public class RideCommand {
 	private static final SimpleCommandExceptionType ERROR_MOUNTING_LOOP = new SimpleCommandExceptionType(
 		Component.translatable("commands.ride.mount.failure.loop")
 	);
+	private static final SimpleCommandExceptionType ERROR_WRONG_DIMENSION = new SimpleCommandExceptionType(
+		Component.translatable("commands.ride.mount.failure.wrong_dimension")
+	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -59,6 +62,8 @@ public class RideCommand {
 			throw ERROR_MOUNTING_PLAYER.create();
 		} else if (entity.getSelfAndPassengers().anyMatch(entity2x -> entity2x == entity2)) {
 			throw ERROR_MOUNTING_LOOP.create();
+		} else if (entity.getLevel() != entity2.getLevel()) {
+			throw ERROR_WRONG_DIMENSION.create();
 		} else if (!entity.startRiding(entity2, true)) {
 			throw ERROR_MOUNT_FAILED.create(entity.getDisplayName(), entity2.getDisplayName());
 		} else {

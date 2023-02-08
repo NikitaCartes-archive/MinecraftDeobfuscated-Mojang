@@ -167,7 +167,7 @@ public class Ocelot extends Animal {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		return entity.hurt(DamageSource.mobAttack(this), this.getAttackDamage());
+		return entity.hurt(this.damageSources().mobAttack(this), this.getAttackDamage());
 	}
 
 	@Override

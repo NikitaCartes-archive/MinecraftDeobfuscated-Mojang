@@ -41,7 +41,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -50,6 +49,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -204,7 +204,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		List<CustomSpawner> list,
 		boolean bl2
 	) {
-		super(serverLevelData, resourceKey, levelStem.type(), minecraftServer::getProfiler, false, bl, l, minecraftServer.getMaxChainedNeighborUpdates());
+		super(
+			serverLevelData,
+			resourceKey,
+			minecraftServer.registryAccess(),
+			levelStem.type(),
+			minecraftServer::getProfiler,
+			false,
+			bl,
+			l,
+			minecraftServer.getMaxChainedNeighborUpdates()
+		);
 		this.tickTime = bl2;
 		this.server = minecraftServer;
 		this.customSpawners = list;
@@ -993,6 +1003,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.getChunkSource().broadcastAndSend(entity, new ClientboundEntityEventPacket(entity, b));
 	}
 
+	@Override
+	public void broadcastDamageEvent(Entity entity, DamageSource damageSource) {
+		this.getChunkSource().broadcastAndSend(entity, new ClientboundDamageEventPacket(entity, damageSource));
+	}
+
 	public ServerChunkCache getChunkSource() {
 		return this.chunkSource;
 	}
@@ -1170,11 +1185,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@Override
 	public boolean noSave() {
 		return this.noSave;
-	}
-
-	@Override
-	public RegistryAccess registryAccess() {
-		return this.server.registryAccess();
 	}
 
 	public DimensionDataStorage getDataStorage() {
@@ -1626,11 +1636,15 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		public void onTickingStart(Entity entity) {
-			ServerLevel.this.entityTickList.add(entity);
+			if (entity.getType().isTicking()) {
+				ServerLevel.this.entityTickList.add(entity);
+			}
 		}
 
 		public void onTickingEnd(Entity entity) {
-			ServerLevel.this.entityTickList.remove(entity);
+			if (entity.getType().isTicking()) {
+				ServerLevel.this.entityTickList.remove(entity);
+			}
 		}
 
 		public void onTrackingStart(Entity entity) {

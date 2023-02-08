@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -56,10 +55,10 @@ public class MobEffect {
 			}
 		} else if (this == MobEffects.POISON) {
 			if (livingEntity.getHealth() > 1.0F) {
-				livingEntity.hurt(DamageSource.MAGIC, 1.0F);
+				livingEntity.hurt(livingEntity.damageSources().magic(), 1.0F);
 			}
 		} else if (this == MobEffects.WITHER) {
-			livingEntity.hurt(DamageSource.WITHER, 1.0F);
+			livingEntity.hurt(livingEntity.damageSources().wither(), 1.0F);
 		} else if (this == MobEffects.HUNGER && livingEntity instanceof Player) {
 			((Player)livingEntity).causeFoodExhaustion(0.005F * (float)(i + 1));
 		} else if (this == MobEffects.SATURATION && livingEntity instanceof Player) {
@@ -68,7 +67,7 @@ public class MobEffect {
 			}
 		} else if ((this != MobEffects.HEAL || livingEntity.isInvertedHealAndHarm()) && (this != MobEffects.HARM || !livingEntity.isInvertedHealAndHarm())) {
 			if (this == MobEffects.HARM && !livingEntity.isInvertedHealAndHarm() || this == MobEffects.HEAL && livingEntity.isInvertedHealAndHarm()) {
-				livingEntity.hurt(DamageSource.MAGIC, (float)(6 << i));
+				livingEntity.hurt(livingEntity.damageSources().magic(), (float)(6 << i));
 			}
 		} else {
 			livingEntity.heal((float)Math.max(4 << i, 0));
@@ -80,9 +79,9 @@ public class MobEffect {
 			if (this == MobEffects.HARM && !livingEntity.isInvertedHealAndHarm() || this == MobEffects.HEAL && livingEntity.isInvertedHealAndHarm()) {
 				int j = (int)(d * (double)(6 << i) + 0.5);
 				if (entity == null) {
-					livingEntity.hurt(DamageSource.MAGIC, (float)j);
+					livingEntity.hurt(livingEntity.damageSources().magic(), (float)j);
 				} else {
-					livingEntity.hurt(DamageSource.indirectMagic(entity, entity2), (float)j);
+					livingEntity.hurt(livingEntity.damageSources().indirectMagic(entity, entity2), (float)j);
 				}
 			} else {
 				this.applyEffectTick(livingEntity, i);

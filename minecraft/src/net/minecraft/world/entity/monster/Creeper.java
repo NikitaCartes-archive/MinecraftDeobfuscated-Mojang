@@ -192,7 +192,7 @@ public class Creeper extends Monster implements PowerableMob {
 	}
 
 	public float getSwelling(float f) {
-		return Mth.lerp(f, (float)this.oldSwell, (float)this.swell) / (float)(this.maxSwell - 2);
+		return (float)(Mth.lerp(f, this.oldSwell, this.swell) / (this.maxSwell - 2));
 	}
 
 	public int getSwellDir() {

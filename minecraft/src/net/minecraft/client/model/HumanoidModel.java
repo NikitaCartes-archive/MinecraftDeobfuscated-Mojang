@@ -22,6 +22,8 @@ import net.minecraft.world.entity.LivingEntity;
 public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> implements ArmedModel, HeadedModel {
 	public static final float OVERLAY_SCALE = 0.25F;
 	public static final float HAT_OVERLAY_SCALE = 0.5F;
+	public static final float LEGGINGS_OVERLAY_SCALE = -0.1F;
+	private static final float DUCK_WALK_ROTATION = 0.005F;
 	private static final float SPYGLASS_ARM_ROT_Y = (float) (Math.PI / 12);
 	private static final float SPYGLASS_ARM_ROT_X = 1.9198622F;
 	private static final float SPYGLASS_ARM_CROUCH_ROT_X = (float) (Math.PI / 12);
@@ -142,8 +144,8 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 		this.leftArm.zRot = 0.0F;
 		this.rightLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g / k;
 		this.leftLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k;
-		this.rightLeg.yRot = 0.0F;
-		this.leftLeg.yRot = 0.0F;
+		this.rightLeg.yRot = 0.005F;
+		this.leftLeg.yRot = -0.005F;
 		this.rightLeg.zRot = 0.0F;
 		this.leftLeg.zRot = 0.0F;
 		if (this.riding) {
@@ -193,8 +195,8 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			this.rightArm.y = 5.2F;
 		} else {
 			this.body.xRot = 0.0F;
-			this.rightLeg.z = 0.1F;
-			this.leftLeg.z = 0.1F;
+			this.rightLeg.z = 0.0F;
+			this.leftLeg.z = 0.0F;
 			this.rightLeg.y = 12.0F;
 			this.leftLeg.y = 12.0F;
 			this.head.y = 0.0F;

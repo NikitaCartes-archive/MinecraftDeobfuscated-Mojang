@@ -601,7 +601,7 @@ public interface DispenseItemBehavior {
 				this.setSuccess(true);
 				if (blockState.is(Blocks.RESPAWN_ANCHOR)) {
 					if ((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
-						RespawnAnchorBlock.charge(level, blockPos, blockState);
+						RespawnAnchorBlock.charge(null, level, blockPos, blockState);
 						itemStack.shrink(1);
 					} else {
 						this.setSuccess(false);

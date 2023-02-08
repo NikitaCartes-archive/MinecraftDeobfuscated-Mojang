@@ -8,6 +8,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluids;
 
 public class TryLaySpawnOnWaterNearLand {
@@ -28,7 +30,9 @@ public class TryLaySpawnOnWaterNearLand {
 											&& serverLevel.getFluidState(blockPos2).is(Fluids.WATER)) {
 											BlockPos blockPos3 = blockPos2.above();
 											if (serverLevel.getBlockState(blockPos3).isAir()) {
-												serverLevel.setBlock(blockPos3, block.defaultBlockState(), 3);
+												BlockState blockState = block.defaultBlockState();
+												serverLevel.setBlock(blockPos3, blockState, 3);
+												serverLevel.gameEvent(GameEvent.BLOCK_PLACE, blockPos3, GameEvent.Context.of(livingEntity, blockState));
 												serverLevel.playSound(null, livingEntity, SoundEvents.FROG_LAY_SPAWN, SoundSource.BLOCKS, 1.0F, 1.0F);
 												memoryAccessor3.erase();
 												return true;

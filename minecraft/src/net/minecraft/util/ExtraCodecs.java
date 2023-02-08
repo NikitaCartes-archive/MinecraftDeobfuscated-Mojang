@@ -22,6 +22,8 @@ import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.Codec.ResultFunction;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatList;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -48,6 +50,9 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.joml.AxisAngle4f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class ExtraCodecs {
@@ -70,8 +75,40 @@ public class ExtraCodecs {
 		.listOf()
 		.comapFlatMap(
 			list -> Util.fixedSize(list, 3).map(listx -> new Vector3f((Float)listx.get(0), (Float)listx.get(1), (Float)listx.get(2))),
-			vector3f -> ImmutableList.of(vector3f.x(), vector3f.y(), vector3f.z())
+			vector3f -> List.of(vector3f.x(), vector3f.y(), vector3f.z())
 		);
+	public static final Codec<Quaternionf> QUATERNIONF_COMPONENTS = Codec.FLOAT
+		.listOf()
+		.comapFlatMap(
+			list -> Util.fixedSize(list, 4).map(listx -> new Quaternionf((Float)listx.get(0), (Float)listx.get(1), (Float)listx.get(2), (Float)listx.get(3))),
+			quaternionf -> List.of(quaternionf.x, quaternionf.y, quaternionf.z, quaternionf.w)
+		);
+	public static final Codec<AxisAngle4f> AXISANGLE4F = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Codec.FLOAT.fieldOf("angle").forGetter(axisAngle4f -> axisAngle4f.angle),
+					VECTOR3F.fieldOf("axis").forGetter(axisAngle4f -> new Vector3f(axisAngle4f.x, axisAngle4f.y, axisAngle4f.z))
+				)
+				.apply(instance, AxisAngle4f::new)
+	);
+	public static final Codec<Quaternionf> QUATERNIONF = Codec.either(QUATERNIONF_COMPONENTS, AXISANGLE4F.xmap(Quaternionf::new, AxisAngle4f::new))
+		.xmap(either -> either.map(quaternionf -> quaternionf, quaternionf -> quaternionf), Either::left);
+	public static Codec<Matrix4f> MATRIX4F = Codec.FLOAT.listOf().comapFlatMap(list -> Util.fixedSize(list, 16).map(listx -> {
+			Matrix4f matrix4f = new Matrix4f();
+
+			for (int i = 0; i < listx.size(); i++) {
+				matrix4f.setRowColumn(i >> 2, i & 3, (Float)listx.get(i));
+			}
+
+			return matrix4f.determineProperties();
+		}), matrix4f -> {
+		FloatList floatList = new FloatArrayList(16);
+
+		for (int i = 0; i < 16; i++) {
+			floatList.add(matrix4f.getRowColumn(i >> 2, i & 3));
+		}
+
+		return floatList;
+	});
 	public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
 	public static final Codec<Integer> POSITIVE_INT = intRangeWithMessage(1, Integer.MAX_VALUE, integer -> "Value must be positive: " + integer);
 	public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, float_ -> "Value must be positive: " + float_);
@@ -261,6 +298,10 @@ public class ExtraCodecs {
 			Codec.INT,
 			integer -> integer.compareTo(i) >= 0 && integer.compareTo(j) <= 0 ? DataResult.success(integer) : DataResult.error((String)function.apply(integer))
 		);
+	}
+
+	public static Codec<Integer> intRange(int i, int j) {
+		return intRangeWithMessage(i, j, integer -> "Value must be within range [" + i + ";" + j + "]: " + integer);
 	}
 
 	private static Codec<Float> floatRangeMinExclusiveWithMessage(float f, float g, Function<Float, String> function) {

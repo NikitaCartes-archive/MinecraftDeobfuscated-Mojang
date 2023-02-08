@@ -208,7 +208,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		this.level.broadcastEntityEvent(this, (byte)4);
 		float f = this.getAttackDamage();
 		float g = (int)f > 0 ? f / 2.0F + (float)this.random.nextInt((int)f) : f;
-		boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
+		boolean bl = entity.hurt(this.damageSources().mobAttack(this), g);
 		if (bl) {
 			double d = entity instanceof LivingEntity livingEntity ? livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) : 0.0;
 			double e = Math.max(0.0, 1.0 - d);

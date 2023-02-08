@@ -1,16 +1,12 @@
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -18,6 +14,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
@@ -29,12 +26,8 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
+		Matrix4f matrix4f = poseStack.last().pose();
 		BlockGetter blockGetter = this.minecraft.player.level;
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.lineWidth(2.0F);
-		RenderSystem.depthMask(false);
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		BlockPos blockPos = new BlockPos(d, e, f);
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-6, -6, -6), blockPos.offset(6, 6, 6))) {
@@ -43,87 +36,66 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 				VoxelShape voxelShape = blockState.getShape(blockGetter, blockPos2);
 
 				for (AABB aABB : voxelShape.toAabbs()) {
-					AABB aABB2 = aABB.move(blockPos2).inflate(0.002).move(-d, -e, -f);
-					double g = aABB2.minX;
-					double h = aABB2.minY;
-					double i = aABB2.minZ;
-					double j = aABB2.maxX;
-					double k = aABB2.maxY;
-					double l = aABB2.maxZ;
+					AABB aABB2 = aABB.move(blockPos2).inflate(0.002);
+					float g = (float)(aABB2.minX - d);
+					float h = (float)(aABB2.minY - e);
+					float i = (float)(aABB2.minZ - f);
+					float j = (float)(aABB2.maxX - d);
+					float k = (float)(aABB2.maxY - e);
+					float l = (float)(aABB2.maxZ - f);
 					float m = 1.0F;
 					float n = 0.0F;
 					float o = 0.0F;
 					float p = 0.5F;
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.WEST)) {
-						Tesselator tesselator = Tesselator.getInstance();
-						BufferBuilder bufferBuilder = tesselator.getBuilder();
-						bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-						bufferBuilder.vertex(g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						tesselator.end();
+						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
+						vertexConsumer.vertex(matrix4f, g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.SOUTH)) {
-						Tesselator tesselator = Tesselator.getInstance();
-						BufferBuilder bufferBuilder = tesselator.getBuilder();
-						bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-						bufferBuilder.vertex(g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						tesselator.end();
+						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
+						vertexConsumer.vertex(matrix4f, g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.EAST)) {
-						Tesselator tesselator = Tesselator.getInstance();
-						BufferBuilder bufferBuilder = tesselator.getBuilder();
-						bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-						bufferBuilder.vertex(j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						tesselator.end();
+						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
+						vertexConsumer.vertex(matrix4f, j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.NORTH)) {
-						Tesselator tesselator = Tesselator.getInstance();
-						BufferBuilder bufferBuilder = tesselator.getBuilder();
-						bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-						bufferBuilder.vertex(j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						tesselator.end();
+						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
+						vertexConsumer.vertex(matrix4f, j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.DOWN)) {
-						Tesselator tesselator = Tesselator.getInstance();
-						BufferBuilder bufferBuilder = tesselator.getBuilder();
-						bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-						bufferBuilder.vertex(g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						tesselator.end();
+						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
+						vertexConsumer.vertex(matrix4f, g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.UP)) {
-						Tesselator tesselator = Tesselator.getInstance();
-						BufferBuilder bufferBuilder = tesselator.getBuilder();
-						bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-						bufferBuilder.vertex(g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						tesselator.end();
+						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
+						vertexConsumer.vertex(matrix4f, g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.vertex(matrix4f, j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 					}
 				}
 			}
 		}
-
-		RenderSystem.depthMask(true);
-		RenderSystem.disableBlend();
 	}
 }

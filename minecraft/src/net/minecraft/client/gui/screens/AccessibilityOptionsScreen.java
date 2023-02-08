@@ -28,6 +28,7 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 			options.screenEffectScale(),
 			options.fovEffectScale(),
 			options.darknessEffectScale(),
+			options.damageTiltStrength(),
 			options.glintSpeed(),
 			options.glintStrength(),
 			options.hideLightningFlash(),

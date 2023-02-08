@@ -9,13 +9,13 @@ import net.minecraft.client.model.SnowGolemModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,7 +59,7 @@ public class SnowGolemHeadLayer extends RenderLayer<SnowGolem, SnowGolemModel<Sn
 						.renderStatic(
 							snowGolem,
 							itemStack,
-							ItemTransforms.TransformType.HEAD,
+							ItemDisplayContext.HEAD,
 							false,
 							poseStack,
 							multiBufferSource,

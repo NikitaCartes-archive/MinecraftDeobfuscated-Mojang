@@ -22,6 +22,7 @@ import net.minecraft.data.worldgen.features.FeatureUtils;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.item.armortrim.TrimMaterials;
 import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.level.biome.Biome;
@@ -50,7 +51,8 @@ public class VanillaRegistries {
 		.add(Registries.FLAT_LEVEL_GENERATOR_PRESET, FlatLevelGeneratorPresets::bootstrap)
 		.add(Registries.CHAT_TYPE, ChatType::bootstrap)
 		.add(Registries.TRIM_PATTERN, TrimPatterns::bootstrap)
-		.add(Registries.TRIM_MATERIAL, TrimMaterials::bootstrap);
+		.add(Registries.TRIM_MATERIAL, TrimMaterials::bootstrap)
+		.add(Registries.DAMAGE_TYPE, DamageTypes::bootstrap);
 
 	private static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderLookup.Provider provider) {
 		HolderGetter<PlacedFeature> holderGetter = provider.lookupOrThrow(Registries.PLACED_FEATURE);

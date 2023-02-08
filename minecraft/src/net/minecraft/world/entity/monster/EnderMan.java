@@ -25,7 +25,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -76,7 +75,9 @@ public class EnderMan extends Monster implements NeutralMob {
 	);
 	private static final int DELAY_BETWEEN_CREEPY_STARE_SOUND = 400;
 	private static final int MIN_DEAGGRESSION_TIME = 600;
-	private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BLOCK_STATE);
+	private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE = SynchedEntityData.defineId(
+		EnderMan.class, EntityDataSerializers.OPTIONAL_BLOCK_STATE
+	);
 	private static final EntityDataAccessor<Boolean> DATA_CREEPY = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_STARED_AT = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
 	private int lastStareSound = Integer.MIN_VALUE;
@@ -369,11 +370,10 @@ public class EnderMan extends Monster implements NeutralMob {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (damageSource instanceof IndirectEntityDamageSource) {
-			Entity entity = damageSource.getDirectEntity();
+		} else if (damageSource.isIndirect()) {
 			boolean bl;
-			if (entity instanceof ThrownPotion) {
-				bl = this.hurtWithCleanWater(damageSource, (ThrownPotion)entity, f);
+			if (damageSource.getDirectEntity() instanceof ThrownPotion thrownPotion) {
+				bl = this.hurtWithCleanWater(damageSource, thrownPotion, f);
 			} else {
 				bl = false;
 			}
@@ -386,12 +386,12 @@ public class EnderMan extends Monster implements NeutralMob {
 
 			return bl;
 		} else {
-			boolean bl2 = super.hurt(damageSource, f);
+			boolean bl = super.hurt(damageSource, f);
 			if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
 				this.teleport();
 			}
 
-			return bl2;
+			return bl;
 		}
 	}
 
@@ -513,7 +513,8 @@ public class EnderMan extends Monster implements NeutralMob {
 		public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable Predicate<LivingEntity> predicate) {
 			super(enderMan, Player.class, 10, false, false, predicate);
 			this.enderman = enderMan;
-			this.isAngerInducing = livingEntity -> enderMan.isLookingAtMe((Player)livingEntity) || enderMan.isAngryAt(livingEntity);
+			this.isAngerInducing = livingEntity -> (enderMan.isLookingAtMe((Player)livingEntity) || enderMan.isAngryAt(livingEntity))
+					&& !enderMan.hasIndirectPassenger(livingEntity);
 			this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
 		}
 
@@ -546,7 +547,17 @@ public class EnderMan extends Monster implements NeutralMob {
 					return true;
 				}
 			} else {
-				return this.target != null && this.continueAggroTargetConditions.test(this.enderman, this.target) ? true : super.canContinueToUse();
+				if (this.target != null) {
+					if (this.enderman.hasIndirectPassenger(this.target)) {
+						return false;
+					}
+
+					if (this.continueAggroTargetConditions.test(this.enderman, this.target)) {
+						return true;
+					}
+				}
+
+				return super.canContinueToUse();
 			}
 		}
 

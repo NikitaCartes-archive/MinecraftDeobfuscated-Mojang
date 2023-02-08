@@ -41,6 +41,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
@@ -105,6 +106,7 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
@@ -650,15 +652,7 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource damageSource) {
-		if (damageSource == DamageSource.ON_FIRE) {
-			return SoundEvents.PLAYER_HURT_ON_FIRE;
-		} else if (damageSource == DamageSource.DROWN) {
-			return SoundEvents.PLAYER_HURT_DROWN;
-		} else if (damageSource == DamageSource.SWEET_BERRY_BUSH) {
-			return SoundEvents.PLAYER_HURT_SWEET_BERRY_BUSH;
-		} else {
-			return damageSource == DamageSource.FREEZE ? SoundEvents.PLAYER_HURT_FREEZE : SoundEvents.PLAYER_HURT;
-		}
+		return damageSource.type().effects().sound();
 	}
 
 	@Override
@@ -817,14 +811,14 @@ public abstract class Player extends LivingEntity {
 	public boolean isInvulnerableTo(DamageSource damageSource) {
 		if (super.isInvulnerableTo(damageSource)) {
 			return true;
-		} else if (damageSource == DamageSource.DROWN) {
+		} else if (damageSource.is(DamageTypeTags.IS_DROWNING)) {
 			return !this.level.getGameRules().getBoolean(GameRules.RULE_DROWNING_DAMAGE);
-		} else if (damageSource.isFall()) {
+		} else if (damageSource.is(DamageTypeTags.IS_FALL)) {
 			return !this.level.getGameRules().getBoolean(GameRules.RULE_FALL_DAMAGE);
-		} else if (damageSource.isFire()) {
+		} else if (damageSource.is(DamageTypeTags.IS_FIRE)) {
 			return !this.level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE);
 		} else {
-			return damageSource == DamageSource.FREEZE ? !this.level.getGameRules().getBoolean(GameRules.RULE_FREEZE_DAMAGE) : false;
+			return damageSource.is(DamageTypeTags.IS_FREEZING) ? !this.level.getGameRules().getBoolean(GameRules.RULE_FREEZE_DAMAGE) : false;
 		}
 	}
 
@@ -832,7 +826,7 @@ public abstract class Player extends LivingEntity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (this.abilities.invulnerable && !damageSource.isBypassInvul()) {
+		} else if (this.abilities.invulnerable && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return false;
 		} else {
 			this.noActionTime = 0;
@@ -1006,6 +1000,7 @@ public abstract class Player extends LivingEntity {
 
 					InteractionResult interactionResult2 = itemStack.interactLivingEntity(this, (LivingEntity)entity, interactionHand);
 					if (interactionResult2.consumesAction()) {
+						this.level.gameEvent(GameEvent.ENTITY_INTERACT, entity.position(), GameEvent.Context.of(this));
 						if (itemStack.isEmpty() && !this.abilities.instabuild) {
 							this.setItemInHand(interactionHand, ItemStack.EMPTY);
 						}
@@ -1161,7 +1156,7 @@ public abstract class Player extends LivingEntity {
 					}
 
 					Vec3 vec3 = entity.getDeltaMovement();
-					boolean bl6 = entity.hurt(DamageSource.playerAttack(this), f);
+					boolean bl6 = entity.hurt(this.damageSources().playerAttack(this), f);
 					if (bl6) {
 						if (i > 0) {
 							if (entity instanceof LivingEntity) {
@@ -1195,7 +1190,7 @@ public abstract class Player extends LivingEntity {
 									livingEntity.knockback(
 										0.4F, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
 									);
-									livingEntity.hurt(DamageSource.playerAttack(this), l);
+									livingEntity.hurt(this.damageSources().playerAttack(this), l);
 								}
 							}
 

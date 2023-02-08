@@ -92,7 +92,7 @@ public class Explosion {
 		this.z = f;
 		this.fire = bl;
 		this.blockInteraction = blockInteraction;
-		this.damageSource = damageSource == null ? DamageSource.explosion(this) : damageSource;
+		this.damageSource = damageSource == null ? level.damageSources().explosion(this) : damageSource;
 		this.damageCalculator = explosionDamageCalculator == null ? this.makeDamageCalculator(entity) : explosionDamageCalculator;
 	}
 

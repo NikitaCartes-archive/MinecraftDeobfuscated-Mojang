@@ -70,7 +70,7 @@ public class NeighborsUpdateRenderer implements DebugRenderer.SimpleDebugRendere
 		for (Entry<BlockPos, Integer> entry : map.entrySet()) {
 			BlockPos blockPos2 = (BlockPos)entry.getKey();
 			Integer integer2 = (Integer)entry.getValue();
-			DebugRenderer.renderFloatingText(String.valueOf(integer2), blockPos2.getX(), blockPos2.getY(), blockPos2.getZ(), -1);
+			DebugRenderer.renderFloatingText(poseStack, multiBufferSource, String.valueOf(integer2), blockPos2.getX(), blockPos2.getY(), blockPos2.getZ(), -1);
 		}
 	}
 }

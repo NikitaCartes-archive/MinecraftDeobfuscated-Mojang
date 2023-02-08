@@ -113,7 +113,7 @@ public class ThrownTrident extends AbstractArrow {
 		}
 
 		Entity entity2 = this.getOwner();
-		DamageSource damageSource = DamageSource.trident(this, (Entity)(entity2 == null ? this : entity2));
+		DamageSource damageSource = this.damageSources().trident(this, (Entity)(entity2 == null ? this : entity2));
 		this.dealtDamage = true;
 		SoundEvent soundEvent = SoundEvents.TRIDENT_HIT;
 		if (entity.hurt(damageSource, f)) {

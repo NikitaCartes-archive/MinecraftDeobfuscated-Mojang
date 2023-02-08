@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
@@ -242,7 +243,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (!this.getItem().isEmpty() && this.getItem().is(Items.NETHER_STAR) && damageSource.isExplosion()) {
+		} else if (!this.getItem().isEmpty() && this.getItem().is(Items.NETHER_STAR) && damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
 			return false;
 		} else if (!this.getItem().getItem().canBeHurtBy(damageSource)) {
 			return false;

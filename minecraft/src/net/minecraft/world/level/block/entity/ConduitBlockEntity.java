@@ -13,7 +13,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -214,7 +213,7 @@ public class ConduitBlockEntity extends BlockEntity {
 				1.0F,
 				1.0F
 			);
-			conduitBlockEntity.destroyTarget.hurt(DamageSource.MAGIC, 4.0F);
+			conduitBlockEntity.destroyTarget.hurt(level.damageSources().magic(), 4.0F);
 		}
 
 		if (livingEntity != conduitBlockEntity.destroyTarget) {

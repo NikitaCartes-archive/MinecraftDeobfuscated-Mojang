@@ -285,15 +285,15 @@ public class WorldOpenFlows {
 		}, component, component2, false));
 	}
 
-	public static void confirmWorldCreation(Minecraft minecraft, CreateWorldScreen createWorldScreen, Lifecycle lifecycle, Runnable runnable) {
-		BooleanConsumer booleanConsumer = bl -> {
-			if (bl) {
+	public static void confirmWorldCreation(Minecraft minecraft, CreateWorldScreen createWorldScreen, Lifecycle lifecycle, Runnable runnable, boolean bl) {
+		BooleanConsumer booleanConsumer = blx -> {
+			if (blx) {
 				runnable.run();
 			} else {
 				minecraft.setScreen(createWorldScreen);
 			}
 		};
-		if (lifecycle == Lifecycle.stable()) {
+		if (bl || lifecycle == Lifecycle.stable()) {
 			runnable.run();
 		} else if (lifecycle == Lifecycle.experimental()) {
 			minecraft.setScreen(

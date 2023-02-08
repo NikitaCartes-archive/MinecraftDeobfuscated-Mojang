@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -395,7 +396,7 @@ public class EnderDragon extends Mob implements Enemy {
 				double h = Math.max(f * f + g * g, 0.1);
 				entity.push(f / h * 4.0, 0.2F, g / h * 4.0);
 				if (!this.phaseManager.getCurrentPhase().isSitting() && ((LivingEntity)entity).getLastHurtByMobTimestamp() < entity.tickCount - 2) {
-					entity.hurt(DamageSource.mobAttack(this), 5.0F);
+					entity.hurt(this.damageSources().mobAttack(this), 5.0F);
 					this.doEnchantDamageEffects(this, entity);
 				}
 			}
@@ -405,7 +406,7 @@ public class EnderDragon extends Mob implements Enemy {
 	private void hurt(List<Entity> list) {
 		for (Entity entity : list) {
 			if (entity instanceof LivingEntity) {
-				entity.hurt(DamageSource.mobAttack(this), 10.0F);
+				entity.hurt(this.damageSources().mobAttack(this), 10.0F);
 				this.doEnchantDamageEffects(this, entity);
 			}
 		}
@@ -461,7 +462,7 @@ public class EnderDragon extends Mob implements Enemy {
 			if (f < 0.01F) {
 				return false;
 			} else {
-				if (damageSource.getEntity() instanceof Player || damageSource.isExplosion()) {
+				if (damageSource.getEntity() instanceof Player || damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
 					float g = this.getHealth();
 					this.reallyHurt(damageSource, f);
 					if (this.isDeadOrDying() && !this.phaseManager.getCurrentPhase().isSitting()) {
@@ -827,7 +828,7 @@ public class EnderDragon extends Mob implements Enemy {
 		}
 
 		if (endCrystal == this.nearestCrystal) {
-			this.hurt(this.head, DamageSource.explosion(endCrystal, player), 10.0F);
+			this.hurt(this.head, this.damageSources().explosion(endCrystal, player), 10.0F);
 		}
 
 		this.phaseManager.getCurrentPhase().onCrystalDestroyed(endCrystal, blockPos, damageSource, player);

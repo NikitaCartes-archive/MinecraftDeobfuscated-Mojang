@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
@@ -24,7 +24,7 @@ public class OnlineOptionsScreen extends SimpleOptionsSubScreen {
 		List<OptionInstance<?>> list = Lists.<OptionInstance<?>>newArrayList();
 		list.add(options.realmsNotifications());
 		list.add(options.allowServerListing());
-		OptionInstance<Unit> optionInstance = Util.mapNullable(
+		OptionInstance<Unit> optionInstance = Optionull.map(
 			minecraft.level,
 			clientLevel -> {
 				Difficulty difficulty = clientLevel.getDifficulty();

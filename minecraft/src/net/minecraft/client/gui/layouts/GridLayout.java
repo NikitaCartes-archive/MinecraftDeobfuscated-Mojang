@@ -130,7 +130,7 @@ public class GridLayout extends AbstractLayout {
 	}
 
 	@Override
-	protected void visitChildren(Consumer<LayoutElement> consumer) {
+	public void visitChildren(Consumer<LayoutElement> consumer) {
 		this.children.forEach(consumer);
 	}
 

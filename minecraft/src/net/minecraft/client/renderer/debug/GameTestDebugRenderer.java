@@ -1,8 +1,6 @@
 package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
@@ -29,25 +27,17 @@ public class GameTestDebugRenderer implements DebugRenderer.SimpleDebugRenderer 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		long l = Util.getMillis();
 		this.markers.entrySet().removeIf(entry -> l > ((GameTestDebugRenderer.Marker)entry.getValue()).removeAtTime);
-		this.markers.forEach(this::renderMarker);
+		this.markers.forEach((blockPos, marker) -> this.renderMarker(poseStack, multiBufferSource, blockPos, marker));
 	}
 
-	private void renderMarker(BlockPos blockPos, GameTestDebugRenderer.Marker marker) {
-		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
-		RenderSystem.setShaderColor(0.0F, 1.0F, 0.0F, 0.75F);
-		DebugRenderer.renderFilledBox(blockPos, 0.02F, marker.getR(), marker.getG(), marker.getB(), marker.getA());
+	private void renderMarker(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos, GameTestDebugRenderer.Marker marker) {
+		DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos, 0.02F, marker.getR(), marker.getG(), marker.getB(), marker.getA() * 0.75F);
 		if (!marker.text.isEmpty()) {
 			double d = (double)blockPos.getX() + 0.5;
 			double e = (double)blockPos.getY() + 1.2;
 			double f = (double)blockPos.getZ() + 0.5;
-			DebugRenderer.renderFloatingText(marker.text, d, e, f, -1, 0.01F, true, 0.0F, true);
+			DebugRenderer.renderFloatingText(poseStack, multiBufferSource, marker.text, d, e, f, -1, 0.01F, true, 0.0F, true);
 		}
-
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.disableBlend();
 	}
 
 	@Environment(EnvType.CLIENT)

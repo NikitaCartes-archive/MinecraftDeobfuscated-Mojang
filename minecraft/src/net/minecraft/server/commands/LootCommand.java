@@ -27,7 +27,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -455,7 +454,7 @@ public class LootCommand {
 				builder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, (Player)entity2);
 			}
 
-			builder.withParameter(LootContextParams.DAMAGE_SOURCE, DamageSource.MAGIC);
+			builder.withParameter(LootContextParams.DAMAGE_SOURCE, entity.damageSources().magic());
 			builder.withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, entity2);
 			builder.withOptionalParameter(LootContextParams.KILLER_ENTITY, entity2);
 			builder.withParameter(LootContextParams.THIS_ENTITY, entity);

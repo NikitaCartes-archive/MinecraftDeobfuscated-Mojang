@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -16,7 +15,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 
@@ -116,19 +114,6 @@ public class TextureUtil {
 				LOGGER.debug("Unable to write: ", (Throwable)var14);
 			}
 		}
-	}
-
-	public static void initTexture(IntBuffer intBuffer, int i, int j) {
-		RenderSystem.assertOnRenderThread();
-		GL11.glPixelStorei(3312, 0);
-		GL11.glPixelStorei(3313, 0);
-		GL11.glPixelStorei(3314, 0);
-		GL11.glPixelStorei(3315, 0);
-		GL11.glPixelStorei(3316, 0);
-		GL11.glPixelStorei(3317, 4);
-		GL11.glTexImage2D(3553, 0, 6408, i, j, 0, 32993, 33639, intBuffer);
-		GL11.glTexParameteri(3553, 10240, 9728);
-		GL11.glTexParameteri(3553, 10241, 9729);
 	}
 
 	public static Path getDebugTexturePath(Path path) {

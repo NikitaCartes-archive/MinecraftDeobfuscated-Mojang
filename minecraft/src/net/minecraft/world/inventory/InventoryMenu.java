@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -55,10 +56,9 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 			final EquipmentSlot equipmentSlot = SLOT_IDS[i];
 			this.addSlot(new Slot(inventory, 39 - i, 8, 8 + i * 18) {
 				@Override
-				public void set(ItemStack itemStack) {
-					ItemStack itemStack2 = this.getItem();
-					super.set(itemStack);
-					player.onEquipItem(equipmentSlot, itemStack2, itemStack);
+				public void setByPlayer(ItemStack itemStack) {
+					InventoryMenu.onEquipItem(player, equipmentSlot, itemStack, this.getItem());
+					super.setByPlayer(itemStack);
 				}
 
 				@Override
@@ -96,10 +96,23 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 
 		this.addSlot(new Slot(inventory, 40, 77, 62) {
 			@Override
+			public void setByPlayer(ItemStack itemStack) {
+				InventoryMenu.onEquipItem(player, EquipmentSlot.OFFHAND, itemStack, this.getItem());
+				super.setByPlayer(itemStack);
+			}
+
+			@Override
 			public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
 				return Pair.of(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD);
 			}
 		});
+	}
+
+	static void onEquipItem(Player player, EquipmentSlot equipmentSlot, ItemStack itemStack, ItemStack itemStack2) {
+		Equipable equipable = Equipable.get(itemStack);
+		if (equipable != null) {
+			player.onEquipItem(equipmentSlot, itemStack2, itemStack);
+		}
 	}
 
 	public static boolean isHotbarSlot(int i) {
@@ -145,7 +158,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 	public ItemStack quickMoveStack(Player player, int i) {
 		ItemStack itemStack = ItemStack.EMPTY;
 		Slot slot = this.slots.get(i);
-		if (slot != null && slot.hasItem()) {
+		if (slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
 			EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
@@ -185,7 +198,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 			}
 
 			if (itemStack2.isEmpty()) {
-				slot.set(ItemStack.EMPTY);
+				slot.setByPlayer(ItemStack.EMPTY);
 			} else {
 				slot.setChanged();
 			}

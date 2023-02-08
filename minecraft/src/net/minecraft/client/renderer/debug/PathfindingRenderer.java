@@ -1,19 +1,15 @@
 package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Locale;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.pathfinder.Node;
@@ -48,7 +44,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 			for (Integer integer : this.pathMap.keySet()) {
 				Path path = (Path)this.pathMap.get(integer);
 				float g = (Float)this.pathMaxDist.get(integer);
-				renderPath(path, g, true, true, d, e, f);
+				renderPath(poseStack, multiBufferSource, path, g, true, true, d, e, f);
 			}
 
 			for (Integer integer2 : (Integer[])this.creationMap.keySet().toArray(new Integer[0])) {
@@ -60,19 +56,15 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 	}
 
-	public static void renderPath(Path path, float f, boolean bl, boolean bl2, double d, double e, double g) {
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.lineWidth(6.0F);
-		doRenderPath(path, f, bl, bl2, d, e, g);
-		RenderSystem.disableBlend();
-	}
-
-	private static void doRenderPath(Path path, float f, boolean bl, boolean bl2, double d, double e, double g) {
-		renderPathLine(path, d, e, g);
+	public static void renderPath(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, Path path, float f, boolean bl, boolean bl2, double d, double e, double g
+	) {
+		renderPathLine(poseStack, multiBufferSource.getBuffer(RenderType.debugLineStrip(6.0)), path, d, e, g);
 		BlockPos blockPos = path.getTarget();
 		if (distanceToCamera(blockPos, d, e, g) <= 80.0F) {
 			DebugRenderer.renderFilledBox(
+				poseStack,
+				multiBufferSource,
 				new AABB(
 						(double)((float)blockPos.getX() + 0.25F),
 						(double)((float)blockPos.getY() + 0.25F),
@@ -94,6 +86,8 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 					float h = i == path.getNextNodeIndex() ? 1.0F : 0.0F;
 					float j = i == path.getNextNodeIndex() ? 0.0F : 1.0F;
 					DebugRenderer.renderFilledBox(
+						poseStack,
+						multiBufferSource,
 						new AABB(
 								(double)((float)node.x + 0.5F - f),
 								(double)((float)node.y + 0.01F * (float)i),
@@ -116,6 +110,8 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 			for (Node node2 : path.getClosedSet()) {
 				if (distanceToCamera(node2.asBlockPos(), d, e, g) <= 80.0F) {
 					DebugRenderer.renderFilledBox(
+						poseStack,
+						multiBufferSource,
 						new AABB(
 								(double)((float)node2.x + 0.5F - f / 2.0F),
 								(double)((float)node2.y + 0.01F),
@@ -136,6 +132,8 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 			for (Node node2x : path.getOpenSet()) {
 				if (distanceToCamera(node2x.asBlockPos(), d, e, g) <= 80.0F) {
 					DebugRenderer.renderFilledBox(
+						poseStack,
+						multiBufferSource,
 						new AABB(
 								(double)((float)node2x.x + 0.5F - f / 2.0F),
 								(double)((float)node2x.y + 0.01F),
@@ -158,21 +156,28 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 			for (int ix = 0; ix < path.getNodeCount(); ix++) {
 				Node node = path.getNode(ix);
 				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0F) {
-					DebugRenderer.renderFloatingText(String.valueOf(node.type), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1, 0.02F, true, 0.0F, true);
 					DebugRenderer.renderFloatingText(
-						String.format(Locale.ROOT, "%.2f", node.costMalus), (double)node.x + 0.5, (double)node.y + 0.25, (double)node.z + 0.5, -1, 0.02F, true, 0.0F, true
+						poseStack, multiBufferSource, String.valueOf(node.type), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1, 0.02F, true, 0.0F, true
+					);
+					DebugRenderer.renderFloatingText(
+						poseStack,
+						multiBufferSource,
+						String.format(Locale.ROOT, "%.2f", node.costMalus),
+						(double)node.x + 0.5,
+						(double)node.y + 0.25,
+						(double)node.z + 0.5,
+						-1,
+						0.02F,
+						true,
+						0.0F,
+						true
 					);
 				}
 			}
 		}
 	}
 
-	public static void renderPathLine(Path path, double d, double e, double f) {
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		bufferBuilder.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-
+	public static void renderPathLine(PoseStack poseStack, VertexConsumer vertexConsumer, Path path, double d, double e, double f) {
 		for (int i = 0; i < path.getNodeCount(); i++) {
 			Node node = path.getNode(i);
 			if (!(distanceToCamera(node.asBlockPos(), d, e, f) > 80.0F)) {
@@ -181,11 +186,11 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 				int k = j >> 16 & 0xFF;
 				int l = j >> 8 & 0xFF;
 				int m = j & 0xFF;
-				bufferBuilder.vertex((double)node.x - d + 0.5, (double)node.y - e + 0.5, (double)node.z - f + 0.5).color(k, l, m, 255).endVertex();
+				vertexConsumer.vertex(poseStack.last().pose(), (float)((double)node.x - d + 0.5), (float)((double)node.y - e + 0.5), (float)((double)node.z - f + 0.5))
+					.color(k, l, m, 255)
+					.endVertex();
 			}
 		}
-
-		tesselator.end();
 	}
 
 	private static float distanceToCamera(BlockPos blockPos, double d, double e, double f) {

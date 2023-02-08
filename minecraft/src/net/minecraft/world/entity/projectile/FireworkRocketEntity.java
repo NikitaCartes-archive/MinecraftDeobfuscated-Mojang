@@ -11,7 +11,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -212,7 +211,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 		if (f > 0.0F) {
 			if (this.attachedToEntity != null) {
-				this.attachedToEntity.hurt(DamageSource.fireworks(this, this.getOwner()), 5.0F + (float)(listTag.size() * 2));
+				this.attachedToEntity.hurt(this.damageSources().fireworks(this, this.getOwner()), 5.0F + (float)(listTag.size() * 2));
 			}
 
 			double d = 5.0;
@@ -233,7 +232,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 					if (bl) {
 						float g = f * (float)Math.sqrt((5.0 - (double)this.distanceTo(livingEntity)) / 5.0);
-						livingEntity.hurt(DamageSource.fireworks(this, this.getOwner()), g);
+						livingEntity.hurt(this.damageSources().fireworks(this, this.getOwner()), g);
 					}
 				}
 			}

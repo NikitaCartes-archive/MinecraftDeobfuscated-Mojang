@@ -6,9 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -97,7 +97,7 @@ public class Silverfish extends Monster {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
-			if ((damageSource instanceof EntityDamageSource || damageSource == DamageSource.MAGIC) && this.friendsGoal != null) {
+			if ((damageSource.getEntity() != null || damageSource.is(DamageTypeTags.ALWAYS_TRIGGERS_SILVERFISH)) && this.friendsGoal != null) {
 				this.friendsGoal.notifyHurt();
 			}
 
