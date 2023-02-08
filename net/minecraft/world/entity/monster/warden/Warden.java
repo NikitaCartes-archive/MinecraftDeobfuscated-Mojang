@@ -25,6 +25,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -32,7 +33,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
@@ -154,7 +154,7 @@ implements VibrationListener.VibrationListenerConfig {
 
     @Override
     public boolean isInvulnerableTo(DamageSource damageSource) {
-        if (this.isDiggingOrEmerging() && !damageSource.isBypassInvul()) {
+        if (this.isDiggingOrEmerging() && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return true;
         }
         return super.isInvulnerableTo(damageSource);
@@ -314,11 +314,11 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     public float getTendrilAnimation(float f) {
-        return Mth.lerp(f, this.tendrilAnimationO, this.tendrilAnimation) / 10.0f;
+        return (float)Mth.lerp(f, this.tendrilAnimationO, this.tendrilAnimation) / 10.0f;
     }
 
     public float getHeartAnimation(float f) {
-        return Mth.lerp(f, this.heartAnimationO, this.heartAnimation) / 10.0f;
+        return (float)Mth.lerp(f, this.heartAnimationO, this.heartAnimation) / 10.0f;
     }
 
     private void clientDiggingParticles(AnimationState animationState) {
@@ -519,7 +519,7 @@ implements VibrationListener.VibrationListenerConfig {
             this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
             if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && entity instanceof LivingEntity) {
                 LivingEntity livingEntity = (LivingEntity)entity;
-                if (!(damageSource instanceof IndirectEntityDamageSource) || this.closerThan(livingEntity, 5.0)) {
+                if (!damageSource.isIndirect() || this.closerThan(livingEntity, 5.0)) {
                     this.setAttackTarget(livingEntity);
                 }
             }

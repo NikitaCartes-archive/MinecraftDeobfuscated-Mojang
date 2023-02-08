@@ -16,6 +16,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -165,7 +167,7 @@ extends HangingEntity {
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (this.fixed) {
-            if (damageSource == DamageSource.OUT_OF_WORLD || damageSource.isCreativePlayer()) {
+            if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || damageSource.isCreativePlayer()) {
                 return super.hurt(damageSource, f);
             }
             return false;
@@ -173,9 +175,10 @@ extends HangingEntity {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        if (!damageSource.isExplosion() && !this.getItem().isEmpty()) {
+        if (!damageSource.is(DamageTypeTags.IS_EXPLOSION) && !this.getItem().isEmpty()) {
             if (!this.level.isClientSide) {
                 this.dropItem(damageSource.getEntity(), false);
+                this.gameEvent(GameEvent.BLOCK_CHANGE, damageSource.getEntity());
                 this.playSound(this.getRemoveItemSound(), 1.0f, 1.0f);
             }
             return true;
@@ -207,6 +210,7 @@ extends HangingEntity {
     public void dropItem(@Nullable Entity entity) {
         this.playSound(this.getBreakSound(), 1.0f, 1.0f);
         this.dropItem(entity, true);
+        this.gameEvent(GameEvent.BLOCK_CHANGE, entity);
     }
 
     public SoundEvent getBreakSound() {
@@ -409,6 +413,7 @@ extends HangingEntity {
                     return InteractionResult.FAIL;
                 }
                 this.setItem(itemStack);
+                this.gameEvent(GameEvent.BLOCK_CHANGE, player);
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }
@@ -416,6 +421,7 @@ extends HangingEntity {
         } else {
             this.playSound(this.getRotateItemSound(), 1.0f, 1.0f);
             this.setRotation(this.getRotation() + 1);
+            this.gameEvent(GameEvent.BLOCK_CHANGE, player);
         }
         return InteractionResult.CONSUME;
     }

@@ -10,9 +10,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -21,7 +27,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.util.Mth;
 import net.minecraft.world.flag.FeatureFlags;
 
 @Environment(value=EnvType.CLIENT)
@@ -30,10 +35,11 @@ extends Screen {
     private static final Component TITLE = Component.translatable("selectWorld.experimental.title");
     private static final Component MESSAGE = Component.translatable("selectWorld.experimental.message");
     private static final Component DETAILS_BUTTON = Component.translatable("selectWorld.experimental.details");
-    private static final int MARGIN = 20;
+    private static final int COLUMN_SPACING = 10;
+    private static final int DETAILS_BUTTON_WIDTH = 100;
     private final BooleanConsumer callback;
     final Collection<Pack> enabledPacks;
-    private MultiLineLabel multilineMessage = MultiLineLabel.EMPTY;
+    private final GridLayout layout = new GridLayout().columnSpacing(10).rowSpacing(20);
 
     public ConfirmExperimentalFeaturesScreen(Collection<Pack> collection, BooleanConsumer booleanConsumer) {
         super(TITLE);
@@ -46,30 +52,32 @@ extends Screen {
         return CommonComponents.joinForNarration(super.getNarrationMessage(), MESSAGE);
     }
 
-    private int messageHeight() {
-        return this.multilineMessage.getLineCount() * this.font.lineHeight;
-    }
-
-    private int titleTop() {
-        int i = (this.height - this.messageHeight()) / 2;
-        return Mth.clamp(i - 20 - this.font.lineHeight, 10, 80);
-    }
-
     @Override
     protected void init() {
         super.init();
-        this.multilineMessage = MultiLineLabel.create(this.font, (FormattedText)MESSAGE, this.width - 50);
-        int i = Mth.clamp(this.titleTop() + 20 + this.messageHeight() + 20, this.height / 6 + 96, this.height - 24);
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_PROCEED, button -> this.callback.accept(true)).bounds(this.width / 2 - 50 - 105, i, 100, 20).build());
-        this.addRenderableWidget(Button.builder(DETAILS_BUTTON, button -> this.minecraft.setScreen(new DetailsScreen())).bounds(this.width / 2 - 50, i, 100, 20).build());
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.callback.accept(false)).bounds(this.width / 2 - 50 + 105, i, 100, 20).build());
+        GridLayout.RowHelper rowHelper = this.layout.createRowHelper(2);
+        LayoutSettings layoutSettings = rowHelper.newCellSettings().alignHorizontallyCenter();
+        rowHelper.addChild(new StringWidget(this.title, this.font), 2, layoutSettings);
+        MultiLineTextWidget multiLineTextWidget = rowHelper.addChild(new MultiLineTextWidget(MESSAGE, this.font).setCentered(true), 2, layoutSettings);
+        multiLineTextWidget.setMaxWidth(310);
+        rowHelper.addChild(Button.builder(DETAILS_BUTTON, button -> this.minecraft.setScreen(new DetailsScreen())).width(100).build(), 2, layoutSettings);
+        rowHelper.addChild(Button.builder(CommonComponents.GUI_PROCEED, button -> this.callback.accept(true)).build());
+        rowHelper.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.callback.accept(false)).build());
+        this.layout.visitWidgets(guiEventListener -> {
+            AbstractWidget cfr_ignored_0 = (AbstractWidget)this.addRenderableWidget(guiEventListener);
+        });
+        this.layout.arrangeElements();
+        this.repositionElements();
+    }
+
+    @Override
+    protected void repositionElements() {
+        FrameLayout.alignInRectangle(this.layout, 0, 0, this.width, this.height, 0.5f, 0.5f);
     }
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        ConfirmExperimentalFeaturesScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.titleTop(), 0xFFFFFF);
-        this.multilineMessage.renderCentered(poseStack, this.width / 2, this.titleTop() + 20);
         super.render(poseStack, i, j, f);
     }
 

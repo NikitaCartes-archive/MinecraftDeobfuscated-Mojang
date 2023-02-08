@@ -27,6 +27,7 @@ import net.minecraft.client.renderer.entity.ChickenRenderer;
 import net.minecraft.client.renderer.entity.CodRenderer;
 import net.minecraft.client.renderer.entity.CowRenderer;
 import net.minecraft.client.renderer.entity.CreeperRenderer;
+import net.minecraft.client.renderer.entity.DisplayRenderer;
 import net.minecraft.client.renderer.entity.DolphinRenderer;
 import net.minecraft.client.renderer.entity.DragonFireballRenderer;
 import net.minecraft.client.renderer.entity.DrownedRenderer;
@@ -174,6 +175,7 @@ public class EntityRenderers {
         EntityRenderers.register(EntityType.BAT, BatRenderer::new);
         EntityRenderers.register(EntityType.BEE, BeeRenderer::new);
         EntityRenderers.register(EntityType.BLAZE, BlazeRenderer::new);
+        EntityRenderers.register(EntityType.BLOCK_DISPLAY, DisplayRenderer.BlockDisplayRenderer::new);
         EntityRenderers.register(EntityType.BOAT, context -> new BoatRenderer(context, false));
         EntityRenderers.register(EntityType.CAT, CatRenderer::new);
         EntityRenderers.register(EntityType.CAMEL, context -> new CamelRenderer(context, ModelLayers.CAMEL));
@@ -221,6 +223,7 @@ public class EntityRenderers {
         EntityRenderers.register(EntityType.ILLUSIONER, IllusionerRenderer::new);
         EntityRenderers.register(EntityType.IRON_GOLEM, IronGolemRenderer::new);
         EntityRenderers.register(EntityType.ITEM, ItemEntityRenderer::new);
+        EntityRenderers.register(EntityType.ITEM_DISPLAY, DisplayRenderer.ItemDisplayRenderer::new);
         EntityRenderers.register(EntityType.ITEM_FRAME, ItemFrameRenderer::new);
         EntityRenderers.register(EntityType.LEASH_KNOT, LeashKnotRenderer::new);
         EntityRenderers.register(EntityType.LIGHTNING_BOLT, LightningBoltRenderer::new);
@@ -263,6 +266,7 @@ public class EntityRenderers {
         EntityRenderers.register(EntityType.STRAY, StrayRenderer::new);
         EntityRenderers.register(EntityType.STRIDER, StriderRenderer::new);
         EntityRenderers.register(EntityType.TADPOLE, TadpoleRenderer::new);
+        EntityRenderers.register(EntityType.TEXT_DISPLAY, DisplayRenderer.TextDisplayRenderer::new);
         EntityRenderers.register(EntityType.TNT, TntRenderer::new);
         EntityRenderers.register(EntityType.TNT_MINECART, TntMinecartRenderer::new);
         EntityRenderers.register(EntityType.TRADER_LLAMA, context -> new LlamaRenderer(context, ModelLayers.TRADER_LLAMA));

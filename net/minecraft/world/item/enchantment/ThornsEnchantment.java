@@ -5,7 +5,6 @@ package net.minecraft.world.item.enchantment;
 
 import java.util.Map;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -53,7 +52,7 @@ extends Enchantment {
         Map.Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.THORNS, livingEntity2);
         if (ThornsEnchantment.shouldHit(i, randomSource)) {
             if (entity != null) {
-                entity.hurt(DamageSource.thorns(livingEntity2), ThornsEnchantment.getDamage(i, randomSource));
+                entity.hurt(livingEntity2.damageSources().thorns(livingEntity2), ThornsEnchantment.getDamage(i, randomSource));
             }
             if (entry != null) {
                 entry.getValue().hurtAndBreak(2, livingEntity2, livingEntity -> livingEntity.broadcastBreakEvent((EquipmentSlot)((Object)((Object)entry.getKey()))));

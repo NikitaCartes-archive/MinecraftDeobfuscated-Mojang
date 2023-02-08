@@ -25,7 +25,6 @@ public class FoodConstants {
     public static final float EXHAUSTION_SPRINT_JUMP = 0.2f;
     public static final float EXHAUSTION_MINE = 0.005f;
     public static final float EXHAUSTION_ATTACK = 0.1f;
-    public static final float EXHAUSTION_DAMAGE = 0.1f;
     public static final float EXHAUSTION_WALK = 0.0f;
     public static final float EXHAUSTION_CROUCH = 0.0f;
     public static final float EXHAUSTION_SPRINT = 0.1f;

@@ -195,7 +195,7 @@ implements NeutralMob {
         this.level.broadcastEntityEvent(this, (byte)4);
         float f = this.getAttackDamage();
         float g = (int)f > 0 ? f / 2.0f + (float)this.random.nextInt((int)f) : f;
-        boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
+        boolean bl = entity.hurt(this.damageSources().mobAttack(this), g);
         if (bl) {
             double d;
             if (entity instanceof LivingEntity) {

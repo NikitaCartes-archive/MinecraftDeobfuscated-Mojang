@@ -92,7 +92,7 @@ implements TraceableEntity {
         this.setNoGravity(true);
         if (this.hasLimitedLife && --this.limitedLifeTicks <= 0) {
             this.limitedLifeTicks = 20;
-            this.hurt(DamageSource.STARVE, 1.0f);
+            this.hurt(this.damageSources().starve(), 1.0f);
         }
     }
 

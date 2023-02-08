@@ -228,7 +228,7 @@ extends Raider {
             List<Entity> list = this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE);
             for (LivingEntity livingEntity : list) {
                 if (!(livingEntity instanceof AbstractIllager)) {
-                    livingEntity.hurt(DamageSource.mobAttack(this), 6.0f);
+                    livingEntity.hurt(this.damageSources().mobAttack(this), 6.0f);
                 }
                 this.strongKnockback(livingEntity);
             }

@@ -180,7 +180,7 @@ extends WaterAnimal {
 
     @Override
     public boolean doHurtTarget(Entity entity) {
-        boolean bl = entity.hurt(DamageSource.mobAttack(this), (int)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
+        boolean bl = entity.hurt(this.damageSources().mobAttack(this), (int)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
         if (bl) {
             this.doEnchantDamageEffects(this, entity);
             this.playSound(SoundEvents.DOLPHIN_ATTACK, 1.0f, 1.0f);
@@ -251,7 +251,7 @@ extends WaterAnimal {
         } else {
             this.setMoisntessLevel(this.getMoistnessLevel() - 1);
             if (this.getMoistnessLevel() <= 0) {
-                this.hurt(DamageSource.DRY_OUT, 1.0f);
+                this.hurt(this.damageSources().dryOut(), 1.0f);
             }
             if (this.onGround) {
                 this.setDeltaMovement(this.getDeltaMovement().add((this.random.nextFloat() * 2.0f - 1.0f) * 0.2f, 0.5, (this.random.nextFloat() * 2.0f - 1.0f) * 0.2f));

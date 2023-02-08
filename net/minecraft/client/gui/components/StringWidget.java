@@ -7,15 +7,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.components.AbstractStringWidget;
 import net.minecraft.network.chat.Component;
 
 @Environment(value=EnvType.CLIENT)
 public class StringWidget
-extends AbstractWidget {
-    private int color = 0xFFFFFF;
-    private final Font font;
+extends AbstractStringWidget {
     private float alignX = 0.5f;
 
     public StringWidget(Component component, Font font) {
@@ -27,13 +24,13 @@ extends AbstractWidget {
     }
 
     public StringWidget(int i, int j, int k, int l, Component component, Font font) {
-        super(i, j, k, l, component);
-        this.font = font;
+        super(i, j, k, l, component, font);
         this.active = false;
     }
 
-    public StringWidget color(int i) {
-        this.color = i;
+    @Override
+    public StringWidget setColor(int i) {
+        super.setColor(i);
         return this;
     }
 
@@ -55,15 +52,17 @@ extends AbstractWidget {
     }
 
     @Override
-    public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+    public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+        Component component = this.getMessage();
+        Font font = this.getFont();
+        int k = this.getX() + Math.round(this.alignX * (float)(this.getWidth() - font.width(component)));
+        int l = this.getY() + (this.getHeight() - font.lineHeight) / 2;
+        StringWidget.drawString(poseStack, font, component, k, l, this.getColor());
     }
 
     @Override
-    public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-        Component component = this.getMessage();
-        int k = this.getX() + Math.round(this.alignX * (float)(this.getWidth() - this.font.width(component)));
-        int l = this.getY() + (this.getHeight() - this.font.lineHeight) / 2;
-        StringWidget.drawString(poseStack, this.font, component, k, l, this.color);
+    public /* synthetic */ AbstractStringWidget setColor(int i) {
+        return this.setColor(i);
     }
 }
 

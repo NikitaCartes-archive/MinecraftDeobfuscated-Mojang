@@ -232,7 +232,7 @@ FlyingAnimal {
 
     @Override
     public boolean doHurtTarget(Entity entity) {
-        boolean bl = entity.hurt(DamageSource.sting(this), (int)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
+        boolean bl = entity.hurt(this.damageSources().sting(this), (int)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
         if (bl) {
             this.doEnchantDamageEffects(this, entity);
             if (entity instanceof LivingEntity) {
@@ -347,12 +347,12 @@ FlyingAnimal {
         boolean bl = this.hasStung();
         this.underWaterTicks = this.isInWaterOrBubble() ? ++this.underWaterTicks : 0;
         if (this.underWaterTicks > 20) {
-            this.hurt(DamageSource.DROWN, 1.0f);
+            this.hurt(this.damageSources().drown(), 1.0f);
         }
         if (bl) {
             ++this.timeSinceSting;
             if (this.timeSinceSting % 5 == 0 && this.random.nextInt(Mth.clamp(1200 - this.timeSinceSting, 1, 1200)) == 0) {
-                this.hurt(DamageSource.GENERIC, this.getHealth());
+                this.hurt(this.damageSources().generic(), this.getHealth());
             }
         }
         if (!this.hasNectar()) {

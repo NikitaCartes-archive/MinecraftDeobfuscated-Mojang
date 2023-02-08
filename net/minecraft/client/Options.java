@@ -191,7 +191,6 @@ public class Options {
     private final OptionInstance<HumanoidArm> mainHand = new OptionInstance<HumanoidArm>("options.mainHand", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<HumanoidArm>(Arrays.asList(HumanoidArm.values()), Codec.STRING.xmap(string -> "left".equals(string) ? HumanoidArm.LEFT : HumanoidArm.RIGHT, humanoidArm -> humanoidArm == HumanoidArm.LEFT ? "left" : "right")), HumanoidArm.RIGHT, humanoidArm -> this.broadcastOptions());
     public int overrideWidth;
     public int overrideHeight;
-    public boolean heldItemTooltips = true;
     private final OptionInstance<Double> chatScale = new OptionInstance<Double>("options.chat.scale", OptionInstance.noTooltip(), (component, double_) -> {
         if (double_ == 0.0) {
             return CommonComponents.optionStatus(component, false);
@@ -378,6 +377,13 @@ public class Options {
         }
         return Options.percentValueLabel(component, double_);
     }, OptionInstance.UnitDouble.INSTANCE, 1.0, RenderSystem::setShaderGlintAlpha);
+    private static final Component ACCESSIBILITY_TOOLTIP_DAMAGE_TILT_STRENGTH = Component.translatable("options.damageTiltStrength.tooltip");
+    private final OptionInstance<Double> damageTiltStrength = new OptionInstance<Double>("options.damageTiltStrength", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_DAMAGE_TILT_STRENGTH), (component, double_) -> {
+        if (double_ == 0.0) {
+            return Options.genericValueLabel(component, CommonComponents.OPTION_OFF);
+        }
+        return Options.percentValueLabel(component, double_);
+    }, OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> {});
     private final OptionInstance<Double> gamma = new OptionInstance<Double>("options.gamma", OptionInstance.noTooltip(), (component, double_) -> {
         int i = (int)(double_ * 100.0);
         if (i == 0) {
@@ -692,6 +698,10 @@ public class Options {
         return this.glintStrength;
     }
 
+    public OptionInstance<Double> damageTiltStrength() {
+        return this.damageTiltStrength;
+    }
+
     public OptionInstance<Double> gamma() {
         return this.gamma;
     }
@@ -770,6 +780,7 @@ public class Options {
         fieldAccess.process("darknessEffectScale", this.darknessEffectScale);
         fieldAccess.process("glintSpeed", this.glintSpeed);
         fieldAccess.process("glintStrength", this.glintStrength);
+        fieldAccess.process("damageTiltStrength", this.damageTiltStrength);
         fieldAccess.process("gamma", this.gamma);
         fieldAccess.process("renderDistance", this.renderDistance);
         fieldAccess.process("simulationDistance", this.simulationDistance);
@@ -797,7 +808,6 @@ public class Options {
         this.pauseOnLostFocus = fieldAccess.process("pauseOnLostFocus", this.pauseOnLostFocus);
         this.overrideWidth = fieldAccess.process("overrideWidth", this.overrideWidth);
         this.overrideHeight = fieldAccess.process("overrideHeight", this.overrideHeight);
-        this.heldItemTooltips = fieldAccess.process("heldItemTooltips", this.heldItemTooltips);
         fieldAccess.process("chatHeightFocused", this.chatHeightFocused);
         fieldAccess.process("chatDelay", this.chatDelay);
         fieldAccess.process("chatHeightUnfocused", this.chatHeightUnfocused);

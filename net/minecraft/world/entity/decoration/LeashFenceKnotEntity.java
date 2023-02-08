@@ -24,6 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -99,14 +100,19 @@ extends HangingEntity {
             mob.setLeashedTo(this, true);
             bl = true;
         }
+        boolean bl2 = false;
         if (!bl) {
             this.discard();
             if (player.getAbilities().instabuild) {
-                for (Mob mob : list) {
-                    if (!mob.isLeashed() || mob.getLeashHolder() != this) continue;
-                    mob.dropLeash(true, false);
+                for (Mob mob2 : list) {
+                    if (!mob2.isLeashed() || mob2.getLeashHolder() != this) continue;
+                    mob2.dropLeash(true, false);
+                    bl2 = true;
                 }
             }
+        }
+        if (bl || bl2) {
+            this.gameEvent(GameEvent.BLOCK_ATTACH, player);
         }
         return InteractionResult.CONSUME;
     }

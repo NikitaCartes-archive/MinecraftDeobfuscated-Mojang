@@ -33,7 +33,6 @@ extends Item {
             if (!level.isClientSide && player != null) {
                 LeadItem.bindPlayerMobs(player, level, blockPos);
             }
-            level.gameEvent(GameEvent.BLOCK_ATTACH, blockPos, GameEvent.Context.of(player));
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
@@ -55,6 +54,9 @@ extends Item {
             }
             mob.setLeashedTo(leashFenceKnotEntity, true);
             bl = true;
+        }
+        if (bl) {
+            level.gameEvent(GameEvent.BLOCK_ATTACH, blockPos, GameEvent.Context.of(player));
         }
         return bl ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }

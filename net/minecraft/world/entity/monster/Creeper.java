@@ -196,7 +196,7 @@ implements PowerableMob {
     }
 
     public float getSwelling(float f) {
-        return Mth.lerp(f, this.oldSwell, this.swell) / (float)(this.maxSwell - 2);
+        return Mth.lerp(f, this.oldSwell, this.swell) / (this.maxSwell - 2);
     }
 
     public int getSwellDir() {

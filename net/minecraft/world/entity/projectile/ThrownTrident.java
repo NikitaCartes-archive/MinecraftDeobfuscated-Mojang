@@ -114,14 +114,14 @@ extends AbstractArrow {
     protected void onHitEntity(EntityHitResult entityHitResult) {
         LightningBolt lightningBolt;
         BlockPos blockPos;
-        Entity entity2;
         Entity entity = entityHitResult.getEntity();
         float f = 8.0f;
         if (entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)entity;
             f += EnchantmentHelper.getDamageBonus(this.tridentItem, livingEntity.getMobType());
         }
-        DamageSource damageSource = DamageSource.trident(this, (entity2 = this.getOwner()) == null ? this : entity2);
+        Entity entity2 = this.getOwner();
+        DamageSource damageSource = this.damageSources().trident(this, entity2 == null ? this : entity2);
         this.dealtDamage = true;
         SoundEvent soundEvent = SoundEvents.TRIDENT_HIT;
         if (entity.hurt(damageSource, f)) {

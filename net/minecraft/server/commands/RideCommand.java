@@ -24,6 +24,7 @@ public class RideCommand {
     private static final Dynamic2CommandExceptionType ERROR_MOUNT_FAILED = new Dynamic2CommandExceptionType((object, object2) -> Component.translatable("commands.ride.mount.failure.generic", object, object2));
     private static final SimpleCommandExceptionType ERROR_MOUNTING_PLAYER = new SimpleCommandExceptionType(Component.translatable("commands.ride.mount.failure.cant_ride_players"));
     private static final SimpleCommandExceptionType ERROR_MOUNTING_LOOP = new SimpleCommandExceptionType(Component.translatable("commands.ride.mount.failure.loop"));
+    private static final SimpleCommandExceptionType ERROR_WRONG_DIMENSION = new SimpleCommandExceptionType(Component.translatable("commands.ride.mount.failure.wrong_dimension"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("ride").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(((RequiredArgumentBuilder)Commands.argument("target", EntityArgument.entity()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.literal("mount").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("vehicle", EntityArgument.entity()).executes(commandContext -> RideCommand.mount((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntity(commandContext, "target"), EntityArgument.getEntity(commandContext, "vehicle")))))).then(Commands.literal("dismount").executes(commandContext -> RideCommand.dismount((CommandSourceStack)commandContext.getSource(), EntityArgument.getEntity(commandContext, "target"))))));
@@ -39,6 +40,9 @@ public class RideCommand {
         }
         if (entity.getSelfAndPassengers().anyMatch(entity2 -> entity2 == entity22)) {
             throw ERROR_MOUNTING_LOOP.create();
+        }
+        if (entity.getLevel() != entity22.getLevel()) {
+            throw ERROR_WRONG_DIMENSION.create();
         }
         if (!entity.startRiding(entity22, true)) {
             throw ERROR_MOUNT_FAILED.create(entity.getDisplayName(), entity22.getDisplayName());

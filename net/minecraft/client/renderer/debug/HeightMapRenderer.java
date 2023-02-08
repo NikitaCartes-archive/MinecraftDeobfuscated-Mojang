@@ -3,20 +3,16 @@
  */
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -39,13 +35,8 @@ implements DebugRenderer.SimpleDebugRenderer {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         ClientLevel levelAccessor = this.minecraft.level;
-        RenderSystem.disableBlend();
-        RenderSystem.enableDepthTest();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
         BlockPos blockPos = new BlockPos(d, 0.0, f);
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         for (int i = -2; i <= 2; ++i) {
             for (int j = -2; j <= 2; ++j) {
                 ChunkAccess chunkAccess = levelAccessor.getChunk(blockPos.offset(i * 16, 0, j * 16));
@@ -58,37 +49,24 @@ implements DebugRenderer.SimpleDebugRenderer {
                             int m = SectionPos.sectionToBlockCoord(chunkPos.x, k);
                             int n = SectionPos.sectionToBlockCoord(chunkPos.z, l);
                             float g = (float)((double)((float)levelAccessor.getHeight(types, m, n) + (float)types.ordinal() * 0.09375f) - e);
-                            LevelRenderer.addChainedFilledBoxVertices(bufferBuilder, (double)((float)m + 0.25f) - d, g, (double)((float)n + 0.25f) - f, (double)((float)m + 0.75f) - d, g + 0.09375f, (double)((float)n + 0.75f) - f, vector3f.x(), vector3f.y(), vector3f.z(), 1.0f);
+                            LevelRenderer.addChainedFilledBoxVertices(poseStack, vertexConsumer, (double)((float)m + 0.25f) - d, (double)g, (double)((float)n + 0.25f) - f, (double)((float)m + 0.75f) - d, (double)(g + 0.09375f), (double)((float)n + 0.75f) - f, vector3f.x(), vector3f.y(), vector3f.z(), 1.0f);
                         }
                     }
                 }
             }
         }
-        tesselator.end();
     }
 
     private Vector3f getColor(Heightmap.Types types) {
-        switch (types) {
-            case WORLD_SURFACE_WG: {
-                return new Vector3f(1.0f, 1.0f, 0.0f);
-            }
-            case OCEAN_FLOOR_WG: {
-                return new Vector3f(1.0f, 0.0f, 1.0f);
-            }
-            case WORLD_SURFACE: {
-                return new Vector3f(0.0f, 0.7f, 0.0f);
-            }
-            case OCEAN_FLOOR: {
-                return new Vector3f(0.0f, 0.0f, 0.5f);
-            }
-            case MOTION_BLOCKING: {
-                return new Vector3f(0.0f, 0.3f, 0.3f);
-            }
-            case MOTION_BLOCKING_NO_LEAVES: {
-                return new Vector3f(0.0f, 0.5f, 0.5f);
-            }
-        }
-        return new Vector3f(0.0f, 0.0f, 0.0f);
+        return switch (types) {
+            default -> throw new IncompatibleClassChangeError();
+            case Heightmap.Types.WORLD_SURFACE_WG -> new Vector3f(1.0f, 1.0f, 0.0f);
+            case Heightmap.Types.OCEAN_FLOOR_WG -> new Vector3f(1.0f, 0.0f, 1.0f);
+            case Heightmap.Types.WORLD_SURFACE -> new Vector3f(0.0f, 0.7f, 0.0f);
+            case Heightmap.Types.OCEAN_FLOOR -> new Vector3f(0.0f, 0.0f, 0.5f);
+            case Heightmap.Types.MOTION_BLOCKING -> new Vector3f(0.0f, 0.3f, 0.3f);
+            case Heightmap.Types.MOTION_BLOCKING_NO_LEAVES -> new Vector3f(0.0f, 0.5f, 0.5f);
+        };
     }
 }
 

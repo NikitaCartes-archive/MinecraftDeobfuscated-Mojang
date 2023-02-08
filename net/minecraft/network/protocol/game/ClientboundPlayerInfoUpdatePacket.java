@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.RemoteChatSession;
@@ -84,7 +84,7 @@ implements Packet<ClientGamePacketListener> {
 
     public record Entry(UUID profileId, GameProfile profile, boolean listed, int latency, GameType gameMode, @Nullable Component displayName, @Nullable RemoteChatSession.Data chatSession) {
         Entry(ServerPlayer serverPlayer) {
-            this(serverPlayer.getUUID(), serverPlayer.getGameProfile(), true, serverPlayer.latency, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.getTabListDisplayName(), Util.mapNullable(serverPlayer.getChatSession(), RemoteChatSession::asData));
+            this(serverPlayer.getUUID(), serverPlayer.getGameProfile(), true, serverPlayer.latency, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.getTabListDisplayName(), Optionull.map(serverPlayer.getChatSession(), RemoteChatSession::asData));
         }
 
         @Nullable

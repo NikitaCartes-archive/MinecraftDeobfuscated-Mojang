@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
@@ -31,7 +31,7 @@ extends SimpleOptionsSubScreen {
         ArrayList<OptionInstance> list = Lists.newArrayList();
         list.add(options.realmsNotifications());
         list.add(options.allowServerListing());
-        OptionInstance optionInstance = Util.mapNullable(minecraft.level, clientLevel -> {
+        OptionInstance optionInstance = Optionull.map(minecraft.level, clientLevel -> {
             Difficulty difficulty = clientLevel.getDifficulty();
             return new OptionInstance<Unit>("options.difficulty.online", OptionInstance.noTooltip(), (component, unit) -> difficulty.getDisplayName(), new OptionInstance.Enum<Unit>(List.of(Unit.INSTANCE), Codec.EMPTY.codec()), Unit.INSTANCE, unit -> {});
         });

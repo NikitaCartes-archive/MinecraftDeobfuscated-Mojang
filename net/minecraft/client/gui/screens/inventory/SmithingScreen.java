@@ -125,7 +125,7 @@ extends ItemCombinerScreen<SmithingMenu> {
             Item item = itemStack.getItem();
             if (item instanceof ArmorItem) {
                 ArmorItem armorItem = (ArmorItem)item;
-                this.armorStandPreview.setItemSlot(armorItem.getSlot(), itemStack2);
+                this.armorStandPreview.setItemSlot(armorItem.getEquipmentSlot(), itemStack2);
             } else {
                 this.armorStandPreview.setItemSlot(EquipmentSlot.OFFHAND, itemStack2);
             }

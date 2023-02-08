@@ -6,7 +6,6 @@ package net.minecraft.world.entity.projectile;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -64,7 +63,8 @@ extends Projectile {
         super.onHitEntity(entityHitResult);
         Entity entity = this.getOwner();
         if (entity instanceof LivingEntity) {
-            entityHitResult.getEntity().hurt(DamageSource.indirectMobAttack(this, (LivingEntity)entity).setProjectile(), 1.0f);
+            LivingEntity livingEntity = (LivingEntity)entity;
+            entityHitResult.getEntity().hurt(this.damageSources().mobProjectile(this, livingEntity), 1.0f);
         }
     }
 

@@ -234,7 +234,7 @@ public class WorldOpenFlows {
         }, component, component2, false));
     }
 
-    public static void confirmWorldCreation(Minecraft minecraft, CreateWorldScreen createWorldScreen, Lifecycle lifecycle, Runnable runnable) {
+    public static void confirmWorldCreation(Minecraft minecraft, CreateWorldScreen createWorldScreen, Lifecycle lifecycle, Runnable runnable, boolean bl2) {
         BooleanConsumer booleanConsumer = bl -> {
             if (bl) {
                 runnable.run();
@@ -242,7 +242,7 @@ public class WorldOpenFlows {
                 minecraft.setScreen(createWorldScreen);
             }
         };
-        if (lifecycle == Lifecycle.stable()) {
+        if (bl2 || lifecycle == Lifecycle.stable()) {
             runnable.run();
         } else if (lifecycle == Lifecycle.experimental()) {
             minecraft.setScreen(new ConfirmScreen(booleanConsumer, Component.translatable("selectWorld.warning.experimental.title"), Component.translatable("selectWorld.warning.experimental.question")));

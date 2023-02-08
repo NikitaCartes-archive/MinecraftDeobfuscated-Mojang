@@ -136,7 +136,7 @@ extends Entity {
             if (!this.level.mayInteract(player, this.pos)) {
                 return true;
             }
-            return this.hurt(DamageSource.playerAttack(player), 0.0f);
+            return this.hurt(this.damageSources().playerAttack(player), 0.0f);
         }
         return false;
     }

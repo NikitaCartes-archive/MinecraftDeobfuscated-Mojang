@@ -37,7 +37,7 @@ public class SummonCommand {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("summon").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(((RequiredArgumentBuilder)Commands.argument("entity", ResourceArgument.resource(commandBuildContext, Registries.ENTITY_TYPE)).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), ((CommandSourceStack)commandContext.getSource()).getPosition(), new CompoundTag(), true))).then(((RequiredArgumentBuilder)Commands.argument("pos", Vec3Argument.vec3()).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), Vec3Argument.getVec3(commandContext, "pos"), new CompoundTag(), true))).then(Commands.argument("nbt", CompoundTagArgument.compoundTag()).executes(commandContext -> SummonCommand.spawnEntity((CommandSourceStack)commandContext.getSource(), ResourceArgument.getSummonableEntityType(commandContext, "entity"), Vec3Argument.getVec3(commandContext, "pos"), CompoundTagArgument.getCompoundTag(commandContext, "nbt"), false))))));
     }
 
-    private static int spawnEntity(CommandSourceStack commandSourceStack, Holder.Reference<EntityType<?>> reference, Vec3 vec3, CompoundTag compoundTag, boolean bl) throws CommandSyntaxException {
+    public static Entity createEntity(CommandSourceStack commandSourceStack, Holder.Reference<EntityType<?>> reference, Vec3 vec3, CompoundTag compoundTag, boolean bl) throws CommandSyntaxException {
         BlockPos blockPos = new BlockPos(vec3);
         if (!Level.isInSpawnableBounds(blockPos)) {
             throw INVALID_POSITION.create();
@@ -58,7 +58,12 @@ public class SummonCommand {
         if (!serverLevel.tryAddFreshEntityWithPassengers(entity2)) {
             throw ERROR_DUPLICATE_UUID.create();
         }
-        commandSourceStack.sendSuccess(Component.translatable("commands.summon.success", entity2.getDisplayName()), true);
+        return entity2;
+    }
+
+    private static int spawnEntity(CommandSourceStack commandSourceStack, Holder.Reference<EntityType<?>> reference, Vec3 vec3, CompoundTag compoundTag, boolean bl) throws CommandSyntaxException {
+        Entity entity = SummonCommand.createEntity(commandSourceStack, reference, vec3, compoundTag, bl);
+        commandSourceStack.sendSuccess(Component.translatable("commands.summon.success", entity.getDisplayName()), true);
         return 1;
     }
 }

@@ -47,13 +47,13 @@ implements PlaceRecipe<Integer> {
         if (this.stackedContents.canCraft(recipe, null)) {
             this.handleRecipeClicked(recipe, bl);
         } else {
-            this.clearGrid(true);
+            this.clearGrid();
             serverPlayer.connection.send(new ClientboundPlaceGhostRecipePacket(serverPlayer.containerMenu.containerId, recipe));
         }
         serverPlayer.getInventory().setChanged();
     }
 
-    protected void clearGrid(boolean bl) {
+    protected void clearGrid() {
         for (int i = 0; i < this.menu.getSize(); ++i) {
             if (!this.menu.shouldMoveToInventory(i)) continue;
             ItemStack itemStack = this.menu.getSlot(i).getItem().copy();
@@ -86,7 +86,7 @@ implements PlaceRecipe<Integer> {
             }
             j = k;
             if (this.stackedContents.canCraft(recipe, intList, j)) {
-                this.clearGrid(false);
+                this.clearGrid();
                 this.placeRecipe(this.menu.getGridWidth(), this.menu.getGridHeight(), this.menu.getResultSlotIndex(), recipe, intList.iterator(), j);
             }
         }

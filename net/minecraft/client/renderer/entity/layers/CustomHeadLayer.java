@@ -16,7 +16,6 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -29,6 +28,7 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
@@ -57,7 +57,8 @@ extends RenderLayer<T, M> {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
-        float m;
+        ArmorItem armorItem;
+        float n;
         boolean bl;
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.HEAD);
         if (itemStack.isEmpty()) {
@@ -68,8 +69,8 @@ extends RenderLayer<T, M> {
         poseStack.scale(this.scaleX, this.scaleY, this.scaleZ);
         boolean bl2 = bl = livingEntity instanceof Villager || livingEntity instanceof ZombieVillager;
         if (((LivingEntity)livingEntity).isBaby() && !(livingEntity instanceof Villager)) {
-            m = 2.0f;
-            float n = 1.4f;
+            float m = 2.0f;
+            n = 1.4f;
             poseStack.translate(0.0f, 0.03125f, 0.0f);
             poseStack.scale(0.7f, 0.7f, 0.7f);
             poseStack.translate(0.0f, 1.0f, 0.0f);
@@ -77,7 +78,7 @@ extends RenderLayer<T, M> {
         ((HeadedModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
         if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
             CompoundTag compoundTag;
-            m = 1.1875f;
+            n = 1.1875f;
             poseStack.scale(1.1875f, -1.1875f, -1.1875f);
             if (bl) {
                 poseStack.translate(0.0f, 0.0625f, 0.0f);
@@ -91,9 +92,9 @@ extends RenderLayer<T, M> {
             SkullModelBase skullModelBase = this.skullModels.get(type);
             RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
             SkullBlockRenderer.renderSkull(null, 180.0f, f, poseStack, multiBufferSource, i, skullModelBase, renderType);
-        } else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
+        } else if (!(item instanceof ArmorItem) || (armorItem = (ArmorItem)item).getEquipmentSlot() != EquipmentSlot.HEAD) {
             CustomHeadLayer.translateToHead(poseStack, bl);
-            this.itemInHandRenderer.renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
+            this.itemInHandRenderer.renderItem((LivingEntity)livingEntity, itemStack, ItemDisplayContext.HEAD, false, poseStack, multiBufferSource, i);
         }
         poseStack.popPose();
     }

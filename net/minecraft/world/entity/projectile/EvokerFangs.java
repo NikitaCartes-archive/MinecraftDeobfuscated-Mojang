@@ -9,7 +9,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -120,12 +119,12 @@ implements TraceableEntity {
             return;
         }
         if (livingEntity2 == null) {
-            livingEntity.hurt(DamageSource.MAGIC, 6.0f);
+            livingEntity.hurt(this.damageSources().magic(), 6.0f);
         } else {
             if (livingEntity2.isAlliedTo(livingEntity)) {
                 return;
             }
-            livingEntity.hurt(DamageSource.indirectMagic(this, livingEntity2), 6.0f);
+            livingEntity.hurt(this.damageSources().indirectMagic(this, livingEntity2), 6.0f);
         }
     }
 

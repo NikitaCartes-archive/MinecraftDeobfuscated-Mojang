@@ -11,7 +11,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -96,7 +95,7 @@ implements EntityBlock {
                 level.removeBlock(blockPos2, false);
             }
             Vec3 vec3 = blockPos.getCenter();
-            level.explode(null, DamageSource.badRespawnPointExplosion(vec3), null, vec3, 5.0f, true, Level.ExplosionInteraction.BLOCK);
+            level.explode(null, level.damageSources().badRespawnPointExplosion(vec3), null, vec3, 5.0f, true, Level.ExplosionInteraction.BLOCK);
             return InteractionResult.SUCCESS;
         }
         if (blockState.getValue(OCCUPIED).booleanValue()) {

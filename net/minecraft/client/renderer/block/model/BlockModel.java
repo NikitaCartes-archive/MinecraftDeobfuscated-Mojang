@@ -57,6 +57,7 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -257,22 +258,22 @@ implements UnbakedModel {
     }
 
     public ItemTransforms getTransforms() {
-        ItemTransform itemTransform = this.getTransform(ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND);
-        ItemTransform itemTransform2 = this.getTransform(ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND);
-        ItemTransform itemTransform3 = this.getTransform(ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND);
-        ItemTransform itemTransform4 = this.getTransform(ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND);
-        ItemTransform itemTransform5 = this.getTransform(ItemTransforms.TransformType.HEAD);
-        ItemTransform itemTransform6 = this.getTransform(ItemTransforms.TransformType.GUI);
-        ItemTransform itemTransform7 = this.getTransform(ItemTransforms.TransformType.GROUND);
-        ItemTransform itemTransform8 = this.getTransform(ItemTransforms.TransformType.FIXED);
+        ItemTransform itemTransform = this.getTransform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND);
+        ItemTransform itemTransform2 = this.getTransform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND);
+        ItemTransform itemTransform3 = this.getTransform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND);
+        ItemTransform itemTransform4 = this.getTransform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND);
+        ItemTransform itemTransform5 = this.getTransform(ItemDisplayContext.HEAD);
+        ItemTransform itemTransform6 = this.getTransform(ItemDisplayContext.GUI);
+        ItemTransform itemTransform7 = this.getTransform(ItemDisplayContext.GROUND);
+        ItemTransform itemTransform8 = this.getTransform(ItemDisplayContext.FIXED);
         return new ItemTransforms(itemTransform, itemTransform2, itemTransform3, itemTransform4, itemTransform5, itemTransform6, itemTransform7, itemTransform8);
     }
 
-    private ItemTransform getTransform(ItemTransforms.TransformType transformType) {
-        if (this.parent != null && !this.transforms.hasTransform(transformType)) {
-            return this.parent.getTransform(transformType);
+    private ItemTransform getTransform(ItemDisplayContext itemDisplayContext) {
+        if (this.parent != null && !this.transforms.hasTransform(itemDisplayContext)) {
+            return this.parent.getTransform(itemDisplayContext);
         }
-        return this.transforms.getTransform(transformType);
+        return this.transforms.getTransform(itemDisplayContext);
     }
 
     public String toString() {

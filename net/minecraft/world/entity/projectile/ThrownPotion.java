@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -118,7 +117,7 @@ implements ItemSupplier {
             double d = this.distanceToSqr(livingEntity);
             if (!(d < 16.0)) continue;
             if (livingEntity.isSensitiveToWater()) {
-                livingEntity.hurt(DamageSource.indirectMagic(this, this.getOwner()), 1.0f);
+                livingEntity.hurt(this.damageSources().indirectMagic(this, this.getOwner()), 1.0f);
             }
             if (!livingEntity.isOnFire() || !livingEntity.isAlive()) continue;
             livingEntity.extinguishFire();

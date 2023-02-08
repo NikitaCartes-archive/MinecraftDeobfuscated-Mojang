@@ -35,12 +35,14 @@ import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
+import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.data.advancements.packs.VanillaAdventureAdvancements;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -63,7 +65,7 @@ implements AdvancementSubProvider {
     @Override
     public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
         Advancement advancement = Advancement.Builder.advancement().display(Blocks.RED_NETHER_BRICKS, (Component)Component.translatable("advancements.nether.root.title"), (Component)Component.translatable("advancements.nether.root.description"), new ResourceLocation("textures/gui/advancements/backgrounds/nether.png"), FrameType.TASK, false, false, false).addCriterion("entered_nether", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.NETHER)).save(consumer, "nether/root");
-        Advancement advancement2 = Advancement.Builder.advancement().parent(advancement).display(Items.FIRE_CHARGE, (Component)Component.translatable("advancements.nether.return_to_sender.title"), (Component)Component.translatable("advancements.nether.return_to_sender.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(50)).addCriterion("killed_ghast", KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityType.GHAST), DamageSourcePredicate.Builder.damageType().isProjectile(true).direct(EntityPredicate.Builder.entity().of(EntityType.FIREBALL)))).save(consumer, "nether/return_to_sender");
+        Advancement advancement2 = Advancement.Builder.advancement().parent(advancement).display(Items.FIRE_CHARGE, (Component)Component.translatable("advancements.nether.return_to_sender.title"), (Component)Component.translatable("advancements.nether.return_to_sender.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(50)).addCriterion("killed_ghast", KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityType.GHAST), DamageSourcePredicate.Builder.damageType().tag(TagPredicate.is(DamageTypeTags.IS_PROJECTILE)).direct(EntityPredicate.Builder.entity().of(EntityType.FIREBALL)))).save(consumer, "nether/return_to_sender");
         Advancement advancement3 = Advancement.Builder.advancement().parent(advancement).display(Blocks.NETHER_BRICKS, (Component)Component.translatable("advancements.nether.find_fortress.title"), (Component)Component.translatable("advancements.nether.find_fortress.description"), null, FrameType.TASK, true, true, false).addCriterion("fortress", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.FORTRESS))).save(consumer, "nether/find_fortress");
         Advancement.Builder.advancement().parent(advancement).display(Items.MAP, (Component)Component.translatable("advancements.nether.fast_travel.title"), (Component)Component.translatable("advancements.nether.fast_travel.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(100)).addCriterion("travelled", DistanceTrigger.TriggerInstance.travelledThroughNether(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(7000.0)))).save(consumer, "nether/fast_travel");
         Advancement.Builder.advancement().parent(advancement2).display(Items.GHAST_TEAR, (Component)Component.translatable("advancements.nether.uneasy_alliance.title"), (Component)Component.translatable("advancements.nether.uneasy_alliance.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(100)).addCriterion("killed_ghast", KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityType.GHAST).located(LocationPredicate.inDimension(Level.OVERWORLD)))).save(consumer, "nether/uneasy_alliance");

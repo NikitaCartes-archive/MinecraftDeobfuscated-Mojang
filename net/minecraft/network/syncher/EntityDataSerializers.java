@@ -28,6 +28,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class EntityDataSerializers {
     private static final CrudeIncrementalIntIdentityHashBiMap<EntityDataSerializer<?>> SERIALIZERS = CrudeIncrementalIntIdentityHashBiMap.create(16);
@@ -60,7 +62,8 @@ public class EntityDataSerializers {
             return this.read(friendlyByteBuf);
         }
     };
-    public static final EntityDataSerializer<Optional<BlockState>> BLOCK_STATE = new EntityDataSerializer.ForValueType<Optional<BlockState>>(){
+    public static final EntityDataSerializer<BlockState> BLOCK_STATE = EntityDataSerializer.simpleId(Block.BLOCK_STATE_REGISTRY);
+    public static final EntityDataSerializer<Optional<BlockState>> OPTIONAL_BLOCK_STATE = new EntityDataSerializer.ForValueType<Optional<BlockState>>(){
 
         @Override
         public void write(FriendlyByteBuf friendlyByteBuf, Optional<BlockState> optional) {
@@ -195,6 +198,8 @@ public class EntityDataSerializers {
     public static final EntityDataSerializer<CatVariant> CAT_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.CAT_VARIANT);
     public static final EntityDataSerializer<FrogVariant> FROG_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.FROG_VARIANT);
     public static final EntityDataSerializer<Holder<PaintingVariant>> PAINTING_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.PAINTING_VARIANT.asHolderIdMap());
+    public static final EntityDataSerializer<Vector3f> VECTOR3 = EntityDataSerializer.simple(FriendlyByteBuf::writeVector3f, FriendlyByteBuf::readVector3f);
+    public static final EntityDataSerializer<Quaternionf> QUATERNION = EntityDataSerializer.simple(FriendlyByteBuf::writeQuaternion, FriendlyByteBuf::readQuaternion);
 
     public static void registerSerializer(EntityDataSerializer<?> entityDataSerializer) {
         SERIALIZERS.add(entityDataSerializer);
@@ -228,6 +233,7 @@ public class EntityDataSerializers {
         EntityDataSerializers.registerSerializer(DIRECTION);
         EntityDataSerializers.registerSerializer(OPTIONAL_UUID);
         EntityDataSerializers.registerSerializer(BLOCK_STATE);
+        EntityDataSerializers.registerSerializer(OPTIONAL_BLOCK_STATE);
         EntityDataSerializers.registerSerializer(COMPOUND_TAG);
         EntityDataSerializers.registerSerializer(PARTICLE);
         EntityDataSerializers.registerSerializer(VILLAGER_DATA);
@@ -237,6 +243,8 @@ public class EntityDataSerializers {
         EntityDataSerializers.registerSerializer(FROG_VARIANT);
         EntityDataSerializers.registerSerializer(OPTIONAL_GLOBAL_POS);
         EntityDataSerializers.registerSerializer(PAINTING_VARIANT);
+        EntityDataSerializers.registerSerializer(VECTOR3);
+        EntityDataSerializers.registerSerializer(QUATERNION);
     }
 }
 

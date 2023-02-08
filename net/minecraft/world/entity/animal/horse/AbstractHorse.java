@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.animal.horse;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -40,6 +39,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Saddleable;
@@ -65,6 +65,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -79,6 +80,7 @@ public abstract class AbstractHorse
 extends Animal
 implements ContainerListener,
 HasCustomInventoryScreen,
+OwnableEntity,
 PlayerRideableJumping,
 Saddleable {
     public static final int EQUIPMENT_SLOT_OFFSET = 400;
@@ -88,7 +90,6 @@ Saddleable {
     private static final TargetingConditions MOMMY_TARGETING = TargetingConditions.forNonCombat().range(16.0).ignoreLineOfSight().selector(PARENT_HORSE_SELECTOR);
     private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Items.SUGAR, Blocks.HAY_BLOCK.asItem(), Items.APPLE, Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE);
     private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.BYTE);
-    private static final EntityDataAccessor<Optional<UUID>> DATA_ID_OWNER_UUID = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final int FLAG_TAME = 2;
     private static final int FLAG_SADDLE = 4;
     private static final int FLAG_BRED = 8;
@@ -116,6 +117,8 @@ Saddleable {
     private float mouthAnimO;
     protected boolean canGallop = true;
     protected int gallopSoundCounter;
+    @Nullable
+    private UUID owner;
 
     protected AbstractHorse(EntityType<? extends AbstractHorse> entityType, Level level) {
         super((EntityType<? extends Animal>)entityType, level);
@@ -147,7 +150,6 @@ Saddleable {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_ID_FLAGS, (byte)0);
-        this.entityData.define(DATA_ID_OWNER_UUID, Optional.empty());
     }
 
     protected boolean getFlag(int i) {
@@ -167,13 +169,14 @@ Saddleable {
         return this.getFlag(2);
     }
 
+    @Override
     @Nullable
     public UUID getOwnerUUID() {
-        return this.entityData.get(DATA_ID_OWNER_UUID).orElse(null);
+        return this.owner;
     }
 
     public void setOwnerUUID(@Nullable UUID uUID) {
-        this.entityData.set(DATA_ID_OWNER_UUID, Optional.ofNullable(uUID));
+        this.owner = uUID;
     }
 
     public boolean isJumping() {
@@ -1051,6 +1054,11 @@ Saddleable {
     @Nullable
     public /* synthetic */ Entity getControllingPassenger() {
         return this.getControllingPassenger();
+    }
+
+    @Override
+    public /* synthetic */ EntityGetter getLevel() {
+        return super.getLevel();
     }
 }
 

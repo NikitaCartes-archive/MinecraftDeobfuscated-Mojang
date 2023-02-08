@@ -228,7 +228,7 @@ implements Enemy {
     protected void dealDamage(LivingEntity livingEntity) {
         if (this.isAlive()) {
             int i = this.getSize();
-            if (this.distanceToSqr(livingEntity) < 0.6 * (double)i * (0.6 * (double)i) && this.hasLineOfSight(livingEntity) && livingEntity.hurt(DamageSource.mobAttack(this), this.getAttackDamage())) {
+            if (this.distanceToSqr(livingEntity) < 0.6 * (double)i * (0.6 * (double)i) && this.hasLineOfSight(livingEntity) && livingEntity.hurt(this.damageSources().mobAttack(this), this.getAttackDamage())) {
                 this.playSound(SoundEvents.SLIME_ATTACK, 1.0f, (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
                 this.doEnchantDamageEffects(this, livingEntity);
             }

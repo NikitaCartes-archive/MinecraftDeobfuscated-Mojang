@@ -21,6 +21,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.level.biome.Biome;
@@ -34,6 +35,7 @@ public class RegistrySynchronization {
         RegistrySynchronization.put(builder, Registries.TRIM_PATTERN, TrimPattern.DIRECT_CODEC);
         RegistrySynchronization.put(builder, Registries.TRIM_MATERIAL, TrimMaterial.DIRECT_CODEC);
         RegistrySynchronization.put(builder, Registries.DIMENSION_TYPE, DimensionType.DIRECT_CODEC);
+        RegistrySynchronization.put(builder, Registries.DAMAGE_TYPE, DamageType.CODEC);
         return builder.build();
     });
     public static final Codec<RegistryAccess> NETWORK_CODEC = RegistrySynchronization.makeNetworkCodec();

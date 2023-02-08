@@ -41,6 +41,7 @@ extends HangingEntity
 implements VariantHolder<Holder<PaintingVariant>> {
     private static final EntityDataAccessor<Holder<PaintingVariant>> DATA_PAINTING_VARIANT_ID = SynchedEntityData.defineId(Painting.class, EntityDataSerializers.PAINTING_VARIANT);
     private static final ResourceKey<PaintingVariant> DEFAULT_VARIANT = PaintingVariants.KEBAB;
+    public static final String VARIANT_TAG = "variant";
 
     private static Holder<PaintingVariant> getDefaultVariant() {
         return BuiltInRegistries.PAINTING_VARIANT.getHolderOrThrow(DEFAULT_VARIANT);
@@ -114,18 +115,26 @@ implements VariantHolder<Holder<PaintingVariant>> {
 
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
-        compoundTag.putString("variant", this.getVariant().unwrapKey().orElse(DEFAULT_VARIANT).location().toString());
+        Painting.storeVariant(compoundTag, (Holder<PaintingVariant>)this.getVariant());
         compoundTag.putByte("facing", (byte)this.direction.get2DDataValue());
         super.addAdditionalSaveData(compoundTag);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
-        Holder holder = Optional.ofNullable(ResourceLocation.tryParse(compoundTag.getString("variant"))).map(resourceLocation -> ResourceKey.create(Registries.PAINTING_VARIANT, resourceLocation)).flatMap(BuiltInRegistries.PAINTING_VARIANT::getHolder).map(reference -> reference).orElseGet(Painting::getDefaultVariant);
+        Holder holder = Painting.loadVariant(compoundTag).orElseGet(Painting::getDefaultVariant);
         this.setVariant(holder);
         this.direction = Direction.from2DDataValue(compoundTag.getByte("facing"));
         super.readAdditionalSaveData(compoundTag);
         this.setDirection(this.direction);
+    }
+
+    public static void storeVariant(CompoundTag compoundTag, Holder<PaintingVariant> holder) {
+        compoundTag.putString(VARIANT_TAG, holder.unwrapKey().orElse(DEFAULT_VARIANT).location().toString());
+    }
+
+    public static Optional<Holder<PaintingVariant>> loadVariant(CompoundTag compoundTag) {
+        return Optional.ofNullable(ResourceLocation.tryParse(compoundTag.getString(VARIANT_TAG))).map(resourceLocation -> ResourceKey.create(Registries.PAINTING_VARIANT, resourceLocation)).flatMap(BuiltInRegistries.PAINTING_VARIANT::getHolder);
     }
 
     @Override

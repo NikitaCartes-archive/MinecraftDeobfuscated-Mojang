@@ -10,11 +10,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.FoxModel;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(value=EnvType.CLIENT)
@@ -59,7 +59,7 @@ extends RenderLayer<Fox, FoxModel<Fox>> {
             poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
         }
         ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);
-        this.itemInHandRenderer.renderItem(fox, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
+        this.itemInHandRenderer.renderItem(fox, itemStack, ItemDisplayContext.GROUND, false, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }
 }

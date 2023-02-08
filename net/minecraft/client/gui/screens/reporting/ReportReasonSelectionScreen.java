@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Optionull;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -51,7 +52,7 @@ extends Screen {
         this.reasonSelectionList = new ReasonSelectionList(this.minecraft);
         this.reasonSelectionList.setRenderBackground(false);
         this.addWidget(this.reasonSelectionList);
-        ReasonSelectionList.Entry entry = Util.mapNullable(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
+        ReasonSelectionList.Entry entry = Optionull.map(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
         this.reasonSelectionList.setSelected(entry);
         int i = this.width / 2 - 150 - 5;
         this.addRenderableWidget(Button.builder(READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {

@@ -9,12 +9,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.DolphinModel;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.animal.Dolphin;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(value=EnvType.CLIENT)
@@ -40,7 +40,7 @@ extends RenderLayer<Dolphin, DolphinModel<Dolphin>> {
             poseStack.translate(0.0f, 1.0f + o * 0.8f, -1.0f + o * 0.2f);
         }
         ItemStack itemStack = bl ? dolphin.getMainHandItem() : dolphin.getOffhandItem();
-        this.itemInHandRenderer.renderItem(dolphin, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
+        this.itemInHandRenderer.renderItem(dolphin, itemStack, ItemDisplayContext.GROUND, false, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }
 }

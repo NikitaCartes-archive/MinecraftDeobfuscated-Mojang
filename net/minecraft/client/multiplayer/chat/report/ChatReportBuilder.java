@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.client.multiplayer.chat.ChatLog;
 import net.minecraft.client.multiplayer.chat.LoggedChatMessage;
 import net.minecraft.client.multiplayer.chat.report.ChatReportContextBuilder;
@@ -129,7 +129,7 @@ public class ChatReportBuilder {
         SignedMessageLink signedMessageLink = player.message().link();
         SignedMessageBody signedMessageBody = player.message().signedBody();
         List<ByteBuffer> list = signedMessageBody.lastSeen().entries().stream().map(MessageSignature::asByteBuffer).toList();
-        ByteBuffer byteBuffer = Util.mapNullable(player.message().signature(), MessageSignature::asByteBuffer);
+        ByteBuffer byteBuffer = Optionull.map(player.message().signature(), MessageSignature::asByteBuffer);
         return new ReportChatMessage(signedMessageLink.index(), signedMessageLink.sender(), signedMessageLink.sessionId(), signedMessageBody.timeStamp(), signedMessageBody.salt(), list, signedMessageBody.content(), byteBuffer, bl);
     }
 

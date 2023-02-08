@@ -5,6 +5,7 @@ package net.minecraft.client.multiplayer.chat.report;
 
 import com.mojang.authlib.yggdrasil.request.AbuseReportRequest;
 import com.mojang.realmsclient.dto.RealmsServer;
+import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -29,7 +30,7 @@ public record ReportEnvironment(String clientVersion, @Nullable Server server) {
     }
 
     public AbuseReportRequest.ClientInfo clientInfo() {
-        return new AbuseReportRequest.ClientInfo(this.clientVersion);
+        return new AbuseReportRequest.ClientInfo(this.clientVersion, Locale.getDefault().toLanguageTag());
     }
 
     @Nullable
@@ -54,7 +55,7 @@ public record ReportEnvironment(String clientVersion, @Nullable Server server) {
 
     private static String getClientVersion() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("23w05a");
+        stringBuilder.append("23w06a");
         if (Minecraft.checkModStatus().shouldReportAsModified()) {
             stringBuilder.append(" (modded)");
         }

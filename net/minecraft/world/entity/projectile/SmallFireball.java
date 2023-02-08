@@ -41,7 +41,7 @@ extends Fireball {
         Entity entity2 = this.getOwner();
         int i = entity.getRemainingFireTicks();
         entity.setSecondsOnFire(5);
-        if (!entity.hurt(DamageSource.fireball(this, entity2), 5.0f)) {
+        if (!entity.hurt(this.damageSources().fireball(this, entity2), 5.0f)) {
             entity.setRemainingFireTicks(i);
         } else if (entity2 instanceof LivingEntity) {
             this.doEnchantDamageEffects((LivingEntity)entity2, entity);

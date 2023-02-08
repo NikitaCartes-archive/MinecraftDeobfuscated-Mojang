@@ -3,6 +3,8 @@
  */
 package net.minecraft.util;
 
+import net.minecraft.util.Mth;
+
 public class FastColor {
 
     public static class ABGR32 {
@@ -62,6 +64,14 @@ public class FastColor {
 
         public static int multiply(int i, int j) {
             return ARGB32.color(ARGB32.alpha(i) * ARGB32.alpha(j) / 255, ARGB32.red(i) * ARGB32.red(j) / 255, ARGB32.green(i) * ARGB32.green(j) / 255, ARGB32.blue(i) * ARGB32.blue(j) / 255);
+        }
+
+        public static int lerp(float f, int i, int j) {
+            int k = Mth.lerp(f, ARGB32.alpha(i), ARGB32.alpha(j));
+            int l = Mth.lerp(f, ARGB32.red(i), ARGB32.red(j));
+            int m = Mth.lerp(f, ARGB32.green(i), ARGB32.green(j));
+            int n = Mth.lerp(f, ARGB32.blue(i), ARGB32.blue(j));
+            return ARGB32.color(k, l, m, n);
         }
     }
 }

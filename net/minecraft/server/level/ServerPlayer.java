@@ -97,6 +97,7 @@ import net.minecraft.stats.ServerRecipeBook;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
@@ -104,7 +105,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -639,24 +639,24 @@ extends Player {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
+        Player player2;
+        AbstractArrow abstractArrow;
+        Entity entity2;
+        Player player;
         boolean bl;
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        boolean bl2 = bl = this.server.isDedicatedServer() && this.isPvpAllowed() && "fall".equals(damageSource.msgId);
-        if (!bl && this.spawnInvulnerableTime > 0 && damageSource != DamageSource.OUT_OF_WORLD) {
+        boolean bl2 = bl = this.server.isDedicatedServer() && this.isPvpAllowed() && damageSource.is(DamageTypeTags.IS_FALL);
+        if (!bl && this.spawnInvulnerableTime > 0 && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return false;
         }
-        if (damageSource instanceof EntityDamageSource) {
-            AbstractArrow abstractArrow;
-            Entity entity2;
-            Entity entity = damageSource.getEntity();
-            if (entity instanceof Player && !this.canHarmPlayer((Player)entity)) {
-                return false;
-            }
-            if (entity instanceof AbstractArrow && (entity2 = (abstractArrow = (AbstractArrow)entity).getOwner()) instanceof Player && !this.canHarmPlayer((Player)entity2)) {
-                return false;
-            }
+        Entity entity = damageSource.getEntity();
+        if (entity instanceof Player && !this.canHarmPlayer(player = (Player)entity)) {
+            return false;
+        }
+        if (entity instanceof AbstractArrow && (entity2 = (abstractArrow = (AbstractArrow)entity).getOwner()) instanceof Player && !this.canHarmPlayer(player2 = (Player)entity2)) {
+            return false;
         }
         return super.hurt(damageSource, f);
     }
@@ -895,7 +895,7 @@ extends Player {
 
     @Override
     public boolean isInvulnerableTo(DamageSource damageSource) {
-        return super.isInvulnerableTo(damageSource) || this.isChangingDimension() || this.getAbilities().invulnerable && damageSource == DamageSource.WITHER;
+        return super.isInvulnerableTo(damageSource) || this.isChangingDimension();
     }
 
     @Override
@@ -1590,9 +1590,8 @@ extends Player {
     }
 
     @Override
-    public void knockback(double d, double e, double f) {
-        super.knockback(d, e, f);
-        this.hurtDir = (float)(Mth.atan2(f, e) * 57.2957763671875 - (double)this.getYRot());
+    public void indicateDamage(double d, double e) {
+        this.hurtDir = (float)(Mth.atan2(e, d) * 57.2957763671875 - (double)this.getYRot());
         this.connection.send(new ClientboundHurtAnimationPacket(this));
     }
 

@@ -4,8 +4,6 @@
 package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
@@ -34,22 +32,17 @@ implements DebugRenderer.SimpleDebugRenderer {
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         long l = Util.getMillis();
         this.markers.entrySet().removeIf(entry -> l > ((Marker)entry.getValue()).removeAtTime);
-        this.markers.forEach(this::renderMarker);
+        this.markers.forEach((blockPos, marker) -> this.renderMarker(poseStack, multiBufferSource, (BlockPos)blockPos, (Marker)marker));
     }
 
-    private void renderMarker(BlockPos blockPos, Marker marker) {
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        RenderSystem.setShaderColor(0.0f, 1.0f, 0.0f, 0.75f);
-        DebugRenderer.renderFilledBox(blockPos, 0.02f, marker.getR(), marker.getG(), marker.getB(), marker.getA());
+    private void renderMarker(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos, Marker marker) {
+        DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos, 0.02f, marker.getR(), marker.getG(), marker.getB(), marker.getA() * 0.75f);
         if (!marker.text.isEmpty()) {
             double d = (double)blockPos.getX() + 0.5;
             double e = (double)blockPos.getY() + 1.2;
             double f = (double)blockPos.getZ() + 0.5;
-            DebugRenderer.renderFloatingText(marker.text, d, e, f, -1, 0.01f, true, 0.0f, true);
+            DebugRenderer.renderFloatingText(poseStack, multiBufferSource, marker.text, d, e, f, -1, 0.01f, true, 0.0f, true);
         }
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.disableBlend();
     }
 
     @Environment(value=EnvType.CLIENT)

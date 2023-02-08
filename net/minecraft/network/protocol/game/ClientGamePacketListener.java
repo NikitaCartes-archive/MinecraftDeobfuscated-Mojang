@@ -27,6 +27,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
@@ -327,5 +328,7 @@ extends PacketListener {
     public void handleEnabledFeatures(ClientboundUpdateEnabledFeaturesPacket var1);
 
     public void handleBundlePacket(ClientboundBundlePacket var1);
+
+    public void handleDamageEvent(ClientboundDamageEventPacket var1);
 }
 

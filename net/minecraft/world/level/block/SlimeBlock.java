@@ -4,7 +4,6 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
@@ -25,7 +24,7 @@ extends HalfTransparentBlock {
         if (entity.isSuppressingBounce()) {
             super.fallOn(level, blockState, blockPos, entity, f);
         } else {
-            entity.causeFallDamage(f, 0.0f, DamageSource.FALL);
+            entity.causeFallDamage(f, 0.0f, level.damageSources().fall());
         }
     }
 

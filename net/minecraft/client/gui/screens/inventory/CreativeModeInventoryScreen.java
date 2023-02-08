@@ -30,6 +30,7 @@ import net.minecraft.client.player.inventory.Hotbar;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.searchtree.SearchTree;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
@@ -91,15 +92,15 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         this.imageHeight = 136;
         this.imageWidth = 195;
         this.displayOperatorCreativeTab = bl;
-        CreativeModeTabs.tryRebuildTabContents(featureFlagSet, this.hasPermissions(player));
+        CreativeModeTabs.tryRebuildTabContents(featureFlagSet, this.hasPermissions(player), player.level.registryAccess());
     }
 
     private boolean hasPermissions(Player player) {
         return player.canUseGameMasterBlocks() && this.displayOperatorCreativeTab;
     }
 
-    private void tryRefreshInvalidatedTabs(FeatureFlagSet featureFlagSet, boolean bl) {
-        if (CreativeModeTabs.tryRebuildTabContents(featureFlagSet, bl)) {
+    private void tryRefreshInvalidatedTabs(FeatureFlagSet featureFlagSet, boolean bl, HolderLookup.Provider provider) {
+        if (CreativeModeTabs.tryRebuildTabContents(featureFlagSet, bl, provider)) {
             for (CreativeModeTab creativeModeTab : CreativeModeTabs.allTabs()) {
                 Collection<ItemStack> collection = creativeModeTab.getDisplayItems();
                 if (creativeModeTab != selectedTab) continue;
@@ -131,7 +132,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             return;
         }
         if (this.minecraft.player != null) {
-            this.tryRefreshInvalidatedTabs(this.minecraft.player.connection.enabledFeatures(), this.hasPermissions(this.minecraft.player));
+            this.tryRefreshInvalidatedTabs(this.minecraft.player.connection.enabledFeatures(), this.hasPermissions(this.minecraft.player), this.minecraft.player.level.registryAccess());
         }
         if (!this.minecraft.gameMode.hasInfiniteItems()) {
             this.minecraft.setScreen(new InventoryScreen(this.minecraft.player));
@@ -790,7 +791,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         public ItemStack quickMoveStack(Player player, int i) {
             Slot slot;
             if (i >= this.slots.size() - 9 && i < this.slots.size() && (slot = (Slot)this.slots.get(i)) != null && slot.hasItem()) {
-                slot.set(ItemStack.EMPTY);
+                slot.setByPlayer(ItemStack.EMPTY);
             }
             return ItemStack.EMPTY;
         }
@@ -844,6 +845,11 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         @Override
         public boolean hasItem() {
             return this.target.hasItem();
+        }
+
+        @Override
+        public void setByPlayer(ItemStack itemStack) {
+            this.target.setByPlayer(itemStack);
         }
 
         @Override

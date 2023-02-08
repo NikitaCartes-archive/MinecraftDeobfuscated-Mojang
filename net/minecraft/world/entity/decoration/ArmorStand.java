@@ -18,6 +18,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -395,19 +396,19 @@ extends LivingEntity {
         if (this.level.isClientSide || this.isRemoved()) {
             return false;
         }
-        if (DamageSource.OUT_OF_WORLD.equals(damageSource)) {
+        if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             this.kill();
             return false;
         }
         if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
             return false;
         }
-        if (damageSource.isExplosion()) {
+        if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
             this.brokenByAnything(damageSource);
             this.kill();
             return false;
         }
-        if (DamageSource.IN_FIRE.equals(damageSource)) {
+        if (damageSource.is(DamageTypeTags.IGNITES_ARMOR_STANDS)) {
             if (this.isOnFire()) {
                 this.causeDamage(damageSource, 0.15f);
             } else {
@@ -415,7 +416,7 @@ extends LivingEntity {
             }
             return false;
         }
-        if (DamageSource.ON_FIRE.equals(damageSource) && this.getHealth() > 0.5f) {
+        if (damageSource.is(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5f) {
             this.causeDamage(damageSource, 4.0f);
             return false;
         }
@@ -425,8 +426,12 @@ extends LivingEntity {
         if (!bl3 && !bl) {
             return false;
         }
-        if (damageSource.getEntity() instanceof Player && !((Player)damageSource.getEntity()).getAbilities().mayBuild) {
-            return false;
+        Entity entity = damageSource.getEntity();
+        if (entity instanceof Player) {
+            Player player = (Player)entity;
+            if (!player.getAbilities().mayBuild) {
+                return false;
+            }
         }
         if (damageSource.isCreativePlayer()) {
             this.playBrokenSound();

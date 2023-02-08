@@ -41,7 +41,7 @@ extends WorkAtPoi {
     private void compostItems(ServerLevel serverLevel, Villager villager, GlobalPos globalPos, BlockState blockState) {
         BlockPos blockPos = globalPos.pos();
         if (blockState.getValue(ComposterBlock.LEVEL) == 8) {
-            blockState = ComposterBlock.extractProduce(blockState, serverLevel, blockPos);
+            blockState = ComposterBlock.extractProduce(villager, blockState, serverLevel, blockPos);
         }
         int i = 20;
         int j = 10;
@@ -60,7 +60,7 @@ extends WorkAtPoi {
             if (p <= 0) continue;
             i -= p;
             for (int q = 0; q < p; ++q) {
-                if ((blockState2 = ComposterBlock.insertItem(blockState2, serverLevel, itemStack, blockPos)).getValue(ComposterBlock.LEVEL) != 7) continue;
+                if ((blockState2 = ComposterBlock.insertItem(villager, blockState2, serverLevel, itemStack, blockPos)).getValue(ComposterBlock.LEVEL) != 7) continue;
                 this.spawnComposterFillEffects(serverLevel, blockState, blockPos, blockState2);
                 return;
             }

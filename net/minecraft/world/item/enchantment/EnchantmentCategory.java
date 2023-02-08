@@ -8,12 +8,12 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.Vanishable;
-import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.block.Block;
 
 /*
@@ -32,7 +32,8 @@ public enum EnchantmentCategory {
 
         @Override
         public boolean canEnchant(Item item) {
-            return item instanceof ArmorItem && ((ArmorItem)item).getSlot() == EquipmentSlot.FEET;
+            ArmorItem armorItem;
+            return item instanceof ArmorItem && (armorItem = (ArmorItem)item).getEquipmentSlot() == EquipmentSlot.FEET;
         }
     }
     ,
@@ -40,7 +41,8 @@ public enum EnchantmentCategory {
 
         @Override
         public boolean canEnchant(Item item) {
-            return item instanceof ArmorItem && ((ArmorItem)item).getSlot() == EquipmentSlot.LEGS;
+            ArmorItem armorItem;
+            return item instanceof ArmorItem && (armorItem = (ArmorItem)item).getEquipmentSlot() == EquipmentSlot.LEGS;
         }
     }
     ,
@@ -48,7 +50,8 @@ public enum EnchantmentCategory {
 
         @Override
         public boolean canEnchant(Item item) {
-            return item instanceof ArmorItem && ((ArmorItem)item).getSlot() == EquipmentSlot.CHEST;
+            ArmorItem armorItem;
+            return item instanceof ArmorItem && (armorItem = (ArmorItem)item).getEquipmentSlot() == EquipmentSlot.CHEST;
         }
     }
     ,
@@ -56,7 +59,8 @@ public enum EnchantmentCategory {
 
         @Override
         public boolean canEnchant(Item item) {
-            return item instanceof ArmorItem && ((ArmorItem)item).getSlot() == EquipmentSlot.HEAD;
+            ArmorItem armorItem;
+            return item instanceof ArmorItem && (armorItem = (ArmorItem)item).getEquipmentSlot() == EquipmentSlot.HEAD;
         }
     }
     ,
@@ -112,7 +116,7 @@ public enum EnchantmentCategory {
 
         @Override
         public boolean canEnchant(Item item) {
-            return item instanceof Wearable || Block.byItem(item) instanceof Wearable;
+            return item instanceof Equipable || Block.byItem(item) instanceof Equipable;
         }
     }
     ,

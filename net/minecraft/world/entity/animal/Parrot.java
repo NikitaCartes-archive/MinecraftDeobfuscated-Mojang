@@ -275,7 +275,7 @@ FlyingAnimal {
             }
             this.addEffect(new MobEffectInstance(MobEffects.POISON, 900));
             if (player.isCreative() || !this.isInvulnerable()) {
-                this.hurt(DamageSource.playerAttack(player), Float.MAX_VALUE);
+                this.hurt(this.damageSources().playerAttack(player), Float.MAX_VALUE);
             }
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
@@ -319,7 +319,7 @@ FlyingAnimal {
 
     @Override
     public boolean doHurtTarget(Entity entity) {
-        return entity.hurt(DamageSource.mobAttack(this), 3.0f);
+        return entity.hurt(this.damageSources().mobAttack(this), 3.0f);
     }
 
     @Override

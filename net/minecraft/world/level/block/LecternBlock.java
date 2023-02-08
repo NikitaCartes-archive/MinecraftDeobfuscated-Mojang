@@ -138,29 +138,30 @@ extends BaseEntityBlock {
         return new LecternBlockEntity(blockPos, blockState);
     }
 
-    public static boolean tryPlaceBook(@Nullable Player player, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+    public static boolean tryPlaceBook(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
         if (!blockState.getValue(HAS_BOOK).booleanValue()) {
             if (!level.isClientSide) {
-                LecternBlock.placeBook(player, level, blockPos, blockState, itemStack);
+                LecternBlock.placeBook(entity, level, blockPos, blockState, itemStack);
             }
             return true;
         }
         return false;
     }
 
-    private static void placeBook(@Nullable Player player, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+    private static void placeBook(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof LecternBlockEntity) {
             LecternBlockEntity lecternBlockEntity = (LecternBlockEntity)blockEntity;
             lecternBlockEntity.setBook(itemStack.split(1));
-            LecternBlock.resetBookState(level, blockPos, blockState, true);
+            LecternBlock.resetBookState(entity, level, blockPos, blockState, true);
             level.playSound(null, blockPos, SoundEvents.BOOK_PUT, SoundSource.BLOCKS, 1.0f, 1.0f);
-            level.gameEvent((Entity)player, GameEvent.BLOCK_CHANGE, blockPos);
         }
     }
 
-    public static void resetBookState(Level level, BlockPos blockPos, BlockState blockState, boolean bl) {
-        level.setBlock(blockPos, (BlockState)((BlockState)blockState.setValue(POWERED, false)).setValue(HAS_BOOK, bl), 3);
+    public static void resetBookState(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, boolean bl) {
+        BlockState blockState2 = (BlockState)((BlockState)blockState.setValue(POWERED, false)).setValue(HAS_BOOK, bl);
+        level.setBlock(blockPos, blockState2, 3);
+        level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState2));
         LecternBlock.updateBelow(level, blockPos, blockState);
     }
 

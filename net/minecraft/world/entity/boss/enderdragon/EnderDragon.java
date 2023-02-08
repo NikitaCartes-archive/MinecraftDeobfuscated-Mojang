@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -355,7 +356,7 @@ implements Enemy {
             double h = Math.max(f * f + g * g, 0.1);
             entity.push(f / h * 4.0, 0.2f, g / h * 4.0);
             if (this.phaseManager.getCurrentPhase().isSitting() || ((LivingEntity)entity).getLastHurtByMobTimestamp() >= entity.tickCount - 2) continue;
-            entity.hurt(DamageSource.mobAttack(this), 5.0f);
+            entity.hurt(this.damageSources().mobAttack(this), 5.0f);
             this.doEnchantDamageEffects(this, entity);
         }
     }
@@ -363,7 +364,7 @@ implements Enemy {
     private void hurt(List<Entity> list) {
         for (Entity entity : list) {
             if (!(entity instanceof LivingEntity)) continue;
-            entity.hurt(DamageSource.mobAttack(this), 10.0f);
+            entity.hurt(this.damageSources().mobAttack(this), 10.0f);
             this.doEnchantDamageEffects(this, entity);
         }
     }
@@ -413,7 +414,7 @@ implements Enemy {
         if (f < 0.01f) {
             return false;
         }
-        if (damageSource.getEntity() instanceof Player || damageSource.isExplosion()) {
+        if (damageSource.getEntity() instanceof Player || damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
             float g = this.getHealth();
             this.reallyHurt(damageSource, f);
             if (this.isDeadOrDying() && !this.phaseManager.getCurrentPhase().isSitting()) {
@@ -734,7 +735,7 @@ implements Enemy {
     public void onCrystalDestroyed(EndCrystal endCrystal, BlockPos blockPos, DamageSource damageSource) {
         Player player = damageSource.getEntity() instanceof Player ? (Player)damageSource.getEntity() : this.level.getNearestPlayer(CRYSTAL_DESTROY_TARGETING, blockPos.getX(), blockPos.getY(), blockPos.getZ());
         if (endCrystal == this.nearestCrystal) {
-            this.hurt(this.head, DamageSource.explosion(endCrystal, player), 10.0f);
+            this.hurt(this.head, this.damageSources().explosion(endCrystal, player), 10.0f);
         }
         this.phaseManager.getCurrentPhase().onCrystalDestroyed(endCrystal, blockPos, damageSource, player);
     }

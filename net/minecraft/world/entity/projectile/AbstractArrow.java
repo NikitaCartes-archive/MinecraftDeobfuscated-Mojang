@@ -292,9 +292,9 @@ extends Projectile {
             i = (int)Math.min(l + (long)i, Integer.MAX_VALUE);
         }
         if ((entity2 = this.getOwner()) == null) {
-            damageSource = DamageSource.arrow(this, this);
+            damageSource = this.damageSources().arrow(this, this);
         } else {
-            damageSource = DamageSource.arrow(this, entity2);
+            damageSource = this.damageSources().arrow(this, entity2);
             if (entity2 instanceof LivingEntity) {
                 ((LivingEntity)entity2).setLastHurtMob(entity);
             }

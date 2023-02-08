@@ -63,6 +63,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
@@ -72,6 +73,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -459,7 +461,7 @@ CommandSource {
                 }
             } else {
                 if (this.remainingFireTicks % 20 == 0 && !this.isInLava()) {
-                    this.hurt(DamageSource.ON_FIRE, 1.0f);
+                    this.hurt(this.damageSources().onFire(), 1.0f);
                 }
                 this.setRemainingFireTicks(this.remainingFireTicks - 1);
             }
@@ -513,7 +515,7 @@ CommandSource {
             return;
         }
         this.setSecondsOnFire(15);
-        if (this.hurt(DamageSource.LAVA, 4.0f)) {
+        if (this.hurt(this.damageSources().lava(), 4.0f)) {
             this.playSound(SoundEvents.GENERIC_BURN, 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
         }
     }
@@ -1670,6 +1672,9 @@ CommandSource {
         if (entity2 == this.vehicle) {
             return false;
         }
+        if (!entity2.couldAcceptPassenger()) {
+            return false;
+        }
         Entity entity22 = entity2;
         while (entity22.vehicle != null) {
             if (entity22.vehicle == this) {
@@ -1685,10 +1690,7 @@ CommandSource {
         }
         this.setPose(Pose.STANDING);
         this.vehicle = entity2;
-        if (!this.vehicle.addPassenger(this)) {
-            this.vehicle = null;
-            return false;
-        }
+        this.vehicle.addPassenger(this);
         entity2.getIndirectPassengersStream().filter(entity -> entity instanceof ServerPlayer).forEach(entity -> CriteriaTriggers.START_RIDING_TRIGGER.trigger((ServerPlayer)entity));
         return true;
     }
@@ -1719,7 +1721,7 @@ CommandSource {
         this.removeVehicle();
     }
 
-    protected boolean addPassenger(Entity entity) {
+    protected void addPassenger(Entity entity) {
         if (entity.getVehicle() != this) {
             throw new IllegalStateException("Use x.startRiding(y), not y.addPassenger(x)");
         }
@@ -1734,7 +1736,7 @@ CommandSource {
             }
             this.passengers = ImmutableList.copyOf(list);
         }
-        return true;
+        this.gameEvent(GameEvent.ENTITY_MOUNT, entity);
     }
 
     protected void removePassenger(Entity entity) {
@@ -1743,10 +1745,15 @@ CommandSource {
         }
         this.passengers = this.passengers.size() == 1 && this.passengers.get(0) == entity ? ImmutableList.of() : this.passengers.stream().filter(entity2 -> entity2 != entity).collect(ImmutableList.toImmutableList());
         entity.boardingCooldown = 60;
+        this.gameEvent(GameEvent.ENTITY_DISMOUNT, entity);
     }
 
     protected boolean canAddPassenger(Entity entity) {
         return this.passengers.isEmpty();
+    }
+
+    protected boolean couldAcceptPassenger() {
+        return true;
     }
 
     public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
@@ -1831,6 +1838,9 @@ CommandSource {
 
     public void lerpMotion(double d, double e, double f) {
         this.setDeltaMovement(d, e, f);
+    }
+
+    public void handleDamageEvent(DamageSource damageSource) {
     }
 
     public void handleEntityEvent(byte b) {
@@ -2033,7 +2043,7 @@ CommandSource {
         if (this.remainingFireTicks == 0) {
             this.setSecondsOnFire(8);
         }
-        this.hurt(DamageSource.LIGHTNING_BOLT, 5.0f);
+        this.hurt(this.damageSources().lightningBolt(), 5.0f);
     }
 
     public void onAboveBubbleCol(boolean bl) {
@@ -2149,7 +2159,7 @@ CommandSource {
     }
 
     public boolean isInvulnerableTo(DamageSource damageSource) {
-        return this.isRemoved() || this.invulnerable && damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer() || damageSource.isFire() && this.fireImmune();
+        return this.isRemoved() || this.invulnerable && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.isCreativePlayer() || damageSource.is(DamageTypeTags.IS_FIRE) && this.fireImmune();
     }
 
     public boolean isInvulnerable() {
@@ -2397,6 +2407,9 @@ CommandSource {
         return this.isCustomNameVisible();
     }
 
+    public void onSyncedDataUpdated(List<SynchedEntityData.DataValue<?>> list) {
+    }
+
     public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
         if (DATA_POSE.equals(entityDataAccessor)) {
             this.refreshDimensions();
@@ -2620,7 +2633,14 @@ CommandSource {
     }
 
     public boolean hasIndirectPassenger(Entity entity) {
-        return this.getIndirectPassengersStream().anyMatch(entity2 -> entity2 == entity);
+        if (!entity.isPassenger()) {
+            return false;
+        }
+        Entity entity2 = entity.getVehicle();
+        if (entity2 == this) {
+            return true;
+        }
+        return this.hasIndirectPassenger(entity2);
     }
 
     public boolean isControlledByLocalInstance() {
@@ -3018,6 +3038,10 @@ CommandSource {
 
     public Level getLevel() {
         return this.level;
+    }
+
+    public DamageSources damageSources() {
+        return this.level.damageSources();
     }
 
     public static enum RemovalReason {

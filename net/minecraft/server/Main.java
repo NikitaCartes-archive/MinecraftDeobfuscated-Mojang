@@ -11,7 +11,11 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.Proxy;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -22,6 +26,8 @@ import joptsimple.NonOptionArgumentSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpecBuilder;
+import joptsimple.util.PathConverter;
+import joptsimple.util.PathProperties;
 import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.SharedConstants;
@@ -88,7 +94,8 @@ public class Main {
         ArgumentAcceptingOptionSpec<Integer> optionSpec12 = optionParser.accepts("port").withRequiredArg().ofType(Integer.class).defaultsTo(-1, (Integer[])new Integer[0]);
         ArgumentAcceptingOptionSpec<String> optionSpec13 = optionParser.accepts("serverId").withRequiredArg();
         OptionSpecBuilder optionSpec14 = optionParser.accepts("jfrProfile");
-        NonOptionArgumentSpec<String> optionSpec15 = optionParser.nonOptions();
+        ArgumentAcceptingOptionSpec<Path> optionSpec15 = optionParser.accepts("pidFile").withRequiredArg().withValuesConvertedBy(new PathConverter(new PathProperties[0]));
+        NonOptionArgumentSpec<String> optionSpec16 = optionParser.nonOptions();
         try {
             WorldStem worldStem;
             boolean bl;
@@ -97,6 +104,10 @@ public class Main {
                 optionParser.printHelpOn(System.err);
                 return;
             }
+            Path path = optionSet.valueOf(optionSpec15);
+            if (path != null) {
+                Main.writePidFile(path);
+            }
             CrashReport.preload();
             if (optionSet.has(optionSpec14)) {
                 JvmProfiler.INSTANCE.start(Environment.SERVER);
@@ -104,13 +115,13 @@ public class Main {
             Bootstrap.bootStrap();
             Bootstrap.validate();
             Util.startTimerHackThread();
-            Path path = Paths.get("server.properties", new String[0]);
-            DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path);
+            Path path2 = Paths.get("server.properties", new String[0]);
+            DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path2);
             dedicatedServerSettings.forceSave();
-            Path path2 = Paths.get("eula.txt", new String[0]);
-            Eula eula = new Eula(path2);
+            Path path3 = Paths.get("eula.txt", new String[0]);
+            Eula eula = new Eula(path3);
             if (optionSet.has(optionSpec2)) {
-                LOGGER.info("Initialized '{}' and '{}'", (Object)path.toAbsolutePath(), (Object)path2.toAbsolutePath());
+                LOGGER.info("Initialized '{}' and '{}'", (Object)path2.toAbsolutePath(), (Object)path3.toAbsolutePath());
                 return;
             }
             if (!eula.hasAgreedToEULA()) {
@@ -180,7 +191,7 @@ public class Main {
                 dedicatedServer.setPort((Integer)optionSet.valueOf(optionSpec12));
                 dedicatedServer.setDemo(optionSet.has(optionSpec3));
                 dedicatedServer.setId((String)optionSet.valueOf(optionSpec13));
-                boolean bl2 = bl = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec15).contains("nogui");
+                boolean bl2 = bl = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec16).contains("nogui");
                 if (bl && !GraphicsEnvironment.isHeadless()) {
                     dedicatedServer.showGui();
                 }
@@ -197,6 +208,15 @@ public class Main {
             Runtime.getRuntime().addShutdownHook(thread2);
         } catch (Exception exception2) {
             LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", exception2);
+        }
+    }
+
+    private static void writePidFile(Path path) {
+        try {
+            long l = ProcessHandle.current().pid();
+            Files.writeString(path, (CharSequence)Long.toString(l), new OpenOption[0]);
+        } catch (IOException iOException) {
+            throw new UncheckedIOException(iOException);
         }
     }
 

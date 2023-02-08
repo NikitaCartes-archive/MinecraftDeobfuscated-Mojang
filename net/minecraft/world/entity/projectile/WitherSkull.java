@@ -65,7 +65,7 @@ extends AbstractHurtingProjectile {
         Entity entity2 = this.getOwner();
         if (entity2 instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)entity2;
-            bl = entity.hurt(DamageSource.witherSkull(this, livingEntity), 8.0f);
+            bl = entity.hurt(this.damageSources().witherSkull(this, livingEntity), 8.0f);
             if (bl) {
                 if (entity.isAlive()) {
                     this.doEnchantDamageEffects(livingEntity, entity);
@@ -74,7 +74,7 @@ extends AbstractHurtingProjectile {
                 }
             }
         } else {
-            bl = entity.hurt(DamageSource.MAGIC, 5.0f);
+            bl = entity.hurt(this.damageSources().magic(), 5.0f);
         }
         if (bl && entity instanceof LivingEntity) {
             int i = 0;

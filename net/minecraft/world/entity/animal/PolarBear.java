@@ -216,7 +216,7 @@ implements NeutralMob {
 
     @Override
     public boolean doHurtTarget(Entity entity) {
-        boolean bl = entity.hurt(DamageSource.mobAttack(this), (int)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
+        boolean bl = entity.hurt(this.damageSources().mobAttack(this), (int)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
         if (bl) {
             this.doEnchantDamageEffects(this, entity);
         }

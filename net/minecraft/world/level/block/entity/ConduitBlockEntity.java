@@ -16,7 +16,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -195,7 +194,7 @@ extends BlockEntity {
         }
         if (conduitBlockEntity.destroyTarget != null) {
             level.playSound(null, conduitBlockEntity.destroyTarget.getX(), conduitBlockEntity.destroyTarget.getY(), conduitBlockEntity.destroyTarget.getZ(), SoundEvents.CONDUIT_ATTACK_TARGET, SoundSource.BLOCKS, 1.0f, 1.0f);
-            conduitBlockEntity.destroyTarget.hurt(DamageSource.MAGIC, 4.0f);
+            conduitBlockEntity.destroyTarget.hurt(level.damageSources().magic(), 4.0f);
         }
         if (livingEntity2 != conduitBlockEntity.destroyTarget) {
             level.sendBlockUpdated(blockPos, blockState, blockState, 2);

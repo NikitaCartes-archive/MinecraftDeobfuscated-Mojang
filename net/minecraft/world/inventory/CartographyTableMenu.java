@@ -175,7 +175,7 @@ extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
             if (itemStack2.isEmpty()) {
-                slot.set(ItemStack.EMPTY);
+                slot.setByPlayer(ItemStack.EMPTY);
             }
             slot.setChanged();
             if (itemStack2.getCount() == itemStack.getCount()) {

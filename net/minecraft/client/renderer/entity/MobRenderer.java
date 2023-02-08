@@ -97,8 +97,8 @@ extends LivingEntityRenderer<T, M> {
 
     private static void addVertexPair(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, float h, int i, int j, int k, int l, float m, float n, float o, float p, int q, boolean bl) {
         float r = (float)q / 24.0f;
-        int s = (int)Mth.lerp(r, i, j);
-        int t = (int)Mth.lerp(r, k, l);
+        int s = Mth.lerp(r, i, j);
+        int t = Mth.lerp(r, k, l);
         int u = LightTexture.pack(s, t);
         float v = q % 2 == (bl ? 1 : 0) ? 0.7f : 1.0f;
         float w = 0.5f * v;

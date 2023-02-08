@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.Difficulty;
@@ -400,10 +401,10 @@ RangedAttackMob {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        if (damageSource == DamageSource.DROWN || damageSource.getEntity() instanceof WitherBoss) {
+        if (damageSource.is(DamageTypeTags.WITHER_IMMUNE_TO) || damageSource.getEntity() instanceof WitherBoss) {
             return false;
         }
-        if (this.getInvulnerableTicks() > 0 && damageSource != DamageSource.OUT_OF_WORLD) {
+        if (this.getInvulnerableTicks() > 0 && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return false;
         }
         if (this.isPowered() && (entity = damageSource.getDirectEntity()) instanceof AbstractArrow) {

@@ -31,7 +31,9 @@ public class GameEvent {
     public static final GameEvent ELYTRA_GLIDE = GameEvent.register("elytra_glide");
     public static final GameEvent ENTITY_DAMAGE = GameEvent.register("entity_damage");
     public static final GameEvent ENTITY_DIE = GameEvent.register("entity_die");
+    public static final GameEvent ENTITY_DISMOUNT = GameEvent.register("entity_dismount");
     public static final GameEvent ENTITY_INTERACT = GameEvent.register("entity_interact");
+    public static final GameEvent ENTITY_MOUNT = GameEvent.register("entity_mount");
     public static final GameEvent ENTITY_PLACE = GameEvent.register("entity_place");
     public static final GameEvent ENTITY_ROAR = GameEvent.register("entity_roar");
     public static final GameEvent ENTITY_SHAKE = GameEvent.register("entity_shake");

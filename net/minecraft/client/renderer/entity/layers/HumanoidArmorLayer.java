@@ -63,7 +63,7 @@ extends RenderLayer<T, M> {
             return;
         }
         ArmorItem armorItem = (ArmorItem)item;
-        if (armorItem.getSlot() != equipmentSlot) {
+        if (armorItem.getEquipmentSlot() != equipmentSlot) {
             return;
         }
         ((HumanoidModel)this.getParentModel()).copyPropertiesTo(humanoidModel);

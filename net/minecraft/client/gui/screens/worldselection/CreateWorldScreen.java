@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -52,6 +53,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import net.minecraft.client.gui.screens.worldselection.ConfirmExperimentalFeaturesScreen;
 import net.minecraft.client.gui.screens.worldselection.EditGameRulesScreen;
+import net.minecraft.client.gui.screens.worldselection.ExperimentsScreen;
 import net.minecraft.client.gui.screens.worldselection.PresetEditor;
 import net.minecraft.client.gui.screens.worldselection.SwitchGrid;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
@@ -100,12 +102,14 @@ extends Screen {
     private static final String TEMP_WORLD_PREFIX = "mcworld-";
     static final Component GAME_MODEL_LABEL = Component.translatable("selectWorld.gameMode");
     static final Component NAME_LABEL = Component.translatable("selectWorld.enterName");
+    static final Component EXPERIMENTS_LABEL = Component.translatable("selectWorld.experiments");
     static final Component ALLOW_CHEATS_INFO = Component.translatable("selectWorld.allowCommands.info");
     private static final Component PREPARING_WORLD_DATA = Component.translatable("createWorld.preparing");
     private static final int HORIZONTAL_BUTTON_SPACING = 10;
     private static final int VERTICAL_BUTTON_SPACING = 8;
     final WorldCreationUiState uiState;
     private final TabManager tabManager = new TabManager(this::addRenderableWidget, guiEventListener -> this.removeWidget((GuiEventListener)guiEventListener));
+    private boolean recreated;
     @Nullable
     private final Screen lastScreen;
     @Nullable
@@ -133,6 +137,7 @@ extends Screen {
 
     public static CreateWorldScreen createFromExisting(@Nullable Screen screen, LevelSettings levelSettings, WorldCreationContext worldCreationContext, @Nullable Path path) {
         CreateWorldScreen createWorldScreen = new CreateWorldScreen(screen, worldCreationContext, WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()), OptionalLong.of(worldCreationContext.options().seed()));
+        createWorldScreen.recreated = true;
         createWorldScreen.uiState.setName(levelSettings.levelName());
         createWorldScreen.uiState.setAllowCheats(levelSettings.allowCommands());
         createWorldScreen.uiState.setDifficulty(levelSettings.difficulty());
@@ -185,7 +190,7 @@ extends Screen {
             abstractWidget.setTabOrderGroup(1);
             this.addRenderableWidget(abstractWidget);
         });
-        this.tabNavigationBar.setInitialTab(0);
+        this.tabNavigationBar.selectTab(0);
         this.uiState.onChanged();
         this.repositionElements();
     }
@@ -232,7 +237,8 @@ extends Screen {
         Lifecycle lifecycle = FeatureFlags.isExperimental(worldCreationContext.dataConfiguration().enabledFeatures()) ? Lifecycle.experimental() : Lifecycle.stable();
         Lifecycle lifecycle2 = layeredRegistryAccess.compositeAccess().allRegistriesLifecycle();
         Lifecycle lifecycle3 = lifecycle2.add(lifecycle);
-        WorldOpenFlows.confirmWorldCreation(this.minecraft, this, lifecycle3, () -> this.createNewWorld(complete.specialWorldProperty(), layeredRegistryAccess, lifecycle3));
+        boolean bl = !this.recreated && lifecycle2 == Lifecycle.stable();
+        WorldOpenFlows.confirmWorldCreation(this.minecraft, this, lifecycle3, () -> this.createNewWorld(complete.specialWorldProperty(), layeredRegistryAccess, lifecycle3), bl);
     }
 
     private void createNewWorld(PrimaryLevelData.SpecialWorldProperty specialWorldProperty, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, Lifecycle lifecycle) {
@@ -261,6 +267,9 @@ extends Screen {
 
     @Override
     public boolean keyPressed(int i, int j, int k) {
+        if (this.tabNavigationBar.keyPressed(i)) {
+            return true;
+        }
         if (super.keyPressed(i, j, k)) {
             return true;
         }
@@ -311,14 +320,21 @@ extends Screen {
         return this.tempDataPackDir;
     }
 
-    void openDataPackSelectionScreen(WorldDataConfiguration worldDataConfiguration) {
+    void openExperimentsScreen(WorldDataConfiguration worldDataConfiguration) {
         Pair<Path, PackRepository> pair = this.getDataPackSelectionSettings(worldDataConfiguration);
         if (pair != null) {
-            this.minecraft.setScreen(new PackSelectionScreen(this, pair.getSecond(), this::tryApplyNewDataPacks, pair.getFirst(), Component.translatable("dataPack.title")));
+            this.minecraft.setScreen(new ExperimentsScreen(this, pair.getSecond(), packRepository -> this.tryApplyNewDataPacks((PackRepository)packRepository, false, this::openExperimentsScreen)));
         }
     }
 
-    private void tryApplyNewDataPacks(PackRepository packRepository) {
+    void openDataPackSelectionScreen(WorldDataConfiguration worldDataConfiguration) {
+        Pair<Path, PackRepository> pair = this.getDataPackSelectionSettings(worldDataConfiguration);
+        if (pair != null) {
+            this.minecraft.setScreen(new PackSelectionScreen(this, pair.getSecond(), packRepository -> this.tryApplyNewDataPacks((PackRepository)packRepository, true, this::openDataPackSelectionScreen), pair.getFirst(), Component.translatable("dataPack.title")));
+        }
+    }
+
+    private void tryApplyNewDataPacks(PackRepository packRepository, boolean bl, Consumer<WorldDataConfiguration> consumer) {
         List list2;
         ImmutableList<String> list = ImmutableList.copyOf(packRepository.getSelectedIds());
         WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(new DataPackConfig(list, list2 = (List)packRepository.getAvailableIds().stream().filter(string -> !list.contains(string)).collect(ImmutableList.toImmutableList())), this.uiState.getSettings().dataConfiguration().enabledFeatures());
@@ -326,20 +342,20 @@ extends Screen {
             return;
         }
         FeatureFlagSet featureFlagSet = packRepository.getRequestedFeatureFlags();
-        if (FeatureFlags.isExperimental(featureFlagSet)) {
+        if (FeatureFlags.isExperimental(featureFlagSet) && bl) {
             this.minecraft.tell(() -> this.minecraft.setScreen(new ConfirmExperimentalFeaturesScreen(packRepository.getSelectedPacks(), bl -> {
                 if (bl) {
-                    this.applyNewPackConfig(packRepository, worldDataConfiguration);
+                    this.applyNewPackConfig(packRepository, worldDataConfiguration, consumer);
                 } else {
-                    this.openDataPackSelectionScreen(this.uiState.getSettings().dataConfiguration());
+                    consumer.accept(this.uiState.getSettings().dataConfiguration());
                 }
             })));
         } else {
-            this.applyNewPackConfig(packRepository, worldDataConfiguration);
+            this.applyNewPackConfig(packRepository, worldDataConfiguration, consumer);
         }
     }
 
-    private void applyNewPackConfig(PackRepository packRepository, WorldDataConfiguration worldDataConfiguration) {
+    private void applyNewPackConfig(PackRepository packRepository, WorldDataConfiguration worldDataConfiguration, Consumer<WorldDataConfiguration> consumer) {
         this.minecraft.tell(() -> this.minecraft.setScreen(new GenericDirtMessageScreen(Component.translatable("dataPack.validation.working"))));
         WorldLoader.InitConfig initConfig = CreateWorldScreen.createDefaultLoadConfig(packRepository, worldDataConfiguration);
         ((CompletableFuture)WorldLoader.load(initConfig, dataLoadContext -> {
@@ -363,9 +379,9 @@ extends Screen {
                 LOGGER.warn("Failed to validate datapack", (Throwable)throwable);
                 this.minecraft.tell(() -> this.minecraft.setScreen(new ConfirmScreen(bl -> {
                     if (bl) {
-                        this.openDataPackSelectionScreen(this.uiState.getSettings().dataConfiguration());
+                        consumer.accept(this.uiState.getSettings().dataConfiguration());
                     } else {
-                        this.openDataPackSelectionScreen(WorldDataConfiguration.DEFAULT);
+                        consumer.accept(WorldDataConfiguration.DEFAULT);
                     }
                 }, Component.translatable("dataPack.validation.failed"), CommonComponents.EMPTY, Component.translatable("dataPack.validation.back"), Component.translatable("dataPack.validation.reset"))));
             } else {
@@ -523,6 +539,7 @@ extends Screen {
                 cycleButton3.setValue(CreateWorldScreen.this.uiState.isAllowCheats());
                 cycleButton.active = !CreateWorldScreen.this.uiState.isDebug() && !CreateWorldScreen.this.uiState.isHardcore();
             });
+            rowHelper.addChild(Button.builder(EXPERIMENTS_LABEL, button -> CreateWorldScreen.this.openExperimentsScreen(CreateWorldScreen.this.uiState.getSettings().dataConfiguration())).width(210).build());
         }
 
         @Override
@@ -630,6 +647,7 @@ extends Screen {
             super(TITLE);
             GridLayout.RowHelper rowHelper = this.layout.rowSpacing(8).createRowHelper(1);
             rowHelper.addChild(Button.builder(GAME_RULES_LABEL, button -> this.openGameRulesScreen()).width(210).build());
+            rowHelper.addChild(Button.builder(EXPERIMENTS_LABEL, button -> CreateWorldScreen.this.openExperimentsScreen(CreateWorldScreen.this.uiState.getSettings().dataConfiguration())).width(210).build());
             rowHelper.addChild(Button.builder(DATA_PACKS_LABEL, button -> CreateWorldScreen.this.openDataPackSelectionScreen(CreateWorldScreen.this.uiState.getSettings().dataConfiguration())).width(210).build());
         }
 

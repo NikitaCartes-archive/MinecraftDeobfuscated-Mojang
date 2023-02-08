@@ -49,6 +49,7 @@ NarratableEntry {
     protected static final int BUTTON_TEXTURE_WIDTH = 200;
     protected static final int BUTTON_TEXTURE_HEIGHT = 20;
     protected static final int BUTTON_TEXTURE_BORDER = 4;
+    private static final int BUTTON_TEXT_MARGIN = 2;
     protected int width;
     protected int height;
     private int x;
@@ -161,7 +162,18 @@ NarratableEntry {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         int k = this.active ? 0xFFFFFF : 0xA0A0A0;
         Font font = minecraft.font;
-        this.renderString(poseStack, font, this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, k);
+        int l = font.width(this.message);
+        int m = this.width - 4;
+        if (l > m) {
+            double d = (double)Util.getMillis() / 1000.0;
+            double e = Math.sin(1.5707963267948966 * Math.cos(d));
+            int n = l - m;
+            AbstractWidget.enableScissor(this.x + 2, this.y + 2, this.x + this.width - 2, this.y + this.height - 2);
+            this.renderString(poseStack, font, this.getX() + this.width / 2 - (int)(e * (double)n), this.getY() + (this.height - 8) / 2, k);
+            AbstractWidget.disableScissor();
+        } else {
+            this.renderString(poseStack, font, this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, k);
+        }
     }
 
     public void renderString(PoseStack poseStack, Font font, int i, int j, int k) {

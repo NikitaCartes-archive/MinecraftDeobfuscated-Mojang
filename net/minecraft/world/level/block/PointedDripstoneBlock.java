@@ -137,7 +137,7 @@ SimpleWaterloggedBlock {
     @Override
     public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
         if (blockState.getValue(TIP_DIRECTION) == Direction.UP && blockState.getValue(THICKNESS) == DripstoneThickness.TIP) {
-            entity.causeFallDamage(f + 2.0f, 2.0f, DamageSource.STALAGMITE);
+            entity.causeFallDamage(f + 2.0f, 2.0f, level.damageSources().stalagmite());
         } else {
             super.fallOn(level, blockState, blockPos, entity, f);
         }
@@ -282,7 +282,7 @@ SimpleWaterloggedBlock {
 
     @Override
     public DamageSource getFallDamageSource(Entity entity) {
-        return DamageSource.fallingStalactite(entity);
+        return entity.damageSources().fallingStalactite(entity);
     }
 
     @Override

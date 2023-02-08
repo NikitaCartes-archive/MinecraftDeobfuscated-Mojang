@@ -694,7 +694,7 @@ implements VariantHolder<Type> {
                     this.resetFallDistance();
                     return;
                 }
-                this.causeFallDamage(this.fallDistance, 1.0f, DamageSource.FALL);
+                this.causeFallDamage(this.fallDistance, 1.0f, this.damageSources().fall());
                 if (!this.level.isClientSide && !this.isRemoved()) {
                     this.kill();
                     if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {

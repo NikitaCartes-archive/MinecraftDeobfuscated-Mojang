@@ -90,7 +90,12 @@ ContainerEntity {
     @Override
     public InteractionResult interact(Player player, InteractionHand interactionHand) {
         if (!this.canAddPassenger(player) || player.isSecondaryUseActive()) {
-            return this.interactWithChestVehicle(this::gameEvent, player);
+            InteractionResult interactionResult = this.interactWithContainerVehicle(player);
+            if (interactionResult.consumesAction()) {
+                this.gameEvent(GameEvent.CONTAINER_OPEN, player);
+                PiglinAi.angerNearbyPiglins(player, true);
+            }
+            return interactionResult;
         }
         return super.interact(player, interactionHand);
     }
@@ -205,6 +210,11 @@ ContainerEntity {
     @Override
     public void clearItemStacks() {
         this.itemStacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+    }
+
+    @Override
+    public void stopOpen(Player player) {
+        this.level.gameEvent(GameEvent.CONTAINER_CLOSE, this.position(), GameEvent.Context.of(player));
     }
 }
 

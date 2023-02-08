@@ -15,7 +15,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -76,12 +75,12 @@ extends Behavior<Goat> {
         Brain<Goat> brain = goat.getBrain();
         if (!list.isEmpty()) {
             LivingEntity livingEntity = list.get(0);
-            livingEntity.hurt(DamageSource.mobAttack(goat).setNoAggro(), (float)goat.getAttributeValue(Attributes.ATTACK_DAMAGE));
+            livingEntity.hurt(serverLevel.damageSources().noAggroMobAttack(goat), (float)goat.getAttributeValue(Attributes.ATTACK_DAMAGE));
             int i = goat.hasEffect(MobEffects.MOVEMENT_SPEED) ? goat.getEffect(MobEffects.MOVEMENT_SPEED).getAmplifier() + 1 : 0;
             int j = goat.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) ? goat.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() + 1 : 0;
             float f = 0.25f * (float)(i - j);
             float g = Mth.clamp(goat.getSpeed() * 1.65f, 0.2f, 3.0f) + f;
-            float h = livingEntity.isDamageSourceBlocked(DamageSource.mobAttack(goat)) ? 0.5f : 1.0f;
+            float h = livingEntity.isDamageSourceBlocked(serverLevel.damageSources().mobAttack(goat)) ? 0.5f : 1.0f;
             livingEntity.knockback((double)(h * g) * this.getKnockbackForce.applyAsDouble(goat), this.ramDirection.x(), this.ramDirection.z());
             this.finishRam(serverLevel, goat);
             serverLevel.playSound(null, goat, this.getImpactSound.apply(goat), SoundSource.NEUTRAL, 1.0f, 1.0f);

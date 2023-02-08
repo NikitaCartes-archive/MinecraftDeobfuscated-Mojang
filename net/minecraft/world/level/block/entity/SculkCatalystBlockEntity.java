@@ -75,7 +75,7 @@ implements GameEventListener {
         LivingEntity livingEntity2 = livingEntity.getLastHurtByMob();
         if (livingEntity2 instanceof ServerPlayer) {
             ServerPlayer serverPlayer = (ServerPlayer)livingEntity2;
-            DamageSource damageSource = livingEntity.getLastDamageSource() == null ? DamageSource.playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
+            DamageSource damageSource = livingEntity.getLastDamageSource() == null ? this.level.damageSources().playerAttack(serverPlayer) : livingEntity.getLastDamageSource();
             CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST.trigger(serverPlayer, livingEntity, damageSource);
         }
     }

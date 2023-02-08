@@ -111,8 +111,10 @@ public abstract class RenderStateShard {
     protected static final ShaderStateShard RENDERTYPE_ENTITY_GLINT_DIRECT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeEntityGlintDirectShader);
     protected static final ShaderStateShard RENDERTYPE_CRUMBLING_SHADER = new ShaderStateShard(GameRenderer::getRendertypeCrumblingShader);
     protected static final ShaderStateShard RENDERTYPE_TEXT_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTextShader);
+    protected static final ShaderStateShard RENDERTYPE_TEXT_BACKGROUND_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTextBackgroundShader);
     protected static final ShaderStateShard RENDERTYPE_TEXT_INTENSITY_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTextIntensityShader);
     protected static final ShaderStateShard RENDERTYPE_TEXT_SEE_THROUGH_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTextSeeThroughShader);
+    protected static final ShaderStateShard RENDERTYPE_TEXT_BACKGROUND_SEE_THROUGH_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTextBackgroundSeeThroughShader);
     protected static final ShaderStateShard RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTextIntensitySeeThroughShader);
     protected static final ShaderStateShard RENDERTYPE_LIGHTNING_SHADER = new ShaderStateShard(GameRenderer::getRendertypeLightningShader);
     protected static final ShaderStateShard RENDERTYPE_TRIPWIRE_SHADER = new ShaderStateShard(GameRenderer::getRendertypeTripwireShader);

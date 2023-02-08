@@ -25,6 +25,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -51,6 +52,9 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.joml.AxisAngle4f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class ExtraCodecs {
@@ -68,7 +72,23 @@ public class ExtraCodecs {
             return DataResult.error(illegalArgumentException.getMessage());
         }
     });
-    public static final Codec<Vector3f> VECTOR3F = Codec.FLOAT.listOf().comapFlatMap(list2 -> Util.fixedSize(list2, 3).map(list -> new Vector3f(((Float)list.get(0)).floatValue(), ((Float)list.get(1)).floatValue(), ((Float)list.get(2)).floatValue())), vector3f -> ImmutableList.of(Float.valueOf(vector3f.x()), Float.valueOf(vector3f.y()), Float.valueOf(vector3f.z())));
+    public static final Codec<Vector3f> VECTOR3F = Codec.FLOAT.listOf().comapFlatMap(list2 -> Util.fixedSize(list2, 3).map(list -> new Vector3f(((Float)list.get(0)).floatValue(), ((Float)list.get(1)).floatValue(), ((Float)list.get(2)).floatValue())), vector3f -> List.of(Float.valueOf(vector3f.x()), Float.valueOf(vector3f.y()), Float.valueOf(vector3f.z())));
+    public static final Codec<Quaternionf> QUATERNIONF_COMPONENTS = Codec.FLOAT.listOf().comapFlatMap(list2 -> Util.fixedSize(list2, 4).map(list -> new Quaternionf(((Float)list.get(0)).floatValue(), ((Float)list.get(1)).floatValue(), ((Float)list.get(2)).floatValue(), ((Float)list.get(3)).floatValue())), quaternionf -> List.of(Float.valueOf(quaternionf.x), Float.valueOf(quaternionf.y), Float.valueOf(quaternionf.z), Float.valueOf(quaternionf.w)));
+    public static final Codec<AxisAngle4f> AXISANGLE4F = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("angle")).forGetter(axisAngle4f -> Float.valueOf(axisAngle4f.angle)), ((MapCodec)VECTOR3F.fieldOf("axis")).forGetter(axisAngle4f -> new Vector3f(axisAngle4f.x, axisAngle4f.y, axisAngle4f.z))).apply((Applicative<AxisAngle4f, ?>)instance, AxisAngle4f::new));
+    public static final Codec<Quaternionf> QUATERNIONF = Codec.either(QUATERNIONF_COMPONENTS, AXISANGLE4F.xmap(Quaternionf::new, AxisAngle4f::new)).xmap(either -> either.map(quaternionf -> quaternionf, quaternionf -> quaternionf), Either::left);
+    public static Codec<Matrix4f> MATRIX4F = Codec.FLOAT.listOf().comapFlatMap(list2 -> Util.fixedSize(list2, 16).map(list -> {
+        Matrix4f matrix4f = new Matrix4f();
+        for (int i = 0; i < list.size(); ++i) {
+            matrix4f.setRowColumn(i >> 2, i & 3, ((Float)list.get(i)).floatValue());
+        }
+        return matrix4f.determineProperties();
+    }), matrix4f -> {
+        FloatArrayList floatList = new FloatArrayList(16);
+        for (int i = 0; i < 16; ++i) {
+            floatList.add(matrix4f.getRowColumn(i >> 2, i & 3));
+        }
+        return floatList;
+    });
     public static final Codec<Integer> NON_NEGATIVE_INT = ExtraCodecs.intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
     public static final Codec<Integer> POSITIVE_INT = ExtraCodecs.intRangeWithMessage(1, Integer.MAX_VALUE, integer -> "Value must be positive: " + integer);
     public static final Codec<Float> POSITIVE_FLOAT = ExtraCodecs.floatRangeMinExclusiveWithMessage(0.0f, Float.MAX_VALUE, float_ -> "Value must be positive: " + float_);
@@ -224,6 +244,10 @@ public class ExtraCodecs {
             }
             return DataResult.error((String)function.apply((Integer)integer));
         });
+    }
+
+    public static Codec<Integer> intRange(int i, int j) {
+        return ExtraCodecs.intRangeWithMessage(i, j, integer -> "Value must be within range [" + i + ";" + j + "]: " + integer);
     }
 
     private static Codec<Float> floatRangeMinExclusiveWithMessage(float f, float g, Function<Float, String> function) {

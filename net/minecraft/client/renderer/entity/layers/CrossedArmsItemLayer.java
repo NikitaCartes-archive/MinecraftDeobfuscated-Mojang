@@ -10,11 +10,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(value=EnvType.CLIENT)
@@ -33,7 +33,7 @@ extends RenderLayer<T, M> {
         poseStack.translate(0.0f, 0.4f, -0.4f);
         poseStack.mulPose(Axis.XP.rotationDegrees(180.0f));
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.MAINHAND);
-        this.itemInHandRenderer.renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
+        this.itemInHandRenderer.renderItem((LivingEntity)livingEntity, itemStack, ItemDisplayContext.GROUND, false, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }
 }

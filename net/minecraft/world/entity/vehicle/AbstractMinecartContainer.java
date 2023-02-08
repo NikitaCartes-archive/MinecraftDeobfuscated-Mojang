@@ -101,7 +101,7 @@ implements ContainerEntity {
 
     @Override
     public InteractionResult interact(Player player, InteractionHand interactionHand) {
-        return this.interactWithChestVehicle(this::gameEvent, player);
+        return this.interactWithContainerVehicle(player);
     }
 
     @Override

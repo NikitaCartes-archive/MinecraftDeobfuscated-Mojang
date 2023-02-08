@@ -138,8 +138,8 @@ implements Comparable<MobEffectInstance> {
     }
 
     public int mapDuration(Int2IntFunction int2IntFunction) {
-        if (this.isInfiniteDuration()) {
-            return -1;
+        if (this.isInfiniteDuration() || this.duration == 0) {
+            return this.duration;
         }
         return int2IntFunction.applyAsInt(this.duration);
     }

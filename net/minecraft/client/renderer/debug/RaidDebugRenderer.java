@@ -35,21 +35,21 @@ implements DebugRenderer.SimpleDebugRenderer {
         BlockPos blockPos = this.getCamera().getBlockPosition();
         for (BlockPos blockPos2 : this.raidCenters) {
             if (!blockPos.closerThan(blockPos2, 160.0)) continue;
-            RaidDebugRenderer.highlightRaidCenter(blockPos2);
+            RaidDebugRenderer.highlightRaidCenter(poseStack, multiBufferSource, blockPos2);
         }
     }
 
-    private static void highlightRaidCenter(BlockPos blockPos) {
-        DebugRenderer.renderFilledBox(blockPos.offset(-0.5, -0.5, -0.5), blockPos.offset(1.5, 1.5, 1.5), 1.0f, 0.0f, 0.0f, 0.15f);
+    private static void highlightRaidCenter(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos) {
+        DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos.offset(-0.5, -0.5, -0.5), blockPos.offset(1.5, 1.5, 1.5), 1.0f, 0.0f, 0.0f, 0.15f);
         int i = -65536;
-        RaidDebugRenderer.renderTextOverBlock("Raid center", blockPos, -65536);
+        RaidDebugRenderer.renderTextOverBlock(poseStack, multiBufferSource, "Raid center", blockPos, -65536);
     }
 
-    private static void renderTextOverBlock(String string, BlockPos blockPos, int i) {
+    private static void renderTextOverBlock(PoseStack poseStack, MultiBufferSource multiBufferSource, String string, BlockPos blockPos, int i) {
         double d = (double)blockPos.getX() + 0.5;
         double e = (double)blockPos.getY() + 1.3;
         double f = (double)blockPos.getZ() + 0.5;
-        DebugRenderer.renderFloatingText(string, d, e, f, i, 0.04f, true, 0.0f, true);
+        DebugRenderer.renderFloatingText(poseStack, multiBufferSource, string, d, e, f, i, 0.04f, true, 0.0f, true);
     }
 
     private Camera getCamera() {

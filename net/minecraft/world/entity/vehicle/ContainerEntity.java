@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.vehicle;
 
-import java.util.function.BiConsumer;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -25,7 +24,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -92,11 +90,9 @@ MenuProvider {
         }
     }
 
-    default public InteractionResult interactWithChestVehicle(BiConsumer<GameEvent, Entity> biConsumer, Player player) {
+    default public InteractionResult interactWithContainerVehicle(Player player) {
         player.openMenu(this);
         if (!player.level.isClientSide) {
-            biConsumer.accept(GameEvent.CONTAINER_OPEN, player);
-            PiglinAi.angerNearbyPiglins(player, true);
             return InteractionResult.CONSUME;
         }
         return InteractionResult.SUCCESS;

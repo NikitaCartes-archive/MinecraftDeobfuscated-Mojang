@@ -27,17 +27,16 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.Nullable;
 
 public class ArmorItem
 extends Item
-implements Wearable {
+implements Equipable {
     private static final EnumMap<Type, UUID> ARMOR_MODIFIER_UUID_PER_TYPE = Util.make(new EnumMap(Type.class), enumMap -> {
         enumMap.put(Type.BOOTS, UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"));
         enumMap.put(Type.LEGGINGS, UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"));
@@ -97,10 +96,6 @@ implements Wearable {
         return this.type;
     }
 
-    public EquipmentSlot getSlot() {
-        return this.type.getSlot();
-    }
-
     @Override
     public int getEnchantmentValue() {
         return this.material.getEnchantmentValue();
@@ -137,7 +132,11 @@ implements Wearable {
     }
 
     @Override
-    @Nullable
+    public EquipmentSlot getEquipmentSlot() {
+        return this.type.getSlot();
+    }
+
+    @Override
     public SoundEvent getEquipSound() {
         return this.getMaterial().getEquipSound();
     }

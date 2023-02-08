@@ -147,11 +147,11 @@ extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
                 slot.onQuickCraft(itemStack2, itemStack);
-            } else if (this.inputSlotIndexes.contains(i) ? !this.moveItemStackTo(itemStack2, j, k, false) : (this.canMoveIntoInputSlots(itemStack2) && i >= this.getInventorySlotStart() && i < this.getUseRowEnd() ? !this.moveItemStackTo(itemStack2, l = this.getSlotToQuickMoveTo(itemStack), l + 1, false) : (i >= this.getInventorySlotStart() && i < this.getInventorySlotEnd() ? !this.moveItemStackTo(itemStack2, this.getUseRowStart(), this.getUseRowEnd(), false) : i >= this.getUseRowStart() && i < this.getUseRowEnd() && !this.moveItemStackTo(itemStack2, this.getInventorySlotStart(), this.getInventorySlotEnd(), false)))) {
+            } else if (this.inputSlotIndexes.contains(i) ? !this.moveItemStackTo(itemStack2, j, k, false) : (this.canMoveIntoInputSlots(itemStack2) && i >= this.getInventorySlotStart() && i < this.getUseRowEnd() ? !this.moveItemStackTo(itemStack2, l = this.getSlotToQuickMoveTo(itemStack), this.getResultSlot(), false) : (i >= this.getInventorySlotStart() && i < this.getInventorySlotEnd() ? !this.moveItemStackTo(itemStack2, this.getUseRowStart(), this.getUseRowEnd(), false) : i >= this.getUseRowStart() && i < this.getUseRowEnd() && !this.moveItemStackTo(itemStack2, this.getInventorySlotStart(), this.getInventorySlotEnd(), false)))) {
                 return ItemStack.EMPTY;
             }
             if (itemStack2.isEmpty()) {
-                slot.set(ItemStack.EMPTY);
+                slot.setByPlayer(ItemStack.EMPTY);
             } else {
                 slot.setChanged();
             }

@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.Optionull;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -260,7 +260,7 @@ extends Screen {
 
             public MessageEntry(int i, Component component, @Nullable Component component2, GuiMessageTag guiMessageTag, boolean bl, boolean bl2) {
                 this.chatId = i;
-                this.tagIcon = Util.mapNullable(guiMessageTag, GuiMessageTag::icon);
+                this.tagIcon = Optionull.map(guiMessageTag, GuiMessageTag::icon);
                 this.tagHoverText = guiMessageTag != null && guiMessageTag.text() != null ? ChatSelectionScreen.this.font.split(guiMessageTag.text(), ChatSelectionList.this.getRowWidth()) : null;
                 this.canReport = bl;
                 this.playerMessage = bl2;

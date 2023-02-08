@@ -295,9 +295,9 @@ implements VariantHolder<Variant> {
     public boolean doHurtTarget(Entity entity) {
         if (this.getVariant() == Variant.EVIL) {
             this.playSound(SoundEvents.RABBIT_ATTACK, 1.0f, (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
-            return entity.hurt(DamageSource.mobAttack(this), 8.0f);
+            return entity.hurt(this.damageSources().mobAttack(this), 8.0f);
         }
-        return entity.hurt(DamageSource.mobAttack(this), 3.0f);
+        return entity.hurt(this.damageSources().mobAttack(this), 3.0f);
     }
 
     @Override

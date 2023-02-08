@@ -5,7 +5,6 @@ package net.minecraft.world.food;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -62,7 +61,7 @@ public class FoodData {
             ++this.tickTimer;
             if (this.tickTimer >= 80) {
                 if (player.getHealth() > 10.0f || difficulty == Difficulty.HARD || player.getHealth() > 1.0f && difficulty == Difficulty.NORMAL) {
-                    player.hurt(DamageSource.STARVE, 1.0f);
+                    player.hurt(player.damageSources().starve(), 1.0f);
                 }
                 this.tickTimer = 0;
             }

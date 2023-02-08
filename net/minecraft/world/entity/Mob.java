@@ -1023,15 +1023,17 @@ extends LivingEntity {
         }
         if (this.getLeashHolder() == player) {
             this.dropLeash(true, !player.getAbilities().instabuild);
+            this.gameEvent(GameEvent.ENTITY_INTERACT, player);
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         InteractionResult interactionResult = this.checkAndHandleImportantInteractions(player, interactionHand);
         if (interactionResult.consumesAction()) {
+            this.gameEvent(GameEvent.ENTITY_INTERACT, player);
             return interactionResult;
         }
         interactionResult = this.mobInteract(player, interactionHand);
         if (interactionResult.consumesAction()) {
-            this.gameEvent(GameEvent.ENTITY_INTERACT);
+            this.gameEvent(GameEvent.ENTITY_INTERACT, player);
             return interactionResult;
         }
         return super.interact(player, interactionHand);
@@ -1297,7 +1299,7 @@ extends LivingEntity {
         if ((i = EnchantmentHelper.getFireAspect(this)) > 0) {
             entity.setSecondsOnFire(i * 4);
         }
-        if (bl = entity.hurt(DamageSource.mobAttack(this), f)) {
+        if (bl = entity.hurt(this.damageSources().mobAttack(this), f)) {
             if (g > 0.0f && entity instanceof LivingEntity) {
                 ((LivingEntity)entity).knockback(g * 0.5f, Mth.sin(this.getYRot() * ((float)Math.PI / 180)), -Mth.cos(this.getYRot() * ((float)Math.PI / 180)));
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));

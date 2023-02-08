@@ -38,7 +38,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
@@ -166,7 +165,7 @@ extends Level {
     }
 
     public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, Holder<DimensionType> holder, int i, int j, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
-        super(clientLevelData, resourceKey, holder, supplier, true, bl, l, 1000000);
+        super(clientLevelData, resourceKey, clientPacketListener.registryAccess(), holder, supplier, true, bl, l, 1000000);
         this.connection = clientPacketListener;
         this.chunkSource = new ClientChunkCache(this, i);
         this.clientLevelData = clientLevelData;
@@ -515,11 +514,6 @@ extends Level {
     }
 
     @Override
-    public RegistryAccess registryAccess() {
-        return this.connection.registryAccess();
-    }
-
-    @Override
     public void sendBlockUpdated(BlockPos blockPos, BlockState blockState, BlockState blockState2, int i) {
         this.levelRenderer.blockChanged(this, blockPos, blockState, blockState2, i);
     }
@@ -820,12 +814,16 @@ extends Level {
 
         @Override
         public void onTickingStart(Entity entity) {
-            ClientLevel.this.tickingEntities.add(entity);
+            if (entity.getType().isTicking()) {
+                ClientLevel.this.tickingEntities.add(entity);
+            }
         }
 
         @Override
         public void onTickingEnd(Entity entity) {
-            ClientLevel.this.tickingEntities.remove(entity);
+            if (entity.getType().isTicking()) {
+                ClientLevel.this.tickingEntities.remove(entity);
+            }
         }
 
         @Override

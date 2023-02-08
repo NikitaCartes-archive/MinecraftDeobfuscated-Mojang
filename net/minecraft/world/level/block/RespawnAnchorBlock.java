@@ -17,7 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
@@ -35,10 +35,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class RespawnAnchorBlock
 extends Block {
@@ -60,7 +62,7 @@ extends Block {
             return InteractionResult.PASS;
         }
         if (RespawnAnchorBlock.isRespawnFuel(itemStack) && RespawnAnchorBlock.canBeCharged(blockState)) {
-            RespawnAnchorBlock.charge(level, blockPos, blockState);
+            RespawnAnchorBlock.charge(player, level, blockPos, blockState);
             if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }
@@ -123,15 +125,17 @@ extends Block {
             }
         };
         Vec3 vec3 = blockPos2.getCenter();
-        level.explode(null, DamageSource.badRespawnPointExplosion(vec3), explosionDamageCalculator, vec3, 5.0f, true, Level.ExplosionInteraction.BLOCK);
+        level.explode(null, level.damageSources().badRespawnPointExplosion(vec3), explosionDamageCalculator, vec3, 5.0f, true, Level.ExplosionInteraction.BLOCK);
     }
 
     public static boolean canSetSpawn(Level level) {
         return level.dimensionType().respawnAnchorWorks();
     }
 
-    public static void charge(Level level, BlockPos blockPos, BlockState blockState) {
-        level.setBlock(blockPos, (BlockState)blockState.setValue(CHARGE, blockState.getValue(CHARGE) + 1), 3);
+    public static void charge(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState) {
+        BlockState blockState2 = (BlockState)blockState.setValue(CHARGE, blockState.getValue(CHARGE) + 1);
+        level.setBlock(blockPos, blockState2, 3);
+        level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState2));
         level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.BLOCKS, 1.0f, 1.0f);
     }
 

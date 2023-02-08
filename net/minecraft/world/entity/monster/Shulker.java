@@ -19,6 +19,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -398,7 +399,7 @@ Enemy {
         if (super.hurt(damageSource, f)) {
             if ((double)this.getHealth() < (double)this.getMaxHealth() * 0.5 && this.random.nextInt(4) == 0) {
                 this.teleportSomewhere();
-            } else if (damageSource.isProjectile() && (entity = damageSource.getDirectEntity()) != null && entity.getType() == EntityType.SHULKER_BULLET) {
+            } else if (damageSource.is(DamageTypeTags.IS_PROJECTILE) && (entity = damageSource.getDirectEntity()) != null && entity.getType() == EntityType.SHULKER_BULLET) {
                 this.hitByShulkerBullet();
             }
             return true;

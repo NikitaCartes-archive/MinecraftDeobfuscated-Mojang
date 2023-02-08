@@ -17,6 +17,7 @@ import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -53,6 +54,15 @@ extends ContainerObjectSelectionList<Entry> {
             }
             this.addEntry(new KeyEntry((KeyMapping)keyMapping, component));
         }
+    }
+
+    public void resetMappingAndUpdateButtons() {
+        KeyMapping.resetMapping();
+        this.refreshEntries();
+    }
+
+    public void refreshEntries() {
+        this.children().forEach(Entry::refreshEntry);
     }
 
     @Override
@@ -109,7 +119,7 @@ extends ContainerObjectSelectionList<Entry> {
         }
 
         @Override
-        void onMappingChanged() {
+        protected void refreshEntry() {
         }
     }
 
@@ -120,12 +130,14 @@ extends ContainerObjectSelectionList<Entry> {
         private final Component name;
         private final Button changeButton;
         private final Button resetButton;
+        private boolean hasCollision = false;
 
         KeyEntry(KeyMapping keyMapping, Component component) {
             this.key = keyMapping;
             this.name = component;
             this.changeButton = Button.builder(component, button -> {
                 KeyBindsList.this.keyBindsScreen.selectedKey = keyMapping;
+                KeyBindsList.this.resetMappingAndUpdateButtons();
             }).bounds(0, 0, 75, 20).createNarration(supplier -> {
                 if (keyMapping.isUnbound()) {
                     return Component.translatable("narrator.controls.unbound", component);
@@ -134,36 +146,20 @@ extends ContainerObjectSelectionList<Entry> {
             }).build();
             this.resetButton = Button.builder(Component.translatable("controls.reset"), button -> {
                 ((KeyBindsList)KeyBindsList.this).minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
-                KeyMapping.resetMapping();
-                this.onMappingChanged();
+                KeyBindsList.this.resetMappingAndUpdateButtons();
             }).bounds(0, 0, 50, 20).createNarration(supplier -> Component.translatable("narrator.controls.reset", component)).build();
-            this.onMappingChanged();
+            this.refreshEntry();
         }
 
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            boolean bl2 = KeyBindsList.this.keyBindsScreen.selectedKey == this.key;
             ((KeyBindsList)KeyBindsList.this).minecraft.font.draw(poseStack, this.name, (float)(k + 90 - KeyBindsList.this.maxNameWidth), (float)(j + m / 2 - ((KeyBindsList)KeyBindsList.this).minecraft.font.lineHeight / 2), 0xFFFFFF);
             this.resetButton.setX(k + 190);
             this.resetButton.setY(j);
             this.resetButton.render(poseStack, n, o, f);
             this.changeButton.setX(k + 105);
             this.changeButton.setY(j);
-            this.changeButton.setMessage(this.key.getTranslatedKeyMessage());
-            boolean bl3 = false;
-            if (!this.key.isUnbound()) {
-                for (KeyMapping keyMapping : ((KeyBindsList)KeyBindsList.this).minecraft.options.keyMappings) {
-                    if (keyMapping == this.key || !this.key.same(keyMapping)) continue;
-                    bl3 = true;
-                    break;
-                }
-            }
-            if (bl2) {
-                this.changeButton.setMessage(Component.literal("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.WHITE, ChatFormatting.UNDERLINE)).append(" <").withStyle(ChatFormatting.YELLOW));
-            } else if (bl3) {
-                this.changeButton.setMessage(Component.literal("[ ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.WHITE)).append(" ]").withStyle(ChatFormatting.RED));
-            }
-            if (bl3) {
+            if (this.hasCollision) {
                 int p = 3;
                 int q = this.changeButton.getX() - 6;
                 GuiComponent.fill(poseStack, q, j + 2, q + 3, j + m + 2, ChatFormatting.RED.getColor() | 0xFF000000);
@@ -195,15 +191,37 @@ extends ContainerObjectSelectionList<Entry> {
         }
 
         @Override
-        void onMappingChanged() {
+        protected void refreshEntry() {
+            this.changeButton.setMessage(this.key.getTranslatedKeyMessage());
             this.resetButton.active = !this.key.isDefault();
+            this.hasCollision = false;
+            MutableComponent mutableComponent = Component.empty();
+            if (!this.key.isUnbound()) {
+                for (KeyMapping keyMapping : ((KeyBindsList)KeyBindsList.this).minecraft.options.keyMappings) {
+                    if (keyMapping == this.key || !this.key.same(keyMapping)) continue;
+                    if (this.hasCollision) {
+                        mutableComponent.append(", ");
+                    }
+                    this.hasCollision = true;
+                    mutableComponent.append(Component.translatable(keyMapping.getName()));
+                }
+            }
+            if (this.hasCollision) {
+                this.changeButton.setMessage(Component.literal("[ ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.WHITE)).append(" ]").withStyle(ChatFormatting.RED));
+                this.changeButton.setTooltip(Tooltip.create(Component.translatable("controls.keybinds.duplicateKeybinds", mutableComponent)));
+            } else {
+                this.changeButton.setTooltip(null);
+            }
+            if (KeyBindsList.this.keyBindsScreen.selectedKey == this.key) {
+                this.changeButton.setMessage(Component.literal("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.WHITE, ChatFormatting.UNDERLINE)).append(" <").withStyle(ChatFormatting.YELLOW));
+            }
         }
     }
 
     @Environment(value=EnvType.CLIENT)
     public static abstract class Entry
     extends ContainerObjectSelectionList.Entry<Entry> {
-        abstract void onMappingChanged();
+        abstract void refreshEntry();
     }
 }
 

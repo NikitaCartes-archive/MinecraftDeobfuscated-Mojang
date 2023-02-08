@@ -5,12 +5,16 @@ package net.minecraft.world.item.alchemy;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.alchemy.Potion;
 
 public class Potions {
-    public static final Potion EMPTY = Potions.register("empty", new Potion(new MobEffectInstance[0]));
+    public static ResourceKey<Potion> EMPTY_ID = ResourceKey.create(Registries.POTION, new ResourceLocation("empty"));
+    public static final Potion EMPTY = Potions.register(EMPTY_ID, new Potion(new MobEffectInstance[0]));
     public static final Potion WATER = Potions.register("water", new Potion(new MobEffectInstance[0]));
     public static final Potion MUNDANE = Potions.register("mundane", new Potion(new MobEffectInstance[0]));
     public static final Potion THICK = Potions.register("thick", new Potion(new MobEffectInstance[0]));
@@ -56,6 +60,10 @@ public class Potions {
 
     private static Potion register(String string, Potion potion) {
         return Registry.register(BuiltInRegistries.POTION, string, potion);
+    }
+
+    private static Potion register(ResourceKey<Potion> resourceKey, Potion potion) {
+        return Registry.register(BuiltInRegistries.POTION, resourceKey, potion);
     }
 }
 

@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -295,10 +296,10 @@ extends Monster {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
-        if (!this.isMoving() && !damageSource.isMagic() && damageSource.getDirectEntity() instanceof LivingEntity) {
+        if (!this.isMoving() && !damageSource.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && damageSource.getDirectEntity() instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)damageSource.getDirectEntity();
-            if (!damageSource.isExplosion()) {
-                livingEntity.hurt(DamageSource.thorns(this), 2.0f);
+            if (!damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
+                livingEntity.hurt(this.damageSources().thorns(this), 2.0f);
             }
         }
         if (this.randomStrollGoal != null) {
@@ -447,8 +448,8 @@ extends Monster {
                 if (this.elder) {
                     f += 2.0f;
                 }
-                livingEntity.hurt(DamageSource.indirectMagic(this.guardian, this.guardian), f);
-                livingEntity.hurt(DamageSource.mobAttack(this.guardian), (float)this.guardian.getAttributeValue(Attributes.ATTACK_DAMAGE));
+                livingEntity.hurt(this.guardian.damageSources().indirectMagic(this.guardian, this.guardian), f);
+                livingEntity.hurt(this.guardian.damageSources().mobAttack(this.guardian), (float)this.guardian.getAttributeValue(Attributes.ATTACK_DAMAGE));
                 this.guardian.setTarget(null);
             }
             super.tick();

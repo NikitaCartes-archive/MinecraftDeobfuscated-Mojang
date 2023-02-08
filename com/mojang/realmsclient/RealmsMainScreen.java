@@ -33,7 +33,7 @@ import com.mojang.realmsclient.gui.screens.RealmsParentalConsentScreen;
 import com.mojang.realmsclient.gui.screens.RealmsPendingInvitesScreen;
 import com.mojang.realmsclient.gui.task.DataFetcher;
 import com.mojang.realmsclient.util.RealmsPersistence;
-import com.mojang.realmsclient.util.RealmsTextureManager;
+import com.mojang.realmsclient.util.RealmsUtil;
 import com.mojang.realmsclient.util.task.GetServerDetailsTask;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +50,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -666,7 +665,10 @@ extends RealmsScreen {
             this.renderLocal(poseStack);
         }
         if (this.shouldShowPopup()) {
+            poseStack.pushPose();
+            poseStack.translate(0.0f, 0.0f, 100.0f);
             this.drawPopup(poseStack);
+            poseStack.popPose();
         } else {
             if (this.showingPopup) {
                 this.updateButtonStates(null);
@@ -1298,7 +1300,7 @@ extends RealmsScreen {
                 }
             }
             RealmsMainScreen.this.font.draw(poseStack, realmsServer.getName(), (float)(i + 2), (float)(j + 1), 0xFFFFFF);
-            RealmsTextureManager.withBoundFace(realmsServer.ownerUUID, () -> PlayerFaceRenderer.draw(poseStack, i - 36, j, 32));
+            RealmsUtil.renderPlayerFace(poseStack, i - 36, j, 32, realmsServer.ownerUUID);
         }
 
         @Override

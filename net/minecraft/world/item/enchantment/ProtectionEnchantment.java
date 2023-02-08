@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -38,22 +39,22 @@ extends Enchantment {
 
     @Override
     public int getDamageProtection(int i, DamageSource damageSource) {
-        if (damageSource.isBypassInvul()) {
+        if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return 0;
         }
         if (this.type == Type.ALL) {
             return i;
         }
-        if (this.type == Type.FIRE && damageSource.isFire()) {
+        if (this.type == Type.FIRE && damageSource.is(DamageTypeTags.IS_FIRE)) {
             return i * 2;
         }
-        if (this.type == Type.FALL && damageSource.isFall()) {
+        if (this.type == Type.FALL && damageSource.is(DamageTypeTags.IS_FALL)) {
             return i * 3;
         }
-        if (this.type == Type.EXPLOSION && damageSource.isExplosion()) {
+        if (this.type == Type.EXPLOSION && damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
             return i * 2;
         }
-        if (this.type == Type.PROJECTILE && damageSource.isProjectile()) {
+        if (this.type == Type.PROJECTILE && damageSource.is(DamageTypeTags.IS_PROJECTILE)) {
             return i * 2;
         }
         return 0;

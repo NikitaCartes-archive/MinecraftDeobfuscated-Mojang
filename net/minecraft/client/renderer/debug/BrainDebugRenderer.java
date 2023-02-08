@@ -7,7 +7,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.util.Collection;
@@ -117,11 +116,8 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         this.clearRemovedEntities();
-        this.doRender(d, e, f);
-        RenderSystem.disableBlend();
+        this.doRender(poseStack, multiBufferSource, d, e, f);
         if (!this.minecraft.player.isSpectator()) {
             this.updateLastLookedAtUuid();
         }
@@ -134,144 +130,139 @@ implements DebugRenderer.SimpleDebugRenderer {
         });
     }
 
-    private void doRender(double d, double e, double f) {
+    private void doRender(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         BlockPos blockPos = new BlockPos(d, e, f);
         this.brainDumpsPerEntity.values().forEach(brainDump -> {
             if (this.isPlayerCloseEnoughToMob((BrainDump)brainDump)) {
-                this.renderBrainInfo((BrainDump)brainDump, d, e, f);
+                this.renderBrainInfo(poseStack, multiBufferSource, (BrainDump)brainDump, d, e, f);
             }
         });
         for (BlockPos blockPos22 : this.pois.keySet()) {
             if (!blockPos.closerThan(blockPos22, 30.0)) continue;
-            BrainDebugRenderer.highlightPoi(blockPos22);
+            BrainDebugRenderer.highlightPoi(poseStack, multiBufferSource, blockPos22);
         }
         this.pois.values().forEach(poiInfo -> {
             if (blockPos.closerThan(poiInfo.pos, 30.0)) {
-                this.renderPoiInfo((PoiInfo)poiInfo);
+                this.renderPoiInfo(poseStack, multiBufferSource, (PoiInfo)poiInfo);
             }
         });
         this.getGhostPois().forEach((blockPos2, list) -> {
             if (blockPos.closerThan((Vec3i)blockPos2, 30.0)) {
-                this.renderGhostPoi((BlockPos)blockPos2, (List<String>)list);
+                this.renderGhostPoi(poseStack, multiBufferSource, (BlockPos)blockPos2, (List<String>)list);
             }
         });
     }
 
-    private static void highlightPoi(BlockPos blockPos) {
+    private static void highlightPoi(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos) {
         float f = 0.05f;
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        DebugRenderer.renderFilledBox(blockPos, 0.05f, 0.2f, 0.2f, 1.0f, 0.3f);
+        DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos, 0.05f, 0.2f, 0.2f, 1.0f, 0.3f);
     }
 
-    private void renderGhostPoi(BlockPos blockPos, List<String> list) {
+    private void renderGhostPoi(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos, List<String> list) {
         float f = 0.05f;
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        DebugRenderer.renderFilledBox(blockPos, 0.05f, 0.2f, 0.2f, 1.0f, 0.3f);
-        BrainDebugRenderer.renderTextOverPos("" + list, blockPos, 0, -256);
-        BrainDebugRenderer.renderTextOverPos("Ghost POI", blockPos, 1, -65536);
+        DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos, 0.05f, 0.2f, 0.2f, 1.0f, 0.3f);
+        BrainDebugRenderer.renderTextOverPos(poseStack, multiBufferSource, "" + list, blockPos, 0, -256);
+        BrainDebugRenderer.renderTextOverPos(poseStack, multiBufferSource, "Ghost POI", blockPos, 1, -65536);
     }
 
-    private void renderPoiInfo(PoiInfo poiInfo) {
+    private void renderPoiInfo(PoseStack poseStack, MultiBufferSource multiBufferSource, PoiInfo poiInfo) {
         int i = 0;
         Set<String> set = this.getTicketHolderNames(poiInfo);
         if (set.size() < 4) {
-            BrainDebugRenderer.renderTextOverPoi("Owners: " + set, poiInfo, i, -256);
+            BrainDebugRenderer.renderTextOverPoi(poseStack, multiBufferSource, "Owners: " + set, poiInfo, i, -256);
         } else {
-            BrainDebugRenderer.renderTextOverPoi(set.size() + " ticket holders", poiInfo, i, -256);
+            BrainDebugRenderer.renderTextOverPoi(poseStack, multiBufferSource, set.size() + " ticket holders", poiInfo, i, -256);
         }
         ++i;
         Set<String> set2 = this.getPotentialTicketHolderNames(poiInfo);
         if (set2.size() < 4) {
-            BrainDebugRenderer.renderTextOverPoi("Candidates: " + set2, poiInfo, i, -23296);
+            BrainDebugRenderer.renderTextOverPoi(poseStack, multiBufferSource, "Candidates: " + set2, poiInfo, i, -23296);
         } else {
-            BrainDebugRenderer.renderTextOverPoi(set2.size() + " potential owners", poiInfo, i, -23296);
+            BrainDebugRenderer.renderTextOverPoi(poseStack, multiBufferSource, set2.size() + " potential owners", poiInfo, i, -23296);
         }
-        BrainDebugRenderer.renderTextOverPoi("Free tickets: " + poiInfo.freeTicketCount, poiInfo, ++i, -256);
-        BrainDebugRenderer.renderTextOverPoi(poiInfo.type, poiInfo, ++i, -1);
+        BrainDebugRenderer.renderTextOverPoi(poseStack, multiBufferSource, "Free tickets: " + poiInfo.freeTicketCount, poiInfo, ++i, -256);
+        BrainDebugRenderer.renderTextOverPoi(poseStack, multiBufferSource, poiInfo.type, poiInfo, ++i, -1);
     }
 
-    private void renderPath(BrainDump brainDump, double d, double e, double f) {
+    private void renderPath(PoseStack poseStack, MultiBufferSource multiBufferSource, BrainDump brainDump, double d, double e, double f) {
         if (brainDump.path != null) {
-            PathfindingRenderer.renderPath(brainDump.path, 0.5f, false, false, d, e, f);
+            PathfindingRenderer.renderPath(poseStack, multiBufferSource, brainDump.path, 0.5f, false, false, d, e, f);
         }
     }
 
-    private void renderBrainInfo(BrainDump brainDump, double d, double e, double f) {
+    private void renderBrainInfo(PoseStack poseStack, MultiBufferSource multiBufferSource, BrainDump brainDump, double d, double e, double f) {
         boolean bl = this.isMobSelected(brainDump);
         int i = 0;
-        BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, brainDump.name, -1, 0.03f);
+        BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, brainDump.name, -1, 0.03f);
         ++i;
         if (bl) {
-            BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, brainDump.profession + " " + brainDump.xp + " xp", -1, 0.02f);
+            BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, brainDump.profession + " " + brainDump.xp + " xp", -1, 0.02f);
             ++i;
         }
         if (bl) {
             int j = brainDump.health < brainDump.maxHealth ? -23296 : -1;
-            BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, "health: " + String.format(Locale.ROOT, "%.1f", Float.valueOf(brainDump.health)) + " / " + String.format(Locale.ROOT, "%.1f", Float.valueOf(brainDump.maxHealth)), j, 0.02f);
+            BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, "health: " + String.format(Locale.ROOT, "%.1f", Float.valueOf(brainDump.health)) + " / " + String.format(Locale.ROOT, "%.1f", Float.valueOf(brainDump.maxHealth)), j, 0.02f);
             ++i;
         }
         if (bl && !brainDump.inventory.equals("")) {
-            BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, brainDump.inventory, -98404, 0.02f);
+            BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, brainDump.inventory, -98404, 0.02f);
             ++i;
         }
         if (bl) {
             for (String string : brainDump.behaviors) {
-                BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, string, -16711681, 0.02f);
+                BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -16711681, 0.02f);
                 ++i;
             }
         }
         if (bl) {
             for (String string : brainDump.activities) {
-                BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, string, -16711936, 0.02f);
+                BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -16711936, 0.02f);
                 ++i;
             }
         }
         if (brainDump.wantsGolem) {
-            BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, "Wants Golem", -23296, 0.02f);
+            BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, "Wants Golem", -23296, 0.02f);
             ++i;
         }
         if (bl && brainDump.angerLevel != -1) {
-            BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, "Anger Level: " + brainDump.angerLevel, -98404, 0.02f);
+            BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, "Anger Level: " + brainDump.angerLevel, -98404, 0.02f);
             ++i;
         }
         if (bl) {
             for (String string : brainDump.gossips) {
                 if (string.startsWith(brainDump.name)) {
-                    BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, string, -1, 0.02f);
+                    BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -1, 0.02f);
                 } else {
-                    BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, string, -23296, 0.02f);
+                    BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -23296, 0.02f);
                 }
                 ++i;
             }
         }
         if (bl) {
             for (String string : Lists.reverse(brainDump.memories)) {
-                BrainDebugRenderer.renderTextOverMob(brainDump.pos, i, string, -3355444, 0.02f);
+                BrainDebugRenderer.renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -3355444, 0.02f);
                 ++i;
             }
         }
         if (bl) {
-            this.renderPath(brainDump, d, e, f);
+            this.renderPath(poseStack, multiBufferSource, brainDump, d, e, f);
         }
     }
 
-    private static void renderTextOverPoi(String string, PoiInfo poiInfo, int i, int j) {
-        BlockPos blockPos = poiInfo.pos;
-        BrainDebugRenderer.renderTextOverPos(string, blockPos, i, j);
+    private static void renderTextOverPoi(PoseStack poseStack, MultiBufferSource multiBufferSource, String string, PoiInfo poiInfo, int i, int j) {
+        BrainDebugRenderer.renderTextOverPos(poseStack, multiBufferSource, string, poiInfo.pos, i, j);
     }
 
-    private static void renderTextOverPos(String string, BlockPos blockPos, int i, int j) {
+    private static void renderTextOverPos(PoseStack poseStack, MultiBufferSource multiBufferSource, String string, BlockPos blockPos, int i, int j) {
         double d = 1.3;
         double e = 0.2;
         double f = (double)blockPos.getX() + 0.5;
         double g = (double)blockPos.getY() + 1.3 + (double)i * 0.2;
         double h = (double)blockPos.getZ() + 0.5;
-        DebugRenderer.renderFloatingText(string, f, g, h, j, 0.02f, true, 0.0f, true);
+        DebugRenderer.renderFloatingText(poseStack, multiBufferSource, string, f, g, h, j, 0.02f, true, 0.0f, true);
     }
 
-    private static void renderTextOverMob(Position position, int i, String string, int j, float f) {
+    private static void renderTextOverMob(PoseStack poseStack, MultiBufferSource multiBufferSource, Position position, int i, String string, int j, float f) {
         double d = 2.4;
         double e = 0.25;
         BlockPos blockPos = new BlockPos(position);
@@ -279,7 +270,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         double h = position.y() + 2.4 + (double)i * 0.25;
         double k = (double)blockPos.getZ() + 0.5;
         float l = 0.5f;
-        DebugRenderer.renderFloatingText(string, g, h, k, j, f, false, 0.5f, true);
+        DebugRenderer.renderFloatingText(poseStack, multiBufferSource, string, g, h, k, j, f, false, 0.5f, true);
     }
 
     private Set<String> getTicketHolderNames(PoiInfo poiInfo) {

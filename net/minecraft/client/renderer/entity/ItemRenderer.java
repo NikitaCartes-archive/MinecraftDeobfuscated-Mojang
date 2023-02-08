@@ -33,7 +33,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -51,6 +50,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -108,13 +108,13 @@ implements ResourceManagerReloadListener {
         this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, null, randomSource), itemStack, i, j);
     }
 
-    public void render(ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel) {
+    public void render(ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel) {
         boolean bl2;
         if (itemStack.isEmpty()) {
             return;
         }
         poseStack.pushPose();
-        boolean bl3 = bl2 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
+        boolean bl3 = bl2 = itemDisplayContext == ItemDisplayContext.GUI || itemDisplayContext == ItemDisplayContext.GROUND || itemDisplayContext == ItemDisplayContext.FIXED;
         if (bl2) {
             if (itemStack.is(Items.TRIDENT)) {
                 bakedModel = this.itemModelShaper.getModelManager().getModel(TRIDENT_MODEL);
@@ -122,21 +122,21 @@ implements ResourceManagerReloadListener {
                 bakedModel = this.itemModelShaper.getModelManager().getModel(SPYGLASS_MODEL);
             }
         }
-        bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
+        bakedModel.getTransforms().getTransform(itemDisplayContext).apply(bl, poseStack);
         poseStack.translate(-0.5f, -0.5f, -0.5f);
         if (bakedModel.isCustomRenderer() || itemStack.is(Items.TRIDENT) && !bl2) {
-            this.blockEntityRenderer.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
+            this.blockEntityRenderer.renderByItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, i, j);
         } else {
             VertexConsumer vertexConsumer;
             Block block;
-            boolean bl32 = transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem ? !((block = ((BlockItem)itemStack.getItem()).getBlock()) instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock) : true;
+            boolean bl32 = itemDisplayContext != ItemDisplayContext.GUI && !itemDisplayContext.firstPerson() && itemStack.getItem() instanceof BlockItem ? !((block = ((BlockItem)itemStack.getItem()).getBlock()) instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock) : true;
             RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl32);
             if (itemStack.is(ItemTags.COMPASSES) && itemStack.hasFoil()) {
                 poseStack.pushPose();
                 PoseStack.Pose pose = poseStack.last();
-                if (transformType == ItemTransforms.TransformType.GUI) {
+                if (itemDisplayContext == ItemDisplayContext.GUI) {
                     MatrixUtil.mulComponentWise(pose.pose(), 0.5f);
-                } else if (transformType.firstPerson()) {
+                } else if (itemDisplayContext.firstPerson()) {
                     MatrixUtil.mulComponentWise(pose.pose(), 0.75f);
                 }
                 vertexConsumer = bl32 ? ItemRenderer.getCompassFoilBufferDirect(multiBufferSource, renderType, pose) : ItemRenderer.getCompassFoilBuffer(multiBufferSource, renderType, pose);
@@ -203,16 +203,16 @@ implements ResourceManagerReloadListener {
         return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
     }
 
-    public void renderStatic(ItemStack itemStack, ItemTransforms.TransformType transformType, int i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource, @Nullable Level level, int k) {
-        this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, level, i, j, k);
+    public void renderStatic(ItemStack itemStack, ItemDisplayContext itemDisplayContext, int i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource, @Nullable Level level, int k) {
+        this.renderStatic(null, itemStack, itemDisplayContext, false, poseStack, multiBufferSource, level, i, j, k);
     }
 
-    public void renderStatic(@Nullable LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, @Nullable Level level, int i, int j, int k) {
+    public void renderStatic(@Nullable LivingEntity livingEntity, ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, @Nullable Level level, int i, int j, int k) {
         if (itemStack.isEmpty()) {
             return;
         }
         BakedModel bakedModel = this.getModel(itemStack, level, livingEntity, k);
-        this.render(itemStack, transformType, bl, poseStack, multiBufferSource, i, j, bakedModel);
+        this.render(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel);
     }
 
     public void renderGuiItem(ItemStack itemStack, int i, int j) {
@@ -238,7 +238,7 @@ implements ResourceManagerReloadListener {
         if (bl) {
             Lighting.setupForFlatItems();
         }
-        this.render(itemStack, ItemTransforms.TransformType.GUI, false, poseStack2, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
+        this.render(itemStack, ItemDisplayContext.GUI, false, poseStack2, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
         bufferSource.endBatch();
         RenderSystem.enableDepthTest();
         if (bl) {

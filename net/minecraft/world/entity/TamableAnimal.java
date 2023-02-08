@@ -21,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
@@ -154,20 +155,6 @@ implements OwnableEntity {
     }
 
     @Override
-    @Nullable
-    public LivingEntity getOwner() {
-        try {
-            UUID uUID = this.getOwnerUUID();
-            if (uUID == null) {
-                return null;
-            }
-            return this.level.getPlayerByUUID(uUID);
-        } catch (IllegalArgumentException illegalArgumentException) {
-            return null;
-        }
-    }
-
-    @Override
     public boolean canAttack(LivingEntity livingEntity) {
         if (this.isOwnedBy(livingEntity)) {
             return false;
@@ -223,9 +210,8 @@ implements OwnableEntity {
     }
 
     @Override
-    @Nullable
-    public /* synthetic */ Entity getOwner() {
-        return this.getOwner();
+    public /* synthetic */ EntityGetter getLevel() {
+        return super.getLevel();
     }
 }
 

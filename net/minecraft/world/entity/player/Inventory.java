@@ -15,6 +15,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -453,7 +454,7 @@ Nameable {
         }
         for (int i : is) {
             ItemStack itemStack = this.armor.get(i);
-            if (damageSource.isFire() && itemStack.getItem().isFireResistant() || !(itemStack.getItem() instanceof ArmorItem)) continue;
+            if (damageSource.is(DamageTypeTags.IS_FIRE) && itemStack.getItem().isFireResistant() || !(itemStack.getItem() instanceof ArmorItem)) continue;
             itemStack.hurtAndBreak((int)f, this.player, player -> player.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, i)));
         }
     }

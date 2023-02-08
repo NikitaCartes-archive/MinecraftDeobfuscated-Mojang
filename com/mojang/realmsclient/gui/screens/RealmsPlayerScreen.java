@@ -14,13 +14,12 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsConfirmScreen;
 import com.mojang.realmsclient.gui.screens.RealmsInviteScreen;
-import com.mojang.realmsclient.util.RealmsTextureManager;
+import com.mojang.realmsclient.util.RealmsUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -353,7 +352,7 @@ extends RealmsScreen {
                 RealmsPlayerScreen.this.drawNormal(poseStack, RealmsPlayerScreen.this.column1X + RealmsPlayerScreen.this.columnWidth - 10, j + 1, k, l);
             }
             RealmsPlayerScreen.this.drawRemoveIcon(poseStack, RealmsPlayerScreen.this.column1X + RealmsPlayerScreen.this.columnWidth - 22, j + 2, k, l);
-            RealmsTextureManager.withBoundFace(playerInfo.getUuid(), () -> PlayerFaceRenderer.draw(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8));
+            RealmsUtil.renderPlayerFace(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, playerInfo.getUuid());
         }
 
         @Override

@@ -373,7 +373,7 @@ public abstract class AbstractContainerMenu {
                                                                 itemStack4.setCount(o);
                                                             }
                                                             m -= itemStack4.getCount() - n;
-                                                            slot2.set(itemStack4);
+                                                            slot2.setByPlayer(itemStack4);
                                                         }
                                                         itemStack23.setCount(m);
                                                         this.setCarried(itemStack23);
@@ -440,7 +440,7 @@ public abstract class AbstractContainerMenu {
                                                         this.setCarried(slot.safeInsert(itemStack5, p));
                                                     } else if (itemStack5.getCount() <= slot.getMaxStackSize(itemStack5)) {
                                                         this.setCarried(itemStack6);
-                                                        slot.set(itemStack5);
+                                                        slot.setByPlayer(itemStack5);
                                                     }
                                                 } else if (ItemStack.isSameItemSameTags(itemStack6, itemStack5)) {
                                                     Optional<ItemStack> optional2 = slot.tryRemove(itemStack6.getCount(), itemStack5.getMaxStackSize() - itemStack5.getCount(), player);
@@ -464,7 +464,7 @@ public abstract class AbstractContainerMenu {
                                 if (!slot3.mayPickup(player)) break block39;
                                 inventory.setItem(j, itemStack3);
                                 slot3.onSwapCraft(itemStack3.getCount());
-                                slot3.set(ItemStack.EMPTY);
+                                slot3.setByPlayer(ItemStack.EMPTY);
                                 slot3.onTake(player, itemStack3);
                                 break block39;
                             }
@@ -472,24 +472,24 @@ public abstract class AbstractContainerMenu {
                             if (!slot3.mayPlace(itemStack22)) break block39;
                             int q = slot3.getMaxStackSize(itemStack22);
                             if (itemStack22.getCount() > q) {
-                                slot3.set(itemStack22.split(q));
+                                slot3.setByPlayer(itemStack22.split(q));
                             } else {
                                 inventory.setItem(j, ItemStack.EMPTY);
-                                slot3.set(itemStack22);
+                                slot3.setByPlayer(itemStack22);
                             }
                             break block39;
                         }
                         if (!slot3.mayPickup(player) || !slot3.mayPlace(itemStack22)) break block39;
                         int q = slot3.getMaxStackSize(itemStack22);
                         if (itemStack22.getCount() <= q) break block49;
-                        slot3.set(itemStack22.split(q));
+                        slot3.setByPlayer(itemStack22.split(q));
                         slot3.onTake(player, itemStack3);
                         if (inventory.add(itemStack3)) break block39;
                         player.drop(itemStack3, true);
                         break block39;
                     }
                     inventory.setItem(j, itemStack3);
-                    slot3.set(itemStack22);
+                    slot3.setByPlayer(itemStack22);
                     slot3.onTake(player, itemStack3);
                     break block39;
                 }
@@ -592,7 +592,7 @@ public abstract class AbstractContainerMenu {
 
     public void initializeContents(int i, List<ItemStack> list, ItemStack itemStack) {
         for (int j = 0; j < list.size(); ++j) {
-            this.getSlot(j).initialize(list.get(j));
+            this.getSlot(j).set(list.get(j));
         }
         this.carried = itemStack;
         this.stateId = i;
@@ -644,9 +644,9 @@ public abstract class AbstractContainerMenu {
                 itemStack2 = slot.getItem();
                 if (itemStack2.isEmpty() && slot.mayPlace(itemStack)) {
                     if (itemStack.getCount() > slot.getMaxStackSize()) {
-                        slot.set(itemStack.split(slot.getMaxStackSize()));
+                        slot.setByPlayer(itemStack.split(slot.getMaxStackSize()));
                     } else {
-                        slot.set(itemStack.split(itemStack.getCount()));
+                        slot.setByPlayer(itemStack.split(itemStack.getCount()));
                     }
                     slot.setChanged();
                     bl2 = true;

@@ -33,6 +33,8 @@ implements ArmedModel,
 HeadedModel {
     public static final float OVERLAY_SCALE = 0.25f;
     public static final float HAT_OVERLAY_SCALE = 0.5f;
+    public static final float LEGGINGS_OVERLAY_SCALE = -0.1f;
+    private static final float DUCK_WALK_ROTATION = 0.005f;
     private static final float SPYGLASS_ARM_ROT_Y = 0.2617994f;
     private static final float SPYGLASS_ARM_ROT_X = 1.9198622f;
     private static final float SPYGLASS_ARM_CROUCH_ROT_X = 0.2617994f;
@@ -121,8 +123,8 @@ HeadedModel {
         this.leftArm.zRot = 0.0f;
         this.rightLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g / k;
         this.leftLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g / k;
-        this.rightLeg.yRot = 0.0f;
-        this.leftLeg.yRot = 0.0f;
+        this.rightLeg.yRot = 0.005f;
+        this.leftLeg.yRot = -0.005f;
         this.rightLeg.zRot = 0.0f;
         this.leftLeg.zRot = 0.0f;
         if (this.riding) {
@@ -170,8 +172,8 @@ HeadedModel {
             this.rightArm.y = 5.2f;
         } else {
             this.body.xRot = 0.0f;
-            this.rightLeg.z = 0.1f;
-            this.leftLeg.z = 0.1f;
+            this.rightLeg.z = 0.0f;
+            this.leftLeg.z = 0.0f;
             this.rightLeg.y = 12.0f;
             this.leftLeg.y = 12.0f;
             this.head.y = 0.0f;

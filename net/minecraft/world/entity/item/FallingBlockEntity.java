@@ -217,7 +217,7 @@ extends Entity {
             damageSource2 = fallable.getFallDamageSource(this);
         } else {
             predicate = EntitySelector.NO_SPECTATORS;
-            damageSource2 = DamageSource.fallingBlock(this);
+            damageSource2 = this.damageSources().fallingBlock(this);
         }
         float h = Math.min(Mth.floor((float)i * this.fallDamagePerDistance), this.fallDamageMax);
         this.level.getEntities(this, this.getBoundingBox(), predicate).forEach(entity -> entity.hurt(damageSource2, h));

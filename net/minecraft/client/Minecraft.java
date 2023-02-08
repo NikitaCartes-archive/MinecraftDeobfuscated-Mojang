@@ -67,6 +67,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.FileUtil;
+import net.minecraft.Optionull;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
@@ -2088,7 +2089,7 @@ implements WindowEventHandler {
 
     @Nullable
     public ServerData getCurrentServer() {
-        return Util.mapNullable(this.getConnection(), ClientPacketListener::getServerData);
+        return Optionull.map(this.getConnection(), ClientPacketListener::getServerData);
     }
 
     public boolean isLocalServer() {

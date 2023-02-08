@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.fabricmc.api.EnvType;
@@ -30,8 +29,6 @@ implements DebugRenderer.SimpleDebugRenderer {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         ClientLevel level = this.minecraft.level;
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         BlockPos blockPos = new BlockPos(d, e, f);
         LongOpenHashSet longSet = new LongOpenHashSet();
         for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-10, -10, -10), blockPos.offset(10, 10, 10))) {
@@ -40,10 +37,10 @@ implements DebugRenderer.SimpleDebugRenderer {
             int j = Mth.hsvToRgb(g, 0.9f, 0.9f);
             long l = SectionPos.blockToSection(blockPos2.asLong());
             if (longSet.add(l)) {
-                DebugRenderer.renderFloatingText(level.getChunkSource().getLightEngine().getDebugData(LightLayer.SKY, SectionPos.of(l)), SectionPos.sectionToBlockCoord(SectionPos.x(l), 8), SectionPos.sectionToBlockCoord(SectionPos.y(l), 8), SectionPos.sectionToBlockCoord(SectionPos.z(l), 8), 0xFF0000, 0.3f);
+                DebugRenderer.renderFloatingText(poseStack, multiBufferSource, level.getChunkSource().getLightEngine().getDebugData(LightLayer.SKY, SectionPos.of(l)), SectionPos.sectionToBlockCoord(SectionPos.x(l), 8), SectionPos.sectionToBlockCoord(SectionPos.y(l), 8), SectionPos.sectionToBlockCoord(SectionPos.z(l), 8), 0xFF0000, 0.3f);
             }
             if (i == 15) continue;
-            DebugRenderer.renderFloatingText(String.valueOf(i), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, j);
+            DebugRenderer.renderFloatingText(poseStack, multiBufferSource, String.valueOf(i), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, j);
         }
     }
 }

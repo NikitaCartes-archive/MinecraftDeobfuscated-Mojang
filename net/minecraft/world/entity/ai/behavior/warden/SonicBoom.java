@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -67,7 +66,7 @@ extends Behavior<Warden> {
                 serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, vec34.x, vec34.y, vec34.z, 1, 0.0, 0.0, 0.0, 0.0);
             }
             warden.playSound(SoundEvents.WARDEN_SONIC_BOOM, 3.0f, 1.0f);
-            livingEntity.hurt(DamageSource.sonicBoom(warden), 10.0f);
+            livingEntity.hurt(serverLevel.damageSources().sonicBoom(warden), 10.0f);
             double d = 0.5 * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
             double e = 2.5 * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
             livingEntity.push(vec33.x() * e, vec33.y() * d, vec33.z() * e);

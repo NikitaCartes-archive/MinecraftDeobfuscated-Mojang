@@ -84,6 +84,7 @@ public class GameRules {
     public static final Key<BooleanValue> RULE_WATER_SOURCE_CONVERSION = GameRules.register("waterSourceConversion", Category.UPDATES, BooleanValue.create(true));
     public static final Key<BooleanValue> RULE_LAVA_SOURCE_CONVERSION = GameRules.register("lavaSourceConversion", Category.UPDATES, BooleanValue.create(false));
     public static final Key<BooleanValue> RULE_GLOBAL_SOUND_EVENTS = GameRules.register("globalSoundEvents", Category.MISC, BooleanValue.create(true));
+    public static final Key<BooleanValue> RULE_DO_VINES_SPREAD = GameRules.register("doVinesSpread", Category.UPDATES, BooleanValue.create(true));
     private final Map<Key<?>, Value<?>> rules;
 
     private static <T extends Value<T>> Key<T> register(String string, Category category, Type<T> type) {

@@ -9,7 +9,6 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -53,7 +52,7 @@ extends HalfTransparentBlock {
         if (!level.isClientSide) {
             level.broadcastEntityEvent(entity, (byte)54);
         }
-        if (entity.causeFallDamage(f, 0.2f, DamageSource.FALL)) {
+        if (entity.causeFallDamage(f, 0.2f, level.damageSources().fall())) {
             entity.playSound(this.soundType.getFallSound(), this.soundType.getVolume() * 0.5f, this.soundType.getPitch() * 0.75f);
         }
     }

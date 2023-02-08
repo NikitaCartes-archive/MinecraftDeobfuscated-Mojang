@@ -52,7 +52,7 @@ extends Block {
 
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
-        FarmBlock.turnToDirt(blockState, serverLevel, blockPos);
+        FarmBlock.turnToDirt(null, blockState, serverLevel, blockPos);
     }
 
     @Override

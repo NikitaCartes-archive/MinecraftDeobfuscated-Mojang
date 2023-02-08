@@ -27,7 +27,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -83,7 +82,7 @@ implements NeutralMob {
     private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", (double)0.15f, AttributeModifier.Operation.ADDITION);
     private static final int DELAY_BETWEEN_CREEPY_STARE_SOUND = 400;
     private static final int MIN_DEAGGRESSION_TIME = 600;
-    private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BLOCK_STATE);
+    private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.OPTIONAL_BLOCK_STATE);
     private static final EntityDataAccessor<Boolean> DATA_CREEPY = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_STARED_AT = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
     private int lastStareSound = Integer.MIN_VALUE;
@@ -345,20 +344,26 @@ implements NeutralMob {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        if (damageSource instanceof IndirectEntityDamageSource) {
+        if (damageSource.isIndirect()) {
+            boolean bl;
             Entity entity = damageSource.getDirectEntity();
-            boolean bl = entity instanceof ThrownPotion ? this.hurtWithCleanWater(damageSource, (ThrownPotion)entity, f) : false;
+            if (entity instanceof ThrownPotion) {
+                ThrownPotion thrownPotion = (ThrownPotion)entity;
+                bl = this.hurtWithCleanWater(damageSource, thrownPotion, f);
+            } else {
+                bl = false;
+            }
             for (int i = 0; i < 64; ++i) {
                 if (!this.teleport()) continue;
                 return true;
             }
             return bl;
         }
-        boolean bl2 = super.hurt(damageSource, f);
+        boolean bl = super.hurt(damageSource, f);
         if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
             this.teleport();
         }
-        return bl2;
+        return bl;
     }
 
     private boolean hurtWithCleanWater(DamageSource damageSource, ThrownPotion thrownPotion, float f) {
@@ -525,7 +530,7 @@ implements NeutralMob {
         public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable Predicate<LivingEntity> predicate) {
             super(enderMan, Player.class, 10, false, false, predicate);
             this.enderman = enderMan;
-            this.isAngerInducing = livingEntity -> enderMan.isLookingAtMe((Player)livingEntity) || enderMan.isAngryAt((LivingEntity)livingEntity);
+            this.isAngerInducing = livingEntity -> (enderMan.isLookingAtMe((Player)livingEntity) || enderMan.isAngryAt((LivingEntity)livingEntity)) && !enderMan.hasIndirectPassenger((Entity)livingEntity);
             this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
         }
 
@@ -557,8 +562,13 @@ implements NeutralMob {
                 this.enderman.lookAt(this.pendingTarget, 10.0f, 10.0f);
                 return true;
             }
-            if (this.target != null && this.continueAggroTargetConditions.test(this.enderman, this.target)) {
-                return true;
+            if (this.target != null) {
+                if (this.enderman.hasIndirectPassenger(this.target)) {
+                    return false;
+                }
+                if (this.continueAggroTargetConditions.test(this.enderman, this.target)) {
+                    return true;
+                }
             }
             return super.canContinueToUse();
         }

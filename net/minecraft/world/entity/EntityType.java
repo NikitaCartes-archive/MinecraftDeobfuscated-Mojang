@@ -30,6 +30,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.entity.AreaEffectCloud;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -178,6 +179,7 @@ EntityTypeTest<Entity, T> {
     public static final String ENTITY_TAG = "EntityTag";
     private final Holder.Reference<EntityType<?>> builtInRegistryHolder = BuiltInRegistries.ENTITY_TYPE.createIntrusiveHolder(this);
     private static final float MAGIC_HORSE_WIDTH = 1.3964844f;
+    private static final int DISPLAY_TRACKING_RANGE = 10;
     public static final EntityType<Allay> ALLAY = EntityType.register("allay", Builder.of(Allay::new, MobCategory.CREATURE).sized(0.35f, 0.6f).clientTrackingRange(8).updateInterval(2));
     public static final EntityType<AreaEffectCloud> AREA_EFFECT_CLOUD = EntityType.register("area_effect_cloud", Builder.of(AreaEffectCloud::new, MobCategory.MISC).fireImmune().sized(6.0f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<ArmorStand> ARMOR_STAND = EntityType.register("armor_stand", Builder.of(ArmorStand::new, MobCategory.MISC).sized(0.5f, 1.975f).clientTrackingRange(10));
@@ -186,6 +188,7 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<Bat> BAT = EntityType.register("bat", Builder.of(Bat::new, MobCategory.AMBIENT).sized(0.5f, 0.9f).clientTrackingRange(5));
     public static final EntityType<Bee> BEE = EntityType.register("bee", Builder.of(Bee::new, MobCategory.CREATURE).sized(0.7f, 0.6f).clientTrackingRange(8));
     public static final EntityType<Blaze> BLAZE = EntityType.register("blaze", Builder.of(Blaze::new, MobCategory.MONSTER).fireImmune().sized(0.6f, 1.8f).clientTrackingRange(8));
+    public static final EntityType<Display.BlockDisplay> BLOCK_DISPLAY = EntityType.register("block_display", Builder.of(Display.BlockDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).ticking(false));
     public static final EntityType<Boat> BOAT = EntityType.register("boat", Builder.of(Boat::new, MobCategory.MISC).sized(1.375f, 0.5625f).clientTrackingRange(10));
     public static final EntityType<ChestBoat> CHEST_BOAT = EntityType.register("chest_boat", Builder.of(ChestBoat::new, MobCategory.MISC).sized(1.375f, 0.5625f).clientTrackingRange(10));
     public static final EntityType<Cat> CAT = EntityType.register("cat", Builder.of(Cat::new, MobCategory.CREATURE).sized(0.6f, 0.7f).clientTrackingRange(8));
@@ -224,6 +227,7 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<Illusioner> ILLUSIONER = EntityType.register("illusioner", Builder.of(Illusioner::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<IronGolem> IRON_GOLEM = EntityType.register("iron_golem", Builder.of(IronGolem::new, MobCategory.MISC).sized(1.4f, 2.7f).clientTrackingRange(10));
     public static final EntityType<ItemEntity> ITEM = EntityType.register("item", Builder.of(ItemEntity::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(6).updateInterval(20));
+    public static final EntityType<Display.ItemDisplay> ITEM_DISPLAY = EntityType.register("item_display", Builder.of(Display.ItemDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).ticking(false));
     public static final EntityType<ItemFrame> ITEM_FRAME = EntityType.register("item_frame", Builder.of(ItemFrame::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<LargeFireball> FIREBALL = EntityType.register("fireball", Builder.of(LargeFireball::new, MobCategory.MISC).sized(1.0f, 1.0f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<LeashFenceKnotEntity> LEASH_KNOT = EntityType.register("leash_knot", Builder.of(LeashFenceKnotEntity::new, MobCategory.MISC).noSave().sized(0.375f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
@@ -231,7 +235,7 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<Llama> LLAMA = EntityType.register("llama", Builder.of(Llama::new, MobCategory.CREATURE).sized(0.9f, 1.87f).clientTrackingRange(10));
     public static final EntityType<LlamaSpit> LLAMA_SPIT = EntityType.register("llama_spit", Builder.of(LlamaSpit::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<MagmaCube> MAGMA_CUBE = EntityType.register("magma_cube", Builder.of(MagmaCube::new, MobCategory.MONSTER).fireImmune().sized(2.04f, 2.04f).clientTrackingRange(8));
-    public static final EntityType<Marker> MARKER = EntityType.register("marker", Builder.of(Marker::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(0));
+    public static final EntityType<Marker> MARKER = EntityType.register("marker", Builder.of(Marker::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(0).ticking(false));
     public static final EntityType<Minecart> MINECART = EntityType.register("minecart", Builder.of(Minecart::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
     public static final EntityType<MinecartChest> CHEST_MINECART = EntityType.register("chest_minecart", Builder.of(MinecartChest::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
     public static final EntityType<MinecartCommandBlock> COMMAND_BLOCK_MINECART = EntityType.register("command_block_minecart", Builder.of(MinecartCommandBlock::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
@@ -272,6 +276,7 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<Stray> STRAY = EntityType.register("stray", Builder.of(Stray::new, MobCategory.MONSTER).sized(0.6f, 1.99f).immuneTo(Blocks.POWDER_SNOW).clientTrackingRange(8));
     public static final EntityType<Strider> STRIDER = EntityType.register("strider", Builder.of(Strider::new, MobCategory.CREATURE).fireImmune().sized(0.9f, 1.7f).clientTrackingRange(10));
     public static final EntityType<Tadpole> TADPOLE = EntityType.register("tadpole", Builder.of(Tadpole::new, MobCategory.CREATURE).sized(Tadpole.HITBOX_WIDTH, Tadpole.HITBOX_HEIGHT).clientTrackingRange(10));
+    public static final EntityType<Display.TextDisplay> TEXT_DISPLAY = EntityType.register("text_display", Builder.of(Display.TextDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).ticking(false));
     public static final EntityType<ThrownEgg> EGG = EntityType.register("egg", Builder.of(ThrownEgg::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<ThrownEnderpearl> ENDER_PEARL = EntityType.register("ender_pearl", Builder.of(ThrownEnderpearl::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<ThrownExperienceBottle> EXPERIENCE_BOTTLE = EntityType.register("experience_bottle", Builder.of(ThrownExperienceBottle::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
@@ -306,6 +311,7 @@ EntityTypeTest<Entity, T> {
     private final boolean canSpawnFarFromPlayer;
     private final int clientTrackingRange;
     private final int updateInterval;
+    private final boolean ticking;
     @Nullable
     private String descriptionId;
     @Nullable
@@ -327,7 +333,7 @@ EntityTypeTest<Entity, T> {
         return BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.tryParse(string));
     }
 
-    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, ImmutableSet<Block> immutableSet, EntityDimensions entityDimensions, int i, int j, FeatureFlagSet featureFlagSet) {
+    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, ImmutableSet<Block> immutableSet, EntityDimensions entityDimensions, int i, int j, boolean bl5, FeatureFlagSet featureFlagSet) {
         this.factory = entityFactory;
         this.category = mobCategory;
         this.canSpawnFarFromPlayer = bl4;
@@ -338,6 +344,7 @@ EntityTypeTest<Entity, T> {
         this.dimensions = entityDimensions;
         this.clientTrackingRange = i;
         this.updateInterval = j;
+        this.ticking = bl5;
         this.requiredFeatures = featureFlagSet;
     }
 
@@ -606,6 +613,10 @@ EntityTypeTest<Entity, T> {
         return this.updateInterval;
     }
 
+    public boolean isTicking() {
+        return this.ticking;
+    }
+
     public boolean trackDeltas() {
         return this != PLAYER && this != LLAMA_SPIT && this != WITHER && this != BAT && this != ITEM_FRAME && this != GLOW_ITEM_FRAME && this != LEASH_KNOT && this != PAINTING && this != END_CRYSTAL && this != EVOKER_FANGS;
     }
@@ -640,6 +651,7 @@ EntityTypeTest<Entity, T> {
         private boolean canSpawnFarFromPlayer;
         private int clientTrackingRange = 5;
         private int updateInterval = 3;
+        private boolean ticking = true;
         private EntityDimensions dimensions = EntityDimensions.scalable(0.6f, 1.8f);
         private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
@@ -697,6 +709,11 @@ EntityTypeTest<Entity, T> {
             return this;
         }
 
+        public Builder<T> ticking(boolean bl) {
+            this.ticking = bl;
+            return this;
+        }
+
         public Builder<T> requiredFeatures(FeatureFlag ... featureFlags) {
             this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
             return this;
@@ -706,7 +723,7 @@ EntityTypeTest<Entity, T> {
             if (this.serialize) {
                 Util.fetchChoiceType(References.ENTITY_TREE, string);
             }
-            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.immuneTo, this.dimensions, this.clientTrackingRange, this.updateInterval, this.requiredFeatures);
+            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.immuneTo, this.dimensions, this.clientTrackingRange, this.updateInterval, this.ticking, this.requiredFeatures);
         }
     }
 
