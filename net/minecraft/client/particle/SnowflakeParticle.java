@@ -11,6 +11,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 
 @Environment(value=EnvType.CLIENT)
@@ -59,6 +60,11 @@ extends TextureSheetParticle {
             SnowflakeParticle snowflakeParticle = new SnowflakeParticle(clientLevel, d, e, f, g, h, i, this.sprites);
             snowflakeParticle.setColor(0.923f, 0.964f, 0.999f);
             return snowflakeParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

@@ -11,6 +11,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.RisingParticle;
 import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 
@@ -67,6 +68,11 @@ extends RisingParticle {
             flameParticle.scale(0.5f);
             return flameParticle;
         }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -83,6 +89,11 @@ extends RisingParticle {
             FlameParticle flameParticle = new FlameParticle(clientLevel, d, e, f, g, h, i);
             flameParticle.pickSprite(this.sprite);
             return flameParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

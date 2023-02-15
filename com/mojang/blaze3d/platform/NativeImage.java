@@ -3,7 +3,6 @@
  */
 package com.mojang.blaze3d.platform;
 
-import com.google.common.base.Charsets;
 import com.mojang.blaze3d.platform.DebugMemoryUntracker;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
@@ -22,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
-import java.util.Base64;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Set;
@@ -112,6 +110,16 @@ implements AutoCloseable {
 
     public static NativeImage read(ByteBuffer byteBuffer) throws IOException {
         return NativeImage.read(Format.RGBA, byteBuffer);
+    }
+
+    public static NativeImage read(byte[] bs) throws IOException {
+        try (MemoryStack memoryStack = MemoryStack.stackPush();){
+            ByteBuffer byteBuffer = memoryStack.malloc(bs.length);
+            byteBuffer.put(bs);
+            byteBuffer.rewind();
+            NativeImage nativeImage = NativeImage.read(byteBuffer);
+            return nativeImage;
+        }
     }
 
     public static NativeImage read(@Nullable Format format, ByteBuffer byteBuffer) throws IOException {
@@ -551,17 +559,6 @@ implements AutoCloseable {
 
     public void untrack() {
         DebugMemoryUntracker.untrack(this.pixels);
-    }
-
-    public static NativeImage fromBase64(String string) throws IOException {
-        byte[] bs = Base64.getDecoder().decode(string.replaceAll("\n", "").getBytes(Charsets.UTF_8));
-        try (MemoryStack memoryStack = MemoryStack.stackPush();){
-            ByteBuffer byteBuffer = memoryStack.malloc(bs.length);
-            byteBuffer.put(bs);
-            byteBuffer.rewind();
-            NativeImage nativeImage = NativeImage.read(byteBuffer);
-            return nativeImage;
-        }
     }
 
     @Environment(value=EnvType.CLIENT)

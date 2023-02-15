@@ -93,13 +93,7 @@ MenuProvider {
 
         @Override
         public boolean stillValid(Player player) {
-            if (LecternBlockEntity.this.level.getBlockEntity(LecternBlockEntity.this.worldPosition) != LecternBlockEntity.this) {
-                return false;
-            }
-            if (player.distanceToSqr((double)LecternBlockEntity.this.worldPosition.getX() + 0.5, (double)LecternBlockEntity.this.worldPosition.getY() + 0.5, (double)LecternBlockEntity.this.worldPosition.getZ() + 0.5) > 64.0) {
-                return false;
-            }
-            return LecternBlockEntity.this.hasBook();
+            return Container.stillValidBlockEntity(LecternBlockEntity.this, player) && LecternBlockEntity.this.hasBook();
         }
 
         @Override

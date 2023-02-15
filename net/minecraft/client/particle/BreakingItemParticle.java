@@ -12,6 +12,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -73,6 +74,11 @@ extends TextureSheetParticle {
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
             return new BreakingItemParticle(clientLevel, d, e, f, new ItemStack(Items.SNOWBALL));
         }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -82,6 +88,11 @@ extends TextureSheetParticle {
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
             return new BreakingItemParticle(clientLevel, d, e, f, new ItemStack(Items.SLIME_BALL));
         }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -90,6 +101,11 @@ extends TextureSheetParticle {
         @Override
         public Particle createParticle(ItemParticleOption itemParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
             return new BreakingItemParticle(clientLevel, d, e, f, g, h, i, itemParticleOption.getItem());
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((ItemParticleOption)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

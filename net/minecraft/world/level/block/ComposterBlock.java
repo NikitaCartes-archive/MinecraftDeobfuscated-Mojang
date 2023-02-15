@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -72,6 +73,7 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.3f, Items.SPRUCE_LEAVES);
         ComposterBlock.add(0.3f, Items.DARK_OAK_LEAVES);
         ComposterBlock.add(0.3f, Items.ACACIA_LEAVES);
+        ComposterBlock.add(0.3f, Items.CHERRY_LEAVES);
         ComposterBlock.add(0.3f, Items.BIRCH_LEAVES);
         ComposterBlock.add(0.3f, Items.AZALEA_LEAVES);
         ComposterBlock.add(0.3f, Items.MANGROVE_LEAVES);
@@ -80,6 +82,7 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.3f, Items.BIRCH_SAPLING);
         ComposterBlock.add(0.3f, Items.JUNGLE_SAPLING);
         ComposterBlock.add(0.3f, Items.ACACIA_SAPLING);
+        ComposterBlock.add(0.3f, Items.CHERRY_SAPLING);
         ComposterBlock.add(0.3f, Items.DARK_OAK_SAPLING);
         ComposterBlock.add(0.3f, Items.MANGROVE_PROPAGULE);
         ComposterBlock.add(0.3f, Items.BEETROOT_SEEDS);
@@ -93,9 +96,11 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.3f, Items.GLOW_BERRIES);
         ComposterBlock.add(0.3f, Items.WHEAT_SEEDS);
         ComposterBlock.add(0.3f, Items.MOSS_CARPET);
+        ComposterBlock.add(0.3f, Items.PINK_PETALS);
         ComposterBlock.add(0.3f, Items.SMALL_DRIPLEAF);
         ComposterBlock.add(0.3f, Items.HANGING_ROOTS);
         ComposterBlock.add(0.3f, Items.MANGROVE_ROOTS);
+        ComposterBlock.add(0.3f, Items.TORCHFLOWER_SEEDS);
         ComposterBlock.add(0.5f, Items.DRIED_KELP_BLOCK);
         ComposterBlock.add(0.5f, Items.TALL_GRASS);
         ComposterBlock.add(0.5f, Items.FLOWERING_AZALEA_LEAVES);
@@ -159,6 +164,7 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.85f, Items.BREAD);
         ComposterBlock.add(0.85f, Items.BAKED_POTATO);
         ComposterBlock.add(0.85f, Items.COOKIE);
+        ComposterBlock.add(0.85f, Items.TORCHFLOWER);
         ComposterBlock.add(1.0f, Items.CAKE);
         ComposterBlock.add(1.0f, Items.PUMPKIN_PIE);
     }
@@ -243,11 +249,8 @@ implements WorldlyContainerHolder {
 
     public static BlockState extractProduce(Entity entity, BlockState blockState, Level level, BlockPos blockPos) {
         if (!level.isClientSide) {
-            float f = 0.7f;
-            double d = (double)(level.random.nextFloat() * 0.7f) + (double)0.15f;
-            double e = (double)(level.random.nextFloat() * 0.7f) + 0.06000000238418579 + 0.6;
-            double g = (double)(level.random.nextFloat() * 0.7f) + (double)0.15f;
-            ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + g, new ItemStack(Items.BONE_MEAL));
+            Vec3 vec3 = Vec3.atLowerCornerWithOffset(blockPos, 0.5, 1.01, 0.5).offsetRandom(level.random, 0.7f);
+            ItemEntity itemEntity = new ItemEntity(level, vec3.x(), vec3.y(), vec3.z(), new ItemStack(Items.BONE_MEAL));
             itemEntity.setDefaultPickUpDelay();
             level.addFreshEntity(itemEntity);
         }

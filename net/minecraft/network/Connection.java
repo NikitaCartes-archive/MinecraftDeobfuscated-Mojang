@@ -269,8 +269,8 @@ extends SimpleChannelInboundHandler<Packet<?>> {
     }
 
     protected void tickSecond() {
-        this.averageSentPackets = Mth.lerp(0.75f, (float)this.sentPackets, this.averageSentPackets);
-        this.averageReceivedPackets = Mth.lerp(0.75f, (float)this.receivedPackets, this.averageReceivedPackets);
+        this.averageSentPackets = Mth.lerp(0.75f, this.sentPackets, this.averageSentPackets);
+        this.averageReceivedPackets = Mth.lerp(0.75f, this.receivedPackets, this.averageReceivedPackets);
         this.sentPackets = 0;
         this.receivedPackets = 0;
     }

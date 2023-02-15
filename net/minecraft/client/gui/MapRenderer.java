@@ -150,7 +150,7 @@ implements AutoCloseable {
                     poseStack.translate(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f - p * q / 2.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f + 4.0f, -0.025f);
                     poseStack.scale(q, q, 1.0f);
                     poseStack.translate(0.0f, 0.0f, -0.1f);
-                    font.drawInBatch(component, 0.0f, 0.0f, -1, false, poseStack.last().pose(), multiBufferSource, false, Integer.MIN_VALUE, i);
+                    font.drawInBatch(component, 0.0f, 0.0f, -1, false, poseStack.last().pose(), multiBufferSource, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, i);
                     poseStack.popPose();
                 }
                 ++l;

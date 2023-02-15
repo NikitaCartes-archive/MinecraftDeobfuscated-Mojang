@@ -39,13 +39,8 @@ extends GuiEventListener {
 
     @Override
     default public boolean mouseClicked(double d, double e, int i) {
-        GuiEventListener guiEventListener = null;
-        List<? extends GuiEventListener> list = List.copyOf(this.children());
-        for (GuiEventListener guiEventListener2 : list) {
-            if (!guiEventListener2.mouseClicked(d, e, i)) continue;
-            guiEventListener = guiEventListener2;
-        }
-        if (guiEventListener != null) {
+        for (GuiEventListener guiEventListener : this.children()) {
+            if (!guiEventListener.mouseClicked(d, e, i)) continue;
             this.setFocused(guiEventListener);
             if (i == 0) {
                 this.setDragging(true);

@@ -85,7 +85,7 @@ extends AgeableListModel<T> {
         float l = 1.0f - (float)Mth.abs(10 - 2 * k) / 10.0f;
         this.head.xRot = Mth.lerp(l, 0.87266463f, -0.34906584f);
         if (((LivingEntity)mob).isBaby()) {
-            this.head.y = Mth.lerp(l, 2, 5);
+            this.head.y = Mth.lerp(l, 2.0f, 5.0f);
             this.mane.z = -3.0f;
         } else {
             this.head.y = 2.0f;

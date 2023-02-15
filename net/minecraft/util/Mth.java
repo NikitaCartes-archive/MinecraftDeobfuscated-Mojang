@@ -486,7 +486,7 @@ public class Mth {
         return i;
     }
 
-    public static int lerp(float f, int i, int j) {
+    public static int lerpInt(float f, int i, int j) {
         return i + Mth.floor(f * (float)(j - i));
     }
 

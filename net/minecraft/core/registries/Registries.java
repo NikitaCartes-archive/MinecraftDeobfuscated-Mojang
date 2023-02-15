@@ -153,6 +153,7 @@ public class Registries {
     public static final ResourceKey<Registry<TrunkPlacerType<?>>> TRUNK_PLACER_TYPE = Registries.createRegistryKey("worldgen/trunk_placer_type");
     public static final ResourceKey<Registry<VillagerProfession>> VILLAGER_PROFESSION = Registries.createRegistryKey("villager_profession");
     public static final ResourceKey<Registry<VillagerType>> VILLAGER_TYPE = Registries.createRegistryKey("villager_type");
+    public static final ResourceKey<Registry<String>> DECORATED_POT_PATTERNS = Registries.createRegistryKey("decorated_pot_patterns");
     public static final ResourceKey<Registry<Biome>> BIOME = Registries.createRegistryKey("worldgen/biome");
     public static final ResourceKey<Registry<ChatType>> CHAT_TYPE = Registries.createRegistryKey("chat_type");
     public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER = Registries.createRegistryKey("worldgen/configured_carver");

@@ -3,8 +3,6 @@
  */
 package net.minecraft.data.advancements.packs;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
@@ -40,7 +38,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.data.advancements.packs.VanillaAdventureAdvancements;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
@@ -49,8 +46,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
@@ -59,7 +55,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyC
 
 public class VanillaNetherAdvancements
 implements AdvancementSubProvider {
-    private static final List<ResourceKey<Biome>> EXPLORABLE_BIOMES = ImmutableList.of(Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST, Biomes.CRIMSON_FOREST, Biomes.BASALT_DELTAS);
     private static final EntityPredicate.Composite DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE = EntityPredicate.Composite.create(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().head(ItemPredicate.Builder.item().of(Items.GOLDEN_HELMET).build()).build())).invert().build(), LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().chest(ItemPredicate.Builder.item().of(Items.GOLDEN_CHESTPLATE).build()).build())).invert().build(), LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().legs(ItemPredicate.Builder.item().of(Items.GOLDEN_LEGGINGS).build()).build())).invert().build(), LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(Items.GOLDEN_BOOTS).build()).build())).invert().build());
 
     @Override
@@ -84,7 +79,7 @@ implements AdvancementSubProvider {
         Advancement.Builder.advancement().parent(advancement11).display(Items.RESPAWN_ANCHOR, (Component)Component.translatable("advancements.nether.charge_respawn_anchor.title"), (Component)Component.translatable("advancements.nether.charge_respawn_anchor.description"), null, FrameType.TASK, true, true, false).addCriterion("charge_respawn_anchor", ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.RESPAWN_ANCHOR).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(RespawnAnchorBlock.CHARGE, 4).build()).build()), ItemPredicate.Builder.item().of(Blocks.GLOWSTONE))).save(consumer, "nether/charge_respawn_anchor");
         Advancement advancement12 = Advancement.Builder.advancement().parent(advancement).display(Items.WARPED_FUNGUS_ON_A_STICK, (Component)Component.translatable("advancements.nether.ride_strider.title"), (Component)Component.translatable("advancements.nether.ride_strider.description"), null, FrameType.TASK, true, true, false).addCriterion("used_warped_fungus_on_a_stick", ItemDurabilityTrigger.TriggerInstance.changedDurability(EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER).build()).build()), ItemPredicate.Builder.item().of(Items.WARPED_FUNGUS_ON_A_STICK).build(), MinMaxBounds.Ints.ANY)).save(consumer, "nether/ride_strider");
         Advancement.Builder.advancement().parent(advancement12).display(Items.WARPED_FUNGUS_ON_A_STICK, (Component)Component.translatable("advancements.nether.ride_strider_in_overworld_lava.title"), (Component)Component.translatable("advancements.nether.ride_strider_in_overworld_lava.description"), null, FrameType.TASK, true, true, false).addCriterion("ride_entity_distance", DistanceTrigger.TriggerInstance.rideEntityInLava(EntityPredicate.Builder.entity().located(LocationPredicate.inDimension(Level.OVERWORLD)).vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER).build()), DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(50.0)))).save(consumer, "nether/ride_strider_in_overworld_lava");
-        VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), EXPLORABLE_BIOMES).parent(advancement12).display(Items.NETHERITE_BOOTS, (Component)Component.translatable("advancements.nether.explore_nether.title"), (Component)Component.translatable("advancements.nether.explore_nether.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "nether/explore_nether");
+        VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSource.Preset.NETHER.possibleBiomes().toList()).parent(advancement12).display(Items.NETHERITE_BOOTS, (Component)Component.translatable("advancements.nether.explore_nether.title"), (Component)Component.translatable("advancements.nether.explore_nether.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "nether/explore_nether");
         Advancement advancement13 = Advancement.Builder.advancement().parent(advancement).display(Items.POLISHED_BLACKSTONE_BRICKS, (Component)Component.translatable("advancements.nether.find_bastion.title"), (Component)Component.translatable("advancements.nether.find_bastion.description"), null, FrameType.TASK, true, true, false).addCriterion("bastion", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.BASTION_REMNANT))).save(consumer, "nether/find_bastion");
         Advancement.Builder.advancement().parent(advancement13).display(Blocks.CHEST, (Component)Component.translatable("advancements.nether.loot_bastion.title"), (Component)Component.translatable("advancements.nether.loot_bastion.description"), null, FrameType.TASK, true, true, false).requirements(RequirementsStrategy.OR).addCriterion("loot_bastion_other", LootTableTrigger.TriggerInstance.lootTableUsed(new ResourceLocation("minecraft:chests/bastion_other"))).addCriterion("loot_bastion_treasure", LootTableTrigger.TriggerInstance.lootTableUsed(new ResourceLocation("minecraft:chests/bastion_treasure"))).addCriterion("loot_bastion_hoglin_stable", LootTableTrigger.TriggerInstance.lootTableUsed(new ResourceLocation("minecraft:chests/bastion_hoglin_stable"))).addCriterion("loot_bastion_bridge", LootTableTrigger.TriggerInstance.lootTableUsed(new ResourceLocation("minecraft:chests/bastion_bridge"))).save(consumer, "nether/loot_bastion");
         Advancement.Builder.advancement().parent(advancement).requirements(RequirementsStrategy.OR).display(Items.GOLD_INGOT, (Component)Component.translatable("advancements.nether.distract_piglin.title"), (Component)Component.translatable("advancements.nether.distract_piglin.description"), null, FrameType.TASK, true, true, false).addCriterion("distract_piglin", PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByEntity(DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE, ItemPredicate.Builder.item().of(ItemTags.PIGLIN_LOVED).build(), EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build()))).addCriterion("distract_piglin_directly", PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE, ItemPredicate.Builder.item().of(PiglinAi.BARTERING_ITEM), EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build()))).save(consumer, "nether/distract_piglin");

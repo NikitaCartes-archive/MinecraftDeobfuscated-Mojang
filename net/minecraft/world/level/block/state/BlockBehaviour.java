@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
@@ -405,7 +406,7 @@ implements FeatureElement {
         StatePredicate emissiveRendering = (blockState, blockGetter, blockPos) -> false;
         boolean dynamicShape;
         FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
-        Function<BlockState, OffsetType> offsetType = blockState -> OffsetType.NONE;
+        Optional<OffsetFunction> offsetFunction = Optional.empty();
 
         private Properties(Material material, MaterialColor materialColor) {
             this(material, (BlockState blockState) -> materialColor);
@@ -448,7 +449,7 @@ implements FeatureElement {
             properties.canOcclude = blockBehaviour.properties.canOcclude;
             properties.isAir = blockBehaviour.properties.isAir;
             properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
-            properties.offsetType = blockBehaviour.properties.offsetType;
+            properties.offsetFunction = blockBehaviour.properties.offsetFunction;
             properties.spawnParticlesOnBreak = blockBehaviour.properties.spawnParticlesOnBreak;
             properties.requiredFeatures = blockBehaviour.properties.requiredFeatures;
             return properties;
@@ -579,11 +580,34 @@ implements FeatureElement {
         }
 
         public Properties offsetType(OffsetType offsetType) {
-            return this.offsetType((BlockState blockState) -> offsetType);
-        }
-
-        public Properties offsetType(Function<BlockState, OffsetType> function) {
-            this.offsetType = function;
+            switch (offsetType) {
+                default: {
+                    this.offsetFunction = Optional.empty();
+                    break;
+                }
+                case XYZ: {
+                    this.offsetFunction = Optional.of((blockState, blockGetter, blockPos) -> {
+                        Block block = blockState.getBlock();
+                        long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
+                        double d = ((double)((float)(l >> 4 & 0xFL) / 15.0f) - 1.0) * (double)block.getMaxVerticalOffset();
+                        float f = block.getMaxHorizontalOffset();
+                        double e = Mth.clamp(((double)((float)(l & 0xFL) / 15.0f) - 0.5) * 0.5, (double)(-f), (double)f);
+                        double g = Mth.clamp(((double)((float)(l >> 8 & 0xFL) / 15.0f) - 0.5) * 0.5, (double)(-f), (double)f);
+                        return new Vec3(e, d, g);
+                    });
+                    break;
+                }
+                case XZ: {
+                    this.offsetFunction = Optional.of((blockState, blockGetter, blockPos) -> {
+                        Block block = blockState.getBlock();
+                        long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
+                        float f = block.getMaxHorizontalOffset();
+                        double d = Mth.clamp(((double)((float)(l & 0xFL) / 15.0f) - 0.5) * 0.5, (double)(-f), (double)f);
+                        double e = Mth.clamp(((double)((float)(l >> 8 & 0xFL) / 15.0f) - 0.5) * 0.5, (double)(-f), (double)f);
+                        return new Vec3(d, 0.0, e);
+                    });
+                }
+            }
             return this;
         }
 
@@ -600,6 +624,10 @@ implements FeatureElement {
 
     public static interface StateArgumentPredicate<A> {
         public boolean test(BlockState var1, BlockGetter var2, BlockPos var3, A var4);
+    }
+
+    public static interface OffsetFunction {
+        public Vec3 evaluate(BlockState var1, BlockGetter var2, BlockPos var3);
     }
 
     public static interface StatePredicate {
@@ -621,7 +649,7 @@ implements FeatureElement {
         private final StatePredicate isViewBlocking;
         private final StatePredicate hasPostProcess;
         private final StatePredicate emissiveRendering;
-        private final OffsetType offsetType;
+        private final Optional<OffsetFunction> offsetFunction;
         private final boolean spawnParticlesOnBreak;
         @Nullable
         protected Cache cache;
@@ -644,7 +672,7 @@ implements FeatureElement {
             this.isViewBlocking = properties.isViewBlocking;
             this.hasPostProcess = properties.hasPostProcess;
             this.emissiveRendering = properties.emissiveRendering;
-            this.offsetType = properties.offsetType.apply(this.asState());
+            this.offsetFunction = properties.offsetFunction;
             this.spawnParticlesOnBreak = properties.spawnParticlesOnBreak;
         }
 
@@ -832,16 +860,11 @@ implements FeatureElement {
         }
 
         public Vec3 getOffset(BlockGetter blockGetter, BlockPos blockPos) {
-            if (this.offsetType == OffsetType.NONE) {
-                return Vec3.ZERO;
-            }
-            Block block = this.getBlock();
-            long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
-            float f = block.getMaxHorizontalOffset();
-            double d = Mth.clamp(((double)((float)(l & 0xFL) / 15.0f) - 0.5) * 0.5, (double)(-f), (double)f);
-            double e = this.offsetType == OffsetType.XYZ ? ((double)((float)(l >> 4 & 0xFL) / 15.0f) - 1.0) * (double)block.getMaxVerticalOffset() : 0.0;
-            double g = Mth.clamp(((double)((float)(l >> 8 & 0xFL) / 15.0f) - 0.5) * 0.5, (double)(-f), (double)f);
-            return new Vec3(d, e, g);
+            return this.offsetFunction.map(offsetFunction -> offsetFunction.evaluate(this.asState(), blockGetter, blockPos)).orElse(Vec3.ZERO);
+        }
+
+        public boolean hasOffsetFunction() {
+            return !this.offsetFunction.isEmpty();
         }
 
         public boolean triggerEvent(Level level, BlockPos blockPos, int i, int j) {
@@ -1027,10 +1050,6 @@ implements FeatureElement {
             return this.requiresCorrectToolForDrops;
         }
 
-        public OffsetType getOffsetType() {
-            return this.offsetType;
-        }
-
         public boolean shouldSpawnParticlesOnBreak() {
             return this.spawnParticlesOnBreak;
         }
@@ -1066,7 +1085,7 @@ implements FeatureElement {
                     }
                 }
                 this.collisionShape = block.getCollisionShape(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, CollisionContext.empty());
-                if (!this.collisionShape.isEmpty() && blockState.getOffsetType() != OffsetType.NONE) {
+                if (!this.collisionShape.isEmpty() && blockState.hasOffsetFunction()) {
                     throw new IllegalStateException(String.format(Locale.ROOT, "%s has a collision shape and an offset type, but is not marked as dynamicShape in its properties.", BuiltInRegistries.BLOCK.getKey(block)));
                 }
                 this.largeCollisionShape = Arrays.stream(Direction.Axis.values()).anyMatch(axis -> this.collisionShape.min((Direction.Axis)axis) < 0.0 || this.collisionShape.max((Direction.Axis)axis) > 1.0);

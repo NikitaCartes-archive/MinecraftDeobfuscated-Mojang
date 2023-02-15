@@ -3,257 +3,56 @@
  */
 package net.minecraft.network.protocol.status;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import com.mojang.authlib.GameProfile;
-import java.lang.reflect.Type;
-import java.util.UUID;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
+import net.minecraft.SharedConstants;
+import net.minecraft.WorldVersion;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.GsonHelper;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.ExtraCodecs;
 
-public class ServerStatus {
-    public static final int FAVICON_WIDTH = 64;
-    public static final int FAVICON_HEIGHT = 64;
-    @Nullable
-    private Component description;
-    @Nullable
-    private Players players;
-    @Nullable
-    private Version version;
-    @Nullable
-    private String favicon;
-    private boolean enforcesSecureChat;
+public record ServerStatus(Component description, Optional<Players> players, Optional<Version> version, Optional<Favicon> favicon, boolean enforcesSecureChat) {
+    public static final Codec<ServerStatus> CODEC = RecordCodecBuilder.create(instance -> instance.group(ExtraCodecs.COMPONENT.optionalFieldOf("description", CommonComponents.EMPTY).forGetter(ServerStatus::description), Players.CODEC.optionalFieldOf("players").forGetter(ServerStatus::players), Version.CODEC.optionalFieldOf("version").forGetter(ServerStatus::version), Favicon.CODEC.optionalFieldOf("favicon").forGetter(ServerStatus::favicon), Codec.BOOL.optionalFieldOf("enforcesSecureChat", false).forGetter(ServerStatus::enforcesSecureChat)).apply((Applicative<ServerStatus, ?>)instance, ServerStatus::new));
 
-    @Nullable
-    public Component getDescription() {
-        return this.description;
+    public record Players(int max, int online, List<GameProfile> sample) {
+        private static final Codec<GameProfile> PROFILE_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)UUIDUtil.STRING_CODEC.fieldOf("id")).forGetter(GameProfile::getId), ((MapCodec)Codec.STRING.fieldOf("name")).forGetter(GameProfile::getName)).apply((Applicative<GameProfile, ?>)instance, GameProfile::new));
+        public static final Codec<Players> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("max")).forGetter(Players::max), ((MapCodec)Codec.INT.fieldOf("online")).forGetter(Players::online), PROFILE_CODEC.listOf().optionalFieldOf("sample", List.of()).forGetter(Players::sample)).apply((Applicative<Players, ?>)instance, Players::new));
     }
 
-    public void setDescription(Component component) {
-        this.description = component;
-    }
+    public record Version(String name, int protocol) {
+        public static final Codec<Version> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.STRING.fieldOf("name")).forGetter(Version::name), ((MapCodec)Codec.INT.fieldOf("protocol")).forGetter(Version::protocol)).apply((Applicative<Version, ?>)instance, Version::new));
 
-    @Nullable
-    public Players getPlayers() {
-        return this.players;
-    }
-
-    public void setPlayers(Players players) {
-        this.players = players;
-    }
-
-    @Nullable
-    public Version getVersion() {
-        return this.version;
-    }
-
-    public void setVersion(Version version) {
-        this.version = version;
-    }
-
-    public void setFavicon(String string) {
-        this.favicon = string;
-    }
-
-    @Nullable
-    public String getFavicon() {
-        return this.favicon;
-    }
-
-    public void setEnforcesSecureChat(boolean bl) {
-        this.enforcesSecureChat = bl;
-    }
-
-    public boolean enforcesSecureChat() {
-        return this.enforcesSecureChat;
-    }
-
-    public static class Players {
-        private final int maxPlayers;
-        private final int numPlayers;
-        @Nullable
-        private GameProfile[] sample;
-
-        public Players(int i, int j) {
-            this.maxPlayers = i;
-            this.numPlayers = j;
-        }
-
-        public int getMaxPlayers() {
-            return this.maxPlayers;
-        }
-
-        public int getNumPlayers() {
-            return this.numPlayers;
-        }
-
-        @Nullable
-        public GameProfile[] getSample() {
-            return this.sample;
-        }
-
-        public void setSample(GameProfile[] gameProfiles) {
-            this.sample = gameProfiles;
-        }
-
-        public static class Serializer
-        implements JsonDeserializer<Players>,
-        JsonSerializer<Players> {
-            @Override
-            public Players deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-                JsonArray jsonArray;
-                JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "players");
-                Players players = new Players(GsonHelper.getAsInt(jsonObject, "max"), GsonHelper.getAsInt(jsonObject, "online"));
-                if (GsonHelper.isArrayNode(jsonObject, "sample") && (jsonArray = GsonHelper.getAsJsonArray(jsonObject, "sample")).size() > 0) {
-                    GameProfile[] gameProfiles = new GameProfile[jsonArray.size()];
-                    for (int i = 0; i < gameProfiles.length; ++i) {
-                        JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonArray.get(i), "player[" + i + "]");
-                        String string = GsonHelper.getAsString(jsonObject2, "id");
-                        gameProfiles[i] = new GameProfile(UUID.fromString(string), GsonHelper.getAsString(jsonObject2, "name"));
-                    }
-                    players.setSample(gameProfiles);
-                }
-                return players;
-            }
-
-            @Override
-            public JsonElement serialize(Players players, Type type, JsonSerializationContext jsonSerializationContext) {
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("max", players.getMaxPlayers());
-                jsonObject.addProperty("online", players.getNumPlayers());
-                GameProfile[] gameProfiles = players.getSample();
-                if (gameProfiles != null && gameProfiles.length > 0) {
-                    JsonArray jsonArray = new JsonArray();
-                    for (int i = 0; i < gameProfiles.length; ++i) {
-                        JsonObject jsonObject2 = new JsonObject();
-                        UUID uUID = gameProfiles[i].getId();
-                        jsonObject2.addProperty("id", uUID == null ? "" : uUID.toString());
-                        jsonObject2.addProperty("name", gameProfiles[i].getName());
-                        jsonArray.add(jsonObject2);
-                    }
-                    jsonObject.add("sample", jsonArray);
-                }
-                return jsonObject;
-            }
-
-            @Override
-            public /* synthetic */ JsonElement serialize(Object object, Type type, JsonSerializationContext jsonSerializationContext) {
-                return this.serialize((Players)object, type, jsonSerializationContext);
-            }
-
-            @Override
-            public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-                return this.deserialize(jsonElement, type, jsonDeserializationContext);
-            }
+        public static Version current() {
+            WorldVersion worldVersion = SharedConstants.getCurrentVersion();
+            return new Version(worldVersion.getName(), worldVersion.getProtocolVersion());
         }
     }
 
-    public static class Version {
-        private final String name;
-        private final int protocol;
-
-        public Version(String string, int i) {
-            this.name = string;
-            this.protocol = i;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public int getProtocol() {
-            return this.protocol;
-        }
-
-        public static class Serializer
-        implements JsonDeserializer<Version>,
-        JsonSerializer<Version> {
-            @Override
-            public Version deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-                JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "version");
-                return new Version(GsonHelper.getAsString(jsonObject, "name"), GsonHelper.getAsInt(jsonObject, "protocol"));
+    public record Favicon(byte[] iconBytes) {
+        public static final int WIDTH = 64;
+        public static final int HEIGHT = 64;
+        private static final String PREFIX = "data:image/png;base64,";
+        public static final Codec<Favicon> CODEC = Codec.STRING.comapFlatMap(string -> {
+            if (!string.startsWith(PREFIX)) {
+                return DataResult.error("Unknown format");
             }
-
-            @Override
-            public JsonElement serialize(Version version, Type type, JsonSerializationContext jsonSerializationContext) {
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("name", version.getName());
-                jsonObject.addProperty("protocol", version.getProtocol());
-                return jsonObject;
+            try {
+                String string2 = string.substring(PREFIX.length()).replaceAll("\n", "");
+                byte[] bs = Base64.getDecoder().decode(string2.getBytes(StandardCharsets.UTF_8));
+                return DataResult.success(new Favicon(bs));
+            } catch (IllegalArgumentException illegalArgumentException) {
+                return DataResult.error("Malformed base64 server icon");
             }
-
-            @Override
-            public /* synthetic */ JsonElement serialize(Object object, Type type, JsonSerializationContext jsonSerializationContext) {
-                return this.serialize((Version)object, type, jsonSerializationContext);
-            }
-
-            @Override
-            public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-                return this.deserialize(jsonElement, type, jsonDeserializationContext);
-            }
-        }
-    }
-
-    public static class Serializer
-    implements JsonDeserializer<ServerStatus>,
-    JsonSerializer<ServerStatus> {
-        @Override
-        public ServerStatus deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "status");
-            ServerStatus serverStatus = new ServerStatus();
-            if (jsonObject.has("description")) {
-                serverStatus.setDescription((Component)jsonDeserializationContext.deserialize(jsonObject.get("description"), (Type)((Object)Component.class)));
-            }
-            if (jsonObject.has("players")) {
-                serverStatus.setPlayers((Players)jsonDeserializationContext.deserialize(jsonObject.get("players"), (Type)((Object)Players.class)));
-            }
-            if (jsonObject.has("version")) {
-                serverStatus.setVersion((Version)jsonDeserializationContext.deserialize(jsonObject.get("version"), (Type)((Object)Version.class)));
-            }
-            if (jsonObject.has("favicon")) {
-                serverStatus.setFavicon(GsonHelper.getAsString(jsonObject, "favicon"));
-            }
-            if (jsonObject.has("enforcesSecureChat")) {
-                serverStatus.setEnforcesSecureChat(GsonHelper.getAsBoolean(jsonObject, "enforcesSecureChat"));
-            }
-            return serverStatus;
-        }
-
-        @Override
-        public JsonElement serialize(ServerStatus serverStatus, Type type, JsonSerializationContext jsonSerializationContext) {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("enforcesSecureChat", serverStatus.enforcesSecureChat());
-            if (serverStatus.getDescription() != null) {
-                jsonObject.add("description", jsonSerializationContext.serialize(serverStatus.getDescription()));
-            }
-            if (serverStatus.getPlayers() != null) {
-                jsonObject.add("players", jsonSerializationContext.serialize(serverStatus.getPlayers()));
-            }
-            if (serverStatus.getVersion() != null) {
-                jsonObject.add("version", jsonSerializationContext.serialize(serverStatus.getVersion()));
-            }
-            if (serverStatus.getFavicon() != null) {
-                jsonObject.addProperty("favicon", serverStatus.getFavicon());
-            }
-            return jsonObject;
-        }
-
-        @Override
-        public /* synthetic */ JsonElement serialize(Object object, Type type, JsonSerializationContext jsonSerializationContext) {
-            return this.serialize((ServerStatus)object, type, jsonSerializationContext);
-        }
-
-        @Override
-        public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            return this.deserialize(jsonElement, type, jsonDeserializationContext);
-        }
+        }, favicon -> PREFIX + new String(Base64.getEncoder().encode(favicon.iconBytes), StandardCharsets.UTF_8));
     }
 }
 

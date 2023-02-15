@@ -1300,7 +1300,7 @@ extends Player {
     }
 
     public void sendServerStatus(ServerStatus serverStatus) {
-        this.connection.send(new ClientboundServerDataPacket(serverStatus.getDescription(), serverStatus.getFavicon(), serverStatus.enforcesSecureChat()));
+        this.connection.send(new ClientboundServerDataPacket(serverStatus.description(), serverStatus.favicon().map(ServerStatus.Favicon::iconBytes), serverStatus.enforcesSecureChat()));
     }
 
     @Override

@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -127,10 +128,7 @@ extends BaseContainerBlockEntity {
 
     @Override
     public boolean stillValid(Player player) {
-        if (this.level.getBlockEntity(this.worldPosition) != this) {
-            return false;
-        }
-        return !(player.distanceToSqr((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5) > 64.0);
+        return Container.stillValidBlockEntity(this, player);
     }
 
     @Override

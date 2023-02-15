@@ -42,6 +42,7 @@ implements RecipeBuilder {
     private final Advancement.Builder advancement = Advancement.Builder.advancement();
     @Nullable
     private String group;
+    private boolean showNotification = true;
 
     public ShapedRecipeBuilder(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
         this.category = recipeCategory;
@@ -96,6 +97,11 @@ implements RecipeBuilder {
         return this;
     }
 
+    public ShapedRecipeBuilder showNotification(boolean bl) {
+        this.showNotification = bl;
+        return this;
+    }
+
     @Override
     public Item getResult() {
         return this.result;
@@ -105,7 +111,7 @@ implements RecipeBuilder {
     public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
         this.ensureValid(resourceLocation);
         this.advancement.parent(ROOT_RECIPE_ADVANCEMENT).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation)).rewards(AdvancementRewards.Builder.recipe(resourceLocation)).requirements(RequirementsStrategy.OR);
-        consumer.accept(new Result(resourceLocation, this.result, this.count, this.group == null ? "" : this.group, ShapedRecipeBuilder.determineBookCategory(this.category), this.rows, this.key, this.advancement, resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
+        consumer.accept(new Result(resourceLocation, this.result, this.count, this.group == null ? "" : this.group, ShapedRecipeBuilder.determineBookCategory(this.category), this.rows, this.key, this.advancement, resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/"), this.showNotification));
     }
 
     private void ensureValid(ResourceLocation resourceLocation) {
@@ -154,8 +160,9 @@ implements RecipeBuilder {
         private final Map<Character, Ingredient> key;
         private final Advancement.Builder advancement;
         private final ResourceLocation advancementId;
+        private final boolean showNotification;
 
-        public Result(ResourceLocation resourceLocation, Item item, int i, String string, CraftingBookCategory craftingBookCategory, List<String> list, Map<Character, Ingredient> map, Advancement.Builder builder, ResourceLocation resourceLocation2) {
+        public Result(ResourceLocation resourceLocation, Item item, int i, String string, CraftingBookCategory craftingBookCategory, List<String> list, Map<Character, Ingredient> map, Advancement.Builder builder, ResourceLocation resourceLocation2, boolean bl) {
             super(craftingBookCategory);
             this.id = resourceLocation;
             this.result = item;
@@ -165,6 +172,7 @@ implements RecipeBuilder {
             this.key = map;
             this.advancement = builder;
             this.advancementId = resourceLocation2;
+            this.showNotification = bl;
         }
 
         @Override
@@ -189,6 +197,7 @@ implements RecipeBuilder {
                 jsonObject3.addProperty("count", this.count);
             }
             jsonObject.add("result", jsonObject3);
+            jsonObject.addProperty("show_notification", this.showNotification);
         }
 
         @Override

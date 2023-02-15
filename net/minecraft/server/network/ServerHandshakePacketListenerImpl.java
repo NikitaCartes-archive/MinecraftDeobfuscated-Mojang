@@ -11,6 +11,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.handshake.ServerHandshakePacketListener;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.server.network.ServerStatusPacketListenerImpl;
@@ -41,9 +42,10 @@ implements ServerHandshakePacketListener {
                 break;
             }
             case STATUS: {
-                if (this.server.repliesToStatus()) {
+                ServerStatus serverStatus = this.server.getStatus();
+                if (this.server.repliesToStatus() && serverStatus != null) {
                     this.connection.setProtocol(ConnectionProtocol.STATUS);
-                    this.connection.setListener(new ServerStatusPacketListenerImpl(this.server, this.connection));
+                    this.connection.setListener(new ServerStatusPacketListenerImpl(serverStatus, this.connection));
                     break;
                 }
                 this.connection.disconnect(IGNORE_STATUS_REASON);

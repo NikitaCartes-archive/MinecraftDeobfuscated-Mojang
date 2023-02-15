@@ -13,6 +13,7 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.ParticleGroup;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -64,6 +65,11 @@ extends TextureSheetParticle {
             suspendedParticle.setSize(0.001f, 0.001f);
             return suspendedParticle;
         }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -84,6 +90,11 @@ extends TextureSheetParticle {
             SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, this.sprite, d, e, f, j, k, l);
             suspendedParticle.setColor(0.9f, 0.4f, 0.5f);
             return suspendedParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 
@@ -110,6 +121,11 @@ extends TextureSheetParticle {
             suspendedParticle.setColor(0.32f, 0.5f, 0.22f);
             return suspendedParticle;
         }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -126,6 +142,11 @@ extends TextureSheetParticle {
             SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, this.sprite, d, e, f);
             suspendedParticle.setColor(0.4f, 0.4f, 0.7f);
             return suspendedParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

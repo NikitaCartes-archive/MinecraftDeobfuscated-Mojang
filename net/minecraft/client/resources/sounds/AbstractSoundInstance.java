@@ -48,6 +48,10 @@ implements SoundInstance {
 
     @Override
     public WeighedSoundEvents resolve(SoundManager soundManager) {
+        if (this.location.equals(SoundManager.INTENTIONALLY_EMPTY_SOUND_LOCATION)) {
+            this.sound = SoundManager.INTENTIONALLY_EMPTY_SOUND;
+            return SoundManager.INTENTIONALLY_EMPTY_SOUND_EVENT;
+        }
         WeighedSoundEvents weighedSoundEvents = soundManager.getSoundEvent(this.location);
         this.sound = weighedSoundEvents == null ? SoundManager.EMPTY_SOUND : weighedSoundEvents.getSound(this.random);
         return weighedSoundEvents;

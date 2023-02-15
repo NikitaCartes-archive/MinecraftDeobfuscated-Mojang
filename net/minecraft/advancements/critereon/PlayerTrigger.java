@@ -71,6 +71,10 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return new TriggerInstance(CriteriaTriggers.AVOID_VIBRATION.id, EntityPredicate.Composite.ANY);
         }
 
+        public static TriggerInstance tick() {
+            return new TriggerInstance(CriteriaTriggers.TICK.id, EntityPredicate.Composite.ANY);
+        }
+
         public static TriggerInstance walkOnBlockWithEquipment(Block block, Item item) {
             return TriggerInstance.located(EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(item).build()).build()).steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(block).build()).build()).build());
         }

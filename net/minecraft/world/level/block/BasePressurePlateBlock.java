@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.AABB;
@@ -28,9 +30,11 @@ extends Block {
     protected static final VoxelShape PRESSED_AABB = Block.box(1.0, 0.0, 1.0, 15.0, 0.5, 15.0);
     protected static final VoxelShape AABB = Block.box(1.0, 0.0, 1.0, 15.0, 1.0, 15.0);
     protected static final AABB TOUCH_AABB = new AABB(0.0625, 0.0, 0.0625, 0.9375, 0.25, 0.9375);
+    private final BlockSetType type;
 
-    protected BasePressurePlateBlock(BlockBehaviour.Properties properties) {
-        super(properties);
+    protected BasePressurePlateBlock(BlockBehaviour.Properties properties, BlockSetType blockSetType) {
+        super(properties.sound(blockSetType.soundType()));
+        this.type = blockSetType;
     }
 
     @Override
@@ -80,7 +84,7 @@ extends Block {
         }
     }
 
-    protected void checkPressed(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i) {
+    private void checkPressed(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i) {
         boolean bl2;
         int j = this.getSignalStrength(level, blockPos);
         boolean bl = i > 0;
@@ -92,20 +96,16 @@ extends Block {
             level.setBlocksDirty(blockPos, blockState, blockState2);
         }
         if (!bl2 && bl) {
-            this.playOffSound(level, blockPos);
+            level.playSound(null, blockPos, this.type.pressurePlateClickOff(), SoundSource.BLOCKS);
             level.gameEvent(entity, GameEvent.BLOCK_DEACTIVATE, blockPos);
         } else if (bl2 && !bl) {
-            this.playOnSound(level, blockPos);
+            level.playSound(null, blockPos, this.type.pressurePlateClickOn(), SoundSource.BLOCKS);
             level.gameEvent(entity, GameEvent.BLOCK_ACTIVATE, blockPos);
         }
         if (bl2) {
             level.scheduleTick(new BlockPos(blockPos), this, this.getPressedTime());
         }
     }
-
-    protected abstract void playOnSound(LevelAccessor var1, BlockPos var2);
-
-    protected abstract void playOffSound(LevelAccessor var1, BlockPos var2);
 
     @Override
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {

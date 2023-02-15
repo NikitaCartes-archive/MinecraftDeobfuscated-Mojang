@@ -100,32 +100,32 @@ public class Font {
             return 0;
         }
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        int j = this.drawInBatch(string, f, g, i, bl, matrix4f, bufferSource, false, 0, 0xF000F0, bl2);
+        int j = this.drawInBatch(string, f, g, i, bl, matrix4f, bufferSource, DisplayMode.NORMAL, 0, 0xF000F0, bl2);
         bufferSource.endBatch();
         return j;
     }
 
     private int drawInternal(FormattedCharSequence formattedCharSequence, float f, float g, int i, Matrix4f matrix4f, boolean bl) {
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        int j = this.drawInBatch(formattedCharSequence, f, g, i, bl, matrix4f, (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
+        int j = this.drawInBatch(formattedCharSequence, f, g, i, bl, matrix4f, (MultiBufferSource)bufferSource, DisplayMode.NORMAL, 0, 0xF000F0);
         bufferSource.endBatch();
         return j;
     }
 
-    public int drawInBatch(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-        return this.drawInBatch(string, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k, this.isBidirectional());
+    public int drawInBatch(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, DisplayMode displayMode, int j, int k) {
+        return this.drawInBatch(string, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, this.isBidirectional());
     }
 
-    public int drawInBatch(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k, boolean bl3) {
-        return this.drawInternal(string, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k, bl3);
+    public int drawInBatch(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, DisplayMode displayMode, int j, int k, boolean bl2) {
+        return this.drawInternal(string, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, bl2);
     }
 
-    public int drawInBatch(Component component, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-        return this.drawInBatch(component.getVisualOrderText(), f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
+    public int drawInBatch(Component component, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, DisplayMode displayMode, int j, int k) {
+        return this.drawInBatch(component.getVisualOrderText(), f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k);
     }
 
-    public int drawInBatch(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-        return this.drawInternal(formattedCharSequence, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
+    public int drawInBatch(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, DisplayMode displayMode, int j, int k) {
+        return this.drawInternal(formattedCharSequence, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k);
     }
 
     public void drawInBatch8xOutline(FormattedCharSequence formattedCharSequence, float f, float g, int i, int j, Matrix4f matrix4f, MultiBufferSource multiBufferSource, int k) {
@@ -160,39 +160,39 @@ public class Font {
         return i;
     }
 
-    private int drawInternal(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k, boolean bl3) {
-        if (bl3) {
+    private int drawInternal(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, DisplayMode displayMode, int j, int k, boolean bl2) {
+        if (bl2) {
             string = this.bidirectionalShaping(string);
         }
         i = Font.adjustColor(i);
         Matrix4f matrix4f2 = new Matrix4f(matrix4f);
         if (bl) {
-            this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
+            this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, displayMode, j, k);
             matrix4f2.translate(SHADOW_OFFSET);
         }
-        f = this.renderText(string, f, g, i, false, matrix4f2, multiBufferSource, bl2, j, k);
+        f = this.renderText(string, f, g, i, false, matrix4f2, multiBufferSource, displayMode, j, k);
         return (int)f + (bl ? 1 : 0);
     }
 
-    private int drawInternal(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
+    private int drawInternal(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, DisplayMode displayMode, int j, int k) {
         i = Font.adjustColor(i);
         Matrix4f matrix4f2 = new Matrix4f(matrix4f);
         if (bl) {
-            this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
+            this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, displayMode, j, k);
             matrix4f2.translate(SHADOW_OFFSET);
         }
-        f = this.renderText(formattedCharSequence, f, g, i, false, matrix4f2, multiBufferSource, bl2, j, k);
+        f = this.renderText(formattedCharSequence, f, g, i, false, matrix4f2, multiBufferSource, displayMode, j, k);
         return (int)f + (bl ? 1 : 0);
     }
 
-    private float renderText(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-        StringRenderOutput stringRenderOutput = new StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, bl2, k);
+    private float renderText(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, DisplayMode displayMode, int j, int k) {
+        StringRenderOutput stringRenderOutput = new StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, displayMode, k);
         StringDecomposer.iterateFormatted(string, Style.EMPTY, (FormattedCharSink)stringRenderOutput);
         return stringRenderOutput.finish(j, f);
     }
 
-    private float renderText(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-        StringRenderOutput stringRenderOutput = new StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, bl2, k);
+    private float renderText(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, DisplayMode displayMode, int j, int k) {
+        StringRenderOutput stringRenderOutput = new StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, displayMode, k);
         formattedCharSequence.accept(stringRenderOutput);
         return stringRenderOutput.finish(j, f);
     }
@@ -257,6 +257,14 @@ public class Font {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public static enum DisplayMode {
+        NORMAL,
+        SEE_THROUGH,
+        POLYGON_OFFSET;
+
+    }
+
+    @Environment(value=EnvType.CLIENT)
     class StringRenderOutput
     implements FormattedCharSink {
         final MultiBufferSource bufferSource;
@@ -279,10 +287,6 @@ public class Font {
                 this.effects = Lists.newArrayList();
             }
             this.effects.add(effect);
-        }
-
-        public StringRenderOutput(MultiBufferSource multiBufferSource, float f, float g, int i, boolean bl, Matrix4f matrix4f, boolean bl2, int j) {
-            this(multiBufferSource, f, g, i, bl, matrix4f, bl2 ? DisplayMode.SEE_THROUGH : DisplayMode.NORMAL, j);
         }
 
         public StringRenderOutput(MultiBufferSource multiBufferSource, float f, float g, int i, boolean bl, Matrix4f matrix4f, DisplayMode displayMode, int j) {
@@ -357,14 +361,6 @@ public class Font {
             }
             return this.x;
         }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static enum DisplayMode {
-        NORMAL,
-        SEE_THROUGH,
-        POLYGON_OFFSET;
-
     }
 }
 

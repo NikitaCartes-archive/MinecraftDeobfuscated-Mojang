@@ -13,6 +13,7 @@ import net.minecraft.world.item.crafting.BannerDuplicateRecipe;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.BookCloningRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.DecoratedPotRecipe;
 import net.minecraft.world.item.crafting.FireworkRocketRecipe;
 import net.minecraft.world.item.crafting.FireworkStarFadeRecipe;
 import net.minecraft.world.item.crafting.FireworkStarRecipe;
@@ -60,6 +61,7 @@ public interface RecipeSerializer<T extends Recipe<?>> {
     public static final RecipeSerializer<LegacyUpgradeRecipe> SMITHING = RecipeSerializer.register("smithing", new LegacyUpgradeRecipe.Serializer());
     public static final RecipeSerializer<SmithingTransformRecipe> SMITHING_TRANSFORM = RecipeSerializer.register("smithing_transform", new SmithingTransformRecipe.Serializer());
     public static final RecipeSerializer<SmithingTrimRecipe> SMITHING_TRIM = RecipeSerializer.register("smithing_trim", new SmithingTrimRecipe.Serializer());
+    public static final RecipeSerializer<DecoratedPotRecipe> DECORATED_POT_RECIPE = RecipeSerializer.register("crafting_decorated_pot", new SimpleCraftingRecipeSerializer<DecoratedPotRecipe>(DecoratedPotRecipe::new));
 
     public T fromJson(ResourceLocation var1, JsonObject var2);
 

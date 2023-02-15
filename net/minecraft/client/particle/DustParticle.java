@@ -11,6 +11,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
 
 @Environment(value=EnvType.CLIENT)
 public class DustParticle
@@ -31,6 +32,11 @@ extends DustParticleBase<DustParticleOptions> {
         @Override
         public Particle createParticle(DustParticleOptions dustParticleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
             return new DustParticle(clientLevel, d, e, f, g, h, i, dustParticleOptions, this.sprites);
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((DustParticleOptions)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

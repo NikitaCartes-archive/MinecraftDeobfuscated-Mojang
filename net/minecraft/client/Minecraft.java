@@ -584,8 +584,6 @@ implements WindowEventHandler {
             }, this.multiplayerBan()));
         } else if (this.options.onboardAccessibility) {
             this.setScreen(new AccessibilityOnboardingScreen(this.options));
-            this.options.onboardAccessibility = false;
-            this.options.save();
         } else {
             this.setScreen(new TitleScreen(true));
         }
@@ -662,10 +660,22 @@ implements WindowEventHandler {
         this.options.resourcePacks.clear();
         this.options.incompatibleResourcePacks.clear();
         this.options.save();
-        this.reloadResourcePacks(true).thenRun(() -> {
-            ToastComponent toastComponent = this.getToasts();
-            SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, Component.translatable("resourcePack.load_fail"), component);
-        });
+        this.reloadResourcePacks(true).thenRun(() -> this.addResourcePackLoadFailToast(component));
+    }
+
+    private void abortResourcePackRecovery() {
+        this.setOverlay(null);
+        if (this.level != null) {
+            this.level.disconnect();
+            this.clearLevel();
+        }
+        this.setScreen(new TitleScreen());
+        this.addResourcePackLoadFailToast(null);
+    }
+
+    private void addResourcePackLoadFailToast(@Nullable Component component) {
+        ToastComponent toastComponent = this.getToasts();
+        SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, Component.translatable("resourcePack.load_fail"), component);
     }
 
     public void run() {
@@ -801,7 +811,13 @@ implements WindowEventHandler {
         if (!bl) {
             this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.MANUAL, list);
         }
-        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
+        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, throwable -> {
+            if (bl) {
+                this.abortResourcePackRecovery();
+            } else {
+                this.rollbackResourcePacks((Throwable)throwable);
+            }
+        }, () -> {
             this.levelRenderer.allChanged();
             this.reloadStateTracker.finishReload();
             completableFuture.complete(null);

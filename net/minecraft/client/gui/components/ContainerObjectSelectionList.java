@@ -37,14 +37,17 @@ extends AbstractSelectionList<E> {
         }
         if (focusNavigationEvent instanceof FocusNavigationEvent.ArrowNavigation) {
             ComponentPath componentPath;
-            int i;
             FocusNavigationEvent.ArrowNavigation arrowNavigation = (FocusNavigationEvent.ArrowNavigation)focusNavigationEvent;
             Entry entry2 = (Entry)this.getFocused();
             if (arrowNavigation.direction().getAxis() == ScreenAxis.HORIZONTAL && entry2 != null) {
                 return ComponentPath.path(this, entry2.nextFocusPath(focusNavigationEvent));
             }
+            int i = -1;
             ScreenDirection screenDirection = arrowNavigation.direction();
-            if (entry2 == null) {
+            if (entry2 != null) {
+                i = entry2.children().indexOf(entry2.getFocused());
+            }
+            if (i == -1) {
                 switch (screenDirection) {
                     case LEFT: {
                         i = Integer.MAX_VALUE;
@@ -58,11 +61,8 @@ extends AbstractSelectionList<E> {
                     }
                     default: {
                         i = 0;
-                        break;
                     }
                 }
-            } else {
-                i = entry2.children().indexOf(entry2.getFocused());
             }
             Entry entry22 = entry2;
             do {

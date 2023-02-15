@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Vector3f;
 
@@ -29,20 +30,24 @@ implements Position {
         return new Vec3(d, e, f);
     }
 
-    public static Vec3 atCenterOf(Vec3i vec3i) {
-        return new Vec3((double)vec3i.getX() + 0.5, (double)vec3i.getY() + 0.5, (double)vec3i.getZ() + 0.5);
-    }
-
     public static Vec3 atLowerCornerOf(Vec3i vec3i) {
         return new Vec3(vec3i.getX(), vec3i.getY(), vec3i.getZ());
     }
 
+    public static Vec3 atLowerCornerWithOffset(Vec3i vec3i, double d, double e, double f) {
+        return new Vec3((double)vec3i.getX() + d, (double)vec3i.getY() + e, (double)vec3i.getZ() + f);
+    }
+
+    public static Vec3 atCenterOf(Vec3i vec3i) {
+        return Vec3.atLowerCornerWithOffset(vec3i, 0.5, 0.5, 0.5);
+    }
+
     public static Vec3 atBottomCenterOf(Vec3i vec3i) {
-        return new Vec3((double)vec3i.getX() + 0.5, vec3i.getY(), (double)vec3i.getZ() + 0.5);
+        return Vec3.atLowerCornerWithOffset(vec3i, 0.5, 0.0, 0.5);
     }
 
     public static Vec3 upFromBottomCenterOf(Vec3i vec3i, double d) {
-        return new Vec3((double)vec3i.getX() + 0.5, (double)vec3i.getY() + d, (double)vec3i.getZ() + 0.5);
+        return Vec3.atLowerCornerWithOffset(vec3i, 0.5, d, 0.5);
     }
 
     public Vec3(double d, double e, double f) {
@@ -130,6 +135,10 @@ implements Position {
 
     public Vec3 multiply(double d, double e, double f) {
         return new Vec3(this.x * d, this.y * e, this.z * f);
+    }
+
+    public Vec3 offsetRandom(RandomSource randomSource, float f) {
+        return this.add((randomSource.nextFloat() - 0.5f) * f, (randomSource.nextFloat() - 0.5f) * f, (randomSource.nextFloat() - 0.5f) * f);
     }
 
     public double length() {

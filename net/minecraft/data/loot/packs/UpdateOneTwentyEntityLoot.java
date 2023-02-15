@@ -14,6 +14,10 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.EmptyLootItem;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.minecraft.world.level.storage.loot.predicates.LootItemKilledByPlayerCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithLootingCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 public class UpdateOneTwentyEntityLoot
@@ -26,6 +30,7 @@ extends EntityLootSubProvider {
     public void generate() {
         this.add(EntityType.CAMEL, LootTable.lootTable());
         this.add(EntityType.ELDER_GUARDIAN, VanillaEntityLoot.elderGuardianLootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)EmptyLootItem.emptyItem().setWeight(4)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))));
+        this.add(EntityType.SNIFFER, LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0f)).add((LootPoolEntryContainer.Builder<?>)((LootPoolSingletonContainer.Builder)((LootPoolEntryContainer.Builder)((Object)LootItem.lootTableItem(Items.MOSS_BLOCK).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0f))))).when(LootItemKilledByPlayerCondition.killedByPlayer())).when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.1f, 0.02f)))));
     }
 }
 

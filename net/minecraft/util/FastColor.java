@@ -67,10 +67,10 @@ public class FastColor {
         }
 
         public static int lerp(float f, int i, int j) {
-            int k = Mth.lerp(f, ARGB32.alpha(i), ARGB32.alpha(j));
-            int l = Mth.lerp(f, ARGB32.red(i), ARGB32.red(j));
-            int m = Mth.lerp(f, ARGB32.green(i), ARGB32.green(j));
-            int n = Mth.lerp(f, ARGB32.blue(i), ARGB32.blue(j));
+            int k = Mth.lerpInt(f, ARGB32.alpha(i), ARGB32.alpha(j));
+            int l = Mth.lerpInt(f, ARGB32.red(i), ARGB32.red(j));
+            int m = Mth.lerpInt(f, ARGB32.green(i), ARGB32.green(j));
+            int n = Mth.lerpInt(f, ARGB32.blue(i), ARGB32.blue(j));
             return ARGB32.color(k, l, m, n);
         }
     }

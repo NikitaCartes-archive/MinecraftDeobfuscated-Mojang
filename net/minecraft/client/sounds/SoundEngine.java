@@ -39,6 +39,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -91,8 +92,8 @@ public class SoundEngine {
     public void reload() {
         ONLY_WARN_ONCE.clear();
         for (SoundEvent soundEvent : BuiltInRegistries.SOUND_EVENT) {
-            ResourceLocation resourceLocation = soundEvent.getLocation();
-            if (this.soundManager.getSoundEvent(resourceLocation) != null) continue;
+            ResourceLocation resourceLocation;
+            if (soundEvent == SoundEvents.EMPTY || this.soundManager.getSoundEvent(resourceLocation = soundEvent.getLocation()) != null) continue;
             LOGGER.warn("Missing sound for event: {}", (Object)BuiltInRegistries.SOUND_EVENT.getKey(soundEvent));
             ONLY_WARN_ONCE.add(resourceLocation);
         }
@@ -324,6 +325,9 @@ public class SoundEngine {
             return;
         }
         Sound sound = soundInstance.getSound();
+        if (sound == SoundManager.INTENTIONALLY_EMPTY_SOUND) {
+            return;
+        }
         if (sound == SoundManager.EMPTY_SOUND) {
             if (ONLY_WARN_ONCE.add(resourceLocation)) {
                 LOGGER.warn(MARKER, "Unable to play empty soundEvent: {}", (Object)resourceLocation);

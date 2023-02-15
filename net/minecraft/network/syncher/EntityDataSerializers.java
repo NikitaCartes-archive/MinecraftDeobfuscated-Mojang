@@ -22,6 +22,7 @@ import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.animal.sniffer.Sniffer;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.item.ItemStack;
@@ -198,6 +199,7 @@ public class EntityDataSerializers {
     public static final EntityDataSerializer<CatVariant> CAT_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.CAT_VARIANT);
     public static final EntityDataSerializer<FrogVariant> FROG_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.FROG_VARIANT);
     public static final EntityDataSerializer<Holder<PaintingVariant>> PAINTING_VARIANT = EntityDataSerializer.simpleId(BuiltInRegistries.PAINTING_VARIANT.asHolderIdMap());
+    public static final EntityDataSerializer<Sniffer.State> SNIFFER_STATE = EntityDataSerializer.simpleEnum(Sniffer.State.class);
     public static final EntityDataSerializer<Vector3f> VECTOR3 = EntityDataSerializer.simple(FriendlyByteBuf::writeVector3f, FriendlyByteBuf::readVector3f);
     public static final EntityDataSerializer<Quaternionf> QUATERNION = EntityDataSerializer.simple(FriendlyByteBuf::writeQuaternion, FriendlyByteBuf::readQuaternion);
 
@@ -243,6 +245,7 @@ public class EntityDataSerializers {
         EntityDataSerializers.registerSerializer(FROG_VARIANT);
         EntityDataSerializers.registerSerializer(OPTIONAL_GLOBAL_POS);
         EntityDataSerializers.registerSerializer(PAINTING_VARIANT);
+        EntityDataSerializers.registerSerializer(SNIFFER_STATE);
         EntityDataSerializers.registerSerializer(VECTOR3);
         EntityDataSerializers.registerSerializer(QUATERNION);
     }

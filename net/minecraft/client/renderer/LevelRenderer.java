@@ -111,6 +111,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
@@ -991,7 +992,6 @@ AutoCloseable {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public void renderLevel(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f) {
-        int m;
         BlockPos blockPos;
         Frustum frustum;
         boolean bl3;
@@ -1077,11 +1077,7 @@ AutoCloseable {
                 OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
                 multiBufferSource = outlineBufferSource;
                 int i = entity.getTeamColor();
-                int j = 255;
-                int k = i >> 16 & 0xFF;
-                m = i >> 8 & 0xFF;
-                int n = i & 0xFF;
-                outlineBufferSource.setColor(k, m, n, 255);
+                outlineBufferSource.setColor(FastColor.ARGB32.red(i), FastColor.ARGB32.green(i), FastColor.ARGB32.blue(i), 255);
             } else {
                 multiBufferSource = bufferSource;
             }
@@ -1098,14 +1094,15 @@ AutoCloseable {
             List<BlockEntity> list = renderChunkInfo.chunk.getCompiledChunk().getRenderableBlockEntities();
             if (list.isEmpty()) continue;
             for (BlockEntity blockEntity : list) {
+                int j;
                 BlockPos blockPos2 = blockEntity.getBlockPos();
                 MultiBufferSource multiBufferSource2 = bufferSource;
                 poseStack.pushPose();
                 poseStack.translate((double)blockPos2.getX() - d, (double)blockPos2.getY() - e, (double)blockPos2.getZ() - g);
                 SortedSet sortedSet = (SortedSet)this.destructionProgress.get(blockPos2.asLong());
-                if (sortedSet != null && !sortedSet.isEmpty() && (m = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
+                if (sortedSet != null && !sortedSet.isEmpty() && (j = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
                     PoseStack.Pose pose = poseStack.last();
-                    SheetedDecalTextureGenerator vertexConsumer = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(m)), pose.pose(), pose.normal(), 1.0f);
+                    SheetedDecalTextureGenerator vertexConsumer = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(j)), pose.pose(), pose.normal(), 1.0f);
                     multiBufferSource2 = renderType -> {
                         VertexConsumer vertexConsumer2 = bufferSource.getBuffer(renderType);
                         if (renderType.affectsCrumbling()) {
@@ -1147,16 +1144,16 @@ AutoCloseable {
         profilerFiller.popPush("destroyProgress");
         for (Long2ObjectMap.Entry entry : this.destructionProgress.long2ObjectEntrySet()) {
             SortedSet sortedSet2;
-            double q;
-            double p;
+            double n;
+            double m;
             blockPos = BlockPos.of(entry.getLongKey());
-            double o = (double)blockPos.getX() - d;
-            if (o * o + (p = (double)blockPos.getY() - e) * p + (q = (double)blockPos.getZ() - g) * q > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
-            int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
+            double k = (double)blockPos.getX() - d;
+            if (k * k + (m = (double)blockPos.getY() - e) * m + (n = (double)blockPos.getZ() - g) * n > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
+            int o = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
             poseStack.pushPose();
             poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
             PoseStack.Pose pose2 = poseStack.last();
-            SheetedDecalTextureGenerator vertexConsumer2 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(r)), pose2.pose(), pose2.normal(), 1.0f);
+            SheetedDecalTextureGenerator vertexConsumer2 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(o)), pose2.pose(), pose2.normal(), 1.0f);
             this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos), blockPos, this.level, poseStack, vertexConsumer2);
             poseStack.popPose();
         }
@@ -2364,6 +2361,11 @@ AutoCloseable {
                 this.level.addDestroyBlockEffect(blockPos, blockState);
                 break;
             }
+            case 3008: {
+                this.level.playLocalSound(blockPos, SoundEvents.BRUSH_BRUSH_SAND_COMPLETED, SoundSource.PLAYERS, 1.0f, 1.0f, false);
+                this.level.addDestroyBlockEffect(blockPos, Block.stateById(j));
+                break;
+            }
             case 2004: {
                 for (int k = 0; k < 20; ++k) {
                     double u = (double)blockPos.getX() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
@@ -2541,10 +2543,13 @@ AutoCloseable {
                 break;
             }
             case 1010: {
-                if (Item.byId(j) instanceof RecordItem) {
-                    this.playStreamingMusic(((RecordItem)Item.byId(j)).getSound(), blockPos);
-                    break;
-                }
+                Item item = Item.byId(j);
+                if (!(item instanceof RecordItem)) break;
+                RecordItem recordItem = (RecordItem)item;
+                this.playStreamingMusic(recordItem.getSound(), blockPos);
+                break;
+            }
+            case 1011: {
                 this.playStreamingMusic(null, blockPos);
                 break;
             }

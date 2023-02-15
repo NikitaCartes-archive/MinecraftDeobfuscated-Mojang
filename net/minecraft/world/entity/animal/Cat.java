@@ -50,6 +50,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.OcelotAttackGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
@@ -111,9 +112,10 @@ implements VariantHolder<CatVariant> {
     protected void registerGoals() {
         this.temptGoal = new CatTemptGoal(this, 0.6, TEMPT_INGREDIENT, true);
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(2, new CatRelaxOnOwnerGoal(this));
-        this.goalSelector.addGoal(3, this.temptGoal);
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.5));
+        this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(3, new CatRelaxOnOwnerGoal(this));
+        this.goalSelector.addGoal(4, this.temptGoal);
         this.goalSelector.addGoal(5, new CatLieOnBedGoal(this, 1.1, 8));
         this.goalSelector.addGoal(6, new FollowOwnerGoal(this, 1.0, 10.0f, 5.0f, false));
         this.goalSelector.addGoal(7, new CatSitOnBlockGoal(this, 0.8));

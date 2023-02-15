@@ -9,10 +9,12 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 
@@ -35,6 +37,7 @@ extends RecipeProvider {
         UpdateOneTwentyRecipeProvider.hangingSign(consumer, Items.BIRCH_HANGING_SIGN, Blocks.STRIPPED_BIRCH_LOG);
         UpdateOneTwentyRecipeProvider.hangingSign(consumer, Items.JUNGLE_HANGING_SIGN, Blocks.STRIPPED_JUNGLE_LOG);
         UpdateOneTwentyRecipeProvider.hangingSign(consumer, Items.ACACIA_HANGING_SIGN, Blocks.STRIPPED_ACACIA_LOG);
+        UpdateOneTwentyRecipeProvider.hangingSign(consumer, Items.CHERRY_HANGING_SIGN, Blocks.STRIPPED_CHERRY_LOG);
         UpdateOneTwentyRecipeProvider.hangingSign(consumer, Items.DARK_OAK_HANGING_SIGN, Blocks.STRIPPED_DARK_OAK_LOG);
         UpdateOneTwentyRecipeProvider.hangingSign(consumer, Items.MANGROVE_HANGING_SIGN, Blocks.STRIPPED_MANGROVE_LOG);
         UpdateOneTwentyRecipeProvider.hangingSign(consumer, Items.BAMBOO_HANGING_SIGN, Items.STRIPPED_BAMBOO_BLOCK);
@@ -73,6 +76,14 @@ extends RecipeProvider {
         UpdateOneTwentyRecipeProvider.copySmithingTemplate(consumer, (ItemLike)Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, Items.BLACKSTONE);
         UpdateOneTwentyRecipeProvider.copySmithingTemplate(consumer, (ItemLike)Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE, Items.NETHERRACK);
         UpdateOneTwentyRecipeProvider.copySmithingTemplate(consumer, (ItemLike)Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE, Items.PURPUR_BLOCK);
+        UpdateOneTwentyRecipeProvider.oneToOneConversionRecipe(consumer, Items.ORANGE_DYE, Blocks.TORCHFLOWER, "orange_dye");
+        UpdateOneTwentyRecipeProvider.planksFromLog(consumer, Blocks.CHERRY_PLANKS, ItemTags.CHERRY_LOGS, 4);
+        UpdateOneTwentyRecipeProvider.woodFromLogs(consumer, Blocks.CHERRY_WOOD, Blocks.CHERRY_LOG);
+        UpdateOneTwentyRecipeProvider.woodFromLogs(consumer, Blocks.STRIPPED_CHERRY_WOOD, Blocks.STRIPPED_CHERRY_LOG);
+        UpdateOneTwentyRecipeProvider.woodenBoat(consumer, Items.CHERRY_BOAT, Blocks.CHERRY_PLANKS);
+        UpdateOneTwentyRecipeProvider.chestBoat(consumer, Items.CHERRY_CHEST_BOAT, Items.CHERRY_BOAT);
+        UpdateOneTwentyRecipeProvider.oneToOneConversionRecipe(consumer, Items.PINK_DYE, Items.PINK_PETALS, "pink_dye", 1);
+        SpecialRecipeBuilder.special(RecipeSerializer.DECORATED_POT_RECIPE).save(consumer, "decorated_pot");
     }
 }
 

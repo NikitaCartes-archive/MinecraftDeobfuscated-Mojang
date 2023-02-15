@@ -314,11 +314,11 @@ implements VibrationListener.VibrationListenerConfig {
     }
 
     public float getTendrilAnimation(float f) {
-        return (float)Mth.lerp(f, this.tendrilAnimationO, this.tendrilAnimation) / 10.0f;
+        return Mth.lerp(f, this.tendrilAnimationO, this.tendrilAnimation) / 10.0f;
     }
 
     public float getHeartAnimation(float f) {
-        return (float)Mth.lerp(f, this.heartAnimationO, this.heartAnimation) / 10.0f;
+        return Mth.lerp(f, this.heartAnimationO, this.heartAnimation) / 10.0f;
     }
 
     private void clientDiggingParticles(AnimationState animationState) {

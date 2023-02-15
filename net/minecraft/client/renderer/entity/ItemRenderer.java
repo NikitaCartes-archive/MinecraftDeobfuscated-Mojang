@@ -309,7 +309,7 @@ implements ResourceManagerReloadListener {
             String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
             poseStack.translate(0.0f, 0.0f, this.blitOffset + 200.0f);
             MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            font.drawInBatch(string2, (float)(i + 19 - 2 - font.width(string2)), (float)(j + 6 + 3), 0xFFFFFF, true, poseStack.last().pose(), (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
+            font.drawInBatch(string2, (float)(i + 19 - 2 - font.width(string2)), (float)(j + 6 + 3), 0xFFFFFF, true, poseStack.last().pose(), (MultiBufferSource)bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
             bufferSource.endBatch();
         }
         if (itemStack.isBarVisible()) {

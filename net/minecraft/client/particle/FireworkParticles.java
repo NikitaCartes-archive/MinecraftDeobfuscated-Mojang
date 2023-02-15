@@ -18,6 +18,7 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
@@ -48,6 +49,11 @@ public class FireworkParticles {
             sparkParticle.setAlpha(0.99f);
             return sparkParticle;
         }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -64,6 +70,11 @@ public class FireworkParticles {
             OverlayParticle overlayParticle = new OverlayParticle(clientLevel, d, e, f);
             overlayParticle.pickSprite(this.sprite);
             return overlayParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 

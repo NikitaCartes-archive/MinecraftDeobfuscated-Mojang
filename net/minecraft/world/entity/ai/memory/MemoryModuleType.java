@@ -126,6 +126,10 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<GlobalPos> LIKED_NOTEBLOCK_POSITION = MemoryModuleType.register("liked_noteblock", GlobalPos.CODEC);
     public static final MemoryModuleType<Integer> LIKED_NOTEBLOCK_COOLDOWN_TICKS = MemoryModuleType.register("liked_noteblock_cooldown_ticks", Codec.INT);
     public static final MemoryModuleType<Integer> ITEM_PICKUP_COOLDOWN_TICKS = MemoryModuleType.register("item_pickup_cooldown_ticks", Codec.INT);
+    public static final MemoryModuleType<List<BlockPos>> SNIFFER_EXPLORED_POSITIONS = MemoryModuleType.register("sniffer_explored_positions", Codec.list(BlockPos.CODEC));
+    public static final MemoryModuleType<BlockPos> SNIFFER_SNIFFING_TARGET = MemoryModuleType.register("sniffer_sniffing_target");
+    public static final MemoryModuleType<Boolean> SNIFFER_DIGGING = MemoryModuleType.register("sniffer_digging");
+    public static final MemoryModuleType<Boolean> SNIFFER_HAPPY = MemoryModuleType.register("sniffer_happy");
     private final Optional<Codec<ExpirableValue<U>>> codec;
 
     @VisibleForTesting

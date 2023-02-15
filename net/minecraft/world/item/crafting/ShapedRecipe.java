@@ -40,8 +40,9 @@ implements CraftingRecipe {
     private final ResourceLocation id;
     final String group;
     final CraftingBookCategory category;
+    final boolean showNotification;
 
-    public ShapedRecipe(ResourceLocation resourceLocation, String string, CraftingBookCategory craftingBookCategory, int i, int j, NonNullList<Ingredient> nonNullList, ItemStack itemStack) {
+    public ShapedRecipe(ResourceLocation resourceLocation, String string, CraftingBookCategory craftingBookCategory, int i, int j, NonNullList<Ingredient> nonNullList, ItemStack itemStack, boolean bl) {
         this.id = resourceLocation;
         this.group = string;
         this.category = craftingBookCategory;
@@ -49,6 +50,11 @@ implements CraftingRecipe {
         this.height = j;
         this.recipeItems = nonNullList;
         this.result = itemStack;
+        this.showNotification = bl;
+    }
+
+    public ShapedRecipe(ResourceLocation resourceLocation, String string, CraftingBookCategory craftingBookCategory, int i, int j, NonNullList<Ingredient> nonNullList, ItemStack itemStack) {
+        this(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, true);
     }
 
     @Override
@@ -79,6 +85,11 @@ implements CraftingRecipe {
     @Override
     public NonNullList<Ingredient> getIngredients() {
         return this.recipeItems;
+    }
+
+    @Override
+    public boolean showNotification() {
+        return this.showNotification;
     }
 
     @Override
@@ -269,7 +280,8 @@ implements CraftingRecipe {
             int j = strings.length;
             NonNullList<Ingredient> nonNullList = ShapedRecipe.dissolvePattern(strings, map, i, j);
             ItemStack itemStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
-            return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack);
+            boolean bl = GsonHelper.getAsBoolean(jsonObject, "show_notification", true);
+            return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, bl);
         }
 
         @Override
@@ -283,7 +295,8 @@ implements CraftingRecipe {
                 nonNullList.set(k, Ingredient.fromNetwork(friendlyByteBuf));
             }
             ItemStack itemStack = friendlyByteBuf.readItem();
-            return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack);
+            boolean bl = friendlyByteBuf.readBoolean();
+            return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, bl);
         }
 
         @Override
@@ -296,6 +309,7 @@ implements CraftingRecipe {
                 ingredient.toNetwork(friendlyByteBuf);
             }
             friendlyByteBuf.writeItem(shapedRecipe.result);
+            friendlyByteBuf.writeBoolean(shapedRecipe.showNotification);
         }
 
         @Override

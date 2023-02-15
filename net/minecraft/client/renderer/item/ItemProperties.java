@@ -107,6 +107,12 @@ public class ItemProperties {
             }
             return (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / 20.0f;
         });
+        ItemProperties.register(Items.BRUSH, new ResourceLocation("brushing"), (itemStack, clientLevel, livingEntity, i) -> {
+            if (livingEntity == null || livingEntity.getUseItem() != itemStack) {
+                return 0.0f;
+            }
+            return (float)(livingEntity.getUseItemRemainingTicks() % 10) / 10.0f;
+        });
         ItemProperties.register(Items.BOW, new ResourceLocation("pulling"), (itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0f : 0.0f);
         ItemProperties.register(Items.BUNDLE, new ResourceLocation("filled"), (itemStack, clientLevel, livingEntity, i) -> BundleItem.getFullnessDisplay(itemStack));
         ItemProperties.register(Items.CLOCK, new ResourceLocation("time"), new ClampedItemPropertyFunction(){

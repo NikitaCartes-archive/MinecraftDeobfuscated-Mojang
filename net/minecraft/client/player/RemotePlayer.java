@@ -12,10 +12,14 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
 public class RemotePlayer
 extends AbstractClientPlayer {
+    private Vec3 lerpDeltaMovement = Vec3.ZERO;
+    private int lerpDeltaMovementSteps;
+
     public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile) {
         super(clientLevel, gameProfile);
         this.maxUpStep = 1.0f;
@@ -58,6 +62,10 @@ extends AbstractClientPlayer {
             this.yHeadRot += (float)(Mth.wrapDegrees(this.lyHeadRot - (double)this.yHeadRot) / (double)this.lerpHeadSteps);
             --this.lerpHeadSteps;
         }
+        if (this.lerpDeltaMovementSteps > 0) {
+            this.addDeltaMovement(new Vec3((this.lerpDeltaMovement.x - this.getDeltaMovement().x) / (double)this.lerpDeltaMovementSteps, (this.lerpDeltaMovement.y - this.getDeltaMovement().y) / (double)this.lerpDeltaMovementSteps, (this.lerpDeltaMovement.z - this.getDeltaMovement().z) / (double)this.lerpDeltaMovementSteps));
+            --this.lerpDeltaMovementSteps;
+        }
         this.oBob = this.bob;
         this.updateSwingTime();
         float g = !this.onGround || this.isDeadOrDying() ? 0.0f : (float)Math.min(0.1, this.getDeltaMovement().horizontalDistance());
@@ -65,6 +73,12 @@ extends AbstractClientPlayer {
         this.level.getProfiler().push("push");
         this.pushEntities();
         this.level.getProfiler().pop();
+    }
+
+    @Override
+    public void lerpMotion(double d, double e, double f) {
+        this.lerpDeltaMovement = new Vec3(d, e, f);
+        this.lerpDeltaMovementSteps = this.getType().updateInterval() + 1;
     }
 
     @Override

@@ -193,7 +193,7 @@ public class DebugRenderer {
         poseStack.mulPoseMatrix(new Matrix4f().rotation(camera.rotation()));
         poseStack.scale(-g, -g, g);
         float m = bl ? (float)(-font.width(string)) / 2.0f : 0.0f;
-        font.drawInBatch(string, m -= h / g, 0.0f, i, false, poseStack.last().pose(), multiBufferSource, bl2, 0, 0xF000F0);
+        font.drawInBatch(string, m -= h / g, 0.0f, i, false, poseStack.last().pose(), multiBufferSource, bl2 ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, 0, 0xF000F0);
         poseStack.popPose();
     }
 

@@ -40,6 +40,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
@@ -329,11 +330,11 @@ public class CommandSuggestions {
         }
     }
 
-    public String getNarrationMessage() {
+    public Component getNarrationMessage() {
         if (this.suggestions != null) {
-            return "\n" + this.suggestions.getNarrationMessage();
+            return CommonComponents.NEW_LINE.copy().append(this.suggestions.getNarrationMessage());
         }
-        return "";
+        return CommonComponents.EMPTY;
     }
 
     @Environment(value=EnvType.CLIENT)

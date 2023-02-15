@@ -5,7 +5,6 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,6 +20,7 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
@@ -49,14 +49,12 @@ implements SimpleWaterloggedBlock {
     protected static final VoxelShape NORTH_OPEN_AABB = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
     protected static final VoxelShape BOTTOM_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 3.0, 16.0);
     protected static final VoxelShape TOP_AABB = Block.box(0.0, 13.0, 0.0, 16.0, 16.0, 16.0);
-    private final SoundEvent closeSound;
-    private final SoundEvent openSound;
+    private final BlockSetType type;
 
-    protected TrapDoorBlock(BlockBehaviour.Properties properties, SoundEvent soundEvent, SoundEvent soundEvent2) {
-        super(properties);
+    protected TrapDoorBlock(BlockBehaviour.Properties properties, BlockSetType blockSetType) {
+        super(properties.sound(blockSetType.soundType()));
+        this.type = blockSetType;
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(OPEN, false)).setValue(HALF, Half.BOTTOM)).setValue(POWERED, false)).setValue(WATERLOGGED, false));
-        this.closeSound = soundEvent;
-        this.openSound = soundEvent2;
     }
 
     @Override
@@ -110,7 +108,7 @@ implements SimpleWaterloggedBlock {
     }
 
     protected void playSound(@Nullable Player player, Level level, BlockPos blockPos, boolean bl) {
-        level.playSound(player, blockPos, bl ? this.openSound : this.closeSound, SoundSource.BLOCKS, 1.0f, level.getRandom().nextFloat() * 0.1f + 0.9f);
+        level.playSound(player, blockPos, bl ? this.type.trapdoorOpen() : this.type.trapdoorClose(), SoundSource.BLOCKS, 1.0f, level.getRandom().nextFloat() * 0.1f + 0.9f);
         level.gameEvent((Entity)player, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
     }
 

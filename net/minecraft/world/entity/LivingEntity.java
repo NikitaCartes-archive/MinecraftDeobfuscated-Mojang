@@ -69,6 +69,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Attackable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
@@ -138,7 +139,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 public abstract class LivingEntity
-extends Entity {
+extends Entity
+implements Attackable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final UUID SPEED_MODIFIER_SPRINTING_UUID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
     private static final UUID SPEED_MODIFIER_SOUL_SPEED_UUID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
@@ -172,6 +174,7 @@ extends Entity {
     protected static final float DEFAULT_EYE_HEIGHT = 1.74f;
     protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2f, 0.2f);
     public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5f;
+    private static final int MAX_HEAD_ROTATION_RELATIVE_TO_BODY = 50;
     private final AttributeMap attributes;
     private final CombatTracker combatTracker = new CombatTracker(this);
     private final Map<MobEffect, MobEffectInstance> activeEffects = Maps.newHashMap();
@@ -559,6 +562,11 @@ extends Entity {
     @Nullable
     public LivingEntity getLastHurtByMob() {
         return this.lastHurtByMob;
+    }
+
+    @Override
+    public LivingEntity getLastAttacker() {
+        return this.getLastHurtByMob();
     }
 
     public int getLastHurtByMobTimestamp() {
@@ -2198,17 +2206,10 @@ extends Entity {
         float h = Mth.wrapDegrees(f - this.yBodyRot);
         this.yBodyRot += h * 0.3f;
         float i = Mth.wrapDegrees(this.getYRot() - this.yBodyRot);
+        if (Math.abs(i) > 50.0f) {
+            this.yBodyRot += i - (float)(Mth.sign(i) * 50);
+        }
         boolean bl2 = bl = i < -90.0f || i >= 90.0f;
-        if (i < -75.0f) {
-            i = -75.0f;
-        }
-        if (i >= 75.0f) {
-            i = 75.0f;
-        }
-        this.yBodyRot = this.getYRot() - i;
-        if (i * i > 2500.0f) {
-            this.yBodyRot += i * 0.2f;
-        }
         if (bl) {
             g *= -1.0f;
         }

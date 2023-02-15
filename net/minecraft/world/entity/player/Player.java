@@ -1653,6 +1653,11 @@ extends LivingEntity {
     public abstract boolean isSpectator();
 
     @Override
+    public boolean canBeHitByProjectile() {
+        return !this.isSpectator() && super.canBeHitByProjectile();
+    }
+
+    @Override
     public boolean isSwimming() {
         return !this.abilities.flying && !this.isSpectator() && super.isSwimming();
     }

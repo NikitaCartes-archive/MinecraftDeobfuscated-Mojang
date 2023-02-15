@@ -22,12 +22,11 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -55,7 +54,7 @@ import org.slf4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class ServerStatusPinger {
     static final Splitter SPLITTER = Splitter.on('\u0000').limit(6);
-    static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final Component CANT_CONNECT_MESSAGE = Component.translatable("multiplayer.status.cannot_connect").withStyle(style -> style.withColor(-65536));
     private final List<Connection> connections = Collections.synchronizedList(Lists.newArrayList());
 
@@ -84,44 +83,39 @@ public class ServerStatusPinger {
                     return;
                 }
                 this.receivedPing = true;
-                ServerStatus serverStatus = clientboundStatusResponsePacket.getStatus();
-                serverData.motd = serverStatus.getDescription() != null ? serverStatus.getDescription() : CommonComponents.EMPTY;
-                if (serverStatus.getVersion() != null) {
-                    serverData.version = Component.literal(serverStatus.getVersion().getName());
-                    serverData.protocol = serverStatus.getVersion().getProtocol();
-                } else {
-                    serverData.version = Component.translatable("multiplayer.status.old");
-                    serverData.protocol = 0;
-                }
-                if (serverStatus.getPlayers() != null) {
-                    serverData.status = ServerStatusPinger.formatPlayerCount(serverStatus.getPlayers().getNumPlayers(), serverStatus.getPlayers().getMaxPlayers());
-                    serverData.players = serverStatus.getPlayers();
-                    ArrayList<Component> list = Lists.newArrayList();
-                    GameProfile[] gameProfiles = serverStatus.getPlayers().getSample();
-                    if (gameProfiles != null && gameProfiles.length > 0) {
-                        for (GameProfile gameProfile : gameProfiles) {
+                ServerStatus serverStatus = clientboundStatusResponsePacket.status();
+                serverData.motd = serverStatus.description();
+                serverStatus.version().ifPresentOrElse(version -> {
+                    serverData2.version = Component.literal(version.name());
+                    serverData2.protocol = version.protocol();
+                }, () -> {
+                    serverData2.version = Component.translatable("multiplayer.status.old");
+                    serverData2.protocol = 0;
+                });
+                serverStatus.players().ifPresentOrElse(players -> {
+                    serverData2.status = ServerStatusPinger.formatPlayerCount(players.online(), players.max());
+                    serverData2.players = players;
+                    if (!players.sample().isEmpty()) {
+                        ArrayList<Component> list = new ArrayList<Component>(players.sample().size());
+                        for (GameProfile gameProfile : players.sample()) {
                             list.add(Component.literal(gameProfile.getName()));
                         }
-                        if (gameProfiles.length < serverStatus.getPlayers().getNumPlayers()) {
-                            list.add(Component.translatable("multiplayer.status.and_more", serverStatus.getPlayers().getNumPlayers() - gameProfiles.length));
+                        if (players.sample().size() < players.online()) {
+                            list.add(Component.translatable("multiplayer.status.and_more", players.online() - players.sample().size()));
                         }
-                        serverData.playerList = list;
+                        serverData2.playerList = list;
+                    } else {
+                        serverData2.playerList = List.of();
                     }
-                } else {
-                    serverData.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
-                }
-                String string = serverStatus.getFavicon();
-                if (string != null) {
-                    try {
-                        string = ServerData.parseFavicon(string);
-                    } catch (ParseException parseException) {
-                        LOGGER.error("Invalid server icon", parseException);
+                }, () -> {
+                    serverData2.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
+                });
+                serverStatus.favicon().ifPresent(favicon -> {
+                    if (!Arrays.equals(favicon.iconBytes(), serverData.getIconBytes())) {
+                        serverData.setIconBytes(favicon.iconBytes());
+                        runnable.run();
                     }
-                }
-                if (!Objects.equals(string, serverData.getIconB64())) {
-                    serverData.setIconB64(string);
-                    runnable.run();
-                }
+                });
                 this.pingStart = Util.getMillis();
                 connection.send(new ServerboundPingRequestPacket(this.pingStart));
                 this.success = true;
@@ -219,7 +213,7 @@ public class ServerStatusPinger {
                             serverData.version = Component.literal(string2);
                             serverData.motd = Component.literal(string3);
                             serverData.status = ServerStatusPinger.formatPlayerCount(j, k);
-                            serverData.players = new ServerStatus.Players(k, j);
+                            serverData.players = new ServerStatus.Players(k, j, List.of());
                         }
                         channelHandlerContext.close();
                     }

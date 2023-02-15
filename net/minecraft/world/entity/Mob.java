@@ -42,6 +42,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.Targeting;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -85,7 +86,8 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Mob
-extends LivingEntity {
+extends LivingEntity
+implements Targeting {
     private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
     private static final int MOB_FLAG_NO_AI = 1;
     private static final int MOB_FLAG_LEFTHANDED = 2;
@@ -204,6 +206,7 @@ extends LivingEntity {
         return this.sensing;
     }
 
+    @Override
     @Nullable
     public LivingEntity getTarget() {
         return this.target;

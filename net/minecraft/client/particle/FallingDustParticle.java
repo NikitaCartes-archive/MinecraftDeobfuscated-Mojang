@@ -14,6 +14,7 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -97,6 +98,12 @@ extends TextureSheetParticle {
             float l = (float)(j >> 8 & 0xFF) / 255.0f;
             float m = (float)(j & 0xFF) / 255.0f;
             return new FallingDustParticle(clientLevel, d, e, f, k, l, m, this.sprite);
+        }
+
+        @Override
+        @Nullable
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((BlockParticleOption)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

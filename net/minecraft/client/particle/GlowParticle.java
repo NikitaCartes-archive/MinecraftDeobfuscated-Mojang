@@ -11,6 +11,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -79,6 +80,11 @@ extends TextureSheetParticle {
             glowParticle.setLifetime(clientLevel.random.nextInt(30) + 10);
             return glowParticle;
         }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -100,6 +106,11 @@ extends TextureSheetParticle {
             int k = 4;
             glowParticle.setLifetime(clientLevel.random.nextInt(2) + 2);
             return glowParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 
@@ -123,6 +134,11 @@ extends TextureSheetParticle {
             glowParticle.setLifetime(clientLevel.random.nextInt(30) + 10);
             return glowParticle;
         }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -144,6 +160,11 @@ extends TextureSheetParticle {
             int k = 40;
             glowParticle.setLifetime(clientLevel.random.nextInt(30) + 10);
             return glowParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 
@@ -171,6 +192,11 @@ extends TextureSheetParticle {
             }
             glowParticle.setLifetime((int)(8.0 / (clientLevel.random.nextDouble() * 0.8 + 0.2)));
             return glowParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

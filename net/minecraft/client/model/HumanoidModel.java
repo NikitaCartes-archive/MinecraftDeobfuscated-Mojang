@@ -125,8 +125,8 @@ HeadedModel {
         this.leftLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g / k;
         this.rightLeg.yRot = 0.005f;
         this.leftLeg.yRot = -0.005f;
-        this.rightLeg.zRot = 0.0f;
-        this.leftLeg.zRot = 0.0f;
+        this.rightLeg.zRot = 0.005f;
+        this.leftLeg.zRot = -0.005f;
         if (this.riding) {
             this.rightArm.xRot += -0.62831855f;
             this.leftArm.xRot += -0.62831855f;
@@ -264,6 +264,11 @@ HeadedModel {
                 AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
                 break;
             }
+            case BRUSH: {
+                this.rightArm.xRot = this.rightArm.xRot * 0.5f - 0.62831855f;
+                this.rightArm.yRot = 0.0f;
+                break;
+            }
             case SPYGLASS: {
                 this.rightArm.xRot = Mth.clamp(this.head.xRot - 1.9198622f - (((Entity)livingEntity).isCrouching() ? 0.2617994f : 0.0f), -2.4f, 3.3f);
                 this.rightArm.yRot = this.head.yRot - 0.2617994f;
@@ -310,6 +315,11 @@ HeadedModel {
             }
             case CROSSBOW_HOLD: {
                 AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, false);
+                break;
+            }
+            case BRUSH: {
+                this.leftArm.xRot = this.leftArm.xRot * 0.5f - 0.62831855f;
+                this.leftArm.yRot = 0.0f;
                 break;
             }
             case SPYGLASS: {
@@ -425,7 +435,8 @@ HeadedModel {
         CROSSBOW_CHARGE(true),
         CROSSBOW_HOLD(true),
         SPYGLASS(false),
-        TOOT_HORN(false);
+        TOOT_HORN(false),
+        BRUSH(false);
 
         private final boolean twoHanded;
 

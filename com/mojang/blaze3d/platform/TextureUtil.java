@@ -8,13 +8,12 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Path;
 import java.util.concurrent.ThreadLocalRandom;
 import net.fabricmc.api.EnvType;
@@ -79,22 +78,26 @@ public class TextureUtil {
     }
 
     public static ByteBuffer readResource(InputStream inputStream) throws IOException {
-        ByteBuffer byteBuffer;
-        if (inputStream instanceof FileInputStream) {
-            FileInputStream fileInputStream = (FileInputStream)inputStream;
-            FileChannel fileChannel = fileInputStream.getChannel();
-            byteBuffer = MemoryUtil.memAlloc((int)fileChannel.size() + 1);
-            while (fileChannel.read(byteBuffer) != -1) {
-            }
-        } else {
-            byteBuffer = MemoryUtil.memAlloc(8192);
-            ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
+        ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
+        if (readableByteChannel instanceof SeekableByteChannel) {
+            SeekableByteChannel seekableByteChannel = (SeekableByteChannel)readableByteChannel;
+            return TextureUtil.readResource(readableByteChannel, (int)seekableByteChannel.size() + 1);
+        }
+        return TextureUtil.readResource(readableByteChannel, 8192);
+    }
+
+    private static ByteBuffer readResource(ReadableByteChannel readableByteChannel, int i) throws IOException {
+        ByteBuffer byteBuffer = MemoryUtil.memAlloc(i);
+        try {
             while (readableByteChannel.read(byteBuffer) != -1) {
-                if (byteBuffer.remaining() != 0) continue;
+                if (byteBuffer.hasRemaining()) continue;
                 byteBuffer = MemoryUtil.memRealloc(byteBuffer, byteBuffer.capacity() * 2);
             }
+            return byteBuffer;
+        } catch (IOException iOException) {
+            MemoryUtil.memFree(byteBuffer);
+            throw iOException;
         }
-        return byteBuffer;
     }
 
     public static void writeAsPNG(Path path, String string, int i, int j, int k, int l) {

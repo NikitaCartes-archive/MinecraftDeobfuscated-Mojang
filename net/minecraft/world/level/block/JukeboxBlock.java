@@ -4,19 +4,17 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -29,7 +27,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,51 +50,13 @@ extends BaseEntityBlock {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        if (blockState.getValue(HAS_RECORD).booleanValue()) {
-            this.dropRecording(level, blockPos);
-            blockState = (BlockState)blockState.setValue(HAS_RECORD, false);
-            level.gameEvent(GameEvent.JUKEBOX_STOP_PLAY, blockPos, GameEvent.Context.of(blockState));
-            level.setBlock(blockPos, blockState, 2);
-            level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState));
+        BlockEntity blockEntity;
+        if (blockState.getValue(HAS_RECORD).booleanValue() && (blockEntity = level.getBlockEntity(blockPos)) instanceof JukeboxBlockEntity) {
+            JukeboxBlockEntity jukeboxBlockEntity = (JukeboxBlockEntity)blockEntity;
+            jukeboxBlockEntity.popOutRecord();
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
-    }
-
-    public void setRecord(@Nullable Entity entity, LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
-        BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
-        if (blockEntity instanceof JukeboxBlockEntity) {
-            JukeboxBlockEntity jukeboxBlockEntity = (JukeboxBlockEntity)blockEntity;
-            jukeboxBlockEntity.setRecord(itemStack.copy());
-            jukeboxBlockEntity.playRecord();
-            levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(HAS_RECORD, true), 2);
-            levelAccessor.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState));
-        }
-    }
-
-    private void dropRecording(Level level, BlockPos blockPos) {
-        if (level.isClientSide) {
-            return;
-        }
-        BlockEntity blockEntity = level.getBlockEntity(blockPos);
-        if (!(blockEntity instanceof JukeboxBlockEntity)) {
-            return;
-        }
-        JukeboxBlockEntity jukeboxBlockEntity = (JukeboxBlockEntity)blockEntity;
-        ItemStack itemStack = jukeboxBlockEntity.getRecord();
-        if (itemStack.isEmpty()) {
-            return;
-        }
-        level.levelEvent(1010, blockPos, 0);
-        jukeboxBlockEntity.clearContent();
-        float f = 0.7f;
-        double d = (double)(level.random.nextFloat() * 0.7f) + (double)0.15f;
-        double e = (double)(level.random.nextFloat() * 0.7f) + 0.06000000238418579 + 0.6;
-        double g = (double)(level.random.nextFloat() * 0.7f) + (double)0.15f;
-        ItemStack itemStack2 = itemStack.copy();
-        ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + g, itemStack2);
-        itemEntity.setDefaultPickUpDelay();
-        level.addFreshEntity(itemEntity);
     }
 
     @Override
@@ -105,7 +64,11 @@ extends BaseEntityBlock {
         if (blockState.is(blockState2.getBlock())) {
             return;
         }
-        this.dropRecording(level, blockPos);
+        BlockEntity blockEntity = level.getBlockEntity(blockPos);
+        if (blockEntity instanceof JukeboxBlockEntity) {
+            JukeboxBlockEntity jukeboxBlockEntity = (JukeboxBlockEntity)blockEntity;
+            jukeboxBlockEntity.popOutRecord();
+        }
         super.onRemove(blockState, level, blockPos, blockState2, bl);
     }
 
@@ -115,16 +78,32 @@ extends BaseEntityBlock {
     }
 
     @Override
+    public boolean isSignalSource(BlockState blockState) {
+        return true;
+    }
+
+    @Override
+    public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+        JukeboxBlockEntity jukeboxBlockEntity;
+        BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
+        if (blockEntity instanceof JukeboxBlockEntity && (jukeboxBlockEntity = (JukeboxBlockEntity)blockEntity).isRecordPlaying()) {
+            return 15;
+        }
+        return 0;
+    }
+
+    @Override
     public boolean hasAnalogOutputSignal(BlockState blockState) {
         return true;
     }
 
     @Override
     public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-        Item item;
-        BlockEntity blockEntity = level.getBlockEntity(blockPos);
-        if (blockEntity instanceof JukeboxBlockEntity && (item = ((JukeboxBlockEntity)blockEntity).getRecord().getItem()) instanceof RecordItem) {
-            return ((RecordItem)item).getAnalogOutput();
+        JukeboxBlockEntity jukeboxBlockEntity;
+        Object object = level.getBlockEntity(blockPos);
+        if (object instanceof JukeboxBlockEntity && (object = (jukeboxBlockEntity = (JukeboxBlockEntity)object).getFirstItem().getItem()) instanceof RecordItem) {
+            RecordItem recordItem = (RecordItem)object;
+            return recordItem.getAnalogOutput();
         }
         return 0;
     }

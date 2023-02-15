@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
@@ -159,12 +160,12 @@ extends Screen {
                 string = this.font.bidirectionalShaping(string);
             }
             float f = -this.minecraft.font.width(string) / 2;
-            this.minecraft.font.drawInBatch(string, f, n * this.sign.getTextLineHeight() - l, i, false, matrix4f, bufferSource, false, 0, 0xF000F0, false);
+            this.minecraft.font.drawInBatch(string, f, n * this.sign.getTextLineHeight() - l, i, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0, false);
             if (n != this.line || j < 0 || !bl) continue;
             o = this.minecraft.font.width(string.substring(0, Math.max(Math.min(j, string.length()), 0)));
             p = o - this.minecraft.font.width(string) / 2;
             if (j < string.length()) continue;
-            this.minecraft.font.drawInBatch("_", p, m, i, false, matrix4f, bufferSource, false, 0, 0xF000F0, false);
+            this.minecraft.font.drawInBatch("_", p, m, i, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0, false);
         }
         bufferSource.endBatch();
         for (n = 0; n < this.messages.length; ++n) {

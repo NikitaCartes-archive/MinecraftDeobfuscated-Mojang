@@ -53,7 +53,7 @@ extends SignBlock {
     private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, SHAPE_NORTHSOUTH, Direction.SOUTH, SHAPE_NORTHSOUTH, Direction.EAST, SHAPE_EASTWEST, Direction.WEST, SHAPE_EASTWEST));
 
     public WallHangingSignBlock(BlockBehaviour.Properties properties, WoodType woodType) {
-        super(properties, woodType);
+        super(properties.sound(woodType.hangingSignSoundType()), woodType);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(WATERLOGGED, false));
     }
 

@@ -814,16 +814,12 @@ extends Level {
 
         @Override
         public void onTickingStart(Entity entity) {
-            if (entity.getType().isTicking()) {
-                ClientLevel.this.tickingEntities.add(entity);
-            }
+            ClientLevel.this.tickingEntities.add(entity);
         }
 
         @Override
         public void onTickingEnd(Entity entity) {
-            if (entity.getType().isTicking()) {
-                ClientLevel.this.tickingEntities.remove(entity);
-            }
+            ClientLevel.this.tickingEntities.remove(entity);
         }
 
         @Override

@@ -38,7 +38,7 @@ extends Feature<BlockStateConfiguration> {
             float f = (float)(j + k + l) * 0.333f + 0.5f;
             for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-j, -k, -l), blockPos.offset(j, k, l))) {
                 if (!(blockPos2.distSqr(blockPos) <= (double)(f * f))) continue;
-                worldGenLevel.setBlock(blockPos2, blockStateConfiguration.state, 4);
+                worldGenLevel.setBlock(blockPos2, blockStateConfiguration.state, 3);
             }
             blockPos = blockPos.offset(-1 + randomSource.nextInt(2), -randomSource.nextInt(2), -1 + randomSource.nextInt(2));
         }

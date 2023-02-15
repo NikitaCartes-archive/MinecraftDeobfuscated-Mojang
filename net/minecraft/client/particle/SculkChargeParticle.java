@@ -11,6 +11,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
 
 @Environment(value=EnvType.CLIENT)
@@ -55,6 +56,11 @@ extends TextureSheetParticle {
             sculkChargeParticle.roll = sculkChargeParticleOptions.roll();
             sculkChargeParticle.setLifetime(clientLevel.random.nextInt(12) + 8);
             return sculkChargeParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SculkChargeParticleOptions)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

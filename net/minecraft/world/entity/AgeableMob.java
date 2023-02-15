@@ -10,10 +10,12 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
@@ -139,6 +141,11 @@ extends PathfinderMob {
     }
 
     protected void ageBoundaryReached() {
+        Boat boat;
+        Entity entity;
+        if (!this.isBaby() && this.isPassenger() && (entity = this.getVehicle()) instanceof Boat && !(boat = (Boat)entity).hasEnoughSpaceFor(this)) {
+            this.stopRiding();
+        }
     }
 
     @Override

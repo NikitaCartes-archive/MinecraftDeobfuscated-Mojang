@@ -371,15 +371,19 @@ extends Animal {
 
         @Override
         public void tick() {
+            double f;
+            double e;
             this.updateSpeed();
             if (this.operation != MoveControl.Operation.MOVE_TO || this.turtle.getNavigation().isDone()) {
                 this.turtle.setSpeed(0.0f);
                 return;
             }
             double d = this.wantedX - this.turtle.getX();
-            double e = this.wantedY - this.turtle.getY();
-            double f = this.wantedZ - this.turtle.getZ();
-            double g = Math.sqrt(d * d + e * e + f * f);
+            double g = Math.sqrt(d * d + (e = this.wantedY - this.turtle.getY()) * e + (f = this.wantedZ - this.turtle.getZ()) * f);
+            if (g < (double)1.0E-5f) {
+                this.mob.setSpeed(0.0f);
+                return;
+            }
             e /= g;
             float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
             this.turtle.setYRot(this.rotlerp(this.turtle.getYRot(), h, 90.0f));

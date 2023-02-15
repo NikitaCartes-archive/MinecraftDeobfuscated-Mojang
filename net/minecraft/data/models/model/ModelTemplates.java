@@ -83,6 +83,10 @@ public class ModelTemplates {
     public static final ModelTemplate RAIL_RAISED_NE = ModelTemplates.create("template_rail_raised_ne", "_raised_ne", TextureSlot.RAIL);
     public static final ModelTemplate RAIL_RAISED_SW = ModelTemplates.create("template_rail_raised_sw", "_raised_sw", TextureSlot.RAIL);
     public static final ModelTemplate CARPET = ModelTemplates.create("carpet", TextureSlot.WOOL);
+    public static final ModelTemplate FLOWERBED_1 = ModelTemplates.create("flowerbed_1", "_1", TextureSlot.FLOWERBED, TextureSlot.STEM);
+    public static final ModelTemplate FLOWERBED_2 = ModelTemplates.create("flowerbed_2", "_2", TextureSlot.FLOWERBED, TextureSlot.STEM);
+    public static final ModelTemplate FLOWERBED_3 = ModelTemplates.create("flowerbed_3", "_3", TextureSlot.FLOWERBED, TextureSlot.STEM);
+    public static final ModelTemplate FLOWERBED_4 = ModelTemplates.create("flowerbed_4", "_4", TextureSlot.FLOWERBED, TextureSlot.STEM);
     public static final ModelTemplate CORAL_FAN = ModelTemplates.create("coral_fan", TextureSlot.FAN);
     public static final ModelTemplate CORAL_WALL_FAN = ModelTemplates.create("coral_wall_fan", TextureSlot.FAN);
     public static final ModelTemplate GLAZED_TERRACOTTA = ModelTemplates.create("template_glazed_terracotta", TextureSlot.PATTERN);

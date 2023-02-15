@@ -191,7 +191,7 @@ implements Hopper {
 
     private static boolean tryTakeInItemFromSlot(Hopper hopper, Container container, int i, Direction direction) {
         ItemStack itemStack = container.getItem(i);
-        if (!itemStack.isEmpty() && HopperBlockEntity.canTakeItemFromContainer(container, itemStack, i, direction)) {
+        if (!itemStack.isEmpty() && HopperBlockEntity.canTakeItemFromContainer(hopper, container, itemStack, i, direction)) {
             ItemStack itemStack2 = itemStack.copy();
             ItemStack itemStack3 = HopperBlockEntity.addItem(container, hopper, container.removeItem(i, 1), null);
             if (itemStack3.isEmpty()) {
@@ -216,31 +216,48 @@ implements Hopper {
         return bl;
     }
 
+    /*
+     * Enabled aggressive block sorting
+     * Lifted jumps to return sites
+     */
     public static ItemStack addItem(@Nullable Container container, Container container2, ItemStack itemStack, @Nullable Direction direction) {
-        if (container2 instanceof WorldlyContainer && direction != null) {
+        if (container2 instanceof WorldlyContainer) {
             WorldlyContainer worldlyContainer = (WorldlyContainer)container2;
-            int[] is = worldlyContainer.getSlotsForFace(direction);
-            for (int i = 0; i < is.length && !itemStack.isEmpty(); ++i) {
-                itemStack = HopperBlockEntity.tryMoveInItem(container, container2, itemStack, is[i], direction);
+            if (direction != null) {
+                int[] is = worldlyContainer.getSlotsForFace(direction);
+                int i = 0;
+                while (i < is.length) {
+                    if (itemStack.isEmpty()) return itemStack;
+                    itemStack = HopperBlockEntity.tryMoveInItem(container, container2, itemStack, is[i], direction);
+                    ++i;
+                }
+                return itemStack;
             }
-        } else {
-            int j = container2.getContainerSize();
-            for (int k = 0; k < j && !itemStack.isEmpty(); ++k) {
-                itemStack = HopperBlockEntity.tryMoveInItem(container, container2, itemStack, k, direction);
-            }
+        }
+        int j = container2.getContainerSize();
+        int i = 0;
+        while (i < j) {
+            if (itemStack.isEmpty()) return itemStack;
+            itemStack = HopperBlockEntity.tryMoveInItem(container, container2, itemStack, i, direction);
+            ++i;
         }
         return itemStack;
     }
 
     private static boolean canPlaceItemInContainer(Container container, ItemStack itemStack, int i, @Nullable Direction direction) {
+        WorldlyContainer worldlyContainer;
         if (!container.canPlaceItem(i, itemStack)) {
             return false;
         }
-        return !(container instanceof WorldlyContainer) || ((WorldlyContainer)container).canPlaceItemThroughFace(i, itemStack, direction);
+        return !(container instanceof WorldlyContainer) || (worldlyContainer = (WorldlyContainer)container).canPlaceItemThroughFace(i, itemStack, direction);
     }
 
-    private static boolean canTakeItemFromContainer(Container container, ItemStack itemStack, int i, Direction direction) {
-        return !(container instanceof WorldlyContainer) || ((WorldlyContainer)container).canTakeItemThroughFace(i, itemStack, direction);
+    private static boolean canTakeItemFromContainer(Container container, Container container2, ItemStack itemStack, int i, Direction direction) {
+        WorldlyContainer worldlyContainer;
+        if (!container2.canTakeItem(container, i, itemStack)) {
+            return false;
+        }
+        return !(container2 instanceof WorldlyContainer) || (worldlyContainer = (WorldlyContainer)container2).canTakeItemThroughFace(i, itemStack, direction);
     }
 
     private static ItemStack tryMoveInItem(@Nullable Container container, Container container2, ItemStack itemStack, int i, @Nullable Direction direction) {

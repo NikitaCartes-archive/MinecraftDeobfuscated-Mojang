@@ -11,10 +11,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.multiplayer.chat.report.ReportReason;
+import net.minecraft.client.multiplayer.chat.report.BanReason;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,8 +42,8 @@ public class BanNoticeScreen {
         String string2 = banDetails.reasonMessage();
         if (StringUtils.isNumeric(string)) {
             int i = Integer.parseInt(string);
-            Component component = ReportReason.getTranslationById(i);
-            component = component != null ? ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withBold(true)) : (string2 != null ? Component.translatable("gui.banned.description.reason_id_message", i, string2).withStyle(ChatFormatting.BOLD) : Component.translatable("gui.banned.description.reason_id", i).withStyle(ChatFormatting.BOLD));
+            BanReason banReason = BanReason.byId(i);
+            MutableComponent component = banReason != null ? ComponentUtils.mergeStyles(banReason.title().copy(), Style.EMPTY.withBold(true)) : (string2 != null ? Component.translatable("gui.banned.description.reason_id_message", i, string2).withStyle(ChatFormatting.BOLD) : Component.translatable("gui.banned.description.reason_id", i).withStyle(ChatFormatting.BOLD));
             return Component.translatable("gui.banned.description.reason", component);
         }
         return Component.translatable("gui.banned.description.unknownreason");

@@ -37,6 +37,7 @@ public final class OverworldBiomeBuilder {
     public static final float EROSION_INDEX_2_START = -0.375f;
     private static final float EROSION_DEEP_DARK_DRYNESS_THRESHOLD = -0.225f;
     private static final float DEPTH_DEEP_DARK_DRYNESS_THRESHOLD = 0.9f;
+    private final Modifier modifier;
     private final Climate.Parameter FULL_RANGE = Climate.Parameter.span(-1.0f, 1.0f);
     private final Climate.Parameter[] temperatures = new Climate.Parameter[]{Climate.Parameter.span(-1.0f, -0.45f), Climate.Parameter.span(-0.45f, -0.15f), Climate.Parameter.span(-0.15f, 0.2f), Climate.Parameter.span(0.2f, 0.55f), Climate.Parameter.span(0.55f, 1.0f)};
     private final Climate.Parameter[] humidities = new Climate.Parameter[]{Climate.Parameter.span(-1.0f, -0.35f), Climate.Parameter.span(-0.35f, -0.1f), Climate.Parameter.span(-0.1f, 0.1f), Climate.Parameter.span(0.1f, 0.3f), Climate.Parameter.span(0.3f, 1.0f)};
@@ -55,8 +56,16 @@ public final class OverworldBiomeBuilder {
     private final ResourceKey<Biome>[][] MIDDLE_BIOMES = new ResourceKey[][]{{Biomes.SNOWY_PLAINS, Biomes.SNOWY_PLAINS, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.TAIGA}, {Biomes.PLAINS, Biomes.PLAINS, Biomes.FOREST, Biomes.TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA}, {Biomes.FLOWER_FOREST, Biomes.PLAINS, Biomes.FOREST, Biomes.BIRCH_FOREST, Biomes.DARK_FOREST}, {Biomes.SAVANNA, Biomes.SAVANNA, Biomes.FOREST, Biomes.JUNGLE, Biomes.JUNGLE}, {Biomes.DESERT, Biomes.DESERT, Biomes.DESERT, Biomes.DESERT, Biomes.DESERT}};
     private final ResourceKey<Biome>[][] MIDDLE_BIOMES_VARIANT = new ResourceKey[][]{{Biomes.ICE_SPIKES, null, Biomes.SNOWY_TAIGA, null, null}, {null, null, null, null, Biomes.OLD_GROWTH_PINE_TAIGA}, {Biomes.SUNFLOWER_PLAINS, null, null, Biomes.OLD_GROWTH_BIRCH_FOREST, null}, {null, null, Biomes.PLAINS, Biomes.SPARSE_JUNGLE, Biomes.BAMBOO_JUNGLE}, {null, null, null, null, null}};
     private final ResourceKey<Biome>[][] PLATEAU_BIOMES = new ResourceKey[][]{{Biomes.SNOWY_PLAINS, Biomes.SNOWY_PLAINS, Biomes.SNOWY_PLAINS, Biomes.SNOWY_TAIGA, Biomes.SNOWY_TAIGA}, {Biomes.MEADOW, Biomes.MEADOW, Biomes.FOREST, Biomes.TAIGA, Biomes.OLD_GROWTH_SPRUCE_TAIGA}, {Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW, Biomes.MEADOW, Biomes.DARK_FOREST}, {Biomes.SAVANNA_PLATEAU, Biomes.SAVANNA_PLATEAU, Biomes.FOREST, Biomes.FOREST, Biomes.JUNGLE}, {Biomes.BADLANDS, Biomes.BADLANDS, Biomes.BADLANDS, Biomes.WOODED_BADLANDS, Biomes.WOODED_BADLANDS}};
-    private final ResourceKey<Biome>[][] PLATEAU_BIOMES_VARIANT = new ResourceKey[][]{{Biomes.ICE_SPIKES, null, null, null, null}, {null, null, Biomes.MEADOW, Biomes.MEADOW, Biomes.OLD_GROWTH_PINE_TAIGA}, {null, null, Biomes.FOREST, Biomes.BIRCH_FOREST, null}, {null, null, null, null, null}, {Biomes.ERODED_BADLANDS, Biomes.ERODED_BADLANDS, null, null, null}};
+    private final ResourceKey<Biome>[][] PLATEAU_BIOMES_VARIANT = new ResourceKey[][]{{Biomes.ICE_SPIKES, null, null, null, null}, {Biomes.CHERRY_GROVE, null, Biomes.MEADOW, Biomes.MEADOW, Biomes.OLD_GROWTH_PINE_TAIGA}, {Biomes.CHERRY_GROVE, Biomes.CHERRY_GROVE, Biomes.FOREST, Biomes.BIRCH_FOREST, null}, {null, null, null, null, null}, {Biomes.ERODED_BADLANDS, Biomes.ERODED_BADLANDS, null, null, null}};
     private final ResourceKey<Biome>[][] SHATTERED_BIOMES = new ResourceKey[][]{{Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_FOREST, Biomes.WINDSWEPT_FOREST}, {Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_GRAVELLY_HILLS, Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_FOREST, Biomes.WINDSWEPT_FOREST}, {Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_HILLS, Biomes.WINDSWEPT_FOREST, Biomes.WINDSWEPT_FOREST}, {null, null, null, null, null}, {null, null, null, null, null}};
+
+    public OverworldBiomeBuilder() {
+        this(Modifier.NONE);
+    }
+
+    public OverworldBiomeBuilder(Modifier modifier) {
+        this.modifier = modifier;
+    }
 
     public List<Climate.ParameterPoint> spawnTarget() {
         Climate.Parameter parameter = Climate.Parameter.point(0.0f);
@@ -333,11 +342,11 @@ public final class OverworldBiomeBuilder {
     }
 
     private ResourceKey<Biome> pickPlateauBiome(int i, int j, Climate.Parameter parameter) {
-        if (parameter.max() < 0L) {
+        ResourceKey<Biome> resourceKey = this.PLATEAU_BIOMES_VARIANT[i][j];
+        if (parameter.max() < 0L || resourceKey == null || resourceKey == Biomes.CHERRY_GROVE && this.modifier != Modifier.UPDATE_1_20) {
             return this.PLATEAU_BIOMES[i][j];
         }
-        ResourceKey<Biome> resourceKey = this.PLATEAU_BIOMES_VARIANT[i][j];
-        return resourceKey == null ? this.PLATEAU_BIOMES[i][j] : resourceKey;
+        return resourceKey;
     }
 
     private ResourceKey<Biome> pickPeakBiome(int i, int j, Climate.Parameter parameter) {
@@ -470,6 +479,12 @@ public final class OverworldBiomeBuilder {
     @VisibleForDebug
     public Climate.Parameter[] getWeirdnessThresholds() {
         return new Climate.Parameter[]{Climate.Parameter.span(-2.0f, 0.0f), Climate.Parameter.span(0.0f, 2.0f)};
+    }
+
+    public static enum Modifier {
+        NONE,
+        UPDATE_1_20;
+
     }
 }
 

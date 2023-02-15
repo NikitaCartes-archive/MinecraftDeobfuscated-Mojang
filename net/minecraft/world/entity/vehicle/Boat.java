@@ -220,6 +220,7 @@ implements VariantHolder<Type> {
             case Type.BIRCH -> Items.BIRCH_BOAT;
             case Type.JUNGLE -> Items.JUNGLE_BOAT;
             case Type.ACACIA -> Items.ACACIA_BOAT;
+            case Type.CHERRY -> Items.CHERRY_BOAT;
             case Type.DARK_OAK -> Items.DARK_OAK_BOAT;
             case Type.MANGROVE -> Items.MANGROVE_BOAT;
             case Type.BAMBOO -> Items.BAMBOO_RAFT;
@@ -306,7 +307,7 @@ implements VariantHolder<Type> {
             for (int j = 0; j < list.size(); ++j) {
                 Entity entity = list.get(j);
                 if (entity.hasPassenger(this)) continue;
-                if (bl && this.getPassengers().size() < this.getMaxPassengers() && !entity.isPassenger() && entity.getBbWidth() < this.getBbWidth() && entity instanceof LivingEntity && !(entity instanceof WaterAnimal) && !(entity instanceof Player)) {
+                if (bl && this.getPassengers().size() < this.getMaxPassengers() && !entity.isPassenger() && this.hasEnoughSpaceFor(entity) && entity instanceof LivingEntity && !(entity instanceof WaterAnimal) && !(entity instanceof Player)) {
                     entity.startRiding(this);
                     continue;
                 }
@@ -588,6 +589,10 @@ implements VariantHolder<Type> {
         return 0.0f;
     }
 
+    public boolean hasEnoughSpaceFor(Entity entity) {
+        return entity.getBbWidth() < this.getBbWidth();
+    }
+
     @Override
     public void positionRider(Entity entity) {
         if (!this.hasPassenger(entity)) {
@@ -808,6 +813,7 @@ implements VariantHolder<Type> {
         BIRCH(Blocks.BIRCH_PLANKS, "birch"),
         JUNGLE(Blocks.JUNGLE_PLANKS, "jungle"),
         ACACIA(Blocks.ACACIA_PLANKS, "acacia"),
+        CHERRY(Blocks.CHERRY_PLANKS, "cherry"),
         DARK_OAK(Blocks.DARK_OAK_PLANKS, "dark_oak"),
         MANGROVE(Blocks.MANGROVE_PLANKS, "mangrove"),
         BAMBOO(Blocks.BAMBOO_PLANKS, "bamboo");

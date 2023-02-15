@@ -14,6 +14,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -116,6 +117,11 @@ extends TextureSheetParticle {
             shriekParticle.pickSprite(this.sprite);
             shriekParticle.setAlpha(1.0f);
             return shriekParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((ShriekParticleOption)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

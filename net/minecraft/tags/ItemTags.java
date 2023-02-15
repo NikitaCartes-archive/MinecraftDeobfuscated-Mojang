@@ -30,6 +30,7 @@ public final class ItemTags {
     public static final TagKey<Item> OAK_LOGS = ItemTags.bind("oak_logs");
     public static final TagKey<Item> BIRCH_LOGS = ItemTags.bind("birch_logs");
     public static final TagKey<Item> ACACIA_LOGS = ItemTags.bind("acacia_logs");
+    public static final TagKey<Item> CHERRY_LOGS = ItemTags.bind("cherry_logs");
     public static final TagKey<Item> JUNGLE_LOGS = ItemTags.bind("jungle_logs");
     public static final TagKey<Item> SPRUCE_LOGS = ItemTags.bind("spruce_logs");
     public static final TagKey<Item> MANGROVE_LOGS = ItemTags.bind("mangrove_logs");
@@ -94,6 +95,15 @@ public final class ItemTags {
     public static final TagKey<Item> TRIMMABLE_ARMOR = ItemTags.bind("trimmable_armor");
     public static final TagKey<Item> TRIM_MATERIALS = ItemTags.bind("trim_materials");
     public static final TagKey<Item> TRIM_TEMPLATES = ItemTags.bind("trim_templates");
+    public static final TagKey<Item> SNIFFER_FOOD = ItemTags.bind("sniffer_food");
+    public static final TagKey<Item> DECORATED_POT_SHARDS = ItemTags.bind("decorated_pot_shards");
+    public static final TagKey<Item> SWORDS = ItemTags.bind("swords");
+    public static final TagKey<Item> AXES = ItemTags.bind("axes");
+    public static final TagKey<Item> HOES = ItemTags.bind("hoes");
+    public static final TagKey<Item> PICKAXES = ItemTags.bind("pickaxes");
+    public static final TagKey<Item> SHOVELS = ItemTags.bind("shovels");
+    public static final TagKey<Item> TOOLS = ItemTags.bind("tools");
+    public static final TagKey<Item> BREAKS_DECORATED_POTS = ItemTags.bind("breaks_decorated_pots");
 
     private ItemTags() {
     }

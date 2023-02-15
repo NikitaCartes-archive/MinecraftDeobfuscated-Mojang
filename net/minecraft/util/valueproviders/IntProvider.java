@@ -19,7 +19,11 @@ public abstract class IntProvider {
     public static final Codec<IntProvider> POSITIVE_CODEC = IntProvider.codec(1, Integer.MAX_VALUE);
 
     public static Codec<IntProvider> codec(int i, int j) {
-        return ExtraCodecs.validate(CODEC, intProvider -> {
+        return IntProvider.codec(i, j, CODEC);
+    }
+
+    public static <T extends IntProvider> Codec<T> codec(int i, int j, Codec<T> codec) {
+        return ExtraCodecs.validate(codec, intProvider -> {
             if (intProvider.getMinValue() < i) {
                 return DataResult.error("Value provider too low: " + i + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
             }

@@ -14,6 +14,7 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -91,6 +92,11 @@ extends TextureSheetParticle {
                 return null;
             }
             return new TerrainParticle(clientLevel, d, e, f, g, h, i, blockState);
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((BlockParticleOption)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

@@ -47,6 +47,8 @@ public class ModelLayers {
     public static final ModelLayerLocation CREEPER = ModelLayers.register("creeper");
     public static final ModelLayerLocation CREEPER_ARMOR = ModelLayers.register("creeper", "armor");
     public static final ModelLayerLocation CREEPER_HEAD = ModelLayers.register("creeper_head");
+    public static final ModelLayerLocation DECORATED_POT_BASE = ModelLayers.register("decorated_pot_base");
+    public static final ModelLayerLocation DECORATED_POT_SIDES = ModelLayers.register("decorated_pot_sides");
     public static final ModelLayerLocation DOLPHIN = ModelLayers.register("dolphin");
     public static final ModelLayerLocation DONKEY = ModelLayers.register("donkey");
     public static final ModelLayerLocation DOUBLE_CHEST_LEFT = ModelLayers.register("double_chest_left");
@@ -133,6 +135,7 @@ public class ModelLayers {
     public static final ModelLayerLocation SKELETON_SKULL = ModelLayers.register("skeleton_skull");
     public static final ModelLayerLocation SLIME = ModelLayers.register("slime");
     public static final ModelLayerLocation SLIME_OUTER = ModelLayers.register("slime", "outer");
+    public static final ModelLayerLocation SNIFFER = ModelLayers.register("sniffer");
     public static final ModelLayerLocation SNOW_GOLEM = ModelLayers.register("snow_golem");
     public static final ModelLayerLocation SPAWNER_MINECART = ModelLayers.register("spawner_minecart");
     public static final ModelLayerLocation SPIDER = ModelLayers.register("spider");

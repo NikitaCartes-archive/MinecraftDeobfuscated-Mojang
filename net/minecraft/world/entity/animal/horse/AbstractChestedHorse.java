@@ -35,7 +35,7 @@ extends AbstractHorse {
 
     @Override
     protected void randomizeAttributes(RandomSource randomSource) {
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.generateRandomMaxHealth(randomSource));
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(AbstractChestedHorse.generateMaxHealth(randomSource::nextInt));
     }
 
     @Override

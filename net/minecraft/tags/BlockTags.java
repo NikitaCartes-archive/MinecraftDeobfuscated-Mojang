@@ -32,6 +32,7 @@ public final class BlockTags {
     public static final TagKey<Block> OAK_LOGS = BlockTags.create("oak_logs");
     public static final TagKey<Block> BIRCH_LOGS = BlockTags.create("birch_logs");
     public static final TagKey<Block> ACACIA_LOGS = BlockTags.create("acacia_logs");
+    public static final TagKey<Block> CHERRY_LOGS = BlockTags.create("cherry_logs");
     public static final TagKey<Block> JUNGLE_LOGS = BlockTags.create("jungle_logs");
     public static final TagKey<Block> SPRUCE_LOGS = BlockTags.create("spruce_logs");
     public static final TagKey<Block> MANGROVE_LOGS = BlockTags.create("mangrove_logs");
@@ -166,6 +167,7 @@ public final class BlockTags {
     public static final TagKey<Block> SNOW_LAYER_CANNOT_SURVIVE_ON = BlockTags.create("snow_layer_cannot_survive_on");
     public static final TagKey<Block> SNOW_LAYER_CAN_SURVIVE_ON = BlockTags.create("snow_layer_can_survive_on");
     public static final TagKey<Block> INVALID_SPAWN_INSIDE = BlockTags.create("invalid_spawn_inside");
+    public static final TagKey<Block> SNIFFER_DIGGABLE_BLOCK = BlockTags.create("sniffer_diggable_block");
 
     private BlockTags() {
     }

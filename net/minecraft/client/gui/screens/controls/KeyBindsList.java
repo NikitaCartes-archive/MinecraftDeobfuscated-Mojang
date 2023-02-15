@@ -178,19 +178,6 @@ extends ContainerObjectSelectionList<Entry> {
         }
 
         @Override
-        public boolean mouseClicked(double d, double e, int i) {
-            if (this.changeButton.mouseClicked(d, e, i)) {
-                return true;
-            }
-            return this.resetButton.mouseClicked(d, e, i);
-        }
-
-        @Override
-        public boolean mouseReleased(double d, double e, int i) {
-            return this.changeButton.mouseReleased(d, e, i) || this.resetButton.mouseReleased(d, e, i);
-        }
-
-        @Override
         protected void refreshEntry() {
             this.changeButton.setMessage(this.key.getTranslatedKeyMessage());
             this.resetButton.active = !this.key.isDefault();

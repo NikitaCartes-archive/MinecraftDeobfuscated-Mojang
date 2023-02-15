@@ -1351,6 +1351,10 @@ CommandSource {
         return this.level.clip(new ClipContext(vec3, vec33, ClipContext.Block.OUTLINE, bl ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, this));
     }
 
+    public boolean canBeHitByProjectile() {
+        return this.isAlive() && this.isPickable();
+    }
+
     public boolean isPickable() {
         return false;
     }
@@ -2064,7 +2068,7 @@ CommandSource {
     }
 
     public void checkSlowFallDistance() {
-        if (this.deltaMovement.y() > -0.5 && this.fallDistance > 1.0f) {
+        if (this.getDeltaMovement().y() > -0.5 && this.fallDistance > 1.0f) {
             this.fallDistance = 1.0f;
         }
     }
@@ -2841,7 +2845,7 @@ CommandSource {
     }
 
     public void addDeltaMovement(Vec3 vec3) {
-        this.deltaMovement = this.deltaMovement.add(vec3);
+        this.setDeltaMovement(this.getDeltaMovement().add(vec3));
     }
 
     public void setDeltaMovement(double d, double e, double f) {

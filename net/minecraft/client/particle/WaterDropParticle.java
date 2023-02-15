@@ -13,6 +13,7 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 
 @Environment(value=EnvType.CLIENT)
@@ -75,6 +76,11 @@ extends TextureSheetParticle {
             WaterDropParticle waterDropParticle = new WaterDropParticle(clientLevel, d, e, f);
             waterDropParticle.pickSprite(this.sprite);
             return waterDropParticle;
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((SimpleParticleType)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

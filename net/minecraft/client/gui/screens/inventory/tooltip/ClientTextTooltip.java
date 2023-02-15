@@ -32,7 +32,7 @@ implements ClientTooltipComponent {
 
     @Override
     public void renderText(Font font, int i, int j, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
-        font.drawInBatch(this.text, (float)i, (float)j, -1, true, matrix4f, (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
+        font.drawInBatch(this.text, (float)i, (float)j, -1, true, matrix4f, (MultiBufferSource)bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
     }
 }
 

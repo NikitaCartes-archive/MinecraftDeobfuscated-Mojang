@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.CampfireRenderer;
 import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.client.renderer.blockentity.ConduitRenderer;
+import net.minecraft.client.renderer.blockentity.DecoratedPotRenderer;
 import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;
 import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
 import net.minecraft.client.renderer.blockentity.LecternRenderer;
@@ -26,6 +27,7 @@ import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.blockentity.SpawnerRenderer;
 import net.minecraft.client.renderer.blockentity.StructureBlockRenderer;
+import net.minecraft.client.renderer.blockentity.SuspiciousSandRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndGatewayRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -73,6 +75,8 @@ public class BlockEntityRenderers {
         BlockEntityRenderers.register(BlockEntityType.CONDUIT, ConduitRenderer::new);
         BlockEntityRenderers.register(BlockEntityType.BELL, BellRenderer::new);
         BlockEntityRenderers.register(BlockEntityType.CAMPFIRE, CampfireRenderer::new);
+        BlockEntityRenderers.register(BlockEntityType.SUSPICIOUS_SAND, SuspiciousSandRenderer::new);
+        BlockEntityRenderers.register(BlockEntityType.DECORATED_POT, DecoratedPotRenderer::new);
     }
 }
 

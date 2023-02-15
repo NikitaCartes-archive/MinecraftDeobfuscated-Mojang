@@ -165,7 +165,7 @@ implements TraceableEntity {
     }
 
     protected boolean canHitEntity(Entity entity) {
-        if (entity.isSpectator() || !entity.isAlive() || !entity.isPickable()) {
+        if (!entity.canBeHitByProjectile()) {
             return false;
         }
         Entity entity2 = this.getOwner();

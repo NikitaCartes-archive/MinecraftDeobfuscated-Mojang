@@ -3,6 +3,7 @@
  */
 package net.minecraft.server;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -14,6 +15,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.BufferedWriter;
@@ -25,15 +27,14 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -174,7 +175,6 @@ import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -212,7 +212,10 @@ AutoCloseable {
     private boolean debugCommandProfilerDelayStart;
     private final ServerConnectionListener connection;
     private final ChunkProgressListenerFactory progressListenerFactory;
-    private final ServerStatus status = new ServerStatus();
+    @Nullable
+    private ServerStatus status;
+    @Nullable
+    private ServerStatus.Favicon statusIcon;
     private final RandomSource random = RandomSource.create();
     private final DataFixer fixerUpper;
     private String localIp;
@@ -594,10 +597,8 @@ AutoCloseable {
             try {
                 if (this.initServer()) {
                     this.nextTickTime = Util.getMillis();
-                    this.status.setDescription(Component.literal(this.motd));
-                    this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
-                    this.status.setEnforcesSecureChat(this.enforceSecureProfile());
-                    this.updateStatusIcon(this.status);
+                    this.statusIcon = this.loadStatusIcon().orElse(null);
+                    this.status = this.buildServerStatus();
                     while (this.running) {
                         long l = Util.getMillis() - this.nextTickTime;
                         if (l > 2000L && this.nextTickTime - this.lastOverloadWarning >= 15000L) {
@@ -717,22 +718,19 @@ AutoCloseable {
         super.doRunTask(tickTask);
     }
 
-    private void updateStatusIcon(ServerStatus serverStatus) {
-        Optional<File> optional = Optional.of(this.getFile("server-icon.png")).filter(File::isFile);
-        if (!optional.isPresent()) {
-            optional = this.storageSource.getIconFile().map(Path::toFile).filter(File::isFile);
-        }
-        optional.ifPresent(file -> {
+    private Optional<ServerStatus.Favicon> loadStatusIcon() {
+        Optional<Path> optional = Optional.of(this.getFile("server-icon.png").toPath()).filter(path -> Files.isRegularFile(path, new LinkOption[0])).or(() -> this.storageSource.getIconFile().filter(path -> Files.isRegularFile(path, new LinkOption[0])));
+        return optional.flatMap(path -> {
             try {
-                BufferedImage bufferedImage = ImageIO.read(file);
-                Validate.validState(bufferedImage.getWidth() == 64, "Must be 64 pixels wide", new Object[0]);
-                Validate.validState(bufferedImage.getHeight() == 64, "Must be 64 pixels high", new Object[0]);
+                BufferedImage bufferedImage = ImageIO.read(path.toFile());
+                Preconditions.checkState(bufferedImage.getWidth() == 64, "Must be 64 pixels wide");
+                Preconditions.checkState(bufferedImage.getHeight() == 64, "Must be 64 pixels high");
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 ImageIO.write((RenderedImage)bufferedImage, "PNG", byteArrayOutputStream);
-                byte[] bs = Base64.getEncoder().encode(byteArrayOutputStream.toByteArray());
-                serverStatus.setFavicon("data:image/png;base64," + new String(bs, StandardCharsets.UTF_8));
+                return Optional.of(new ServerStatus.Favicon(byteArrayOutputStream.toByteArray()));
             } catch (Exception exception) {
                 LOGGER.error("Couldn't load server icon", exception);
+                return Optional.empty();
             }
         });
     }
@@ -757,17 +755,7 @@ AutoCloseable {
         this.tickChildren(booleanSupplier);
         if (l - this.lastServerStatus >= 5000000000L) {
             this.lastServerStatus = l;
-            this.status.setPlayers(new ServerStatus.Players(this.getMaxPlayers(), this.getPlayerCount()));
-            if (!this.hidesOnlinePlayers()) {
-                GameProfile[] gameProfiles = new GameProfile[Math.min(this.getPlayerCount(), 12)];
-                int i = Mth.nextInt(this.random, 0, this.getPlayerCount() - gameProfiles.length);
-                for (int j = 0; j < gameProfiles.length; ++j) {
-                    ServerPlayer serverPlayer = this.playerList.getPlayers().get(i + j);
-                    gameProfiles[j] = serverPlayer.allowsListing() ? serverPlayer.getGameProfile() : ANONYMOUS_PLAYER_PROFILE;
-                }
-                Collections.shuffle(Arrays.asList(gameProfiles));
-                this.status.getPlayers().setSample(gameProfiles);
-            }
+            this.status = this.buildServerStatus();
         }
         if (this.tickCount % 6000 == 0) {
             LOGGER.debug("Autosave started");
@@ -784,6 +772,28 @@ AutoCloseable {
         long n = Util.getNanos();
         this.frameTimer.logFrameDuration(n - l);
         this.profiler.pop();
+    }
+
+    private ServerStatus buildServerStatus() {
+        ServerStatus.Players players = this.buildPlayerStatus();
+        return new ServerStatus(Component.nullToEmpty(this.motd), Optional.of(players), Optional.of(ServerStatus.Version.current()), Optional.ofNullable(this.statusIcon), this.enforceSecureProfile());
+    }
+
+    private ServerStatus.Players buildPlayerStatus() {
+        List<ServerPlayer> list = this.playerList.getPlayers();
+        int i = this.getMaxPlayers();
+        if (this.hidesOnlinePlayers()) {
+            return new ServerStatus.Players(i, list.size(), List.of());
+        }
+        int j = Math.min(list.size(), 12);
+        ObjectArrayList<GameProfile> objectArrayList = new ObjectArrayList<GameProfile>(j);
+        int k = Mth.nextInt(this.random, 0, list.size() - j);
+        for (int l = 0; l < j; ++l) {
+            ServerPlayer serverPlayer = list.get(k + l);
+            objectArrayList.add(serverPlayer.allowsListing() ? serverPlayer.getGameProfile() : ANONYMOUS_PLAYER_PROFILE);
+        }
+        Util.shuffle(objectArrayList, this.random);
+        return new ServerStatus.Players(i, list.size(), objectArrayList);
     }
 
     public void tickChildren(BooleanSupplier booleanSupplier) {
@@ -1127,6 +1137,7 @@ AutoCloseable {
         return this.services.profileCache();
     }
 
+    @Nullable
     public ServerStatus getStatus() {
         return this.status;
     }

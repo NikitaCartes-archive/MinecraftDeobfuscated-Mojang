@@ -1357,16 +1357,12 @@ implements WorldGenLevel {
 
         @Override
         public void onTickingStart(Entity entity) {
-            if (entity.getType().isTicking()) {
-                ServerLevel.this.entityTickList.add(entity);
-            }
+            ServerLevel.this.entityTickList.add(entity);
         }
 
         @Override
         public void onTickingEnd(Entity entity) {
-            if (entity.getType().isTicking()) {
-                ServerLevel.this.entityTickList.remove(entity);
-            }
+            ServerLevel.this.entityTickList.remove(entity);
         }
 
         @Override

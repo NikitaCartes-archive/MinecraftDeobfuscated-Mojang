@@ -35,6 +35,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.GlowSquid;
+import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Marker;
 import net.minecraft.world.entity.Mob;
@@ -77,6 +78,7 @@ import net.minecraft.world.entity.animal.horse.Mule;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.animal.horse.ZombieHorse;
+import net.minecraft.world.entity.animal.sniffer.Sniffer;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
@@ -188,33 +190,39 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<Bat> BAT = EntityType.register("bat", Builder.of(Bat::new, MobCategory.AMBIENT).sized(0.5f, 0.9f).clientTrackingRange(5));
     public static final EntityType<Bee> BEE = EntityType.register("bee", Builder.of(Bee::new, MobCategory.CREATURE).sized(0.7f, 0.6f).clientTrackingRange(8));
     public static final EntityType<Blaze> BLAZE = EntityType.register("blaze", Builder.of(Blaze::new, MobCategory.MONSTER).fireImmune().sized(0.6f, 1.8f).clientTrackingRange(8));
-    public static final EntityType<Display.BlockDisplay> BLOCK_DISPLAY = EntityType.register("block_display", Builder.of(Display.BlockDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).ticking(false));
+    public static final EntityType<Display.BlockDisplay> BLOCK_DISPLAY = EntityType.register("block_display", Builder.of(Display.BlockDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).updateInterval(1));
     public static final EntityType<Boat> BOAT = EntityType.register("boat", Builder.of(Boat::new, MobCategory.MISC).sized(1.375f, 0.5625f).clientTrackingRange(10));
-    public static final EntityType<ChestBoat> CHEST_BOAT = EntityType.register("chest_boat", Builder.of(ChestBoat::new, MobCategory.MISC).sized(1.375f, 0.5625f).clientTrackingRange(10));
-    public static final EntityType<Cat> CAT = EntityType.register("cat", Builder.of(Cat::new, MobCategory.CREATURE).sized(0.6f, 0.7f).clientTrackingRange(8));
     public static final EntityType<Camel> CAMEL = EntityType.register("camel", Builder.of(Camel::new, MobCategory.CREATURE).sized(1.7f, 2.375f).clientTrackingRange(10).requiredFeatures(FeatureFlags.UPDATE_1_20));
+    public static final EntityType<Cat> CAT = EntityType.register("cat", Builder.of(Cat::new, MobCategory.CREATURE).sized(0.6f, 0.7f).clientTrackingRange(8));
     public static final EntityType<CaveSpider> CAVE_SPIDER = EntityType.register("cave_spider", Builder.of(CaveSpider::new, MobCategory.MONSTER).sized(0.7f, 0.5f).clientTrackingRange(8));
+    public static final EntityType<ChestBoat> CHEST_BOAT = EntityType.register("chest_boat", Builder.of(ChestBoat::new, MobCategory.MISC).sized(1.375f, 0.5625f).clientTrackingRange(10));
+    public static final EntityType<MinecartChest> CHEST_MINECART = EntityType.register("chest_minecart", Builder.of(MinecartChest::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
     public static final EntityType<Chicken> CHICKEN = EntityType.register("chicken", Builder.of(Chicken::new, MobCategory.CREATURE).sized(0.4f, 0.7f).clientTrackingRange(10));
     public static final EntityType<Cod> COD = EntityType.register("cod", Builder.of(Cod::new, MobCategory.WATER_AMBIENT).sized(0.5f, 0.3f).clientTrackingRange(4));
+    public static final EntityType<MinecartCommandBlock> COMMAND_BLOCK_MINECART = EntityType.register("command_block_minecart", Builder.of(MinecartCommandBlock::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
     public static final EntityType<Cow> COW = EntityType.register("cow", Builder.of(Cow::new, MobCategory.CREATURE).sized(0.9f, 1.4f).clientTrackingRange(10));
     public static final EntityType<Creeper> CREEPER = EntityType.register("creeper", Builder.of(Creeper::new, MobCategory.MONSTER).sized(0.6f, 1.7f).clientTrackingRange(8));
     public static final EntityType<Dolphin> DOLPHIN = EntityType.register("dolphin", Builder.of(Dolphin::new, MobCategory.WATER_CREATURE).sized(0.9f, 0.6f));
     public static final EntityType<Donkey> DONKEY = EntityType.register("donkey", Builder.of(Donkey::new, MobCategory.CREATURE).sized(1.3964844f, 1.5f).clientTrackingRange(10));
     public static final EntityType<DragonFireball> DRAGON_FIREBALL = EntityType.register("dragon_fireball", Builder.of(DragonFireball::new, MobCategory.MISC).sized(1.0f, 1.0f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<Drowned> DROWNED = EntityType.register("drowned", Builder.of(Drowned::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
+    public static final EntityType<ThrownEgg> EGG = EntityType.register("egg", Builder.of(ThrownEgg::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<ElderGuardian> ELDER_GUARDIAN = EntityType.register("elder_guardian", Builder.of(ElderGuardian::new, MobCategory.MONSTER).sized(1.9975f, 1.9975f).clientTrackingRange(10));
     public static final EntityType<EndCrystal> END_CRYSTAL = EntityType.register("end_crystal", Builder.of(EndCrystal::new, MobCategory.MISC).sized(2.0f, 2.0f).clientTrackingRange(16).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<EnderDragon> ENDER_DRAGON = EntityType.register("ender_dragon", Builder.of(EnderDragon::new, MobCategory.MONSTER).fireImmune().sized(16.0f, 8.0f).clientTrackingRange(10));
+    public static final EntityType<ThrownEnderpearl> ENDER_PEARL = EntityType.register("ender_pearl", Builder.of(ThrownEnderpearl::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<EnderMan> ENDERMAN = EntityType.register("enderman", Builder.of(EnderMan::new, MobCategory.MONSTER).sized(0.6f, 2.9f).clientTrackingRange(8));
     public static final EntityType<Endermite> ENDERMITE = EntityType.register("endermite", Builder.of(Endermite::new, MobCategory.MONSTER).sized(0.4f, 0.3f).clientTrackingRange(8));
     public static final EntityType<Evoker> EVOKER = EntityType.register("evoker", Builder.of(Evoker::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<EvokerFangs> EVOKER_FANGS = EntityType.register("evoker_fangs", Builder.of(EvokerFangs::new, MobCategory.MISC).sized(0.5f, 0.8f).clientTrackingRange(6).updateInterval(2));
+    public static final EntityType<ThrownExperienceBottle> EXPERIENCE_BOTTLE = EntityType.register("experience_bottle", Builder.of(ThrownExperienceBottle::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<ExperienceOrb> EXPERIENCE_ORB = EntityType.register("experience_orb", Builder.of(ExperienceOrb::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(6).updateInterval(20));
     public static final EntityType<EyeOfEnder> EYE_OF_ENDER = EntityType.register("eye_of_ender", Builder.of(EyeOfEnder::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(4));
     public static final EntityType<FallingBlockEntity> FALLING_BLOCK = EntityType.register("falling_block", Builder.of(FallingBlockEntity::new, MobCategory.MISC).sized(0.98f, 0.98f).clientTrackingRange(10).updateInterval(20));
     public static final EntityType<FireworkRocketEntity> FIREWORK_ROCKET = EntityType.register("firework_rocket", Builder.of(FireworkRocketEntity::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<Fox> FOX = EntityType.register("fox", Builder.of(Fox::new, MobCategory.CREATURE).sized(0.6f, 0.7f).clientTrackingRange(8).immuneTo(Blocks.SWEET_BERRY_BUSH));
     public static final EntityType<Frog> FROG = EntityType.register("frog", Builder.of(Frog::new, MobCategory.CREATURE).sized(0.5f, 0.5f).clientTrackingRange(10));
+    public static final EntityType<MinecartFurnace> FURNACE_MINECART = EntityType.register("furnace_minecart", Builder.of(MinecartFurnace::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
     public static final EntityType<Ghast> GHAST = EntityType.register("ghast", Builder.of(Ghast::new, MobCategory.MONSTER).fireImmune().sized(4.0f, 4.0f).clientTrackingRange(10));
     public static final EntityType<Giant> GIANT = EntityType.register("giant", Builder.of(Giant::new, MobCategory.MONSTER).sized(3.6f, 12.0f).clientTrackingRange(10));
     public static final EntityType<GlowItemFrame> GLOW_ITEM_FRAME = EntityType.register("glow_item_frame", Builder.of(GlowItemFrame::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
@@ -222,12 +230,14 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<Goat> GOAT = EntityType.register("goat", Builder.of(Goat::new, MobCategory.CREATURE).sized(0.9f, 1.3f).clientTrackingRange(10));
     public static final EntityType<Guardian> GUARDIAN = EntityType.register("guardian", Builder.of(Guardian::new, MobCategory.MONSTER).sized(0.85f, 0.85f).clientTrackingRange(8));
     public static final EntityType<Hoglin> HOGLIN = EntityType.register("hoglin", Builder.of(Hoglin::new, MobCategory.MONSTER).sized(1.3964844f, 1.4f).clientTrackingRange(8));
+    public static final EntityType<MinecartHopper> HOPPER_MINECART = EntityType.register("hopper_minecart", Builder.of(MinecartHopper::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
     public static final EntityType<Horse> HORSE = EntityType.register("horse", Builder.of(Horse::new, MobCategory.CREATURE).sized(1.3964844f, 1.6f).clientTrackingRange(10));
     public static final EntityType<Husk> HUSK = EntityType.register("husk", Builder.of(Husk::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<Illusioner> ILLUSIONER = EntityType.register("illusioner", Builder.of(Illusioner::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
+    public static final EntityType<Interaction> INTERACTION = EntityType.register("interaction", Builder.of(Interaction::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10));
     public static final EntityType<IronGolem> IRON_GOLEM = EntityType.register("iron_golem", Builder.of(IronGolem::new, MobCategory.MISC).sized(1.4f, 2.7f).clientTrackingRange(10));
     public static final EntityType<ItemEntity> ITEM = EntityType.register("item", Builder.of(ItemEntity::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(6).updateInterval(20));
-    public static final EntityType<Display.ItemDisplay> ITEM_DISPLAY = EntityType.register("item_display", Builder.of(Display.ItemDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).ticking(false));
+    public static final EntityType<Display.ItemDisplay> ITEM_DISPLAY = EntityType.register("item_display", Builder.of(Display.ItemDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).updateInterval(1));
     public static final EntityType<ItemFrame> ITEM_FRAME = EntityType.register("item_frame", Builder.of(ItemFrame::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<LargeFireball> FIREBALL = EntityType.register("fireball", Builder.of(LargeFireball::new, MobCategory.MISC).sized(1.0f, 1.0f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<LeashFenceKnotEntity> LEASH_KNOT = EntityType.register("leash_knot", Builder.of(LeashFenceKnotEntity::new, MobCategory.MISC).noSave().sized(0.375f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
@@ -235,16 +245,10 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<Llama> LLAMA = EntityType.register("llama", Builder.of(Llama::new, MobCategory.CREATURE).sized(0.9f, 1.87f).clientTrackingRange(10));
     public static final EntityType<LlamaSpit> LLAMA_SPIT = EntityType.register("llama_spit", Builder.of(LlamaSpit::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<MagmaCube> MAGMA_CUBE = EntityType.register("magma_cube", Builder.of(MagmaCube::new, MobCategory.MONSTER).fireImmune().sized(2.04f, 2.04f).clientTrackingRange(8));
-    public static final EntityType<Marker> MARKER = EntityType.register("marker", Builder.of(Marker::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(0).ticking(false));
+    public static final EntityType<Marker> MARKER = EntityType.register("marker", Builder.of(Marker::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(0));
     public static final EntityType<Minecart> MINECART = EntityType.register("minecart", Builder.of(Minecart::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
-    public static final EntityType<MinecartChest> CHEST_MINECART = EntityType.register("chest_minecart", Builder.of(MinecartChest::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
-    public static final EntityType<MinecartCommandBlock> COMMAND_BLOCK_MINECART = EntityType.register("command_block_minecart", Builder.of(MinecartCommandBlock::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
-    public static final EntityType<MinecartFurnace> FURNACE_MINECART = EntityType.register("furnace_minecart", Builder.of(MinecartFurnace::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
-    public static final EntityType<MinecartHopper> HOPPER_MINECART = EntityType.register("hopper_minecart", Builder.of(MinecartHopper::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
-    public static final EntityType<MinecartSpawner> SPAWNER_MINECART = EntityType.register("spawner_minecart", Builder.of(MinecartSpawner::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
-    public static final EntityType<MinecartTNT> TNT_MINECART = EntityType.register("tnt_minecart", Builder.of(MinecartTNT::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
-    public static final EntityType<Mule> MULE = EntityType.register("mule", Builder.of(Mule::new, MobCategory.CREATURE).sized(1.3964844f, 1.6f).clientTrackingRange(8));
     public static final EntityType<MushroomCow> MOOSHROOM = EntityType.register("mooshroom", Builder.of(MushroomCow::new, MobCategory.CREATURE).sized(0.9f, 1.4f).clientTrackingRange(10));
+    public static final EntityType<Mule> MULE = EntityType.register("mule", Builder.of(Mule::new, MobCategory.CREATURE).sized(1.3964844f, 1.6f).clientTrackingRange(8));
     public static final EntityType<Ocelot> OCELOT = EntityType.register("ocelot", Builder.of(Ocelot::new, MobCategory.CREATURE).sized(0.6f, 0.7f).clientTrackingRange(10));
     public static final EntityType<Painting> PAINTING = EntityType.register("painting", Builder.of(Painting::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE));
     public static final EntityType<Panda> PANDA = EntityType.register("panda", Builder.of(Panda::new, MobCategory.CREATURE).sized(1.3f, 1.25f).clientTrackingRange(10));
@@ -255,7 +259,7 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<PiglinBrute> PIGLIN_BRUTE = EntityType.register("piglin_brute", Builder.of(PiglinBrute::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<Pillager> PILLAGER = EntityType.register("pillager", Builder.of(Pillager::new, MobCategory.MONSTER).canSpawnFarFromPlayer().sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<PolarBear> POLAR_BEAR = EntityType.register("polar_bear", Builder.of(PolarBear::new, MobCategory.CREATURE).immuneTo(Blocks.POWDER_SNOW).sized(1.4f, 1.4f).clientTrackingRange(10));
-    public static final EntityType<PrimedTnt> TNT = EntityType.register("tnt", Builder.of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98f, 0.98f).clientTrackingRange(10).updateInterval(10));
+    public static final EntityType<ThrownPotion> POTION = EntityType.register("potion", Builder.of(ThrownPotion::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<Pufferfish> PUFFERFISH = EntityType.register("pufferfish", Builder.of(Pufferfish::new, MobCategory.WATER_AMBIENT).sized(0.7f, 0.7f).clientTrackingRange(4));
     public static final EntityType<Rabbit> RABBIT = EntityType.register("rabbit", Builder.of(Rabbit::new, MobCategory.CREATURE).sized(0.4f, 0.5f).clientTrackingRange(8));
     public static final EntityType<Ravager> RAVAGER = EntityType.register("ravager", Builder.of(Ravager::new, MobCategory.MONSTER).sized(1.95f, 2.2f).clientTrackingRange(10));
@@ -268,21 +272,21 @@ EntityTypeTest<Entity, T> {
     public static final EntityType<SkeletonHorse> SKELETON_HORSE = EntityType.register("skeleton_horse", Builder.of(SkeletonHorse::new, MobCategory.CREATURE).sized(1.3964844f, 1.6f).clientTrackingRange(10));
     public static final EntityType<Slime> SLIME = EntityType.register("slime", Builder.of(Slime::new, MobCategory.MONSTER).sized(2.04f, 2.04f).clientTrackingRange(10));
     public static final EntityType<SmallFireball> SMALL_FIREBALL = EntityType.register("small_fireball", Builder.of(SmallFireball::new, MobCategory.MISC).sized(0.3125f, 0.3125f).clientTrackingRange(4).updateInterval(10));
+    public static final EntityType<Sniffer> SNIFFER = EntityType.register("sniffer", Builder.of(Sniffer::new, MobCategory.CREATURE).sized(1.9f, 1.75f).clientTrackingRange(10).requiredFeatures(FeatureFlags.UPDATE_1_20));
     public static final EntityType<SnowGolem> SNOW_GOLEM = EntityType.register("snow_golem", Builder.of(SnowGolem::new, MobCategory.MISC).immuneTo(Blocks.POWDER_SNOW).sized(0.7f, 1.9f).clientTrackingRange(8));
     public static final EntityType<Snowball> SNOWBALL = EntityType.register("snowball", Builder.of(Snowball::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
+    public static final EntityType<MinecartSpawner> SPAWNER_MINECART = EntityType.register("spawner_minecart", Builder.of(MinecartSpawner::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
     public static final EntityType<SpectralArrow> SPECTRAL_ARROW = EntityType.register("spectral_arrow", Builder.of(SpectralArrow::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(20));
     public static final EntityType<Spider> SPIDER = EntityType.register("spider", Builder.of(Spider::new, MobCategory.MONSTER).sized(1.4f, 0.9f).clientTrackingRange(8));
     public static final EntityType<Squid> SQUID = EntityType.register("squid", Builder.of(Squid::new, MobCategory.WATER_CREATURE).sized(0.8f, 0.8f).clientTrackingRange(8));
     public static final EntityType<Stray> STRAY = EntityType.register("stray", Builder.of(Stray::new, MobCategory.MONSTER).sized(0.6f, 1.99f).immuneTo(Blocks.POWDER_SNOW).clientTrackingRange(8));
     public static final EntityType<Strider> STRIDER = EntityType.register("strider", Builder.of(Strider::new, MobCategory.CREATURE).fireImmune().sized(0.9f, 1.7f).clientTrackingRange(10));
     public static final EntityType<Tadpole> TADPOLE = EntityType.register("tadpole", Builder.of(Tadpole::new, MobCategory.CREATURE).sized(Tadpole.HITBOX_WIDTH, Tadpole.HITBOX_HEIGHT).clientTrackingRange(10));
-    public static final EntityType<Display.TextDisplay> TEXT_DISPLAY = EntityType.register("text_display", Builder.of(Display.TextDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).ticking(false));
-    public static final EntityType<ThrownEgg> EGG = EntityType.register("egg", Builder.of(ThrownEgg::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
-    public static final EntityType<ThrownEnderpearl> ENDER_PEARL = EntityType.register("ender_pearl", Builder.of(ThrownEnderpearl::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
-    public static final EntityType<ThrownExperienceBottle> EXPERIENCE_BOTTLE = EntityType.register("experience_bottle", Builder.of(ThrownExperienceBottle::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
-    public static final EntityType<ThrownPotion> POTION = EntityType.register("potion", Builder.of(ThrownPotion::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
-    public static final EntityType<ThrownTrident> TRIDENT = EntityType.register("trident", Builder.of(ThrownTrident::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(20));
+    public static final EntityType<Display.TextDisplay> TEXT_DISPLAY = EntityType.register("text_display", Builder.of(Display.TextDisplay::new, MobCategory.MISC).sized(0.0f, 0.0f).clientTrackingRange(10).updateInterval(1));
+    public static final EntityType<PrimedTnt> TNT = EntityType.register("tnt", Builder.of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98f, 0.98f).clientTrackingRange(10).updateInterval(10));
+    public static final EntityType<MinecartTNT> TNT_MINECART = EntityType.register("tnt_minecart", Builder.of(MinecartTNT::new, MobCategory.MISC).sized(0.98f, 0.7f).clientTrackingRange(8));
     public static final EntityType<TraderLlama> TRADER_LLAMA = EntityType.register("trader_llama", Builder.of(TraderLlama::new, MobCategory.CREATURE).sized(0.9f, 1.87f).clientTrackingRange(10));
+    public static final EntityType<ThrownTrident> TRIDENT = EntityType.register("trident", Builder.of(ThrownTrident::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(20));
     public static final EntityType<TropicalFish> TROPICAL_FISH = EntityType.register("tropical_fish", Builder.of(TropicalFish::new, MobCategory.WATER_AMBIENT).sized(0.5f, 0.4f).clientTrackingRange(4));
     public static final EntityType<Turtle> TURTLE = EntityType.register("turtle", Builder.of(Turtle::new, MobCategory.CREATURE).sized(1.2f, 0.4f).clientTrackingRange(10));
     public static final EntityType<Vex> VEX = EntityType.register("vex", Builder.of(Vex::new, MobCategory.MONSTER).fireImmune().sized(0.4f, 0.8f).clientTrackingRange(8));
@@ -311,7 +315,6 @@ EntityTypeTest<Entity, T> {
     private final boolean canSpawnFarFromPlayer;
     private final int clientTrackingRange;
     private final int updateInterval;
-    private final boolean ticking;
     @Nullable
     private String descriptionId;
     @Nullable
@@ -333,7 +336,7 @@ EntityTypeTest<Entity, T> {
         return BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.tryParse(string));
     }
 
-    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, ImmutableSet<Block> immutableSet, EntityDimensions entityDimensions, int i, int j, boolean bl5, FeatureFlagSet featureFlagSet) {
+    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, ImmutableSet<Block> immutableSet, EntityDimensions entityDimensions, int i, int j, FeatureFlagSet featureFlagSet) {
         this.factory = entityFactory;
         this.category = mobCategory;
         this.canSpawnFarFromPlayer = bl4;
@@ -344,7 +347,6 @@ EntityTypeTest<Entity, T> {
         this.dimensions = entityDimensions;
         this.clientTrackingRange = i;
         this.updateInterval = j;
-        this.ticking = bl5;
         this.requiredFeatures = featureFlagSet;
     }
 
@@ -613,10 +615,6 @@ EntityTypeTest<Entity, T> {
         return this.updateInterval;
     }
 
-    public boolean isTicking() {
-        return this.ticking;
-    }
-
     public boolean trackDeltas() {
         return this != PLAYER && this != LLAMA_SPIT && this != WITHER && this != BAT && this != ITEM_FRAME && this != GLOW_ITEM_FRAME && this != LEASH_KNOT && this != PAINTING && this != END_CRYSTAL && this != EVOKER_FANGS;
     }
@@ -651,7 +649,6 @@ EntityTypeTest<Entity, T> {
         private boolean canSpawnFarFromPlayer;
         private int clientTrackingRange = 5;
         private int updateInterval = 3;
-        private boolean ticking = true;
         private EntityDimensions dimensions = EntityDimensions.scalable(0.6f, 1.8f);
         private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
@@ -709,11 +706,6 @@ EntityTypeTest<Entity, T> {
             return this;
         }
 
-        public Builder<T> ticking(boolean bl) {
-            this.ticking = bl;
-            return this;
-        }
-
         public Builder<T> requiredFeatures(FeatureFlag ... featureFlags) {
             this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
             return this;
@@ -723,7 +715,7 @@ EntityTypeTest<Entity, T> {
             if (this.serialize) {
                 Util.fetchChoiceType(References.ENTITY_TREE, string);
             }
-            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.immuneTo, this.dimensions, this.clientTrackingRange, this.updateInterval, this.ticking, this.requiredFeatures);
+            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.immuneTo, this.dimensions, this.clientTrackingRange, this.updateInterval, this.requiredFeatures);
         }
     }
 

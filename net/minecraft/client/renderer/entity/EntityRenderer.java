@@ -103,9 +103,9 @@ public abstract class EntityRenderer<T extends Entity> {
         int k = (int)(g * 255.0f) << 24;
         Font font = this.getFont();
         float h = -font.width(component) / 2;
-        font.drawInBatch(component, h, (float)j, 0x20FFFFFF, false, matrix4f, multiBufferSource, bl, k, i);
+        font.drawInBatch(component, h, (float)j, 0x20FFFFFF, false, matrix4f, multiBufferSource, bl ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, k, i);
         if (bl) {
-            font.drawInBatch(component, h, (float)j, -1, false, matrix4f, multiBufferSource, false, 0, i);
+            font.drawInBatch(component, h, (float)j, -1, false, matrix4f, multiBufferSource, Font.DisplayMode.NORMAL, 0, i);
         }
         poseStack.popPose();
     }

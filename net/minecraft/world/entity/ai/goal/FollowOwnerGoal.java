@@ -57,7 +57,7 @@ extends Goal {
         if (livingEntity.isSpectator()) {
             return false;
         }
-        if (this.tamable.isOrderedToSit()) {
+        if (this.unableToMove()) {
             return false;
         }
         if (this.tamable.distanceToSqr(livingEntity) < (double)(this.startDistance * this.startDistance)) {
@@ -72,10 +72,14 @@ extends Goal {
         if (this.navigation.isDone()) {
             return false;
         }
-        if (this.tamable.isOrderedToSit()) {
+        if (this.unableToMove()) {
             return false;
         }
         return !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
+    }
+
+    private boolean unableToMove() {
+        return this.tamable.isOrderedToSit() || this.tamable.isPassenger() || this.tamable.isLeashed();
     }
 
     @Override
@@ -99,9 +103,6 @@ extends Goal {
             return;
         }
         this.timeToRecalcPath = this.adjustedTickDelay(10);
-        if (this.tamable.isLeashed() || this.tamable.isPassenger()) {
-            return;
-        }
         if (this.tamable.distanceToSqr(this.owner) >= 144.0) {
             this.teleportToOwner();
         } else {

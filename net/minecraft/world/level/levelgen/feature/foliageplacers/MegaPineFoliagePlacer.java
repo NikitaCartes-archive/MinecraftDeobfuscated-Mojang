@@ -7,13 +7,11 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
@@ -34,14 +32,14 @@ extends FoliagePlacer {
     }
 
     @Override
-    protected void createFoliage(LevelSimulatedReader levelSimulatedReader, BiConsumer<BlockPos, BlockState> biConsumer, RandomSource randomSource, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, int l) {
+    protected void createFoliage(LevelSimulatedReader levelSimulatedReader, FoliagePlacer.FoliageSetter foliageSetter, RandomSource randomSource, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, int l) {
         BlockPos blockPos = foliageAttachment.pos();
         int m = 0;
         for (int n = blockPos.getY() - j + l; n <= blockPos.getY() + l; ++n) {
             int o = blockPos.getY() - n;
             int p = k + foliageAttachment.radiusOffset() + Mth.floor((float)o / (float)j * 3.5f);
             int q = o > 0 && p == m && (n & 1) == 0 ? p + 1 : p;
-            this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, new BlockPos(blockPos.getX(), n, blockPos.getZ()), q, 0, foliageAttachment.doubleTrunk());
+            this.placeLeavesRow(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, new BlockPos(blockPos.getX(), n, blockPos.getZ()), q, 0, foliageAttachment.doubleTrunk());
             m = p;
         }
     }

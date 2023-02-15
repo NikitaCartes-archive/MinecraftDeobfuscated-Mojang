@@ -13,6 +13,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.DustColorTransitionOptions;
+import net.minecraft.core.particles.ParticleOptions;
 import org.joml.Vector3f;
 
 @Environment(value=EnvType.CLIENT)
@@ -58,6 +59,11 @@ extends DustParticleBase<DustColorTransitionOptions> {
         @Override
         public Particle createParticle(DustColorTransitionOptions dustColorTransitionOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
             return new DustColorTransitionParticle(clientLevel, d, e, f, g, h, i, dustColorTransitionOptions, this.sprites);
+        }
+
+        @Override
+        public /* synthetic */ Particle createParticle(ParticleOptions particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return this.createParticle((DustColorTransitionOptions)particleOptions, clientLevel, d, e, f, g, h, i);
         }
     }
 }

@@ -128,7 +128,7 @@ implements BlockEntityRenderer<SignBlockEntity> {
                 this.font.drawInBatch8xOutline(formattedCharSequence, h, n * signBlockEntity.getTextLineHeight() - k, l, j, poseStack.last().pose(), multiBufferSource, m);
                 continue;
             }
-            this.font.drawInBatch(formattedCharSequence, h, (float)(n * signBlockEntity.getTextLineHeight() - k), l, false, poseStack.last().pose(), multiBufferSource, false, 0, m);
+            this.font.drawInBatch(formattedCharSequence, h, (float)(n * signBlockEntity.getTextLineHeight() - k), l, false, poseStack.last().pose(), multiBufferSource, Font.DisplayMode.NORMAL, 0, m);
         }
         poseStack.popPose();
     }

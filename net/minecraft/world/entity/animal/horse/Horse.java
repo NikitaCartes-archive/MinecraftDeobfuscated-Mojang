@@ -52,9 +52,9 @@ implements VariantHolder<Variant> {
 
     @Override
     protected void randomizeAttributes(RandomSource randomSource) {
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.generateRandomMaxHealth(randomSource));
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.generateRandomSpeed(randomSource));
-        this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength(randomSource));
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Horse.generateMaxHealth(randomSource::nextInt));
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(Horse.generateSpeed(randomSource::nextDouble));
+        this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(Horse.generateJumpStrength(randomSource::nextDouble));
     }
 
     @Override

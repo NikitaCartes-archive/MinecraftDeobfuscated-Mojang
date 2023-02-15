@@ -6,6 +6,7 @@ package net.minecraft.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -73,10 +74,7 @@ implements LidBlockEntity {
     }
 
     public boolean stillValid(Player player) {
-        if (this.level.getBlockEntity(this.worldPosition) != this) {
-            return false;
-        }
-        return !(player.distanceToSqr((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5) > 64.0);
+        return Container.stillValidBlockEntity(this, player);
     }
 
     public void recheckOpen() {

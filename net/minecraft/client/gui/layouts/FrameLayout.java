@@ -102,7 +102,7 @@ extends AbstractLayout {
     }
 
     public static void alignInDimension(int i, int j, int k, Consumer<Integer> consumer, float f) {
-        int l = Mth.lerp(f, 0, j - k);
+        int l = (int)Mth.lerp(f, 0.0f, j - k);
         consumer.accept(i + l);
     }
 

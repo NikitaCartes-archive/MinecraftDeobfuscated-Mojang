@@ -23,10 +23,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class Sheets {
@@ -37,6 +39,7 @@ public class Sheets {
     public static final ResourceLocation SIGN_SHEET = new ResourceLocation("textures/atlas/signs.png");
     public static final ResourceLocation CHEST_SHEET = new ResourceLocation("textures/atlas/chest.png");
     public static final ResourceLocation ARMOR_TRIMS_SHEET = new ResourceLocation("textures/atlas/armor_trims.png");
+    public static final ResourceLocation DECORATED_POT_SHEET = new ResourceLocation("textures/atlas/decorated_pot.png");
     private static final RenderType SHULKER_BOX_SHEET_TYPE = RenderType.entityCutoutNoCull(SHULKER_SHEET);
     private static final RenderType BED_SHEET_TYPE = RenderType.entitySolid(BED_SHEET);
     private static final RenderType BANNER_SHEET_TYPE = RenderType.entityNoOutline(BANNER_SHEET);
@@ -54,6 +57,7 @@ public class Sheets {
     public static final Map<WoodType, Material> HANGING_SIGN_MATERIALS = WoodType.values().collect(Collectors.toMap(Function.identity(), Sheets::createHangingSignMaterial));
     public static final Map<ResourceKey<BannerPattern>, Material> BANNER_MATERIALS = BuiltInRegistries.BANNER_PATTERN.registryKeySet().stream().collect(Collectors.toMap(Function.identity(), Sheets::createBannerMaterial));
     public static final Map<ResourceKey<BannerPattern>, Material> SHIELD_MATERIALS = BuiltInRegistries.BANNER_PATTERN.registryKeySet().stream().collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));
+    public static final Map<ResourceKey<String>, Material> DECORATED_POT_MATERIALS = BuiltInRegistries.DECORATED_POT_PATTERNS.registryKeySet().stream().collect(Collectors.toMap(Function.identity(), Sheets::createDecoratedPotMaterial));
     public static final Material[] BED_TEXTURES = (Material[])Arrays.stream(DyeColor.values()).sorted(Comparator.comparingInt(DyeColor::getId)).map(dyeColor -> new Material(BED_SHEET, new ResourceLocation("entity/bed/" + dyeColor.getName()))).toArray(Material[]::new);
     public static final Material CHEST_TRAP_LOCATION = Sheets.chestMaterial("trapped");
     public static final Material CHEST_TRAP_LOCATION_LEFT = Sheets.chestMaterial("trapped_left");
@@ -170,6 +174,18 @@ public class Sheets {
 
     private static Material chestMaterial(String string) {
         return new Material(CHEST_SHEET, new ResourceLocation("entity/chest/" + string));
+    }
+
+    private static Material createDecoratedPotMaterial(ResourceKey<String> resourceKey) {
+        return new Material(DECORATED_POT_SHEET, DecoratedPotPatterns.location(resourceKey));
+    }
+
+    @Nullable
+    public static Material getDecoratedPotMaterial(@Nullable ResourceKey<String> resourceKey) {
+        if (resourceKey == null) {
+            return null;
+        }
+        return DECORATED_POT_MATERIALS.get(resourceKey);
     }
 
     public static Material chooseMaterial(BlockEntity blockEntity, ChestType chestType, boolean bl) {

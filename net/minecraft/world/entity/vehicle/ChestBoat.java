@@ -116,6 +116,7 @@ ContainerEntity {
             case Boat.Type.BIRCH -> Items.BIRCH_CHEST_BOAT;
             case Boat.Type.JUNGLE -> Items.JUNGLE_CHEST_BOAT;
             case Boat.Type.ACACIA -> Items.ACACIA_CHEST_BOAT;
+            case Boat.Type.CHERRY -> Items.CHERRY_CHEST_BOAT;
             case Boat.Type.DARK_OAK -> Items.DARK_OAK_CHEST_BOAT;
             case Boat.Type.MANGROVE -> Items.MANGROVE_CHEST_BOAT;
             case Boat.Type.BAMBOO -> Items.BAMBOO_CHEST_RAFT;

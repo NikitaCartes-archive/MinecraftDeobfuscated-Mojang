@@ -47,8 +47,7 @@ extends EntityRenderer<T> {
 
     @Override
     public void render(T display, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-        long l = ((Display)display).level.getGameTime();
-        float h = ((Display)display).calculateInterpolationProgress(l, g);
+        float h = ((Display)display).calculateInterpolationProgress(g);
         this.shadowRadius = Math.min(((Display)display).getShadowRadius(h), 64.0f);
         this.shadowStrength = ((Display)display).getShadowStrength(h);
         int j = ((Display)display).getPackedBrightnessOverride();
@@ -77,7 +76,6 @@ extends EntityRenderer<T> {
     @Environment(value=EnvType.CLIENT)
     public static class TextDisplayRenderer
     extends DisplayRenderer<Display.TextDisplay> {
-        private static final float Z_FIGHTER = 0.001f;
         private final Font font;
 
         protected TextDisplayRenderer(EntityRendererProvider.Context context) {
@@ -124,10 +122,10 @@ extends EntityRenderer<T> {
             matrix4f.translate(1.0f - (float)l / 2.0f, -m, 0.0f);
             if (j != 0) {
                 VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl ? RenderType.textBackgroundSeeThrough() : RenderType.textBackground());
-                vertexConsumer.vertex(matrix4f, -1.0f, -1.0f, -0.001f).color(j).uv2(i).endVertex();
-                vertexConsumer.vertex(matrix4f, -1.0f, m, -0.001f).color(j).uv2(i).endVertex();
-                vertexConsumer.vertex(matrix4f, l, m, -0.001f).color(j).uv2(i).endVertex();
-                vertexConsumer.vertex(matrix4f, l, -1.0f, -0.001f).color(j).uv2(i).endVertex();
+                vertexConsumer.vertex(matrix4f, -1.0f, -1.0f, 0.0f).color(j).uv2(i).endVertex();
+                vertexConsumer.vertex(matrix4f, -1.0f, m, 0.0f).color(j).uv2(i).endVertex();
+                vertexConsumer.vertex(matrix4f, l, m, 0.0f).color(j).uv2(i).endVertex();
+                vertexConsumer.vertex(matrix4f, l, -1.0f, 0.0f).color(j).uv2(i).endVertex();
             }
             for (Display.TextDisplay.CachedLine cachedLine : cachedInfo.lines()) {
                 float h = switch (align) {
@@ -136,7 +134,7 @@ extends EntityRenderer<T> {
                     case Display.TextDisplay.Align.RIGHT -> l - cachedLine.width();
                     case Display.TextDisplay.Align.CENTER -> (float)l / 2.0f - (float)cachedLine.width() / 2.0f;
                 };
-                this.font.drawInBatch(cachedLine.contents(), h, g, c << 24 | 0xFFFFFF, bl3, matrix4f, multiBufferSource, bl, 0, i);
+                this.font.drawInBatch(cachedLine.contents(), h, g, c << 24 | 0xFFFFFF, bl3, matrix4f, multiBufferSource, bl ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET, 0, i);
                 g += (float)k;
             }
         }

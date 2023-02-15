@@ -24,6 +24,10 @@ public class TexturedModel {
     public static final Provider ORIENTABLE_ONLY_TOP = TexturedModel.createDefault(TextureMapping::orientableCubeOnlyTop, ModelTemplates.CUBE_ORIENTABLE);
     public static final Provider ORIENTABLE = TexturedModel.createDefault(TextureMapping::orientableCube, ModelTemplates.CUBE_ORIENTABLE_TOP_BOTTOM);
     public static final Provider CARPET = TexturedModel.createDefault(TextureMapping::wool, ModelTemplates.CARPET);
+    public static final Provider FLOWERBED_1 = TexturedModel.createDefault(TextureMapping::flowerbed, ModelTemplates.FLOWERBED_1);
+    public static final Provider FLOWERBED_2 = TexturedModel.createDefault(TextureMapping::flowerbed, ModelTemplates.FLOWERBED_2);
+    public static final Provider FLOWERBED_3 = TexturedModel.createDefault(TextureMapping::flowerbed, ModelTemplates.FLOWERBED_3);
+    public static final Provider FLOWERBED_4 = TexturedModel.createDefault(TextureMapping::flowerbed, ModelTemplates.FLOWERBED_4);
     public static final Provider GLAZED_TERRACOTTA = TexturedModel.createDefault(TextureMapping::pattern, ModelTemplates.GLAZED_TERRACOTTA);
     public static final Provider CORAL_FAN = TexturedModel.createDefault(TextureMapping::fan, ModelTemplates.CORAL_FAN);
     public static final Provider PARTICLE_ONLY = TexturedModel.createDefault(TextureMapping::particle, ModelTemplates.PARTICLE_ONLY);

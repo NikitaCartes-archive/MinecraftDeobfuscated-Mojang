@@ -15,7 +15,6 @@ import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -87,6 +86,7 @@ import net.minecraft.client.resources.sounds.BeeFlyingSoundInstance;
 import net.minecraft.client.resources.sounds.BeeSoundInstance;
 import net.minecraft.client.resources.sounds.GuardianAttackSoundInstance;
 import net.minecraft.client.resources.sounds.MinecartSoundInstance;
+import net.minecraft.client.resources.sounds.SnifferSoundInstance;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.commands.CommandBuildContext;
@@ -277,6 +277,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.sniffer.Sniffer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.player.Inventory;
@@ -944,17 +945,26 @@ ClientGamePacketListener {
         PacketUtils.ensureRunningOnSameThread(clientboundEntityEventPacket, this, this.minecraft);
         Entity entity = clientboundEntityEventPacket.getEntity(this.level);
         if (entity != null) {
-            if (clientboundEntityEventPacket.getEventId() == 21) {
-                this.minecraft.getSoundManager().play(new GuardianAttackSoundInstance((Guardian)entity));
-            } else if (clientboundEntityEventPacket.getEventId() == 35) {
-                int i = 40;
-                this.minecraft.particleEngine.createTrackingEmitter(entity, ParticleTypes.TOTEM_OF_UNDYING, 30);
-                this.level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.TOTEM_USE, entity.getSoundSource(), 1.0f, 1.0f, false);
-                if (entity == this.minecraft.player) {
-                    this.minecraft.gameRenderer.displayItemActivation(ClientPacketListener.findTotem(this.minecraft.player));
+            switch (clientboundEntityEventPacket.getEventId()) {
+                case 63: {
+                    this.minecraft.getSoundManager().play(new SnifferSoundInstance((Sniffer)entity));
+                    break;
                 }
-            } else {
-                entity.handleEntityEvent(clientboundEntityEventPacket.getEventId());
+                case 21: {
+                    this.minecraft.getSoundManager().play(new GuardianAttackSoundInstance((Guardian)entity));
+                    break;
+                }
+                case 35: {
+                    int i = 40;
+                    this.minecraft.particleEngine.createTrackingEmitter(entity, ParticleTypes.TOTEM_OF_UNDYING, 30);
+                    this.level.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), SoundEvents.TOTEM_USE, entity.getSoundSource(), 1.0f, 1.0f, false);
+                    if (entity != this.minecraft.player) break;
+                    this.minecraft.gameRenderer.displayItemActivation(ClientPacketListener.findTotem(this.minecraft.player));
+                    break;
+                }
+                default: {
+                    entity.handleEntityEvent(clientboundEntityEventPacket.getEventId());
+                }
             }
         }
     }
@@ -1031,7 +1041,7 @@ ClientGamePacketListener {
         localPlayer2.setReducedDebugInfo(localPlayer.isReducedDebugInfo());
         localPlayer2.setShowDeathScreen(localPlayer.shouldShowDeathScreen());
         localPlayer2.setLastDeathLocation(clientboundRespawnPacket.getLastDeathLocation());
-        if (this.minecraft.screen instanceof DeathScreen) {
+        if (this.minecraft.screen instanceof DeathScreen || this.minecraft.screen instanceof DeathScreen.TitleConfirmScreen) {
             this.minecraft.setScreen(null);
         }
         this.minecraft.gameMode.setLocalMode(clientboundRespawnPacket.getPlayerGameType(), clientboundRespawnPacket.getPreviousPlayerGameType());
@@ -1354,7 +1364,9 @@ ClientGamePacketListener {
                     this.recipeManager.byKey(resourceLocation).ifPresent(recipe -> {
                         clientRecipeBook.add((Recipe<?>)recipe);
                         clientRecipeBook.addHighlight((Recipe<?>)recipe);
-                        RecipeToast.addOrUpdate(this.minecraft.getToasts(), recipe);
+                        if (recipe.showNotification()) {
+                            RecipeToast.addOrUpdate(this.minecraft.getToasts(), recipe);
+                        }
                     });
                 }
                 break;
@@ -1506,16 +1518,8 @@ ClientGamePacketListener {
         if (this.serverData == null) {
             return;
         }
-        clientboundServerDataPacket.getMotd().ifPresent(component -> {
-            this.serverData.motd = component;
-        });
-        clientboundServerDataPacket.getIconBase64().ifPresent(string -> {
-            try {
-                this.serverData.setIconB64(ServerData.parseFavicon(string));
-            } catch (ParseException parseException) {
-                LOGGER.error("Invalid server icon", parseException);
-            }
-        });
+        this.serverData.motd = clientboundServerDataPacket.getMotd();
+        clientboundServerDataPacket.getIconBytes().ifPresent(this.serverData::setIconBytes);
         this.serverData.setEnforcesSecureChat(clientboundServerDataPacket.enforcesSecureChat());
         ServerList.saveSingleServer(this.serverData);
         if (!clientboundServerDataPacket.enforcesSecureChat()) {

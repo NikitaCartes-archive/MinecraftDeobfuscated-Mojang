@@ -262,6 +262,31 @@ public class ItemInHandRenderer {
         poseStack.mulPose(Axis.ZP.rotationDegrees((float)j * i * 30.0f));
     }
 
+    private void applyBrushTransform(PoseStack poseStack, float f, HumanoidArm humanoidArm, ItemStack itemStack, float g) {
+        this.applyItemArmTransform(poseStack, humanoidArm, g);
+        float h = (float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0f;
+        float i = 1.0f - h / (float)itemStack.getUseDuration();
+        float j = -90.0f;
+        float k = 60.0f;
+        int l = 45;
+        float m = 150.0f;
+        float n = -15.0f;
+        float o = -15.0f + 75.0f * Mth.cos(i * 45.0f * (float)Math.PI);
+        if (humanoidArm != HumanoidArm.RIGHT) {
+            poseStack.translate(0.1, 0.83, 0.35);
+            poseStack.mulPose(Axis.XP.rotationDegrees(-80.0f));
+            poseStack.mulPose(Axis.YP.rotationDegrees(-90.0f));
+            poseStack.mulPose(Axis.XP.rotationDegrees(o));
+            poseStack.translate(-0.3, 0.22, 0.35);
+        } else {
+            poseStack.translate(-0.25, 0.22, 0.35);
+            poseStack.mulPose(Axis.XP.rotationDegrees(-80.0f));
+            poseStack.mulPose(Axis.YP.rotationDegrees(90.0f));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(0.0f));
+            poseStack.mulPose(Axis.XP.rotationDegrees(o));
+        }
+    }
+
     private void applyItemArmAttackTransform(PoseStack poseStack, HumanoidArm humanoidArm, float f) {
         int i = humanoidArm == HumanoidArm.RIGHT ? 1 : -1;
         float g = Mth.sin(f * f * (float)Math.PI);
@@ -452,6 +477,9 @@ public class ItemInHandRenderer {
                         poseStack.scale(1.0f, 1.0f, 1.0f + l * 0.2f);
                         poseStack.mulPose(Axis.YN.rotationDegrees((float)q * 45.0f));
                         break;
+                    }
+                    case BRUSH: {
+                        this.applyBrushTransform(poseStack, f, humanoidArm, itemStack, i);
                     }
                 }
             } else if (abstractClientPlayer.isAutoSpinAttack()) {

@@ -16,6 +16,8 @@ import net.minecraft.client.gui.components.CommonButtons;
 import net.minecraft.client.gui.components.LogoRenderer;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
+import net.minecraft.client.gui.screens.LanguageSelectScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.PanoramaRenderer;
@@ -62,8 +64,8 @@ extends Screen {
         if (this.narratorAvailable) {
             this.setInitialFocus(abstractWidget);
         }
-        rowHelper.addChild(CommonButtons.accessibilityTextAndImage(this.minecraft, this));
-        rowHelper.addChild(CommonButtons.languageTextAndImage(this.minecraft, this));
+        rowHelper.addChild(CommonButtons.accessibilityTextAndImage(button -> this.closeAndSetScreen(new AccessibilityOptionsScreen(this, this.minecraft.options))));
+        rowHelper.addChild(CommonButtons.languageTextAndImage(button -> this.closeAndSetScreen(new LanguageSelectScreen((Screen)this, this.minecraft.options, this.minecraft.getLanguageManager()))));
         frameLayout.addChild(Button.builder(CommonComponents.GUI_CONTINUE, button -> this.onClose()).build(), frameLayout.newChildLayoutSettings().alignVerticallyBottom().padding(8));
         frameLayout.arrangeElements();
         FrameLayout.alignInRectangle(frameLayout, 0, i, this.width, this.height, 0.5f, 0.0f);
@@ -76,8 +78,14 @@ extends Screen {
 
     @Override
     public void onClose() {
+        this.closeAndSetScreen(new TitleScreen(true, this.logoRenderer));
+    }
+
+    private void closeAndSetScreen(Screen screen) {
+        this.options.onboardAccessibility = false;
+        this.options.save();
         Narrator.getNarrator().clear();
-        this.minecraft.setScreen(new TitleScreen(true, this.logoRenderer));
+        this.minecraft.setScreen(screen);
     }
 
     @Override
@@ -96,7 +104,7 @@ extends Screen {
         if (!this.hasNarrated && this.narratorAvailable) {
             if (this.timer < 40.0f) {
                 this.timer += 1.0f;
-            } else {
+            } else if (this.minecraft.isWindowActive()) {
                 Narrator.getNarrator().say(ONBOARDING_NARRATOR_MESSAGE.getString(), true);
                 this.hasNarrated = true;
             }

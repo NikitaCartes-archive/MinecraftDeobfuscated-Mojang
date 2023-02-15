@@ -124,7 +124,6 @@ extends Screen {
         public ReasonSelectionList(Minecraft minecraft) {
             super(minecraft, ReportReasonSelectionScreen.this.width, ReportReasonSelectionScreen.this.height, 40, ReportReasonSelectionScreen.this.height - 95, 18);
             for (ReportReason reportReason : ReportReason.values()) {
-                if (!reportReason.reportable()) continue;
                 this.addEntry(new Entry(reportReason));
             }
         }
