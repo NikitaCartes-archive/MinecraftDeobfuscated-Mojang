@@ -145,7 +145,7 @@ public class MapRenderer implements AutoCloseable {
 						poseStack.translate(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F - p * q / 2.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F + 4.0F, -0.025F);
 						poseStack.scale(q, q, 1.0F);
 						poseStack.translate(0.0F, 0.0F, -0.1F);
-						font.drawInBatch(component, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, false, Integer.MIN_VALUE, i);
+						font.drawInBatch(component, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, i);
 						poseStack.popPose();
 					}
 

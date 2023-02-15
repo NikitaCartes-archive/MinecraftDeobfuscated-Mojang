@@ -39,7 +39,7 @@ public class BlockBlobFeature extends Feature<BlockStateConfiguration> {
 
 				for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-j, -k, -l), blockPos.offset(j, k, l))) {
 					if (blockPos2.distSqr(blockPos) <= (double)(f * f)) {
-						worldGenLevel.setBlock(blockPos2, blockStateConfiguration.state, 4);
+						worldGenLevel.setBlock(blockPos2, blockStateConfiguration.state, 3);
 					}
 				}
 

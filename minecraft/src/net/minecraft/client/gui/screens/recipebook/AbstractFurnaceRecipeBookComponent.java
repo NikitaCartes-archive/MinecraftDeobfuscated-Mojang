@@ -40,7 +40,7 @@ public abstract class AbstractFurnaceRecipeBookComponent extends RecipeBookCompo
 		Slot slot = (Slot)list.get(1);
 		if (slot.getItem().isEmpty()) {
 			if (this.fuels == null) {
-				this.fuels = Ingredient.of(this.getFuelItems().stream().map(ItemStack::new));
+				this.fuels = Ingredient.of(this.getFuelItems().stream().filter(item -> item.isEnabled(this.minecraft.level.enabledFeatures())).map(ItemStack::new));
 			}
 
 			this.ghostRecipe.addIngredient(this.fuels, slot.x, slot.y);

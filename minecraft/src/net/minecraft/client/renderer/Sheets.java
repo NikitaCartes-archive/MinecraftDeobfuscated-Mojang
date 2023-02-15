@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -19,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
 import net.minecraft.world.level.block.state.properties.ChestType;
@@ -33,6 +35,7 @@ public class Sheets {
 	public static final ResourceLocation SIGN_SHEET = new ResourceLocation("textures/atlas/signs.png");
 	public static final ResourceLocation CHEST_SHEET = new ResourceLocation("textures/atlas/chest.png");
 	public static final ResourceLocation ARMOR_TRIMS_SHEET = new ResourceLocation("textures/atlas/armor_trims.png");
+	public static final ResourceLocation DECORATED_POT_SHEET = new ResourceLocation("textures/atlas/decorated_pot.png");
 	private static final RenderType SHULKER_BOX_SHEET_TYPE = RenderType.entityCutoutNoCull(SHULKER_SHEET);
 	private static final RenderType BED_SHEET_TYPE = RenderType.entitySolid(BED_SHEET);
 	private static final RenderType BANNER_SHEET_TYPE = RenderType.entityNoOutline(BANNER_SHEET);
@@ -62,6 +65,10 @@ public class Sheets {
 		.registryKeySet()
 		.stream()
 		.collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));
+	public static final Map<ResourceKey<String>, Material> DECORATED_POT_MATERIALS = (Map<ResourceKey<String>, Material>)BuiltInRegistries.DECORATED_POT_PATTERNS
+		.registryKeySet()
+		.stream()
+		.collect(Collectors.toMap(Function.identity(), Sheets::createDecoratedPotMaterial));
 	public static final Material[] BED_TEXTURES = (Material[])Arrays.stream(DyeColor.values())
 		.sorted(Comparator.comparingInt(DyeColor::getId))
 		.map(dyeColor -> new Material(BED_SHEET, new ResourceLocation("entity/bed/" + dyeColor.getName())))
@@ -183,6 +190,15 @@ public class Sheets {
 
 	private static Material chestMaterial(String string) {
 		return new Material(CHEST_SHEET, new ResourceLocation("entity/chest/" + string));
+	}
+
+	private static Material createDecoratedPotMaterial(ResourceKey<String> resourceKey) {
+		return new Material(DECORATED_POT_SHEET, DecoratedPotPatterns.location(resourceKey));
+	}
+
+	@Nullable
+	public static Material getDecoratedPotMaterial(@Nullable ResourceKey<String> resourceKey) {
+		return resourceKey == null ? null : (Material)DECORATED_POT_MATERIALS.get(resourceKey);
 	}
 
 	public static Material chooseMaterial(BlockEntity blockEntity, ChestType chestType, boolean bl) {

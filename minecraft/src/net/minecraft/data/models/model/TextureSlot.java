@@ -44,6 +44,7 @@ public final class TextureSlot {
 	public static final TextureSlot INSIDE = create("inside");
 	public static final TextureSlot CONTENT = create("content");
 	public static final TextureSlot INNER_TOP = create("inner_top");
+	public static final TextureSlot FLOWERBED = create("flowerbed");
 	private final String id;
 	@Nullable
 	private final TextureSlot parent;

@@ -15,6 +15,7 @@ public class TrunkPlacerType<P extends TrunkPlacer> {
 	public static final TrunkPlacerType<UpwardsBranchingTrunkPlacer> UPWARDS_BRANCHING_TRUNK_PLACER = register(
 		"upwards_branching_trunk_placer", UpwardsBranchingTrunkPlacer.CODEC
 	);
+	public static final TrunkPlacerType<CherryTrunkPlacer> CHERRY_TRUNK_PLACER = register("cherry_trunk_placer", CherryTrunkPlacer.CODEC);
 	private final Codec<P> codec;
 
 	private static <P extends TrunkPlacer> TrunkPlacerType<P> register(String string, Codec<P> codec) {

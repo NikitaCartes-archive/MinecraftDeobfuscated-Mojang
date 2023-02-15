@@ -107,6 +107,10 @@ public class TextureMapping {
 		return singleSlot(TextureSlot.WOOL, getBlockTexture(block));
 	}
 
+	public static TextureMapping flowerbed(Block block) {
+		return new TextureMapping().put(TextureSlot.FLOWERBED, getBlockTexture(block)).put(TextureSlot.STEM, getBlockTexture(block, "_stem"));
+	}
+
 	public static TextureMapping wool(ResourceLocation resourceLocation) {
 		return singleSlot(TextureSlot.WOOL, resourceLocation);
 	}

@@ -105,9 +105,7 @@ public class BookViewScreen extends Screen {
 	}
 
 	protected void createMenuControls() {
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(null)).bounds(this.width / 2 - 100, 196, 200, 20).build()
-		);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 - 100, 196, 200, 20).build());
 	}
 
 	protected void createPageControlButtons() {

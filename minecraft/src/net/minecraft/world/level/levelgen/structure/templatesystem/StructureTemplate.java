@@ -62,7 +62,6 @@ public class StructureTemplate {
 	public static final String ENTITY_TAG_BLOCKPOS = "blockPos";
 	public static final String ENTITY_TAG_NBT = "nbt";
 	public static final String SIZE_TAG = "size";
-	static final int CHUNK_SIZE = 16;
 	private final List<StructureTemplate.Palette> palettes = Lists.<StructureTemplate.Palette>newArrayList();
 	private final List<StructureTemplate.StructureEntityInfo> entityInfoList = Lists.<StructureTemplate.StructureEntityInfo>newArrayList();
 	private Vec3i size = Vec3i.ZERO;
@@ -408,6 +407,10 @@ public class StructureTemplate {
 			if (structureBlockInfo2 != null) {
 				list2.add(structureBlockInfo2);
 			}
+		}
+
+		for (StructureProcessor structureProcessor : structurePlaceSettings.getProcessors()) {
+			structureProcessor.finalizeStructure(levelAccessor, blockPos, blockPos2, structurePlaceSettings, list2);
 		}
 
 		return list2;

@@ -47,6 +47,7 @@ import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.ConduitBlockEntity;
+import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -67,6 +68,7 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 	private final BannerBlockEntity banner = new BannerBlockEntity(BlockPos.ZERO, Blocks.WHITE_BANNER.defaultBlockState());
 	private final BedBlockEntity bed = new BedBlockEntity(BlockPos.ZERO, Blocks.RED_BED.defaultBlockState());
 	private final ConduitBlockEntity conduit = new ConduitBlockEntity(BlockPos.ZERO, Blocks.CONDUIT.defaultBlockState());
+	private final DecoratedPotBlockEntity decoratedPot = new DecoratedPotBlockEntity(BlockPos.ZERO, Blocks.DECORATED_POT.defaultBlockState());
 	private ShieldModel shieldModel;
 	private TridentModel tridentModel;
 	private Map<SkullBlock.Type, SkullModelBase> skullModels;
@@ -123,6 +125,9 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 					blockEntity = this.enderChest;
 				} else if (blockState.is(Blocks.TRAPPED_CHEST)) {
 					blockEntity = this.trappedChest;
+				} else if (blockState.is(Blocks.DECORATED_POT)) {
+					this.decoratedPot.setFromItem(itemStack);
+					blockEntity = this.decoratedPot;
 				} else {
 					if (!(block instanceof ShulkerBoxBlock)) {
 						return;

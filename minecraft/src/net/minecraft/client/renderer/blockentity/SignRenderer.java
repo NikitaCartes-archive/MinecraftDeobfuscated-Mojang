@@ -129,7 +129,16 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 			} else {
 				this.font
 					.drawInBatch(
-						formattedCharSequence, h, (float)(n * signBlockEntity.getTextLineHeight() - k), l, false, poseStack.last().pose(), multiBufferSource, false, 0, m
+						formattedCharSequence,
+						h,
+						(float)(n * signBlockEntity.getTextLineHeight() - k),
+						l,
+						false,
+						poseStack.last().pose(),
+						multiBufferSource,
+						Font.DisplayMode.NORMAL,
+						0,
+						m
 					);
 			}
 		}

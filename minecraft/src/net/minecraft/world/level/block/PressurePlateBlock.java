@@ -2,15 +2,13 @@ package net.minecraft.world.level.block;
 
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.AABB;
@@ -18,15 +16,11 @@ import net.minecraft.world.phys.AABB;
 public class PressurePlateBlock extends BasePressurePlateBlock {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private final PressurePlateBlock.Sensitivity sensitivity;
-	private final SoundEvent soundOff;
-	private final SoundEvent soundOn;
 
-	protected PressurePlateBlock(PressurePlateBlock.Sensitivity sensitivity, BlockBehaviour.Properties properties, SoundEvent soundEvent, SoundEvent soundEvent2) {
-		super(properties);
+	protected PressurePlateBlock(PressurePlateBlock.Sensitivity sensitivity, BlockBehaviour.Properties properties, BlockSetType blockSetType) {
+		super(properties, blockSetType);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)));
 		this.sensitivity = sensitivity;
-		this.soundOff = soundEvent;
-		this.soundOn = soundEvent2;
 	}
 
 	@Override
@@ -37,16 +31,6 @@ public class PressurePlateBlock extends BasePressurePlateBlock {
 	@Override
 	protected BlockState setSignalForState(BlockState blockState, int i) {
 		return blockState.setValue(POWERED, Boolean.valueOf(i > 0));
-	}
-
-	@Override
-	protected void playOnSound(LevelAccessor levelAccessor, BlockPos blockPos) {
-		levelAccessor.playSound(null, blockPos, this.soundOn, SoundSource.BLOCKS);
-	}
-
-	@Override
-	protected void playOffSound(LevelAccessor levelAccessor, BlockPos blockPos) {
-		levelAccessor.playSound(null, blockPos, this.soundOff, SoundSource.BLOCKS);
 	}
 
 	@Override

@@ -66,6 +66,7 @@ import net.minecraft.network.protocol.game.ClientboundUpdateEnabledFeaturesPacke
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
@@ -228,7 +229,11 @@ public abstract class PlayerList {
 
 		this.broadcastSystemMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), false);
 		serverGamePacketListenerImpl.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
-		serverPlayer.sendServerStatus(this.server.getStatus());
+		ServerStatus serverStatus = this.server.getStatus();
+		if (serverStatus != null) {
+			serverPlayer.sendServerStatus(serverStatus);
+		}
+
 		serverPlayer.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(this.players));
 		this.players.add(serverPlayer);
 		this.playersByUUID.put(serverPlayer.getUUID(), serverPlayer);

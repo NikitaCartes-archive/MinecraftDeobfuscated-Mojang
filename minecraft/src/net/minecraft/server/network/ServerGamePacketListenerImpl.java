@@ -259,7 +259,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 		this.player.absMoveTo(this.firstGoodX, this.firstGoodY, this.firstGoodZ, this.player.getYRot(), this.player.getXRot());
 		this.tickCount++;
 		this.knownMovePacketCount = this.receivedMovePacketCount;
-		if (this.clientIsFloating && !this.player.isSleeping() && !this.player.isPassenger()) {
+		if (this.clientIsFloating && !this.player.isSleeping() && !this.player.isPassenger() && !this.player.isDeadOrDying()) {
 			if (++this.aboveGroundTickCount > 80) {
 				LOGGER.warn("{} was kicked for floating too long!", this.player.getName().getString());
 				this.disconnect(Component.translatable("multiplayer.disconnect.flying"));
@@ -1516,7 +1516,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				return;
 			}
 
-			if (entity.distanceToSqr(this.player.getEyePosition()) < MAX_INTERACTION_DISTANCE) {
+			AABB aABB = entity.getBoundingBox();
+			if (aABB.distanceToSqr(this.player.getEyePosition()) < MAX_INTERACTION_DISTANCE) {
 				serverboundInteractPacket.dispatch(
 					new ServerboundInteractPacket.Handler() {
 						private void performInteraction(InteractionHand interactionHand, ServerGamePacketListenerImpl.EntityInteraction entityInteraction) {

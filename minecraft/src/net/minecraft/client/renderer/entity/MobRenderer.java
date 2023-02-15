@@ -102,8 +102,8 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		boolean bl
 	) {
 		float r = (float)q / 24.0F;
-		int s = Mth.lerp(r, i, j);
-		int t = Mth.lerp(r, k, l);
+		int s = (int)Mth.lerp(r, (float)i, (float)j);
+		int t = (int)Mth.lerp(r, (float)k, (float)l);
 		int u = LightTexture.pack(s, t);
 		float v = q % 2 == (bl ? 1 : 0) ? 0.7F : 1.0F;
 		float w = 0.5F * v;

@@ -50,7 +50,7 @@ public class FollowOwnerGoal extends Goal {
 			return false;
 		} else if (livingEntity.isSpectator()) {
 			return false;
-		} else if (this.tamable.isOrderedToSit()) {
+		} else if (this.unableToMove()) {
 			return false;
 		} else if (this.tamable.distanceToSqr(livingEntity) < (double)(this.startDistance * this.startDistance)) {
 			return false;
@@ -65,8 +65,12 @@ public class FollowOwnerGoal extends Goal {
 		if (this.navigation.isDone()) {
 			return false;
 		} else {
-			return this.tamable.isOrderedToSit() ? false : !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
+			return this.unableToMove() ? false : !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
 		}
+	}
+
+	private boolean unableToMove() {
+		return this.tamable.isOrderedToSit() || this.tamable.isPassenger() || this.tamable.isLeashed();
 	}
 
 	@Override
@@ -88,12 +92,10 @@ public class FollowOwnerGoal extends Goal {
 		this.tamable.getLookControl().setLookAt(this.owner, 10.0F, (float)this.tamable.getMaxHeadXRot());
 		if (--this.timeToRecalcPath <= 0) {
 			this.timeToRecalcPath = this.adjustedTickDelay(10);
-			if (!this.tamable.isLeashed() && !this.tamable.isPassenger()) {
-				if (this.tamable.distanceToSqr(this.owner) >= 144.0) {
-					this.teleportToOwner();
-				} else {
-					this.navigation.moveTo(this.owner, this.speedModifier);
-				}
+			if (this.tamable.distanceToSqr(this.owner) >= 144.0) {
+				this.teleportToOwner();
+			} else {
+				this.navigation.moveTo(this.owner, this.speedModifier);
 			}
 		}
 	}

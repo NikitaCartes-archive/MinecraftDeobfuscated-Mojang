@@ -5,12 +5,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
-import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public class BlobFoliagePlacer extends FoliagePlacer {
@@ -34,7 +31,7 @@ public class BlobFoliagePlacer extends FoliagePlacer {
 	@Override
 	protected void createFoliage(
 		LevelSimulatedReader levelSimulatedReader,
-		BiConsumer<BlockPos, BlockState> biConsumer,
+		FoliagePlacer.FoliageSetter foliageSetter,
 		RandomSource randomSource,
 		TreeConfiguration treeConfiguration,
 		int i,
@@ -45,7 +42,7 @@ public class BlobFoliagePlacer extends FoliagePlacer {
 	) {
 		for (int m = l; m >= l - j; m--) {
 			int n = Math.max(k + foliageAttachment.radiusOffset() - 1 - m / 2, 0);
-			this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, foliageAttachment.pos(), n, m, foliageAttachment.doubleTrunk());
+			this.placeLeavesRow(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, foliageAttachment.pos(), n, m, foliageAttachment.doubleTrunk());
 		}
 	}
 

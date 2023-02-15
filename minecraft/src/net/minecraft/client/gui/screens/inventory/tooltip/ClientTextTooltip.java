@@ -27,6 +27,6 @@ public class ClientTextTooltip implements ClientTooltipComponent {
 
 	@Override
 	public void renderText(Font font, int i, int j, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
-		font.drawInBatch(this.text, (float)i, (float)j, -1, true, matrix4f, bufferSource, false, 0, 15728880);
+		font.drawInBatch(this.text, (float)i, (float)j, -1, true, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
 	}
 }

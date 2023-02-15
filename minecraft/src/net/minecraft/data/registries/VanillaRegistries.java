@@ -17,7 +17,7 @@ import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.data.worldgen.StructureSets;
 import net.minecraft.data.worldgen.Structures;
-import net.minecraft.data.worldgen.biome.Biomes;
+import net.minecraft.data.worldgen.biome.BiomeData;
 import net.minecraft.data.worldgen.features.FeatureUtils;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.network.chat.ChatType;
@@ -43,7 +43,7 @@ public class VanillaRegistries {
 		.add(Registries.STRUCTURE_SET, StructureSets::bootstrap)
 		.add(Registries.PROCESSOR_LIST, ProcessorLists::bootstrap)
 		.add(Registries.TEMPLATE_POOL, Pools::bootstrap)
-		.add(Registries.BIOME, Biomes::bootstrap)
+		.add(Registries.BIOME, BiomeData::bootstrap)
 		.add(Registries.NOISE, NoiseData::bootstrap)
 		.add(Registries.DENSITY_FUNCTION, NoiseRouterData::bootstrap)
 		.add(Registries.NOISE_SETTINGS, NoiseGeneratorSettings::bootstrap)
@@ -55,8 +55,11 @@ public class VanillaRegistries {
 		.add(Registries.DAMAGE_TYPE, DamageTypes::bootstrap);
 
 	private static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderLookup.Provider provider) {
-		HolderGetter<PlacedFeature> holderGetter = provider.lookupOrThrow(Registries.PLACED_FEATURE);
-		provider.lookupOrThrow(Registries.BIOME).listElements().forEach(reference -> {
+		validateThatAllBiomeFeaturesHaveBiomeFilter(provider.lookupOrThrow(Registries.PLACED_FEATURE), provider.lookupOrThrow(Registries.BIOME));
+	}
+
+	public static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderGetter<PlacedFeature> holderGetter, HolderLookup<Biome> holderLookup) {
+		holderLookup.listElements().forEach(reference -> {
 			ResourceLocation resourceLocation = reference.key().location();
 			List<HolderSet<PlacedFeature>> list = ((Biome)reference.value()).getGenerationSettings().features();
 			list.stream().flatMap(HolderSet::stream).forEach(holder -> holder.unwrap().ifLeft(resourceKey -> {

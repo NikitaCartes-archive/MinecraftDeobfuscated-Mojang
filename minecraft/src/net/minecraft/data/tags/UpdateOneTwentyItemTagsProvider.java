@@ -88,5 +88,11 @@ public class UpdateOneTwentyItemTagsProvider extends ItemTagsProvider {
 			.add(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE)
 			.add(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE)
 			.add(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE);
+		this.tag(ItemTags.SNIFFER_FOOD).add(Items.TORCHFLOWER_SEEDS);
+		this.copy(BlockTags.CHERRY_LOGS, ItemTags.CHERRY_LOGS);
+		this.tag(ItemTags.BOATS).add(Items.CHERRY_BOAT);
+		this.tag(ItemTags.CHEST_BOATS).add(Items.CHERRY_CHEST_BOAT);
+		this.tag(ItemTags.DECORATED_POT_SHARDS)
+			.add(Items.BRICK, Items.POTTERY_SHARD_ARCHER, Items.POTTERY_SHARD_PRIZE, Items.POTTERY_SHARD_ARMS_UP, Items.POTTERY_SHARD_SKULL);
 	}
 }

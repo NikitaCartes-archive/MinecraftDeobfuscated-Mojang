@@ -41,6 +41,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.animal.horse.ZombieHorse;
+import net.minecraft.world.entity.animal.sniffer.Sniffer;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
@@ -137,6 +138,7 @@ public class DefaultAttributes {
 		.put(EntityType.SKELETON, AbstractSkeleton.createAttributes().build())
 		.put(EntityType.SKELETON_HORSE, SkeletonHorse.createAttributes().build())
 		.put(EntityType.SLIME, Monster.createMonsterAttributes().build())
+		.put(EntityType.SNIFFER, Sniffer.createAttributes().build())
 		.put(EntityType.SNOW_GOLEM, SnowGolem.createAttributes().build())
 		.put(EntityType.SPIDER, Spider.createAttributes().build())
 		.put(EntityType.SQUID, Squid.createAttributes().build())

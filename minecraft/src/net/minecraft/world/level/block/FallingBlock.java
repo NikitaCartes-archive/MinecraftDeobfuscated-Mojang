@@ -6,6 +6,7 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.BlockGetter;
@@ -58,10 +59,7 @@ public class FallingBlock extends Block implements Fallable {
 		if (randomSource.nextInt(16) == 0) {
 			BlockPos blockPos2 = blockPos.below();
 			if (isFree(level.getBlockState(blockPos2))) {
-				double d = (double)blockPos.getX() + randomSource.nextDouble();
-				double e = (double)blockPos.getY() - 0.05;
-				double f = (double)blockPos.getZ() + randomSource.nextDouble();
-				level.addParticle(new BlockParticleOption(ParticleTypes.FALLING_DUST, blockState), d, e, f, 0.0, 0.0, 0.0);
+				ParticleUtils.spawnParticleBelow(level, blockPos, randomSource, new BlockParticleOption(ParticleTypes.FALLING_DUST, blockState));
 			}
 		}
 	}

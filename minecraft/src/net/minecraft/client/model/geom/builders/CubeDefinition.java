@@ -1,9 +1,11 @@
 package net.minecraft.client.model.geom.builders;
 
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.core.Direction;
 import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
@@ -16,6 +18,7 @@ public final class CubeDefinition {
 	private final boolean mirror;
 	private final UVPair texCoord;
 	private final UVPair texScale;
+	private final Set<Direction> visibleFaces;
 
 	protected CubeDefinition(
 		@Nullable String string,
@@ -30,7 +33,8 @@ public final class CubeDefinition {
 		CubeDeformation cubeDeformation,
 		boolean bl,
 		float n,
-		float o
+		float o,
+		Set<Direction> set
 	) {
 		this.comment = string;
 		this.texCoord = new UVPair(f, g);
@@ -39,6 +43,7 @@ public final class CubeDefinition {
 		this.grow = cubeDeformation;
 		this.mirror = bl;
 		this.texScale = new UVPair(n, o);
+		this.visibleFaces = set;
 	}
 
 	public ModelPart.Cube bake(int i, int j) {
@@ -56,7 +61,8 @@ public final class CubeDefinition {
 			this.grow.growZ,
 			this.mirror,
 			(float)i * this.texScale.u(),
-			(float)j * this.texScale.v()
+			(float)j * this.texScale.v(),
+			this.visibleFaces
 		);
 	}
 }

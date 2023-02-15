@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -67,6 +68,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.SPRUCE_LEAVES);
 		add(0.3F, Items.DARK_OAK_LEAVES);
 		add(0.3F, Items.ACACIA_LEAVES);
+		add(0.3F, Items.CHERRY_LEAVES);
 		add(0.3F, Items.BIRCH_LEAVES);
 		add(0.3F, Items.AZALEA_LEAVES);
 		add(0.3F, Items.MANGROVE_LEAVES);
@@ -75,6 +77,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.BIRCH_SAPLING);
 		add(0.3F, Items.JUNGLE_SAPLING);
 		add(0.3F, Items.ACACIA_SAPLING);
+		add(0.3F, Items.CHERRY_SAPLING);
 		add(0.3F, Items.DARK_OAK_SAPLING);
 		add(0.3F, Items.MANGROVE_PROPAGULE);
 		add(0.3F, Items.BEETROOT_SEEDS);
@@ -88,9 +91,11 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.GLOW_BERRIES);
 		add(0.3F, Items.WHEAT_SEEDS);
 		add(0.3F, Items.MOSS_CARPET);
+		add(0.3F, Items.PINK_PETALS);
 		add(0.3F, Items.SMALL_DRIPLEAF);
 		add(0.3F, Items.HANGING_ROOTS);
 		add(0.3F, Items.MANGROVE_ROOTS);
+		add(0.3F, Items.TORCHFLOWER_SEEDS);
 		add(0.5F, Items.DRIED_KELP_BLOCK);
 		add(0.5F, Items.TALL_GRASS);
 		add(0.5F, Items.FLOWERING_AZALEA_LEAVES);
@@ -154,6 +159,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.85F, Items.BREAD);
 		add(0.85F, Items.BAKED_POTATO);
 		add(0.85F, Items.COOKIE);
+		add(0.85F, Items.TORCHFLOWER);
 		add(1.0F, Items.CAKE);
 		add(1.0F, Items.PUMPKIN_PIE);
 	}
@@ -251,13 +257,8 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 
 	public static BlockState extractProduce(Entity entity, BlockState blockState, Level level, BlockPos blockPos) {
 		if (!level.isClientSide) {
-			float f = 0.7F;
-			double d = (double)(level.random.nextFloat() * 0.7F) + 0.15F;
-			double e = (double)(level.random.nextFloat() * 0.7F) + 0.060000002F + 0.6;
-			double g = (double)(level.random.nextFloat() * 0.7F) + 0.15F;
-			ItemEntity itemEntity = new ItemEntity(
-				level, (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + g, new ItemStack(Items.BONE_MEAL)
-			);
+			Vec3 vec3 = Vec3.atLowerCornerWithOffset(blockPos, 0.5, 1.01, 0.5).offsetRandom(level.random, 0.7F);
+			ItemEntity itemEntity = new ItemEntity(level, vec3.x(), vec3.y(), vec3.z(), new ItemStack(Items.BONE_MEAL));
 			itemEntity.setDefaultPickUpDelay();
 			level.addFreshEntity(itemEntity);
 		}

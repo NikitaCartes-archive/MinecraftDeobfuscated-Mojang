@@ -87,18 +87,7 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 
 		@Override
 		public boolean stillValid(Player player) {
-			if (LecternBlockEntity.this.level.getBlockEntity(LecternBlockEntity.this.worldPosition) != LecternBlockEntity.this) {
-				return false;
-			} else {
-				return player.distanceToSqr(
-							(double)LecternBlockEntity.this.worldPosition.getX() + 0.5,
-							(double)LecternBlockEntity.this.worldPosition.getY() + 0.5,
-							(double)LecternBlockEntity.this.worldPosition.getZ() + 0.5
-						)
-						> 64.0
-					? false
-					: LecternBlockEntity.this.hasBook();
-			}
+			return Container.stillValidBlockEntity(LecternBlockEntity.this, player) && LecternBlockEntity.this.hasBook();
 		}
 
 		@Override

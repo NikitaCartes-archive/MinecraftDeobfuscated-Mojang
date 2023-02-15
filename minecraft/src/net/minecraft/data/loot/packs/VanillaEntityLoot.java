@@ -705,6 +705,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						)
 				)
 		);
+		this.add(EntityType.SNIFFER, LootTable.lootTable());
 		this.add(
 			EntityType.SNOW_GOLEM,
 			LootTable.lootTable()

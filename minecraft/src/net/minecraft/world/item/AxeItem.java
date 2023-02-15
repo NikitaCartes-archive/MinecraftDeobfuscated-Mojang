@@ -30,6 +30,8 @@ public class AxeItem extends DiggerItem {
 		.put(Blocks.DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_LOG)
 		.put(Blocks.ACACIA_WOOD, Blocks.STRIPPED_ACACIA_WOOD)
 		.put(Blocks.ACACIA_LOG, Blocks.STRIPPED_ACACIA_LOG)
+		.put(Blocks.CHERRY_WOOD, Blocks.STRIPPED_CHERRY_WOOD)
+		.put(Blocks.CHERRY_LOG, Blocks.STRIPPED_CHERRY_LOG)
 		.put(Blocks.BIRCH_WOOD, Blocks.STRIPPED_BIRCH_WOOD)
 		.put(Blocks.BIRCH_LOG, Blocks.STRIPPED_BIRCH_LOG)
 		.put(Blocks.JUNGLE_WOOD, Blocks.STRIPPED_JUNGLE_WOOD)

@@ -34,6 +34,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 	private final Advancement.Builder advancement = Advancement.Builder.advancement();
 	@Nullable
 	private String group;
+	private boolean showNotification = true;
 
 	public ShapedRecipeBuilder(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
 		this.category = recipeCategory;
@@ -87,6 +88,11 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 		return this;
 	}
 
+	public ShapedRecipeBuilder showNotification(boolean bl) {
+		this.showNotification = bl;
+		return this;
+	}
+
 	@Override
 	public Item getResult() {
 		return this.result;
@@ -110,7 +116,8 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 				this.rows,
 				this.key,
 				this.advancement,
-				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")
+				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/"),
+				this.showNotification
 			)
 		);
 	}
@@ -152,6 +159,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 		private final Map<Character, Ingredient> key;
 		private final Advancement.Builder advancement;
 		private final ResourceLocation advancementId;
+		private final boolean showNotification;
 
 		public Result(
 			ResourceLocation resourceLocation,
@@ -162,7 +170,8 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 			List<String> list,
 			Map<Character, Ingredient> map,
 			Advancement.Builder builder,
-			ResourceLocation resourceLocation2
+			ResourceLocation resourceLocation2,
+			boolean bl
 		) {
 			super(craftingBookCategory);
 			this.id = resourceLocation;
@@ -173,6 +182,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 			this.key = map;
 			this.advancement = builder;
 			this.advancementId = resourceLocation2;
+			this.showNotification = bl;
 		}
 
 		@Override
@@ -203,6 +213,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 			}
 
 			jsonObject.add("result", jsonObject3);
+			jsonObject.addProperty("show_notification", this.showNotification);
 		}
 
 		@Override

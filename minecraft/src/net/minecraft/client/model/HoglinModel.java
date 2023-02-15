@@ -108,7 +108,7 @@ public class HoglinModel<T extends Mob & HoglinBase> extends AgeableListModel<T>
 		float l = 1.0F - (float)Mth.abs(10 - 2 * k) / 10.0F;
 		this.head.xRot = Mth.lerp(l, 0.87266463F, (float) (-Math.PI / 9));
 		if (mob.isBaby()) {
-			this.head.y = (float)Mth.lerp(l, 2, 5);
+			this.head.y = Mth.lerp(l, 2.0F, 5.0F);
 			this.mane.z = -3.0F;
 		} else {
 			this.head.y = 2.0F;

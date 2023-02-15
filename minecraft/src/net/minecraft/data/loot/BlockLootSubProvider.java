@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -33,6 +34,7 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.MultifaceBlock;
+import net.minecraft.world.level.block.PinkPetalsBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StemBlock;
@@ -544,6 +546,28 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 											.when(
 												LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
 													.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CandleBlock.CANDLES, integer))
+											)
+								)
+						)
+					)
+			);
+	}
+
+	protected LootTable.Builder createPetalsDrops(Block block) {
+		return LootTable.lootTable()
+			.withPool(
+				LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(
+						(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
+							block,
+							LootItem.lootTableItem(block)
+								.apply(
+									IntStream.rangeClosed(1, 4).boxed().toList(),
+									integer -> SetItemCountFunction.setCount(ConstantValue.exactly((float)integer.intValue()))
+											.when(
+												LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+													.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PinkPetalsBlock.AMOUNT, integer))
 											)
 								)
 						)

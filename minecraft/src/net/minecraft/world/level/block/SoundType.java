@@ -352,6 +352,15 @@ public class SoundType {
 		SoundEvents.MOSS_CARPET_HIT,
 		SoundEvents.MOSS_CARPET_FALL
 	);
+	public static final SoundType PINK_PETALS = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.PINK_PETALS_BREAK,
+		SoundEvents.PINK_PETALS_STEP,
+		SoundEvents.PINK_PETALS_PLACE,
+		SoundEvents.PINK_PETALS_HIT,
+		SoundEvents.PINK_PETALS_FALL
+	);
 	public static final SoundType MOSS = new SoundType(
 		1.0F, 1.0F, SoundEvents.MOSS_BREAK, SoundEvents.MOSS_STEP, SoundEvents.MOSS_PLACE, SoundEvents.MOSS_HIT, SoundEvents.MOSS_FALL
 	);
@@ -550,6 +559,42 @@ public class SoundType {
 		SoundEvents.NETHER_WOOD_HIT,
 		SoundEvents.NETHER_WOOD_FALL
 	);
+	public static final SoundType CHERRY_WOOD = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.CHERRY_WOOD_BREAK,
+		SoundEvents.CHERRY_WOOD_STEP,
+		SoundEvents.CHERRY_WOOD_PLACE,
+		SoundEvents.CHERRY_WOOD_HIT,
+		SoundEvents.CHERRY_WOOD_FALL
+	);
+	public static final SoundType CHERRY_SAPLING = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.CHERRY_SAPLING_BREAK,
+		SoundEvents.CHERRY_SAPLING_STEP,
+		SoundEvents.CHERRY_SAPLING_PLACE,
+		SoundEvents.CHERRY_SAPLING_HIT,
+		SoundEvents.CHERRY_SAPLING_FALL
+	);
+	public static final SoundType CHERRY_LEAVES = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.CHERRY_LEAVES_BREAK,
+		SoundEvents.CHERRY_LEAVES_STEP,
+		SoundEvents.CHERRY_LEAVES_PLACE,
+		SoundEvents.CHERRY_LEAVES_HIT,
+		SoundEvents.CHERRY_LEAVES_FALL
+	);
+	public static final SoundType CHERRY_WOOD_HANGING_SIGN = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.CHERRY_WOOD_HANGING_SIGN_BREAK,
+		SoundEvents.CHERRY_WOOD_HANGING_SIGN_STEP,
+		SoundEvents.CHERRY_WOOD_HANGING_SIGN_PLACE,
+		SoundEvents.CHERRY_WOOD_HANGING_SIGN_HIT,
+		SoundEvents.CHERRY_WOOD_HANGING_SIGN_FALL
+	);
 	public static final SoundType CHISELED_BOOKSHELF = new SoundType(
 		1.0F,
 		1.0F,
@@ -558,6 +603,18 @@ public class SoundType {
 		SoundEvents.CHISELED_BOOKSHELF_PLACE,
 		SoundEvents.CHISELED_BOOKSHELF_HIT,
 		SoundEvents.CHISELED_BOOKSHELF_FALL
+	);
+	public static final SoundType SUSPICIOUS_SAND = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SUSPICIOUS_SAND_BREAK,
+		SoundEvents.SUSPICIOUS_SAND_STEP,
+		SoundEvents.SUSPICIOUS_SAND_PLACE,
+		SoundEvents.SUSPICIOUS_SAND_HIT,
+		SoundEvents.SUSPICIOUS_SAND_FALL
+	);
+	public static final SoundType DECORATED_POT = new SoundType(
+		1.0F, 1.0F, SoundEvents.EMPTY, SoundEvents.DECORATED_POT_STEP, SoundEvents.DECORATED_POT_PLACE, SoundEvents.DECORATED_POT_HIT, SoundEvents.DECORATED_POT_FALL
 	);
 	public final float volume;
 	public final float pitch;

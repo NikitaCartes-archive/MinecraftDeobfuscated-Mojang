@@ -33,10 +33,8 @@ import net.minecraft.advancements.critereon.TargetBlockTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.advancements.critereon.UsingItemTrigger;
-import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -144,21 +142,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("slept_in_bed", PlayerTrigger.TriggerInstance.sleptInBed())
 			.save(consumer, "adventure/sleep_in_bed");
-		HolderGetter<Biome> holderGetter = provider.lookupOrThrow(Registries.BIOME);
-		addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSource.Preset.OVERWORLD.possibleBiomes(holderGetter).toList())
-			.parent(advancement2)
-			.display(
-				Items.DIAMOND_BOOTS,
-				Component.translatable("advancements.adventure.adventuring_time.title"),
-				Component.translatable("advancements.adventure.adventuring_time.description"),
-				null,
-				FrameType.CHALLENGE,
-				true,
-				true,
-				false
-			)
-			.rewards(AdvancementRewards.Builder.experience(500))
-			.save(consumer, "adventure/adventuring_time");
+		createAdventuringTime(consumer, advancement2, MultiNoiseBiomeSource.Preset.OVERWORLD);
 		Advancement advancement3 = Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(
@@ -605,6 +589,23 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("avoid_vibration", PlayerTrigger.TriggerInstance.avoidVibration())
 			.save(consumer, "adventure/avoid_vibration");
+	}
+
+	protected static void createAdventuringTime(Consumer<Advancement> consumer, Advancement advancement, MultiNoiseBiomeSource.Preset preset) {
+		addBiomes(Advancement.Builder.advancement(), preset.possibleBiomes().toList())
+			.parent(advancement)
+			.display(
+				Items.DIAMOND_BOOTS,
+				Component.translatable("advancements.adventure.adventuring_time.title"),
+				Component.translatable("advancements.adventure.adventuring_time.description"),
+				null,
+				FrameType.CHALLENGE,
+				true,
+				true,
+				false
+			)
+			.rewards(AdvancementRewards.Builder.experience(500))
+			.save(consumer, "adventure/adventuring_time");
 	}
 
 	private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

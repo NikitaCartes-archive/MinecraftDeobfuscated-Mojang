@@ -27,7 +27,7 @@ public class ZombieHorse extends AbstractHorse {
 
 	@Override
 	protected void randomizeAttributes(RandomSource randomSource) {
-		this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength(randomSource));
+		this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(generateJumpStrength(randomSource::nextDouble));
 	}
 
 	@Override

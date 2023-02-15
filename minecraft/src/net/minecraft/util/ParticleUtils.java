@@ -63,4 +63,11 @@ public class ParticleUtils {
 		double m = k == 0 ? vec3.z() : 0.0;
 		level.addParticle(particleOptions, e, f, g, h, l, m);
 	}
+
+	public static void spawnParticleBelow(Level level, BlockPos blockPos, RandomSource randomSource, ParticleOptions particleOptions) {
+		double d = (double)blockPos.getX() + randomSource.nextDouble();
+		double e = (double)blockPos.getY() - 0.05;
+		double f = (double)blockPos.getZ() + randomSource.nextDouble();
+		level.addParticle(particleOptions, d, e, f, 0.0, 0.0, 0.0);
+	}
 }

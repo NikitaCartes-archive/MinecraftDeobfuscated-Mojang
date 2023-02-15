@@ -114,6 +114,13 @@ public class ItemProperties {
 			}
 		});
 		register(
+			Items.BRUSH,
+			new ResourceLocation("brushing"),
+			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.getUseItem() == itemStack
+					? (float)(livingEntity.getUseItemRemainingTicks() % 10) / 10.0F
+					: 0.0F
+		);
+		register(
 			Items.BOW,
 			new ResourceLocation("pulling"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F

@@ -1,6 +1,7 @@
 package net.minecraft.client.multiplayer;
 
-import java.text.ParseException;
+import com.mojang.logging.LogUtils;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -10,9 +11,11 @@ import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ServerData {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public String name;
 	public String ip;
 	public Component status;
@@ -26,7 +29,7 @@ public class ServerData {
 	public List<Component> playerList = Collections.emptyList();
 	private ServerData.ServerPackStatus packStatus = ServerData.ServerPackStatus.PROMPT;
 	@Nullable
-	private String iconB64;
+	private byte[] iconBytes;
 	private boolean lan;
 	private boolean enforcesSecureChat;
 
@@ -40,8 +43,8 @@ public class ServerData {
 		CompoundTag compoundTag = new CompoundTag();
 		compoundTag.putString("name", this.name);
 		compoundTag.putString("ip", this.ip);
-		if (this.iconB64 != null) {
-			compoundTag.putString("icon", this.iconB64);
+		if (this.iconBytes != null) {
+			compoundTag.putString("icon", Base64.getEncoder().encodeToString(this.iconBytes));
 		}
 
 		if (this.packStatus == ServerData.ServerPackStatus.ENABLED) {
@@ -64,7 +67,11 @@ public class ServerData {
 	public static ServerData read(CompoundTag compoundTag) {
 		ServerData serverData = new ServerData(compoundTag.getString("name"), compoundTag.getString("ip"), false);
 		if (compoundTag.contains("icon", 8)) {
-			serverData.setIconB64(compoundTag.getString("icon"));
+			try {
+				serverData.setIconBytes(Base64.getDecoder().decode(compoundTag.getString("icon")));
+			} catch (IllegalArgumentException var3) {
+				LOGGER.warn("Malformed base64 server icon", (Throwable)var3);
+			}
 		}
 
 		if (compoundTag.contains("acceptTextures", 1)) {
@@ -81,20 +88,12 @@ public class ServerData {
 	}
 
 	@Nullable
-	public String getIconB64() {
-		return this.iconB64;
+	public byte[] getIconBytes() {
+		return this.iconBytes;
 	}
 
-	public static String parseFavicon(String string) throws ParseException {
-		if (string.startsWith("data:image/png;base64,")) {
-			return string.substring("data:image/png;base64,".length());
-		} else {
-			throw new ParseException("Unknown format", 0);
-		}
-	}
-
-	public void setIconB64(@Nullable String string) {
-		this.iconB64 = string;
+	public void setIconBytes(@Nullable byte[] bs) {
+		this.iconBytes = bs;
 	}
 
 	public boolean isLan() {
@@ -112,7 +111,7 @@ public class ServerData {
 	public void copyNameIconFrom(ServerData serverData) {
 		this.ip = serverData.ip;
 		this.name = serverData.name;
-		this.iconB64 = serverData.iconB64;
+		this.iconBytes = serverData.iconBytes;
 	}
 
 	public void copyFrom(ServerData serverData) {

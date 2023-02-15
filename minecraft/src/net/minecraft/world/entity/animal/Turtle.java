@@ -561,13 +561,17 @@ public class Turtle extends Animal {
 				double e = this.wantedY - this.turtle.getY();
 				double f = this.wantedZ - this.turtle.getZ();
 				double g = Math.sqrt(d * d + e * e + f * f);
-				e /= g;
-				float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
-				this.turtle.setYRot(this.rotlerp(this.turtle.getYRot(), h, 90.0F));
-				this.turtle.yBodyRot = this.turtle.getYRot();
-				float i = (float)(this.speedModifier * this.turtle.getAttributeValue(Attributes.MOVEMENT_SPEED));
-				this.turtle.setSpeed(Mth.lerp(0.125F, this.turtle.getSpeed(), i));
-				this.turtle.setDeltaMovement(this.turtle.getDeltaMovement().add(0.0, (double)this.turtle.getSpeed() * e * 0.1, 0.0));
+				if (g < 1.0E-5F) {
+					this.mob.setSpeed(0.0F);
+				} else {
+					e /= g;
+					float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
+					this.turtle.setYRot(this.rotlerp(this.turtle.getYRot(), h, 90.0F));
+					this.turtle.yBodyRot = this.turtle.getYRot();
+					float i = (float)(this.speedModifier * this.turtle.getAttributeValue(Attributes.MOVEMENT_SPEED));
+					this.turtle.setSpeed(Mth.lerp(0.125F, this.turtle.getSpeed(), i));
+					this.turtle.setDeltaMovement(this.turtle.getDeltaMovement().add(0.0, (double)this.turtle.getSpeed() * e * 0.1, 0.0));
+				}
 			} else {
 				this.turtle.setSpeed(0.0F);
 			}

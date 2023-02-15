@@ -1,13 +1,21 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.stream.Stream;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.data.loot.packs.UpdateOneTwentyBuiltInLootTables;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.predicate.BlockStatePredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public class DesertWellFeature extends Feature<NoneFeatureConfiguration> {
 	private static final BlockStatePredicate IS_SAND = BlockStatePredicate.forBlock(Blocks.SAND);
@@ -48,6 +56,10 @@ public class DesertWellFeature extends Feature<NoneFeatureConfiguration> {
 				}
 			}
 
+			if (worldGenLevel.enabledFeatures().contains(FeatureFlags.UPDATE_1_20)) {
+				placeSandFloor(worldGenLevel, blockPos, featurePlaceContext.random());
+			}
+
 			worldGenLevel.setBlock(blockPos, this.water, 2);
 
 			for (Direction direction : Direction.Plane.HORIZONTAL) {
@@ -86,5 +98,31 @@ public class DesertWellFeature extends Feature<NoneFeatureConfiguration> {
 
 			return true;
 		}
+	}
+
+	private static void placeSandFloor(WorldGenLevel worldGenLevel, BlockPos blockPos, RandomSource randomSource) {
+		BlockPos blockPos2 = blockPos.offset(0, -1, 0);
+		ObjectArrayList<BlockPos> objectArrayList = Util.make(new ObjectArrayList<>(), objectArrayListx -> {
+			objectArrayListx.add(blockPos2.east());
+			objectArrayListx.add(blockPos2.south());
+			objectArrayListx.add(blockPos2.west());
+			objectArrayListx.add(blockPos2.north());
+		});
+		Util.shuffle(objectArrayList, randomSource);
+		MutableInt mutableInt = new MutableInt(randomSource.nextInt(2, 4));
+		Stream.concat(Stream.of(blockPos2), objectArrayList.stream())
+			.forEach(
+				blockPosx -> {
+					if (mutableInt.getAndDecrement() > 0) {
+						worldGenLevel.setBlock(blockPosx, Blocks.SUSPICIOUS_SAND.defaultBlockState(), 3);
+						worldGenLevel.getBlockEntity(blockPosx, BlockEntityType.SUSPICIOUS_SAND)
+							.ifPresent(
+								suspiciousSandBlockEntity -> suspiciousSandBlockEntity.setLootTable(UpdateOneTwentyBuiltInLootTables.DESERT_WELL_ARCHAEOLOGY, blockPosx.asLong())
+							);
+					} else {
+						worldGenLevel.setBlock(blockPosx, Blocks.SAND.defaultBlockState(), 3);
+					}
+				}
+			);
 	}
 }

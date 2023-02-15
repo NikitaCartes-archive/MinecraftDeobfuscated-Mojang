@@ -118,27 +118,43 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 		static final Map<ResourceLocation, MultiNoiseBiomeSource.Preset> BY_NAME = Maps.<ResourceLocation, MultiNoiseBiomeSource.Preset>newHashMap();
 		public static final MultiNoiseBiomeSource.Preset NETHER = new MultiNoiseBiomeSource.Preset(
 			new ResourceLocation("nether"),
-			holderGetter -> new Climate.ParameterList(
-					ImmutableList.of(
-						Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), holderGetter.getOrThrow(Biomes.NETHER_WASTES)),
-						Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), holderGetter.getOrThrow(Biomes.SOUL_SAND_VALLEY)),
-						Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), holderGetter.getOrThrow(Biomes.CRIMSON_FOREST)),
-						Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), holderGetter.getOrThrow(Biomes.WARPED_FOREST)),
-						Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), holderGetter.getOrThrow(Biomes.BASALT_DELTAS))
-					)
-				)
+			new MultiNoiseBiomeSource.Preset.SourceProvider() {
+				@Override
+				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
+					return new Climate.ParameterList<>(
+						List.of(
+							Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), function.apply(Biomes.NETHER_WASTES)),
+							Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), function.apply(Biomes.SOUL_SAND_VALLEY)),
+							Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), function.apply(Biomes.CRIMSON_FOREST)),
+							Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), function.apply(Biomes.WARPED_FOREST)),
+							Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), function.apply(Biomes.BASALT_DELTAS))
+						)
+					);
+				}
+			}
 		);
-		public static final MultiNoiseBiomeSource.Preset OVERWORLD = new MultiNoiseBiomeSource.Preset(new ResourceLocation("overworld"), holderGetter -> {
-			Builder<Pair<Climate.ParameterPoint, Holder<Biome>>> builder = ImmutableList.builder();
-			new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(holderGetter::getOrThrow)));
-			return new Climate.ParameterList(builder.build());
-		});
+		public static final MultiNoiseBiomeSource.Preset OVERWORLD = new MultiNoiseBiomeSource.Preset(
+			new ResourceLocation("overworld"), new MultiNoiseBiomeSource.Preset.SourceProvider() {
+				@Override
+				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
+					return MultiNoiseBiomeSource.Preset.generateOverworldBiomes(function, OverworldBiomeBuilder.Modifier.NONE);
+				}
+			}
+		);
+		public static final MultiNoiseBiomeSource.Preset OVERWORLD_UPDATE_1_20 = new MultiNoiseBiomeSource.Preset(
+			new ResourceLocation("overworld_update_1_20"), new MultiNoiseBiomeSource.Preset.SourceProvider() {
+				@Override
+				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
+					return MultiNoiseBiomeSource.Preset.generateOverworldBiomes(function, OverworldBiomeBuilder.Modifier.UPDATE_1_20);
+				}
+			}
+		);
 		final ResourceLocation name;
-		private final Function<HolderGetter<Biome>, Climate.ParameterList<Holder<Biome>>> parameterSource;
+		private final MultiNoiseBiomeSource.Preset.SourceProvider parameterSource;
 
-		public Preset(ResourceLocation resourceLocation, Function<HolderGetter<Biome>, Climate.ParameterList<Holder<Biome>>> function) {
+		public Preset(ResourceLocation resourceLocation, MultiNoiseBiomeSource.Preset.SourceProvider sourceProvider) {
 			this.name = resourceLocation;
-			this.parameterSource = function;
+			this.parameterSource = sourceProvider;
 			BY_NAME.put(resourceLocation, this);
 		}
 
@@ -147,8 +163,14 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 			return BY_NAME.entrySet().stream().map(entry -> Pair.of((ResourceLocation)entry.getKey(), (MultiNoiseBiomeSource.Preset)entry.getValue()));
 		}
 
+		static <T> Climate.ParameterList<T> generateOverworldBiomes(Function<ResourceKey<Biome>, T> function, OverworldBiomeBuilder.Modifier modifier) {
+			Builder<Pair<Climate.ParameterPoint, T>> builder = ImmutableList.builder();
+			new OverworldBiomeBuilder(modifier).addBiomes(pair -> builder.add(pair.mapSecond(function)));
+			return new Climate.ParameterList<>(builder.build());
+		}
+
 		MultiNoiseBiomeSource biomeSource(MultiNoiseBiomeSource.PresetInstance presetInstance, boolean bl) {
-			Climate.ParameterList<Holder<Biome>> parameterList = (Climate.ParameterList<Holder<Biome>>)this.parameterSource.apply(presetInstance.biomes());
+			Climate.ParameterList<Holder<Biome>> parameterList = this.parameterSource.apply(resourceKey -> presetInstance.biomes().getOrThrow(resourceKey));
 			return new MultiNoiseBiomeSource(parameterList, bl ? Optional.of(presetInstance) : Optional.empty());
 		}
 
@@ -160,8 +182,13 @@ public class MultiNoiseBiomeSource extends BiomeSource {
 			return this.biomeSource(holderGetter, true);
 		}
 
-		public Stream<ResourceKey<Biome>> possibleBiomes(HolderGetter<Biome> holderGetter) {
-			return this.biomeSource(holderGetter).possibleBiomes().stream().flatMap(holder -> holder.unwrapKey().stream());
+		public Stream<ResourceKey<Biome>> possibleBiomes() {
+			return this.parameterSource.apply(resourceKey -> resourceKey).values().stream().map(Pair::getSecond).distinct();
+		}
+
+		@FunctionalInterface
+		public interface SourceProvider {
+			<T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function);
 		}
 	}
 

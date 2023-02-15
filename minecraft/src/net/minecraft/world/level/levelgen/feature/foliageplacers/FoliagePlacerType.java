@@ -17,6 +17,7 @@ public class FoliagePlacerType<P extends FoliagePlacer> {
 	public static final FoliagePlacerType<RandomSpreadFoliagePlacer> RANDOM_SPREAD_FOLIAGE_PLACER = register(
 		"random_spread_foliage_placer", RandomSpreadFoliagePlacer.CODEC
 	);
+	public static final FoliagePlacerType<CherryFoliagePlacer> CHERRY_FOLIAGE_PLACER = register("cherry_foliage_placer", CherryFoliagePlacer.CODEC);
 	private final Codec<P> codec;
 
 	private static <P extends FoliagePlacer> FoliagePlacerType<P> register(String string, Codec<P> codec) {

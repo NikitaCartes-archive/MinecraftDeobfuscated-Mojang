@@ -1000,15 +1000,11 @@ public class ClientLevel extends Level {
 		}
 
 		public void onTickingStart(Entity entity) {
-			if (entity.getType().isTicking()) {
-				ClientLevel.this.tickingEntities.add(entity);
-			}
+			ClientLevel.this.tickingEntities.add(entity);
 		}
 
 		public void onTickingEnd(Entity entity) {
-			if (entity.getType().isTicking()) {
-				ClientLevel.this.tickingEntities.remove(entity);
-			}
+			ClientLevel.this.tickingEntities.remove(entity);
 		}
 
 		public void onTrackingStart(Entity entity) {

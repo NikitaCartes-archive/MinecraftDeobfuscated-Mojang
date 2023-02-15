@@ -1,13 +1,17 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -21,6 +25,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 	public static final int WIDTH = 21;
 	public static final int DEPTH = 21;
 	private final boolean[] hasPlacedChest = new boolean[4];
+	private final List<BlockPos> potentialSuspiciousSandWorldPositions = new ArrayList();
 
 	public DesertPyramidPiece(RandomSource randomSource, int i, int j) {
 		super(StructurePieceType.DESERT_PYRAMID_PIECE, i, 64, j, 21, 15, 21, getRandomHorizontalDirection(randomSource));
@@ -302,6 +307,131 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 					);
 				}
 			}
+
+			if (worldGenLevel.enabledFeatures().contains(FeatureFlags.UPDATE_1_20)) {
+				this.addCellar(worldGenLevel, boundingBox);
+			}
 		}
+	}
+
+	private void addCellar(WorldGenLevel worldGenLevel, BoundingBox boundingBox) {
+		BlockPos blockPos = new BlockPos(16, -4, 13);
+		this.addCellarStairs(blockPos, worldGenLevel, boundingBox);
+		this.addCellarRoom(blockPos, worldGenLevel, boundingBox);
+	}
+
+	private void addCellarStairs(BlockPos blockPos, WorldGenLevel worldGenLevel, BoundingBox boundingBox) {
+		int i = blockPos.getX();
+		int j = blockPos.getY();
+		int k = blockPos.getZ();
+		BlockState blockState = Blocks.SANDSTONE_STAIRS.defaultBlockState();
+		this.placeBlock(worldGenLevel, blockState.rotate(Rotation.COUNTERCLOCKWISE_90), 12, 0, 17, boundingBox);
+		this.placeBlock(worldGenLevel, blockState.rotate(Rotation.COUNTERCLOCKWISE_90), 13, -1, 17, boundingBox);
+		this.placeBlock(worldGenLevel, blockState.rotate(Rotation.COUNTERCLOCKWISE_90), 14, -2, 17, boundingBox);
+		this.placeBlock(worldGenLevel, blockState.rotate(Rotation.COUNTERCLOCKWISE_90), 15, -3, 17, boundingBox);
+		BlockState blockState2 = Blocks.SAND.defaultBlockState();
+		BlockState blockState3 = Blocks.SANDSTONE.defaultBlockState();
+		boolean bl = worldGenLevel.getRandom().nextBoolean();
+		this.placeBlock(worldGenLevel, blockState2, i - 4, j + 4, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i - 3, j + 4, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i - 2, j + 4, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i - 1, j + 4, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i, j + 4, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i - 2, j + 3, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i - 1, j + 3, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i, j + 3, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i - 1, j + 2, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, bl ? blockState2 : blockState3, i, j + 2, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, bl ? blockState2 : blockState3, i, j + 1, k + 4, boundingBox);
+	}
+
+	private void addCellarRoom(BlockPos blockPos, WorldGenLevel worldGenLevel, BoundingBox boundingBox) {
+		int i = blockPos.getX();
+		int j = blockPos.getY();
+		int k = blockPos.getZ();
+		BlockState blockState = Blocks.CUT_SANDSTONE.defaultBlockState();
+		BlockState blockState2 = Blocks.CHISELED_SANDSTONE.defaultBlockState();
+		this.generateBox(worldGenLevel, boundingBox, i - 3, j + 1, k - 3, i - 3, j + 1, k + 2, blockState, blockState, true);
+		this.generateBox(worldGenLevel, boundingBox, i + 3, j + 1, k - 3, i + 3, j + 1, k + 2, blockState, blockState, true);
+		this.generateBox(worldGenLevel, boundingBox, i - 3, j + 1, k - 3, i + 3, j + 1, k - 2, blockState, blockState, true);
+		this.generateBox(worldGenLevel, boundingBox, i - 3, j + 1, k + 3, i + 3, j + 1, k + 3, blockState, blockState, true);
+		this.generateBox(worldGenLevel, boundingBox, i - 3, j + 2, k - 3, i - 3, j + 2, k + 2, blockState2, blockState2, true);
+		this.generateBox(worldGenLevel, boundingBox, i + 3, j + 2, k - 3, i + 3, j + 2, k + 2, blockState2, blockState2, true);
+		this.generateBox(worldGenLevel, boundingBox, i - 3, j + 2, k - 3, i + 3, j + 2, k - 2, blockState2, blockState2, true);
+		this.generateBox(worldGenLevel, boundingBox, i - 3, j + 2, k + 3, i + 3, j + 2, k + 3, blockState2, blockState2, true);
+		this.generateBox(worldGenLevel, boundingBox, i - 3, -1, k - 3, i - 3, -1, k + 2, blockState, blockState, true);
+		this.generateBox(worldGenLevel, boundingBox, i + 3, -1, k - 3, i + 3, -1, k + 2, blockState, blockState, true);
+		this.generateBox(worldGenLevel, boundingBox, i - 3, -1, k - 3, i + 3, -1, k - 2, blockState, blockState, true);
+		this.generateBox(worldGenLevel, boundingBox, i - 3, -1, k + 3, i + 3, -1, k + 3, blockState, blockState, true);
+		this.placeSandBox(boundingBox, i - 2, j + 1, k - 2, i + 2, j + 3, k + 2);
+		this.placeCollapsedRoof(worldGenLevel, boundingBox, i - 2, j + 4, k - 2, i + 2, k + 2);
+		BlockState blockState3 = Blocks.ORANGE_TERRACOTTA.defaultBlockState();
+		BlockState blockState4 = Blocks.BLUE_TERRACOTTA.defaultBlockState();
+		this.placeBlock(worldGenLevel, blockState4, i, j, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i + 1, j, k - 1, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i + 1, j, k + 1, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i - 1, j, k - 1, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i - 1, j, k + 1, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i + 2, j, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i - 2, j, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i, j, k + 2, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i, j, k - 2, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i + 3, j, k, boundingBox);
+		this.placeSand(i + 3, j + 1, k, boundingBox);
+		this.placeSand(i + 3, j + 2, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState, i + 4, j + 1, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i + 4, j + 2, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i - 3, j, k, boundingBox);
+		this.placeSand(i - 3, j + 1, k, boundingBox);
+		this.placeSand(i - 3, j + 2, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState, i - 4, j + 1, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i - 4, j + 2, k, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i, j, k + 3, boundingBox);
+		this.placeSand(i, j + 1, k + 3, boundingBox);
+		this.placeSand(i, j + 2, k + 3, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i, j, k - 3, boundingBox);
+		this.placeSand(i, j + 1, k - 3, boundingBox);
+		this.placeSand(i, j + 2, k - 3, boundingBox);
+		this.placeBlock(worldGenLevel, blockState, i, j + 1, k - 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i, -2, k - 4, boundingBox);
+	}
+
+	private void placeSand(int i, int j, int k, BoundingBox boundingBox) {
+		BlockPos blockPos = this.getWorldPos(i, j, k);
+		if (boundingBox.isInside(blockPos)) {
+			this.potentialSuspiciousSandWorldPositions.add(blockPos);
+		}
+	}
+
+	private void placeSandBox(BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {
+		for (int o = j; o <= m; o++) {
+			for (int p = i; p <= l; p++) {
+				for (int q = k; q <= n; q++) {
+					this.placeSand(p, o, q, boundingBox);
+				}
+			}
+		}
+	}
+
+	private void placeCollapsedRoofPiece(WorldGenLevel worldGenLevel, int i, int j, int k, BoundingBox boundingBox) {
+		if (worldGenLevel.getRandom().nextBoolean()) {
+			BlockState blockState = Blocks.SANDSTONE.defaultBlockState();
+			this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
+		} else {
+			BlockState blockState = Blocks.SAND.defaultBlockState();
+			this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
+		}
+	}
+
+	private void placeCollapsedRoof(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m) {
+		for (int n = i; n <= l; n++) {
+			for (int o = k; o <= m; o++) {
+				this.placeCollapsedRoofPiece(worldGenLevel, n, j, o, boundingBox);
+			}
+		}
+	}
+
+	public List<BlockPos> getPotentialSuspiciousSandWorldPositions() {
+		return this.potentialSuspiciousSandWorldPositions;
 	}
 }

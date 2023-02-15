@@ -427,9 +427,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 
 	@Override
 	public boolean stillValid(Player player) {
-		return this.level.getBlockEntity(this.worldPosition) != this
-			? false
-			: player.distanceToSqr((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5) <= 64.0;
+		return Container.stillValidBlockEntity(this, player);
 	}
 
 	@Override

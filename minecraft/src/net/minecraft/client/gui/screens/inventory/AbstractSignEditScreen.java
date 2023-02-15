@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
@@ -159,12 +160,14 @@ public abstract class AbstractSignEditScreen extends Screen {
 				}
 
 				float f = (float)(-this.minecraft.font.width(string) / 2);
-				this.minecraft.font.drawInBatch(string, f, (float)(n * this.sign.getTextLineHeight() - l), i, false, matrix4f, bufferSource, false, 0, 15728880, false);
+				this.minecraft
+					.font
+					.drawInBatch(string, f, (float)(n * this.sign.getTextLineHeight() - l), i, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, false);
 				if (n == this.line && j >= 0 && bl) {
 					int o = this.minecraft.font.width(string.substring(0, Math.max(Math.min(j, string.length()), 0)));
 					int p = o - this.minecraft.font.width(string) / 2;
 					if (j >= string.length()) {
-						this.minecraft.font.drawInBatch("_", (float)p, (float)m, i, false, matrix4f, bufferSource, false, 0, 15728880, false);
+						this.minecraft.font.drawInBatch("_", (float)p, (float)m, i, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, false);
 					}
 				}
 			}

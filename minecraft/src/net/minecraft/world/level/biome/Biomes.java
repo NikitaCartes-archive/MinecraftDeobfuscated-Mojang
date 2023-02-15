@@ -35,6 +35,7 @@ public abstract class Biomes {
 	public static final ResourceKey<Biome> ERODED_BADLANDS = register("eroded_badlands");
 	public static final ResourceKey<Biome> WOODED_BADLANDS = register("wooded_badlands");
 	public static final ResourceKey<Biome> MEADOW = register("meadow");
+	public static final ResourceKey<Biome> CHERRY_GROVE = register("cherry_grove");
 	public static final ResourceKey<Biome> GROVE = register("grove");
 	public static final ResourceKey<Biome> SNOWY_SLOPES = register("snowy_slopes");
 	public static final ResourceKey<Biome> FROZEN_PEAKS = register("frozen_peaks");

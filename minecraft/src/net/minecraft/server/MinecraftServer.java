@@ -1,5 +1,6 @@
 package net.minecraft.server;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -11,6 +12,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,12 +22,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -159,7 +160,6 @@ import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements CommandSource, AutoCloseable {
@@ -196,7 +196,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private boolean debugCommandProfilerDelayStart;
 	private final ServerConnectionListener connection;
 	private final ChunkProgressListenerFactory progressListenerFactory;
-	private final ServerStatus status = new ServerStatus();
+	@Nullable
+	private ServerStatus status;
+	@Nullable
+	private ServerStatus.Favicon statusIcon;
 	private final RandomSource random = RandomSource.create();
 	private final DataFixer fixerUpper;
 	private String localIp;
@@ -657,10 +660,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			}
 
 			this.nextTickTime = Util.getMillis();
-			this.status.setDescription(Component.literal(this.motd));
-			this.status.setVersion(new ServerStatus.Version(SharedConstants.getCurrentVersion().getName(), SharedConstants.getCurrentVersion().getProtocolVersion()));
-			this.status.setEnforcesSecureChat(this.enforceSecureProfile());
-			this.updateStatusIcon(this.status);
+			this.statusIcon = (ServerStatus.Favicon)this.loadStatusIcon().orElse(null);
+			this.status = this.buildServerStatus();
 
 			while (this.running) {
 				long l = Util.getMillis() - this.nextTickTime;
@@ -784,23 +785,21 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		super.doRunTask(tickTask);
 	}
 
-	private void updateStatusIcon(ServerStatus serverStatus) {
-		Optional<File> optional = Optional.of(this.getFile("server-icon.png")).filter(File::isFile);
-		if (!optional.isPresent()) {
-			optional = this.storageSource.getIconFile().map(Path::toFile).filter(File::isFile);
-		}
-
-		optional.ifPresent(file -> {
+	private Optional<ServerStatus.Favicon> loadStatusIcon() {
+		Optional<Path> optional = Optional.of(this.getFile("server-icon.png").toPath())
+			.filter(path -> Files.isRegularFile(path, new LinkOption[0]))
+			.or(() -> this.storageSource.getIconFile().filter(path -> Files.isRegularFile(path, new LinkOption[0])));
+		return optional.flatMap(path -> {
 			try {
-				BufferedImage bufferedImage = ImageIO.read(file);
-				Validate.validState(bufferedImage.getWidth() == 64, "Must be 64 pixels wide");
-				Validate.validState(bufferedImage.getHeight() == 64, "Must be 64 pixels high");
+				BufferedImage bufferedImage = ImageIO.read(path.toFile());
+				Preconditions.checkState(bufferedImage.getWidth() == 64, "Must be 64 pixels wide");
+				Preconditions.checkState(bufferedImage.getHeight() == 64, "Must be 64 pixels high");
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				ImageIO.write(bufferedImage, "PNG", byteArrayOutputStream);
-				byte[] bs = Base64.getEncoder().encode(byteArrayOutputStream.toByteArray());
-				serverStatus.setFavicon("data:image/png;base64," + new String(bs, StandardCharsets.UTF_8));
-			} catch (Exception var5) {
-				LOGGER.error("Couldn't load server icon", (Throwable)var5);
+				return Optional.of(new ServerStatus.Favicon(byteArrayOutputStream.toByteArray()));
+			} catch (Exception var3) {
+				LOGGER.error("Couldn't load server icon", (Throwable)var3);
+				return Optional.empty();
 			}
 		});
 	}
@@ -825,23 +824,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.tickChildren(booleanSupplier);
 		if (l - this.lastServerStatus >= 5000000000L) {
 			this.lastServerStatus = l;
-			this.status.setPlayers(new ServerStatus.Players(this.getMaxPlayers(), this.getPlayerCount()));
-			if (!this.hidesOnlinePlayers()) {
-				GameProfile[] gameProfiles = new GameProfile[Math.min(this.getPlayerCount(), 12)];
-				int i = Mth.nextInt(this.random, 0, this.getPlayerCount() - gameProfiles.length);
-
-				for (int j = 0; j < gameProfiles.length; j++) {
-					ServerPlayer serverPlayer = (ServerPlayer)this.playerList.getPlayers().get(i + j);
-					if (serverPlayer.allowsListing()) {
-						gameProfiles[j] = serverPlayer.getGameProfile();
-					} else {
-						gameProfiles[j] = ANONYMOUS_PLAYER_PROFILE;
-					}
-				}
-
-				Collections.shuffle(Arrays.asList(gameProfiles));
-				this.status.getPlayers().setSample(gameProfiles);
-			}
+			this.status = this.buildServerStatus();
 		}
 
 		if (this.tickCount % 6000 == 0) {
@@ -858,6 +841,37 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		long n = Util.getNanos();
 		this.frameTimer.logFrameDuration(n - l);
 		this.profiler.pop();
+	}
+
+	private ServerStatus buildServerStatus() {
+		ServerStatus.Players players = this.buildPlayerStatus();
+		return new ServerStatus(
+			Component.nullToEmpty(this.motd),
+			Optional.of(players),
+			Optional.of(ServerStatus.Version.current()),
+			Optional.ofNullable(this.statusIcon),
+			this.enforceSecureProfile()
+		);
+	}
+
+	private ServerStatus.Players buildPlayerStatus() {
+		List<ServerPlayer> list = this.playerList.getPlayers();
+		int i = this.getMaxPlayers();
+		if (this.hidesOnlinePlayers()) {
+			return new ServerStatus.Players(i, list.size(), List.of());
+		} else {
+			int j = Math.min(list.size(), 12);
+			ObjectArrayList<GameProfile> objectArrayList = new ObjectArrayList<>(j);
+			int k = Mth.nextInt(this.random, 0, list.size() - j);
+
+			for (int l = 0; l < j; l++) {
+				ServerPlayer serverPlayer = (ServerPlayer)list.get(k + l);
+				objectArrayList.add(serverPlayer.allowsListing() ? serverPlayer.getGameProfile() : ANONYMOUS_PLAYER_PROFILE);
+			}
+
+			Util.shuffle(objectArrayList, this.random);
+			return new ServerStatus.Players(i, list.size(), objectArrayList);
+		}
 	}
 
 	public void tickChildren(BooleanSupplier booleanSupplier) {
@@ -1231,6 +1245,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return this.services.profileCache();
 	}
 
+	@Nullable
 	public ServerStatus getStatus() {
 		return this.status;
 	}

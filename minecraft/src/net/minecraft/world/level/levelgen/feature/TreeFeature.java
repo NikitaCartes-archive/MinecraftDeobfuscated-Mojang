@@ -69,7 +69,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		BlockPos blockPos,
 		BiConsumer<BlockPos, BlockState> biConsumer,
 		BiConsumer<BlockPos, BlockState> biConsumer2,
-		BiConsumer<BlockPos, BlockState> biConsumer3,
+		FoliagePlacer.FoliageSetter foliageSetter,
 		TreeConfiguration treeConfiguration
 	) {
 		int i = treeConfiguration.trunkPlacer.getTreeHeight(randomSource);
@@ -91,7 +91,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 						.placeTrunk(worldGenLevel, biConsumer2, randomSource, o, blockPos2, treeConfiguration);
 					list.forEach(
 						foliageAttachment -> treeConfiguration.foliagePlacer
-								.createFoliage(worldGenLevel, biConsumer3, randomSource, treeConfiguration, o, foliageAttachment, j, l)
+								.createFoliage(worldGenLevel, foliageSetter, randomSource, treeConfiguration, o, foliageAttachment, j, l)
 					);
 					return true;
 				}
@@ -130,13 +130,13 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 
 	@Override
 	public final boolean place(FeaturePlaceContext<TreeConfiguration> featurePlaceContext) {
-		WorldGenLevel worldGenLevel = featurePlaceContext.level();
+		final WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		RandomSource randomSource = featurePlaceContext.random();
 		BlockPos blockPos = featurePlaceContext.origin();
 		TreeConfiguration treeConfiguration = featurePlaceContext.config();
 		Set<BlockPos> set = Sets.<BlockPos>newHashSet();
 		Set<BlockPos> set2 = Sets.<BlockPos>newHashSet();
-		Set<BlockPos> set3 = Sets.<BlockPos>newHashSet();
+		final Set<BlockPos> set3 = Sets.<BlockPos>newHashSet();
 		Set<BlockPos> set4 = Sets.<BlockPos>newHashSet();
 		BiConsumer<BlockPos, BlockState> biConsumer = (blockPosx, blockState) -> {
 			set.add(blockPosx.immutable());
@@ -146,18 +146,26 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 			set2.add(blockPosx.immutable());
 			worldGenLevel.setBlock(blockPosx, blockState, 19);
 		};
-		BiConsumer<BlockPos, BlockState> biConsumer3 = (blockPosx, blockState) -> {
-			set3.add(blockPosx.immutable());
-			worldGenLevel.setBlock(blockPosx, blockState, 19);
+		FoliagePlacer.FoliageSetter foliageSetter = new FoliagePlacer.FoliageSetter() {
+			@Override
+			public void set(BlockPos blockPos, BlockState blockState) {
+				set3.add(blockPos.immutable());
+				worldGenLevel.setBlock(blockPos, blockState, 19);
+			}
+
+			@Override
+			public boolean isSet(BlockPos blockPos) {
+				return set3.contains(blockPos);
+			}
 		};
-		BiConsumer<BlockPos, BlockState> biConsumer4 = (blockPosx, blockState) -> {
+		BiConsumer<BlockPos, BlockState> biConsumer3 = (blockPosx, blockState) -> {
 			set4.add(blockPosx.immutable());
 			worldGenLevel.setBlock(blockPosx, blockState, 19);
 		};
-		boolean bl = this.doPlace(worldGenLevel, randomSource, blockPos, biConsumer, biConsumer2, biConsumer3, treeConfiguration);
+		boolean bl = this.doPlace(worldGenLevel, randomSource, blockPos, biConsumer, biConsumer2, foliageSetter, treeConfiguration);
 		if (bl && (!set2.isEmpty() || !set3.isEmpty())) {
 			if (!treeConfiguration.decorators.isEmpty()) {
-				TreeDecorator.Context context = new TreeDecorator.Context(worldGenLevel, biConsumer4, randomSource, set2, set3, set);
+				TreeDecorator.Context context = new TreeDecorator.Context(worldGenLevel, biConsumer3, randomSource, set2, set3, set);
 				treeConfiguration.decorators.forEach(treeDecorator -> treeDecorator.place(context));
 			}
 

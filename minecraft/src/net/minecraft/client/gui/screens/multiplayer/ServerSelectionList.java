@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.multiplayer;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -8,9 +9,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.Nullable;
@@ -38,7 +39,6 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -227,7 +227,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		private final ServerData serverData;
 		private final ResourceLocation iconLocation;
 		@Nullable
-		private String lastIconB64;
+		private byte[] lastIconBytes;
 		@Nullable
 		private DynamicTexture icon;
 		private long lastClickTime;
@@ -318,12 +318,12 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
 			GuiComponent.blit(poseStack, k + l - 15, j, (float)(r * 10), (float)(176 + s * 8), 10, 8, 256, 256);
-			String string = this.serverData.getIconB64();
-			if (!Objects.equals(string, this.lastIconB64)) {
-				if (this.uploadServerIcon(string)) {
-					this.lastIconB64 = string;
+			byte[] bs = this.serverData.getIconBytes();
+			if (!Arrays.equals(bs, this.lastIconBytes)) {
+				if (this.uploadServerIcon(bs)) {
+					this.lastIconBytes = bs;
 				} else {
-					this.serverData.setIconB64(null);
+					this.serverData.setIconBytes(null);
 					this.updateServerList();
 				}
 			}
@@ -397,8 +397,8 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			return true;
 		}
 
-		private boolean uploadServerIcon(@Nullable String string) {
-			if (string == null) {
+		private boolean uploadServerIcon(@Nullable byte[] bs) {
+			if (bs == null) {
 				this.minecraft.getTextureManager().release(this.iconLocation);
 				if (this.icon != null && this.icon.getPixels() != null) {
 					this.icon.getPixels().close();
@@ -407,9 +407,9 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				this.icon = null;
 			} else {
 				try {
-					NativeImage nativeImage = NativeImage.fromBase64(string);
-					Validate.validState(nativeImage.getWidth() == 64, "Must be 64 pixels wide");
-					Validate.validState(nativeImage.getHeight() == 64, "Must be 64 pixels high");
+					NativeImage nativeImage = NativeImage.read(bs);
+					Preconditions.checkState(nativeImage.getWidth() == 64, "Must be 64 pixels wide");
+					Preconditions.checkState(nativeImage.getHeight() == 64, "Must be 64 pixels high");
 					if (this.icon == null) {
 						this.icon = new DynamicTexture(nativeImage);
 					} else {
@@ -513,7 +513,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				if (this.serverData.players != null) {
 					mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
 					mutableComponent.append(
-						Component.translatable("multiplayer.status.player_count.narration", this.serverData.players.getNumPlayers(), this.serverData.players.getMaxPlayers())
+						Component.translatable("multiplayer.status.player_count.narration", this.serverData.players.online(), this.serverData.players.max())
 					);
 					mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
 					mutableComponent.append(ComponentUtils.formatList(this.serverData.playerList, Component.literal(", ")));

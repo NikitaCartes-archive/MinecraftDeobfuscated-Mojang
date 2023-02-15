@@ -593,10 +593,10 @@ public class DebugScreenOverlay extends GuiComponent {
 		int p = j >> 16 & 0xFF;
 		int q = j >> 8 & 0xFF;
 		int r = j & 0xFF;
-		int s = Mth.clamp(Mth.lerp(f, k, o), 0, 255);
-		int t = Mth.clamp(Mth.lerp(f, l, p), 0, 255);
-		int u = Mth.clamp(Mth.lerp(f, m, q), 0, 255);
-		int v = Mth.clamp(Mth.lerp(f, n, r), 0, 255);
+		int s = Mth.clamp((int)Mth.lerp(f, (float)k, (float)o), 0, 255);
+		int t = Mth.clamp((int)Mth.lerp(f, (float)l, (float)p), 0, 255);
+		int u = Mth.clamp((int)Mth.lerp(f, (float)m, (float)q), 0, 255);
+		int v = Mth.clamp((int)Mth.lerp(f, (float)n, (float)r), 0, 255);
 		return s << 24 | t << 16 | u << 8 | v;
 	}
 

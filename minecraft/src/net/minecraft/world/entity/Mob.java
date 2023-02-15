@@ -72,7 +72,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.storage.loot.LootContext;
 
-public abstract class Mob extends LivingEntity {
+public abstract class Mob extends LivingEntity implements Targeting {
 	private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
 	private static final int MOB_FLAG_NO_AI = 1;
 	private static final int MOB_FLAG_LEFTHANDED = 2;
@@ -200,6 +200,7 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	@Nullable
+	@Override
 	public LivingEntity getTarget() {
 		return this.target;
 	}

@@ -134,6 +134,10 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 				if (useAnim == UseAnim.TOOT_HORN) {
 					return HumanoidModel.ArmPose.TOOT_HORN;
 				}
+
+				if (useAnim == UseAnim.BRUSH) {
+					return HumanoidModel.ArmPose.BRUSH;
+				}
 			} else if (!abstractClientPlayer.swinging && itemStack.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack)) {
 				return HumanoidModel.ArmPose.CROSSBOW_HOLD;
 			}
@@ -210,7 +214,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			}
 
 			Vec3 vec3 = abstractClientPlayer.getViewVector(h);
-			Vec3 vec32 = abstractClientPlayer.getDeltaMovement();
+			Vec3 vec32 = abstractClientPlayer.getDeltaMovementLerped(h);
 			double d = vec32.horizontalDistanceSqr();
 			double e = vec3.horizontalDistanceSqr();
 			if (d > 0.0 && e > 0.0) {

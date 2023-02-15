@@ -2,19 +2,17 @@ package net.minecraft.world.level.block;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -24,7 +22,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class JukeboxBlock extends BaseEntityBlock {
@@ -48,51 +45,21 @@ public class JukeboxBlock extends BaseEntityBlock {
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if ((Boolean)blockState.getValue(HAS_RECORD)) {
-			this.dropRecording(level, blockPos);
-			blockState = blockState.setValue(HAS_RECORD, Boolean.valueOf(false));
-			level.gameEvent(GameEvent.JUKEBOX_STOP_PLAY, blockPos, GameEvent.Context.of(blockState));
-			level.setBlock(blockPos, blockState, 2);
-			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState));
+		if ((Boolean)blockState.getValue(HAS_RECORD) && level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
+			jukeboxBlockEntity.popOutRecord();
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}
 	}
 
-	public void setRecord(@Nullable Entity entity, LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
-		if (levelAccessor.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
-			jukeboxBlockEntity.setRecord(itemStack.copy());
-			jukeboxBlockEntity.playRecord();
-			levelAccessor.setBlock(blockPos, blockState.setValue(HAS_RECORD, Boolean.valueOf(true)), 2);
-			levelAccessor.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, blockState));
-		}
-	}
-
-	private void dropRecording(Level level, BlockPos blockPos) {
-		if (!level.isClientSide) {
-			if (level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
-				ItemStack itemStack = jukeboxBlockEntity.getRecord();
-				if (!itemStack.isEmpty()) {
-					level.levelEvent(1010, blockPos, 0);
-					jukeboxBlockEntity.clearContent();
-					float f = 0.7F;
-					double d = (double)(level.random.nextFloat() * 0.7F) + 0.15F;
-					double e = (double)(level.random.nextFloat() * 0.7F) + 0.060000002F + 0.6;
-					double g = (double)(level.random.nextFloat() * 0.7F) + 0.15F;
-					ItemStack itemStack2 = itemStack.copy();
-					ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + g, itemStack2);
-					itemEntity.setDefaultPickUpDelay();
-					level.addFreshEntity(itemEntity);
-				}
-			}
-		}
-	}
-
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState.is(blockState2.getBlock())) {
-			this.dropRecording(level, blockPos);
+			if (level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
+				jukeboxBlockEntity.popOutRecord();
+			}
+
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
 		}
 	}
@@ -103,18 +70,29 @@ public class JukeboxBlock extends BaseEntityBlock {
 	}
 
 	@Override
+	public boolean isSignalSource(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+		if (blockGetter.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity && jukeboxBlockEntity.isRecordPlaying()) {
+			return 15;
+		}
+
+		return 0;
+	}
+
+	@Override
 	public boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
 	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof JukeboxBlockEntity) {
-			Item item = ((JukeboxBlockEntity)blockEntity).getRecord().getItem();
-			if (item instanceof RecordItem) {
-				return ((RecordItem)item).getAnalogOutput();
-			}
+		if (level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity
+			&& jukeboxBlockEntity.getFirstItem().getItem() instanceof RecordItem recordItem) {
+			return recordItem.getAnalogOutput();
 		}
 
 		return 0;

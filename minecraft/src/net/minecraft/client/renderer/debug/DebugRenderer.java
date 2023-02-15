@@ -175,7 +175,9 @@ public class DebugRenderer {
 			poseStack.scale(-g, -g, g);
 			float m = bl ? (float)(-font.width(string)) / 2.0F : 0.0F;
 			m -= h / g;
-			font.drawInBatch(string, m, 0.0F, i, false, poseStack.last().pose(), multiBufferSource, bl2, 0, 15728880);
+			font.drawInBatch(
+				string, m, 0.0F, i, false, poseStack.last().pose(), multiBufferSource, bl2 ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, 0, 15728880
+			);
 			poseStack.popPose();
 		}
 	}

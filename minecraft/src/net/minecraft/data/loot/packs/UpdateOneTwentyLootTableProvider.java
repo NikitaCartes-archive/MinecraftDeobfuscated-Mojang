@@ -15,7 +15,8 @@ public class UpdateOneTwentyLootTableProvider {
 				new LootTableProvider.SubProviderEntry(UpdateOneTwentyFishingLoot::new, LootContextParamSets.FISHING),
 				new LootTableProvider.SubProviderEntry(UpdateOneTwentyBlockLoot::new, LootContextParamSets.BLOCK),
 				new LootTableProvider.SubProviderEntry(UpdateOneTwentyChestLoot::new, LootContextParamSets.CHEST),
-				new LootTableProvider.SubProviderEntry(UpdateOneTwentyEntityLoot::new, LootContextParamSets.ENTITY)
+				new LootTableProvider.SubProviderEntry(UpdateOneTwentyEntityLoot::new, LootContextParamSets.ENTITY),
+				new LootTableProvider.SubProviderEntry(UpdateOneTwentyArchaeologyLoot::new, LootContextParamSets.ARCHAEOLOGY)
 			)
 		);
 	}

@@ -32,6 +32,7 @@ public final class OverworldBiomeBuilder {
 	public static final float EROSION_INDEX_2_START = -0.375F;
 	private static final float EROSION_DEEP_DARK_DRYNESS_THRESHOLD = -0.225F;
 	private static final float DEPTH_DEEP_DARK_DRYNESS_THRESHOLD = 0.9F;
+	private final OverworldBiomeBuilder.Modifier modifier;
 	private final Climate.Parameter FULL_RANGE = Climate.Parameter.span(-1.0F, 1.0F);
 	private final Climate.Parameter[] temperatures = new Climate.Parameter[]{
 		Climate.Parameter.span(-1.0F, -0.45F),
@@ -93,8 +94,8 @@ public final class OverworldBiomeBuilder {
 	};
 	private final ResourceKey<Biome>[][] PLATEAU_BIOMES_VARIANT = new ResourceKey[][]{
 		{Biomes.ICE_SPIKES, null, null, null, null},
-		{null, null, Biomes.MEADOW, Biomes.MEADOW, Biomes.OLD_GROWTH_PINE_TAIGA},
-		{null, null, Biomes.FOREST, Biomes.BIRCH_FOREST, null},
+		{Biomes.CHERRY_GROVE, null, Biomes.MEADOW, Biomes.MEADOW, Biomes.OLD_GROWTH_PINE_TAIGA},
+		{Biomes.CHERRY_GROVE, Biomes.CHERRY_GROVE, Biomes.FOREST, Biomes.BIRCH_FOREST, null},
 		{null, null, null, null, null},
 		{Biomes.ERODED_BADLANDS, Biomes.ERODED_BADLANDS, null, null, null}
 	};
@@ -105,6 +106,14 @@ public final class OverworldBiomeBuilder {
 		{null, null, null, null, null},
 		{null, null, null, null, null}
 	};
+
+	public OverworldBiomeBuilder() {
+		this(OverworldBiomeBuilder.Modifier.NONE);
+	}
+
+	public OverworldBiomeBuilder(OverworldBiomeBuilder.Modifier modifier) {
+		this.modifier = modifier;
+	}
 
 	public List<Climate.ParameterPoint> spawnTarget() {
 		Climate.Parameter parameter = Climate.Parameter.point(0.0F);
@@ -868,12 +877,10 @@ public final class OverworldBiomeBuilder {
 	}
 
 	private ResourceKey<Biome> pickPlateauBiome(int i, int j, Climate.Parameter parameter) {
-		if (parameter.max() < 0L) {
-			return this.PLATEAU_BIOMES[i][j];
-		} else {
-			ResourceKey<Biome> resourceKey = this.PLATEAU_BIOMES_VARIANT[i][j];
-			return resourceKey == null ? this.PLATEAU_BIOMES[i][j] : resourceKey;
-		}
+		ResourceKey<Biome> resourceKey = this.PLATEAU_BIOMES_VARIANT[i][j];
+		return parameter.max() >= 0L && resourceKey != null && (resourceKey != Biomes.CHERRY_GROVE || this.modifier == OverworldBiomeBuilder.Modifier.UPDATE_1_20)
+			? resourceKey
+			: this.PLATEAU_BIOMES[i][j];
 	}
 
 	private ResourceKey<Biome> pickPeakBiome(int i, int j, Climate.Parameter parameter) {
@@ -1036,5 +1043,10 @@ public final class OverworldBiomeBuilder {
 	@VisibleForDebug
 	public Climate.Parameter[] getWeirdnessThresholds() {
 		return new Climate.Parameter[]{Climate.Parameter.span(-2.0F, 0.0F), Climate.Parameter.span(0.0F, 2.0F)};
+	}
+
+	public static enum Modifier {
+		NONE,
+		UPDATE_1_20;
 	}
 }

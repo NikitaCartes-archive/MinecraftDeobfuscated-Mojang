@@ -54,6 +54,10 @@ public class PlayerTrigger extends SimpleCriterionTrigger<PlayerTrigger.TriggerI
 			return new PlayerTrigger.TriggerInstance(CriteriaTriggers.AVOID_VIBRATION.id, EntityPredicate.Composite.ANY);
 		}
 
+		public static PlayerTrigger.TriggerInstance tick() {
+			return new PlayerTrigger.TriggerInstance(CriteriaTriggers.TICK.id, EntityPredicate.Composite.ANY);
+		}
+
 		public static PlayerTrigger.TriggerInstance walkOnBlockWithEquipment(Block block, Item item) {
 			return located(
 				EntityPredicate.Builder.entity()

@@ -57,4 +57,5 @@ public class EntityEvent {
 	public static final byte POOF = 60;
 	public static final byte TENDRILS_SHIVER = 61;
 	public static final byte SONIC_CHARGE = 62;
+	public static final byte SNIFFER_DIGGING_SOUND = 63;
 }

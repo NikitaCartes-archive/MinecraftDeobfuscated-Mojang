@@ -93,6 +93,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
@@ -1221,11 +1222,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
 						multiBufferSource = outlineBufferSource;
 						int i = entity.getTeamColor();
-						int j = 255;
-						int k = i >> 16 & 0xFF;
-						int m = i >> 8 & 0xFF;
-						int n = i & 0xFF;
-						outlineBufferSource.setColor(k, m, n, 255);
+						outlineBufferSource.setColor(FastColor.ARGB32.red(i), FastColor.ARGB32.green(i), FastColor.ARGB32.blue(i), 255);
 					} else {
 						multiBufferSource = bufferSource;
 					}
@@ -1253,11 +1250,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					poseStack.translate((double)blockPos2.getX() - d, (double)blockPos2.getY() - e, (double)blockPos2.getZ() - g);
 					SortedSet<BlockDestructionProgress> sortedSet = this.destructionProgress.get(blockPos2.asLong());
 					if (sortedSet != null && !sortedSet.isEmpty()) {
-						int m = ((BlockDestructionProgress)sortedSet.last()).getProgress();
-						if (m >= 0) {
+						int j = ((BlockDestructionProgress)sortedSet.last()).getProgress();
+						if (j >= 0) {
 							PoseStack.Pose pose = poseStack.last();
 							VertexConsumer vertexConsumer = new SheetedDecalTextureGenerator(
-								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(m)), pose.pose(), pose.normal(), 1.0F
+								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(j)), pose.pose(), pose.normal(), 1.0F
 							);
 							multiBufferSource2 = renderType -> {
 								VertexConsumer vertexConsumer2x = bufferSource.getBuffer(renderType);
@@ -1303,18 +1300,18 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		for (Entry<SortedSet<BlockDestructionProgress>> entry : this.destructionProgress.long2ObjectEntrySet()) {
 			BlockPos blockPos = BlockPos.of(entry.getLongKey());
-			double o = (double)blockPos.getX() - d;
-			double p = (double)blockPos.getY() - e;
-			double q = (double)blockPos.getZ() - g;
-			if (!(o * o + p * p + q * q > 1024.0)) {
+			double k = (double)blockPos.getX() - d;
+			double m = (double)blockPos.getY() - e;
+			double n = (double)blockPos.getZ() - g;
+			if (!(k * k + m * m + n * n > 1024.0)) {
 				SortedSet<BlockDestructionProgress> sortedSet2 = (SortedSet<BlockDestructionProgress>)entry.getValue();
 				if (sortedSet2 != null && !sortedSet2.isEmpty()) {
-					int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
+					int o = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
 					poseStack.pushPose();
 					poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
 					PoseStack.Pose pose2 = poseStack.last();
 					VertexConsumer vertexConsumer2 = new SheetedDecalTextureGenerator(
-						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(r)), pose2.pose(), pose2.normal(), 1.0F
+						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(o)), pose2.pose(), pose2.normal(), 1.0F
 					);
 					this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos), blockPos, this.level, poseStack, vertexConsumer2);
 					poseStack.popPose();
@@ -2698,11 +2695,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 				break;
 			case 1010:
-				if (Item.byId(j) instanceof RecordItem) {
-					this.playStreamingMusic(((RecordItem)Item.byId(j)).getSound(), blockPos);
-				} else {
-					this.playStreamingMusic(null, blockPos);
+				if (Item.byId(j) instanceof RecordItem recordItem) {
+					this.playStreamingMusic(recordItem.getSound(), blockPos);
 				}
+				break;
+			case 1011:
+				this.playStreamingMusic(null, blockPos);
 				break;
 			case 1015:
 				this.level
@@ -3134,6 +3132,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						0.6F + this.level.random.nextFloat() * 0.4F,
 						false
 					);
+				break;
+			case 3008:
+				this.level.playLocalSound(blockPos, SoundEvents.BRUSH_BRUSH_SAND_COMPLETED, SoundSource.PLAYERS, 1.0F, 1.0F, false);
+				this.level.addDestroyBlockEffect(blockPos, Block.stateById(j));
 		}
 	}
 

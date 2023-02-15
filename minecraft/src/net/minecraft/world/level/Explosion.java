@@ -207,16 +207,22 @@ public class Explosion {
 						double ab = (double)getSeenPercent(vec3, entity);
 						double ac = (1.0 - w) * ab;
 						entity.hurt(this.getDamageSource(), (float)((int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0)));
-						double ad = ac;
+						double ad;
 						if (entity instanceof LivingEntity livingEntity) {
 							ad = ProtectionEnchantment.getExplosionKnockbackAfterDampener(livingEntity, ac);
+						} else {
+							ad = ac;
 						}
 
-						entity.setDeltaMovement(entity.getDeltaMovement().add(x * ad, y * ad, z * ad));
+						x *= ad;
+						y *= ad;
+						z *= ad;
+						Vec3 vec32 = new Vec3(x, y, z);
+						entity.setDeltaMovement(entity.getDeltaMovement().add(vec32));
 						if (entity instanceof Player) {
 							Player player = (Player)entity;
 							if (!player.isSpectator() && (!player.isCreative() || !player.getAbilities().flying)) {
-								this.hitPlayers.put(player, new Vec3(x * ac, y * ac, z * ac));
+								this.hitPlayers.put(player, vec32);
 							}
 						}
 					}

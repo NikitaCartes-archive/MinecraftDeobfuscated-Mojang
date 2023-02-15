@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -77,7 +78,7 @@ public class AllayAi {
 			ImmutableList.of(
 				Pair.of(0, GoToWantedItem.create(allay -> true, 1.75F, true, 32)),
 				Pair.of(1, new GoAndGiveItemsToTarget<>(AllayAi::getItemDepositPosition, 2.25F, 20)),
-				Pair.of(2, StayCloseToTarget.create(AllayAi::getItemDepositPosition, 4, 16, 2.25F)),
+				Pair.of(2, StayCloseToTarget.create(AllayAi::getItemDepositPosition, Predicate.not(AllayAi::hasWantedItem), 4, 16, 2.25F)),
 				Pair.of(3, SetEntityLookTargetSometimes.create(6.0F, UniformInt.of(30, 60))),
 				Pair.of(
 					4,
@@ -119,6 +120,11 @@ public class AllayAi {
 		}
 
 		return getLikedPlayerPositionTracker(livingEntity);
+	}
+
+	private static boolean hasWantedItem(LivingEntity livingEntity) {
+		Brain<?> brain = livingEntity.getBrain();
+		return brain.hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM);
 	}
 
 	private static boolean shouldDepositItemsAtLikedNoteblock(LivingEntity livingEntity, Brain<?> brain, GlobalPos globalPos) {

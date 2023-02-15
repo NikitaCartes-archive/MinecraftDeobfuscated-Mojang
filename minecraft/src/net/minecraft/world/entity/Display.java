@@ -64,7 +64,7 @@ public abstract class Display extends Entity {
 	private static final EntityDataAccessor<Integer> DATA_GLOW_COLOR_OVERRIDE_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
 	private static final float INITIAL_SHADOW_RADIUS = 0.0F;
 	private static final float INITIAL_SHADOW_STRENGTH = 1.0F;
-	private static final int NO_GLOW_COLOR_OVERRIDE = 0;
+	private static final int NO_GLOW_COLOR_OVERRIDE = -1;
 	public static final String TAG_INTERPOLATION_DURATION = "interpolation_duration";
 	public static final String TAG_INTERPOLATION_START = "interpolation_start";
 	public static final String TAG_TRANSFORMATION = "transformation";
@@ -85,6 +85,7 @@ public abstract class Display extends Entity {
 	private final Display.FloatInterpolator shadowStrength = new Display.FloatInterpolator(1.0F);
 	private final Quaternionf orientation = new Quaternionf();
 	protected final Display.InterpolatorSet interpolators = new Display.InterpolatorSet();
+	private long interpolationStartClientTick;
 	private AABB cullingBoundingBox;
 
 	public Display(EntityType<?> entityType, Level level) {
@@ -121,6 +122,11 @@ public abstract class Display extends Entity {
 		if (DATA_HEIGHT_ID.equals(entityDataAccessor) || DATA_WIDTH_ID.equals(entityDataAccessor)) {
 			this.updateCulling();
 		}
+
+		if (DATA_INTERPOLATION_START_TICKS_ID.equals(entityDataAccessor)) {
+			long l = this.entityData.get(DATA_INTERPOLATION_START_TICKS_ID) - this.level.getGameTime();
+			this.interpolationStartClientTick = (long)this.tickCount + l;
+		}
 	}
 
 	private static Transformation createTransformation(SynchedEntityData synchedEntityData) {
@@ -133,6 +139,10 @@ public abstract class Display extends Entity {
 
 	@Override
 	public void tick() {
+		Entity entity = this.getVehicle();
+		if (entity != null && entity.isRemoved()) {
+			this.stopRiding();
+		}
 	}
 
 	@Override
@@ -150,7 +160,7 @@ public abstract class Display extends Entity {
 		this.entityData.define(DATA_SHADOW_STRENGTH_ID, 1.0F);
 		this.entityData.define(DATA_WIDTH_ID, 0.0F);
 		this.entityData.define(DATA_HEIGHT_ID, 0.0F);
-		this.entityData.define(DATA_GLOW_COLOR_OVERRIDE_ID, 0);
+		this.entityData.define(DATA_GLOW_COLOR_OVERRIDE_ID, -1);
 	}
 
 	@Override
@@ -170,7 +180,8 @@ public abstract class Display extends Entity {
 		if (compoundTag.contains("interpolation_start", 99)) {
 			long l = compoundTag.getLong("interpolation_start");
 			if (l < 0L) {
-				this.setInterpolationStartTick(this.level.getGameTime());
+				long m = -l - 1L;
+				this.setInterpolationStartTick(this.level.getGameTime() + m);
 			} else {
 				this.setInterpolationStartTick(l);
 			}
@@ -358,13 +369,12 @@ public abstract class Display extends Entity {
 		this.entityData.set(DATA_GLOW_COLOR_OVERRIDE_ID, i);
 	}
 
-	public float calculateInterpolationProgress(long l, float f) {
+	public float calculateInterpolationProgress(float f) {
 		int i = this.getInterpolationDuration();
 		if (i <= 0) {
 			return 1.0F;
 		} else {
-			long m = this.getInterpolationStartTick();
-			float g = (float)(l - m);
+			float g = (float)((long)this.tickCount - this.interpolationStartClientTick);
 			float h = g + f;
 			return Mth.clamp(Mth.inverseLerp(h, 0.0F, (float)i), 0.0F, 1.0F);
 		}
@@ -398,14 +408,12 @@ public abstract class Display extends Entity {
 	@Override
 	public void setXRot(float f) {
 		super.setXRot(f);
-		this.xRotO = f;
 		this.updateOrientation();
 	}
 
 	@Override
 	public void setYRot(float f) {
 		super.setYRot(f);
-		this.yRotO = f;
 		this.updateOrientation();
 	}
 
@@ -421,7 +429,7 @@ public abstract class Display extends Entity {
 	@Override
 	public int getTeamColor() {
 		int i = this.getGlowColorOverride();
-		return i != 0 ? i : super.getTeamColor();
+		return i != -1 ? i : super.getTeamColor();
 	}
 
 	public static enum BillboardConstraints implements StringRepresentable {
@@ -532,7 +540,7 @@ public abstract class Display extends Entity {
 		}
 
 		protected int interpolate(float f, int i, int j) {
-			return Mth.lerp(f, i, j);
+			return Mth.lerpInt(f, i, j);
 		}
 
 		public int get(float f) {

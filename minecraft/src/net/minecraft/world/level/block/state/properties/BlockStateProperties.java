@@ -34,7 +34,6 @@ public class BlockStateProperties {
 	public static final BooleanProperty TRIGGERED = BooleanProperty.create("triggered");
 	public static final BooleanProperty UNSTABLE = BooleanProperty.create("unstable");
 	public static final BooleanProperty WATERLOGGED = BooleanProperty.create("waterlogged");
-	public static final BooleanProperty VINE_END = BooleanProperty.create("vine_end");
 	public static final BooleanProperty BERRIES = BooleanProperty.create("berries");
 	public static final BooleanProperty BLOOM = BooleanProperty.create("bloom");
 	public static final BooleanProperty SHRIEKING = BooleanProperty.create("shrieking");
@@ -52,6 +51,7 @@ public class BlockStateProperties {
 	);
 	public static final DirectionProperty FACING_HOPPER = DirectionProperty.create("facing", (Predicate<Direction>)(direction -> direction != Direction.UP));
 	public static final DirectionProperty HORIZONTAL_FACING = DirectionProperty.create("facing", Direction.Plane.HORIZONTAL);
+	public static final IntegerProperty FLOWER_AMOUNT = IntegerProperty.create("flower_amount", 1, 4);
 	public static final EnumProperty<FrontAndTop> ORIENTATION = EnumProperty.create("orientation", FrontAndTop.class);
 	public static final EnumProperty<AttachFace> ATTACH_FACE = EnumProperty.create("face", AttachFace.class);
 	public static final EnumProperty<BellAttachType> BELL_ATTACHMENT = EnumProperty.create("attachment", BellAttachType.class);
@@ -139,4 +139,5 @@ public class BlockStateProperties {
 	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_3_OCCUPIED = BooleanProperty.create("slot_3_occupied");
 	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_4_OCCUPIED = BooleanProperty.create("slot_4_occupied");
 	public static final BooleanProperty CHISELED_BOOKSHELF_SLOT_5_OCCUPIED = BooleanProperty.create("slot_5_occupied");
+	public static final IntegerProperty DUSTED = IntegerProperty.create("dusted", 0, 3);
 }

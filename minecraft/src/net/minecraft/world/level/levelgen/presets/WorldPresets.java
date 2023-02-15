@@ -38,7 +38,11 @@ public class WorldPresets {
 	public static final ResourceKey<WorldPreset> DEBUG = register("debug_all_block_states");
 
 	public static void bootstrap(BootstapContext<WorldPreset> bootstapContext) {
-		new WorldPresets.Bootstrap(bootstapContext).run();
+		new WorldPresets.Bootstrap(bootstapContext).bootstrap();
+	}
+
+	public static void nextUpdate(BootstapContext<WorldPreset> bootstapContext) {
+		new WorldPresets.Bootstrap(bootstapContext).nextUpdate();
 	}
 
 	private static ResourceKey<WorldPreset> register(String string) {
@@ -106,20 +110,28 @@ public class WorldPresets {
 			this.context.register(resourceKey, this.createPresetWithCustomOverworld(levelStem));
 		}
 
-		public void run() {
-			MultiNoiseBiomeSource multiNoiseBiomeSource = MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(this.biomes);
+		private void registerOverworlds(BiomeSource biomeSource) {
 			Holder<NoiseGeneratorSettings> holder = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
-			this.registerCustomOverworldPreset(WorldPresets.NORMAL, this.makeNoiseBasedOverworld(multiNoiseBiomeSource, holder));
+			this.registerCustomOverworldPreset(WorldPresets.NORMAL, this.makeNoiseBasedOverworld(biomeSource, holder));
 			Holder<NoiseGeneratorSettings> holder2 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.LARGE_BIOMES);
-			this.registerCustomOverworldPreset(WorldPresets.LARGE_BIOMES, this.makeNoiseBasedOverworld(multiNoiseBiomeSource, holder2));
+			this.registerCustomOverworldPreset(WorldPresets.LARGE_BIOMES, this.makeNoiseBasedOverworld(biomeSource, holder2));
 			Holder<NoiseGeneratorSettings> holder3 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.AMPLIFIED);
-			this.registerCustomOverworldPreset(WorldPresets.AMPLIFIED, this.makeNoiseBasedOverworld(multiNoiseBiomeSource, holder3));
+			this.registerCustomOverworldPreset(WorldPresets.AMPLIFIED, this.makeNoiseBasedOverworld(biomeSource, holder3));
+		}
+
+		public void bootstrap() {
+			this.registerOverworlds(MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(this.biomes));
+			Holder<NoiseGeneratorSettings> holder = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
 			Holder.Reference<Biome> reference = this.biomes.getOrThrow(Biomes.PLAINS);
 			this.registerCustomOverworldPreset(WorldPresets.SINGLE_BIOME_SURFACE, this.makeNoiseBasedOverworld(new FixedBiomeSource(reference), holder));
 			this.registerCustomOverworldPreset(
 				WorldPresets.FLAT, this.makeOverworld(new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(this.biomes, this.structureSets, this.placedFeatures)))
 			);
 			this.registerCustomOverworldPreset(WorldPresets.DEBUG, this.makeOverworld(new DebugLevelSource(reference)));
+		}
+
+		public void nextUpdate() {
+			this.registerOverworlds(MultiNoiseBiomeSource.Preset.OVERWORLD_UPDATE_1_20.biomeSource(this.biomes));
 		}
 	}
 }

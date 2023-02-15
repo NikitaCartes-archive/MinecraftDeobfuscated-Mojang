@@ -2,12 +2,16 @@ package net.minecraft.world;
 
 import java.util.Set;
 import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public interface Container extends Clearable {
 	int LARGE_MAX_STACK_SIZE = 64;
+	int DEFAULT_DISTANCE_LIMIT = 8;
 
 	int getContainerSize();
 
@@ -39,6 +43,10 @@ public interface Container extends Clearable {
 		return true;
 	}
 
+	default boolean canTakeItem(Container container, int i, ItemStack itemStack) {
+		return true;
+	}
+
 	default int countItem(Item item) {
 		int i = 0;
 
@@ -65,5 +73,21 @@ public interface Container extends Clearable {
 		}
 
 		return false;
+	}
+
+	static boolean stillValidBlockEntity(BlockEntity blockEntity, Player player) {
+		return stillValidBlockEntity(blockEntity, player, 8);
+	}
+
+	static boolean stillValidBlockEntity(BlockEntity blockEntity, Player player, int i) {
+		Level level = blockEntity.getLevel();
+		BlockPos blockPos = blockEntity.getBlockPos();
+		if (level == null) {
+			return false;
+		} else {
+			return level.getBlockEntity(blockPos) != blockEntity
+				? false
+				: player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) <= (double)(i * i);
+		}
 	}
 }

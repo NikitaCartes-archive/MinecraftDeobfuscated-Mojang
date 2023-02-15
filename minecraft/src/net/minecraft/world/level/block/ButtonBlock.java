@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -48,20 +49,18 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	protected static final VoxelShape PRESSED_SOUTH_AABB = Block.box(5.0, 6.0, 0.0, 11.0, 10.0, 1.0);
 	protected static final VoxelShape PRESSED_WEST_AABB = Block.box(15.0, 6.0, 5.0, 16.0, 10.0, 11.0);
 	protected static final VoxelShape PRESSED_EAST_AABB = Block.box(0.0, 6.0, 5.0, 1.0, 10.0, 11.0);
-	private final SoundEvent soundOff;
-	private final SoundEvent soundOn;
+	private final BlockSetType type;
 	private final int ticksToStayPressed;
 	private final boolean arrowsCanPress;
 
-	protected ButtonBlock(BlockBehaviour.Properties properties, int i, boolean bl, SoundEvent soundEvent, SoundEvent soundEvent2) {
-		super(properties);
+	protected ButtonBlock(BlockBehaviour.Properties properties, BlockSetType blockSetType, int i, boolean bl) {
+		super(properties.sound(blockSetType.soundType()));
+		this.type = blockSetType;
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(FACE, AttachFace.WALL)
 		);
 		this.ticksToStayPressed = i;
 		this.arrowsCanPress = bl;
-		this.soundOff = soundEvent;
-		this.soundOn = soundEvent2;
 	}
 
 	@Override
@@ -117,7 +116,7 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	protected SoundEvent getSound(boolean bl) {
-		return bl ? this.soundOn : this.soundOff;
+		return bl ? this.type.buttonClickOn() : this.type.buttonClickOff();
 	}
 
 	@Override

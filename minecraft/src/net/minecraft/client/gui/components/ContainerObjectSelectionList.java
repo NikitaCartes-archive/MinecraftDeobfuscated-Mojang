@@ -36,9 +36,13 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
 			if (arrowNavigation.direction().getAxis() == ScreenAxis.HORIZONTAL && entry != null) {
 				return ComponentPath.path(this, entry.nextFocusPath(focusNavigationEvent));
 			} else {
+				int i = -1;
 				ScreenDirection screenDirection = arrowNavigation.direction();
-				int i;
-				if (entry == null) {
+				if (entry != null) {
+					i = entry.children().indexOf(entry.getFocused());
+				}
+
+				if (i == -1) {
 					switch (screenDirection) {
 						case LEFT:
 							i = Integer.MAX_VALUE;
@@ -51,8 +55,6 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
 						default:
 							i = 0;
 					}
-				} else {
-					i = entry.children().indexOf(entry.getFocused());
 				}
 
 				E entry2 = entry;

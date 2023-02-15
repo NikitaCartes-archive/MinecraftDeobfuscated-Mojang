@@ -36,26 +36,41 @@ public class OverworldBiomes {
 	}
 
 	private static Biome biome(boolean bl, float f, float g, MobSpawnSettings.Builder builder, BiomeGenerationSettings.Builder builder2, @Nullable Music music) {
-		return biome(bl, f, g, 4159204, 329011, builder, builder2, music);
+		return biome(bl, f, g, 4159204, 329011, null, null, builder, builder2, music);
 	}
 
 	private static Biome biome(
-		boolean bl, float f, float g, int i, int j, MobSpawnSettings.Builder builder, BiomeGenerationSettings.Builder builder2, @Nullable Music music
+		boolean bl,
+		float f,
+		float g,
+		int i,
+		int j,
+		@Nullable Integer integer,
+		@Nullable Integer integer2,
+		MobSpawnSettings.Builder builder,
+		BiomeGenerationSettings.Builder builder2,
+		@Nullable Music music
 	) {
+		BiomeSpecialEffects.Builder builder3 = new BiomeSpecialEffects.Builder()
+			.waterColor(i)
+			.waterFogColor(j)
+			.fogColor(12638463)
+			.skyColor(calculateSkyColor(f))
+			.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+			.backgroundMusic(music);
+		if (integer != null) {
+			builder3.grassColorOverride(integer);
+		}
+
+		if (integer2 != null) {
+			builder3.foliageColorOverride(integer2);
+		}
+
 		return new Biome.BiomeBuilder()
 			.hasPrecipitation(bl)
 			.temperature(f)
 			.downfall(g)
-			.specialEffects(
-				new BiomeSpecialEffects.Builder()
-					.waterColor(i)
-					.waterFogColor(j)
-					.fogColor(12638463)
-					.skyColor(calculateSkyColor(f))
-					.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
-					.backgroundMusic(music)
-					.build()
-			)
+			.specialEffects(builder3.build())
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
 			.build();
@@ -332,7 +347,7 @@ public class OverworldBiomes {
 	}
 
 	private static Biome baseOcean(MobSpawnSettings.Builder builder, int i, int j, BiomeGenerationSettings.Builder builder2) {
-		return biome(true, 0.5F, 0.5F, i, j, builder, builder2, NORMAL_MUSIC);
+		return biome(true, 0.5F, 0.5F, i, j, null, null, builder, builder2, NORMAL_MUSIC);
 	}
 
 	private static BiomeGenerationSettings.Builder baseOceanGeneration(
@@ -513,7 +528,7 @@ public class OverworldBiomes {
 			BiomeDefaultFeatures.addCommonBerryBushes(builder2);
 		}
 
-		return biome(true, f, bl ? 0.4F : 0.8F, bl ? 4020182 : 4159204, 329011, builder, builder2, NORMAL_MUSIC);
+		return biome(true, f, bl ? 0.4F : 0.8F, bl ? 4020182 : 4159204, 329011, null, null, builder, builder2, NORMAL_MUSIC);
 	}
 
 	public static Biome darkForest(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
@@ -643,7 +658,7 @@ public class OverworldBiomes {
 		}
 
 		float f = bl ? 0.0F : 0.5F;
-		return biome(true, f, 0.5F, bl ? 3750089 : 4159204, 329011, builder, builder2, NORMAL_MUSIC);
+		return biome(true, f, 0.5F, bl ? 3750089 : 4159204, 329011, null, null, builder, builder2, NORMAL_MUSIC);
 	}
 
 	public static Biome beach(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2, boolean bl, boolean bl2) {
@@ -671,7 +686,7 @@ public class OverworldBiomes {
 			f = 0.8F;
 		}
 
-		return biome(true, f, bl3 ? 0.4F : 0.3F, bl ? 4020182 : 4159204, 329011, builder, builder2, NORMAL_MUSIC);
+		return biome(true, f, bl3 ? 0.4F : 0.3F, bl ? 4020182 : 4159204, 329011, null, null, builder, builder2, NORMAL_MUSIC);
 	}
 
 	public static Biome theVoid(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
@@ -680,7 +695,7 @@ public class OverworldBiomes {
 		return biome(false, 0.5F, 0.5F, new MobSpawnSettings.Builder(), builder, NORMAL_MUSIC);
 	}
 
-	public static Biome meadow(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
+	public static Biome meadowOrCherryGrove(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2, boolean bl) {
 		BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2);
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
 		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.DONKEY, 1, 1, 2))
@@ -691,11 +706,18 @@ public class OverworldBiomes {
 		BiomeDefaultFeatures.addPlainGrass(builder);
 		BiomeDefaultFeatures.addDefaultOres(builder);
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder);
-		BiomeDefaultFeatures.addMeadowVegetation(builder);
+		if (bl) {
+			BiomeDefaultFeatures.addCherryGroveVegetation(builder);
+		} else {
+			BiomeDefaultFeatures.addMeadowVegetation(builder);
+		}
+
 		BiomeDefaultFeatures.addExtraEmeralds(builder);
 		BiomeDefaultFeatures.addInfestedStone(builder);
-		Music music = Musics.createGameMusic(SoundEvents.MUSIC_BIOME_MEADOW);
-		return biome(true, 0.5F, 0.8F, 937679, 329011, builder2, builder, music);
+		Music music = Musics.createGameMusic(bl ? SoundEvents.MUSIC_BIOME_CHERRY_GROVE : SoundEvents.MUSIC_BIOME_MEADOW);
+		return bl
+			? biome(true, 0.5F, 0.8F, 6141935, 6141935, 11983713, 11983713, builder2, builder, music)
+			: biome(true, 0.5F, 0.8F, 937679, 329011, null, null, builder2, builder, music);
 	}
 
 	public static Biome frozenPeaks(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {

@@ -26,6 +26,8 @@ public class PartNames {
 	public static final String RIGHT_LEG = "right_leg";
 	public static final String LEFT_HIND_LEG = "left_hind_leg";
 	public static final String RIGHT_HIND_LEG = "right_hind_leg";
+	public static final String LEFT_MID_LEG = "left_mid_leg";
+	public static final String RIGHT_MID_LEG = "right_mid_leg";
 	public static final String LEFT_FRONT_LEG = "left_front_leg";
 	public static final String RIGHT_FRONT_LEG = "right_front_leg";
 	public static final String LEFT_HIND_FOOT = "left_hind_foot";

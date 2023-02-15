@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -297,6 +298,10 @@ public class FallingBlockEntity extends Entity {
 		this.fallDamageMax = i;
 	}
 
+	public void disableDrop() {
+		this.cancelDrop = true;
+	}
+
 	@Override
 	public boolean displayFireAnimation() {
 		return false;
@@ -310,6 +315,11 @@ public class FallingBlockEntity extends Entity {
 
 	public BlockState getBlockState() {
 		return this.blockState;
+	}
+
+	@Override
+	protected Component getTypeName() {
+		return Component.translatable("entity.minecraft.falling_block_type", this.blockState.getBlock().getName());
 	}
 
 	@Override

@@ -42,6 +42,6 @@ public class MenuTooltipPositioner implements ClientTooltipPositioner {
 
 	private static int getOffset(int i, int j, int k) {
 		int l = Math.min(Math.abs(i - j), k);
-		return Math.round((float)Mth.lerp((float)l / (float)k, k - 3, 5));
+		return Math.round(Mth.lerp((float)l / (float)k, (float)(k - 3), 5.0F));
 	}
 }

@@ -117,7 +117,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import org.slf4j.Logger;
 
-public abstract class LivingEntity extends Entity {
+public abstract class LivingEntity extends Entity implements Attackable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final UUID SPEED_MODIFIER_SPRINTING_UUID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
 	private static final UUID SPEED_MODIFIER_SOUL_SPEED_UUID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
@@ -155,6 +155,7 @@ public abstract class LivingEntity extends Entity {
 	protected static final float DEFAULT_EYE_HEIGHT = 1.74F;
 	protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F);
 	public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
+	private static final int MAX_HEAD_ROTATION_RELATIVE_TO_BODY = 50;
 	private final AttributeMap attributes;
 	private final CombatTracker combatTracker = new CombatTracker(this);
 	private final Map<MobEffect, MobEffectInstance> activeEffects = Maps.<MobEffect, MobEffectInstance>newHashMap();
@@ -592,6 +593,11 @@ public abstract class LivingEntity extends Entity {
 	@Nullable
 	public LivingEntity getLastHurtByMob() {
 		return this.lastHurtByMob;
+	}
+
+	@Override
+	public LivingEntity getLastAttacker() {
+		return this.getLastHurtByMob();
 	}
 
 	public int getLastHurtByMobTimestamp() {
@@ -2376,20 +2382,11 @@ public abstract class LivingEntity extends Entity {
 		float h = Mth.wrapDegrees(f - this.yBodyRot);
 		this.yBodyRot += h * 0.3F;
 		float i = Mth.wrapDegrees(this.getYRot() - this.yBodyRot);
+		if (Math.abs(i) > 50.0F) {
+			this.yBodyRot = this.yBodyRot + (i - (float)(Mth.sign((double)i) * 50));
+		}
+
 		boolean bl = i < -90.0F || i >= 90.0F;
-		if (i < -75.0F) {
-			i = -75.0F;
-		}
-
-		if (i >= 75.0F) {
-			i = 75.0F;
-		}
-
-		this.yBodyRot = this.getYRot() - i;
-		if (i * i > 2500.0F) {
-			this.yBodyRot += i * 0.2F;
-		}
-
 		if (bl) {
 			g *= -1.0F;
 		}

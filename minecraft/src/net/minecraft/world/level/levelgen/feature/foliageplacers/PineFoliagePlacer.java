@@ -2,12 +2,9 @@ package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.LevelSimulatedReader;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public class PineFoliagePlacer extends FoliagePlacer {
@@ -31,7 +28,7 @@ public class PineFoliagePlacer extends FoliagePlacer {
 	@Override
 	protected void createFoliage(
 		LevelSimulatedReader levelSimulatedReader,
-		BiConsumer<BlockPos, BlockState> biConsumer,
+		FoliagePlacer.FoliageSetter foliageSetter,
 		RandomSource randomSource,
 		TreeConfiguration treeConfiguration,
 		int i,
@@ -43,7 +40,7 @@ public class PineFoliagePlacer extends FoliagePlacer {
 		int m = 0;
 
 		for (int n = l; n >= l - j; n--) {
-			this.placeLeavesRow(levelSimulatedReader, biConsumer, randomSource, treeConfiguration, foliageAttachment.pos(), m, n, foliageAttachment.doubleTrunk());
+			this.placeLeavesRow(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, foliageAttachment.pos(), m, n, foliageAttachment.doubleTrunk());
 			if (m >= 1 && n == l - j + 1) {
 				m--;
 			} else if (m < k + foliageAttachment.radiusOffset()) {

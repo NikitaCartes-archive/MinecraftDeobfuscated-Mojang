@@ -10,4 +10,10 @@ import net.minecraft.core.particles.ParticleOptions;
 public interface ParticleProvider<T extends ParticleOptions> {
 	@Nullable
 	Particle createParticle(T particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i);
+
+	@Environment(EnvType.CLIENT)
+	public interface Sprite<T extends ParticleOptions> {
+		@Nullable
+		TextureSheetParticle createParticle(T particleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i);
+	}
 }

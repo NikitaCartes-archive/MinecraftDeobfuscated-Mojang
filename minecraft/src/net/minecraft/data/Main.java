@@ -46,6 +46,7 @@ import net.minecraft.data.tags.PaintingVariantTagsProvider;
 import net.minecraft.data.tags.PoiTypeTagsProvider;
 import net.minecraft.data.tags.StructureTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.data.tags.UpdateOneTwentyBiomeTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyBlockTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyItemTagsProvider;
 import net.minecraft.data.tags.VanillaBlockTagsProvider;
@@ -144,15 +145,14 @@ public class Main {
 		packGenerator2.addProvider(
 			packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE))
 		);
-		CompletableFuture<HolderLookup.Provider> completableFuture2 = CompletableFuture.supplyAsync(
-			UpdateOneTwentyRegistries::createLookup, Util.backgroundExecutor()
-		);
+		CompletableFuture<HolderLookup.Provider> completableFuture2 = UpdateOneTwentyRegistries.createLookup(completableFuture);
 		DataGenerator.PackGenerator packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "update_1_20");
 		packGenerator3.addProvider(UpdateOneTwentyRecipeProvider::new);
-		TagsProvider<Block> tagsProvider2 = packGenerator3.addProvider(bindRegistries(UpdateOneTwentyBlockTagsProvider::new, completableFuture));
-		packGenerator3.addProvider(packOutput -> new UpdateOneTwentyItemTagsProvider(packOutput, completableFuture, tagsProvider2));
+		TagsProvider<Block> tagsProvider2 = packGenerator3.addProvider(bindRegistries(UpdateOneTwentyBlockTagsProvider::new, completableFuture2));
+		packGenerator3.addProvider(packOutput -> new UpdateOneTwentyItemTagsProvider(packOutput, completableFuture2, tagsProvider2));
+		packGenerator3.addProvider(bindRegistries(UpdateOneTwentyBiomeTagsProvider::new, completableFuture2));
 		packGenerator3.addProvider(UpdateOneTwentyLootTableProvider::create);
-		packGenerator3.addProvider(bindRegistries(UpdateOneTwentyVanillaAdvancementProvider::create, completableFuture));
+		packGenerator3.addProvider(bindRegistries(UpdateOneTwentyVanillaAdvancementProvider::create, completableFuture2));
 		packGenerator3.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture2));
 		packGenerator3.addProvider(
 			packOutput -> PackMetadataGenerator.forFeaturePack(

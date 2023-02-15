@@ -1,7 +1,5 @@
 package net.minecraft.data.advancements.packs;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
@@ -36,7 +34,6 @@ import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
@@ -45,8 +42,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
@@ -54,9 +50,6 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
 public class VanillaNetherAdvancements implements AdvancementSubProvider {
-	private static final List<ResourceKey<Biome>> EXPLORABLE_BIOMES = ImmutableList.of(
-		Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST, Biomes.CRIMSON_FOREST, Biomes.BASALT_DELTAS
-	);
 	private static final EntityPredicate.Composite DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE = EntityPredicate.Composite.create(
 		LootItemEntityPropertyCondition.hasProperties(
 				LootContext.EntityTarget.THIS,
@@ -473,7 +466,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "nether/ride_strider_in_overworld_lava");
-		VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), EXPLORABLE_BIOMES)
+		VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSource.Preset.NETHER.possibleBiomes().toList())
 			.parent(advancement12)
 			.display(
 				Items.NETHERITE_BOOTS,

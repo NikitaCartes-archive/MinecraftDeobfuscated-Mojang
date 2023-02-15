@@ -279,6 +279,31 @@ public class ItemInHandRenderer {
 		poseStack.mulPose(Axis.ZP.rotationDegrees((float)j * i * 30.0F));
 	}
 
+	private void applyBrushTransform(PoseStack poseStack, float f, HumanoidArm humanoidArm, ItemStack itemStack, float g) {
+		this.applyItemArmTransform(poseStack, humanoidArm, g);
+		float h = (float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F;
+		float i = 1.0F - h / (float)itemStack.getUseDuration();
+		float j = -90.0F;
+		float k = 60.0F;
+		int l = 45;
+		float m = 150.0F;
+		float n = -15.0F;
+		float o = -15.0F + 75.0F * Mth.cos(i * 45.0F * (float) Math.PI);
+		if (humanoidArm != HumanoidArm.RIGHT) {
+			poseStack.translate(0.1, 0.83, 0.35);
+			poseStack.mulPose(Axis.XP.rotationDegrees(-80.0F));
+			poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+			poseStack.mulPose(Axis.XP.rotationDegrees(o));
+			poseStack.translate(-0.3, 0.22, 0.35);
+		} else {
+			poseStack.translate(-0.25, 0.22, 0.35);
+			poseStack.mulPose(Axis.XP.rotationDegrees(-80.0F));
+			poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+			poseStack.mulPose(Axis.ZP.rotationDegrees(0.0F));
+			poseStack.mulPose(Axis.XP.rotationDegrees(o));
+		}
+	}
+
 	private void applyItemArmAttackTransform(PoseStack poseStack, HumanoidArm humanoidArm, float f) {
 		int i = humanoidArm == HumanoidArm.RIGHT ? 1 : -1;
 		float g = Mth.sin(f * f * (float) Math.PI);
@@ -487,6 +512,9 @@ public class ItemInHandRenderer {
 							poseStack.translate(0.0F, 0.0F, lx * 0.2F);
 							poseStack.scale(1.0F, 1.0F, 1.0F + lx * 0.2F);
 							poseStack.mulPose(Axis.YN.rotationDegrees((float)q * 45.0F));
+							break;
+						case BRUSH:
+							this.applyBrushTransform(poseStack, f, humanoidArm, itemStack, i);
 					}
 				} else if (abstractClientPlayer.isAutoSpinAttack()) {
 					this.applyItemArmTransform(poseStack, humanoidArm, i);

@@ -33,6 +33,7 @@ public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvide
 				Blocks.SPRUCE_HANGING_SIGN,
 				Blocks.BIRCH_HANGING_SIGN,
 				Blocks.ACACIA_HANGING_SIGN,
+				Blocks.CHERRY_HANGING_SIGN,
 				Blocks.JUNGLE_HANGING_SIGN,
 				Blocks.DARK_OAK_HANGING_SIGN,
 				Blocks.CRIMSON_HANGING_SIGN,
@@ -46,6 +47,7 @@ public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvide
 				Blocks.SPRUCE_WALL_HANGING_SIGN,
 				Blocks.BIRCH_WALL_HANGING_SIGN,
 				Blocks.ACACIA_WALL_HANGING_SIGN,
+				Blocks.CHERRY_WALL_HANGING_SIGN,
 				Blocks.JUNGLE_WALL_HANGING_SIGN,
 				Blocks.DARK_OAK_WALL_HANGING_SIGN,
 				Blocks.CRIMSON_WALL_HANGING_SIGN,
@@ -60,5 +62,29 @@ public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvide
 			.add(Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_MOSAIC_SLAB, Blocks.BAMBOO_MOSAIC_STAIRS)
 			.addTag(BlockTags.BAMBOO_BLOCKS)
 			.add(Blocks.CHISELED_BOOKSHELF);
+		this.tag(BlockTags.SNIFFER_DIGGABLE_BLOCK)
+			.add(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT, Blocks.MOSS_BLOCK, Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS);
+		this.tag(BlockTags.CHERRY_LOGS).add(Blocks.CHERRY_LOG, Blocks.CHERRY_WOOD, Blocks.STRIPPED_CHERRY_LOG, Blocks.STRIPPED_CHERRY_WOOD);
+		this.tag(BlockTags.PLANKS).add(Blocks.CHERRY_PLANKS);
+		this.tag(BlockTags.WOODEN_BUTTONS).add(Blocks.CHERRY_BUTTON);
+		this.tag(BlockTags.WOODEN_DOORS).add(Blocks.CHERRY_DOOR);
+		this.tag(BlockTags.WOODEN_STAIRS).add(Blocks.CHERRY_STAIRS);
+		this.tag(BlockTags.WOODEN_SLABS).add(Blocks.CHERRY_SLAB);
+		this.tag(BlockTags.WOODEN_FENCES).add(Blocks.CHERRY_FENCE);
+		this.tag(BlockTags.SAPLINGS).add(Blocks.CHERRY_SAPLING);
+		this.tag(BlockTags.LOGS_THAT_BURN).addTag(BlockTags.CHERRY_LOGS);
+		this.tag(BlockTags.OVERWORLD_NATURAL_LOGS).add(Blocks.CHERRY_LOG);
+		this.tag(BlockTags.FLOWER_POTS).add(Blocks.FLOWER_POT);
+		this.tag(BlockTags.WOODEN_PRESSURE_PLATES).add(Blocks.CHERRY_PRESSURE_PLATE);
+		this.tag(BlockTags.LEAVES).add(Blocks.CHERRY_LEAVES);
+		this.tag(BlockTags.WOODEN_TRAPDOORS).add(Blocks.CHERRY_TRAPDOOR);
+		this.tag(BlockTags.STANDING_SIGNS).add(Blocks.CHERRY_SIGN);
+		this.tag(BlockTags.WALL_SIGNS).add(Blocks.CHERRY_WALL_SIGN);
+		this.tag(BlockTags.FENCE_GATES).add(Blocks.CHERRY_FENCE_GATE);
+		this.tag(BlockTags.MINEABLE_WITH_HOE).add(Blocks.CHERRY_LEAVES);
+		this.tag(BlockTags.FLOWERS).add(Blocks.CHERRY_LEAVES, Blocks.PINK_PETALS);
+		this.tag(BlockTags.INSIDE_STEP_SOUND_BLOCKS).add(Blocks.PINK_PETALS);
+		this.tag(BlockTags.MINEABLE_WITH_HOE).add(Blocks.PINK_PETALS);
+		this.tag(BlockTags.SAND).add(Blocks.SUSPICIOUS_SAND);
 	}
 }

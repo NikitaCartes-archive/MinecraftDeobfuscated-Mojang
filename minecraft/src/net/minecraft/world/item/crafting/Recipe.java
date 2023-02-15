@@ -39,6 +39,10 @@ public interface Recipe<C extends Container> {
 		return false;
 	}
 
+	default boolean showNotification() {
+		return true;
+	}
+
 	default String getGroup() {
 		return "";
 	}

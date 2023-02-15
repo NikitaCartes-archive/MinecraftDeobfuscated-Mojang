@@ -57,8 +57,12 @@ public class AccessibilityOnboardingScreen extends Screen {
 			this.setInitialFocus(abstractWidget);
 		}
 
-		rowHelper.addChild(CommonButtons.accessibilityTextAndImage(this.minecraft, this));
-		rowHelper.addChild(CommonButtons.languageTextAndImage(this.minecraft, this));
+		rowHelper.addChild(CommonButtons.accessibilityTextAndImage(button -> this.closeAndSetScreen(new AccessibilityOptionsScreen(this, this.minecraft.options))));
+		rowHelper.addChild(
+			CommonButtons.languageTextAndImage(
+				button -> this.closeAndSetScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager()))
+			)
+		);
 		frameLayout.addChild(
 			Button.builder(CommonComponents.GUI_CONTINUE, button -> this.onClose()).build(), frameLayout.newChildLayoutSettings().alignVerticallyBottom().padding(8)
 		);
@@ -73,8 +77,14 @@ public class AccessibilityOnboardingScreen extends Screen {
 
 	@Override
 	public void onClose() {
+		this.closeAndSetScreen(new TitleScreen(true, this.logoRenderer));
+	}
+
+	private void closeAndSetScreen(Screen screen) {
+		this.options.onboardAccessibility = false;
+		this.options.save();
 		Narrator.getNarrator().clear();
-		this.minecraft.setScreen(new TitleScreen(true, this.logoRenderer));
+		this.minecraft.setScreen(screen);
 	}
 
 	@Override
@@ -94,7 +104,7 @@ public class AccessibilityOnboardingScreen extends Screen {
 		if (!this.hasNarrated && this.narratorAvailable) {
 			if (this.timer < 40.0F) {
 				this.timer++;
-			} else {
+			} else if (this.minecraft.isWindowActive()) {
 				Narrator.getNarrator().say(ONBOARDING_NARRATOR_MESSAGE.getString(), true);
 				this.hasNarrated = true;
 			}

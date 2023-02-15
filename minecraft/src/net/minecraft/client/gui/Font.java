@@ -97,7 +97,7 @@ public class Font {
 			return 0;
 		} else {
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-			int j = this.drawInBatch(string, f, g, i, bl, matrix4f, bufferSource, false, 0, 15728880, bl2);
+			int j = this.drawInBatch(string, f, g, i, bl, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, bl2);
 			bufferSource.endBatch();
 			return j;
 		}
@@ -105,25 +105,37 @@ public class Font {
 
 	private int drawInternal(FormattedCharSequence formattedCharSequence, float f, float g, int i, Matrix4f matrix4f, boolean bl) {
 		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		int j = this.drawInBatch(formattedCharSequence, f, g, i, bl, matrix4f, bufferSource, false, 0, 15728880);
+		int j = this.drawInBatch(formattedCharSequence, f, g, i, bl, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
 		bufferSource.endBatch();
 		return j;
 	}
 
-	public int drawInBatch(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-		return this.drawInBatch(string, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k, this.isBidirectional());
+	public int drawInBatch(
+		String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int j, int k
+	) {
+		return this.drawInBatch(string, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, this.isBidirectional());
 	}
 
 	public int drawInBatch(
-		String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k, boolean bl3
+		String string,
+		float f,
+		float g,
+		int i,
+		boolean bl,
+		Matrix4f matrix4f,
+		MultiBufferSource multiBufferSource,
+		Font.DisplayMode displayMode,
+		int j,
+		int k,
+		boolean bl2
 	) {
-		return this.drawInternal(string, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k, bl3);
+		return this.drawInternal(string, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, bl2);
 	}
 
 	public int drawInBatch(
-		Component component, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k
+		Component component, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int j, int k
 	) {
-		return this.drawInBatch(component.getVisualOrderText(), f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
+		return this.drawInBatch(component.getVisualOrderText(), f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k);
 	}
 
 	public int drawInBatch(
@@ -134,11 +146,11 @@ public class Font {
 		boolean bl,
 		Matrix4f matrix4f,
 		MultiBufferSource multiBufferSource,
-		boolean bl2,
+		Font.DisplayMode displayMode,
 		int j,
 		int k
 	) {
-		return this.drawInternal(formattedCharSequence, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
+		return this.drawInternal(formattedCharSequence, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k);
 	}
 
 	public void drawInBatch8xOutline(
@@ -178,20 +190,30 @@ public class Font {
 	}
 
 	private int drawInternal(
-		String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k, boolean bl3
+		String string,
+		float f,
+		float g,
+		int i,
+		boolean bl,
+		Matrix4f matrix4f,
+		MultiBufferSource multiBufferSource,
+		Font.DisplayMode displayMode,
+		int j,
+		int k,
+		boolean bl2
 	) {
-		if (bl3) {
+		if (bl2) {
 			string = this.bidirectionalShaping(string);
 		}
 
 		i = adjustColor(i);
 		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (bl) {
-			this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
+			this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, displayMode, j, k);
 			matrix4f2.translate(SHADOW_OFFSET);
 		}
 
-		f = this.renderText(string, f, g, i, false, matrix4f2, multiBufferSource, bl2, j, k);
+		f = this.renderText(string, f, g, i, false, matrix4f2, multiBufferSource, displayMode, j, k);
 		return (int)f + (bl ? 1 : 0);
 	}
 
@@ -203,23 +225,25 @@ public class Font {
 		boolean bl,
 		Matrix4f matrix4f,
 		MultiBufferSource multiBufferSource,
-		boolean bl2,
+		Font.DisplayMode displayMode,
 		int j,
 		int k
 	) {
 		i = adjustColor(i);
 		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (bl) {
-			this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
+			this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, displayMode, j, k);
 			matrix4f2.translate(SHADOW_OFFSET);
 		}
 
-		f = this.renderText(formattedCharSequence, f, g, i, false, matrix4f2, multiBufferSource, bl2, j, k);
+		f = this.renderText(formattedCharSequence, f, g, i, false, matrix4f2, multiBufferSource, displayMode, j, k);
 		return (int)f + (bl ? 1 : 0);
 	}
 
-	private float renderText(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, bl2, k);
+	private float renderText(
+		String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int j, int k
+	) {
+		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, displayMode, k);
 		StringDecomposer.iterateFormatted(string, Style.EMPTY, stringRenderOutput);
 		return stringRenderOutput.finish(j, f);
 	}
@@ -232,11 +256,11 @@ public class Font {
 		boolean bl,
 		Matrix4f matrix4f,
 		MultiBufferSource multiBufferSource,
-		boolean bl2,
+		Font.DisplayMode displayMode,
 		int j,
 		int k
 	) {
-		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, bl2, k);
+		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, displayMode, k);
 		formattedCharSequence.accept(stringRenderOutput);
 		return stringRenderOutput.finish(j, f);
 	}
@@ -345,10 +369,6 @@ public class Font {
 			}
 
 			this.effects.add(effect);
-		}
-
-		public StringRenderOutput(MultiBufferSource multiBufferSource, float f, float g, int i, boolean bl, Matrix4f matrix4f, boolean bl2, int j) {
-			this(multiBufferSource, f, g, i, bl, matrix4f, bl2 ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, j);
 		}
 
 		public StringRenderOutput(MultiBufferSource multiBufferSource, float f, float g, int i, boolean bl, Matrix4f matrix4f, Font.DisplayMode displayMode, int j) {

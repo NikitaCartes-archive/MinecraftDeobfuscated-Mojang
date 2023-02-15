@@ -41,7 +41,12 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class SoundManager extends SimplePreparableReloadListener<SoundManager.Preparations> {
-	public static final Sound EMPTY_SOUND = new Sound("meta:missing_sound", ConstantFloat.of(1.0F), ConstantFloat.of(1.0F), 1, Sound.Type.FILE, false, false, 16);
+	public static final Sound EMPTY_SOUND = new Sound("minecraft:empty", ConstantFloat.of(1.0F), ConstantFloat.of(1.0F), 1, Sound.Type.FILE, false, false, 16);
+	public static final ResourceLocation INTENTIONALLY_EMPTY_SOUND_LOCATION = new ResourceLocation("minecraft", "intentionally_empty");
+	public static final WeighedSoundEvents INTENTIONALLY_EMPTY_SOUND_EVENT = new WeighedSoundEvents(INTENTIONALLY_EMPTY_SOUND_LOCATION, null);
+	public static final Sound INTENTIONALLY_EMPTY_SOUND = new Sound(
+		INTENTIONALLY_EMPTY_SOUND_LOCATION.toString(), ConstantFloat.of(1.0F), ConstantFloat.of(1.0F), 1, Sound.Type.FILE, false, false, 16
+	);
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final String SOUNDS_PATH = "sounds.json";
 	private static final Gson GSON = new GsonBuilder()

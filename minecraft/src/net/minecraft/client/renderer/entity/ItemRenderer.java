@@ -377,7 +377,16 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				poseStack.translate(0.0F, 0.0F, this.blitOffset + 200.0F);
 				MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 				font.drawInBatch(
-					string2, (float)(i + 19 - 2 - font.width(string2)), (float)(j + 6 + 3), 16777215, true, poseStack.last().pose(), bufferSource, false, 0, 15728880
+					string2,
+					(float)(i + 19 - 2 - font.width(string2)),
+					(float)(j + 6 + 3),
+					16777215,
+					true,
+					poseStack.last().pose(),
+					bufferSource,
+					Font.DisplayMode.NORMAL,
+					0,
+					15728880
 				);
 				bufferSource.endBatch();
 			}

@@ -1,7 +1,6 @@
 package net.minecraft.data.tags;
 
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
@@ -40,11 +39,10 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 			.add(Biomes.DARK_FOREST)
 			.add(Biomes.GROVE);
 		this.tag(BiomeTags.IS_SAVANNA).add(Biomes.SAVANNA).add(Biomes.SAVANNA_PLATEAU).add(Biomes.WINDSWEPT_SAVANNA);
-		HolderGetter<Biome> holderGetter = provider.lookupOrThrow(Registries.BIOME);
 		TagsProvider.TagAppender<Biome> tagAppender = this.tag(BiomeTags.IS_NETHER);
-		MultiNoiseBiomeSource.Preset.NETHER.possibleBiomes(holderGetter).forEach(tagAppender::add);
+		MultiNoiseBiomeSource.Preset.NETHER.possibleBiomes().forEach(tagAppender::add);
 		TagsProvider.TagAppender<Biome> tagAppender2 = this.tag(BiomeTags.IS_OVERWORLD);
-		MultiNoiseBiomeSource.Preset.OVERWORLD.possibleBiomes(holderGetter).forEach(tagAppender2::add);
+		MultiNoiseBiomeSource.Preset.OVERWORLD.possibleBiomes().forEach(tagAppender2::add);
 		this.tag(BiomeTags.IS_END).add(Biomes.THE_END).add(Biomes.END_HIGHLANDS).add(Biomes.END_MIDLANDS).add(Biomes.SMALL_END_ISLANDS).add(Biomes.END_BARRENS);
 		this.tag(BiomeTags.HAS_BURIED_TREASURE).addTag(BiomeTags.IS_BEACH);
 		this.tag(BiomeTags.HAS_DESERT_PYRAMID).add(Biomes.DESERT);

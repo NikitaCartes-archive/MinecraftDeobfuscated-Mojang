@@ -7,7 +7,8 @@ public class LevelEvent {
 	public static final int SOUND_ENDER_EYE_LAUNCH = 1003;
 	public static final int SOUND_FIREWORK_SHOOT = 1004;
 	public static final int SOUND_EXTINGUISH_FIRE = 1009;
-	public static final int SOUND_PLAY_RECORDING = 1010;
+	public static final int SOUND_PLAY_JUKEBOX_SONG = 1010;
+	public static final int SOUND_STOP_JUKEBOX_SONG = 1011;
 	public static final int SOUND_GHAST_WARNING = 1015;
 	public static final int SOUND_GHAST_FIREBALL = 1016;
 	public static final int SOUND_DRAGON_FIREBALL = 1017;
@@ -64,4 +65,5 @@ public class LevelEvent {
 	public static final int PARTICLES_SCRAPE = 3005;
 	public static final int PARTICLES_SCULK_CHARGE = 3006;
 	public static final int PARTICLES_SCULK_SHRIEK = 3007;
+	public static final int PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE = 3008;
 }
