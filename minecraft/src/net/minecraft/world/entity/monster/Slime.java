@@ -398,7 +398,9 @@ public class Slime extends Mob implements Enemy {
 				this.slime.lookAt(livingEntity, 10.0F, 10.0F);
 			}
 
-			((Slime.SlimeMoveControl)this.slime.getMoveControl()).setDirection(this.slime.getYRot(), this.slime.isDealsDamage());
+			if (this.slime.getMoveControl() instanceof Slime.SlimeMoveControl slimeMoveControl) {
+				slimeMoveControl.setDirection(this.slime.getYRot(), this.slime.isDealsDamage());
+			}
 		}
 	}
 
@@ -427,7 +429,9 @@ public class Slime extends Mob implements Enemy {
 				this.slime.getJumpControl().jump();
 			}
 
-			((Slime.SlimeMoveControl)this.slime.getMoveControl()).setWantedMovement(1.2);
+			if (this.slime.getMoveControl() instanceof Slime.SlimeMoveControl slimeMoveControl) {
+				slimeMoveControl.setWantedMovement(1.2);
+			}
 		}
 	}
 
@@ -446,7 +450,9 @@ public class Slime extends Mob implements Enemy {
 
 		@Override
 		public void tick() {
-			((Slime.SlimeMoveControl)this.slime.getMoveControl()).setWantedMovement(1.0);
+			if (this.slime.getMoveControl() instanceof Slime.SlimeMoveControl slimeMoveControl) {
+				slimeMoveControl.setWantedMovement(1.0);
+			}
 		}
 	}
 
@@ -529,7 +535,9 @@ public class Slime extends Mob implements Enemy {
 				this.chosenDegrees = (float)this.slime.getRandom().nextInt(360);
 			}
 
-			((Slime.SlimeMoveControl)this.slime.getMoveControl()).setDirection(this.chosenDegrees, false);
+			if (this.slime.getMoveControl() instanceof Slime.SlimeMoveControl slimeMoveControl) {
+				slimeMoveControl.setDirection(this.chosenDegrees, false);
+			}
 		}
 	}
 }

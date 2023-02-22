@@ -13,7 +13,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.CommonComponents;
@@ -80,11 +79,10 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		Lighting.setupForFlatItems();
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, ENCHANTING_TABLE_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		int m = (int)this.minecraft.getWindow().getGuiScale();
 		RenderSystem.viewport((this.width - 320) / 2 * m, (this.height - 240) / 2 * m, 320 * m, 240 * m);
 		Matrix4f matrix4f = new Matrix4f().translation(-0.34F, 0.23F, 0.0F).perspective((float) (Math.PI / 2), 1.3333334F, 9.0F, 80.0F);
@@ -137,34 +135,32 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 		for (int r = 0; r < 3; r++) {
 			int s = k + 60;
 			int t = s + 20;
-			this.setBlitOffset(0);
-			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, ENCHANTING_TABLE_LOCATION);
 			int u = this.menu.costs[r];
 			if (u == 0) {
-				this.blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
+				blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
 			} else {
 				String string = u + "";
 				int v = 86 - this.font.width(string);
 				FormattedText formattedText = EnchantmentNames.getInstance().getRandomName(this.font, v);
 				int w = 6839882;
 				if ((q < r + 1 || this.minecraft.player.experienceLevel < u) && !this.minecraft.player.getAbilities().instabuild) {
-					this.blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
-					this.blit(poseStack, s + 1, l + 15 + 19 * r, 16 * r, 239, 16, 16);
-					this.font.drawWordWrap(formattedText, t, l + 16 + 19 * r, v, (w & 16711422) >> 1);
+					blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
+					blit(poseStack, s + 1, l + 15 + 19 * r, 16 * r, 239, 16, 16);
+					this.font.drawWordWrap(poseStack, formattedText, t, l + 16 + 19 * r, v, (w & 16711422) >> 1);
 					w = 4226832;
 				} else {
 					int x = i - (k + 60);
 					int y = j - (l + 14 + 19 * r);
 					if (x >= 0 && y >= 0 && x < 108 && y < 19) {
-						this.blit(poseStack, s, l + 14 + 19 * r, 0, 204, 108, 19);
+						blit(poseStack, s, l + 14 + 19 * r, 0, 204, 108, 19);
 						w = 16777088;
 					} else {
-						this.blit(poseStack, s, l + 14 + 19 * r, 0, 166, 108, 19);
+						blit(poseStack, s, l + 14 + 19 * r, 0, 166, 108, 19);
 					}
 
-					this.blit(poseStack, s + 1, l + 15 + 19 * r, 16 * r, 223, 16, 16);
-					this.font.drawWordWrap(formattedText, t, l + 16 + 19 * r, v, w);
+					blit(poseStack, s + 1, l + 15 + 19 * r, 16 * r, 223, 16, 16);
+					this.font.drawWordWrap(poseStack, formattedText, t, l + 16 + 19 * r, v, w);
 					w = 8453920;
 				}
 

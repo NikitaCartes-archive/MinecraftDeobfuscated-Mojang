@@ -32,7 +32,7 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 			Level level = fallingBlockEntity.getLevel();
 			if (blockState != level.getBlockState(fallingBlockEntity.blockPosition()) && blockState.getRenderShape() != RenderShape.INVISIBLE) {
 				poseStack.pushPose();
-				BlockPos blockPos = new BlockPos(fallingBlockEntity.getX(), fallingBlockEntity.getBoundingBox().maxY, fallingBlockEntity.getZ());
+				BlockPos blockPos = BlockPos.containing(fallingBlockEntity.getX(), fallingBlockEntity.getBoundingBox().maxY, fallingBlockEntity.getZ());
 				poseStack.translate(-0.5, 0.0, -0.5);
 				this.dispatcher
 					.getModelRenderer()

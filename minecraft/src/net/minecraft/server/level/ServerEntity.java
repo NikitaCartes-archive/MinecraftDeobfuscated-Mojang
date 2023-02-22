@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -79,8 +80,13 @@ public class ServerEntity {
 	public void sendChanges() {
 		List<Entity> list = this.entity.getPassengers();
 		if (!list.equals(this.lastPassengers)) {
-			this.lastPassengers = list;
 			this.broadcast.accept(new ClientboundSetPassengersPacket(this.entity));
+			this.changedPassengers(list, this.lastPassengers).forEach(entity -> {
+				if (entity instanceof ServerPlayer serverPlayer && !list.contains(serverPlayer)) {
+					serverPlayer.connection.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
+				}
+			});
+			this.lastPassengers = list;
 		}
 
 		if (this.entity instanceof ItemFrame itemFrame && this.tickCount % 10 == 0) {
@@ -195,6 +201,10 @@ public class ServerEntity {
 			this.broadcastAndSend(new ClientboundSetEntityMotionPacket(this.entity));
 			this.entity.hurtMarked = false;
 		}
+	}
+
+	private Stream<Entity> changedPassengers(List<Entity> list, List<Entity> list2) {
+		return Stream.concat(list2.stream().filter(entity -> !list.contains(entity)), list.stream().filter(entity -> !list2.contains(entity)));
 	}
 
 	public void removePairing(ServerPlayer serverPlayer) {

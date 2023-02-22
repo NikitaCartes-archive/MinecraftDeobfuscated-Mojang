@@ -61,7 +61,7 @@ public class FancyTrunkPlacer extends TrunkPlacer {
 					double h = (double)(randomSource.nextFloat() * 2.0F) * Math.PI;
 					double q = g * Math.sin(h) + 0.5;
 					double r = g * Math.cos(h) + 0.5;
-					BlockPos blockPos2 = blockPos.offset(q, (double)(o - 1), r);
+					BlockPos blockPos2 = blockPos.offset(Mth.floor(q), o - 1, Mth.floor(r));
 					BlockPos blockPos3 = blockPos2.above(5);
 					if (this.makeLimb(levelSimulatedReader, biConsumer, randomSource, blockPos2, blockPos3, false, treeConfiguration)) {
 						int s = blockPos.getX() - blockPos2.getX();
@@ -109,7 +109,7 @@ public class FancyTrunkPlacer extends TrunkPlacer {
 			float h = (float)blockPos3.getZ() / (float)i;
 
 			for (int j = 0; j <= i; j++) {
-				BlockPos blockPos4 = blockPos.offset((double)(0.5F + (float)j * f), (double)(0.5F + (float)j * g), (double)(0.5F + (float)j * h));
+				BlockPos blockPos4 = blockPos.offset(Mth.floor(0.5F + (float)j * f), Mth.floor(0.5F + (float)j * g), Mth.floor(0.5F + (float)j * h));
 				if (bl) {
 					this.placeLog(
 						levelSimulatedReader,

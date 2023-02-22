@@ -8,7 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -26,10 +26,9 @@ public class AdvancementToast implements Toast {
 
 	@Override
 	public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		DisplayInfo displayInfo = this.advancement.getDisplay();
-		toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
+		GuiComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
 		if (displayInfo != null) {
 			List<FormattedCharSequence> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
 			int i = displayInfo.getFrame() == FrameType.CHALLENGE ? 16746751 : 16776960;
@@ -60,7 +59,7 @@ public class AdvancementToast implements Toast {
 				}
 			}
 
-			toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(displayInfo.getIcon(), 8, 8);
+			toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(poseStack, displayInfo.getIcon(), 8, 8);
 			return (double)l >= 5000.0 * toastComponent.getNotificationDisplayTimeMultiplier() ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
 		} else {
 			return Toast.Visibility.HIDE;

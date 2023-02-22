@@ -69,6 +69,8 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleLevelChunkWithLight(ClientboundLevelChunkWithLightPacket clientboundLevelChunkWithLightPacket);
 
+	void handleChunksBiomes(ClientboundChunksBiomesPacket clientboundChunksBiomesPacket);
+
 	void handleForgetLevelChunk(ClientboundForgetLevelChunkPacket clientboundForgetLevelChunkPacket);
 
 	void handleLevelEvent(ClientboundLevelEventPacket clientboundLevelEventPacket);

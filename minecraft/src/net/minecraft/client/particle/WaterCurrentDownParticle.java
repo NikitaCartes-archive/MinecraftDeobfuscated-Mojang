@@ -43,7 +43,7 @@ public class WaterCurrentDownParticle extends TextureSheetParticle {
 			this.xd *= 0.07;
 			this.zd *= 0.07;
 			this.move(this.xd, this.yd, this.zd);
-			if (!this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER) || this.onGround) {
+			if (!this.level.getFluidState(BlockPos.containing(this.x, this.y, this.z)).is(FluidTags.WATER) || this.onGround) {
 				this.remove();
 			}
 

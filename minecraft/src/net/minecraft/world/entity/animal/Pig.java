@@ -16,7 +16,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ItemBasedSteering;
@@ -76,15 +75,12 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 
 	@Nullable
 	@Override
-	public Entity getControllingPassenger() {
-		Entity entity = this.getFirstPassenger();
-		return entity != null && this.canBeControlledBy(entity) ? entity : null;
-	}
-
-	private boolean canBeControlledBy(Entity entity) {
-		return this.isSaddled() && entity instanceof Player player
-			? player.getMainHandItem().is(Items.CARROT_ON_A_STICK) || player.getOffhandItem().is(Items.CARROT_ON_A_STICK)
-			: false;
+	public LivingEntity getControllingPassenger() {
+		return !this.isSaddled()
+				|| !(this.getFirstPassenger() instanceof Player player)
+				|| !player.getMainHandItem().is(Items.CARROT_ON_A_STICK) && !player.getOffhandItem().is(Items.CARROT_ON_A_STICK)
+			? null
+			: player;
 	}
 
 	@Override
@@ -237,18 +233,21 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	public void travel(Vec3 vec3) {
-		this.travel(this, this.steering, vec3);
+	protected void tickRidden(LivingEntity livingEntity, Vec3 vec3) {
+		super.tickRidden(livingEntity, vec3);
+		this.setRot(livingEntity.getYRot(), livingEntity.getXRot() * 0.5F);
+		this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
+		this.steering.tickBoost();
 	}
 
 	@Override
-	public float getSteeringSpeed() {
-		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 0.225F;
+	protected Vec3 getRiddenInput(LivingEntity livingEntity, Vec3 vec3) {
+		return new Vec3(0.0, 0.0, 1.0);
 	}
 
 	@Override
-	public void travelWithInput(Vec3 vec3) {
-		super.travel(vec3);
+	protected float getRiddenSpeed(LivingEntity livingEntity) {
+		return super.getRiddenSpeed(livingEntity) * 0.225F * this.steering.boostFactor();
 	}
 
 	@Override

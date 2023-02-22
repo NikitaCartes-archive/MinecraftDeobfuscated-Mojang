@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import org.joml.Matrix4f;
 
@@ -25,9 +26,9 @@ public abstract class GuiComponent {
 	public static final ResourceLocation BACKGROUND_LOCATION = new ResourceLocation("textures/gui/options_background.png");
 	public static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
 	public static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
-	private int blitOffset;
+	public static final ResourceLocation LIGHT_DIRT_BACKGROUND = new ResourceLocation("textures/gui/light_dirt_background.png");
 
-	protected void hLine(PoseStack poseStack, int i, int j, int k, int l) {
+	protected static void hLine(PoseStack poseStack, int i, int j, int k, int l) {
 		if (j < i) {
 			int m = i;
 			i = j;
@@ -37,7 +38,7 @@ public abstract class GuiComponent {
 		fill(poseStack, i, k, j + 1, k + 1, l);
 	}
 
-	protected void vLine(PoseStack poseStack, int i, int j, int k, int l) {
+	protected static void vLine(PoseStack poseStack, int i, int j, int k, int l) {
 		if (k < j) {
 			int m = j;
 			j = k;
@@ -67,10 +68,7 @@ public abstract class GuiComponent {
 	}
 
 	public static void fill(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
-		innerFill(poseStack.last().pose(), i, j, k, l, m, n);
-	}
-
-	private static void innerFill(Matrix4f matrix4f, int i, int j, int k, int l, int m, int n) {
+		Matrix4f matrix4f = poseStack.last().pose();
 		if (i < k) {
 			int o = i;
 			i = k;
@@ -83,30 +81,28 @@ public abstract class GuiComponent {
 			l = o;
 		}
 
-		float f = (float)(n >> 24 & 0xFF) / 255.0F;
-		float g = (float)(n >> 16 & 0xFF) / 255.0F;
-		float h = (float)(n >> 8 & 0xFF) / 255.0F;
-		float p = (float)(n & 0xFF) / 255.0F;
+		float f = (float)FastColor.ARGB32.alpha(n) / 255.0F;
+		float g = (float)FastColor.ARGB32.red(n) / 255.0F;
+		float h = (float)FastColor.ARGB32.green(n) / 255.0F;
+		float p = (float)FastColor.ARGB32.blue(n) / 255.0F;
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).color(g, h, p, f).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)k, (float)l, (float)m).color(g, h, p, f).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
 		BufferUploader.drawWithShader(bufferBuilder.end());
 		RenderSystem.disableBlend();
 	}
 
-	protected void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
-		fillGradient(poseStack, i, j, k, l, m, n, this.blitOffset);
+	protected static void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+		fillGradient(poseStack, i, j, k, l, m, n, 0);
 	}
 
 	protected static void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o) {
 		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -117,18 +113,18 @@ public abstract class GuiComponent {
 	}
 
 	protected static void fillGradient(Matrix4f matrix4f, BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o) {
-		float f = (float)(n >> 24 & 0xFF) / 255.0F;
-		float g = (float)(n >> 16 & 0xFF) / 255.0F;
-		float h = (float)(n >> 8 & 0xFF) / 255.0F;
-		float p = (float)(n & 0xFF) / 255.0F;
-		float q = (float)(o >> 24 & 0xFF) / 255.0F;
-		float r = (float)(o >> 16 & 0xFF) / 255.0F;
-		float s = (float)(o >> 8 & 0xFF) / 255.0F;
-		float t = (float)(o & 0xFF) / 255.0F;
-		bufferBuilder.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
+		float f = (float)FastColor.ARGB32.alpha(n) / 255.0F;
+		float g = (float)FastColor.ARGB32.red(n) / 255.0F;
+		float h = (float)FastColor.ARGB32.green(n) / 255.0F;
+		float p = (float)FastColor.ARGB32.blue(n) / 255.0F;
+		float q = (float)FastColor.ARGB32.alpha(o) / 255.0F;
+		float r = (float)FastColor.ARGB32.red(o) / 255.0F;
+		float s = (float)FastColor.ARGB32.green(o) / 255.0F;
+		float t = (float)FastColor.ARGB32.blue(o) / 255.0F;
 		bufferBuilder.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).color(r, s, t, q).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)k, (float)l, (float)m).color(r, s, t, q).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
 	}
 
 	public static void drawCenteredString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
@@ -156,7 +152,7 @@ public abstract class GuiComponent {
 		font.drawShadow(poseStack, component, (float)i, (float)j, k);
 	}
 
-	public void blitOutlineBlack(int i, int j, BiConsumer<Integer, Integer> biConsumer) {
+	public static void blitOutlineBlack(int i, int j, BiConsumer<Integer, Integer> biConsumer) {
 		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.ZERO,
 			GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
@@ -167,7 +163,7 @@ public abstract class GuiComponent {
 		biConsumer.accept(i - 1, j);
 		biConsumer.accept(i, j + 1);
 		biConsumer.accept(i, j - 1);
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		RenderSystem.defaultBlendFunc();
 		biConsumer.accept(i, j);
 	}
 
@@ -205,23 +201,30 @@ public abstract class GuiComponent {
 		);
 	}
 
-	public void blit(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
-		blit(poseStack, i, j, this.blitOffset, (float)k, (float)l, m, n, 256, 256);
+	public static void renderOutline(PoseStack poseStack, int i, int j, int k, int l, int m) {
+		fill(poseStack, i, j, i + k, j + 1, m);
+		fill(poseStack, i, j + l - 1, i + k, j + l, m);
+		fill(poseStack, i, j + 1, i + 1, j + l - 1, m);
+		fill(poseStack, i + k - 1, j + 1, i + k, j + l - 1, m);
+	}
+
+	public static void blit(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+		blit(poseStack, i, j, 0, (float)k, (float)l, m, n, 256, 256);
 	}
 
 	public static void blit(PoseStack poseStack, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
-		innerBlit(poseStack, i, i + l, j, j + m, k, l, m, f, g, n, o);
+		blit(poseStack, i, i + l, j, j + m, k, l, m, f, g, n, o);
 	}
 
 	public static void blit(PoseStack poseStack, int i, int j, int k, int l, float f, float g, int m, int n, int o, int p) {
-		innerBlit(poseStack, i, i + k, j, j + l, 0, m, n, f, g, o, p);
+		blit(poseStack, i, i + k, j, j + l, 0, m, n, f, g, o, p);
 	}
 
 	public static void blit(PoseStack poseStack, int i, int j, float f, float g, int k, int l, int m, int n) {
 		blit(poseStack, i, j, k, l, f, g, k, l, m, n);
 	}
 
-	private static void innerBlit(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, float f, float g, int p, int q) {
+	private static void blit(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, float f, float g, int p, int q) {
 		innerBlit(poseStack.last().pose(), i, j, k, l, m, (f + 0.0F) / (float)p, (f + (float)n) / (float)p, (g + 0.0F) / (float)q, (g + (float)o) / (float)q);
 	}
 
@@ -229,64 +232,55 @@ public abstract class GuiComponent {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+		bufferBuilder.vertex(matrix4f, (float)i, (float)k, (float)m).uv(f, h).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).uv(f, n).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)j, (float)l, (float)m).uv(g, n).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)j, (float)k, (float)m).uv(g, h).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)k, (float)m).uv(f, h).endVertex();
 		BufferUploader.drawWithShader(bufferBuilder.end());
 	}
 
 	private static void innerBlit(Matrix4f matrix4f, int i, int j, int k, int l, int m, float f, float g, float h, float n, float o, float p, float q, float r) {
 		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
 		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+		bufferBuilder.vertex(matrix4f, (float)i, (float)k, (float)m).color(o, p, q, r).uv(f, h).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).color(o, p, q, r).uv(f, n).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)j, (float)l, (float)m).color(o, p, q, r).uv(g, n).endVertex();
 		bufferBuilder.vertex(matrix4f, (float)j, (float)k, (float)m).color(o, p, q, r).uv(g, h).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)k, (float)m).color(o, p, q, r).uv(f, h).endVertex();
 		BufferUploader.drawWithShader(bufferBuilder.end());
 		RenderSystem.disableBlend();
 	}
 
-	public int getBlitOffset() {
-		return this.blitOffset;
+	public static void blitNineSliced(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
+		blitNineSliced(poseStack, i, j, k, l, m, m, m, m, n, o, p, q);
 	}
 
-	public void setBlitOffset(int i) {
-		this.blitOffset = i;
-	}
-
-	public void blitNineSliced(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
-		this.blitNineSliced(poseStack, i, j, k, l, m, m, m, m, n, o, p, q);
-	}
-
-	public void blitNineSliced(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r, int s, int t) {
+	public static void blitNineSliced(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r, int s, int t) {
 		if (k == q && l == r) {
-			this.blit(poseStack, i, j, s, t, k, l);
+			blit(poseStack, i, j, s, t, k, l);
 		} else if (l == r) {
-			this.blit(poseStack, i, j, s, t, m, l);
-			this.blitRepeating(poseStack, i + m, j, k - o - m, l, s + m, t, q - o - m, r);
-			this.blit(poseStack, i + k - o, j, s + q - o, t, o, l);
+			blit(poseStack, i, j, s, t, m, l);
+			blitRepeating(poseStack, i + m, j, k - o - m, l, s + m, t, q - o - m, r);
+			blit(poseStack, i + k - o, j, s + q - o, t, o, l);
 		} else if (k == q) {
-			this.blit(poseStack, i, j, s, t, k, n);
-			this.blitRepeating(poseStack, i, j + n, k, l - p - n, s, t + n, q, r - p - n);
-			this.blit(poseStack, i, j + l - p, s, t + r - p, k, p);
+			blit(poseStack, i, j, s, t, k, n);
+			blitRepeating(poseStack, i, j + n, k, l - p - n, s, t + n, q, r - p - n);
+			blit(poseStack, i, j + l - p, s, t + r - p, k, p);
 		} else {
-			this.blit(poseStack, i, j, s, t, m, n);
-			this.blitRepeating(poseStack, i + m, j, k - o - m, n, s + m, t, q - o - m, r);
-			this.blit(poseStack, i + k - o, j, s + q - o, t, o, n);
-			this.blit(poseStack, i, j + l - p, s, t + r - p, m, p);
-			this.blitRepeating(poseStack, i + m, j + l - p, k - o - m, p, s + m, t + r - p, q - o - m, r);
-			this.blit(poseStack, i + k - o, j + l - p, s + q - o, t + r - p, o, p);
-			this.blitRepeating(poseStack, i, j + n, m, l - p - n, s, t + n, q, r - p - n);
-			this.blitRepeating(poseStack, i + m, j + n, k - o - m, l - p - n, s + m, t + n, q - o - m, r - p - n);
-			this.blitRepeating(poseStack, i + k - o, j + n, m, l - p - n, s + q - o, t + n, q, r - p - n);
+			blit(poseStack, i, j, s, t, m, n);
+			blitRepeating(poseStack, i + m, j, k - o - m, n, s + m, t, q - o - m, r);
+			blit(poseStack, i + k - o, j, s + q - o, t, o, n);
+			blit(poseStack, i, j + l - p, s, t + r - p, m, p);
+			blitRepeating(poseStack, i + m, j + l - p, k - o - m, p, s + m, t + r - p, q - o - m, r);
+			blit(poseStack, i + k - o, j + l - p, s + q - o, t + r - p, o, p);
+			blitRepeating(poseStack, i, j + n, m, l - p - n, s, t + n, q, r - p - n);
+			blitRepeating(poseStack, i + m, j + n, k - o - m, l - p - n, s + m, t + n, q - o - m, r - p - n);
+			blitRepeating(poseStack, i + k - o, j + n, m, l - p - n, s + q - o, t + n, q, r - p - n);
 		}
 	}
 
-	public void blitRepeating(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p) {
+	public static void blitRepeating(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p) {
 		int q = 0;
 
 		while (q < k) {
@@ -297,7 +291,7 @@ public abstract class GuiComponent {
 			while (t < l) {
 				int u = j + t;
 				int v = Math.min(p, l - t);
-				this.blit(poseStack, r, u, m, n, s, v);
+				blit(poseStack, r, u, m, n, s, v);
 				t += p;
 			}
 

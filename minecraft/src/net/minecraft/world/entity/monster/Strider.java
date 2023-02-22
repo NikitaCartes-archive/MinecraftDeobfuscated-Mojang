@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -33,6 +34,8 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
@@ -68,8 +71,11 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class Strider extends Animal implements ItemSteerable, Saddleable {
-	private static final float SUFFOCATE_STEERING_MODIFIER = 0.23F;
-	private static final float SUFFOCATE_SPEED_MODIFIER = 0.66F;
+	private static final UUID SUFFOCATING_MODIFIER_UUID = UUID.fromString("9e362924-01de-4ddd-a2b2-d0f7a405a174");
+	private static final AttributeModifier SUFFOCATING_MODIFIER = new AttributeModifier(
+		SUFFOCATING_MODIFIER_UUID, "Strider suffocating modifier", -0.34F, AttributeModifier.Operation.MULTIPLY_BASE
+	);
+	private static final float SUFFOCATE_STEERING_MODIFIER = 0.35F;
 	private static final float STEERING_MODIFIER = 0.55F;
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WARPED_FUNGUS);
 	private static final Ingredient TEMPT_ITEMS = Ingredient.of(Items.WARPED_FUNGUS, Items.WARPED_FUNGUS_ON_A_STICK);
@@ -157,8 +163,8 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
 		this.temptGoal = new TemptGoal(this, 1.4, TEMPT_ITEMS, false);
 		this.goalSelector.addGoal(3, this.temptGoal);
-		this.goalSelector.addGoal(4, new Strider.StriderGoToLavaGoal(this, 1.5));
-		this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.1));
+		this.goalSelector.addGoal(4, new Strider.StriderGoToLavaGoal(this, 1.0));
+		this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.0));
 		this.goalSelector.addGoal(7, new RandomStrollGoal(this, 1.0, 60));
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
@@ -167,10 +173,17 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	public void setSuffocating(boolean bl) {
 		this.entityData.set(DATA_SUFFOCATING, bl);
+		AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (attributeInstance != null) {
+			attributeInstance.removeModifier(SUFFOCATING_MODIFIER_UUID);
+			if (bl) {
+				attributeInstance.addTransientModifier(SUFFOCATING_MODIFIER);
+			}
+		}
 	}
 
 	public boolean isSuffocating() {
-		return this.getVehicle() instanceof Strider ? ((Strider)this.getVehicle()).isSuffocating() : this.entityData.get(DATA_SUFFOCATING);
+		return this.entityData.get(DATA_SUFFOCATING);
 	}
 
 	@Override
@@ -192,15 +205,13 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	@Nullable
 	@Override
-	public Entity getControllingPassenger() {
-		Entity entity = this.getFirstPassenger();
-		return entity != null && this.canBeControlledBy(entity) ? entity : null;
-	}
+	public LivingEntity getControllingPassenger() {
+		if (this.getFirstPassenger() instanceof Player player
+			&& (player.getMainHandItem().is(Items.WARPED_FUNGUS_ON_A_STICK) || player.getOffhandItem().is(Items.WARPED_FUNGUS_ON_A_STICK))) {
+			return player;
+		}
 
-	private boolean canBeControlledBy(Entity entity) {
-		return !(entity instanceof Player player)
-			? false
-			: player.getMainHandItem().is(Items.WARPED_FUNGUS_ON_A_STICK) || player.getOffhandItem().is(Items.WARPED_FUNGUS_ON_A_STICK);
+		return null;
 	}
 
 	@Override
@@ -247,23 +258,21 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	public void travel(Vec3 vec3) {
-		this.setSpeed(this.getMoveSpeed());
-		this.travel(this, this.steering, vec3);
-	}
-
-	public float getMoveSpeed() {
-		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED) * (this.isSuffocating() ? 0.66F : 1.0F);
-	}
-
-	@Override
-	public float getSteeringSpeed() {
-		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED) * (this.isSuffocating() ? 0.23F : 0.55F);
+	protected void tickRidden(LivingEntity livingEntity, Vec3 vec3) {
+		this.setRot(livingEntity.getYRot(), livingEntity.getXRot() * 0.5F);
+		this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
+		this.steering.tickBoost();
+		super.tickRidden(livingEntity, vec3);
 	}
 
 	@Override
-	public void travelWithInput(Vec3 vec3) {
-		super.travel(vec3);
+	protected Vec3 getRiddenInput(LivingEntity livingEntity, Vec3 vec3) {
+		return new Vec3(0.0, 0.0, 1.0);
+	}
+
+	@Override
+	protected float getRiddenSpeed(LivingEntity livingEntity) {
+		return super.getRiddenSpeed(livingEntity) * (this.isSuffocating() ? 0.35F : 0.55F) * this.steering.boostFactor();
 	}
 
 	@Override
@@ -300,10 +309,22 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		}
 
 		if (!this.isNoAi()) {
-			BlockState blockState = this.level.getBlockState(this.blockPosition());
-			BlockState blockState2 = this.getBlockStateOnLegacy();
-			boolean bl = blockState.is(BlockTags.STRIDER_WARM_BLOCKS) || blockState2.is(BlockTags.STRIDER_WARM_BLOCKS) || this.getFluidHeight(FluidTags.LAVA) > 0.0;
-			this.setSuffocating(!bl);
+			boolean bl;
+			boolean var10000;
+			label36: {
+				BlockState blockState = this.level.getBlockState(this.blockPosition());
+				BlockState blockState2 = this.getBlockStateOnLegacy();
+				bl = blockState.is(BlockTags.STRIDER_WARM_BLOCKS) || blockState2.is(BlockTags.STRIDER_WARM_BLOCKS) || this.getFluidHeight(FluidTags.LAVA) > 0.0;
+				if (this.getVehicle() instanceof Strider strider && strider.isSuffocating()) {
+					var10000 = true;
+					break label36;
+				}
+
+				var10000 = false;
+			}
+
+			boolean bl2 = var10000;
+			this.setSuffocating(!bl || bl2);
 		}
 
 		super.tick();

@@ -2,6 +2,7 @@ package net.minecraft.util.datafix.fixes;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.OpticFinder;
@@ -15,7 +16,6 @@ import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class ChunkBedBlockEntityInjecterFix extends DataFix {
 	public ChunkBedBlockEntityInjecterFix(Schema schema, boolean bl) {
@@ -59,28 +59,33 @@ public class ChunkBedBlockEntityInjecterFix extends DataFix {
 					for (int k = 0; k < list2.size(); k++) {
 						Dynamic<?> dynamic2 = (Dynamic<?>)list2.get(k);
 						int l = dynamic2.get("Y").asInt(0);
-						Stream<Integer> stream = dynamic2.get("Blocks").asStream().map(dynamicx -> dynamicx.asInt(0));
-						int m = 0;
-
-						for (int n : stream::iterator) {
-							if (416 == (n & 0xFF) << 4) {
-								int o = m & 15;
-								int p = m >> 8 & 15;
-								int q = m >> 4 & 15;
-								Map<Dynamic<?>, Dynamic<?>> map = Maps.<Dynamic<?>, Dynamic<?>>newHashMap();
-								map.put(dynamic2.createString("id"), dynamic2.createString("minecraft:bed"));
-								map.put(dynamic2.createString("x"), dynamic2.createInt(o + (ix << 4)));
-								map.put(dynamic2.createString("y"), dynamic2.createInt(p + (l << 4)));
-								map.put(dynamic2.createString("z"), dynamic2.createInt(q + (j << 4)));
-								map.put(dynamic2.createString("color"), dynamic2.createShort((short)14));
-								list.add(
-									((Pair)type2.read(dynamic2.createMap(map)).result().orElseThrow(() -> new IllegalStateException("Could not parse newly created bed block entity.")))
-										.getFirst()
-								);
-							}
-
-							m++;
-						}
+						Streams.mapWithIndex(dynamic2.get("Blocks").asIntStream(), (lx, m) -> {
+								if (416 == (lx & 0xFF) << 4) {
+									int n = (int)m;
+									int o = n & 15;
+									int p = n >> 8 & 15;
+									int q = n >> 4 & 15;
+									Map<Dynamic<?>, Dynamic<?>> map = Maps.<Dynamic<?>, Dynamic<?>>newHashMap();
+									map.put(dynamic2.createString("id"), dynamic2.createString("minecraft:bed"));
+									map.put(dynamic2.createString("x"), dynamic2.createInt(o + (ix << 4)));
+									map.put(dynamic2.createString("y"), dynamic2.createInt(p + (l << 4)));
+									map.put(dynamic2.createString("z"), dynamic2.createInt(q + (j << 4)));
+									map.put(dynamic2.createString("color"), dynamic2.createShort((short)14));
+									return map;
+								} else {
+									return null;
+								}
+							})
+							.forEachOrdered(
+								map -> {
+									if (map != null) {
+										list.add(
+											((Pair)type2.read(dynamic2.createMap(map)).result().orElseThrow(() -> new IllegalStateException("Could not parse newly created bed block entity.")))
+												.getFirst()
+										);
+									}
+								}
+							);
 					}
 
 					return !list.isEmpty() ? typed.set(opticFinder, typed2.set(opticFinder2, list)) : typed;

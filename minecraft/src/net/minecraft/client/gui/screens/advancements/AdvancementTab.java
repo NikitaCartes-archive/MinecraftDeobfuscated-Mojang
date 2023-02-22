@@ -11,7 +11,6 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
@@ -76,59 +75,46 @@ public class AdvancementTab extends GuiComponent {
 	}
 
 	public void drawTab(PoseStack poseStack, int i, int j, boolean bl) {
-		this.type.draw(poseStack, this, i, j, bl, this.index);
+		this.type.draw(poseStack, i, j, bl, this.index);
 	}
 
-	public void drawIcon(int i, int j, ItemRenderer itemRenderer) {
-		this.type.drawIcon(i, j, this.index, itemRenderer, this.icon);
+	public void drawIcon(PoseStack poseStack, int i, int j, ItemRenderer itemRenderer) {
+		this.type.drawIcon(poseStack, i, j, this.index, itemRenderer, this.icon);
 	}
 
-	public void drawContents(PoseStack poseStack) {
+	public void drawContents(PoseStack poseStack, int i, int j) {
 		if (!this.centered) {
 			this.scrollX = (double)(117 - (this.maxX + this.minX) / 2);
 			this.scrollY = (double)(56 - (this.maxY + this.minY) / 2);
 			this.centered = true;
 		}
 
+		enableScissor(i, j, i + 234, j + 113);
 		poseStack.pushPose();
-		poseStack.translate(0.0F, 0.0F, 950.0F);
-		RenderSystem.enableDepthTest();
-		RenderSystem.colorMask(false, false, false, false);
-		fill(poseStack, 4680, 2260, -4680, -2260, -16777216);
-		RenderSystem.colorMask(true, true, true, true);
-		poseStack.translate(0.0F, 0.0F, -950.0F);
-		RenderSystem.depthFunc(518);
-		fill(poseStack, 234, 113, 0, 0, -16777216);
-		RenderSystem.depthFunc(515);
+		poseStack.translate((float)i, (float)j, 0.0F);
 		ResourceLocation resourceLocation = this.display.getBackground();
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		if (resourceLocation != null) {
 			RenderSystem.setShaderTexture(0, resourceLocation);
 		} else {
 			RenderSystem.setShaderTexture(0, TextureManager.INTENTIONAL_MISSING_TEXTURE);
 		}
 
-		int i = Mth.floor(this.scrollX);
-		int j = Mth.floor(this.scrollY);
-		int k = i % 16;
-		int l = j % 16;
+		int k = Mth.floor(this.scrollX);
+		int l = Mth.floor(this.scrollY);
+		int m = k % 16;
+		int n = l % 16;
 
-		for (int m = -1; m <= 15; m++) {
-			for (int n = -1; n <= 8; n++) {
-				blit(poseStack, k + 16 * m, l + 16 * n, 0.0F, 0.0F, 16, 16, 16, 16);
+		for (int o = -1; o <= 15; o++) {
+			for (int p = -1; p <= 8; p++) {
+				blit(poseStack, m + 16 * o, n + 16 * p, 0.0F, 0.0F, 16, 16, 16, 16);
 			}
 		}
 
-		this.root.drawConnectivity(poseStack, i, j, true);
-		this.root.drawConnectivity(poseStack, i, j, false);
-		this.root.draw(poseStack, i, j);
-		RenderSystem.depthFunc(518);
-		poseStack.translate(0.0F, 0.0F, -950.0F);
-		RenderSystem.colorMask(false, false, false, false);
-		fill(poseStack, 4680, 2260, -4680, -2260, -16777216);
-		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.depthFunc(515);
+		this.root.drawConnectivity(poseStack, k, l, true);
+		this.root.drawConnectivity(poseStack, k, l, false);
+		this.root.draw(poseStack, k, l);
 		poseStack.popPose();
+		disableScissor();
 	}
 
 	public void drawTooltips(PoseStack poseStack, int i, int j, int k, int l) {

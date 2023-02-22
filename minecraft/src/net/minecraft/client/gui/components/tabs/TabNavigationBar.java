@@ -1,78 +1,169 @@
 package net.minecraft.client.gui.components.tabs;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.mojang.math.Divisor;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.TabButton;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
-public class TabNavigationBar extends GridLayout {
+public class TabNavigationBar extends AbstractContainerEventHandler implements Renderable, GuiEventListener, NarratableEntry {
 	private static final int NO_TAB = -1;
+	private static final int MAX_WIDTH = 400;
+	private static final int HEIGHT = 24;
+	private static final int MARGIN = 14;
+	private static final Component USAGE_NARRATION = Component.translatable("narration.tab_navigation.usage");
+	private final GridLayout layout;
 	private int width;
 	private final TabManager tabManager;
 	private final ImmutableList<Tab> tabs;
-	private final ImmutableMap<Tab, Button> tabButtons;
+	private final ImmutableList<TabButton> tabButtons;
 
-	public void setWidth(int i) {
+	TabNavigationBar(int i, TabManager tabManager, Iterable<Tab> iterable) {
 		this.width = i;
+		this.tabManager = tabManager;
+		this.tabs = ImmutableList.copyOf(iterable);
+		this.layout = new GridLayout(0, 0);
+		this.layout.defaultCellSetting().alignHorizontallyCenter();
+		ImmutableList.Builder<TabButton> builder = ImmutableList.builder();
+		int j = 0;
+
+		for (Tab tab : iterable) {
+			builder.add(this.layout.addChild(new TabButton(tabManager, tab, 0, 24), 0, j++));
+		}
+
+		this.tabButtons = builder.build();
 	}
 
 	public static TabNavigationBar.Builder builder(TabManager tabManager, int i) {
 		return new TabNavigationBar.Builder(tabManager, i);
 	}
 
-	TabNavigationBar(int i, int j, int k, TabManager tabManager, Iterable<Tab> iterable) {
-		super(i, j);
-		this.width = k;
-		this.tabManager = tabManager;
-		this.tabs = ImmutableList.copyOf(iterable);
-		ImmutableMap.Builder<Tab, Button> builder = ImmutableMap.builder();
-		int l = 0;
-
-		for (Tab tab : iterable) {
-			Button button = Button.builder(tab.getTabTitle(), buttonx -> this.selectTab(Optional.of(buttonx), tab))
-				.createNarration(supplier -> Component.translatable("gui.narrate.tab", tab.getTabTitle()))
-				.build();
-			builder.put(tab, this.addChild(button, 0, l++));
-		}
-
-		this.tabButtons = builder.build();
-		this.arrangeElements();
+	public void setWidth(int i) {
+		this.width = i;
 	}
 
 	@Override
-	public void arrangeElements() {
-		Divisor divisor = new Divisor(this.width, this.tabs.size());
+	public void setFocused(boolean bl) {
+		super.setFocused(bl);
+		if (this.getFocused() != null) {
+			this.getFocused().setFocused(bl);
+		}
+	}
 
-		for (Button button : this.tabButtons.values()) {
-			button.setWidth(divisor.nextInt());
+	@Override
+	public void setFocused(@Nullable GuiEventListener guiEventListener) {
+		super.setFocused(guiEventListener);
+		if (guiEventListener instanceof TabButton tabButton) {
+			this.tabManager.setCurrentTab(tabButton.tab());
+		}
+	}
+
+	@Nullable
+	@Override
+	public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+		if (!this.isFocused()) {
+			TabButton tabButton = this.currentTabButton();
+			if (tabButton != null) {
+				return ComponentPath.path(this, ComponentPath.leaf(tabButton));
+			}
 		}
 
-		super.arrangeElements();
+		return focusNavigationEvent instanceof FocusNavigationEvent.TabNavigation ? null : super.nextFocusPath(focusNavigationEvent);
 	}
 
-	private void selectTab(Optional<Button> optional, Tab tab) {
-		this.tabButtons.values().forEach(button -> button.active = true);
-		optional.ifPresent(button -> button.active = false);
-		this.tabManager.setCurrentTab(tab);
+	@Override
+	public List<? extends GuiEventListener> children() {
+		return this.tabButtons;
 	}
 
-	public void selectTab(Tab tab) {
-		this.selectTab(Optional.ofNullable(this.tabButtons.get(tab)), tab);
+	@Override
+	public NarratableEntry.NarrationPriority narrationPriority() {
+		return (NarratableEntry.NarrationPriority)this.tabButtons
+			.stream()
+			.map(AbstractWidget::narrationPriority)
+			.max(Comparator.naturalOrder())
+			.orElse(NarratableEntry.NarrationPriority.NONE);
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		Optional<TabButton> optional = this.tabButtons.stream().filter(AbstractWidget::isHovered).findFirst().or(() -> Optional.ofNullable(this.currentTabButton()));
+		optional.ifPresent(tabButton -> {
+			this.narrateListElementPosition(narrationElementOutput.nest(), tabButton);
+			tabButton.updateNarration(narrationElementOutput);
+		});
+		if (this.isFocused()) {
+			narrationElementOutput.add(NarratedElementType.USAGE, USAGE_NARRATION);
+		}
+	}
+
+	protected void narrateListElementPosition(NarrationElementOutput narrationElementOutput, TabButton tabButton) {
+		if (this.tabs.size() > 1) {
+			int i = this.tabButtons.indexOf(tabButton);
+			if (i != -1) {
+				narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.tab", i + 1, this.tabs.size()));
+			}
+		}
+	}
+
+	@Override
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		fill(poseStack, 0, 0, this.width, 24, -16777216);
+		RenderSystem.setShaderTexture(0, CreateWorldScreen.HEADER_SEPERATOR);
+		blit(poseStack, 0, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+
+		for (TabButton tabButton : this.tabButtons) {
+			tabButton.render(poseStack, i, j, f);
+		}
+	}
+
+	@Override
+	public ScreenRectangle getRectangle() {
+		return this.layout.getRectangle();
+	}
+
+	public void arrangeElements() {
+		int i = Math.min(400, this.width) - 28;
+		int j = Mth.roundToward(i / this.tabs.size(), 2);
+
+		for (TabButton tabButton : this.tabButtons) {
+			tabButton.setWidth(j);
+		}
+
+		this.layout.arrangeElements();
+		this.layout.setX(Mth.roundToward((this.width - i) / 2, 2));
+		this.layout.setY(0);
 	}
 
 	public void selectTab(int i) {
-		this.selectTab((Tab)this.tabs.get(i));
+		if (this.isFocused()) {
+			this.setFocused((GuiEventListener)this.tabButtons.get(i));
+		} else {
+			this.tabManager.setCurrentTab((Tab)this.tabs.get(i));
+		}
 	}
 
 	public boolean keyPressed(int i) {
@@ -109,11 +200,15 @@ public class TabNavigationBar extends GridLayout {
 		return i != -1 ? i : -1;
 	}
 
+	@Nullable
+	private TabButton currentTabButton() {
+		int i = this.currentTabIndex();
+		return i != -1 ? (TabButton)this.tabButtons.get(i) : null;
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
-		private int x = 0;
-		private int y = 0;
-		private int width;
+		private final int width;
 		private final TabManager tabManager;
 		private final List<Tab> tabs = new ArrayList();
 
@@ -122,37 +217,13 @@ public class TabNavigationBar extends GridLayout {
 			this.width = i;
 		}
 
-		public TabNavigationBar.Builder addTab(Tab tab) {
-			this.tabs.add(tab);
-			return this;
-		}
-
 		public TabNavigationBar.Builder addTabs(Tab... tabs) {
 			Collections.addAll(this.tabs, tabs);
 			return this;
 		}
 
-		public TabNavigationBar.Builder setX(int i) {
-			this.x = i;
-			return this;
-		}
-
-		public TabNavigationBar.Builder setY(int i) {
-			this.y = i;
-			return this;
-		}
-
-		public TabNavigationBar.Builder setPosition(int i, int j) {
-			return this.setX(i).setY(j);
-		}
-
-		public TabNavigationBar.Builder setWidth(int i) {
-			this.width = i;
-			return this;
-		}
-
 		public TabNavigationBar build() {
-			return new TabNavigationBar(this.x, this.y, this.width, this.tabManager, this.tabs);
+			return new TabNavigationBar(this.width, this.tabManager, this.tabs);
 		}
 	}
 }

@@ -75,7 +75,7 @@ public class SummonCommand {
 	public static Entity createEntity(
 		CommandSourceStack commandSourceStack, Holder.Reference<EntityType<?>> reference, Vec3 vec3, CompoundTag compoundTag, boolean bl
 	) throws CommandSyntaxException {
-		BlockPos blockPos = new BlockPos(vec3);
+		BlockPos blockPos = BlockPos.containing(vec3);
 		if (!Level.isInSpawnableBounds(blockPos)) {
 			throw INVALID_POSITION.create();
 		} else {

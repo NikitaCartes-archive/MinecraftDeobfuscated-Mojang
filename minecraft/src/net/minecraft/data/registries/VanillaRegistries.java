@@ -26,6 +26,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.item.armortrim.TrimMaterials;
 import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPresets;
@@ -44,6 +45,7 @@ public class VanillaRegistries {
 		.add(Registries.PROCESSOR_LIST, ProcessorLists::bootstrap)
 		.add(Registries.TEMPLATE_POOL, Pools::bootstrap)
 		.add(Registries.BIOME, BiomeData::bootstrap)
+		.add(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, MultiNoiseBiomeSourceParameterLists::bootstrap)
 		.add(Registries.NOISE, NoiseData::bootstrap)
 		.add(Registries.DENSITY_FUNCTION, NoiseRouterData::bootstrap)
 		.add(Registries.NOISE_SETTINGS, NoiseGeneratorSettings::bootstrap)

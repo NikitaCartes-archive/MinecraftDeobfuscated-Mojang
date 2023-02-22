@@ -48,7 +48,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 			i = Mth.floor(this.mob.getY() + 0.5);
 		}
 
-		BlockPos blockPos = new BlockPos(this.mob.getX(), (double)i, this.mob.getZ());
+		BlockPos blockPos = BlockPos.containing(this.mob.getX(), (double)i, this.mob.getZ());
 		if (!this.canStartAt(blockPos)) {
 			for (BlockPos blockPos2 : this.iteratePathfindingStartNodeCandidatePositions(this.mob)) {
 				if (this.canStartAt(blockPos2)) {
@@ -346,10 +346,10 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		boolean bl = aABB.getSize() < 1.0;
 		if (!bl) {
 			return List.of(
-				new BlockPos(aABB.minX, (double)mob.getBlockY(), aABB.minZ),
-				new BlockPos(aABB.minX, (double)mob.getBlockY(), aABB.maxZ),
-				new BlockPos(aABB.maxX, (double)mob.getBlockY(), aABB.minZ),
-				new BlockPos(aABB.maxX, (double)mob.getBlockY(), aABB.maxZ)
+				BlockPos.containing(aABB.minX, (double)mob.getBlockY(), aABB.minZ),
+				BlockPos.containing(aABB.minX, (double)mob.getBlockY(), aABB.maxZ),
+				BlockPos.containing(aABB.maxX, (double)mob.getBlockY(), aABB.minZ),
+				BlockPos.containing(aABB.maxX, (double)mob.getBlockY(), aABB.maxZ)
 			);
 		} else {
 			double d = Math.max(0.0, (1.5 - aABB.getZsize()) / 2.0);

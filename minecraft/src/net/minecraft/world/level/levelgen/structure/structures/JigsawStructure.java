@@ -49,7 +49,7 @@ public final class JigsawStructure extends Structure {
 				case BURY, BEARD_THIN, BEARD_BOX -> 12;
 			};
 			return jigsawStructure.maxDistanceFromCenter + i > 128
-				? DataResult.error("Structure size including terrain adaptation must not exceed 128")
+				? DataResult.error(() -> "Structure size including terrain adaptation must not exceed 128")
 				: DataResult.success(jigsawStructure);
 		};
 	}

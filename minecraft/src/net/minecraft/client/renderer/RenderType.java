@@ -320,7 +320,7 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ARMOR_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -336,7 +336,7 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ARMOR_ENTITY_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -352,7 +352,7 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_TRANSLUCENT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -368,7 +368,7 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -383,7 +383,7 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_DIRECT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -398,7 +398,7 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ENTITY_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -414,7 +414,7 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ENTITY_GLINT_DIRECT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)

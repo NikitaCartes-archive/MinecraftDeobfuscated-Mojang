@@ -151,7 +151,7 @@ public class Bat extends AmbientCreature {
 			}
 
 			if (this.targetPosition == null || this.random.nextInt(30) == 0 || this.targetPosition.closerToCenterThan(this.position(), 2.0)) {
-				this.targetPosition = new BlockPos(
+				this.targetPosition = BlockPos.containing(
 					this.getX() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7),
 					this.getY() + (double)this.random.nextInt(6) - 2.0,
 					this.getZ() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7)
@@ -177,11 +177,6 @@ public class Bat extends AmbientCreature {
 	@Override
 	protected Entity.MovementEmission getMovementEmission() {
 		return Entity.MovementEmission.EVENTS;
-	}
-
-	@Override
-	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
-		return false;
 	}
 
 	@Override

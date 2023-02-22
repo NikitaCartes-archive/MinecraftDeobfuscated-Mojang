@@ -24,7 +24,7 @@ public class BubbleColumnUpParticle extends TextureSheetParticle {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.removed && !this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER)) {
+		if (!this.removed && !this.level.getFluidState(BlockPos.containing(this.x, this.y, this.z)).is(FluidTags.WATER)) {
 			this.remove();
 		}
 	}

@@ -2,6 +2,7 @@ package com.mojang.realmsclient.gui;
 
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsNews;
+import com.mojang.realmsclient.dto.RealmsNotification;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsServerPlayerLists;
 import com.mojang.realmsclient.gui.task.DataFetcher;
@@ -17,6 +18,7 @@ import net.minecraft.Util;
 @Environment(EnvType.CLIENT)
 public class RealmsDataFetcher {
 	public final DataFetcher dataFetcher = new DataFetcher(Util.ioPool(), TimeUnit.MILLISECONDS, Util.timeSource);
+	public final DataFetcher.Task<List<RealmsNotification>> notificationsTask;
 	public final DataFetcher.Task<List<RealmsServer>> serverListUpdateTask;
 	public final DataFetcher.Task<RealmsServerPlayerLists> liveStatsTask;
 	public final DataFetcher.Task<Integer> pendingInvitesTask;
@@ -33,5 +35,6 @@ public class RealmsDataFetcher {
 		this.trialAvailabilityTask = this.dataFetcher
 			.createTask("trial availablity", realmsClient::trialAvailable, Duration.ofSeconds(60L), RepeatedDelayStrategy.exponentialBackoff(60));
 		this.newsTask = this.dataFetcher.createTask("unread news", realmsClient::getNews, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
+		this.notificationsTask = this.dataFetcher.createTask("notifications", realmsClient::getNotifications, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
 	}
 }

@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -83,7 +82,6 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 
 	@Override
 	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		RenderSystem.disableBlend();
 		super.renderLabels(poseStack, i, j);
 		int k = this.menu.getCost();
 		if (k > 0) {
@@ -113,7 +111,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		super.renderBg(poseStack, f, i, j);
-		this.blit(poseStack, this.leftPos + 59, this.topPos + 20, 0, this.imageHeight + (this.menu.getSlot(0).hasItem() ? 0 : 16), 110, 16);
+		blit(poseStack, this.leftPos + 59, this.topPos + 20, 0, this.imageHeight + (this.menu.getSlot(0).hasItem() ? 0 : 16), 110, 16);
 	}
 
 	@Override
@@ -124,7 +122,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	@Override
 	protected void renderErrorIcon(PoseStack poseStack, int i, int j) {
 		if ((this.menu.getSlot(0).hasItem() || this.menu.getSlot(1).hasItem()) && !this.menu.getSlot(this.menu.getResultSlot()).hasItem()) {
-			this.blit(poseStack, i + 99, j + 45, this.imageWidth, 0, 28, 21);
+			blit(poseStack, i + 99, j + 45, this.imageWidth, 0, 28, 21);
 		}
 	}
 

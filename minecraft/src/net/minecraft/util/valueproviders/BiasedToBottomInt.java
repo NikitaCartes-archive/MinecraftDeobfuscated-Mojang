@@ -16,7 +16,9 @@ public class BiasedToBottomInt extends IntProvider {
 		)
 		.comapFlatMap(
 			biasedToBottomInt -> biasedToBottomInt.maxInclusive < biasedToBottomInt.minInclusive
-					? DataResult.error("Max must be at least min, min_inclusive: " + biasedToBottomInt.minInclusive + ", max_inclusive: " + biasedToBottomInt.maxInclusive)
+					? DataResult.error(
+						() -> "Max must be at least min, min_inclusive: " + biasedToBottomInt.minInclusive + ", max_inclusive: " + biasedToBottomInt.maxInclusive
+					)
 					: DataResult.success(biasedToBottomInt),
 			Function.identity()
 		);

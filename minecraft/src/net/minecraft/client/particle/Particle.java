@@ -220,7 +220,7 @@ public abstract class Particle {
 	}
 
 	protected int getLightColor(float f) {
-		BlockPos blockPos = new BlockPos(this.x, this.y, this.z);
+		BlockPos blockPos = BlockPos.containing(this.x, this.y, this.z);
 		return this.level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(this.level, blockPos) : 0;
 	}
 

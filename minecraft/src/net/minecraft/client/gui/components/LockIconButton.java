@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -35,7 +34,6 @@ public class LockIconButton extends Button {
 
 	@Override
 	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, Button.WIDGETS_LOCATION);
 		LockIconButton.Icon icon;
 		if (!this.active) {
@@ -46,7 +44,7 @@ public class LockIconButton extends Button {
 			icon = this.locked ? LockIconButton.Icon.LOCKED : LockIconButton.Icon.UNLOCKED;
 		}
 
-		this.blit(poseStack, this.getX(), this.getY(), icon.getX(), icon.getY(), this.width, this.height);
+		blit(poseStack, this.getX(), this.getY(), icon.getX(), icon.getY(), this.width, this.height);
 	}
 
 	@Environment(EnvType.CLIENT)

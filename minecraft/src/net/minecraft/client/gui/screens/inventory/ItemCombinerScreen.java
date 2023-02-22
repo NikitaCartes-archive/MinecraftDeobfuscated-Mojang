@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -42,7 +41,6 @@ public abstract class ItemCombinerScreen<T extends ItemCombinerMenu> extends Abs
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		super.render(poseStack, i, j, f);
-		RenderSystem.disableBlend();
 		this.renderFg(poseStack, i, j, f);
 		this.renderTooltip(poseStack, i, j);
 	}
@@ -52,9 +50,8 @@ public abstract class ItemCombinerScreen<T extends ItemCombinerMenu> extends Abs
 
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, this.menuResource);
-		this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+		blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 		this.renderErrorIcon(poseStack, this.leftPos, this.topPos);
 	}
 

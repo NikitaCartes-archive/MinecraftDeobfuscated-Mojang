@@ -52,12 +52,16 @@ public interface BlockGetter extends LevelHeightAccessor {
 				BlockState blockState = this.getBlockState(blockPos);
 				Vec3 vec3 = clipBlockStateContextx.getFrom().subtract(clipBlockStateContextx.getTo());
 				return clipBlockStateContextx.isTargetBlock().test(blockState)
-					? new BlockHitResult(clipBlockStateContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(clipBlockStateContextx.getTo()), false)
+					? new BlockHitResult(
+						clipBlockStateContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipBlockStateContextx.getTo()), false
+					)
 					: null;
 			},
 			clipBlockStateContextx -> {
 				Vec3 vec3 = clipBlockStateContextx.getFrom().subtract(clipBlockStateContextx.getTo());
-				return BlockHitResult.miss(clipBlockStateContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(clipBlockStateContextx.getTo()));
+				return BlockHitResult.miss(
+					clipBlockStateContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipBlockStateContextx.getTo())
+				);
 			}
 		);
 	}
@@ -77,7 +81,7 @@ public interface BlockGetter extends LevelHeightAccessor {
 			return d <= e ? blockHitResult : blockHitResult2;
 		}, clipContextx -> {
 			Vec3 vec3 = clipContextx.getFrom().subtract(clipContextx.getTo());
-			return BlockHitResult.miss(clipContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(clipContextx.getTo()));
+			return BlockHitResult.miss(clipContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipContextx.getTo()));
 		});
 	}
 

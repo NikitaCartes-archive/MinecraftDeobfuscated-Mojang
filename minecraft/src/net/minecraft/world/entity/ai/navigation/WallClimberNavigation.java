@@ -48,7 +48,7 @@ public class WallClimberNavigation extends GroundPathNavigation {
 				if (!this.pathToPosition.closerToCenterThan(this.mob.position(), (double)this.mob.getBbWidth())
 					&& (
 						!(this.mob.getY() > (double)this.pathToPosition.getY())
-							|| !new BlockPos((double)this.pathToPosition.getX(), this.mob.getY(), (double)this.pathToPosition.getZ())
+							|| !BlockPos.containing((double)this.pathToPosition.getX(), this.mob.getY(), (double)this.pathToPosition.getZ())
 								.closerToCenterThan(this.mob.position(), (double)this.mob.getBbWidth())
 					)) {
 					this.mob

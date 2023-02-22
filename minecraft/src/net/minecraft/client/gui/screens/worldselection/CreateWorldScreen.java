@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
@@ -55,10 +56,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -94,6 +97,8 @@ public class CreateWorldScreen extends Screen {
 	private static final Component PREPARING_WORLD_DATA = Component.translatable("createWorld.preparing");
 	private static final int HORIZONTAL_BUTTON_SPACING = 10;
 	private static final int VERTICAL_BUTTON_SPACING = 8;
+	public static final ResourceLocation HEADER_SEPERATOR = new ResourceLocation("textures/gui/header_separator.png");
+	public static final ResourceLocation FOOTER_SEPERATOR = new ResourceLocation("textures/gui/footer_separator.png");
 	final WorldCreationUiState uiState;
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, guiEventListener -> this.removeWidget(guiEventListener));
 	private boolean recreated;
@@ -185,7 +190,7 @@ public class CreateWorldScreen extends Screen {
 		this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width)
 			.addTabs(new CreateWorldScreen.GameTab(), new CreateWorldScreen.WorldTab(), new CreateWorldScreen.MoreTab())
 			.build();
-		this.tabNavigationBar.visitWidgets(this::addRenderableWidget);
+		this.addRenderableWidget(this.tabNavigationBar);
 		this.uiState.addListener(worldCreationUiState -> {
 			if (worldCreationUiState.nameChanged()) {
 				this.updateResultFolder(worldCreationUiState.getName());
@@ -212,7 +217,7 @@ public class CreateWorldScreen extends Screen {
 			this.tabNavigationBar.arrangeElements();
 			this.bottomButtons.arrangeElements();
 			FrameLayout.centerInRectangle(this.bottomButtons, 0, this.height - 36, this.width, 36);
-			int i = this.tabNavigationBar.getY() + this.tabNavigationBar.getHeight();
+			int i = this.tabNavigationBar.getRectangle().bottom();
 			ScreenRectangle screenRectangle = new ScreenRectangle(0, i, this.width, this.bottomButtons.getY() - i);
 			this.tabManager.setTabArea(screenRectangle);
 		}
@@ -320,7 +325,16 @@ public class CreateWorldScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
+		RenderSystem.setShaderTexture(0, FOOTER_SEPERATOR);
+		blit(poseStack, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
 		super.render(poseStack, i, j, f);
+	}
+
+	@Override
+	public void renderDirtBackground(PoseStack poseStack) {
+		RenderSystem.setShaderTexture(0, LIGHT_DIRT_BACKGROUND);
+		int i = 32;
+		blit(poseStack, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, 32, 32);
 	}
 
 	@Override
@@ -362,7 +376,6 @@ public class CreateWorldScreen extends Screen {
 			this.minecraft
 				.setScreen(
 					new PackSelectionScreen(
-						this,
 						pair.getSecond(),
 						packRepository -> this.tryApplyNewDataPacks(packRepository, true, this::openDataPackSelectionScreen),
 						pair.getFirst(),
@@ -381,16 +394,18 @@ public class CreateWorldScreen extends Screen {
 		WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(
 			new DataPackConfig(list, list2), this.uiState.getSettings().dataConfiguration().enabledFeatures()
 		);
-		if (!this.uiState.tryUpdateDataConfiguration(worldDataConfiguration)) {
+		if (this.uiState.tryUpdateDataConfiguration(worldDataConfiguration)) {
+			this.minecraft.setScreen(this);
+		} else {
 			FeatureFlagSet featureFlagSet = packRepository.getRequestedFeatureFlags();
 			if (FeatureFlags.isExperimental(featureFlagSet) && bl) {
-				this.minecraft.tell(() -> this.minecraft.setScreen(new ConfirmExperimentalFeaturesScreen(packRepository.getSelectedPacks(), blx -> {
-						if (blx) {
-							this.applyNewPackConfig(packRepository, worldDataConfiguration, consumer);
-						} else {
-							consumer.accept(this.uiState.getSettings().dataConfiguration());
-						}
-					})));
+				this.minecraft.setScreen(new ConfirmExperimentalFeaturesScreen(packRepository.getSelectedPacks(), blx -> {
+					if (blx) {
+						this.applyNewPackConfig(packRepository, worldDataConfiguration, consumer);
+					} else {
+						consumer.accept(this.uiState.getSettings().dataConfiguration());
+					}
+				}));
 			} else {
 				this.applyNewPackConfig(packRepository, worldDataConfiguration, consumer);
 			}
@@ -398,7 +413,7 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private void applyNewPackConfig(PackRepository packRepository, WorldDataConfiguration worldDataConfiguration, Consumer<WorldDataConfiguration> consumer) {
-		this.minecraft.tell(() -> this.minecraft.setScreen(new GenericDirtMessageScreen(Component.translatable("dataPack.validation.working"))));
+		this.minecraft.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("dataPack.validation.working")));
 		WorldLoader.InitConfig initConfig = createDefaultLoadConfig(packRepository, worldDataConfiguration);
 		WorldLoader.<CreateWorldScreen.DataPackReloadCookie, WorldCreationContext>load(
 				initConfig,
@@ -435,26 +450,23 @@ public class CreateWorldScreen extends Screen {
 					if (throwable != null) {
 						LOGGER.warn("Failed to validate datapack", throwable);
 						this.minecraft
-							.tell(
-								() -> this.minecraft
-										.setScreen(
-											new ConfirmScreen(
-												bl -> {
-													if (bl) {
-														consumer.accept(this.uiState.getSettings().dataConfiguration());
-													} else {
-														consumer.accept(WorldDataConfiguration.DEFAULT);
-													}
-												},
-												Component.translatable("dataPack.validation.failed"),
-												CommonComponents.EMPTY,
-												Component.translatable("dataPack.validation.back"),
-												Component.translatable("dataPack.validation.reset")
-											)
-										)
+							.setScreen(
+								new ConfirmScreen(
+									bl -> {
+										if (bl) {
+											consumer.accept(this.uiState.getSettings().dataConfiguration());
+										} else {
+											consumer.accept(WorldDataConfiguration.DEFAULT);
+										}
+									},
+									Component.translatable("dataPack.validation.failed"),
+									CommonComponents.EMPTY,
+									Component.translatable("dataPack.validation.back"),
+									Component.translatable("dataPack.validation.reset")
+								)
 							);
 					} else {
-						this.minecraft.tell(() -> this.minecraft.setScreen(this));
+						this.minecraft.setScreen(this);
 					}
 
 					return null;

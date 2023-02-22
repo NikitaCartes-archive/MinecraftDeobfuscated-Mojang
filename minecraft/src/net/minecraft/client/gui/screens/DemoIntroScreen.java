@@ -55,7 +55,7 @@ public class DemoIntroScreen extends Screen {
 		RenderSystem.setShaderTexture(0, DEMO_BACKGROUND_LOCATION);
 		int i = (this.width - 248) / 2;
 		int j = (this.height - 166) / 2;
-		this.blit(poseStack, i, j, 0, 0, 248, 166);
+		blit(poseStack, i, j, 0, 0, 248, 166);
 	}
 
 	@Override

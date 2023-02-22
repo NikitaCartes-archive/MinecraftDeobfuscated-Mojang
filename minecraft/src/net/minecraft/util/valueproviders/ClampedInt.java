@@ -18,7 +18,7 @@ public class ClampedInt extends IntProvider {
 		)
 		.comapFlatMap(
 			clampedInt -> clampedInt.maxInclusive < clampedInt.minInclusive
-					? DataResult.error("Max must be at least min, min_inclusive: " + clampedInt.minInclusive + ", max_inclusive: " + clampedInt.maxInclusive)
+					? DataResult.error(() -> "Max must be at least min, min_inclusive: " + clampedInt.minInclusive + ", max_inclusive: " + clampedInt.maxInclusive)
 					: DataResult.success(clampedInt),
 			Function.identity()
 		);

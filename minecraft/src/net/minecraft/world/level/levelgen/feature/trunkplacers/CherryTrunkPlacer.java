@@ -23,7 +23,7 @@ public class CherryTrunkPlacer extends TrunkPlacer {
 	private static final Codec<UniformInt> BRANCH_START_CODEC = ExtraCodecs.validate(
 		UniformInt.CODEC,
 		uniformInt -> uniformInt.getMaxValue() - uniformInt.getMinValue() < 1
-				? DataResult.error("Need at least 2 blocks variation for the branch starts to fit both branches")
+				? DataResult.error(() -> "Need at least 2 blocks variation for the branch starts to fit both branches")
 				: DataResult.success(uniformInt)
 	);
 	public static final Codec<CherryTrunkPlacer> CODEC = RecordCodecBuilder.create(

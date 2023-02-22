@@ -9,8 +9,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvider<Block> {
-	public UpdateOneTwentyBlockTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-		super(packOutput, Registries.BLOCK, completableFuture, block -> block.builtInRegistryHolder().key());
+	public UpdateOneTwentyBlockTagsProvider(
+		PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture, CompletableFuture<TagsProvider.TagLookup<Block>> completableFuture2
+	) {
+		super(packOutput, Registries.BLOCK, completableFuture, completableFuture2, block -> block.builtInRegistryHolder().key());
 	}
 
 	@Override
@@ -64,6 +66,8 @@ public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvide
 			.add(Blocks.CHISELED_BOOKSHELF);
 		this.tag(BlockTags.SNIFFER_DIGGABLE_BLOCK)
 			.add(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT, Blocks.MOSS_BLOCK, Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS);
+		this.tag(BlockTags.SMALL_FLOWERS).add(Blocks.TORCHFLOWER);
+		this.tag(BlockTags.CROPS).add(Blocks.TORCHFLOWER_CROP);
 		this.tag(BlockTags.CHERRY_LOGS).add(Blocks.CHERRY_LOG, Blocks.CHERRY_WOOD, Blocks.STRIPPED_CHERRY_LOG, Blocks.STRIPPED_CHERRY_WOOD);
 		this.tag(BlockTags.PLANKS).add(Blocks.CHERRY_PLANKS);
 		this.tag(BlockTags.WOODEN_BUTTONS).add(Blocks.CHERRY_BUTTON);

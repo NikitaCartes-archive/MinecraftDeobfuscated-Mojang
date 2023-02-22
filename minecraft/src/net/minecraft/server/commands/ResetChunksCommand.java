@@ -56,7 +56,7 @@ public class ResetChunksCommand {
 		ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 		serverChunkCache.chunkMap.debugReloadGenerator();
 		Vec3 vec3 = commandSourceStack.getPosition();
-		ChunkPos chunkPos = new ChunkPos(new BlockPos(vec3));
+		ChunkPos chunkPos = new ChunkPos(BlockPos.containing(vec3));
 		int j = chunkPos.z - i;
 		int k = chunkPos.z + i;
 		int l = chunkPos.x - i;

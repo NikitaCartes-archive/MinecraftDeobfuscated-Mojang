@@ -21,16 +21,11 @@ public class ChunkToProtochunkFix extends DataFix {
 
 	@Override
 	public TypeRewriteRule makeRule() {
-		return TypeRewriteRule.seq(
-			this.writeFixAndRead(
-				"ChunkToProtoChunkFix",
-				this.getInputSchema().getType(References.CHUNK),
-				this.getOutputSchema().getType(References.CHUNK),
-				dynamic -> dynamic.update("Level", ChunkToProtochunkFix::fixChunkData)
-			),
-			this.writeAndRead(
-				"Structure biome inject", this.getInputSchema().getType(References.STRUCTURE_FEATURE), this.getOutputSchema().getType(References.STRUCTURE_FEATURE)
-			)
+		return this.writeFixAndRead(
+			"ChunkToProtoChunkFix",
+			this.getInputSchema().getType(References.CHUNK),
+			this.getOutputSchema().getType(References.CHUNK),
+			dynamic -> dynamic.update("Level", ChunkToProtochunkFix::fixChunkData)
 		);
 	}
 

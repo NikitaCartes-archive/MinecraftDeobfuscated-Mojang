@@ -4091,8 +4091,7 @@ public class Blocks {
 	public static final Block PINK_PETALS = register(
 		"pink_petals",
 		new PinkPetalsBlock(
-			BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.COLOR_PINK)
-				.strength(0.1F)
+			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_PINK)
 				.noCollission()
 				.sound(SoundType.PINK_PETALS)
 				.requiredFeatures(FeatureFlags.UPDATE_1_20)

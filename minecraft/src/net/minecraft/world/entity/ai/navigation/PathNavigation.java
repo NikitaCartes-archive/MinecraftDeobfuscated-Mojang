@@ -94,7 +94,7 @@ public abstract class PathNavigation {
 
 	@Nullable
 	public final Path createPath(double d, double e, double f, int i) {
-		return this.createPath(new BlockPos(d, e, f), i);
+		return this.createPath(BlockPos.containing(d, e, f), i);
 	}
 
 	@Nullable
@@ -220,7 +220,7 @@ public abstract class PathNavigation {
 	}
 
 	protected double getGroundY(Vec3 vec3) {
-		BlockPos blockPos = new BlockPos(vec3);
+		BlockPos blockPos = BlockPos.containing(vec3);
 		return this.level.getBlockState(blockPos.below()).isAir() ? vec3.y : WalkNodeEvaluator.getFloorLevel(this.level, blockPos);
 	}
 

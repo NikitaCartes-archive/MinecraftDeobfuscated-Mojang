@@ -703,7 +703,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 			double h = f == 0.0 ? e * (double)((float)j / 6.0F) : g / f;
 
 			for (int k = 1; k < 4; k++) {
-				if (!fox.level.getBlockState(new BlockPos(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).canBeReplaced()) {
+				if (!fox.level.getBlockState(BlockPos.containing(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).canBeReplaced()) {
 					return false;
 				}
 			}
@@ -817,7 +817,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 			.selector(Fox.this.new FoxAlertableEntitiesSelector());
 
 		protected boolean hasShelter() {
-			BlockPos blockPos = new BlockPos(Fox.this.getX(), Fox.this.getBoundingBox().maxY, Fox.this.getZ());
+			BlockPos blockPos = BlockPos.containing(Fox.this.getX(), Fox.this.getBoundingBox().maxY, Fox.this.getZ());
 			return !Fox.this.level.canSeeSky(blockPos) && Fox.this.getWalkTargetValue(blockPos) >= 0.0F;
 		}
 

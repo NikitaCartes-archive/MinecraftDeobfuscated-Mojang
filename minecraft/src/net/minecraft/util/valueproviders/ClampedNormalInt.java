@@ -19,7 +19,7 @@ public class ClampedNormalInt extends IntProvider {
 		)
 		.comapFlatMap(
 			clampedNormalInt -> clampedNormalInt.max_inclusive < clampedNormalInt.min_inclusive
-					? DataResult.error("Max must be larger than min: [" + clampedNormalInt.min_inclusive + ", " + clampedNormalInt.max_inclusive + "]")
+					? DataResult.error(() -> "Max must be larger than min: [" + clampedNormalInt.min_inclusive + ", " + clampedNormalInt.max_inclusive + "]")
 					: DataResult.success(clampedNormalInt),
 			Function.identity()
 		);

@@ -418,7 +418,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	private void moveTowardsClosestSpace(double d, double e) {
-		BlockPos blockPos = new BlockPos(d, this.getY(), e);
+		BlockPos blockPos = BlockPos.containing(d, this.getY(), e);
 		if (this.suffocatesAt(blockPos)) {
 			double f = d - (double)blockPos.getX();
 			double g = e - (double)blockPos.getZ();
@@ -926,7 +926,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			float l = (float)(vec35.x * vec34.x + vec35.z * vec34.z);
 			if (!(l < -0.15F)) {
 				CollisionContext collisionContext = CollisionContext.of(this);
-				BlockPos blockPos = new BlockPos(this.getX(), this.getBoundingBox().maxY, this.getZ());
+				BlockPos blockPos = BlockPos.containing(this.getX(), this.getBoundingBox().maxY, this.getZ());
 				BlockState blockState = this.level.getBlockState(blockPos);
 				if (blockState.getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
 					blockPos = blockPos.above();
@@ -960,7 +960,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 							if (aABB2.intersects(vec310, vec311) || aABB2.intersects(vec312, vec313)) {
 								t = (float)aABB2.maxY;
 								Vec3 vec314 = aABB2.getCenter();
-								BlockPos blockPos2 = new BlockPos(vec314);
+								BlockPos blockPos2 = BlockPos.containing(vec314);
 
 								for (int u = 1; (float)u < p; u++) {
 									BlockPos blockPos3 = blockPos2.above(u);

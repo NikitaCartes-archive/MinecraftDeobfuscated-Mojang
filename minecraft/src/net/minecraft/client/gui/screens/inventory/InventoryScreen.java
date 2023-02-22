@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
@@ -20,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 @Environment(EnvType.CLIENT)
@@ -99,15 +99,14 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 
 	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, INVENTORY_LOCATION);
 		int k = this.leftPos;
 		int l = this.topPos;
-		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
-		renderEntityInInventoryFollowsMouse(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
+		blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		renderEntityInInventoryFollowsMouse(poseStack, k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
 	}
 
-	public static void renderEntityInInventoryFollowsMouse(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
+	public static void renderEntityInInventoryFollowsMouse(PoseStack poseStack, int i, int j, int k, float f, float g, LivingEntity livingEntity) {
 		float h = (float)Math.atan((double)(f / 40.0F));
 		float l = (float)Math.atan((double)(g / 40.0F));
 		Quaternionf quaternionf = new Quaternionf().rotateZ((float) Math.PI);
@@ -123,7 +122,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		livingEntity.setXRot(-l * 20.0F);
 		livingEntity.yHeadRot = livingEntity.getYRot();
 		livingEntity.yHeadRotO = livingEntity.getYRot();
-		renderEntityInInventory(i, j, k, quaternionf, quaternionf2, livingEntity);
+		renderEntityInInventory(poseStack, i, j, k, quaternionf, quaternionf2, livingEntity);
 		livingEntity.yBodyRot = m;
 		livingEntity.setYRot(n);
 		livingEntity.setXRot(o);
@@ -131,16 +130,13 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		livingEntity.yHeadRot = q;
 	}
 
-	public static void renderEntityInInventory(int i, int j, int k, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity) {
-		PoseStack poseStack = RenderSystem.getModelViewStack();
+	public static void renderEntityInInventory(
+		PoseStack poseStack, int i, int j, int k, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity
+	) {
 		poseStack.pushPose();
-		poseStack.translate((float)i, (float)j, 1050.0F);
-		poseStack.scale(1.0F, 1.0F, -1.0F);
-		RenderSystem.applyModelViewMatrix();
-		PoseStack poseStack2 = new PoseStack();
-		poseStack2.translate(0.0F, 0.0F, 1000.0F);
-		poseStack2.scale((float)k, (float)k, (float)k);
-		poseStack2.mulPose(quaternionf);
+		poseStack.translate((float)i, (float)j, 50.0F);
+		poseStack.mulPoseMatrix(new Matrix4f().scaling((float)k, (float)k, (float)(-k)));
+		poseStack.mulPose(quaternionf);
 		Lighting.setupForEntityInInventory();
 		EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 		if (quaternionf2 != null) {
@@ -150,11 +146,10 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 
 		entityRenderDispatcher.setRenderShadow(false);
 		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-		RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, poseStack2, bufferSource, 15728880));
+		RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, poseStack, bufferSource, 15728880));
 		bufferSource.endBatch();
 		entityRenderDispatcher.setRenderShadow(true);
 		poseStack.popPose();
-		RenderSystem.applyModelViewMatrix();
 		Lighting.setupFor3DItems();
 	}
 

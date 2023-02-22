@@ -280,7 +280,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			RenderSystem.disableCull();
 			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
 			RenderSystem.enableDepthTest();
 			int l = 5;
 			if (Minecraft.useFancyGraphics()) {
@@ -425,7 +424,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		if (!(f <= 0.0F)) {
 			RandomSource randomSource = RandomSource.create((long)this.ticks * 312987231L);
 			LevelReader levelReader = this.minecraft.level;
-			BlockPos blockPos = new BlockPos(camera.getPosition());
+			BlockPos blockPos = BlockPos.containing(camera.getPosition());
 			BlockPos blockPos2 = null;
 			int i = (int)(100.0F * f * f) / (this.minecraft.options.particles().get() == ParticleStatus.DECREASED ? 2 : 1);
 
@@ -582,6 +581,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			);
 			this.entityTarget.blitToScreen(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), false);
 			RenderSystem.disableBlend();
+			RenderSystem.defaultBlendFunc();
 		}
 	}
 
@@ -1039,7 +1039,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 								break;
 							}
 
-							ChunkRenderDispatcher.RenderChunk renderChunk3 = this.viewArea.getRenderChunkAt(new BlockPos(vec32.x, vec32.y, vec32.z));
+							ChunkRenderDispatcher.RenderChunk renderChunk3 = this.viewArea.getRenderChunkAt(BlockPos.containing(vec32.x, vec32.y, vec32.z));
 							if (renderChunk3 == null || renderInfoMap.get(renderChunk3) == null) {
 								bl4 = false;
 								break;
@@ -1443,14 +1443,20 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			double h = e - this.yTransparentOld;
 			double i = f - this.zTransparentOld;
 			if (g * g + h * h + i * i > 1.0) {
+				int j = SectionPos.posToSectionCoord(d);
+				int k = SectionPos.posToSectionCoord(e);
+				int l = SectionPos.posToSectionCoord(f);
+				boolean bl = j != SectionPos.posToSectionCoord(this.xTransparentOld)
+					|| l != SectionPos.posToSectionCoord(this.zTransparentOld)
+					|| k != SectionPos.posToSectionCoord(this.yTransparentOld);
 				this.xTransparentOld = d;
 				this.yTransparentOld = e;
 				this.zTransparentOld = f;
-				int j = 0;
+				int m = 0;
 
 				for (LevelRenderer.RenderChunkInfo renderChunkInfo : this.renderChunksInFrustum) {
-					if (j < 15 && renderChunkInfo.chunk.resortTransparency(renderType, this.chunkRenderDispatcher)) {
-						j++;
+					if (m < 15 && (bl || renderChunkInfo.isAxisAlignedWith(j, k, l)) && renderChunkInfo.chunk.resortTransparency(renderType, this.chunkRenderDispatcher)) {
+						m++;
 					}
 				}
 			}
@@ -1460,13 +1466,13 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		this.minecraft.getProfiler().push("filterempty");
 		this.minecraft.getProfiler().popPush((Supplier<String>)(() -> "render_" + renderType));
-		boolean bl = renderType != RenderType.translucent();
-		ObjectListIterator<LevelRenderer.RenderChunkInfo> objectListIterator = this.renderChunksInFrustum.listIterator(bl ? 0 : this.renderChunksInFrustum.size());
+		boolean bl2 = renderType != RenderType.translucent();
+		ObjectListIterator<LevelRenderer.RenderChunkInfo> objectListIterator = this.renderChunksInFrustum.listIterator(bl2 ? 0 : this.renderChunksInFrustum.size());
 		ShaderInstance shaderInstance = RenderSystem.getShader();
 
-		for (int k = 0; k < 12; k++) {
-			int l = RenderSystem.getShaderTexture(k);
-			shaderInstance.setSampler("Sampler" + k, l);
+		for (int n = 0; n < 12; n++) {
+			int o = RenderSystem.getShaderTexture(n);
+			shaderInstance.setSampler("Sampler" + n, o);
 		}
 
 		if (shaderInstance.MODEL_VIEW_MATRIX != null) {
@@ -1513,8 +1519,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		shaderInstance.apply();
 		Uniform uniform = shaderInstance.CHUNK_OFFSET;
 
-		while (bl ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
-			LevelRenderer.RenderChunkInfo renderChunkInfo2 = bl ? (LevelRenderer.RenderChunkInfo)objectListIterator.next() : objectListIterator.previous();
+		while (bl2 ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
+			LevelRenderer.RenderChunkInfo renderChunkInfo2 = bl2 ? (LevelRenderer.RenderChunkInfo)objectListIterator.next() : objectListIterator.previous();
 			ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo2.chunk;
 			if (!renderChunk.getCompiledChunk().isEmpty(renderType)) {
 				VertexBuffer vertexBuffer = renderChunk.getBuffer(renderType);
@@ -1731,7 +1737,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 	private void renderEndSky(PoseStack poseStack) {
 		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
 		RenderSystem.depthMask(false);
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.setShaderTexture(0, END_SKY_LOCATION);
@@ -1795,7 +1800,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					this.skyBuffer.drawWithShader(poseStack.last().pose(), matrix4f, shaderInstance);
 					VertexBuffer.unbind();
 					RenderSystem.enableBlend();
-					RenderSystem.defaultBlendFunc();
 					float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(f), f);
 					if (fs != null) {
 						RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -1869,6 +1873,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 					RenderSystem.disableBlend();
+					RenderSystem.defaultBlendFunc();
 					poseStack.popPose();
 					RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
 					double d = this.minecraft.player.getEyePosition(f).y - this.level.getLevelData().getHorizonHeight(this.level);
@@ -1977,6 +1982,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			poseStack.popPose();
 			RenderSystem.enableCull();
 			RenderSystem.disableBlend();
+			RenderSystem.defaultBlendFunc();
 		}
 	}
 
@@ -2333,6 +2339,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			RenderSystem.polygonOffset(0.0F, 0.0F);
 			RenderSystem.disablePolygonOffset();
 			RenderSystem.disableBlend();
+			RenderSystem.defaultBlendFunc();
 			poseStack.popPose();
 			RenderSystem.applyModelViewMatrix();
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -3274,6 +3281,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		public boolean hasSourceDirections() {
 			return this.sourceDirections != 0;
+		}
+
+		public boolean isAxisAlignedWith(int i, int j, int k) {
+			BlockPos blockPos = this.chunk.getOrigin();
+			return i == blockPos.getX() / 16 || k == blockPos.getZ() / 16 || j == blockPos.getY() / 16;
 		}
 
 		public int hashCode() {

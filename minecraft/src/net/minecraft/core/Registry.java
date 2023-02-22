@@ -30,11 +30,11 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 			.flatXmap(
 				resourceLocation -> (DataResult)Optional.ofNullable(this.get(resourceLocation))
 						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown registry key in " + this.key() + ": " + resourceLocation)),
+						.orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + this.key() + ": " + resourceLocation)),
 				object -> (DataResult)this.getResourceKey((T)object)
 						.map(ResourceKey::location)
 						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown registry element in " + this.key() + ":" + object))
+						.orElseGet(() -> DataResult.error(() -> "Unknown registry element in " + this.key() + ":" + object))
 			);
 		Codec<T> codec2 = ExtraCodecs.idResolverCodec(object -> this.getResourceKey((T)object).isPresent() ? this.getId((T)object) : -1, this::byId, -1);
 		return ExtraCodecs.overrideLifecycle(ExtraCodecs.orCompressed(codec, codec2), this::lifecycle, this::lifecycle);
@@ -45,11 +45,11 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 			.flatXmap(
 				resourceLocation -> (DataResult)this.getHolder(ResourceKey.create(this.key(), resourceLocation))
 						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown registry key in " + this.key() + ": " + resourceLocation)),
+						.orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + this.key() + ": " + resourceLocation)),
 				holder -> (DataResult)holder.unwrapKey()
 						.map(ResourceKey::location)
 						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown registry element in " + this.key() + ":" + holder))
+						.orElseGet(() -> DataResult.error(() -> "Unknown registry element in " + this.key() + ":" + holder))
 			);
 		return ExtraCodecs.overrideLifecycle(codec, holder -> this.lifecycle((T)holder.value()), holder -> this.lifecycle((T)holder.value()));
 	}

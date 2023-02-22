@@ -14,7 +14,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
@@ -111,9 +110,7 @@ public class LoadingOverlay extends Overlay {
 		int u = (int)(e * 0.5);
 		RenderSystem.setShaderTexture(0, MOJANG_STUDIOS_LOGO_LOCATION);
 		RenderSystem.enableBlend();
-		RenderSystem.blendEquation(32774);
 		RenderSystem.blendFunc(770, 1);
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
 		blit(poseStack, n - u, s - t, u, (int)d, -0.0625F, 0.0F, 120, 60, 120, 120);
 		blit(poseStack, n, s - t, u, (int)d, 0.0625F, 60.0F, 120, 60, 120, 120);

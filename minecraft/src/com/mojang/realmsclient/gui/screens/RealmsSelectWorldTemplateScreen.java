@@ -330,7 +330,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			int k = i + 12;
 			int l = j - 12;
 			int m = this.font.width(component);
-			this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+			fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
 			this.font.drawShadow(poseStack, component, (float)k, (float)l, 16777215);
 		}
 	}
@@ -456,7 +456,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 				int l = k / this.itemHeight;
 				if (d >= (double)j && d < (double)this.getScrollbarPosition() && l >= 0 && k >= 0 && l < this.getItemCount()) {
 					this.selectItem(l);
-					this.itemClicked(k, l, d, e, this.width);
+					this.itemClicked(k, l, d, e, this.width, i);
 					if (l >= RealmsSelectWorldTemplateScreen.this.worldTemplateObjectSelectionList.getItemCount()) {
 						return super.mouseClicked(d, e, i);
 					}

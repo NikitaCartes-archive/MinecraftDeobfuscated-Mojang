@@ -42,7 +42,6 @@ import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -327,7 +326,6 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 			this.minecraft.font.draw(poseStack, string, (float)(k + 32 + 3), (float)(j + 1), 16777215);
 			this.minecraft.font.draw(poseStack, string2, (float)(k + 32 + 3), (float)(j + 9 + 3), 8421504);
 			this.minecraft.font.draw(poseStack, component, (float)(k + 32 + 3), (float)(j + 9 + 9 + 3), 8421504);
-			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, this.icon != null ? this.iconLocation : WorldSelectionList.ICON_MISSING);
 			RenderSystem.enableBlend();
 			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
@@ -335,7 +333,6 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 			if (this.minecraft.options.touchscreen().get() || bl) {
 				RenderSystem.setShaderTexture(0, WorldSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
-				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				int p = n - k;
 				boolean bl2 = p < 32;
 				int q = bl2 ? 32 : 0;

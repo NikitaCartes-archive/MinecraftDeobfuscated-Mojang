@@ -139,9 +139,4 @@ public class PotionItem extends Item {
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		PotionUtils.addPotionTooltip(itemStack, list, 1.0F);
 	}
-
-	@Override
-	public boolean isFoil(ItemStack itemStack) {
-		return super.isFoil(itemStack) || !PotionUtils.getMobEffects(itemStack).isEmpty();
-	}
 }

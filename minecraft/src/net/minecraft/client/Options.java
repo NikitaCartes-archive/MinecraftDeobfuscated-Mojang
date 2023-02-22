@@ -3,6 +3,7 @@ package net.minecraft.client;
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -251,6 +252,20 @@ public class Options {
 	);
 	private final OptionInstance<Double> panoramaSpeed = new OptionInstance<>(
 		"options.accessibility.panorama_speed", OptionInstance.noTooltip(), Options::percentValueLabel, OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> {
+		}
+	);
+	private static final Component ACCESSIBILITY_TOOLTIP_CONTRAST_MODE = Component.translatable("options.accessibility.high_contrast.tooltip");
+	private final OptionInstance<Boolean> highContrast = OptionInstance.createBoolean(
+		"options.accessibility.high_contrast", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_CONTRAST_MODE), false, boolean_ -> {
+			PackRepository packRepository = Minecraft.getInstance().getResourcePackRepository();
+			boolean blx = packRepository.getSelectedIds().contains("high_contrast");
+			if (!blx && boolean_) {
+				packRepository.addPack("high_contrast");
+				this.updateResourcePacks(packRepository);
+			} else if (blx && !boolean_) {
+				packRepository.removePack("high_contrast");
+				this.updateResourcePacks(packRepository);
+			}
 		}
 	);
 	@Nullable
@@ -624,7 +639,7 @@ public class Options {
 		OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_GLINT_STRENGTH),
 		(component, double_) -> double_ == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, double_),
 		OptionInstance.UnitDouble.INSTANCE,
-		1.0,
+		0.75,
 		RenderSystem::setShaderGlintAlpha
 	);
 	private static final Component ACCESSIBILITY_TOOLTIP_DAMAGE_TILT_STRENGTH = Component.translatable("options.damageTiltStrength.tooltip");
@@ -751,6 +766,27 @@ public class Options {
 		return this.prioritizeChunkUpdates;
 	}
 
+	public void updateResourcePacks(PackRepository packRepository) {
+		List<String> list = ImmutableList.copyOf(this.resourcePacks);
+		this.resourcePacks.clear();
+		this.incompatibleResourcePacks.clear();
+
+		for (Pack pack : packRepository.getSelectedPacks()) {
+			if (!pack.isFixedPosition()) {
+				this.resourcePacks.add(pack.getId());
+				if (!pack.getCompatibility().isCompatible()) {
+					this.incompatibleResourcePacks.add(pack.getId());
+				}
+			}
+		}
+
+		this.save();
+		List<String> list2 = ImmutableList.copyOf(this.resourcePacks);
+		if (!list2.equals(list)) {
+			this.minecraft.reloadResourcePacks();
+		}
+	}
+
 	public OptionInstance<ChatVisiblity> chatVisibility() {
 		return this.chatVisibility;
 	}
@@ -769,6 +805,10 @@ public class Options {
 
 	public OptionInstance<Double> panoramaSpeed() {
 		return this.panoramaSpeed;
+	}
+
+	public OptionInstance<Boolean> highContrast() {
+		return this.highContrast;
 	}
 
 	public OptionInstance<HumanoidArm> mainHand() {
@@ -1072,6 +1112,7 @@ public class Options {
 		fieldAccess.process("glintSpeed", this.glintSpeed);
 		fieldAccess.process("glintStrength", this.glintStrength);
 		fieldAccess.process("damageTiltStrength", this.damageTiltStrength);
+		fieldAccess.process("highContrast", this.highContrast);
 		fieldAccess.process("gamma", this.gamma);
 		fieldAccess.process("renderDistance", this.renderDistance);
 		fieldAccess.process("simulationDistance", this.simulationDistance);

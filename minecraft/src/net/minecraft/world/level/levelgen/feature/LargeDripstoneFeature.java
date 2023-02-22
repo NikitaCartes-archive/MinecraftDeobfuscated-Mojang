@@ -214,7 +214,7 @@ public class LargeDripstoneFeature extends Feature<LargeDripstoneConfiguration> 
 			} else {
 				int i = this.originY - blockPos.getY();
 				Vec3 vec3 = this.windSpeed.scale((double)i);
-				return blockPos.offset(vec3.x, 0.0, vec3.z);
+				return blockPos.offset(Mth.floor(vec3.x), 0, Mth.floor(vec3.z));
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -33,7 +32,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
@@ -56,10 +54,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class ItemRenderer implements ResourceManagerReloadListener {
-	public static final ResourceLocation ENCHANT_GLINT_LOCATION = new ResourceLocation("textures/misc/enchanted_item_glint.png");
+	public static final ResourceLocation ENCHANTED_GLINT_ENTITY = new ResourceLocation("textures/misc/enchanted_glint_entity.png");
+	public static final ResourceLocation ENCHANTED_GLINT_ITEM = new ResourceLocation("textures/misc/enchanted_glint_item.png");
 	private static final Set<Item> IGNORED = Sets.<Item>newHashSet(Items.AIR);
 	private static final int GUI_SLOT_CENTER_X = 8;
 	private static final int GUI_SLOT_CENTER_Y = 8;
@@ -71,7 +71,6 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	public static final ModelResourceLocation TRIDENT_IN_HAND_MODEL = ModelResourceLocation.vanilla("trident_in_hand", "inventory");
 	private static final ModelResourceLocation SPYGLASS_MODEL = ModelResourceLocation.vanilla("spyglass", "inventory");
 	public static final ModelResourceLocation SPYGLASS_IN_HAND_MODEL = ModelResourceLocation.vanilla("spyglass_in_hand", "inventory");
-	public float blitOffset;
 	private final Minecraft minecraft;
 	private final ItemModelShaper itemModelShaper;
 	private final TextureManager textureManager;
@@ -286,30 +285,23 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		}
 	}
 
-	public void renderGuiItem(ItemStack itemStack, int i, int j) {
-		this.renderGuiItem(itemStack, i, j, this.getModel(itemStack, null, null, 0));
+	public void renderGuiItem(PoseStack poseStack, ItemStack itemStack, int i, int j) {
+		this.renderGuiItem(poseStack, itemStack, i, j, this.getModel(itemStack, null, null, 0));
 	}
 
-	protected void renderGuiItem(ItemStack itemStack, int i, int j, BakedModel bakedModel) {
-		this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		PoseStack poseStack = RenderSystem.getModelViewStack();
+	protected void renderGuiItem(PoseStack poseStack, ItemStack itemStack, int i, int j, BakedModel bakedModel) {
 		poseStack.pushPose();
-		poseStack.translate((float)i, (float)j, 100.0F + this.blitOffset);
+		poseStack.translate((float)i, (float)j, 100.0F);
 		poseStack.translate(8.0F, 8.0F, 0.0F);
-		poseStack.scale(1.0F, -1.0F, 1.0F);
+		poseStack.mulPoseMatrix(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
 		poseStack.scale(16.0F, 16.0F, 16.0F);
-		RenderSystem.applyModelViewMatrix();
-		PoseStack poseStack2 = new PoseStack();
 		MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
 		boolean bl = !bakedModel.usesBlockLight();
 		if (bl) {
 			Lighting.setupForFlatItems();
 		}
 
-		this.render(itemStack, ItemDisplayContext.GUI, false, poseStack2, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+		this.render(itemStack, ItemDisplayContext.GUI, false, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
 		bufferSource.endBatch();
 		RenderSystem.enableDepthTest();
 		if (bl) {
@@ -317,42 +309,42 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		}
 
 		poseStack.popPose();
-		RenderSystem.applyModelViewMatrix();
 	}
 
-	public void renderAndDecorateItem(ItemStack itemStack, int i, int j) {
-		this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, 0);
+	public void renderAndDecorateItem(PoseStack poseStack, ItemStack itemStack, int i, int j) {
+		this.tryRenderGuiItem(poseStack, this.minecraft.player, this.minecraft.level, itemStack, i, j, 0);
 	}
 
-	public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k) {
-		this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, k);
+	public void renderAndDecorateItem(PoseStack poseStack, ItemStack itemStack, int i, int j, int k) {
+		this.tryRenderGuiItem(poseStack, this.minecraft.player, this.minecraft.level, itemStack, i, j, k);
 	}
 
-	public void renderAndDecorateItem(ItemStack itemStack, int i, int j, int k, int l) {
-		this.tryRenderGuiItem(this.minecraft.player, this.minecraft.level, itemStack, i, j, k, l);
+	public void renderAndDecorateItem(PoseStack poseStack, ItemStack itemStack, int i, int j, int k, int l) {
+		this.tryRenderGuiItem(poseStack, this.minecraft.player, this.minecraft.level, itemStack, i, j, k, l);
 	}
 
-	public void renderAndDecorateFakeItem(ItemStack itemStack, int i, int j) {
-		this.tryRenderGuiItem(null, this.minecraft.level, itemStack, i, j, 0);
+	public void renderAndDecorateFakeItem(PoseStack poseStack, ItemStack itemStack, int i, int j) {
+		this.tryRenderGuiItem(poseStack, null, this.minecraft.level, itemStack, i, j, 0);
 	}
 
-	public void renderAndDecorateItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
-		this.tryRenderGuiItem(livingEntity, livingEntity.level, itemStack, i, j, k);
+	public void renderAndDecorateItem(PoseStack poseStack, LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
+		this.tryRenderGuiItem(poseStack, livingEntity, livingEntity.level, itemStack, i, j, k);
 	}
 
-	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k) {
-		this.tryRenderGuiItem(livingEntity, level, itemStack, i, j, k, 0);
+	private void tryRenderGuiItem(PoseStack poseStack, @Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k) {
+		this.tryRenderGuiItem(poseStack, livingEntity, level, itemStack, i, j, k, 0);
 	}
 
-	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k, int l) {
+	private void tryRenderGuiItem(PoseStack poseStack, @Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k, int l) {
 		if (!itemStack.isEmpty()) {
 			BakedModel bakedModel = this.getModel(itemStack, level, livingEntity, k);
-			this.blitOffset = bakedModel.isGui3d() ? this.blitOffset + 50.0F + (float)l : this.blitOffset + 50.0F;
+			poseStack.pushPose();
+			poseStack.translate(0.0F, 0.0F, (float)(50 + (bakedModel.isGui3d() ? l : 0)));
 
 			try {
-				this.renderGuiItem(itemStack, i, j, bakedModel);
-			} catch (Throwable var12) {
-				CrashReport crashReport = CrashReport.forThrowable(var12, "Rendering item");
+				this.renderGuiItem(poseStack, itemStack, i, j, bakedModel);
+			} catch (Throwable var13) {
+				CrashReport crashReport = CrashReport.forThrowable(var13, "Rendering item");
 				CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
 				crashReportCategory.setDetail("Item Type", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getItem())));
 				crashReportCategory.setDetail("Item Damage", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getDamageValue())));
@@ -361,20 +353,20 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				throw new ReportedException(crashReport);
 			}
 
-			this.blitOffset = bakedModel.isGui3d() ? this.blitOffset - 50.0F - (float)l : this.blitOffset - 50.0F;
+			poseStack.popPose();
 		}
 	}
 
-	public void renderGuiItemDecorations(Font font, ItemStack itemStack, int i, int j) {
-		this.renderGuiItemDecorations(font, itemStack, i, j, null);
+	public void renderGuiItemDecorations(PoseStack poseStack, Font font, ItemStack itemStack, int i, int j) {
+		this.renderGuiItemDecorations(poseStack, font, itemStack, i, j, null);
 	}
 
-	public void renderGuiItemDecorations(Font font, ItemStack itemStack, int i, int j, @Nullable String string) {
+	public void renderGuiItemDecorations(PoseStack poseStack, Font font, ItemStack itemStack, int i, int j, @Nullable String string) {
 		if (!itemStack.isEmpty()) {
-			PoseStack poseStack = new PoseStack();
+			poseStack.pushPose();
 			if (itemStack.getCount() != 1 || string != null) {
 				String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
-				poseStack.translate(0.0F, 0.0F, this.blitOffset + 200.0F);
+				poseStack.translate(0.0F, 0.0F, 200.0F);
 				MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 				font.drawInBatch(
 					string2,
@@ -411,6 +403,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				GuiComponent.fill(poseStack, i, m, i + 16, n, Integer.MAX_VALUE);
 				RenderSystem.enableDepthTest();
 			}
+
+			poseStack.popPose();
 		}
 	}
 

@@ -224,7 +224,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 			int k = i + 12;
 			int l = j - 12;
 			int m = this.font.width(component);
-			this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+			fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
 			this.font.drawShadow(poseStack, component, (float)k, (float)l, 16777215);
 		}
 	}
@@ -326,7 +326,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 				int m = l / this.itemHeight;
 				if (d >= (double)j && d <= (double)k && m >= 0 && l >= 0 && m < this.getItemCount()) {
 					this.selectItem(m);
-					this.itemClicked(l, m, d, e, this.width);
+					this.itemClicked(l, m, d, e, this.width, i);
 				}
 
 				return true;
@@ -336,7 +336,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void itemClicked(int i, int j, double d, double e, int k) {
+		public void itemClicked(int i, int j, double d, double e, int k, int l) {
 			if (j >= 0 && j <= RealmsPlayerScreen.this.serverData.players.size() && RealmsPlayerScreen.this.hoveredUserAction != RealmsPlayerScreen.UserAction.NONE) {
 				if (RealmsPlayerScreen.this.hoveredUserAction == RealmsPlayerScreen.UserAction.TOGGLE_OP) {
 					if (((PlayerInfo)RealmsPlayerScreen.this.serverData.players.get(j)).isOperator()) {

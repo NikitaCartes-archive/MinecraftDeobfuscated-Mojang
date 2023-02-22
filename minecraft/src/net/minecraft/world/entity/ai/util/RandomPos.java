@@ -30,7 +30,7 @@ public class RandomPos {
 		double n = l * Math.cos(h);
 		if (!(Math.abs(m) > (double)i) && !(Math.abs(n) > (double)i)) {
 			int o = randomSource.nextInt(2 * j + 1) - j + k;
-			return new BlockPos(m, (double)o, n);
+			return BlockPos.containing(m, (double)o, n);
 		} else {
 			return null;
 		}
@@ -121,6 +121,6 @@ public class RandomPos {
 			}
 		}
 
-		return new BlockPos((double)j + pathfinderMob.getX(), (double)blockPos.getY() + pathfinderMob.getY(), (double)k + pathfinderMob.getZ());
+		return BlockPos.containing((double)j + pathfinderMob.getX(), (double)blockPos.getY() + pathfinderMob.getY(), (double)k + pathfinderMob.getZ());
 	}
 }

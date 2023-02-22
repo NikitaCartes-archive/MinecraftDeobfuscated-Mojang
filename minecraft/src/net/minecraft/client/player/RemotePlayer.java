@@ -17,7 +17,7 @@ public class RemotePlayer extends AbstractClientPlayer {
 
 	public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile) {
 		super(clientLevel, gameProfile);
-		this.maxUpStep = 1.0F;
+		this.setMaxUpStep(1.0F);
 		this.noPhysics = true;
 	}
 

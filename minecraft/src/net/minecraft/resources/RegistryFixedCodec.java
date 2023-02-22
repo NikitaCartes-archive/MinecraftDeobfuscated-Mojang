@@ -27,18 +27,18 @@ public final class RegistryFixedCodec<E> implements Codec<Holder<E>> {
 			Optional<HolderOwner<E>> optional = registryOps.owner(this.registryKey);
 			if (optional.isPresent()) {
 				if (!holder.canSerializeIn((HolderOwner<E>)optional.get())) {
-					return DataResult.error("Element " + holder + " is not valid in current registry set");
+					return DataResult.error(() -> "Element " + holder + " is not valid in current registry set");
 				}
 
 				return holder.unwrap()
 					.map(
 						resourceKey -> ResourceLocation.CODEC.encode(resourceKey.location(), dynamicOps, object),
-						objectx -> DataResult.error("Elements from registry " + this.registryKey + " can't be serialized to a value")
+						objectx -> DataResult.error(() -> "Elements from registry " + this.registryKey + " can't be serialized to a value")
 					);
 			}
 		}
 
-		return DataResult.error("Can't access registry " + this.registryKey);
+		return DataResult.error(() -> "Can't access registry " + this.registryKey);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public final class RegistryFixedCodec<E> implements Codec<Holder<E>> {
 							return ((DataResult)((HolderGetter)optional.get())
 									.get(ResourceKey.create(this.registryKey, resourceLocation))
 									.map(DataResult::success)
-									.orElseGet(() -> DataResult.error("Failed to get element " + resourceLocation)))
+									.orElseGet(() -> DataResult.error(() -> "Failed to get element " + resourceLocation)))
 								.map(reference -> Pair.of(reference, pair.getSecond()))
 								.setLifecycle(Lifecycle.stable());
 						}
@@ -62,7 +62,7 @@ public final class RegistryFixedCodec<E> implements Codec<Holder<E>> {
 			}
 		}
 
-		return DataResult.error("Can't access registry " + this.registryKey);
+		return DataResult.error(() -> "Can't access registry " + this.registryKey);
 	}
 
 	public String toString() {

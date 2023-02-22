@@ -39,11 +39,11 @@ public class FrostWalkerEnchantment extends Enchantment {
 	public static void onEntityMoved(LivingEntity livingEntity, Level level, BlockPos blockPos, int i) {
 		if (livingEntity.isOnGround()) {
 			BlockState blockState = Blocks.FROSTED_ICE.defaultBlockState();
-			float f = (float)Math.min(16, 2 + i);
+			int j = Math.min(16, 2 + i);
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-			for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset((double)(-f), -1.0, (double)(-f)), blockPos.offset((double)f, -1.0, (double)f))) {
-				if (blockPos2.closerToCenterThan(livingEntity.position(), (double)f)) {
+			for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-j, -1, -j), blockPos.offset(j, -1, j))) {
+				if (blockPos2.closerToCenterThan(livingEntity.position(), (double)j)) {
 					mutableBlockPos.set(blockPos2.getX(), blockPos2.getY() + 1, blockPos2.getZ());
 					BlockState blockState2 = level.getBlockState(mutableBlockPos);
 					if (blockState2.isAir()) {

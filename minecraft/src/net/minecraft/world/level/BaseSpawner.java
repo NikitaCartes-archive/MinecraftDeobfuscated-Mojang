@@ -104,7 +104,7 @@ public abstract class BaseSpawner {
 						? listTag.getDouble(2)
 						: (double)blockPos.getZ() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.spawnRange + 0.5;
 					if (serverLevel.noCollision(((EntityType)optional.get()).getAABB(d, e, f))) {
-						BlockPos blockPos2 = new BlockPos(d, e, f);
+						BlockPos blockPos2 = BlockPos.containing(d, e, f);
 						if (spawnData.getCustomSpawnRules().isPresent()) {
 							if (!((EntityType)optional.get()).getCategory().isFriendly() && serverLevel.getDifficulty() == Difficulty.PEACEFUL) {
 								continue;

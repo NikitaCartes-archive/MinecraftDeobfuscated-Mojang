@@ -195,7 +195,7 @@ public abstract class PatrollingMonster extends Monster {
 					Vec3 vec33 = vec32.subtract(vec3);
 					vec3 = vec33.yRot(90.0F).scale(0.4).add(vec3);
 					Vec3 vec34 = vec3.subtract(vec32).normalize().scale(10.0).add(vec32);
-					BlockPos blockPos = new BlockPos(vec34);
+					BlockPos blockPos = BlockPos.containing(vec34);
 					blockPos = this.mob.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
 					if (!pathNavigation.moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), bl ? this.leaderSpeedModifier : this.speedModifier)) {
 						this.moveRandomly();

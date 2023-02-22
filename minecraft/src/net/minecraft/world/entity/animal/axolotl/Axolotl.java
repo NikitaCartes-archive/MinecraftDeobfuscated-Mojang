@@ -110,7 +110,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
 		this.moveControl = new Axolotl.AxolotlMoveControl(this);
 		this.lookControl = new Axolotl.AxolotlLookControl(this, 20);
-		this.maxUpStep = 1.0F;
+		this.setMaxUpStep(1.0F);
 	}
 
 	@Override
@@ -427,9 +427,10 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 
 	public void applySupportingEffects(Player player) {
 		MobEffectInstance mobEffectInstance = player.getEffect(MobEffects.REGENERATION);
-		if (mobEffectInstance != null && mobEffectInstance.endsWithin(2399)) {
-			int i = Math.min(2400, 100 + mobEffectInstance.getDuration());
-			player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, i, 0), this);
+		if (mobEffectInstance == null || mobEffectInstance.endsWithin(2399)) {
+			int i = mobEffectInstance != null ? mobEffectInstance.getDuration() : 0;
+			int j = Math.min(2400, 100 + i);
+			player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, j, 0), this);
 		}
 
 		player.removeEffect(MobEffects.DIG_SLOWDOWN);
@@ -490,7 +491,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.isEffectiveAi() && this.isInWater()) {
+		if (this.isControlledByLocalInstance() && this.isInWater()) {
 			this.moveRelative(this.getSpeed(), vec3);
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.9));

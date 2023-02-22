@@ -257,7 +257,7 @@ public class TeleportCommand {
 		float h,
 		@Nullable TeleportCommand.LookAt lookAt
 	) throws CommandSyntaxException {
-		BlockPos blockPos = new BlockPos(d, e, f);
+		BlockPos blockPos = BlockPos.containing(d, e, f);
 		if (!Level.isInSpawnableBounds(blockPos)) {
 			throw INVALID_POSITION.create();
 		} else {

@@ -394,7 +394,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			k = k - m - 20;
 		}
 
-		this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+		fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
 		this.font.drawShadow(poseStack, component, (float)k, (float)l, 16777215);
 	}
 

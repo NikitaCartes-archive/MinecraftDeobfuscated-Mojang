@@ -241,7 +241,7 @@ public class WinScreen extends Screen {
 		h *= h;
 		h = h * 96.0F / 255.0F;
 		RenderSystem.setShaderColor(h, h, h, 1.0F);
-		blit(poseStack, 0, 0, this.getBlitOffset(), 0.0F, f, i, this.height, 64, 64);
+		blit(poseStack, 0, 0, 0, 0.0F, f, i, this.height, 64, 64);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
@@ -281,8 +281,9 @@ public class WinScreen extends Screen {
 		RenderSystem.setShaderTexture(0, VIGNETTE_LOCATION);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
-		blit(poseStack, 0, 0, this.getBlitOffset(), 0.0F, 0.0F, this.width, this.height, this.width, this.height);
+		blit(poseStack, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, this.width, this.height);
 		RenderSystem.disableBlend();
+		RenderSystem.defaultBlendFunc();
 		super.render(poseStack, i, j, f);
 	}
 

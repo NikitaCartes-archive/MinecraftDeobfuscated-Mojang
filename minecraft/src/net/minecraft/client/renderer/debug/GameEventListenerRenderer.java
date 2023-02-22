@@ -82,10 +82,15 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 			}
 
 			for (GameEventListenerRenderer.TrackedListener trackedListener2 : this.trackedListeners) {
-				trackedListener2.getPosition(level).ifPresent(vec3x -> {
-					DebugRenderer.renderFloatingText(poseStack, multiBufferSource, "Listener Origin", vec3x.x(), vec3x.y() + 1.8F, vec3x.z(), -1, 0.025F);
-					DebugRenderer.renderFloatingText(poseStack, multiBufferSource, new BlockPos(vec3x).toString(), vec3x.x(), vec3x.y() + 1.5, vec3x.z(), -6959665, 0.025F);
-				});
+				trackedListener2.getPosition(level)
+					.ifPresent(
+						vec3x -> {
+							DebugRenderer.renderFloatingText(poseStack, multiBufferSource, "Listener Origin", vec3x.x(), vec3x.y() + 1.8F, vec3x.z(), -1, 0.025F);
+							DebugRenderer.renderFloatingText(
+								poseStack, multiBufferSource, BlockPos.containing(vec3x).toString(), vec3x.x(), vec3x.y() + 1.5, vec3x.z(), -6959665, 0.025F
+							);
+						}
+					);
 			}
 
 			for (GameEventListenerRenderer.TrackedGameEvent trackedGameEvent : this.trackedGameEvents) {

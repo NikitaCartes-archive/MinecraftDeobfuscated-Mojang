@@ -34,6 +34,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.HeightmapTypeArgument;
 import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.commands.arguments.ObjectiveArgument;
 import net.minecraft.commands.arguments.RangeArgument;
@@ -65,6 +66,7 @@ import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Attackable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -83,6 +85,7 @@ import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
@@ -157,6 +160,18 @@ public class ExecuteCommand {
 							}
 
 							return list;
+						})))
+						.then(Commands.literal("over").then(Commands.argument("heightmap", HeightmapTypeArgument.heightmap()).redirect(literalCommandNode, commandContext -> {
+							Vec3 vec3 = commandContext.getSource().getPosition();
+							ServerLevel serverLevel = commandContext.getSource().getLevel();
+							double d = vec3.x();
+							double e = vec3.z();
+							if (!serverLevel.hasChunk(SectionPos.blockToSectionCoord(d), SectionPos.blockToSectionCoord(e))) {
+								throw BlockPosArgument.ERROR_NOT_LOADED.create();
+							} else {
+								int i = serverLevel.getHeight(HeightmapTypeArgument.getHeightmap(commandContext, "heightmap"), Mth.floor(d), Mth.floor(e));
+								return commandContext.getSource().withPosition(new Vec3(d, (double)i, e));
+							}
 						})))
 				)
 				.then(

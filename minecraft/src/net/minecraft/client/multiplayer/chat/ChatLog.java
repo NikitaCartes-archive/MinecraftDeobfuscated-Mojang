@@ -16,9 +16,12 @@ public class ChatLog {
 	public static Codec<ChatLog> codec(int i) {
 		return Codec.list(LoggedChatEvent.CODEC)
 			.comapFlatMap(
-				list -> list.size() > i
-						? DataResult.error("Expected: a buffer of size less than or equal to " + i + " but: " + list.size() + " is greater than " + i)
-						: DataResult.success(new ChatLog(i, list)),
+				list -> {
+					int j = list.size();
+					return j > i
+						? DataResult.error(() -> "Expected: a buffer of size less than or equal to " + i + " but: " + j + " is greater than " + i)
+						: DataResult.success(new ChatLog(i, list));
+				},
 				ChatLog::loggedChatEvents
 			);
 	}

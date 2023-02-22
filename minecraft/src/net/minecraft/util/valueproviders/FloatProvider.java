@@ -20,10 +20,10 @@ public abstract class FloatProvider implements SampledFloat {
 			CODEC,
 			floatProvider -> {
 				if (floatProvider.getMinValue() < f) {
-					return DataResult.error("Value provider too low: " + f + " [" + floatProvider.getMinValue() + "-" + floatProvider.getMaxValue() + "]");
+					return DataResult.error(() -> "Value provider too low: " + f + " [" + floatProvider.getMinValue() + "-" + floatProvider.getMaxValue() + "]");
 				} else {
 					return floatProvider.getMaxValue() > g
-						? DataResult.error("Value provider too high: " + g + " [" + floatProvider.getMinValue() + "-" + floatProvider.getMaxValue() + "]")
+						? DataResult.error(() -> "Value provider too high: " + g + " [" + floatProvider.getMinValue() + "-" + floatProvider.getMaxValue() + "]")
 						: DataResult.success(floatProvider);
 				}
 			}

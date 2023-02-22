@@ -50,7 +50,7 @@ public class PlayTagWithOtherKids {
 								} else {
 									for (int i = 0; i < 10; i++) {
 										Vec3 vec3 = LandRandomPos.getPos(pathfinderMob, 20, 8);
-										if (vec3 != null && serverLevel.isVillage(new BlockPos(vec3))) {
+										if (vec3 != null && serverLevel.isVillage(BlockPos.containing(vec3))) {
 											memoryAccessor2.set(new WalkTarget(vec3, 0.6F, 0));
 											break;
 										}

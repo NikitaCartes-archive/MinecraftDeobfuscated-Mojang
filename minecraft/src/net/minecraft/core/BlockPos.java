@@ -43,18 +43,6 @@ public class BlockPos extends Vec3i {
 		super(i, j, k);
 	}
 
-	public BlockPos(double d, double e, double f) {
-		super(d, e, f);
-	}
-
-	public BlockPos(Vec3 vec3) {
-		this(vec3.x, vec3.y, vec3.z);
-	}
-
-	public BlockPos(Position position) {
-		this(position.x(), position.y(), position.z());
-	}
-
 	public BlockPos(Vec3i vec3i) {
 		this(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 	}
@@ -83,6 +71,14 @@ public class BlockPos extends Vec3i {
 		return new BlockPos(getX(l), getY(l), getZ(l));
 	}
 
+	public static BlockPos containing(double d, double e, double f) {
+		return new BlockPos(Mth.floor(d), Mth.floor(e), Mth.floor(f));
+	}
+
+	public static BlockPos containing(Position position) {
+		return containing(position.x(), position.y(), position.z());
+	}
+
 	public long asLong() {
 		return asLong(this.getX(), this.getY(), this.getZ());
 	}
@@ -96,10 +92,6 @@ public class BlockPos extends Vec3i {
 
 	public static long getFlatIndex(long l) {
 		return l & -16L;
-	}
-
-	public BlockPos offset(double d, double e, double f) {
-		return d == 0.0 && e == 0.0 && f == 0.0 ? this : new BlockPos((double)this.getX() + d, (double)this.getY() + e, (double)this.getZ() + f);
 	}
 
 	public BlockPos offset(int i, int j, int k) {
@@ -423,11 +415,6 @@ public class BlockPos extends Vec3i {
 
 		public MutableBlockPos(double d, double e, double f) {
 			this(Mth.floor(d), Mth.floor(e), Mth.floor(f));
-		}
-
-		@Override
-		public BlockPos offset(double d, double e, double f) {
-			return super.offset(d, e, f).immutable();
 		}
 
 		@Override

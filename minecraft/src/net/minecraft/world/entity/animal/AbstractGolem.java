@@ -12,11 +12,6 @@ public abstract class AbstractGolem extends PathfinderMob {
 		super(entityType, level);
 	}
 
-	@Override
-	public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
-		return false;
-	}
-
 	@Nullable
 	@Override
 	protected SoundEvent getAmbientSound() {

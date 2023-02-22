@@ -52,24 +52,23 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 				this.menu.exit();
 			} else {
 				int i = this.minecraft.getWindow().getGuiScaledWidth() / 2;
-				int j = this.getBlitOffset();
-				this.setBlitOffset(-90);
-				int k = Mth.floor((float)this.minecraft.getWindow().getGuiScaledHeight() - 22.0F * f);
+				poseStack.pushPose();
+				poseStack.translate(0.0F, 0.0F, -90.0F);
+				int j = Mth.floor((float)this.minecraft.getWindow().getGuiScaledHeight() - 22.0F * f);
 				SpectatorPage spectatorPage = this.menu.getCurrentPage();
-				this.renderPage(poseStack, f, i, k, spectatorPage);
-				this.setBlitOffset(j);
+				this.renderPage(poseStack, f, i, j, spectatorPage);
+				poseStack.popPose();
 			}
 		}
 	}
 
 	protected void renderPage(PoseStack poseStack, float f, int i, int j, SpectatorPage spectatorPage) {
 		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, f);
 		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-		this.blit(poseStack, i - 91, j, 0, 0, 182, 22);
+		blit(poseStack, i - 91, j, 0, 0, 182, 22);
 		if (spectatorPage.getSelectedSlot() >= 0) {
-			this.blit(poseStack, i - 91 - 1 + spectatorPage.getSelectedSlot() * 20, j - 1, 0, 22, 24, 22);
+			blit(poseStack, i - 91 - 1 + spectatorPage.getSelectedSlot() * 20, j - 1, 0, 22, 24, 22);
 		}
 
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -107,10 +106,7 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 			if (component != null) {
 				int j = (this.minecraft.getWindow().getGuiScaledWidth() - this.minecraft.font.width(component)) / 2;
 				int k = this.minecraft.getWindow().getGuiScaledHeight() - 35;
-				RenderSystem.enableBlend();
-				RenderSystem.defaultBlendFunc();
 				this.minecraft.font.drawShadow(poseStack, component, (float)j, (float)k, 16777215 + (i << 24));
-				RenderSystem.disableBlend();
 			}
 		}
 	}

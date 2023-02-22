@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.components.toasts;
 
 import com.google.common.collect.Queues;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -147,13 +146,10 @@ public class ToastComponent extends GuiComponent {
 				this.visibleTime = l;
 			}
 
-			PoseStack poseStack2 = RenderSystem.getModelViewStack();
-			poseStack2.pushPose();
-			poseStack2.translate((float)i - (float)this.toast.width() * this.getVisibility(l), (float)(this.index * 32), 800.0F);
-			RenderSystem.applyModelViewMatrix();
+			poseStack.pushPose();
+			poseStack.translate((float)i - (float)this.toast.width() * this.getVisibility(l), (float)(this.index * 32), 800.0F);
 			Toast.Visibility visibility = this.toast.render(poseStack, ToastComponent.this, l - this.visibleTime);
-			poseStack2.popPose();
-			RenderSystem.applyModelViewMatrix();
+			poseStack.popPose();
 			if (visibility != this.visibility) {
 				this.animationTime = l - (long)((int)((1.0F - this.getVisibility(l)) * 600.0F));
 				this.visibility = visibility;

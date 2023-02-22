@@ -34,6 +34,7 @@ public class VibrationListener implements GameEventListener {
 	public static final Object2IntMap<GameEvent> VIBRATION_FREQUENCY_FOR_EVENT = Object2IntMaps.unmodifiable(
 		Util.make(new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> {
 			object2IntOpenHashMap.put(GameEvent.STEP, 1);
+			object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH, 2);
 			object2IntOpenHashMap.put(GameEvent.FLAP, 2);
 			object2IntOpenHashMap.put(GameEvent.SWIM, 3);
 			object2IntOpenHashMap.put(GameEvent.ELYTRA_GLIDE, 4);
@@ -68,7 +69,6 @@ public class VibrationListener implements GameEventListener {
 			object2IntOpenHashMap.put(GameEvent.ENTITY_DIE, 13);
 			object2IntOpenHashMap.put(GameEvent.BLOCK_DESTROY, 13);
 			object2IntOpenHashMap.put(GameEvent.FLUID_PICKUP, 13);
-			object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH, 14);
 			object2IntOpenHashMap.put(GameEvent.CONTAINER_CLOSE, 14);
 			object2IntOpenHashMap.put(GameEvent.PISTON_CONTRACT, 14);
 			object2IntOpenHashMap.put(GameEvent.PISTON_EXTEND, 15);
@@ -149,7 +149,7 @@ public class VibrationListener implements GameEventListener {
 						.onSignalReceive(
 							serverLevel,
 							this,
-							new BlockPos(this.currentVibration.pos()),
+							BlockPos.containing(this.currentVibration.pos()),
 							this.currentVibration.gameEvent(),
 							(Entity)this.currentVibration.getEntity(serverLevel).orElse(null),
 							(Entity)this.currentVibration.getProjectileOwner(serverLevel).orElse(null),
@@ -183,7 +183,7 @@ public class VibrationListener implements GameEventListener {
 				return false;
 			} else {
 				Vec3 vec32 = (Vec3)optional.get();
-				if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
+				if (!this.config.shouldListen(serverLevel, this, BlockPos.containing(vec3), gameEvent, context)) {
 					return false;
 				} else if (isOccluded(serverLevel, vec3, vec32)) {
 					return false;

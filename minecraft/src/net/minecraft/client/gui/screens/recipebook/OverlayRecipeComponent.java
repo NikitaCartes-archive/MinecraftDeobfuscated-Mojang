@@ -137,7 +137,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Renderable, 
 			int l = Math.min(this.recipeButtons.size(), k);
 			int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
 			int n = 4;
-			this.blitNineSliced(poseStack, this.x, this.y, l * 25 + 8, m * 25 + 8, 4, 32, 32, 82, 208);
+			blitNineSliced(poseStack, this.x, this.y, l * 25 + 8, m * 25 + 8, 4, 32, 32, 82, 208);
 			RenderSystem.disableBlend();
 
 			for (OverlayRecipeComponent.OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
@@ -210,25 +210,22 @@ public class OverlayRecipeComponent extends GuiComponent implements Renderable, 
 				l += 26;
 			}
 
-			this.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
-			PoseStack poseStack2 = RenderSystem.getModelViewStack();
-			poseStack2.pushPose();
-			poseStack2.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
+			blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
+			poseStack.pushPose();
+			poseStack.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
 
 			for (OverlayRecipeComponent.OverlayRecipeButton.Pos pos : this.ingredientPos) {
-				poseStack2.pushPose();
-				poseStack2.translate((double)pos.x, (double)pos.y, 0.0);
-				poseStack2.scale(0.375F, 0.375F, 1.0F);
-				poseStack2.translate(-8.0, -8.0, 0.0);
-				RenderSystem.applyModelViewMatrix();
+				poseStack.pushPose();
+				poseStack.translate((double)pos.x, (double)pos.y, 0.0);
+				poseStack.scale(0.375F, 0.375F, 1.0F);
+				poseStack.translate(-8.0, -8.0, 0.0);
 				OverlayRecipeComponent.this.minecraft
 					.getItemRenderer()
-					.renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], 0, 0);
-				poseStack2.popPose();
+					.renderAndDecorateItem(poseStack, pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], 0, 0);
+				poseStack.popPose();
 			}
 
-			poseStack2.popPose();
-			RenderSystem.applyModelViewMatrix();
+			poseStack.popPose();
 		}
 
 		@Environment(EnvType.CLIENT)

@@ -42,7 +42,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
@@ -466,7 +466,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "nether/ride_strider_in_overworld_lava");
-		VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSource.Preset.NETHER.possibleBiomes().toList())
+		VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSourceParameterList.Preset.NETHER.usedBiomes().toList())
 			.parent(advancement12)
 			.display(
 				Items.NETHERITE_BOOTS,

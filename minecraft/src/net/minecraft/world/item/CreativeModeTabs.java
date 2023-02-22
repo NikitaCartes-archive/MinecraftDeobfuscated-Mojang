@@ -759,10 +759,10 @@ public class CreativeModeTabs {
 			output.accept(Items.PUMPKIN_SEEDS);
 			output.accept(Items.MELON_SEEDS);
 			output.accept(Items.BEETROOT_SEEDS);
+			output.accept(Items.TORCHFLOWER_SEEDS);
 			output.accept(Items.GLOW_BERRIES);
 			output.accept(Items.SWEET_BERRIES);
 			output.accept(Items.NETHER_WART);
-			output.accept(Items.TORCHFLOWER_SEEDS);
 			output.accept(Items.LILY_PAD);
 			output.accept(Items.SEAGRASS);
 			output.accept(Items.SEA_PICKLE);

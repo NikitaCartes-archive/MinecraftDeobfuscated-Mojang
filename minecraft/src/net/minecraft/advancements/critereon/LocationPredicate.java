@@ -132,7 +132,7 @@ public class LocationPredicate {
 		} else if (this.dimension != null && this.dimension != serverLevel.dimension()) {
 			return false;
 		} else {
-			BlockPos blockPos = new BlockPos(d, e, f);
+			BlockPos blockPos = BlockPos.containing(d, e, f);
 			boolean bl = serverLevel.isLoaded(blockPos);
 			if (this.biome == null || bl && serverLevel.getBiome(blockPos).is(this.biome)) {
 				if (this.structure == null || bl && serverLevel.structureManager().getStructureWithPieceAt(blockPos, this.structure).isValid()) {

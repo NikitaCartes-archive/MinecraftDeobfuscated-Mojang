@@ -1,11 +1,11 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -21,8 +21,12 @@ public class FixedBiomeSource extends BiomeSource implements BiomeManager.NoiseB
 	private final Holder<Biome> biome;
 
 	public FixedBiomeSource(Holder<Biome> holder) {
-		super(ImmutableList.of(holder));
 		this.biome = holder;
+	}
+
+	@Override
+	protected Stream<Holder<Biome>> collectPossibleBiomes() {
+		return Stream.of(this.biome);
 	}
 
 	@Override

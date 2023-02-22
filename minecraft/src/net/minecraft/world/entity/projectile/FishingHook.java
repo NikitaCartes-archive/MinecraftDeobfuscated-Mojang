@@ -306,7 +306,7 @@ public class FishingHook extends Projectile {
 				double d = this.getX() + (double)(g * (float)this.timeUntilHooked * 0.1F);
 				double e = (double)((float)Mth.floor(this.getY()) + 1.0F);
 				double j = this.getZ() + (double)(h * (float)this.timeUntilHooked * 0.1F);
-				BlockState blockState = serverLevel.getBlockState(new BlockPos(d, e - 1.0, j));
+				BlockState blockState = serverLevel.getBlockState(BlockPos.containing(d, e - 1.0, j));
 				if (blockState.is(Blocks.WATER)) {
 					if (this.random.nextFloat() < 0.15F) {
 						serverLevel.sendParticles(ParticleTypes.BUBBLE, d, e - 0.1F, j, 1, (double)g, 0.1, (double)h, 0.0);
@@ -362,7 +362,7 @@ public class FishingHook extends Projectile {
 				double d = this.getX() + (double)(Mth.sin(g) * h) * 0.1;
 				double e = (double)((float)Mth.floor(this.getY()) + 1.0F);
 				double j = this.getZ() + (double)(Mth.cos(g) * h) * 0.1;
-				BlockState blockState = serverLevel.getBlockState(new BlockPos(d, e - 1.0, j));
+				BlockState blockState = serverLevel.getBlockState(BlockPos.containing(d, e - 1.0, j));
 				if (blockState.is(Blocks.WATER)) {
 					serverLevel.sendParticles(ParticleTypes.SPLASH, d, e, j, 2 + this.random.nextInt(2), 0.1F, 0.0, 0.1F, 0.0);
 				}

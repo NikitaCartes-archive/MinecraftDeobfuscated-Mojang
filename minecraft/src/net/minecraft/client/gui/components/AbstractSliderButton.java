@@ -17,6 +17,10 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSliderButton extends AbstractWidget {
 	private static final ResourceLocation SLIDER_LOCATION = new ResourceLocation("textures/gui/slider.png");
+	protected static final int TEXTURE_WIDTH = 200;
+	protected static final int TEXTURE_HEIGHT = 20;
+	protected static final int TEXTURE_BORDER = 4;
+	protected static final int TEXT_MARGIN = 2;
 	private static final int HEIGHT = 20;
 	private static final int HANDLE_HALF_WIDTH = 4;
 	private static final int HANDLE_WIDTH = 8;
@@ -32,13 +36,7 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 		this.value = d;
 	}
 
-	@Override
-	protected ResourceLocation getTextureLocation() {
-		return SLIDER_LOCATION;
-	}
-
-	@Override
-	protected int getTextureY() {
+	private int getTextureY() {
 		int i = this.isFocused() && !this.canChangeValue ? 1 : 0;
 		return i * 20;
 	}
@@ -66,10 +64,18 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
-		RenderSystem.setShaderTexture(0, this.getTextureLocation());
-		int k = this.getHandleTextureY();
-		this.blitNineSliced(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, 20, 4, 200, 20, 0, k);
+	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+		Minecraft minecraft = Minecraft.getInstance();
+		RenderSystem.setShaderTexture(0, SLIDER_LOCATION);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableDepthTest();
+		blitNineSliced(poseStack, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 4, 200, 20, 0, this.getTextureY());
+		blitNineSliced(poseStack, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, 20, 4, 200, 20, 0, this.getHandleTextureY());
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		int k = this.active ? 16777215 : 10526880;
+		this.renderScrollingString(poseStack, minecraft.font, 2, k | Mth.ceil(this.alpha * 255.0F) << 24);
 	}
 
 	@Override

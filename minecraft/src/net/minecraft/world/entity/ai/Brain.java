@@ -96,7 +96,9 @@ public class Brain<E extends LivingEntity> {
 					}
 
 					private <T, U> DataResult<Brain.MemoryValue<U>> captureRead(MemoryModuleType<U> memoryModuleType, DynamicOps<T> dynamicOps, T object) {
-						return ((DataResult)memoryModuleType.getCodec().map(DataResult::success).orElseGet(() -> DataResult.error("No codec for memory: " + memoryModuleType)))
+						return ((DataResult)memoryModuleType.getCodec()
+								.map(DataResult::success)
+								.orElseGet(() -> DataResult.error(() -> "No codec for memory: " + memoryModuleType)))
 							.flatMap(codec -> codec.parse(dynamicOps, object))
 							.map(expirableValue -> new Brain.MemoryValue<>(memoryModuleType, Optional.of(expirableValue)));
 					}

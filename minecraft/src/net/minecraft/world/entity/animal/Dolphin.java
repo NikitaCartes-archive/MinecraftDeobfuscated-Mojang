@@ -394,7 +394,7 @@ public class Dolphin extends WaterAnimal {
 		@Override
 		public boolean canContinueToUse() {
 			BlockPos blockPos = this.dolphin.getTreasurePos();
-			return !new BlockPos((double)blockPos.getX(), this.dolphin.getY(), (double)blockPos.getZ()).closerToCenterThan(this.dolphin.position(), 4.0)
+			return !BlockPos.containing((double)blockPos.getX(), this.dolphin.getY(), (double)blockPos.getZ()).closerToCenterThan(this.dolphin.position(), 4.0)
 				&& !this.stuck
 				&& this.dolphin.getAirSupply() >= 100;
 		}
@@ -418,7 +418,8 @@ public class Dolphin extends WaterAnimal {
 		@Override
 		public void stop() {
 			BlockPos blockPos = this.dolphin.getTreasurePos();
-			if (new BlockPos((double)blockPos.getX(), this.dolphin.getY(), (double)blockPos.getZ()).closerToCenterThan(this.dolphin.position(), 4.0) || this.stuck) {
+			if (BlockPos.containing((double)blockPos.getX(), this.dolphin.getY(), (double)blockPos.getZ()).closerToCenterThan(this.dolphin.position(), 4.0)
+				|| this.stuck) {
 				this.dolphin.setGotFish(false);
 			}
 		}
@@ -434,7 +435,7 @@ public class Dolphin extends WaterAnimal {
 				}
 
 				if (vec32 != null) {
-					BlockPos blockPos = new BlockPos(vec32);
+					BlockPos blockPos = BlockPos.containing(vec32);
 					if (!level.getFluidState(blockPos).is(FluidTags.WATER) || !level.getBlockState(blockPos).isPathfindable(level, blockPos, PathComputationType.WATER)) {
 						vec32 = DefaultRandomPos.getPosTowards(this.dolphin, 8, 5, vec3, (float) (Math.PI / 2));
 					}

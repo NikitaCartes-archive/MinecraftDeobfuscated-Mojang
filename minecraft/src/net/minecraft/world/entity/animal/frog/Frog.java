@@ -114,7 +114,7 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 		this.setPathfindingMalus(BlockPathTypes.WATER, 4.0F);
 		this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, -1.0F);
 		this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.02F, 0.1F, true);
-		this.maxUpStep = 1.0F;
+		this.setMaxUpStep(1.0F);
 	}
 
 	@Override
@@ -356,7 +356,7 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.isEffectiveAi() && this.isInWater()) {
+		if (this.isControlledByLocalInstance() && this.isInWater()) {
 			this.moveRelative(this.getSpeed(), vec3);
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.9));

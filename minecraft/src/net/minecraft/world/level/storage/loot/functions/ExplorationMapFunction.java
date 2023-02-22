@@ -68,7 +68,7 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 			Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
 			if (vec3 != null) {
 				ServerLevel serverLevel = lootContext.getLevel();
-				BlockPos blockPos = serverLevel.findNearestMapStructure(this.destination, new BlockPos(vec3), this.searchRadius, this.skipKnownStructures);
+				BlockPos blockPos = serverLevel.findNearestMapStructure(this.destination, BlockPos.containing(vec3), this.searchRadius, this.skipKnownStructures);
 				if (blockPos != null) {
 					ItemStack itemStack2 = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), this.zoom, true, true);
 					MapItem.renderBiomePreviewMap(serverLevel, itemStack2);

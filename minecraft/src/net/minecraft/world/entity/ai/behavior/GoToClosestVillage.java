@@ -24,7 +24,7 @@ public class GoToClosestVillage {
 							for (int k = 0; k < 5; k++) {
 								Vec3 vec32 = LandRandomPos.getPos(villager, 15, 7, blockPos -> (double)(-poiManager.sectionsToVillage(SectionPos.of(blockPos))));
 								if (vec32 != null) {
-									int m = poiManager.sectionsToVillage(SectionPos.of(new BlockPos(vec32)));
+									int m = poiManager.sectionsToVillage(SectionPos.of(BlockPos.containing(vec32)));
 									if (m < j) {
 										vec3 = vec32;
 										break;

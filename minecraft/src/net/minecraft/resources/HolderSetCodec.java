@@ -59,7 +59,7 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
 			Optional<HolderOwner<E>> optional = registryOps.owner(this.registryKey);
 			if (optional.isPresent()) {
 				if (!holderSet.canSerializeIn((HolderOwner<E>)optional.get())) {
-					return DataResult.error("HolderSet " + holderSet + " is not valid in current registry set");
+					return DataResult.error(() -> "HolderSet " + holderSet + " is not valid in current registry set");
 				}
 
 				return this.registryAwareCodec.encode(holderSet.unwrap().mapRight(List::copyOf), dynamicOps, object);
@@ -75,7 +75,7 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
 
 			for (Holder<E> holder : (List)pair.getFirst()) {
 				if (!(holder instanceof Holder.Direct<E> direct)) {
-					return DataResult.error("Can't decode element " + holder + " without registry");
+					return DataResult.error(() -> "Can't decode element " + holder + " without registry");
 				}
 
 				list.add(direct);

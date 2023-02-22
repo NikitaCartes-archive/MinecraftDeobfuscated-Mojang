@@ -16,7 +16,7 @@ public class WeightedStateProvider extends BlockStateProvider {
 
 	private static DataResult<WeightedStateProvider> create(SimpleWeightedRandomList<BlockState> simpleWeightedRandomList) {
 		return simpleWeightedRandomList.isEmpty()
-			? DataResult.error("WeightedStateProvider with no states")
+			? DataResult.error(() -> "WeightedStateProvider with no states")
 			: DataResult.success(new WeightedStateProvider(simpleWeightedRandomList));
 	}
 

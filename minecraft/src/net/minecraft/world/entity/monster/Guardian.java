@@ -328,18 +328,19 @@ public class Guardian extends Monster {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		if (!this.isMoving() && !damageSource.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && damageSource.getDirectEntity() instanceof LivingEntity) {
-			LivingEntity livingEntity = (LivingEntity)damageSource.getDirectEntity();
-			if (!damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
+		if (this.level.isClientSide) {
+			return false;
+		} else {
+			if (!damageSource.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && damageSource.getEntity() instanceof LivingEntity livingEntity) {
 				livingEntity.hurt(this.damageSources().thorns(this), 2.0F);
 			}
-		}
 
-		if (this.randomStrollGoal != null) {
-			this.randomStrollGoal.trigger();
-		}
+			if (this.randomStrollGoal != null) {
+				this.randomStrollGoal.trigger();
+			}
 
-		return super.hurt(damageSource, f);
+			return super.hurt(damageSource, f);
+		}
 	}
 
 	@Override
@@ -349,7 +350,7 @@ public class Guardian extends Monster {
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.isEffectiveAi() && this.isInWater()) {
+		if (this.isControlledByLocalInstance() && this.isInWater()) {
 			this.moveRelative(0.1F, vec3);
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.9));

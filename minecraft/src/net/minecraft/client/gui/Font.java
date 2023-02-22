@@ -8,7 +8,6 @@ import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Transformation;
 import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -310,8 +309,8 @@ public class Font {
 		return this.splitter.headByWidth(formattedText, i, Style.EMPTY);
 	}
 
-	public void drawWordWrap(FormattedText formattedText, int i, int j, int k, int l) {
-		Matrix4f matrix4f = Transformation.identity().getMatrix();
+	public void drawWordWrap(PoseStack poseStack, FormattedText formattedText, int i, int j, int k, int l) {
+		Matrix4f matrix4f = poseStack.last().pose();
 
 		for (FormattedCharSequence formattedCharSequence : this.split(formattedText, k)) {
 			this.drawInternal(formattedCharSequence, (float)i, (float)j, l, matrix4f, false);

@@ -87,7 +87,7 @@ public class ReportReasonSelectionScreen extends Screen {
 			int o = l - k;
 			int p = n - m;
 			int q = this.font.wordWrapHeight(entry.reason.description(), o);
-			this.font.drawWordWrap(entry.reason.description(), k, m + (p - q) / 2, o, -1);
+			this.font.drawWordWrap(poseStack, entry.reason.description(), k, m + (p - q) / 2, o, -1);
 		}
 	}
 

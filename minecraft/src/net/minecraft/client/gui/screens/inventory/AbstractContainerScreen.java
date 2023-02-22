@@ -13,7 +13,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -93,16 +92,13 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		this.renderBg(poseStack, f, i, j);
 		RenderSystem.disableDepthTest();
 		super.render(poseStack, i, j, f);
-		PoseStack poseStack2 = RenderSystem.getModelViewStack();
-		poseStack2.pushPose();
-		poseStack2.translate((float)k, (float)l, 0.0F);
-		RenderSystem.applyModelViewMatrix();
+		poseStack.pushPose();
+		poseStack.translate((float)k, (float)l, 0.0F);
 		this.hoveredSlot = null;
 
 		for (int m = 0; m < this.menu.slots.size(); m++) {
 			Slot slot = this.menu.slots.get(m);
 			if (slot.isActive()) {
-				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				this.renderSlot(poseStack, slot);
 			}
 
@@ -110,7 +106,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				this.hoveredSlot = slot;
 				int n = slot.x;
 				int o = slot.y;
-				renderSlotHighlight(poseStack, n, o, this.getBlitOffset());
+				renderSlotHighlight(poseStack, n, o, 0);
 			}
 		}
 
@@ -131,7 +127,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				}
 			}
 
-			this.renderFloatingItem(itemStack, i - k - 8, j - l - n, string);
+			this.renderFloatingItem(poseStack, itemStack, i - k - 8, j - l - n, string);
 		}
 
 		if (!this.snapbackItem.isEmpty()) {
@@ -145,11 +141,10 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			int o = this.snapbackEnd.y - this.snapbackStartY;
 			int q = this.snapbackStartX + (int)((float)n * g);
 			int r = this.snapbackStartY + (int)((float)o * g);
-			this.renderFloatingItem(this.snapbackItem, q, r, null);
+			this.renderFloatingItem(poseStack, this.snapbackItem, q, r, null);
 		}
 
-		poseStack2.popPose();
-		RenderSystem.applyModelViewMatrix();
+		poseStack.popPose();
 		RenderSystem.enableDepthTest();
 	}
 
@@ -167,16 +162,12 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		}
 	}
 
-	private void renderFloatingItem(ItemStack itemStack, int i, int j, String string) {
-		PoseStack poseStack = RenderSystem.getModelViewStack();
-		poseStack.translate(0.0F, 0.0F, 32.0F);
-		RenderSystem.applyModelViewMatrix();
-		this.setBlitOffset(200);
-		this.itemRenderer.blitOffset = 200.0F;
-		this.itemRenderer.renderAndDecorateItem(itemStack, i, j);
-		this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j - (this.draggingItem.isEmpty() ? 0 : 8), string);
-		this.setBlitOffset(0);
-		this.itemRenderer.blitOffset = 0.0F;
+	private void renderFloatingItem(PoseStack poseStack, ItemStack itemStack, int i, int j, String string) {
+		poseStack.pushPose();
+		poseStack.translate(0.0F, 0.0F, 232.0F);
+		this.itemRenderer.renderAndDecorateItem(poseStack, itemStack, i, j);
+		this.itemRenderer.renderGuiItemDecorations(poseStack, this.font, itemStack, i, j - (this.draggingItem.isEmpty() ? 0 : 8), string);
+		poseStack.popPose();
 	}
 
 	protected void renderLabels(PoseStack poseStack, int i, int j) {
@@ -219,14 +210,14 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			}
 		}
 
-		this.setBlitOffset(100);
-		this.itemRenderer.blitOffset = 100.0F;
+		poseStack.pushPose();
+		poseStack.translate(0.0F, 0.0F, 100.0F);
 		if (itemStack.isEmpty() && slot.isActive()) {
 			Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
 			if (pair != null) {
 				TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
 				RenderSystem.setShaderTexture(0, textureAtlasSprite.atlasLocation());
-				blit(poseStack, i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
+				blit(poseStack, i, j, 0, 16, 16, textureAtlasSprite);
 				bl2 = true;
 			}
 		}
@@ -236,13 +227,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				fill(poseStack, i, j, i + 16, j + 16, -2130706433);
 			}
 
-			RenderSystem.enableDepthTest();
-			this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemStack, i, j, slot.x + slot.y * this.imageWidth);
-			this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j, string);
+			this.itemRenderer.renderAndDecorateItem(poseStack, this.minecraft.player, itemStack, i, j, slot.x + slot.y * this.imageWidth);
+			this.itemRenderer.renderGuiItemDecorations(poseStack, this.font, itemStack, i, j, string);
 		}
 
-		this.itemRenderer.blitOffset = 0.0F;
-		this.setBlitOffset(0);
+		poseStack.popPose();
 	}
 
 	private void recalculateQuickCraftRemaining() {

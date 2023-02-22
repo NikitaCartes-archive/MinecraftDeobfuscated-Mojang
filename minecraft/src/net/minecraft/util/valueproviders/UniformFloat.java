@@ -17,7 +17,7 @@ public class UniformFloat extends FloatProvider {
 		)
 		.comapFlatMap(
 			uniformFloat -> uniformFloat.maxExclusive <= uniformFloat.minInclusive
-					? DataResult.error("Max must be larger than min, min_inclusive: " + uniformFloat.minInclusive + ", max_exclusive: " + uniformFloat.maxExclusive)
+					? DataResult.error(() -> "Max must be larger than min, min_inclusive: " + uniformFloat.minInclusive + ", max_exclusive: " + uniformFloat.maxExclusive)
 					: DataResult.success(uniformFloat),
 			Function.identity()
 		);

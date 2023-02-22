@@ -47,6 +47,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class Sniffer extends Animal {
@@ -89,6 +90,14 @@ public class Sniffer extends Animal {
 		return bl && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6;
 	}
 
+	private boolean isMovingInWater() {
+		return this.isMoving() && this.isInWater() && !this.isUnderWater() && this.getDeltaMovement().horizontalDistanceSqr() > 9.999999999999999E-6;
+	}
+
+	private boolean isMovingOnLand() {
+		return this.isMoving() && !this.isUnderWater() && !this.isInWater();
+	}
+
 	public boolean isPanicking() {
 		return this.brain.getMemory(MemoryModuleType.IS_PANICKING).isPresent();
 	}
@@ -99,7 +108,7 @@ public class Sniffer extends Animal {
 
 	private BlockPos getHeadPosition() {
 		Vec3 vec3 = this.position().add(this.getForward().scale(2.25));
-		return new BlockPos(vec3.x(), this.getY(), vec3.z());
+		return BlockPos.containing(vec3.x(), this.getY(), vec3.z());
 	}
 
 	private Sniffer.State getState() {
@@ -198,7 +207,7 @@ public class Sniffer extends Animal {
 		return IntStream.range(0, 5)
 			.mapToObj(i -> LandRandomPos.getPos(this, 10 + 2 * i, 3))
 			.filter(Objects::nonNull)
-			.map(BlockPos::new)
+			.map(BlockPos::containing)
 			.map(BlockPos::below)
 			.filter(this::canDig)
 			.findFirst();
@@ -262,9 +271,22 @@ public class Sniffer extends Animal {
 	}
 
 	@Override
+	protected void jumpFromGround() {
+		super.jumpFromGround();
+		double d = this.moveControl.getSpeedModifier();
+		if (d > 0.0) {
+			double e = this.getDeltaMovement().horizontalDistanceSqr();
+			if (e < 0.01) {
+				this.moveRelative(0.1F, new Vec3(0.0, 0.0, 1.0));
+			}
+		}
+	}
+
+	@Override
 	public void tick() {
-		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.isInWater() ? 0.2F : 0.1F);
-		if (!this.isMoving() && !this.isInWater()) {
+		boolean bl = this.isInWater() && !this.isUnderWater();
+		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(bl ? 0.2F : 0.1F);
+		if (!this.isMovingOnLand() && !this.isMovingInWater()) {
 			this.panicAnimationState.stop();
 			this.walkingAnimationState.stop();
 		} else if (this.isPanicking()) {
@@ -329,6 +351,11 @@ public class Sniffer extends Animal {
 	}
 
 	@Override
+	public int getMaxHeadYRot() {
+		return 50;
+	}
+
+	@Override
 	public void setBaby(boolean bl) {
 		this.setAge(bl ? -48000 : 0);
 	}
@@ -346,6 +373,11 @@ public class Sniffer extends Animal {
 			Set<Sniffer.State> set = Set.of(Sniffer.State.IDLING, Sniffer.State.SCENTING, Sniffer.State.FEELING_HAPPY);
 			return set.contains(this.getState()) && set.contains(sniffer.getState()) && super.canMate(animal);
 		}
+	}
+
+	@Override
+	public AABB getBoundingBoxForCulling() {
+		return super.getBoundingBoxForCulling().inflate(0.6F);
 	}
 
 	@Override

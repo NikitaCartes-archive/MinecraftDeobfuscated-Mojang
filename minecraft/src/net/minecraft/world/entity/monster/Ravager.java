@@ -55,7 +55,7 @@ public class Ravager extends Raider {
 
 	public Ravager(EntityType<? extends Ravager> entityType, Level level) {
 		super(entityType, level);
-		this.maxUpStep = 1.0F;
+		this.setMaxUpStep(1.0F);
 		this.xpReward = 20;
 		this.setPathfindingMalus(BlockPathTypes.LEAVES, 0.0F);
 	}
@@ -127,13 +127,8 @@ public class Ravager extends Raider {
 
 	@Nullable
 	@Override
-	public Entity getControllingPassenger() {
-		Entity entity = this.getFirstPassenger();
-		return entity != null && this.canBeControlledBy(entity) ? entity : null;
-	}
-
-	private boolean canBeControlledBy(Entity entity) {
-		return !this.isNoAi() && entity instanceof LivingEntity;
+	public LivingEntity getControllingPassenger() {
+		return !this.isNoAi() && this.getFirstPassenger() instanceof LivingEntity livingEntity ? livingEntity : null;
 	}
 
 	@Override
@@ -319,6 +314,11 @@ public class Ravager extends Raider {
 	@Override
 	public boolean canBeLeader() {
 		return false;
+	}
+
+	@Override
+	protected float getFlyingSpeed() {
+		return 0.02F;
 	}
 
 	class RavagerMeleeAttackGoal extends MeleeAttackGoal {

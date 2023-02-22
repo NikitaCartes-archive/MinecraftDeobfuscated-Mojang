@@ -164,7 +164,7 @@ public class StructureTemplate {
 			if (entity instanceof Painting) {
 				blockPos3 = ((Painting)entity).getPos().subtract(blockPos);
 			} else {
-				blockPos3 = new BlockPos(vec3);
+				blockPos3 = BlockPos.containing(vec3);
 			}
 
 			this.entityInfoList.add(new StructureTemplate.StructureEntityInfo(vec3, blockPos3, compoundTag.copy()));
@@ -445,7 +445,7 @@ public class StructureTemplate {
 							entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.getXRot());
 							if (bl && entity instanceof Mob) {
 								((Mob)entity)
-									.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
+									.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(BlockPos.containing(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
 							}
 
 							serverLevelAccessor.addFreshEntityWithPassengers(entity);

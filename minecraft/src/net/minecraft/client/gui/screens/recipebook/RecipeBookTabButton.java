@@ -9,7 +9,6 @@ import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.components.StateSwitchingButton;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
@@ -53,7 +52,6 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		}
 
 		Minecraft minecraft = Minecraft.getInstance();
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, this.resourceLocation);
 		RenderSystem.disableDepthTest();
 		int k = this.xTexStart;
@@ -71,23 +69,23 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 			m -= 2;
 		}
 
-		this.blit(poseStack, m, this.getY(), k, l, this.width, this.height);
+		blit(poseStack, m, this.getY(), k, l, this.width, this.height);
 		RenderSystem.enableDepthTest();
-		this.renderIcon(minecraft.getItemRenderer());
+		this.renderIcon(poseStack, minecraft.getItemRenderer());
 		if (this.animationTime > 0.0F) {
 			poseStack.popPose();
 			this.animationTime -= f;
 		}
 	}
 
-	private void renderIcon(ItemRenderer itemRenderer) {
+	private void renderIcon(PoseStack poseStack, ItemRenderer itemRenderer) {
 		List<ItemStack> list = this.category.getIconItems();
 		int i = this.isStateTriggered ? -2 : 0;
 		if (list.size() == 1) {
-			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(0), this.getX() + 9 + i, this.getY() + 5);
+			itemRenderer.renderAndDecorateFakeItem(poseStack, (ItemStack)list.get(0), this.getX() + 9 + i, this.getY() + 5);
 		} else if (list.size() == 2) {
-			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(0), this.getX() + 3 + i, this.getY() + 5);
-			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(1), this.getX() + 14 + i, this.getY() + 5);
+			itemRenderer.renderAndDecorateFakeItem(poseStack, (ItemStack)list.get(0), this.getX() + 3 + i, this.getY() + 5);
+			itemRenderer.renderAndDecorateFakeItem(poseStack, (ItemStack)list.get(1), this.getX() + 14 + i, this.getY() + 5);
 		}
 	}
 

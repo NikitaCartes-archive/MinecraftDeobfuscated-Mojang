@@ -32,7 +32,7 @@ enum AdvancementTabType {
 		return this.max;
 	}
 
-	public void draw(PoseStack poseStack, GuiComponent guiComponent, int i, int j, boolean bl, int k) {
+	public void draw(PoseStack poseStack, int i, int j, boolean bl, int k) {
 		int l = this.textureX;
 		if (k > 0) {
 			l += this.width;
@@ -43,10 +43,10 @@ enum AdvancementTabType {
 		}
 
 		int m = bl ? this.textureY + this.height : this.textureY;
-		guiComponent.blit(poseStack, i + this.getX(k), j + this.getY(k), l, m, this.width, this.height);
+		GuiComponent.blit(poseStack, i + this.getX(k), j + this.getY(k), l, m, this.width, this.height);
 	}
 
-	public void drawIcon(int i, int j, int k, ItemRenderer itemRenderer, ItemStack itemStack) {
+	public void drawIcon(PoseStack poseStack, int i, int j, int k, ItemRenderer itemRenderer, ItemStack itemStack) {
 		int l = i + this.getX(k);
 		int m = j + this.getY(k);
 		switch (this) {
@@ -67,7 +67,7 @@ enum AdvancementTabType {
 				m += 5;
 		}
 
-		itemRenderer.renderAndDecorateFakeItem(itemStack, l, m);
+		itemRenderer.renderAndDecorateFakeItem(poseStack, itemStack, l, m);
 	}
 
 	public int getX(int i) {

@@ -25,7 +25,7 @@ public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Level level = this.minecraft.level;
-		BlockPos blockPos = new BlockPos(d, e, f);
+		BlockPos blockPos = BlockPos.containing(d, e, f);
 		LongSet longSet = new LongOpenHashSet();
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-10, -10, -10), blockPos.offset(10, 10, 10))) {

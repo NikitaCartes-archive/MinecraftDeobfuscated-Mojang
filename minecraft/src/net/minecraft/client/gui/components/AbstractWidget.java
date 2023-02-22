@@ -22,7 +22,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.MenuTooltipPositioner;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
@@ -35,11 +34,8 @@ import net.minecraft.util.Mth;
 public abstract class AbstractWidget extends GuiComponent implements Renderable, GuiEventListener, LayoutElement, NarratableEntry {
 	public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
 	public static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");
-	protected static final int BUTTON_TEXTURE_Y_OFFSET = 46;
-	protected static final int BUTTON_TEXTURE_WIDTH = 200;
-	protected static final int BUTTON_TEXTURE_HEIGHT = 20;
-	protected static final int BUTTON_TEXTURE_BORDER = 4;
-	private static final int BUTTON_TEXT_MARGIN = 2;
+	private static final double PERIOD_PER_SCROLLED_PIXEL = 0.5;
+	private static final double MIN_SCROLL_PERIOD = 3.0;
 	protected int width;
 	protected int height;
 	private int x;
@@ -68,21 +64,6 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 	@Override
 	public int getHeight() {
 		return this.height;
-	}
-
-	protected ResourceLocation getTextureLocation() {
-		return WIDGETS_LOCATION;
-	}
-
-	protected int getTextureY() {
-		int i = 1;
-		if (!this.active) {
-			i = 0;
-		} else if (this.isHoveredOrFocused()) {
-			i = 2;
-		}
-
-		return 46 + i * 20;
 	}
 
 	@Override
@@ -136,39 +117,30 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 		return Component.translatable("gui.narrate.button", component);
 	}
 
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-		this.renderButton(poseStack, i, j);
-	}
+	public abstract void renderWidget(PoseStack poseStack, int i, int j, float f);
 
-	protected void renderButton(PoseStack poseStack, int i, int j) {
-		Minecraft minecraft = Minecraft.getInstance();
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderTexture(0, this.getTextureLocation());
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableDepthTest();
-		this.blitNineSliced(poseStack, this.getX(), this.getY(), this.width, this.height, 4, 200, 20, 0, this.getTextureY());
-		this.renderBg(poseStack, minecraft, i, j);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		int k = this.active ? 16777215 : 10526880;
-		Font font = minecraft.font;
-		int l = font.width(this.message);
-		int m = this.width - 4;
-		if (l > m) {
+	protected static void renderScrollingString(PoseStack poseStack, Font font, Component component, int i, int j, int k, int l, int m) {
+		int n = font.width(component);
+		int o = (j + l - 9) / 2 + 1;
+		int p = k - i;
+		if (n > p) {
+			int q = n - p;
 			double d = (double)Util.getMillis() / 1000.0;
-			double e = Math.sin((Math.PI / 2) * Math.cos(d));
-			int n = l - m;
-			enableScissor(this.x + 2, this.y + 2, this.x + this.width - 2, this.y + this.height - 2);
-			this.renderString(poseStack, font, this.getX() + this.width / 2 - (int)(e * (double)n), this.getY() + (this.height - 8) / 2, k);
+			double e = Math.max((double)q * 0.5, 3.0);
+			double f = Math.sin((Math.PI / 2) * Math.cos((Math.PI * 2) * d / e)) / 2.0 + 0.5;
+			double g = Mth.lerp(f, 0.0, (double)q);
+			enableScissor(i, j, k, l);
+			drawString(poseStack, font, component, i - (int)g, o, m);
 			disableScissor();
 		} else {
-			this.renderString(poseStack, font, this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, k);
+			drawCenteredString(poseStack, font, component, (i + k) / 2, o, m);
 		}
 	}
 
-	public void renderString(PoseStack poseStack, Font font, int i, int j, int k) {
-		drawCenteredString(poseStack, font, this.getMessage(), i, j, k | Mth.ceil(this.alpha * 255.0F) << 24);
+	protected void renderScrollingString(PoseStack poseStack, Font font, int i, int j) {
+		int k = this.getX() + i;
+		int l = this.getX() + this.getWidth() - i;
+		renderScrollingString(poseStack, font, this.getMessage(), k, this.getY(), l, this.getY() + this.getHeight(), j);
 	}
 
 	public void renderTexture(PoseStack poseStack, ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
@@ -182,9 +154,6 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 
 		RenderSystem.enableDepthTest();
 		blit(poseStack, i, j, (float)k, (float)r, n, o, p, q);
-	}
-
-	protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
 	}
 
 	public void onClick(double d, double e) {
@@ -247,10 +216,6 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 			&& e < (double)(this.getY() + this.height);
 	}
 
-	public boolean isHoveredOrFocused() {
-		return this.isHovered || this.isFocused();
-	}
-
 	@Nullable
 	@Override
 	public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
@@ -299,6 +264,14 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 	@Override
 	public boolean isFocused() {
 		return this.focused;
+	}
+
+	public boolean isHovered() {
+		return this.isHovered;
+	}
+
+	public boolean isHoveredOrFocused() {
+		return this.isHovered() || this.isFocused();
 	}
 
 	@Override
@@ -368,7 +341,7 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 
 	@Override
 	public ScreenRectangle getRectangle() {
-		return new ScreenRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight());
+		return LayoutElement.super.getRectangle();
 	}
 
 	@Override

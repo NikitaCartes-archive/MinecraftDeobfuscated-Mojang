@@ -13,7 +13,7 @@ public class SetWorldSpawnCommand {
 		commandDispatcher.register(
 			Commands.literal("setworldspawn")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
-				.executes(commandContext -> setSpawn(commandContext.getSource(), new BlockPos(commandContext.getSource().getPosition()), 0.0F))
+				.executes(commandContext -> setSpawn(commandContext.getSource(), BlockPos.containing(commandContext.getSource().getPosition()), 0.0F))
 				.then(
 					Commands.argument("pos", BlockPosArgument.blockPos())
 						.executes(commandContext -> setSpawn(commandContext.getSource(), BlockPosArgument.getSpawnablePos(commandContext, "pos"), 0.0F))

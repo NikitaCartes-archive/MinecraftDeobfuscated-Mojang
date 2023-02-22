@@ -101,7 +101,7 @@ public class Raids extends SavedData {
 				BlockPos blockPos3;
 				if (i > 0) {
 					vec3 = vec3.scale(1.0 / (double)i);
-					blockPos3 = new BlockPos(vec3);
+					blockPos3 = BlockPos.containing(vec3);
 				} else {
 					blockPos3 = blockPos;
 				}

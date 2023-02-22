@@ -181,7 +181,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public float yBodyRotO;
 	public float yHeadRot;
 	public float yHeadRotO;
-	public float flyingSpeed = 0.02F;
 	@Nullable
 	protected Player lastHurtByPlayer;
 	protected int lastHurtByPlayerTime;
@@ -239,7 +238,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.timeOffs = (float)Math.random() * 12398.0F;
 		this.setYRot((float)(Math.random() * (float) (Math.PI * 2)));
 		this.yHeadRot = this.getYRot();
-		this.maxUpStep = 0.6F;
+		this.setMaxUpStep(0.6F);
 		NbtOps nbtOps = NbtOps.INSTANCE;
 		this.brain = this.makeBrain(new Dynamic<>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), nbtOps.emptyMap()))));
 	}
@@ -350,7 +349,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 			}
 
-			if (this.isEyeInFluid(FluidTags.WATER) && !this.level.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
+			if (this.isEyeInFluid(FluidTags.WATER) && !this.level.getBlockState(BlockPos.containing(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
 				boolean bl2 = !this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && (!bl || !((Player)this).getAbilities().invulnerable);
 				if (bl2) {
 					this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()));
@@ -1054,7 +1053,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			this.walkAnimation.setSpeed(1.5F);
 			boolean bl2 = true;
-			if ((float)this.invulnerableTime > 10.0F) {
+			if ((float)this.invulnerableTime > 10.0F && !damageSource.is(DamageTypeTags.BYPASSES_COOLDOWN)) {
 				if (f <= this.lastHurt) {
 					return false;
 				}
@@ -1479,9 +1478,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected int calculateFallDamage(float f, float g) {
-		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP);
-		float h = mobEffectInstance == null ? 0.0F : (float)(mobEffectInstance.getAmplifier() + 1);
-		return Mth.ceil((f - 3.0F - h) * g);
+		if (this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) {
+			return 0;
+		} else {
+			MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP);
+			float h = mobEffectInstance == null ? 0.0F : (float)(mobEffectInstance.getAmplifier() + 1);
+			return Mth.ceil((f - 3.0F - h) * g);
+		}
 	}
 
 	protected void playBlockFallSound() {
@@ -1952,7 +1955,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public void travel(Vec3 vec3) {
-		if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
+		if (this.isControlledByLocalInstance()) {
 			double d = 0.08;
 			boolean bl = this.getDeltaMovement().y <= 0.0;
 			if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
@@ -2086,6 +2089,30 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.calculateEntityAnimation(this instanceof FlyingAnimal);
 	}
 
+	private void travelRidden(LivingEntity livingEntity, Vec3 vec3) {
+		Vec3 vec32 = this.getRiddenInput(livingEntity, vec3);
+		this.tickRidden(livingEntity, vec32);
+		if (this.isControlledByLocalInstance()) {
+			this.setSpeed(this.getRiddenSpeed(livingEntity));
+			this.travel(vec32);
+		} else {
+			this.calculateEntityAnimation(false);
+			this.setDeltaMovement(Vec3.ZERO);
+			this.tryCheckInsideBlocks();
+		}
+	}
+
+	protected void tickRidden(LivingEntity livingEntity, Vec3 vec3) {
+	}
+
+	protected Vec3 getRiddenInput(LivingEntity livingEntity, Vec3 vec3) {
+		return vec3;
+	}
+
+	protected float getRiddenSpeed(LivingEntity livingEntity) {
+		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
+	}
+
 	public void calculateEntityAnimation(boolean bl) {
 		float f = (float)Mth.length(this.getX() - this.xo, bl ? this.getY() - this.yo : 0.0, this.getZ() - this.zo);
 		this.updateWalkAnimation(f);
@@ -2142,7 +2169,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	private float getFrictionInfluencedSpeed(float f) {
-		return this.onGround ? this.getSpeed() * (0.21600002F / (f * f * f)) : this.flyingSpeed;
+		return this.onGround ? this.getSpeed() * (0.21600002F / (f * f * f)) : this.getFlyingSpeed();
+	}
+
+	protected float getFlyingSpeed() {
+		return this.hasControllingPassenger() ? this.getSpeed() * 0.1F : 0.02F;
 	}
 
 	public float getSpeed() {
@@ -2485,7 +2516,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.zza *= 0.98F;
 		this.updateFallFlying();
 		AABB aABB = this.getBoundingBox();
-		this.travel(new Vec3((double)this.xxa, (double)this.yya, (double)this.zza));
+		if (this.isAlive()) {
+			LivingEntity livingEntity = this.getControllingPassenger();
+			Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
+			if (livingEntity != null) {
+				this.travelRidden(livingEntity, vec32);
+			} else {
+				this.travel(vec32);
+			}
+		}
+
 		this.level.getProfiler().pop();
 		this.level.getProfiler().push("freezing");
 		boolean bl2 = this.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES);
@@ -2689,10 +2729,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		return this.oAttackAnim + g * f;
-	}
-
-	public boolean isEffectiveAi() {
-		return !this.level.isClientSide;
 	}
 
 	@Override
@@ -2968,7 +3004,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		double i = this.getZ();
 		double j = e;
 		boolean bl2 = false;
-		BlockPos blockPos = new BlockPos(d, e, f);
+		BlockPos blockPos = BlockPos.containing(d, e, f);
 		Level level = this.level;
 		if (level.hasChunkAt(blockPos)) {
 			boolean bl3 = false;

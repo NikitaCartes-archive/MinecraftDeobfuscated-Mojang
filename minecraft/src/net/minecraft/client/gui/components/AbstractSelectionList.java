@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.AbstractList;
@@ -209,30 +208,24 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 		int m = this.getRowLeft();
 		int n = this.y0 + 4 - (int)this.getScrollAmount();
+		this.enableScissor();
 		if (this.renderHeader) {
 			this.renderHeader(poseStack, m, n);
 		}
 
 		this.renderList(poseStack, i, j, f);
+		disableScissor();
 		if (this.renderTopAndBottom) {
 			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
-			RenderSystem.enableDepthTest();
-			RenderSystem.depthFunc(519);
 			int o = 32;
 			int p = -100;
 			RenderSystem.setShaderColor(0.25F, 0.25F, 0.25F, 1.0F);
 			blit(poseStack, this.x0, 0, -100, 0.0F, 0.0F, this.width, this.y0, 32, 32);
 			blit(poseStack, this.x0, this.y1, -100, 0.0F, (float)this.y1, this.width, this.height - this.y1, 32, 32);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.depthFunc(515);
-			RenderSystem.disableDepthTest();
-			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
-			);
 			int q = 4;
-			this.fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
-			this.fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
+			fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
+			fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
 		}
 
 		int o = this.getMaxScroll();
@@ -251,6 +244,10 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 		this.renderDecorations(poseStack, i, j);
 		RenderSystem.disableBlend();
+	}
+
+	protected void enableScissor() {
+		enableScissor(this.x0, this.y0, this.x1, this.y1);
 	}
 
 	protected void centerScrollOn(E entry) {
@@ -434,6 +431,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 	protected void renderItem(PoseStack poseStack, int i, int j, float f, int k, int l, int m, int n, int o) {
 		E entry = this.getEntry(k);
+		entry.renderBack(poseStack, k, m, l, n, o, i, j, Objects.equals(this.hovered, entry), f);
 		if (this.renderSelection && this.isSelectedItem(k)) {
 			int p = this.isFocused() ? -1 : -8355712;
 			this.renderSelection(poseStack, m, n, o, p, -16777216);
@@ -528,6 +526,9 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		}
 
 		public abstract void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f);
+
+		public void renderBack(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		}
 
 		@Override
 		public boolean isMouseOver(double d, double e) {

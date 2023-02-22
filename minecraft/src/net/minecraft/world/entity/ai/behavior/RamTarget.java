@@ -105,7 +105,7 @@ public class RamTarget extends Behavior<Goat> {
 
 	private boolean hasRammedHornBreakingBlock(ServerLevel serverLevel, Goat goat) {
 		Vec3 vec3 = goat.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize();
-		BlockPos blockPos = new BlockPos(goat.position().add(vec3));
+		BlockPos blockPos = BlockPos.containing(goat.position().add(vec3));
 		return serverLevel.getBlockState(blockPos).is(BlockTags.SNAPS_GOAT_HORN) || serverLevel.getBlockState(blockPos.above()).is(BlockTags.SNAPS_GOAT_HORN);
 	}
 

@@ -95,7 +95,7 @@ public class DeathScreen extends Screen {
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.fillGradient(poseStack, 0, 0, this.width, this.height, 1615855616, -1602211792);
+		fillGradient(poseStack, 0, 0, this.width, this.height, 1615855616, -1602211792);
 		poseStack.pushPose();
 		poseStack.scale(2.0F, 2.0F, 2.0F);
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2 / 2, 30, 16777215);
@@ -113,7 +113,7 @@ public class DeathScreen extends Screen {
 		super.render(poseStack, i, j, f);
 		if (this.exitToTitleButton != null && this.minecraft.getReportingContext().hasDraftReport()) {
 			RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-			this.blit(poseStack, this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17, this.exitToTitleButton.getY() + 3, 182, 24, 15, 15);
+			blit(poseStack, this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17, this.exitToTitleButton.getY() + 3, 182, 24, 15, 15);
 		}
 	}
 

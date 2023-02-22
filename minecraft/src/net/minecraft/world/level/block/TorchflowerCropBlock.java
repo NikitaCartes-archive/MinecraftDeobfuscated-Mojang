@@ -18,9 +18,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class TorchflowerCropBlock extends CropBlock {
 	public static final int MAX_AGE = 2;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_2;
-	private static final float AABB_OFFSET = 4.0F;
+	private static final float AABB_OFFSET = 3.0F;
 	private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{
-		Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0)
+		Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0), Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0), Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0)
 	};
 
 	public TorchflowerCropBlock(BlockBehaviour.Properties properties) {
@@ -50,6 +50,11 @@ public class TorchflowerCropBlock extends CropBlock {
 	@Override
 	protected ItemLike getBaseSeedId() {
 		return Items.TORCHFLOWER_SEEDS;
+	}
+
+	@Override
+	public BlockState getStateForAge(int i) {
+		return i == 2 ? Blocks.TORCHFLOWER.defaultBlockState() : super.getStateForAge(i);
 	}
 
 	@Override

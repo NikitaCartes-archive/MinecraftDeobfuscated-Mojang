@@ -31,17 +31,17 @@ public class LogoRenderer extends GuiComponent {
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.keepLogoThroughFade ? 1.0F : f);
 		int k = i / 2 - 137;
 		if (this.showEasterEgg) {
-			this.blitOutlineBlack(k, j, (integer, integer2) -> {
-				this.blit(poseStack, integer, integer2, 0, 0, 99, 44);
-				this.blit(poseStack, integer + 99, integer2, 129, 0, 27, 44);
-				this.blit(poseStack, integer + 99 + 26, integer2, 126, 0, 3, 44);
-				this.blit(poseStack, integer + 99 + 26 + 3, integer2, 99, 0, 26, 44);
-				this.blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
+			blitOutlineBlack(k, j, (integer, integer2) -> {
+				blit(poseStack, integer, integer2, 0, 0, 99, 44);
+				blit(poseStack, integer + 99, integer2, 129, 0, 27, 44);
+				blit(poseStack, integer + 99 + 26, integer2, 126, 0, 3, 44);
+				blit(poseStack, integer + 99 + 26 + 3, integer2, 99, 0, 26, 44);
+				blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
 			});
 		} else {
-			this.blitOutlineBlack(k, j, (integer, integer2) -> {
-				this.blit(poseStack, integer, integer2, 0, 0, 155, 44);
-				this.blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
+			blitOutlineBlack(k, j, (integer, integer2) -> {
+				blit(poseStack, integer, integer2, 0, 0, 155, 44);
+				blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
 			});
 		}
 

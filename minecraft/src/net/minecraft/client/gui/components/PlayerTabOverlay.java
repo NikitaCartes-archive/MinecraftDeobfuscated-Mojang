@@ -169,7 +169,6 @@ public class PlayerTabOverlay extends GuiComponent {
 			int y = r + w * 9;
 			fill(poseStack, x, y, x + p, y + 8, u);
 			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
 			if (v < list.size()) {
 				PlayerInfo playerInfo2 = (PlayerInfo)list.get(v);
 				GameProfile gameProfile = playerInfo2.getProfile();
@@ -227,9 +226,10 @@ public class PlayerTabOverlay extends GuiComponent {
 			m = 4;
 		}
 
-		this.setBlitOffset(this.getBlitOffset() + 100);
-		this.blit(poseStack, j + i - 11, k, 0, 176 + m * 8, 10, 8);
-		this.setBlitOffset(this.getBlitOffset() - 100);
+		poseStack.pushPose();
+		poseStack.translate(0.0F, 0.0F, 100.0F);
+		blit(poseStack, j + i - 11, k, 0, 176 + m * 8, 10, 8);
+		poseStack.popPose();
 	}
 
 	private void renderTablistScore(Objective objective, int i, String string, int j, int k, UUID uUID, PoseStack poseStack) {
@@ -263,27 +263,27 @@ public class PlayerTabOverlay extends GuiComponent {
 				this.minecraft.font.drawShadow(poseStack, string, (float)((k + j - this.minecraft.font.width(string)) / 2), (float)i, p);
 			} else {
 				for (int q = m; q < n; q++) {
-					this.blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
+					blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
 				}
 
 				for (int q = 0; q < m; q++) {
-					this.blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
+					blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
 					if (bl) {
 						if (q * 2 + 1 < healthState.displayedValue()) {
-							this.blit(poseStack, j + q * o, i, 70, 0, 9, 9);
+							blit(poseStack, j + q * o, i, 70, 0, 9, 9);
 						}
 
 						if (q * 2 + 1 == healthState.displayedValue()) {
-							this.blit(poseStack, j + q * o, i, 79, 0, 9, 9);
+							blit(poseStack, j + q * o, i, 79, 0, 9, 9);
 						}
 					}
 
 					if (q * 2 + 1 < l) {
-						this.blit(poseStack, j + q * o, i, q >= 10 ? 160 : 52, 0, 9, 9);
+						blit(poseStack, j + q * o, i, q >= 10 ? 160 : 52, 0, 9, 9);
 					}
 
 					if (q * 2 + 1 == l) {
-						this.blit(poseStack, j + q * o, i, q >= 10 ? 169 : 61, 0, 9, 9);
+						blit(poseStack, j + q * o, i, q >= 10 ? 169 : 61, 0, 9, 9);
 					}
 				}
 			}

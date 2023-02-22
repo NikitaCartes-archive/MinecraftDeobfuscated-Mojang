@@ -27,7 +27,7 @@ public record TagKey<T>(ResourceKey<? extends Registry<T>> registry, ResourceLoc
 			.comapFlatMap(
 				string -> string.startsWith("#")
 						? ResourceLocation.read(string.substring(1)).map(resourceLocation -> create(resourceKey, resourceLocation))
-						: DataResult.error("Not a tag id"),
+						: DataResult.error(() -> "Not a tag id"),
 				tagKey -> "#" + tagKey.location
 			);
 	}

@@ -227,11 +227,9 @@ public class WorldCreationUiState {
 		this.altPresetList.addAll((Collection)getNonEmptyList(registry, WorldPresetTags.EXTENDED).orElse(this.normalPresetList));
 		Holder<WorldPreset> holder = this.worldType.preset();
 		if (holder != null) {
-			this.setWorldType(
-				(WorldCreationUiState.WorldTypeEntry)findPreset(this.getSettings(), holder.unwrapKey())
-					.map(WorldCreationUiState.WorldTypeEntry::new)
-					.orElse((WorldCreationUiState.WorldTypeEntry)this.normalPresetList.get(0))
-			);
+			this.worldType = (WorldCreationUiState.WorldTypeEntry)findPreset(this.getSettings(), holder.unwrapKey())
+				.map(WorldCreationUiState.WorldTypeEntry::new)
+				.orElse((WorldCreationUiState.WorldTypeEntry)this.normalPresetList.get(0));
 		}
 	}
 

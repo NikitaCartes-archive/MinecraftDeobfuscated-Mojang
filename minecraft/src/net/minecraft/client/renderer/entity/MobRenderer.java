@@ -66,8 +66,8 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		float o = Mth.invSqrt(k * k + m * m) * 0.025F / 2.0F;
 		float p = m * o;
 		float q = k * o;
-		BlockPos blockPos = new BlockPos(mob.getEyePosition(f));
-		BlockPos blockPos2 = new BlockPos(entity.getEyePosition(f));
+		BlockPos blockPos = BlockPos.containing(mob.getEyePosition(f));
+		BlockPos blockPos2 = BlockPos.containing(entity.getEyePosition(f));
 		int r = this.getBlockLightLevel(mob, blockPos);
 		int s = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, blockPos2);
 		int t = mob.level.getBrightness(LightLayer.SKY, blockPos);

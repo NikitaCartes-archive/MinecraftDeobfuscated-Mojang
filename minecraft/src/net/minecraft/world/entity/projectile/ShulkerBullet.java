@@ -117,7 +117,7 @@ public class ShulkerBullet extends Projectile {
 			blockPos = this.blockPosition().below();
 		} else {
 			d = (double)this.finalTarget.getBbHeight() * 0.5;
-			blockPos = new BlockPos(this.finalTarget.getX(), this.finalTarget.getY() + d, this.finalTarget.getZ());
+			blockPos = BlockPos.containing(this.finalTarget.getX(), this.finalTarget.getY() + d, this.finalTarget.getZ());
 		}
 
 		double e = (double)blockPos.getX() + 0.5;

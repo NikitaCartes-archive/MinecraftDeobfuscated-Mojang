@@ -38,6 +38,7 @@ public final class BlockTags {
 	public static final TagKey<Block> WART_BLOCKS = create("wart_blocks");
 	public static final TagKey<Block> BANNERS = create("banners");
 	public static final TagKey<Block> SAND = create("sand");
+	public static final TagKey<Block> SMELTS_TO_GLASS = create("smelts_to_glass");
 	public static final TagKey<Block> STAIRS = create("stairs");
 	public static final TagKey<Block> SLABS = create("slabs");
 	public static final TagKey<Block> WALLS = create("walls");

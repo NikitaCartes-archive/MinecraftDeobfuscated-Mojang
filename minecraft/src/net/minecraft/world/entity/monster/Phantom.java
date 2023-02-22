@@ -238,6 +238,11 @@ public class Phantom extends FlyingMob implements Enemy {
 		return entityDimensions.scale(f);
 	}
 
+	@Override
+	public double getPassengersRidingOffset() {
+		return (double)this.getEyeHeight();
+	}
+
 	static enum AttackPhase {
 		CIRCLE,
 		SWOOP;

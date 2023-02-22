@@ -16,7 +16,6 @@ import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ClickEvent;
@@ -162,11 +161,10 @@ public class BookViewScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, BOOK_LOCATION);
 		int k = (this.width - 192) / 2;
 		int l = 2;
-		this.blit(poseStack, k, 2, 0, 0, 192, 192);
+		blit(poseStack, k, 2, 0, 0, 192, 192);
 		if (this.cachedPage != this.currentPage) {
 			FormattedText formattedText = this.bookAccess.getPage(this.currentPage);
 			this.cachedPageComponents = this.font.split(formattedText, 114);

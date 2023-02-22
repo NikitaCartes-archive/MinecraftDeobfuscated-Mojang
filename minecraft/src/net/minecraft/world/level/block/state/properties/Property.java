@@ -19,7 +19,7 @@ public abstract class Property<T extends Comparable<T>> {
 		.comapFlatMap(
 			stringx -> (DataResult)this.getValue(stringx)
 					.map(DataResult::success)
-					.orElseGet(() -> DataResult.error("Unable to read property: " + this + " with value: " + stringx)),
+					.orElseGet(() -> DataResult.error(() -> "Unable to read property: " + this + " with value: " + stringx)),
 			this::getName
 		);
 	private final Codec<Property.Value<T>> valueCodec = this.codec.xmap(this::value, Property.Value::value);

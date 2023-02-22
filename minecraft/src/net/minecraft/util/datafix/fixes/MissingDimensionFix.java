@@ -10,7 +10,6 @@ import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.CompoundList.CompoundListType;
-import com.mojang.datafixers.types.templates.TaggedChoice.TaggedChoiceType;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.datafixers.util.Unit;
@@ -40,7 +39,7 @@ public class MissingDimensionFix extends DataFix {
 	@Override
 	protected TypeRewriteRule makeRule() {
 		Schema schema = this.getInputSchema();
-		TaggedChoiceType<String> taggedChoiceType = new TaggedChoiceType<>(
+		Type<?> type = DSL.taggedChoiceType(
 			"type",
 			DSL.string(),
 			ImmutableMap.of(
@@ -72,16 +71,16 @@ public class MissingDimensionFix extends DataFix {
 				)
 			)
 		);
-		CompoundListType<String, ?> compoundListType = DSL.compoundList(NamespacedSchema.namespacedString(), fields("generator", taggedChoiceType));
-		Type<?> type = DSL.and(compoundListType, DSL.remainderType());
-		Type<?> type2 = schema.getType(References.WORLD_GEN_SETTINGS);
-		FieldFinder<?> fieldFinder = new FieldFinder<>("dimensions", type);
-		if (!type2.findFieldType("dimensions").equals(type)) {
+		CompoundListType<String, ?> compoundListType = DSL.compoundList(NamespacedSchema.namespacedString(), fields("generator", type));
+		Type<?> type2 = DSL.and(compoundListType, DSL.remainderType());
+		Type<?> type3 = schema.getType(References.WORLD_GEN_SETTINGS);
+		FieldFinder<?> fieldFinder = new FieldFinder<>("dimensions", type2);
+		if (!type3.findFieldType("dimensions").equals(type2)) {
 			throw new IllegalStateException();
 		} else {
 			OpticFinder<? extends List<? extends Pair<String, ?>>> opticFinder = compoundListType.finder();
 			return this.fixTypeEverywhereTyped(
-				"MissingDimensionFix", type2, typed -> typed.updateTyped(fieldFinder, typed2 -> typed2.updateTyped(opticFinder, typed2x -> {
+				"MissingDimensionFix", type3, typed -> typed.updateTyped(fieldFinder, typed2 -> typed2.updateTyped(opticFinder, typed2x -> {
 							if (!(typed2x.getValue() instanceof List)) {
 								throw new IllegalStateException("List exptected");
 							} else if (((List)typed2x.getValue()).isEmpty()) {

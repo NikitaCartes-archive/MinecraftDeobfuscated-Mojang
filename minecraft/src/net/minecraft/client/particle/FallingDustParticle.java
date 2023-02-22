@@ -77,7 +77,7 @@ public class FallingDustParticle extends TextureSheetParticle {
 			if (!blockState.isAir() && blockState.getRenderShape() == RenderShape.INVISIBLE) {
 				return null;
 			} else {
-				BlockPos blockPos = new BlockPos(d, e, f);
+				BlockPos blockPos = BlockPos.containing(d, e, f);
 				int j = Minecraft.getInstance().getBlockColors().getColor(blockState, clientLevel, blockPos);
 				if (blockState.getBlock() instanceof FallingBlock) {
 					j = ((FallingBlock)blockState.getBlock()).getDustColor(blockState, clientLevel, blockPos);

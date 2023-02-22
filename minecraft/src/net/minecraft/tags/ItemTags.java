@@ -36,6 +36,7 @@ public final class ItemTags {
 	public static final TagKey<Item> WART_BLOCKS = bind("wart_blocks");
 	public static final TagKey<Item> BANNERS = bind("banners");
 	public static final TagKey<Item> SAND = bind("sand");
+	public static final TagKey<Item> SMELTS_TO_GLASS = bind("smelts_to_glass");
 	public static final TagKey<Item> STAIRS = bind("stairs");
 	public static final TagKey<Item> SLABS = bind("slabs");
 	public static final TagKey<Item> WALLS = bind("walls");

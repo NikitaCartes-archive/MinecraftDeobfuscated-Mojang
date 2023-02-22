@@ -87,7 +87,7 @@ public class ArmorStand extends LivingEntity {
 
 	public ArmorStand(EntityType<? extends ArmorStand> entityType, Level level) {
 		super(entityType, level);
-		this.maxUpStep = 0.0F;
+		this.setMaxUpStep(0.0F);
 	}
 
 	public ArmorStand(Level level, double d, double e, double f) {
@@ -803,7 +803,7 @@ public class ArmorStand extends LivingEntity {
 			BlockPos blockPos = this.blockPosition();
 			int i = Integer.MIN_VALUE;
 
-			for (BlockPos blockPos2 : BlockPos.betweenClosed(new BlockPos(aABB.minX, aABB.minY, aABB.minZ), new BlockPos(aABB.maxX, aABB.maxY, aABB.maxZ))) {
+			for (BlockPos blockPos2 : BlockPos.betweenClosed(BlockPos.containing(aABB.minX, aABB.minY, aABB.minZ), BlockPos.containing(aABB.maxX, aABB.maxY, aABB.maxZ))) {
 				int j = Math.max(this.level.getBrightness(LightLayer.BLOCK, blockPos2), this.level.getBrightness(LightLayer.SKY, blockPos2));
 				if (j == 15) {
 					return Vec3.atCenterOf(blockPos2);

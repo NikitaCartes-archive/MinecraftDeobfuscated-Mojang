@@ -343,7 +343,7 @@ public class SpreadPlayersCommand {
 		}
 
 		public boolean isSafe(BlockGetter blockGetter, int i) {
-			BlockPos blockPos = new BlockPos(this.x, (double)(this.getSpawnY(blockGetter, i) - 1), this.z);
+			BlockPos blockPos = BlockPos.containing(this.x, (double)(this.getSpawnY(blockGetter, i) - 1), this.z);
 			BlockState blockState = blockGetter.getBlockState(blockPos);
 			Material material = blockState.getMaterial();
 			return blockPos.getY() < i && !material.isLiquid() && material != Material.FIRE;

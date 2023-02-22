@@ -61,4 +61,20 @@ public record ScreenRectangle(ScreenPosition position, int width, int height) {
 	public int getCenterInAxis(ScreenAxis screenAxis) {
 		return (this.getBoundInDirection(screenAxis.getPositive()) + this.getBoundInDirection(screenAxis.getNegative())) / 2;
 	}
+
+	public int top() {
+		return this.position.y();
+	}
+
+	public int bottom() {
+		return this.position.y() + this.height;
+	}
+
+	public int left() {
+		return this.position.x();
+	}
+
+	public int right() {
+		return this.position.x() + this.width;
+	}
 }

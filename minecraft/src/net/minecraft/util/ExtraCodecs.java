@@ -62,13 +62,13 @@ public class ExtraCodecs {
 		try {
 			return DataResult.success(Component.Serializer.fromJson(jsonElement));
 		} catch (JsonParseException var2) {
-			return DataResult.error(var2.getMessage());
+			return DataResult.error(var2::getMessage);
 		}
 	}, component -> {
 		try {
 			return DataResult.success(Component.Serializer.toJsonTree(component));
 		} catch (IllegalArgumentException var2) {
-			return DataResult.error(var2.getMessage());
+			return DataResult.error(var2::getMessage);
 		}
 	});
 	public static final Codec<Vector3f> VECTOR3F = Codec.FLOAT
@@ -116,7 +116,7 @@ public class ExtraCodecs {
 		try {
 			return DataResult.success(Pattern.compile(string));
 		} catch (PatternSyntaxException var2) {
-			return DataResult.error("Invalid regex pattern '" + string + "': " + var2.getMessage());
+			return DataResult.error(() -> "Invalid regex pattern '" + string + "': " + var2.getMessage());
 		}
 	}, Pattern::pattern);
 	public static final Codec<Instant> INSTANT_ISO8601 = instantCodec(DateTimeFormatter.ISO_INSTANT);
@@ -124,7 +124,7 @@ public class ExtraCodecs {
 		try {
 			return DataResult.success(Base64.getDecoder().decode(string));
 		} catch (IllegalArgumentException var2) {
-			return DataResult.error("Malformed base64 string");
+			return DataResult.error(() -> "Malformed base64 string");
 		}
 	}, bs -> Base64.getEncoder().encodeToString(bs));
 	public static final Codec<ExtraCodecs.TagOrElementLocation> TAG_OR_ELEMENT_ID = Codec.STRING
@@ -180,7 +180,7 @@ public class ExtraCodecs {
 				})
 	);
 	public static final Codec<String> NON_EMPTY_STRING = validate(
-		Codec.STRING, string -> string.isEmpty() ? DataResult.error("Expected non-empty string") : DataResult.success(string)
+		Codec.STRING, string -> string.isEmpty() ? DataResult.error(() -> "Expected non-empty string") : DataResult.success(string)
 	);
 
 	public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
@@ -214,7 +214,7 @@ public class ExtraCodecs {
 			public <T> DataResult<Pair<A, T>> apply(DynamicOps<T> dynamicOps, T object, DataResult<Pair<A, T>> dataResult) {
 				MutableObject<String> mutableObject = new MutableObject<>();
 				Optional<Pair<A, T>> optional = dataResult.resultOrPartial(mutableObject::setValue);
-				return optional.isPresent() ? dataResult : DataResult.error("(" + mutableObject.getValue() + " -> using default)", Pair.of(object, object));
+				return optional.isPresent() ? dataResult : DataResult.error(() -> "(" + mutableObject.getValue() + " -> using default)", Pair.of(object, object));
 			}
 
 			@Override
@@ -233,10 +233,10 @@ public class ExtraCodecs {
 			.flatXmap(
 				integer -> (DataResult)Optional.ofNullable(intFunction.apply(integer))
 						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown element id: " + integer)),
+						.orElseGet(() -> DataResult.error(() -> "Unknown element id: " + integer)),
 				object -> {
 					int j = toIntFunction.applyAsInt(object);
-					return j == i ? DataResult.error("Element with unknown id: " + object) : DataResult.success(j);
+					return j == i ? DataResult.error(() -> "Element with unknown id: " + object) : DataResult.success(j);
 				}
 			);
 	}
@@ -246,10 +246,10 @@ public class ExtraCodecs {
 			.flatXmap(
 				string -> (DataResult)Optional.ofNullable(function2.apply(string))
 						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown element name:" + string)),
+						.orElseGet(() -> DataResult.error(() -> "Unknown element name:" + string)),
 				object -> (DataResult)Optional.ofNullable((String)function.apply(object))
 						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Element with unknown name: " + object))
+						.orElseGet(() -> DataResult.error(() -> "Element with unknown name: " + object))
 			);
 	}
 
@@ -296,7 +296,7 @@ public class ExtraCodecs {
 	private static Codec<Integer> intRangeWithMessage(int i, int j, Function<Integer, String> function) {
 		return validate(
 			Codec.INT,
-			integer -> integer.compareTo(i) >= 0 && integer.compareTo(j) <= 0 ? DataResult.success(integer) : DataResult.error((String)function.apply(integer))
+			integer -> integer.compareTo(i) >= 0 && integer.compareTo(j) <= 0 ? DataResult.success(integer) : DataResult.error(() -> (String)function.apply(integer))
 		);
 	}
 
@@ -306,18 +306,21 @@ public class ExtraCodecs {
 
 	private static Codec<Float> floatRangeMinExclusiveWithMessage(float f, float g, Function<Float, String> function) {
 		return validate(
-			Codec.FLOAT, float_ -> float_.compareTo(f) > 0 && float_.compareTo(g) <= 0 ? DataResult.success(float_) : DataResult.error((String)function.apply(float_))
+			Codec.FLOAT,
+			float_ -> float_.compareTo(f) > 0 && float_.compareTo(g) <= 0 ? DataResult.success(float_) : DataResult.error(() -> (String)function.apply(float_))
 		);
 	}
 
 	public static <T> Codec<List<T>> nonEmptyList(Codec<List<T>> codec) {
-		return validate(codec, list -> list.isEmpty() ? DataResult.error("List must have contents") : DataResult.success(list));
+		return validate(codec, list -> list.isEmpty() ? DataResult.error(() -> "List must have contents") : DataResult.success(list));
 	}
 
 	public static <T> Codec<HolderSet<T>> nonEmptyHolderSet(Codec<HolderSet<T>> codec) {
 		return validate(
 			codec,
-			holderSet -> holderSet.unwrap().right().filter(List::isEmpty).isPresent() ? DataResult.error("List must have contents") : DataResult.success(holderSet)
+			holderSet -> holderSet.unwrap().right().filter(List::isEmpty).isPresent()
+					? DataResult.error(() -> "List must have contents")
+					: DataResult.success(holderSet)
 		);
 	}
 
@@ -360,7 +363,7 @@ public class ExtraCodecs {
 					E object2 = (E)iterator.next();
 					T object3 = (T)function.apply(object2);
 					if (object3 != object) {
-						return DataResult.error("Mixed type list: element " + object2 + " had type " + object3 + ", but list is of type " + object);
+						return DataResult.error(() -> "Mixed type list: element " + object2 + " had type " + object3 + ", but list is of type " + object);
 					}
 				}
 			}
@@ -376,7 +379,7 @@ public class ExtraCodecs {
 				try {
 					return codec.decode(dynamicOps, object);
 				} catch (Exception var4) {
-					return DataResult.error("Cauch exception decoding " + object + ": " + var4.getMessage());
+					return DataResult.error(() -> "Caught exception decoding " + object + ": " + var4.getMessage());
 				}
 			}
 		});
@@ -387,7 +390,7 @@ public class ExtraCodecs {
 			try {
 				return DataResult.success(Instant.from(dateTimeFormatter.parse(string)));
 			} catch (Exception var3) {
-				return DataResult.error(var3.getMessage());
+				return DataResult.error(var3::getMessage);
 			}
 		}, dateTimeFormatter::format);
 	}
@@ -400,7 +403,7 @@ public class ExtraCodecs {
 		try {
 			return DataResult.success(new GameProfile((UUID)pair.getFirst().orElse(null), (String)pair.getSecond().orElse(null)));
 		} catch (Throwable var2) {
-			return DataResult.error(var2.getMessage());
+			return DataResult.error(var2::getMessage);
 		}
 	}
 
@@ -409,14 +412,19 @@ public class ExtraCodecs {
 	}
 
 	public static Codec<String> sizeLimitedString(int i, int j) {
-		return validate(Codec.STRING, string -> {
-			int k = string.length();
-			if (k < i) {
-				return DataResult.error("String \"" + string + "\" is too short: " + k + ", expected range [" + i + "-" + j + "]");
-			} else {
-				return k > j ? DataResult.error("String \"" + string + "\" is too long: " + k + ", expected range [" + i + "-" + j + "]") : DataResult.success(string);
+		return validate(
+			Codec.STRING,
+			string -> {
+				int k = string.length();
+				if (k < i) {
+					return DataResult.error(() -> "String \"" + string + "\" is too short: " + k + ", expected range [" + i + "-" + j + "]");
+				} else {
+					return k > j
+						? DataResult.error(() -> "String \"" + string + "\" is too long: " + k + ", expected range [" + i + "-" + j + "]")
+						: DataResult.success(string);
+				}
 			}
-		});
+		);
 	}
 
 	static final class EitherCodec<F, S> implements Codec<Either<F, S>> {
@@ -507,7 +515,7 @@ public class ExtraCodecs {
 			Optional<Pair<Either<F, S>, T>> optional2 = dataResult2.result();
 			if (optional.isPresent() && optional2.isPresent()) {
 				return DataResult.error(
-					"Both alternatives read successfully, can not pick the correct one; first: " + optional.get() + " second: " + optional2.get(),
+					() -> "Both alternatives read successfully, can not pick the correct one; first: " + optional.get() + " second: " + optional2.get(),
 					(Pair<Either<F, S>, T>)optional.get()
 				);
 			} else {

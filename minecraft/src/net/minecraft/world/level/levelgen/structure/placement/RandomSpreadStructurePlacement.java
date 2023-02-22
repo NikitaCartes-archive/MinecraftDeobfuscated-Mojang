@@ -24,7 +24,7 @@ public class RandomSpreadStructurePlacement extends StructurePlacement {
 		)
 		.<RandomSpreadStructurePlacement>flatXmap(
 			randomSpreadStructurePlacement -> randomSpreadStructurePlacement.spacing <= randomSpreadStructurePlacement.separation
-					? DataResult.error("Spacing has to be larger than separation")
+					? DataResult.error(() -> "Spacing has to be larger than separation")
 					: DataResult.success(randomSpreadStructurePlacement),
 			DataResult::success
 		)

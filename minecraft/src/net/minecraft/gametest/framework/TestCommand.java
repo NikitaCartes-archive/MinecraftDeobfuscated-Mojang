@@ -224,7 +224,7 @@ public class TestCommand {
 	private static int createNewStructure(CommandSourceStack commandSourceStack, String string, int i, int j, int k) {
 		if (i <= 48 && j <= 48 && k <= 48) {
 			ServerLevel serverLevel = commandSourceStack.getLevel();
-			BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+			BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 			BlockPos blockPos2 = new BlockPos(
 				blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
 			);
@@ -278,7 +278,7 @@ public class TestCommand {
 	}
 
 	private static int runNearbyTest(CommandSourceStack commandSourceStack) {
-		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		BlockPos blockPos2 = StructureUtils.findNearestStructureBlock(blockPos, 15, serverLevel);
 		if (blockPos2 == null) {
@@ -292,7 +292,7 @@ public class TestCommand {
 	}
 
 	private static int runAllNearbyTests(CommandSourceStack commandSourceStack) {
-		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		Collection<BlockPos> collection = StructureUtils.findStructureBlocks(blockPos, 200, serverLevel);
 		if (collection.isEmpty()) {
@@ -319,7 +319,7 @@ public class TestCommand {
 
 		runTestPreparation(testFunction, serverLevel);
 		AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
-		BlockPos blockPos2 = new BlockPos(aABB.minX, aABB.minY, aABB.minZ);
+		BlockPos blockPos2 = BlockPos.containing(aABB.minX, aABB.minY, aABB.minZ);
 		GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
 	}
 
@@ -341,9 +341,9 @@ public class TestCommand {
 	private static int clearAllTests(CommandSourceStack commandSourceStack, int i) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		GameTestRunner.clearMarkers(serverLevel);
-		BlockPos blockPos = new BlockPos(
+		BlockPos blockPos = BlockPos.containing(
 			commandSourceStack.getPosition().x,
-			(double)commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, new BlockPos(commandSourceStack.getPosition())).getY(),
+			(double)commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, BlockPos.containing(commandSourceStack.getPosition())).getY(),
 			commandSourceStack.getPosition().z
 		);
 		GameTestRunner.clearAllTests(serverLevel, blockPos, GameTestTicker.SINGLETON, Mth.clamp(i, 0, 1024));
@@ -352,7 +352,7 @@ public class TestCommand {
 
 	private static int runTest(CommandSourceStack commandSourceStack, TestFunction testFunction, int i) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		int j = commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
 		BlockPos blockPos2 = new BlockPos(blockPos.getX(), j, blockPos.getZ() + 3);
 		GameTestRunner.clearMarkers(serverLevel);
@@ -408,7 +408,7 @@ public class TestCommand {
 	}
 
 	private static void runTests(CommandSourceStack commandSourceStack, Collection<TestFunction> collection, int i, int j) {
-		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		BlockPos blockPos2 = new BlockPos(
 			blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
 		);
@@ -425,7 +425,7 @@ public class TestCommand {
 	}
 
 	private static int exportNearestTestStructure(CommandSourceStack commandSourceStack) {
-		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		BlockPos blockPos2 = StructureUtils.findNearestStructureBlock(blockPos, 15, serverLevel);
 		if (blockPos2 == null) {

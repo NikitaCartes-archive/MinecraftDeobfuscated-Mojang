@@ -48,7 +48,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.block.Blocks;
 
 public class VanillaAdventureAdvancements implements AdvancementSubProvider {
@@ -142,7 +142,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("slept_in_bed", PlayerTrigger.TriggerInstance.sleptInBed())
 			.save(consumer, "adventure/sleep_in_bed");
-		createAdventuringTime(consumer, advancement2, MultiNoiseBiomeSource.Preset.OVERWORLD);
+		createAdventuringTime(consumer, advancement2, MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD);
 		Advancement advancement3 = Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(
@@ -591,8 +591,8 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			.save(consumer, "adventure/avoid_vibration");
 	}
 
-	protected static void createAdventuringTime(Consumer<Advancement> consumer, Advancement advancement, MultiNoiseBiomeSource.Preset preset) {
-		addBiomes(Advancement.Builder.advancement(), preset.possibleBiomes().toList())
+	protected static void createAdventuringTime(Consumer<Advancement> consumer, Advancement advancement, MultiNoiseBiomeSourceParameterList.Preset preset) {
+		addBiomes(Advancement.Builder.advancement(), preset.usedBiomes().toList())
 			.parent(advancement)
 			.display(
 				Items.DIAMOND_BOOTS,

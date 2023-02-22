@@ -95,7 +95,7 @@ public class LocateCommand {
 	private static int locateStructure(CommandSourceStack commandSourceStack, ResourceOrTagKeyArgument.Result<Structure> result) throws CommandSyntaxException {
 		Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
 		HolderSet<Structure> holderSet = (HolderSet<Structure>)getHolders(result, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(result.asPrintable()));
-		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
 		Pair<BlockPos, Holder<Structure>> pair = serverLevel.getChunkSource().getGenerator().findNearestMapStructure(serverLevel, holderSet, blockPos, 100, false);
@@ -108,7 +108,7 @@ public class LocateCommand {
 	}
 
 	private static int locateBiome(CommandSourceStack commandSourceStack, ResourceOrTagArgument.Result<Biome> result) throws CommandSyntaxException {
-		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
 		Pair<BlockPos, Holder<Biome>> pair = commandSourceStack.getLevel().findClosestBiome3d(result, blockPos, 6400, 32, 64);
 		stopwatch.stop();
@@ -120,7 +120,7 @@ public class LocateCommand {
 	}
 
 	private static int locatePoi(CommandSourceStack commandSourceStack, ResourceOrTagArgument.Result<PoiType> result) throws CommandSyntaxException {
-		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		Stopwatch stopwatch = Stopwatch.createStarted(Util.TICKER);
 		Optional<Pair<Holder<PoiType>, BlockPos>> optional = serverLevel.getPoiManager().findClosestWithType(result, blockPos, 256, PoiManager.Occupancy.ANY);

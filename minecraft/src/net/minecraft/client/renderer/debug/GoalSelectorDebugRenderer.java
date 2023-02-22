@@ -37,7 +37,7 @@ public class GoalSelectorDebugRenderer implements DebugRenderer.SimpleDebugRende
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Camera camera = this.minecraft.gameRenderer.getMainCamera();
-		BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
+		BlockPos blockPos = BlockPos.containing(camera.getPosition().x, 0.0, camera.getPosition().z);
 		this.goalSelectors.forEach((integer, list) -> {
 			for (int i = 0; i < list.size(); i++) {
 				GoalSelectorDebugRenderer.DebugGoal debugGoal = (GoalSelectorDebugRenderer.DebugGoal)list.get(i);

@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,15 +22,9 @@ public class LegacySmithingScreen extends ItemCombinerScreen<LegacySmithingMenu>
 	}
 
 	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		RenderSystem.disableBlend();
-		super.renderLabels(poseStack, i, j);
-	}
-
-	@Override
 	protected void renderErrorIcon(PoseStack poseStack, int i, int j) {
 		if ((this.menu.getSlot(0).hasItem() || this.menu.getSlot(1).hasItem()) && !this.menu.getSlot(this.menu.getResultSlot()).hasItem()) {
-			this.blit(poseStack, i + 99, j + 45, this.imageWidth, 0, 28, 21);
+			blit(poseStack, i + 99, j + 45, this.imageWidth, 0, 28, 21);
 		}
 	}
 }

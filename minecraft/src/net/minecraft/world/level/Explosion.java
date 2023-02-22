@@ -155,7 +155,7 @@ public class Explosion {
 						double o = this.z;
 
 						for (float p = 0.3F; h > 0.0F; h -= 0.22500001F) {
-							BlockPos blockPos = new BlockPos(m, n, o);
+							BlockPos blockPos = BlockPos.containing(m, n, o);
 							BlockState blockState = this.level.getBlockState(blockPos);
 							FluidState fluidState = this.level.getFluidState(blockPos);
 							if (!this.level.isInWorldBounds(blockPos)) {

@@ -97,7 +97,7 @@ public class RaidCommand {
 			raider.setPos(commandSourceStack.getPosition().x, commandSourceStack.getPosition().y, commandSourceStack.getPosition().z);
 			raider.finalizeSpawn(
 				commandSourceStack.getLevel(),
-				commandSourceStack.getLevel().getCurrentDifficultyAt(new BlockPos(commandSourceStack.getPosition())),
+				commandSourceStack.getLevel().getCurrentDifficultyAt(BlockPos.containing(commandSourceStack.getPosition())),
 				MobSpawnType.COMMAND,
 				null,
 				null

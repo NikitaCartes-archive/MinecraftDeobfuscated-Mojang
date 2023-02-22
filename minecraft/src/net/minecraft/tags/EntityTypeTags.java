@@ -16,6 +16,7 @@ public final class EntityTypeTags {
 	public static final TagKey<EntityType<?>> FREEZE_IMMUNE_ENTITY_TYPES = create("freeze_immune_entity_types");
 	public static final TagKey<EntityType<?>> FREEZE_HURTS_EXTRA_TYPES = create("freeze_hurts_extra_types");
 	public static final TagKey<EntityType<?>> FROG_FOOD = create("frog_food");
+	public static final TagKey<EntityType<?>> FALL_DAMAGE_IMMUNE = create("fall_damage_immune");
 
 	private EntityTypeTags() {
 	}

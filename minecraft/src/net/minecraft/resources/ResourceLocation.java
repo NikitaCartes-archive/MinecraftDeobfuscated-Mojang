@@ -85,7 +85,7 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		try {
 			return DataResult.success(new ResourceLocation(string));
 		} catch (ResourceLocationException var2) {
-			return DataResult.error("Not a valid resource location: " + string + " " + var2.getMessage());
+			return DataResult.error(() -> "Not a valid resource location: " + string + " " + var2.getMessage());
 		}
 	}
 

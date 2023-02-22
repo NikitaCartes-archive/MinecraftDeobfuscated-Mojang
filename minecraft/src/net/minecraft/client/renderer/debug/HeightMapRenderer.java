@@ -31,7 +31,7 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		LevelAccessor levelAccessor = this.minecraft.level;
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
-		BlockPos blockPos = new BlockPos(d, 0.0, f);
+		BlockPos blockPos = BlockPos.containing(d, 0.0, f);
 
 		for (int i = -2; i <= 2; i++) {
 			for (int j = -2; j <= 2; j++) {

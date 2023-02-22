@@ -71,7 +71,7 @@ public class NbtOps implements DynamicOps<Tag> {
 	}
 
 	public DataResult<Number> getNumberValue(Tag tag) {
-		return tag instanceof NumericTag numericTag ? DataResult.success(numericTag.getAsNumber()) : DataResult.error("Not a number");
+		return tag instanceof NumericTag numericTag ? DataResult.success(numericTag.getAsNumber()) : DataResult.error(() -> "Not a number");
 	}
 
 	public Tag createNumeric(Number number) {
@@ -107,7 +107,7 @@ public class NbtOps implements DynamicOps<Tag> {
 	}
 
 	public DataResult<String> getStringValue(Tag tag) {
-		return tag instanceof StringTag stringTag ? DataResult.success(stringTag.getAsString()) : DataResult.error("Not a string");
+		return tag instanceof StringTag stringTag ? DataResult.success(stringTag.getAsString()) : DataResult.error(() -> "Not a string");
 	}
 
 	public Tag createString(String string) {
@@ -117,20 +117,20 @@ public class NbtOps implements DynamicOps<Tag> {
 	public DataResult<Tag> mergeToList(Tag tag, Tag tag2) {
 		return (DataResult<Tag>)createCollector(tag)
 			.map(listCollector -> DataResult.success(listCollector.accept(tag2).result()))
-			.orElseGet(() -> DataResult.error("mergeToList called with not a list: " + tag, tag));
+			.orElseGet(() -> DataResult.error(() -> "mergeToList called with not a list: " + tag, tag));
 	}
 
 	public DataResult<Tag> mergeToList(Tag tag, List<Tag> list) {
 		return (DataResult<Tag>)createCollector(tag)
 			.map(listCollector -> DataResult.success(listCollector.acceptAll(list).result()))
-			.orElseGet(() -> DataResult.error("mergeToList called with not a list: " + tag, tag));
+			.orElseGet(() -> DataResult.error(() -> "mergeToList called with not a list: " + tag, tag));
 	}
 
 	public DataResult<Tag> mergeToMap(Tag tag, Tag tag2, Tag tag3) {
 		if (!(tag instanceof CompoundTag) && !(tag instanceof EndTag)) {
-			return DataResult.error("mergeToMap called with not a map: " + tag, tag);
+			return DataResult.error(() -> "mergeToMap called with not a map: " + tag, tag);
 		} else if (!(tag2 instanceof StringTag)) {
-			return DataResult.error("key is not a string: " + tag2, tag);
+			return DataResult.error(() -> "key is not a string: " + tag2, tag);
 		} else {
 			CompoundTag compoundTag = new CompoundTag();
 			if (tag instanceof CompoundTag compoundTag2) {
@@ -144,7 +144,7 @@ public class NbtOps implements DynamicOps<Tag> {
 
 	public DataResult<Tag> mergeToMap(Tag tag, MapLike<Tag> mapLike) {
 		if (!(tag instanceof CompoundTag) && !(tag instanceof EndTag)) {
-			return DataResult.error("mergeToMap called with not a map: " + tag, tag);
+			return DataResult.error(() -> "mergeToMap called with not a map: " + tag, tag);
 		} else {
 			CompoundTag compoundTag = new CompoundTag();
 			if (tag instanceof CompoundTag compoundTag2) {
@@ -160,20 +160,20 @@ public class NbtOps implements DynamicOps<Tag> {
 					compoundTag.put(tagx.getAsString(), (Tag)pair.getSecond());
 				}
 			});
-			return !list.isEmpty() ? DataResult.error("some keys are not strings: " + list, compoundTag) : DataResult.success(compoundTag);
+			return !list.isEmpty() ? DataResult.error(() -> "some keys are not strings: " + list, compoundTag) : DataResult.success(compoundTag);
 		}
 	}
 
 	public DataResult<Stream<Pair<Tag, Tag>>> getMapValues(Tag tag) {
 		return tag instanceof CompoundTag compoundTag
 			? DataResult.success(compoundTag.getAllKeys().stream().map(string -> Pair.of(this.createString(string), compoundTag.get(string))))
-			: DataResult.error("Not a map: " + tag);
+			: DataResult.error(() -> "Not a map: " + tag);
 	}
 
 	public DataResult<Consumer<BiConsumer<Tag, Tag>>> getMapEntries(Tag tag) {
 		return tag instanceof CompoundTag compoundTag
 			? DataResult.success(biConsumer -> compoundTag.getAllKeys().forEach(string -> biConsumer.accept(this.createString(string), compoundTag.get(string))))
-			: DataResult.error("Not a map: " + tag);
+			: DataResult.error(() -> "Not a map: " + tag);
 	}
 
 	public DataResult<MapLike<Tag>> getMap(Tag tag) {
@@ -196,7 +196,7 @@ public class NbtOps implements DynamicOps<Tag> {
 			public String toString() {
 				return "MapLike[" + compoundTag + "]";
 			}
-		}) : DataResult.error("Not a map: " + tag);
+		}) : DataResult.error(() -> "Not a map: " + tag);
 	}
 
 	public Tag createMap(Stream<Pair<Tag, Tag>> stream) {
@@ -222,7 +222,7 @@ public class NbtOps implements DynamicOps<Tag> {
 				? DataResult.success(listTag.stream().map(tagx -> tryUnwrap((CompoundTag)tagx)))
 				: DataResult.success(listTag.stream());
 		} else {
-			return tag instanceof CollectionTag<?> collectionTag ? DataResult.success(collectionTag.stream().map(tagx -> tagx)) : DataResult.error("Not a list");
+			return tag instanceof CollectionTag<?> collectionTag ? DataResult.success(collectionTag.stream().map(tagx -> tagx)) : DataResult.error(() -> "Not a list");
 		}
 	}
 
@@ -232,7 +232,7 @@ public class NbtOps implements DynamicOps<Tag> {
 				? DataResult.success(consumer -> listTag.forEach(tagx -> consumer.accept(tryUnwrap((CompoundTag)tagx))))
 				: DataResult.success(listTag::forEach);
 		} else {
-			return tag instanceof CollectionTag<?> collectionTag ? DataResult.success(collectionTag::forEach) : DataResult.error("Not a list: " + tag);
+			return tag instanceof CollectionTag<?> collectionTag ? DataResult.success(collectionTag::forEach) : DataResult.error(() -> "Not a list: " + tag);
 		}
 	}
 
@@ -543,7 +543,7 @@ public class NbtOps implements DynamicOps<Tag> {
 			if (tag == null || tag == EndTag.INSTANCE) {
 				return DataResult.success(compoundTag);
 			} else if (!(tag instanceof CompoundTag compoundTag2)) {
-				return DataResult.error("mergeToMap called with not a map: " + tag, tag);
+				return DataResult.error(() -> "mergeToMap called with not a map: " + tag, tag);
 			} else {
 				CompoundTag compoundTag3 = new CompoundTag(Maps.<String, Tag>newHashMap(compoundTag2.entries()));
 

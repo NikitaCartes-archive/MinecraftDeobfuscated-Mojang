@@ -123,7 +123,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	private void doRender(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
-		BlockPos blockPos = new BlockPos(d, e, f);
+		BlockPos blockPos = BlockPos.containing(d, e, f);
 		this.brainDumpsPerEntity.values().forEach(brainDump -> {
 			if (this.isPlayerCloseEnoughToMob(brainDump)) {
 				this.renderBrainInfo(poseStack, multiBufferSource, brainDump, d, e, f);
@@ -282,7 +282,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private static void renderTextOverMob(PoseStack poseStack, MultiBufferSource multiBufferSource, Position position, int i, String string, int j, float f) {
 		double d = 2.4;
 		double e = 0.25;
-		BlockPos blockPos = new BlockPos(position);
+		BlockPos blockPos = BlockPos.containing(position);
 		double g = (double)blockPos.getX() + 0.5;
 		double h = position.y() + 2.4 + (double)i * 0.25;
 		double k = (double)blockPos.getZ() + 0.5;
@@ -304,8 +304,8 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	private boolean isPlayerCloseEnoughToMob(BrainDebugRenderer.BrainDump brainDump) {
 		Player player = this.minecraft.player;
-		BlockPos blockPos = new BlockPos(player.getX(), brainDump.pos.y(), player.getZ());
-		BlockPos blockPos2 = new BlockPos(brainDump.pos);
+		BlockPos blockPos = BlockPos.containing(player.getX(), brainDump.pos.y(), player.getZ());
+		BlockPos blockPos2 = BlockPos.containing(brainDump.pos);
 		return blockPos.closerThan(blockPos2, 30.0);
 	}
 

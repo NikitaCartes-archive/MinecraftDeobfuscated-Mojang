@@ -35,7 +35,7 @@ public final class RegistryFileCodec<E> implements Codec<Holder<E>> {
 			Optional<HolderOwner<E>> optional = registryOps.owner(this.registryKey);
 			if (optional.isPresent()) {
 				if (!holder.canSerializeIn((HolderOwner<E>)optional.get())) {
-					return DataResult.error("Element " + holder + " is not valid in current registry set");
+					return DataResult.error(() -> "Element " + holder + " is not valid in current registry set");
 				}
 
 				return holder.unwrap()
@@ -54,18 +54,18 @@ public final class RegistryFileCodec<E> implements Codec<Holder<E>> {
 		if (dynamicOps instanceof RegistryOps<?> registryOps) {
 			Optional<HolderGetter<E>> optional = registryOps.getter(this.registryKey);
 			if (optional.isEmpty()) {
-				return DataResult.error("Registry does not exist: " + this.registryKey);
+				return DataResult.error(() -> "Registry does not exist: " + this.registryKey);
 			} else {
 				HolderGetter<E> holderGetter = (HolderGetter<E>)optional.get();
 				DataResult<Pair<ResourceLocation, T>> dataResult = ResourceLocation.CODEC.decode(dynamicOps, object);
 				if (dataResult.result().isEmpty()) {
 					return !this.allowInline
-						? DataResult.error("Inline definitions not allowed here")
+						? DataResult.error(() -> "Inline definitions not allowed here")
 						: this.elementCodec.decode(dynamicOps, object).map(pairx -> pairx.mapFirst(Holder::direct));
 				} else {
 					Pair<ResourceLocation, T> pair = (Pair<ResourceLocation, T>)dataResult.result().get();
 					ResourceKey<E> resourceKey = ResourceKey.create(this.registryKey, pair.getFirst());
-					return ((DataResult)holderGetter.get(resourceKey).map(DataResult::success).orElseGet(() -> DataResult.error("Failed to get element " + resourceKey)))
+					return ((DataResult)holderGetter.get(resourceKey).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Failed to get element " + resourceKey)))
 						.<Pair<Holder<E>, T>>map(reference -> Pair.of(reference, pair.getSecond()))
 						.setLifecycle(Lifecycle.stable());
 				}

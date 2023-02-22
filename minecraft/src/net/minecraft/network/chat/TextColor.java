@@ -15,7 +15,7 @@ public final class TextColor {
 	private static final String CUSTOM_COLOR_PREFIX = "#";
 	public static final Codec<TextColor> CODEC = Codec.STRING.comapFlatMap(string -> {
 		TextColor textColor = parseColor(string);
-		return textColor != null ? DataResult.success(textColor) : DataResult.error("String is not a valid color name or hex color code");
+		return textColor != null ? DataResult.success(textColor) : DataResult.error(() -> "String is not a valid color name or hex color code");
 	}, TextColor::serialize);
 	private static final Map<ChatFormatting, TextColor> LEGACY_FORMAT_TO_COLOR = (Map<ChatFormatting, TextColor>)Stream.of(ChatFormatting.values())
 		.filter(ChatFormatting::isColor)

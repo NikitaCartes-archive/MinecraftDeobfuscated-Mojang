@@ -67,7 +67,7 @@ public class RandomStroll {
 				vec32 = pathfinderMob.position().add(pathfinderMob.position().vectorTo(vec3).normalize().multiply((double)is[0], (double)is[1], (double)is[0]));
 			}
 
-			if (vec32 == null || pathfinderMob.level.getFluidState(new BlockPos(vec32)).isEmpty()) {
+			if (vec32 == null || pathfinderMob.level.getFluidState(BlockPos.containing(vec32)).isEmpty()) {
 				return vec3;
 			}
 

@@ -8,6 +8,7 @@ public interface DamageTypeTags {
 	TagKey<DamageType> DAMAGES_HELMET = create("damages_helmet");
 	TagKey<DamageType> BYPASSES_ARMOR = create("bypasses_armor");
 	TagKey<DamageType> BYPASSES_INVULNERABILITY = create("bypasses_invulnerability");
+	TagKey<DamageType> BYPASSES_COOLDOWN = create("bypasses_cooldown");
 	TagKey<DamageType> BYPASSES_EFFECTS = create("bypasses_effects");
 	TagKey<DamageType> BYPASSES_RESISTANCE = create("bypasses_resistance");
 	TagKey<DamageType> BYPASSES_ENCHANTMENTS = create("bypasses_enchantments");
@@ -27,6 +28,7 @@ public interface DamageTypeTags {
 	TagKey<DamageType> BURNS_ARMOR_STANDS = create("burns_armor_stands");
 	TagKey<DamageType> AVOIDS_GUARDIAN_THORNS = create("avoids_guardian_thorns");
 	TagKey<DamageType> ALWAYS_TRIGGERS_SILVERFISH = create("always_triggers_silverfish");
+	TagKey<DamageType> ALWAYS_HURTS_ENDER_DRAGONS = create("always_hurts_ender_dragons");
 
 	private static TagKey<DamageType> create(String string) {
 		return TagKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(string));

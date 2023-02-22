@@ -257,7 +257,7 @@ public class ServerPlayer extends Player {
 		this.server = minecraftServer;
 		this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
 		this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
-		this.maxUpStep = 1.0F;
+		this.setMaxUpStep(1.0F);
 		this.fudgeSpawnLocation(serverLevel);
 	}
 
@@ -770,7 +770,7 @@ public class ServerPlayer extends Player {
 				if (resourceKey == Level.OVERWORLD && serverLevel.dimension() == Level.NETHER) {
 					this.enteredNetherPosition = this.position();
 				} else if (serverLevel.dimension() == Level.END) {
-					this.createEndPlatform(serverLevel, new BlockPos(portalInfo.pos));
+					this.createEndPlatform(serverLevel, BlockPos.containing(portalInfo.pos));
 				}
 
 				serverLevel2.getProfiler().pop();
@@ -934,36 +934,9 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	public boolean startRiding(Entity entity, boolean bl) {
-		Entity entity2 = this.getVehicle();
-		if (!super.startRiding(entity, bl)) {
-			return false;
-		} else {
-			Entity entity3 = this.getVehicle();
-			if (entity3 != entity2 && this.connection != null) {
-				this.connection.teleport(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-			}
-
-			return true;
-		}
-	}
-
-	@Override
-	public void stopRiding() {
-		Entity entity = this.getVehicle();
-		super.stopRiding();
-		Entity entity2 = this.getVehicle();
-		if (entity2 != entity && this.connection != null) {
-			this.connection.dismount(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-		}
-	}
-
-	@Override
 	public void dismountTo(double d, double e, double f) {
 		this.removeVehicle();
-		if (this.connection != null) {
-			this.connection.dismount(d, e, f, this.getYRot(), this.getXRot());
-		}
+		this.setPos(d, e, f);
 	}
 
 	@Override
@@ -1246,7 +1219,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h) {
-		ChunkPos chunkPos = new ChunkPos(new BlockPos(d, e, f));
+		ChunkPos chunkPos = new ChunkPos(BlockPos.containing(d, e, f));
 		serverLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, this.getId());
 		this.stopRiding();
 		if (this.isSleeping()) {

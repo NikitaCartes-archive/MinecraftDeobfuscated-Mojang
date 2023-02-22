@@ -299,8 +299,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 			int q = vector2ic.y();
 			poseStack.pushPose();
 			int r = 400;
-			float f = this.itemRenderer.blitOffset;
-			this.itemRenderer.blitOffset = 400.0F;
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -320,7 +318,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			BufferUploader.drawWithShader(bufferBuilder.end());
-			RenderSystem.disableBlend();
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 			poseStack.translate(0.0F, 0.0F, 400.0F);
 			int s = q;
@@ -340,8 +337,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 				clientTooltipComponent2.renderImage(this.font, p, s, poseStack, this.itemRenderer, 400);
 				s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
 			}
-
-			this.itemRenderer.blitOffset = f;
 		}
 	}
 
@@ -469,9 +464,12 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	public void removed() {
 	}
 
+	public void added() {
+	}
+
 	public void renderBackground(PoseStack poseStack) {
 		if (this.minecraft.level != null) {
-			this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
+			fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
 		} else {
 			this.renderDirtBackground(poseStack);
 		}

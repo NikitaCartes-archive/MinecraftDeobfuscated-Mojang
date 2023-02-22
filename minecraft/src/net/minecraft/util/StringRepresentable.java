@@ -20,15 +20,21 @@ public interface StringRepresentable {
 	String getSerializedName();
 
 	static <E extends Enum<E> & StringRepresentable> StringRepresentable.EnumCodec<E> fromEnum(Supplier<E[]> supplier) {
+		return fromEnumWithMapping(supplier, string -> string);
+	}
+
+	static <E extends Enum<E> & StringRepresentable> StringRepresentable.EnumCodec<E> fromEnumWithMapping(
+		Supplier<E[]> supplier, Function<String, String> function
+	) {
 		E[] enums = (E[])supplier.get();
 		if (enums.length > 16) {
 			Map<String, E> map = (Map<String, E>)Arrays.stream(enums)
-				.collect(Collectors.toMap(object -> ((StringRepresentable)object).getSerializedName(), enum_ -> enum_));
+				.collect(Collectors.toMap(enum_ -> (String)function.apply(((StringRepresentable)enum_).getSerializedName()), enum_ -> enum_));
 			return new StringRepresentable.EnumCodec<>(enums, string -> string == null ? null : (Enum)map.get(string));
 		} else {
 			return new StringRepresentable.EnumCodec<>(enums, string -> {
 				for (E enum_ : enums) {
-					if (enum_.getSerializedName().equals(string)) {
+					if (((String)function.apply(enum_.getSerializedName())).equals(string)) {
 						return enum_;
 					}
 				}

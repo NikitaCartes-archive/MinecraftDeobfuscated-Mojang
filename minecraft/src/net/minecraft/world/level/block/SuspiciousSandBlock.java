@@ -77,7 +77,7 @@ public class SuspiciousSandBlock extends BaseEntityBlock implements Fallable {
 	@Override
 	public void onBrokenAfterFall(Level level, BlockPos blockPos, FallingBlockEntity fallingBlockEntity) {
 		Vec3 vec3 = fallingBlockEntity.getBoundingBox().getCenter();
-		level.levelEvent(2001, new BlockPos(vec3), Block.getId(fallingBlockEntity.getBlockState()));
+		level.levelEvent(2001, BlockPos.containing(vec3), Block.getId(fallingBlockEntity.getBlockState()));
 		level.gameEvent(fallingBlockEntity, GameEvent.BLOCK_DESTROY, vec3);
 	}
 

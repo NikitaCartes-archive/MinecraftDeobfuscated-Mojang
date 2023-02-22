@@ -63,8 +63,8 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 		} else {
 			ItemStack itemStack = this.items.get(k);
 			this.blit(poseStack, i, j, l, ClientBundleTooltip.Texture.SLOT);
-			itemRenderer.renderAndDecorateItem(itemStack, i + 1, j + 1, k);
-			itemRenderer.renderGuiItemDecorations(font, itemStack, i + 1, j + 1);
+			itemRenderer.renderAndDecorateItem(poseStack, itemStack, i + 1, j + 1, k);
+			itemRenderer.renderGuiItemDecorations(poseStack, font, itemStack, i + 1, j + 1);
 			if (k == 0) {
 				AbstractContainerScreen.renderSlotHighlight(poseStack, i + 1, j + 1, l);
 			}

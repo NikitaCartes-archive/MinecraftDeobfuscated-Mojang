@@ -2,6 +2,7 @@ package net.minecraft.world.level.biome;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 
@@ -18,10 +19,14 @@ public class CheckerboardColumnBiomeSource extends BiomeSource {
 	private final int size;
 
 	public CheckerboardColumnBiomeSource(HolderSet<Biome> holderSet, int i) {
-		super(holderSet.stream());
 		this.allowedBiomes = holderSet;
 		this.bitShift = i + 2;
 		this.size = i;
+	}
+
+	@Override
+	protected Stream<Holder<Biome>> collectPossibleBiomes() {
+		return this.allowedBiomes.stream();
 	}
 
 	@Override

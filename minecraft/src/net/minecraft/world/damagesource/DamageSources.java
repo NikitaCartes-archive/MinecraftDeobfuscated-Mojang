@@ -213,7 +213,7 @@ public class DamageSources {
 	}
 
 	public DamageSource thrown(Entity entity, @Nullable Entity entity2) {
-		return this.source(DamageTypes.THORNS, entity, entity2);
+		return this.source(DamageTypes.THROWN, entity, entity2);
 	}
 
 	public DamageSource indirectMagic(Entity entity, @Nullable Entity entity2) {

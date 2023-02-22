@@ -49,7 +49,9 @@ public class MultifaceGrowthConfiguration implements FeatureConfiguration {
 	private final ObjectArrayList<Direction> validDirections;
 
 	private static DataResult<MultifaceBlock> apply(Block block) {
-		return block instanceof MultifaceBlock multifaceBlock ? DataResult.success(multifaceBlock) : DataResult.error("Growth block should be a multiface block");
+		return block instanceof MultifaceBlock multifaceBlock
+			? DataResult.success(multifaceBlock)
+			: DataResult.error(() -> "Growth block should be a multiface block");
 	}
 
 	public MultifaceGrowthConfiguration(MultifaceBlock multifaceBlock, int i, boolean bl, boolean bl2, boolean bl3, float f, HolderSet<Block> holderSet) {

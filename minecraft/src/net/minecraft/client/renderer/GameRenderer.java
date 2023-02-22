@@ -874,7 +874,7 @@ public class GameRenderer implements AutoCloseable {
 					Vec3 vec34 = entityHitResult.getLocation();
 					double h = vec3.distanceToSqr(vec34);
 					if (bl && h > 9.0) {
-						this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), new BlockPos(vec34));
+						this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), BlockPos.containing(vec34));
 					} else if (h < e || this.minecraft.hitResult == null) {
 						this.minecraft.hitResult = entityHitResult;
 						if (entity2 instanceof LivingEntity || entity2 instanceof ItemFrame) {
@@ -1091,6 +1091,7 @@ public class GameRenderer implements AutoCloseable {
 				);
 			RenderSystem.setProjectionMatrix(matrix4f);
 			PoseStack poseStack = RenderSystem.getModelViewStack();
+			poseStack.pushPose();
 			poseStack.setIdentity();
 			poseStack.translate(0.0F, 0.0F, -2000.0F);
 			RenderSystem.applyModelViewMatrix();
@@ -1163,6 +1164,12 @@ public class GameRenderer implements AutoCloseable {
 					throw new ReportedException(crashReport);
 				}
 			}
+
+			this.minecraft.getProfiler().push("toasts");
+			this.minecraft.getToasts().render(poseStack2);
+			this.minecraft.getProfiler().pop();
+			poseStack.popPose();
+			RenderSystem.applyModelViewMatrix();
 		}
 	}
 

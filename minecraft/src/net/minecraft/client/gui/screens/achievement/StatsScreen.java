@@ -17,7 +17,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -164,13 +163,12 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
 	void blitSlot(PoseStack poseStack, int i, int j, Item item) {
 		this.blitSlotIcon(poseStack, i + 1, j + 1, 0, 0);
-		this.itemRenderer.renderGuiItem(item.getDefaultInstance(), i + 2, j + 2);
+		this.itemRenderer.renderGuiItem(poseStack, item.getDefaultInstance(), i + 2, j + 2);
 	}
 
 	void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, STATS_ICON_LOCATION);
-		blit(poseStack, i, j, this.getBlitOffset(), (float)k, (float)l, 18, 18, 128, 128);
+		blit(poseStack, i, j, 0, (float)k, (float)l, 18, 18, 128, 128);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -375,7 +373,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 				int k = i + 12;
 				int l = j - 12;
 				int m = StatsScreen.this.font.width(component);
-				this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+				fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
 				poseStack.pushPose();
 				poseStack.translate(0.0F, 0.0F, 400.0F);
 				StatsScreen.this.font.drawShadow(poseStack, component, (float)k, (float)l, -1);

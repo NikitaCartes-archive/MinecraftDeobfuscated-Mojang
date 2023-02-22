@@ -79,9 +79,9 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			if (bl) {
-				this.blit(poseStack, i, k, 0, 166, 120, 32);
+				blit(poseStack, i, k, 0, 166, 120, 32);
 			} else {
-				this.blit(poseStack, i, k, 0, 198, 32, 32);
+				blit(poseStack, i, k, 0, 198, 32, 32);
 			}
 
 			k += j;
@@ -96,7 +96,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 			MobEffect mobEffect = mobEffectInstance.getEffect();
 			TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(mobEffect);
 			RenderSystem.setShaderTexture(0, textureAtlasSprite.atlasLocation());
-			blit(poseStack, i + (bl ? 6 : 7), k + 7, this.getBlitOffset(), 18, 18, textureAtlasSprite);
+			blit(poseStack, i + (bl ? 6 : 7), k + 7, 0, 18, 18, textureAtlasSprite);
 			k += j;
 		}
 	}

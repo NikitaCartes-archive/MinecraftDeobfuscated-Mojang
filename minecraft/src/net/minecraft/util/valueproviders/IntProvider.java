@@ -27,10 +27,10 @@ public abstract class IntProvider {
 			codec,
 			intProvider -> {
 				if (intProvider.getMinValue() < i) {
-					return DataResult.error("Value provider too low: " + i + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
+					return DataResult.error(() -> "Value provider too low: " + i + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
 				} else {
 					return intProvider.getMaxValue() > j
-						? DataResult.error("Value provider too high: " + j + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]")
+						? DataResult.error(() -> "Value provider too high: " + j + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]")
 						: DataResult.success(intProvider);
 				}
 			}
