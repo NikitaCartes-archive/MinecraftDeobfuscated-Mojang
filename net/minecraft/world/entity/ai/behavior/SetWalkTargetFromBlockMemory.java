@@ -27,7 +27,7 @@ public class SetWalkTargetFromBlockMemory {
                 Vec3 vec3 = null;
                 int m = 0;
                 int n = 1000;
-                while (vec3 == null || new BlockPos(vec3).distManhattan(villager.blockPosition()) > j) {
+                while (vec3 == null || BlockPos.containing(vec3).distManhattan(villager.blockPosition()) > j) {
                     vec3 = DefaultRandomPos.getPosTowards(villager, 15, 7, Vec3.atBottomCenterOf(globalPos.pos()), 1.5707963705062866);
                     if (++m != 1000) continue;
                     villager.releasePoi(memoryModuleType);

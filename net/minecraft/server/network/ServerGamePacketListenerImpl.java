@@ -930,19 +930,11 @@ ServerGamePacketListener {
         return false;
     }
 
-    public void dismount(double d, double e, double f, float g, float h) {
-        this.teleport(d, e, f, g, h, Collections.emptySet(), true);
-    }
-
     public void teleport(double d, double e, double f, float g, float h) {
-        this.teleport(d, e, f, g, h, Collections.emptySet(), false);
+        this.teleport(d, e, f, g, h, Collections.emptySet());
     }
 
     public void teleport(double d, double e, double f, float g, float h, Set<RelativeMovement> set) {
-        this.teleport(d, e, f, g, h, set, false);
-    }
-
-    public void teleport(double d, double e, double f, float g, float h, Set<RelativeMovement> set, boolean bl) {
         double i = set.contains((Object)RelativeMovement.X) ? this.player.getX() : 0.0;
         double j = set.contains((Object)RelativeMovement.Y) ? this.player.getY() : 0.0;
         double k = set.contains((Object)RelativeMovement.Z) ? this.player.getZ() : 0.0;
@@ -954,7 +946,7 @@ ServerGamePacketListener {
         }
         this.awaitingTeleportTime = this.tickCount;
         this.player.absMoveTo(d, e, f, g, h);
-        this.player.connection.send(new ClientboundPlayerPositionPacket(d - i, e - j, f - k, g - l, h - m, set, this.awaitingTeleport, bl));
+        this.player.connection.send(new ClientboundPlayerPositionPacket(d - i, e - j, f - k, g - l, h - m, set, this.awaitingTeleport));
     }
 
     @Override

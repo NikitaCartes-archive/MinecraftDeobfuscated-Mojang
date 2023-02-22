@@ -48,7 +48,6 @@ import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
@@ -304,7 +303,6 @@ extends ObjectSelectionList<Entry> {
             this.minecraft.font.draw(poseStack, (String)string, (float)(k + 32 + 3), (float)(j + 1), 0xFFFFFF);
             this.minecraft.font.draw(poseStack, string2, (float)(k + 32 + 3), (float)(j + this.minecraft.font.lineHeight + 3), 0x808080);
             this.minecraft.font.draw(poseStack, component, (float)(k + 32 + 3), (float)(j + this.minecraft.font.lineHeight + this.minecraft.font.lineHeight + 3), 0x808080);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, this.icon != null ? this.iconLocation : ICON_MISSING);
             RenderSystem.enableBlend();
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
@@ -313,7 +311,6 @@ extends ObjectSelectionList<Entry> {
                 int q;
                 RenderSystem.setShaderTexture(0, ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
                 int p = n - k;
                 boolean bl2 = p < 32;
                 int n2 = q = bl2 ? 32 : 0;

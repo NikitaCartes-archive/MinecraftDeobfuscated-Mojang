@@ -56,12 +56,12 @@ extends TrunkPlacer {
             if (f < 0.0f) continue;
             for (int p = 0; p < m; ++p) {
                 BlockPos blockPos3;
-                double r;
-                double h;
                 double e = 1.0;
                 double g = 1.0 * (double)f * ((double)randomSource.nextFloat() + 0.328);
-                double q = g * Math.sin(h = (double)(randomSource.nextFloat() * 2.0f) * Math.PI) + 0.5;
-                BlockPos blockPos2 = blockPos.offset(q, (double)(o - 1), r = g * Math.cos(h) + 0.5);
+                double h = (double)(randomSource.nextFloat() * 2.0f) * Math.PI;
+                double q = g * Math.sin(h) + 0.5;
+                double r = g * Math.cos(h) + 0.5;
+                BlockPos blockPos2 = blockPos.offset(Mth.floor(q), o - 1, Mth.floor(r));
                 if (!this.makeLimb(levelSimulatedReader, biConsumer, randomSource, blockPos2, blockPos3 = blockPos2.above(5), false, treeConfiguration)) continue;
                 int s = blockPos.getX() - blockPos2.getX();
                 int t = blockPos.getZ() - blockPos2.getZ();
@@ -92,7 +92,7 @@ extends TrunkPlacer {
         float g = (float)blockPos3.getY() / (float)i;
         float h = (float)blockPos3.getZ() / (float)i;
         for (int j = 0; j <= i; ++j) {
-            BlockPos blockPos4 = blockPos.offset(0.5f + (float)j * f, 0.5f + (float)j * g, 0.5f + (float)j * h);
+            BlockPos blockPos4 = blockPos.offset(Mth.floor(0.5f + (float)j * f), Mth.floor(0.5f + (float)j * g), Mth.floor(0.5f + (float)j * h));
             if (bl) {
                 this.placeLog(levelSimulatedReader, biConsumer, randomSource, blockPos4, treeConfiguration, blockState -> (BlockState)blockState.trySetValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)));
                 continue;

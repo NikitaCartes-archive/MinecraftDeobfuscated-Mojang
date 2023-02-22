@@ -291,7 +291,7 @@ extends Projectile {
                 float g = Mth.sin(f);
                 float h = Mth.cos(f);
                 double d = this.getX() + (double)(g * (float)this.timeUntilHooked * 0.1f);
-                BlockState blockState = serverLevel.getBlockState(new BlockPos(d, (e = (double)((float)Mth.floor(this.getY()) + 1.0f)) - 1.0, j = this.getZ() + (double)(h * (float)this.timeUntilHooked * 0.1f)));
+                BlockState blockState = serverLevel.getBlockState(BlockPos.containing(d, (e = (double)((float)Mth.floor(this.getY()) + 1.0f)) - 1.0, j = this.getZ() + (double)(h * (float)this.timeUntilHooked * 0.1f)));
                 if (blockState.is(Blocks.WATER)) {
                     if (this.random.nextFloat() < 0.15f) {
                         serverLevel.sendParticles(ParticleTypes.BUBBLE, d, e - (double)0.1f, j, 1, g, 0.1, h, 0.0);
@@ -325,7 +325,7 @@ extends Projectile {
                 float g = Mth.nextFloat(this.random, 0.0f, 360.0f) * ((float)Math.PI / 180);
                 float h = Mth.nextFloat(this.random, 25.0f, 60.0f);
                 double d = this.getX() + (double)(Mth.sin(g) * h) * 0.1;
-                BlockState blockState = serverLevel.getBlockState(new BlockPos(d, (e = (double)((float)Mth.floor(this.getY()) + 1.0f)) - 1.0, j = this.getZ() + (double)(Mth.cos(g) * h) * 0.1));
+                BlockState blockState = serverLevel.getBlockState(BlockPos.containing(d, (e = (double)((float)Mth.floor(this.getY()) + 1.0f)) - 1.0, j = this.getZ() + (double)(Mth.cos(g) * h) * 0.1));
                 if (blockState.is(Blocks.WATER)) {
                     serverLevel.sendParticles(ParticleTypes.SPLASH, d, e, j, 2 + this.random.nextInt(2), 0.1f, 0.0, 0.1f, 0.0);
                 }

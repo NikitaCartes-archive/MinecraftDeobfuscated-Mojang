@@ -20,10 +20,10 @@ implements SampledFloat {
     public static Codec<FloatProvider> codec(float f, float g) {
         return ExtraCodecs.validate(CODEC, floatProvider -> {
             if (floatProvider.getMinValue() < f) {
-                return DataResult.error("Value provider too low: " + f + " [" + floatProvider.getMinValue() + "-" + floatProvider.getMaxValue() + "]");
+                return DataResult.error(() -> "Value provider too low: " + f + " [" + floatProvider.getMinValue() + "-" + floatProvider.getMaxValue() + "]");
             }
             if (floatProvider.getMaxValue() > g) {
-                return DataResult.error("Value provider too high: " + g + " [" + floatProvider.getMinValue() + "-" + floatProvider.getMaxValue() + "]");
+                return DataResult.error(() -> "Value provider too high: " + g + " [" + floatProvider.getMinValue() + "-" + floatProvider.getMaxValue() + "]");
             }
             return DataResult.success(floatProvider);
         });

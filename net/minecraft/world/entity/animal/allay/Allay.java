@@ -148,7 +148,7 @@ implements InventoryCarrier {
 
     @Override
     public void travel(Vec3 vec3) {
-        if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
+        if (this.isControlledByLocalInstance()) {
             if (this.isInWater()) {
                 this.moveRelative(0.02f, vec3);
                 this.move(MoverType.SELF, this.getDeltaMovement());
@@ -169,11 +169,6 @@ implements InventoryCarrier {
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
         return entityDimensions.height * 0.6f;
-    }
-
-    @Override
-    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
-        return false;
     }
 
     @Override
@@ -592,11 +587,11 @@ implements InventoryCarrier {
         @Override
         public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
             if (gameEvent == GameEvent.JUKEBOX_PLAY) {
-                Allay.this.setJukeboxPlaying(new BlockPos(vec3), true);
+                Allay.this.setJukeboxPlaying(BlockPos.containing(vec3), true);
                 return true;
             }
             if (gameEvent == GameEvent.JUKEBOX_STOP_PLAY) {
-                Allay.this.setJukeboxPlaying(new BlockPos(vec3), false);
+                Allay.this.setJukeboxPlaying(BlockPos.containing(vec3), false);
                 return true;
             }
             return false;

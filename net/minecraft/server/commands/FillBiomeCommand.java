@@ -87,8 +87,8 @@ public class FillBiomeCommand {
         for (ChunkAccess chunkAccess : list) {
             chunkAccess.fillBiomesFromNoise(FillBiomeCommand.makeResolver(mutableInt, chunkAccess, boundingBox, reference, predicate), serverLevel.getChunkSource().randomState().sampler());
             chunkAccess.setUnsaved(true);
-            serverLevel.getChunkSource().chunkMap.resendChunk(chunkAccess);
         }
+        serverLevel.getChunkSource().chunkMap.resendBiomesForChunks(list);
         commandSourceStack.sendSuccess(Component.translatable("commands.fillbiome.success.count", mutableInt.getValue(), boundingBox.minX(), boundingBox.minY(), boundingBox.minZ(), boundingBox.maxX(), boundingBox.maxY(), boundingBox.maxZ()), true);
         return mutableInt.getValue();
     }

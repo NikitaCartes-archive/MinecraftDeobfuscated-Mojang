@@ -85,7 +85,7 @@ public class LocationPredicate {
         if (this.dimension != null && this.dimension != serverLevel.dimension()) {
             return false;
         }
-        BlockPos blockPos = new BlockPos(d, e, f);
+        BlockPos blockPos = BlockPos.containing(d, e, f);
         boolean bl = serverLevel.isLoaded(blockPos);
         if (!(this.biome == null || bl && serverLevel.getBiome(blockPos).is(this.biome))) {
             return false;

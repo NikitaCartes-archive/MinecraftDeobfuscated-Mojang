@@ -41,12 +41,16 @@ implements ArgumentType<T> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-        return SharedSuggestionProvider.suggest(Arrays.stream((Enum[])this.values.get()).map(object -> ((StringRepresentable)object).getSerializedName()).collect(Collectors.toList()), suggestionsBuilder);
+        return SharedSuggestionProvider.suggest(Arrays.stream((Enum[])this.values.get()).map(object -> ((StringRepresentable)object).getSerializedName()).map(this::convertId).collect(Collectors.toList()), suggestionsBuilder);
     }
 
     @Override
     public Collection<String> getExamples() {
-        return Arrays.stream((Enum[])this.values.get()).map(object -> ((StringRepresentable)object).getSerializedName()).limit(2L).collect(Collectors.toList());
+        return Arrays.stream((Enum[])this.values.get()).map(object -> ((StringRepresentable)object).getSerializedName()).map(this::convertId).limit(2L).collect(Collectors.toList());
+    }
+
+    protected String convertId(String string) {
+        return string;
     }
 
     @Override

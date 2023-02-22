@@ -94,11 +94,6 @@ extends Slime {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
-        return false;
-    }
-
-    @Override
     protected boolean isDealsDamage() {
         return this.isEffectiveAi();
     }

@@ -24,6 +24,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
@@ -131,14 +132,14 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
             return false;
         }
         BiomeSource biomeSource = levelStem.generator().getBiomeSource();
-        return !(biomeSource instanceof MultiNoiseBiomeSource) || (multiNoiseBiomeSource = (MultiNoiseBiomeSource)biomeSource).stable(MultiNoiseBiomeSource.Preset.OVERWORLD);
+        return !(biomeSource instanceof MultiNoiseBiomeSource) || (multiNoiseBiomeSource = (MultiNoiseBiomeSource)biomeSource).stable(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
     }
 
     private static boolean isStableNether(LevelStem levelStem) {
         MultiNoiseBiomeSource multiNoiseBiomeSource;
         NoiseBasedChunkGenerator noiseBasedChunkGenerator;
         Object object;
-        return levelStem.type().is(BuiltinDimensionTypes.NETHER) && (object = levelStem.generator()) instanceof NoiseBasedChunkGenerator && (noiseBasedChunkGenerator = (NoiseBasedChunkGenerator)object).stable(NoiseGeneratorSettings.NETHER) && (object = noiseBasedChunkGenerator.getBiomeSource()) instanceof MultiNoiseBiomeSource && (multiNoiseBiomeSource = (MultiNoiseBiomeSource)object).stable(MultiNoiseBiomeSource.Preset.NETHER);
+        return levelStem.type().is(BuiltinDimensionTypes.NETHER) && (object = levelStem.generator()) instanceof NoiseBasedChunkGenerator && (noiseBasedChunkGenerator = (NoiseBasedChunkGenerator)object).stable(NoiseGeneratorSettings.NETHER) && (object = noiseBasedChunkGenerator.getBiomeSource()) instanceof MultiNoiseBiomeSource && (multiNoiseBiomeSource = (MultiNoiseBiomeSource)object).stable(MultiNoiseBiomeSourceParameterLists.NETHER);
     }
 
     private static boolean isStableEnd(LevelStem levelStem) {

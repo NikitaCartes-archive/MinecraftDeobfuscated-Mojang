@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -83,14 +84,20 @@ public class ServerEntity {
     }
 
     public void sendChanges() {
-        Entity entity;
+        Entity entity2;
         List<Entity> list = this.entity.getPassengers();
         if (!list.equals(this.lastPassengers)) {
-            this.lastPassengers = list;
             this.broadcast.accept(new ClientboundSetPassengersPacket(this.entity));
+            this.changedPassengers(list, this.lastPassengers).forEach(entity -> {
+                ServerPlayer serverPlayer;
+                if (entity instanceof ServerPlayer && !list.contains(serverPlayer = (ServerPlayer)entity)) {
+                    serverPlayer.connection.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
+                }
+            });
+            this.lastPassengers = list;
         }
-        if ((entity = this.entity) instanceof ItemFrame) {
-            ItemFrame itemFrame = (ItemFrame)entity;
+        if ((entity2 = this.entity) instanceof ItemFrame) {
+            ItemFrame itemFrame = (ItemFrame)entity2;
             if (this.tickCount % 10 == 0) {
                 Integer integer;
                 MapItemSavedData mapItemSavedData;
@@ -187,6 +194,10 @@ public class ServerEntity {
             this.broadcastAndSend(new ClientboundSetEntityMotionPacket(this.entity));
             this.entity.hurtMarked = false;
         }
+    }
+
+    private Stream<Entity> changedPassengers(List<Entity> list, List<Entity> list2) {
+        return Stream.concat(list2.stream().filter(entity -> !list.contains(entity)), list.stream().filter(entity -> !list2.contains(entity)));
     }
 
     public void removePairing(ServerPlayer serverPlayer) {

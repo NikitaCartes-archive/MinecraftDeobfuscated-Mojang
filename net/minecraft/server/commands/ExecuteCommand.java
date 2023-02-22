@@ -39,6 +39,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.HeightmapTypeArgument;
 import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.commands.arguments.ObjectiveArgument;
 import net.minecraft.commands.arguments.RangeArgument;
@@ -73,6 +74,7 @@ import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Attackable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -91,6 +93,7 @@ import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 
@@ -122,12 +125,22 @@ public class ExecuteCommand {
                 list.add(((CommandSourceStack)commandContext.getSource()).withLevel((ServerLevel)entity.level).withPosition(entity.position()).withRotation(entity.getRotationVector()));
             }
             return list;
-        })))).then(((LiteralArgumentBuilder)Commands.literal("store").then(ExecuteCommand.wrapStores(literalCommandNode, Commands.literal("result"), true))).then(ExecuteCommand.wrapStores(literalCommandNode, Commands.literal("success"), false)))).then(((LiteralArgumentBuilder)Commands.literal("positioned").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("pos", Vec3Argument.vec3()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withPosition(Vec3Argument.getVec3(commandContext, "pos")).withAnchor(EntityAnchorArgument.Anchor.FEET)))).then(Commands.literal("as").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {
+        })))).then(((LiteralArgumentBuilder)Commands.literal("store").then(ExecuteCommand.wrapStores(literalCommandNode, Commands.literal("result"), true))).then(ExecuteCommand.wrapStores(literalCommandNode, Commands.literal("success"), false)))).then(((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("positioned").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("pos", Vec3Argument.vec3()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withPosition(Vec3Argument.getVec3(commandContext, "pos")).withAnchor(EntityAnchorArgument.Anchor.FEET)))).then(Commands.literal("as").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {
             ArrayList<CommandSourceStack> list = Lists.newArrayList();
             for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
                 list.add(((CommandSourceStack)commandContext.getSource()).withPosition(entity.position()));
             }
             return list;
+        })))).then(Commands.literal("over").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("heightmap", HeightmapTypeArgument.heightmap()).redirect(literalCommandNode, commandContext -> {
+            Vec3 vec3 = ((CommandSourceStack)commandContext.getSource()).getPosition();
+            ServerLevel serverLevel = ((CommandSourceStack)commandContext.getSource()).getLevel();
+            double d = vec3.x();
+            double e = vec3.z();
+            if (!serverLevel.hasChunk(SectionPos.blockToSectionCoord(d), SectionPos.blockToSectionCoord(e))) {
+                throw BlockPosArgument.ERROR_NOT_LOADED.create();
+            }
+            int i = serverLevel.getHeight(HeightmapTypeArgument.getHeightmap(commandContext, "heightmap"), Mth.floor(d), Mth.floor(e));
+            return ((CommandSourceStack)commandContext.getSource()).withPosition(new Vec3(d, i, e));
         }))))).then(((LiteralArgumentBuilder)Commands.literal("rotated").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("rot", RotationArgument.rotation()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withRotation(RotationArgument.getRotation(commandContext, "rot").getRotation((CommandSourceStack)commandContext.getSource()))))).then(Commands.literal("as").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {
             ArrayList<CommandSourceStack> list = Lists.newArrayList();
             for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {

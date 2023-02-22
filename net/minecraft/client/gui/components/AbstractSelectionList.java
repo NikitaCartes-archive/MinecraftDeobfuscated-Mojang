@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.AbstractList;
@@ -217,27 +216,23 @@ NarratableEntry {
         }
         m = this.getRowLeft();
         int n = this.y0 + 4 - (int)this.getScrollAmount();
+        this.enableScissor();
         if (this.renderHeader) {
             this.renderHeader(poseStack, m, n);
         }
         this.renderList(poseStack, i, j, f);
+        AbstractSelectionList.disableScissor();
         if (this.renderTopAndBottom) {
             RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
-            RenderSystem.enableDepthTest();
-            RenderSystem.depthFunc(519);
             o = 32;
             p = -100;
             RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1.0f);
             AbstractSelectionList.blit(poseStack, this.x0, 0, -100, 0.0f, 0.0f, this.width, this.y0, 32, 32);
             AbstractSelectionList.blit(poseStack, this.x0, this.y1, -100, 0.0f, this.y1, this.width, this.height - this.y1, 32, 32);
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.depthFunc(515);
-            RenderSystem.disableDepthTest();
-            RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
             q = 4;
-            this.fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
-            this.fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
+            AbstractSelectionList.fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
+            AbstractSelectionList.fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
         }
         if ((o = this.getMaxScroll()) > 0) {
             p = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
@@ -252,6 +247,10 @@ NarratableEntry {
         }
         this.renderDecorations(poseStack, i, j);
         RenderSystem.disableBlend();
+    }
+
+    protected void enableScissor() {
+        AbstractSelectionList.enableScissor(this.x0, this.y0, this.x1, this.y1);
     }
 
     protected void centerScrollOn(E entry) {
@@ -433,6 +432,7 @@ NarratableEntry {
 
     protected void renderItem(PoseStack poseStack, int i, int j, float f, int k, int l, int m, int n, int o) {
         E entry = this.getEntry(k);
+        ((Entry)entry).renderBack(poseStack, k, m, l, n, o, i, j, Objects.equals(this.hovered, entry), f);
         if (this.renderSelection && this.isSelectedItem(k)) {
             int p = this.isFocused() ? -1 : -8355712;
             this.renderSelection(poseStack, m, n, o, p, -16777216);
@@ -595,6 +595,9 @@ NarratableEntry {
         }
 
         public abstract void render(PoseStack var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, boolean var9, float var10);
+
+        public void renderBack(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+        }
 
         @Override
         public boolean isMouseOver(double d, double e) {

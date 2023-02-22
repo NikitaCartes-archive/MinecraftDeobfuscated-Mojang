@@ -18,7 +18,7 @@ public class UniformInt
 extends IntProvider {
     public static final Codec<UniformInt> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("min_inclusive")).forGetter(uniformInt -> uniformInt.minInclusive), ((MapCodec)Codec.INT.fieldOf("max_inclusive")).forGetter(uniformInt -> uniformInt.maxInclusive)).apply((Applicative<UniformInt, ?>)instance, UniformInt::new)).comapFlatMap(uniformInt -> {
         if (uniformInt.maxInclusive < uniformInt.minInclusive) {
-            return DataResult.error("Max must be at least min, min_inclusive: " + uniformInt.minInclusive + ", max_inclusive: " + uniformInt.maxInclusive);
+            return DataResult.error(() -> "Max must be at least min, min_inclusive: " + uniformInt.minInclusive + ", max_inclusive: " + uniformInt.maxInclusive);
         }
         return DataResult.success(uniformInt);
     }, Function.identity());

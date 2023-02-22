@@ -84,7 +84,7 @@ public class Climate {
     public record Parameter(long min, long max) {
         public static final Codec<Parameter> CODEC = ExtraCodecs.intervalCodec(Codec.floatRange(-2.0f, 2.0f), "min", "max", (float_, float2) -> {
             if (float_.compareTo((Float)float2) > 0) {
-                return DataResult.error("Cannon construct interval, min > max (" + float_ + " > " + float2 + ")");
+                return DataResult.error(() -> "Cannon construct interval, min > max (" + float_ + " > " + float2 + ")");
             }
             return DataResult.success(new Parameter(Climate.quantizeCoord(float_.floatValue()), Climate.quantizeCoord(float2.floatValue())));
         }, parameter -> Float.valueOf(Climate.unquantizeCoord(parameter.min())), parameter -> Float.valueOf(Climate.unquantizeCoord(parameter.max())));
@@ -198,6 +198,10 @@ public class Climate {
     public static class ParameterList<T> {
         private final List<Pair<ParameterPoint, T>> values;
         private final RTree<T> index;
+
+        public static <T> Codec<ParameterList<T>> codec(MapCodec<T> mapCodec) {
+            return ExtraCodecs.nonEmptyList(RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ParameterPoint.CODEC.fieldOf("parameters")).forGetter(Pair::getFirst), mapCodec.forGetter(Pair::getSecond)).apply((Applicative<Pair, ?>)instance, Pair::of)).listOf()).xmap(ParameterList::new, ParameterList::values);
+        }
 
         public ParameterList(List<Pair<ParameterPoint, T>> list) {
             this.values = list;

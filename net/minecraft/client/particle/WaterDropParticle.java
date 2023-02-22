@@ -57,7 +57,7 @@ extends TextureSheetParticle {
             this.xd *= (double)0.7f;
             this.zd *= (double)0.7f;
         }
-        if ((d = Math.max(this.level.getBlockState(blockPos = new BlockPos(this.x, this.y, this.z)).getCollisionShape(this.level, blockPos).max(Direction.Axis.Y, this.x - (double)blockPos.getX(), this.z - (double)blockPos.getZ()), (double)this.level.getFluidState(blockPos).getHeight(this.level, blockPos))) > 0.0 && this.y < (double)blockPos.getY() + d) {
+        if ((d = Math.max(this.level.getBlockState(blockPos = BlockPos.containing(this.x, this.y, this.z)).getCollisionShape(this.level, blockPos).max(Direction.Axis.Y, this.x - (double)blockPos.getX(), this.z - (double)blockPos.getZ()), (double)this.level.getFluidState(blockPos).getHeight(this.level, blockPos))) > 0.0 && this.y < (double)blockPos.getY() + d) {
             this.remove();
         }
     }

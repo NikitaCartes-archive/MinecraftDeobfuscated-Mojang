@@ -8,22 +8,31 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 
 @Environment(value=EnvType.CLIENT)
 public class TextAndImageButton
-extends ImageButton {
-    private static final int TEXT_OVERFLOW_PADDING = 5;
+extends Button {
+    protected final ResourceLocation resourceLocation;
+    protected final int xTexStart;
+    protected final int yTexStart;
+    protected final int yDiffTex;
+    protected final int textureWidth;
+    protected final int textureHeight;
     private final int xOffset;
     private final int yOffset;
     private final int usedTextureWidth;
     private final int usedTextureHeight;
 
     TextAndImageButton(Component component, int i, int j, int k, int l, int m, int n, int o, int p, int q, ResourceLocation resourceLocation, Button.OnPress onPress) {
-        super(0, 0, 150, 20, i, j, m, resourceLocation, p, q, onPress, component);
+        super(0, 0, 150, 20, component, onPress, DEFAULT_NARRATION);
+        this.textureWidth = p;
+        this.textureHeight = q;
+        this.xTexStart = i;
+        this.yTexStart = j;
+        this.yDiffTex = m;
+        this.resourceLocation = resourceLocation;
         this.xOffset = k;
         this.yOffset = l;
         this.usedTextureWidth = n;
@@ -32,21 +41,15 @@ extends ImageButton {
 
     @Override
     public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-        this.renderButton(poseStack, i, j);
+        super.renderWidget(poseStack, i, j, f);
         this.renderTexture(poseStack, this.resourceLocation, this.getXOffset(), this.getYOffset(), this.xTexStart, this.yTexStart, this.yDiffTex, this.usedTextureWidth, this.usedTextureHeight, this.textureWidth, this.textureHeight);
     }
 
     @Override
-    public void renderString(PoseStack poseStack, Font font, int i, int j, int k) {
-        int o;
-        FormattedCharSequence formattedCharSequence = this.getMessage().getVisualOrderText();
-        int l = font.width(formattedCharSequence);
-        int m = i - l / 2;
-        int n = m + l;
-        if (n >= (o = this.getX() + this.width - this.usedTextureWidth - 5)) {
-            m -= n - o;
-        }
-        TextAndImageButton.drawString(poseStack, font, formattedCharSequence, m, j, k);
+    public void renderString(PoseStack poseStack, Font font, int i) {
+        int j = this.getX() + 2;
+        int k = this.getX() + this.getWidth() - this.usedTextureWidth - 6;
+        TextAndImageButton.renderScrollingString(poseStack, font, this.getMessage(), j, this.getY(), k, this.getY() + this.getHeight(), i);
     }
 
     private int getXOffset() {

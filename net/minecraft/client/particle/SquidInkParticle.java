@@ -40,7 +40,7 @@ extends SimpleAnimatedParticle {
             if (this.age > this.lifetime / 2) {
                 this.setAlpha(1.0f - ((float)this.age - (float)(this.lifetime / 2)) / (float)this.lifetime);
             }
-            if (this.level.getBlockState(new BlockPos(this.x, this.y, this.z)).isAir()) {
+            if (this.level.getBlockState(BlockPos.containing(this.x, this.y, this.z)).isAir()) {
                 this.yd -= (double)0.0074f;
             }
         }

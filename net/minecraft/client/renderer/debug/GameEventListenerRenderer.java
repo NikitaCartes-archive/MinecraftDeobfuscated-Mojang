@@ -71,7 +71,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         for (TrackedListener trackedListener2 : this.trackedListeners) {
             trackedListener2.getPosition(level).ifPresent(vec3 -> {
                 DebugRenderer.renderFloatingText(poseStack, multiBufferSource, "Listener Origin", vec3.x(), vec3.y() + (double)1.8f, vec3.z(), -1, 0.025f);
-                DebugRenderer.renderFloatingText(poseStack, multiBufferSource, new BlockPos((Vec3)vec3).toString(), vec3.x(), vec3.y() + 1.5, vec3.z(), -6959665, 0.025f);
+                DebugRenderer.renderFloatingText(poseStack, multiBufferSource, BlockPos.containing(vec3).toString(), vec3.x(), vec3.y() + 1.5, vec3.z(), -6959665, 0.025f);
             });
         }
         for (TrackedGameEvent trackedGameEvent : this.trackedGameEvents) {

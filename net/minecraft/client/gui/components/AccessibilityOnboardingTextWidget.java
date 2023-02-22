@@ -6,7 +6,6 @@ package net.minecraft.client.gui.components;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -36,7 +35,7 @@ extends MultiLineTextWidget {
     }
 
     @Override
-    protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
+    public void renderWidget(PoseStack poseStack, int i, int j, float f) {
         int k = this.getX() - 3;
         int l = this.getY() - 3;
         int m = this.getX() + this.getWidth() + 3;
@@ -47,12 +46,6 @@ extends MultiLineTextWidget {
         AccessibilityOnboardingTextWidget.fill(poseStack, k, l, m, l - 1, o);
         AccessibilityOnboardingTextWidget.fill(poseStack, k, n, m, n + 1, o);
         AccessibilityOnboardingTextWidget.fill(poseStack, k, l, m, n, 0x55000000);
-        super.renderBg(poseStack, minecraft, i, j);
-    }
-
-    @Override
-    public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-        this.renderBg(poseStack, Minecraft.getInstance(), i, j);
         super.renderWidget(poseStack, i, j, f);
     }
 

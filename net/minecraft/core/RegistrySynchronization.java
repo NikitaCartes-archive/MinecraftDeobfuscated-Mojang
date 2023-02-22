@@ -49,7 +49,7 @@ public class RegistrySynchronization {
     }
 
     private static <E> DataResult<? extends Codec<E>> getNetworkCodec(ResourceKey<? extends Registry<E>> resourceKey) {
-        return Optional.ofNullable(NETWORKABLE_REGISTRIES.get(resourceKey)).map(networkedRegistryData -> networkedRegistryData.networkCodec()).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown or not serializable registry: " + resourceKey));
+        return Optional.ofNullable(NETWORKABLE_REGISTRIES.get(resourceKey)).map(networkedRegistryData -> networkedRegistryData.networkCodec()).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown or not serializable registry: " + resourceKey));
     }
 
     private static <E> Codec<RegistryAccess> makeNetworkCodec() {

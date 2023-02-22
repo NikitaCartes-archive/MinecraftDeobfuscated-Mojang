@@ -146,7 +146,7 @@ public class Explosion {
                     double o = this.z;
                     float p = 0.3f;
                     for (float h = this.radius * (0.7f + this.level.random.nextFloat() * 0.6f); h > 0.0f; h -= 0.22500001f) {
-                        BlockPos blockPos = new BlockPos(m, n, o);
+                        BlockPos blockPos = BlockPos.containing(m, n, o);
                         BlockState blockState = this.level.getBlockState(blockPos);
                         FluidState fluidState = this.level.getFluidState(blockPos);
                         if (!this.level.isInWorldBounds(blockPos)) continue block2;

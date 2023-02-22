@@ -14,7 +14,7 @@ public interface Coordinates {
     public Vec2 getRotation(CommandSourceStack var1);
 
     default public BlockPos getBlockPos(CommandSourceStack commandSourceStack) {
-        return new BlockPos(this.getPosition(commandSourceStack));
+        return BlockPos.containing(this.getPosition(commandSourceStack));
     }
 
     public boolean isXRelative();

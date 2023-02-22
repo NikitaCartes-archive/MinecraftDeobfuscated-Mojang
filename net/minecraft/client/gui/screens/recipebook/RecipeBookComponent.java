@@ -32,7 +32,6 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookTabButton;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.gui.screens.recipebook.RecipeShownListener;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.searchtree.SearchRegistry;
@@ -244,11 +243,10 @@ RecipeShownListener {
         }
         poseStack.pushPose();
         poseStack.translate(0.0f, 0.0f, 100.0f);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
         int k = (this.width - 147) / 2 - this.xOffset;
         int l = (this.height - 166) / 2;
-        this.blit(poseStack, k, l, 1, 1, 147, 166);
+        RecipeBookComponent.blit(poseStack, k, l, 1, 1, 147, 166);
         this.searchBox.render(poseStack, i, j, f);
         for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
             recipeBookTabButton.render(poseStack, i, j, f);

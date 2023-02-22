@@ -81,7 +81,7 @@ public final class NaturalSpawner {
             chunkGetter.query(ChunkPos.asLong(blockPos), levelChunk -> {
                 MobSpawnSettings.MobSpawnCost mobSpawnCost = NaturalSpawner.getRoughBiome(blockPos, levelChunk).getMobSettings().getMobSpawnCost(entity.getType());
                 if (mobSpawnCost != null) {
-                    potentialCalculator.addCharge(entity.blockPosition(), mobSpawnCost.getCharge());
+                    potentialCalculator.addCharge(entity.blockPosition(), mobSpawnCost.charge());
                 }
                 if (entity instanceof Mob) {
                     localMobCapCalculator.addMob(levelChunk.getPos(), mobCategory);
@@ -330,7 +330,7 @@ public final class NaturalSpawner {
                         float f = spawnerData.type.getWidth();
                         double d = Mth.clamp((double)l, (double)i + (double)f, (double)i + 16.0 - (double)f);
                         double e = Mth.clamp((double)m, (double)j + (double)f, (double)j + 16.0 - (double)f);
-                        if (!serverLevelAccessor.noCollision(spawnerData.type.getAABB(d, blockPos.getY(), e)) || !SpawnPlacements.checkSpawnRules(spawnerData.type, serverLevelAccessor, MobSpawnType.CHUNK_GENERATION, new BlockPos(d, (double)blockPos.getY(), e), serverLevelAccessor.getRandom())) continue;
+                        if (!serverLevelAccessor.noCollision(spawnerData.type.getAABB(d, blockPos.getY(), e)) || !SpawnPlacements.checkSpawnRules(spawnerData.type, serverLevelAccessor, MobSpawnType.CHUNK_GENERATION, BlockPos.containing(d, blockPos.getY(), e), serverLevelAccessor.getRandom())) continue;
                         try {
                             entity = spawnerData.type.create(serverLevelAccessor.getLevel());
                         } catch (Exception exception) {
@@ -408,16 +408,16 @@ public final class NaturalSpawner {
                 this.lastCharge = 0.0;
                 return true;
             }
-            this.lastCharge = d = mobSpawnCost.getCharge();
+            this.lastCharge = d = mobSpawnCost.charge();
             double e = this.spawnPotential.getPotentialEnergyChange(blockPos, d);
-            return e <= mobSpawnCost.getEnergyBudget();
+            return e <= mobSpawnCost.energyBudget();
         }
 
         private void afterSpawn(Mob mob, ChunkAccess chunkAccess) {
             MobSpawnSettings.MobSpawnCost mobSpawnCost;
             EntityType<?> entityType = mob.getType();
             BlockPos blockPos = mob.blockPosition();
-            double d = blockPos.equals(this.lastCheckedPos) && entityType == this.lastCheckedType ? this.lastCharge : ((mobSpawnCost = NaturalSpawner.getRoughBiome(blockPos, chunkAccess).getMobSettings().getMobSpawnCost(entityType)) != null ? mobSpawnCost.getCharge() : 0.0);
+            double d = blockPos.equals(this.lastCheckedPos) && entityType == this.lastCheckedType ? this.lastCharge : ((mobSpawnCost = NaturalSpawner.getRoughBiome(blockPos, chunkAccess).getMobSettings().getMobSpawnCost(entityType)) != null ? mobSpawnCost.charge() : 0.0);
             this.spawnPotential.addCharge(blockPos, d);
             MobCategory mobCategory = entityType.getCategory();
             this.mobCategoryCounts.addTo(mobCategory, 1);

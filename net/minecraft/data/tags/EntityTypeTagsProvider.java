@@ -15,7 +15,7 @@ import net.minecraft.world.entity.EntityType;
 public class EntityTypeTagsProvider
 extends IntrinsicHolderTagsProvider<EntityType<?>> {
     public EntityTypeTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-        super(packOutput, Registries.ENTITY_TYPE, completableFuture, entityType -> entityType.builtInRegistryHolder().key());
+        super(packOutput, Registries.ENTITY_TYPE, completableFuture, (T entityType) -> entityType.builtInRegistryHolder().key());
     }
 
     @Override
@@ -31,6 +31,7 @@ extends IntrinsicHolderTagsProvider<EntityType<?>> {
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES)).add(EntityType.STRAY, EntityType.POLAR_BEAR, EntityType.SNOW_GOLEM, EntityType.WITHER);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)).add(EntityType.STRIDER, EntityType.BLAZE, EntityType.MAGMA_CUBE);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)EntityTypeTags.FROG_FOOD)).add(EntityType.SLIME, EntityType.MAGMA_CUBE);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)EntityTypeTags.FALL_DAMAGE_IMMUNE)).add(EntityType.IRON_GOLEM, EntityType.SNOW_GOLEM, EntityType.SHULKER, EntityType.ALLAY, EntityType.BAT, EntityType.BEE, EntityType.BLAZE, EntityType.CAT, EntityType.CHICKEN, EntityType.GHAST, EntityType.PHANTOM, EntityType.MAGMA_CUBE, EntityType.OCELOT, EntityType.PARROT, EntityType.WITHER);
     }
 }
 

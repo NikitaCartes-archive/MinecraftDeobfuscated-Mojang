@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.chat.Component;
@@ -72,7 +73,7 @@ implements Toast {
         RenderSystem.setShaderTexture(0, TEXTURE);
         int i = this.width();
         if (i == 160 && this.messageLines.size() <= 1) {
-            toastComponent.blit(poseStack, 0, 0, 0, 64, i, this.height());
+            GuiComponent.blit(poseStack, 0, 0, 0, 64, i, this.height());
         } else {
             j = this.height();
             int k = 28;
@@ -97,11 +98,11 @@ implements Toast {
     private void renderBackgroundRow(PoseStack poseStack, ToastComponent toastComponent, int i, int j, int k, int l) {
         int m = j == 0 ? 20 : 5;
         int n = Math.min(60, i - m);
-        toastComponent.blit(poseStack, 0, k, 0, 64 + j, m, l);
+        GuiComponent.blit(poseStack, 0, k, 0, 64 + j, m, l);
         for (int o = m; o < i - n; o += 64) {
-            toastComponent.blit(poseStack, o, k, 32, 64 + j, Math.min(64, i - o - n), l);
+            GuiComponent.blit(poseStack, o, k, 32, 64 + j, Math.min(64, i - o - n), l);
         }
-        toastComponent.blit(poseStack, i - n, k, 160 - n, 64 + j, n, l);
+        GuiComponent.blit(poseStack, i - n, k, 160 - n, 64 + j, n, l);
     }
 
     public void reset(Component component, @Nullable Component component2) {

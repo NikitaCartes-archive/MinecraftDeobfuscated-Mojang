@@ -36,7 +36,7 @@ implements Tab {
     @Override
     public void doLayout(ScreenRectangle screenRectangle) {
         this.layout.arrangeElements();
-        FrameLayout.centerInRectangle(this.layout, screenRectangle);
+        FrameLayout.alignInRectangle(this.layout, screenRectangle, 0.5f, 0.16666667f);
     }
 }
 

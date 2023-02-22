@@ -169,7 +169,7 @@ extends NamespacedSchema {
         Supplier<TypeTemplate> supplier = () -> DSL.compoundList(References.ITEM_NAME.in(schema), DSL.constType(DSL.intType()));
         schema.registerType(false, References.STATS, () -> DSL.optionalFields("stats", DSL.optionalFields("minecraft:mined", DSL.compoundList(References.BLOCK_NAME.in(schema), DSL.constType(DSL.intType())), "minecraft:crafted", (TypeTemplate)supplier.get(), "minecraft:used", (TypeTemplate)supplier.get(), "minecraft:broken", (TypeTemplate)supplier.get(), "minecraft:picked_up", (TypeTemplate)supplier.get(), DSL.optionalFields("minecraft:dropped", (TypeTemplate)supplier.get(), "minecraft:killed", DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType())), "minecraft:killed_by", DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType())), "minecraft:custom", DSL.compoundList(DSL.constType(V1460.namespacedString()), DSL.constType(DSL.intType()))))));
         schema.registerType(false, References.SAVED_DATA, () -> DSL.optionalFields("data", DSL.optionalFields("Features", DSL.compoundList(References.STRUCTURE_FEATURE.in(schema)), "Objectives", DSL.list(References.OBJECTIVE.in(schema)), "Teams", DSL.list(References.TEAM.in(schema)))));
-        schema.registerType(false, References.STRUCTURE_FEATURE, () -> DSL.optionalFields("Children", DSL.list(DSL.optionalFields("CA", References.BLOCK_STATE.in(schema), "CB", References.BLOCK_STATE.in(schema), "CC", References.BLOCK_STATE.in(schema), "CD", References.BLOCK_STATE.in(schema)))));
+        schema.registerType(false, References.STRUCTURE_FEATURE, DSL::remainder);
         Map<String, Supplier<TypeTemplate>> map3 = V1451_6.createCriterionTypes(schema);
         schema.registerType(false, References.OBJECTIVE, () -> DSL.hook(DSL.optionalFields("CriteriaType", DSL.taggedChoiceLazy("type", DSL.string(), map3)), V1451_6.UNPACK_OBJECTIVE_ID, V1451_6.REPACK_OBJECTIVE_ID));
         schema.registerType(false, References.TEAM, DSL::remainder);
@@ -178,7 +178,7 @@ extends NamespacedSchema {
         schema.registerType(false, References.BIOME, () -> DSL.constType(V1460.namespacedString()));
         schema.registerType(false, References.ENTITY_NAME, () -> DSL.constType(V1460.namespacedString()));
         schema.registerType(false, References.POI_CHUNK, DSL::remainder);
-        schema.registerType(true, References.WORLD_GEN_SETTINGS, DSL::remainder);
+        schema.registerType(false, References.WORLD_GEN_SETTINGS, DSL::remainder);
         schema.registerType(false, References.ENTITY_CHUNK, () -> DSL.optionalFields("Entities", DSL.list(References.ENTITY_TREE.in(schema))));
     }
 }

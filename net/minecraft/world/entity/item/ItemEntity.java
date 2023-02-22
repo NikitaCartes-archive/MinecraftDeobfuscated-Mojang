@@ -136,7 +136,7 @@ implements TraceableEntity {
             this.move(MoverType.SELF, this.getDeltaMovement());
             float g = 0.98f;
             if (this.onGround) {
-                g = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98f;
+                g = this.level.getBlockState(BlockPos.containing(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98f;
             }
             this.setDeltaMovement(this.getDeltaMovement().multiply(g, 0.98, g));
             if (this.onGround) {

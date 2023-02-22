@@ -95,7 +95,7 @@ extends AbstractCommandBlockEditScreen {
 
     @Override
     protected void populateAndSendPacket(BaseCommandBlock baseCommandBlock) {
-        this.minecraft.getConnection().send(new ServerboundSetCommandBlockPacket(new BlockPos(baseCommandBlock.getPosition()), this.commandEdit.getValue(), this.mode, baseCommandBlock.isTrackOutput(), this.conditional, this.autoexec));
+        this.minecraft.getConnection().send(new ServerboundSetCommandBlockPacket(BlockPos.containing(baseCommandBlock.getPosition()), this.commandEdit.getValue(), this.mode, baseCommandBlock.isTrackOutput(), this.conditional, this.autoexec));
     }
 }
 

@@ -90,6 +90,20 @@ extends ChunkSource {
         return this.level;
     }
 
+    public void replaceBiomes(int i, int j, FriendlyByteBuf friendlyByteBuf) {
+        if (!this.storage.inRange(i, j)) {
+            LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", (Object)i, (Object)j);
+            return;
+        }
+        int k = this.storage.getIndex(i, j);
+        LevelChunk levelChunk = this.storage.chunks.get(k);
+        if (!ClientChunkCache.isValidChunk(levelChunk, i, j)) {
+            LOGGER.warn("Ignoring chunk since it's not present: {}, {}", (Object)i, (Object)j);
+        } else {
+            levelChunk.replaceBiomes(friendlyByteBuf);
+        }
+    }
+
     @Nullable
     public LevelChunk replaceWithPacketData(int i, int j, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, Consumer<ClientboundLevelChunkPacketData.BlockEntityTagOutput> consumer) {
         if (!this.storage.inRange(i, j)) {

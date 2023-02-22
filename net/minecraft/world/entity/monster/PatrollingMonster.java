@@ -186,7 +186,7 @@ extends Monster {
                     Vec3 vec33 = vec32.subtract(vec3);
                     vec3 = vec33.yRot(90.0f).scale(0.4).add(vec3);
                     Vec3 vec34 = vec3.subtract(vec32).normalize().scale(10.0).add(vec32);
-                    BlockPos blockPos = new BlockPos(vec34);
+                    BlockPos blockPos = BlockPos.containing(vec34);
                     if (!pathNavigation.moveTo((blockPos = ((PatrollingMonster)this.mob).level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos)).getX(), blockPos.getY(), blockPos.getZ(), bl ? this.leaderSpeedModifier : this.speedModifier)) {
                         this.moveRandomly();
                         this.cooldownUntil = ((PatrollingMonster)this.mob).level.getGameTime() + 200L;

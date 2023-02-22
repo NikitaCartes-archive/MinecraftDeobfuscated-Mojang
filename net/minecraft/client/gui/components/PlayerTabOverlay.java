@@ -155,7 +155,6 @@ extends GuiComponent {
             int y = r + w * 9;
             PlayerTabOverlay.fill(poseStack, x, y, x + p, y + 8, n2);
             RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
             if (v >= list.size()) continue;
             PlayerInfo playerInfo2 = list.get(v);
             GameProfile gameProfile = playerInfo2.getProfile();
@@ -187,9 +186,10 @@ extends GuiComponent {
         RenderSystem.setShaderTexture(0, GUI_ICONS_LOCATION);
         boolean l = false;
         int m = playerInfo.getLatency() < 0 ? 5 : (playerInfo.getLatency() < 150 ? 0 : (playerInfo.getLatency() < 300 ? 1 : (playerInfo.getLatency() < 600 ? 2 : (playerInfo.getLatency() < 1000 ? 3 : 4))));
-        this.setBlitOffset(this.getBlitOffset() + 100);
-        this.blit(poseStack, j + i - 11, k, 0, 176 + m * 8, 10, 8);
-        this.setBlitOffset(this.getBlitOffset() - 100);
+        poseStack.pushPose();
+        poseStack.translate(0.0f, 0.0f, 100.0f);
+        PlayerTabOverlay.blit(poseStack, j + i - 11, k, 0, 176 + m * 8, 10, 8);
+        poseStack.popPose();
     }
 
     private void renderTablistScore(Objective objective, int i, String string, int j, int k, UUID uUID, PoseStack poseStack) {
@@ -225,23 +225,23 @@ extends GuiComponent {
             return;
         }
         for (q = m; q < n; ++q) {
-            this.blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
+            PlayerTabOverlay.blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
         }
         for (q = 0; q < m; ++q) {
-            this.blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
+            PlayerTabOverlay.blit(poseStack, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
             if (bl) {
                 if (q * 2 + 1 < healthState.displayedValue()) {
-                    this.blit(poseStack, j + q * o, i, 70, 0, 9, 9);
+                    PlayerTabOverlay.blit(poseStack, j + q * o, i, 70, 0, 9, 9);
                 }
                 if (q * 2 + 1 == healthState.displayedValue()) {
-                    this.blit(poseStack, j + q * o, i, 79, 0, 9, 9);
+                    PlayerTabOverlay.blit(poseStack, j + q * o, i, 79, 0, 9, 9);
                 }
             }
             if (q * 2 + 1 < l) {
-                this.blit(poseStack, j + q * o, i, q >= 10 ? 160 : 52, 0, 9, 9);
+                PlayerTabOverlay.blit(poseStack, j + q * o, i, q >= 10 ? 160 : 52, 0, 9, 9);
             }
             if (q * 2 + 1 != l) continue;
-            this.blit(poseStack, j + q * o, i, q >= 10 ? 169 : 61, 0, 9, 9);
+            PlayerTabOverlay.blit(poseStack, j + q * o, i, q >= 10 ? 169 : 61, 0, 9, 9);
         }
     }
 

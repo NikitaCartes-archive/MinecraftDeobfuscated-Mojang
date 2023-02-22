@@ -76,7 +76,7 @@ public class FeatureFlagRegistry {
             HashSet set = new HashSet();
             FeatureFlagSet featureFlagSet = this.fromNames((Iterable<ResourceLocation>)list, set::add);
             if (!set.isEmpty()) {
-                return DataResult.error("Unknown feature ids: " + set, featureFlagSet);
+                return DataResult.error(() -> "Unknown feature ids: " + set, featureFlagSet);
             }
             return DataResult.success(featureFlagSet);
         }, featureFlagSet -> List.copyOf(this.toNames((FeatureFlagSet)featureFlagSet)));

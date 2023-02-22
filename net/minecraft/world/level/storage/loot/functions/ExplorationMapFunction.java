@@ -76,7 +76,7 @@ extends LootItemConditionalFunction {
             return itemStack;
         }
         Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
-        if (vec3 != null && (blockPos = (serverLevel = lootContext.getLevel()).findNearestMapStructure(this.destination, new BlockPos(vec3), this.searchRadius, this.skipKnownStructures)) != null) {
+        if (vec3 != null && (blockPos = (serverLevel = lootContext.getLevel()).findNearestMapStructure(this.destination, BlockPos.containing(vec3), this.searchRadius, this.skipKnownStructures)) != null) {
             ItemStack itemStack2 = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), this.zoom, true, true);
             MapItem.renderBiomePreviewMap(serverLevel, itemStack2);
             MapItemSavedData.addTargetDecoration(itemStack2, blockPos, "+", this.mapDecoration);

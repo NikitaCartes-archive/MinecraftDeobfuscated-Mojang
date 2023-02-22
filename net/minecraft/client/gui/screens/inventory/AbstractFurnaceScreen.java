@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.AbstractFurnaceRecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -74,17 +73,16 @@ implements RecipeUpdateListener {
     @Override
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         int m;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, this.texture);
         int k = this.leftPos;
         int l = this.topPos;
-        this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+        AbstractFurnaceScreen.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
         if (((AbstractFurnaceMenu)this.menu).isLit()) {
             m = ((AbstractFurnaceMenu)this.menu).getLitProgress();
-            this.blit(poseStack, k + 56, l + 36 + 12 - m, 176, 12 - m, 14, m + 1);
+            AbstractFurnaceScreen.blit(poseStack, k + 56, l + 36 + 12 - m, 176, 12 - m, 14, m + 1);
         }
         m = ((AbstractFurnaceMenu)this.menu).getBurnProgress();
-        this.blit(poseStack, k + 79, l + 34, 176, 14, m + 1, 16);
+        AbstractFurnaceScreen.blit(poseStack, k + 79, l + 34, 176, 14, m + 1, 16);
     }
 
     @Override

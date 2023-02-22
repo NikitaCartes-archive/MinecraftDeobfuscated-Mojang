@@ -72,7 +72,7 @@ public class RaidCommand {
         raider.setPatrolLeader(true);
         raider.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
         raider.setPos(commandSourceStack.getPosition().x, commandSourceStack.getPosition().y, commandSourceStack.getPosition().z);
-        raider.finalizeSpawn(commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(new BlockPos(commandSourceStack.getPosition())), MobSpawnType.COMMAND, null, null);
+        raider.finalizeSpawn(commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(BlockPos.containing(commandSourceStack.getPosition())), MobSpawnType.COMMAND, null, null);
         commandSourceStack.getLevel().addFreshEntityWithPassengers(raider);
         return 1;
     }

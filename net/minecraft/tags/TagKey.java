@@ -20,7 +20,7 @@ public record TagKey<T>(ResourceKey<? extends Registry<T>> registry, ResourceLoc
     }
 
     public static <T> Codec<TagKey<T>> hashedCodec(ResourceKey<? extends Registry<T>> resourceKey) {
-        return Codec.STRING.comapFlatMap(string -> string.startsWith("#") ? ResourceLocation.read(string.substring(1)).map(resourceLocation -> TagKey.create(resourceKey, resourceLocation)) : DataResult.error("Not a tag id"), tagKey -> "#" + tagKey.location);
+        return Codec.STRING.comapFlatMap(string -> string.startsWith("#") ? ResourceLocation.read(string.substring(1)).map(resourceLocation -> TagKey.create(resourceKey, resourceLocation)) : DataResult.error(() -> "Not a tag id"), tagKey -> "#" + tagKey.location);
     }
 
     public static <T> TagKey<T> create(ResourceKey<? extends Registry<T>> resourceKey, ResourceLocation resourceLocation) {

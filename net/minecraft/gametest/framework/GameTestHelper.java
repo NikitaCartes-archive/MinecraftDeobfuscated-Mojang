@@ -355,7 +355,7 @@ public class GameTestHelper {
     public void assertEntityPresent(EntityType<?> entityType, Vec3 vec3, Vec3 vec32) {
         List<Entity> list = this.getLevel().getEntities(entityType, new AABB(vec3, vec32), Entity::isAlive);
         if (list.isEmpty()) {
-            throw new GameTestAssertPosException("Expected " + entityType.toShortString() + " between ", new BlockPos(vec3), new BlockPos(vec32), this.testInfo.getTick());
+            throw new GameTestAssertPosException("Expected " + entityType.toShortString() + " between ", BlockPos.containing(vec3), BlockPos.containing(vec32), this.testInfo.getTick());
         }
     }
 

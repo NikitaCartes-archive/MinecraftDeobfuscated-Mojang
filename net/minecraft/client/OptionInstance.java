@@ -251,7 +251,7 @@ public final class OptionInstance<T> {
                 if (integer.compareTo(this.minInclusive) >= 0 && integer.compareTo(i) <= 0) {
                     return DataResult.success(integer);
                 }
-                return DataResult.error("Value " + integer + " outside of range [" + this.minInclusive + ":" + i + "]", integer);
+                return DataResult.error(() -> "Value " + integer + " outside of range [" + this.minInclusive + ":" + i + "]", integer);
             });
         }
 

@@ -25,6 +25,7 @@ import net.minecraft.util.SpawnUtil;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.warden.Warden;
@@ -108,13 +109,13 @@ implements VibrationListener.VibrationListenerConfig {
         ServerPlayer serverPlayer2;
         Projectile projectile;
         Entity entity2;
-        Entity entity3;
+        LivingEntity livingEntity;
         if (entity instanceof ServerPlayer) {
             ServerPlayer serverPlayer = (ServerPlayer)entity;
             return serverPlayer;
         }
-        if (entity != null && (entity3 = entity.getControllingPassenger()) instanceof ServerPlayer) {
-            ServerPlayer serverPlayer = (ServerPlayer)entity3;
+        if (entity != null && (livingEntity = entity.getControllingPassenger()) instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer)livingEntity;
             return serverPlayer;
         }
         if (entity instanceof Projectile && (entity2 = (projectile = (Projectile)entity).getOwner()) instanceof ServerPlayer) {

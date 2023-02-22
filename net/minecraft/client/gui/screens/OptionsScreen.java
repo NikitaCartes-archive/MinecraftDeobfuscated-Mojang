@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
@@ -34,7 +33,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.Difficulty;
 
@@ -76,13 +74,18 @@ extends Screen {
         rowHelper.addChild(this.openScreenButton(CONTROLS, () -> new ControlsScreen(this, this.options)));
         rowHelper.addChild(this.openScreenButton(LANGUAGE, () -> new LanguageSelectScreen((Screen)this, this.options, this.minecraft.getLanguageManager())));
         rowHelper.addChild(this.openScreenButton(CHAT, () -> new ChatOptionsScreen(this, this.options)));
-        rowHelper.addChild(this.openScreenButton(RESOURCEPACK, () -> new PackSelectionScreen(this, this.minecraft.getResourcePackRepository(), this::updatePackList, this.minecraft.getResourcePackDirectory(), Component.translatable("resourcePack.title"))));
+        rowHelper.addChild(this.openScreenButton(RESOURCEPACK, () -> new PackSelectionScreen(this.minecraft.getResourcePackRepository(), this::applyPacks, this.minecraft.getResourcePackDirectory(), Component.translatable("resourcePack.title"))));
         rowHelper.addChild(this.openScreenButton(ACCESSIBILITY, () -> new AccessibilityOptionsScreen(this, this.options)));
         rowHelper.addChild(this.openScreenButton(TELEMETRY, () -> new TelemetryInfoScreen(this, this.options)));
         rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).width(200).build(), 2, rowHelper.newCellSettings().paddingTop(6));
         gridLayout.arrangeElements();
         FrameLayout.alignInRectangle(gridLayout, 0, this.height / 6 - 12, this.width, this.height, 0.5f, 0.0f);
         gridLayout.visitWidgets(this::addRenderableWidget);
+    }
+
+    private void applyPacks(PackRepository packRepository) {
+        this.options.updateResourcePacks(packRepository);
+        this.minecraft.setScreen(this);
     }
 
     private LayoutElement createOnlineButton() {
@@ -107,23 +110,6 @@ extends Screen {
 
     public static CycleButton<Difficulty> createDifficultyButton(int i, int j, String string, Minecraft minecraft) {
         return CycleButton.builder(Difficulty::getDisplayName).withValues((Difficulty[])Difficulty.values()).withInitialValue(minecraft.level.getDifficulty()).create(i, j, 150, 20, Component.translatable(string), (cycleButton, difficulty) -> minecraft.getConnection().send(new ServerboundChangeDifficultyPacket((Difficulty)difficulty)));
-    }
-
-    private void updatePackList(PackRepository packRepository) {
-        ImmutableList<String> list = ImmutableList.copyOf(this.options.resourcePacks);
-        this.options.resourcePacks.clear();
-        this.options.incompatibleResourcePacks.clear();
-        for (Pack pack : packRepository.getSelectedPacks()) {
-            if (pack.isFixedPosition()) continue;
-            this.options.resourcePacks.add(pack.getId());
-            if (pack.getCompatibility().isCompatible()) continue;
-            this.options.incompatibleResourcePacks.add(pack.getId());
-        }
-        this.options.save();
-        ImmutableList<String> list2 = ImmutableList.copyOf(this.options.resourcePacks);
-        if (!list2.equals(list)) {
-            this.minecraft.reloadResourcePacks();
-        }
     }
 
     private void lockCallback(boolean bl) {

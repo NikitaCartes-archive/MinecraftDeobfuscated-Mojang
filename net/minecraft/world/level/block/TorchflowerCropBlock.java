@@ -11,6 +11,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,8 +25,8 @@ public class TorchflowerCropBlock
 extends CropBlock {
     public static final int MAX_AGE = 2;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_2;
-    private static final float AABB_OFFSET = 4.0f;
-    private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 10.0, 12.0)};
+    private static final float AABB_OFFSET = 3.0f;
+    private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0), Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0), Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0)};
 
     public TorchflowerCropBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -54,6 +55,14 @@ extends CropBlock {
     @Override
     protected ItemLike getBaseSeedId() {
         return Items.TORCHFLOWER_SEEDS;
+    }
+
+    @Override
+    public BlockState getStateForAge(int i) {
+        if (i == 2) {
+            return Blocks.TORCHFLOWER.defaultBlockState();
+        }
+        return super.getStateForAge(i);
     }
 
     @Override

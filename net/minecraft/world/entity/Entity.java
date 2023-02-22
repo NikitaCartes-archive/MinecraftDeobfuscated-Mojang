@@ -197,7 +197,7 @@ CommandSource {
     public double xOld;
     public double yOld;
     public double zOld;
-    public float maxUpStep;
+    private float maxUpStep;
     public boolean noPhysics;
     protected final RandomSource random = RandomSource.create();
     public int tickCount;
@@ -742,7 +742,7 @@ CommandSource {
     }
 
     protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
-        return new BlockPos(this.position.x, this.getBoundingBox().minY - 0.5000001, this.position.z);
+        return BlockPos.containing(this.position.x, this.getBoundingBox().minY - 0.5000001, this.position.z);
     }
 
     protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
@@ -790,11 +790,11 @@ CommandSource {
         boolean bl2 = vec3.y != vec32.y;
         boolean bl3 = vec3.z != vec32.z;
         boolean bl5 = bl4 = this.onGround || bl2 && vec3.y < 0.0;
-        if (this.maxUpStep > 0.0f && bl4 && (bl || bl3)) {
+        if (this.maxUpStep() > 0.0f && bl4 && (bl || bl3)) {
             Vec3 vec35;
-            Vec3 vec33 = Entity.collideBoundingBox(this, new Vec3(vec3.x, this.maxUpStep, vec3.z), aABB, this.level, list);
-            Vec3 vec34 = Entity.collideBoundingBox(this, new Vec3(0.0, this.maxUpStep, 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level, list);
-            if (vec34.y < (double)this.maxUpStep && (vec35 = Entity.collideBoundingBox(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, list).add(vec34)).horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
+            Vec3 vec33 = Entity.collideBoundingBox(this, new Vec3(vec3.x, this.maxUpStep(), vec3.z), aABB, this.level, list);
+            Vec3 vec34 = Entity.collideBoundingBox(this, new Vec3(0.0, this.maxUpStep(), 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level, list);
+            if (vec34.y < (double)this.maxUpStep() && (vec35 = Entity.collideBoundingBox(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level, list).add(vec34)).horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
                 vec33 = vec35;
             }
             if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
@@ -863,10 +863,10 @@ CommandSource {
     }
 
     protected void checkInsideBlocks() {
+        BlockPos blockPos2;
         AABB aABB = this.getBoundingBox();
-        BlockPos blockPos = new BlockPos(aABB.minX + 1.0E-7, aABB.minY + 1.0E-7, aABB.minZ + 1.0E-7);
-        BlockPos blockPos2 = new BlockPos(aABB.maxX - 1.0E-7, aABB.maxY - 1.0E-7, aABB.maxZ - 1.0E-7);
-        if (this.level.hasChunksAt(blockPos, blockPos2)) {
+        BlockPos blockPos = BlockPos.containing(aABB.minX + 1.0E-7, aABB.minY + 1.0E-7, aABB.minZ + 1.0E-7);
+        if (this.level.hasChunksAt(blockPos, blockPos2 = BlockPos.containing(aABB.maxX - 1.0E-7, aABB.maxY - 1.0E-7, aABB.maxZ - 1.0E-7))) {
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
             for (int i = blockPos.getX(); i <= blockPos2.getX(); ++i) {
                 for (int j = blockPos.getY(); j <= blockPos2.getY(); ++j) {
@@ -985,6 +985,9 @@ CommandSource {
     }
 
     public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
+        if (this.type.is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) {
+            return false;
+        }
         if (this.isVehicle()) {
             for (Entity entity : this.getPassengers()) {
                 entity.causeFallDamage(f, g, damageSource);
@@ -999,7 +1002,7 @@ CommandSource {
 
     private boolean isInRain() {
         BlockPos blockPos = this.blockPosition();
-        return this.level.isRainingAt(blockPos) || this.level.isRainingAt(new BlockPos((double)blockPos.getX(), this.getBoundingBox().maxY, (double)blockPos.getZ()));
+        return this.level.isRainingAt(blockPos) || this.level.isRainingAt(BlockPos.containing(blockPos.getX(), this.getBoundingBox().maxY, blockPos.getZ()));
     }
 
     private boolean isInBubbleColumn() {
@@ -1064,7 +1067,7 @@ CommandSource {
         if (entity instanceof Boat && !(boat = (Boat)entity).isUnderWater() && boat.getBoundingBox().maxY >= d && boat.getBoundingBox().minY <= d) {
             return;
         }
-        BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
+        BlockPos blockPos = BlockPos.containing(this.getX(), d, this.getZ());
         FluidState fluidState = this.level.getFluidState(blockPos);
         double e = (float)blockPos.getY() + fluidState.getHeight(this.level, blockPos);
         if (e > d) {
@@ -1154,7 +1157,7 @@ CommandSource {
     @Deprecated
     public float getLightLevelDependentMagicValue() {
         if (this.level.hasChunkAt(this.getBlockX(), this.getBlockZ())) {
-            return this.level.getLightLevelDependentMagicValue(new BlockPos(this.getX(), this.getEyeY(), this.getZ()));
+            return this.level.getLightLevelDependentMagicValue(BlockPos.containing(this.getX(), this.getEyeY(), this.getZ()));
         }
         return 0.0f;
     }
@@ -2078,7 +2081,7 @@ CommandSource {
     }
 
     protected void moveTowardsClosestSpace(double d, double e, double f) {
-        BlockPos blockPos = new BlockPos(d, e, f);
+        BlockPos blockPos = BlockPos.containing(d, e, f);
         Vec3 vec3 = new Vec3(d - (double)blockPos.getX(), e - (double)blockPos.getY(), f - (double)blockPos.getZ());
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         Direction direction = Direction.UP;
@@ -2163,7 +2166,7 @@ CommandSource {
     }
 
     public boolean isInvulnerableTo(DamageSource damageSource) {
-        return this.isRemoved() || this.invulnerable && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.isCreativePlayer() || damageSource.is(DamageTypeTags.IS_FIRE) && this.fireImmune();
+        return this.isRemoved() || this.invulnerable && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.isCreativePlayer() || damageSource.is(DamageTypeTags.IS_FIRE) && this.fireImmune() || damageSource.is(DamageTypeTags.IS_FALL) && this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
     }
 
     public boolean isInvulnerable() {
@@ -2360,7 +2363,7 @@ CommandSource {
         if (!(this.level instanceof ServerLevel)) {
             return;
         }
-        ChunkPos chunkPos = new ChunkPos(new BlockPos(d, e, f));
+        ChunkPos chunkPos = new ChunkPos(BlockPos.containing(d, e, f));
         ((ServerLevel)this.level).getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 0, this.getId());
         this.level.getChunk(chunkPos.x, chunkPos.z);
         this.teleportTo(d, e, f);
@@ -2575,7 +2578,7 @@ CommandSource {
     }
 
     @Nullable
-    public Entity getControllingPassenger() {
+    public LivingEntity getControllingPassenger() {
         return null;
     }
 
@@ -2648,10 +2651,15 @@ CommandSource {
     }
 
     public boolean isControlledByLocalInstance() {
-        Entity entity = this.getControllingPassenger();
-        if (entity instanceof Player) {
-            return ((Player)entity).isLocalPlayer();
+        LivingEntity livingEntity = this.getControllingPassenger();
+        if (livingEntity instanceof Player) {
+            Player player = (Player)livingEntity;
+            return player.isLocalPlayer();
         }
+        return this.isEffectiveAi();
+    }
+
+    public boolean isEffectiveAi() {
         return !this.level.isClientSide;
     }
 
@@ -2988,6 +2996,14 @@ CommandSource {
 
     public boolean canSprint() {
         return false;
+    }
+
+    public float maxUpStep() {
+        return this.hasControllingPassenger() ? Math.max(this.maxUpStep, 1.0f) : this.maxUpStep;
+    }
+
+    public void setMaxUpStep(float f) {
+        this.maxUpStep = f;
     }
 
     public final boolean isRemoved() {

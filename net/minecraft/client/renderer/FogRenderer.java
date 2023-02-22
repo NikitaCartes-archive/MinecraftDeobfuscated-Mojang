@@ -49,7 +49,7 @@ public class FogRenderer {
         Entity entity = camera.getEntity();
         if (fogType == FogType.WATER) {
             long l = Util.getMillis();
-            int j2 = clientLevel.getBiome(new BlockPos(camera.getPosition())).value().getWaterFogColor();
+            int j2 = clientLevel.getBiome(BlockPos.containing(camera.getPosition())).value().getWaterFogColor();
             if (biomeChangedTime < 0L) {
                 targetBiomeFog = j2;
                 previousBiomeFog = j2;

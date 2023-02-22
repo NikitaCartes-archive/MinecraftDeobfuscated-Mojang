@@ -160,7 +160,7 @@ extends RealmsScreen {
         int k = i + 12;
         int l = j - 12;
         int m = this.font.width(component);
-        this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+        RealmsPendingInvitesScreen.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
         this.font.drawShadow(poseStack, component, (float)k, (float)l, 0xFFFFFF);
     }
 

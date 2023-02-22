@@ -63,7 +63,7 @@ implements Codec<HolderSet<E>> {
         Optional optional;
         if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).owner(this.registryKey)).isPresent()) {
             if (!holderSet.canSerializeIn(optional.get())) {
-                return DataResult.error("HolderSet " + holderSet + " is not valid in current registry set");
+                return DataResult.error(() -> "HolderSet " + holderSet + " is not valid in current registry set");
             }
             return this.registryAwareCodec.encode(holderSet.unwrap().mapRight(List::copyOf), dynamicOps, object);
         }
@@ -79,7 +79,7 @@ implements Codec<HolderSet<E>> {
                     list.add(direct);
                     continue;
                 }
-                return DataResult.error("Can't decode element " + holder + " without registry");
+                return DataResult.error(() -> "Can't decode element " + holder + " without registry");
             }
             return DataResult.success(new Pair(HolderSet.direct(list), pair.getSecond()));
         });

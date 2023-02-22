@@ -95,7 +95,7 @@ implements VariantHolder<FrogVariant> {
         this.setPathfindingMalus(BlockPathTypes.WATER, 4.0f);
         this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, -1.0f);
         this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.02f, 0.1f, true);
-        this.maxUpStep = 1.0f;
+        this.setMaxUpStep(1.0f);
     }
 
     protected Brain.Provider<Frog> brainProvider() {
@@ -317,7 +317,7 @@ implements VariantHolder<FrogVariant> {
 
     @Override
     public void travel(Vec3 vec3) {
-        if (this.isEffectiveAi() && this.isInWater()) {
+        if (this.isControlledByLocalInstance() && this.isInWater()) {
             this.moveRelative(this.getSpeed(), vec3);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9));

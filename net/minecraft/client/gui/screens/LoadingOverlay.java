@@ -18,7 +18,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Overlay;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
@@ -112,9 +111,7 @@ extends Overlay {
         int u = (int)(e * 0.5);
         RenderSystem.setShaderTexture(0, MOJANG_STUDIOS_LOGO_LOCATION);
         RenderSystem.enableBlend();
-        RenderSystem.blendEquation(32774);
         RenderSystem.blendFunc(770, 1);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, o);
         LoadingOverlay.blit(poseStack, n - u, s - t, u, (int)d, -0.0625f, 0.0f, 120, 60, 120, 120);
         LoadingOverlay.blit(poseStack, n, s - t, u, (int)d, 0.0625f, 60.0f, 120, 60, 120, 120);

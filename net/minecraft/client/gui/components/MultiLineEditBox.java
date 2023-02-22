@@ -111,7 +111,7 @@ extends AbstractScrollWidget {
     protected void renderContents(PoseStack poseStack, int i, int j, float f) {
         String string = this.textField.value();
         if (string.isEmpty() && !this.isFocused()) {
-            this.font.drawWordWrap(this.placeholder, this.getX() + this.innerPadding(), this.getY() + this.innerPadding(), this.width - this.totalInnerPadding(), -857677600);
+            this.font.drawWordWrap(poseStack, this.placeholder, this.getX() + this.innerPadding(), this.getY() + this.innerPadding(), this.width - this.totalInnerPadding(), -857677600);
             return;
         }
         int k = this.textField.cursor();

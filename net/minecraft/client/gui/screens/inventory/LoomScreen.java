@@ -14,7 +14,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -90,26 +89,25 @@ extends AbstractContainerScreen<LoomMenu> {
     @Override
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         this.renderBackground(poseStack);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, BG_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;
-        this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+        LoomScreen.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
         Slot slot = ((LoomMenu)this.menu).getBannerSlot();
         Slot slot2 = ((LoomMenu)this.menu).getDyeSlot();
         Slot slot3 = ((LoomMenu)this.menu).getPatternSlot();
         Slot slot4 = ((LoomMenu)this.menu).getResultSlot();
         if (!slot.hasItem()) {
-            this.blit(poseStack, k + slot.x, l + slot.y, this.imageWidth, 0, 16, 16);
+            LoomScreen.blit(poseStack, k + slot.x, l + slot.y, this.imageWidth, 0, 16, 16);
         }
         if (!slot2.hasItem()) {
-            this.blit(poseStack, k + slot2.x, l + slot2.y, this.imageWidth + 16, 0, 16, 16);
+            LoomScreen.blit(poseStack, k + slot2.x, l + slot2.y, this.imageWidth + 16, 0, 16, 16);
         }
         if (!slot3.hasItem()) {
-            this.blit(poseStack, k + slot3.x, l + slot3.y, this.imageWidth + 32, 0, 16, 16);
+            LoomScreen.blit(poseStack, k + slot3.x, l + slot3.y, this.imageWidth + 32, 0, 16, 16);
         }
         int m = (int)(41.0f * this.scrollOffs);
-        this.blit(poseStack, k + 119, l + 13 + m, 232 + (this.displayPatterns ? 0 : 12), 0, 12, 15);
+        LoomScreen.blit(poseStack, k + 119, l + 13 + m, 232 + (this.displayPatterns ? 0 : 12), 0, 12, 15);
         Lighting.setupForFlatItems();
         if (this.resultBannerPatterns != null && !this.hasMaxPatterns) {
             MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
@@ -125,7 +123,7 @@ extends AbstractContainerScreen<LoomMenu> {
             poseStack.popPose();
             bufferSource.endBatch();
         } else if (this.hasMaxPatterns) {
-            this.blit(poseStack, k + slot4.x - 2, l + slot4.y - 2, this.imageWidth, 17, 17, 16);
+            LoomScreen.blit(poseStack, k + slot4.x - 2, l + slot4.y - 2, this.imageWidth, 17, 17, 16);
         }
         if (this.displayPatterns) {
             int n = k + 60;
@@ -142,7 +140,7 @@ extends AbstractContainerScreen<LoomMenu> {
                     int u = o + p * 14;
                     boolean bl2 = bl = i >= t && j >= u && i < t + 14 && j < u + 14;
                     int v = s == ((LoomMenu)this.menu).getSelectedBannerPatternIndex() ? this.imageHeight + 14 : (bl ? this.imageHeight + 28 : this.imageHeight);
-                    this.blit(poseStack, t, u, 0, v, 14, 14);
+                    LoomScreen.blit(poseStack, t, u, 0, v, 14, 14);
                     this.renderPattern(list.get(s), t, u);
                 }
             }

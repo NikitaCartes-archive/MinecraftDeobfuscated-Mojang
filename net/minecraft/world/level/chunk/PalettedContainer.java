@@ -197,7 +197,7 @@ PalettedContainerRO<T> {
         } else {
             Optional<LongStream> optional = packedData.storage();
             if (optional.isEmpty()) {
-                return DataResult.error("Missing values for non-zero storage");
+                return DataResult.error(() -> "Missing values for non-zero storage");
             }
             long[] ls = optional.get().toArray();
             try {
@@ -212,7 +212,7 @@ PalettedContainerRO<T> {
                     bitStorage = new SimpleBitStorage(configuration.bits(), i2, ls);
                 }
             } catch (SimpleBitStorage.InitializationException initializationException) {
-                return DataResult.error("Failed to read PalettedContainer: " + initializationException.getMessage());
+                return DataResult.error(() -> "Failed to read PalettedContainer: " + initializationException.getMessage());
             }
         }
         return DataResult.success(new PalettedContainer<T>(idMap, strategy, configuration, bitStorage, list));

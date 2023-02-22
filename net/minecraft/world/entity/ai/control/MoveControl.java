@@ -98,7 +98,7 @@ implements Control {
             BlockPos blockPos = this.mob.blockPosition();
             BlockState blockState = this.mob.level.getBlockState(blockPos);
             VoxelShape voxelShape = blockState.getCollisionShape(this.mob.level, blockPos);
-            if (o > (double)this.mob.maxUpStep && d * d + e * e < (double)Math.max(1.0f, this.mob.getBbWidth()) || !voxelShape.isEmpty() && this.mob.getY() < voxelShape.max(Direction.Axis.Y) + (double)blockPos.getY() && !blockState.is(BlockTags.DOORS) && !blockState.is(BlockTags.FENCES)) {
+            if (o > (double)this.mob.maxUpStep() && d * d + e * e < (double)Math.max(1.0f, this.mob.getBbWidth()) || !voxelShape.isEmpty() && this.mob.getY() < voxelShape.max(Direction.Axis.Y) + (double)blockPos.getY() && !blockState.is(BlockTags.DOORS) && !blockState.is(BlockTags.FENCES)) {
                 this.mob.getJumpControl().jump();
                 this.operation = Operation.JUMPING;
             }

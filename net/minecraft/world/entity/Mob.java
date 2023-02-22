@@ -183,8 +183,9 @@ implements Targeting {
     }
 
     public MoveControl getMoveControl() {
-        if (this.isPassenger() && this.getVehicle() instanceof Mob) {
-            Mob mob = (Mob)this.getVehicle();
+        Entity entity = this.getVehicle();
+        if (entity instanceof Mob) {
+            Mob mob = (Mob)entity;
             return mob.getMoveControl();
         }
         return this.moveControl;
@@ -1232,11 +1233,6 @@ implements Targeting {
     }
 
     @Override
-    public boolean isControlledByLocalInstance() {
-        return this.hasControllingPassenger() && super.isControlledByLocalInstance();
-    }
-
-    @Override
     public boolean isEffectiveAi() {
         return super.isEffectiveAi() && !this.isNoAi();
     }
@@ -1331,7 +1327,7 @@ implements Targeting {
         if (this.level.isDay() && !this.level.isClientSide) {
             boolean bl;
             float f = this.getLightLevelDependentMagicValue();
-            BlockPos blockPos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
+            BlockPos blockPos = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
             boolean bl2 = bl = this.isInWaterRainOrBubble() || this.isInPowderSnow || this.wasInPowderSnow;
             if (f > 0.5f && this.random.nextFloat() * 30.0f < (f - 0.4f) * 2.0f && !bl && this.level.canSeeSky(blockPos)) {
                 return true;

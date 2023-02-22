@@ -64,9 +64,9 @@ extends DelegatingOps<T> {
         return ExtraCodecs.retrieveContext(dynamicOps -> {
             if (dynamicOps instanceof RegistryOps) {
                 RegistryOps registryOps = (RegistryOps)dynamicOps;
-                return registryOps.lookupProvider.lookup(resourceKey).map(registryInfo -> DataResult.success(registryInfo.getter(), registryInfo.elementsLifecycle())).orElseGet(() -> DataResult.error("Unknown registry: " + resourceKey));
+                return registryOps.lookupProvider.lookup(resourceKey).map(registryInfo -> DataResult.success(registryInfo.getter(), registryInfo.elementsLifecycle())).orElseGet(() -> DataResult.error(() -> "Unknown registry: " + resourceKey));
             }
-            return DataResult.error("Not a registry ops");
+            return DataResult.error(() -> "Not a registry ops");
         }).forGetter(object -> null);
     }
 
@@ -75,9 +75,9 @@ extends DelegatingOps<T> {
         return ExtraCodecs.retrieveContext(dynamicOps -> {
             if (dynamicOps instanceof RegistryOps) {
                 RegistryOps registryOps = (RegistryOps)dynamicOps;
-                return registryOps.lookupProvider.lookup(resourceKey2).flatMap(registryInfo -> registryInfo.getter().get(resourceKey)).map(DataResult::success).orElseGet(() -> DataResult.error("Can't find value: " + resourceKey));
+                return registryOps.lookupProvider.lookup(resourceKey2).flatMap(registryInfo -> registryInfo.getter().get(resourceKey)).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Can't find value: " + resourceKey));
             }
-            return DataResult.error("Not a registry ops");
+            return DataResult.error(() -> "Not a registry ops");
         }).forGetter(object -> null);
     }
 

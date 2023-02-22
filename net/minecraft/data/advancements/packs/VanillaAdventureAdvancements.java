@@ -51,7 +51,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.block.Blocks;
 
 public class VanillaAdventureAdvancements
@@ -74,7 +74,7 @@ implements AdvancementSubProvider {
     public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
         Advancement advancement = Advancement.Builder.advancement().display(Items.MAP, (Component)Component.translatable("advancements.adventure.root.title"), (Component)Component.translatable("advancements.adventure.root.description"), new ResourceLocation("textures/gui/advancements/backgrounds/adventure.png"), FrameType.TASK, false, false, false).requirements(RequirementsStrategy.OR).addCriterion("killed_something", KilledTrigger.TriggerInstance.playerKilledEntity()).addCriterion("killed_by_something", KilledTrigger.TriggerInstance.entityKilledPlayer()).save(consumer, "adventure/root");
         Advancement advancement2 = Advancement.Builder.advancement().parent(advancement).display(Blocks.RED_BED, (Component)Component.translatable("advancements.adventure.sleep_in_bed.title"), (Component)Component.translatable("advancements.adventure.sleep_in_bed.description"), null, FrameType.TASK, true, true, false).addCriterion("slept_in_bed", PlayerTrigger.TriggerInstance.sleptInBed()).save(consumer, "adventure/sleep_in_bed");
-        VanillaAdventureAdvancements.createAdventuringTime(consumer, advancement2, MultiNoiseBiomeSource.Preset.OVERWORLD);
+        VanillaAdventureAdvancements.createAdventuringTime(consumer, advancement2, MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD);
         Advancement advancement3 = Advancement.Builder.advancement().parent(advancement).display(Items.EMERALD, (Component)Component.translatable("advancements.adventure.trade.title"), (Component)Component.translatable("advancements.adventure.trade.description"), null, FrameType.TASK, true, true, false).addCriterion("traded", TradeTrigger.TriggerInstance.tradedWithVillager()).save(consumer, "adventure/trade");
         Advancement.Builder.advancement().parent(advancement3).display(Items.EMERALD, (Component)Component.translatable("advancements.adventure.trade_at_world_height.title"), (Component)Component.translatable("advancements.adventure.trade_at_world_height.description"), null, FrameType.TASK, true, true, false).addCriterion("trade_at_world_height", TradeTrigger.TriggerInstance.tradedWithVillager(EntityPredicate.Builder.entity().located(LocationPredicate.atYLocation(MinMaxBounds.Doubles.atLeast(319.0))))).save(consumer, "adventure/trade_at_world_height");
         Advancement advancement4 = this.addMobsToKill(Advancement.Builder.advancement()).parent(advancement).display(Items.IRON_SWORD, (Component)Component.translatable("advancements.adventure.kill_a_mob.title"), (Component)Component.translatable("advancements.adventure.kill_a_mob.description"), null, FrameType.TASK, true, true, false).requirements(RequirementsStrategy.OR).save(consumer, "adventure/kill_a_mob");
@@ -104,8 +104,8 @@ implements AdvancementSubProvider {
         Advancement.Builder.advancement().parent(advancement).display(Blocks.SCULK_SENSOR, (Component)Component.translatable("advancements.adventure.avoid_vibration.title"), (Component)Component.translatable("advancements.adventure.avoid_vibration.description"), null, FrameType.TASK, true, true, false).addCriterion("avoid_vibration", PlayerTrigger.TriggerInstance.avoidVibration()).save(consumer, "adventure/avoid_vibration");
     }
 
-    protected static void createAdventuringTime(Consumer<Advancement> consumer, Advancement advancement, MultiNoiseBiomeSource.Preset preset) {
-        VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), preset.possibleBiomes().toList()).parent(advancement).display(Items.DIAMOND_BOOTS, (Component)Component.translatable("advancements.adventure.adventuring_time.title"), (Component)Component.translatable("advancements.adventure.adventuring_time.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "adventure/adventuring_time");
+    protected static void createAdventuringTime(Consumer<Advancement> consumer, Advancement advancement, MultiNoiseBiomeSourceParameterList.Preset preset) {
+        VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), preset.usedBiomes().toList()).parent(advancement).display(Items.DIAMOND_BOOTS, (Component)Component.translatable("advancements.adventure.adventuring_time.title"), (Component)Component.translatable("advancements.adventure.adventuring_time.description"), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(500)).save(consumer, "adventure/adventuring_time");
     }
 
     private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

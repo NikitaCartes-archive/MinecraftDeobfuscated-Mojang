@@ -24,10 +24,12 @@ extends AgeableHierarchicalModel<T> {
     private static final float MAX_WALK_ANIMATION_SPEED = 1.0f;
     private static final float PANIC_ANIMATION_FACTOR = 2.0f;
     private final ModelPart root;
+    private final ModelPart head;
 
     public SnifferModel(ModelPart modelPart) {
         super(0.5f, 24.0f);
         this.root = modelPart.getChild("root");
+        this.head = this.root.getChild("bone").getChild("body").getChild("head");
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -52,6 +54,8 @@ extends AgeableHierarchicalModel<T> {
     @Override
     public void setupAnim(T sniffer, float f, float g, float h, float i, float j) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
+        this.head.xRot = j * ((float)Math.PI / 180);
+        this.head.yRot = i * ((float)Math.PI / 180);
         float k = Math.min((float)((Entity)sniffer).getDeltaMovement().horizontalDistanceSqr() * 9000.0f, 1.0f);
         float l = k * 2.0f;
         this.animate(((Sniffer)sniffer).walkingAnimationState, SnifferAnimation.SNIFFER_WALK, h, k);

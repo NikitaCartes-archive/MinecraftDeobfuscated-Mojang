@@ -26,6 +26,8 @@ public class CamelModel<T extends Camel>
 extends HierarchicalModel<T> {
     private static final float MAX_WALK_ANIMATION_SPEED = 2.0f;
     private static final float WALK_ANIMATION_SCALE_FACTOR = 2.5f;
+    private static final float BABY_SCALE = 0.45f;
+    private static final float BABY_Y_OFFSET = 29.35f;
     private static final String SADDLE = "saddle";
     private static final String BRIDLE = "bridle";
     private static final String REINS = "reins";
@@ -101,11 +103,9 @@ extends HierarchicalModel<T> {
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
         if (this.young) {
-            float l = 2.0f;
-            float m = 1.1f;
             poseStack.pushPose();
-            poseStack.scale(0.45454544f, 0.41322312f, 0.45454544f);
-            poseStack.translate(0.0f, 2.0625f, 0.0f);
+            poseStack.scale(0.45f, 0.45f, 0.45f);
+            poseStack.translate(0.0f, 1.834375f, 0.0f);
             this.root().render(poseStack, vertexConsumer, i, j, f, g, h, k);
             poseStack.popPose();
         } else {

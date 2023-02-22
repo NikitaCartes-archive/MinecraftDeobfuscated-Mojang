@@ -17,11 +17,6 @@ extends PathfinderMob {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
-        return false;
-    }
-
-    @Override
     @Nullable
     protected SoundEvent getAmbientSound() {
         return null;

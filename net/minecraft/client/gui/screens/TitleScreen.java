@@ -5,7 +5,6 @@ package net.minecraft.client.gui.screens;
 
 import com.google.common.util.concurrent.Runnables;
 import com.mojang.authlib.minecraft.BanDetails;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
@@ -42,7 +41,6 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.renderer.CubeMap;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
@@ -94,7 +92,7 @@ extends Screen {
     }
 
     private boolean realmsNotificationsEnabled() {
-        return this.minecraft.options.realmsNotifications().get() != false && this.realmsNotificationsScreen != null;
+        return this.realmsNotificationsScreen != null;
     }
 
     @Override
@@ -139,7 +137,7 @@ extends Screen {
         this.addRenderableWidget(new ImageButton(this.width / 2 + 104, l + 72 + 12, 20, 20, 0, 0, 20, Button.ACCESSIBILITY_TEXTURE, 32, 64, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), Component.translatable("narrator.button.accessibility")));
         this.addRenderableWidget(new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new WinScreen(false, this.logoRenderer, Runnables.doNothing())), this.font));
         this.minecraft.setConnectedToRealms(false);
-        if (this.minecraft.options.realmsNotifications().get().booleanValue() && this.realmsNotificationsScreen == null) {
+        if (this.realmsNotificationsScreen == null) {
             this.realmsNotificationsScreen = new RealmsNotificationsScreen();
         }
         if (this.realmsNotificationsEnabled()) {
@@ -237,10 +235,8 @@ extends Screen {
         }
         float g = this.fading ? (float)(Util.getMillis() - this.fadeInStart) / 1000.0f : 1.0f;
         this.panorama.render(f, Mth.clamp(g, 0.0f, 1.0f));
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, PANORAMA_OVERLAY);
         RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, this.fading ? (float)Mth.ceil(Mth.clamp(g, 0.0f, 1.0f)) : 1.0f);
         TitleScreen.blit(poseStack, 0, 0, this.width, this.height, 0.0f, 0.0f, 16, 128, 16, 128);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -292,6 +288,14 @@ extends Screen {
     public void removed() {
         if (this.realmsNotificationsScreen != null) {
             this.realmsNotificationsScreen.removed();
+        }
+    }
+
+    @Override
+    public void added() {
+        super.added();
+        if (this.realmsNotificationsScreen != null) {
+            this.realmsNotificationsScreen.added();
         }
     }
 

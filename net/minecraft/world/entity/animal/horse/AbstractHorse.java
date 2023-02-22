@@ -76,6 +76,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -96,6 +97,8 @@ Saddleable {
     private static final float MAX_JUMP_STRENGTH = (float)AbstractHorse.generateJumpStrength(() -> 1.0);
     private static final float MIN_HEALTH = AbstractHorse.generateMaxHealth(i -> 0);
     private static final float MAX_HEALTH = AbstractHorse.generateMaxHealth(i -> i - 1);
+    private static final float BACKWARDS_MOVE_SPEED_FACTOR = 0.25f;
+    private static final float SIDEWAYS_MOVE_SPEED_FACTOR = 0.5f;
     private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse && ((AbstractHorse)livingEntity).isBred();
     private static final TargetingConditions MOMMY_TARGETING = TargetingConditions.forNonCombat().range(16.0).ignoreLineOfSight().selector(PARENT_HORSE_SELECTOR);
     private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Items.SUGAR, Blocks.HAY_BLOCK.asItem(), Items.APPLE, Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE);
@@ -132,7 +135,7 @@ Saddleable {
 
     protected AbstractHorse(EntityType<? extends AbstractHorse> entityType, Level level) {
         super((EntityType<? extends Animal>)entityType, level);
-        this.maxUpStep = 1.0f;
+        this.setMaxUpStep(1.0f);
         this.createInventory();
     }
 
@@ -574,7 +577,7 @@ Saddleable {
             this.mouthCounter = 0;
             this.setFlag(64, false);
         }
-        if ((this.isControlledByLocalInstance() || this.isEffectiveAi()) && this.standCounter > 0 && ++this.standCounter > 20) {
+        if (this.isEffectiveAi() && this.standCounter > 0 && ++this.standCounter > 20) {
             this.standCounter = 0;
             this.setStanding(false);
         }
@@ -675,7 +678,7 @@ Saddleable {
     }
 
     public void standIfPossible() {
-        if (this.canPerformRearing() && this.isControlledByLocalInstance() || this.isEffectiveAi()) {
+        if (this.canPerformRearing() && this.isEffectiveAi()) {
             this.standCounter = 1;
             this.setStanding(true);
         }
@@ -702,66 +705,59 @@ Saddleable {
     }
 
     @Override
-    public void travel(Vec3 vec3) {
-        if (!this.isAlive()) {
-            return;
-        }
-        LivingEntity livingEntity = this.getControllingPassenger();
-        if (!this.isVehicle() || livingEntity == null || this.mountIgnoresControllerInput(livingEntity)) {
-            this.flyingSpeed = 0.02f;
-            super.travel(vec3);
-            return;
-        }
-        this.setRot(livingEntity.getYRot(), livingEntity.getXRot() * 0.5f);
+    protected void tickRidden(LivingEntity livingEntity, Vec3 vec3) {
+        super.tickRidden(livingEntity, vec3);
+        Vec2 vec2 = this.getRiddenRotation(livingEntity);
+        this.setRot(vec2.y, vec2.x);
         this.yBodyRot = this.yHeadRot = this.getYRot();
         this.yRotO = this.yHeadRot;
+        if (this.isControlledByLocalInstance()) {
+            if (vec3.z <= 0.0) {
+                this.gallopSoundCounter = 0;
+            }
+            if (this.onGround) {
+                this.setIsJumping(false);
+                if (this.playerJumpPendingScale > 0.0f && !this.isJumping()) {
+                    this.executeRidersJump(this.playerJumpPendingScale, vec3);
+                }
+                this.playerJumpPendingScale = 0.0f;
+            }
+        }
+    }
+
+    protected Vec2 getRiddenRotation(LivingEntity livingEntity) {
+        return new Vec2(livingEntity.getXRot() * 0.5f, livingEntity.getYRot());
+    }
+
+    @Override
+    protected Vec3 getRiddenInput(LivingEntity livingEntity, Vec3 vec3) {
+        if (this.onGround && this.playerJumpPendingScale == 0.0f && this.isStanding() && !this.allowStandSliding) {
+            return Vec3.ZERO;
+        }
         float f = livingEntity.xxa * 0.5f;
         float g = livingEntity.zza;
         if (g <= 0.0f) {
             g *= 0.25f;
-            this.gallopSoundCounter = 0;
         }
-        if (this.onGround && this.playerJumpPendingScale == 0.0f && this.isStanding() && !this.allowStandSliding) {
-            f = 0.0f;
-            g = 0.0f;
-        }
-        if (this.playerJumpPendingScale > 0.0f && !this.isJumping() && this.onGround) {
-            this.executeRidersJump(this.playerJumpPendingScale, f, g);
-            this.playerJumpPendingScale = 0.0f;
-        }
-        this.flyingSpeed = this.getSpeed() * 0.1f;
-        if (this.isControlledByLocalInstance()) {
-            this.setSpeed(this.getDrivenMovementSpeed(livingEntity));
-            super.travel(new Vec3(f, vec3.y, g));
-        } else {
-            this.calculateEntityAnimation(false);
-            this.tryCheckInsideBlocks();
-        }
-        if (this.onGround) {
-            this.playerJumpPendingScale = 0.0f;
-            this.setIsJumping(false);
-        }
+        return new Vec3(f, 0.0, g);
     }
 
-    protected float getDrivenMovementSpeed(LivingEntity livingEntity) {
+    @Override
+    protected float getRiddenSpeed(LivingEntity livingEntity) {
         return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
     }
 
-    protected boolean mountIgnoresControllerInput(LivingEntity livingEntity) {
-        return false;
-    }
-
-    protected void executeRidersJump(float f, float g, float h) {
+    protected void executeRidersJump(float f, Vec3 vec3) {
         double d = this.getCustomJump() * (double)f * (double)this.getBlockJumpFactor();
         double e = d + this.getJumpBoostPower();
-        Vec3 vec3 = this.getDeltaMovement();
-        this.setDeltaMovement(vec3.x, e, vec3.z);
+        Vec3 vec32 = this.getDeltaMovement();
+        this.setDeltaMovement(vec32.x, e, vec32.z);
         this.setIsJumping(true);
         this.hasImpulse = true;
-        if (h > 0.0f) {
-            float i = Mth.sin(this.getYRot() * ((float)Math.PI / 180));
-            float j = Mth.cos(this.getYRot() * ((float)Math.PI / 180));
-            this.setDeltaMovement(this.getDeltaMovement().add(-0.4f * i * f, 0.0, 0.4f * j * f));
+        if (vec3.z > 0.0) {
+            float g = Mth.sin(this.getYRot() * ((float)Math.PI / 180));
+            float h = Mth.cos(this.getYRot() * ((float)Math.PI / 180));
+            this.setDeltaMovement(this.getDeltaMovement().add(-0.4f * g * f, 0.0, 0.4f * h * f));
         }
     }
 
@@ -1082,12 +1078,6 @@ Saddleable {
 
     public int getAmbientStandInterval() {
         return this.getAmbientSoundInterval();
-    }
-
-    @Override
-    @Nullable
-    public /* synthetic */ Entity getControllingPassenger() {
-        return this.getControllingPassenger();
     }
 
     @Override

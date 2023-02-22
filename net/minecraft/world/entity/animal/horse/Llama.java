@@ -490,12 +490,6 @@ RangedAttackMob {
     }
 
     @Override
-    @Nullable
-    public /* synthetic */ Entity getControllingPassenger() {
-        return this.getControllingPassenger();
-    }
-
-    @Override
     public /* synthetic */ Object getVariant() {
         return this.getVariant();
     }

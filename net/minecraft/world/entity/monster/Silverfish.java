@@ -218,7 +218,7 @@ extends Monster {
             RandomSource randomSource = this.mob.getRandom();
             if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && randomSource.nextInt(SilverfishMergeWithStoneGoal.reducedTickDelay(10)) == 0) {
                 this.selectedDirection = Direction.getRandom(randomSource);
-                BlockPos blockPos = new BlockPos(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
+                BlockPos blockPos = BlockPos.containing(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
                 BlockState blockState = this.mob.level.getBlockState(blockPos);
                 if (InfestedBlock.isCompatibleHostBlock(blockState)) {
                     this.doMerge = true;
@@ -244,7 +244,7 @@ extends Monster {
                 return;
             }
             Level levelAccessor = this.mob.level;
-            BlockPos blockPos = new BlockPos(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
+            BlockPos blockPos = BlockPos.containing(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
             BlockState blockState = levelAccessor.getBlockState(blockPos);
             if (InfestedBlock.isCompatibleHostBlock(blockState)) {
                 levelAccessor.setBlock(blockPos, InfestedBlock.infestedStateByHost(blockState), 3);

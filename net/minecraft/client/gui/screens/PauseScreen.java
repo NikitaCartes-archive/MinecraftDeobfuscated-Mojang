@@ -130,7 +130,7 @@ extends Screen {
         super.render(poseStack, i, j, f);
         if (this.showPauseMenu && this.minecraft != null && this.minecraft.getReportingContext().hasDraftReport() && this.disconnectButton != null) {
             RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-            this.blit(poseStack, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 182, 24, 15, 15);
+            PauseScreen.blit(poseStack, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 182, 24, 15, 15);
         }
     }
 

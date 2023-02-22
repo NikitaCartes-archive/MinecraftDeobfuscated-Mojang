@@ -39,6 +39,7 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -47,6 +48,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class WanderingTrader
@@ -114,10 +116,14 @@ extends AbstractVillager {
 
     @Override
     protected void updateTrades() {
+        VillagerTrades.ItemListing[] itemListings3;
         VillagerTrades.ItemListing[] itemListings = (VillagerTrades.ItemListing[])VillagerTrades.WANDERING_TRADER_TRADES.get(1);
         VillagerTrades.ItemListing[] itemListings2 = (VillagerTrades.ItemListing[])VillagerTrades.WANDERING_TRADER_TRADES.get(2);
         if (itemListings == null || itemListings2 == null) {
             return;
+        }
+        if (this.level.enabledFeatures().contains(FeatureFlags.UPDATE_1_20) && (itemListings3 = (VillagerTrades.ItemListing[])VillagerTrades.WANDERING_TRADER_TRADES_1_20.get(1)) != null) {
+            itemListings = ArrayUtils.addAll(itemListings, itemListings3);
         }
         MerchantOffers merchantOffers = this.getOffers();
         this.addOffersFromItemListings(merchantOffers, itemListings, 5);

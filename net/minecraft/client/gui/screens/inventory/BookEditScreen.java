@@ -27,7 +27,6 @@ import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.PageButton;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -395,11 +394,10 @@ extends Screen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
         this.setFocused(null);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, BookViewScreen.BOOK_LOCATION);
         int k = (this.width - 192) / 2;
         int l = 2;
-        this.blit(poseStack, k, 2, 0, 0, 192, 192);
+        BookEditScreen.blit(poseStack, k, 2, 0, 0, 192, 192);
         if (this.isSigning) {
             boolean bl = this.frameTick / 6 % 2 == 0;
             FormattedCharSequence formattedCharSequence = FormattedCharSequence.composite(FormattedCharSequence.forward(this.title, Style.EMPTY), bl ? BLACK_CURSOR : GRAY_CURSOR);
@@ -409,7 +407,7 @@ extends Screen {
             this.font.draw(poseStack, formattedCharSequence, (float)(k + 36 + (114 - n) / 2), 50.0f, 0);
             int o = this.font.width(this.ownerText);
             this.font.draw(poseStack, this.ownerText, (float)(k + 36 + (114 - o) / 2), 60.0f, 0);
-            this.font.drawWordWrap(FINALIZE_WARNING_LABEL, k + 36, 82, 114, 0);
+            this.font.drawWordWrap(poseStack, FINALIZE_WARNING_LABEL, k + 36, 82, 114, 0);
         } else {
             int p = this.font.width(this.pageMsg);
             this.font.draw(poseStack, this.pageMsg, (float)(k - p + 192 - 44), 18.0f, 0);

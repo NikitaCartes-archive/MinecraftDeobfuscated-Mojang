@@ -17,6 +17,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundChunksBiomesPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
@@ -180,6 +181,8 @@ extends PacketListener {
     public void handleKeepAlive(ClientboundKeepAlivePacket var1);
 
     public void handleLevelChunkWithLight(ClientboundLevelChunkWithLightPacket var1);
+
+    public void handleChunksBiomes(ClientboundChunksBiomesPacket var1);
 
     public void handleForgetLevelChunk(ClientboundForgetLevelChunkPacket var1);
 

@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens.reporting;
 
 import com.mojang.authlib.minecraft.report.AbuseReportLimits;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Unit;
 import com.mojang.logging.LogUtils;
@@ -177,7 +176,6 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         int k = this.width / 2;
-        RenderSystem.disableDepthTest();
         this.renderBackground(poseStack);
         ChatReportScreen.drawCenteredString(poseStack, this.font, this.title, k, 10, 0xFFFFFF);
         ChatReportScreen.drawCenteredString(poseStack, this.font, OBSERVED_WHAT_LABEL, k, this.selectChatTop() - this.font.lineHeight - 6, 0xFFFFFF);
@@ -186,7 +184,6 @@ extends Screen {
         }
         ChatReportScreen.drawString(poseStack, this.font, MORE_COMMENTS_LABEL, this.contentLeft(), this.commentBoxTop() - this.font.lineHeight - 6, 0xFFFFFF);
         super.render(poseStack, i, j, f);
-        RenderSystem.enableDepthTest();
     }
 
     @Override

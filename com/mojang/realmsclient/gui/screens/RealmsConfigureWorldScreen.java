@@ -304,7 +304,7 @@ extends RealmsScreen {
         if (k + m + 3 > this.rightX) {
             k = k - m - 20;
         }
-        this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+        RealmsConfigureWorldScreen.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
         this.font.drawShadow(poseStack, component, (float)k, (float)l, 0xFFFFFF);
     }
 

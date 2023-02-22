@@ -46,18 +46,6 @@ extends Vec3i {
         super(i, j, k);
     }
 
-    public BlockPos(double d, double e, double f) {
-        super(d, e, f);
-    }
-
-    public BlockPos(Vec3 vec3) {
-        this(vec3.x, vec3.y, vec3.z);
-    }
-
-    public BlockPos(Position position) {
-        this(position.x(), position.y(), position.z());
-    }
-
     public BlockPos(Vec3i vec3i) {
         this(vec3i.getX(), vec3i.getY(), vec3i.getZ());
     }
@@ -86,6 +74,14 @@ extends Vec3i {
         return new BlockPos(BlockPos.getX(l), BlockPos.getY(l), BlockPos.getZ(l));
     }
 
+    public static BlockPos containing(double d, double e, double f) {
+        return new BlockPos(Mth.floor(d), Mth.floor(e), Mth.floor(f));
+    }
+
+    public static BlockPos containing(Position position) {
+        return BlockPos.containing(position.x(), position.y(), position.z());
+    }
+
     public long asLong() {
         return BlockPos.asLong(this.getX(), this.getY(), this.getZ());
     }
@@ -99,14 +95,6 @@ extends Vec3i {
 
     public static long getFlatIndex(long l) {
         return l & 0xFFFFFFFFFFFFFFF0L;
-    }
-
-    @Override
-    public BlockPos offset(double d, double e, double f) {
-        if (d == 0.0 && e == 0.0 && f == 0.0) {
-            return this;
-        }
-        return new BlockPos((double)this.getX() + d, (double)this.getY() + e, (double)this.getZ() + f);
     }
 
     @Override
@@ -551,11 +539,6 @@ extends Vec3i {
         return this.offset(i, j, k);
     }
 
-    @Override
-    public /* synthetic */ Vec3i offset(double d, double e, double f) {
-        return this.offset(d, e, f);
-    }
-
     static {
         PACKED_Z_LENGTH = PACKED_X_LENGTH = 1 + Mth.log2(Mth.smallestEncompassingPowerOfTwo(30000000));
         PACKED_Y_LENGTH = 64 - PACKED_X_LENGTH - PACKED_Z_LENGTH;
@@ -578,11 +561,6 @@ extends Vec3i {
 
         public MutableBlockPos(double d, double e, double f) {
             this(Mth.floor(d), Mth.floor(e), Mth.floor(f));
-        }
-
-        @Override
-        public BlockPos offset(double d, double e, double f) {
-            return super.offset(d, e, f).immutable();
         }
 
         @Override
@@ -797,11 +775,6 @@ extends Vec3i {
         @Override
         public /* synthetic */ Vec3i offset(int i, int j, int k) {
             return this.offset(i, j, k);
-        }
-
-        @Override
-        public /* synthetic */ Vec3i offset(double d, double e, double f) {
-            return this.offset(d, e, f);
         }
 
         @Override

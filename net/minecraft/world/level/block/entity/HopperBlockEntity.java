@@ -320,7 +320,7 @@ implements Hopper {
         List<Entity> list;
         BlockEntity blockEntity;
         Container container = null;
-        BlockPos blockPos = new BlockPos(d, e, f);
+        BlockPos blockPos = BlockPos.containing(d, e, f);
         BlockState blockState = level.getBlockState(blockPos);
         Block block = blockState.getBlock();
         if (block instanceof WorldlyContainerHolder) {

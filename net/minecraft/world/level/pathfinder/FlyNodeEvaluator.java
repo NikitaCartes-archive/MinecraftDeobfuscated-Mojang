@@ -56,7 +56,7 @@ extends WalkNodeEvaluator {
         } else {
             i = Mth.floor(this.mob.getY() + 0.5);
         }
-        if (!this.canStartAt(blockPos = new BlockPos(this.mob.getX(), (double)i, this.mob.getZ()))) {
+        if (!this.canStartAt(blockPos = BlockPos.containing(this.mob.getX(), i, this.mob.getZ()))) {
             for (BlockPos blockPos2 : this.iteratePathfindingStartNodeCandidatePositions(this.mob)) {
                 if (!this.canStartAt(blockPos2)) continue;
                 return super.getStartNode(blockPos2);
@@ -269,7 +269,7 @@ extends WalkNodeEvaluator {
         AABB aABB = mob.getBoundingBox();
         boolean bl2 = bl = aABB.getSize() < 1.0;
         if (!bl) {
-            return List.of(new BlockPos(aABB.minX, (double)mob.getBlockY(), aABB.minZ), new BlockPos(aABB.minX, (double)mob.getBlockY(), aABB.maxZ), new BlockPos(aABB.maxX, (double)mob.getBlockY(), aABB.minZ), new BlockPos(aABB.maxX, (double)mob.getBlockY(), aABB.maxZ));
+            return List.of(BlockPos.containing(aABB.minX, mob.getBlockY(), aABB.minZ), BlockPos.containing(aABB.minX, mob.getBlockY(), aABB.maxZ), BlockPos.containing(aABB.maxX, mob.getBlockY(), aABB.minZ), BlockPos.containing(aABB.maxX, mob.getBlockY(), aABB.maxZ));
         }
         double d = Math.max(0.0, (1.5 - aABB.getZsize()) / 2.0);
         double e = Math.max(0.0, (1.5 - aABB.getXsize()) / 2.0);

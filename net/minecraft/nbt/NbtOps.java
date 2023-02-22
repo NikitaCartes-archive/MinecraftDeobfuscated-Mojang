@@ -110,7 +110,7 @@ implements DynamicOps<Tag> {
             NumericTag numericTag = (NumericTag)tag;
             return DataResult.success(numericTag.getAsNumber());
         }
-        return DataResult.error("Not a number");
+        return DataResult.error(() -> "Not a number");
     }
 
     @Override
@@ -159,7 +159,7 @@ implements DynamicOps<Tag> {
             StringTag stringTag = (StringTag)tag;
             return DataResult.success(stringTag.getAsString());
         }
-        return DataResult.error("Not a string");
+        return DataResult.error(() -> "Not a string");
     }
 
     @Override
@@ -169,21 +169,21 @@ implements DynamicOps<Tag> {
 
     @Override
     public DataResult<Tag> mergeToList(Tag tag, Tag tag2) {
-        return NbtOps.createCollector(tag).map(listCollector -> DataResult.success(listCollector.accept(tag2).result())).orElseGet(() -> DataResult.error("mergeToList called with not a list: " + tag, tag));
+        return NbtOps.createCollector(tag).map(listCollector -> DataResult.success(listCollector.accept(tag2).result())).orElseGet(() -> DataResult.error(() -> "mergeToList called with not a list: " + tag, tag));
     }
 
     @Override
     public DataResult<Tag> mergeToList(Tag tag, List<Tag> list) {
-        return NbtOps.createCollector(tag).map(listCollector -> DataResult.success(listCollector.acceptAll(list).result())).orElseGet(() -> DataResult.error("mergeToList called with not a list: " + tag, tag));
+        return NbtOps.createCollector(tag).map(listCollector -> DataResult.success(listCollector.acceptAll(list).result())).orElseGet(() -> DataResult.error(() -> "mergeToList called with not a list: " + tag, tag));
     }
 
     @Override
     public DataResult<Tag> mergeToMap(Tag tag, Tag tag2, Tag tag3) {
         if (!(tag instanceof CompoundTag) && !(tag instanceof EndTag)) {
-            return DataResult.error("mergeToMap called with not a map: " + tag, tag);
+            return DataResult.error(() -> "mergeToMap called with not a map: " + tag, tag);
         }
         if (!(tag2 instanceof StringTag)) {
-            return DataResult.error("key is not a string: " + tag2, tag);
+            return DataResult.error(() -> "key is not a string: " + tag2, tag);
         }
         CompoundTag compoundTag = new CompoundTag();
         if (tag instanceof CompoundTag) {
@@ -197,7 +197,7 @@ implements DynamicOps<Tag> {
     @Override
     public DataResult<Tag> mergeToMap(Tag tag, MapLike<Tag> mapLike) {
         if (!(tag instanceof CompoundTag) && !(tag instanceof EndTag)) {
-            return DataResult.error("mergeToMap called with not a map: " + tag, tag);
+            return DataResult.error(() -> "mergeToMap called with not a map: " + tag, tag);
         }
         CompoundTag compoundTag = new CompoundTag();
         if (tag instanceof CompoundTag) {
@@ -214,7 +214,7 @@ implements DynamicOps<Tag> {
             compoundTag.put(tag.getAsString(), (Tag)pair.getSecond());
         });
         if (!list.isEmpty()) {
-            return DataResult.error("some keys are not strings: " + list, compoundTag);
+            return DataResult.error(() -> "some keys are not strings: " + list, compoundTag);
         }
         return DataResult.success(compoundTag);
     }
@@ -225,7 +225,7 @@ implements DynamicOps<Tag> {
             CompoundTag compoundTag = (CompoundTag)tag;
             return DataResult.success(compoundTag.getAllKeys().stream().map(string -> Pair.of(this.createString((String)string), compoundTag.get((String)string))));
         }
-        return DataResult.error("Not a map: " + tag);
+        return DataResult.error(() -> "Not a map: " + tag);
     }
 
     @Override
@@ -234,7 +234,7 @@ implements DynamicOps<Tag> {
             CompoundTag compoundTag = (CompoundTag)tag;
             return DataResult.success(biConsumer -> compoundTag.getAllKeys().forEach(string -> biConsumer.accept(this.createString((String)string), compoundTag.get((String)string))));
         }
-        return DataResult.error("Not a map: " + tag);
+        return DataResult.error(() -> "Not a map: " + tag);
     }
 
     @Override
@@ -277,7 +277,7 @@ implements DynamicOps<Tag> {
                 }
             });
         }
-        return DataResult.error("Not a map: " + tag);
+        return DataResult.error(() -> "Not a map: " + tag);
     }
 
     @Override
@@ -308,7 +308,7 @@ implements DynamicOps<Tag> {
             CollectionTag collectionTag = (CollectionTag)tag2;
             return DataResult.success(collectionTag.stream().map(tag -> tag));
         }
-        return DataResult.error("Not a list");
+        return DataResult.error(() -> "Not a list");
     }
 
     @Override
@@ -324,7 +324,7 @@ implements DynamicOps<Tag> {
             CollectionTag collectionTag = (CollectionTag)tag;
             return DataResult.success(collectionTag::forEach);
         }
-        return DataResult.error("Not a list: " + tag);
+        return DataResult.error(() -> "Not a list: " + tag);
     }
 
     @Override
@@ -664,7 +664,7 @@ implements DynamicOps<Tag> {
                 }
                 return DataResult.success(compoundTag3);
             }
-            return DataResult.error("mergeToMap called with not a map: " + tag, tag);
+            return DataResult.error(() -> "mergeToMap called with not a map: " + tag, tag);
         }
 
         @Override

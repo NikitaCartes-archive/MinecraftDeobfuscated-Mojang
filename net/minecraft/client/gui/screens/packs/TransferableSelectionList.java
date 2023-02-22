@@ -17,7 +17,6 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionModel;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -140,7 +139,6 @@ extends ObjectSelectionList<PackEntry> {
             if (!packCompatibility.isCompatible()) {
                 GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
             }
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, this.pack.getIconTexture());
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
             FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
@@ -148,7 +146,6 @@ extends ObjectSelectionList<PackEntry> {
             if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get().booleanValue() || bl || this.parent.getSelected() == this && this.parent.isFocused())) {
                 RenderSystem.setShaderTexture(0, ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
                 int p = n - k;
                 int q = o - j;
                 if (!this.pack.getCompatibility().isCompatible()) {

@@ -23,10 +23,10 @@ public record InclusiveRange<T extends Comparable<T>>(T minInclusive, T maxInclu
     public static <T extends Comparable<T>> Codec<InclusiveRange<T>> codec(Codec<T> codec, T comparable, T comparable2) {
         return ExtraCodecs.validate(InclusiveRange.codec(codec), inclusiveRange -> {
             if (inclusiveRange.minInclusive().compareTo(comparable) < 0) {
-                return DataResult.error("Range limit too low, expected at least " + comparable + " [" + inclusiveRange.minInclusive() + "-" + inclusiveRange.maxInclusive() + "]");
+                return DataResult.error(() -> "Range limit too low, expected at least " + comparable + " [" + inclusiveRange.minInclusive() + "-" + inclusiveRange.maxInclusive() + "]");
             }
             if (inclusiveRange.maxInclusive().compareTo(comparable2) > 0) {
-                return DataResult.error("Range limit too high, expected at most " + comparable2 + " [" + inclusiveRange.minInclusive() + "-" + inclusiveRange.maxInclusive() + "]");
+                return DataResult.error(() -> "Range limit too high, expected at most " + comparable2 + " [" + inclusiveRange.minInclusive() + "-" + inclusiveRange.maxInclusive() + "]");
             }
             return DataResult.success(inclusiveRange);
         });
@@ -36,7 +36,7 @@ public record InclusiveRange<T extends Comparable<T>>(T minInclusive, T maxInclu
         if (comparable.compareTo(comparable2) <= 0) {
             return DataResult.success(new InclusiveRange<T>(comparable, comparable2));
         }
-        return DataResult.error("min_inclusive must be less than or equal to max_inclusive");
+        return DataResult.error(() -> "min_inclusive must be less than or equal to max_inclusive");
     }
 
     public boolean isValueInRange(T comparable) {

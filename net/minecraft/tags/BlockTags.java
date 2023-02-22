@@ -42,6 +42,7 @@ public final class BlockTags {
     public static final TagKey<Block> WART_BLOCKS = BlockTags.create("wart_blocks");
     public static final TagKey<Block> BANNERS = BlockTags.create("banners");
     public static final TagKey<Block> SAND = BlockTags.create("sand");
+    public static final TagKey<Block> SMELTS_TO_GLASS = BlockTags.create("smelts_to_glass");
     public static final TagKey<Block> STAIRS = BlockTags.create("stairs");
     public static final TagKey<Block> SLABS = BlockTags.create("slabs");
     public static final TagKey<Block> WALLS = BlockTags.create("walls");

@@ -157,7 +157,7 @@ extends AmbientCreature {
                 this.targetPosition = null;
             }
             if (this.targetPosition == null || this.random.nextInt(30) == 0 || this.targetPosition.closerToCenterThan(this.position(), 2.0)) {
-                this.targetPosition = new BlockPos(this.getX() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7), this.getY() + (double)this.random.nextInt(6) - 2.0, this.getZ() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7));
+                this.targetPosition = BlockPos.containing(this.getX() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7), this.getY() + (double)this.random.nextInt(6) - 2.0, this.getZ() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7));
             }
             double d = (double)this.targetPosition.getX() + 0.5 - this.getX();
             double e = (double)this.targetPosition.getY() + 0.1 - this.getY();
@@ -178,11 +178,6 @@ extends AmbientCreature {
     @Override
     protected Entity.MovementEmission getMovementEmission() {
         return Entity.MovementEmission.EVENTS;
-    }
-
-    @Override
-    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
-        return false;
     }
 
     @Override

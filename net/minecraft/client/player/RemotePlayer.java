@@ -22,7 +22,7 @@ extends AbstractClientPlayer {
 
     public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile) {
         super(clientLevel, gameProfile);
-        this.maxUpStep = 1.0f;
+        this.setMaxUpStep(1.0f);
         this.noPhysics = true;
     }
 

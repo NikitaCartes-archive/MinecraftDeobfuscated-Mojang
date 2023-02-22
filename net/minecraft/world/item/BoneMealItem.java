@@ -148,7 +148,7 @@ extends Item {
             double h = randomSource.nextGaussian() * 0.02;
             double k = 0.5 - d;
             double l = (double)blockPos.getX() + k + randomSource.nextDouble() * d * 2.0;
-            if (levelAccessor.getBlockState(new BlockPos(l, m = (double)blockPos.getY() + randomSource.nextDouble() * e, n = (double)blockPos.getZ() + k + randomSource.nextDouble() * d * 2.0).below()).isAir()) continue;
+            if (levelAccessor.getBlockState(BlockPos.containing(l, m = (double)blockPos.getY() + randomSource.nextDouble() * e, n = (double)blockPos.getZ() + k + randomSource.nextDouble() * d * 2.0).below()).isAir()) continue;
             levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, l, m, n, f, g, h);
         }
     }

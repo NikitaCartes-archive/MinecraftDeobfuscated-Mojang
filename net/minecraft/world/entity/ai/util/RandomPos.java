@@ -35,7 +35,7 @@ public class RandomPos {
             return null;
         }
         int o = randomSource.nextInt(2 * j + 1) - j + k;
-        return new BlockPos(m, (double)o, n);
+        return BlockPos.containing(m, o, n);
     }
 
     @VisibleForTesting
@@ -97,7 +97,7 @@ public class RandomPos {
             j = pathfinderMob.getX() > (double)blockPos2.getX() ? (j -= randomSource.nextInt(i / 2)) : (j += randomSource.nextInt(i / 2));
             k = pathfinderMob.getZ() > (double)blockPos2.getZ() ? (k -= randomSource.nextInt(i / 2)) : (k += randomSource.nextInt(i / 2));
         }
-        return new BlockPos((double)j + pathfinderMob.getX(), (double)blockPos.getY() + pathfinderMob.getY(), (double)k + pathfinderMob.getZ());
+        return BlockPos.containing((double)j + pathfinderMob.getX(), (double)blockPos.getY() + pathfinderMob.getY(), (double)k + pathfinderMob.getZ());
     }
 }
 

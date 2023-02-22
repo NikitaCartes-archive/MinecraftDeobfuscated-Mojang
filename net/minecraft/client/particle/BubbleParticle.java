@@ -43,7 +43,7 @@ extends TextureSheetParticle {
         this.xd *= (double)0.85f;
         this.yd *= (double)0.85f;
         this.zd *= (double)0.85f;
-        if (!this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER)) {
+        if (!this.level.getFluidState(BlockPos.containing(this.x, this.y, this.z)).is(FluidTags.WATER)) {
             this.remove();
         }
     }

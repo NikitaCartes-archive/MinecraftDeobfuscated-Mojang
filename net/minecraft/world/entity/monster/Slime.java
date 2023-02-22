@@ -414,10 +414,14 @@ implements Enemy {
 
         @Override
         public void tick() {
+            MoveControl moveControl;
             if (this.slime.getRandom().nextFloat() < 0.8f) {
                 this.slime.getJumpControl().jump();
             }
-            ((SlimeMoveControl)this.slime.getMoveControl()).setWantedMovement(1.2);
+            if ((moveControl = this.slime.getMoveControl()) instanceof SlimeMoveControl) {
+                SlimeMoveControl slimeMoveControl = (SlimeMoveControl)moveControl;
+                slimeMoveControl.setWantedMovement(1.2);
+            }
         }
     }
 
@@ -468,11 +472,15 @@ implements Enemy {
 
         @Override
         public void tick() {
+            MoveControl moveControl;
             LivingEntity livingEntity = this.slime.getTarget();
             if (livingEntity != null) {
                 this.slime.lookAt(livingEntity, 10.0f, 10.0f);
             }
-            ((SlimeMoveControl)this.slime.getMoveControl()).setDirection(this.slime.getYRot(), this.slime.isDealsDamage());
+            if ((moveControl = this.slime.getMoveControl()) instanceof SlimeMoveControl) {
+                SlimeMoveControl slimeMoveControl = (SlimeMoveControl)moveControl;
+                slimeMoveControl.setDirection(this.slime.getYRot(), this.slime.isDealsDamage());
+            }
         }
     }
 
@@ -494,11 +502,15 @@ implements Enemy {
 
         @Override
         public void tick() {
+            MoveControl moveControl;
             if (--this.nextRandomizeTime <= 0) {
                 this.nextRandomizeTime = this.adjustedTickDelay(40 + this.slime.getRandom().nextInt(60));
                 this.chosenDegrees = this.slime.getRandom().nextInt(360);
             }
-            ((SlimeMoveControl)this.slime.getMoveControl()).setDirection(this.chosenDegrees, false);
+            if ((moveControl = this.slime.getMoveControl()) instanceof SlimeMoveControl) {
+                SlimeMoveControl slimeMoveControl = (SlimeMoveControl)moveControl;
+                slimeMoveControl.setDirection(this.chosenDegrees, false);
+            }
         }
     }
 
@@ -518,7 +530,11 @@ implements Enemy {
 
         @Override
         public void tick() {
-            ((SlimeMoveControl)this.slime.getMoveControl()).setWantedMovement(1.0);
+            MoveControl moveControl = this.slime.getMoveControl();
+            if (moveControl instanceof SlimeMoveControl) {
+                SlimeMoveControl slimeMoveControl = (SlimeMoveControl)moveControl;
+                slimeMoveControl.setWantedMovement(1.0);
+            }
         }
     }
 }

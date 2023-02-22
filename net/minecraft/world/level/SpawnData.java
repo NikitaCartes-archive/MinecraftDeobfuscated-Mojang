@@ -48,7 +48,7 @@ public record SpawnData(CompoundTag entityToSpawn, Optional<CustomSpawnRules> cu
 
         private static DataResult<InclusiveRange<Integer>> checkLightBoundaries(InclusiveRange<Integer> inclusiveRange) {
             if (!LIGHT_RANGE.contains(inclusiveRange)) {
-                return DataResult.error("Light values must be withing range " + LIGHT_RANGE);
+                return DataResult.error(() -> "Light values must be withing range " + LIGHT_RANGE);
             }
             return DataResult.success(inclusiveRange);
         }

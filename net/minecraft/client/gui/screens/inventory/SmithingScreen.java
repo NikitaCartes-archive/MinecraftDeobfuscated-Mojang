@@ -103,7 +103,7 @@ extends ItemCombinerScreen<SmithingMenu> {
         this.templateIcon.render(this.menu, poseStack, f, this.leftPos, this.topPos);
         this.baseIcon.render(this.menu, poseStack, f, this.leftPos, this.topPos);
         this.additionalIcon.render(this.menu, poseStack, f, this.leftPos, this.topPos);
-        InventoryScreen.renderEntityInInventory(this.leftPos + 141, this.topPos + 75, 25, ARMOR_STAND_ANGLE, null, this.armorStandPreview);
+        InventoryScreen.renderEntityInInventory(poseStack, this.leftPos + 141, this.topPos + 75, 25, ARMOR_STAND_ANGLE, null, this.armorStandPreview);
     }
 
     @Override
@@ -135,7 +135,7 @@ extends ItemCombinerScreen<SmithingMenu> {
     @Override
     protected void renderErrorIcon(PoseStack poseStack, int i, int j) {
         if (this.hasRecipeError()) {
-            this.blit(poseStack, i + 65, j + 46, this.imageWidth, 0, 28, 21);
+            SmithingScreen.blit(poseStack, i + 65, j + 46, this.imageWidth, 0, 28, 21);
         }
     }
 

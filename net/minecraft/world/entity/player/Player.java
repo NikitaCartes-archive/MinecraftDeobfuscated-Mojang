@@ -460,10 +460,6 @@ extends LivingEntity {
         this.inventory.tick();
         this.oBob = this.bob;
         super.aiStep();
-        this.flyingSpeed = 0.02f;
-        if (this.isSprinting()) {
-            this.flyingSpeed += 0.006f;
-        }
         this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
         float f = !this.onGround || this.isDeadOrDying() || this.isSwimming() ? 0.0f : Math.min(0.1f, (float)this.getDeltaMovement().horizontalDistance());
         this.bob += (f - this.bob) * 0.4f;
@@ -932,7 +928,7 @@ extends LivingEntity {
             double d = vec3.x;
             double e = vec3.z;
             double f = 0.05;
-            while (d != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(d, -this.maxUpStep, 0.0))) {
+            while (d != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(d, -this.maxUpStep(), 0.0))) {
                 if (d < 0.05 && d >= -0.05) {
                     d = 0.0;
                     continue;
@@ -943,7 +939,7 @@ extends LivingEntity {
                 }
                 d += 0.05;
             }
-            while (e != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(0.0, -this.maxUpStep, e))) {
+            while (e != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(0.0, -this.maxUpStep(), e))) {
                 if (e < 0.05 && e >= -0.05) {
                     e = 0.0;
                     continue;
@@ -954,7 +950,7 @@ extends LivingEntity {
                 }
                 e += 0.05;
             }
-            while (d != 0.0 && e != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(d, -this.maxUpStep, e))) {
+            while (d != 0.0 && e != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(d, -this.maxUpStep(), e))) {
                 d = d < 0.05 && d >= -0.05 ? 0.0 : (d > 0.0 ? (d -= 0.05) : (d += 0.05));
                 if (e < 0.05 && e >= -0.05) {
                     e = 0.0;
@@ -972,7 +968,7 @@ extends LivingEntity {
     }
 
     private boolean isAboveGround() {
-        return this.onGround || this.fallDistance < this.maxUpStep && !this.level.noCollision(this, this.getBoundingBox().move(0.0, this.fallDistance - this.maxUpStep, 0.0));
+        return this.onGround || this.fallDistance < this.maxUpStep() && !this.level.noCollision(this, this.getBoundingBox().move(0.0, this.fallDistance - this.maxUpStep(), 0.0));
     }
 
     public void attack(Entity entity) {
@@ -1268,19 +1264,16 @@ extends LivingEntity {
             double h;
             g = this.getLookAngle().y;
             double d2 = h = g < -0.2 ? 0.085 : 0.06;
-            if (g <= 0.0 || this.jumping || !this.level.getBlockState(new BlockPos(this.getX(), this.getY() + 1.0 - 0.1, this.getZ())).getFluidState().isEmpty()) {
+            if (g <= 0.0 || this.jumping || !this.level.getBlockState(BlockPos.containing(this.getX(), this.getY() + 1.0 - 0.1, this.getZ())).getFluidState().isEmpty()) {
                 Vec3 vec32 = this.getDeltaMovement();
                 this.setDeltaMovement(vec32.add(0.0, (g - vec32.y) * h, 0.0));
             }
         }
         if (this.abilities.flying && !this.isPassenger()) {
             g = this.getDeltaMovement().y;
-            float i = this.flyingSpeed;
-            this.flyingSpeed = this.abilities.getFlyingSpeed() * (float)(this.isSprinting() ? 2 : 1);
             super.travel(vec3);
             Vec3 vec33 = this.getDeltaMovement();
             this.setDeltaMovement(vec33.x, g * 0.6, vec33.z);
-            this.flyingSpeed = i;
             this.resetFallDistance();
             this.setSharedFlag(7, false);
         } else {
@@ -1915,6 +1908,14 @@ extends LivingEntity {
     @Override
     public boolean canSprint() {
         return true;
+    }
+
+    @Override
+    protected float getFlyingSpeed() {
+        if (this.abilities.flying && !this.isPassenger()) {
+            return this.isSprinting() ? this.abilities.getFlyingSpeed() * 2.0f : this.abilities.getFlyingSpeed();
+        }
+        return this.isSprinting() ? 0.025999999f : 0.02f;
     }
 
     public static enum BedSleepingProblem {

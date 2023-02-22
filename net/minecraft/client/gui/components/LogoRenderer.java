@@ -35,17 +35,17 @@ extends GuiComponent {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, this.keepLogoThroughFade ? 1.0f : f);
         int k = i / 2 - 137;
         if (this.showEasterEgg) {
-            this.blitOutlineBlack(k, j, (integer, integer2) -> {
-                this.blit(poseStack, (int)integer, (int)integer2, 0, 0, 99, 44);
-                this.blit(poseStack, integer + 99, (int)integer2, 129, 0, 27, 44);
-                this.blit(poseStack, integer + 99 + 26, (int)integer2, 126, 0, 3, 44);
-                this.blit(poseStack, integer + 99 + 26 + 3, (int)integer2, 99, 0, 26, 44);
-                this.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
+            LogoRenderer.blitOutlineBlack(k, j, (integer, integer2) -> {
+                LogoRenderer.blit(poseStack, (int)integer, (int)integer2, 0, 0, 99, 44);
+                LogoRenderer.blit(poseStack, integer + 99, (int)integer2, 129, 0, 27, 44);
+                LogoRenderer.blit(poseStack, integer + 99 + 26, (int)integer2, 126, 0, 3, 44);
+                LogoRenderer.blit(poseStack, integer + 99 + 26 + 3, (int)integer2, 99, 0, 26, 44);
+                LogoRenderer.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
             });
         } else {
-            this.blitOutlineBlack(k, j, (integer, integer2) -> {
-                this.blit(poseStack, (int)integer, (int)integer2, 0, 0, 155, 44);
-                this.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
+            LogoRenderer.blitOutlineBlack(k, j, (integer, integer2) -> {
+                LogoRenderer.blit(poseStack, (int)integer, (int)integer2, 0, 0, 155, 44);
+                LogoRenderer.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
             });
         }
         RenderSystem.setShaderTexture(0, MINECRAFT_EDITION);

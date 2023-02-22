@@ -84,17 +84,13 @@ Saddleable {
 
     @Override
     @Nullable
-    public Entity getControllingPassenger() {
-        Entity entity = this.getFirstPassenger();
-        return entity != null && this.canBeControlledBy(entity) ? entity : null;
-    }
-
-    private boolean canBeControlledBy(Entity entity) {
-        if (this.isSaddled() && entity instanceof Player) {
-            Player player = (Player)entity;
-            return player.getMainHandItem().is(Items.CARROT_ON_A_STICK) || player.getOffhandItem().is(Items.CARROT_ON_A_STICK);
+    public LivingEntity getControllingPassenger() {
+        Player player;
+        Entity entity;
+        if (this.isSaddled() && (entity = this.getFirstPassenger()) instanceof Player && ((player = (Player)entity).getMainHandItem().is(Items.CARROT_ON_A_STICK) || player.getOffhandItem().is(Items.CARROT_ON_A_STICK))) {
+            return player;
         }
-        return false;
+        return null;
     }
 
     @Override
@@ -238,18 +234,22 @@ Saddleable {
     }
 
     @Override
-    public void travel(Vec3 vec3) {
-        this.travel(this, this.steering, vec3);
+    protected void tickRidden(LivingEntity livingEntity, Vec3 vec3) {
+        super.tickRidden(livingEntity, vec3);
+        this.setRot(livingEntity.getYRot(), livingEntity.getXRot() * 0.5f);
+        this.yBodyRot = this.yHeadRot = this.getYRot();
+        this.yRotO = this.yHeadRot;
+        this.steering.tickBoost();
     }
 
     @Override
-    public float getSteeringSpeed() {
-        return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 0.225f;
+    protected Vec3 getRiddenInput(LivingEntity livingEntity, Vec3 vec3) {
+        return new Vec3(0.0, 0.0, 1.0);
     }
 
     @Override
-    public void travelWithInput(Vec3 vec3) {
-        super.travel(vec3);
+    protected float getRiddenSpeed(LivingEntity livingEntity) {
+        return super.getRiddenSpeed(livingEntity) * 0.225f * this.steering.boostFactor();
     }
 
     @Override

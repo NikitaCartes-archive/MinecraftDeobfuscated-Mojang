@@ -23,6 +23,11 @@ extends TagsProvider<T> {
         this.keyExtractor = function;
     }
 
+    public IntrinsicHolderTagsProvider(PackOutput packOutput, ResourceKey<? extends Registry<T>> resourceKey, CompletableFuture<HolderLookup.Provider> completableFuture, CompletableFuture<TagsProvider.TagLookup<T>> completableFuture2, Function<T, ResourceKey<T>> function) {
+        super(packOutput, resourceKey, completableFuture, completableFuture2);
+        this.keyExtractor = function;
+    }
+
     @Override
     protected IntrinsicTagAppender<T> tag(TagKey<T> tagKey) {
         TagBuilder tagBuilder = this.getOrCreateRawBuilder(tagKey);

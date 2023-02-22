@@ -42,7 +42,7 @@ implements Codec<Holder<E>> {
         Optional optional;
         if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).owner(this.registryKey)).isPresent()) {
             if (!holder.canSerializeIn(optional.get())) {
-                return DataResult.error("Element " + holder + " is not valid in current registry set");
+                return DataResult.error(() -> "Element " + holder + " is not valid in current registry set");
             }
             return holder.unwrap().map(resourceKey -> ResourceLocation.CODEC.encode(resourceKey.location(), dynamicOps, object), object2 -> this.elementCodec.encode(object2, dynamicOps, object));
         }
@@ -55,19 +55,19 @@ implements Codec<Holder<E>> {
             RegistryOps registryOps = (RegistryOps)dynamicOps;
             Optional optional = registryOps.getter(this.registryKey);
             if (optional.isEmpty()) {
-                return DataResult.error("Registry does not exist: " + this.registryKey);
+                return DataResult.error(() -> "Registry does not exist: " + this.registryKey);
             }
             HolderGetter holderGetter = optional.get();
             DataResult dataResult = ResourceLocation.CODEC.decode(dynamicOps, object);
             if (dataResult.result().isEmpty()) {
                 if (!this.allowInline) {
-                    return DataResult.error("Inline definitions not allowed here");
+                    return DataResult.error(() -> "Inline definitions not allowed here");
                 }
                 return this.elementCodec.decode(dynamicOps, object).map((? super R pair) -> pair.mapFirst(Holder::direct));
             }
             Pair pair2 = dataResult.result().get();
             ResourceKey resourceKey = ResourceKey.create(this.registryKey, (ResourceLocation)pair2.getFirst());
-            return holderGetter.get(resourceKey).map(DataResult::success).orElseGet(() -> DataResult.error("Failed to get element " + resourceKey)).map((? super R reference) -> Pair.of(reference, pair2.getSecond())).setLifecycle(Lifecycle.stable());
+            return holderGetter.get(resourceKey).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Failed to get element " + resourceKey)).map((? super R reference) -> Pair.of(reference, pair2.getSecond())).setLifecycle(Lifecycle.stable());
         }
         return this.elementCodec.decode(dynamicOps, object).map((? super R pair) -> pair.mapFirst(Holder::direct));
     }

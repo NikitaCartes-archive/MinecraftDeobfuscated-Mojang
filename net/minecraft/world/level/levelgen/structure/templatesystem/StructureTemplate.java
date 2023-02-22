@@ -143,7 +143,7 @@ public class StructureTemplate {
             Vec3 vec3 = new Vec3(entity2.getX() - (double)blockPos.getX(), entity2.getY() - (double)blockPos.getY(), entity2.getZ() - (double)blockPos.getZ());
             CompoundTag compoundTag = new CompoundTag();
             entity2.save(compoundTag);
-            BlockPos blockPos3 = entity2 instanceof Painting ? ((Painting)entity2).getPos().subtract(blockPos) : new BlockPos(vec3);
+            BlockPos blockPos3 = entity2 instanceof Painting ? ((Painting)entity2).getPos().subtract(blockPos) : BlockPos.containing(vec3);
             this.entityInfoList.add(new StructureEntityInfo(vec3, blockPos3, compoundTag.copy()));
         }
     }
@@ -338,7 +338,7 @@ public class StructureTemplate {
                 float f = entity.rotate(rotation);
                 entity.moveTo(vec3.x, vec3.y, vec3.z, f += entity.mirror(mirror) - entity.getYRot(), entity.getXRot());
                 if (bl && entity instanceof Mob) {
-                    ((Mob)entity).finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
+                    ((Mob)entity).finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(BlockPos.containing(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
                 }
                 serverLevelAccessor.addFreshEntityWithPassengers((Entity)entity);
             });

@@ -137,7 +137,7 @@ GuiEventListener {
         int l = Math.min(this.recipeButtons.size(), k);
         int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
         int n = 4;
-        this.blitNineSliced(poseStack, this.x, this.y, l * 25 + 8, m * 25 + 8, 4, 32, 32, 82, 208);
+        OverlayRecipeComponent.blitNineSliced(poseStack, this.x, this.y, l * 25 + 8, m * 25 + 8, 4, 32, 32, 82, 208);
         RenderSystem.disableBlend();
         for (OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
             overlayRecipeButton.render(poseStack, i, j, f);
@@ -223,21 +223,18 @@ GuiEventListener {
             if (this.isHoveredOrFocused()) {
                 l += 26;
             }
-            this.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
-            PoseStack poseStack2 = RenderSystem.getModelViewStack();
-            poseStack2.pushPose();
-            poseStack2.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
+            OverlayRecipeButton.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
+            poseStack.pushPose();
+            poseStack.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
             for (Pos pos : this.ingredientPos) {
-                poseStack2.pushPose();
-                poseStack2.translate((double)pos.x, (double)pos.y, 0.0);
-                poseStack2.scale(0.375f, 0.375f, 1.0f);
-                poseStack2.translate(-8.0, -8.0, 0.0);
-                RenderSystem.applyModelViewMatrix();
-                OverlayRecipeComponent.this.minecraft.getItemRenderer().renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0f) % pos.ingredients.length], 0, 0);
-                poseStack2.popPose();
+                poseStack.pushPose();
+                poseStack.translate((double)pos.x, (double)pos.y, 0.0);
+                poseStack.scale(0.375f, 0.375f, 1.0f);
+                poseStack.translate(-8.0, -8.0, 0.0);
+                OverlayRecipeComponent.this.minecraft.getItemRenderer().renderAndDecorateItem(poseStack, pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0f) % pos.ingredients.length], 0, 0);
+                poseStack.popPose();
             }
-            poseStack2.popPose();
-            RenderSystem.applyModelViewMatrix();
+            poseStack.popPose();
         }
 
         @Environment(value=EnvType.CLIENT)

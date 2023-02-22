@@ -69,7 +69,7 @@ implements RangedAttackMob {
 
     public Drowned(EntityType<? extends Drowned> entityType, Level level) {
         super((EntityType<? extends Zombie>)entityType, level);
-        this.maxUpStep = 1.0f;
+        this.setMaxUpStep(1.0f);
         this.moveControl = new DrownedMoveControl(this);
         this.setPathfindingMalus(BlockPathTypes.WATER, 0.0f);
         this.waterNavigation = new WaterBoundPathNavigation(this, level);
@@ -224,7 +224,7 @@ implements RangedAttackMob {
 
     @Override
     public void travel(Vec3 vec3) {
-        if (this.isEffectiveAi() && this.isInWater() && this.wantsToSwim()) {
+        if (this.isControlledByLocalInstance() && this.isInWater() && this.wantsToSwim()) {
             this.moveRelative(0.01f, vec3);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9));

@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 
 @Environment(value=EnvType.CLIENT)
 public interface LayoutElement {
@@ -21,6 +22,10 @@ public interface LayoutElement {
     public int getWidth();
 
     public int getHeight();
+
+    default public ScreenRectangle getRectangle() {
+        return new ScreenRectangle(this.getX(), this.getY(), this.getWidth(), this.getHeight());
+    }
 
     default public void setPosition(int i, int j) {
         this.setX(i);

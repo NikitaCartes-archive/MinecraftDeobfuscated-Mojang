@@ -63,7 +63,7 @@ public class BlendingData {
 
     private static DataResult<BlendingData> validateArraySize(BlendingData blendingData) {
         if (blendingData.heights.length != CELL_COLUMN_COUNT) {
-            return DataResult.error("heights has to be of length " + CELL_COLUMN_COUNT);
+            return DataResult.error(() -> "heights has to be of length " + CELL_COLUMN_COUNT);
         }
         return DataResult.success(blendingData);
     }

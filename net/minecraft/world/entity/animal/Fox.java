@@ -648,7 +648,7 @@ implements VariantHolder<Type> {
             double g = f == 0.0 ? 0.0 : d * (double)((float)j / 6.0f);
             double h = f == 0.0 ? e * (double)((float)j / 6.0f) : g / f;
             for (int k = 1; k < 4; ++k) {
-                if (fox.level.getBlockState(new BlockPos(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).canBeReplaced()) continue;
+                if (fox.level.getBlockState(BlockPos.containing(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).canBeReplaced()) continue;
                 return false;
             }
         }
@@ -1418,7 +1418,7 @@ implements VariantHolder<Type> {
         }
 
         protected boolean hasShelter() {
-            BlockPos blockPos = new BlockPos(Fox.this.getX(), Fox.this.getBoundingBox().maxY, Fox.this.getZ());
+            BlockPos blockPos = BlockPos.containing(Fox.this.getX(), Fox.this.getBoundingBox().maxY, Fox.this.getZ());
             return !Fox.this.level.canSeeSky(blockPos) && Fox.this.getWalkTargetValue(blockPos) >= 0.0f;
         }
 

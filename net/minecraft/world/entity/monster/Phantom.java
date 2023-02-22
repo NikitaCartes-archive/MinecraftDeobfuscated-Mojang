@@ -224,6 +224,11 @@ implements Enemy {
         return entityDimensions.scale(f);
     }
 
+    @Override
+    public double getPassengersRidingOffset() {
+        return this.getEyeHeight();
+    }
+
     static enum AttackPhase {
         CIRCLE,
         SWOOP;

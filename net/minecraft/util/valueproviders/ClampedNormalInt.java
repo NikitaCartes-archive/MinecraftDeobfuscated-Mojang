@@ -18,7 +18,7 @@ public class ClampedNormalInt
 extends IntProvider {
     public static final Codec<ClampedNormalInt> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("mean")).forGetter(clampedNormalInt -> Float.valueOf(clampedNormalInt.mean)), ((MapCodec)Codec.FLOAT.fieldOf("deviation")).forGetter(clampedNormalInt -> Float.valueOf(clampedNormalInt.deviation)), ((MapCodec)Codec.INT.fieldOf("min_inclusive")).forGetter(clampedNormalInt -> clampedNormalInt.min_inclusive), ((MapCodec)Codec.INT.fieldOf("max_inclusive")).forGetter(clampedNormalInt -> clampedNormalInt.max_inclusive)).apply((Applicative<ClampedNormalInt, ?>)instance, ClampedNormalInt::new)).comapFlatMap(clampedNormalInt -> {
         if (clampedNormalInt.max_inclusive < clampedNormalInt.min_inclusive) {
-            return DataResult.error("Max must be larger than min: [" + clampedNormalInt.min_inclusive + ", " + clampedNormalInt.max_inclusive + "]");
+            return DataResult.error(() -> "Max must be larger than min: [" + clampedNormalInt.min_inclusive + ", " + clampedNormalInt.max_inclusive + "]");
         }
         return DataResult.success(clampedNormalInt);
     }, Function.identity());

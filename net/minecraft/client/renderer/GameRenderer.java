@@ -707,7 +707,7 @@ implements AutoCloseable {
             Vec3 vec34 = entityHitResult.getLocation();
             double h = vec3.distanceToSqr(vec34);
             if (bl && h > 9.0) {
-                this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), new BlockPos(vec34));
+                this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), BlockPos.containing(vec34));
             } else if (h < e || this.minecraft.hitResult == null) {
                 this.minecraft.hitResult = entityHitResult;
                 if (entity22 instanceof LivingEntity || entity22 instanceof ItemFrame) {
@@ -884,6 +884,7 @@ implements AutoCloseable {
         Matrix4f matrix4f = new Matrix4f().setOrtho(0.0f, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0f, 1000.0f, 3000.0f);
         RenderSystem.setProjectionMatrix(matrix4f);
         PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
         poseStack.setIdentity();
         poseStack.translate(0.0f, 0.0f, -2000.0f);
         RenderSystem.applyModelViewMatrix();
@@ -937,6 +938,11 @@ implements AutoCloseable {
                 throw new ReportedException(crashReport);
             }
         }
+        this.minecraft.getProfiler().push("toasts");
+        this.minecraft.getToasts().render(poseStack2);
+        this.minecraft.getProfiler().pop();
+        poseStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 
     private void tryTakeScreenshotIfNeeded() {

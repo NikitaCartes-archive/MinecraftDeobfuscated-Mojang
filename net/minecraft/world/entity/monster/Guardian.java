@@ -296,11 +296,13 @@ extends Monster {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
-        if (!this.isMoving() && !damageSource.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && damageSource.getDirectEntity() instanceof LivingEntity) {
-            LivingEntity livingEntity = (LivingEntity)damageSource.getDirectEntity();
-            if (!damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
-                livingEntity.hurt(this.damageSources().thorns(this), 2.0f);
-            }
+        Entity entity;
+        if (this.level.isClientSide) {
+            return false;
+        }
+        if (!damageSource.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && (entity = damageSource.getEntity()) instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity)entity;
+            livingEntity.hurt(this.damageSources().thorns(this), 2.0f);
         }
         if (this.randomStrollGoal != null) {
             this.randomStrollGoal.trigger();
@@ -315,7 +317,7 @@ extends Monster {
 
     @Override
     public void travel(Vec3 vec3) {
-        if (this.isEffectiveAi() && this.isInWater()) {
+        if (this.isControlledByLocalInstance() && this.isInWater()) {
             this.moveRelative(0.1f, vec3);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9));

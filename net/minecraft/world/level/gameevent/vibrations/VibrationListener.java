@@ -41,6 +41,7 @@ implements GameEventListener {
     @VisibleForTesting
     public static final Object2IntMap<GameEvent> VIBRATION_FREQUENCY_FOR_EVENT = Object2IntMaps.unmodifiable(Util.make(new Object2IntOpenHashMap(), object2IntOpenHashMap -> {
         object2IntOpenHashMap.put(GameEvent.STEP, 1);
+        object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH, 2);
         object2IntOpenHashMap.put(GameEvent.FLAP, 2);
         object2IntOpenHashMap.put(GameEvent.SWIM, 3);
         object2IntOpenHashMap.put(GameEvent.ELYTRA_GLIDE, 4);
@@ -75,7 +76,6 @@ implements GameEventListener {
         object2IntOpenHashMap.put(GameEvent.ENTITY_DIE, 13);
         object2IntOpenHashMap.put(GameEvent.BLOCK_DESTROY, 13);
         object2IntOpenHashMap.put(GameEvent.FLUID_PICKUP, 13);
-        object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH, 14);
         object2IntOpenHashMap.put(GameEvent.CONTAINER_CLOSE, 14);
         object2IntOpenHashMap.put(GameEvent.PISTON_CONTRACT, 14);
         object2IntOpenHashMap.put(GameEvent.PISTON_EXTEND, 15);
@@ -130,7 +130,7 @@ implements GameEventListener {
                 --this.travelTimeInTicks;
                 if (this.travelTimeInTicks <= 0) {
                     this.travelTimeInTicks = 0;
-                    this.config.onSignalReceive(serverLevel, this, new BlockPos(this.currentVibration.pos()), this.currentVibration.gameEvent(), this.currentVibration.getEntity(serverLevel).orElse(null), this.currentVibration.getProjectileOwner(serverLevel).orElse(null), this.currentVibration.distance());
+                    this.config.onSignalReceive(serverLevel, this, BlockPos.containing(this.currentVibration.pos()), this.currentVibration.gameEvent(), this.currentVibration.getEntity(serverLevel).orElse(null), this.currentVibration.getProjectileOwner(serverLevel).orElse(null), this.currentVibration.distance());
                     this.currentVibration = null;
                 }
             }
@@ -160,7 +160,7 @@ implements GameEventListener {
             return false;
         }
         Vec3 vec32 = optional.get();
-        if (!this.config.shouldListen(serverLevel, this, new BlockPos(vec3), gameEvent, context)) {
+        if (!this.config.shouldListen(serverLevel, this, BlockPos.containing(vec3), gameEvent, context)) {
             return false;
         }
         if (VibrationListener.isOccluded(serverLevel, vec3, vec32)) {

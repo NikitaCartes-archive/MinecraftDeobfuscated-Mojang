@@ -60,7 +60,7 @@ extends WalkNodeEvaluator {
         int i = super.getNeighbors(nodes, node);
         BlockPathTypes blockPathTypes = this.getCachedBlockType(this.mob, node.x, node.y + 1, node.z);
         BlockPathTypes blockPathTypes2 = this.getCachedBlockType(this.mob, node.x, node.y, node.z);
-        int j = this.mob.getPathfindingMalus(blockPathTypes) >= 0.0f && blockPathTypes2 != BlockPathTypes.STICKY_HONEY ? Mth.floor(Math.max(1.0f, this.mob.maxUpStep)) : 0;
+        int j = this.mob.getPathfindingMalus(blockPathTypes) >= 0.0f && blockPathTypes2 != BlockPathTypes.STICKY_HONEY ? Mth.floor(Math.max(1.0f, this.mob.maxUpStep())) : 0;
         double d = this.getFloorLevel(new BlockPos(node.x, node.y, node.z));
         Node node2 = this.findAcceptedNode(node.x, node.y + 1, node.z, Math.max(0, j - 1), d, Direction.UP, blockPathTypes2);
         Node node3 = this.findAcceptedNode(node.x, node.y - 1, node.z, j, d, Direction.DOWN, blockPathTypes2);

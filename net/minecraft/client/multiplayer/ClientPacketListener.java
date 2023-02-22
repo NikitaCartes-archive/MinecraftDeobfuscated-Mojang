@@ -136,6 +136,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundChunksBiomesPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
@@ -607,9 +608,6 @@ ClientGamePacketListener {
         double d;
         PacketUtils.ensureRunningOnSameThread(clientboundPlayerPositionPacket, this, this.minecraft);
         LocalPlayer player = this.minecraft.player;
-        if (clientboundPlayerPositionPacket.requestDismountVehicle()) {
-            ((Player)player).removeVehicle();
-        }
         Vec3 vec3 = player.getDeltaMovement();
         boolean bl = clientboundPlayerPositionPacket.getRelativeArguments().contains((Object)RelativeMovement.X);
         boolean bl2 = clientboundPlayerPositionPacket.getRelativeArguments().contains((Object)RelativeMovement.Y);
@@ -678,6 +676,26 @@ ClientGamePacketListener {
         PacketUtils.ensureRunningOnSameThread(clientboundLevelChunkWithLightPacket, this, this.minecraft);
         this.updateLevelChunk(clientboundLevelChunkWithLightPacket.getX(), clientboundLevelChunkWithLightPacket.getZ(), clientboundLevelChunkWithLightPacket.getChunkData());
         this.queueLightUpdate(clientboundLevelChunkWithLightPacket.getX(), clientboundLevelChunkWithLightPacket.getZ(), clientboundLevelChunkWithLightPacket.getLightData());
+    }
+
+    @Override
+    public void handleChunksBiomes(ClientboundChunksBiomesPacket clientboundChunksBiomesPacket) {
+        PacketUtils.ensureRunningOnSameThread(clientboundChunksBiomesPacket, this, this.minecraft);
+        for (ClientboundChunksBiomesPacket.ChunkBiomeData chunkBiomeData : clientboundChunksBiomesPacket.chunkBiomeData()) {
+            this.level.getChunkSource().replaceBiomes(chunkBiomeData.pos().x, chunkBiomeData.pos().z, chunkBiomeData.getReadBuffer());
+        }
+        for (ClientboundChunksBiomesPacket.ChunkBiomeData chunkBiomeData : clientboundChunksBiomesPacket.chunkBiomeData()) {
+            this.level.onChunkLoaded(new ChunkPos(chunkBiomeData.pos().x, chunkBiomeData.pos().z));
+        }
+        for (ClientboundChunksBiomesPacket.ChunkBiomeData chunkBiomeData : clientboundChunksBiomesPacket.chunkBiomeData()) {
+            for (int i = -1; i <= 1; ++i) {
+                for (int j = -1; j <= 1; ++j) {
+                    for (int k = this.level.getMinSection(); k < this.level.getMaxSection(); ++k) {
+                        this.minecraft.levelRenderer.setSectionDirty(chunkBiomeData.pos().x + i, k, chunkBiomeData.pos().z + j);
+                    }
+                }
+            }
+        }
     }
 
     private void updateLevelChunk(int i, int j, ClientboundLevelChunkPacketData clientboundLevelChunkPacketData) {

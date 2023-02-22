@@ -189,8 +189,8 @@ extends Screen {
         int i = this.marginX() + 3;
         super.renderBackground(poseStack);
         RenderSystem.setShaderTexture(0, SOCIAL_INTERACTIONS_LOCATION);
-        this.blitNineSliced(poseStack, i, 64, 236, this.windowHeight() + 16, 8, 236, 34, 1, 1);
-        this.blit(poseStack, i + 10, 76, 243, 1, 12, 12);
+        SocialInteractionsScreen.blitNineSliced(poseStack, i, 64, 236, this.windowHeight() + 16, 8, 236, 34, 1, 1);
+        SocialInteractionsScreen.blit(poseStack, i + 10, 76, 243, 1, 12, 12);
     }
 
     @Override

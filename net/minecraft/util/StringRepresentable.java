@@ -24,14 +24,18 @@ public interface StringRepresentable {
     public String getSerializedName();
 
     public static <E extends Enum<E>> EnumCodec<E> fromEnum(Supplier<E[]> supplier) {
+        return StringRepresentable.fromEnumWithMapping(supplier, string -> string);
+    }
+
+    public static <E extends Enum<E>> EnumCodec<E> fromEnumWithMapping(Supplier<E[]> supplier, Function<String, String> function) {
         Enum[] enums = (Enum[])supplier.get();
         if (enums.length > 16) {
-            Map<String, Enum> map = Arrays.stream(enums).collect(Collectors.toMap(object -> ((StringRepresentable)object).getSerializedName(), enum_ -> enum_));
+            Map<String, Enum> map = Arrays.stream(enums).collect(Collectors.toMap(enum_ -> (String)function.apply(((StringRepresentable)((Object)enum_)).getSerializedName()), enum_ -> enum_));
             return new EnumCodec(enums, string -> string == null ? null : (Enum)map.get(string));
         }
         return new EnumCodec(enums, string -> {
             for (Enum enum_ : enums) {
-                if (!((StringRepresentable)((Object)enum_)).getSerializedName().equals(string)) continue;
+                if (!((String)function.apply(((StringRepresentable)((Object)enum_)).getSerializedName())).equals(string)) continue;
                 return enum_;
             }
             return null;

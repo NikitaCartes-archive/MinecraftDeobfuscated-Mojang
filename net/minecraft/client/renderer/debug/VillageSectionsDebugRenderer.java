@@ -37,7 +37,7 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
-        BlockPos blockPos = new BlockPos(d, e, f);
+        BlockPos blockPos = BlockPos.containing(d, e, f);
         this.villageSections.forEach(sectionPos -> {
             if (blockPos.closerThan(sectionPos.center(), 60.0)) {
                 VillageSectionsDebugRenderer.highlightVillageSection(poseStack, multiBufferSource, sectionPos);
@@ -46,10 +46,10 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     private static void highlightVillageSection(PoseStack poseStack, MultiBufferSource multiBufferSource, SectionPos sectionPos) {
-        float f = 1.0f;
+        boolean i = true;
         BlockPos blockPos = sectionPos.center();
-        BlockPos blockPos2 = blockPos.offset(-1.0, -1.0, -1.0);
-        BlockPos blockPos3 = blockPos.offset(1.0, 1.0, 1.0);
+        BlockPos blockPos2 = blockPos.offset(-1, -1, -1);
+        BlockPos blockPos3 = blockPos.offset(1, 1, 1);
         DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos2, blockPos3, 0.2f, 1.0f, 0.2f, 0.15f);
     }
 }

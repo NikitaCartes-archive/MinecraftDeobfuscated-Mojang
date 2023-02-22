@@ -420,21 +420,21 @@ extends GuiComponent {
         if (bl) {
             DebugScreenOverlay.fill(poseStack, i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
             this.font.draw(poseStack, "60 FPS", (float)(i + 2), (float)(t - 30 + 2), 0xE0E0E0);
-            this.hLine(poseStack, i, i + p - 1, t - 30, -1);
+            DebugScreenOverlay.hLine(poseStack, i, i + p - 1, t - 30, -1);
             DebugScreenOverlay.fill(poseStack, i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
             this.font.draw(poseStack, "30 FPS", (float)(i + 2), (float)(t - 60 + 2), 0xE0E0E0);
-            this.hLine(poseStack, i, i + p - 1, t - 60, -1);
+            DebugScreenOverlay.hLine(poseStack, i, i + p - 1, t - 60, -1);
         } else {
             DebugScreenOverlay.fill(poseStack, i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
             this.font.draw(poseStack, "20 TPS", (float)(i + 2), (float)(t - 60 + 2), 0xE0E0E0);
-            this.hLine(poseStack, i, i + p - 1, t - 60, -1);
+            DebugScreenOverlay.hLine(poseStack, i, i + p - 1, t - 60, -1);
         }
-        this.hLine(poseStack, i, i + p - 1, t - 1, -1);
-        this.vLine(poseStack, i, t - 60, t, -1);
-        this.vLine(poseStack, i + p - 1, t - 60, t, -1);
+        DebugScreenOverlay.hLine(poseStack, i, i + p - 1, t - 1, -1);
+        DebugScreenOverlay.vLine(poseStack, i, t - 60, t, -1);
+        DebugScreenOverlay.vLine(poseStack, i + p - 1, t - 60, t, -1);
         v = this.minecraft.options.framerateLimit().get();
         if (bl && v > 0 && v <= 250) {
-            this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)v), -16711681);
+            DebugScreenOverlay.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)v), -16711681);
         }
         String string = r + " ms min";
         String string2 = q / (long)p + " ms avg";

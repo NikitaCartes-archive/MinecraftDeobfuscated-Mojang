@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.random.Weight;
 import net.minecraft.util.random.WeightedEntry;
@@ -55,28 +57,18 @@ public class MobSpawnSettings {
         return this.creatureGenerationProbability;
     }
 
-    public static class MobSpawnCost {
+    public record MobSpawnCost(double energyBudget, double charge) {
         public static final Codec<MobSpawnCost> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.DOUBLE.fieldOf("energy_budget")).forGetter(mobSpawnCost -> mobSpawnCost.energyBudget), ((MapCodec)Codec.DOUBLE.fieldOf("charge")).forGetter(mobSpawnCost -> mobSpawnCost.charge)).apply((Applicative<MobSpawnCost, ?>)instance, MobSpawnCost::new));
-        private final double energyBudget;
-        private final double charge;
-
-        MobSpawnCost(double d, double e) {
-            this.energyBudget = d;
-            this.charge = e;
-        }
-
-        public double getEnergyBudget() {
-            return this.energyBudget;
-        }
-
-        public double getCharge() {
-            return this.charge;
-        }
     }
 
     public static class SpawnerData
     extends WeightedEntry.IntrusiveBase {
-        public static final Codec<SpawnerData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("type")).forGetter(spawnerData -> spawnerData.type), ((MapCodec)Weight.CODEC.fieldOf("weight")).forGetter(WeightedEntry.IntrusiveBase::getWeight), ((MapCodec)Codec.INT.fieldOf("minCount")).forGetter(spawnerData -> spawnerData.minCount), ((MapCodec)Codec.INT.fieldOf("maxCount")).forGetter(spawnerData -> spawnerData.maxCount)).apply((Applicative<SpawnerData, ?>)instance, SpawnerData::new));
+        public static final Codec<SpawnerData> CODEC = ExtraCodecs.validate(RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("type")).forGetter(spawnerData -> spawnerData.type), ((MapCodec)Weight.CODEC.fieldOf("weight")).forGetter(WeightedEntry.IntrusiveBase::getWeight), ((MapCodec)ExtraCodecs.POSITIVE_INT.fieldOf("minCount")).forGetter(spawnerData -> spawnerData.minCount), ((MapCodec)ExtraCodecs.POSITIVE_INT.fieldOf("maxCount")).forGetter(spawnerData -> spawnerData.maxCount)).apply((Applicative<SpawnerData, ?>)instance, SpawnerData::new)), spawnerData -> {
+            if (spawnerData.minCount > spawnerData.maxCount) {
+                return DataResult.error(() -> "minCount needs to be smaller or equal to maxCount");
+            }
+            return DataResult.success(spawnerData);
+        });
         public final EntityType<?> type;
         public final int minCount;
         public final int maxCount;

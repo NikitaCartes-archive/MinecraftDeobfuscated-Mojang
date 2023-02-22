@@ -156,7 +156,7 @@ public class BehaviorUtils {
     public static Vec3 getRandomSwimmablePos(PathfinderMob pathfinderMob, int i, int j) {
         Vec3 vec3 = DefaultRandomPos.getPos(pathfinderMob, i, j);
         int k = 0;
-        while (vec3 != null && !pathfinderMob.level.getBlockState(new BlockPos(vec3)).isPathfindable(pathfinderMob.level, new BlockPos(vec3), PathComputationType.WATER) && k++ < 10) {
+        while (vec3 != null && !pathfinderMob.level.getBlockState(BlockPos.containing(vec3)).isPathfindable(pathfinderMob.level, BlockPos.containing(vec3), PathComputationType.WATER) && k++ < 10) {
             vec3 = DefaultRandomPos.getPos(pathfinderMob, i, j);
         }
         return vec3;

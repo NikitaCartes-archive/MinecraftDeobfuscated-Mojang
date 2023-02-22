@@ -104,7 +104,7 @@ public abstract class BaseSpawner {
             double e = j >= 2 ? listTag.getDouble(1) : (double)(blockPos.getY() + randomSource.nextInt(3) - 1);
             double d2 = f = j >= 3 ? listTag.getDouble(2) : (double)blockPos.getZ() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.spawnRange + 0.5;
             if (!serverLevel.noCollision(optional.get().getAABB(d, e, f))) continue;
-            BlockPos blockPos2 = new BlockPos(d, e, f);
+            BlockPos blockPos2 = BlockPos.containing(d, e, f);
             if (!spawnData.getCustomSpawnRules().isPresent() ? !SpawnPlacements.checkSpawnRules(optional.get(), serverLevel, MobSpawnType.SPAWNER, blockPos2, serverLevel.getRandom()) : !optional.get().getCategory().isFriendly() && serverLevel.getDifficulty() == Difficulty.PEACEFUL || !(customSpawnRules = spawnData.getCustomSpawnRules().get()).blockLightLimit().isValueInRange(serverLevel.getBrightness(LightLayer.BLOCK, blockPos2)) || !customSpawnRules.skyLightLimit().isValueInRange(serverLevel.getBrightness(LightLayer.SKY, blockPos2))) continue;
             Entity entity2 = EntityType.loadEntityRecursive(compoundTag, serverLevel, entity -> {
                 entity.moveTo(d, e, f, entity.getYRot(), entity.getXRot());

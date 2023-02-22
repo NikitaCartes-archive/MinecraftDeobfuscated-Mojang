@@ -249,11 +249,6 @@ implements VariantHolder<CatVariant> {
     }
 
     @Override
-    public boolean causeFallDamage(float f, float g, DamageSource damageSource) {
-        return false;
-    }
-
-    @Override
     protected void usePlayerItem(Player player, InteractionHand interactionHand, ItemStack itemStack) {
         if (this.isFood(itemStack)) {
             this.playSound(SoundEvents.CAT_EAT, 1.0f, 1.0f);

@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Iterator;
 import java.util.List;
@@ -44,8 +43,6 @@ implements SoundEventListener {
         if (!this.isListening || this.subtitles.isEmpty()) {
             return;
         }
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         Vec3 vec3 = new Vec3(this.minecraft.player.getX(), this.minecraft.player.getEyeY(), this.minecraft.player.getZ());
         Vec3 vec32 = new Vec3(0.0, 0.0, -1.0).xRot(-this.minecraft.player.getXRot() * ((float)Math.PI / 180)).yRot(-this.minecraft.player.getYRot() * ((float)Math.PI / 180));
         Vec3 vec33 = new Vec3(0.0, 1.0, 0.0).xRot(-this.minecraft.player.getXRot() * ((float)Math.PI / 180)).yRot(-this.minecraft.player.getYRot() * ((float)Math.PI / 180));
@@ -81,7 +78,6 @@ implements SoundEventListener {
             poseStack.translate((float)this.minecraft.getWindow().getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.getWindow().getGuiScaledHeight() - 35) - (float)(i * (m + 1)) * 1.0f, 0.0f);
             poseStack.scale(1.0f, 1.0f, 1.0f);
             SubtitleOverlay.fill(poseStack, -l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8f));
-            RenderSystem.enableBlend();
             int r = q + -16777216;
             if (!bl) {
                 if (e > 0.0) {
@@ -94,7 +90,6 @@ implements SoundEventListener {
             poseStack.popPose();
             ++i;
         }
-        RenderSystem.disableBlend();
     }
 
     @Override

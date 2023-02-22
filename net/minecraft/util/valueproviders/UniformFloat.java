@@ -18,7 +18,7 @@ public class UniformFloat
 extends FloatProvider {
     public static final Codec<UniformFloat> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("min_inclusive")).forGetter(uniformFloat -> Float.valueOf(uniformFloat.minInclusive)), ((MapCodec)Codec.FLOAT.fieldOf("max_exclusive")).forGetter(uniformFloat -> Float.valueOf(uniformFloat.maxExclusive))).apply((Applicative<UniformFloat, ?>)instance, UniformFloat::new)).comapFlatMap(uniformFloat -> {
         if (uniformFloat.maxExclusive <= uniformFloat.minInclusive) {
-            return DataResult.error("Max must be larger than min, min_inclusive: " + uniformFloat.minInclusive + ", max_exclusive: " + uniformFloat.maxExclusive);
+            return DataResult.error(() -> "Max must be larger than min, min_inclusive: " + uniformFloat.minInclusive + ", max_exclusive: " + uniformFloat.maxExclusive);
         }
         return DataResult.success(uniformFloat);
     }, Function.identity());

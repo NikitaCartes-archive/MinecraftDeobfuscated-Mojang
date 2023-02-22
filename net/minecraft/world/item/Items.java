@@ -1130,7 +1130,7 @@ public class Items {
     public static final Item SKELETON_SPAWN_EGG = Items.registerItem("skeleton_spawn_egg", (Item)new SpawnEggItem(EntityType.SKELETON, 0xC1C1C1, 0x494949, new Item.Properties()));
     public static final Item SKELETON_HORSE_SPAWN_EGG = Items.registerItem("skeleton_horse_spawn_egg", (Item)new SpawnEggItem(EntityType.SKELETON_HORSE, 6842447, 15066584, new Item.Properties()));
     public static final Item SLIME_SPAWN_EGG = Items.registerItem("slime_spawn_egg", (Item)new SpawnEggItem(EntityType.SLIME, 5349438, 8306542, new Item.Properties()));
-    public static final Item SNIFFER_SPAWN_EGG = Items.registerItem("sniffer_spawn_egg", (Item)new SpawnEggItem(EntityType.SNIFFER, 9840944, 5085536, new Item.Properties()));
+    public static final Item SNIFFER_SPAWN_EGG = Items.registerItem("sniffer_spawn_egg", (Item)new SpawnEggItem(EntityType.SNIFFER, 8855049, 2468720, new Item.Properties()));
     public static final Item SNOW_GOLEM_SPAWN_EGG = Items.registerItem("snow_golem_spawn_egg", (Item)new SpawnEggItem(EntityType.SNOW_GOLEM, 14283506, 8496292, new Item.Properties()));
     public static final Item SPIDER_SPAWN_EGG = Items.registerItem("spider_spawn_egg", (Item)new SpawnEggItem(EntityType.SPIDER, 3419431, 11013646, new Item.Properties()));
     public static final Item SQUID_SPAWN_EGG = Items.registerItem("squid_spawn_egg", (Item)new SpawnEggItem(EntityType.SQUID, 2243405, 7375001, new Item.Properties()));

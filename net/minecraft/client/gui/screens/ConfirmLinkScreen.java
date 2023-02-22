@@ -7,8 +7,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -69,6 +72,20 @@ extends ConfirmScreen {
         if (this.showWarning) {
             ConfirmLinkScreen.drawCenteredString(poseStack, this.font, WARNING_TEXT, this.width / 2, 110, 0xFFCCCC);
         }
+    }
+
+    public static void confirmLinkNow(String string, Screen screen, boolean bl2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+            if (bl) {
+                Util.getPlatform().openUri(string);
+            }
+            minecraft.setScreen(screen);
+        }, string, bl2));
+    }
+
+    public static Button.OnPress confirmLink(String string, Screen screen, boolean bl) {
+        return button -> ConfirmLinkScreen.confirmLinkNow(string, screen, bl);
     }
 }
 

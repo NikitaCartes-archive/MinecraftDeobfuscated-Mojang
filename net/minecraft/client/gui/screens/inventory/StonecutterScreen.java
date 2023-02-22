@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -53,18 +52,17 @@ extends AbstractContainerScreen<StonecutterMenu> {
     @Override
     protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         this.renderBackground(poseStack);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, BG_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;
-        this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+        StonecutterScreen.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
         int m = (int)(41.0f * this.scrollOffs);
-        this.blit(poseStack, k + 119, l + 15 + m, 176 + (this.isScrollBarActive() ? 0 : 12), 0, 12, 15);
+        StonecutterScreen.blit(poseStack, k + 119, l + 15 + m, 176 + (this.isScrollBarActive() ? 0 : 12), 0, 12, 15);
         int n = this.leftPos + 52;
         int o = this.topPos + 14;
         int p = this.startIndex + 12;
         this.renderButtons(poseStack, i, j, n, o, p);
-        this.renderRecipes(n, o, p);
+        this.renderRecipes(poseStack, n, o, p);
     }
 
     @Override
@@ -97,18 +95,18 @@ extends AbstractContainerScreen<StonecutterMenu> {
             } else if (i >= p && j >= r && i < p + 16 && j < r + 18) {
                 s += 36;
             }
-            this.blit(poseStack, p, r - 1, 0, s, 16, 18);
+            StonecutterScreen.blit(poseStack, p, r - 1, 0, s, 16, 18);
         }
     }
 
-    private void renderRecipes(int i, int j, int k) {
+    private void renderRecipes(PoseStack poseStack, int i, int j, int k) {
         List<StonecutterRecipe> list = ((StonecutterMenu)this.menu).getRecipes();
         for (int l = this.startIndex; l < k && l < ((StonecutterMenu)this.menu).getNumRecipes(); ++l) {
             int m = l - this.startIndex;
             int n = i + m % 4 * 16;
             int o = m / 4;
             int p = j + o * 18 + 2;
-            this.minecraft.getItemRenderer().renderAndDecorateItem(list.get(l).getResultItem(this.minecraft.level.registryAccess()), n, p);
+            this.minecraft.getItemRenderer().renderAndDecorateItem(poseStack, list.get(l).getResultItem(this.minecraft.level.registryAccess()), n, p);
         }
     }
 

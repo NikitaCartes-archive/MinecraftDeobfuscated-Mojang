@@ -89,7 +89,6 @@ public class Util {
     private static final int DEFAULT_MAX_THREADS = 255;
     private static final String MAX_THREADS_SYSTEM_PROPERTY = "max.bg.threads";
     private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
-    private static final ExecutorService BOOTSTRAP_EXECUTOR = Util.makeExecutor("Bootstrap");
     private static final ExecutorService BACKGROUND_EXECUTOR = Util.makeExecutor("Main");
     private static final ExecutorService IO_POOL = Util.makeIoExecutor();
     private static final DateTimeFormatter FILENAME_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
@@ -171,10 +170,6 @@ public class Util {
             }
         }
         return 255;
-    }
-
-    public static ExecutorService bootstrapExecutor() {
-        return BOOTSTRAP_EXECUTOR;
     }
 
     public static ExecutorService backgroundExecutor() {
@@ -381,10 +376,11 @@ public class Util {
     public static <V> CompletableFuture<List<V>> sequenceFailFastAndCancel(List<? extends CompletableFuture<? extends V>> list) {
         CompletableFuture completableFuture = new CompletableFuture();
         return Util.fallibleSequence(list, throwable -> {
-            for (CompletableFuture completableFuture2 : list) {
-                completableFuture2.cancel(true);
+            if (completableFuture.completeExceptionally((Throwable)throwable)) {
+                for (CompletableFuture completableFuture2 : list) {
+                    completableFuture2.cancel(true);
+                }
             }
-            completableFuture.completeExceptionally((Throwable)throwable);
         }).applyToEither((CompletionStage)completableFuture, Function.identity());
     }
 
@@ -623,22 +619,22 @@ public class Util {
     public static DataResult<int[]> fixedSize(IntStream intStream, int i) {
         int[] is = intStream.limit(i + 1).toArray();
         if (is.length != i) {
-            String string = "Input is not a list of " + i + " ints";
+            Supplier<String> supplier = () -> "Input is not a list of " + i + " ints";
             if (is.length >= i) {
-                return DataResult.error(string, Arrays.copyOf(is, i));
+                return DataResult.error(supplier, Arrays.copyOf(is, i));
             }
-            return DataResult.error(string);
+            return DataResult.error(supplier);
         }
         return DataResult.success(is);
     }
 
     public static <T> DataResult<List<T>> fixedSize(List<T> list, int i) {
         if (list.size() != i) {
-            String string = "Input is not a list of " + i + " elements";
+            Supplier<String> supplier = () -> "Input is not a list of " + i + " elements";
             if (list.size() >= i) {
-                return DataResult.error(string, list.subList(0, i));
+                return DataResult.error(supplier, list.subList(0, i));
             }
-            return DataResult.error(string);
+            return DataResult.error(supplier);
         }
         return DataResult.success(list);
     }

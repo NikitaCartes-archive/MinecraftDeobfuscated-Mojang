@@ -51,6 +51,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class Sniffer
@@ -94,6 +95,14 @@ extends Animal {
         return bl && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-6;
     }
 
+    private boolean isMovingInWater() {
+        return this.isMoving() && this.isInWater() && !this.isUnderWater() && this.getDeltaMovement().horizontalDistanceSqr() > 9.999999999999999E-6;
+    }
+
+    private boolean isMovingOnLand() {
+        return this.isMoving() && !this.isUnderWater() && !this.isInWater();
+    }
+
     public boolean isPanicking() {
         return this.brain.getMemory(MemoryModuleType.IS_PANICKING).isPresent();
     }
@@ -104,7 +113,7 @@ extends Animal {
 
     private BlockPos getHeadPosition() {
         Vec3 vec3 = this.position().add(this.getForward().scale(2.25));
-        return new BlockPos(vec3.x(), this.getY(), vec3.z());
+        return BlockPos.containing(vec3.x(), this.getY(), vec3.z());
     }
 
     private State getState() {
@@ -210,7 +219,7 @@ extends Animal {
     }
 
     Optional<BlockPos> calculateDigPosition() {
-        return IntStream.range(0, 5).mapToObj(i -> LandRandomPos.getPos(this, 10 + 2 * i, 3)).filter(Objects::nonNull).map(BlockPos::new).map(BlockPos::below).filter(this::canDig).findFirst();
+        return IntStream.range(0, 5).mapToObj(i -> LandRandomPos.getPos(this, 10 + 2 * i, 3)).filter(Objects::nonNull).map(BlockPos::containing).map(BlockPos::below).filter(this::canDig).findFirst();
     }
 
     @Override
@@ -276,9 +285,20 @@ extends Animal {
     }
 
     @Override
+    protected void jumpFromGround() {
+        double e;
+        super.jumpFromGround();
+        double d = this.moveControl.getSpeedModifier();
+        if (d > 0.0 && (e = this.getDeltaMovement().horizontalDistanceSqr()) < 0.01) {
+            this.moveRelative(0.1f, new Vec3(0.0, 0.0, 1.0));
+        }
+    }
+
+    @Override
     public void tick() {
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.isInWater() ? (double)0.2f : (double)0.1f);
-        if (this.isMoving() || this.isInWater()) {
+        boolean bl = this.isInWater() && !this.isUnderWater();
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(bl ? (double)0.2f : (double)0.1f);
+        if (this.isMovingOnLand() || this.isMovingInWater()) {
             if (this.isPanicking()) {
                 this.walkingAnimationState.stop();
                 this.panicAnimationState.startIfStopped(this.tickCount);
@@ -344,6 +364,11 @@ extends Animal {
     }
 
     @Override
+    public int getMaxHeadYRot() {
+        return 50;
+    }
+
+    @Override
     public void setBaby(boolean bl) {
         this.setAge(bl ? -48000 : 0);
     }
@@ -361,6 +386,11 @@ extends Animal {
             return set.contains((Object)this.getState()) && set.contains((Object)sniffer.getState()) && super.canMate(animal);
         }
         return false;
+    }
+
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        return super.getBoundingBoxForCulling().inflate(0.6f);
     }
 
     @Override

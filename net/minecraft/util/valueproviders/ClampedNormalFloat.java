@@ -18,7 +18,7 @@ public class ClampedNormalFloat
 extends FloatProvider {
     public static final Codec<ClampedNormalFloat> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("mean")).forGetter(clampedNormalFloat -> Float.valueOf(clampedNormalFloat.mean)), ((MapCodec)Codec.FLOAT.fieldOf("deviation")).forGetter(clampedNormalFloat -> Float.valueOf(clampedNormalFloat.deviation)), ((MapCodec)Codec.FLOAT.fieldOf("min")).forGetter(clampedNormalFloat -> Float.valueOf(clampedNormalFloat.min)), ((MapCodec)Codec.FLOAT.fieldOf("max")).forGetter(clampedNormalFloat -> Float.valueOf(clampedNormalFloat.max))).apply((Applicative<ClampedNormalFloat, ?>)instance, ClampedNormalFloat::new)).comapFlatMap(clampedNormalFloat -> {
         if (clampedNormalFloat.max < clampedNormalFloat.min) {
-            return DataResult.error("Max must be larger than min: [" + clampedNormalFloat.min + ", " + clampedNormalFloat.max + "]");
+            return DataResult.error(() -> "Max must be larger than min: [" + clampedNormalFloat.min + ", " + clampedNormalFloat.max + "]");
         }
         return DataResult.success(clampedNormalFloat);
     }, Function.identity());

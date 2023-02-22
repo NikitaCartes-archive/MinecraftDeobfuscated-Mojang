@@ -95,7 +95,7 @@ public class DataFetcher {
             }
         }
 
-        void reset() {
+        public void reset() {
             this.pendingTask = null;
             this.lastResult = null;
             this.nextUpdate = -1L;

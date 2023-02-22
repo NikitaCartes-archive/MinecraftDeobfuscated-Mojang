@@ -228,7 +228,7 @@ extends RealmsScreen {
         int k = i + 12;
         int l = j - 12;
         int m = this.font.width(component);
-        this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+        RealmsBackupScreen.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
         this.font.drawShadow(poseStack, component, (float)k, (float)l, 0xFFFFFF);
     }
 
@@ -270,7 +270,7 @@ extends RealmsScreen {
                 int m = l / this.itemHeight;
                 if (d >= (double)j && d <= (double)k && m >= 0 && l >= 0 && m < this.getItemCount()) {
                     this.selectItem(m);
-                    this.itemClicked(l, m, d, e, this.width);
+                    this.itemClicked(l, m, d, e, this.width, i);
                 }
                 return true;
             }
@@ -283,18 +283,18 @@ extends RealmsScreen {
         }
 
         @Override
-        public void itemClicked(int i, int j, double d, double e, int k) {
-            int l = this.width - 35;
-            int m = j * this.itemHeight + 36 - (int)this.getScrollAmount();
-            int n = l + 10;
-            int o = m - 3;
-            if (d >= (double)l && d <= (double)(l + 9) && e >= (double)m && e <= (double)(m + 9)) {
+        public void itemClicked(int i, int j, double d, double e, int k, int l) {
+            int m = this.width - 35;
+            int n = j * this.itemHeight + 36 - (int)this.getScrollAmount();
+            int o = m + 10;
+            int p = n - 3;
+            if (d >= (double)m && d <= (double)(m + 9) && e >= (double)n && e <= (double)(n + 9)) {
                 if (!RealmsBackupScreen.this.backups.get((int)j).changeList.isEmpty()) {
                     RealmsBackupScreen.this.selectedBackup = -1;
                     lastScrollPosition = (int)this.getScrollAmount();
                     this.minecraft.setScreen(new RealmsBackupInfoScreen(RealmsBackupScreen.this, RealmsBackupScreen.this.backups.get(j)));
                 }
-            } else if (d >= (double)n && d < (double)(n + 13) && e >= (double)o && e < (double)(o + 15)) {
+            } else if (d >= (double)o && d < (double)(o + 13) && e >= (double)p && e < (double)(p + 15)) {
                 lastScrollPosition = (int)this.getScrollAmount();
                 RealmsBackupScreen.this.restoreClicked(j);
             }

@@ -40,6 +40,7 @@ public final class ItemTags {
     public static final TagKey<Item> WART_BLOCKS = ItemTags.bind("wart_blocks");
     public static final TagKey<Item> BANNERS = ItemTags.bind("banners");
     public static final TagKey<Item> SAND = ItemTags.bind("sand");
+    public static final TagKey<Item> SMELTS_TO_GLASS = ItemTags.bind("smelts_to_glass");
     public static final TagKey<Item> STAIRS = ItemTags.bind("stairs");
     public static final TagKey<Item> SLABS = ItemTags.bind("slabs");
     public static final TagKey<Item> WALLS = ItemTags.bind("walls");

@@ -31,7 +31,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -233,7 +232,6 @@ extends ObjectSelectionList<Entry> {
                 component2 = PINGING_STATUS;
                 list2 = Collections.emptyList();
             }
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
             GuiComponent.blit(poseStack, k + l - 15, j, r * 10, 176 + s * 8, 10, 8, 256, 256);
             byte[] bs = this.serverData.getIconBytes();
@@ -260,7 +258,6 @@ extends ObjectSelectionList<Entry> {
             if (this.minecraft.options.touchscreen().get().booleanValue() || bl) {
                 RenderSystem.setShaderTexture(0, ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
                 int v = n - k;
                 int w = o - j;
                 if (this.canJoin()) {

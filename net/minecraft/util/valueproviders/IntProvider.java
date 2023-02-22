@@ -25,10 +25,10 @@ public abstract class IntProvider {
     public static <T extends IntProvider> Codec<T> codec(int i, int j, Codec<T> codec) {
         return ExtraCodecs.validate(codec, intProvider -> {
             if (intProvider.getMinValue() < i) {
-                return DataResult.error("Value provider too low: " + i + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
+                return DataResult.error(() -> "Value provider too low: " + i + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
             }
             if (intProvider.getMaxValue() > j) {
-                return DataResult.error("Value provider too high: " + j + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
+                return DataResult.error(() -> "Value provider too high: " + j + " [" + intProvider.getMinValue() + "-" + intProvider.getMaxValue() + "]");
             }
             return DataResult.success(intProvider);
         });

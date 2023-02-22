@@ -60,7 +60,7 @@ implements GameEventListener {
             if (!livingEntity.wasExperienceConsumed()) {
                 int i = livingEntity.getExperienceReward();
                 if (livingEntity.shouldDropExperience() && i > 0) {
-                    this.sculkSpreader.addCursors(new BlockPos(vec3.relative(Direction.UP, 0.5)), i);
+                    this.sculkSpreader.addCursors(BlockPos.containing(vec3.relative(Direction.UP, 0.5)), i);
                     this.tryAwardItSpreadsAdvancement(livingEntity);
                 }
                 livingEntity.skipDropExperience();

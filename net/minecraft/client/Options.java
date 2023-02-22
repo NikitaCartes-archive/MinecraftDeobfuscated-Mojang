@@ -6,6 +6,7 @@ package net.minecraft.client;
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
@@ -182,6 +183,18 @@ public class Options {
     private final OptionInstance<Double> chatLineSpacing = new OptionInstance<Double>("options.chat.line_spacing", OptionInstance.noTooltip(), Options::percentValueLabel, OptionInstance.UnitDouble.INSTANCE, 0.0, double_ -> {});
     private final OptionInstance<Double> textBackgroundOpacity = new OptionInstance<Double>("options.accessibility.text_background_opacity", OptionInstance.noTooltip(), Options::percentValueLabel, OptionInstance.UnitDouble.INSTANCE, 0.5, double_ -> Minecraft.getInstance().gui.getChat().rescaleChat());
     private final OptionInstance<Double> panoramaSpeed = new OptionInstance<Double>("options.accessibility.panorama_speed", OptionInstance.noTooltip(), Options::percentValueLabel, OptionInstance.UnitDouble.INSTANCE, 1.0, double_ -> {});
+    private static final Component ACCESSIBILITY_TOOLTIP_CONTRAST_MODE = Component.translatable("options.accessibility.high_contrast.tooltip");
+    private final OptionInstance<Boolean> highContrast = OptionInstance.createBoolean("options.accessibility.high_contrast", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_CONTRAST_MODE), false, boolean_ -> {
+        PackRepository packRepository = Minecraft.getInstance().getResourcePackRepository();
+        boolean bl = packRepository.getSelectedIds().contains("high_contrast");
+        if (!bl && boolean_.booleanValue()) {
+            packRepository.addPack("high_contrast");
+            this.updateResourcePacks(packRepository);
+        } else if (bl && !boolean_.booleanValue()) {
+            packRepository.removePack("high_contrast");
+            this.updateResourcePacks(packRepository);
+        }
+    });
     @Nullable
     public String fullscreenVideoModeString;
     public boolean hideServerAddress;
@@ -376,7 +389,7 @@ public class Options {
             return Options.genericValueLabel(component, CommonComponents.OPTION_OFF);
         }
         return Options.percentValueLabel(component, double_);
-    }, OptionInstance.UnitDouble.INSTANCE, 1.0, RenderSystem::setShaderGlintAlpha);
+    }, OptionInstance.UnitDouble.INSTANCE, 0.75, RenderSystem::setShaderGlintAlpha);
     private static final Component ACCESSIBILITY_TOOLTIP_DAMAGE_TILT_STRENGTH = Component.translatable("options.damageTiltStrength.tooltip");
     private final OptionInstance<Double> damageTiltStrength = new OptionInstance<Double>("options.damageTiltStrength", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_DAMAGE_TILT_STRENGTH), (component, double_) -> {
         if (double_ == 0.0) {
@@ -477,6 +490,23 @@ public class Options {
         return this.prioritizeChunkUpdates;
     }
 
+    public void updateResourcePacks(PackRepository packRepository) {
+        ImmutableList<String> list = ImmutableList.copyOf(this.resourcePacks);
+        this.resourcePacks.clear();
+        this.incompatibleResourcePacks.clear();
+        for (Pack pack : packRepository.getSelectedPacks()) {
+            if (pack.isFixedPosition()) continue;
+            this.resourcePacks.add(pack.getId());
+            if (pack.getCompatibility().isCompatible()) continue;
+            this.incompatibleResourcePacks.add(pack.getId());
+        }
+        this.save();
+        ImmutableList<String> list2 = ImmutableList.copyOf(this.resourcePacks);
+        if (!list2.equals(list)) {
+            this.minecraft.reloadResourcePacks();
+        }
+    }
+
     public OptionInstance<ChatVisiblity> chatVisibility() {
         return this.chatVisibility;
     }
@@ -495,6 +525,10 @@ public class Options {
 
     public OptionInstance<Double> panoramaSpeed() {
         return this.panoramaSpeed;
+    }
+
+    public OptionInstance<Boolean> highContrast() {
+        return this.highContrast;
     }
 
     public OptionInstance<HumanoidArm> mainHand() {
@@ -781,6 +815,7 @@ public class Options {
         fieldAccess.process("glintSpeed", this.glintSpeed);
         fieldAccess.process("glintStrength", this.glintStrength);
         fieldAccess.process("damageTiltStrength", this.damageTiltStrength);
+        fieldAccess.process("highContrast", this.highContrast);
         fieldAccess.process("gamma", this.gamma);
         fieldAccess.process("renderDistance", this.renderDistance);
         fieldAccess.process("simulationDistance", this.simulationDistance);

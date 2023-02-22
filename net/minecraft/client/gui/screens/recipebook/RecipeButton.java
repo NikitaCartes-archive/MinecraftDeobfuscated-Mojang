@@ -17,7 +17,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -65,11 +64,11 @@ extends AbstractWidget {
 
     @Override
     public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+        boolean bl;
         if (!Screen.hasControlDown()) {
             this.time += f;
         }
         Minecraft minecraft = Minecraft.getInstance();
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
         int k = 29;
         if (!this.collection.hasCraftable()) {
@@ -79,30 +78,27 @@ extends AbstractWidget {
         if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
             l += 25;
         }
-        boolean bl = this.animationTime > 0.0f;
-        PoseStack poseStack2 = RenderSystem.getModelViewStack();
+        boolean bl2 = bl = this.animationTime > 0.0f;
         if (bl) {
             float g = 1.0f + 0.1f * (float)Math.sin(this.animationTime / 15.0f * (float)Math.PI);
-            poseStack2.pushPose();
-            poseStack2.translate(this.getX() + 8, this.getY() + 12, 0.0f);
-            poseStack2.scale(g, g, 1.0f);
-            poseStack2.translate(-(this.getX() + 8), -(this.getY() + 12), 0.0f);
-            RenderSystem.applyModelViewMatrix();
+            poseStack.pushPose();
+            poseStack.translate(this.getX() + 8, this.getY() + 12, 0.0f);
+            poseStack.scale(g, g, 1.0f);
+            poseStack.translate(-(this.getX() + 8), -(this.getY() + 12), 0.0f);
             this.animationTime -= f;
         }
-        this.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
+        RecipeButton.blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
         List<Recipe<?>> list = this.getOrderedRecipes();
         this.currentIndex = Mth.floor(this.time / 30.0f) % list.size();
         ItemStack itemStack = list.get(this.currentIndex).getResultItem(this.collection.registryAccess());
         int m = 4;
         if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
-            minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.getX() + m + 1, this.getY() + m + 1, 0, 10);
+            minecraft.getItemRenderer().renderAndDecorateItem(poseStack, itemStack, this.getX() + m + 1, this.getY() + m + 1, 0, 10);
             --m;
         }
-        minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.getX() + m, this.getY() + m);
+        minecraft.getItemRenderer().renderAndDecorateFakeItem(poseStack, itemStack, this.getX() + m, this.getY() + m);
         if (bl) {
-            poseStack2.popPose();
-            RenderSystem.applyModelViewMatrix();
+            poseStack.popPose();
         }
     }
 

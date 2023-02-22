@@ -36,13 +36,13 @@ IdMap<T> {
     public ResourceKey<? extends Registry<T>> key();
 
     default public Codec<T> byNameCodec() {
-        Codec<Object> codec = ResourceLocation.CODEC.flatXmap(resourceLocation -> Optional.ofNullable(this.get((ResourceLocation)resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown registry key in " + this.key() + ": " + resourceLocation)), object -> this.getResourceKey(object).map(ResourceKey::location).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown registry element in " + this.key() + ":" + object)));
+        Codec<Object> codec = ResourceLocation.CODEC.flatXmap(resourceLocation -> Optional.ofNullable(this.get((ResourceLocation)resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + this.key() + ": " + resourceLocation)), object -> this.getResourceKey(object).map(ResourceKey::location).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry element in " + this.key() + ":" + object)));
         Codec<Object> codec2 = ExtraCodecs.idResolverCodec(object -> this.getResourceKey(object).isPresent() ? this.getId(object) : -1, this::byId, -1);
         return ExtraCodecs.overrideLifecycle(ExtraCodecs.orCompressed(codec, codec2), this::lifecycle, this::lifecycle);
     }
 
     default public Codec<Holder<T>> holderByNameCodec() {
-        Codec<Holder> codec = ResourceLocation.CODEC.flatXmap(resourceLocation -> this.getHolder(ResourceKey.create(this.key(), resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown registry key in " + this.key() + ": " + resourceLocation)), holder -> holder.unwrapKey().map(ResourceKey::location).map(DataResult::success).orElseGet(() -> DataResult.error("Unknown registry element in " + this.key() + ":" + holder)));
+        Codec<Holder> codec = ResourceLocation.CODEC.flatXmap(resourceLocation -> this.getHolder(ResourceKey.create(this.key(), resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + this.key() + ": " + resourceLocation)), holder -> holder.unwrapKey().map(ResourceKey::location).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry element in " + this.key() + ":" + holder)));
         return ExtraCodecs.overrideLifecycle(codec, holder -> this.lifecycle(holder.value()), holder -> this.lifecycle(holder.value()));
     }
 

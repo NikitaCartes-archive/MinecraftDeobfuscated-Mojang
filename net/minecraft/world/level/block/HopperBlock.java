@@ -140,7 +140,7 @@ extends BaseEntityBlock {
         if (blockState2.is(blockState.getBlock())) {
             return;
         }
-        this.checkPoweredState(level, blockPos, blockState);
+        this.checkPoweredState(level, blockPos, blockState, 2);
     }
 
     @Override
@@ -158,14 +158,14 @@ extends BaseEntityBlock {
 
     @Override
     public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-        this.checkPoweredState(level, blockPos, blockState);
+        this.checkPoweredState(level, blockPos, blockState, 4);
     }
 
-    private void checkPoweredState(Level level, BlockPos blockPos, BlockState blockState) {
+    private void checkPoweredState(Level level, BlockPos blockPos, BlockState blockState, int i) {
         boolean bl;
         boolean bl2 = bl = !level.hasNeighborSignal(blockPos);
         if (bl != blockState.getValue(ENABLED)) {
-            level.setBlock(blockPos, (BlockState)blockState.setValue(ENABLED, bl), 4);
+            level.setBlock(blockPos, (BlockState)blockState.setValue(ENABLED, bl), i);
         }
     }
 

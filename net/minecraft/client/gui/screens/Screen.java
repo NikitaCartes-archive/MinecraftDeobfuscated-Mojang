@@ -304,8 +304,6 @@ implements Renderable {
         int q = vector2ic.y();
         poseStack.pushPose();
         int r = 400;
-        float f = this.itemRenderer.blitOffset;
-        this.itemRenderer.blitOffset = 400.0f;
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder2 = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -316,7 +314,6 @@ implements Renderable {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         BufferUploader.drawWithShader(bufferBuilder2.end());
-        RenderSystem.disableBlend();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0f, 0.0f, 400.0f);
         int s = q;
@@ -333,7 +330,6 @@ implements Renderable {
             clientTooltipComponent2.renderImage(this.font, p, s, poseStack, this.itemRenderer, 400);
             s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
         }
-        this.itemRenderer.blitOffset = f;
     }
 
     protected void renderComponentHoverEffect(PoseStack poseStack, @Nullable Style style, int i, int j) {
@@ -456,9 +452,12 @@ implements Renderable {
     public void removed() {
     }
 
+    public void added() {
+    }
+
     public void renderBackground(PoseStack poseStack) {
         if (this.minecraft.level != null) {
-            this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
+            Screen.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
         } else {
             this.renderDirtBackground(poseStack);
         }

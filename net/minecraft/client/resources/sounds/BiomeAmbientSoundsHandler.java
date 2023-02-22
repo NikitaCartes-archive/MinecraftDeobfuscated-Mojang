@@ -79,7 +79,7 @@ implements AmbientSoundHandler {
         this.moodSettings.ifPresent(ambientMoodSettings -> {
             Level level = this.player.level;
             int i = ambientMoodSettings.getBlockSearchExtent() * 2 + 1;
-            BlockPos blockPos = new BlockPos(this.player.getX() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent(), this.player.getEyeY() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent(), this.player.getZ() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent());
+            BlockPos blockPos = BlockPos.containing(this.player.getX() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent(), this.player.getEyeY() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent(), this.player.getZ() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent());
             int j = level.getBrightness(LightLayer.SKY, blockPos);
             this.moodiness = j > 0 ? (this.moodiness -= (float)j / (float)level.getMaxLightLevel() * 0.001f) : (this.moodiness -= (float)(level.getBrightness(LightLayer.BLOCK, blockPos) - 1) / (float)ambientMoodSettings.getTickDelay());
             if (this.moodiness >= 1.0f) {

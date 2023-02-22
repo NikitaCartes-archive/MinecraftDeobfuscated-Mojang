@@ -29,7 +29,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         ClientLevel level = this.minecraft.level;
-        BlockPos blockPos = new BlockPos(d, e, f);
+        BlockPos blockPos = BlockPos.containing(d, e, f);
         LongOpenHashSet longSet = new LongOpenHashSet();
         for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-10, -10, -10), blockPos.offset(10, 10, 10))) {
             int i = level.getBrightness(LightLayer.SKY, blockPos2);

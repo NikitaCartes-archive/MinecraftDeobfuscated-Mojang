@@ -93,7 +93,7 @@ extends Entity {
         this.move(MoverType.SELF, this.getDeltaMovement());
         float f = 0.98f;
         if (this.onGround) {
-            f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98f;
+            f = this.level.getBlockState(BlockPos.containing(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98f;
         }
         this.setDeltaMovement(this.getDeltaMovement().multiply(f, 0.98, f));
         if (this.onGround) {

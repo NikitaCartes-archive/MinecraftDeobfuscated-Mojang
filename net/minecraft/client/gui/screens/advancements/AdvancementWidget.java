@@ -17,7 +17,6 @@ import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.advancements.AdvancementTab;
 import net.minecraft.client.gui.screens.advancements.AdvancementWidgetType;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -120,18 +119,18 @@ extends GuiComponent {
             int o = j + this.y + 13;
             int n2 = p = bl ? -16777216 : -1;
             if (bl) {
-                this.hLine(poseStack, l, k, m - 1, p);
-                this.hLine(poseStack, l + 1, k, m, p);
-                this.hLine(poseStack, l, k, m + 1, p);
-                this.hLine(poseStack, n, l - 1, o - 1, p);
-                this.hLine(poseStack, n, l - 1, o, p);
-                this.hLine(poseStack, n, l - 1, o + 1, p);
-                this.vLine(poseStack, l - 1, o, m, p);
-                this.vLine(poseStack, l + 1, o, m, p);
+                AdvancementWidget.hLine(poseStack, l, k, m - 1, p);
+                AdvancementWidget.hLine(poseStack, l + 1, k, m, p);
+                AdvancementWidget.hLine(poseStack, l, k, m + 1, p);
+                AdvancementWidget.hLine(poseStack, n, l - 1, o - 1, p);
+                AdvancementWidget.hLine(poseStack, n, l - 1, o, p);
+                AdvancementWidget.hLine(poseStack, n, l - 1, o + 1, p);
+                AdvancementWidget.vLine(poseStack, l - 1, o, m, p);
+                AdvancementWidget.vLine(poseStack, l + 1, o, m, p);
             } else {
-                this.hLine(poseStack, l, k, m, p);
-                this.hLine(poseStack, n, l, o, p);
-                this.vLine(poseStack, l, o, m, p);
+                AdvancementWidget.hLine(poseStack, l, k, m, p);
+                AdvancementWidget.hLine(poseStack, n, l, o, p);
+                AdvancementWidget.vLine(poseStack, l, o, m, p);
             }
         }
         for (AdvancementWidget advancementWidget : this.children) {
@@ -143,10 +142,9 @@ extends GuiComponent {
         if (!this.display.isHidden() || this.progress != null && this.progress.isDone()) {
             float f = this.progress == null ? 0.0f : this.progress.getPercent();
             AdvancementWidgetType advancementWidgetType = f >= 1.0f ? AdvancementWidgetType.OBTAINED : AdvancementWidgetType.UNOBTAINED;
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-            this.blit(poseStack, i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
-            this.minecraft.getItemRenderer().renderAndDecorateFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
+            AdvancementWidget.blit(poseStack, i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
+            this.minecraft.getItemRenderer().renderAndDecorateFakeItem(poseStack, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
         }
         for (AdvancementWidget advancementWidget : this.children) {
             advancementWidget.draw(poseStack, i, j);
@@ -196,7 +194,6 @@ extends GuiComponent {
             advancementWidgetType3 = AdvancementWidgetType.UNOBTAINED;
         }
         int o = this.width - n;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         RenderSystem.enableBlend();
         int p = j + this.y;
@@ -204,14 +201,14 @@ extends GuiComponent {
         int r = 32 + this.description.size() * this.minecraft.font.lineHeight;
         if (!this.description.isEmpty()) {
             if (bl2) {
-                this.blitNineSliced(poseStack, q, p + 26 - r, this.width, r, 10, 200, 26, 0, 52);
+                AdvancementWidget.blitNineSliced(poseStack, q, p + 26 - r, this.width, r, 10, 200, 26, 0, 52);
             } else {
-                this.blitNineSliced(poseStack, q, p, this.width, r, 10, 200, 26, 0, 52);
+                AdvancementWidget.blitNineSliced(poseStack, q, p, this.width, r, 10, 200, 26, 0, 52);
             }
         }
-        this.blit(poseStack, q, p, 0, advancementWidgetType.getIndex() * 26, n, 26);
-        this.blit(poseStack, q + n, p, 200 - o, advancementWidgetType2.getIndex() * 26, o, 26);
-        this.blit(poseStack, i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType3.getIndex() * 26, 26, 26);
+        AdvancementWidget.blit(poseStack, q, p, 0, advancementWidgetType.getIndex() * 26, n, 26);
+        AdvancementWidget.blit(poseStack, q + n, p, 200 - o, advancementWidgetType2.getIndex() * 26, o, 26);
+        AdvancementWidget.blit(poseStack, i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType3.getIndex() * 26, 26, 26);
         if (bl) {
             this.minecraft.font.drawShadow(poseStack, this.title, (float)(q + 5), (float)(j + this.y + 9), -1);
             if (string != null) {
@@ -232,7 +229,7 @@ extends GuiComponent {
                 this.minecraft.font.draw(poseStack, this.description.get(s), (float)(q + 5), (float)(j + this.y + 9 + 17 + s * this.minecraft.font.lineHeight), -5592406);
             }
         }
-        this.minecraft.getItemRenderer().renderAndDecorateFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
+        this.minecraft.getItemRenderer().renderAndDecorateFakeItem(poseStack, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
     }
 
     public boolean isMouseOver(int i, int j, int k, int l) {

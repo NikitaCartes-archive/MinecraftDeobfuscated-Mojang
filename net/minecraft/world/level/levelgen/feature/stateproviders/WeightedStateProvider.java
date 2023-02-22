@@ -20,7 +20,7 @@ extends BlockStateProvider {
 
     private static DataResult<WeightedStateProvider> create(SimpleWeightedRandomList<BlockState> simpleWeightedRandomList) {
         if (simpleWeightedRandomList.isEmpty()) {
-            return DataResult.error("WeightedStateProvider with no states");
+            return DataResult.error(() -> "WeightedStateProvider with no states");
         }
         return DataResult.success(new WeightedStateProvider(simpleWeightedRandomList));
     }

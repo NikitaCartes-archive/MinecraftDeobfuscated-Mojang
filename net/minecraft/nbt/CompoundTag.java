@@ -49,7 +49,7 @@ implements Tag {
         if (tag instanceof CompoundTag) {
             return DataResult.success((CompoundTag)tag);
         }
-        return DataResult.error("Not a compound tag: " + tag);
+        return DataResult.error(() -> "Not a compound tag: " + tag);
     }, compoundTag -> new Dynamic<CompoundTag>(NbtOps.INSTANCE, (CompoundTag)compoundTag));
     private static final int SELF_SIZE_IN_BYTES = 48;
     private static final int MAP_ENTRY_SIZE_IN_BYTES = 32;

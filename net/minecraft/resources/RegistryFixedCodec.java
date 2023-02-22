@@ -34,11 +34,11 @@ implements Codec<Holder<E>> {
         Optional optional;
         if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).owner(this.registryKey)).isPresent()) {
             if (!holder.canSerializeIn(optional.get())) {
-                return DataResult.error("Element " + holder + " is not valid in current registry set");
+                return DataResult.error(() -> "Element " + holder + " is not valid in current registry set");
             }
-            return holder.unwrap().map(resourceKey -> ResourceLocation.CODEC.encode(resourceKey.location(), dynamicOps, object2), object -> DataResult.error("Elements from registry " + this.registryKey + " can't be serialized to a value"));
+            return holder.unwrap().map(resourceKey -> ResourceLocation.CODEC.encode(resourceKey.location(), dynamicOps, object2), object -> DataResult.error(() -> "Elements from registry " + this.registryKey + " can't be serialized to a value"));
         }
-        return DataResult.error("Can't access registry " + this.registryKey);
+        return DataResult.error(() -> "Can't access registry " + this.registryKey);
     }
 
     @Override
@@ -48,10 +48,10 @@ implements Codec<Holder<E>> {
         if (dynamicOps instanceof RegistryOps && (optional = (registryOps = (RegistryOps)dynamicOps).getter(this.registryKey)).isPresent()) {
             return ResourceLocation.CODEC.decode(dynamicOps, object).flatMap((? super R pair) -> {
                 ResourceLocation resourceLocation = (ResourceLocation)pair.getFirst();
-                return ((HolderGetter)optional.get()).get(ResourceKey.create(this.registryKey, resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error("Failed to get element " + resourceLocation)).map((? super R reference) -> Pair.of(reference, pair.getSecond())).setLifecycle(Lifecycle.stable());
+                return ((HolderGetter)optional.get()).get(ResourceKey.create(this.registryKey, resourceLocation)).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Failed to get element " + resourceLocation)).map((? super R reference) -> Pair.of(reference, pair.getSecond())).setLifecycle(Lifecycle.stable());
             });
         }
-        return DataResult.error("Can't access registry " + this.registryKey);
+        return DataResult.error(() -> "Can't access registry " + this.registryKey);
     }
 
     public String toString() {

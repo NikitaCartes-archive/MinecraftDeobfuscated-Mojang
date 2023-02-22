@@ -94,7 +94,7 @@ implements NeutralMob {
 
     public EnderMan(EntityType<? extends EnderMan> entityType, Level level) {
         super((EntityType<? extends Monster>)entityType, level);
-        this.maxUpStep = 1.0f;
+        this.setMaxUpStep(1.0f);
         this.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
     }
 

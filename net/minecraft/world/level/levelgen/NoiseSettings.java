@@ -23,13 +23,13 @@ public record NoiseSettings(int minY, int height, int noiseSizeHorizontal, int n
 
     private static DataResult<NoiseSettings> guardY(NoiseSettings noiseSettings) {
         if (noiseSettings.minY() + noiseSettings.height() > DimensionType.MAX_Y + 1) {
-            return DataResult.error("min_y + height cannot be higher than: " + (DimensionType.MAX_Y + 1));
+            return DataResult.error(() -> "min_y + height cannot be higher than: " + (DimensionType.MAX_Y + 1));
         }
         if (noiseSettings.height() % 16 != 0) {
-            return DataResult.error("height has to be a multiple of 16");
+            return DataResult.error(() -> "height has to be a multiple of 16");
         }
         if (noiseSettings.minY() % 16 != 0) {
-            return DataResult.error("min_y has to be a multiple of 16");
+            return DataResult.error(() -> "min_y has to be a multiple of 16");
         }
         return DataResult.success(noiseSettings);
     }

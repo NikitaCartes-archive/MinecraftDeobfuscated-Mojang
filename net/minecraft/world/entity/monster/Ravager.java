@@ -62,7 +62,7 @@ extends Raider {
 
     public Ravager(EntityType<? extends Ravager> entityType, Level level) {
         super((EntityType<? extends Raider>)entityType, level);
-        this.maxUpStep = 1.0f;
+        this.setMaxUpStep(1.0f);
         this.xpReward = 20;
         this.setPathfindingMalus(BlockPathTypes.LEAVES, 0.0f);
     }
@@ -128,13 +128,10 @@ extends Raider {
 
     @Override
     @Nullable
-    public Entity getControllingPassenger() {
-        Entity entity = this.getFirstPassenger();
-        return entity != null && this.canBeControlledBy(entity) ? entity : null;
-    }
-
-    private boolean canBeControlledBy(Entity entity) {
-        return !this.isNoAi() && entity instanceof LivingEntity;
+    public LivingEntity getControllingPassenger() {
+        LivingEntity livingEntity;
+        Entity entity;
+        return !this.isNoAi() && (entity = this.getFirstPassenger()) instanceof LivingEntity ? (livingEntity = (LivingEntity)entity) : null;
     }
 
     @Override
@@ -316,6 +313,11 @@ extends Raider {
     @Override
     public boolean canBeLeader() {
         return false;
+    }
+
+    @Override
+    protected float getFlyingSpeed() {
+        return 0.02f;
     }
 
     class RavagerMeleeAttackGoal

@@ -29,7 +29,7 @@ extends ObjectSelectionList<E> {
         this.setSelectedItem(i);
     }
 
-    public void itemClicked(int i, int j, double d, double e, int k) {
+    public void itemClicked(int i, int j, double d, double e, int k, int l) {
     }
 
     @Override

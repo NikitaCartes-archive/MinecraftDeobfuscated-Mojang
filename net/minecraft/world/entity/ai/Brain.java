@@ -83,7 +83,7 @@ public class Brain<E extends LivingEntity> {
             }
 
             private <T, U> DataResult<MemoryValue<U>> captureRead(MemoryModuleType<U> memoryModuleType, DynamicOps<T> dynamicOps, T object) {
-                return memoryModuleType.getCodec().map(DataResult::success).orElseGet(() -> DataResult.error("No codec for memory: " + memoryModuleType)).flatMap((? super R codec) -> codec.parse(dynamicOps, object)).map((? super R expirableValue) -> new MemoryValue(memoryModuleType, Optional.of(expirableValue)));
+                return memoryModuleType.getCodec().map(DataResult::success).orElseGet(() -> DataResult.error(() -> "No codec for memory: " + memoryModuleType)).flatMap((? super R codec) -> codec.parse(dynamicOps, object)).map((? super R expirableValue) -> new MemoryValue(memoryModuleType, Optional.of(expirableValue)));
             }
 
             @Override

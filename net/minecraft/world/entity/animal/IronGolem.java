@@ -71,7 +71,7 @@ implements NeutralMob {
 
     public IronGolem(EntityType<? extends IronGolem> entityType, Level level) {
         super((EntityType<? extends AbstractGolem>)entityType, level);
-        this.maxUpStep = 1.0f;
+        this.setMaxUpStep(1.0f);
     }
 
     @Override

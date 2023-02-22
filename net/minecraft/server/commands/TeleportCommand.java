@@ -103,7 +103,7 @@ public class TeleportCommand {
     private static void performTeleport(CommandSourceStack commandSourceStack, Entity entity, ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h, @Nullable LookAt lookAt) throws CommandSyntaxException {
         LivingEntity livingEntity;
         float j;
-        BlockPos blockPos = new BlockPos(d, e, f);
+        BlockPos blockPos = BlockPos.containing(d, e, f);
         if (!Level.isInSpawnableBounds(blockPos)) {
             throw INVALID_POSITION.create();
         }

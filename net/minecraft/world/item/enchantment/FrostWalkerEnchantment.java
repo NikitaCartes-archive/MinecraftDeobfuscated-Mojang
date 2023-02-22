@@ -48,11 +48,11 @@ extends Enchantment {
             return;
         }
         BlockState blockState = Blocks.FROSTED_ICE.defaultBlockState();
-        float f = Math.min(16, 2 + i);
+        int j = Math.min(16, 2 + i);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-f, -1.0, -f), blockPos.offset(f, -1.0, f))) {
+        for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-j, -1, -j), blockPos.offset(j, -1, j))) {
             BlockState blockState3;
-            if (!blockPos2.closerToCenterThan(livingEntity.position(), f)) continue;
+            if (!blockPos2.closerToCenterThan(livingEntity.position(), j)) continue;
             mutableBlockPos.set(blockPos2.getX(), blockPos2.getY() + 1, blockPos2.getZ());
             BlockState blockState2 = level.getBlockState(mutableBlockPos);
             if (!blockState2.isAir() || (blockState3 = level.getBlockState(blockPos2)).getMaterial() != Material.WATER || blockState3.getValue(LiquidBlock.LEVEL) != 0 || !blockState.canSurvive(level, blockPos2) || !level.isUnobstructed(blockState, blockPos2, CollisionContext.empty())) continue;

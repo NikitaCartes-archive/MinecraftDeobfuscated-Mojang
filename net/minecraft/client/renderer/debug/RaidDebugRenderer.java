@@ -40,7 +40,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     private static void highlightRaidCenter(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos) {
-        DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos.offset(-0.5, -0.5, -0.5), blockPos.offset(1.5, 1.5, 1.5), 1.0f, 0.0f, 0.0f, 0.15f);
+        DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos.offset(-1, -1, -1), blockPos.offset(1, 1, 1), 1.0f, 0.0f, 0.0f, 0.15f);
         int i = -65536;
         RaidDebugRenderer.renderTextOverBlock(poseStack, multiBufferSource, "Raid center", blockPos, -65536);
     }

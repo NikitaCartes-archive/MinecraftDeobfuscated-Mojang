@@ -88,7 +88,7 @@ implements Comparable<ResourceLocation> {
         try {
             return DataResult.success(new ResourceLocation(string));
         } catch (ResourceLocationException resourceLocationException) {
-            return DataResult.error("Not a valid resource location: " + string + " " + resourceLocationException.getMessage());
+            return DataResult.error(() -> "Not a valid resource location: " + string + " " + resourceLocationException.getMessage());
         }
     }
 

@@ -232,7 +232,7 @@ public class WorldCreationUiState {
         this.altPresetList.addAll((Collection<WorldTypeEntry>)WorldCreationUiState.getNonEmptyList(registry, WorldPresetTags.EXTENDED).orElse(this.normalPresetList));
         Holder<WorldPreset> holder = this.worldType.preset();
         if (holder != null) {
-            this.setWorldType(WorldCreationUiState.findPreset(this.getSettings(), holder.unwrapKey()).map(WorldTypeEntry::new).orElse(this.normalPresetList.get(0)));
+            this.worldType = WorldCreationUiState.findPreset(this.getSettings(), holder.unwrapKey()).map(WorldTypeEntry::new).orElse(this.normalPresetList.get(0));
         }
     }
 

@@ -42,7 +42,7 @@ public class ViewArea {
                     int m = this.getChunkIndex(j, k, l);
                     ChunkRenderDispatcher chunkRenderDispatcher2 = chunkRenderDispatcher;
                     Objects.requireNonNull(chunkRenderDispatcher2);
-                    this.chunks[m] = new ChunkRenderDispatcher.RenderChunk(chunkRenderDispatcher2, m, j * 16, k * 16, l * 16);
+                    this.chunks[m] = chunkRenderDispatcher2.new ChunkRenderDispatcher.RenderChunk(m, j * 16, k * 16, l * 16);
                 }
             }
         }

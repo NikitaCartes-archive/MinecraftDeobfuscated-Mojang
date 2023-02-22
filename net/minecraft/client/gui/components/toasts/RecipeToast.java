@@ -9,9 +9,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
@@ -39,21 +39,17 @@ implements Toast {
         if (this.recipes.isEmpty()) {
             return Toast.Visibility.HIDE;
         }
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        toastComponent.blit(poseStack, 0, 0, 0, 32, this.width(), this.height());
+        GuiComponent.blit(poseStack, 0, 0, 0, 32, this.width(), this.height());
         toastComponent.getMinecraft().font.draw(poseStack, TITLE_TEXT, 30.0f, 7.0f, -11534256);
         toastComponent.getMinecraft().font.draw(poseStack, DESCRIPTION_TEXT, 30.0f, 18.0f, -16777216);
         Recipe<?> recipe = this.recipes.get((int)((double)l / Math.max(1.0, 5000.0 * toastComponent.getNotificationDisplayTimeMultiplier() / (double)this.recipes.size()) % (double)this.recipes.size()));
         ItemStack itemStack = recipe.getToastSymbol();
-        PoseStack poseStack2 = RenderSystem.getModelViewStack();
-        poseStack2.pushPose();
-        poseStack2.scale(0.6f, 0.6f, 1.0f);
-        RenderSystem.applyModelViewMatrix();
-        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(itemStack, 3, 3);
-        poseStack2.popPose();
-        RenderSystem.applyModelViewMatrix();
-        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(recipe.getResultItem(toastComponent.getMinecraft().level.registryAccess()), 8, 8);
+        poseStack.pushPose();
+        poseStack.scale(0.6f, 0.6f, 1.0f);
+        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(poseStack, itemStack, 3, 3);
+        poseStack.popPose();
+        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(poseStack, recipe.getResultItem(toastComponent.getMinecraft().level.registryAccess()), 8, 8);
         return (double)(l - this.lastChanged) >= 5000.0 * toastComponent.getNotificationDisplayTimeMultiplier() ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
     }
 

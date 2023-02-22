@@ -96,6 +96,10 @@ extends AbstractLayout {
         FrameLayout.centerInRectangle(layoutElement, screenRectangle.position().x(), screenRectangle.position().y(), screenRectangle.width(), screenRectangle.height());
     }
 
+    public static void alignInRectangle(LayoutElement layoutElement, ScreenRectangle screenRectangle, float f, float g) {
+        FrameLayout.alignInRectangle(layoutElement, screenRectangle.left(), screenRectangle.top(), screenRectangle.width(), screenRectangle.height(), f, g);
+    }
+
     public static void alignInRectangle(LayoutElement layoutElement, int i, int j, int k, int l, float f, float g) {
         FrameLayout.alignInDimension(i, k, layoutElement.getWidth(), layoutElement::setX, f);
         FrameLayout.alignInDimension(j, l, layoutElement.getHeight(), layoutElement::setY, g);

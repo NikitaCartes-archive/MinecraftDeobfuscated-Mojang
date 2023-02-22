@@ -80,8 +80,8 @@ extends LivingEntityRenderer<T, M> {
         float o = Mth.invSqrt(k * k + m * m) * 0.025f / 2.0f;
         float p = m * o;
         float q = k * o;
-        BlockPos blockPos = new BlockPos(((Entity)mob).getEyePosition(f));
-        BlockPos blockPos2 = new BlockPos(entity.getEyePosition(f));
+        BlockPos blockPos = BlockPos.containing(((Entity)mob).getEyePosition(f));
+        BlockPos blockPos2 = BlockPos.containing(entity.getEyePosition(f));
         int r = this.getBlockLightLevel(mob, blockPos);
         int s = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, blockPos2);
         int t = ((Mob)mob).level.getBrightness(LightLayer.SKY, blockPos);
