@@ -105,8 +105,6 @@ public class CreateWorldScreen extends Screen {
 	@Nullable
 	private final Screen lastScreen;
 	@Nullable
-	private String resultFolder;
-	@Nullable
 	private Path tempDataPackDir;
 	@Nullable
 	private PackRepository tempDataPackRepository;
@@ -138,13 +136,16 @@ public class CreateWorldScreen extends Screen {
 			minecraft
 		);
 		minecraft.managedBlock(completableFuture::isDone);
-		minecraft.setScreen(new CreateWorldScreen(screen, (WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL), OptionalLong.empty()));
+		minecraft.setScreen(
+			new CreateWorldScreen(minecraft, screen, (WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL), OptionalLong.empty())
+		);
 	}
 
 	public static CreateWorldScreen createFromExisting(
-		@Nullable Screen screen, LevelSettings levelSettings, WorldCreationContext worldCreationContext, @Nullable Path path
+		Minecraft minecraft, @Nullable Screen screen, LevelSettings levelSettings, WorldCreationContext worldCreationContext, @Nullable Path path
 	) {
 		CreateWorldScreen createWorldScreen = new CreateWorldScreen(
+			minecraft,
 			screen,
 			worldCreationContext,
 			WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()),
@@ -168,11 +169,15 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private CreateWorldScreen(
-		@Nullable Screen screen, WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional, OptionalLong optionalLong
+		Minecraft minecraft,
+		@Nullable Screen screen,
+		WorldCreationContext worldCreationContext,
+		Optional<ResourceKey<WorldPreset>> optional,
+		OptionalLong optionalLong
 	) {
 		super(Component.translatable("selectWorld.create"));
 		this.lastScreen = screen;
-		this.uiState = new WorldCreationUiState(worldCreationContext, optional, optionalLong);
+		this.uiState = new WorldCreationUiState(minecraft.getLevelSource().getBaseDir(), worldCreationContext, optional, optionalLong);
 	}
 
 	public WorldCreationUiState getUiState() {
@@ -186,21 +191,14 @@ public class CreateWorldScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.updateResultFolder(this.uiState.getName());
 		this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width)
 			.addTabs(new CreateWorldScreen.GameTab(), new CreateWorldScreen.WorldTab(), new CreateWorldScreen.MoreTab())
 			.build();
 		this.addRenderableWidget(this.tabNavigationBar);
-		this.uiState.addListener(worldCreationUiState -> {
-			if (worldCreationUiState.nameChanged()) {
-				this.updateResultFolder(worldCreationUiState.getName());
-			}
-		});
 		this.bottomButtons = new GridLayout().columnSpacing(10);
 		GridLayout.RowHelper rowHelper = this.bottomButtons.createRowHelper(2);
-		Button button = rowHelper.addChild(Button.builder(Component.translatable("selectWorld.create"), buttonx -> this.onCreate()).build());
-		this.uiState.addListener(worldCreationUiState -> button.active = !this.uiState.getName().isEmpty());
-		rowHelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.popScreen()).build());
+		rowHelper.addChild(Button.builder(Component.translatable("selectWorld.create"), button -> this.onCreate()).build());
+		rowHelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.popScreen()).build());
 		this.bottomButtons.visitWidgets(abstractWidget -> {
 			abstractWidget.setTabOrderGroup(1);
 			this.addRenderableWidget(abstractWidget);
@@ -220,25 +218,6 @@ public class CreateWorldScreen extends Screen {
 			int i = this.tabNavigationBar.getRectangle().bottom();
 			ScreenRectangle screenRectangle = new ScreenRectangle(0, i, this.width, this.bottomButtons.getY() - i);
 			this.tabManager.setTabArea(screenRectangle);
-		}
-	}
-
-	private void updateResultFolder(String string) {
-		this.resultFolder = string.trim();
-		if (this.resultFolder.isEmpty()) {
-			this.resultFolder = "World";
-		}
-
-		try {
-			this.resultFolder = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), this.resultFolder, "");
-		} catch (Exception var5) {
-			this.resultFolder = "World";
-
-			try {
-				this.resultFolder = FileUtil.findAvailableName(this.minecraft.getLevelSource().getBaseDir(), this.resultFolder, "");
-			} catch (Exception var4) {
-				throw new RuntimeException("Could not create save folder", var4);
-			}
 		}
 	}
 
@@ -354,7 +333,7 @@ public class CreateWorldScreen extends Screen {
 				this.tempDataPackDir = Files.createTempDirectory("mcworld-");
 			} catch (IOException var2) {
 				LOGGER.warn("Failed to create temporary dir", (Throwable)var2);
-				SystemToast.onPackCopyFailure(this.minecraft, this.resultFolder);
+				SystemToast.onPackCopyFailure(this.minecraft, this.uiState.getTargetFolder());
 				this.popScreen();
 			}
 		}
@@ -525,8 +504,10 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private Optional<LevelStorageSource.LevelStorageAccess> createNewWorldDirectory() {
+		String string = this.uiState.getTargetFolder();
+
 		try {
-			LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.resultFolder);
+			LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(string);
 			if (this.tempDataPackDir == null) {
 				return Optional.of(levelStorageAccess);
 			}
@@ -534,38 +515,38 @@ public class CreateWorldScreen extends Screen {
 			try {
 				Stream<Path> stream = Files.walk(this.tempDataPackDir);
 
-				Optional var4;
+				Optional var5;
 				try {
 					Path path = levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR);
 					FileUtil.createDirectoriesSafe(path);
 					stream.filter(pathx -> !pathx.equals(this.tempDataPackDir)).forEach(path2 -> copyBetweenDirs(this.tempDataPackDir, path, path2));
-					var4 = Optional.of(levelStorageAccess);
-				} catch (Throwable var6) {
+					var5 = Optional.of(levelStorageAccess);
+				} catch (Throwable var7) {
 					if (stream != null) {
 						try {
 							stream.close();
-						} catch (Throwable var5) {
-							var6.addSuppressed(var5);
+						} catch (Throwable var6) {
+							var7.addSuppressed(var6);
 						}
 					}
 
-					throw var6;
+					throw var7;
 				}
 
 				if (stream != null) {
 					stream.close();
 				}
 
-				return var4;
-			} catch (UncheckedIOException | IOException var7) {
-				LOGGER.warn("Failed to copy datapacks to world {}", this.resultFolder, var7);
+				return var5;
+			} catch (UncheckedIOException | IOException var8) {
+				LOGGER.warn("Failed to copy datapacks to world {}", string, var8);
 				levelStorageAccess.close();
 			}
-		} catch (UncheckedIOException | IOException var8) {
-			LOGGER.warn("Failed to create access for {}", this.resultFolder, var8);
+		} catch (UncheckedIOException | IOException var9) {
+			LOGGER.warn("Failed to create access for {}", string, var9);
 		}
 
-		SystemToast.onPackCopyFailure(this.minecraft, this.resultFolder);
+		SystemToast.onPackCopyFailure(this.minecraft, string);
 		this.popScreen();
 		return Optional.empty();
 	}
@@ -654,6 +635,15 @@ public class CreateWorldScreen extends Screen {
 			);
 			this.nameEdit.setValue(CreateWorldScreen.this.uiState.getName());
 			this.nameEdit.setResponder(CreateWorldScreen.this.uiState::setName);
+			CreateWorldScreen.this.uiState
+				.addListener(
+					worldCreationUiState -> this.nameEdit
+							.setTooltip(
+								Tooltip.create(
+									Component.translatable("selectWorld.targetFolder", Component.literal(worldCreationUiState.getTargetFolder()).withStyle(ChatFormatting.ITALIC))
+								)
+							)
+				);
 			CreateWorldScreen.this.setInitialFocus(this.nameEdit);
 			rowHelper.addChild(rowHelper2.getGrid(), rowHelper.newCellSettings().alignHorizontallyCenter());
 			CycleButton<WorldCreationUiState.SelectedGameMode> cycleButton = rowHelper.addChild(

@@ -15,6 +15,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DatapackLoadFailureScreen;
@@ -210,7 +211,21 @@ public class WorldOpenFlows {
 				worldStem = this.loadWorldStem(levelStorageAccess, bl, packRepository);
 			} catch (Exception var11) {
 				LOGGER.warn("Failed to load level data or datapacks, can't proceed with server load", (Throwable)var11);
-				this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(screen, string, true, bl2)));
+				if (!bl) {
+					this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> this.doLoadLevel(screen, string, true, bl2)));
+				} else {
+					this.minecraft
+						.setScreen(
+							new AlertScreen(
+								() -> this.minecraft.setScreen(null),
+								Component.translatable("datapackFailure.safeMode.failed.title"),
+								Component.translatable("datapackFailure.safeMode.failed.description"),
+								CommonComponents.GUI_TO_TITLE,
+								true
+							)
+						);
+				}
+
 				safeCloseAccess(levelStorageAccess, string);
 				return;
 			}

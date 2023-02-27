@@ -26,7 +26,6 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.GENERIC,
 				DamageTypes.WITHER,
 				DamageTypes.DRAGON_BREATH,
-				DamageTypes.FREEZE,
 				DamageTypes.STARVE,
 				DamageTypes.FALL,
 				DamageTypes.FREEZE,

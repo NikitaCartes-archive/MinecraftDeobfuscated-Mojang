@@ -79,6 +79,21 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 	}
 
 	@Override
+	public boolean keyPressed(int i, int j, int k) {
+		boolean bl = i == 265;
+		boolean bl2 = i == 264;
+		if (bl || bl2) {
+			double d = this.scrollAmount;
+			this.setScrollAmount(this.scrollAmount + (double)(bl ? -1 : 1) * this.scrollRate());
+			if (d != this.scrollAmount) {
+				return true;
+			}
+		}
+
+		return super.keyPressed(i, j, k);
+	}
+
+	@Override
 	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
 		if (this.visible) {
 			this.renderBackground(poseStack);

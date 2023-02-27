@@ -1151,9 +1151,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	@Override
 	public void handlePaddleBoat(ServerboundPaddleBoatPacket serverboundPaddleBoatPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPaddleBoatPacket, this, this.player.getLevel());
-		Entity entity = this.player.getVehicle();
-		if (entity instanceof Boat) {
-			((Boat)entity).setPaddleState(serverboundPaddleBoatPacket.getLeft(), serverboundPaddleBoatPacket.getRight());
+		if (this.player.getControlledVehicle() instanceof Boat boat) {
+			boat.setPaddleState(serverboundPaddleBoatPacket.getLeft(), serverboundPaddleBoatPacket.getRight());
 		}
 	}
 
@@ -1428,17 +1427,15 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				}
 				break;
 			case START_RIDING_JUMP:
-				if (this.player.getVehicle() instanceof PlayerRideableJumping) {
-					PlayerRideableJumping playerRideableJumping = (PlayerRideableJumping)this.player.getVehicle();
+				if (this.player.getControlledVehicle() instanceof PlayerRideableJumping playerRideableJumping) {
 					int i = serverboundPlayerCommandPacket.getData();
-					if (playerRideableJumping.canJump(this.player) && i > 0) {
+					if (playerRideableJumping.canJump() && i > 0) {
 						playerRideableJumping.handleStartJump(i);
 					}
 				}
 				break;
 			case STOP_RIDING_JUMP:
-				if (this.player.getVehicle() instanceof PlayerRideableJumping) {
-					PlayerRideableJumping playerRideableJumping = (PlayerRideableJumping)this.player.getVehicle();
+				if (this.player.getControlledVehicle() instanceof PlayerRideableJumping playerRideableJumping) {
 					playerRideableJumping.handleStopJump();
 				}
 				break;

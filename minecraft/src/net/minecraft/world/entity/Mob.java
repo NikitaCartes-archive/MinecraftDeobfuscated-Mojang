@@ -150,14 +150,17 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	public float getPathfindingMalus(BlockPathTypes blockPathTypes) {
-		Mob mob;
-		if (this.getVehicle() instanceof Mob && ((Mob)this.getVehicle()).shouldPassengersInheritMalus()) {
-			mob = (Mob)this.getVehicle();
-		} else {
-			mob = this;
+		Mob mob2;
+		label17: {
+			if (this.getControlledVehicle() instanceof Mob mob && mob.shouldPassengersInheritMalus()) {
+				mob2 = mob;
+				break label17;
+			}
+
+			mob2 = this;
 		}
 
-		Float float_ = (Float)mob.pathfindingMalus.get(blockPathTypes);
+		Float float_ = (Float)mob2.pathfindingMalus.get(blockPathTypes);
 		return float_ == null ? blockPathTypes.getMalus() : float_;
 	}
 
@@ -174,7 +177,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	public MoveControl getMoveControl() {
-		return this.getVehicle() instanceof Mob mob ? mob.getMoveControl() : this.moveControl;
+		return this.getControlledVehicle() instanceof Mob mob ? mob.getMoveControl() : this.moveControl;
 	}
 
 	public JumpControl getJumpControl() {
@@ -182,12 +185,13 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	public PathNavigation getNavigation() {
-		if (this.isPassenger() && this.getVehicle() instanceof Mob) {
-			Mob mob = (Mob)this.getVehicle();
-			return mob.getNavigation();
-		} else {
-			return this.navigation;
-		}
+		return this.getControlledVehicle() instanceof Mob mob ? mob.getNavigation() : this.navigation;
+	}
+
+	@Nullable
+	@Override
+	public LivingEntity getControllingPassenger() {
+		return !this.isNoAi() && this.getFirstPassenger() instanceof Mob mob ? mob : null;
 	}
 
 	public Sensing getSensing() {

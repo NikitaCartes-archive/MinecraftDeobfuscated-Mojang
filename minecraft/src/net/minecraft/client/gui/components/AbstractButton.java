@@ -14,7 +14,8 @@ public abstract class AbstractButton extends AbstractWidget {
 	protected static final int TEXTURE_Y_OFFSET = 46;
 	protected static final int TEXTURE_WIDTH = 200;
 	protected static final int TEXTURE_HEIGHT = 20;
-	protected static final int TEXTURE_BORDER = 4;
+	protected static final int TEXTURE_BORDER_X = 20;
+	protected static final int TEXTURE_BORDER_Y = 4;
 	protected static final int TEXT_MARGIN = 2;
 
 	public AbstractButton(int i, int j, int k, int l, Component component) {
@@ -30,7 +31,7 @@ public abstract class AbstractButton extends AbstractWidget {
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
 		RenderSystem.enableBlend();
 		RenderSystem.enableDepthTest();
-		blitNineSliced(poseStack, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 4, 200, 20, 0, this.getTextureY());
+		blitNineSliced(poseStack, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		int k = this.active ? 16777215 : 10526880;
 		this.renderString(poseStack, minecraft.font, k | Mth.ceil(this.alpha * 255.0F) << 24);

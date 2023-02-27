@@ -414,6 +414,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			}
 
 			this.realmsServers = list2;
+			this.hasFetchedServers = true;
 			this.refreshRealmsSelectionList();
 			if (!regionsPinged && bl) {
 				regionsPinged = true;
@@ -476,10 +477,6 @@ public class RealmsMainScreen extends RealmsScreen {
 
 	private void refreshRealmsSelectionList() {
 		boolean bl = !this.hasFetchedServers;
-		if (bl) {
-			this.hasFetchedServers = true;
-		}
-
 		this.realmSelectionList.clear();
 		List<UUID> list = new ArrayList();
 

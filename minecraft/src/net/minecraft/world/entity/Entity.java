@@ -1978,8 +1978,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return !this.passengers.isEmpty();
 	}
 
-	public boolean rideableUnderWater() {
-		return true;
+	public boolean dismountsUnderwater() {
+		return this.getType().is(EntityTypeTags.DISMOUNTS_UNDERWATER);
 	}
 
 	public void setShiftKeyDown(boolean bl) {
@@ -2825,6 +2825,11 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.vehicle;
 	}
 
+	@Nullable
+	public Entity getControlledVehicle() {
+		return this.vehicle != null && this.vehicle.getControllingPassenger() == this ? this.vehicle : null;
+	}
+
 	public PushReaction getPistonPushReaction() {
 		return PushReaction.NORMAL;
 	}
@@ -3168,7 +3173,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public float maxUpStep() {
-		return this.hasControllingPassenger() ? Math.max(this.maxUpStep, 1.0F) : this.maxUpStep;
+		return this.maxUpStep;
 	}
 
 	public void setMaxUpStep(float f) {

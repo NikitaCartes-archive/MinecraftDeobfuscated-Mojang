@@ -925,7 +925,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	public boolean canJump(Player player) {
+	public boolean canJump() {
 		return this.isSaddled();
 	}
 

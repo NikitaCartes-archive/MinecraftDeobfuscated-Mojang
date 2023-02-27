@@ -14,6 +14,7 @@ public class CommonComponents {
 	public static final Component GUI_PROCEED = Component.translatable("gui.proceed");
 	public static final Component GUI_CONTINUE = Component.translatable("gui.continue");
 	public static final Component GUI_BACK = Component.translatable("gui.back");
+	public static final Component GUI_TO_TITLE = Component.translatable("gui.toTitle");
 	public static final Component GUI_ACKNOWLEDGE = Component.translatable("gui.acknowledge");
 	public static final Component CONNECT_FAILED = Component.translatable("connect.failed");
 	public static final Component NEW_LINE = Component.literal("\n");

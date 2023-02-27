@@ -124,8 +124,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 	@Override
 	public void rideTick() {
 		super.rideTick();
-		if (this.getVehicle() instanceof PathfinderMob) {
-			PathfinderMob pathfinderMob = (PathfinderMob)this.getVehicle();
+		if (this.getControlledVehicle() instanceof PathfinderMob pathfinderMob) {
 			this.yBodyRot = pathfinderMob.yBodyRot;
 		}
 	}

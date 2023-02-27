@@ -321,8 +321,24 @@ public class KeyboardHandler {
 				this.debugCrashKeyReportedCount = 0L;
 			}
 
-			this.minecraft.setLastInputType(i == 258 ? InputType.KEYBOARD_TAB : InputType.KEYBOARD_OTHER);
 			Screen screen = this.minecraft.screen;
+			if (screen != null) {
+				switch (i) {
+					case 258:
+						this.minecraft.setLastInputType(InputType.KEYBOARD_TAB);
+					case 259:
+					case 260:
+					case 261:
+					default:
+						break;
+					case 262:
+					case 263:
+					case 264:
+					case 265:
+						this.minecraft.setLastInputType(InputType.KEYBOARD_ARROW);
+				}
+			}
+
 			if (k == 1 && (!(this.minecraft.screen instanceof KeyBindsScreen) || ((KeyBindsScreen)screen).lastKeySelection <= Util.getMillis() - 20L)) {
 				if (this.minecraft.options.keyFullscreen.matches(i, j)) {
 					this.minecraft.getWindow().toggleFullScreen();

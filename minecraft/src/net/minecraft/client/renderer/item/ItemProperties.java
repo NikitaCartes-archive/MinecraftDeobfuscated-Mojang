@@ -209,17 +209,11 @@ public class ItemProperties {
 					? 1.0F
 					: 0.0F
 		);
-		register(
-			Items.CROSSBOW,
-			new ResourceLocation("charged"),
-			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && CrossbowItem.isCharged(itemStack) ? 1.0F : 0.0F
-		);
+		register(Items.CROSSBOW, new ResourceLocation("charged"), (itemStack, clientLevel, livingEntity, i) -> CrossbowItem.isCharged(itemStack) ? 1.0F : 0.0F);
 		register(
 			Items.CROSSBOW,
 			new ResourceLocation("firework"),
-			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null
-						&& CrossbowItem.isCharged(itemStack)
-						&& CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET)
+			(itemStack, clientLevel, livingEntity, i) -> CrossbowItem.isCharged(itemStack) && CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET)
 					? 1.0F
 					: 0.0F
 		);

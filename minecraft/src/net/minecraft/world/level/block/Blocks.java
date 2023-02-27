@@ -4090,12 +4090,7 @@ public class Blocks {
 	);
 	public static final Block PINK_PETALS = register(
 		"pink_petals",
-		new PinkPetalsBlock(
-			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_PINK)
-				.noCollission()
-				.sound(SoundType.PINK_PETALS)
-				.requiredFeatures(FeatureFlags.UPDATE_1_20)
-		)
+		new PinkPetalsBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().sound(SoundType.PINK_PETALS).requiredFeatures(FeatureFlags.UPDATE_1_20))
 	);
 	public static final Block MOSS_BLOCK = register(
 		"moss_block", new MossBlock(BlockBehaviour.Properties.of(Material.MOSS, MaterialColor.COLOR_GREEN).strength(0.1F).sound(SoundType.MOSS))

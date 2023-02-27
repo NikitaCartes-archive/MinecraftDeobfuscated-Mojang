@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
@@ -27,7 +28,7 @@ public class DatapackLoadFailureScreen extends Screen {
 				.build()
 		);
 		this.addRenderableWidget(
-			Button.builder(Component.translatable("gui.toTitle"), button -> this.minecraft.setScreen(null))
+			Button.builder(CommonComponents.GUI_TO_TITLE, button -> this.minecraft.setScreen(null))
 				.bounds(this.width / 2 - 155 + 160, this.height / 6 + 96, 150, 20)
 				.build()
 		);

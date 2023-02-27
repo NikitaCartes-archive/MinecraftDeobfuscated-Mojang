@@ -542,7 +542,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Nullable
 	public PlayerRideableJumping jumpableVehicle() {
-		if (this.getVehicle() instanceof PlayerRideableJumping playerRideableJumping && playerRideableJumping.canJump(this)) {
+		if (this.getControlledVehicle() instanceof PlayerRideableJumping playerRideableJumping && playerRideableJumping.canJump()) {
 			return playerRideableJumping;
 		}
 
@@ -866,8 +866,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	public void rideTick() {
 		super.rideTick();
 		this.handsBusy = false;
-		if (this.getVehicle() instanceof Boat) {
-			Boat boat = (Boat)this.getVehicle();
+		if (this.getControlledVehicle() instanceof Boat boat) {
 			boat.setInput(this.input.left, this.input.right, this.input.up, this.input.down);
 			this.handsBusy = this.handsBusy | (this.input.left || this.input.right || this.input.up || this.input.down);
 		}

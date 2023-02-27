@@ -1,5 +1,7 @@
 package net.minecraft.client.gui.screens.worldselection;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.FileUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -27,9 +29,9 @@ import net.minecraft.world.level.levelgen.presets.WorldPresets;
 
 @Environment(EnvType.CLIENT)
 public class WorldCreationUiState {
+	private static final Component DEFAULT_WORLD_NAME = Component.translatable("selectWorld.newWorld");
 	private final List<Consumer<WorldCreationUiState>> listeners = new ArrayList();
-	private String name = I18n.get("selectWorld.newWorld");
-	private boolean nameChanged = true;
+	private String name = DEFAULT_WORLD_NAME.getString();
 	private WorldCreationUiState.SelectedGameMode gameMode = WorldCreationUiState.SelectedGameMode.SURVIVAL;
 	private Difficulty difficulty = Difficulty.NORMAL;
 	@Nullable
@@ -37,19 +39,23 @@ public class WorldCreationUiState {
 	private String seed;
 	private boolean generateStructures;
 	private boolean bonusChest;
+	private final Path savesFolder;
+	private String targetFolder;
 	private WorldCreationContext settings;
 	private WorldCreationUiState.WorldTypeEntry worldType;
 	private final List<WorldCreationUiState.WorldTypeEntry> normalPresetList = new ArrayList();
 	private final List<WorldCreationUiState.WorldTypeEntry> altPresetList = new ArrayList();
 	private GameRules gameRules = new GameRules();
 
-	public WorldCreationUiState(WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional, OptionalLong optionalLong) {
+	public WorldCreationUiState(Path path, WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional, OptionalLong optionalLong) {
+		this.savesFolder = path;
 		this.settings = worldCreationContext;
 		this.worldType = new WorldCreationUiState.WorldTypeEntry((Holder<WorldPreset>)findPreset(worldCreationContext, optional).orElse(null));
 		this.updatePresetLists();
 		this.seed = optionalLong.isPresent() ? Long.toString(optionalLong.getAsLong()) : "";
 		this.generateStructures = worldCreationContext.options().generateStructures();
 		this.bonusChest = worldCreationContext.options().generateBonusChest();
+		this.targetFolder = this.findResultFolder(this.name);
 	}
 
 	public void addListener(Consumer<WorldCreationUiState> consumer) {
@@ -70,22 +76,34 @@ public class WorldCreationUiState {
 		for (Consumer<WorldCreationUiState> consumer : this.listeners) {
 			consumer.accept(this);
 		}
-
-		this.nameChanged = false;
 	}
 
 	public void setName(String string) {
 		this.name = string;
-		this.nameChanged = true;
+		this.targetFolder = this.findResultFolder(string);
 		this.onChanged();
+	}
+
+	private String findResultFolder(String string) {
+		String string2 = string.trim();
+
+		try {
+			return FileUtil.findAvailableName(this.savesFolder, !string2.isEmpty() ? string2 : DEFAULT_WORLD_NAME.getString(), "");
+		} catch (Exception var5) {
+			try {
+				return FileUtil.findAvailableName(this.savesFolder, "World", "");
+			} catch (IOException var4) {
+				throw new RuntimeException("Could not create save folder", var4);
+			}
+		}
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	public boolean nameChanged() {
-		return this.nameChanged;
+	public String getTargetFolder() {
+		return this.targetFolder;
 	}
 
 	public void setGameMode(WorldCreationUiState.SelectedGameMode selectedGameMode) {

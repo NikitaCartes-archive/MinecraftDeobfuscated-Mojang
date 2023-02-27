@@ -265,8 +265,8 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 	}
 
 	@Override
-	public boolean canJump(Player player) {
-		return !this.refuseToMove() && this.getControllingPassenger() == player && super.canJump(player);
+	public boolean canJump() {
+		return !this.refuseToMove() && super.canJump();
 	}
 
 	@Override

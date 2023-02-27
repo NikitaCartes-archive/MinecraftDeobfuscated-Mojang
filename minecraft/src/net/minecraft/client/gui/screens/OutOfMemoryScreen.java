@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
@@ -18,7 +19,7 @@ public class OutOfMemoryScreen extends Screen {
 	@Override
 	protected void init() {
 		this.addRenderableWidget(
-			Button.builder(Component.translatable("gui.toTitle"), button -> this.minecraft.setScreen(new TitleScreen()))
+			Button.builder(CommonComponents.GUI_TO_TITLE, button -> this.minecraft.setScreen(new TitleScreen()))
 				.bounds(this.width / 2 - 155, this.height / 4 + 120 + 12, 150, 20)
 				.build()
 		);

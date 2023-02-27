@@ -368,7 +368,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					}
 				}
 
-				if (!this.level.isClientSide && this.isPassenger() && this.getVehicle() != null && !this.getVehicle().rideableUnderWater()) {
+				if (!this.level.isClientSide && this.isPassenger() && this.getVehicle() != null && this.getVehicle().dismountsUnderwater()) {
 					this.stopRiding();
 				}
 			} else if (this.getAirSupply() < this.getMaxAirSupply()) {
@@ -545,11 +545,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	protected boolean isAffectedByFluids() {
 		return true;
-	}
-
-	@Override
-	public boolean rideableUnderWater() {
-		return false;
 	}
 
 	protected void tickDeath() {
@@ -1049,6 +1044,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 
 				bl = true;
+			}
+
+			if (damageSource.is(DamageTypeTags.IS_FREEZING) && this.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)) {
+				f *= 5.0F;
 			}
 
 			this.walkAnimation.setSpeed(1.5F);
@@ -2173,7 +2172,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected float getFlyingSpeed() {
-		return this.hasControllingPassenger() ? this.getSpeed() * 0.1F : 0.02F;
+		return this.getControllingPassenger() instanceof Player ? this.getSpeed() * 0.1F : 0.02F;
 	}
 
 	public float getSpeed() {
@@ -2528,7 +2527,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		this.level.getProfiler().pop();
 		this.level.getProfiler().push("freezing");
-		boolean bl2 = this.getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES);
 		if (!this.level.isClientSide && !this.isDeadOrDying()) {
 			int m = this.getTicksFrozen();
 			if (this.isInPowderSnow && this.canFreeze()) {
@@ -2541,8 +2539,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.removeFrost();
 		this.tryAddFrost();
 		if (!this.level.isClientSide && this.tickCount % 40 == 0 && this.isFullyFrozen() && this.canFreeze()) {
-			int m = bl2 ? 5 : 1;
-			this.hurt(this.damageSources().freeze(), (float)m);
+			this.hurt(this.damageSources().freeze(), 1.0F);
 		}
 
 		this.level.getProfiler().pop();
@@ -3321,6 +3318,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public boolean canDisableShield() {
 		return this.getMainHandItem().getItem() instanceof AxeItem;
+	}
+
+	@Override
+	public float maxUpStep() {
+		float f = super.maxUpStep();
+		return this.getControllingPassenger() instanceof Player ? Math.max(f, 1.0F) : f;
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {

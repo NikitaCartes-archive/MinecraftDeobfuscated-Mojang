@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.navigation;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -60,6 +61,15 @@ public record ScreenRectangle(ScreenPosition position, int width, int height) {
 
 	public int getCenterInAxis(ScreenAxis screenAxis) {
 		return (this.getBoundInDirection(screenAxis.getPositive()) + this.getBoundInDirection(screenAxis.getNegative())) / 2;
+	}
+
+	@Nullable
+	public ScreenRectangle intersection(ScreenRectangle screenRectangle) {
+		int i = Math.max(this.left(), screenRectangle.left());
+		int j = Math.max(this.top(), screenRectangle.top());
+		int k = Math.min(this.right(), screenRectangle.right());
+		int l = Math.min(this.bottom(), screenRectangle.bottom());
+		return i < k && j < l ? new ScreenRectangle(i, j, k - i, l - j) : null;
 	}
 
 	public int top() {

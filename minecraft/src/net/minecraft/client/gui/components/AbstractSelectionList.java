@@ -218,12 +218,11 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		if (this.renderTopAndBottom) {
 			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
 			int o = 32;
-			int p = -100;
 			RenderSystem.setShaderColor(0.25F, 0.25F, 0.25F, 1.0F);
-			blit(poseStack, this.x0, 0, -100, 0.0F, 0.0F, this.width, this.y0, 32, 32);
-			blit(poseStack, this.x0, this.y1, -100, 0.0F, (float)this.y1, this.width, this.height - this.y1, 32, 32);
+			blit(poseStack, this.x0, 0, 0.0F, 0.0F, this.width, this.y0, 32, 32);
+			blit(poseStack, this.x0, this.y1, 0.0F, (float)this.y1, this.width, this.height - this.y1, 32, 32);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			int q = 4;
+			int p = 4;
 			fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
 			fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
 		}

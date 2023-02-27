@@ -5,7 +5,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
@@ -41,6 +43,16 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 
 	public AccessibilityOptionsScreen(Screen screen, Options options) {
 		super(screen, options, Component.translatable("options.accessibility.title"), options(options));
+	}
+
+	@Override
+	protected void init() {
+		super.init();
+		AbstractWidget abstractWidget = this.list.findOption(this.options.highContrast());
+		if (abstractWidget != null && !this.minecraft.getResourcePackRepository().getAvailableIds().contains("high_contrast")) {
+			abstractWidget.active = false;
+			abstractWidget.setTooltip(Tooltip.create(Component.translatable("options.accessibility.high_contrast.error.tooltip")));
+		}
 	}
 
 	@Override
