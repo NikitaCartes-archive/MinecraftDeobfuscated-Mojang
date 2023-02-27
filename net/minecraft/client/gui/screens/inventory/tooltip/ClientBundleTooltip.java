@@ -45,54 +45,54 @@ implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderImage(Font font, int i, int j, PoseStack poseStack, ItemRenderer itemRenderer, int k) {
-        int l = this.gridSizeX();
-        int m = this.gridSizeY();
+    public void renderImage(Font font, int i, int j, PoseStack poseStack, ItemRenderer itemRenderer) {
+        int k = this.gridSizeX();
+        int l = this.gridSizeY();
         boolean bl = this.weight >= 64;
-        int n = 0;
-        for (int o = 0; o < m; ++o) {
-            for (int p = 0; p < l; ++p) {
-                int q = i + p * 18 + 1;
-                int r = j + o * 20 + 1;
-                this.renderSlot(q, r, n++, bl, font, poseStack, itemRenderer, k);
+        int m = 0;
+        for (int n = 0; n < l; ++n) {
+            for (int o = 0; o < k; ++o) {
+                int p = i + o * 18 + 1;
+                int q = j + n * 20 + 1;
+                this.renderSlot(p, q, m++, bl, font, poseStack, itemRenderer);
             }
         }
-        this.drawBorder(i, j, l, m, poseStack, k);
+        this.drawBorder(i, j, k, l, poseStack);
     }
 
-    private void renderSlot(int i, int j, int k, boolean bl, Font font, PoseStack poseStack, ItemRenderer itemRenderer, int l) {
+    private void renderSlot(int i, int j, int k, boolean bl, Font font, PoseStack poseStack, ItemRenderer itemRenderer) {
         if (k >= this.items.size()) {
-            this.blit(poseStack, i, j, l, bl ? Texture.BLOCKED_SLOT : Texture.SLOT);
+            this.blit(poseStack, i, j, bl ? Texture.BLOCKED_SLOT : Texture.SLOT);
             return;
         }
         ItemStack itemStack = this.items.get(k);
-        this.blit(poseStack, i, j, l, Texture.SLOT);
+        this.blit(poseStack, i, j, Texture.SLOT);
         itemRenderer.renderAndDecorateItem(poseStack, itemStack, i + 1, j + 1, k);
         itemRenderer.renderGuiItemDecorations(poseStack, font, itemStack, i + 1, j + 1);
         if (k == 0) {
-            AbstractContainerScreen.renderSlotHighlight(poseStack, i + 1, j + 1, l);
+            AbstractContainerScreen.renderSlotHighlight(poseStack, i + 1, j + 1, 0);
         }
     }
 
-    private void drawBorder(int i, int j, int k, int l, PoseStack poseStack, int m) {
-        int n;
-        this.blit(poseStack, i, j, m, Texture.BORDER_CORNER_TOP);
-        this.blit(poseStack, i + k * 18 + 1, j, m, Texture.BORDER_CORNER_TOP);
-        for (n = 0; n < k; ++n) {
-            this.blit(poseStack, i + 1 + n * 18, j, m, Texture.BORDER_HORIZONTAL_TOP);
-            this.blit(poseStack, i + 1 + n * 18, j + l * 20, m, Texture.BORDER_HORIZONTAL_BOTTOM);
+    private void drawBorder(int i, int j, int k, int l, PoseStack poseStack) {
+        int m;
+        this.blit(poseStack, i, j, Texture.BORDER_CORNER_TOP);
+        this.blit(poseStack, i + k * 18 + 1, j, Texture.BORDER_CORNER_TOP);
+        for (m = 0; m < k; ++m) {
+            this.blit(poseStack, i + 1 + m * 18, j, Texture.BORDER_HORIZONTAL_TOP);
+            this.blit(poseStack, i + 1 + m * 18, j + l * 20, Texture.BORDER_HORIZONTAL_BOTTOM);
         }
-        for (n = 0; n < l; ++n) {
-            this.blit(poseStack, i, j + n * 20 + 1, m, Texture.BORDER_VERTICAL);
-            this.blit(poseStack, i + k * 18 + 1, j + n * 20 + 1, m, Texture.BORDER_VERTICAL);
+        for (m = 0; m < l; ++m) {
+            this.blit(poseStack, i, j + m * 20 + 1, Texture.BORDER_VERTICAL);
+            this.blit(poseStack, i + k * 18 + 1, j + m * 20 + 1, Texture.BORDER_VERTICAL);
         }
-        this.blit(poseStack, i, j + l * 20, m, Texture.BORDER_CORNER_BOTTOM);
-        this.blit(poseStack, i + k * 18 + 1, j + l * 20, m, Texture.BORDER_CORNER_BOTTOM);
+        this.blit(poseStack, i, j + l * 20, Texture.BORDER_CORNER_BOTTOM);
+        this.blit(poseStack, i + k * 18 + 1, j + l * 20, Texture.BORDER_CORNER_BOTTOM);
     }
 
-    private void blit(PoseStack poseStack, int i, int j, int k, Texture texture) {
+    private void blit(PoseStack poseStack, int i, int j, Texture texture) {
         RenderSystem.setShaderTexture(0, TEXTURE_LOCATION);
-        GuiComponent.blit(poseStack, i, j, k, texture.x, texture.y, texture.w, texture.h, 128, 128);
+        GuiComponent.blit(poseStack, i, j, 0, texture.x, texture.y, texture.w, texture.h, 128, 128);
     }
 
     private int gridSizeX() {

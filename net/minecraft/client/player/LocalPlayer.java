@@ -531,8 +531,8 @@ extends AbstractClientPlayer {
     @Nullable
     public PlayerRideableJumping jumpableVehicle() {
         PlayerRideableJumping playerRideableJumping;
-        Entity entity = this.getVehicle();
-        return entity instanceof PlayerRideableJumping && (playerRideableJumping = (PlayerRideableJumping)((Object)entity)).canJump(this) ? playerRideableJumping : null;
+        Entity entity = this.getControlledVehicle();
+        return entity instanceof PlayerRideableJumping && (playerRideableJumping = (PlayerRideableJumping)((Object)entity)).canJump() ? playerRideableJumping : null;
     }
 
     public float getJumpRidingScale() {
@@ -818,8 +818,9 @@ extends AbstractClientPlayer {
     public void rideTick() {
         super.rideTick();
         this.handsBusy = false;
-        if (this.getVehicle() instanceof Boat) {
-            Boat boat = (Boat)this.getVehicle();
+        Entity entity = this.getControlledVehicle();
+        if (entity instanceof Boat) {
+            Boat boat = (Boat)entity;
             boat.setInput(this.input.left, this.input.right, this.input.up, this.input.down);
             this.handsBusy |= this.input.left || this.input.right || this.input.up || this.input.down;
         }

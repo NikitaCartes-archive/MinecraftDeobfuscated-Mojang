@@ -325,8 +325,17 @@ VillagerDataHolder {
         for (MerchantOffer merchantOffer : this.getOffers()) {
             merchantOffer.resetUses();
         }
+        this.resendOffersToTradingPlayer();
         this.lastRestockGameTime = this.level.getGameTime();
         ++this.numberOfRestocksToday;
+    }
+
+    private void resendOffersToTradingPlayer() {
+        MerchantOffers merchantOffers = this.getOffers();
+        Player player = this.getTradingPlayer();
+        if (player != null && !merchantOffers.isEmpty()) {
+            player.sendMerchantOffers(player.containerMenu.containerId, merchantOffers, this.getVillagerData().getLevel(), this.getVillagerXp(), this.showProgressBar(), this.canRestock());
+        }
     }
 
     private boolean needsToRestock() {
@@ -369,6 +378,7 @@ VillagerDataHolder {
         for (int j = 0; j < i; ++j) {
             this.updateDemand();
         }
+        this.resendOffersToTradingPlayer();
     }
 
     private void updateDemand() {

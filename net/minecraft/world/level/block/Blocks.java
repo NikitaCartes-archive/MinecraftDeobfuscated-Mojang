@@ -1232,7 +1232,7 @@ public class Blocks {
     public static final Block AZALEA = Blocks.register("azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().sound(SoundType.AZALEA).noOcclusion()));
     public static final Block FLOWERING_AZALEA = Blocks.register("flowering_azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().sound(SoundType.FLOWERING_AZALEA).noOcclusion()));
     public static final Block MOSS_CARPET = Blocks.register("moss_carpet", new CarpetBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_GREEN).strength(0.1f).sound(SoundType.MOSS_CARPET)));
-    public static final Block PINK_PETALS = Blocks.register("pink_petals", new PinkPetalsBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_PINK).noCollission().sound(SoundType.PINK_PETALS).requiredFeatures(FeatureFlags.UPDATE_1_20)));
+    public static final Block PINK_PETALS = Blocks.register("pink_petals", new PinkPetalsBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().sound(SoundType.PINK_PETALS).requiredFeatures(FeatureFlags.UPDATE_1_20)));
     public static final Block MOSS_BLOCK = Blocks.register("moss_block", new MossBlock(BlockBehaviour.Properties.of(Material.MOSS, MaterialColor.COLOR_GREEN).strength(0.1f).sound(SoundType.MOSS)));
     public static final Block BIG_DRIPLEAF = Blocks.register("big_dripleaf", new BigDripleafBlock(BlockBehaviour.Properties.of(Material.PLANT).strength(0.1f).sound(SoundType.BIG_DRIPLEAF)));
     public static final Block BIG_DRIPLEAF_STEM = Blocks.register("big_dripleaf_stem", new BigDripleafStemBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().strength(0.1f).sound(SoundType.BIG_DRIPLEAF)));

@@ -165,8 +165,10 @@ implements Targeting {
     }
 
     public float getPathfindingMalus(BlockPathTypes blockPathTypes) {
-        Mob mob = this.getVehicle() instanceof Mob && ((Mob)this.getVehicle()).shouldPassengersInheritMalus() ? (Mob)this.getVehicle() : this;
-        Float float_ = mob.pathfindingMalus.get((Object)blockPathTypes);
+        Mob mob;
+        Entity entity = this.getControlledVehicle();
+        Mob mob2 = entity instanceof Mob && (mob = (Mob)entity).shouldPassengersInheritMalus() ? mob : this;
+        Float float_ = mob2.pathfindingMalus.get((Object)blockPathTypes);
         return float_ == null ? blockPathTypes.getMalus() : float_.floatValue();
     }
 
@@ -183,7 +185,7 @@ implements Targeting {
     }
 
     public MoveControl getMoveControl() {
-        Entity entity = this.getVehicle();
+        Entity entity = this.getControlledVehicle();
         if (entity instanceof Mob) {
             Mob mob = (Mob)entity;
             return mob.getMoveControl();
@@ -196,11 +198,20 @@ implements Targeting {
     }
 
     public PathNavigation getNavigation() {
-        if (this.isPassenger() && this.getVehicle() instanceof Mob) {
-            Mob mob = (Mob)this.getVehicle();
+        Entity entity = this.getControlledVehicle();
+        if (entity instanceof Mob) {
+            Mob mob = (Mob)entity;
             return mob.getNavigation();
         }
         return this.navigation;
+    }
+
+    @Override
+    @Nullable
+    public LivingEntity getControllingPassenger() {
+        Mob mob;
+        Entity entity;
+        return !this.isNoAi() && (entity = this.getFirstPassenger()) instanceof Mob ? (mob = (Mob)entity) : null;
     }
 
     public Sensing getSensing() {

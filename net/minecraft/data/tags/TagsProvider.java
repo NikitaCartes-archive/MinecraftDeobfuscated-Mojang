@@ -35,7 +35,8 @@ public abstract class TagsProvider<T>
 implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
     protected final PackOutput.PathProvider pathProvider;
-    private final CompletableFuture<HolderLookup.Provider> contentsProvider;
+    private final CompletableFuture<HolderLookup.Provider> lookupProvider;
+    private final CompletableFuture<Void> contentsDone = new CompletableFuture();
     private final CompletableFuture<TagLookup<T>> parentProvider;
     protected final ResourceKey<? extends Registry<T>> registryKey;
     private final Map<ResourceLocation, TagBuilder> builders = Maps.newLinkedHashMap();
@@ -48,11 +49,7 @@ implements DataProvider {
         this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, TagManager.getTagDir(resourceKey));
         this.registryKey = resourceKey;
         this.parentProvider = completableFuture2;
-        this.contentsProvider = completableFuture.thenApply(provider -> {
-            this.builders.clear();
-            this.addTags((HolderLookup.Provider)provider);
-            return provider;
-        });
+        this.lookupProvider = completableFuture;
     }
 
     @Override
@@ -66,7 +63,10 @@ implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cachedOutput) {
         record CombinedData<T>(HolderLookup.Provider contents, TagLookup<T> parent) {
         }
-        return ((CompletableFuture)this.contentsProvider().thenCombineAsync(this.parentProvider, (provider, tagLookup) -> new CombinedData((HolderLookup.Provider)provider, tagLookup))).thenCompose(arg -> {
+        return ((CompletableFuture)((CompletableFuture)this.createContentsProvider().thenApply(provider -> {
+            this.contentsDone.complete(null);
+            return provider;
+        })).thenCombineAsync(this.parentProvider, (provider, tagLookup) -> new CombinedData((HolderLookup.Provider)provider, tagLookup))).thenCompose(arg -> {
             HolderLookup.RegistryLookup registryLookup = arg.contents.lookupOrThrow(this.registryKey);
             Predicate<ResourceLocation> predicate = resourceLocation -> registryLookup.get(ResourceKey.create(this.registryKey, resourceLocation)).isPresent();
             Predicate<ResourceLocation> predicate2 = resourceLocation -> this.builders.containsKey(resourceLocation) || arg.parent.contains(TagKey.create(this.registryKey, resourceLocation));
@@ -95,11 +95,15 @@ implements DataProvider {
     }
 
     public CompletableFuture<TagLookup<T>> contentsGetter() {
-        return this.contentsProvider().thenApply(provider -> tagKey -> Optional.ofNullable(this.builders.get(tagKey.location())));
+        return this.contentsDone.thenApply(void_ -> tagKey -> Optional.ofNullable(this.builders.get(tagKey.location())));
     }
 
-    protected CompletableFuture<HolderLookup.Provider> contentsProvider() {
-        return this.contentsProvider;
+    protected CompletableFuture<HolderLookup.Provider> createContentsProvider() {
+        return this.lookupProvider.thenApply(provider -> {
+            this.builders.clear();
+            this.addTags((HolderLookup.Provider)provider);
+            return provider;
+        });
     }
 
     @FunctionalInterface

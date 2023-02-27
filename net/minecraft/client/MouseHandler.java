@@ -49,7 +49,9 @@ public class MouseHandler {
         if (l != this.minecraft.getWindow().getWindow()) {
             return;
         }
-        this.minecraft.setLastInputType(InputType.MOUSE);
+        if (this.minecraft.screen != null) {
+            this.minecraft.setLastInputType(InputType.MOUSE);
+        }
         boolean bl2 = bl = j == 1;
         if (Minecraft.ON_OSX && i == 0) {
             if (bl) {

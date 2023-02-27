@@ -198,7 +198,6 @@ NarratableEntry {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        int q;
         int p;
         int o;
         int m;
@@ -225,19 +224,18 @@ NarratableEntry {
         if (this.renderTopAndBottom) {
             RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
             o = 32;
-            p = -100;
             RenderSystem.setShaderColor(0.25f, 0.25f, 0.25f, 1.0f);
-            AbstractSelectionList.blit(poseStack, this.x0, 0, -100, 0.0f, 0.0f, this.width, this.y0, 32, 32);
-            AbstractSelectionList.blit(poseStack, this.x0, this.y1, -100, 0.0f, this.y1, this.width, this.height - this.y1, 32, 32);
+            AbstractSelectionList.blit(poseStack, this.x0, 0, 0.0f, 0.0f, this.width, this.y0, 32, 32);
+            AbstractSelectionList.blit(poseStack, this.x0, this.y1, 0.0f, this.y1, this.width, this.height - this.y1, 32, 32);
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-            q = 4;
+            p = 4;
             AbstractSelectionList.fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
             AbstractSelectionList.fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
         }
         if ((o = this.getMaxScroll()) > 0) {
             p = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
             p = Mth.clamp(p, 32, this.y1 - this.y0 - 8);
-            q = (int)this.getScrollAmount() * (this.y1 - this.y0 - p) / o + this.y0;
+            int q = (int)this.getScrollAmount() * (this.y1 - this.y0 - p) / o + this.y0;
             if (q < this.y0) {
                 q = this.y0;
             }

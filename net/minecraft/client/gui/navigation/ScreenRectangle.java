@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.navigation.ScreenAxis;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.navigation.ScreenPosition;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public record ScreenRectangle(ScreenPosition position, int width, int height) {
@@ -71,6 +72,18 @@ public record ScreenRectangle(ScreenPosition position, int width, int height) {
 
     public int getCenterInAxis(ScreenAxis screenAxis) {
         return (this.getBoundInDirection(screenAxis.getPositive()) + this.getBoundInDirection(screenAxis.getNegative())) / 2;
+    }
+
+    @Nullable
+    public ScreenRectangle intersection(ScreenRectangle screenRectangle) {
+        int i = Math.max(this.left(), screenRectangle.left());
+        int j = Math.max(this.top(), screenRectangle.top());
+        int k = Math.min(this.right(), screenRectangle.right());
+        int l = Math.min(this.bottom(), screenRectangle.bottom());
+        if (i >= k || j >= l) {
+            return null;
+        }
+        return new ScreenRectangle(i, j, k - i, l - j);
     }
 
     public int top() {

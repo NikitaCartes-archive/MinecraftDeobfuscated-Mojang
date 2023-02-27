@@ -14,6 +14,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
@@ -65,10 +66,12 @@ implements BlockEntityRenderer<DecoratedPotBlockEntity> {
     public static LayerDefinition createBaseLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild(NECK, CubeListBuilder.create().texOffs(0, 0).addBox(5.0f, 16.0f, 5.0f, 6.0f, 4.0f, 6.0f), PartPose.offsetAndRotation(0.0f, 36.0f, 16.0f, (float)Math.PI, 0.0f, 0.0f));
-        CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 10).addBox(0.0f, 0.0f, 0.0f, 14.0f, 14.0f, 0.0f);
-        partDefinition.addOrReplaceChild(TOP, cubeListBuilder, PartPose.offsetAndRotation(1.0f, 16.0f, 1.0f, 1.5707964f, 0.0f, 0.0f));
-        partDefinition.addOrReplaceChild(BOTTOM, cubeListBuilder, PartPose.offsetAndRotation(15.0f, 0.0f, 1.0f, 1.5707964f, 0.0f, (float)Math.PI));
+        CubeDeformation cubeDeformation = new CubeDeformation(0.2f);
+        CubeDeformation cubeDeformation2 = new CubeDeformation(-0.1f);
+        partDefinition.addOrReplaceChild(NECK, CubeListBuilder.create().texOffs(0, 0).addBox(4.0f, 17.0f, 4.0f, 8.0f, 3.0f, 8.0f, cubeDeformation2).texOffs(0, 5).addBox(5.0f, 20.0f, 5.0f, 6.0f, 1.0f, 6.0f, cubeDeformation), PartPose.offsetAndRotation(0.0f, 37.0f, 16.0f, (float)Math.PI, 0.0f, 0.0f));
+        CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(-14, 13).addBox(0.0f, 0.0f, 0.0f, 14.0f, 0.0f, 14.0f);
+        partDefinition.addOrReplaceChild(TOP, cubeListBuilder, PartPose.offsetAndRotation(1.0f, 16.0f, 1.0f, 0.0f, 0.0f, 0.0f));
+        partDefinition.addOrReplaceChild(BOTTOM, cubeListBuilder, PartPose.offsetAndRotation(1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f));
         return LayerDefinition.create(meshDefinition, 32, 32);
     }
 

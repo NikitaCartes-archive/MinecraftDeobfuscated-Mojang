@@ -51,16 +51,26 @@ public class PackRepository {
         this.selected = this.rebuildSelected(collection);
     }
 
-    public void addPack(String string) {
-        ArrayList<Pack> list = Lists.newArrayList(this.selected);
-        list.add(this.available.get(string));
-        this.selected = list;
+    public boolean addPack(String string) {
+        Pack pack = this.available.get(string);
+        if (pack != null && !this.selected.contains(pack)) {
+            ArrayList<Pack> list = Lists.newArrayList(this.selected);
+            list.add(pack);
+            this.selected = list;
+            return true;
+        }
+        return false;
     }
 
-    public void removePack(String string) {
-        ArrayList<Pack> list = Lists.newArrayList(this.selected);
-        list.remove(this.available.get(string));
-        this.selected = list;
+    public boolean removePack(String string) {
+        Pack pack = this.available.get(string);
+        if (pack != null && this.selected.contains(pack)) {
+            ArrayList<Pack> list = Lists.newArrayList(this.selected);
+            list.remove(pack);
+            this.selected = list;
+            return true;
+        }
+        return false;
     }
 
     private List<Pack> rebuildSelected(Collection<String> collection) {

@@ -78,6 +78,21 @@ GuiEventListener {
     }
 
     @Override
+    public boolean keyPressed(int i, int j, int k) {
+        boolean bl2;
+        boolean bl = i == 265;
+        boolean bl3 = bl2 = i == 264;
+        if (bl || bl2) {
+            double d = this.scrollAmount;
+            this.setScrollAmount(this.scrollAmount + (double)(bl ? -1 : 1) * this.scrollRate());
+            if (d != this.scrollAmount) {
+                return true;
+            }
+        }
+        return super.keyPressed(i, j, k);
+    }
+
+    @Override
     public void renderWidget(PoseStack poseStack, int i, int j, float f) {
         if (!this.visible) {
             return;

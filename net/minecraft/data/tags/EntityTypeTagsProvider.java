@@ -32,6 +32,7 @@ extends IntrinsicHolderTagsProvider<EntityType<?>> {
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)).add(EntityType.STRIDER, EntityType.BLAZE, EntityType.MAGMA_CUBE);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)EntityTypeTags.FROG_FOOD)).add(EntityType.SLIME, EntityType.MAGMA_CUBE);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)EntityTypeTags.FALL_DAMAGE_IMMUNE)).add(EntityType.IRON_GOLEM, EntityType.SNOW_GOLEM, EntityType.SHULKER, EntityType.ALLAY, EntityType.BAT, EntityType.BEE, EntityType.BLAZE, EntityType.CAT, EntityType.CHICKEN, EntityType.GHAST, EntityType.PHANTOM, EntityType.MAGMA_CUBE, EntityType.OCELOT, EntityType.PARROT, EntityType.WITHER);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)EntityTypeTags.DISMOUNTS_UNDERWATER)).add(EntityType.CAMEL, EntityType.CHICKEN, EntityType.DONKEY, EntityType.HORSE, EntityType.LLAMA, EntityType.MULE, EntityType.PIG, EntityType.RAVAGER, EntityType.SPIDER, EntityType.STRIDER, EntityType.TRADER_LLAMA, EntityType.ZOMBIE_HORSE);
     }
 }
 

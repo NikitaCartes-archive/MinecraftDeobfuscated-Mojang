@@ -315,11 +315,6 @@ extends Raider {
         return false;
     }
 
-    @Override
-    protected float getFlyingSpeed() {
-        return 0.02f;
-    }
-
     class RavagerMeleeAttackGoal
     extends MeleeAttackGoal {
         public RavagerMeleeAttackGoal() {

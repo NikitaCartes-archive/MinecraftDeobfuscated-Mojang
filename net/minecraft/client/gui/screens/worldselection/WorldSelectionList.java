@@ -458,9 +458,9 @@ extends ObjectSelectionList<Entry> {
                 WorldCreationContext worldCreationContext = pair.getSecond();
                 Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
                 if (worldCreationContext.options().isOldCustomizedWorld()) {
-                    this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? CreateWorldScreen.createFromExisting(this.screen, levelSettings, worldCreationContext, path) : this.screen), Component.translatable("selectWorld.recreate.customized.title"), Component.translatable("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
+                    this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? CreateWorldScreen.createFromExisting(this.minecraft, this.screen, levelSettings, worldCreationContext, path) : this.screen), Component.translatable("selectWorld.recreate.customized.title"), Component.translatable("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
                 } else {
-                    this.minecraft.setScreen(CreateWorldScreen.createFromExisting(this.screen, levelSettings, worldCreationContext, path));
+                    this.minecraft.setScreen(CreateWorldScreen.createFromExisting(this.minecraft, this.screen, levelSettings, worldCreationContext, path));
                 }
             } catch (Exception exception) {
                 LOGGER.error("Unable to recreate world", exception);

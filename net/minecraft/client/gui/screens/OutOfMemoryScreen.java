@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 
@@ -24,7 +25,7 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.toTitle"), button -> this.minecraft.setScreen(new TitleScreen())).bounds(this.width / 2 - 155, this.height / 4 + 120 + 12, 150, 20).build());
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_TO_TITLE, button -> this.minecraft.setScreen(new TitleScreen())).bounds(this.width / 2 - 155, this.height / 4 + 120 + 12, 150, 20).build());
         this.addRenderableWidget(Button.builder(Component.translatable("menu.quit"), button -> this.minecraft.stop()).bounds(this.width / 2 - 155 + 160, this.height / 4 + 120 + 12, 150, 20).build());
         this.message = MultiLineLabel.create(this.font, (FormattedText)Component.translatable("outOfMemory.message"), 295);
     }

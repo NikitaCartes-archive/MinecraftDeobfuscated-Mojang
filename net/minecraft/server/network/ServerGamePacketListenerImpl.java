@@ -1086,9 +1086,10 @@ ServerGamePacketListener {
     @Override
     public void handlePaddleBoat(ServerboundPaddleBoatPacket serverboundPaddleBoatPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundPaddleBoatPacket, this, this.player.getLevel());
-        Entity entity = this.player.getVehicle();
+        Entity entity = this.player.getControlledVehicle();
         if (entity instanceof Boat) {
-            ((Boat)entity).setPaddleState(serverboundPaddleBoatPacket.getLeft(), serverboundPaddleBoatPacket.getRight());
+            Boat boat = (Boat)entity;
+            boat.setPaddleState(serverboundPaddleBoatPacket.getLeft(), serverboundPaddleBoatPacket.getRight());
         }
     }
 
@@ -1339,16 +1340,18 @@ ServerGamePacketListener {
                 break;
             }
             case START_RIDING_JUMP: {
-                if (!(this.player.getVehicle() instanceof PlayerRideableJumping)) break;
-                PlayerRideableJumping playerRideableJumping = (PlayerRideableJumping)((Object)this.player.getVehicle());
+                Entity entity = this.player.getControlledVehicle();
+                if (!(entity instanceof PlayerRideableJumping)) break;
+                PlayerRideableJumping playerRideableJumping = (PlayerRideableJumping)((Object)entity);
                 int i = serverboundPlayerCommandPacket.getData();
-                if (!playerRideableJumping.canJump(this.player) || i <= 0) break;
+                if (!playerRideableJumping.canJump() || i <= 0) break;
                 playerRideableJumping.handleStartJump(i);
                 break;
             }
             case STOP_RIDING_JUMP: {
-                if (!(this.player.getVehicle() instanceof PlayerRideableJumping)) break;
-                PlayerRideableJumping playerRideableJumping = (PlayerRideableJumping)((Object)this.player.getVehicle());
+                Entity entity = this.player.getControlledVehicle();
+                if (!(entity instanceof PlayerRideableJumping)) break;
+                PlayerRideableJumping playerRideableJumping = (PlayerRideableJumping)((Object)entity);
                 playerRideableJumping.handleStopJump();
                 break;
             }

@@ -299,26 +299,26 @@ implements ItemLike {
     }
 
     public static void popResource(Level level, BlockPos blockPos, ItemStack itemStack) {
-        float f = EntityType.ITEM.getHeight() / 2.0f;
-        double d = (double)((float)blockPos.getX() + 0.5f) + Mth.nextDouble(level.random, -0.25, 0.25);
-        double e = (double)((float)blockPos.getY() + 0.5f) + Mth.nextDouble(level.random, -0.25, 0.25) - (double)f;
-        double g = (double)((float)blockPos.getZ() + 0.5f) + Mth.nextDouble(level.random, -0.25, 0.25);
-        Block.popResource(level, () -> new ItemEntity(level, d, e, g, itemStack), itemStack);
+        double d = (double)EntityType.ITEM.getHeight() / 2.0;
+        double e = (double)blockPos.getX() + 0.5 + Mth.nextDouble(level.random, -0.25, 0.25);
+        double f = (double)blockPos.getY() + 0.5 + Mth.nextDouble(level.random, -0.25, 0.25) - d;
+        double g = (double)blockPos.getZ() + 0.5 + Mth.nextDouble(level.random, -0.25, 0.25);
+        Block.popResource(level, () -> new ItemEntity(level, e, f, g, itemStack), itemStack);
     }
 
     public static void popResourceFromFace(Level level, BlockPos blockPos, Direction direction, ItemStack itemStack) {
         int i = direction.getStepX();
         int j = direction.getStepY();
         int k = direction.getStepZ();
-        float f = EntityType.ITEM.getWidth() / 2.0f;
-        float g = EntityType.ITEM.getHeight() / 2.0f;
-        double d = (double)((float)blockPos.getX() + 0.5f) + (i == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)((float)i * (0.5f + f)));
-        double e = (double)((float)blockPos.getY() + 0.5f) + (j == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)((float)j * (0.5f + g))) - (double)g;
-        double h = (double)((float)blockPos.getZ() + 0.5f) + (k == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)((float)k * (0.5f + f)));
+        double d = (double)EntityType.ITEM.getWidth() / 2.0;
+        double e = (double)EntityType.ITEM.getHeight() / 2.0;
+        double f = (double)blockPos.getX() + 0.5 + (i == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)i * (0.5 + d));
+        double g = (double)blockPos.getY() + 0.5 + (j == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)j * (0.5 + e)) - e;
+        double h = (double)blockPos.getZ() + 0.5 + (k == 0 ? Mth.nextDouble(level.random, -0.25, 0.25) : (double)k * (0.5 + d));
         double l = i == 0 ? Mth.nextDouble(level.random, -0.1, 0.1) : (double)i * 0.1;
         double m = j == 0 ? Mth.nextDouble(level.random, 0.0, 0.1) : (double)j * 0.1 + 0.1;
         double n = k == 0 ? Mth.nextDouble(level.random, -0.1, 0.1) : (double)k * 0.1;
-        Block.popResource(level, () -> new ItemEntity(level, d, e, h, itemStack, l, m, n), itemStack);
+        Block.popResource(level, () -> new ItemEntity(level, f, g, h, itemStack, l, m, n), itemStack);
     }
 
     private static void popResource(Level level, Supplier<ItemEntity> supplier, ItemStack itemStack) {

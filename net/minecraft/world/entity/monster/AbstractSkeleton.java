@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -130,8 +131,9 @@ implements RangedAttackMob {
     @Override
     public void rideTick() {
         super.rideTick();
-        if (this.getVehicle() instanceof PathfinderMob) {
-            PathfinderMob pathfinderMob = (PathfinderMob)this.getVehicle();
+        Entity entity = this.getControlledVehicle();
+        if (entity instanceof PathfinderMob) {
+            PathfinderMob pathfinderMob = (PathfinderMob)entity;
             this.yBodyRot = pathfinderMob.yBodyRot;
         }
     }

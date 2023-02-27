@@ -228,7 +228,7 @@ extends Screen {
         float g = -this.scroll;
         poseStack.pushPose();
         poseStack.translate(0.0f, g, 0.0f);
-        this.logoRenderer.renderLogo(poseStack, this.width, f, l);
+        this.logoRenderer.renderLogo(poseStack, this.width, 1.0f, l);
         int m = l + 100;
         for (int n = 0; n < this.lines.size(); ++n) {
             float h;

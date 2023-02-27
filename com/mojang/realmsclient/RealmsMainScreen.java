@@ -385,6 +385,7 @@ extends RealmsScreen {
                 bl = true;
             }
             this.realmsServers = list2;
+            this.hasFetchedServers = true;
             this.refreshRealmsSelectionList();
             if (!regionsPinged && bl) {
                 regionsPinged = true;
@@ -446,11 +447,7 @@ extends RealmsScreen {
     }
 
     private void refreshRealmsSelectionList() {
-        boolean bl;
-        boolean bl2 = bl = !this.hasFetchedServers;
-        if (bl) {
-            this.hasFetchedServers = true;
-        }
+        boolean bl = !this.hasFetchedServers;
         this.realmSelectionList.clear();
         ArrayList<UUID> list = new ArrayList<UUID>();
         for (RealmsNotification realmsNotification : this.notifications) {

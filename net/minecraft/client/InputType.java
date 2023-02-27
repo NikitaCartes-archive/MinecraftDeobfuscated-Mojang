@@ -10,7 +10,7 @@ import net.fabricmc.api.Environment;
 public enum InputType {
     NONE,
     MOUSE,
-    KEYBOARD_OTHER,
+    KEYBOARD_ARROW,
     KEYBOARD_TAB;
 
 
@@ -19,7 +19,7 @@ public enum InputType {
     }
 
     public boolean isKeyboard() {
-        return this == KEYBOARD_OTHER || this == KEYBOARD_TAB;
+        return this == KEYBOARD_ARROW || this == KEYBOARD_TAB;
     }
 }
 

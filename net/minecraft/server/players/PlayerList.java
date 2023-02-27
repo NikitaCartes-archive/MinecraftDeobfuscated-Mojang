@@ -209,9 +209,9 @@ public abstract class PlayerList {
         this.players.add(serverPlayer);
         this.playersByUUID.put(serverPlayer.getUUID(), serverPlayer);
         this.broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(serverPlayer)));
+        this.sendLevelInfo(serverPlayer, serverLevel2);
         serverLevel2.addNewPlayer(serverPlayer);
         this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
-        this.sendLevelInfo(serverPlayer, serverLevel2);
         this.server.getServerResourcePack().ifPresent(serverResourcePackInfo -> serverPlayer.sendTexturePack(serverResourcePackInfo.url(), serverResourcePackInfo.hash(), serverResourcePackInfo.isRequired(), serverResourcePackInfo.prompt()));
         for (MobEffectInstance mobEffectInstance : serverPlayer.getActiveEffects()) {
             serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance));

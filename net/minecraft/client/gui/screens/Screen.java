@@ -323,13 +323,13 @@ implements Renderable {
             s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
         }
         bufferSource.endBatch();
-        poseStack.popPose();
         s = q;
         for (t = 0; t < list.size(); ++t) {
             clientTooltipComponent2 = list.get(t);
-            clientTooltipComponent2.renderImage(this.font, p, s, poseStack, this.itemRenderer, 400);
+            clientTooltipComponent2.renderImage(this.font, p, s, poseStack, this.itemRenderer);
             s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
         }
+        poseStack.popPose();
     }
 
     protected void renderComponentHoverEffect(PoseStack poseStack, @Nullable Style style, int i, int j) {
