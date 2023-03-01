@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -370,28 +371,26 @@ public class EnderMan extends Monster implements NeutralMob {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (damageSource.isIndirect()) {
-			boolean bl;
-			if (damageSource.getDirectEntity() instanceof ThrownPotion thrownPotion) {
-				bl = this.hurtWithCleanWater(damageSource, thrownPotion, f);
-			} else {
-				bl = false;
-			}
-
-			for (int i = 0; i < 64; i++) {
-				if (this.teleport()) {
-					return true;
-				}
-			}
-
-			return bl;
 		} else {
-			boolean bl = super.hurt(damageSource, f);
-			if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
-				this.teleport();
-			}
+			boolean bl = damageSource.getDirectEntity() instanceof ThrownPotion;
+			if (!damageSource.is(DamageTypeTags.IS_PROJECTILE) && !bl) {
+				boolean bl2 = super.hurt(damageSource, f);
+				if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
+					this.teleport();
+				}
 
-			return bl;
+				return bl2;
+			} else {
+				boolean bl2 = bl && this.hurtWithCleanWater(damageSource, (ThrownPotion)damageSource.getDirectEntity(), f);
+
+				for (int i = 0; i < 64; i++) {
+					if (this.teleport()) {
+						return true;
+					}
+				}
+
+				return bl2;
+			}
 		}
 	}
 

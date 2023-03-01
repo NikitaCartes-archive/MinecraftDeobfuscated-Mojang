@@ -133,8 +133,13 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	public static void renderEntityInInventory(
 		PoseStack poseStack, int i, int j, int k, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity
 	) {
+		double d = 1000.0;
+		PoseStack poseStack2 = RenderSystem.getModelViewStack();
+		poseStack2.pushPose();
+		poseStack2.translate(0.0, 0.0, 1000.0);
+		RenderSystem.applyModelViewMatrix();
 		poseStack.pushPose();
-		poseStack.translate((float)i, (float)j, 50.0F);
+		poseStack.translate((double)i, (double)j, -950.0);
 		poseStack.mulPoseMatrix(new Matrix4f().scaling((float)k, (float)k, (float)(-k)));
 		poseStack.mulPose(quaternionf);
 		Lighting.setupForEntityInInventory();
@@ -151,6 +156,8 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		entityRenderDispatcher.setRenderShadow(true);
 		poseStack.popPose();
 		Lighting.setupFor3DItems();
+		poseStack2.popPose();
+		RenderSystem.applyModelViewMatrix();
 	}
 
 	@Override

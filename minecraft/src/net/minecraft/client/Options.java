@@ -663,6 +663,7 @@ public class Options {
 		}
 	}, OptionInstance.UnitDouble.INSTANCE, 0.5, double_ -> {
 	});
+	private static final int MAX_GUI_SCALE_INCLUSIVE = 2147483646;
 	private final OptionInstance<Integer> guiScale = new OptionInstance<>(
 		"options.guiScale",
 		OptionInstance.noTooltip(),
@@ -670,7 +671,7 @@ public class Options {
 		new OptionInstance.ClampingLazyMaxIntRange(0, () -> {
 			Minecraft minecraftx = Minecraft.getInstance();
 			return !minecraftx.isRunning() ? 2147483646 : minecraftx.getWindow().calculateScale(0, minecraftx.isEnforceUnicode());
-		}),
+		}, 2147483646),
 		0,
 		integer -> {
 		}

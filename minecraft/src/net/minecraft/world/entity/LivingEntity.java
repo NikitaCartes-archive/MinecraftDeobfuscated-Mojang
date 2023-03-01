@@ -664,6 +664,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
+	public void remove(Entity.RemovalReason removalReason) {
+		super.remove(removalReason);
+		this.brain.clearMemories();
+	}
+
+	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		compoundTag.putFloat("Health", this.getHealth());
 		compoundTag.putShort("HurtTime", (short)this.hurtTime);
@@ -2109,7 +2115,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected float getRiddenSpeed(LivingEntity livingEntity) {
-		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
+		return this.getSpeed();
 	}
 
 	public void calculateEntityAnimation(boolean bl) {
@@ -2515,14 +2521,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.zza *= 0.98F;
 		this.updateFallFlying();
 		AABB aABB = this.getBoundingBox();
-		if (this.isAlive()) {
-			LivingEntity livingEntity = this.getControllingPassenger();
-			Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
-			if (livingEntity != null) {
-				this.travelRidden(livingEntity, vec32);
-			} else {
-				this.travel(vec32);
-			}
+		LivingEntity livingEntity = this.getControllingPassenger();
+		Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
+		if (livingEntity != null && this.isAlive()) {
+			this.travelRidden(livingEntity, vec32);
+		} else {
+			this.travel(vec32);
 		}
 
 		this.level.getProfiler().pop();

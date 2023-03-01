@@ -198,7 +198,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 
 	public void setSelected(@Nullable WorldSelectionList.Entry entry) {
 		super.setSelected(entry);
-		this.screen.updateButtonStatus(entry != null && entry.isSelectable());
+		this.screen.updateButtonStatus(entry != null && entry.isSelectable(), entry != null);
 	}
 
 	public Optional<WorldSelectionList.WorldListEntry> getSelectedOpt() {
@@ -377,7 +377,6 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 				return true;
 			} else {
 				WorldSelectionList.this.setSelected((WorldSelectionList.Entry)this);
-				this.screen.updateButtonStatus(WorldSelectionList.this.getSelectedOpt().isPresent());
 				if (d - (double)WorldSelectionList.this.getRowLeft() <= 32.0) {
 					this.joinWorld();
 					return true;

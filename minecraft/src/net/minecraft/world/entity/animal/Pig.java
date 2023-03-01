@@ -247,7 +247,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	protected float getRiddenSpeed(LivingEntity livingEntity) {
-		return super.getRiddenSpeed(livingEntity) * 0.225F * this.steering.boostFactor();
+		return (float)(this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 0.225 * (double)this.steering.boostFactor());
 	}
 
 	@Override

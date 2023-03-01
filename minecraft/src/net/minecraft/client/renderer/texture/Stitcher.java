@@ -52,9 +52,6 @@ public class Stitcher<T extends Stitcher.Entry> {
 				throw new StitcherException(holder.entry, (Collection<Stitcher.Entry>)list.stream().map(holderx -> holderx.entry).collect(ImmutableList.toImmutableList()));
 			}
 		}
-
-		this.storageX = Mth.smallestEncompassingPowerOfTwo(this.storageX);
-		this.storageY = Mth.smallestEncompassingPowerOfTwo(this.storageY);
 	}
 
 	public void gatherSprites(Stitcher.SpriteLoader<T> spriteLoader) {
@@ -99,14 +96,14 @@ public class Stitcher<T extends Stitcher.Entry> {
 			Stitcher.Region<T> region;
 			if (bl5) {
 				if (this.storageY == 0) {
-					this.storageY = holder.height;
+					this.storageY = l;
 				}
 
-				region = new Stitcher.Region<>(this.storageX, 0, holder.width, this.storageY);
-				this.storageX = this.storageX + holder.width;
+				region = new Stitcher.Region<>(this.storageX, 0, k - this.storageX, this.storageY);
+				this.storageX = k;
 			} else {
-				region = new Stitcher.Region<>(0, this.storageY, this.storageX, holder.height);
-				this.storageY = this.storageY + holder.height;
+				region = new Stitcher.Region<>(0, this.storageY, this.storageX, l - this.storageY);
+				this.storageY = l;
 			}
 
 			region.add(holder);

@@ -4,6 +4,8 @@ import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.platform.ClipboardManager;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.TextureUtil;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Locale;
 import javax.annotation.Nullable;
@@ -27,6 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -213,9 +216,18 @@ public class KeyboardHandler {
 					chatComponent.addMessage(Component.translatable("debug.creative_spectator.help"));
 					chatComponent.addMessage(Component.translatable("debug.pause_focus.help"));
 					chatComponent.addMessage(Component.translatable("debug.help.help"));
+					chatComponent.addMessage(Component.translatable("debug.dump_dynamic_textures.help"));
 					chatComponent.addMessage(Component.translatable("debug.reload_resourcepacks.help"));
 					chatComponent.addMessage(Component.translatable("debug.pause.help"));
 					chatComponent.addMessage(Component.translatable("debug.gamemodes.help"));
+					return true;
+				case 83:
+					Path path = TextureUtil.getDebugTexturePath(this.minecraft.gameDirectory.toPath()).toAbsolutePath();
+					this.minecraft.getTextureManager().dumpAllSheets(path);
+					Component component = Component.literal(path.toString())
+						.withStyle(ChatFormatting.UNDERLINE)
+						.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toFile().toString())));
+					this.debugFeedbackTranslated("debug.dump_dynamic_textures", component);
 					return true;
 				case 84:
 					this.debugFeedbackTranslated("debug.reload_resourcepacks.message");

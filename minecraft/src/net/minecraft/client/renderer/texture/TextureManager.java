@@ -7,6 +7,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.RealmsMainScreen;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -200,5 +202,32 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 				Minecraft.getInstance().tell(() -> completableFuture.complete(null));
 			}, runnable -> RenderSystem.recordRenderCall(runnable::run));
 		return completableFuture;
+	}
+
+	public void dumpAllSheets(Path path) {
+		if (!RenderSystem.isOnRenderThread()) {
+			RenderSystem.recordRenderCall(() -> this._dumpAllSheets(path));
+		} else {
+			this._dumpAllSheets(path);
+		}
+	}
+
+	private void _dumpAllSheets(Path path) {
+		try {
+			Files.createDirectories(path);
+		} catch (IOException var3) {
+			LOGGER.error("Failed to create directory {}", path, var3);
+			return;
+		}
+
+		this.byPath.forEach((resourceLocation, abstractTexture) -> {
+			if (abstractTexture instanceof Dumpable dumpable) {
+				try {
+					dumpable.dumpContents(resourceLocation, path);
+				} catch (IOException var5) {
+					LOGGER.error("Failed to dump texture {}", resourceLocation, var5);
+				}
+			}
+		});
 	}
 }

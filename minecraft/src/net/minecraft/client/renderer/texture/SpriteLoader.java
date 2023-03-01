@@ -34,14 +34,18 @@ public class SpriteLoader {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final ResourceLocation location;
 	private final int maxSupportedTextureSize;
+	private final int minWidth;
+	private final int minHeight;
 
-	public SpriteLoader(ResourceLocation resourceLocation, int i) {
+	public SpriteLoader(ResourceLocation resourceLocation, int i, int j, int k) {
 		this.location = resourceLocation;
 		this.maxSupportedTextureSize = i;
+		this.minWidth = j;
+		this.minHeight = k;
 	}
 
 	public static SpriteLoader create(TextureAtlas textureAtlas) {
-		return new SpriteLoader(textureAtlas.location(), textureAtlas.maxSupportedTextureSize());
+		return new SpriteLoader(textureAtlas.location(), textureAtlas.maxSupportedTextureSize(), textureAtlas.getWidth(), textureAtlas.getHeight());
 	}
 
 	public SpriteLoader.Preparations stitch(List<SpriteContents> list, int i, Executor executor) {
@@ -80,12 +84,12 @@ public class SpriteLoader {
 
 		try {
 			stitcher.stitch();
-		} catch (StitcherException var14) {
-			CrashReport crashReport = CrashReport.forThrowable(var14, "Stitching");
+		} catch (StitcherException var16) {
+			CrashReport crashReport = CrashReport.forThrowable(var16, "Stitching");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Stitcher");
 			crashReportCategory.setDetail(
 				"Sprites",
-				var14.getAllSprites()
+				var16.getAllSprites()
 					.stream()
 					.map(entry -> String.format(Locale.ROOT, "%s[%dx%d]", entry.name(), entry.width(), entry.height()))
 					.collect(Collectors.joining(","))
@@ -94,7 +98,9 @@ public class SpriteLoader {
 			throw new ReportedException(crashReport);
 		}
 
-		Map<ResourceLocation, TextureAtlasSprite> map = this.getStitchedSprites(stitcher);
+		int p = Math.max(stitcher.getWidth(), this.minWidth);
+		int q = Math.max(stitcher.getHeight(), this.minHeight);
+		Map<ResourceLocation, TextureAtlasSprite> map = this.getStitchedSprites(stitcher, p, q);
 		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)map.get(MissingTextureAtlasSprite.getLocation());
 		CompletableFuture<Void> completableFuture;
 		if (m > 0) {
@@ -105,7 +111,7 @@ public class SpriteLoader {
 			completableFuture = CompletableFuture.completedFuture(null);
 		}
 
-		return new SpriteLoader.Preparations(stitcher.getWidth(), stitcher.getHeight(), m, textureAtlasSprite, map, completableFuture);
+		return new SpriteLoader.Preparations(p, q, m, textureAtlasSprite, map, completableFuture);
 	}
 
 	public static CompletableFuture<List<SpriteContents>> runSpriteSuppliers(List<Supplier<SpriteContents>> list, Executor executor) {
@@ -174,10 +180,8 @@ public class SpriteLoader {
 		}
 	}
 
-	private Map<ResourceLocation, TextureAtlasSprite> getStitchedSprites(Stitcher<SpriteContents> stitcher) {
+	private Map<ResourceLocation, TextureAtlasSprite> getStitchedSprites(Stitcher<SpriteContents> stitcher, int i, int j) {
 		Map<ResourceLocation, TextureAtlasSprite> map = new HashMap();
-		int i = stitcher.getWidth();
-		int j = stitcher.getHeight();
 		stitcher.gatherSprites((spriteContents, k, l) -> map.put(spriteContents.name(), new TextureAtlasSprite(this.location, spriteContents, i, j, k, l)));
 		return map;
 	}

@@ -16,6 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -331,7 +332,9 @@ public class Guardian extends Monster {
 		if (this.level.isClientSide) {
 			return false;
 		} else {
-			if (!damageSource.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS) && damageSource.getEntity() instanceof LivingEntity livingEntity) {
+			if (!damageSource.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS)
+				&& !damageSource.is(DamageTypes.THORNS)
+				&& damageSource.getEntity() instanceof LivingEntity livingEntity) {
 				livingEntity.hurt(this.damageSources().thorns(this), 2.0F);
 			}
 

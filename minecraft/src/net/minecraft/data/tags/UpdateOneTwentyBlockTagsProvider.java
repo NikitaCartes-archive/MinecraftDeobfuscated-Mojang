@@ -78,7 +78,7 @@ public class UpdateOneTwentyBlockTagsProvider extends IntrinsicHolderTagsProvide
 		this.tag(BlockTags.SAPLINGS).add(Blocks.CHERRY_SAPLING);
 		this.tag(BlockTags.LOGS_THAT_BURN).addTag(BlockTags.CHERRY_LOGS);
 		this.tag(BlockTags.OVERWORLD_NATURAL_LOGS).add(Blocks.CHERRY_LOG);
-		this.tag(BlockTags.FLOWER_POTS).add(Blocks.FLOWER_POT);
+		this.tag(BlockTags.FLOWER_POTS).add(Blocks.POTTED_CHERRY_SAPLING);
 		this.tag(BlockTags.WOODEN_PRESSURE_PLATES).add(Blocks.CHERRY_PRESSURE_PLATE);
 		this.tag(BlockTags.LEAVES).add(Blocks.CHERRY_LEAVES);
 		this.tag(BlockTags.WOODEN_TRAPDOORS).add(Blocks.CHERRY_TRAPDOOR);

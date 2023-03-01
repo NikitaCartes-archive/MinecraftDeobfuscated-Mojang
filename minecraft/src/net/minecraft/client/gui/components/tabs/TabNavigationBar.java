@@ -77,7 +77,7 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
 	public void setFocused(@Nullable GuiEventListener guiEventListener) {
 		super.setFocused(guiEventListener);
 		if (guiEventListener instanceof TabButton tabButton) {
-			this.tabManager.setCurrentTab(tabButton.tab());
+			this.tabManager.setCurrentTab(tabButton.tab(), true);
 		}
 	}
 
@@ -158,11 +158,11 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
 		this.layout.setY(0);
 	}
 
-	public void selectTab(int i) {
+	public void selectTab(int i, boolean bl) {
 		if (this.isFocused()) {
 			this.setFocused((GuiEventListener)this.tabButtons.get(i));
 		} else {
-			this.tabManager.setCurrentTab((Tab)this.tabs.get(i));
+			this.tabManager.setCurrentTab((Tab)this.tabs.get(i), bl);
 		}
 	}
 
@@ -170,7 +170,7 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
 		if (Screen.hasControlDown()) {
 			int j = this.getNextTabIndex(i);
 			if (j != -1) {
-				this.selectTab(Mth.clamp(j, 0, this.tabs.size() - 1));
+				this.selectTab(Mth.clamp(j, 0, this.tabs.size() - 1), true);
 				return true;
 			}
 		}

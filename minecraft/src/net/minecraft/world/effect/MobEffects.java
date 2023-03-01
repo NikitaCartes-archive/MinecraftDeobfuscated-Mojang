@@ -14,13 +14,13 @@ public class MobEffects {
 	public static final MobEffect MOVEMENT_SPEED = register(
 		1,
 		"speed",
-		new MobEffect(MobEffectCategory.BENEFICIAL, 8171462)
+		new MobEffect(MobEffectCategory.BENEFICIAL, 3402751)
 			.addAttributeModifier(Attributes.MOVEMENT_SPEED, "91AEAA56-376B-4498-935B-2F7F68070635", 0.2F, AttributeModifier.Operation.MULTIPLY_TOTAL)
 	);
 	public static final MobEffect MOVEMENT_SLOWDOWN = register(
 		2,
 		"slowness",
-		new MobEffect(MobEffectCategory.HARMFUL, 5926017)
+		new MobEffect(MobEffectCategory.HARMFUL, 9154528)
 			.addAttributeModifier(Attributes.MOVEMENT_SPEED, "7107DE5E-7CE8-4030-940E-514C1F160890", -0.15F, AttributeModifier.Operation.MULTIPLY_TOTAL)
 	);
 	public static final MobEffect DIG_SPEED = register(
@@ -38,20 +38,20 @@ public class MobEffects {
 	public static final MobEffect DAMAGE_BOOST = register(
 		5,
 		"strength",
-		new AttackDamageMobEffect(MobEffectCategory.BENEFICIAL, 9643043, 3.0)
+		new AttackDamageMobEffect(MobEffectCategory.BENEFICIAL, 16762624, 3.0)
 			.addAttributeModifier(Attributes.ATTACK_DAMAGE, "648D7064-6A60-4F59-8ABE-C2C23A6DD7A9", 0.0, AttributeModifier.Operation.ADDITION)
 	);
 	public static final MobEffect HEAL = register(6, "instant_health", new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 16262179));
-	public static final MobEffect HARM = register(7, "instant_damage", new InstantenousMobEffect(MobEffectCategory.HARMFUL, 4393481));
-	public static final MobEffect JUMP = register(8, "jump_boost", new MobEffect(MobEffectCategory.BENEFICIAL, 2293580));
+	public static final MobEffect HARM = register(7, "instant_damage", new InstantenousMobEffect(MobEffectCategory.HARMFUL, 11101546));
+	public static final MobEffect JUMP = register(8, "jump_boost", new MobEffect(MobEffectCategory.BENEFICIAL, 16646020));
 	public static final MobEffect CONFUSION = register(9, "nausea", new MobEffect(MobEffectCategory.HARMFUL, 5578058));
 	public static final MobEffect REGENERATION = register(10, "regeneration", new MobEffect(MobEffectCategory.BENEFICIAL, 13458603));
-	public static final MobEffect DAMAGE_RESISTANCE = register(11, "resistance", new MobEffect(MobEffectCategory.BENEFICIAL, 10044730));
-	public static final MobEffect FIRE_RESISTANCE = register(12, "fire_resistance", new MobEffect(MobEffectCategory.BENEFICIAL, 14981690));
-	public static final MobEffect WATER_BREATHING = register(13, "water_breathing", new MobEffect(MobEffectCategory.BENEFICIAL, 3035801));
-	public static final MobEffect INVISIBILITY = register(14, "invisibility", new MobEffect(MobEffectCategory.BENEFICIAL, 8356754));
+	public static final MobEffect DAMAGE_RESISTANCE = register(11, "resistance", new MobEffect(MobEffectCategory.BENEFICIAL, 9520880));
+	public static final MobEffect FIRE_RESISTANCE = register(12, "fire_resistance", new MobEffect(MobEffectCategory.BENEFICIAL, 16750848));
+	public static final MobEffect WATER_BREATHING = register(13, "water_breathing", new MobEffect(MobEffectCategory.BENEFICIAL, 10017472));
+	public static final MobEffect INVISIBILITY = register(14, "invisibility", new MobEffect(MobEffectCategory.BENEFICIAL, 16185078));
 	public static final MobEffect BLINDNESS = register(15, "blindness", new MobEffect(MobEffectCategory.HARMFUL, 2039587));
-	public static final MobEffect NIGHT_VISION = register(16, "night_vision", new MobEffect(MobEffectCategory.BENEFICIAL, 2039713));
+	public static final MobEffect NIGHT_VISION = register(16, "night_vision", new MobEffect(MobEffectCategory.BENEFICIAL, 12779366));
 	public static final MobEffect HUNGER = register(17, "hunger", new MobEffect(MobEffectCategory.HARMFUL, 5797459));
 	public static final MobEffect WEAKNESS = register(
 		18,
@@ -59,7 +59,7 @@ public class MobEffects {
 		new AttackDamageMobEffect(MobEffectCategory.HARMFUL, 4738376, -4.0)
 			.addAttributeModifier(Attributes.ATTACK_DAMAGE, "22653B89-116E-49DC-9B6B-9971489B5BE5", 0.0, AttributeModifier.Operation.ADDITION)
 	);
-	public static final MobEffect POISON = register(19, "poison", new MobEffect(MobEffectCategory.HARMFUL, 5149489));
+	public static final MobEffect POISON = register(19, "poison", new MobEffect(MobEffectCategory.HARMFUL, 8889187));
 	public static final MobEffect WITHER = register(20, "wither", new MobEffect(MobEffectCategory.HARMFUL, 3484199));
 	public static final MobEffect HEALTH_BOOST = register(
 		21,
@@ -74,7 +74,7 @@ public class MobEffects {
 	public static final MobEffect LUCK = register(
 		26,
 		"luck",
-		new MobEffect(MobEffectCategory.BENEFICIAL, 3381504)
+		new MobEffect(MobEffectCategory.BENEFICIAL, 5882118)
 			.addAttributeModifier(Attributes.LUCK, "03C3C89D-7037-4B42-869F-B146BCB64D2E", 1.0, AttributeModifier.Operation.ADDITION)
 	);
 	public static final MobEffect UNLUCK = register(
