@@ -44,7 +44,7 @@ extends Behavior<E> {
     @Override
     protected void stop(ServerLevel serverLevel, E warden, long l) {
         if (((Entity)warden).getRemovalReason() == null) {
-            ((Entity)warden).remove(Entity.RemovalReason.DISCARDED);
+            ((LivingEntity)warden).remove(Entity.RemovalReason.DISCARDED);
         }
     }
 

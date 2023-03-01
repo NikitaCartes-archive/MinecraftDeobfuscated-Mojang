@@ -85,7 +85,7 @@ NarratableEntry {
         super.setFocused(guiEventListener);
         if (guiEventListener instanceof TabButton) {
             TabButton tabButton = (TabButton)guiEventListener;
-            this.tabManager.setCurrentTab(tabButton.tab());
+            this.tabManager.setCurrentTab(tabButton.tab(), true);
         }
     }
 
@@ -157,18 +157,18 @@ NarratableEntry {
         this.layout.setY(0);
     }
 
-    public void selectTab(int i) {
+    public void selectTab(int i, boolean bl) {
         if (this.isFocused()) {
             this.setFocused((GuiEventListener)this.tabButtons.get(i));
         } else {
-            this.tabManager.setCurrentTab((Tab)this.tabs.get(i));
+            this.tabManager.setCurrentTab((Tab)this.tabs.get(i), bl);
         }
     }
 
     public boolean keyPressed(int i) {
         int j;
         if (Screen.hasControlDown() && (j = this.getNextTabIndex(i)) != -1) {
-            this.selectTab(Mth.clamp(j, 0, this.tabs.size() - 1));
+            this.selectTab(Mth.clamp(j, 0, this.tabs.size() - 1), true);
             return true;
         }
         return false;

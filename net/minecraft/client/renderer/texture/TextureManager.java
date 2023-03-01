@@ -10,6 +10,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.RealmsMainScreen;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -25,6 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.PreloadedTexture;
@@ -193,6 +197,33 @@ AutoCloseable {
             Minecraft.getInstance().tell(() -> completableFuture.complete(null));
         }, runnable -> RenderSystem.recordRenderCall(runnable::run));
         return completableFuture;
+    }
+
+    public void dumpAllSheets(Path path) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> this._dumpAllSheets(path));
+        } else {
+            this._dumpAllSheets(path);
+        }
+    }
+
+    private void _dumpAllSheets(Path path) {
+        try {
+            Files.createDirectories(path, new FileAttribute[0]);
+        } catch (IOException iOException) {
+            LOGGER.error("Failed to create directory {}", (Object)path, (Object)iOException);
+            return;
+        }
+        this.byPath.forEach((resourceLocation, abstractTexture) -> {
+            if (abstractTexture instanceof Dumpable) {
+                Dumpable dumpable = (Dumpable)((Object)abstractTexture);
+                try {
+                    dumpable.dumpContents((ResourceLocation)resourceLocation, path);
+                } catch (IOException iOException) {
+                    LOGGER.error("Failed to dump texture {}", resourceLocation, (Object)iOException);
+                }
+            }
+        });
     }
 }
 

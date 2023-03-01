@@ -66,7 +66,7 @@ extends Screen {
         this.deleteButton = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.delete"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::deleteWorld)).bounds(this.width / 2 - 76, this.height - 28, 72, 20).build());
         this.copyButton = this.addRenderableWidget(Button.builder(Component.translatable("selectWorld.recreate"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::recreateWorld)).bounds(this.width / 2 + 4, this.height - 28, 72, 20).build());
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 82, this.height - 28, 72, 20).build());
-        this.updateButtonStatus(false);
+        this.updateButtonStatus(false, false);
         this.setInitialFocus(this.searchBox);
     }
 
@@ -96,11 +96,11 @@ extends Screen {
         super.render(poseStack, i, j, f);
     }
 
-    public void updateButtonStatus(boolean bl) {
+    public void updateButtonStatus(boolean bl, boolean bl2) {
         this.selectButton.active = bl;
-        this.deleteButton.active = bl;
         this.renameButton.active = bl;
         this.copyButton.active = bl;
+        this.deleteButton.active = bl2;
     }
 
     @Override

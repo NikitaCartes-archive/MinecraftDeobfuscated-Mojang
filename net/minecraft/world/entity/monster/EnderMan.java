@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -344,26 +345,20 @@ implements NeutralMob {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        if (damageSource.isIndirect()) {
-            boolean bl;
-            Entity entity = damageSource.getDirectEntity();
-            if (entity instanceof ThrownPotion) {
-                ThrownPotion thrownPotion = (ThrownPotion)entity;
-                bl = this.hurtWithCleanWater(damageSource, thrownPotion, f);
-            } else {
-                bl = false;
-            }
+        boolean bl = damageSource.getDirectEntity() instanceof ThrownPotion;
+        if (damageSource.is(DamageTypeTags.IS_PROJECTILE) || bl) {
+            boolean bl2 = bl && this.hurtWithCleanWater(damageSource, (ThrownPotion)damageSource.getDirectEntity(), f);
             for (int i = 0; i < 64; ++i) {
                 if (!this.teleport()) continue;
                 return true;
             }
-            return bl;
+            return bl2;
         }
-        boolean bl = super.hurt(damageSource, f);
+        boolean bl2 = super.hurt(damageSource, f);
         if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
             this.teleport();
         }
-        return bl;
+        return bl2;
     }
 
     private boolean hurtWithCleanWater(DamageSource damageSource, ThrownPotion thrownPotion, float f) {

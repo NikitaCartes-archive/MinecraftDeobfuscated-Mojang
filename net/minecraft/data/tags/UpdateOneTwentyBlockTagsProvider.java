@@ -52,7 +52,7 @@ extends IntrinsicHolderTagsProvider<Block> {
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.SAPLINGS)).add(Blocks.CHERRY_SAPLING);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.LOGS_THAT_BURN)).addTag((TagKey)BlockTags.CHERRY_LOGS);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.OVERWORLD_NATURAL_LOGS)).add(Blocks.CHERRY_LOG);
-        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.FLOWER_POTS)).add(Blocks.FLOWER_POT);
+        ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.FLOWER_POTS)).add(Blocks.POTTED_CHERRY_SAPLING);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.WOODEN_PRESSURE_PLATES)).add(Blocks.CHERRY_PRESSURE_PLATE);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.LEAVES)).add(Blocks.CHERRY_LEAVES);
         ((IntrinsicHolderTagsProvider.IntrinsicTagAppender)this.tag((TagKey)BlockTags.WOODEN_TRAPDOORS)).add(Blocks.CHERRY_TRAPDOOR);

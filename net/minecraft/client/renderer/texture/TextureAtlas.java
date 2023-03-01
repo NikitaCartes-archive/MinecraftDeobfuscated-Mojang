@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +21,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.SpriteLoader;
@@ -35,7 +35,8 @@ import org.slf4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class TextureAtlas
 extends AbstractTexture
-implements Tickable {
+implements Dumpable,
+Tickable {
     private static final Logger LOGGER = LogUtils.getLogger();
     @Deprecated
     public static final ResourceLocation LOCATION_BLOCKS = InventoryMenu.BLOCK_ATLAS;
@@ -46,6 +47,9 @@ implements Tickable {
     private Map<ResourceLocation, TextureAtlasSprite> texturesByName = Map.of();
     private final ResourceLocation location;
     private final int maxSupportedTextureSize;
+    private int width;
+    private int height;
+    private int mipLevel;
 
     public TextureAtlas(ResourceLocation resourceLocation) {
         this.location = resourceLocation;
@@ -59,6 +63,9 @@ implements Tickable {
     public void upload(SpriteLoader.Preparations preparations) {
         LOGGER.info("Created: {}x{}x{} {}-atlas", preparations.width(), preparations.height(), preparations.mipLevel(), this.location);
         TextureUtil.prepareImage(this.getId(), preparations.mipLevel(), preparations.width(), preparations.height());
+        this.width = preparations.width();
+        this.height = preparations.height();
+        this.mipLevel = preparations.mipLevel();
         this.clearTextureData();
         this.texturesByName = Map.copyOf(preparations.regions());
         ArrayList<SpriteContents> list = new ArrayList<SpriteContents>();
@@ -82,16 +89,11 @@ implements Tickable {
         this.animatedTextures = List.copyOf(list2);
     }
 
-    private void dumpContents(int i, int j, int k) {
-        String string = this.location.toDebugFileName();
-        Path path = TextureUtil.getDebugTexturePath();
-        try {
-            Files.createDirectories(path, new FileAttribute[0]);
-            TextureUtil.writeAsPNG(path, string, this.getId(), i, j, k);
-            TextureAtlas.dumpSpriteNames(path, string, this.texturesByName);
-        } catch (IOException iOException) {
-            LOGGER.warn("Failed to dump atlas contents to {}", (Object)path);
-        }
+    @Override
+    public void dumpContents(ResourceLocation resourceLocation, Path path) throws IOException {
+        String string = resourceLocation.toDebugFileName();
+        TextureUtil.writeAsPNG(path, string, this.getId(), this.mipLevel, this.width, this.height);
+        TextureAtlas.dumpSpriteNames(path, string, this.texturesByName);
     }
 
     private static void dumpSpriteNames(Path path, String string, Map<ResourceLocation, TextureAtlasSprite> map) {
@@ -144,6 +146,14 @@ implements Tickable {
 
     public int maxSupportedTextureSize() {
         return this.maxSupportedTextureSize;
+    }
+
+    int getWidth() {
+        return this.width;
+    }
+
+    int getHeight() {
+        return this.height;
     }
 
     public void updateFilter(SpriteLoader.Preparations preparations) {

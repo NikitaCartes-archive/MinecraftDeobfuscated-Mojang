@@ -7,9 +7,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -34,7 +37,7 @@ public class TabManager {
         }
     }
 
-    public void setCurrentTab(Tab tab) {
+    public void setCurrentTab(Tab tab, boolean bl) {
         if (!Objects.equals(this.currentTab, tab)) {
             if (this.currentTab != null) {
                 this.currentTab.visitChildren(this.removeWidget);
@@ -43,6 +46,9 @@ public class TabManager {
             tab.visitChildren(this.addWidget);
             if (this.tabArea != null) {
                 tab.doLayout(this.tabArea);
+            }
+            if (bl) {
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
             }
         }
     }

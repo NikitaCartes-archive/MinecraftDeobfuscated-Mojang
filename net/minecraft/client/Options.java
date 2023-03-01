@@ -410,13 +410,14 @@ public class Options {
         }
         return Options.genericValueLabel(component, i);
     }, OptionInstance.UnitDouble.INSTANCE, 0.5, double_ -> {});
+    private static final int MAX_GUI_SCALE_INCLUSIVE = 0x7FFFFFFE;
     private final OptionInstance<Integer> guiScale = new OptionInstance<Integer>("options.guiScale", OptionInstance.noTooltip(), (component, integer) -> integer == 0 ? Component.translatable("options.guiScale.auto") : Component.literal(Integer.toString(integer)), new OptionInstance.ClampingLazyMaxIntRange(0, () -> {
         Minecraft minecraft = Minecraft.getInstance();
         if (!minecraft.isRunning()) {
             return 0x7FFFFFFE;
         }
         return minecraft.getWindow().calculateScale(0, minecraft.isEnforceUnicode());
-    }), 0, integer -> {});
+    }, 0x7FFFFFFE), 0, integer -> {});
     private final OptionInstance<ParticleStatus> particles = new OptionInstance<ParticleStatus>("options.particles", OptionInstance.noTooltip(), OptionInstance.forOptionEnum(), new OptionInstance.Enum<ParticleStatus>(Arrays.asList(ParticleStatus.values()), Codec.INT.xmap(ParticleStatus::byId, ParticleStatus::getId)), ParticleStatus.ALL, particleStatus -> {});
     private final OptionInstance<NarratorStatus> narrator = new OptionInstance<NarratorStatus>("options.narrator", OptionInstance.noTooltip(), (component, narratorStatus) -> {
         if (this.minecraft.getNarrator().isActive()) {

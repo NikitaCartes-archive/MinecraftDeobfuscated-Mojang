@@ -193,7 +193,7 @@ extends ObjectSelectionList<Entry> {
     @Override
     public void setSelected(@Nullable Entry entry) {
         super.setSelected(entry);
-        this.screen.updateButtonStatus(entry != null && entry.isSelectable());
+        this.screen.updateButtonStatus(entry != null && entry.isSelectable(), entry != null);
     }
 
     public Optional<WorldListEntry> getSelectedOpt() {
@@ -349,7 +349,6 @@ extends ObjectSelectionList<Entry> {
                 return true;
             }
             WorldSelectionList.this.setSelected(this);
-            this.screen.updateButtonStatus(WorldSelectionList.this.getSelectedOpt().isPresent());
             if (d - (double)WorldSelectionList.this.getRowLeft() <= 32.0) {
                 this.joinWorld();
                 return true;

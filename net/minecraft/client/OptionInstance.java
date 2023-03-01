@@ -231,7 +231,7 @@ public final class OptionInstance<T> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public record ClampingLazyMaxIntRange(int minInclusive, IntSupplier maxSupplier) implements IntRangeBase,
+    public record ClampingLazyMaxIntRange(int minInclusive, IntSupplier maxSupplier, int encodableMaxInclusive) implements IntRangeBase,
     SliderableOrCyclableValueSet<Integer>
     {
         @Override
@@ -247,7 +247,7 @@ public final class OptionInstance<T> {
         @Override
         public Codec<Integer> codec() {
             return ExtraCodecs.validate(Codec.INT, integer -> {
-                int i = this.maxSupplier.getAsInt() + 1;
+                int i = this.encodableMaxInclusive + 1;
                 if (integer.compareTo(this.minInclusive) >= 0 && integer.compareTo(i) <= 0) {
                     return DataResult.success(integer);
                 }

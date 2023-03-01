@@ -132,8 +132,13 @@ implements RecipeUpdateListener {
     }
 
     public static void renderEntityInInventory(PoseStack poseStack, int i, int j, int k, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity) {
+        double d = 1000.0;
+        PoseStack poseStack2 = RenderSystem.getModelViewStack();
+        poseStack2.pushPose();
+        poseStack2.translate(0.0, 0.0, 1000.0);
+        RenderSystem.applyModelViewMatrix();
         poseStack.pushPose();
-        poseStack.translate(i, j, 50.0f);
+        poseStack.translate((double)i, (double)j, -950.0);
         poseStack.mulPoseMatrix(new Matrix4f().scaling(k, k, -k));
         poseStack.mulPose(quaternionf);
         Lighting.setupForEntityInInventory();
@@ -149,6 +154,8 @@ implements RecipeUpdateListener {
         entityRenderDispatcher.setRenderShadow(true);
         poseStack.popPose();
         Lighting.setupFor3DItems();
+        poseStack2.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 
     @Override

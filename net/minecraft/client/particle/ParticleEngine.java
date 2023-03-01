@@ -531,6 +531,8 @@ implements PreparableReloadListener {
 
     private void clearParticles() {
         this.particles.clear();
+        this.particlesToAdd.clear();
+        this.trackingEmitters.clear();
         this.trackedParticleCounts.clear();
     }
 

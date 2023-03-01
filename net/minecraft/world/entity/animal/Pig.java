@@ -249,7 +249,7 @@ Saddleable {
 
     @Override
     protected float getRiddenSpeed(LivingEntity livingEntity) {
-        return super.getRiddenSpeed(livingEntity) * 0.225f * this.steering.boostFactor();
+        return (float)(this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 0.225 * (double)this.steering.boostFactor());
     }
 
     @Override

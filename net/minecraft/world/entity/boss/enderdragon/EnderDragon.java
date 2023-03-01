@@ -480,8 +480,6 @@ implements Enemy {
             }
         }
         this.move(MoverType.SELF, new Vec3(0.0, 0.1f, 0.0));
-        this.setYRot(this.getYRot() + 20.0f);
-        this.yBodyRot = this.getYRot();
         if (this.dragonDeathTime == 200 && this.level instanceof ServerLevel) {
             if (bl) {
                 ExperienceOrb.award((ServerLevel)this.level, this.position(), Mth.floor((float)i * 0.2f));
