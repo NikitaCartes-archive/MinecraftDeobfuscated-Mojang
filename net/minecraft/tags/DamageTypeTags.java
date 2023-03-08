@@ -11,6 +11,7 @@ import net.minecraft.world.damagesource.DamageType;
 public interface DamageTypeTags {
     public static final TagKey<DamageType> DAMAGES_HELMET = DamageTypeTags.create("damages_helmet");
     public static final TagKey<DamageType> BYPASSES_ARMOR = DamageTypeTags.create("bypasses_armor");
+    public static final TagKey<DamageType> BYPASSES_SHIELD = DamageTypeTags.create("bypasses_shield");
     public static final TagKey<DamageType> BYPASSES_INVULNERABILITY = DamageTypeTags.create("bypasses_invulnerability");
     public static final TagKey<DamageType> BYPASSES_COOLDOWN = DamageTypeTags.create("bypasses_cooldown");
     public static final TagKey<DamageType> BYPASSES_EFFECTS = DamageTypeTags.create("bypasses_effects");

@@ -91,7 +91,7 @@ implements Layout {
         public void setY(int i, int j) {
             float f = this.layoutSettings.paddingTop;
             float g = j - this.child.getHeight() - this.layoutSettings.paddingBottom;
-            int k = (int)Mth.lerp(this.layoutSettings.yAlignment, f, g);
+            int k = Math.round(Mth.lerp(this.layoutSettings.yAlignment, f, g));
             this.child.setY(k + i);
         }
     }

@@ -20,8 +20,6 @@ import net.minecraft.network.chat.Component;
 @Environment(value=EnvType.CLIENT)
 public class AccessibilityOptionsScreen
 extends SimpleOptionsSubScreen {
-    private static final String GUIDE_LINK = "https://aka.ms/MinecraftJavaAccessibility";
-
     private static OptionInstance<?>[] options(Options options) {
         return new OptionInstance[]{options.narrator(), options.showSubtitles(), options.highContrast(), options.autoJump(), options.textBackgroundOpacity(), options.backgroundForChatOnly(), options.chatOpacity(), options.chatLineSpacing(), options.chatDelay(), options.notificationDisplayTime(), options.toggleCrouch(), options.toggleSprint(), options.screenEffectScale(), options.fovEffectScale(), options.darknessEffectScale(), options.damageTiltStrength(), options.glintSpeed(), options.glintStrength(), options.hideLightningFlash(), options.darkMojangStudiosBackground(), options.panoramaSpeed()};
     }
@@ -44,10 +42,10 @@ extends SimpleOptionsSubScreen {
     protected void createFooter() {
         this.addRenderableWidget(Button.builder(Component.translatable("options.accessibility.link"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
-                Util.getPlatform().openUri(GUIDE_LINK);
+                Util.getPlatform().openUri("https://aka.ms/MinecraftJavaAccessibility");
             }
             this.minecraft.setScreen(this);
-        }, GUIDE_LINK, true))).bounds(this.width / 2 - 155, this.height - 27, 150, 20).build());
+        }, "https://aka.ms/MinecraftJavaAccessibility", true))).bounds(this.width / 2 - 155, this.height - 27, 150, 20).build());
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 5, this.height - 27, 150, 20).build());
     }
 }

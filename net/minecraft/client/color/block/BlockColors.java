@@ -39,21 +39,21 @@ public class BlockColors {
         BlockColors blockColors = new BlockColors();
         blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
             if (blockAndTintGetter == null || blockPos == null) {
-                return -1;
+                return GrassColor.getDefaultColor();
             }
             return BiomeColors.getAverageGrassColor(blockAndTintGetter, blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER ? blockPos.below() : blockPos);
         }, Blocks.LARGE_FERN, Blocks.TALL_GRASS);
         blockColors.addColoringState(DoublePlantBlock.HALF, Blocks.LARGE_FERN, Blocks.TALL_GRASS);
         blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
             if (blockAndTintGetter == null || blockPos == null) {
-                return GrassColor.get(0.5, 1.0);
+                return GrassColor.getDefaultColor();
             }
             return BiomeColors.getAverageGrassColor(blockAndTintGetter, blockPos);
         }, Blocks.GRASS_BLOCK, Blocks.FERN, Blocks.GRASS, Blocks.POTTED_FERN);
         blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
             if (i != 0) {
                 if (blockAndTintGetter == null || blockPos == null) {
-                    return GrassColor.get(0.5, 1.0);
+                    return GrassColor.getDefaultColor();
                 }
                 return BiomeColors.getAverageGrassColor(blockAndTintGetter, blockPos);
             }

@@ -2580,7 +2580,6 @@ implements WindowEventHandler {
         };
 
         static final Component INFO_DISABLED_BY_PROFILE;
-        private static final String URL_DISABLED_BY_PROFILE = "https://aka.ms/JavaAccountSettings";
         private final Component message;
 
         ChatStatus(Component component) {

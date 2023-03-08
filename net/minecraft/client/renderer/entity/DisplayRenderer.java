@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Transformation;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -55,7 +56,9 @@ extends EntityRenderer<T> {
         super.render(display, f, g, poseStack, multiBufferSource, k);
         poseStack.pushPose();
         poseStack.mulPose(this.calculateOrientation(display));
-        poseStack.mulPoseMatrix(((Display)display).transformation(h).getMatrix());
+        Transformation transformation = ((Display)display).transformation(h);
+        poseStack.mulPoseMatrix(transformation.getMatrix());
+        poseStack.last().normal().rotate(transformation.getLeftRotation()).rotate(transformation.getRightRotation());
         this.renderInner(display, poseStack, multiBufferSource, k, h);
         poseStack.popPose();
     }

@@ -51,12 +51,11 @@ extends Screen {
     private final IntSet speedupModifiers = new IntOpenHashSet();
     private float scrollSpeed;
     private final float unmodifiedScrollSpeed;
-    private final LogoRenderer logoRenderer;
+    private final LogoRenderer logoRenderer = new LogoRenderer(false);
 
-    public WinScreen(boolean bl, LogoRenderer logoRenderer, Runnable runnable) {
+    public WinScreen(boolean bl, Runnable runnable) {
         super(GameNarrator.NO_TITLE);
         this.poem = bl;
-        this.logoRenderer = logoRenderer;
         this.onFinished = runnable;
         this.unmodifiedScrollSpeed = !bl ? 0.75f : 0.5f;
         this.scrollSpeed = this.unmodifiedScrollSpeed;
@@ -108,7 +107,6 @@ extends Screen {
 
     private void respawn() {
         this.onFinished.run();
-        this.minecraft.setScreen(null);
     }
 
     @Override

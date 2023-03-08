@@ -32,9 +32,6 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class PauseScreen
 extends Screen {
-    private static final String URL_FEEDBACK_SNAPSHOT = "https://aka.ms/snapshotfeedback?ref=game";
-    private static final String URL_FEEDBACK_RELEASE = "https://aka.ms/javafeedback?ref=game";
-    private static final String URL_BUGS = "https://aka.ms/snapshotbugs?ref=game";
     private static final int COLUMNS = 2;
     private static final int MENU_PADDING_TOP = 50;
     private static final int BUTTON_PADDING = 4;
@@ -80,8 +77,8 @@ extends Screen {
         }).width(204).build(), 2, gridLayout.newCellSettings().paddingTop(50));
         rowHelper.addChild(this.openScreenButton(ADVANCEMENTS, () -> new AdvancementsScreen(this.minecraft.player.connection.getAdvancements())));
         rowHelper.addChild(this.openScreenButton(STATS, () -> new StatsScreen(this, this.minecraft.player.getStats())));
-        rowHelper.addChild(this.openLinkButton(SEND_FEEDBACK, SharedConstants.getCurrentVersion().isStable() ? URL_FEEDBACK_RELEASE : URL_FEEDBACK_SNAPSHOT));
-        rowHelper.addChild(this.openLinkButton((Component)PauseScreen.REPORT_BUGS, (String)URL_BUGS)).active = !SharedConstants.getCurrentVersion().getDataVersion().isSideSeries();
+        rowHelper.addChild(this.openLinkButton(SEND_FEEDBACK, SharedConstants.getCurrentVersion().isStable() ? "https://aka.ms/javafeedback?ref=game" : "https://aka.ms/snapshotfeedback?ref=game"));
+        rowHelper.addChild(this.openLinkButton((Component)PauseScreen.REPORT_BUGS, (String)"https://aka.ms/snapshotbugs?ref=game")).active = !SharedConstants.getCurrentVersion().getDataVersion().isSideSeries();
         rowHelper.addChild(this.openScreenButton(OPTIONS, () -> new OptionsScreen(this, this.minecraft.options)));
         if (this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished()) {
             rowHelper.addChild(this.openScreenButton(SHARE_TO_LAN, () -> new ShareToLanScreen(this)));

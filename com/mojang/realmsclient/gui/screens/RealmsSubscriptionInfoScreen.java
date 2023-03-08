@@ -24,6 +24,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.util.CommonLinks;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -49,7 +50,6 @@ extends RealmsScreen {
     private Component startDate = UNKNOWN;
     @Nullable
     private Subscription.SubscriptionType type;
-    private static final String PURCHASE_LINK = "https://aka.ms/ExtendJavaRealms";
 
     public RealmsSubscriptionInfoScreen(Screen screen, RealmsServer realmsServer, Screen screen2) {
         super(GameNarrator.NO_TITLE);
@@ -62,7 +62,7 @@ extends RealmsScreen {
     public void init() {
         this.getSubscription(this.serverData.id);
         this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.subscription.extend"), button -> {
-            String string = "https://aka.ms/ExtendJavaRealms?subscriptionId=" + this.serverData.remoteSubscriptionId + "&profileId=" + this.minecraft.getUser().getUuid();
+            String string = CommonLinks.extendRealms(this.serverData.remoteSubscriptionId, this.minecraft.getUser().getUuid());
             this.minecraft.keyboardHandler.setClipboard(string);
             Util.getPlatform().openUri(string);
         }).bounds(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(6), 200, 20).build());

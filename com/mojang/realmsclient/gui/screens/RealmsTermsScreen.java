@@ -34,7 +34,6 @@ extends RealmsScreen {
     private final RealmsMainScreen mainScreen;
     private final RealmsServer realmsServer;
     private boolean onLink;
-    private final String realmsToSUrl = "https://aka.ms/MinecraftRealmsTerms";
 
     public RealmsTermsScreen(Screen screen, RealmsMainScreen realmsMainScreen, RealmsServer realmsServer) {
         super(TITLE);

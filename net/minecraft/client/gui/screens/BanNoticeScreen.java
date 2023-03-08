@@ -21,12 +21,11 @@ import org.apache.commons.lang3.StringUtils;
 
 @Environment(value=EnvType.CLIENT)
 public class BanNoticeScreen {
-    public static final String URL_MODERATION = "https://aka.ms/mcjavamoderation";
     private static final Component TEMPORARY_BAN_TITLE = Component.translatable("gui.banned.title.temporary").withStyle(ChatFormatting.BOLD);
     private static final Component PERMANENT_BAN_TITLE = Component.translatable("gui.banned.title.permanent").withStyle(ChatFormatting.BOLD);
 
     public static ConfirmLinkScreen create(BooleanConsumer booleanConsumer, BanDetails banDetails) {
-        return new ConfirmLinkScreen(booleanConsumer, BanNoticeScreen.getBannedTitle(banDetails), BanNoticeScreen.getBannedScreenText(banDetails), URL_MODERATION, CommonComponents.GUI_ACKNOWLEDGE, true);
+        return new ConfirmLinkScreen(booleanConsumer, BanNoticeScreen.getBannedTitle(banDetails), BanNoticeScreen.getBannedScreenText(banDetails), "https://aka.ms/mcjavamoderation", CommonComponents.GUI_ACKNOWLEDGE, true);
     }
 
     private static Component getBannedTitle(BanDetails banDetails) {
@@ -34,7 +33,7 @@ public class BanNoticeScreen {
     }
 
     private static Component getBannedScreenText(BanDetails banDetails) {
-        return Component.translatable("gui.banned.description", BanNoticeScreen.getBanReasonText(banDetails), BanNoticeScreen.getBanStatusText(banDetails), Component.literal(URL_MODERATION));
+        return Component.translatable("gui.banned.description", BanNoticeScreen.getBanReasonText(banDetails), BanNoticeScreen.getBanStatusText(banDetails), Component.literal("https://aka.ms/mcjavamoderation"));
     }
 
     private static Component getBanReasonText(BanDetails banDetails) {

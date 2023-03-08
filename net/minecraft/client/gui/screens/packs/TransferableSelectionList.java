@@ -232,6 +232,9 @@ extends ObjectSelectionList<PackEntry> {
 
         @Override
         public boolean mouseClicked(double d, double e, int i) {
+            if (i != 0) {
+                return false;
+            }
             double f = d - (double)this.parent.getRowLeft();
             double g = e - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
             if (this.showHoverOverlay() && f <= 32.0) {

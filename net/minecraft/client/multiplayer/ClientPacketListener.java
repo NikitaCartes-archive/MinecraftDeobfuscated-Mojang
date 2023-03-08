@@ -42,7 +42,6 @@ import net.minecraft.client.DebugQueryHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.MapRenderer;
-import net.minecraft.client.gui.components.LogoRenderer;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -1222,7 +1221,10 @@ ClientGamePacketListener {
                 this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
                 this.minecraft.setScreen(new ReceivingLevelScreen());
             } else if (i == 1) {
-                this.minecraft.setScreen(new WinScreen(true, new LogoRenderer(false), () -> this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN))));
+                this.minecraft.setScreen(new WinScreen(true, () -> {
+                    this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
+                    this.minecraft.setScreen(null);
+                }));
             }
         } else if (type == ClientboundGameEventPacket.DEMO_EVENT) {
             Options options = this.minecraft.options;

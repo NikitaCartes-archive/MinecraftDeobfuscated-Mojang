@@ -45,7 +45,6 @@ extends Screen {
     private static final Component EMPTY_HIDDEN = Component.translatable("gui.socialInteractions.empty_hidden").withStyle(ChatFormatting.GRAY);
     private static final Component EMPTY_BLOCKED = Component.translatable("gui.socialInteractions.empty_blocked").withStyle(ChatFormatting.GRAY);
     private static final Component BLOCKING_HINT = Component.translatable("gui.socialInteractions.blocking_hint");
-    private static final String BLOCK_LINK = "https://aka.ms/javablocking";
     private static final int BG_BORDER_SIZE = 8;
     private static final int BG_WIDTH = 236;
     private static final int SEARCH_HEIGHT = 16;
@@ -136,10 +135,10 @@ extends Screen {
         this.addWidget(this.socialInteractionsPlayerList);
         this.blockingHintButton = this.addRenderableWidget(Button.builder(BLOCKING_HINT, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
-                Util.getPlatform().openUri(BLOCK_LINK);
+                Util.getPlatform().openUri("https://aka.ms/javablocking");
             }
             this.minecraft.setScreen(this);
-        }, BLOCK_LINK, true))).bounds(n, m, l, 20).build());
+        }, "https://aka.ms/javablocking", true))).bounds(n, m, l, 20).build());
         this.initialized = true;
         this.showPage(this.page);
     }

@@ -20,6 +20,7 @@ import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
 import net.minecraft.client.gui.screens.ChatOptionsScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.CreditsAndAttributionScreen;
 import net.minecraft.client.gui.screens.LanguageSelectScreen;
 import net.minecraft.client.gui.screens.OnlineOptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,6 +49,7 @@ extends Screen {
     private static final Component RESOURCEPACK = Component.translatable("options.resourcepack");
     private static final Component ACCESSIBILITY = Component.translatable("options.accessibility.title");
     private static final Component TELEMETRY = Component.translatable("options.telemetry");
+    private static final Component CREDITS_AND_ATTRIBUTION = Component.translatable("options.credits_and_attribution");
     private static final int COLUMNS = 2;
     private final Screen lastScreen;
     private final Options options;
@@ -77,6 +79,7 @@ extends Screen {
         rowHelper.addChild(this.openScreenButton(RESOURCEPACK, () -> new PackSelectionScreen(this.minecraft.getResourcePackRepository(), this::applyPacks, this.minecraft.getResourcePackDirectory(), Component.translatable("resourcePack.title"))));
         rowHelper.addChild(this.openScreenButton(ACCESSIBILITY, () -> new AccessibilityOptionsScreen(this, this.options)));
         rowHelper.addChild(this.openScreenButton(TELEMETRY, () -> new TelemetryInfoScreen(this, this.options)));
+        rowHelper.addChild(this.openScreenButton(CREDITS_AND_ATTRIBUTION, () -> new CreditsAndAttributionScreen(this)));
         rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).width(200).build(), 2, rowHelper.newCellSettings().paddingTop(6));
         gridLayout.arrangeElements();
         FrameLayout.alignInRectangle(gridLayout, 0, this.height / 6 - 12, this.width, this.height, 0.5f, 0.0f);

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ReportReasonSelectionScreen
 extends Screen {
-    private static final String ADDITIONAL_INFO_LINK = "https://aka.ms/aboutjavareporting";
     private static final Component REASON_TITLE = Component.translatable("gui.abuseReport.reason.title");
     private static final Component REASON_DESCRIPTION = Component.translatable("gui.abuseReport.reason.description");
     private static final Component READ_INFO_LABEL = Component.translatable("gui.chatReport.read_info");
@@ -57,10 +56,10 @@ extends Screen {
         int i = this.width / 2 - 150 - 5;
         this.addRenderableWidget(Button.builder(READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
-                Util.getPlatform().openUri(ADDITIONAL_INFO_LINK);
+                Util.getPlatform().openUri("https://aka.ms/aboutjavareporting");
             }
             this.minecraft.setScreen(this);
-        }, ADDITIONAL_INFO_LINK, true))).bounds(i, this.buttonTop(), 150, 20).build());
+        }, "https://aka.ms/aboutjavareporting", true))).bounds(i, this.buttonTop(), 150, 20).build());
         int j = this.width / 2 + 5;
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
             ReasonSelectionList.Entry entry = (ReasonSelectionList.Entry)this.reasonSelectionList.getSelected();

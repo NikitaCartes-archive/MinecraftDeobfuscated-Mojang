@@ -1132,7 +1132,7 @@ implements Attackable {
         if (entity instanceof AbstractArrow && (abstractArrow = (AbstractArrow)entity).getPierceLevel() > 0) {
             bl = true;
         }
-        if (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR) && this.isBlocking() && !bl && (vec3 = damageSource.getSourcePosition()) != null) {
+        if (!damageSource.is(DamageTypeTags.BYPASSES_SHIELD) && this.isBlocking() && !bl && (vec3 = damageSource.getSourcePosition()) != null) {
             Vec3 vec32 = this.getViewVector(1.0f);
             Vec3 vec33 = vec3.vectorTo(this.position()).normalize();
             vec33 = new Vec3(vec33.x, 0.0, vec33.z);

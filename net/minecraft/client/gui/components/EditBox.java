@@ -343,7 +343,7 @@ implements Renderable {
     @Override
     public boolean mouseClicked(double d, double e, int i) {
         boolean bl;
-        if (!this.isVisible()) {
+        if (!this.isVisible() || i != 0) {
             return false;
         }
         boolean bl2 = bl = d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);

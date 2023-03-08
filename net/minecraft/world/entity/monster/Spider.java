@@ -156,7 +156,6 @@ extends Monster {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        MobEffect mobEffect;
         Skeleton skeleton;
         spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         RandomSource randomSource = serverLevelAccessor.getRandom();
@@ -171,8 +170,12 @@ extends Monster {
                 ((SpiderEffectsGroupData)spawnGroupData).setRandomEffect(randomSource);
             }
         }
-        if (spawnGroupData instanceof SpiderEffectsGroupData && (mobEffect = ((SpiderEffectsGroupData)spawnGroupData).effect) != null) {
-            this.addEffect(new MobEffectInstance(mobEffect, Integer.MAX_VALUE));
+        if (spawnGroupData instanceof SpiderEffectsGroupData) {
+            SpiderEffectsGroupData spiderEffectsGroupData = (SpiderEffectsGroupData)spawnGroupData;
+            MobEffect mobEffect = spiderEffectsGroupData.effect;
+            if (mobEffect != null) {
+                this.addEffect(new MobEffectInstance(mobEffect, -1));
+            }
         }
         return spawnGroupData;
     }

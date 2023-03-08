@@ -146,14 +146,29 @@ extends BlockEntity {
         profileCache.getAsync(gameProfile.getName(), optional -> Util.backgroundExecutor().execute(() -> Util.ifElse(optional, gameProfile -> {
             Property property = Iterables.getFirst(gameProfile.getProperties().get("textures"), null);
             if (property == null) {
-                gameProfile = sessionService.fillProfileProperties((GameProfile)gameProfile, true);
+                MinecraftSessionService minecraftSessionService = sessionService;
+                if (minecraftSessionService == null) {
+                    return;
+                }
+                gameProfile = minecraftSessionService.fillProfileProperties((GameProfile)gameProfile, true);
             }
             GameProfile gameProfile2 = gameProfile;
-            mainThreadExecutor.execute(() -> {
-                profileCache.add(gameProfile2);
-                consumer.accept(gameProfile2);
-            });
-        }, () -> mainThreadExecutor.execute(() -> consumer.accept(gameProfile)))));
+            Executor executor = mainThreadExecutor;
+            if (executor != null) {
+                executor.execute(() -> {
+                    GameProfileCache gameProfileCache = profileCache;
+                    if (gameProfileCache != null) {
+                        gameProfileCache.add(gameProfile2);
+                        consumer.accept(gameProfile2);
+                    }
+                });
+            }
+        }, () -> {
+            Executor executor = mainThreadExecutor;
+            if (executor != null) {
+                executor.execute(() -> consumer.accept(gameProfile));
+            }
+        })));
     }
 
     public /* synthetic */ Packet getUpdatePacket() {

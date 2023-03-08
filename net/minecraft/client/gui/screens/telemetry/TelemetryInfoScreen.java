@@ -26,7 +26,6 @@ import net.minecraft.network.chat.Component;
 public class TelemetryInfoScreen
 extends Screen {
     private static final int PADDING = 8;
-    private static final String FEEDBACK_URL = "https://aka.ms/javafeedback?ref=game";
     private static final Component TITLE = Component.translatable("telemetry_info.screen.title");
     private static final Component DESCRIPTION = Component.translatable("telemetry_info.screen.description").withStyle(ChatFormatting.GRAY);
     private static final Component BUTTON_GIVE_FEEDBACK = Component.translatable("telemetry_info.button.give_feedback");
@@ -89,10 +88,10 @@ extends Screen {
     private void openFeedbackLink(Button button) {
         this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
             if (bl) {
-                Util.getPlatform().openUri(FEEDBACK_URL);
+                Util.getPlatform().openUri("https://aka.ms/javafeedback?ref=game");
             }
             this.minecraft.setScreen(this);
-        }, FEEDBACK_URL, true));
+        }, "https://aka.ms/javafeedback?ref=game", true));
     }
 
     private void openDataFolder(Button button) {

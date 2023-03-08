@@ -47,19 +47,12 @@ extends MoveToBlockGoal {
             --this.nextStartTick;
             return false;
         }
-        if (this.tryFindBlock()) {
+        if (this.findNearestBlock()) {
             this.nextStartTick = RemoveBlockGoal.reducedTickDelay(20);
             return true;
         }
         this.nextStartTick = this.nextStartTick(this.mob);
         return false;
-    }
-
-    private boolean tryFindBlock() {
-        if (this.blockPos != null && this.isValidTarget(this.mob.level, this.blockPos)) {
-            return true;
-        }
-        return this.findNearestBlock();
     }
 
     @Override

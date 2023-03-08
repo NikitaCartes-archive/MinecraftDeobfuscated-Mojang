@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -97,6 +96,7 @@ extends Entity {
     private final Quaternionf orientation = new Quaternionf();
     protected final InterpolatorSet interpolators = new InterpolatorSet();
     private long interpolationStartClientTick;
+    private float lastProgress;
     private AABB cullingBoundingBox;
 
     public Display(EntityType<?> entityType, Level level) {
@@ -104,7 +104,7 @@ extends Entity {
         this.noPhysics = true;
         this.noCulling = true;
         this.cullingBoundingBox = this.getBoundingBox();
-        this.interpolators.addEntry(Set.of(DATA_TRANSLATION_ID, DATA_LEFT_ROTATION_ID, DATA_SCALE_ID, DATA_RIGHT_ROTATION_ID), synchedEntityData -> this.transformation.updateValue(Display.createTransformation(synchedEntityData)));
+        this.interpolators.addEntry(Set.of(DATA_TRANSLATION_ID, DATA_LEFT_ROTATION_ID, DATA_SCALE_ID, DATA_RIGHT_ROTATION_ID), (f, synchedEntityData) -> this.transformation.updateValue(f, Display.createTransformation(synchedEntityData)));
         this.interpolators.addEntry(DATA_SHADOW_STRENGTH_ID, this.shadowStrength);
         this.interpolators.addEntry(DATA_SHADOW_RADIUS_ID, this.shadowRadius);
     }
@@ -117,7 +117,7 @@ extends Entity {
             bl |= this.interpolators.shouldTriggerUpdate(dataValue.id());
         }
         if (bl) {
-            this.interpolators.updateValues(this.entityData);
+            this.interpolators.updateValues(this.lastProgress, this.entityData);
         }
     }
 
@@ -352,13 +352,15 @@ extends Entity {
     }
 
     public float calculateInterpolationProgress(float f) {
+        float j;
         int i = this.getInterpolationDuration();
         if (i <= 0) {
             return 1.0f;
         }
         float g = (long)this.tickCount - this.interpolationStartClientTick;
         float h = g + f;
-        return Mth.clamp(Mth.inverseLerp(h, 0.0f, i), 0.0f, 1.0f);
+        this.lastProgress = j = Mth.clamp(Mth.inverseLerp(h, 0.0f, i), 0.0f, 1.0f);
+        return j;
     }
 
     private float getHeight() {
@@ -427,6 +429,12 @@ extends Entity {
             }
             return (T)this.interpolate(f, this.lastValue, this.currentValue);
         }
+
+        @Override
+        public void updateValue(float f, T object) {
+            this.lastValue = this.get(f);
+            this.currentValue = object;
+        }
     }
 
     static class FloatInterpolator
@@ -445,36 +453,47 @@ extends Entity {
             }
             return this.interpolate(f, ((Float)this.lastValue).floatValue(), ((Float)this.currentValue).floatValue());
         }
+
+        @Override
+        public void updateValue(float f, Float float_) {
+            this.lastValue = Float.valueOf(this.get(f));
+            this.currentValue = float_;
+        }
     }
 
     static class InterpolatorSet {
         private final IntSet interpolatedData = new IntOpenHashSet();
-        private final List<Consumer<SynchedEntityData>> updaters = new ArrayList<Consumer<SynchedEntityData>>();
+        private final List<IntepolatorUpdater> updaters = new ArrayList<IntepolatorUpdater>();
 
         InterpolatorSet() {
         }
 
         protected <T> void addEntry(EntityDataAccessor<T> entityDataAccessor, Interpolator<T> interpolator) {
             this.interpolatedData.add(entityDataAccessor.getId());
-            this.updaters.add(synchedEntityData -> interpolator.updateValue(synchedEntityData.get(entityDataAccessor)));
+            this.updaters.add((f, synchedEntityData) -> interpolator.updateValue(f, synchedEntityData.get(entityDataAccessor)));
         }
 
-        protected void addEntry(Set<EntityDataAccessor<?>> set, Consumer<SynchedEntityData> consumer) {
+        protected void addEntry(Set<EntityDataAccessor<?>> set, IntepolatorUpdater intepolatorUpdater) {
             for (EntityDataAccessor<?> entityDataAccessor : set) {
                 this.interpolatedData.add(entityDataAccessor.getId());
             }
-            this.updaters.add(consumer);
+            this.updaters.add(intepolatorUpdater);
         }
 
         public boolean shouldTriggerUpdate(int i) {
             return this.interpolatedData.contains(i);
         }
 
-        public void updateValues(SynchedEntityData synchedEntityData) {
-            for (Consumer<SynchedEntityData> consumer : this.updaters) {
-                consumer.accept(synchedEntityData);
+        public void updateValues(float f, SynchedEntityData synchedEntityData) {
+            for (IntepolatorUpdater intepolatorUpdater : this.updaters) {
+                intepolatorUpdater.update(f, synchedEntityData);
             }
         }
+    }
+
+    @FunctionalInterface
+    static interface IntepolatorUpdater {
+        public void update(float var1, SynchedEntityData var2);
     }
 
     static abstract class Interpolator<T> {
@@ -486,10 +505,7 @@ extends Entity {
             this.currentValue = object;
         }
 
-        public void updateValue(T object) {
-            this.lastValue = this.currentValue;
-            this.currentValue = object;
-        }
+        public abstract void updateValue(float var1, T var2);
     }
 
     public static enum BillboardConstraints implements StringRepresentable
@@ -552,6 +568,12 @@ extends Entity {
             }
             return this.interpolate(f, (Integer)this.lastValue, (Integer)this.currentValue);
         }
+
+        @Override
+        public void updateValue(float f, Integer integer) {
+            this.lastValue = this.get(f);
+            this.currentValue = integer;
+        }
     }
 
     public static class TextDisplay
@@ -584,7 +606,7 @@ extends Entity {
         public TextDisplay(EntityType<?> entityType, Level level) {
             super(entityType, level);
             this.interpolators.addEntry(DATA_BACKGROUND_COLOR_ID, this.backgroundColor);
-            this.interpolators.addEntry(Set.of(DATA_TEXT_OPACITY_ID), synchedEntityData -> this.textOpacity.updateValue(synchedEntityData.get(DATA_TEXT_OPACITY_ID) & 0xFF));
+            this.interpolators.addEntry(Set.of(DATA_TEXT_OPACITY_ID), (f, synchedEntityData) -> this.textOpacity.updateValue(f, synchedEntityData.get(DATA_TEXT_OPACITY_ID) & 0xFF));
         }
 
         @Override
@@ -835,7 +857,7 @@ extends Entity {
         protected void defineSynchedData() {
             super.defineSynchedData();
             this.entityData.define(DATA_ITEM_STACK_ID, ItemStack.EMPTY);
-            this.entityData.define(DATA_ITEM_DISPLAY_ID, ItemDisplayContext.FIXED.getId());
+            this.entityData.define(DATA_ITEM_DISPLAY_ID, ItemDisplayContext.NONE.getId());
         }
 
         public ItemStack getItemStack() {
