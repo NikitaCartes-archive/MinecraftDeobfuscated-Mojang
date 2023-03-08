@@ -40,17 +40,13 @@ public class RemoveBlockGoal extends MoveToBlockGoal {
 		} else if (this.nextStartTick > 0) {
 			this.nextStartTick--;
 			return false;
-		} else if (this.tryFindBlock()) {
+		} else if (this.findNearestBlock()) {
 			this.nextStartTick = reducedTickDelay(20);
 			return true;
 		} else {
 			this.nextStartTick = this.nextStartTick(this.mob);
 			return false;
 		}
-	}
-
-	private boolean tryFindBlock() {
-		return this.blockPos != null && this.isValidTarget(this.mob.level, this.blockPos) ? true : this.findNearestBlock();
 	}
 
 	@Override

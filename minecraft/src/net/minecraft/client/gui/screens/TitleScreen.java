@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens;
 
-import com.google.common.util.concurrent.Runnables;
 import com.mojang.authlib.minecraft.BanDetails;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -168,9 +167,7 @@ public class TitleScreen extends Screen {
 			)
 		);
 		this.addRenderableWidget(
-			new PlainTextButton(
-				j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new WinScreen(false, this.logoRenderer, Runnables.doNothing())), this.font
-			)
+			new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new CreditsAndAttributionScreen(this)), this.font)
 		);
 		this.minecraft.setConnectedToRealms(false);
 		if (this.realmsNotificationsScreen == null) {

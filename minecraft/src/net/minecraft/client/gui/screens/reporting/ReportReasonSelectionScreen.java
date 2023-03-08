@@ -19,7 +19,6 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class ReportReasonSelectionScreen extends Screen {
-	private static final String ADDITIONAL_INFO_LINK = "https://aka.ms/aboutjavareporting";
 	private static final Component REASON_TITLE = Component.translatable("gui.abuseReport.reason.title");
 	private static final Component REASON_DESCRIPTION = Component.translatable("gui.abuseReport.reason.description");
 	private static final Component READ_INFO_LABEL = Component.translatable("gui.chatReport.read_info");

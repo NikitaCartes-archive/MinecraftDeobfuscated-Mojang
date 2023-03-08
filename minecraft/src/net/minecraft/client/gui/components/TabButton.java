@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -77,6 +78,10 @@ public class TabButton extends AbstractWidget {
 	@Override
 	protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 		narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("gui.narrate.tab", this.tab.getTabTitle()));
+	}
+
+	@Override
+	public void playDownSound(SoundManager soundManager) {
 	}
 
 	public Tab tab() {

@@ -36,7 +36,7 @@ public class BlockColors {
 		blockColors.register(
 			(blockState, blockAndTintGetter, blockPos, i) -> blockAndTintGetter != null && blockPos != null
 					? BiomeColors.getAverageGrassColor(blockAndTintGetter, blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER ? blockPos.below() : blockPos)
-					: -1,
+					: GrassColor.getDefaultColor(),
 			Blocks.LARGE_FERN,
 			Blocks.TALL_GRASS
 		);
@@ -44,7 +44,7 @@ public class BlockColors {
 		blockColors.register(
 			(blockState, blockAndTintGetter, blockPos, i) -> blockAndTintGetter != null && blockPos != null
 					? BiomeColors.getAverageGrassColor(blockAndTintGetter, blockPos)
-					: GrassColor.get(0.5, 1.0),
+					: GrassColor.getDefaultColor(),
 			Blocks.GRASS_BLOCK,
 			Blocks.FERN,
 			Blocks.GRASS,
@@ -52,7 +52,7 @@ public class BlockColors {
 		);
 		blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
 			if (i != 0) {
-				return blockAndTintGetter != null && blockPos != null ? BiomeColors.getAverageGrassColor(blockAndTintGetter, blockPos) : GrassColor.get(0.5, 1.0);
+				return blockAndTintGetter != null && blockPos != null ? BiomeColors.getAverageGrassColor(blockAndTintGetter, blockPos) : GrassColor.getDefaultColor();
 			} else {
 				return -1;
 			}

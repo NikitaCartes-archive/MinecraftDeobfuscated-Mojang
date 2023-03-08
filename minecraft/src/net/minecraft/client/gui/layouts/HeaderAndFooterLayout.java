@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screens.Screen;
 @Environment(EnvType.CLIENT)
 public class HeaderAndFooterLayout implements Layout {
 	private static final int DEFAULT_HEADER_AND_FOOTER_HEIGHT = 36;
+	private static final int DEFAULT_CONTENT_MARGIN_TOP = 30;
 	private final FrameLayout headerFrame = new FrameLayout();
 	private final FrameLayout footerFrame = new FrameLayout();
 	private final FrameLayout contentsFrame = new FrameLayout();
@@ -29,7 +30,7 @@ public class HeaderAndFooterLayout implements Layout {
 		this.footerHeight = j;
 		this.headerFrame.defaultChildLayoutSetting().align(0.5F, 0.5F);
 		this.footerFrame.defaultChildLayoutSetting().align(0.5F, 0.5F);
-		this.contentsFrame.defaultChildLayoutSetting().align(0.5F, 0.5F);
+		this.contentsFrame.defaultChildLayoutSetting().align(0.5F, 0.0F).paddingTop(30);
 	}
 
 	@Override

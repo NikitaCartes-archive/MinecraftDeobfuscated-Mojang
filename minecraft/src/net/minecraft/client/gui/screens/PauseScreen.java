@@ -22,9 +22,6 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class PauseScreen extends Screen {
-	private static final String URL_FEEDBACK_SNAPSHOT = "https://aka.ms/snapshotfeedback?ref=game";
-	private static final String URL_FEEDBACK_RELEASE = "https://aka.ms/javafeedback?ref=game";
-	private static final String URL_BUGS = "https://aka.ms/snapshotbugs?ref=game";
 	private static final int COLUMNS = 2;
 	private static final int MENU_PADDING_TOP = 50;
 	private static final int BUTTON_PADDING = 4;

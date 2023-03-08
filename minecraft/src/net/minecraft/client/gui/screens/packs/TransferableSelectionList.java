@@ -230,32 +230,36 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 
 		@Override
 		public boolean mouseClicked(double d, double e, int i) {
-			double f = d - (double)this.parent.getRowLeft();
-			double g = e - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
-			if (this.showHoverOverlay() && f <= 32.0) {
-				this.parent.screen.clearSelected();
-				if (this.pack.canSelect()) {
-					this.handlePackSelection();
-					return true;
+			if (i != 0) {
+				return false;
+			} else {
+				double f = d - (double)this.parent.getRowLeft();
+				double g = e - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
+				if (this.showHoverOverlay() && f <= 32.0) {
+					this.parent.screen.clearSelected();
+					if (this.pack.canSelect()) {
+						this.handlePackSelection();
+						return true;
+					}
+
+					if (f < 16.0 && this.pack.canUnselect()) {
+						this.pack.unselect();
+						return true;
+					}
+
+					if (f > 16.0 && g < 16.0 && this.pack.canMoveUp()) {
+						this.pack.moveUp();
+						return true;
+					}
+
+					if (f > 16.0 && g > 16.0 && this.pack.canMoveDown()) {
+						this.pack.moveDown();
+						return true;
+					}
 				}
 
-				if (f < 16.0 && this.pack.canUnselect()) {
-					this.pack.unselect();
-					return true;
-				}
-
-				if (f > 16.0 && g < 16.0 && this.pack.canMoveUp()) {
-					this.pack.moveUp();
-					return true;
-				}
-
-				if (f > 16.0 && g > 16.0 && this.pack.canMoveDown()) {
-					this.pack.moveDown();
-					return true;
-				}
+				return false;
 			}
-
-			return false;
 		}
 	}
 }

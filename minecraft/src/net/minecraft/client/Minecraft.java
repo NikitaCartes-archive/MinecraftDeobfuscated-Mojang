@@ -2818,7 +2818,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		};
 
 		static final Component INFO_DISABLED_BY_PROFILE = Component.translatable("chat.disabled.profile.moreInfo");
-		private static final String URL_DISABLED_BY_PROFILE = "https://aka.ms/JavaAccountSettings";
 		private final Component message;
 
 		ChatStatus(Component component) {

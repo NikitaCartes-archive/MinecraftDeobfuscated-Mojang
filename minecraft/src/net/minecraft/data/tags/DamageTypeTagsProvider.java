@@ -35,6 +35,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.OUT_OF_WORLD,
 				DamageTypes.SONIC_BOOM
 			);
+		this.tag(DamageTypeTags.BYPASSES_SHIELD).addTag(DamageTypeTags.BYPASSES_ARMOR).add(DamageTypes.FALLING_ANVIL, DamageTypes.FALLING_STALACTITE);
 		this.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).add(DamageTypes.OUT_OF_WORLD);
 		this.tag(DamageTypeTags.BYPASSES_EFFECTS).add(DamageTypes.STARVE);
 		this.tag(DamageTypeTags.BYPASSES_RESISTANCE).add(DamageTypes.OUT_OF_WORLD);

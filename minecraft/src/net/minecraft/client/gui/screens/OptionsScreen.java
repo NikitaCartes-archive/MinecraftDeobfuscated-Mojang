@@ -35,6 +35,7 @@ public class OptionsScreen extends Screen {
 	private static final Component RESOURCEPACK = Component.translatable("options.resourcepack");
 	private static final Component ACCESSIBILITY = Component.translatable("options.accessibility.title");
 	private static final Component TELEMETRY = Component.translatable("options.telemetry");
+	private static final Component CREDITS_AND_ATTRIBUTION = Component.translatable("options.credits_and_attribution");
 	private static final int COLUMNS = 2;
 	private final Screen lastScreen;
 	private final Options options;
@@ -71,6 +72,7 @@ public class OptionsScreen extends Screen {
 		);
 		rowHelper.addChild(this.openScreenButton(ACCESSIBILITY, () -> new AccessibilityOptionsScreen(this, this.options)));
 		rowHelper.addChild(this.openScreenButton(TELEMETRY, () -> new TelemetryInfoScreen(this, this.options)));
+		rowHelper.addChild(this.openScreenButton(CREDITS_AND_ATTRIBUTION, () -> new CreditsAndAttributionScreen(this)));
 		rowHelper.addChild(
 			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).width(200).build(),
 			2,

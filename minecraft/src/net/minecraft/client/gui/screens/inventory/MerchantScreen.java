@@ -32,7 +32,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	private static final int NUMBER_OF_OFFER_BUTTONS = 7;
 	private static final int TRADE_BUTTON_X = 5;
 	private static final int TRADE_BUTTON_HEIGHT = 20;
-	private static final int TRADE_BUTTON_WIDTH = 89;
+	private static final int TRADE_BUTTON_WIDTH = 88;
 	private static final int SCROLLER_HEIGHT = 27;
 	private static final int SCROLLER_WIDTH = 6;
 	private static final int SCROLL_BAR_HEIGHT = 139;
@@ -293,7 +293,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		final int index;
 
 		public TradeOfferButton(int i, int j, int k, Button.OnPress onPress) {
-			super(i, j, 89, 20, CommonComponents.EMPTY, onPress, DEFAULT_NARRATION);
+			super(i, j, 88, 20, CommonComponents.EMPTY, onPress, DEFAULT_NARRATION);
 			this.index = k;
 			this.visible = false;
 		}

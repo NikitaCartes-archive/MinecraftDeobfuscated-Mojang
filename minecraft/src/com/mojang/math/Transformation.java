@@ -10,7 +10,6 @@ import net.minecraft.util.ExtraCodecs;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import org.joml.Matrix4x3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -38,13 +37,17 @@ public final class Transformation {
 	private Quaternionf rightRotation;
 	private static final Transformation IDENTITY = Util.make(() -> {
 		Transformation transformation = new Transformation(new Matrix4f());
-		transformation.getLeftRotation();
+		transformation.translation = new Vector3f();
+		transformation.leftRotation = new Quaternionf();
+		transformation.scale = new Vector3f(1.0F, 1.0F, 1.0F);
+		transformation.rightRotation = new Quaternionf();
+		transformation.decomposed = true;
 		return transformation;
 	});
 
 	public Transformation(@Nullable Matrix4f matrix4f) {
 		if (matrix4f == null) {
-			this.matrix = IDENTITY.matrix;
+			this.matrix = new Matrix4f();
 		} else {
 			this.matrix = matrix4f;
 		}
@@ -81,9 +84,9 @@ public final class Transformation {
 
 	private void ensureDecomposed() {
 		if (!this.decomposed) {
-			Matrix4x3f matrix4x3f = MatrixUtil.toAffine(this.matrix);
-			Triple<Quaternionf, Vector3f, Quaternionf> triple = MatrixUtil.svdDecompose(new Matrix3f().set(matrix4x3f));
-			this.translation = matrix4x3f.getTranslation(new Vector3f());
+			float f = 1.0F / this.matrix.m33();
+			Triple<Quaternionf, Vector3f, Quaternionf> triple = MatrixUtil.svdDecompose(new Matrix3f(this.matrix).scale(f));
+			this.translation = this.matrix.getTranslation(new Vector3f()).mul(f);
 			this.leftRotation = new Quaternionf(triple.getLeft());
 			this.scale = new Vector3f(triple.getMiddle());
 			this.rightRotation = new Quaternionf(triple.getRight());

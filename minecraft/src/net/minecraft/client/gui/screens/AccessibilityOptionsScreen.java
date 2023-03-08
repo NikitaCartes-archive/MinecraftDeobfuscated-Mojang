@@ -13,8 +13,6 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
-	private static final String GUIDE_LINK = "https://aka.ms/MinecraftJavaAccessibility";
-
 	private static OptionInstance<?>[] options(Options options) {
 		return new OptionInstance[]{
 			options.narrator(),

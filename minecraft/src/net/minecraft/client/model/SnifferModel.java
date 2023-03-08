@@ -33,10 +33,10 @@ public class SnifferModel<T extends Sniffer> extends AgeableHierarchicalModel<T>
 		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(
 			"body",
 			CubeListBuilder.create()
-				.texOffs(62, 0)
-				.addBox(-12.5F, -14.0F, -20.0F, 25.0F, 24.0F, 40.0F, new CubeDeformation(0.5F))
 				.texOffs(62, 68)
 				.addBox(-12.5F, -14.0F, -20.0F, 25.0F, 29.0F, 40.0F, new CubeDeformation(0.0F))
+				.texOffs(62, 0)
+				.addBox(-12.5F, -14.0F, -20.0F, 25.0F, 24.0F, 40.0F, new CubeDeformation(0.5F))
 				.texOffs(87, 68)
 				.addBox(-12.5F, 12.0F, -20.0F, 25.0F, 0.0F, 40.0F, new CubeDeformation(0.0F)),
 			PartPose.offset(0.0F, 0.0F, 0.0F)

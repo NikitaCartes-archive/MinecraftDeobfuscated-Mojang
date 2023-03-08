@@ -23,6 +23,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -293,10 +294,15 @@ public class ShulkerBullet extends Projectile {
 		this.playSound(SoundEvents.SHULKER_BULLET_HIT, 1.0F, 1.0F);
 	}
 
+	private void destroy() {
+		this.discard();
+		this.level.gameEvent(GameEvent.ENTITY_DAMAGE, this.position(), GameEvent.Context.of(this));
+	}
+
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		this.discard();
+		this.destroy();
 	}
 
 	@Override
@@ -309,7 +315,7 @@ public class ShulkerBullet extends Projectile {
 		if (!this.level.isClientSide) {
 			this.playSound(SoundEvents.SHULKER_BULLET_HURT, 1.0F, 1.0F);
 			((ServerLevel)this.level).sendParticles(ParticleTypes.CRIT, this.getX(), this.getY(), this.getZ(), 15, 0.2, 0.2, 0.2, 0.0);
-			this.discard();
+			this.destroy();
 		}
 
 		return true;

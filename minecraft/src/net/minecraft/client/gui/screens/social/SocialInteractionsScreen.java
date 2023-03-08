@@ -41,7 +41,6 @@ public class SocialInteractionsScreen extends Screen {
 	private static final Component EMPTY_HIDDEN = Component.translatable("gui.socialInteractions.empty_hidden").withStyle(ChatFormatting.GRAY);
 	private static final Component EMPTY_BLOCKED = Component.translatable("gui.socialInteractions.empty_blocked").withStyle(ChatFormatting.GRAY);
 	private static final Component BLOCKING_HINT = Component.translatable("gui.socialInteractions.blocking_hint");
-	private static final String BLOCK_LINK = "https://aka.ms/javablocking";
 	private static final int BG_BORDER_SIZE = 8;
 	private static final int BG_WIDTH = 236;
 	private static final int SEARCH_HEIGHT = 16;

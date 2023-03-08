@@ -346,9 +346,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
-		if (!this.isVisible()) {
-			return false;
-		} else {
+		if (this.isVisible() && i == 0) {
 			boolean bl = d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);
 			if (this.canLoseFocus) {
 				this.setFocused(bl);
@@ -366,6 +364,8 @@ public class EditBox extends AbstractWidget implements Renderable {
 			} else {
 				return false;
 			}
+		} else {
+			return false;
 		}
 	}
 

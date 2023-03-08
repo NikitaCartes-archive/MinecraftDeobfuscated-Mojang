@@ -7,6 +7,7 @@ import net.minecraft.world.damagesource.DamageType;
 public interface DamageTypeTags {
 	TagKey<DamageType> DAMAGES_HELMET = create("damages_helmet");
 	TagKey<DamageType> BYPASSES_ARMOR = create("bypasses_armor");
+	TagKey<DamageType> BYPASSES_SHIELD = create("bypasses_shield");
 	TagKey<DamageType> BYPASSES_INVULNERABILITY = create("bypasses_invulnerability");
 	TagKey<DamageType> BYPASSES_COOLDOWN = create("bypasses_cooldown");
 	TagKey<DamageType> BYPASSES_EFFECTS = create("bypasses_effects");

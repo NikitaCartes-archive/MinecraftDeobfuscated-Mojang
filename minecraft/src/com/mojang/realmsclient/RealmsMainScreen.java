@@ -67,6 +67,7 @@ import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.CommonLinks;
 import net.minecraft.util.Mth;
 import org.slf4j.Logger;
 
@@ -563,12 +564,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
 	private void onRenew(@Nullable RealmsServer realmsServer) {
 		if (realmsServer != null) {
-			String string = "https://aka.ms/ExtendJavaRealms?subscriptionId="
-				+ realmsServer.remoteSubscriptionId
-				+ "&profileId="
-				+ this.minecraft.getUser().getUuid()
-				+ "&ref="
-				+ (realmsServer.expiredTrial ? "expiredTrial" : "expiredRealm");
+			String string = CommonLinks.extendRealms(realmsServer.remoteSubscriptionId, this.minecraft.getUser().getUuid(), realmsServer.expiredTrial);
 			this.minecraft.keyboardHandler.setClipboard(string);
 			Util.getPlatform().openUri(string);
 		}

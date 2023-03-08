@@ -1323,13 +1323,15 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 			LOGGER.warn("{} sent out-of-order chat: '{}'", this.player.getName().getString(), string);
 			this.disconnect(Component.translatable("multiplayer.disconnect.out_of_order_chat"));
 			return Optional.empty();
-		} else if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
-			this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), false));
-			return Optional.empty();
 		} else {
 			Optional<LastSeenMessages> optional = this.unpackAndApplyLastSeen(update);
-			this.player.resetLastActionTime();
-			return optional;
+			if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
+				this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), false));
+				return Optional.empty();
+			} else {
+				this.player.resetLastActionTime();
+				return optional;
+			}
 		}
 	}
 
