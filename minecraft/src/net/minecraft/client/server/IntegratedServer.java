@@ -91,6 +91,10 @@ public class IntegratedServer extends MinecraftServer {
 		if (bl2 && this.paused) {
 			this.tickPaused();
 		} else {
+			if (bl && !this.paused) {
+				this.forceTimeSynchronization();
+			}
+
 			super.tickServer(booleanSupplier);
 			int i = Math.max(2, this.minecraft.options.renderDistance().get());
 			if (i != this.getPlayerList().getViewDistance()) {

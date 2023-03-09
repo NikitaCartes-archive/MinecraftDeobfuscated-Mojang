@@ -45,9 +45,9 @@ import org.slf4j.Logger;
 
 public abstract class Display extends Entity {
 	static final Logger LOGGER = LogUtils.getLogger();
-	private static final long NO_LAST_UPDATE = -1000L;
+	private static final float INITIAL_UPDATE_PROGRESS = Float.POSITIVE_INFINITY;
 	public static final int NO_BRIGHTNESS_OVERRIDE = -1;
-	private static final EntityDataAccessor<Long> DATA_INTERPOLATION_START_TICKS_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.LONG);
+	private static final EntityDataAccessor<Integer> DATA_INTERPOLATION_START_DELTA_TICKS_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_INTERPOLATION_DURATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Vector3f> DATA_TRANSLATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.VECTOR3);
 	private static final EntityDataAccessor<Vector3f> DATA_SCALE_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.VECTOR3);
@@ -65,7 +65,7 @@ public abstract class Display extends Entity {
 	private static final float INITIAL_SHADOW_STRENGTH = 1.0F;
 	private static final int NO_GLOW_COLOR_OVERRIDE = -1;
 	public static final String TAG_INTERPOLATION_DURATION = "interpolation_duration";
-	public static final String TAG_INTERPOLATION_START = "interpolation_start";
+	public static final String TAG_START_INTERPOLATION = "start_interpolation";
 	public static final String TAG_TRANSFORMATION = "transformation";
 	public static final String TAG_BILLBOARD = "billboard";
 	public static final String TAG_BRIGHTNESS = "brightness";
@@ -87,6 +87,8 @@ public abstract class Display extends Entity {
 	private long interpolationStartClientTick;
 	private float lastProgress;
 	private AABB cullingBoundingBox;
+	private boolean updateInterpolators;
+	private boolean updateTime;
 
 	public Display(EntityType<?> entityType, Level level) {
 		super(entityType, level);
@@ -112,7 +114,12 @@ public abstract class Display extends Entity {
 		}
 
 		if (bl) {
-			this.interpolators.updateValues(this.lastProgress, this.entityData);
+			boolean bl2 = this.tickCount <= 0;
+			if (bl2) {
+				this.interpolators.updateValues(Float.POSITIVE_INFINITY, this.entityData);
+			} else {
+				this.updateInterpolators = true;
+			}
 		}
 	}
 
@@ -123,9 +130,8 @@ public abstract class Display extends Entity {
 			this.updateCulling();
 		}
 
-		if (DATA_INTERPOLATION_START_TICKS_ID.equals(entityDataAccessor)) {
-			long l = this.entityData.get(DATA_INTERPOLATION_START_TICKS_ID) - this.level.getGameTime();
-			this.interpolationStartClientTick = (long)this.tickCount + l;
+		if (DATA_INTERPOLATION_START_DELTA_TICKS_ID.equals(entityDataAccessor)) {
+			this.updateTime = true;
 		}
 	}
 
@@ -143,11 +149,24 @@ public abstract class Display extends Entity {
 		if (entity != null && entity.isRemoved()) {
 			this.stopRiding();
 		}
+
+		if (this.level.isClientSide) {
+			if (this.updateTime) {
+				this.updateTime = false;
+				int i = this.getInterpolationDelay();
+				this.interpolationStartClientTick = (long)(this.tickCount + i);
+			}
+
+			if (this.updateInterpolators) {
+				this.updateInterpolators = false;
+				this.interpolators.updateValues(this.lastProgress, this.entityData);
+			}
+		}
 	}
 
 	@Override
 	protected void defineSynchedData() {
-		this.entityData.define(DATA_INTERPOLATION_START_TICKS_ID, -1000L);
+		this.entityData.define(DATA_INTERPOLATION_START_DELTA_TICKS_ID, 0);
 		this.entityData.define(DATA_INTERPOLATION_DURATION_ID, 0);
 		this.entityData.define(DATA_TRANSLATION_ID, new Vector3f());
 		this.entityData.define(DATA_SCALE_ID, new Vector3f(1.0F, 1.0F, 1.0F));
@@ -177,14 +196,9 @@ public abstract class Display extends Entity {
 			this.setInterpolationDuration(i);
 		}
 
-		if (compoundTag.contains("interpolation_start", 99)) {
-			long l = compoundTag.getLong("interpolation_start");
-			if (l < 0L) {
-				long m = -l - 1L;
-				this.setInterpolationStartTick(this.level.getGameTime() + m);
-			} else {
-				this.setInterpolationStartTick(l);
-			}
+		if (compoundTag.contains("start_interpolation", 99)) {
+			int i = compoundTag.getInt("start_interpolation");
+			this.setInterpolationDelay(i);
 		}
 
 		if (compoundTag.contains("billboard", 8)) {
@@ -248,7 +262,6 @@ public abstract class Display extends Entity {
 		compoundTag.putFloat("shadow_strength", this.getShadowStrength());
 		compoundTag.putFloat("width", this.getWidth());
 		compoundTag.putFloat("height", this.getHeight());
-		compoundTag.putLong("interpolation_start", this.getInterpolationStartTick());
 		compoundTag.putInt("glow_color_override", this.getGlowColorOverride());
 		Brightness brightness = this.getBrightnessOverride();
 		if (brightness != null) {
@@ -287,12 +300,12 @@ public abstract class Display extends Entity {
 		return this.entityData.get(DATA_INTERPOLATION_DURATION_ID);
 	}
 
-	private void setInterpolationStartTick(long l) {
-		this.entityData.set(DATA_INTERPOLATION_START_TICKS_ID, l);
+	private void setInterpolationDelay(int i) {
+		this.entityData.set(DATA_INTERPOLATION_START_DELTA_TICKS_ID, i, true);
 	}
 
-	private long getInterpolationStartTick() {
-		return this.entityData.get(DATA_INTERPOLATION_START_TICKS_ID);
+	private int getInterpolationDelay() {
+		return this.entityData.get(DATA_INTERPOLATION_START_DELTA_TICKS_ID);
 	}
 
 	private void setBillboardConstraints(Display.BillboardConstraints billboardConstraints) {
@@ -523,9 +536,8 @@ public abstract class Display extends Entity {
 			return !((double)f >= 1.0) && this.lastValue != null ? this.interpolate(f, this.lastValue, this.currentValue) : this.currentValue;
 		}
 
-		public void updateValue(float f, Float float_) {
-			this.lastValue = this.get(f);
-			this.currentValue = float_;
+		protected Float getGeneric(float f) {
+			return this.get(f);
 		}
 	}
 
@@ -541,9 +553,8 @@ public abstract class Display extends Entity {
 		}
 
 		@Override
-		public void updateValue(float f, T object) {
-			this.lastValue = this.get(f);
-			this.currentValue = object;
+		protected T getGeneric(float f) {
+			return this.get(f);
 		}
 	}
 
@@ -560,9 +571,8 @@ public abstract class Display extends Entity {
 			return !((double)f >= 1.0) && this.lastValue != null ? this.interpolate(f, this.lastValue, this.currentValue) : this.currentValue;
 		}
 
-		public void updateValue(float f, Integer integer) {
-			this.lastValue = this.get(f);
-			this.currentValue = integer;
+		protected Integer getGeneric(float f) {
+			return this.get(f);
 		}
 	}
 
@@ -580,7 +590,15 @@ public abstract class Display extends Entity {
 			this.currentValue = object;
 		}
 
-		public abstract void updateValue(float f, T object);
+		protected abstract T getGeneric(float f);
+
+		public void updateValue(float f, T object) {
+			if (f != Float.POSITIVE_INFINITY) {
+				this.lastValue = this.getGeneric(f);
+			}
+
+			this.currentValue = object;
+		}
 	}
 
 	static class InterpolatorSet {
@@ -713,7 +731,10 @@ public abstract class Display extends Entity {
 			super(entityType, level);
 			this.interpolators.addEntry(DATA_BACKGROUND_COLOR_ID, this.backgroundColor);
 			this.interpolators
-				.addEntry(Set.of(DATA_TEXT_OPACITY_ID), (f, synchedEntityData) -> this.textOpacity.updateValue(f, synchedEntityData.get(DATA_TEXT_OPACITY_ID) & 255));
+				.addEntry(
+					Set.of(DATA_TEXT_OPACITY_ID),
+					(f, synchedEntityData) -> this.textOpacity.updateValue(f, Integer.valueOf(synchedEntityData.get(DATA_TEXT_OPACITY_ID) & 255))
+				);
 		}
 
 		@Override
