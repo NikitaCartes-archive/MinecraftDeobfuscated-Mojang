@@ -54,9 +54,9 @@ import org.slf4j.Logger;
 public abstract class Display
 extends Entity {
     static final Logger LOGGER = LogUtils.getLogger();
-    private static final long NO_LAST_UPDATE = -1000L;
+    private static final float INITIAL_UPDATE_PROGRESS = Float.POSITIVE_INFINITY;
     public static final int NO_BRIGHTNESS_OVERRIDE = -1;
-    private static final EntityDataAccessor<Long> DATA_INTERPOLATION_START_TICKS_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Integer> DATA_INTERPOLATION_START_DELTA_TICKS_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_INTERPOLATION_DURATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Vector3f> DATA_TRANSLATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.VECTOR3);
     private static final EntityDataAccessor<Vector3f> DATA_SCALE_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.VECTOR3);
@@ -74,7 +74,7 @@ extends Entity {
     private static final float INITIAL_SHADOW_STRENGTH = 1.0f;
     private static final int NO_GLOW_COLOR_OVERRIDE = -1;
     public static final String TAG_INTERPOLATION_DURATION = "interpolation_duration";
-    public static final String TAG_INTERPOLATION_START = "interpolation_start";
+    public static final String TAG_START_INTERPOLATION = "start_interpolation";
     public static final String TAG_TRANSFORMATION = "transformation";
     public static final String TAG_BILLBOARD = "billboard";
     public static final String TAG_BRIGHTNESS = "brightness";
@@ -98,6 +98,8 @@ extends Entity {
     private long interpolationStartClientTick;
     private float lastProgress;
     private AABB cullingBoundingBox;
+    private boolean updateInterpolators;
+    private boolean updateTime;
 
     public Display(EntityType<?> entityType, Level level) {
         super(entityType, level);
@@ -117,7 +119,13 @@ extends Entity {
             bl |= this.interpolators.shouldTriggerUpdate(dataValue.id());
         }
         if (bl) {
-            this.interpolators.updateValues(this.lastProgress, this.entityData);
+            boolean bl2;
+            boolean bl3 = bl2 = this.tickCount <= 0;
+            if (bl2) {
+                this.interpolators.updateValues(Float.POSITIVE_INFINITY, this.entityData);
+            } else {
+                this.updateInterpolators = true;
+            }
         }
     }
 
@@ -127,9 +135,8 @@ extends Entity {
         if (DATA_HEIGHT_ID.equals(entityDataAccessor) || DATA_WIDTH_ID.equals(entityDataAccessor)) {
             this.updateCulling();
         }
-        if (DATA_INTERPOLATION_START_TICKS_ID.equals(entityDataAccessor)) {
-            long l = this.entityData.get(DATA_INTERPOLATION_START_TICKS_ID) - this.level.getGameTime();
-            this.interpolationStartClientTick = (long)this.tickCount + l;
+        if (DATA_INTERPOLATION_START_DELTA_TICKS_ID.equals(entityDataAccessor)) {
+            this.updateTime = true;
         }
     }
 
@@ -147,11 +154,22 @@ extends Entity {
         if (entity != null && entity.isRemoved()) {
             this.stopRiding();
         }
+        if (this.level.isClientSide) {
+            if (this.updateTime) {
+                this.updateTime = false;
+                int i = this.getInterpolationDelay();
+                this.interpolationStartClientTick = this.tickCount + i;
+            }
+            if (this.updateInterpolators) {
+                this.updateInterpolators = false;
+                this.interpolators.updateValues(this.lastProgress, this.entityData);
+            }
+        }
     }
 
     @Override
     protected void defineSynchedData() {
-        this.entityData.define(DATA_INTERPOLATION_START_TICKS_ID, -1000L);
+        this.entityData.define(DATA_INTERPOLATION_START_DELTA_TICKS_ID, 0);
         this.entityData.define(DATA_INTERPOLATION_DURATION_ID, 0);
         this.entityData.define(DATA_TRANSLATION_ID, new Vector3f());
         this.entityData.define(DATA_SCALE_ID, new Vector3f(1.0f, 1.0f, 1.0f));
@@ -169,21 +187,17 @@ extends Entity {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compoundTag) {
+        int i;
         if (compoundTag.contains(TAG_TRANSFORMATION)) {
             Transformation.EXTENDED_CODEC.decode(NbtOps.INSTANCE, compoundTag.get(TAG_TRANSFORMATION)).resultOrPartial(Util.prefix("Display entity", LOGGER::error)).ifPresent(pair -> this.setTransformation((Transformation)pair.getFirst()));
         }
         if (compoundTag.contains(TAG_INTERPOLATION_DURATION, 99)) {
-            int i = compoundTag.getInt(TAG_INTERPOLATION_DURATION);
+            i = compoundTag.getInt(TAG_INTERPOLATION_DURATION);
             this.setInterpolationDuration(i);
         }
-        if (compoundTag.contains(TAG_INTERPOLATION_START, 99)) {
-            long l = compoundTag.getLong(TAG_INTERPOLATION_START);
-            if (l < 0L) {
-                long m = -l - 1L;
-                this.setInterpolationStartTick(this.level.getGameTime() + m);
-            } else {
-                this.setInterpolationStartTick(l);
-            }
+        if (compoundTag.contains(TAG_START_INTERPOLATION, 99)) {
+            i = compoundTag.getInt(TAG_START_INTERPOLATION);
+            this.setInterpolationDelay(i);
         }
         if (compoundTag.contains(TAG_BILLBOARD, 8)) {
             BillboardConstraints.CODEC.decode(NbtOps.INSTANCE, compoundTag.get(TAG_BILLBOARD)).resultOrPartial(Util.prefix("Display entity", LOGGER::error)).ifPresent(pair -> this.setBillboardConstraints((BillboardConstraints)pair.getFirst()));
@@ -230,7 +244,6 @@ extends Entity {
         compoundTag.putFloat(TAG_SHADOW_STRENGTH, this.getShadowStrength());
         compoundTag.putFloat(TAG_WIDTH, this.getWidth());
         compoundTag.putFloat(TAG_HEIGHT, this.getHeight());
-        compoundTag.putLong(TAG_INTERPOLATION_START, this.getInterpolationStartTick());
         compoundTag.putInt(TAG_GLOW_COLOR_OVERRIDE, this.getGlowColorOverride());
         Brightness brightness = this.getBrightnessOverride();
         if (brightness != null) {
@@ -269,12 +282,12 @@ extends Entity {
         return this.entityData.get(DATA_INTERPOLATION_DURATION_ID);
     }
 
-    private void setInterpolationStartTick(long l) {
-        this.entityData.set(DATA_INTERPOLATION_START_TICKS_ID, l);
+    private void setInterpolationDelay(int i) {
+        this.entityData.set(DATA_INTERPOLATION_START_DELTA_TICKS_ID, i, true);
     }
 
-    private long getInterpolationStartTick() {
-        return this.entityData.get(DATA_INTERPOLATION_START_TICKS_ID);
+    private int getInterpolationDelay() {
+        return this.entityData.get(DATA_INTERPOLATION_START_DELTA_TICKS_ID);
     }
 
     private void setBillboardConstraints(BillboardConstraints billboardConstraints) {
@@ -431,9 +444,8 @@ extends Entity {
         }
 
         @Override
-        public void updateValue(float f, T object) {
-            this.lastValue = this.get(f);
-            this.currentValue = object;
+        protected T getGeneric(float f) {
+            return this.get(f);
         }
     }
 
@@ -455,9 +467,13 @@ extends Entity {
         }
 
         @Override
-        public void updateValue(float f, Float float_) {
-            this.lastValue = Float.valueOf(this.get(f));
-            this.currentValue = float_;
+        protected Float getGeneric(float f) {
+            return Float.valueOf(this.get(f));
+        }
+
+        @Override
+        protected /* synthetic */ Object getGeneric(float f) {
+            return this.getGeneric(f);
         }
     }
 
@@ -505,7 +521,14 @@ extends Entity {
             this.currentValue = object;
         }
 
-        public abstract void updateValue(float var1, T var2);
+        protected abstract T getGeneric(float var1);
+
+        public void updateValue(float f, T object) {
+            if (f != Float.POSITIVE_INFINITY) {
+                this.lastValue = this.getGeneric(f);
+            }
+            this.currentValue = object;
+        }
     }
 
     public static enum BillboardConstraints implements StringRepresentable
@@ -570,9 +593,13 @@ extends Entity {
         }
 
         @Override
-        public void updateValue(float f, Integer integer) {
-            this.lastValue = this.get(f);
-            this.currentValue = integer;
+        protected Integer getGeneric(float f) {
+            return this.get(f);
+        }
+
+        @Override
+        protected /* synthetic */ Object getGeneric(float f) {
+            return this.getGeneric(f);
         }
     }
 

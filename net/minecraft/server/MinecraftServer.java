@@ -804,7 +804,7 @@ AutoCloseable {
             this.profiler.push(() -> serverLevel + " " + serverLevel.dimension().location());
             if (this.tickCount % 20 == 0) {
                 this.profiler.push("timeSync");
-                this.playerList.broadcastAll(new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)), serverLevel.dimension());
+                this.synchronizeTime(serverLevel);
                 this.profiler.pop();
             }
             this.profiler.push("tick");
@@ -828,6 +828,18 @@ AutoCloseable {
         this.profiler.popPush("server gui refresh");
         for (int i = 0; i < this.tickables.size(); ++i) {
             this.tickables.get(i).run();
+        }
+        this.profiler.pop();
+    }
+
+    private void synchronizeTime(ServerLevel serverLevel) {
+        this.playerList.broadcastAll(new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)), serverLevel.dimension());
+    }
+
+    public void forceTimeSynchronization() {
+        this.profiler.push("timeSync");
+        for (ServerLevel serverLevel : this.getAllLevels()) {
+            this.synchronizeTime(serverLevel);
         }
         this.profiler.pop();
     }

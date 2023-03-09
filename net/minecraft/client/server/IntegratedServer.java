@@ -93,6 +93,9 @@ extends MinecraftServer {
             this.tickPaused();
             return;
         }
+        if (bl && !this.paused) {
+            this.forceTimeSynchronization();
+        }
         super.tickServer(booleanSupplier);
         int i = Math.max(2, this.minecraft.options.renderDistance().get());
         if (i != this.getPlayerList().getViewDistance()) {

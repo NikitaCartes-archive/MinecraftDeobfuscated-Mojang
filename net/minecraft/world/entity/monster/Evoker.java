@@ -156,6 +156,7 @@ extends SpellcasterIllager {
     class EvokerCastingSpellGoal
     extends SpellcasterIllager.SpellcasterCastingSpellGoal {
         EvokerCastingSpellGoal() {
+            super(Evoker.this);
         }
 
         @Override
@@ -170,9 +171,11 @@ extends SpellcasterIllager {
 
     class EvokerSummonSpellGoal
     extends SpellcasterIllager.SpellcasterUseSpellGoal {
-        private final TargetingConditions vexCountTargeting = TargetingConditions.forNonCombat().range(16.0).ignoreLineOfSight().ignoreInvisibilityTesting();
+        private final TargetingConditions vexCountTargeting;
 
         EvokerSummonSpellGoal() {
+            super(Evoker.this);
+            this.vexCountTargeting = TargetingConditions.forNonCombat().range(16.0).ignoreLineOfSight().ignoreInvisibilityTesting();
         }
 
         @Override
@@ -224,6 +227,7 @@ extends SpellcasterIllager {
     class EvokerAttackSpellGoal
     extends SpellcasterIllager.SpellcasterUseSpellGoal {
         EvokerAttackSpellGoal() {
+            super(Evoker.this);
         }
 
         @Override
@@ -296,7 +300,12 @@ extends SpellcasterIllager {
 
     public class EvokerWololoSpellGoal
     extends SpellcasterIllager.SpellcasterUseSpellGoal {
-        private final TargetingConditions wololoTargeting = TargetingConditions.forNonCombat().range(16.0).selector(livingEntity -> ((Sheep)livingEntity).getColor() == DyeColor.BLUE);
+        private final TargetingConditions wololoTargeting;
+
+        public EvokerWololoSpellGoal() {
+            super(Evoker.this);
+            this.wololoTargeting = TargetingConditions.forNonCombat().range(16.0).selector(livingEntity -> ((Sheep)livingEntity).getColor() == DyeColor.BLUE);
+        }
 
         @Override
         public boolean canUse() {
