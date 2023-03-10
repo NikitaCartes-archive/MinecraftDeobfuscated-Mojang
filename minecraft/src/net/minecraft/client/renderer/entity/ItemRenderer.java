@@ -301,7 +301,11 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			Lighting.setupForFlatItems();
 		}
 
-		this.render(itemStack, ItemDisplayContext.GUI, false, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+		PoseStack poseStack2 = RenderSystem.getModelViewStack();
+		poseStack2.pushPose();
+		poseStack2.mulPoseMatrix(poseStack.last().pose());
+		RenderSystem.applyModelViewMatrix();
+		this.render(itemStack, ItemDisplayContext.GUI, false, new PoseStack(), bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
 		bufferSource.endBatch();
 		RenderSystem.enableDepthTest();
 		if (bl) {
@@ -309,6 +313,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		}
 
 		poseStack.popPose();
+		poseStack2.popPose();
+		RenderSystem.applyModelViewMatrix();
 	}
 
 	public void renderAndDecorateItem(PoseStack poseStack, ItemStack itemStack, int i, int j) {

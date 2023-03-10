@@ -334,7 +334,7 @@ public class Guardian extends Monster {
 		} else {
 			if (!damageSource.is(DamageTypeTags.AVOIDS_GUARDIAN_THORNS)
 				&& !damageSource.is(DamageTypes.THORNS)
-				&& damageSource.getEntity() instanceof LivingEntity livingEntity) {
+				&& damageSource.getDirectEntity() instanceof LivingEntity livingEntity) {
 				livingEntity.hurt(this.damageSources().thorns(this), 2.0F);
 			}
 
