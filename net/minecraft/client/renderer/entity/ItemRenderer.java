@@ -230,13 +230,19 @@ implements ResourceManagerReloadListener {
         if (bl) {
             Lighting.setupForFlatItems();
         }
-        this.render(itemStack, ItemDisplayContext.GUI, false, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
+        PoseStack poseStack2 = RenderSystem.getModelViewStack();
+        poseStack2.pushPose();
+        poseStack2.mulPoseMatrix(poseStack.last().pose());
+        RenderSystem.applyModelViewMatrix();
+        this.render(itemStack, ItemDisplayContext.GUI, false, new PoseStack(), bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
         bufferSource.endBatch();
         RenderSystem.enableDepthTest();
         if (bl) {
             Lighting.setupFor3DItems();
         }
         poseStack.popPose();
+        poseStack2.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 
     public void renderAndDecorateItem(PoseStack poseStack, ItemStack itemStack, int i, int j) {
