@@ -528,12 +528,15 @@ extends Screen {
                 cycleButton3.setValue(CreateWorldScreen.this.uiState.isAllowCheats());
                 cycleButton.active = !CreateWorldScreen.this.uiState.isDebug() && !CreateWorldScreen.this.uiState.isHardcore();
             });
-            rowHelper.addChild(Button.builder(EXPERIMENTS_LABEL, button -> CreateWorldScreen.this.openExperimentsScreen(CreateWorldScreen.this.uiState.getSettings().dataConfiguration())).width(210).build());
         }
 
         @Override
         public void tick() {
             this.nameEdit.tick();
+        }
+
+        private /* synthetic */ void method_49012(Button button) {
+            CreateWorldScreen.this.openExperimentsScreen(CreateWorldScreen.this.uiState.getSettings().dataConfiguration());
         }
     }
 

@@ -19,6 +19,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -43,6 +44,7 @@ extends RealmsScreen {
     private static final Component DAY_SUFFIX = Component.translatable("mco.configure.world.subscription.day");
     private static final Component DAYS_SUFFIX = Component.translatable("mco.configure.world.subscription.days");
     private static final Component UNKNOWN = Component.translatable("mco.configure.world.subscription.unknown");
+    private static final Component RECURRING_INFO = Component.translatable("mco.configure.world.subscription.recurring.info");
     private final Screen lastScreen;
     final RealmsServer serverData;
     final Screen mainScreen;
@@ -73,6 +75,8 @@ extends RealmsScreen {
                 MutableComponent component2 = Component.translatable("mco.configure.world.delete.question.line2");
                 this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.Warning, component, component2, true));
             }).bounds(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(10), 200, 20).build());
+        } else {
+            this.addRenderableWidget(new MultiLineTextWidget(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(8), RECURRING_INFO, this.font).setColor(0xA0A0A0).setMaxWidth(200));
         }
     }
 
