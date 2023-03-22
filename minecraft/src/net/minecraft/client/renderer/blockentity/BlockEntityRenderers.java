@@ -51,7 +51,7 @@ public class BlockEntityRenderers {
 		register(BlockEntityType.CONDUIT, ConduitRenderer::new);
 		register(BlockEntityType.BELL, BellRenderer::new);
 		register(BlockEntityType.CAMPFIRE, CampfireRenderer::new);
-		register(BlockEntityType.SUSPICIOUS_SAND, SuspiciousSandRenderer::new);
+		register(BlockEntityType.BRUSHABLE_BLOCK, BrushableBlockRenderer::new);
 		register(BlockEntityType.DECORATED_POT, DecoratedPotRenderer::new);
 	}
 }

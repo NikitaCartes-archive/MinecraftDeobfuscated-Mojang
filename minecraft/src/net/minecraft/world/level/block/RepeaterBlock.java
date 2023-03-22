@@ -73,8 +73,8 @@ public class RepeaterBlock extends DiodeBlock {
 	}
 
 	@Override
-	protected boolean isAlternateInput(BlockState blockState) {
-		return isDiode(blockState);
+	protected boolean sideInputDiodesOnly() {
+		return true;
 	}
 
 	@Override

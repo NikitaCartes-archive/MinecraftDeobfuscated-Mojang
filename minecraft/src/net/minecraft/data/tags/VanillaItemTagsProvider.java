@@ -31,6 +31,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.copy(BlockTags.WOODEN_PRESSURE_PLATES, ItemTags.WOODEN_PRESSURE_PLATES);
 		this.copy(BlockTags.DOORS, ItemTags.DOORS);
 		this.copy(BlockTags.SAPLINGS, ItemTags.SAPLINGS);
+		this.copy(BlockTags.BAMBOO_BLOCKS, ItemTags.BAMBOO_BLOCKS);
 		this.copy(BlockTags.OAK_LOGS, ItemTags.OAK_LOGS);
 		this.copy(BlockTags.DARK_OAK_LOGS, ItemTags.DARK_OAK_LOGS);
 		this.copy(BlockTags.BIRCH_LOGS, ItemTags.BIRCH_LOGS);
@@ -38,6 +39,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.copy(BlockTags.SPRUCE_LOGS, ItemTags.SPRUCE_LOGS);
 		this.copy(BlockTags.MANGROVE_LOGS, ItemTags.MANGROVE_LOGS);
 		this.copy(BlockTags.JUNGLE_LOGS, ItemTags.JUNGLE_LOGS);
+		this.copy(BlockTags.CHERRY_LOGS, ItemTags.CHERRY_LOGS);
 		this.copy(BlockTags.CRIMSON_STEMS, ItemTags.CRIMSON_STEMS);
 		this.copy(BlockTags.WARPED_STEMS, ItemTags.WARPED_STEMS);
 		this.copy(BlockTags.WART_BLOCKS, ItemTags.WART_BLOCKS);
@@ -92,7 +94,17 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.BLACK_BANNER
 			);
 		this.tag(ItemTags.BOATS)
-			.add(Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT, Items.MANGROVE_BOAT)
+			.add(
+				Items.OAK_BOAT,
+				Items.SPRUCE_BOAT,
+				Items.BIRCH_BOAT,
+				Items.JUNGLE_BOAT,
+				Items.ACACIA_BOAT,
+				Items.DARK_OAK_BOAT,
+				Items.MANGROVE_BOAT,
+				Items.BAMBOO_RAFT,
+				Items.CHERRY_BOAT
+			)
 			.addTag(ItemTags.CHEST_BOATS);
 		this.tag(ItemTags.CHEST_BOATS)
 			.add(
@@ -102,10 +114,13 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.JUNGLE_CHEST_BOAT,
 				Items.ACACIA_CHEST_BOAT,
 				Items.DARK_OAK_CHEST_BOAT,
-				Items.MANGROVE_CHEST_BOAT
+				Items.MANGROVE_CHEST_BOAT,
+				Items.BAMBOO_CHEST_RAFT,
+				Items.CHERRY_CHEST_BOAT
 			);
 		this.tag(ItemTags.FISHES).add(Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH);
 		this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
+		this.copy(BlockTags.CEILING_HANGING_SIGNS, ItemTags.HANGING_SIGNS);
 		this.tag(ItemTags.CREEPER_DROP_MUSIC_DISCS)
 			.add(
 				Items.MUSIC_DISC_13,
@@ -189,7 +204,9 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.CRIMSON_DOOR,
 				Items.WARPED_DOOR,
 				Items.CRIMSON_SIGN,
-				Items.WARPED_SIGN
+				Items.WARPED_SIGN,
+				Items.WARPED_HANGING_SIGN,
+				Items.CRIMSON_HANGING_SIGN
 			);
 		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
 		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
@@ -230,5 +247,88 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.addTag(ItemTags.SHOVELS)
 			.addTag(ItemTags.HOES)
 			.add(Items.TRIDENT);
+		this.tag(ItemTags.BREAKS_DECORATED_POTS).addTag(ItemTags.TOOLS);
+		this.tag(ItemTags.DECORATED_POT_SHARDS)
+			.add(
+				Items.BRICK,
+				Items.ANGLER_POTTERY_SHARD,
+				Items.ARCHER_POTTERY_SHARD,
+				Items.ARMS_UP_POTTERY_SHARD,
+				Items.BLADE_POTTERY_SHARD,
+				Items.BREWER_POTTERY_SHARD,
+				Items.BURN_POTTERY_SHARD,
+				Items.DANGER_POTTERY_SHARD,
+				Items.EXPLORER_POTTERY_SHARD,
+				Items.FRIEND_POTTERY_SHARD,
+				Items.HEART_POTTERY_SHARD,
+				Items.HEARTBREAK_POTTERY_SHARD,
+				Items.HOWL_POTTERY_SHARD,
+				Items.MINER_POTTERY_SHARD,
+				Items.MOURNER_POTTERY_SHARD,
+				Items.PLENTY_POTTERY_SHARD,
+				Items.PRIZE_POTTERY_SHARD,
+				Items.SHEAF_POTTERY_SHARD,
+				Items.SHELTER_POTTERY_SHARD,
+				Items.SKULL_POTTERY_SHARD,
+				Items.SNORT_POTTERY_SHARD
+			);
+		this.tag(ItemTags.TRIMMABLE_ARMOR)
+			.add(Items.NETHERITE_HELMET)
+			.add(Items.NETHERITE_CHESTPLATE)
+			.add(Items.NETHERITE_LEGGINGS)
+			.add(Items.NETHERITE_BOOTS)
+			.add(Items.DIAMOND_HELMET)
+			.add(Items.DIAMOND_CHESTPLATE)
+			.add(Items.DIAMOND_LEGGINGS)
+			.add(Items.DIAMOND_BOOTS)
+			.add(Items.GOLDEN_HELMET)
+			.add(Items.GOLDEN_CHESTPLATE)
+			.add(Items.GOLDEN_LEGGINGS)
+			.add(Items.GOLDEN_BOOTS)
+			.add(Items.IRON_HELMET)
+			.add(Items.IRON_CHESTPLATE)
+			.add(Items.IRON_LEGGINGS)
+			.add(Items.IRON_BOOTS)
+			.add(Items.CHAINMAIL_HELMET)
+			.add(Items.CHAINMAIL_CHESTPLATE)
+			.add(Items.CHAINMAIL_LEGGINGS)
+			.add(Items.CHAINMAIL_BOOTS)
+			.add(Items.LEATHER_HELMET)
+			.add(Items.LEATHER_CHESTPLATE)
+			.add(Items.LEATHER_LEGGINGS)
+			.add(Items.LEATHER_BOOTS)
+			.add(Items.TURTLE_HELMET);
+		this.tag(ItemTags.TRIM_MATERIALS)
+			.add(Items.IRON_INGOT)
+			.add(Items.COPPER_INGOT)
+			.add(Items.GOLD_INGOT)
+			.add(Items.LAPIS_LAZULI)
+			.add(Items.EMERALD)
+			.add(Items.DIAMOND)
+			.add(Items.NETHERITE_INGOT)
+			.add(Items.REDSTONE)
+			.add(Items.QUARTZ)
+			.add(Items.AMETHYST_SHARD);
+		this.tag(ItemTags.TRIM_TEMPLATES)
+			.add(Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE);
+		this.tag(ItemTags.BOOKSHELF_BOOKS).add(Items.BOOK, Items.WRITTEN_BOOK, Items.ENCHANTED_BOOK, Items.WRITABLE_BOOK);
+		this.tag(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS)
+			.add(Items.ZOMBIE_HEAD, Items.SKELETON_SKULL, Items.CREEPER_HEAD, Items.DRAGON_HEAD, Items.WITHER_SKELETON_SKULL, Items.PIGLIN_HEAD, Items.PLAYER_HEAD);
+		this.tag(ItemTags.SNIFFER_FOOD).add(Items.TORCHFLOWER_SEEDS);
 	}
 }

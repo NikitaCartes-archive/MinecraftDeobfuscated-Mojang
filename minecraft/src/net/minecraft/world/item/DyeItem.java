@@ -9,8 +9,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 
-public class DyeItem extends Item {
+public class DyeItem extends Item implements SignApplicator {
 	private static final Map<DyeColor, DyeItem> ITEM_BY_COLOR = Maps.newEnumMap(DyeColor.class);
 	private final DyeColor dyeColor;
 
@@ -41,5 +43,15 @@ public class DyeItem extends Item {
 
 	public static DyeItem byColor(DyeColor dyeColor) {
 		return (DyeItem)ITEM_BY_COLOR.get(dyeColor);
+	}
+
+	@Override
+	public boolean tryApplyToSign(Level level, SignBlockEntity signBlockEntity, boolean bl, Player player) {
+		if (signBlockEntity.updateText(signText -> signText.setColor(this.getDyeColor()), bl)) {
+			level.playSound(null, signBlockEntity.getBlockPos(), SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

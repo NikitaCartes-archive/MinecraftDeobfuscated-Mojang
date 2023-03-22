@@ -5,12 +5,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.SuspiciousSandBlockEntity;
+import net.minecraft.world.level.block.entity.BrushableBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -19,13 +20,20 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-public class SuspiciousSandBlock extends BaseEntityBlock implements Fallable {
+public class BrushableBlock extends BaseEntityBlock implements Fallable {
 	private static final IntegerProperty DUSTED = BlockStateProperties.DUSTED;
 	public static final int TICK_DELAY = 2;
+	private final Block turnsInto;
+	private final SoundEvent brushSound;
+	private final SoundEvent brushCompletedSound;
 
-	public SuspiciousSandBlock(BlockBehaviour.Properties properties) {
+	public BrushableBlock(Block block, BlockBehaviour.Properties properties, SoundEvent soundEvent, SoundEvent soundEvent2) {
 		super(properties);
+		this.turnsInto = block;
+		this.brushSound = soundEvent;
+		this.brushCompletedSound = soundEvent2;
 		this.registerDefaultState(this.stateDefinition.any().setValue(DUSTED, Integer.valueOf(0)));
 	}
 
@@ -37,11 +45,6 @@ public class SuspiciousSandBlock extends BaseEntityBlock implements Fallable {
 	@Override
 	public RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
-	}
-
-	@Override
-	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return new SuspiciousSandBlockEntity(blockPos, blockState);
 	}
 
 	@Override
@@ -64,8 +67,8 @@ public class SuspiciousSandBlock extends BaseEntityBlock implements Fallable {
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
-		if (serverLevel.getBlockEntity(blockPos) instanceof SuspiciousSandBlockEntity suspiciousSandBlockEntity) {
-			suspiciousSandBlockEntity.checkReset();
+		if (serverLevel.getBlockEntity(blockPos) instanceof BrushableBlockEntity brushableBlockEntity) {
+			brushableBlockEntity.checkReset();
 		}
 
 		if (FallingBlock.isFree(serverLevel.getBlockState(blockPos.below())) && blockPos.getY() >= serverLevel.getMinBuildHeight()) {
@@ -92,5 +95,23 @@ public class SuspiciousSandBlock extends BaseEntityBlock implements Fallable {
 				level.addParticle(new BlockParticleOption(ParticleTypes.FALLING_DUST, blockState), d, e, f, 0.0, 0.0, 0.0);
 			}
 		}
+	}
+
+	@Nullable
+	@Override
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return new BrushableBlockEntity(blockPos, blockState);
+	}
+
+	public Block getTurnsInto() {
+		return this.turnsInto;
+	}
+
+	public SoundEvent getBrushSound() {
+		return this.brushSound;
+	}
+
+	public SoundEvent getBrushCompletedSound() {
+		return this.brushCompletedSound;
 	}
 }

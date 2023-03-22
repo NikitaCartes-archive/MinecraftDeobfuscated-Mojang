@@ -14,7 +14,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -44,21 +43,13 @@ public class NoteBlock extends Block {
 		);
 	}
 
-	private static boolean isFeatureFlagEnabled(LevelAccessor levelAccessor) {
-		return levelAccessor.enabledFeatures().contains(FeatureFlags.UPDATE_1_20);
-	}
-
 	private BlockState setInstrument(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
-		if (isFeatureFlagEnabled(levelAccessor)) {
-			BlockState blockState2 = levelAccessor.getBlockState(blockPos.above());
-			return blockState.setValue(
-				INSTRUMENT,
-				(NoteBlockInstrument)NoteBlockInstrument.byStateAbove(blockState2)
-					.orElseGet(() -> NoteBlockInstrument.byStateBelow(levelAccessor.getBlockState(blockPos.below())))
-			);
-		} else {
-			return blockState.setValue(INSTRUMENT, NoteBlockInstrument.byStateBelow(levelAccessor.getBlockState(blockPos.below())));
-		}
+		BlockState blockState2 = levelAccessor.getBlockState(blockPos.above());
+		return blockState.setValue(
+			INSTRUMENT,
+			(NoteBlockInstrument)NoteBlockInstrument.byStateAbove(blockState2)
+				.orElseGet(() -> NoteBlockInstrument.byStateBelow(levelAccessor.getBlockState(blockPos.below())))
+		);
 	}
 
 	@Override
@@ -70,7 +61,7 @@ public class NoteBlock extends Block {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		boolean bl = isFeatureFlagEnabled(levelAccessor) ? direction.getAxis() == Direction.Axis.Y : direction == Direction.DOWN;
+		boolean bl = direction.getAxis() == Direction.Axis.Y;
 		return bl
 			? this.setInstrument(levelAccessor, blockPos, blockState)
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -99,14 +90,10 @@ public class NoteBlock extends Block {
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if (isFeatureFlagEnabled(level)) {
-			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (itemStack.is(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS) && blockHitResult.getDirection() == Direction.UP) {
-				return InteractionResult.PASS;
-			}
-		}
-
-		if (level.isClientSide) {
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		if (itemStack.is(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS) && blockHitResult.getDirection() == Direction.UP) {
+			return InteractionResult.PASS;
+		} else if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else {
 			blockState = blockState.cycle(NOTE);
@@ -125,13 +112,17 @@ public class NoteBlock extends Block {
 		}
 	}
 
+	public static float getPitchFromNote(int i) {
+		return (float)Math.pow(2.0, (double)(i - 12) / 12.0);
+	}
+
 	@Override
 	public boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
 		NoteBlockInstrument noteBlockInstrument = blockState.getValue(INSTRUMENT);
 		float f;
 		if (noteBlockInstrument.isTunable()) {
 			int k = (Integer)blockState.getValue(NOTE);
-			f = (float)Math.pow(2.0, (double)(k - 12) / 12.0);
+			f = getPitchFromNote(k);
 			level.addParticle(
 				ParticleTypes.NOTE, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + 0.5, (double)k / 24.0, 0.0, 0.0
 			);

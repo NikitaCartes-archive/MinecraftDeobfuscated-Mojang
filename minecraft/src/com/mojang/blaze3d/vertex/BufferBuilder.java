@@ -1,10 +1,8 @@
 package com.mojang.blaze3d.vertex;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Floats;
 import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.logging.LogUtils;
-import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntConsumer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -36,9 +34,8 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 	private boolean building;
 	@Nullable
 	private Vector3f[] sortingPoints;
-	private float sortX = Float.NaN;
-	private float sortY = Float.NaN;
-	private float sortZ = Float.NaN;
+	@Nullable
+	private VertexSorting sorting;
 	private boolean indexOnly;
 
 	public BufferBuilder(int i) {
@@ -74,21 +71,17 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		}
 	}
 
-	public void setQuadSortOrigin(float f, float g, float h) {
+	public void setQuadSorting(VertexSorting vertexSorting) {
 		if (this.mode == VertexFormat.Mode.QUADS) {
-			if (this.sortX != f || this.sortY != g || this.sortZ != h) {
-				this.sortX = f;
-				this.sortY = g;
-				this.sortZ = h;
-				if (this.sortingPoints == null) {
-					this.sortingPoints = this.makeQuadSortingPoints();
-				}
+			this.sorting = vertexSorting;
+			if (this.sortingPoints == null) {
+				this.sortingPoints = this.makeQuadSortingPoints();
 			}
 		}
 	}
 
 	public BufferBuilder.SortState getSortState() {
-		return new BufferBuilder.SortState(this.mode, this.vertices, this.sortingPoints, this.sortX, this.sortY, this.sortZ);
+		return new BufferBuilder.SortState(this.mode, this.vertices, this.sortingPoints, this.sorting);
 	}
 
 	public void restoreSortState(BufferBuilder.SortState sortState) {
@@ -97,9 +90,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		this.vertices = sortState.vertices;
 		this.nextElementByte = this.renderedBufferPointer;
 		this.sortingPoints = sortState.sortingPoints;
-		this.sortX = sortState.sortX;
-		this.sortY = sortState.sortY;
-		this.sortZ = sortState.sortZ;
+		this.sorting = sortState.sorting;
 		this.indexOnly = true;
 	}
 
@@ -130,7 +121,6 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		MutableInt mutableInt = new MutableInt(i);
 
 		return switch (indexType) {
-			case BYTE -> ix -> this.buffer.put(mutableInt.getAndIncrement(), (byte)ix);
 			case SHORT -> ix -> this.buffer.putShort(mutableInt.getAndAdd(2), (short)ix);
 			case INT -> ix -> this.buffer.putInt(mutableInt.getAndAdd(4), ix);
 		};
@@ -161,26 +151,20 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 	}
 
 	private void putSortedQuadIndices(VertexFormat.IndexType indexType) {
-		float[] fs = new float[this.sortingPoints.length];
-		int[] is = new int[this.sortingPoints.length];
+		if (this.sortingPoints != null && this.sorting != null) {
+			int[] is = this.sorting.sort(this.sortingPoints);
+			IntConsumer intConsumer = this.intConsumer(this.nextElementByte, indexType);
 
-		for (int i = 0; i < this.sortingPoints.length; is[i] = i++) {
-			float f = this.sortingPoints[i].x() - this.sortX;
-			float g = this.sortingPoints[i].y() - this.sortY;
-			float h = this.sortingPoints[i].z() - this.sortZ;
-			fs[i] = f * f + g * g + h * h;
-		}
-
-		IntArrays.mergeSort(is, (i, jx) -> Floats.compare(fs[jx], fs[i]));
-		IntConsumer intConsumer = this.intConsumer(this.nextElementByte, indexType);
-
-		for (int j : is) {
-			intConsumer.accept(j * this.mode.primitiveStride + 0);
-			intConsumer.accept(j * this.mode.primitiveStride + 1);
-			intConsumer.accept(j * this.mode.primitiveStride + 2);
-			intConsumer.accept(j * this.mode.primitiveStride + 2);
-			intConsumer.accept(j * this.mode.primitiveStride + 3);
-			intConsumer.accept(j * this.mode.primitiveStride + 0);
+			for (int i : is) {
+				intConsumer.accept(i * this.mode.primitiveStride + 0);
+				intConsumer.accept(i * this.mode.primitiveStride + 1);
+				intConsumer.accept(i * this.mode.primitiveStride + 2);
+				intConsumer.accept(i * this.mode.primitiveStride + 2);
+				intConsumer.accept(i * this.mode.primitiveStride + 3);
+				intConsumer.accept(i * this.mode.primitiveStride + 0);
+			}
+		} else {
+			throw new IllegalStateException("Sorting state uninitialized");
 		}
 	}
 
@@ -245,9 +229,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		this.currentElement = null;
 		this.elementIndex = 0;
 		this.sortingPoints = null;
-		this.sortX = Float.NaN;
-		this.sortY = Float.NaN;
-		this.sortZ = Float.NaN;
+		this.sorting = null;
 		this.indexOnly = false;
 	}
 
@@ -461,17 +443,14 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		final int vertices;
 		@Nullable
 		final Vector3f[] sortingPoints;
-		final float sortX;
-		final float sortY;
-		final float sortZ;
+		@Nullable
+		final VertexSorting sorting;
 
-		SortState(VertexFormat.Mode mode, int i, @Nullable Vector3f[] vector3fs, float f, float g, float h) {
+		SortState(VertexFormat.Mode mode, int i, @Nullable Vector3f[] vector3fs, @Nullable VertexSorting vertexSorting) {
 			this.mode = mode;
 			this.vertices = i;
 			this.sortingPoints = vector3fs;
-			this.sortX = f;
-			this.sortY = g;
-			this.sortZ = h;
+			this.sorting = vertexSorting;
 		}
 	}
 }

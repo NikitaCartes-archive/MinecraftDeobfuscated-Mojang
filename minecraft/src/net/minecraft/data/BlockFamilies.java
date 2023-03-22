@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -26,7 +25,6 @@ public class BlockFamilies {
 		.recipeUnlockedBy("has_planks")
 		.getFamily();
 	public static final BlockFamily CHERRY_PLANKS = familyBuilder(Blocks.CHERRY_PLANKS)
-		.featureLockedBehind(FeatureFlags.UPDATE_1_20)
 		.button(Blocks.CHERRY_BUTTON)
 		.fence(Blocks.CHERRY_FENCE)
 		.fenceGate(Blocks.CHERRY_FENCE_GATE)
@@ -156,12 +154,10 @@ public class BlockFamilies {
 		.mosaic(Blocks.BAMBOO_MOSAIC)
 		.recipeGroupPrefix("wooden")
 		.recipeUnlockedBy("has_planks")
-		.featureLockedBehind(FeatureFlags.UPDATE_1_20)
 		.getFamily();
 	public static final BlockFamily BAMBOO_MOSAIC = familyBuilder(Blocks.BAMBOO_MOSAIC)
 		.slab(Blocks.BAMBOO_MOSAIC_SLAB)
 		.stairs(Blocks.BAMBOO_MOSAIC_STAIRS)
-		.featureLockedBehind(FeatureFlags.UPDATE_1_20)
 		.getFamily();
 	public static final BlockFamily MUD_BRICKS = familyBuilder(Blocks.MUD_BRICKS)
 		.wall(Blocks.MUD_BRICK_WALL)

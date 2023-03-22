@@ -46,6 +46,11 @@ public class StandingSignBlock extends SignBlock {
 	}
 
 	@Override
+	public float getYRotationDegrees(BlockState blockState) {
+		return RotationSegment.convertToDegrees((Integer)blockState.getValue(ROTATION));
+	}
+
+	@Override
 	public BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(ROTATION, Integer.valueOf(rotation.rotate((Integer)blockState.getValue(ROTATION), 16)));
 	}

@@ -36,17 +36,17 @@ public class ChestRaftModel extends RaftModel {
 		partDefinition.addOrReplaceChild(
 			"chest_bottom",
 			CubeListBuilder.create().texOffs(0, 76).addBox(0.0F, 0.0F, 0.0F, 12.0F, 8.0F, 12.0F),
-			PartPose.offsetAndRotation(-2.0F, -11.0F, -6.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
+			PartPose.offsetAndRotation(-2.0F, -10.0F, -6.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
 		);
 		partDefinition.addOrReplaceChild(
 			"chest_lid",
 			CubeListBuilder.create().texOffs(0, 59).addBox(0.0F, 0.0F, 0.0F, 12.0F, 4.0F, 12.0F),
-			PartPose.offsetAndRotation(-2.0F, -15.0F, -6.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
+			PartPose.offsetAndRotation(-2.0F, -14.0F, -6.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
 		);
 		partDefinition.addOrReplaceChild(
 			"chest_lock",
 			CubeListBuilder.create().texOffs(0, 59).addBox(0.0F, 0.0F, 0.0F, 2.0F, 4.0F, 1.0F),
-			PartPose.offsetAndRotation(-1.0F, -12.0F, -1.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
+			PartPose.offsetAndRotation(-1.0F, -11.0F, -1.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 128, 128);
 	}

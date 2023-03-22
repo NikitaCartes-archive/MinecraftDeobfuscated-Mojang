@@ -293,7 +293,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -1280,14 +1279,14 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 	public void handleOpenSignEditor(ClientboundOpenSignEditorPacket clientboundOpenSignEditorPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundOpenSignEditorPacket, this, this.minecraft);
 		BlockPos blockPos = clientboundOpenSignEditorPacket.getPos();
-		BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
-		if (!(blockEntity instanceof SignBlockEntity)) {
+		if (this.level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
+			this.minecraft.player.openTextEdit(signBlockEntity, clientboundOpenSignEditorPacket.isFrontText());
+		} else {
 			BlockState blockState = this.level.getBlockState(blockPos);
-			blockEntity = new SignBlockEntity(blockPos, blockState);
-			blockEntity.setLevel(this.level);
+			SignBlockEntity signBlockEntity2 = new SignBlockEntity(blockPos, blockState);
+			signBlockEntity2.setLevel(this.level);
+			this.minecraft.player.openTextEdit(signBlockEntity2, clientboundOpenSignEditorPacket.isFrontText());
 		}
-
-		this.minecraft.player.openTextEdit((SignBlockEntity)blockEntity);
 	}
 
 	@Override

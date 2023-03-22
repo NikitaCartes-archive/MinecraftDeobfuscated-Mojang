@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -308,9 +307,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 				}
 			}
 
-			if (worldGenLevel.enabledFeatures().contains(FeatureFlags.UPDATE_1_20)) {
-				this.addCellar(worldGenLevel, boundingBox);
-			}
+			this.addCellar(worldGenLevel, boundingBox);
 		}
 	}
 

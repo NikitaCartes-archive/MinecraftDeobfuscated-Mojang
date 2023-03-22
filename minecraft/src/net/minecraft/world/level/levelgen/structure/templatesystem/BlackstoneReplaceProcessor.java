@@ -57,11 +57,11 @@ public class BlackstoneReplaceProcessor extends StructureProcessor {
 		StructureTemplate.StructureBlockInfo structureBlockInfo2,
 		StructurePlaceSettings structurePlaceSettings
 	) {
-		Block block = (Block)this.replacements.get(structureBlockInfo2.state.getBlock());
+		Block block = (Block)this.replacements.get(structureBlockInfo2.state().getBlock());
 		if (block == null) {
 			return structureBlockInfo2;
 		} else {
-			BlockState blockState = structureBlockInfo2.state;
+			BlockState blockState = structureBlockInfo2.state();
 			BlockState blockState2 = block.defaultBlockState();
 			if (blockState.hasProperty(StairBlock.FACING)) {
 				blockState2 = blockState2.setValue(StairBlock.FACING, (Direction)blockState.getValue(StairBlock.FACING));
@@ -75,7 +75,7 @@ public class BlackstoneReplaceProcessor extends StructureProcessor {
 				blockState2 = blockState2.setValue(SlabBlock.TYPE, (SlabType)blockState.getValue(SlabBlock.TYPE));
 			}
 
-			return new StructureTemplate.StructureBlockInfo(structureBlockInfo2.pos, blockState2, structureBlockInfo2.nbt);
+			return new StructureTemplate.StructureBlockInfo(structureBlockInfo2.pos(), blockState2, structureBlockInfo2.nbt());
 		}
 	}
 

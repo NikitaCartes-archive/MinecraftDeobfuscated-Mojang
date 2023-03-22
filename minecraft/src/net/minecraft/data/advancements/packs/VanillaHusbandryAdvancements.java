@@ -67,7 +67,9 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		EntityType.HOGLIN,
 		EntityType.STRIDER,
 		EntityType.GOAT,
-		EntityType.AXOLOTL
+		EntityType.AXOLOTL,
+		EntityType.CAMEL,
+		EntityType.SNIFFER
 	);
 	public static final List<EntityType<?>> INDIRECTLY_BREEDABLE_ANIMALS = List.of(EntityType.TURTLE, EntityType.FROG);
 	private static final Item[] FISH = new Item[]{Items.COD, Items.TROPICAL_FISH, Items.PUFFERFISH, Items.SALMON};

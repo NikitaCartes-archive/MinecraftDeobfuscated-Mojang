@@ -19,14 +19,11 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.CeilingHangingSignBlock;
 import net.minecraft.world.level.block.SignBlock;
-import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,12 +31,13 @@ import net.minecraft.world.phys.Vec3;
 public class HangingSignRenderer extends SignRenderer {
 	private static final String PLANK = "plank";
 	private static final String V_CHAINS = "vChains";
-	public static final String NORMAL_CHAINS = "normalChains";
-	public static final String CHAIN_L_1 = "chainL1";
-	public static final String CHAIN_L_2 = "chainL2";
-	public static final String CHAIN_R_1 = "chainR1";
-	public static final String CHAIN_R_2 = "chainR2";
-	public static final String BOARD = "board";
+	private static final String NORMAL_CHAINS = "normalChains";
+	private static final String CHAIN_L_1 = "chainL1";
+	private static final String CHAIN_L_2 = "chainL2";
+	private static final String CHAIN_R_1 = "chainR1";
+	private static final String CHAIN_R_2 = "chainR2";
+	private static final String BOARD = "board";
+	private static final float SIZE = 1.0F;
 	private final Map<WoodType, HangingSignRenderer.HangingSignModel> hangingSignModels;
 
 	public HangingSignRenderer(BlockEntityRendererProvider.Context context) {
@@ -55,35 +53,18 @@ public class HangingSignRenderer extends SignRenderer {
 	@Override
 	public void render(SignBlockEntity signBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		BlockState blockState = signBlockEntity.getBlockState();
-		poseStack.pushPose();
-		WoodType woodType = SignBlock.getWoodType(blockState.getBlock());
+		SignBlock signBlock = (SignBlock)blockState.getBlock();
+		WoodType woodType = SignBlock.getWoodType(signBlock);
 		HangingSignRenderer.HangingSignModel hangingSignModel = (HangingSignRenderer.HangingSignModel)this.hangingSignModels.get(woodType);
-		boolean bl = !(blockState.getBlock() instanceof CeilingHangingSignBlock);
-		boolean bl2 = blockState.hasProperty(BlockStateProperties.ATTACHED) && (Boolean)blockState.getValue(BlockStateProperties.ATTACHED);
-		poseStack.translate(0.5, 0.9375, 0.5);
-		if (bl2) {
-			float g = -RotationSegment.convertToDegrees((Integer)blockState.getValue(CeilingHangingSignBlock.ROTATION));
-			poseStack.mulPose(Axis.YP.rotationDegrees(g));
-		} else {
-			poseStack.mulPose(Axis.YP.rotationDegrees(this.getSignAngle(blockState, bl)));
-		}
-
-		poseStack.translate(0.0F, -0.3125F, 0.0F);
 		hangingSignModel.evaluateVisibleParts(blockState);
-		float g = 1.0F;
-		this.renderSign(poseStack, multiBufferSource, i, j, 1.0F, woodType, hangingSignModel);
-		this.renderSignText(signBlockEntity, poseStack, multiBufferSource, i, 1.0F);
-	}
-
-	private float getSignAngle(BlockState blockState, boolean bl) {
-		return bl
-			? -((Direction)blockState.getValue(WallSignBlock.FACING)).toYRot()
-			: -((float)((Integer)blockState.getValue(CeilingHangingSignBlock.ROTATION) * 360) / 16.0F);
+		this.renderSignWithText(signBlockEntity, poseStack, multiBufferSource, i, j, blockState, signBlock, woodType, hangingSignModel, 1.0F);
 	}
 
 	@Override
-	Material getSignMaterial(WoodType woodType) {
-		return Sheets.getHangingSignMaterial(woodType);
+	void translateSign(PoseStack poseStack, float f, BlockState blockState) {
+		poseStack.translate(0.5, 0.9375, 0.5);
+		poseStack.mulPose(Axis.YP.rotationDegrees(f));
+		poseStack.translate(0.0F, -0.3125F, 0.0F);
 	}
 
 	@Override
@@ -93,8 +74,13 @@ public class HangingSignRenderer extends SignRenderer {
 	}
 
 	@Override
+	Material getSignMaterial(WoodType woodType) {
+		return Sheets.getHangingSignMaterial(woodType);
+	}
+
+	@Override
 	Vec3 getTextOffset(float f) {
-		return new Vec3(0.0, (double)(-0.32F * f), (double)(0.063F * f));
+		return new Vec3(0.0, (double)(-0.32F * f), (double)(0.07F * f));
 	}
 
 	public static LayerDefinition createHangingSignLayer() {

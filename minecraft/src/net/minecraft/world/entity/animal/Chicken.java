@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class Chicken extends Animal {
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(
-		Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS
+		Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD
 	);
 	public float flap;
 	public float flapSpeed;

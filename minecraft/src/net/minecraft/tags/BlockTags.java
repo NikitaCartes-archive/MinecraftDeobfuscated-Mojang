@@ -120,6 +120,7 @@ public final class BlockTags {
 	public static final TagKey<Block> CAULDRONS = create("cauldrons");
 	public static final TagKey<Block> CRYSTAL_SOUND_BLOCKS = create("crystal_sound_blocks");
 	public static final TagKey<Block> INSIDE_STEP_SOUND_BLOCKS = create("inside_step_sound_blocks");
+	public static final TagKey<Block> COMBINATION_STEP_SOUND_BLOCKS = create("combination_step_sound_blocks");
 	public static final TagKey<Block> OCCLUDES_VIBRATION_SIGNALS = create("occludes_vibration_signals");
 	public static final TagKey<Block> DAMPENS_VIBRATIONS = create("dampens_vibrations");
 	public static final TagKey<Block> DRIPSTONE_REPLACEABLE = create("dripstone_replaceable_blocks");
@@ -144,6 +145,7 @@ public final class BlockTags {
 	public static final TagKey<Block> SCULK_REPLACEABLE = create("sculk_replaceable");
 	public static final TagKey<Block> SCULK_REPLACEABLE_WORLD_GEN = create("sculk_replaceable_world_gen");
 	public static final TagKey<Block> ANCIENT_CITY_REPLACEABLE = create("ancient_city_replaceable");
+	public static final TagKey<Block> VIBRATION_RESONATORS = create("vibration_resonators");
 	public static final TagKey<Block> ANIMALS_SPAWNABLE_ON = create("animals_spawnable_on");
 	public static final TagKey<Block> AXOLOTLS_SPAWNABLE_ON = create("axolotls_spawnable_on");
 	public static final TagKey<Block> GOATS_SPAWNABLE_ON = create("goats_spawnable_on");
@@ -165,6 +167,8 @@ public final class BlockTags {
 	public static final TagKey<Block> SNOW_LAYER_CAN_SURVIVE_ON = create("snow_layer_can_survive_on");
 	public static final TagKey<Block> INVALID_SPAWN_INSIDE = create("invalid_spawn_inside");
 	public static final TagKey<Block> SNIFFER_DIGGABLE_BLOCK = create("sniffer_diggable_block");
+	public static final TagKey<Block> SNIFFER_EGG_HATCH_BOOST = create("sniffer_egg_hatch_boost");
+	public static final TagKey<Block> TRAIL_RUINS_REPLACEABLE = create("trail_ruins_replaceable");
 
 	private BlockTags() {
 	}

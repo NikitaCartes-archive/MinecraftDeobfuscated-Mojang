@@ -90,6 +90,11 @@ public class WallSignBlock extends SignBlock {
 	}
 
 	@Override
+	public float getYRotationDegrees(BlockState blockState) {
+		return ((Direction)blockState.getValue(FACING)).toYRot();
+	}
+
+	@Override
 	public BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
 	}

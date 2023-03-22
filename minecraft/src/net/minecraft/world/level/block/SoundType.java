@@ -613,8 +613,32 @@ public class SoundType {
 		SoundEvents.SUSPICIOUS_SAND_HIT,
 		SoundEvents.SUSPICIOUS_SAND_FALL
 	);
+	public static final SoundType SUSPICIOUS_GRAVEL = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SUSPICIOUS_GRAVEL_BREAK,
+		SoundEvents.SUSPICIOUS_GRAVEL_STEP,
+		SoundEvents.SUSPICIOUS_GRAVEL_PLACE,
+		SoundEvents.SUSPICIOUS_GRAVEL_HIT,
+		SoundEvents.SUSPICIOUS_GRAVEL_FALL
+	);
 	public static final SoundType DECORATED_POT = new SoundType(
-		1.0F, 1.0F, SoundEvents.EMPTY, SoundEvents.DECORATED_POT_STEP, SoundEvents.DECORATED_POT_PLACE, SoundEvents.DECORATED_POT_HIT, SoundEvents.DECORATED_POT_FALL
+		1.0F,
+		1.0F,
+		SoundEvents.DECORATED_POT_BREAK,
+		SoundEvents.DECORATED_POT_STEP,
+		SoundEvents.DECORATED_POT_PLACE,
+		SoundEvents.DECORATED_POT_HIT,
+		SoundEvents.DECORATED_POT_FALL
+	);
+	public static final SoundType DECORATED_POT_CRACKED = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.DECORATED_POT_SHATTER,
+		SoundEvents.DECORATED_POT_STEP,
+		SoundEvents.DECORATED_POT_PLACE,
+		SoundEvents.DECORATED_POT_HIT,
+		SoundEvents.DECORATED_POT_FALL
 	);
 	public final float volume;
 	public final float pitch;

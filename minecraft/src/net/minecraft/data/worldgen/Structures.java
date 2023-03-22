@@ -332,5 +332,16 @@ public class Structures {
 				116
 			)
 		);
+		bootstapContext.register(
+			BuiltinStructures.TRAIL_RUINS,
+			new JigsawStructure(
+				structure(holderGetter.getOrThrow(BiomeTags.HAS_TRAIL_RUINS), Map.of(), GenerationStep.Decoration.UNDERGROUND_STRUCTURES, TerrainAdjustment.BURY),
+				holderGetter2.getOrThrow(TrailRuinsStructurePools.START),
+				7,
+				ConstantHeight.of(VerticalAnchor.absolute(-15)),
+				false,
+				Heightmap.Types.WORLD_SURFACE_WG
+			)
+		);
 	}
 }

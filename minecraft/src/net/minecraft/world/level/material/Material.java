@@ -91,6 +91,7 @@ public final class Material {
 	public static final Material MOSS = new Material.Builder(MaterialColor.PLANT).destroyOnPush().build();
 	public static final Material VEGETABLE = new Material.Builder(MaterialColor.PLANT).destroyOnPush().build();
 	public static final Material EGG = new Material.Builder(MaterialColor.PLANT).destroyOnPush().build();
+	public static final Material FRAGILE_EGG = new Material.Builder(MaterialColor.PLANT).noCollider().build();
 	public static final Material CAKE = new Material.Builder(MaterialColor.NONE).destroyOnPush().build();
 	public static final Material AMETHYST = new Material.Builder(MaterialColor.COLOR_PURPLE).build();
 	public static final Material POWDER_SNOW = new Material.Builder(MaterialColor.SNOW).nonSolid().noCollider().build();

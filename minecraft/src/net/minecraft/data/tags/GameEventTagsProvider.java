@@ -7,6 +7,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
 
 public class GameEventTagsProvider extends IntrinsicHolderTagsProvider<GameEvent> {
 	@VisibleForTesting
@@ -22,7 +23,6 @@ public class GameEventTagsProvider extends IntrinsicHolderTagsProvider<GameEvent
 		GameEvent.BLOCK_DEACTIVATE,
 		GameEvent.CONTAINER_CLOSE,
 		GameEvent.CONTAINER_OPEN,
-		GameEvent.DISPENSE_FAIL,
 		GameEvent.DRINK,
 		GameEvent.EAT,
 		GameEvent.ELYTRA_GLIDE,
@@ -43,8 +43,6 @@ public class GameEventTagsProvider extends IntrinsicHolderTagsProvider<GameEvent
 		GameEvent.ITEM_INTERACT_FINISH,
 		GameEvent.LIGHTNING_STRIKE,
 		GameEvent.NOTE_BLOCK_PLAY,
-		GameEvent.PISTON_CONTRACT,
-		GameEvent.PISTON_EXTEND,
 		GameEvent.PRIME_FUSE,
 		GameEvent.PROJECTILE_LAND,
 		GameEvent.PROJECTILE_SHOOT,
@@ -61,9 +59,13 @@ public class GameEventTagsProvider extends IntrinsicHolderTagsProvider<GameEvent
 
 	@Override
 	protected void addTags(HolderLookup.Provider provider) {
-		this.tag(GameEventTags.VIBRATIONS).add(VIBRATIONS_EXCEPT_FLAP).add(GameEvent.FLAP);
+		this.tag(GameEventTags.VIBRATIONS).add(VIBRATIONS_EXCEPT_FLAP).add(VibrationListener.RESONANCE_EVENTS).add(GameEvent.FLAP);
 		this.tag(GameEventTags.SHRIEKER_CAN_LISTEN).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING);
-		this.tag(GameEventTags.WARDEN_CAN_LISTEN).add(VIBRATIONS_EXCEPT_FLAP).add(GameEvent.SHRIEK).addTag(GameEventTags.SHRIEKER_CAN_LISTEN);
+		this.tag(GameEventTags.WARDEN_CAN_LISTEN)
+			.add(VIBRATIONS_EXCEPT_FLAP)
+			.add(VibrationListener.RESONANCE_EVENTS)
+			.add(GameEvent.SHRIEK)
+			.addTag(GameEventTags.SHRIEKER_CAN_LISTEN);
 		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)
 			.add(GameEvent.HIT_GROUND, GameEvent.PROJECTILE_SHOOT, GameEvent.STEP, GameEvent.SWIM, GameEvent.ITEM_INTERACT_START, GameEvent.ITEM_INTERACT_FINISH);
 		this.tag(GameEventTags.ALLAY_CAN_LISTEN).add(GameEvent.NOTE_BLOCK_PLAY);

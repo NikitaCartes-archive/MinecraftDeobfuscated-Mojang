@@ -138,13 +138,6 @@ public abstract class RecipeProvider implements DataProvider {
 		}
 	}
 
-	@Deprecated
-	protected static void legacyNetheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, RecipeCategory recipeCategory, Item item2) {
-		LegacyUpgradeRecipeBuilder.smithing(Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2)
-			.unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT))
-			.save(consumer, getItemName(item2) + "_smithing");
-	}
-
 	protected static void netheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, RecipeCategory recipeCategory, Item item2) {
 		SmithingTransformRecipeBuilder.smithing(
 				Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2

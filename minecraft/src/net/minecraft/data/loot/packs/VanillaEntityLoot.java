@@ -705,7 +705,20 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						)
 				)
 		);
-		this.add(EntityType.SNIFFER, LootTable.lootTable());
+		this.add(
+			EntityType.SNIFFER,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(
+							LootItem.lootTableItem(Items.MOSS_BLOCK)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.when(LootItemKilledByPlayerCondition.killedByPlayer())
+								.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.1F, 0.02F))
+						)
+				)
+		);
 		this.add(
 			EntityType.SNOW_GOLEM,
 			LootTable.lootTable()
@@ -1112,6 +1125,12 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 					)
 					.when(LootItemKilledByPlayerCondition.killedByPlayer())
 					.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.025F, 0.01F))
+			)
+			.withPool(
+				LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(EmptyLootItem.emptyItem().setWeight(4))
+					.add(LootItem.lootTableItem(Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1))
 			);
 	}
 }

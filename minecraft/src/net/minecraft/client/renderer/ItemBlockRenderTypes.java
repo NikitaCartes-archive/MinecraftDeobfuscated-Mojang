@@ -76,7 +76,6 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.DANDELION, renderType3);
 		hashMap.put(Blocks.POPPY, renderType3);
 		hashMap.put(Blocks.BLUE_ORCHID, renderType3);
-		hashMap.put(Blocks.TORCHFLOWER, renderType3);
 		hashMap.put(Blocks.ALLIUM, renderType3);
 		hashMap.put(Blocks.AZURE_BLUET, renderType3);
 		hashMap.put(Blocks.RED_TULIP, renderType3);
@@ -181,7 +180,10 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.END_ROD, renderType3);
 		hashMap.put(Blocks.CHORUS_PLANT, renderType3);
 		hashMap.put(Blocks.CHORUS_FLOWER, renderType3);
+		hashMap.put(Blocks.TORCHFLOWER, renderType3);
 		hashMap.put(Blocks.TORCHFLOWER_CROP, renderType3);
+		hashMap.put(Blocks.PITCHER_PLANT, renderType3);
+		hashMap.put(Blocks.PITCHER_CROP, renderType3);
 		hashMap.put(Blocks.BEETROOTS, renderType3);
 		hashMap.put(Blocks.KELP, renderType3);
 		hashMap.put(Blocks.KELP_PLANT, renderType3);
@@ -261,6 +263,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SMALL_DRIPLEAF, renderType3);
 		hashMap.put(Blocks.HANGING_ROOTS, renderType3);
 		hashMap.put(Blocks.SCULK_SENSOR, renderType3);
+		hashMap.put(Blocks.CALIBRATED_SCULK_SENSOR, renderType3);
 		hashMap.put(Blocks.SCULK_VEIN, renderType3);
 		hashMap.put(Blocks.SCULK_SHRIEKER, renderType3);
 		hashMap.put(Blocks.MANGROVE_PROPAGULE, renderType3);

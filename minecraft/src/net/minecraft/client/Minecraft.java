@@ -28,6 +28,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
@@ -1445,7 +1446,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		RenderSystem.clear(256, ON_OSX);
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)this.window.getWidth(), (float)this.window.getHeight(), 0.0F, 1000.0F, 3000.0F);
-		RenderSystem.setProjectionMatrix(matrix4f);
+		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 		PoseStack poseStack2 = RenderSystem.getModelViewStack();
 		poseStack2.pushPose();
 		poseStack2.setIdentity();

@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.animal;
 
+import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -214,27 +215,25 @@ public abstract class Animal extends AgeableMob {
 	public void spawnChildFromBreeding(ServerLevel serverLevel, Animal animal) {
 		AgeableMob ageableMob = this.getBreedOffspring(serverLevel, animal);
 		if (ageableMob != null) {
-			ServerPlayer serverPlayer = this.getLoveCause();
-			if (serverPlayer == null && animal.getLoveCause() != null) {
-				serverPlayer = animal.getLoveCause();
-			}
-
-			if (serverPlayer != null) {
-				serverPlayer.awardStat(Stats.ANIMALS_BRED);
-				CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this, animal, ageableMob);
-			}
-
-			this.setAge(6000);
-			animal.setAge(6000);
-			this.resetLove();
-			animal.resetLove();
 			ageableMob.setBaby(true);
 			ageableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
+			this.finalizeSpawnChildFromBreeding(serverLevel, animal, ageableMob);
 			serverLevel.addFreshEntityWithPassengers(ageableMob);
-			serverLevel.broadcastEntityEvent(this, (byte)18);
-			if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-				serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
-			}
+		}
+	}
+
+	public void finalizeSpawnChildFromBreeding(ServerLevel serverLevel, Animal animal, @Nullable AgeableMob ageableMob) {
+		Optional.ofNullable(this.getLoveCause()).or(() -> Optional.ofNullable(animal.getLoveCause())).ifPresent(serverPlayer -> {
+			serverPlayer.awardStat(Stats.ANIMALS_BRED);
+			CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this, animal, ageableMob);
+		});
+		this.setAge(6000);
+		animal.setAge(6000);
+		this.resetLove();
+		animal.resetLove();
+		serverLevel.broadcastEntityEvent(this, (byte)18);
+		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+			serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
 		}
 	}
 

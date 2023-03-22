@@ -74,20 +74,12 @@ public class MultiNoiseBiomeSourceParameterList {
 			new ResourceLocation("overworld"), new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
 				@Override
 				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
-					return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(function, OverworldBiomeBuilder.Modifier.NONE);
-				}
-			}
-		);
-		public static final MultiNoiseBiomeSourceParameterList.Preset OVERWORLD_UPDATE_1_20 = new MultiNoiseBiomeSourceParameterList.Preset(
-			new ResourceLocation("overworld_update_1_20"), new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
-				@Override
-				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
-					return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(function, OverworldBiomeBuilder.Modifier.UPDATE_1_20);
+					return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(function);
 				}
 			}
 		);
 		static final Map<ResourceLocation, MultiNoiseBiomeSourceParameterList.Preset> BY_NAME = (Map<ResourceLocation, MultiNoiseBiomeSourceParameterList.Preset>)Stream.of(
-				NETHER, OVERWORLD, OVERWORLD_UPDATE_1_20
+				NETHER, OVERWORLD
 			)
 			.collect(Collectors.toMap(MultiNoiseBiomeSourceParameterList.Preset::id, preset -> preset));
 		public static final Codec<MultiNoiseBiomeSourceParameterList.Preset> CODEC = ResourceLocation.CODEC
@@ -98,9 +90,9 @@ public class MultiNoiseBiomeSourceParameterList {
 				preset -> DataResult.success(preset.id)
 			);
 
-		static <T> Climate.ParameterList<T> generateOverworldBiomes(Function<ResourceKey<Biome>, T> function, OverworldBiomeBuilder.Modifier modifier) {
+		static <T> Climate.ParameterList<T> generateOverworldBiomes(Function<ResourceKey<Biome>, T> function) {
 			Builder<Pair<Climate.ParameterPoint, T>> builder = ImmutableList.builder();
-			new OverworldBiomeBuilder(modifier).addBiomes(pair -> builder.add(pair.mapSecond(function)));
+			new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(function)));
 			return new Climate.ParameterList<>(builder.build());
 		}
 

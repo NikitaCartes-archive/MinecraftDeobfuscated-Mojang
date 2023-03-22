@@ -4,12 +4,9 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Transformation;
 import com.mojang.serialization.Codec;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -45,7 +42,6 @@ import org.slf4j.Logger;
 
 public abstract class Display extends Entity {
 	static final Logger LOGGER = LogUtils.getLogger();
-	private static final float INITIAL_UPDATE_PROGRESS = Float.POSITIVE_INFINITY;
 	public static final int NO_BRIGHTNESS_OVERRIDE = -1;
 	private static final EntityDataAccessor<Integer> DATA_INTERPOLATION_START_DELTA_TICKS_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_INTERPOLATION_DURATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
@@ -61,6 +57,16 @@ public abstract class Display extends Entity {
 	private static final EntityDataAccessor<Float> DATA_WIDTH_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Float> DATA_HEIGHT_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> DATA_GLOW_COLOR_OVERRIDE_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
+	private static final IntSet RENDER_STATE_IDS = IntSet.of(
+		DATA_TRANSLATION_ID.getId(),
+		DATA_SCALE_ID.getId(),
+		DATA_LEFT_ROTATION_ID.getId(),
+		DATA_RIGHT_ROTATION_ID.getId(),
+		DATA_BILLBOARD_RENDER_CONSTRAINTS_ID.getId(),
+		DATA_BRIGHTNESS_OVERRIDE_ID.getId(),
+		DATA_SHADOW_RADIUS_ID.getId(),
+		DATA_SHADOW_STRENGTH_ID.getId()
+	);
 	private static final float INITIAL_SHADOW_RADIUS = 0.0F;
 	private static final float INITIAL_SHADOW_STRENGTH = 1.0F;
 	private static final int NO_GLOW_COLOR_OVERRIDE = -1;
@@ -75,52 +81,22 @@ public abstract class Display extends Entity {
 	public static final String TAG_WIDTH = "width";
 	public static final String TAG_HEIGHT = "height";
 	public static final String TAG_GLOW_COLOR_OVERRIDE = "glow_color_override";
-	private final Display.GenericInterpolator<Transformation> transformation = new Display.GenericInterpolator<Transformation>(Transformation.identity()) {
-		protected Transformation interpolate(float f, Transformation transformation, Transformation transformation2) {
-			return transformation.slerp(transformation2, f);
-		}
-	};
-	private final Display.FloatInterpolator shadowRadius = new Display.FloatInterpolator(0.0F);
-	private final Display.FloatInterpolator shadowStrength = new Display.FloatInterpolator(1.0F);
 	private final Quaternionf orientation = new Quaternionf();
-	protected final Display.InterpolatorSet interpolators = new Display.InterpolatorSet();
-	private long interpolationStartClientTick;
+	private long interpolationStartClientTick = -2147483648L;
+	private int interpolationDuration;
 	private float lastProgress;
 	private AABB cullingBoundingBox;
-	private boolean updateInterpolators;
-	private boolean updateTime;
+	protected boolean updateRenderState;
+	private boolean updateStartTick;
+	private boolean updateInterpolationDuration;
+	@Nullable
+	private Display.RenderState renderState;
 
 	public Display(EntityType<?> entityType, Level level) {
 		super(entityType, level);
 		this.noPhysics = true;
 		this.noCulling = true;
 		this.cullingBoundingBox = this.getBoundingBox();
-		this.interpolators
-			.addEntry(
-				Set.of(DATA_TRANSLATION_ID, DATA_LEFT_ROTATION_ID, DATA_SCALE_ID, DATA_RIGHT_ROTATION_ID),
-				(f, synchedEntityData) -> this.transformation.updateValue(f, createTransformation(synchedEntityData))
-			);
-		this.interpolators.addEntry(DATA_SHADOW_STRENGTH_ID, this.shadowStrength);
-		this.interpolators.addEntry(DATA_SHADOW_RADIUS_ID, this.shadowRadius);
-	}
-
-	@Override
-	public void onSyncedDataUpdated(List<SynchedEntityData.DataValue<?>> list) {
-		super.onSyncedDataUpdated(list);
-		boolean bl = false;
-
-		for (SynchedEntityData.DataValue<?> dataValue : list) {
-			bl |= this.interpolators.shouldTriggerUpdate(dataValue.id());
-		}
-
-		if (bl) {
-			boolean bl2 = this.tickCount <= 0;
-			if (bl2) {
-				this.interpolators.updateValues(Float.POSITIVE_INFINITY, this.entityData);
-			} else {
-				this.updateInterpolators = true;
-			}
-		}
 	}
 
 	@Override
@@ -131,7 +107,15 @@ public abstract class Display extends Entity {
 		}
 
 		if (DATA_INTERPOLATION_START_DELTA_TICKS_ID.equals(entityDataAccessor)) {
-			this.updateTime = true;
+			this.updateStartTick = true;
+		}
+
+		if (DATA_INTERPOLATION_DURATION_ID.equals(entityDataAccessor)) {
+			this.updateInterpolationDuration = true;
+		}
+
+		if (RENDER_STATE_IDS.contains(entityDataAccessor.getId())) {
+			this.updateRenderState = true;
 		}
 	}
 
@@ -151,18 +135,32 @@ public abstract class Display extends Entity {
 		}
 
 		if (this.level.isClientSide) {
-			if (this.updateTime) {
-				this.updateTime = false;
+			if (this.updateStartTick) {
+				this.updateStartTick = false;
 				int i = this.getInterpolationDelay();
 				this.interpolationStartClientTick = (long)(this.tickCount + i);
 			}
 
-			if (this.updateInterpolators) {
-				this.updateInterpolators = false;
-				this.interpolators.updateValues(this.lastProgress, this.entityData);
+			if (this.updateInterpolationDuration) {
+				this.updateInterpolationDuration = false;
+				this.interpolationDuration = this.getInterpolationDuration();
+			}
+
+			if (this.updateRenderState) {
+				this.updateRenderState = false;
+				boolean bl = this.interpolationDuration != 0;
+				if (bl && this.renderState != null) {
+					this.renderState = this.createInterpolatedRenderState(this.renderState, this.lastProgress);
+				} else {
+					this.renderState = this.createFreshRenderState();
+				}
+
+				this.updateRenderSubState(bl, this.lastProgress);
 			}
 		}
 	}
+
+	protected abstract void updateRenderSubState(boolean bl, float f);
 
 	@Override
 	protected void defineSynchedData() {
@@ -288,8 +286,9 @@ public abstract class Display extends Entity {
 		return this.orientation;
 	}
 
-	public Transformation transformation(float f) {
-		return this.transformation.get(f);
+	@Nullable
+	public Display.RenderState renderState() {
+		return this.renderState;
 	}
 
 	private void setInterpolationDuration(int i) {
@@ -312,7 +311,7 @@ public abstract class Display extends Entity {
 		this.entityData.set(DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, billboardConstraints.getId());
 	}
 
-	public Display.BillboardConstraints getBillboardConstraints() {
+	private Display.BillboardConstraints getBillboardConstraints() {
 		return (Display.BillboardConstraints)Display.BillboardConstraints.BY_ID.apply(this.entityData.get(DATA_BILLBOARD_RENDER_CONSTRAINTS_ID));
 	}
 
@@ -326,7 +325,7 @@ public abstract class Display extends Entity {
 		return i != -1 ? Brightness.unpack(i) : null;
 	}
 
-	public int getPackedBrightnessOverride() {
+	private int getPackedBrightnessOverride() {
 		return this.entityData.get(DATA_BRIGHTNESS_OVERRIDE_ID);
 	}
 
@@ -346,20 +345,12 @@ public abstract class Display extends Entity {
 		return this.entityData.get(DATA_SHADOW_RADIUS_ID);
 	}
 
-	public float getShadowRadius(float f) {
-		return this.shadowRadius.get(f);
-	}
-
 	private void setShadowStrength(float f) {
 		this.entityData.set(DATA_SHADOW_STRENGTH_ID, f);
 	}
 
 	private float getShadowStrength() {
 		return this.entityData.get(DATA_SHADOW_STRENGTH_ID);
-	}
-
-	public float getShadowStrength(float f) {
-		return this.shadowStrength.get(f);
 	}
 
 	private void setWidth(float f) {
@@ -383,7 +374,7 @@ public abstract class Display extends Entity {
 	}
 
 	public float calculateInterpolationProgress(float f) {
-		int i = this.getInterpolationDuration();
+		int i = this.interpolationDuration;
 		if (i <= 0) {
 			return 1.0F;
 		} else {
@@ -447,6 +438,31 @@ public abstract class Display extends Entity {
 		return i != -1 ? i : super.getTeamColor();
 	}
 
+	private Display.RenderState createFreshRenderState() {
+		return new Display.RenderState(
+			Display.GenericInterpolator.constant(createTransformation(this.entityData)),
+			this.getBillboardConstraints(),
+			this.getPackedBrightnessOverride(),
+			Display.FloatInterpolator.constant(this.getShadowRadius()),
+			Display.FloatInterpolator.constant(this.getShadowStrength()),
+			this.getGlowColorOverride()
+		);
+	}
+
+	private Display.RenderState createInterpolatedRenderState(Display.RenderState renderState, float f) {
+		Transformation transformation = renderState.transformation.get(f);
+		float g = renderState.shadowRadius.get(f);
+		float h = renderState.shadowStrength.get(f);
+		return new Display.RenderState(
+			new Display.TransformationInterpolator(transformation, createTransformation(this.entityData)),
+			this.getBillboardConstraints(),
+			this.getPackedBrightnessOverride(),
+			new Display.LinearFloatInterpolator(g, this.getShadowRadius()),
+			new Display.LinearFloatInterpolator(h, this.getShadowStrength()),
+			this.getGlowColorOverride()
+		);
+	}
+
 	public static enum BillboardConstraints implements StringRepresentable {
 		FIXED((byte)0, "fixed"),
 		VERTICAL((byte)1, "vertical"),
@@ -480,6 +496,8 @@ public abstract class Display extends Entity {
 		private static final EntityDataAccessor<BlockState> DATA_BLOCK_STATE_ID = SynchedEntityData.defineId(
 			Display.BlockDisplay.class, EntityDataSerializers.BLOCK_STATE
 		);
+		@Nullable
+		private Display.BlockDisplay.BlockRenderState blockRenderState;
 
 		public BlockDisplay(EntityType<?> entityType, Level level) {
 			super(entityType, level);
@@ -491,11 +509,19 @@ public abstract class Display extends Entity {
 			this.entityData.define(DATA_BLOCK_STATE_ID, Blocks.AIR.defaultBlockState());
 		}
 
-		public BlockState getBlockState() {
+		@Override
+		public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
+			super.onSyncedDataUpdated(entityDataAccessor);
+			if (entityDataAccessor.equals(DATA_BLOCK_STATE_ID)) {
+				this.updateRenderState = true;
+			}
+		}
+
+		private BlockState getBlockState() {
 			return this.entityData.get(DATA_BLOCK_STATE_ID);
 		}
 
-		public void setBlockState(BlockState blockState) {
+		private void setBlockState(BlockState blockState) {
 			this.entityData.set(DATA_BLOCK_STATE_ID, blockState);
 		}
 
@@ -510,123 +536,53 @@ public abstract class Display extends Entity {
 			super.addAdditionalSaveData(compoundTag);
 			compoundTag.put("block_state", NbtUtils.writeBlockState(this.getBlockState()));
 		}
-	}
 
-	static class ColorInterpolator extends Display.IntInterpolator {
-		protected ColorInterpolator(int i) {
-			super(i);
+		@Nullable
+		public Display.BlockDisplay.BlockRenderState blockRenderState() {
+			return this.blockRenderState;
 		}
 
 		@Override
-		protected int interpolate(float f, int i, int j) {
-			return FastColor.ARGB32.lerp(f, i, j);
+		protected void updateRenderSubState(boolean bl, float f) {
+			this.blockRenderState = new Display.BlockDisplay.BlockRenderState(this.getBlockState());
+		}
+
+		public static record BlockRenderState(BlockState blockState) {
 		}
 	}
 
-	static class FloatInterpolator extends Display.Interpolator<Float> {
-		protected FloatInterpolator(float f) {
-			super(f);
-		}
-
-		protected float interpolate(float f, float g, float h) {
-			return Mth.lerp(f, g, h);
-		}
-
-		public float get(float f) {
-			return !((double)f >= 1.0) && this.lastValue != null ? this.interpolate(f, this.lastValue, this.currentValue) : this.currentValue;
-		}
-
-		protected Float getGeneric(float f) {
-			return this.get(f);
-		}
-	}
-
-	abstract static class GenericInterpolator<T> extends Display.Interpolator<T> {
-		protected GenericInterpolator(T object) {
-			super(object);
-		}
-
-		protected abstract T interpolate(float f, T object, T object2);
-
-		public T get(float f) {
-			return !((double)f >= 1.0) && this.lastValue != null ? this.interpolate(f, this.lastValue, this.currentValue) : this.currentValue;
-		}
-
+	static record ColorInterpolator(int previous, int current) implements Display.IntInterpolator {
 		@Override
-		protected T getGeneric(float f) {
-			return this.get(f);
-		}
-	}
-
-	static class IntInterpolator extends Display.Interpolator<Integer> {
-		protected IntInterpolator(int i) {
-			super(i);
-		}
-
-		protected int interpolate(float f, int i, int j) {
-			return Mth.lerpInt(f, i, j);
-		}
-
 		public int get(float f) {
-			return !((double)f >= 1.0) && this.lastValue != null ? this.interpolate(f, this.lastValue, this.currentValue) : this.currentValue;
-		}
-
-		protected Integer getGeneric(float f) {
-			return this.get(f);
+			return FastColor.ARGB32.lerp(f, this.previous, this.current);
 		}
 	}
 
 	@FunctionalInterface
-	interface IntepolatorUpdater {
-		void update(float f, SynchedEntityData synchedEntityData);
+	public interface FloatInterpolator {
+		static Display.FloatInterpolator constant(float f) {
+			return g -> f;
+		}
+
+		float get(float f);
 	}
 
-	abstract static class Interpolator<T> {
-		@Nullable
-		protected T lastValue;
-		protected T currentValue;
-
-		protected Interpolator(T object) {
-			this.currentValue = object;
+	@FunctionalInterface
+	public interface GenericInterpolator<T> {
+		static <T> Display.GenericInterpolator<T> constant(T object) {
+			return f -> object;
 		}
 
-		protected abstract T getGeneric(float f);
-
-		public void updateValue(float f, T object) {
-			if (f != Float.POSITIVE_INFINITY) {
-				this.lastValue = this.getGeneric(f);
-			}
-
-			this.currentValue = object;
-		}
+		T get(float f);
 	}
 
-	static class InterpolatorSet {
-		private final IntSet interpolatedData = new IntOpenHashSet();
-		private final List<Display.IntepolatorUpdater> updaters = new ArrayList();
-
-		protected <T> void addEntry(EntityDataAccessor<T> entityDataAccessor, Display.Interpolator<T> interpolator) {
-			this.interpolatedData.add(entityDataAccessor.getId());
-			this.updaters.add((Display.IntepolatorUpdater)(f, synchedEntityData) -> interpolator.updateValue(f, synchedEntityData.get(entityDataAccessor)));
+	@FunctionalInterface
+	public interface IntInterpolator {
+		static Display.IntInterpolator constant(int i) {
+			return f -> i;
 		}
 
-		protected void addEntry(Set<EntityDataAccessor<?>> set, Display.IntepolatorUpdater intepolatorUpdater) {
-			for (EntityDataAccessor<?> entityDataAccessor : set) {
-				this.interpolatedData.add(entityDataAccessor.getId());
-			}
-
-			this.updaters.add(intepolatorUpdater);
-		}
-
-		public boolean shouldTriggerUpdate(int i) {
-			return this.interpolatedData.contains(i);
-		}
-
-		public void updateValues(float f, SynchedEntityData synchedEntityData) {
-			for (Display.IntepolatorUpdater intepolatorUpdater : this.updaters) {
-				intepolatorUpdater.update(f, synchedEntityData);
-			}
-		}
+		int get(float f);
 	}
 
 	public static class ItemDisplay extends Display {
@@ -648,6 +604,8 @@ public abstract class Display extends Entity {
 				return true;
 			}
 		};
+		@Nullable
+		private Display.ItemDisplay.ItemRenderState itemRenderState;
 
 		public ItemDisplay(EntityType<?> entityType, Level level) {
 			super(entityType, level);
@@ -660,7 +618,15 @@ public abstract class Display extends Entity {
 			this.entityData.define(DATA_ITEM_DISPLAY_ID, ItemDisplayContext.NONE.getId());
 		}
 
-		public ItemStack getItemStack() {
+		@Override
+		public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
+			super.onSyncedDataUpdated(entityDataAccessor);
+			if (DATA_ITEM_STACK_ID.equals(entityDataAccessor) || DATA_ITEM_DISPLAY_ID.equals(entityDataAccessor)) {
+				this.updateRenderState = true;
+			}
+		}
+
+		ItemStack getItemStack() {
 			return this.entityData.get(DATA_ITEM_STACK_ID);
 		}
 
@@ -672,7 +638,7 @@ public abstract class Display extends Entity {
 			this.entityData.set(DATA_ITEM_DISPLAY_ID, itemDisplayContext.getId());
 		}
 
-		public ItemDisplayContext getItemTransform() {
+		private ItemDisplayContext getItemTransform() {
 			return (ItemDisplayContext)ItemDisplayContext.BY_ID.apply(this.entityData.get(DATA_ITEM_DISPLAY_ID));
 		}
 
@@ -699,6 +665,43 @@ public abstract class Display extends Entity {
 		public SlotAccess getSlot(int i) {
 			return i == 0 ? this.slot : SlotAccess.NULL;
 		}
+
+		@Nullable
+		public Display.ItemDisplay.ItemRenderState itemRenderState() {
+			return this.itemRenderState;
+		}
+
+		@Override
+		protected void updateRenderSubState(boolean bl, float f) {
+			this.itemRenderState = new Display.ItemDisplay.ItemRenderState(this.getItemStack(), this.getItemTransform());
+		}
+
+		public static record ItemRenderState(ItemStack itemStack, ItemDisplayContext itemTransform) {
+		}
+	}
+
+	static record LinearFloatInterpolator(float previous, float current) implements Display.FloatInterpolator {
+		@Override
+		public float get(float f) {
+			return Mth.lerp(f, this.previous, this.current);
+		}
+	}
+
+	static record LinearIntInterpolator(int previous, int current) implements Display.IntInterpolator {
+		@Override
+		public int get(float f) {
+			return Mth.lerpInt(f, this.previous, this.current);
+		}
+	}
+
+	public static record RenderState(
+		Display.GenericInterpolator<Transformation> transformation,
+		Display.BillboardConstraints billboardConstraints,
+		int brightnessOverride,
+		Display.FloatInterpolator shadowRadius,
+		Display.FloatInterpolator shadowStrength,
+		int glowColorOverride
+	) {
 	}
 
 	public static class TextDisplay extends Display {
@@ -722,19 +725,16 @@ public abstract class Display extends Entity {
 		private static final EntityDataAccessor<Integer> DATA_BACKGROUND_COLOR_ID = SynchedEntityData.defineId(Display.TextDisplay.class, EntityDataSerializers.INT);
 		private static final EntityDataAccessor<Byte> DATA_TEXT_OPACITY_ID = SynchedEntityData.defineId(Display.TextDisplay.class, EntityDataSerializers.BYTE);
 		private static final EntityDataAccessor<Byte> DATA_STYLE_FLAGS_ID = SynchedEntityData.defineId(Display.TextDisplay.class, EntityDataSerializers.BYTE);
-		private final Display.IntInterpolator textOpacity = new Display.IntInterpolator(-1);
-		private final Display.IntInterpolator backgroundColor = new Display.ColorInterpolator(1073741824);
+		private static final IntSet TEXT_RENDER_STATE_IDS = IntSet.of(
+			DATA_TEXT_ID.getId(), DATA_LINE_WIDTH_ID.getId(), DATA_BACKGROUND_COLOR_ID.getId(), DATA_TEXT_OPACITY_ID.getId(), DATA_STYLE_FLAGS_ID.getId()
+		);
 		@Nullable
 		private Display.TextDisplay.CachedInfo clientDisplayCache;
+		@Nullable
+		private Display.TextDisplay.TextRenderState textRenderState;
 
 		public TextDisplay(EntityType<?> entityType, Level level) {
 			super(entityType, level);
-			this.interpolators.addEntry(DATA_BACKGROUND_COLOR_ID, this.backgroundColor);
-			this.interpolators
-				.addEntry(
-					Set.of(DATA_TEXT_OPACITY_ID),
-					(f, synchedEntityData) -> this.textOpacity.updateValue(f, Integer.valueOf(synchedEntityData.get(DATA_TEXT_OPACITY_ID) & 255))
-				);
 		}
 
 		@Override
@@ -750,10 +750,12 @@ public abstract class Display extends Entity {
 		@Override
 		public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
 			super.onSyncedDataUpdated(entityDataAccessor);
-			this.clientDisplayCache = null;
+			if (TEXT_RENDER_STATE_IDS.contains(entityDataAccessor.getId())) {
+				this.updateRenderState = true;
+			}
 		}
 
-		public Component getText() {
+		private Component getText() {
 			return this.entityData.get(DATA_TEXT_ID);
 		}
 
@@ -761,16 +763,12 @@ public abstract class Display extends Entity {
 			this.entityData.set(DATA_TEXT_ID, component);
 		}
 
-		public int getLineWidth() {
+		private int getLineWidth() {
 			return this.entityData.get(DATA_LINE_WIDTH_ID);
 		}
 
 		private void setLineWidth(int i) {
 			this.entityData.set(DATA_LINE_WIDTH_ID, i);
-		}
-
-		public byte getTextOpacity(float f) {
-			return (byte)this.textOpacity.get(f);
 		}
 
 		private byte getTextOpacity() {
@@ -781,10 +779,6 @@ public abstract class Display extends Entity {
 			this.entityData.set(DATA_TEXT_OPACITY_ID, b);
 		}
 
-		public int getBackgroundColor(float f) {
-			return this.backgroundColor.get(f);
-		}
-
 		private int getBackgroundColor() {
 			return this.entityData.get(DATA_BACKGROUND_COLOR_ID);
 		}
@@ -793,7 +787,7 @@ public abstract class Display extends Entity {
 			this.entityData.set(DATA_BACKGROUND_COLOR_ID, i);
 		}
 
-		public byte getFlags() {
+		private byte getFlags() {
 			return this.entityData.get(DATA_STYLE_FLAGS_ID);
 		}
 
@@ -872,10 +866,51 @@ public abstract class Display extends Entity {
 			Display.TextDisplay.Align.CODEC.encodeStart(NbtOps.INSTANCE, getAlign(b)).result().ifPresent(tag -> compoundTag.put("alignment", tag));
 		}
 
+		@Override
+		protected void updateRenderSubState(boolean bl, float f) {
+			if (bl && this.textRenderState != null) {
+				this.textRenderState = this.createInterpolatedTextRenderState(this.textRenderState, f);
+			} else {
+				this.textRenderState = this.createFreshTextRenderState();
+			}
+
+			this.clientDisplayCache = null;
+		}
+
+		@Nullable
+		public Display.TextDisplay.TextRenderState textRenderState() {
+			return this.textRenderState;
+		}
+
+		private Display.TextDisplay.TextRenderState createFreshTextRenderState() {
+			return new Display.TextDisplay.TextRenderState(
+				this.getText(),
+				this.getLineWidth(),
+				Display.IntInterpolator.constant(this.getTextOpacity()),
+				Display.IntInterpolator.constant(this.getBackgroundColor()),
+				this.getFlags()
+			);
+		}
+
+		private Display.TextDisplay.TextRenderState createInterpolatedTextRenderState(Display.TextDisplay.TextRenderState textRenderState, float f) {
+			int i = textRenderState.backgroundColor.get(f);
+			int j = textRenderState.textOpacity.get(f);
+			return new Display.TextDisplay.TextRenderState(
+				this.getText(),
+				this.getLineWidth(),
+				new Display.LinearIntInterpolator(j, this.getTextOpacity()),
+				new Display.ColorInterpolator(i, this.getBackgroundColor()),
+				this.getFlags()
+			);
+		}
+
 		public Display.TextDisplay.CachedInfo cacheDisplay(Display.TextDisplay.LineSplitter lineSplitter) {
 			if (this.clientDisplayCache == null) {
-				int i = this.getLineWidth();
-				this.clientDisplayCache = lineSplitter.split(this.getText(), i);
+				if (this.textRenderState != null) {
+					this.clientDisplayCache = lineSplitter.split(this.textRenderState.text(), this.textRenderState.lineWidth());
+				} else {
+					this.clientDisplayCache = new Display.TextDisplay.CachedInfo(List.of(), 0);
+				}
 			}
 
 			return this.clientDisplayCache;
@@ -916,6 +951,15 @@ public abstract class Display extends Entity {
 		@FunctionalInterface
 		public interface LineSplitter {
 			Display.TextDisplay.CachedInfo split(Component component, int i);
+		}
+
+		public static record TextRenderState(Component text, int lineWidth, Display.IntInterpolator textOpacity, Display.IntInterpolator backgroundColor, byte flags) {
+		}
+	}
+
+	static record TransformationInterpolator(Transformation previous, Transformation current) implements Display.GenericInterpolator<Transformation> {
+		public Transformation get(float f) {
+			return (double)f >= 1.0 ? this.current : this.previous.slerp(this.current, f);
 		}
 	}
 }

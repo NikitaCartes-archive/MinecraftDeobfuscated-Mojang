@@ -149,9 +149,9 @@ public class JigsawPlacement {
 		Optional<BlockPos> optional = Optional.empty();
 
 		for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
-			ResourceLocation resourceLocation2 = ResourceLocation.tryParse(structureBlockInfo.nbt.getString("name"));
+			ResourceLocation resourceLocation2 = ResourceLocation.tryParse(structureBlockInfo.nbt().getString("name"));
 			if (resourceLocation.equals(resourceLocation2)) {
-				optional = Optional.of(structureBlockInfo.pos);
+				optional = Optional.of(structureBlockInfo.pos());
 				break;
 			}
 		}
@@ -273,8 +273,8 @@ public class JigsawPlacement {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePoolElement.getShuffledJigsawBlocks(
 				this.structureTemplateManager, blockPos, rotation, this.random
 			)) {
-				Direction direction = JigsawBlock.getFrontFacing(structureBlockInfo.state);
-				BlockPos blockPos2 = structureBlockInfo.pos;
+				Direction direction = JigsawBlock.getFrontFacing(structureBlockInfo.state());
+				BlockPos blockPos2 = structureBlockInfo.pos();
 				BlockPos blockPos3 = blockPos2.relative(direction);
 				int k = blockPos2.getY() - j;
 				int l = -1;
@@ -323,7 +323,7 @@ public class JigsawPlacement {
 									int m;
 									if (bl && boundingBox2.getYSpan() <= 16) {
 										m = list2.stream().mapToInt(structureBlockInfox -> {
-											if (!boundingBox2.isInside(structureBlockInfox.pos.relative(JigsawBlock.getFrontFacing(structureBlockInfox.state)))) {
+											if (!boundingBox2.isInside(structureBlockInfox.pos().relative(JigsawBlock.getFrontFacing(structureBlockInfox.state())))) {
 												return 0;
 											} else {
 												ResourceKey<StructureTemplatePool> resourceKeyx = readPoolName(structureBlockInfox);
@@ -340,14 +340,14 @@ public class JigsawPlacement {
 
 									for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : list2) {
 										if (JigsawBlock.canAttach(structureBlockInfo, structureBlockInfo2)) {
-											BlockPos blockPos4 = structureBlockInfo2.pos;
+											BlockPos blockPos4 = structureBlockInfo2.pos();
 											BlockPos blockPos5 = blockPos3.subtract(blockPos4);
 											BoundingBox boundingBox3 = structurePoolElement2.getBoundingBox(this.structureTemplateManager, blockPos5, rotation2);
 											int n = boundingBox3.minY();
 											StructureTemplatePool.Projection projection2 = structurePoolElement2.getProjection();
 											boolean bl4 = projection2 == StructureTemplatePool.Projection.RIGID;
 											int o = blockPos4.getY();
-											int p = k - o + JigsawBlock.getFrontFacing(structureBlockInfo.state).getStepY();
+											int p = k - o + JigsawBlock.getFrontFacing(structureBlockInfo.state()).getStepY();
 											int q;
 											if (bl2 && bl4) {
 												q = j + p;
@@ -413,7 +413,7 @@ public class JigsawPlacement {
 		}
 
 		private static ResourceKey<StructureTemplatePool> readPoolName(StructureTemplate.StructureBlockInfo structureBlockInfo) {
-			return ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(structureBlockInfo.nbt.getString("pool")));
+			return ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(structureBlockInfo.nbt().getString("pool")));
 		}
 	}
 }

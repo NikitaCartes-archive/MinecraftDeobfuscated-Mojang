@@ -338,57 +338,57 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		if (this.level.isClientSide) {
 			boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame() && !this.isAngry();
 			return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
-		} else {
-			if (this.isTame()) {
-				if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-					if (!player.getAbilities().instabuild) {
-						itemStack.shrink(1);
-					}
-
-					this.heal((float)item.getFoodProperties().getNutrition());
-					return InteractionResult.SUCCESS;
-				}
-
-				if (!(item instanceof DyeItem)) {
-					InteractionResult interactionResult = super.mobInteract(player, interactionHand);
-					if ((!interactionResult.consumesAction() || this.isBaby()) && this.isOwnedBy(player)) {
-						this.setOrderedToSit(!this.isOrderedToSit());
-						this.jumping = false;
-						this.navigation.stop();
-						this.setTarget(null);
-						return InteractionResult.SUCCESS;
-					}
-
-					return interactionResult;
-				}
-
-				DyeColor dyeColor = ((DyeItem)item).getDyeColor();
-				if (dyeColor != this.getCollarColor()) {
-					this.setCollarColor(dyeColor);
-					if (!player.getAbilities().instabuild) {
-						itemStack.shrink(1);
-					}
-
-					return InteractionResult.SUCCESS;
-				}
-			} else if (itemStack.is(Items.BONE) && !this.isAngry()) {
+		} else if (this.isTame()) {
+			if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
 				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}
 
-				if (this.random.nextInt(3) == 0) {
-					this.tame(player);
-					this.navigation.stop();
-					this.setTarget(null);
-					this.setOrderedToSit(true);
-					this.level.broadcastEntityEvent(this, (byte)7);
-				} else {
-					this.level.broadcastEntityEvent(this, (byte)6);
+				this.heal((float)item.getFoodProperties().getNutrition());
+				return InteractionResult.SUCCESS;
+			} else {
+				if (item instanceof DyeItem dyeItem && this.isOwnedBy(player)) {
+					DyeColor dyeColor = dyeItem.getDyeColor();
+					if (dyeColor != this.getCollarColor()) {
+						this.setCollarColor(dyeColor);
+						if (!player.getAbilities().instabuild) {
+							itemStack.shrink(1);
+						}
+
+						return InteractionResult.SUCCESS;
+					}
+
+					return super.mobInteract(player, interactionHand);
 				}
 
-				return InteractionResult.SUCCESS;
+				InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+				if ((!interactionResult.consumesAction() || this.isBaby()) && this.isOwnedBy(player)) {
+					this.setOrderedToSit(!this.isOrderedToSit());
+					this.jumping = false;
+					this.navigation.stop();
+					this.setTarget(null);
+					return InteractionResult.SUCCESS;
+				} else {
+					return interactionResult;
+				}
+			}
+		} else if (itemStack.is(Items.BONE) && !this.isAngry()) {
+			if (!player.getAbilities().instabuild) {
+				itemStack.shrink(1);
 			}
 
+			if (this.random.nextInt(3) == 0) {
+				this.tame(player);
+				this.navigation.stop();
+				this.setTarget(null);
+				this.setOrderedToSit(true);
+				this.level.broadcastEntityEvent(this, (byte)7);
+			} else {
+				this.level.broadcastEntityEvent(this, (byte)6);
+			}
+
+			return InteractionResult.SUCCESS;
+		} else {
 			return super.mobInteract(player, interactionHand);
 		}
 	}

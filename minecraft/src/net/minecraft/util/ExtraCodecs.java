@@ -71,6 +71,19 @@ public class ExtraCodecs {
 			return DataResult.error(var2::getMessage);
 		}
 	});
+	public static final Codec<Component> FLAT_COMPONENT = Codec.STRING.flatXmap(string -> {
+		try {
+			return DataResult.success(Component.Serializer.fromJson(string));
+		} catch (JsonParseException var2) {
+			return DataResult.error(var2::getMessage);
+		}
+	}, component -> {
+		try {
+			return DataResult.success(Component.Serializer.toJson(component));
+		} catch (IllegalArgumentException var2) {
+			return DataResult.error(var2::getMessage);
+		}
+	});
 	public static final Codec<Vector3f> VECTOR3F = Codec.FLOAT
 		.listOf()
 		.comapFlatMap(

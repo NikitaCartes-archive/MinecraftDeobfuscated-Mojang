@@ -232,7 +232,7 @@ public class ListTag extends CollectionTag<Tag> {
 	public long[] getLongArray(int i) {
 		if (i >= 0 && i < this.list.size()) {
 			Tag tag = (Tag)this.list.get(i);
-			if (tag.getId() == 11) {
+			if (tag.getId() == 12) {
 				return ((LongArrayTag)tag).getAsLongArray();
 			}
 		}

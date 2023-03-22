@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Transformation;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -23,8 +24,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 @Environment(EnvType.CLIENT)
-public abstract class DisplayRenderer<T extends Display> extends EntityRenderer<T> {
-	private static final float MAX_SHADOW_RADIUS = 64.0F;
+public abstract class DisplayRenderer<T extends Display, S> extends EntityRenderer<T> {
 	private final EntityRenderDispatcher entityRenderDispatcher;
 
 	protected DisplayRenderer(EntityRendererProvider.Context context) {
@@ -37,25 +37,31 @@ public abstract class DisplayRenderer<T extends Display> extends EntityRenderer<
 	}
 
 	public void render(T display, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-		float h = display.calculateInterpolationProgress(g);
-		this.shadowRadius = Math.min(display.getShadowRadius(h), 64.0F);
-		this.shadowStrength = display.getShadowStrength(h);
-		int j = display.getPackedBrightnessOverride();
-		int k = j != -1 ? j : i;
-		super.render(display, f, g, poseStack, multiBufferSource, k);
-		poseStack.pushPose();
-		poseStack.mulPose(this.calculateOrientation(display));
-		Transformation transformation = display.transformation(h);
-		poseStack.mulPoseMatrix(transformation.getMatrix());
-		poseStack.last().normal().rotate(transformation.getLeftRotation()).rotate(transformation.getRightRotation());
-		this.renderInner(display, poseStack, multiBufferSource, k, h);
-		poseStack.popPose();
+		Display.RenderState renderState = display.renderState();
+		if (renderState != null) {
+			S object = this.getSubState(display);
+			if (object != null) {
+				float h = display.calculateInterpolationProgress(g);
+				this.shadowRadius = renderState.shadowRadius().get(h);
+				this.shadowStrength = renderState.shadowStrength().get(h);
+				int j = renderState.brightnessOverride();
+				int k = j != -1 ? j : i;
+				super.render(display, f, g, poseStack, multiBufferSource, k);
+				poseStack.pushPose();
+				poseStack.mulPose(this.calculateOrientation(renderState, display));
+				Transformation transformation = renderState.transformation().get(h);
+				poseStack.mulPoseMatrix(transformation.getMatrix());
+				poseStack.last().normal().rotate(transformation.getLeftRotation()).rotate(transformation.getRightRotation());
+				this.renderInner(display, object, poseStack, multiBufferSource, k, h);
+				poseStack.popPose();
+			}
+		}
 	}
 
-	private Quaternionf calculateOrientation(T display) {
+	private Quaternionf calculateOrientation(Display.RenderState renderState, T display) {
 		Camera camera = this.entityRenderDispatcher.camera;
 
-		return switch (display.getBillboardConstraints()) {
+		return switch (renderState.billboardConstraints()) {
 			case FIXED -> display.orientation();
 			case HORIZONTAL -> new Quaternionf().rotationYXZ((float) (-Math.PI / 180.0) * display.getYRot(), (float) (-Math.PI / 180.0) * camera.getXRot(), 0.0F);
 			case VERTICAL -> new Quaternionf()
@@ -65,10 +71,13 @@ public abstract class DisplayRenderer<T extends Display> extends EntityRenderer<
 		};
 	}
 
-	protected abstract void renderInner(T display, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f);
+	@Nullable
+	protected abstract S getSubState(T display);
+
+	protected abstract void renderInner(T display, S object, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f);
 
 	@Environment(EnvType.CLIENT)
-	public static class BlockDisplayRenderer extends DisplayRenderer<Display.BlockDisplay> {
+	public static class BlockDisplayRenderer extends DisplayRenderer<Display.BlockDisplay, Display.BlockDisplay.BlockRenderState> {
 		private final BlockRenderDispatcher blockRenderer;
 
 		protected BlockDisplayRenderer(EntityRendererProvider.Context context) {
@@ -76,13 +85,25 @@ public abstract class DisplayRenderer<T extends Display> extends EntityRenderer<
 			this.blockRenderer = context.getBlockRenderDispatcher();
 		}
 
-		public void renderInner(Display.BlockDisplay blockDisplay, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f) {
-			this.blockRenderer.renderSingleBlock(blockDisplay.getBlockState(), poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
+		@Nullable
+		protected Display.BlockDisplay.BlockRenderState getSubState(Display.BlockDisplay blockDisplay) {
+			return blockDisplay.blockRenderState();
+		}
+
+		public void renderInner(
+			Display.BlockDisplay blockDisplay,
+			Display.BlockDisplay.BlockRenderState blockRenderState,
+			PoseStack poseStack,
+			MultiBufferSource multiBufferSource,
+			int i,
+			float f
+		) {
+			this.blockRenderer.renderSingleBlock(blockRenderState.blockState(), poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class ItemDisplayRenderer extends DisplayRenderer<Display.ItemDisplay> {
+	public static class ItemDisplayRenderer extends DisplayRenderer<Display.ItemDisplay, Display.ItemDisplay.ItemRenderState> {
 		private final ItemRenderer itemRenderer;
 
 		protected ItemDisplayRenderer(EntityRendererProvider.Context context) {
@@ -90,11 +111,23 @@ public abstract class DisplayRenderer<T extends Display> extends EntityRenderer<
 			this.itemRenderer = context.getItemRenderer();
 		}
 
-		public void renderInner(Display.ItemDisplay itemDisplay, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f) {
+		@Nullable
+		protected Display.ItemDisplay.ItemRenderState getSubState(Display.ItemDisplay itemDisplay) {
+			return itemDisplay.itemRenderState();
+		}
+
+		public void renderInner(
+			Display.ItemDisplay itemDisplay,
+			Display.ItemDisplay.ItemRenderState itemRenderState,
+			PoseStack poseStack,
+			MultiBufferSource multiBufferSource,
+			int i,
+			float f
+		) {
 			this.itemRenderer
 				.renderStatic(
-					itemDisplay.getItemStack(),
-					itemDisplay.getItemTransform(),
+					itemRenderState.itemStack(),
+					itemRenderState.itemTransform(),
 					i,
 					OverlayTexture.NO_OVERLAY,
 					poseStack,
@@ -106,7 +139,7 @@ public abstract class DisplayRenderer<T extends Display> extends EntityRenderer<
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class TextDisplayRenderer extends DisplayRenderer<Display.TextDisplay> {
+	public static class TextDisplayRenderer extends DisplayRenderer<Display.TextDisplay, Display.TextDisplay.TextRenderState> {
 		private final Font font;
 
 		protected TextDisplayRenderer(EntityRendererProvider.Context context) {
@@ -128,19 +161,31 @@ public abstract class DisplayRenderer<T extends Display> extends EntityRenderer<
 			return new Display.TextDisplay.CachedInfo(list2, j);
 		}
 
-		public void renderInner(Display.TextDisplay textDisplay, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f) {
-			byte b = textDisplay.getFlags();
+		@Nullable
+		protected Display.TextDisplay.TextRenderState getSubState(Display.TextDisplay textDisplay) {
+			return textDisplay.textRenderState();
+		}
+
+		public void renderInner(
+			Display.TextDisplay textDisplay,
+			Display.TextDisplay.TextRenderState textRenderState,
+			PoseStack poseStack,
+			MultiBufferSource multiBufferSource,
+			int i,
+			float f
+		) {
+			byte b = textRenderState.flags();
 			boolean bl = (b & 2) != 0;
 			boolean bl2 = (b & 4) != 0;
 			boolean bl3 = (b & 1) != 0;
 			Display.TextDisplay.Align align = Display.TextDisplay.getAlign(b);
-			byte c = textDisplay.getTextOpacity(f);
+			byte c = (byte)textRenderState.textOpacity().get(f);
 			int j;
 			if (bl2) {
 				float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
 				j = (int)(g * 255.0F) << 24;
 			} else {
-				j = textDisplay.getBackgroundColor(f);
+				j = textRenderState.backgroundColor().get(f);
 			}
 
 			float g = 0.0F;

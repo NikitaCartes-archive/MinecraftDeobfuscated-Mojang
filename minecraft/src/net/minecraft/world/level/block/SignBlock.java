@@ -1,8 +1,11 @@
 package net.minecraft.world.level.block;
 
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -10,20 +13,23 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SignApplicator;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
@@ -73,48 +79,47 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		boolean bl = item instanceof DyeItem;
-		boolean bl2 = itemStack.is(Items.GLOW_INK_SAC);
-		boolean bl3 = itemStack.is(Items.INK_SAC);
-		boolean bl4 = (bl2 || bl || bl3) && player.getAbilities().mayBuild;
+		SignApplicator signApplicator2 = itemStack.getItem() instanceof SignApplicator signApplicator ? signApplicator : null;
+		boolean bl = signApplicator2 != null && player.getAbilities().mayBuild;
 		if (level.isClientSide) {
-			return bl4 ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
-		} else if (!(level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity)) {
-			return InteractionResult.PASS;
-		} else {
-			boolean bl5 = signBlockEntity.hasGlowingText();
-			if ((!bl2 || !bl5) && (!bl3 || bl5)) {
-				if (bl4) {
-					boolean bl6;
-					if (bl2) {
-						level.playSound(null, blockPos, SoundEvents.GLOW_INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
-						bl6 = signBlockEntity.setHasGlowingText(true);
-						if (player instanceof ServerPlayer) {
-							CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
-						}
-					} else if (bl3) {
-						level.playSound(null, blockPos, SoundEvents.INK_SAC_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
-						bl6 = signBlockEntity.setHasGlowingText(false);
-					} else {
-						level.playSound(null, blockPos, SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
-						bl6 = signBlockEntity.setColor(((DyeItem)item).getDyeColor());
-					}
-
-					if (bl6) {
-						if (!player.isCreative()) {
-							itemStack.shrink(1);
-						}
-
-						player.awardStat(Stats.ITEM_USED.get(item));
-					}
+			return bl ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+		} else if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
+			boolean bl2 = signBlockEntity.isFacingFrontText(player);
+			SignText signText = signBlockEntity.getText(bl2);
+			if (signBlockEntity.isWaxed()) {
+				boolean bl3 = signText.executeClickCommandsIfPresent((ServerPlayer)player, (ServerLevel)level, blockPos);
+				if (!bl3) {
+					level.playSound(null, signBlockEntity.getBlockPos(), SoundEvents.WAXED_SIGN_INTERACT_FAIL, SoundSource.BLOCKS);
 				}
 
-				return signBlockEntity.executeClickCommands((ServerPlayer)player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+				return InteractionResult.SUCCESS;
+			} else if (bl
+				&& !this.otherPlayerIsEditingSign(player, signBlockEntity)
+				&& signApplicator2.canApplyToSign(signText, player)
+				&& signApplicator2.tryApplyToSign(level, signBlockEntity, bl2, player)) {
+				if (!player.isCreative()) {
+					itemStack.shrink(1);
+				}
+
+				if (player instanceof ServerPlayer serverPlayer) {
+					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack);
+				}
+
+				level.gameEvent(GameEvent.BLOCK_CHANGE, signBlockEntity.getBlockPos(), GameEvent.Context.of(player, signBlockEntity.getBlockState()));
+				player.awardStat(Stats.ITEM_USED.get(item));
+				return InteractionResult.SUCCESS;
+			} else if (!this.otherPlayerIsEditingSign(player, signBlockEntity)) {
+				this.openTextEdit(player, signBlockEntity, bl2);
+				return InteractionResult.SUCCESS;
 			} else {
 				return InteractionResult.PASS;
 			}
+		} else {
+			return InteractionResult.PASS;
 		}
 	}
+
+	public abstract float getYRotationDegrees(BlockState blockState);
 
 	@Override
 	public FluidState getFluidState(BlockState blockState) {
@@ -134,5 +139,21 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 		}
 
 		return woodType;
+	}
+
+	public void openTextEdit(Player player, SignBlockEntity signBlockEntity, boolean bl) {
+		signBlockEntity.setAllowedPlayerEditor(player.getUUID());
+		player.openTextEdit(signBlockEntity, bl);
+	}
+
+	private boolean otherPlayerIsEditingSign(Player player, SignBlockEntity signBlockEntity) {
+		UUID uUID = signBlockEntity.getPlayerWhoMayEdit();
+		return uUID != null && !uUID.equals(player.getUUID());
+	}
+
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
+		return createTickerHelper(blockEntityType, BlockEntityType.SIGN, SignBlockEntity::tick);
 	}
 }

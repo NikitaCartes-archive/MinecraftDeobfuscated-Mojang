@@ -79,7 +79,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public static final int MAX_LEVEL_SIZE = 30000000;
 	public static final int LONG_PARTICLE_CLIP_RANGE = 512;
 	public static final int SHORT_PARTICLE_CLIP_RANGE = 32;
-	private static final Direction[] DIRECTIONS = Direction.values();
 	public static final int MAX_BRIGHTNESS = 15;
 	public static final int TICKS_PER_DAY = 24000;
 	public static final int MAX_ENTITY_SPAWN_Y = 20000000;
@@ -707,78 +706,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	@Override
 	public int getSeaLevel() {
 		return 63;
-	}
-
-	public int getDirectSignalTo(BlockPos blockPos) {
-		int i = 0;
-		i = Math.max(i, this.getDirectSignal(blockPos.below(), Direction.DOWN));
-		if (i >= 15) {
-			return i;
-		} else {
-			i = Math.max(i, this.getDirectSignal(blockPos.above(), Direction.UP));
-			if (i >= 15) {
-				return i;
-			} else {
-				i = Math.max(i, this.getDirectSignal(blockPos.north(), Direction.NORTH));
-				if (i >= 15) {
-					return i;
-				} else {
-					i = Math.max(i, this.getDirectSignal(blockPos.south(), Direction.SOUTH));
-					if (i >= 15) {
-						return i;
-					} else {
-						i = Math.max(i, this.getDirectSignal(blockPos.west(), Direction.WEST));
-						if (i >= 15) {
-							return i;
-						} else {
-							i = Math.max(i, this.getDirectSignal(blockPos.east(), Direction.EAST));
-							return i >= 15 ? i : i;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public boolean hasSignal(BlockPos blockPos, Direction direction) {
-		return this.getSignal(blockPos, direction) > 0;
-	}
-
-	public int getSignal(BlockPos blockPos, Direction direction) {
-		BlockState blockState = this.getBlockState(blockPos);
-		int i = blockState.getSignal(this, blockPos, direction);
-		return blockState.isRedstoneConductor(this, blockPos) ? Math.max(i, this.getDirectSignalTo(blockPos)) : i;
-	}
-
-	public boolean hasNeighborSignal(BlockPos blockPos) {
-		if (this.getSignal(blockPos.below(), Direction.DOWN) > 0) {
-			return true;
-		} else if (this.getSignal(blockPos.above(), Direction.UP) > 0) {
-			return true;
-		} else if (this.getSignal(blockPos.north(), Direction.NORTH) > 0) {
-			return true;
-		} else if (this.getSignal(blockPos.south(), Direction.SOUTH) > 0) {
-			return true;
-		} else {
-			return this.getSignal(blockPos.west(), Direction.WEST) > 0 ? true : this.getSignal(blockPos.east(), Direction.EAST) > 0;
-		}
-	}
-
-	public int getBestNeighborSignal(BlockPos blockPos) {
-		int i = 0;
-
-		for (Direction direction : DIRECTIONS) {
-			int j = this.getSignal(blockPos.relative(direction), direction);
-			if (j >= 15) {
-				return 15;
-			}
-
-			if (j > i) {
-				i = j;
-			}
-		}
-
-		return i;
 	}
 
 	public void disconnect() {

@@ -14,21 +14,17 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.WorldVersion;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.advancements.packs.UpdateOneTwentyVanillaAdvancementProvider;
 import net.minecraft.data.advancements.packs.VanillaAdvancementProvider;
 import net.minecraft.data.info.BiomeParametersDumpReport;
 import net.minecraft.data.info.BlockListReport;
 import net.minecraft.data.info.CommandsReport;
 import net.minecraft.data.info.RegistryDumpReport;
-import net.minecraft.data.loot.packs.UpdateOneTwentyLootTableProvider;
 import net.minecraft.data.loot.packs.VanillaLootTableProvider;
 import net.minecraft.data.metadata.PackMetadataGenerator;
 import net.minecraft.data.models.ModelProvider;
 import net.minecraft.data.recipes.packs.BundleRecipeProvider;
-import net.minecraft.data.recipes.packs.UpdateOneTwentyRecipeProvider;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
 import net.minecraft.data.registries.RegistriesDatapackGenerator;
-import net.minecraft.data.registries.UpdateOneTwentyRegistries;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.data.structures.SnbtToNbt;
@@ -46,9 +42,6 @@ import net.minecraft.data.tags.PaintingVariantTagsProvider;
 import net.minecraft.data.tags.PoiTypeTagsProvider;
 import net.minecraft.data.tags.StructureTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.data.tags.UpdateOneTwentyBiomeTagsProvider;
-import net.minecraft.data.tags.UpdateOneTwentyBlockTagsProvider;
-import net.minecraft.data.tags.UpdateOneTwentyItemTagsProvider;
 import net.minecraft.data.tags.VanillaBlockTagsProvider;
 import net.minecraft.data.tags.VanillaItemTagsProvider;
 import net.minecraft.data.tags.WorldPresetTagsProvider;
@@ -147,24 +140,6 @@ public class Main {
 		packGenerator3.addProvider(BundleRecipeProvider::new);
 		packGenerator3.addProvider(
 			packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE))
-		);
-		CompletableFuture<HolderLookup.Provider> completableFuture2 = UpdateOneTwentyRegistries.createLookup(completableFuture);
-		DataGenerator.PackGenerator packGenerator4 = dataGenerator.getBuiltinDatapack(bl2, "update_1_20");
-		packGenerator4.addProvider(UpdateOneTwentyRecipeProvider::new);
-		TagsProvider<Block> tagsProvider3 = packGenerator4.addProvider(
-			packOutput -> new UpdateOneTwentyBlockTagsProvider(packOutput, completableFuture2, tagsProvider.contentsGetter())
-		);
-		packGenerator4.addProvider(
-			packOutput -> new UpdateOneTwentyItemTagsProvider(packOutput, completableFuture2, tagsProvider2.contentsGetter(), tagsProvider3.contentsGetter())
-		);
-		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyBiomeTagsProvider::new, completableFuture2));
-		packGenerator4.addProvider(UpdateOneTwentyLootTableProvider::create);
-		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyVanillaAdvancementProvider::create, completableFuture2));
-		packGenerator4.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture2));
-		packGenerator4.addProvider(
-			packOutput -> PackMetadataGenerator.forFeaturePack(
-					packOutput, Component.translatable("dataPack.update_1_20.description"), FeatureFlagSet.of(FeatureFlags.UPDATE_1_20)
-				)
 		);
 		return dataGenerator;
 	}

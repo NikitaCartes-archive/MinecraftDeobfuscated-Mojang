@@ -37,6 +37,7 @@ public interface BuiltinStructures {
 	ResourceKey<Structure> RUINED_PORTAL_OCEAN = createKey("ruined_portal_ocean");
 	ResourceKey<Structure> RUINED_PORTAL_NETHER = createKey("ruined_portal_nether");
 	ResourceKey<Structure> ANCIENT_CITY = createKey("ancient_city");
+	ResourceKey<Structure> TRAIL_RUINS = createKey("trail_ruins");
 
 	private static ResourceKey<Structure> createKey(String string) {
 		return ResourceKey.create(Registries.STRUCTURE, new ResourceLocation(string));

@@ -81,7 +81,7 @@ public class DispenserBlock extends BaseEntityBlock {
 		int i = dispenserBlockEntity.getRandomSlot(serverLevel.random);
 		if (i < 0) {
 			serverLevel.levelEvent(1001, blockPos, 0);
-			serverLevel.gameEvent(null, GameEvent.DISPENSE_FAIL, blockPos);
+			serverLevel.gameEvent(GameEvent.BLOCK_ACTIVATE, blockPos, GameEvent.Context.of(dispenserBlockEntity.getBlockState()));
 		} else {
 			ItemStack itemStack = dispenserBlockEntity.getItem(i);
 			DispenseItemBehavior dispenseItemBehavior = this.getDispenseMethod(itemStack);

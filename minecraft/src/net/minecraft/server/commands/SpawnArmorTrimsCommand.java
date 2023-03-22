@@ -19,7 +19,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ArmorMaterials;
@@ -70,7 +69,12 @@ public class SpawnArmorTrimsCommand {
 		TrimPatterns.TIDE,
 		TrimPatterns.SNOUT,
 		TrimPatterns.RIB,
-		TrimPatterns.SPIRE
+		TrimPatterns.SPIRE,
+		TrimPatterns.WAYFINDER,
+		TrimPatterns.SHAPER,
+		TrimPatterns.SILENCE,
+		TrimPatterns.RAISER,
+		TrimPatterns.HOST
 	);
 	private static final List<ResourceKey<TrimMaterial>> VANILLA_TRIM_MATERIALS = List.of(
 		TrimMaterials.QUARTZ,
@@ -90,7 +94,7 @@ public class SpawnArmorTrimsCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
 			Commands.literal("spawn_armor_trims")
-				.requires(commandSourceStack -> commandSourceStack.hasPermission(2) && commandSourceStack.getLevel().enabledFeatures().contains(FeatureFlags.UPDATE_1_20))
+				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.executes(commandContext -> spawnArmorTrims(commandContext.getSource(), commandContext.getSource().getPlayerOrException()))
 		);
 	}

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.stream.IntStream;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
@@ -18,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import org.joml.Matrix4f;
@@ -25,36 +27,37 @@ import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSignEditScreen extends Screen {
-	protected final SignBlockEntity sign;
-	protected final String[] messages;
+	private final SignBlockEntity sign;
+	private SignText text;
+	private final String[] messages;
+	private final boolean isFrontText;
 	protected final WoodType woodType;
 	private int frame;
 	private int line;
+	@Nullable
 	private TextFieldHelper signField;
 
-	public AbstractSignEditScreen(SignBlockEntity signBlockEntity, boolean bl) {
-		this(signBlockEntity, bl, Component.translatable("sign.edit"));
+	public AbstractSignEditScreen(SignBlockEntity signBlockEntity, boolean bl, boolean bl2) {
+		this(signBlockEntity, bl, bl2, Component.translatable("sign.edit"));
 	}
 
-	public AbstractSignEditScreen(SignBlockEntity signBlockEntity, boolean bl, Component component) {
+	public AbstractSignEditScreen(SignBlockEntity signBlockEntity, boolean bl, boolean bl2, Component component) {
 		super(component);
-		this.woodType = SignBlock.getWoodType(signBlockEntity.getBlockState().getBlock());
-		this.messages = (String[])IntStream.range(0, 4).mapToObj(i -> signBlockEntity.getMessage(i, bl)).map(Component::getString).toArray(String[]::new);
 		this.sign = signBlockEntity;
+		this.text = signBlockEntity.getText(bl);
+		this.isFrontText = bl;
+		this.woodType = SignBlock.getWoodType(signBlockEntity.getBlockState().getBlock());
+		this.messages = (String[])IntStream.range(0, 4).mapToObj(i -> this.text.getMessage(i, bl2)).map(Component::getString).toArray(String[]::new);
 	}
 
 	@Override
 	protected void init() {
 		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 100, this.height / 4 + 120, 200, 20).build()
+			Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 100, this.height / 4 + 144, 200, 20).build()
 		);
-		this.sign.setEditable(false);
 		this.signField = new TextFieldHelper(
 			() -> this.messages[this.line],
-			string -> {
-				this.messages[this.line] = string;
-				this.sign.setMessage(this.line, Component.literal(string));
-			},
+			this::setMessage,
 			TextFieldHelper.createClipboardGetter(this.minecraft),
 			TextFieldHelper.createClipboardSetter(this.minecraft),
 			string -> this.minecraft.font.width(string) <= this.sign.getMaxTextLineWidth()
@@ -62,37 +65,18 @@ public abstract class AbstractSignEditScreen extends Screen {
 	}
 
 	@Override
-	public void removed() {
-		ClientPacketListener clientPacketListener = this.minecraft.getConnection();
-		if (clientPacketListener != null) {
-			clientPacketListener.send(new ServerboundSignUpdatePacket(this.sign.getBlockPos(), this.messages[0], this.messages[1], this.messages[2], this.messages[3]));
-		}
-
-		this.sign.setEditable(true);
-	}
-
-	@Override
 	public void tick() {
 		this.frame++;
-		if (!this.sign.getType().isValid(this.sign.getBlockState())) {
+		if (!this.isValid()) {
 			this.onDone();
 		}
 	}
 
-	private void onDone() {
-		this.sign.setChanged();
-		this.minecraft.setScreen(null);
-	}
-
-	@Override
-	public boolean charTyped(char c, int i) {
-		this.signField.charTyped(c);
-		return true;
-	}
-
-	@Override
-	public void onClose() {
-		this.onDone();
+	private boolean isValid() {
+		return this.minecraft == null
+			|| this.minecraft.player == null
+			|| !this.sign.getType().isValid(this.sign.getBlockState())
+			|| !this.sign.playerIsTooFarAwayToEdit(this.minecraft.player.getUUID());
 	}
 
 	@Override
@@ -111,6 +95,12 @@ public abstract class AbstractSignEditScreen extends Screen {
 	}
 
 	@Override
+	public boolean charTyped(char c, int i) {
+		this.signField.charTyped(c);
+		return true;
+	}
+
+	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		Lighting.setupForFlatItems();
 		this.renderBackground(poseStack);
@@ -118,6 +108,26 @@ public abstract class AbstractSignEditScreen extends Screen {
 		this.renderSign(poseStack);
 		Lighting.setupFor3DItems();
 		super.render(poseStack, i, j, f);
+	}
+
+	@Override
+	public void onClose() {
+		this.onDone();
+	}
+
+	@Override
+	public void removed() {
+		ClientPacketListener clientPacketListener = this.minecraft.getConnection();
+		if (clientPacketListener != null) {
+			clientPacketListener.send(
+				new ServerboundSignUpdatePacket(this.sign.getBlockPos(), this.isFrontText, this.messages[0], this.messages[1], this.messages[2], this.messages[3])
+			);
+		}
+	}
+
+	@Override
+	public boolean isPauseScreen() {
+		return false;
 	}
 
 	protected abstract void renderSignBackground(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, BlockState blockState);
@@ -144,7 +154,7 @@ public abstract class AbstractSignEditScreen extends Screen {
 		poseStack.translate(0.0F, 0.0F, 4.0F);
 		Vector3f vector3f = this.getSignTextScale();
 		poseStack.scale(vector3f.x(), vector3f.y(), vector3f.z());
-		int i = this.sign.getColor().getTextColor();
+		int i = this.text.getColor().getTextColor();
 		boolean bl = this.frame / 6 % 2 == 0;
 		int j = this.signField.getCursorPos();
 		int k = this.signField.getSelectionPos();
@@ -198,5 +208,15 @@ public abstract class AbstractSignEditScreen extends Screen {
 				}
 			}
 		}
+	}
+
+	private void setMessage(String string) {
+		this.messages[this.line] = string;
+		this.text = this.text.setMessage(this.line, Component.literal(string));
+		this.sign.setText(this.text, this.isFrontText);
+	}
+
+	private void onDone() {
+		this.minecraft.setScreen(null);
 	}
 }

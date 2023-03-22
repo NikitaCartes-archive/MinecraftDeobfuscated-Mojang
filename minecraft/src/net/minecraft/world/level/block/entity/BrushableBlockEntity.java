@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -27,10 +28,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
-public class SuspiciousSandBlockEntity extends BlockEntity {
+public class BrushableBlockEntity extends BlockEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final String LOOT_TABLE_TAG = "loot_table";
-	private static final String LOOT_TABLE_SEED_TAG = "loot_table_seed";
+	private static final String LOOT_TABLE_TAG = "LootTable";
+	private static final String LOOT_TABLE_SEED_TAG = "LootTableSeed";
 	private static final String HIT_DIRECTION_TAG = "hit_direction";
 	private static final String ITEM_TAG = "item";
 	private static final int BRUSH_COOLDOWN_TICKS = 10;
@@ -46,8 +47,8 @@ public class SuspiciousSandBlockEntity extends BlockEntity {
 	private ResourceLocation lootTable;
 	private long lootTableSeed;
 
-	public SuspiciousSandBlockEntity(BlockPos blockPos, BlockState blockState) {
-		super(BlockEntityType.SUSPICIOUS_SAND, blockPos, blockState);
+	public BrushableBlockEntity(BlockPos blockPos, BlockState blockState) {
+		super(BlockEntityType.BRUSHABLE_BLOCK, blockPos, blockState);
 	}
 
 	public boolean brush(long l, Player player, Direction direction) {
@@ -64,7 +65,7 @@ public class SuspiciousSandBlockEntity extends BlockEntity {
 				this.brushingCompleted(player);
 				return true;
 			} else {
-				this.level.scheduleTick(this.getBlockPos(), Blocks.SUSPICIOUS_SAND, 40);
+				this.level.scheduleTick(this.getBlockPos(), this.getBlockState().getBlock(), 40);
 				int j = this.getCompletionState();
 				if (i != j) {
 					BlockState blockState = this.getBlockState();
@@ -109,8 +110,16 @@ public class SuspiciousSandBlockEntity extends BlockEntity {
 	private void brushingCompleted(Player player) {
 		if (this.level != null && this.level.getServer() != null) {
 			this.dropContent(player);
-			this.level.levelEvent(3008, this.getBlockPos(), Block.getId(this.getBlockState()));
-			this.level.setBlock(this.worldPosition, Blocks.SAND.defaultBlockState(), 3);
+			BlockState blockState = this.getBlockState();
+			this.level.levelEvent(3008, this.getBlockPos(), Block.getId(blockState));
+			Block block2;
+			if (this.getBlockState().getBlock() instanceof BrushableBlock brushableBlock) {
+				block2 = brushableBlock.getTurnsInto();
+			} else {
+				block2 = Blocks.AIR;
+			}
+
+			this.level.setBlock(this.worldPosition, block2.defaultBlockState(), 3);
 		}
 	}
 
@@ -123,9 +132,9 @@ public class SuspiciousSandBlockEntity extends BlockEntity {
 				double f = d / 2.0;
 				Direction direction = (Direction)Objects.requireNonNullElse(this.hitDirection, Direction.UP);
 				BlockPos blockPos = this.worldPosition.relative(direction, 1);
-				double g = Math.floor((double)blockPos.getX()) + 0.5 * e + f;
-				double h = Math.floor((double)blockPos.getY() + 0.5) + (double)(EntityType.ITEM.getHeight() / 2.0F);
-				double i = Math.floor((double)blockPos.getZ()) + 0.5 * e + f;
+				double g = (double)blockPos.getX() + 0.5 * e + f;
+				double h = (double)blockPos.getY() + 0.5 + (double)(EntityType.ITEM.getHeight() / 2.0F);
+				double i = (double)blockPos.getZ() + 0.5 * e + f;
 				ItemEntity itemEntity = new ItemEntity(this.level, g, h, i, this.item.split(this.level.random.nextInt(21) + 10));
 				itemEntity.setDeltaMovement(Vec3.ZERO);
 				this.level.addFreshEntity(itemEntity);
@@ -153,15 +162,15 @@ public class SuspiciousSandBlockEntity extends BlockEntity {
 				this.brushCountResetsAtTick = 0L;
 				this.coolDownEndsAtTick = 0L;
 			} else {
-				this.level.scheduleTick(this.getBlockPos(), Blocks.SUSPICIOUS_SAND, (int)(this.brushCountResetsAtTick - this.level.getGameTime()));
+				this.level.scheduleTick(this.getBlockPos(), this.getBlockState().getBlock(), (int)(this.brushCountResetsAtTick - this.level.getGameTime()));
 			}
 		}
 	}
 
 	private boolean tryLoadLootTable(CompoundTag compoundTag) {
-		if (compoundTag.contains("loot_table", 8)) {
-			this.lootTable = new ResourceLocation(compoundTag.getString("loot_table"));
-			this.lootTableSeed = compoundTag.getLong("loot_table_seed");
+		if (compoundTag.contains("LootTable", 8)) {
+			this.lootTable = new ResourceLocation(compoundTag.getString("LootTable"));
+			this.lootTableSeed = compoundTag.getLong("LootTableSeed");
 			return true;
 		} else {
 			return false;
@@ -172,9 +181,9 @@ public class SuspiciousSandBlockEntity extends BlockEntity {
 		if (this.lootTable == null) {
 			return false;
 		} else {
-			compoundTag.putString("loot_table", this.lootTable.toString());
+			compoundTag.putString("LootTable", this.lootTable.toString());
 			if (this.lootTableSeed != 0L) {
-				compoundTag.putLong("loot_table_seed", this.lootTableSeed);
+				compoundTag.putLong("LootTableSeed", this.lootTableSeed);
 			}
 
 			return true;

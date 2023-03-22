@@ -41,14 +41,14 @@ public class BlockAgeProcessor extends StructureProcessor {
 		StructureTemplate.StructureBlockInfo structureBlockInfo2,
 		StructurePlaceSettings structurePlaceSettings
 	) {
-		RandomSource randomSource = structurePlaceSettings.getRandom(structureBlockInfo2.pos);
-		BlockState blockState = structureBlockInfo2.state;
-		BlockPos blockPos3 = structureBlockInfo2.pos;
+		RandomSource randomSource = structurePlaceSettings.getRandom(structureBlockInfo2.pos());
+		BlockState blockState = structureBlockInfo2.state();
+		BlockPos blockPos3 = structureBlockInfo2.pos();
 		BlockState blockState2 = null;
 		if (blockState.is(Blocks.STONE_BRICKS) || blockState.is(Blocks.STONE) || blockState.is(Blocks.CHISELED_STONE_BRICKS)) {
 			blockState2 = this.maybeReplaceFullStoneBlock(randomSource);
 		} else if (blockState.is(BlockTags.STAIRS)) {
-			blockState2 = this.maybeReplaceStairs(randomSource, structureBlockInfo2.state);
+			blockState2 = this.maybeReplaceStairs(randomSource, structureBlockInfo2.state());
 		} else if (blockState.is(BlockTags.SLABS)) {
 			blockState2 = this.maybeReplaceSlab(randomSource);
 		} else if (blockState.is(BlockTags.WALLS)) {
@@ -57,7 +57,7 @@ public class BlockAgeProcessor extends StructureProcessor {
 			blockState2 = this.maybeReplaceObsidian(randomSource);
 		}
 
-		return blockState2 != null ? new StructureTemplate.StructureBlockInfo(blockPos3, blockState2, structureBlockInfo2.nbt) : structureBlockInfo2;
+		return blockState2 != null ? new StructureTemplate.StructureBlockInfo(blockPos3, blockState2, structureBlockInfo2.nbt()) : structureBlockInfo2;
 	}
 
 	@Nullable

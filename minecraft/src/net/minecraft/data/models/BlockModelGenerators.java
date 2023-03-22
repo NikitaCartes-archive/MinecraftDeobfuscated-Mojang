@@ -49,6 +49,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.MangrovePropaguleBlock;
+import net.minecraft.world.level.block.PitcherCropBlock;
+import net.minecraft.world.level.block.SnifferEggBlock;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.BellAttachType;
@@ -303,27 +305,26 @@ public class BlockModelGenerators {
 		this.blockStateOutput.accept(createRotatedVariant(block, resourceLocation));
 	}
 
-	private void createSuspiciousSandBlock() {
+	private void createBrushableBlock(Block block) {
 		this.blockStateOutput
 			.accept(
-				MultiVariantGenerator.multiVariant(Blocks.SUSPICIOUS_SAND)
+				MultiVariantGenerator.multiVariant(block)
 					.with(
 						PropertyDispatch.property(BlockStateProperties.DUSTED)
 							.generate(
 								integer -> {
 									String string = "_" + integer;
-									ResourceLocation resourceLocation = TextureMapping.getBlockTexture(Blocks.SUSPICIOUS_SAND, string);
+									ResourceLocation resourceLocation = TextureMapping.getBlockTexture(block, string);
 									return Variant.variant()
 										.with(
 											VariantProperties.MODEL,
-											ModelTemplates.CUBE_ALL
-												.createWithSuffix(Blocks.SUSPICIOUS_SAND, string, new TextureMapping().put(TextureSlot.ALL, resourceLocation), this.modelOutput)
+											ModelTemplates.CUBE_ALL.createWithSuffix(block, string, new TextureMapping().put(TextureSlot.ALL, resourceLocation), this.modelOutput)
 										);
 								}
 							)
 					)
 			);
-		this.delegateItemModel(Blocks.SUSPICIOUS_SAND, TextureMapping.getBlockTexture(Blocks.SUSPICIOUS_SAND, "_0"));
+		this.delegateItemModel(block, TextureMapping.getBlockTexture(block, "_0"));
 	}
 
 	static BlockStateGenerator createButton(Block block, ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
@@ -1417,6 +1418,27 @@ public class BlockModelGenerators {
 							.generate(integer -> Variant.variant().with(VariantProperties.MODEL, ModelTemplates.STEMS[integer].create(block, textureMapping, this.modelOutput)))
 					)
 			);
+	}
+
+	private void createPitcherPlant() {
+		Block block = Blocks.PITCHER_PLANT;
+		this.createSimpleFlatItemModel(block.asItem());
+		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block, "_top");
+		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(block, "_bottom");
+		this.createDoubleBlock(block, resourceLocation, resourceLocation2);
+	}
+
+	private void createPitcherCrop() {
+		Block block = Blocks.PITCHER_CROP;
+		this.createSimpleFlatItemModel(block.asItem());
+		PropertyDispatch propertyDispatch = PropertyDispatch.properties(PitcherCropBlock.AGE, BlockStateProperties.DOUBLE_BLOCK_HALF)
+			.generate((integer, doubleBlockHalf) -> {
+				return switch (doubleBlockHalf) {
+					case UPPER -> Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block, "_top_stage_" + integer));
+					case LOWER -> Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block, "_bottom_stage_" + integer));
+				};
+			});
+		this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(propertyDispatch));
 	}
 
 	private void createCoral(Block block, Block block2, Block block3, Block block4, Block block5, Block block6, Block block7, Block block8) {
@@ -3267,6 +3289,23 @@ public class BlockModelGenerators {
 			);
 	}
 
+	private void createCalibratedSculkSensor() {
+		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.CALIBRATED_SCULK_SENSOR, "_inactive");
+		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.CALIBRATED_SCULK_SENSOR, "_active");
+		this.delegateItemModel(Blocks.CALIBRATED_SCULK_SENSOR, resourceLocation);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.CALIBRATED_SCULK_SENSOR)
+					.with(
+						PropertyDispatch.property(BlockStateProperties.SCULK_SENSOR_PHASE)
+							.generate(
+								sculkSensorPhase -> Variant.variant().with(VariantProperties.MODEL, sculkSensorPhase == SculkSensorPhase.ACTIVE ? resourceLocation2 : resourceLocation)
+							)
+					)
+					.with(createHorizontalFacingDispatch())
+			);
+	}
+
 	private void createSculkShrieker() {
 		ResourceLocation resourceLocation = ModelTemplates.SCULK_SHRIEKER.create(Blocks.SCULK_SHRIEKER, TextureMapping.sculkShrieker(false), this.modelOutput);
 		ResourceLocation resourceLocation2 = ModelTemplates.SCULK_SHRIEKER
@@ -3751,6 +3790,27 @@ public class BlockModelGenerators {
 			);
 	}
 
+	private void createSnifferEgg() {
+		this.createSimpleFlatItemModel(Items.SNIFFER_EGG);
+		Function<Integer, ResourceLocation> function = integer -> {
+			String string = switch (integer) {
+				case 1 -> "_slightly_cracked";
+				case 2 -> "_very_cracked";
+				default -> "_not_cracked";
+			};
+			TextureMapping textureMapping = TextureMapping.cube(TextureMapping.getBlockTexture(Blocks.SNIFFER_EGG, string));
+			return ModelTemplates.SNIFFER_EGG.createWithSuffix(Blocks.SNIFFER_EGG, string, textureMapping, this.modelOutput);
+		};
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.SNIFFER_EGG)
+					.with(
+						PropertyDispatch.property(SnifferEggBlock.AGE)
+							.generate(integer -> Variant.variant().with(VariantProperties.MODEL, (ResourceLocation)function.apply(integer)))
+					)
+			);
+	}
+
 	private void createMultiface(Block block) {
 		this.createSimpleFlatItemModel(block);
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block);
@@ -4193,12 +4253,14 @@ public class BlockModelGenerators {
 		this.createTripwire();
 		this.createTripwireHook();
 		this.createTurtleEgg();
+		this.createSnifferEgg();
 		this.createMultiface(Blocks.VINE);
 		this.createMultiface(Blocks.GLOW_LICHEN);
 		this.createMultiface(Blocks.SCULK_VEIN);
 		this.createMagmaBlock();
 		this.createJigsaw();
 		this.createSculkSensor();
+		this.createCalibratedSculkSensor();
 		this.createSculkShrieker();
 		this.createFrogspawnBlock();
 		this.createMangrovePropagule();
@@ -4226,7 +4288,8 @@ public class BlockModelGenerators {
 		this.createRotatedVariantBlock(Blocks.DIRT);
 		this.createRotatedVariantBlock(Blocks.ROOTED_DIRT);
 		this.createRotatedVariantBlock(Blocks.SAND);
-		this.createSuspiciousSandBlock();
+		this.createBrushableBlock(Blocks.SUSPICIOUS_SAND);
+		this.createBrushableBlock(Blocks.SUSPICIOUS_GRAVEL);
 		this.createRotatedVariantBlock(Blocks.RED_SAND);
 		this.createRotatedMirroredVariantBlock(Blocks.BEDROCK);
 		this.createTrivialBlock(Blocks.REINFORCED_DEEPSLATE, TexturedModel.CUBE_TOP_BOTTOM);
@@ -4246,6 +4309,8 @@ public class BlockModelGenerators {
 		this.createCropBlock(Blocks.POTATOES, BlockStateProperties.AGE_7, 0, 0, 1, 1, 2, 2, 2, 3);
 		this.createCropBlock(Blocks.WHEAT, BlockStateProperties.AGE_7, 0, 1, 2, 3, 4, 5, 6, 7);
 		this.createCrossBlock(Blocks.TORCHFLOWER_CROP, BlockModelGenerators.TintState.NOT_TINTED, BlockStateProperties.AGE_2, 0, 1, 2);
+		this.createPitcherCrop();
+		this.createPitcherPlant();
 		this.blockEntityModels(ModelLocationUtils.decorateBlockModelLocation("decorated_pot"), Blocks.TERRACOTTA).createWithoutBlockItem(Blocks.DECORATED_POT);
 		this.blockEntityModels(ModelLocationUtils.decorateBlockModelLocation("banner"), Blocks.OAK_PLANKS)
 			.createWithCustomBlockItemModel(

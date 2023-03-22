@@ -60,7 +60,7 @@ public class MobEffects {
 			.addAttributeModifier(Attributes.ATTACK_DAMAGE, "22653B89-116E-49DC-9B6B-9971489B5BE5", 0.0, AttributeModifier.Operation.ADDITION)
 	);
 	public static final MobEffect POISON = register(19, "poison", new MobEffect(MobEffectCategory.HARMFUL, 8889187));
-	public static final MobEffect WITHER = register(20, "wither", new MobEffect(MobEffectCategory.HARMFUL, 3484199));
+	public static final MobEffect WITHER = register(20, "wither", new MobEffect(MobEffectCategory.HARMFUL, 7561558));
 	public static final MobEffect HEALTH_BOOST = register(
 		21,
 		"health_boost",
@@ -83,7 +83,7 @@ public class MobEffects {
 		new MobEffect(MobEffectCategory.HARMFUL, 12624973)
 			.addAttributeModifier(Attributes.LUCK, "CC5AF142-2BD2-4215-B636-2605AED11727", -1.0, AttributeModifier.Operation.ADDITION)
 	);
-	public static final MobEffect SLOW_FALLING = register(28, "slow_falling", new MobEffect(MobEffectCategory.BENEFICIAL, 16773073));
+	public static final MobEffect SLOW_FALLING = register(28, "slow_falling", new MobEffect(MobEffectCategory.BENEFICIAL, 15978425));
 	public static final MobEffect CONDUIT_POWER = register(29, "conduit_power", new MobEffect(MobEffectCategory.BENEFICIAL, 1950417));
 	public static final MobEffect DOLPHINS_GRACE = register(30, "dolphins_grace", new MobEffect(MobEffectCategory.BENEFICIAL, 8954814));
 	public static final MobEffect BAD_OMEN = register(31, "bad_omen", new MobEffect(MobEffectCategory.NEUTRAL, 745784) {

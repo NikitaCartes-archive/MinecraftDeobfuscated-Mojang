@@ -87,6 +87,11 @@ public class BuiltInLootTables {
 	public static final ResourceLocation TOOLSMITH_GIFT = register("gameplay/hero_of_the_village/toolsmith_gift");
 	public static final ResourceLocation WEAPONSMITH_GIFT = register("gameplay/hero_of_the_village/weaponsmith_gift");
 	public static final ResourceLocation PIGLIN_BARTERING = register("gameplay/piglin_bartering");
+	public static final ResourceLocation DESERT_WELL_ARCHAEOLOGY = register("archaeology/desert_well");
+	public static final ResourceLocation DESERT_PYRAMID_ARCHAEOLOGY = register("archaeology/desert_pyramid");
+	public static final ResourceLocation TRAIL_RUINS_ARCHAEOLOGY = register("archaeology/trail_ruins");
+	public static final ResourceLocation OCEAN_RUIN_WARM_ARCHAEOLOGY = register("archaeology/ocean_ruin_warm");
+	public static final ResourceLocation OCEAN_RUIN_COLD_ARCHAEOLOGY = register("archaeology/ocean_ruin_cold");
 
 	private static ResourceLocation register(String string) {
 		return register(new ResourceLocation(string));

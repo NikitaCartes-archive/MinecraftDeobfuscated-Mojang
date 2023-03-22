@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -226,7 +227,7 @@ public abstract class RenderTarget {
 		ShaderInstance shaderInstance = minecraft.gameRenderer.blitShader;
 		shaderInstance.setSampler("DiffuseSampler", this.colorTextureId);
 		Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)i, (float)j, 0.0F, 1000.0F, 3000.0F);
-		RenderSystem.setProjectionMatrix(matrix4f);
+		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 		if (shaderInstance.MODEL_VIEW_MATRIX != null) {
 			shaderInstance.MODEL_VIEW_MATRIX.set(new Matrix4f().translation(0.0F, 0.0F, -2000.0F));
 		}

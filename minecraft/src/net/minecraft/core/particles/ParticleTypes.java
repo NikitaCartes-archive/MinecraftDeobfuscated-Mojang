@@ -43,9 +43,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType FIREWORK = register("firework", false);
 	public static final SimpleParticleType FISHING = register("fishing", false);
 	public static final SimpleParticleType FLAME = register("flame", false);
-	public static final SimpleParticleType DRIPPING_CHERRY_LEAVES = register("dripping_cherry_leaves", false);
-	public static final SimpleParticleType FALLING_CHERRY_LEAVES = register("falling_cherry_leaves", false);
-	public static final SimpleParticleType LANDING_CHERRY_LEAVES = register("landing_cherry_leaves", false);
+	public static final SimpleParticleType CHERRY_LEAVES = register("cherry_leaves", false);
 	public static final SimpleParticleType SCULK_SOUL = register("sculk_soul", false);
 	public static final ParticleType<SculkChargeParticleOptions> SCULK_CHARGE = register(
 		"sculk_charge", true, SculkChargeParticleOptions.DESERIALIZER, particleType -> SculkChargeParticleOptions.CODEC
@@ -116,6 +114,7 @@ public class ParticleTypes {
 	public static final ParticleType<ShriekParticleOption> SHRIEK = register(
 		"shriek", false, ShriekParticleOption.DESERIALIZER, particleType -> ShriekParticleOption.CODEC
 	);
+	public static final SimpleParticleType EGG_CRACK = register("egg_crack", false);
 	public static final Codec<ParticleOptions> CODEC = BuiltInRegistries.PARTICLE_TYPE
 		.byNameCodec()
 		.dispatch("type", ParticleOptions::getType, ParticleType::codec);

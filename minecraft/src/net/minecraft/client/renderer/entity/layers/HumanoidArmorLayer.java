@@ -20,7 +20,6 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.DyeableArmorItem;
@@ -67,10 +66,8 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 					this.renderModel(poseStack, multiBufferSource, i, armorItem, bl2, humanoidModel, bl, 1.0F, 1.0F, 1.0F, null);
 				}
 
-				if (livingEntity.level.enabledFeatures().contains(FeatureFlags.UPDATE_1_20)) {
-					ArmorTrim.getTrim(livingEntity.level.registryAccess(), itemStack)
-						.ifPresent(armorTrim -> this.renderTrim(armorItem.getMaterial(), poseStack, multiBufferSource, i, armorTrim, bl2, humanoidModel, bl, 1.0F, 1.0F, 1.0F));
-				}
+				ArmorTrim.getTrim(livingEntity.level.registryAccess(), itemStack)
+					.ifPresent(armorTrim -> this.renderTrim(armorItem.getMaterial(), poseStack, multiBufferSource, i, armorTrim, bl2, humanoidModel, bl, 1.0F, 1.0F, 1.0F));
 			}
 		}
 	}

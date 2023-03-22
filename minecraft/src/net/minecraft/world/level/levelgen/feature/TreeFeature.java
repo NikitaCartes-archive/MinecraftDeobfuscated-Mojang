@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
+import java.util.Iterator;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -180,15 +182,13 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 	}
 
 	private static DiscreteVoxelShape updateLeaves(LevelAccessor levelAccessor, BoundingBox boundingBox, Set<BlockPos> set, Set<BlockPos> set2, Set<BlockPos> set3) {
-		List<Set<BlockPos>> list = Lists.<Set<BlockPos>>newArrayList();
 		DiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
-		int i = 6;
+		int i = 7;
+		List<Set<BlockPos>> list = Lists.<Set<BlockPos>>newArrayList();
 
-		for (int j = 0; j < 6; j++) {
+		for (int j = 0; j < 7; j++) {
 			list.add(Sets.newHashSet());
 		}
-
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (BlockPos blockPos : Lists.newArrayList(Sets.union(set2, set3))) {
 			if (boundingBox.isInside(blockPos)) {
@@ -196,60 +196,50 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 			}
 		}
 
-		for (BlockPos blockPosx : Lists.newArrayList(set)) {
-			if (boundingBox.isInside(blockPosx)) {
-				discreteVoxelShape.fill(blockPosx.getX() - boundingBox.minX(), blockPosx.getY() - boundingBox.minY(), blockPosx.getZ() - boundingBox.minZ());
-			}
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		int k = 0;
+		((Set)list.get(0)).addAll(set);
 
-			for (Direction direction : Direction.values()) {
-				mutableBlockPos.setWithOffset(blockPosx, direction);
-				if (!set.contains(mutableBlockPos)) {
-					BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
-					if (blockState.hasProperty(BlockStateProperties.DISTANCE)) {
-						((Set)list.get(0)).add(mutableBlockPos.immutable());
-						setBlockKnownShape(levelAccessor, mutableBlockPos, blockState.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(1)));
-						if (boundingBox.isInside(mutableBlockPos)) {
-							discreteVoxelShape.fill(
-								mutableBlockPos.getX() - boundingBox.minX(), mutableBlockPos.getY() - boundingBox.minY(), mutableBlockPos.getZ() - boundingBox.minZ()
-							);
-						}
-					}
+		while (true) {
+			while (k >= 7 || !((Set)list.get(k)).isEmpty()) {
+				if (k >= 7) {
+					return discreteVoxelShape;
 				}
-			}
-		}
 
-		for (int k = 1; k < 6; k++) {
-			Set<BlockPos> set4 = (Set<BlockPos>)list.get(k - 1);
-			Set<BlockPos> set5 = (Set<BlockPos>)list.get(k);
-
-			for (BlockPos blockPos2 : set4) {
+				Iterator<BlockPos> iterator = ((Set)list.get(k)).iterator();
+				BlockPos blockPos2 = (BlockPos)iterator.next();
+				iterator.remove();
 				if (boundingBox.isInside(blockPos2)) {
+					if (k != 0) {
+						BlockState blockState = levelAccessor.getBlockState(blockPos2);
+						setBlockKnownShape(levelAccessor, blockPos2, blockState.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(k)));
+					}
+
 					discreteVoxelShape.fill(blockPos2.getX() - boundingBox.minX(), blockPos2.getY() - boundingBox.minY(), blockPos2.getZ() - boundingBox.minZ());
-				}
 
-				for (Direction direction2 : Direction.values()) {
-					mutableBlockPos.setWithOffset(blockPos2, direction2);
-					if (!set4.contains(mutableBlockPos) && !set5.contains(mutableBlockPos)) {
-						BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
-						if (blockState2.hasProperty(BlockStateProperties.DISTANCE)) {
-							int l = (Integer)blockState2.getValue(BlockStateProperties.DISTANCE);
-							if (l > k + 1) {
-								BlockState blockState3 = blockState2.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(k + 1));
-								setBlockKnownShape(levelAccessor, mutableBlockPos, blockState3);
-								if (boundingBox.isInside(mutableBlockPos)) {
-									discreteVoxelShape.fill(
-										mutableBlockPos.getX() - boundingBox.minX(), mutableBlockPos.getY() - boundingBox.minY(), mutableBlockPos.getZ() - boundingBox.minZ()
-									);
+					for (Direction direction : Direction.values()) {
+						mutableBlockPos.setWithOffset(blockPos2, direction);
+						if (boundingBox.isInside(mutableBlockPos)) {
+							int l = mutableBlockPos.getX() - boundingBox.minX();
+							int m = mutableBlockPos.getY() - boundingBox.minY();
+							int n = mutableBlockPos.getZ() - boundingBox.minZ();
+							if (!discreteVoxelShape.isFull(l, m, n)) {
+								BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
+								OptionalInt optionalInt = LeavesBlock.getOptionalDistanceAt(blockState2);
+								if (!optionalInt.isEmpty()) {
+									int o = Math.min(optionalInt.getAsInt(), k + 1);
+									if (o < 7) {
+										((Set)list.get(o)).add(mutableBlockPos.immutable());
+										k = Math.min(k, o);
+									}
 								}
-
-								set5.add(mutableBlockPos.immutable());
 							}
 						}
 					}
 				}
 			}
-		}
 
-		return discreteVoxelShape;
+			k++;
+		}
 	}
 }

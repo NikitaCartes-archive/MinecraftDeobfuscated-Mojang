@@ -16,11 +16,6 @@ public class MultiNoiseBiomeSourceParameterLists {
 		bootstapContext.register(OVERWORLD, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD, holderGetter));
 	}
 
-	public static void nextUpdate(BootstapContext<MultiNoiseBiomeSourceParameterList> bootstapContext) {
-		HolderGetter<Biome> holderGetter = bootstapContext.lookup(Registries.BIOME);
-		bootstapContext.register(OVERWORLD, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD_UPDATE_1_20, holderGetter));
-	}
-
 	private static ResourceKey<MultiNoiseBiomeSourceParameterList> register(String string) {
 		return ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, new ResourceLocation(string));
 	}

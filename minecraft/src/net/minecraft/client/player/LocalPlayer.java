@@ -559,11 +559,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	@Override
-	public void openTextEdit(SignBlockEntity signBlockEntity) {
+	public void openTextEdit(SignBlockEntity signBlockEntity, boolean bl) {
 		if (signBlockEntity instanceof HangingSignBlockEntity hangingSignBlockEntity) {
-			this.minecraft.setScreen(new HangingSignEditScreen(hangingSignBlockEntity, this.minecraft.isTextFilteringEnabled()));
+			this.minecraft.setScreen(new HangingSignEditScreen(hangingSignBlockEntity, bl, this.minecraft.isTextFilteringEnabled()));
 		} else {
-			this.minecraft.setScreen(new SignEditScreen(signBlockEntity, this.minecraft.isTextFilteringEnabled()));
+			this.minecraft.setScreen(new SignEditScreen(signBlockEntity, bl, this.minecraft.isTextFilteringEnabled()));
 		}
 	}
 

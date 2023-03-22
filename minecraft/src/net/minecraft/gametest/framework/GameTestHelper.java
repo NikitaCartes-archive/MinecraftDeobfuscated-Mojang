@@ -315,7 +315,14 @@ public class GameTestHelper {
 	}
 
 	public <T extends Comparable<T>> void assertBlockProperty(BlockPos blockPos, Property<T> property, Predicate<T> predicate, String string) {
-		this.assertBlockState(blockPos, blockState -> predicate.test(blockState.getValue(property)), () -> string);
+		this.assertBlockState(blockPos, blockState -> {
+			if (!blockState.hasProperty(property)) {
+				return false;
+			} else {
+				T comparable = blockState.getValue(property);
+				return predicate.test(comparable);
+			}
+		}, () -> string);
 	}
 
 	public void assertBlockState(BlockPos blockPos, Predicate<BlockState> predicate, Supplier<String> supplier) {
@@ -694,6 +701,12 @@ public class GameTestHelper {
 
 	public void assertTrue(boolean bl, String string) {
 		if (!bl) {
+			throw new GameTestAssertException(string);
+		}
+	}
+
+	public void assertFalse(boolean bl, String string) {
+		if (bl) {
 			throw new GameTestAssertException(string);
 		}
 	}

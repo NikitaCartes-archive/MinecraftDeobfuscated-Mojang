@@ -1,51 +1,72 @@
 package net.minecraft.world.level.block.entity;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.logging.LogUtils;
+import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
-import net.minecraft.commands.CommandSource;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.server.network.FilteredText;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
 
 public class SignBlockEntity extends BlockEntity {
-	public static final int LINES = 4;
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int MAX_TEXT_LINE_WIDTH = 90;
 	private static final int TEXT_LINE_HEIGHT = 10;
-	private static final String[] RAW_TEXT_FIELD_NAMES = new String[]{"Text1", "Text2", "Text3", "Text4"};
-	private static final String[] FILTERED_TEXT_FIELD_NAMES = new String[]{"FilteredText1", "FilteredText2", "FilteredText3", "FilteredText4"};
-	private final Component[] messages = new Component[]{CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY};
-	private final Component[] filteredMessages = new Component[]{CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY};
-	private boolean isEditable = true;
 	@Nullable
 	private UUID playerWhoMayEdit;
-	@Nullable
-	private FormattedCharSequence[] renderMessages;
-	private boolean renderMessagedFiltered;
-	private DyeColor color = DyeColor.BLACK;
-	private boolean hasGlowingText;
+	private SignText frontText = this.createDefaultSignText();
+	private SignText backText = this.createDefaultSignText();
+	private boolean isWaxed;
 
 	public SignBlockEntity(BlockPos blockPos, BlockState blockState) {
-		super(BlockEntityType.SIGN, blockPos, blockState);
+		this(BlockEntityType.SIGN, blockPos, blockState);
 	}
 
 	public SignBlockEntity(BlockEntityType blockEntityType, BlockPos blockPos, BlockState blockState) {
 		super(blockEntityType, blockPos, blockState);
+	}
+
+	protected SignText createDefaultSignText() {
+		return new SignText();
+	}
+
+	public boolean isFacingFrontText(Player player) {
+		if (this.getBlockState().getBlock() instanceof SignBlock signBlock) {
+			double d = player.getX() - ((double)this.getBlockPos().getX() + 0.5);
+			double e = player.getZ() - ((double)this.getBlockPos().getZ() + 0.5);
+			float f = signBlock.getYRotationDegrees(this.getBlockState());
+			float g = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI) - 90.0F;
+			return Mth.degreesDifferenceAbs(f, g) <= 90.0F;
+		} else {
+			return false;
+		}
+	}
+
+	public SignText getTextFacingPlayer(Player player) {
+		return this.getText(this.isFacingFrontText(player));
+	}
+
+	public SignText getText(boolean bl) {
+		return bl ? this.frontText : this.backText;
+	}
+
+	public SignText getFrontText() {
+		return this.frontText;
+	}
+
+	public SignText getBackText() {
+		return this.backText;
 	}
 
 	public int getTextLineHeight() {
@@ -59,96 +80,80 @@ public class SignBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag) {
 		super.saveAdditional(compoundTag);
-
-		for (int i = 0; i < 4; i++) {
-			Component component = this.messages[i];
-			String string = Component.Serializer.toJson(component);
-			compoundTag.putString(RAW_TEXT_FIELD_NAMES[i], string);
-			Component component2 = this.filteredMessages[i];
-			if (!component2.equals(component)) {
-				compoundTag.putString(FILTERED_TEXT_FIELD_NAMES[i], Component.Serializer.toJson(component2));
-			}
-		}
-
-		compoundTag.putString("Color", this.color.getName());
-		compoundTag.putBoolean("GlowingText", this.hasGlowingText);
+		SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, this.frontText).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("front_text", tag));
+		SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, this.backText).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("back_text", tag));
+		compoundTag.putBoolean("is_waxed", this.isWaxed);
 	}
 
 	@Override
 	public void load(CompoundTag compoundTag) {
-		this.isEditable = false;
 		super.load(compoundTag);
-		this.color = DyeColor.byName(compoundTag.getString("Color"), DyeColor.BLACK);
+		if (compoundTag.contains("front_text")) {
+			SignText.DIRECT_CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.getCompound("front_text"))
+				.resultOrPartial(LOGGER::error)
+				.ifPresent(signText -> this.frontText = signText);
+		}
 
-		for (int i = 0; i < 4; i++) {
-			String string = compoundTag.getString(RAW_TEXT_FIELD_NAMES[i]);
-			Component component = this.loadLine(string);
-			this.messages[i] = component;
-			String string2 = FILTERED_TEXT_FIELD_NAMES[i];
-			if (compoundTag.contains(string2, 8)) {
-				this.filteredMessages[i] = this.loadLine(compoundTag.getString(string2));
+		if (compoundTag.contains("back_text")) {
+			SignText.DIRECT_CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.getCompound("back_text"))
+				.resultOrPartial(LOGGER::error)
+				.ifPresent(signText -> this.backText = signText);
+		}
+
+		this.isWaxed = compoundTag.getBoolean("is_waxed");
+	}
+
+	public void updateSignText(Player player, boolean bl, List<FilteredText> list) {
+		if (!this.isWaxed() && player.getUUID().equals(this.getPlayerWhoMayEdit())) {
+			this.updateText(signText -> this.setMessages(player, list, signText), bl);
+		} else {
+			LOGGER.warn("Player {} just tried to change non-editable sign", player.getName().getString());
+		}
+	}
+
+	public boolean updateText(UnaryOperator<SignText> unaryOperator, boolean bl) {
+		SignText signText = this.getText(bl);
+		return this.setText((SignText)unaryOperator.apply(signText), bl);
+	}
+
+	private SignText setMessages(Player player, List<FilteredText> list, SignText signText) {
+		for (int i = 0; i < list.size(); i++) {
+			FilteredText filteredText = (FilteredText)list.get(i);
+			Style style = signText.getMessage(i, player.isTextFilteringEnabled()).getStyle();
+			if (player.isTextFilteringEnabled()) {
+				signText = signText.setMessage(i, Component.literal(filteredText.filteredOrEmpty()).setStyle(style));
 			} else {
-				this.filteredMessages[i] = component;
+				signText = signText.setMessage(i, Component.literal(filteredText.raw()).setStyle(style), Component.literal(filteredText.filteredOrEmpty()).setStyle(style));
 			}
 		}
 
-		this.renderMessages = null;
-		this.hasGlowingText = compoundTag.getBoolean("GlowingText");
+		return signText;
 	}
 
-	private Component loadLine(String string) {
-		Component component = this.deserializeTextSafe(string);
-		if (this.level instanceof ServerLevel) {
-			try {
-				return ComponentUtils.updateForEntity(this.createCommandSourceStack(null), component, null, 0);
-			} catch (CommandSyntaxException var4) {
-			}
+	public boolean setText(SignText signText, boolean bl) {
+		return bl ? this.setFrontText(signText) : this.setBackText(signText);
+	}
+
+	private boolean setBackText(SignText signText) {
+		if (signText != this.backText) {
+			this.backText = signText;
+			this.markUpdated();
+			return true;
+		} else {
+			return false;
 		}
-
-		return component;
 	}
 
-	private Component deserializeTextSafe(String string) {
-		try {
-			Component component = Component.Serializer.fromJson(string);
-			if (component != null) {
-				return component;
-			}
-		} catch (Exception var3) {
+	private boolean setFrontText(SignText signText) {
+		if (signText != this.frontText) {
+			this.frontText = signText;
+			this.markUpdated();
+			return true;
+		} else {
+			return false;
 		}
-
-		return CommonComponents.EMPTY;
-	}
-
-	public Component getMessage(int i, boolean bl) {
-		return this.getMessages(bl)[i];
-	}
-
-	public void setMessage(int i, Component component) {
-		this.setMessage(i, component, component);
-	}
-
-	public void setMessage(int i, Component component, Component component2) {
-		this.messages[i] = component;
-		this.filteredMessages[i] = component2;
-		this.renderMessages = null;
-	}
-
-	public FormattedCharSequence[] getRenderMessages(boolean bl, Function<Component, FormattedCharSequence> function) {
-		if (this.renderMessages == null || this.renderMessagedFiltered != bl) {
-			this.renderMessagedFiltered = bl;
-			this.renderMessages = new FormattedCharSequence[4];
-
-			for (int i = 0; i < 4; i++) {
-				this.renderMessages[i] = (FormattedCharSequence)function.apply(this.getMessage(i, bl));
-			}
-		}
-
-		return this.renderMessages;
-	}
-
-	private Component[] getMessages(boolean bl) {
-		return bl ? this.filteredMessages : this.messages;
 	}
 
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
@@ -165,18 +170,7 @@ public class SignBlockEntity extends BlockEntity {
 		return true;
 	}
 
-	public boolean isEditable() {
-		return this.isEditable;
-	}
-
-	public void setEditable(boolean bl) {
-		this.isEditable = bl;
-		if (!bl) {
-			this.playerWhoMayEdit = null;
-		}
-	}
-
-	public void setAllowedPlayerEditor(UUID uUID) {
+	public void setAllowedPlayerEditor(@Nullable UUID uUID) {
 		this.playerWhoMayEdit = uUID;
 	}
 
@@ -185,68 +179,40 @@ public class SignBlockEntity extends BlockEntity {
 		return this.playerWhoMayEdit;
 	}
 
-	public boolean hasAnyClickCommands(Player player) {
-		for (Component component : this.getMessages(player.isTextFilteringEnabled())) {
-			Style style = component.getStyle();
-			ClickEvent clickEvent = style.getClickEvent();
-			if (clickEvent != null && clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public boolean executeClickCommands(ServerPlayer serverPlayer) {
-		for (Component component : this.getMessages(serverPlayer.isTextFilteringEnabled())) {
-			Style style = component.getStyle();
-			ClickEvent clickEvent = style.getClickEvent();
-			if (clickEvent != null && clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-				serverPlayer.getServer().getCommands().performPrefixedCommand(this.createCommandSourceStack(serverPlayer), clickEvent.getValue());
-			}
-		}
-
-		return true;
-	}
-
-	public CommandSourceStack createCommandSourceStack(@Nullable ServerPlayer serverPlayer) {
-		String string = serverPlayer == null ? "Sign" : serverPlayer.getName().getString();
-		Component component = (Component)(serverPlayer == null ? Component.literal("Sign") : serverPlayer.getDisplayName());
-		return new CommandSourceStack(
-			CommandSource.NULL, Vec3.atCenterOf(this.worldPosition), Vec2.ZERO, (ServerLevel)this.level, 2, string, component, this.level.getServer(), serverPlayer
-		);
-	}
-
-	public DyeColor getColor() {
-		return this.color;
-	}
-
-	public boolean setColor(DyeColor dyeColor) {
-		if (dyeColor != this.getColor()) {
-			this.color = dyeColor;
-			this.markUpdated();
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean hasGlowingText() {
-		return this.hasGlowingText;
-	}
-
-	public boolean setHasGlowingText(boolean bl) {
-		if (this.hasGlowingText != bl) {
-			this.hasGlowingText = bl;
-			this.markUpdated();
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	private void markUpdated() {
 		this.setChanged();
 		this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+	}
+
+	public boolean isWaxed() {
+		return this.isWaxed;
+	}
+
+	public boolean setWaxed(boolean bl) {
+		if (this.isWaxed != bl) {
+			this.isWaxed = bl;
+			this.markUpdated();
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean playerIsTooFarAwayToEdit(UUID uUID) {
+		Player player = this.level.getPlayerByUUID(uUID);
+		return player == null || player.distanceToSqr((double)this.getBlockPos().getX(), (double)this.getBlockPos().getY(), (double)this.getBlockPos().getZ()) > 64.0;
+	}
+
+	public static void tick(Level level, BlockPos blockPos, BlockState blockState, SignBlockEntity signBlockEntity) {
+		UUID uUID = signBlockEntity.getPlayerWhoMayEdit();
+		if (uUID != null) {
+			signBlockEntity.clearInvalidPlayerWhoMayEdit(signBlockEntity, level, uUID);
+		}
+	}
+
+	private void clearInvalidPlayerWhoMayEdit(SignBlockEntity signBlockEntity, Level level, UUID uUID) {
+		if (signBlockEntity.playerIsTooFarAwayToEdit(uUID)) {
+			signBlockEntity.setAllowedPlayerEditor(null);
+		}
 	}
 }

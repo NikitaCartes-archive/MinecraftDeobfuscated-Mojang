@@ -942,7 +942,7 @@ public abstract class Player extends LivingEntity {
 		return false;
 	}
 
-	public void openTextEdit(SignBlockEntity signBlockEntity) {
+	public void openTextEdit(SignBlockEntity signBlockEntity, boolean bl) {
 	}
 
 	public void openMinecartCommandBlock(BaseCommandBlock baseCommandBlock) {

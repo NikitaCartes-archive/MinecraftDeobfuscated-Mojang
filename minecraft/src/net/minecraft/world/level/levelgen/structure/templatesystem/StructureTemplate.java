@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -390,7 +391,8 @@ public class StructureTemplate {
 		StructurePlaceSettings structurePlaceSettings,
 		List<StructureTemplate.StructureBlockInfo> list
 	) {
-		List<StructureTemplate.StructureBlockInfo> list2 = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();
+		List<StructureTemplate.StructureBlockInfo> list2 = new ArrayList();
+		List<StructureTemplate.StructureBlockInfo> list3 = new ArrayList();
 
 		for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
 			BlockPos blockPos3 = calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos);
@@ -405,15 +407,16 @@ public class StructureTemplate {
 			}
 
 			if (structureBlockInfo2 != null) {
-				list2.add(structureBlockInfo2);
+				list3.add(structureBlockInfo2);
+				list2.add(structureBlockInfo);
 			}
 		}
 
 		for (StructureProcessor structureProcessor : structurePlaceSettings.getProcessors()) {
-			structureProcessor.finalizeStructure(levelAccessor, blockPos, blockPos2, structurePlaceSettings, list2);
+			list3 = structureProcessor.finalizeProcessing(levelAccessor, blockPos, blockPos2, list2, list3, structurePlaceSettings);
 		}
 
-		return list2;
+		return list3;
 	}
 
 	private void placeEntities(
@@ -786,16 +789,7 @@ public class StructureTemplate {
 		}
 	}
 
-	public static class StructureBlockInfo {
-		public final BlockPos pos;
-		public final BlockState state;
-		public final CompoundTag nbt;
-
-		public StructureBlockInfo(BlockPos blockPos, BlockState blockState, @Nullable CompoundTag compoundTag) {
-			this.pos = blockPos;
-			this.state = blockState;
-			this.nbt = compoundTag;
-		}
+	public static record StructureBlockInfo(BlockPos pos, BlockState state, @Nullable CompoundTag nbt) {
 
 		public String toString() {
 			return String.format(Locale.ROOT, "<StructureBlockInfo | %s | %s | %s>", this.pos, this.state, this.nbt);

@@ -96,6 +96,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.HANGING_ROOTS);
 		add(0.3F, Items.MANGROVE_ROOTS);
 		add(0.3F, Items.TORCHFLOWER_SEEDS);
+		add(0.3F, Items.PITCHER_POD);
 		add(0.5F, Items.DRIED_KELP_BLOCK);
 		add(0.5F, Items.TALL_GRASS);
 		add(0.5F, Items.FLOWERING_AZALEA_LEAVES);
@@ -160,6 +161,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.85F, Items.BAKED_POTATO);
 		add(0.85F, Items.COOKIE);
 		add(0.85F, Items.TORCHFLOWER);
+		add(0.85F, Items.PITCHER_PLANT);
 		add(1.0F, Items.CAKE);
 		add(1.0F, Items.PUMPKIN_PIE);
 	}

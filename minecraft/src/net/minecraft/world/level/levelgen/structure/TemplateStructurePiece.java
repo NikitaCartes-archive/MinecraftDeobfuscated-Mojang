@@ -92,26 +92,26 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 		this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
 		if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, randomSource, 2)) {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.STRUCTURE_BLOCK)) {
-				if (structureBlockInfo.nbt != null) {
-					StructureMode structureMode = StructureMode.valueOf(structureBlockInfo.nbt.getString("mode"));
+				if (structureBlockInfo.nbt() != null) {
+					StructureMode structureMode = StructureMode.valueOf(structureBlockInfo.nbt().getString("mode"));
 					if (structureMode == StructureMode.DATA) {
-						this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, worldGenLevel, randomSource, boundingBox);
+						this.handleDataMarker(structureBlockInfo.nbt().getString("metadata"), structureBlockInfo.pos(), worldGenLevel, randomSource, boundingBox);
 					}
 				}
 			}
 
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.JIGSAW)) {
-				if (structureBlockInfo2.nbt != null) {
-					String string = structureBlockInfo2.nbt.getString("final_state");
+				if (structureBlockInfo2.nbt() != null) {
+					String string = structureBlockInfo2.nbt().getString("final_state");
 					BlockState blockState = Blocks.AIR.defaultBlockState();
 
 					try {
 						blockState = BlockStateParser.parseForBlock(worldGenLevel.holderLookup(Registries.BLOCK), string, true).blockState();
 					} catch (CommandSyntaxException var15) {
-						LOGGER.error("Error while parsing blockstate {} in jigsaw block @ {}", string, structureBlockInfo2.pos);
+						LOGGER.error("Error while parsing blockstate {} in jigsaw block @ {}", string, structureBlockInfo2.pos());
 					}
 
-					worldGenLevel.setBlock(structureBlockInfo2.pos, blockState, 3);
+					worldGenLevel.setBlock(structureBlockInfo2.pos(), blockState, 3);
 				}
 			}
 		}

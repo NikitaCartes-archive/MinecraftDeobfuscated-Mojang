@@ -21,7 +21,6 @@ public class GameEvent {
 	public static final GameEvent BLOCK_PLACE = register("block_place");
 	public static final GameEvent CONTAINER_CLOSE = register("container_close");
 	public static final GameEvent CONTAINER_OPEN = register("container_open");
-	public static final GameEvent DISPENSE_FAIL = register("dispense_fail");
 	public static final GameEvent DRINK = register("drink");
 	public static final GameEvent EAT = register("eat");
 	public static final GameEvent ELYTRA_GLIDE = register("elytra_glide");
@@ -46,8 +45,6 @@ public class GameEvent {
 	public static final GameEvent JUKEBOX_STOP_PLAY = register("jukebox_stop_play", 10);
 	public static final GameEvent LIGHTNING_STRIKE = register("lightning_strike");
 	public static final GameEvent NOTE_BLOCK_PLAY = register("note_block_play");
-	public static final GameEvent PISTON_CONTRACT = register("piston_contract");
-	public static final GameEvent PISTON_EXTEND = register("piston_extend");
 	public static final GameEvent PRIME_FUSE = register("prime_fuse");
 	public static final GameEvent PROJECTILE_LAND = register("projectile_land");
 	public static final GameEvent PROJECTILE_SHOOT = register("projectile_shoot");
@@ -58,6 +55,21 @@ public class GameEvent {
 	public static final GameEvent STEP = register("step");
 	public static final GameEvent SWIM = register("swim");
 	public static final GameEvent TELEPORT = register("teleport");
+	public static final GameEvent RESONATE_1 = register("resonate_1");
+	public static final GameEvent RESONATE_2 = register("resonate_2");
+	public static final GameEvent RESONATE_3 = register("resonate_3");
+	public static final GameEvent RESONATE_4 = register("resonate_4");
+	public static final GameEvent RESONATE_5 = register("resonate_5");
+	public static final GameEvent RESONATE_6 = register("resonate_6");
+	public static final GameEvent RESONATE_7 = register("resonate_7");
+	public static final GameEvent RESONATE_8 = register("resonate_8");
+	public static final GameEvent RESONATE_9 = register("resonate_9");
+	public static final GameEvent RESONATE_10 = register("resonate_10");
+	public static final GameEvent RESONATE_11 = register("resonate_11");
+	public static final GameEvent RESONATE_12 = register("resonate_12");
+	public static final GameEvent RESONATE_13 = register("resonate_13");
+	public static final GameEvent RESONATE_14 = register("resonate_14");
+	public static final GameEvent RESONATE_15 = register("resonate_15");
 	public static final int DEFAULT_NOTIFICATION_RADIUS = 16;
 	private final String name;
 	private final int notificationRadius;

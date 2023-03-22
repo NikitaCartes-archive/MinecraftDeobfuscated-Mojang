@@ -375,6 +375,11 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.DEBUG_STICK, Items.STICK, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_APPLE, ModelTemplates.FLAT_ITEM);
 
@@ -384,10 +389,26 @@ public class ItemModelGenerators {
 			}
 		}
 
-		this.generateFlatItem(Items.POTTERY_SHARD_ARCHER, ModelTemplates.FLAT_ITEM);
-		this.generateFlatItem(Items.POTTERY_SHARD_PRIZE, ModelTemplates.FLAT_ITEM);
-		this.generateFlatItem(Items.POTTERY_SHARD_ARMS_UP, ModelTemplates.FLAT_ITEM);
-		this.generateFlatItem(Items.POTTERY_SHARD_SKULL, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.ANGLER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.ARCHER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.ARMS_UP_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BLADE_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BREWER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BURN_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.DANGER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.EXPLORER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.FRIEND_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.HEART_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.HEARTBREAK_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.HOWL_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.MINER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.MOURNER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.PLENTY_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.PRIZE_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SHEAF_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SHELTER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SKULL_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SNORT_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
 	}
 
 	static record TrimModelData(String name, float itemModelIndex, Map<ArmorMaterial, String> overrideArmorMaterials) {

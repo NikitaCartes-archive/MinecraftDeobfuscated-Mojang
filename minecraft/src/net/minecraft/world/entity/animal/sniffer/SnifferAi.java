@@ -109,6 +109,7 @@ public class SnifferAi {
 		brain.addActivityWithConditions(
 			Activity.IDLE,
 			ImmutableList.of(
+				Pair.of(0, new AnimalMakeLove(EntityType.SNIFFER, 1.0F)),
 				Pair.of(0, new LookAtTargetSink(45, 90)),
 				Pair.of(0, new SnifferAi.FeelingHappy(40, 100)),
 				Pair.of(
@@ -118,7 +119,6 @@ public class SnifferAi {
 							Pair.of(SetWalkTargetFromLookTarget.create(1.0F, 3), 2),
 							Pair.of(new SnifferAi.Scenting(40, 80), 1),
 							Pair.of(new SnifferAi.Sniffing(40, 80), 1),
-							Pair.of(new AnimalMakeLove(EntityType.SNIFFER, 1.0F), 1),
 							Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 6.0F), 1),
 							Pair.of(RandomStroll.stroll(1.0F), 1),
 							Pair.of(new DoNothing(5, 20), 2)

@@ -43,9 +43,9 @@
 		"url": "https://libraries.minecraft.net/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
 	},
 	{
-		"sha1sum": "e38e20946530646e866db03b2b192883d0ea6e84",
-		"name": "datafixerupper-6.0.6.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/datafixerupper/6.0.6/datafixerupper-6.0.6.jar"
+		"sha1sum": "3ba4a30557a9b057760af4011f909ba619fc5125",
+		"name": "datafixerupper-6.0.8.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/datafixerupper/6.0.8/datafixerupper-6.0.8.jar"
 	},
 	{
 		"sha1sum": "1dcf1de382a0bf95a3d8b0849546c88bac1292c9",

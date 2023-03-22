@@ -8,6 +8,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -17,6 +18,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.AxisAlignedLi
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.CappedProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.PosAlwaysTrueTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule;
 import net.minecraft.world.level.levelgen.structure.templatesystem.ProtectedBlockProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RandomBlockMatchTest;
@@ -24,6 +27,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity.AppendLoot;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class ProcessorLists {
 	private static final ResourceKey<StructureProcessorList> EMPTY = createKey("empty");
@@ -62,6 +67,7 @@ public class ProcessorLists {
 	public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_START_DEGRADATION = createKey("ancient_city_start_degradation");
 	public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_GENERIC_DEGRADATION = createKey("ancient_city_generic_degradation");
 	public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_WALLS_DEGRADATION = createKey("ancient_city_walls_degradation");
+	public static final ResourceKey<StructureProcessorList> TRAIL_RUINS_SUSPICIOUS_SAND = createKey("trail_ruins_suspicious_sand");
 
 	private static ResourceKey<StructureProcessorList> createKey(String string) {
 		return ResourceKey.create(Registries.PROCESSOR_LIST, new ResourceLocation(string));
@@ -687,6 +693,47 @@ public class ProcessorLists {
 					)
 				),
 				new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)
+			)
+		);
+		register(
+			bootstapContext,
+			TRAIL_RUINS_SUSPICIOUS_SAND,
+			List.of(
+				new RuleProcessor(
+					List.of(
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.SAND, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.GRAVEL.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.SAND, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.DIRT.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.SAND, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.COARSE_DIRT.defaultBlockState())
+					)
+				),
+				new CappedProcessor(
+					new RuleProcessor(
+						List.of(
+							new ProcessorRule(
+								new TagMatchTest(BlockTags.TRAIL_RUINS_REPLACEABLE),
+								AlwaysTrueTest.INSTANCE,
+								PosAlwaysTrueTest.INSTANCE,
+								Blocks.SUSPICIOUS_SAND.defaultBlockState(),
+								new AppendLoot(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY)
+							)
+						)
+					),
+					ConstantInt.of(6)
+				),
+				new CappedProcessor(
+					new RuleProcessor(
+						List.of(
+							new ProcessorRule(
+								new TagMatchTest(BlockTags.TRAIL_RUINS_REPLACEABLE),
+								AlwaysTrueTest.INSTANCE,
+								PosAlwaysTrueTest.INSTANCE,
+								Blocks.SUSPICIOUS_GRAVEL.defaultBlockState(),
+								new AppendLoot(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY)
+							)
+						)
+					),
+					ConstantInt.of(2)
+				)
 			)
 		);
 	}

@@ -8,23 +8,27 @@ import net.minecraft.world.level.LevelReader;
 
 public abstract class StructureProcessor {
 	@Nullable
-	public abstract StructureTemplate.StructureBlockInfo processBlock(
+	public StructureTemplate.StructureBlockInfo processBlock(
 		LevelReader levelReader,
 		BlockPos blockPos,
 		BlockPos blockPos2,
 		StructureTemplate.StructureBlockInfo structureBlockInfo,
 		StructureTemplate.StructureBlockInfo structureBlockInfo2,
 		StructurePlaceSettings structurePlaceSettings
-	);
+	) {
+		return structureBlockInfo2;
+	}
 
 	protected abstract StructureProcessorType<?> getType();
 
-	public void finalizeStructure(
+	public List<StructureTemplate.StructureBlockInfo> finalizeProcessing(
 		LevelAccessor levelAccessor,
 		BlockPos blockPos,
 		BlockPos blockPos2,
-		StructurePlaceSettings structurePlaceSettings,
-		List<StructureTemplate.StructureBlockInfo> list
+		List<StructureTemplate.StructureBlockInfo> list,
+		List<StructureTemplate.StructureBlockInfo> list2,
+		StructurePlaceSettings structurePlaceSettings
 	) {
+		return list2;
 	}
 }

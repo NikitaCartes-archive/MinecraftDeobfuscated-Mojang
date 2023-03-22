@@ -152,6 +152,7 @@ public class ModelTemplates {
 	);
 	public static final ModelTemplate AZALEA = create("template_azalea", TextureSlot.TOP, TextureSlot.SIDE);
 	public static final ModelTemplate POTTED_AZALEA = create("template_potted_azalea_bush", TextureSlot.TOP, TextureSlot.SIDE);
+	public static final ModelTemplate SNIFFER_EGG = create("sniffer_egg", TextureSlot.ALL);
 	public static final ModelTemplate FLAT_ITEM = createItem("generated", TextureSlot.LAYER0);
 	public static final ModelTemplate FLAT_HANDHELD_ITEM = createItem("handheld", TextureSlot.LAYER0);
 	public static final ModelTemplate FLAT_HANDHELD_ROD_ITEM = createItem("handheld_rod", TextureSlot.LAYER0);

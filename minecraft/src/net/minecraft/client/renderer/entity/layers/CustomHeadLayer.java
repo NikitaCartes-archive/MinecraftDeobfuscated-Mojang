@@ -19,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.WalkAnimationState;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ArmorItem;
@@ -87,7 +88,15 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 				SkullBlock.Type type = ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType();
 				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(type);
 				RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
-				SkullBlockRenderer.renderSkull(null, 180.0F, f, poseStack, multiBufferSource, i, skullModelBase, renderType);
+				WalkAnimationState walkAnimationState;
+				if (livingEntity.getVehicle() instanceof LivingEntity livingEntity2) {
+					walkAnimationState = livingEntity2.walkAnimation;
+				} else {
+					walkAnimationState = livingEntity.walkAnimation;
+				}
+
+				float o = walkAnimationState.position(h);
+				SkullBlockRenderer.renderSkull(null, 180.0F, o, poseStack, multiBufferSource, i, skullModelBase, renderType);
 			} else if (!(item instanceof ArmorItem armorItem) || armorItem.getEquipmentSlot() != EquipmentSlot.HEAD) {
 				translateToHead(poseStack, bl);
 				this.itemInHandRenderer.renderItem(livingEntity, itemStack, ItemDisplayContext.HEAD, false, poseStack, multiBufferSource, i);

@@ -149,7 +149,7 @@ public class Boat extends Entity implements VariantHolder<Boat.Type> {
 
 	@Override
 	public double getPassengersRidingOffset() {
-		return this.getVariant() == Boat.Type.BAMBOO ? 0.3 : -0.1;
+		return this.getVariant() == Boat.Type.BAMBOO ? 0.25 : -0.1;
 	}
 
 	@Override

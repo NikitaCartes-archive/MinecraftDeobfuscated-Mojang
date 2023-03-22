@@ -20,6 +20,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.HangingSignBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -54,7 +55,8 @@ public class WallHangingSignBlock extends SignBlock {
 	) {
 		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (!signBlockEntity.hasAnyClickCommands(player) && itemStack.getItem() instanceof BlockItem) {
+			SignText signText = signBlockEntity.getTextFacingPlayer(player);
+			if (!signText.hasAnyClickCommands(player) && itemStack.getItem() instanceof BlockItem) {
 				return InteractionResult.PASS;
 			}
 		}
@@ -130,6 +132,11 @@ public class WallHangingSignBlock extends SignBlock {
 		return direction.getAxis() == ((Direction)blockState.getValue(FACING)).getClockWise().getAxis() && !blockState.canSurvive(levelAccessor, blockPos)
 			? Blocks.AIR.defaultBlockState()
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+	}
+
+	@Override
+	public float getYRotationDegrees(BlockState blockState) {
+		return ((Direction)blockState.getValue(FACING)).toYRot();
 	}
 
 	@Override

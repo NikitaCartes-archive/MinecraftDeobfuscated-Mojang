@@ -26,7 +26,13 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 			.add(Biomes.WARM_OCEAN);
 		this.tag(BiomeTags.IS_BEACH).add(Biomes.BEACH).add(Biomes.SNOWY_BEACH);
 		this.tag(BiomeTags.IS_RIVER).add(Biomes.RIVER).add(Biomes.FROZEN_RIVER);
-		this.tag(BiomeTags.IS_MOUNTAIN).add(Biomes.MEADOW).add(Biomes.FROZEN_PEAKS).add(Biomes.JAGGED_PEAKS).add(Biomes.STONY_PEAKS).add(Biomes.SNOWY_SLOPES);
+		this.tag(BiomeTags.IS_MOUNTAIN)
+			.add(Biomes.MEADOW)
+			.add(Biomes.FROZEN_PEAKS)
+			.add(Biomes.JAGGED_PEAKS)
+			.add(Biomes.STONY_PEAKS)
+			.add(Biomes.SNOWY_SLOPES)
+			.add(Biomes.CHERRY_GROVE);
 		this.tag(BiomeTags.IS_BADLANDS).add(Biomes.BADLANDS).add(Biomes.ERODED_BADLANDS).add(Biomes.WOODED_BADLANDS);
 		this.tag(BiomeTags.IS_HILL).add(Biomes.WINDSWEPT_HILLS).add(Biomes.WINDSWEPT_FOREST).add(Biomes.WINDSWEPT_GRAVELLY_HILLS);
 		this.tag(BiomeTags.IS_TAIGA).add(Biomes.TAIGA).add(Biomes.SNOWY_TAIGA).add(Biomes.OLD_GROWTH_PINE_TAIGA).add(Biomes.OLD_GROWTH_SPRUCE_TAIGA);
@@ -123,6 +129,13 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 		this.tag(BiomeTags.HAS_VILLAGE_SAVANNA).add(Biomes.SAVANNA);
 		this.tag(BiomeTags.HAS_VILLAGE_SNOWY).add(Biomes.SNOWY_PLAINS);
 		this.tag(BiomeTags.HAS_VILLAGE_TAIGA).add(Biomes.TAIGA);
+		this.tag(BiomeTags.HAS_TRAIL_RUINS)
+			.add(Biomes.TAIGA)
+			.add(Biomes.SNOWY_TAIGA)
+			.add(Biomes.OLD_GROWTH_PINE_TAIGA)
+			.add(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
+			.add(Biomes.OLD_GROWTH_BIRCH_FOREST)
+			.add(Biomes.JUNGLE);
 		this.tag(BiomeTags.HAS_WOODLAND_MANSION).add(Biomes.DARK_FOREST);
 		this.tag(BiomeTags.STRONGHOLD_BIASED_TO)
 			.add(Biomes.PLAINS)

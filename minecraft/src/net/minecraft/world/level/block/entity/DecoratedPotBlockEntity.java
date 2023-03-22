@@ -5,32 +5,23 @@ import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.Containers;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class DecoratedPotBlockEntity extends BlockEntity {
-	private static final String TAG_SHARDS = "shards";
+	public static final String TAG_SHARDS = "shards";
 	private static final int SHARDS_IN_POT = 4;
-	private boolean isBroken = false;
 	private final List<Item> shards = Util.make(new ArrayList(4), arrayList -> {
 		arrayList.add(Items.BRICK);
 		arrayList.add(Items.BRICK);
@@ -103,25 +94,6 @@ public class DecoratedPotBlockEntity extends BlockEntity {
 		return this.shards;
 	}
 
-	public void playerDestroy(Level level, BlockPos blockPos, ItemStack itemStack, Player player) {
-		if (player.isCreative()) {
-			this.isBroken = true;
-		} else {
-			if (itemStack.is(ItemTags.BREAKS_DECORATED_POTS) && !EnchantmentHelper.hasSilkTouch(itemStack)) {
-				List<Item> list = this.getShards();
-				NonNullList<ItemStack> nonNullList = NonNullList.createWithCapacity(list.size());
-				nonNullList.addAll(0, list.stream().map(Item::getDefaultInstance).toList());
-				Containers.dropContents(level, blockPos, nonNullList);
-				this.isBroken = true;
-				level.playSound(null, blockPos, SoundEvents.DECORATED_POT_SHATTER, SoundSource.PLAYERS, 1.0F, 1.0F);
-			}
-		}
-	}
-
-	public boolean isBroken() {
-		return this.isBroken;
-	}
-
 	public Direction getDirection() {
 		return this.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 	}
@@ -130,6 +102,12 @@ public class DecoratedPotBlockEntity extends BlockEntity {
 		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
 		if (compoundTag != null) {
 			this.load(compoundTag);
+		} else {
+			this.shards.clear();
+
+			for (int i = 0; i < 4; i++) {
+				this.shards.add(Items.BRICK);
+			}
 		}
 	}
 }

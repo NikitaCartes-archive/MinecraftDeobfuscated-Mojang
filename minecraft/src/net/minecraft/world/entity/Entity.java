@@ -629,8 +629,17 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 					this.walkDist = this.walkDist + (float)vec32.horizontalDistance() * 0.6F;
 					this.moveDist = this.moveDist + (float)Math.sqrt(e * e + f * f + g * g) * 0.6F;
 					if (this.moveDist > this.nextStep && !blockState.isAir()) {
-						this.nextStep = this.nextStep();
-						if (this.isInWater()) {
+						if (this.onGround || bl3) {
+							this.nextStep = this.nextStep();
+							if (movementEmission.emitsSounds()) {
+								this.handleStepSounds(blockPos, blockState);
+							}
+
+							if (movementEmission.emitsEvents()) {
+								this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
+							}
+						} else if (this.isInWater()) {
+							this.nextStep = this.nextStep();
 							if (movementEmission.emitsSounds()) {
 								Entity entity = (Entity)(this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this);
 								float h = entity == this ? 0.35F : 0.4F;
@@ -641,15 +650,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 							if (movementEmission.emitsEvents()) {
 								this.gameEvent(GameEvent.SWIM);
-							}
-						} else {
-							if (movementEmission.emitsSounds()) {
-								this.playAmethystStepSound(blockState);
-								this.playStepSound(blockPos, blockState);
-							}
-
-							if (movementEmission.emitsEvents() && (this.onGround || vec3.y == 0.0 || this.isInPowderSnow || bl3)) {
-								this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
 							}
 						}
 					} else if (blockState.isAir()) {
@@ -933,24 +933,53 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.gameEvent(gameEvent, this);
 	}
 
-	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
-		BlockState blockState2 = this.level.getBlockState(blockPos.above());
-		boolean bl = blockState2.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS);
-		if (bl || !blockState.getMaterial().isLiquid()) {
-			SoundType soundType = bl ? blockState2.getSoundType() : blockState.getSoundType();
-			this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
+	private void handleStepSounds(BlockPos blockPos, BlockState blockState) {
+		BlockPos blockPos2 = this.getPrimaryStepSoundBlockPos(blockPos);
+		if (this instanceof Player && !blockPos.equals(blockPos2)) {
+			BlockState blockState2 = this.level.getBlockState(blockPos2);
+			if (blockState2.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS)) {
+				this.playCombinationStepSounds(blockState2, blockState);
+			} else {
+				this.playStepSound(blockPos2, blockState2);
+			}
+		} else {
+			this.playStepSound(blockPos, blockState);
+		}
+
+		if (this.shouldPlayAmethystStepSound(blockState)) {
+			this.playAmethystStepSound();
 		}
 	}
 
-	private void playAmethystStepSound(BlockState blockState) {
-		if (blockState.is(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.tickCount >= this.lastCrystalSoundPlayTick + 20) {
-			this.crystalSoundIntensity = this.crystalSoundIntensity * (float)Math.pow(0.997, (double)(this.tickCount - this.lastCrystalSoundPlayTick));
-			this.crystalSoundIntensity = Math.min(1.0F, this.crystalSoundIntensity + 0.07F);
-			float f = 0.5F + this.crystalSoundIntensity * this.random.nextFloat() * 1.2F;
-			float g = 0.1F + this.crystalSoundIntensity * 1.2F;
-			this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, g, f);
-			this.lastCrystalSoundPlayTick = this.tickCount;
-		}
+	private BlockPos getPrimaryStepSoundBlockPos(BlockPos blockPos) {
+		BlockPos blockPos2 = blockPos.above();
+		BlockState blockState = this.level.getBlockState(blockPos2);
+		return !blockState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !blockState.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? blockPos : blockPos2;
+	}
+
+	private void playCombinationStepSounds(BlockState blockState, BlockState blockState2) {
+		SoundType soundType = blockState.getSoundType();
+		SoundType soundType2 = blockState2.getSoundType();
+		this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
+		this.playSound(soundType2.getStepSound(), soundType2.getVolume() * 0.05F, soundType2.getPitch() * 0.8F);
+	}
+
+	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
+		SoundType soundType = blockState.getSoundType();
+		this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
+	}
+
+	private boolean shouldPlayAmethystStepSound(BlockState blockState) {
+		return blockState.is(BlockTags.CRYSTAL_SOUND_BLOCKS) && this.tickCount >= this.lastCrystalSoundPlayTick + 20;
+	}
+
+	private void playAmethystStepSound() {
+		this.crystalSoundIntensity = this.crystalSoundIntensity * (float)Math.pow(0.997, (double)(this.tickCount - this.lastCrystalSoundPlayTick));
+		this.crystalSoundIntensity = Math.min(1.0F, this.crystalSoundIntensity + 0.07F);
+		float f = 0.5F + this.crystalSoundIntensity * this.random.nextFloat() * 1.2F;
+		float g = 0.1F + this.crystalSoundIntensity * 1.2F;
+		this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, g, f);
+		this.lastCrystalSoundPlayTick = this.tickCount;
 	}
 
 	protected void playSwimSound(float f) {
@@ -2515,6 +2544,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		float i = Mth.clamp(h, -90.0F, 90.0F);
 		if (serverLevel == this.level) {
 			this.moveTo(d, e, f, g, i);
+			this.teleportPassengers();
 			this.setYHeadRot(g);
 		} else {
 			this.unRide();
@@ -2540,12 +2570,16 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public void teleportTo(double d, double e, double f) {
 		if (this.level instanceof ServerLevel) {
 			this.moveTo(d, e, f, this.getYRot(), this.getXRot());
-			this.getSelfAndPassengers().forEach(entity -> {
-				for (Entity entity2 : entity.passengers) {
-					entity.positionRider(entity2, Entity::moveTo);
-				}
-			});
+			this.teleportPassengers();
 		}
+	}
+
+	private void teleportPassengers() {
+		this.getSelfAndPassengers().forEach(entity -> {
+			for (Entity entity2 : entity.passengers) {
+				entity.positionRider(entity2, Entity::moveTo);
+			}
+		});
 	}
 
 	public void teleportRelative(double d, double e, double f) {

@@ -242,6 +242,9 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<SculkSensorBlockEntity> SCULK_SENSOR = register(
 		"sculk_sensor", BlockEntityType.Builder.of(SculkSensorBlockEntity::new, Blocks.SCULK_SENSOR)
 	);
+	public static final BlockEntityType<CalibratedSculkSensorBlockEntity> CALIBRATED_SCULK_SENSOR = register(
+		"calibrated_sculk_sensor", BlockEntityType.Builder.of(CalibratedSculkSensorBlockEntity::new, Blocks.CALIBRATED_SCULK_SENSOR)
+	);
 	public static final BlockEntityType<SculkCatalystBlockEntity> SCULK_CATALYST = register(
 		"sculk_catalyst", BlockEntityType.Builder.of(SculkCatalystBlockEntity::new, Blocks.SCULK_CATALYST)
 	);
@@ -251,8 +254,8 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<ChiseledBookShelfBlockEntity> CHISELED_BOOKSHELF = register(
 		"chiseled_bookshelf", BlockEntityType.Builder.of(ChiseledBookShelfBlockEntity::new, Blocks.CHISELED_BOOKSHELF)
 	);
-	public static final BlockEntityType<SuspiciousSandBlockEntity> SUSPICIOUS_SAND = register(
-		"suspicious_sand", BlockEntityType.Builder.of(SuspiciousSandBlockEntity::new, Blocks.SUSPICIOUS_SAND)
+	public static final BlockEntityType<BrushableBlockEntity> BRUSHABLE_BLOCK = register(
+		"brushable_block", BlockEntityType.Builder.of(BrushableBlockEntity::new, Blocks.SUSPICIOUS_SAND, Blocks.SUSPICIOUS_GRAVEL)
 	);
 	public static final BlockEntityType<DecoratedPotBlockEntity> DECORATED_POT = register(
 		"decorated_pot", BlockEntityType.Builder.of(DecoratedPotBlockEntity::new, Blocks.DECORATED_POT)

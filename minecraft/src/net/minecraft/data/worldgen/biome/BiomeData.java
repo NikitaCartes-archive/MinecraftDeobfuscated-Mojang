@@ -42,6 +42,7 @@ public abstract class BiomeData {
 		bootstapContext.register(Biomes.ERODED_BADLANDS, OverworldBiomes.badlands(holderGetter, holderGetter2, false));
 		bootstapContext.register(Biomes.WOODED_BADLANDS, OverworldBiomes.badlands(holderGetter, holderGetter2, true));
 		bootstapContext.register(Biomes.MEADOW, OverworldBiomes.meadowOrCherryGrove(holderGetter, holderGetter2, false));
+		bootstapContext.register(Biomes.CHERRY_GROVE, OverworldBiomes.meadowOrCherryGrove(holderGetter, holderGetter2, true));
 		bootstapContext.register(Biomes.GROVE, OverworldBiomes.grove(holderGetter, holderGetter2));
 		bootstapContext.register(Biomes.SNOWY_SLOPES, OverworldBiomes.snowySlopes(holderGetter, holderGetter2));
 		bootstapContext.register(Biomes.FROZEN_PEAKS, OverworldBiomes.frozenPeaks(holderGetter, holderGetter2));
@@ -75,11 +76,5 @@ public abstract class BiomeData {
 		bootstapContext.register(Biomes.END_MIDLANDS, EndBiomes.endMidlands(holderGetter, holderGetter2));
 		bootstapContext.register(Biomes.SMALL_END_ISLANDS, EndBiomes.smallEndIslands(holderGetter, holderGetter2));
 		bootstapContext.register(Biomes.END_BARRENS, EndBiomes.endBarrens(holderGetter, holderGetter2));
-	}
-
-	public static void nextUpdate(BootstapContext<Biome> bootstapContext) {
-		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
-		HolderGetter<ConfiguredWorldCarver<?>> holderGetter2 = bootstapContext.lookup(Registries.CONFIGURED_CARVER);
-		bootstapContext.register(Biomes.CHERRY_GROVE, OverworldBiomes.meadowOrCherryGrove(holderGetter, holderGetter2, true));
 	}
 }

@@ -2,6 +2,7 @@ package net.minecraft.client.renderer;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Map;
@@ -90,7 +91,7 @@ public interface MultiBufferSource {
 			boolean bl = Objects.equals(this.lastState, renderType.asOptional());
 			if (bl || bufferBuilder != this.builder) {
 				if (this.startedBuffers.remove(bufferBuilder)) {
-					renderType.end(bufferBuilder, 0, 0, 0);
+					renderType.end(bufferBuilder, RenderSystem.getVertexSorting());
 					if (bl) {
 						this.lastState = Optional.empty();
 					}

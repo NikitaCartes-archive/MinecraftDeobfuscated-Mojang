@@ -19,8 +19,8 @@ public class HangingSignEditScreen extends AbstractSignEditScreen {
 	private static final int TEXTURE_HEIGHT = 16;
 	private final ResourceLocation texture = new ResourceLocation("textures/gui/hanging_signs/" + this.woodType.name() + ".png");
 
-	public HangingSignEditScreen(SignBlockEntity signBlockEntity, boolean bl) {
-		super(signBlockEntity, bl, Component.translatable("hanging_sign.edit"));
+	public HangingSignEditScreen(SignBlockEntity signBlockEntity, boolean bl, boolean bl2) {
+		super(signBlockEntity, bl, bl2, Component.translatable("hanging_sign.edit"));
 	}
 
 	@Override

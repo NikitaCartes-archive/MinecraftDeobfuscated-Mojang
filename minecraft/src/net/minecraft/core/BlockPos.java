@@ -3,7 +3,13 @@ package net.minecraft.core;
 import com.google.common.collect.AbstractIterator;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import java.util.ArrayDeque;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -17,6 +23,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 @Immutable
@@ -402,6 +409,31 @@ public class BlockPos extends Vec3i {
 					return this.cursor;
 				}
 			};
+	}
+
+	public static int breadthFirstTraversal(BlockPos blockPos, int i, int j, BiConsumer<BlockPos, Consumer<BlockPos>> biConsumer, Predicate<BlockPos> predicate) {
+		Queue<Pair<BlockPos, Integer>> queue = new ArrayDeque();
+		LongSet longSet = new LongOpenHashSet();
+		queue.add(Pair.of(blockPos, 0));
+		int k = 0;
+
+		while (!queue.isEmpty()) {
+			Pair<BlockPos, Integer> pair = (Pair<BlockPos, Integer>)queue.poll();
+			BlockPos blockPos2 = pair.getLeft();
+			int l = pair.getRight();
+			long m = blockPos2.asLong();
+			if (longSet.add(m) && predicate.test(blockPos2)) {
+				if (++k >= j) {
+					return k;
+				}
+
+				if (l < i) {
+					biConsumer.accept(blockPos2, (Consumer)blockPosx -> queue.add(Pair.of(blockPosx, l + 1)));
+				}
+			}
+		}
+
+		return k;
 	}
 
 	public static class MutableBlockPos extends BlockPos {

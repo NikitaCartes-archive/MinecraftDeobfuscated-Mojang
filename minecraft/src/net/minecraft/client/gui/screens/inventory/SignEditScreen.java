@@ -23,8 +23,8 @@ public class SignEditScreen extends AbstractSignEditScreen {
 	@Nullable
 	private SignRenderer.SignModel signModel;
 
-	public SignEditScreen(SignBlockEntity signBlockEntity, boolean bl) {
-		super(signBlockEntity, bl);
+	public SignEditScreen(SignBlockEntity signBlockEntity, boolean bl, boolean bl2) {
+		super(signBlockEntity, bl, bl2);
 	}
 
 	@Override

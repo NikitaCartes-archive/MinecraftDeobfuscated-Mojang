@@ -963,10 +963,9 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	public void openTextEdit(SignBlockEntity signBlockEntity) {
-		signBlockEntity.setAllowedPlayerEditor(this.getUUID());
+	public void openTextEdit(SignBlockEntity signBlockEntity, boolean bl) {
 		this.connection.send(new ClientboundBlockUpdatePacket(this.level, signBlockEntity.getBlockPos()));
-		this.connection.send(new ClientboundOpenSignEditorPacket(signBlockEntity.getBlockPos()));
+		this.connection.send(new ClientboundOpenSignEditorPacket(signBlockEntity.getBlockPos(), bl));
 	}
 
 	private void nextContainerCounter() {
@@ -1672,5 +1671,16 @@ public class ServerPlayer extends Player {
 	public void indicateDamage(double d, double e) {
 		this.hurtDir = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI - (double)this.getYRot());
 		this.connection.send(new ClientboundHurtAnimationPacket(this));
+	}
+
+	@Override
+	public boolean startRiding(Entity entity, boolean bl) {
+		if (super.startRiding(entity, bl)) {
+			entity.positionRider(this);
+			this.connection.teleport(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

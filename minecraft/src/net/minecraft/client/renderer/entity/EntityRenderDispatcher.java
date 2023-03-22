@@ -45,16 +45,20 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityShadow(new ResourceLocation("textures/misc/shadow.png"));
+	private static final float MAX_SHADOW_RADIUS = 32.0F;
+	private static final float SHADOW_POWER_FALLOFF_Y = 0.5F;
 	private Map<EntityType<?>, EntityRenderer<?>> renderers = ImmutableMap.of();
 	private Map<String, EntityRenderer<? extends Player>> playerRenderers = ImmutableMap.of();
 	public final TextureManager textureManager;
@@ -153,7 +157,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 				double m = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
 				float n = (float)((1.0 - m / 256.0) * (double)entityRenderer.shadowStrength);
 				if (n > 0.0F) {
-					renderShadow(poseStack, multiBufferSource, entity, n, h, this.level, entityRenderer.shadowRadius);
+					renderShadow(poseStack, multiBufferSource, entity, n, h, this.level, Math.min(entityRenderer.shadowRadius, 32.0F));
 				}
 			}
 
@@ -293,31 +297,51 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		double d = Mth.lerp((double)g, entity.xOld, entity.getX());
 		double e = Mth.lerp((double)g, entity.yOld, entity.getY());
 		double j = Mth.lerp((double)g, entity.zOld, entity.getZ());
-		int k = Mth.floor(d - (double)i);
-		int l = Mth.floor(d + (double)i);
-		int m = Mth.floor(e - (double)i);
-		int n = Mth.floor(e);
-		int o = Mth.floor(j - (double)i);
-		int p = Mth.floor(j + (double)i);
+		float k = Math.min(f / 0.5F, i);
+		int l = Mth.floor(d - (double)i);
+		int m = Mth.floor(d + (double)i);
+		int n = Mth.floor(e - (double)k);
+		int o = Mth.floor(e);
+		int p = Mth.floor(j - (double)i);
+		int q = Mth.floor(j + (double)i);
 		PoseStack.Pose pose = poseStack.last();
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(SHADOW_RENDER_TYPE);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(k, m, o), new BlockPos(l, n, p))) {
-			renderBlockShadow(pose, vertexConsumer, levelReader, blockPos, d, e, j, i, f);
+		for (int r = p; r <= q; r++) {
+			for (int s = l; s <= m; s++) {
+				mutableBlockPos.set(s, 0, r);
+				ChunkAccess chunkAccess = levelReader.getChunk(mutableBlockPos);
+
+				for (int t = n; t <= o; t++) {
+					mutableBlockPos.setY(t);
+					float u = f - (float)(e - (double)mutableBlockPos.getY()) * 0.5F;
+					renderBlockShadow(pose, vertexConsumer, chunkAccess, levelReader, mutableBlockPos, d, e, j, i, u);
+				}
+			}
 		}
 	}
 
 	private static void renderBlockShadow(
-		PoseStack.Pose pose, VertexConsumer vertexConsumer, LevelReader levelReader, BlockPos blockPos, double d, double e, double f, float g, float h
+		PoseStack.Pose pose,
+		VertexConsumer vertexConsumer,
+		ChunkAccess chunkAccess,
+		LevelReader levelReader,
+		BlockPos blockPos,
+		double d,
+		double e,
+		double f,
+		float g,
+		float h
 	) {
 		BlockPos blockPos2 = blockPos.below();
-		BlockState blockState = levelReader.getBlockState(blockPos2);
+		BlockState blockState = chunkAccess.getBlockState(blockPos2);
 		if (blockState.getRenderShape() != RenderShape.INVISIBLE && levelReader.getMaxLocalRawBrightness(blockPos) > 3) {
-			if (blockState.isCollisionShapeFullBlock(levelReader, blockPos2)) {
-				VoxelShape voxelShape = blockState.getShape(levelReader, blockPos.below());
+			if (blockState.isCollisionShapeFullBlock(chunkAccess, blockPos2)) {
+				VoxelShape voxelShape = blockState.getShape(chunkAccess, blockPos2);
 				if (!voxelShape.isEmpty()) {
 					float i = LightTexture.getBrightness(levelReader.dimensionType(), levelReader.getMaxLocalRawBrightness(blockPos));
-					float j = (float)(((double)h - (e - (double)blockPos.getY()) / 2.0) * 0.5 * (double)i);
+					float j = h * 0.5F * i;
 					if (j >= 0.0F) {
 						if (j > 1.0F) {
 							j = 1.0F;
@@ -349,13 +373,8 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	}
 
 	private static void shadowVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k) {
-		vertexConsumer.vertex(pose.pose(), g, h, i)
-			.color(1.0F, 1.0F, 1.0F, f)
-			.uv(j, k)
-			.overlayCoords(OverlayTexture.NO_OVERLAY)
-			.uv2(15728880)
-			.normal(pose.normal(), 0.0F, 1.0F, 0.0F)
-			.endVertex();
+		Vector3f vector3f = pose.pose().transformPosition(g, h, i, new Vector3f());
+		vertexConsumer.vertex(vector3f.x(), vector3f.y(), vector3f.z(), 1.0F, 1.0F, 1.0F, f, j, k, OverlayTexture.NO_OVERLAY, 15728880, 0.0F, 1.0F, 0.0F);
 	}
 
 	public void setLevel(@Nullable Level level) {

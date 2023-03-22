@@ -1707,21 +1707,8 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				return;
 			}
 
-			if (!signBlockEntity.isEditable() || !this.player.getUUID().equals(signBlockEntity.getPlayerWhoMayEdit())) {
-				LOGGER.warn("Player {} just tried to change non-editable sign", this.player.getName().getString());
-				return;
-			}
-
-			for (int i = 0; i < list.size(); i++) {
-				FilteredText filteredText = (FilteredText)list.get(i);
-				if (this.player.isTextFilteringEnabled()) {
-					signBlockEntity.setMessage(i, Component.literal(filteredText.filteredOrEmpty()));
-				} else {
-					signBlockEntity.setMessage(i, Component.literal(filteredText.raw()), Component.literal(filteredText.filteredOrEmpty()));
-				}
-			}
-
-			signBlockEntity.setChanged();
+			signBlockEntity.updateSignText(this.player, serverboundSignUpdatePacket.isFrontText(), list);
+			signBlockEntity.setAllowedPlayerEditor(null);
 			serverLevel.sendBlockUpdated(blockPos, blockState, blockState, 3);
 		}
 	}

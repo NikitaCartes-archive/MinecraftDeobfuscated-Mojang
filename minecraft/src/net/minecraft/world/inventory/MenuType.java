@@ -29,8 +29,7 @@ public class MenuType<T extends AbstractContainerMenu> implements FeatureElement
 	public static final MenuType<LoomMenu> LOOM = register("loom", LoomMenu::new);
 	public static final MenuType<MerchantMenu> MERCHANT = register("merchant", MerchantMenu::new);
 	public static final MenuType<ShulkerBoxMenu> SHULKER_BOX = register("shulker_box", ShulkerBoxMenu::new);
-	public static final MenuType<LegacySmithingMenu> LEGACY_SMITHING = register("legacy_smithing", LegacySmithingMenu::new);
-	public static final MenuType<SmithingMenu> SMITHING = register("smithing", SmithingMenu::new, FeatureFlags.UPDATE_1_20);
+	public static final MenuType<SmithingMenu> SMITHING = register("smithing", SmithingMenu::new);
 	public static final MenuType<SmokerMenu> SMOKER = register("smoker", SmokerMenu::new);
 	public static final MenuType<CartographyTableMenu> CARTOGRAPHY_TABLE = register("cartography_table", CartographyTableMenu::new);
 	public static final MenuType<StonecutterMenu> STONECUTTER = register("stonecutter", StonecutterMenu::new);

@@ -8,6 +8,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -78,6 +79,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private UUID wanderingTraderId;
 	private final Set<String> knownServerBrands;
 	private boolean wasModded;
+	private final Set<String> removedFeatureFlags;
 	private final TimerQueue<MinecraftServer> scheduledEvents;
 
 	private PrimaryLevelData(
@@ -104,6 +106,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		int t,
 		@Nullable UUID uUID,
 		Set<String> set,
+		Set<String> set2,
 		TimerQueue<MinecraftServer> timerQueue,
 		@Nullable CompoundTag compoundTag2,
 		CompoundTag compoundTag3,
@@ -133,6 +136,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		this.wanderingTraderSpawnChance = t;
 		this.wanderingTraderId = uUID;
 		this.knownServerBrands = set;
+		this.removedFeatureFlags = set2;
 		this.loadedPlayerTag = compoundTag;
 		this.playerDataVersion = i;
 		this.scheduledEvents = timerQueue;
@@ -171,6 +175,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			0,
 			null,
 			Sets.<String>newLinkedHashSet(),
+			new HashSet(),
 			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS),
 			null,
 			new CompoundTag(),
@@ -225,6 +230,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 				.asStream()
 				.flatMap(dynamicx -> dynamicx.asString().result().stream())
 				.collect(Collectors.toCollection(Sets::newLinkedHashSet)),
+			(Set<String>)dynamic.get("removed_features").asStream().flatMap(dynamicx -> dynamicx.asString().result().stream()).collect(Collectors.toSet()),
 			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS, dynamic.get("ScheduledEvents").asStream()),
 			(CompoundTag)dynamic.get("CustomBossEvents").orElseEmptyMap().getValue(),
 			compoundTag2,
@@ -248,10 +254,12 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	private void setTagData(RegistryAccess registryAccess, CompoundTag compoundTag, @Nullable CompoundTag compoundTag2) {
-		ListTag listTag = new ListTag();
-		this.knownServerBrands.stream().map(StringTag::valueOf).forEach(listTag::add);
-		compoundTag.put("ServerBrands", listTag);
+		compoundTag.put("ServerBrands", stringCollectionToTag(this.knownServerBrands));
 		compoundTag.putBoolean("WasModded", this.wasModded);
+		if (!this.removedFeatureFlags.isEmpty()) {
+			compoundTag.put("removed_features", stringCollectionToTag(this.removedFeatureFlags));
+		}
+
 		CompoundTag compoundTag3 = new CompoundTag();
 		compoundTag3.putString("Name", SharedConstants.getCurrentVersion().getName());
 		compoundTag3.putInt("Id", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
@@ -304,6 +312,12 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		if (this.wanderingTraderId != null) {
 			compoundTag.putUUID("WanderingTraderId", this.wanderingTraderId);
 		}
+	}
+
+	private static ListTag stringCollectionToTag(Set<String> set) {
+		ListTag listTag = new ListTag();
+		set.stream().map(StringTag::valueOf).forEach(listTag::add);
+		return listTag;
 	}
 
 	@Override
@@ -626,6 +640,11 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	@Override
 	public Set<String> getKnownServerBrands() {
 		return ImmutableSet.copyOf(this.knownServerBrands);
+	}
+
+	@Override
+	public Set<String> getRemovedFeatureFlags() {
+		return Set.copyOf(this.removedFeatureFlags);
 	}
 
 	@Override

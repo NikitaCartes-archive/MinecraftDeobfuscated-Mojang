@@ -29,5 +29,6 @@ public class References {
 	public static final TypeReference TEAM = () -> "team";
 	public static final TypeReference RECIPE = () -> "recipe";
 	public static final TypeReference BIOME = () -> "biome";
+	public static final TypeReference MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST = () -> "multi_noise_biome_source_parameter_list";
 	public static final TypeReference WORLD_GEN_SETTINGS = () -> "world_gen_settings";
 }

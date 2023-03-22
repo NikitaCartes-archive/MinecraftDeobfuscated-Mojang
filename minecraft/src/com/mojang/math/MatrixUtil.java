@@ -104,10 +104,11 @@ public class MatrixUtil {
 		matrix3f2.transpose();
 		matrix3f2.mul(matrix3f);
 		Quaternionf quaternionf = eigenvalueJacobi(matrix3f2, 5);
-		boolean bl = (double)matrix3f2.m00 < 1.0E-6;
-		boolean bl2 = (double)matrix3f2.m11 < 1.0E-6;
+		float f = matrix3f2.m00;
+		float g = matrix3f2.m11;
+		boolean bl = (double)f < 1.0E-6;
+		boolean bl2 = (double)g < 1.0E-6;
 		Matrix3f matrix3f4 = matrix3f.rotate(quaternionf);
-		float f = 1.0F;
 		Quaternionf quaternionf2 = new Quaternionf();
 		Quaternionf quaternionf3 = new Quaternionf();
 		GivensParameters givensParameters;
@@ -119,7 +120,6 @@ public class MatrixUtil {
 
 		Quaternionf quaternionf4 = givensParameters.aroundZ(quaternionf3);
 		Matrix3f matrix3f5 = givensParameters.aroundZ(matrix3f2);
-		f *= matrix3f5.m22;
 		quaternionf2.mul(quaternionf4);
 		matrix3f5.transpose().mul(matrix3f4);
 		if (bl) {
@@ -131,7 +131,6 @@ public class MatrixUtil {
 		givensParameters = givensParameters.inverse();
 		Quaternionf quaternionf5 = givensParameters.aroundY(quaternionf3);
 		Matrix3f matrix3f6 = givensParameters.aroundY(matrix3f4);
-		f *= matrix3f6.m11;
 		quaternionf2.mul(quaternionf5);
 		matrix3f6.transpose().mul(matrix3f5);
 		if (bl2) {
@@ -142,12 +141,9 @@ public class MatrixUtil {
 
 		Quaternionf quaternionf6 = givensParameters.aroundX(quaternionf3);
 		Matrix3f matrix3f7 = givensParameters.aroundX(matrix3f5);
-		f *= matrix3f7.m00;
 		quaternionf2.mul(quaternionf6);
 		matrix3f7.transpose().mul(matrix3f6);
-		f = 1.0F / f;
-		quaternionf2.mul(Math.sqrt(f));
-		Vector3f vector3f = new Vector3f(matrix3f7.m00 * f, matrix3f7.m11 * f, matrix3f7.m22 * f);
+		Vector3f vector3f = new Vector3f(matrix3f7.m00, matrix3f7.m11, matrix3f7.m22);
 		return Triple.of(quaternionf2, vector3f, quaternionf.conjugate());
 	}
 }

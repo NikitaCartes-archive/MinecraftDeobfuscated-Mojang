@@ -28,7 +28,7 @@ public class ProtectedBlockProcessor extends StructureProcessor {
 		StructureTemplate.StructureBlockInfo structureBlockInfo2,
 		StructurePlaceSettings structurePlaceSettings
 	) {
-		return Feature.isReplaceable(this.cannotReplace).test(levelReader.getBlockState(structureBlockInfo2.pos)) ? structureBlockInfo2 : null;
+		return Feature.isReplaceable(this.cannotReplace).test(levelReader.getBlockState(structureBlockInfo2.pos())) ? structureBlockInfo2 : null;
 	}
 
 	@Override

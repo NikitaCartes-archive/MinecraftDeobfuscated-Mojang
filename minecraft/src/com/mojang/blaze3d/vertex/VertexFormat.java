@@ -116,7 +116,6 @@ public class VertexFormat {
 
 	@Environment(EnvType.CLIENT)
 	public static enum IndexType {
-		BYTE(5121, 1),
 		SHORT(5123, 2),
 		INT(5125, 4);
 
@@ -129,11 +128,7 @@ public class VertexFormat {
 		}
 
 		public static VertexFormat.IndexType least(int i) {
-			if ((i & -65536) != 0) {
-				return INT;
-			} else {
-				return (i & 0xFF00) != 0 ? SHORT : BYTE;
-			}
+			return (i & -65536) != 0 ? INT : SHORT;
 		}
 	}
 

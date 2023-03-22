@@ -9,6 +9,7 @@ import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.logging.LogUtils;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -76,6 +77,8 @@ public class RenderSystem {
 	private static Matrix3f inverseViewRotationMatrix = new Matrix3f().zero();
 	private static Matrix4f projectionMatrix = new Matrix4f();
 	private static Matrix4f savedProjectionMatrix = new Matrix4f();
+	private static VertexSorting vertexSorting = VertexSorting.DISTANCE_TO_ORIGIN;
+	private static VertexSorting savedVertexSorting = VertexSorting.DISTANCE_TO_ORIGIN;
 	private static final PoseStack modelViewStack = new PoseStack();
 	private static Matrix4f modelViewMatrix = new Matrix4f();
 	private static Matrix4f textureMatrix = new Matrix4f();
@@ -827,12 +830,16 @@ public class RenderSystem {
 		return i >= 0 && i < shaderTextures.length ? shaderTextures[i] : 0;
 	}
 
-	public static void setProjectionMatrix(Matrix4f matrix4f) {
+	public static void setProjectionMatrix(Matrix4f matrix4f, VertexSorting vertexSorting) {
 		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (!isOnRenderThread()) {
-			recordRenderCall(() -> projectionMatrix = matrix4f2);
+			recordRenderCall(() -> {
+				projectionMatrix = matrix4f2;
+				RenderSystem.vertexSorting = vertexSorting;
+			});
 		} else {
 			projectionMatrix = matrix4f2;
+			RenderSystem.vertexSorting = vertexSorting;
 		}
 	}
 
@@ -881,6 +888,7 @@ public class RenderSystem {
 
 	private static void _backupProjectionMatrix() {
 		savedProjectionMatrix = projectionMatrix;
+		savedVertexSorting = vertexSorting;
 	}
 
 	public static void restoreProjectionMatrix() {
@@ -893,6 +901,7 @@ public class RenderSystem {
 
 	private static void _restoreProjectionMatrix() {
 		projectionMatrix = savedProjectionMatrix;
+		vertexSorting = savedVertexSorting;
 	}
 
 	public static Matrix4f getProjectionMatrix() {
@@ -943,13 +952,18 @@ public class RenderSystem {
 		return shaderGameTime;
 	}
 
+	public static VertexSorting getVertexSorting() {
+		assertOnRenderThread();
+		return vertexSorting;
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static final class AutoStorageIndexBuffer {
 		private final int vertexStride;
 		private final int indexStride;
 		private final RenderSystem.AutoStorageIndexBuffer.IndexGenerator generator;
 		private int name;
-		private VertexFormat.IndexType type = VertexFormat.IndexType.BYTE;
+		private VertexFormat.IndexType type = VertexFormat.IndexType.SHORT;
 		private int indexCount;
 
 		AutoStorageIndexBuffer(int i, int j, RenderSystem.AutoStorageIndexBuffer.IndexGenerator indexGenerator) {
@@ -997,8 +1011,6 @@ public class RenderSystem {
 
 		private it.unimi.dsi.fastutil.ints.IntConsumer intConsumer(ByteBuffer byteBuffer) {
 			switch (this.type) {
-				case BYTE:
-					return i -> byteBuffer.put((byte)i);
 				case SHORT:
 					return i -> byteBuffer.putShort((short)i);
 				case INT:

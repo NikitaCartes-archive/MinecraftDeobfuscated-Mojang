@@ -123,6 +123,7 @@ public abstract class FoliagePlacer {
 	) {
 		this.placeLeavesRow(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, blockPos, i, j, bl);
 		int k = bl ? 1 : 0;
+		BlockPos blockPos2 = blockPos.below();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
@@ -134,17 +135,31 @@ public abstract class FoliagePlacer {
 			while (m < i + k) {
 				boolean bl2 = foliageSetter.isSet(mutableBlockPos.move(Direction.UP));
 				mutableBlockPos.move(Direction.DOWN);
-				if (bl2
-					&& !(randomSource.nextFloat() > f)
-					&& tryPlaceLeaf(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, mutableBlockPos)
-					&& !(randomSource.nextFloat() > g)) {
-					tryPlaceLeaf(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, mutableBlockPos.move(Direction.DOWN));
+				if (bl2 && tryPlaceExtension(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, f, blockPos2, mutableBlockPos)) {
+					mutableBlockPos.move(Direction.DOWN);
+					tryPlaceExtension(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, g, blockPos2, mutableBlockPos);
 					mutableBlockPos.move(Direction.UP);
 				}
 
 				m++;
 				mutableBlockPos.move(direction);
 			}
+		}
+	}
+
+	private static boolean tryPlaceExtension(
+		LevelSimulatedReader levelSimulatedReader,
+		FoliagePlacer.FoliageSetter foliageSetter,
+		RandomSource randomSource,
+		TreeConfiguration treeConfiguration,
+		float f,
+		BlockPos blockPos,
+		BlockPos.MutableBlockPos mutableBlockPos
+	) {
+		if (mutableBlockPos.distManhattan(blockPos) >= 7) {
+			return false;
+		} else {
+			return randomSource.nextFloat() > f ? false : tryPlaceLeaf(levelSimulatedReader, foliageSetter, randomSource, treeConfiguration, mutableBlockPos);
 		}
 	}
 

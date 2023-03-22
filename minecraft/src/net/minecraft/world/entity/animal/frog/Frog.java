@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -17,10 +16,8 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.stats.Stats;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
@@ -33,7 +30,6 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -58,7 +54,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -269,25 +264,8 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 
 	@Override
 	public void spawnChildFromBreeding(ServerLevel serverLevel, Animal animal) {
-		ServerPlayer serverPlayer = this.getLoveCause();
-		if (serverPlayer == null) {
-			serverPlayer = animal.getLoveCause();
-		}
-
-		if (serverPlayer != null) {
-			serverPlayer.awardStat(Stats.ANIMALS_BRED);
-			CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this, animal, null);
-		}
-
-		this.setAge(6000);
-		animal.setAge(6000);
-		this.resetLove();
-		animal.resetLove();
+		this.finalizeSpawnChildFromBreeding(serverLevel, animal, null);
 		this.getBrain().setMemory(MemoryModuleType.IS_PREGNANT, Unit.INSTANCE);
-		serverLevel.broadcastEntityEvent(this, (byte)18);
-		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
-		}
 	}
 
 	@Override

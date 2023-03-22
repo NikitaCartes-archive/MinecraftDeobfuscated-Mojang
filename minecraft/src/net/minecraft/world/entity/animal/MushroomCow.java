@@ -214,11 +214,11 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		this.setVariant(MushroomCow.MushroomType.byType(compoundTag.getString("Type")));
-		if (compoundTag.contains("EffectId", 1)) {
+		if (compoundTag.contains("EffectId", 99)) {
 			this.effect = MobEffect.byId(compoundTag.getInt("EffectId"));
 		}
 
-		if (compoundTag.contains("EffectDuration", 3)) {
+		if (compoundTag.contains("EffectDuration", 99)) {
 			this.effectDuration = compoundTag.getInt("EffectDuration");
 		}
 	}

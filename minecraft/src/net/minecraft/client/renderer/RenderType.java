@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -983,10 +984,10 @@ public abstract class RenderType extends RenderStateShard {
 		return new RenderType.CompositeRenderType(string, vertexFormat, mode, i, bl, bl2, compositeState);
 	}
 
-	public void end(BufferBuilder bufferBuilder, int i, int j, int k) {
+	public void end(BufferBuilder bufferBuilder, VertexSorting vertexSorting) {
 		if (bufferBuilder.building()) {
 			if (this.sortOnUpload) {
-				bufferBuilder.setQuadSortOrigin((float)i, (float)j, (float)k);
+				bufferBuilder.setQuadSorting(vertexSorting);
 			}
 
 			BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();

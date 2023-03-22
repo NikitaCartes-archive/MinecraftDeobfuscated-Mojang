@@ -29,9 +29,6 @@ public class TrimMaterials {
 	public static final ResourceKey<TrimMaterial> AMETHYST = registryKey("amethyst");
 
 	public static void bootstrap(BootstapContext<TrimMaterial> bootstapContext) {
-	}
-
-	public static void nextUpdate(BootstapContext<TrimMaterial> bootstapContext) {
 		register(bootstapContext, QUARTZ, Items.QUARTZ, Style.EMPTY.withColor(14931140), 0.1F);
 		register(bootstapContext, IRON, Items.IRON_INGOT, Style.EMPTY.withColor(15527148), 0.2F, Map.of(ArmorMaterials.IRON, "iron_darker"));
 		register(bootstapContext, NETHERITE, Items.NETHERITE_INGOT, Style.EMPTY.withColor(6445145), 0.3F, Map.of(ArmorMaterials.NETHERITE, "netherite_darker"));

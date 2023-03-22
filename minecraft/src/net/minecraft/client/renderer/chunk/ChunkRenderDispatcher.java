@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
@@ -630,7 +631,7 @@ public class ChunkRenderDispatcher {
 					if (set.contains(RenderType.translucent())) {
 						BufferBuilder bufferBuilder2 = chunkBufferBuilderPack.builder(RenderType.translucent());
 						if (!bufferBuilder2.isCurrentBatchEmpty()) {
-							bufferBuilder2.setQuadSortOrigin(f - (float)blockPos.getX(), g - (float)blockPos.getY(), h - (float)blockPos.getZ());
+							bufferBuilder2.setQuadSorting(VertexSorting.byDistance(f - (float)blockPos.getX(), g - (float)blockPos.getY(), h - (float)blockPos.getZ()));
 							compileResults.transparencyState = bufferBuilder2.getSortState();
 						}
 					}
@@ -711,8 +712,8 @@ public class ChunkRenderDispatcher {
 						BufferBuilder bufferBuilder = chunkBufferBuilderPack.builder(RenderType.translucent());
 						RenderChunk.this.beginLayer(bufferBuilder);
 						bufferBuilder.restoreSortState(sortState);
-						bufferBuilder.setQuadSortOrigin(
-							f - (float)RenderChunk.this.origin.getX(), g - (float)RenderChunk.this.origin.getY(), h - (float)RenderChunk.this.origin.getZ()
+						bufferBuilder.setQuadSorting(
+							VertexSorting.byDistance(f - (float)RenderChunk.this.origin.getX(), g - (float)RenderChunk.this.origin.getY(), h - (float)RenderChunk.this.origin.getZ())
 						);
 						this.compiledChunk.transparencyState = bufferBuilder.getSortState();
 						BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();

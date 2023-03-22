@@ -69,7 +69,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.slf4j.Logger;
 
-public class Warden extends Monster implements VibrationListener.VibrationListenerConfig {
+public class Warden extends Monster implements VibrationListener.Config {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int GAME_EVENT_LISTENER_RANGE = 16;
 	private static final int VIBRATION_COOLDOWN_TICKS = 40;
@@ -109,7 +109,7 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 
 	public Warden(EntityType<? extends Monster> entityType, Level level) {
 		super(entityType, level);
-		this.dynamicGameEventListener = new DynamicGameEventListener<>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), 16, this));
+		this.dynamicGameEventListener = new DynamicGameEventListener<>(new VibrationListener(new EntityPositionSource(this, this.getEyeHeight()), this));
 		this.xpReward = 5;
 		this.getNavigation().setCanFloat(true);
 		this.setPathfindingMalus(BlockPathTypes.UNPASSABLE_RAIL, 0.0F);
@@ -375,6 +375,11 @@ public class Warden extends Monster implements VibrationListener.VibrationListen
 		if (this.level instanceof ServerLevel serverLevel) {
 			biConsumer.accept(this.dynamicGameEventListener, serverLevel);
 		}
+	}
+
+	@Override
+	public int getListenerRadius() {
+		return 16;
 	}
 
 	@Override

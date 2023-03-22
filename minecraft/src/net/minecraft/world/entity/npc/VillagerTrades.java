@@ -652,6 +652,7 @@ public class VillagerTrades {
 				new VillagerTrades.ItemsForEmeralds(Items.JUNGLE_SAPLING, 5, 1, 8, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.OAK_SAPLING, 5, 1, 8, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.SPRUCE_SAPLING, 5, 1, 8, 1),
+				new VillagerTrades.ItemsForEmeralds(Items.CHERRY_SAPLING, 5, 1, 8, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.MANGROVE_PROPAGULE, 5, 1, 8, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.RED_DYE, 1, 3, 12, 1),
 				new VillagerTrades.ItemsForEmeralds(Items.WHITE_DYE, 1, 3, 12, 1),
@@ -695,9 +696,6 @@ public class VillagerTrades {
 				new VillagerTrades.ItemsForEmeralds(Items.PODZOL, 3, 3, 6, 1)
 			}
 		)
-	);
-	public static final Int2ObjectMap<VillagerTrades.ItemListing[]> WANDERING_TRADER_TRADES_1_20 = toIntMap(
-		ImmutableMap.of(1, new VillagerTrades.ItemListing[]{new VillagerTrades.ItemsForEmeralds(Items.CHERRY_SAPLING, 5, 1, 8, 1)})
 	);
 
 	private static Int2ObjectMap<VillagerTrades.ItemListing[]> toIntMap(ImmutableMap<Integer, VillagerTrades.ItemListing[]> immutableMap) {

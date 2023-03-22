@@ -542,7 +542,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		if (equipmentSlot.isArmor() && !bl) {
 			equipmentSlot = EquipmentSlot.MAINHAND;
 			itemStack2 = this.getItemBySlot(equipmentSlot);
-			bl = this.canReplaceCurrentItem(itemStack, itemStack2);
+			bl = itemStack2.isEmpty();
 		}
 
 		if (bl && this.canHoldItem(itemStack)) {

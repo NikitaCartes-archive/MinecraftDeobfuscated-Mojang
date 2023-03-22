@@ -117,6 +117,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.MultifaceBlock;
@@ -2844,7 +2845,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						blockPos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (randomSource.nextFloat() - randomSource.nextFloat()) * 0.8F, false
 					);
 
-				for (int lx = 0; lx < 8; lx++) {
+				for (int mx = 0; mx < 8; mx++) {
 					this.level
 						.addParticle(
 							ParticleTypes.LARGE_SMOKE,
@@ -2863,21 +2864,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						blockPos, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.5F, 2.6F + (randomSource.nextFloat() - randomSource.nextFloat()) * 0.8F, false
 					);
 
-				for (int lx = 0; lx < 5; lx++) {
-					double al = (double)blockPos.getX() + randomSource.nextDouble() * 0.6 + 0.2;
-					double am = (double)blockPos.getY() + randomSource.nextDouble() * 0.6 + 0.2;
-					double an = (double)blockPos.getZ() + randomSource.nextDouble() * 0.6 + 0.2;
-					this.level.addParticle(ParticleTypes.SMOKE, al, am, an, 0.0, 0.0, 0.0);
+				for (int mx = 0; mx < 5; mx++) {
+					double d = (double)blockPos.getX() + randomSource.nextDouble() * 0.6 + 0.2;
+					double e = (double)blockPos.getY() + randomSource.nextDouble() * 0.6 + 0.2;
+					double f = (double)blockPos.getZ() + randomSource.nextDouble() * 0.6 + 0.2;
+					this.level.addParticle(ParticleTypes.SMOKE, d, e, f, 0.0, 0.0, 0.0);
 				}
 				break;
 			case 1503:
 				this.level.playLocalSound(blockPos, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 
-				for (int lx = 0; lx < 16; lx++) {
-					double al = (double)blockPos.getX() + (5.0 + randomSource.nextDouble() * 6.0) / 16.0;
-					double am = (double)blockPos.getY() + 0.8125;
-					double an = (double)blockPos.getZ() + (5.0 + randomSource.nextDouble() * 6.0) / 16.0;
-					this.level.addParticle(ParticleTypes.SMOKE, al, am, an, 0.0, 0.0, 0.0);
+				for (int mx = 0; mx < 16; mx++) {
+					double d = (double)blockPos.getX() + (5.0 + randomSource.nextDouble() * 6.0) / 16.0;
+					double e = (double)blockPos.getY() + 0.8125;
+					double f = (double)blockPos.getZ() + (5.0 + randomSource.nextDouble() * 6.0) / 16.0;
+					this.level.addParticle(ParticleTypes.SMOKE, d, e, f, 0.0, 0.0, 0.0);
 				}
 				break;
 			case 1504:
@@ -2889,21 +2890,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 2000:
 				Direction direction = Direction.from3DDataValue(j);
-				int kx = direction.getStepX();
+				int k = direction.getStepX();
 				int lx = direction.getStepY();
-				int m = direction.getStepZ();
-				double d = (double)blockPos.getX() + (double)kx * 0.6 + 0.5;
+				int mx = direction.getStepZ();
+				double d = (double)blockPos.getX() + (double)k * 0.6 + 0.5;
 				double e = (double)blockPos.getY() + (double)lx * 0.6 + 0.5;
-				double f = (double)blockPos.getZ() + (double)m * 0.6 + 0.5;
+				double f = (double)blockPos.getZ() + (double)mx * 0.6 + 0.5;
 
 				for (int n = 0; n < 10; n++) {
 					double g = randomSource.nextDouble() * 0.2 + 0.01;
-					double h = d + (double)kx * 0.01 + (randomSource.nextDouble() - 0.5) * (double)m * 0.5;
+					double h = d + (double)k * 0.01 + (randomSource.nextDouble() - 0.5) * (double)mx * 0.5;
 					double o = e + (double)lx * 0.01 + (randomSource.nextDouble() - 0.5) * (double)lx * 0.5;
-					double p = f + (double)m * 0.01 + (randomSource.nextDouble() - 0.5) * (double)kx * 0.5;
-					double q = (double)kx * g + randomSource.nextGaussian() * 0.01;
+					double p = f + (double)mx * 0.01 + (randomSource.nextDouble() - 0.5) * (double)k * 0.5;
+					double q = (double)k * g + randomSource.nextGaussian() * 0.01;
 					double r = (double)lx * g + randomSource.nextGaussian() * 0.01;
-					double s = (double)m * g + randomSource.nextGaussian() * 0.01;
+					double s = (double)mx * g + randomSource.nextGaussian() * 0.01;
 					this.addParticle(ParticleTypes.SMOKE, h, o, p, q, r, s);
 				}
 				break;
@@ -2921,7 +2922,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 2007:
 				Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
 
-				for (int kx = 0; kx < 8; kx++) {
+				for (int k = 0; k < 8; k++) {
 					this.addParticle(
 						new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.SPLASH_POTION)),
 						vec3.x,
@@ -2979,29 +2980,29 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 				break;
 			case 2004:
-				for (int kx = 0; kx < 20; kx++) {
-					double u = (double)blockPos.getX() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
-					double d = (double)blockPos.getY() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
-					double e = (double)blockPos.getZ() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
-					this.level.addParticle(ParticleTypes.SMOKE, u, d, e, 0.0, 0.0, 0.0);
-					this.level.addParticle(ParticleTypes.FLAME, u, d, e, 0.0, 0.0, 0.0);
+				for (int lx = 0; lx < 20; lx++) {
+					double ae = (double)blockPos.getX() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+					double af = (double)blockPos.getY() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+					double ag = (double)blockPos.getZ() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+					this.level.addParticle(ParticleTypes.SMOKE, ae, af, ag, 0.0, 0.0, 0.0);
+					this.level.addParticle(ParticleTypes.FLAME, ae, af, ag, 0.0, 0.0, 0.0);
 				}
 				break;
 			case 2005:
 				BoneMealItem.addGrowthParticles(this.level, blockPos, j);
 				break;
 			case 2006:
-				for (int l = 0; l < 200; l++) {
-					float y = randomSource.nextFloat() * 4.0F;
-					float ae = randomSource.nextFloat() * (float) (Math.PI * 2);
-					double am = (double)(Mth.cos(ae) * y);
-					double an = 0.01 + randomSource.nextDouble() * 0.5;
-					double ah = (double)(Mth.sin(ae) * y);
+				for (int m = 0; m < 200; m++) {
+					float ah = randomSource.nextFloat() * 4.0F;
+					float ai = randomSource.nextFloat() * (float) (Math.PI * 2);
+					double e = (double)(Mth.cos(ai) * ah);
+					double f = 0.01 + randomSource.nextDouble() * 0.5;
+					double aa = (double)(Mth.sin(ai) * ah);
 					Particle particle2 = this.addParticleInternal(
-						ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + am * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + ah * 0.1, am, an, ah
+						ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + e * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + aa * 0.1, e, f, aa
 					);
 					if (particle2 != null) {
-						particle2.setPower(y);
+						particle2.setPower(ah);
 					}
 				}
 
@@ -3013,7 +3014,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.level.addParticle(ParticleTypes.EXPLOSION, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
 				break;
 			case 2009:
-				for (int lx = 0; lx < 8; lx++) {
+				for (int mx = 0; mx < 8; mx++) {
 					this.level
 						.addParticle(
 							ParticleTypes.CLOUD,
@@ -3062,62 +3063,62 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.SCRAPE, UniformInt.of(3, 5));
 				break;
 			case 3006:
-				int k = j >> 6;
-				if (k > 0) {
-					if (randomSource.nextFloat() < 0.3F + (float)k * 0.1F) {
-						float x = 0.15F + 0.02F * (float)k * (float)k * randomSource.nextFloat();
-						float y = 0.4F + 0.3F * (float)k * randomSource.nextFloat();
-						this.level.playLocalSound(blockPos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, x, y, false);
+				int l = j >> 6;
+				if (l > 0) {
+					if (randomSource.nextFloat() < 0.3F + (float)l * 0.1F) {
+						float y = 0.15F + 0.02F * (float)l * (float)l * randomSource.nextFloat();
+						float ah = 0.4F + 0.3F * (float)l * randomSource.nextFloat();
+						this.level.playLocalSound(blockPos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, y, ah, false);
 					}
 
 					byte b = (byte)(j & 63);
-					IntProvider intProvider = UniformInt.of(0, k);
-					float ae = 0.005F;
+					IntProvider intProvider = UniformInt.of(0, l);
+					float ai = 0.005F;
 					Supplier<Vec3> supplier = () -> new Vec3(
 							Mth.nextDouble(randomSource, -0.005F, 0.005F), Mth.nextDouble(randomSource, -0.005F, 0.005F), Mth.nextDouble(randomSource, -0.005F, 0.005F)
 						);
 					if (b == 0) {
 						for (Direction direction2 : Direction.values()) {
-							float af = direction2 == Direction.DOWN ? (float) Math.PI : 0.0F;
-							double g = direction2.getAxis() == Direction.Axis.Y ? 0.65 : 0.57;
-							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(af), intProvider, direction2, supplier, g);
+							float aj = direction2 == Direction.DOWN ? (float) Math.PI : 0.0F;
+							double ab = direction2.getAxis() == Direction.Axis.Y ? 0.65 : 0.57;
+							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(aj), intProvider, direction2, supplier, ab);
 						}
 					} else {
 						for (Direction direction3 : MultifaceBlock.unpack(b)) {
-							float ag = direction3 == Direction.UP ? (float) Math.PI : 0.0F;
-							double ah = 0.35;
-							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(ag), intProvider, direction3, supplier, 0.35);
+							float ak = direction3 == Direction.UP ? (float) Math.PI : 0.0F;
+							double aa = 0.35;
+							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(ak), intProvider, direction3, supplier, 0.35);
 						}
 					}
 				} else {
 					this.level.playLocalSound(blockPos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 					boolean bl = this.level.getBlockState(blockPos).isCollisionShapeFullBlock(this.level, blockPos);
-					int m = bl ? 40 : 20;
-					float ae = bl ? 0.45F : 0.25F;
-					float ai = 0.07F;
+					int al = bl ? 40 : 20;
+					float ai = bl ? 0.45F : 0.25F;
+					float am = 0.07F;
 
-					for (int v = 0; v < m; v++) {
-						float aj = 2.0F * randomSource.nextFloat() - 1.0F;
-						float ag = 2.0F * randomSource.nextFloat() - 1.0F;
+					for (int an = 0; an < al; an++) {
+						float ao = 2.0F * randomSource.nextFloat() - 1.0F;
 						float ak = 2.0F * randomSource.nextFloat() - 1.0F;
+						float ap = 2.0F * randomSource.nextFloat() - 1.0F;
 						this.level
 							.addParticle(
 								ParticleTypes.SCULK_CHARGE_POP,
-								(double)blockPos.getX() + 0.5 + (double)(aj * ae),
-								(double)blockPos.getY() + 0.5 + (double)(ag * ae),
-								(double)blockPos.getZ() + 0.5 + (double)(ak * ae),
-								(double)(aj * 0.07F),
-								(double)(ag * 0.07F),
-								(double)(ak * 0.07F)
+								(double)blockPos.getX() + 0.5 + (double)(ao * ai),
+								(double)blockPos.getY() + 0.5 + (double)(ak * ai),
+								(double)blockPos.getZ() + 0.5 + (double)(ap * ai),
+								(double)(ao * 0.07F),
+								(double)(ak * 0.07F),
+								(double)(ap * 0.07F)
 							);
 					}
 				}
 				break;
 			case 3007:
-				for (int lx = 0; lx < 10; lx++) {
+				for (int mx = 0; mx < 10; mx++) {
 					this.level
 						.addParticle(
-							new ShriekParticleOption(lx * 5),
+							new ShriekParticleOption(mx * 5),
 							false,
 							(double)blockPos.getX() + 0.5,
 							(double)blockPos.getY() + SculkShriekerBlock.TOP_Y,
@@ -3141,8 +3142,15 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					);
 				break;
 			case 3008:
-				this.level.playLocalSound(blockPos, SoundEvents.BRUSH_BRUSH_SAND_COMPLETED, SoundSource.PLAYERS, 1.0F, 1.0F, false);
-				this.level.addDestroyBlockEffect(blockPos, Block.stateById(j));
+				BlockState blockState2 = Block.stateById(j);
+				if (blockState2.getBlock() instanceof BrushableBlock brushableBlock) {
+					this.level.playLocalSound(blockPos, brushableBlock.getBrushCompletedSound(), SoundSource.PLAYERS, 1.0F, 1.0F, false);
+				}
+
+				this.level.addDestroyBlockEffect(blockPos, blockState2);
+				break;
+			case 3009:
+				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.EGG_CRACK, j == 1 ? UniformInt.of(3, 6) : UniformInt.of(1, 3));
 		}
 	}
 

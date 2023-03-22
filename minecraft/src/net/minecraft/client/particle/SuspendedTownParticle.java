@@ -83,6 +83,22 @@ public class SuspendedTownParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public static class EggCrackProvider implements ParticleProvider<SimpleParticleType> {
+		private final SpriteSet sprite;
+
+		public EggCrackProvider(SpriteSet spriteSet) {
+			this.sprite = spriteSet;
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(clientLevel, d, e, f, g, h, i);
+			suspendedTownParticle.pickSprite(this.sprite);
+			suspendedTownParticle.setColor(1.0F, 1.0F, 1.0F);
+			return suspendedTownParticle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static class HappyVillagerProvider implements ParticleProvider<SimpleParticleType> {
 		private final SpriteSet sprite;
 

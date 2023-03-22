@@ -10,6 +10,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -119,27 +120,15 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 		}
 	}
 
-	protected int getAlternateSignal(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+	protected int getAlternateSignal(SignalGetter signalGetter, BlockPos blockPos, BlockState blockState) {
 		Direction direction = blockState.getValue(FACING);
 		Direction direction2 = direction.getClockWise();
 		Direction direction3 = direction.getCounterClockWise();
+		boolean bl = this.sideInputDiodesOnly();
 		return Math.max(
-			this.getAlternateSignalAt(levelReader, blockPos.relative(direction2), direction2),
-			this.getAlternateSignalAt(levelReader, blockPos.relative(direction3), direction3)
+			signalGetter.getControlInputSignal(blockPos.relative(direction2), direction2, bl),
+			signalGetter.getControlInputSignal(blockPos.relative(direction3), direction3, bl)
 		);
-	}
-
-	protected int getAlternateSignalAt(LevelReader levelReader, BlockPos blockPos, Direction direction) {
-		BlockState blockState = levelReader.getBlockState(blockPos);
-		if (this.isAlternateInput(blockState)) {
-			if (blockState.is(Blocks.REDSTONE_BLOCK)) {
-				return 15;
-			} else {
-				return blockState.is(Blocks.REDSTONE_WIRE) ? (Integer)blockState.getValue(RedStoneWireBlock.POWER) : levelReader.getDirectSignal(blockPos, direction);
-			}
-		} else {
-			return 0;
-		}
 	}
 
 	@Override
@@ -179,8 +168,8 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 		level.updateNeighborsAtExceptFromFacing(blockPos2, this, direction);
 	}
 
-	protected boolean isAlternateInput(BlockState blockState) {
-		return blockState.isSignalSource();
+	protected boolean sideInputDiodesOnly() {
+		return false;
 	}
 
 	protected int getOutputSignal(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
