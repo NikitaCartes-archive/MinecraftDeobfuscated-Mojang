@@ -29,7 +29,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -256,11 +255,6 @@ public class BellBlock extends BaseEntityBlock {
 			default:
 				return ((Direction)blockState.getValue(FACING)).getOpposite();
 		}
-	}
-
-	@Override
-	public PushReaction getPistonPushReaction(BlockState blockState) {
-		return PushReaction.DESTROY;
 	}
 
 	@Override

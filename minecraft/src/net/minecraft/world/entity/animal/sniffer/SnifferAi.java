@@ -116,7 +116,7 @@ public class SnifferAi {
 					0,
 					new RunOne<>(
 						ImmutableList.of(
-							Pair.of(SetWalkTargetFromLookTarget.create(1.0F, 3), 2),
+							Pair.of(SetWalkTargetFromLookTarget.create(1.0F, 3), 1),
 							Pair.of(new SnifferAi.Scenting(40, 80), 1),
 							Pair.of(new SnifferAi.Sniffing(40, 80), 1),
 							Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 6.0F), 1),

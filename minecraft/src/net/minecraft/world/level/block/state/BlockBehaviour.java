@@ -180,11 +180,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 	}
 
 	@Deprecated
-	public PushReaction getPistonPushReaction(BlockState blockState) {
-		return this.material.getPushReaction();
-	}
-
-	@Deprecated
 	public FluidState getFluidState(BlockState blockState) {
 		return Fluids.EMPTY.defaultFluidState();
 	}
@@ -386,6 +381,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		private final int lightEmission;
 		private final boolean useShapeForLightOcclusion;
 		private final boolean isAir;
+		private final boolean ignitedByLava;
+		private final PushReaction pushReaction;
 		private final Material material;
 		private final MaterialColor materialColor;
 		private final float destroySpeed;
@@ -409,6 +406,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 			this.lightEmission = properties.lightEmission.applyAsInt(this.asState());
 			this.useShapeForLightOcclusion = block.useShapeForLightOcclusion(this.asState());
 			this.isAir = properties.isAir;
+			this.ignitedByLava = properties.ignitedByLava;
+			this.pushReaction = properties.pushReaction;
 			this.material = properties.material;
 			this.materialColor = (MaterialColor)properties.materialColor.apply(this.asState());
 			this.destroySpeed = properties.destroyTime;
@@ -481,6 +480,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.isAir;
 		}
 
+		public boolean ignitedByLava() {
+			return this.ignitedByLava;
+		}
+
 		public MaterialColor getMapColor(BlockGetter blockGetter, BlockPos blockPos) {
 			return this.materialColor;
 		}
@@ -538,7 +541,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 		}
 
 		public PushReaction getPistonPushReaction() {
-			return this.getBlock().getPistonPushReaction(this.asState());
+			return this.pushReaction;
 		}
 
 		public boolean isSolidRender(BlockGetter blockGetter, BlockPos blockPos) {
@@ -869,6 +872,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		ResourceLocation drops;
 		boolean canOcclude = true;
 		boolean isAir;
+		boolean ignitedByLava;
+		PushReaction pushReaction = PushReaction.NORMAL;
 		boolean spawnParticlesOnBreak = true;
 		BlockBehaviour.StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(
 					blockGetter, blockPos, Direction.UP
@@ -925,6 +930,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 			properties.dynamicShape = blockBehaviour.properties.dynamicShape;
 			properties.canOcclude = blockBehaviour.properties.canOcclude;
 			properties.isAir = blockBehaviour.properties.isAir;
+			properties.ignitedByLava = blockBehaviour.properties.ignitedByLava;
+			properties.pushReaction = blockBehaviour.properties.pushReaction;
 			properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
 			properties.offsetFunction = blockBehaviour.properties.offsetFunction;
 			properties.spawnParticlesOnBreak = blockBehaviour.properties.spawnParticlesOnBreak;
@@ -998,6 +1005,16 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public BlockBehaviour.Properties dropsLike(Block block) {
 			this.drops = block.getLootTable();
+			return this;
+		}
+
+		public BlockBehaviour.Properties ignitedByLava() {
+			this.ignitedByLava = true;
+			return this;
+		}
+
+		public BlockBehaviour.Properties pushReaction(PushReaction pushReaction) {
+			this.pushReaction = pushReaction;
 			return this;
 		}
 

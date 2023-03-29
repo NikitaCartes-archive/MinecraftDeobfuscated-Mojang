@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.PushReaction;
 
 public class IceBlock extends HalfTransparentBlock {
 	public IceBlock(BlockBehaviour.Properties properties) {
@@ -51,10 +50,5 @@ public class IceBlock extends HalfTransparentBlock {
 			level.setBlockAndUpdate(blockPos, Blocks.WATER.defaultBlockState());
 			level.neighborChanged(blockPos, Blocks.WATER, blockPos);
 		}
-	}
-
-	@Override
-	public PushReaction getPistonPushReaction(BlockState blockState) {
-		return PushReaction.NORMAL;
 	}
 }

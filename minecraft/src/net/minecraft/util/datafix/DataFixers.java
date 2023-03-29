@@ -1061,10 +1061,10 @@ public class DataFixers {
 		Schema schema179 = dataFixerBuilder.addSchema(3328, V3328::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema179, "Added interaction", References.ENTITY));
 		Schema schema180 = dataFixerBuilder.addSchema(3438, V3438::new);
-		dataFixerBuilder.addFixer(new AddNewChoices(schema180, "Added calibrated sculk sensor", References.BLOCK_ENTITY));
 		dataFixerBuilder.addFixer(
 			BlockEntityRenameFix.create(schema180, "Rename Suspicious Sand to Brushable Block", createRenamer("minecraft:suspicious_sand", "minecraft:brushable_block"))
 		);
+		dataFixerBuilder.addFixer(new EntityBrushableBlockFieldsRenameFix(schema180));
 		dataFixerBuilder.addFixer(
 			ItemRenameFix.create(
 				schema180,
@@ -1083,7 +1083,7 @@ public class DataFixers {
 				)
 			)
 		);
-		dataFixerBuilder.addFixer(new EntityBrushableBlockFieldsRenameFix(schema180));
+		dataFixerBuilder.addFixer(new AddNewChoices(schema180, "Added calibrated sculk sensor", References.BLOCK_ENTITY));
 		Schema schema181 = dataFixerBuilder.addSchema(3439, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new BlockEntitySignDoubleSidedEditableTextFix(schema181, "Updated sign text format for Signs", "minecraft:sign"));
 		dataFixerBuilder.addFixer(new BlockEntitySignDoubleSidedEditableTextFix(schema181, "Updated sign text format for Hanging Signs", "minecraft:hanging_sign"));

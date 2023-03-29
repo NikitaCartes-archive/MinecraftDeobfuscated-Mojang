@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -112,11 +111,6 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
 			RailShape railShape = blockState.getValue(this.getShapeProperty());
 			return new RailState(level, blockPos, blockState).place(level.hasNeighborSignal(blockPos), bl, railShape).getState();
 		}
-	}
-
-	@Override
-	public PushReaction getPistonPushReaction(BlockState blockState) {
-		return PushReaction.NORMAL;
 	}
 
 	@Override

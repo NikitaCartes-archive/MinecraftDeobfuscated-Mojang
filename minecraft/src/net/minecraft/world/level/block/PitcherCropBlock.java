@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -26,8 +25,7 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_4;
 	public static final int MAX_AGE = 4;
 	private static final int DOUBLE_PLANT_AGE_INTERSECTION = 3;
-	private static final int BONEMEAL_INCREASE_MIN = 2;
-	private static final int BONEMEAL_INCREASE_MAX = 5;
+	private static final int BONEMEAL_INCREASE = 1;
 	private static final VoxelShape UPPER_SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 15.0, 13.0);
 	private static final VoxelShape LOWER_SHAPE = Block.box(3.0, -1.0, 3.0, 13.0, 16.0, 13.0);
 	private static final VoxelShape COLLISION_SHAPE_BULB = Block.box(5.0, -1.0, 5.0, 11.0, 3.0, 11.0);
@@ -74,7 +72,9 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		if (blockState.getValue(HALF) == DoubleBlockHalf.LOWER && (Integer)blockState.getValue(AGE) >= 3) {
 			BlockState blockState2 = levelReader.getBlockState(blockPos.above());
-			return blockState2.is(this) && blockState2.getValue(HALF) == DoubleBlockHalf.UPPER;
+			return blockState2.is(this)
+				&& blockState2.getValue(HALF) == DoubleBlockHalf.UPPER
+				&& this.mayPlaceOn(levelReader.getBlockState(blockPos.below()), levelReader, blockPos);
 		} else {
 			return (levelReader.getRawBrightness(blockPos, 0) >= 8 || levelReader.canSeeSky(blockPos)) && super.canSurvive(blockState, levelReader, blockPos);
 		}
@@ -119,11 +119,19 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 		if (j < 3 || canGrowInto(serverLevel, blockPos.above())) {
 			serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(j)), 2);
 			if (j >= 3) {
-				if (blockState.getValue(HALF) == DoubleBlockHalf.LOWER) {
+				DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
+				if (doubleBlockHalf == DoubleBlockHalf.LOWER) {
 					BlockPos blockPos2 = blockPos.above();
 					serverLevel.setBlock(
 						blockPos2,
 						copyWaterloggedFrom(serverLevel, blockPos, this.defaultBlockState().setValue(AGE, Integer.valueOf(j)).setValue(HALF, DoubleBlockHalf.UPPER)),
+						3
+					);
+				} else if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
+					BlockPos blockPos2 = blockPos.below();
+					serverLevel.setBlock(
+						blockPos2,
+						copyWaterloggedFrom(serverLevel, blockPos, this.defaultBlockState().setValue(AGE, Integer.valueOf(j)).setValue(HALF, DoubleBlockHalf.LOWER)),
 						3
 					);
 				}
@@ -148,6 +156,6 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
-		this.grow(serverLevel, blockState, blockPos, Mth.nextInt(serverLevel.random, 2, 5));
+		this.grow(serverLevel, blockState, blockPos, 1);
 	}
 }

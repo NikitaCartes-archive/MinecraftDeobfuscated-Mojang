@@ -618,7 +618,6 @@ public class CreativeModeTabs {
 			output.accept(Items.SNOW);
 			output.accept(Items.MOSS_BLOCK);
 			output.accept(Items.MOSS_CARPET);
-			output.accept(Items.PINK_PETALS);
 			output.accept(Items.STONE);
 			output.accept(Items.DEEPSLATE);
 			output.accept(Items.GRANITE);
@@ -728,6 +727,7 @@ public class CreativeModeTabs {
 			output.accept(Items.OXEYE_DAISY);
 			output.accept(Items.CORNFLOWER);
 			output.accept(Items.LILY_OF_THE_VALLEY);
+			output.accept(Items.PINK_PETALS);
 			output.accept(Items.SPORE_BLOSSOM);
 			output.accept(Items.BAMBOO);
 			output.accept(Items.SUGAR_CANE);

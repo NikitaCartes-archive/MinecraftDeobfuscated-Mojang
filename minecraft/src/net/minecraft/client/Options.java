@@ -663,6 +663,7 @@ public class Options {
 		}
 	}, OptionInstance.UnitDouble.INSTANCE, 0.5, double_ -> {
 	});
+	public static final int AUTO_GUI_SCALE = 0;
 	private static final int MAX_GUI_SCALE_INCLUSIVE = 2147483646;
 	private final OptionInstance<Integer> guiScale = new OptionInstance<>(
 		"options.guiScale",

@@ -116,7 +116,7 @@ public enum NoteBlockInstrument implements StringRepresentable {
 			} else if (material == Material.GLASS) {
 				return HAT;
 			} else {
-				return material != Material.WOOD && material != Material.NETHER_WOOD ? HARP : BASS;
+				return material == Material.WOOD ? BASS : HARP;
 			}
 		}
 	}

@@ -10,7 +10,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public class CappedProcessor extends StructureProcessor {
 	public static final Codec<CappedProcessor> CODEC = RecordCodecBuilder.create(
@@ -35,7 +35,7 @@ public class CappedProcessor extends StructureProcessor {
 
 	@Override
 	public final List<StructureTemplate.StructureBlockInfo> finalizeProcessing(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		BlockPos blockPos,
 		BlockPos blockPos2,
 		List<StructureTemplate.StructureBlockInfo> list,
@@ -49,7 +49,7 @@ public class CappedProcessor extends StructureProcessor {
 				);
 				return list2;
 			} else {
-				RandomSource randomSource = levelAccessor.getRandom().forkPositional().at(blockPos);
+				RandomSource randomSource = RandomSource.create(serverLevelAccessor.getLevel().getSeed()).forkPositional().at(blockPos);
 				int i = Math.min(this.limit.sample(randomSource), list2.size());
 				if (i < 1) {
 					return list2;
@@ -63,7 +63,7 @@ public class CappedProcessor extends StructureProcessor {
 						StructureTemplate.StructureBlockInfo structureBlockInfo = (StructureTemplate.StructureBlockInfo)list.get(k);
 						StructureTemplate.StructureBlockInfo structureBlockInfo2 = (StructureTemplate.StructureBlockInfo)list2.get(k);
 						StructureTemplate.StructureBlockInfo structureBlockInfo3 = this.delegate
-							.processBlock(levelAccessor, blockPos, blockPos2, structureBlockInfo, structureBlockInfo2, structurePlaceSettings);
+							.processBlock(serverLevelAccessor, blockPos, blockPos2, structureBlockInfo, structureBlockInfo2, structurePlaceSettings);
 						if (structureBlockInfo3 != null && !structureBlockInfo2.equals(structureBlockInfo3)) {
 							j++;
 							list2.set(k, structureBlockInfo3);

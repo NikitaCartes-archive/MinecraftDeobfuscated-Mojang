@@ -3,8 +3,8 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public abstract class StructureProcessor {
 	@Nullable
@@ -22,7 +22,7 @@ public abstract class StructureProcessor {
 	protected abstract StructureProcessorType<?> getType();
 
 	public List<StructureTemplate.StructureBlockInfo> finalizeProcessing(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		BlockPos blockPos,
 		BlockPos blockPos2,
 		List<StructureTemplate.StructureBlockInfo> list,

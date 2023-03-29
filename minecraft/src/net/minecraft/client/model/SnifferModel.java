@@ -14,8 +14,9 @@ import net.minecraft.world.entity.animal.sniffer.Sniffer;
 
 @Environment(EnvType.CLIENT)
 public class SnifferModel<T extends Sniffer> extends AgeableHierarchicalModel<T> {
-	private static final float WALK_ANIMATION_SPEED_FACTOR = 9000.0F;
-	private static final float WALK_ANIMATION_SPEED_MAX = 2.0F;
+	private static final float WALK_ANIMATION_SPEED_FACTOR = 40000.0F;
+	private static final float WALK_ANIMATION_SPEED_MAX = 9.0F;
+	private static final float WALK_ANIMATION_SCALE_FACTOR = 75.0F;
 	private static final float SEARCHING_ANIMATION_SPEED_MAX = 1.0F;
 	private final ModelPart root;
 	private final ModelPart head;
@@ -107,14 +108,15 @@ public class SnifferModel<T extends Sniffer> extends AgeableHierarchicalModel<T>
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.head.yRot = i * (float) (Math.PI / 180.0);
-		float k = Math.min((float)sniffer.getDeltaMovement().horizontalDistanceSqr() * 9000.0F, 2.0F);
-		this.animate(sniffer.walkingAnimationState, SnifferAnimation.SNIFFER_WALK, h, k);
+		float k = Math.min((float)sniffer.getDeltaMovement().horizontalDistanceSqr() * 40000.0F, 9.0F);
+		this.animateWalk(SnifferAnimation.SNIFFER_WALK, f, g, 9.0F, 75.0F);
 		this.animate(sniffer.diggingAnimationState, SnifferAnimation.SNIFFER_DIG, h);
 		this.animate(sniffer.searchingAnimationState, SnifferAnimation.SNIFFER_SNIFF_SEARCH, h, Math.min(k, 1.0F));
 		this.animate(sniffer.sniffingAnimationState, SnifferAnimation.SNIFFER_LONGSNIFF, h);
 		this.animate(sniffer.risingAnimationState, SnifferAnimation.SNIFFER_STAND_UP, h);
 		this.animate(sniffer.feelingHappyAnimationState, SnifferAnimation.SNIFFER_HAPPY, h);
 		this.animate(sniffer.scentingAnimationState, SnifferAnimation.SNIFFER_SNIFFSNIFF, h);
+		this.animate(sniffer.babyTransformationState, SnifferAnimation.BABY_TRANSFORM, h);
 	}
 
 	@Override

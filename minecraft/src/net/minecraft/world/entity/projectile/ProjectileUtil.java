@@ -19,18 +19,29 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class ProjectileUtil {
-	public static HitResult getHitResult(Entity entity, Predicate<Entity> predicate) {
+	public static HitResult getHitResultOnMoveVector(Entity entity, Predicate<Entity> predicate) {
 		Vec3 vec3 = entity.getDeltaMovement();
 		Level level = entity.level;
 		Vec3 vec32 = entity.position();
-		Vec3 vec33 = vec32.add(vec3);
-		HitResult hitResult = level.clip(new ClipContext(vec32, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
+		return getHitResult(vec32, entity, predicate, vec3, level);
+	}
+
+	public static HitResult getHitResultOnViewVector(Entity entity, Predicate<Entity> predicate, double d) {
+		Vec3 vec3 = entity.getViewVector(0.0F).scale(d);
+		Level level = entity.level;
+		Vec3 vec32 = entity.getEyePosition();
+		return getHitResult(vec32, entity, predicate, vec3, level);
+	}
+
+	private static HitResult getHitResult(Vec3 vec3, Entity entity, Predicate<Entity> predicate, Vec3 vec32, Level level) {
+		Vec3 vec33 = vec3.add(vec32);
+		HitResult hitResult = level.clip(new ClipContext(vec3, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
 		if (hitResult.getType() != HitResult.Type.MISS) {
 			vec33 = hitResult.getLocation();
 		}
 
 		HitResult hitResult2 = getEntityHitResult(
-			level, entity, vec32, vec33, entity.getBoundingBox().expandTowards(entity.getDeltaMovement()).inflate(1.0), predicate
+			level, entity, vec3, vec33, entity.getBoundingBox().expandTowards(entity.getDeltaMovement()).inflate(1.0), predicate
 		);
 		if (hitResult2 != null) {
 			hitResult = hitResult2;

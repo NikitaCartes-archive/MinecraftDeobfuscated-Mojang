@@ -52,6 +52,12 @@ public class MusicManager {
 		this.nextSongDelay = Integer.MAX_VALUE;
 	}
 
+	public void stopPlaying(Music music) {
+		if (this.isPlayingMusic(music)) {
+			this.stopPlaying();
+		}
+	}
+
 	public void stopPlaying() {
 		if (this.currentMusic != null) {
 			this.minecraft.getSoundManager().stop(this.currentMusic);

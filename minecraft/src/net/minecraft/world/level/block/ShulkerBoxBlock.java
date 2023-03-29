@@ -40,7 +40,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
@@ -222,11 +221,6 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 				}
 			}
 		}
-	}
-
-	@Override
-	public PushReaction getPistonPushReaction(BlockState blockState) {
-		return PushReaction.DESTROY;
 	}
 
 	@Override

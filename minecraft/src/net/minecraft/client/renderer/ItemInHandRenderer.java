@@ -281,26 +281,27 @@ public class ItemInHandRenderer {
 
 	private void applyBrushTransform(PoseStack poseStack, float f, HumanoidArm humanoidArm, ItemStack itemStack, float g) {
 		this.applyItemArmTransform(poseStack, humanoidArm, g);
-		float h = (float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F;
-		float i = 1.0F - h / (float)itemStack.getUseDuration();
-		float j = -90.0F;
-		float k = 60.0F;
-		int l = 45;
+		float h = (float)(this.minecraft.player.getUseItemRemainingTicks() % 10);
+		float i = h - f + 1.0F;
+		float j = 1.0F - i / 10.0F;
+		float k = -90.0F;
+		float l = 60.0F;
 		float m = 150.0F;
 		float n = -15.0F;
-		float o = -15.0F + 75.0F * Mth.cos(i * 45.0F * (float) Math.PI);
+		int o = 2;
+		float p = -15.0F + 75.0F * Mth.cos(j * 2.0F * (float) Math.PI);
 		if (humanoidArm != HumanoidArm.RIGHT) {
 			poseStack.translate(0.1, 0.83, 0.35);
 			poseStack.mulPose(Axis.XP.rotationDegrees(-80.0F));
 			poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
-			poseStack.mulPose(Axis.XP.rotationDegrees(o));
+			poseStack.mulPose(Axis.XP.rotationDegrees(p));
 			poseStack.translate(-0.3, 0.22, 0.35);
 		} else {
 			poseStack.translate(-0.25, 0.22, 0.35);
 			poseStack.mulPose(Axis.XP.rotationDegrees(-80.0F));
 			poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 			poseStack.mulPose(Axis.ZP.rotationDegrees(0.0F));
-			poseStack.mulPose(Axis.XP.rotationDegrees(o));
+			poseStack.mulPose(Axis.XP.rotationDegrees(p));
 		}
 	}
 

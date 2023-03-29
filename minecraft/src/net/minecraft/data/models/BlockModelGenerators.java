@@ -2026,7 +2026,13 @@ public class BlockModelGenerators {
 	}
 
 	private void createPottedAzalea(Block block) {
-		ResourceLocation resourceLocation = ModelTemplates.POTTED_AZALEA.create(block, TextureMapping.cubeTop(block), this.modelOutput);
+		ResourceLocation resourceLocation;
+		if (block == Blocks.POTTED_FLOWERING_AZALEA) {
+			resourceLocation = ModelTemplates.POTTED_FLOWERING_AZALEA.create(block, TextureMapping.pottedAzalea(block), this.modelOutput);
+		} else {
+			resourceLocation = ModelTemplates.POTTED_AZALEA.create(block, TextureMapping.pottedAzalea(block), this.modelOutput);
+		}
+
 		this.blockStateOutput.accept(createSimpleBlock(block, resourceLocation));
 	}
 
@@ -3798,7 +3804,7 @@ public class BlockModelGenerators {
 				case 2 -> "_very_cracked";
 				default -> "_not_cracked";
 			};
-			TextureMapping textureMapping = TextureMapping.cube(TextureMapping.getBlockTexture(Blocks.SNIFFER_EGG, string));
+			TextureMapping textureMapping = TextureMapping.snifferEgg(string);
 			return ModelTemplates.SNIFFER_EGG.createWithSuffix(Blocks.SNIFFER_EGG, string, textureMapping, this.modelOutput);
 		};
 		this.blockStateOutput
@@ -4308,7 +4314,7 @@ public class BlockModelGenerators {
 		this.createCropBlock(Blocks.NETHER_WART, BlockStateProperties.AGE_3, 0, 1, 1, 2);
 		this.createCropBlock(Blocks.POTATOES, BlockStateProperties.AGE_7, 0, 0, 1, 1, 2, 2, 2, 3);
 		this.createCropBlock(Blocks.WHEAT, BlockStateProperties.AGE_7, 0, 1, 2, 3, 4, 5, 6, 7);
-		this.createCrossBlock(Blocks.TORCHFLOWER_CROP, BlockModelGenerators.TintState.NOT_TINTED, BlockStateProperties.AGE_2, 0, 1, 2);
+		this.createCrossBlock(Blocks.TORCHFLOWER_CROP, BlockModelGenerators.TintState.NOT_TINTED, BlockStateProperties.AGE_1, 0, 1);
 		this.createPitcherCrop();
 		this.createPitcherPlant();
 		this.blockEntityModels(ModelLocationUtils.decorateBlockModelLocation("decorated_pot"), Blocks.TERRACOTTA).createWithoutBlockItem(Blocks.DECORATED_POT);

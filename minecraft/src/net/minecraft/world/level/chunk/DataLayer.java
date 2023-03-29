@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.util.VisibleForDebug;
 
-public final class DataLayer {
+public class DataLayer {
 	public static final int LAYER_COUNT = 16;
 	public static final int LAYER_SIZE = 128;
 	public static final int SIZE = 2048;

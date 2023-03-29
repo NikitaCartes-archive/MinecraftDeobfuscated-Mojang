@@ -2094,11 +2094,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.calculateEntityAnimation(this instanceof FlyingAnimal);
 	}
 
-	private void travelRidden(LivingEntity livingEntity, Vec3 vec3) {
-		Vec3 vec32 = this.getRiddenInput(livingEntity, vec3);
-		this.tickRidden(livingEntity, vec32);
+	private void travelRidden(Player player, Vec3 vec3) {
+		Vec3 vec32 = this.getRiddenInput(player, vec3);
+		this.tickRidden(player, vec32);
 		if (this.isControlledByLocalInstance()) {
-			this.setSpeed(this.getRiddenSpeed(livingEntity));
+			this.setSpeed(this.getRiddenSpeed(player));
 			this.travel(vec32);
 		} else {
 			this.calculateEntityAnimation(false);
@@ -2107,14 +2107,14 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
-	protected void tickRidden(LivingEntity livingEntity, Vec3 vec3) {
+	protected void tickRidden(Player player, Vec3 vec3) {
 	}
 
-	protected Vec3 getRiddenInput(LivingEntity livingEntity, Vec3 vec3) {
+	protected Vec3 getRiddenInput(Player player, Vec3 vec3) {
 		return vec3;
 	}
 
-	protected float getRiddenSpeed(LivingEntity livingEntity) {
+	protected float getRiddenSpeed(Player player) {
 		return this.getSpeed();
 	}
 
@@ -2515,17 +2515,20 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.noJumpDelay = 0;
 		}
 
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("travel");
-		this.xxa *= 0.98F;
-		this.zza *= 0.98F;
-		this.updateFallFlying();
-		AABB aABB = this.getBoundingBox();
-		LivingEntity livingEntity = this.getControllingPassenger();
-		Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
-		if (livingEntity != null && this.isAlive()) {
-			this.travelRidden(livingEntity, vec32);
-		} else {
+		AABB aABB;
+		label101: {
+			this.level.getProfiler().pop();
+			this.level.getProfiler().push("travel");
+			this.xxa *= 0.98F;
+			this.zza *= 0.98F;
+			this.updateFallFlying();
+			aABB = this.getBoundingBox();
+			Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
+			if (this.getControllingPassenger() instanceof Player player && this.isAlive()) {
+				this.travelRidden(player, vec32);
+				break label101;
+			}
+
 			this.travel(vec32);
 		}
 

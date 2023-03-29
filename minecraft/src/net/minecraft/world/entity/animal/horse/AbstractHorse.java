@@ -229,9 +229,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	public void equipSaddle(@Nullable SoundSource soundSource) {
 		this.inventory.setItem(0, new ItemStack(Items.SADDLE));
-		if (soundSource != null) {
-			this.level.playSound(null, this, this.getSaddleSoundEvent(), soundSource, 0.5F, 1.0F);
-		}
 	}
 
 	public void equipArmor(Player player, ItemStack itemStack) {
@@ -341,7 +338,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		boolean bl = this.isSaddled();
 		this.updateContainerEquipment();
 		if (this.tickCount > 20 && !bl && this.isSaddled()) {
-			this.playSound(SoundEvents.HORSE_SADDLE, 0.5F, 1.0F);
+			this.playSound(this.getSaddleSoundEvent(), 0.5F, 1.0F);
 		}
 	}
 
@@ -389,12 +386,20 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				} else if (this.gallopSoundCounter <= 5) {
 					this.playSound(SoundEvents.HORSE_STEP_WOOD, soundType.getVolume() * 0.15F, soundType.getPitch());
 				}
-			} else if (soundType == SoundType.WOOD) {
+			} else if (this.isWoodSoundType(soundType)) {
 				this.playSound(SoundEvents.HORSE_STEP_WOOD, soundType.getVolume() * 0.15F, soundType.getPitch());
 			} else {
 				this.playSound(SoundEvents.HORSE_STEP, soundType.getVolume() * 0.15F, soundType.getPitch());
 			}
 		}
+	}
+
+	private boolean isWoodSoundType(SoundType soundType) {
+		return soundType == SoundType.WOOD
+			|| soundType == SoundType.NETHER_WOOD
+			|| soundType == SoundType.STEM
+			|| soundType == SoundType.CHERRY_WOOD
+			|| soundType == SoundType.BAMBOO_WOOD;
 	}
 
 	protected void playGallopSound(SoundType soundType) {
@@ -737,9 +742,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	protected void tickRidden(LivingEntity livingEntity, Vec3 vec3) {
-		super.tickRidden(livingEntity, vec3);
-		Vec2 vec2 = this.getRiddenRotation(livingEntity);
+	protected void tickRidden(Player player, Vec3 vec3) {
+		super.tickRidden(player, vec3);
+		Vec2 vec2 = this.getRiddenRotation(player);
 		this.setRot(vec2.y, vec2.x);
 		this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
 		if (this.isControlledByLocalInstance()) {
@@ -763,12 +768,12 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	protected Vec3 getRiddenInput(LivingEntity livingEntity, Vec3 vec3) {
+	protected Vec3 getRiddenInput(Player player, Vec3 vec3) {
 		if (this.onGround && this.playerJumpPendingScale == 0.0F && this.isStanding() && !this.allowStandSliding) {
 			return Vec3.ZERO;
 		} else {
-			float f = livingEntity.xxa * 0.5F;
-			float g = livingEntity.zza;
+			float f = player.xxa * 0.5F;
+			float g = player.zza;
 			if (g <= 0.0F) {
 				g *= 0.25F;
 			}
@@ -778,7 +783,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	protected float getRiddenSpeed(LivingEntity livingEntity) {
+	protected float getRiddenSpeed(Player player) {
 		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
 	}
 
@@ -965,10 +970,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	public void positionRider(Entity entity) {
 		super.positionRider(entity);
-		if (entity instanceof Mob mob) {
-			this.yBodyRot = mob.yBodyRot;
-		}
-
 		if (this.standAnimO > 0.0F) {
 			float f = Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0));
 			float g = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
@@ -1061,14 +1062,19 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Nullable
 	@Override
 	public LivingEntity getControllingPassenger() {
-		if (this.isSaddled()) {
-			Entity var2 = this.getFirstPassenger();
-			if (var2 instanceof LivingEntity) {
-				return (LivingEntity)var2;
+		Entity var3 = this.getFirstPassenger();
+		if (var3 instanceof Mob) {
+			return (Mob)var3;
+		} else {
+			if (this.isSaddled()) {
+				var3 = this.getFirstPassenger();
+				if (var3 instanceof Player) {
+					return (Player)var3;
+				}
 			}
-		}
 
-		return null;
+			return null;
+		}
 	}
 
 	@Nullable

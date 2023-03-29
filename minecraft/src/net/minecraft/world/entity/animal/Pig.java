@@ -233,20 +233,20 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	protected void tickRidden(LivingEntity livingEntity, Vec3 vec3) {
-		super.tickRidden(livingEntity, vec3);
-		this.setRot(livingEntity.getYRot(), livingEntity.getXRot() * 0.5F);
+	protected void tickRidden(Player player, Vec3 vec3) {
+		super.tickRidden(player, vec3);
+		this.setRot(player.getYRot(), player.getXRot() * 0.5F);
 		this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
 		this.steering.tickBoost();
 	}
 
 	@Override
-	protected Vec3 getRiddenInput(LivingEntity livingEntity, Vec3 vec3) {
+	protected Vec3 getRiddenInput(Player player, Vec3 vec3) {
 		return new Vec3(0.0, 0.0, 1.0);
 	}
 
 	@Override
-	protected float getRiddenSpeed(LivingEntity livingEntity) {
+	protected float getRiddenSpeed(Player player) {
 		return (float)(this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 0.225 * (double)this.steering.boostFactor());
 	}
 

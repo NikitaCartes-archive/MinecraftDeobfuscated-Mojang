@@ -2,6 +2,7 @@ package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -110,6 +111,10 @@ public class RangedBowAttackGoal<T extends Monster & RangedAttackMob> extends Go
 				}
 
 				this.mob.getMoveControl().strafe(this.strafingBackwards ? -0.5F : 0.5F, this.strafingClockwise ? 0.5F : -0.5F);
+				if (this.mob.getControlledVehicle() instanceof Mob mob) {
+					mob.lookAt(livingEntity, 30.0F, 30.0F);
+				}
+
 				this.mob.lookAt(livingEntity, 30.0F, 30.0F);
 			} else {
 				this.mob.getLookControl().setLookAt(livingEntity, 30.0F, 30.0F);

@@ -1,58 +1,52 @@
 package net.minecraft.world.level.lighting;
 
+import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import org.apache.commons.lang3.mutable.MutableInt;
 
 public final class BlockLightEngine extends LayerLightEngine<BlockLightSectionStorage.BlockDataLayerStorageMap, BlockLightSectionStorage> {
 	private static final Direction[] DIRECTIONS = Direction.values();
 	private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
 	public BlockLightEngine(LightChunkGetter lightChunkGetter) {
-		super(lightChunkGetter, LightLayer.BLOCK, new BlockLightSectionStorage(lightChunkGetter));
+		this(lightChunkGetter, new BlockLightSectionStorage(lightChunkGetter));
+	}
+
+	@VisibleForTesting
+	public BlockLightEngine(LightChunkGetter lightChunkGetter, BlockLightSectionStorage blockLightSectionStorage) {
+		super(lightChunkGetter, blockLightSectionStorage);
 	}
 
 	private int getLightEmission(long l) {
-		int i = BlockPos.getX(l);
-		int j = BlockPos.getY(l);
-		int k = BlockPos.getZ(l);
-		BlockGetter blockGetter = this.chunkSource.getChunkForLighting(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(k));
-		return blockGetter != null ? blockGetter.getLightEmission(this.pos.set(i, j, k)) : 0;
+		return this.getState(this.pos.set(l)).getLightEmission();
 	}
 
 	@Override
 	protected int computeLevelFromNeighbor(long l, long m, int i) {
-		if (m == Long.MAX_VALUE) {
+		if (this.isSource(m)) {
 			return 15;
-		} else if (l == Long.MAX_VALUE) {
+		} else if (this.isSource(l)) {
 			return i + 15 - this.getLightEmission(m);
-		} else if (i >= 15) {
-			return i;
+		} else if (i >= 14) {
+			return 15;
 		} else {
-			int j = Integer.signum(BlockPos.getX(m) - BlockPos.getX(l));
-			int k = Integer.signum(BlockPos.getY(m) - BlockPos.getY(l));
-			int n = Integer.signum(BlockPos.getZ(m) - BlockPos.getZ(l));
-			Direction direction = Direction.fromNormal(j, k, n);
-			if (direction == null) {
+			this.pos.set(m);
+			BlockState blockState = this.getState(this.pos);
+			int j = this.getOpacity(blockState, this.pos);
+			if (j >= 15) {
 				return 15;
 			} else {
-				MutableInt mutableInt = new MutableInt();
-				BlockState blockState = this.getStateAndOpacity(m, mutableInt);
-				if (mutableInt.getValue() >= 15) {
+				Direction direction = getDirection(l, m);
+				if (direction == null) {
 					return 15;
 				} else {
-					BlockState blockState2 = this.getStateAndOpacity(l, null);
-					VoxelShape voxelShape = this.getShape(blockState2, l, direction);
-					VoxelShape voxelShape2 = this.getShape(blockState, m, direction.getOpposite());
-					return Shapes.faceShapeOccludes(voxelShape, voxelShape2) ? 15 : i + Math.max(1, mutableInt.getValue());
+					this.pos.set(l);
+					BlockState blockState2 = this.getState(this.pos);
+					return this.shapeOccludes(l, blockState2, m, blockState, direction) ? 15 : i + Math.max(1, j);
 				}
 			}
 		}
@@ -60,13 +54,15 @@ public final class BlockLightEngine extends LayerLightEngine<BlockLightSectionSt
 
 	@Override
 	protected void checkNeighborsAfterUpdate(long l, int i, boolean bl) {
-		long m = SectionPos.blockToSection(l);
+		if (!bl || i < this.levelCount - 2) {
+			long m = SectionPos.blockToSection(l);
 
-		for (Direction direction : DIRECTIONS) {
-			long n = BlockPos.offset(l, direction);
-			long o = SectionPos.blockToSection(n);
-			if (m == o || this.storage.storingLightForSection(o)) {
-				this.checkNeighbor(l, n, i, bl);
+			for (Direction direction : DIRECTIONS) {
+				long n = BlockPos.offset(l, direction);
+				long o = SectionPos.blockToSection(n);
+				if (m == o || this.storage.storingLightForSection(o)) {
+					this.checkNeighbor(l, n, i, bl);
+				}
 			}
 		}
 	}
@@ -74,7 +70,7 @@ public final class BlockLightEngine extends LayerLightEngine<BlockLightSectionSt
 	@Override
 	protected int getComputedLevel(long l, long m, int i) {
 		int j = i;
-		if (Long.MAX_VALUE != m) {
+		if (!this.isSource(m)) {
 			int k = this.computeLevelFromNeighbor(Long.MAX_VALUE, l, 0);
 			if (i > k) {
 				j = k;
@@ -100,13 +96,16 @@ public final class BlockLightEngine extends LayerLightEngine<BlockLightSectionSt
 				}
 
 				if (dataLayer2 != null) {
-					int q = this.computeLevelFromNeighbor(o, l, this.getLevel(dataLayer2, o));
-					if (j > q) {
-						j = q;
-					}
+					int q = this.getLevel(dataLayer2, o);
+					if (q + 1 < j) {
+						int r = this.computeLevelFromNeighbor(o, l, q);
+						if (j > r) {
+							j = r;
+						}
 
-					if (j == 0) {
-						return j;
+						if (j == 0) {
+							return j;
+						}
 					}
 				}
 			}

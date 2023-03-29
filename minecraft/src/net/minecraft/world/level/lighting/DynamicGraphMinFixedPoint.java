@@ -3,17 +3,16 @@ package net.minecraft.world.level.lighting;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
-import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongList;
 import java.util.function.LongPredicate;
 import net.minecraft.util.Mth;
 
 public abstract class DynamicGraphMinFixedPoint {
+	public static final long SOURCE = Long.MAX_VALUE;
 	private static final int NO_COMPUTED_LEVEL = 255;
-	private final int levelCount;
-	private final LongLinkedOpenHashSet[] queues;
+	protected final int levelCount;
+	private final LeveledPriorityQueue priorityQueue;
 	private final Long2ByteMap computedLevels;
-	private int firstQueuedLevel;
 	private volatile boolean hasWork;
 
 	protected DynamicGraphMinFixedPoint(int i, int j, int k) {
@@ -21,19 +20,7 @@ public abstract class DynamicGraphMinFixedPoint {
 			throw new IllegalArgumentException("Level count must be < 254.");
 		} else {
 			this.levelCount = i;
-			this.queues = new LongLinkedOpenHashSet[i];
-
-			for (int l = 0; l < i; l++) {
-				this.queues[l] = new LongLinkedOpenHashSet(j, 0.5F) {
-					@Override
-					protected void rehash(int i) {
-						if (i > j) {
-							super.rehash(i);
-						}
-					}
-				};
-			}
-
+			this.priorityQueue = new LeveledPriorityQueue(i, j);
 			this.computedLevels = new Long2ByteOpenHashMap(k, 0.5F) {
 				@Override
 				protected void rehash(int i) {
@@ -43,42 +30,16 @@ public abstract class DynamicGraphMinFixedPoint {
 				}
 			};
 			this.computedLevels.defaultReturnValue((byte)-1);
-			this.firstQueuedLevel = i;
-		}
-	}
-
-	private int getKey(int i, int j) {
-		int k = i;
-		if (i > j) {
-			k = j;
-		}
-
-		if (k > this.levelCount - 1) {
-			k = this.levelCount - 1;
-		}
-
-		return k;
-	}
-
-	private void checkFirstQueuedLevel(int i) {
-		int j = this.firstQueuedLevel;
-		this.firstQueuedLevel = i;
-
-		for (int k = j + 1; k < i; k++) {
-			if (!this.queues[k].isEmpty()) {
-				this.firstQueuedLevel = k;
-				break;
-			}
 		}
 	}
 
 	protected void removeFromQueue(long l) {
-		int i = this.computedLevels.get(l) & 255;
+		int i = this.computedLevels.remove(l) & 255;
 		if (i != 255) {
 			int j = this.getLevel(l);
-			int k = this.getKey(j, i);
-			this.dequeue(l, k, this.levelCount, true);
-			this.hasWork = this.firstQueuedLevel < this.levelCount;
+			int k = this.calculatePriority(j, i);
+			this.priorityQueue.dequeue(l, k, this.levelCount);
+			this.hasWork = !this.priorityQueue.isEmpty();
 		}
 	}
 
@@ -92,23 +53,8 @@ public abstract class DynamicGraphMinFixedPoint {
 		longList.forEach(this::removeFromQueue);
 	}
 
-	private void dequeue(long l, int i, int j, boolean bl) {
-		if (bl) {
-			this.computedLevels.remove(l);
-		}
-
-		this.queues[i].remove(l);
-		if (this.queues[i].isEmpty() && this.firstQueuedLevel == i) {
-			this.checkFirstQueuedLevel(j);
-		}
-	}
-
-	private void enqueue(long l, int i, int j) {
-		this.computedLevels.put(l, (byte)i);
-		this.queues[j].add(l);
-		if (this.firstQueuedLevel > j) {
-			this.firstQueuedLevel = j;
-		}
+	private int calculatePriority(int i, int j) {
+		return Math.min(Math.min(i, j), this.levelCount - 1);
 	}
 
 	protected void checkNode(long l) {
@@ -117,19 +63,16 @@ public abstract class DynamicGraphMinFixedPoint {
 
 	protected void checkEdge(long l, long m, int i, boolean bl) {
 		this.checkEdge(l, m, i, this.getLevel(m), this.computedLevels.get(m) & 255, bl);
-		this.hasWork = this.firstQueuedLevel < this.levelCount;
+		this.hasWork = !this.priorityQueue.isEmpty();
 	}
 
 	private void checkEdge(long l, long m, int i, int j, int k, boolean bl) {
 		if (!this.isSource(m)) {
 			i = Mth.clamp(i, 0, this.levelCount - 1);
 			j = Mth.clamp(j, 0, this.levelCount - 1);
-			boolean bl2;
-			if (k == 255) {
-				bl2 = true;
+			boolean bl2 = k == 255;
+			if (bl2) {
 				k = j;
-			} else {
-				bl2 = false;
 			}
 
 			int n;
@@ -139,16 +82,18 @@ public abstract class DynamicGraphMinFixedPoint {
 				n = Mth.clamp(this.getComputedLevel(m, l, i), 0, this.levelCount - 1);
 			}
 
-			int o = this.getKey(j, k);
+			int o = this.calculatePriority(j, k);
 			if (j != n) {
-				int p = this.getKey(j, n);
+				int p = this.calculatePriority(j, n);
 				if (o != p && !bl2) {
-					this.dequeue(m, o, p, false);
+					this.priorityQueue.dequeue(m, o, p);
 				}
 
-				this.enqueue(m, n, p);
+				this.priorityQueue.enqueue(m, p);
+				this.computedLevels.put(m, (byte)n);
 			} else if (!bl2) {
-				this.dequeue(m, o, this.levelCount, true);
+				this.priorityQueue.dequeue(m, o, this.levelCount);
+				this.computedLevels.remove(m);
 			}
 		}
 	}
@@ -157,20 +102,18 @@ public abstract class DynamicGraphMinFixedPoint {
 		int j = this.computedLevels.get(m) & 255;
 		int k = Mth.clamp(this.computeLevelFromNeighbor(l, m, i), 0, this.levelCount - 1);
 		if (bl) {
-			this.checkEdge(l, m, k, this.getLevel(m), j, true);
+			this.checkEdge(l, m, k, this.getLevel(m), j, bl);
 		} else {
+			boolean bl2 = j == 255;
 			int n;
-			boolean bl2;
-			if (j == 255) {
-				bl2 = true;
+			if (bl2) {
 				n = Mth.clamp(this.getLevel(m), 0, this.levelCount - 1);
 			} else {
 				n = j;
-				bl2 = false;
 			}
 
 			if (k == n) {
-				this.checkEdge(l, m, this.levelCount - 1, bl2 ? n : this.getLevel(m), j, false);
+				this.checkEdge(l, m, this.levelCount - 1, bl2 ? n : this.getLevel(m), j, bl);
 			}
 		}
 	}
@@ -180,30 +123,29 @@ public abstract class DynamicGraphMinFixedPoint {
 	}
 
 	protected final int runUpdates(int i) {
-		if (this.firstQueuedLevel >= this.levelCount) {
+		if (this.priorityQueue.isEmpty()) {
 			return i;
 		} else {
-			while (this.firstQueuedLevel < this.levelCount && i > 0) {
+			while (!this.priorityQueue.isEmpty() && i > 0) {
 				i--;
-				LongLinkedOpenHashSet longLinkedOpenHashSet = this.queues[this.firstQueuedLevel];
-				long l = longLinkedOpenHashSet.removeFirstLong();
+				long l = this.priorityQueue.removeFirstLong();
 				int j = Mth.clamp(this.getLevel(l), 0, this.levelCount - 1);
-				if (longLinkedOpenHashSet.isEmpty()) {
-					this.checkFirstQueuedLevel(this.levelCount);
-				}
-
 				int k = this.computedLevels.remove(l) & 255;
 				if (k < j) {
 					this.setLevel(l, k);
 					this.checkNeighborsAfterUpdate(l, k, true);
 				} else if (k > j) {
-					this.enqueue(l, k, this.getKey(this.levelCount - 1, k));
 					this.setLevel(l, this.levelCount - 1);
+					if (k != this.levelCount - 1) {
+						this.priorityQueue.enqueue(l, this.calculatePriority(this.levelCount - 1, k));
+						this.computedLevels.put(l, (byte)k);
+					}
+
 					this.checkNeighborsAfterUpdate(l, j, false);
 				}
 			}
 
-			this.hasWork = this.firstQueuedLevel < this.levelCount;
+			this.hasWork = !this.priorityQueue.isEmpty();
 			return i;
 		}
 	}
@@ -212,7 +154,9 @@ public abstract class DynamicGraphMinFixedPoint {
 		return this.computedLevels.size();
 	}
 
-	protected abstract boolean isSource(long l);
+	protected boolean isSource(long l) {
+		return l == Long.MAX_VALUE;
+	}
 
 	protected abstract int getComputedLevel(long l, long m, int i);
 

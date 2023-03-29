@@ -2,7 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -33,6 +32,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -81,38 +81,37 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 		Item item = itemStack.getItem();
 		SignApplicator signApplicator2 = itemStack.getItem() instanceof SignApplicator signApplicator ? signApplicator : null;
 		boolean bl = signApplicator2 != null && player.getAbilities().mayBuild;
-		if (level.isClientSide) {
-			return bl ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
-		} else if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
-			boolean bl2 = signBlockEntity.isFacingFrontText(player);
-			SignText signText = signBlockEntity.getText(bl2);
-			if (signBlockEntity.isWaxed()) {
-				boolean bl3 = signText.executeClickCommandsIfPresent((ServerPlayer)player, (ServerLevel)level, blockPos);
-				if (!bl3) {
-					level.playSound(null, signBlockEntity.getBlockPos(), SoundEvents.WAXED_SIGN_INTERACT_FAIL, SoundSource.BLOCKS);
-				}
+		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
+			if (!level.isClientSide) {
+				boolean bl2 = signBlockEntity.isFacingFrontText(player);
+				SignText signText = signBlockEntity.getText(bl2);
+				if (signBlockEntity.isWaxed()) {
+					boolean bl3 = signBlockEntity.executeClickCommandsIfPresent((ServerPlayer)player, (ServerLevel)level, blockPos, bl2);
+					if (!bl3) {
+						level.playSound(null, signBlockEntity.getBlockPos(), SoundEvents.WAXED_SIGN_INTERACT_FAIL, SoundSource.BLOCKS);
+						return InteractionResult.PASS;
+					} else {
+						return bl ? InteractionResult.PASS : InteractionResult.SUCCESS;
+					}
+				} else if (bl
+					&& !this.otherPlayerIsEditingSign(player, signBlockEntity)
+					&& signApplicator2.canApplyToSign(signText, player)
+					&& signApplicator2.tryApplyToSign(level, signBlockEntity, bl2, player)) {
+					if (!player.isCreative()) {
+						itemStack.shrink(1);
+					}
 
-				return InteractionResult.SUCCESS;
-			} else if (bl
-				&& !this.otherPlayerIsEditingSign(player, signBlockEntity)
-				&& signApplicator2.canApplyToSign(signText, player)
-				&& signApplicator2.tryApplyToSign(level, signBlockEntity, bl2, player)) {
-				if (!player.isCreative()) {
-					itemStack.shrink(1);
+					level.gameEvent(GameEvent.BLOCK_CHANGE, signBlockEntity.getBlockPos(), GameEvent.Context.of(player, signBlockEntity.getBlockState()));
+					player.awardStat(Stats.ITEM_USED.get(item));
+					return InteractionResult.SUCCESS;
+				} else if (!this.otherPlayerIsEditingSign(player, signBlockEntity)) {
+					this.openTextEdit(player, signBlockEntity, bl2);
+					return InteractionResult.SUCCESS;
+				} else {
+					return InteractionResult.PASS;
 				}
-
-				if (player instanceof ServerPlayer serverPlayer) {
-					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack);
-				}
-
-				level.gameEvent(GameEvent.BLOCK_CHANGE, signBlockEntity.getBlockPos(), GameEvent.Context.of(player, signBlockEntity.getBlockState()));
-				player.awardStat(Stats.ITEM_USED.get(item));
-				return InteractionResult.SUCCESS;
-			} else if (!this.otherPlayerIsEditingSign(player, signBlockEntity)) {
-				this.openTextEdit(player, signBlockEntity, bl2);
-				return InteractionResult.SUCCESS;
 			} else {
-				return InteractionResult.PASS;
+				return !bl && !signBlockEntity.isWaxed() ? InteractionResult.CONSUME : InteractionResult.SUCCESS;
 			}
 		} else {
 			return InteractionResult.PASS;
@@ -120,6 +119,10 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	public abstract float getYRotationDegrees(BlockState blockState);
+
+	public Vec3 getSignHitboxCenterPosition(BlockState blockState) {
+		return new Vec3(0.5, 0.5, 0.5);
+	}
 
 	@Override
 	public FluidState getFluidState(BlockState blockState) {

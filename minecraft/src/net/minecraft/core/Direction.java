@@ -3,15 +3,12 @@ package net.minecraft.core;
 import com.google.common.collect.Iterators;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -50,10 +47,6 @@ public enum Direction implements StringRepresentable {
 		.filter(direction -> direction.getAxis().isHorizontal())
 		.sorted(Comparator.comparingInt(direction -> direction.data2d))
 		.toArray(Direction[]::new);
-	private static final Long2ObjectMap<Direction> BY_NORMAL = (Long2ObjectMap<Direction>)Arrays.stream(VALUES)
-		.collect(Collectors.toMap(direction -> new BlockPos(direction.getNormal()).asLong(), direction -> direction, (direction, direction2) -> {
-			throw new IllegalArgumentException("Duplicate keys");
-		}, Long2ObjectOpenHashMap::new));
 
 	private Direction(int j, int k, int l, String string2, Direction.AxisDirection axisDirection, Direction.Axis axis, Vec3i vec3i) {
 		this.data3d = j;
@@ -263,13 +256,32 @@ public enum Direction implements StringRepresentable {
 	}
 
 	@Nullable
-	public static Direction fromNormal(BlockPos blockPos) {
-		return BY_NORMAL.get(blockPos.asLong());
-	}
+	public static Direction fromDelta(int i, int j, int k) {
+		if (i == 0) {
+			if (j == 0) {
+				if (k > 0) {
+					return SOUTH;
+				}
 
-	@Nullable
-	public static Direction fromNormal(int i, int j, int k) {
-		return BY_NORMAL.get(BlockPos.asLong(i, j, k));
+				if (k < 0) {
+					return NORTH;
+				}
+			} else if (k == 0) {
+				if (j > 0) {
+					return UP;
+				}
+
+				return DOWN;
+			}
+		} else if (j == 0 && k == 0) {
+			if (i > 0) {
+				return EAST;
+			}
+
+			return WEST;
+		}
+
+		return null;
 	}
 
 	public static Direction fromYRot(double d) {

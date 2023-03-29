@@ -88,7 +88,7 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 
 	@Override
 	protected int getLevel(long l) {
-		if (l == Long.MAX_VALUE) {
+		if (this.isSource(l)) {
 			return 2;
 		} else if (this.dataSectionSet.contains(l)) {
 			return 0;

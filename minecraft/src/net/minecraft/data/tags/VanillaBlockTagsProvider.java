@@ -270,7 +270,8 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.POTTED_AZALEA,
 				Blocks.POTTED_FLOWERING_AZALEA,
 				Blocks.POTTED_MANGROVE_PROPAGULE,
-				Blocks.POTTED_CHERRY_SAPLING
+				Blocks.POTTED_CHERRY_SAPLING,
+				Blocks.POTTED_TORCHFLOWER
 			);
 		this.tag(BlockTags.BANNERS)
 			.add(
@@ -626,14 +627,14 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.REINFORCED_DEEPSLATE
 			);
 		this.tag(BlockTags.WITHER_SUMMON_BASE_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
-		this.tag(BlockTags.TALL_FLOWERS).add(Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH);
+		this.tag(BlockTags.TALL_FLOWERS).add(Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH, Blocks.PITCHER_PLANT);
 		this.tag(BlockTags.FLOWERS)
 			.addTag(BlockTags.SMALL_FLOWERS)
 			.addTag(BlockTags.TALL_FLOWERS)
 			.add(Blocks.FLOWERING_AZALEA_LEAVES, Blocks.FLOWERING_AZALEA, Blocks.MANGROVE_PROPAGULE, Blocks.CHERRY_LEAVES, Blocks.PINK_PETALS);
 		this.tag(BlockTags.BEEHIVES).add(Blocks.BEE_NEST, Blocks.BEEHIVE);
 		this.tag(BlockTags.CROPS)
-			.add(Blocks.BEETROOTS, Blocks.CARROTS, Blocks.POTATOES, Blocks.WHEAT, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM, Blocks.TORCHFLOWER_CROP);
+			.add(Blocks.BEETROOTS, Blocks.CARROTS, Blocks.POTATOES, Blocks.WHEAT, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM, Blocks.TORCHFLOWER_CROP, Blocks.PITCHER_CROP);
 		this.tag(BlockTags.BEE_GROWABLES).addTag(BlockTags.CROPS).add(Blocks.SWEET_BERRY_BUSH).add(Blocks.CAVE_VINES).add(Blocks.CAVE_VINES_PLANT);
 		this.tag(BlockTags.SHULKER_BOXES)
 			.add(

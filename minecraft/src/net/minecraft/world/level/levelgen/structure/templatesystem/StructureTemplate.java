@@ -385,7 +385,7 @@ public class StructureTemplate {
 	}
 
 	public static List<StructureTemplate.StructureBlockInfo> processBlockInfos(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		BlockPos blockPos,
 		BlockPos blockPos2,
 		StructurePlaceSettings structurePlaceSettings,
@@ -403,7 +403,7 @@ public class StructureTemplate {
 
 			while (structureBlockInfo2 != null && iterator.hasNext()) {
 				structureBlockInfo2 = ((StructureProcessor)iterator.next())
-					.processBlock(levelAccessor, blockPos, blockPos2, structureBlockInfo, structureBlockInfo2, structurePlaceSettings);
+					.processBlock(serverLevelAccessor, blockPos, blockPos2, structureBlockInfo, structureBlockInfo2, structurePlaceSettings);
 			}
 
 			if (structureBlockInfo2 != null) {
@@ -413,7 +413,7 @@ public class StructureTemplate {
 		}
 
 		for (StructureProcessor structureProcessor : structurePlaceSettings.getProcessors()) {
-			list3 = structureProcessor.finalizeProcessing(levelAccessor, blockPos, blockPos2, list2, list3, structurePlaceSettings);
+			list3 = structureProcessor.finalizeProcessing(serverLevelAccessor, blockPos, blockPos2, list2, list3, structurePlaceSettings);
 		}
 
 		return list3;

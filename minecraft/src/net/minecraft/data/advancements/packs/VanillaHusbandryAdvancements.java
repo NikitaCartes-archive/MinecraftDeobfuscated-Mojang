@@ -68,10 +68,9 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		EntityType.STRIDER,
 		EntityType.GOAT,
 		EntityType.AXOLOTL,
-		EntityType.CAMEL,
-		EntityType.SNIFFER
+		EntityType.CAMEL
 	);
-	public static final List<EntityType<?>> INDIRECTLY_BREEDABLE_ANIMALS = List.of(EntityType.TURTLE, EntityType.FROG);
+	public static final List<EntityType<?>> INDIRECTLY_BREEDABLE_ANIMALS = List.of(EntityType.TURTLE, EntityType.FROG, EntityType.SNIFFER);
 	private static final Item[] FISH = new Item[]{Items.COD, Items.TROPICAL_FISH, Items.PUFFERFISH, Items.SALMON};
 	private static final Item[] FISH_BUCKETS = new Item[]{Items.COD_BUCKET, Items.TROPICAL_FISH_BUCKET, Items.PUFFERFISH_BUCKET, Items.SALMON_BUCKET};
 	private static final Item[] EDIBLE_ITEMS = new Item[]{
@@ -154,6 +153,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.addCriterion("beetroots", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.BEETROOTS))
 			.addCriterion("nether_wart", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.NETHER_WART))
 			.addCriterion("torchflower", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.TORCHFLOWER_CROP))
+			.addCriterion("pitcher_pod", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.PITCHER_CROP))
 			.save(consumer, "husbandry/plant_seed");
 		Advancement advancement3 = Advancement.Builder.advancement()
 			.parent(advancement)

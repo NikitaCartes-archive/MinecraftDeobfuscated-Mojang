@@ -10,7 +10,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.HangingSignItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -20,7 +20,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.HangingSignBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -55,13 +54,24 @@ public class WallHangingSignBlock extends SignBlock {
 	) {
 		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
-			SignText signText = signBlockEntity.getTextFacingPlayer(player);
-			if (!signText.hasAnyClickCommands(player) && itemStack.getItem() instanceof BlockItem) {
+			if (this.shouldTryToChainAnotherHangingSign(blockState, player, blockHitResult, signBlockEntity, itemStack)) {
 				return InteractionResult.PASS;
 			}
 		}
 
 		return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
+	}
+
+	private boolean shouldTryToChainAnotherHangingSign(
+		BlockState blockState, Player player, BlockHitResult blockHitResult, SignBlockEntity signBlockEntity, ItemStack itemStack
+	) {
+		return !signBlockEntity.canExecuteClickCommands(signBlockEntity.isFacingFrontText(player), player)
+			&& itemStack.getItem() instanceof HangingSignItem
+			&& !this.isHittingEditableSide(blockHitResult, blockState);
+	}
+
+	private boolean isHittingEditableSide(BlockHitResult blockHitResult, BlockState blockState) {
+		return blockHitResult.getDirection().getAxis() == ((Direction)blockState.getValue(FACING)).getAxis();
 	}
 
 	@Override

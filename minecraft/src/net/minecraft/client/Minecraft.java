@@ -98,7 +98,6 @@ import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -2438,8 +2437,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public Music getSituationalMusic() {
-		if (this.screen instanceof WinScreen) {
-			return Musics.CREDITS;
+		Music music = Optionull.map(this.screen, Screen::getBackgroundMusic);
+		if (music != null) {
+			return music;
 		} else if (this.player != null) {
 			if (this.player.level.dimension() == Level.END) {
 				return this.gui.getBossOverlay().shouldPlayMusic() ? Musics.END_BOSS : Musics.END;

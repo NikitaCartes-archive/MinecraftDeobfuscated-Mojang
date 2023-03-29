@@ -7,7 +7,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.PushReaction;
 
 public class BuddingAmethystBlock extends AmethystBlock {
 	public static final int GROWTH_CHANCE = 5;
@@ -15,11 +14,6 @@ public class BuddingAmethystBlock extends AmethystBlock {
 
 	public BuddingAmethystBlock(BlockBehaviour.Properties properties) {
 		super(properties);
-	}
-
-	@Override
-	public PushReaction getPistonPushReaction(BlockState blockState) {
-		return PushReaction.DESTROY;
 	}
 
 	@Override

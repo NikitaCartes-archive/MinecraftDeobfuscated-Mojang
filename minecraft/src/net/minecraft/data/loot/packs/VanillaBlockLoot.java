@@ -32,7 +32,6 @@ import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.TorchflowerCropBlock;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.storage.loot.IntRange;
@@ -968,15 +967,9 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 				Blocks.MANGROVE_PROPAGULE, LootTable.lootTable().withPool(LootPool.lootPool().when(builder4).add(LootItem.lootTableItem(Items.MANGROVE_PROPAGULE)))
 			)
 		);
-		LootItemBlockStatePropertyCondition.Builder builder5 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.TORCHFLOWER_CROP)
-			.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(TorchflowerCropBlock.AGE, 2));
 		this.add(
 			Blocks.TORCHFLOWER_CROP,
-			this.applyExplosionDecay(
-				Blocks.TORCHFLOWER_CROP,
-				LootTable.lootTable()
-					.withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.TORCHFLOWER).when(builder5).otherwise(LootItem.lootTableItem(Items.TORCHFLOWER_SEEDS))))
-			)
+			this.applyExplosionDecay(Blocks.TORCHFLOWER_CROP, LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.TORCHFLOWER_SEEDS))))
 		);
 		this.dropSelf(Blocks.SNIFFER_EGG);
 		this.add(Blocks.PITCHER_CROP, block -> this.createPitcherCropLoot());
@@ -1011,7 +1004,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					)
 			)
 		);
-		LootItemCondition.Builder builder6 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.POTATOES)
+		LootItemCondition.Builder builder5 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.POTATOES)
 			.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PotatoBlock.AGE, 7));
 		this.add(
 			Blocks.POTATOES,
@@ -1021,10 +1014,10 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					.withPool(LootPool.lootPool().add(LootItem.lootTableItem(Items.POTATO)))
 					.withPool(
 						LootPool.lootPool()
-							.when(builder6)
+							.when(builder5)
 							.add(LootItem.lootTableItem(Items.POTATO).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286F, 3)))
 					)
-					.withPool(LootPool.lootPool().when(builder6).add(LootItem.lootTableItem(Items.POISONOUS_POTATO).when(LootItemRandomChanceCondition.randomChance(0.02F))))
+					.withPool(LootPool.lootPool().when(builder5).add(LootItem.lootTableItem(Items.POISONOUS_POTATO).when(LootItemRandomChanceCondition.randomChance(0.02F))))
 			)
 		);
 		this.add(

@@ -8,21 +8,14 @@ import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.commands.CommandSource;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 
 public class SignText {
 	private static final Codec<Component[]> LINES_CODEC = ExtraCodecs.FLAT_COMPONENT
@@ -115,7 +108,7 @@ public class SignText {
 		return Arrays.stream(this.getMessages(player.isTextFilteringEnabled())).anyMatch(component -> !component.getString().isEmpty());
 	}
 
-	private Component[] getMessages(boolean bl) {
+	public Component[] getMessages(boolean bl) {
 		return bl ? this.filteredMessages : this.messages;
 	}
 
@@ -159,28 +152,5 @@ public class SignText {
 		}
 
 		return false;
-	}
-
-	public boolean executeClickCommandsIfPresent(ServerPlayer serverPlayer, ServerLevel serverLevel, BlockPos blockPos) {
-		boolean bl = false;
-
-		for (Component component : this.getMessages(serverPlayer.isTextFilteringEnabled())) {
-			Style style = component.getStyle();
-			ClickEvent clickEvent = style.getClickEvent();
-			if (clickEvent != null && clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-				serverPlayer.getServer().getCommands().performPrefixedCommand(createCommandSourceStack(serverPlayer, serverLevel, blockPos), clickEvent.getValue());
-				bl = true;
-			}
-		}
-
-		return bl;
-	}
-
-	private static CommandSourceStack createCommandSourceStack(ServerPlayer serverPlayer, ServerLevel serverLevel, BlockPos blockPos) {
-		String string = serverPlayer.getName().getString();
-		Component component = serverPlayer.getDisplayName();
-		return new CommandSourceStack(
-			CommandSource.NULL, Vec3.atCenterOf(blockPos), Vec2.ZERO, serverLevel, 2, string, component, serverLevel.getServer(), serverPlayer
-		);
 	}
 }
