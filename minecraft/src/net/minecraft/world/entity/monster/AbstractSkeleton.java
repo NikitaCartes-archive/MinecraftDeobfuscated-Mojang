@@ -100,7 +100,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 
 	@Override
 	public void aiStep() {
-		if (this.transform.entity() == null) {
+		if (this.getTransform().entity() == null) {
 			this.burnInSun(this);
 		}
 

@@ -239,7 +239,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private float swimAmountO;
 	protected Brain<?> brain;
 	private boolean skipDropExperience;
-	protected EntityTransform transform = EntityTransform.IDENTITY;
+	private EntityTransform transform = EntityTransform.IDENTITY;
 	private float scaleOld = 1.0F;
 	private float lastScaleModifier = 1.0F;
 
@@ -327,7 +327,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean canBreatheUnderwater() {
-		return this.transform.canBreatheUnderwater() ? true : this.getMobType() == MobType.UNDEAD;
+		return this.getTransform().canBreatheUnderwater() ? true : this.getMobType() == MobType.UNDEAD;
 	}
 
 	public float getSwimAmount(float f) {
@@ -368,7 +368,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			}
 
 			boolean bl2 = this.level.getBlockState(BlockPos.containing(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN);
-			if (!this.transform.canBreatheInAir()) {
+			if (!this.getTransform().canBreatheInAir()) {
 				if (this.isEyeInFluid(FluidTags.WATER) && !bl2) {
 					if (this.getAirSupply() < this.getMaxAirSupply()) {
 						this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
@@ -381,7 +381,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 						this.hurt(this.damageSources().dryOut(), 2.0F);
 					}
 				}
-			} else if (this.transform.canBreatheUnderwater()) {
+			} else if (this.getTransform().canBreatheUnderwater()) {
 				if (this.getAirSupply() < this.getMaxAirSupply()) {
 					this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
 				}
@@ -768,9 +768,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		});
 		DataResult<Tag> dataResult = this.brain.serializeStart(NbtOps.INSTANCE);
 		dataResult.resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Brain", tag));
-		if (!this.transform.isIdentity()) {
+		EntityTransform entityTransform = this.getTransform();
+		if (!entityTransform.isIdentity()) {
 			EntityTransformType.CODEC
-				.encodeStart(NbtOps.INSTANCE, this.transform.type())
+				.encodeStart(NbtOps.INSTANCE, entityTransform.type())
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(tag -> compoundTag.put("transform", tag));
 		}
@@ -1495,7 +1496,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	private float transformScaleDropModifier() {
-		return Mth.clamp(this.transform.scale() * this.transform.scale() * this.transform.scale(), 0.5F, 256.0F);
+		float f = this.getTransform().scale();
+		return Mth.clamp(f * f * f, 0.5F, 256.0F);
 	}
 
 	protected LootContext.Builder createLootContext(boolean bl, DamageSource damageSource) {
@@ -1575,7 +1577,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public float getTransformScale(float f) {
-		return Mth.lerp(f, this.scaleOld, this.transform.scale());
+		return Mth.lerp(f, this.scaleOld, this.getTransform().scale());
 	}
 
 	public LivingEntity.Fallsounds getFallSounds() {
@@ -2415,13 +2417,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Override
 	public void postTick() {
 		super.postTick();
-		this.transform.copyProperties(this);
+		this.getTransform().copyProperties(this);
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-		this.scaleOld = this.transform.scale();
+		this.scaleOld = this.getTransform().scale();
 		if (!this.level.isClientSide) {
 			float f = this.getScaleModifier();
 			if (Math.abs(f - this.lastScaleModifier) > 1.0E-5F) {
@@ -2431,9 +2433,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			}
 		}
 
-		Entity entity = this.transform.entity();
+		Entity entity = this.getTransform().entity();
 		if (entity != null) {
-			entity.transformedTick(this.transform, this);
+			entity.transformedTick(this.getTransform(), this);
 		}
 
 		this.updatingUsingItem();
@@ -2804,7 +2806,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public boolean fireImmune() {
-		return this.isGold() ? true : this.transform.entity() != null && this.transform.entity().fireImmune() || super.fireImmune();
+		return this.isGold() ? true : this.getTransform().entity() != null && this.getTransform().entity().fireImmune() || super.fireImmune();
 	}
 
 	@Override
@@ -2813,7 +2815,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean isSensitiveToWater() {
-		return this.transform.isSensitiveToWater();
+		return this.getTransform().isSensitiveToWater();
 	}
 
 	private void updateFallFlying() {
@@ -3325,7 +3327,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Override
 	public EntityDimensions getDimensions(Pose pose) {
 		EntityDimensions entityDimensions = pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : super.getDimensions(pose).scale(this.getScale());
-		return this.transform.getDimensions(pose, entityDimensions);
+		return this.getTransform().getDimensions(pose, entityDimensions);
 	}
 
 	public ImmutableList<Pose> getDismountPoses() {
@@ -3598,12 +3600,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Override
 	public float maxUpStep() {
 		float f = super.maxUpStep();
-		return this.transform.maxUpStep(this.getControllingPassenger() instanceof Player ? Math.max(f, 1.0F) : f);
+		return this.getTransform().maxUpStep(this.getControllingPassenger() instanceof Player ? Math.max(f, 1.0F) : f);
 	}
 
 	@Override
 	public boolean noCulling() {
-		Entity entity = this.transform.entity();
+		Entity entity = this.getTransform().entity();
 		return entity != null ? entity.noCulling() : super.noCulling();
 	}
 
@@ -3677,7 +3679,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public InteractionResult interact(Player player, InteractionHand interactionHand) {
-		if (this.transform.entity() instanceof Mob mob) {
+		if (this.getTransform().entity() instanceof Mob mob) {
 			InteractionResult interactionResult = mob.transformInteract(player, this, interactionHand);
 			if (interactionResult.consumesAction()) {
 				return interactionResult;
@@ -3689,19 +3691,21 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public double getPassengersRidingOffset() {
-		return this.transform.entity() != null ? this.transform.entity().getPassengersRidingOffset() : super.getPassengersRidingOffset();
+		return this.getTransform().entity() != null ? this.getTransform().entity().getPassengersRidingOffset() : super.getPassengersRidingOffset();
 	}
 
 	@Override
 	public double getMyRidingOffset() {
-		return this.transform.entity() != null ? this.transform.entity().getMyRidingOffset() : super.getMyRidingOffset();
+		Entity entity = this.getTransform().entity();
+		return entity != null ? entity.getMyRidingOffset() : super.getMyRidingOffset();
 	}
 
 	@Override
 	public void positionRider(Entity entity) {
-		if (this.transform.entity() != null) {
-			this.transform.entity().copyTransformedProperties(this);
-			this.transform.entity().positionRider(entity);
+		Entity entity2 = this.getTransform().entity();
+		if (entity2 != null) {
+			entity2.copyTransformedProperties(this);
+			entity2.positionRider(entity);
 		} else {
 			super.positionRider(entity);
 		}

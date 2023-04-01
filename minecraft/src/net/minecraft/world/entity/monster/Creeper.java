@@ -239,8 +239,9 @@ public class Creeper extends Monster implements PowerableMob {
 	private void explodeCreeper() {
 		if (!this.level.isClientSide) {
 			float f = this.isPowered() ? 2.0F : 1.0F;
-			if (this.transform.scale() > 1.0F) {
-				f *= Math.min(this.transform.scale(), 4.0F);
+			float g = this.getTransform().scale();
+			if (g > 1.0F) {
+				f *= Math.min(g, 4.0F);
 			}
 
 			this.dead = true;

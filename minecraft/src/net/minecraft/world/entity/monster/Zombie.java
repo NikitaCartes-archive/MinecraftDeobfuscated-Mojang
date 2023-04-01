@@ -243,7 +243,7 @@ public class Zombie extends Monster {
 
 	@Override
 	public void aiStep() {
-		if (this.transform.entity() == null) {
+		if (this.getTransform().entity() == null) {
 			this.burnInSun(this);
 		}
 

@@ -62,7 +62,7 @@ public abstract class AbstractClientPlayer extends Player {
 
 	@Nullable
 	protected PlayerInfo getVisiblePlayerInfo() {
-		GameProfile gameProfile = this.transform.playerSkin();
+		GameProfile gameProfile = this.getTransform().playerSkin();
 		if (gameProfile == null) {
 			return this.getPlayerInfo();
 		} else {

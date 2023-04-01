@@ -125,7 +125,7 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 	}
 
 	public void setFuse(int i) {
-		int j = Rules.RANDOM_TNT_FUSE.get() ? this.level.random.nextInt(400) : i;
+		int j = Rules.RANDOM_TNT_FUSE.get() ? this.level.random.nextInt(399) + 1 : i;
 		this.entityData.set(DATA_FUSE_ID, j);
 	}
 
