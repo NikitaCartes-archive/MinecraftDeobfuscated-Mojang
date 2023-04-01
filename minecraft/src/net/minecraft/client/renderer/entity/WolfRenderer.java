@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WolfModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.layers.CrownLayer;
 import net.minecraft.client.renderer.entity.layers.WolfCollarLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Wolf;
@@ -19,6 +20,7 @@ public class WolfRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
 	public WolfRenderer(EntityRendererProvider.Context context) {
 		super(context, new WolfModel<>(context.bakeLayer(ModelLayers.WOLF)), 0.5F);
 		this.addLayer(new WolfCollarLayer(this));
+		this.addLayer(new CrownLayer<>(this, context.getModelSet()));
 	}
 
 	protected float getBob(Wolf wolf, float f) {

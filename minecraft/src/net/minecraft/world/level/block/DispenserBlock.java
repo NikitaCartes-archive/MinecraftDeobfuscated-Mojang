@@ -14,6 +14,7 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -97,7 +98,7 @@ public class DispenserBlock extends BaseEntityBlock {
 
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		boolean bl2 = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
+		boolean bl2 = level.hasNeighborSignal(blockPos) || !Rules.FIX_QC.get() && level.hasNeighborSignal(blockPos.above());
 		boolean bl3 = (Boolean)blockState.getValue(TRIGGERED);
 		if (bl2 && !bl3) {
 			level.scheduleTick(blockPos, this, 4);

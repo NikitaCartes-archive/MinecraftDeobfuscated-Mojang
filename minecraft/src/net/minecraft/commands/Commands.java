@@ -118,6 +118,8 @@ import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
+import net.minecraft.voting.VoteCommand;
+import net.minecraft.world.entity.transform.TransformCommand;
 import org.slf4j.Logger;
 
 public class Commands {
@@ -188,6 +190,8 @@ public class Commands {
 		TriggerCommand.register(this.dispatcher);
 		WeatherCommand.register(this.dispatcher);
 		WorldBorderCommand.register(this.dispatcher);
+		VoteCommand.register(this.dispatcher, commandBuildContext);
+		TransformCommand.register(this.dispatcher, commandBuildContext);
 		if (JvmProfiler.INSTANCE.isAvailable()) {
 			JfrCommand.register(this.dispatcher);
 		}

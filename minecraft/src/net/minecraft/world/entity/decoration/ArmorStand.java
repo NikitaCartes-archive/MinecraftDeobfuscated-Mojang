@@ -385,7 +385,7 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.level.isClientSide || this.isRemoved()) {
 			return false;
 		} else if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {

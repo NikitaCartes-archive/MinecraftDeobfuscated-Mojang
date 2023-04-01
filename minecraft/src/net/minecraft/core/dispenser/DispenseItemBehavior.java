@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -440,8 +441,11 @@ public interface DispenseItemBehavior {
 					level.setBlockAndUpdate(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)));
 					level.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
 				} else if (blockState.getBlock() instanceof TntBlock) {
-					TntBlock.explode(level, blockPos);
+					TntBlock.explode(level, blockPos, blockState);
 					level.removeBlock(blockPos, false);
+				} else if (Rules.FLINTSPLODER.get() && !blockState.isAir()) {
+					TntBlock.explode(level, blockPos, null, blockState);
+					level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 11);
 				} else {
 					this.setSuccess(false);
 				}

@@ -205,7 +205,7 @@ public class ShulkerBullet extends Projectile {
 
 			if (this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && this.finalTarget.isSpectator()) {
 				if (!this.isNoGravity()) {
-					this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
+					this.setDeltaMovement(this.getDeltaMovement().add(0.0, (double)(-this.getEffectiveGravity()), 0.0));
 				}
 			} else {
 				this.targetDeltaX = Mth.clamp(this.targetDeltaX * 1.025, -1.0, 1.0);
@@ -311,7 +311,7 @@ public class ShulkerBullet extends Projectile {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (!this.level.isClientSide) {
 			this.playSound(SoundEvents.SHULKER_BULLET_HURT, 1.0F, 1.0F);
 			((ServerLevel)this.level).sendParticles(ParticleTypes.CRIT, this.getX(), this.getY(), this.getZ(), 15, 0.2, 0.2, 0.2, 0.0);

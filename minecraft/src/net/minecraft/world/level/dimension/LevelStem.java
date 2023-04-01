@@ -18,4 +18,5 @@ public record LevelStem(Holder<DimensionType> type, ChunkGenerator generator) {
 	public static final ResourceKey<LevelStem> OVERWORLD = ResourceKey.create(Registries.LEVEL_STEM, new ResourceLocation("overworld"));
 	public static final ResourceKey<LevelStem> NETHER = ResourceKey.create(Registries.LEVEL_STEM, new ResourceLocation("the_nether"));
 	public static final ResourceKey<LevelStem> END = ResourceKey.create(Registries.LEVEL_STEM, new ResourceLocation("the_end"));
+	public static final ResourceKey<LevelStem> MOON = ResourceKey.create(Registries.LEVEL_STEM, new ResourceLocation("the_moon"));
 }

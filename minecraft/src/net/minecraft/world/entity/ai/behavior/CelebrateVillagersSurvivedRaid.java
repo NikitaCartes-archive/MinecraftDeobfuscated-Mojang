@@ -50,7 +50,7 @@ public class CelebrateVillagersSurvivedRaid extends Behavior<Villager> {
 		if (randomSource.nextInt(200) == 0 && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, villager.blockPosition())) {
 			DyeColor dyeColor = Util.getRandom(DyeColor.values(), randomSource);
 			int i = randomSource.nextInt(3);
-			ItemStack itemStack = this.getFirework(dyeColor, i);
+			ItemStack itemStack = getFirework(i, 1, dyeColor.getFireworkColor());
 			FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
 				villager.level, villager, villager.getX(), villager.getEyeY(), villager.getZ(), itemStack
 			);
@@ -58,19 +58,25 @@ public class CelebrateVillagersSurvivedRaid extends Behavior<Villager> {
 		}
 	}
 
-	private ItemStack getFirework(DyeColor dyeColor, int i) {
+	public static ItemStack getFirework(int i, int j, int... is) {
 		ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET, 1);
 		ItemStack itemStack2 = new ItemStack(Items.FIREWORK_STAR);
 		CompoundTag compoundTag = itemStack2.getOrCreateTagElement("Explosion");
 		List<Integer> list = Lists.<Integer>newArrayList();
-		list.add(dyeColor.getFireworkColor());
+
+		for (int k : is) {
+			list.add(k);
+		}
+
 		compoundTag.putIntArray("Colors", list);
 		compoundTag.putByte("Type", (byte)FireworkRocketItem.Shape.BURST.getId());
 		CompoundTag compoundTag2 = itemStack.getOrCreateTagElement("Fireworks");
 		ListTag listTag = new ListTag();
 		CompoundTag compoundTag3 = itemStack2.getTagElement("Explosion");
 		if (compoundTag3 != null) {
-			listTag.add(compoundTag3);
+			for (int k = 0; k < j; k++) {
+				listTag.add(compoundTag3);
+			}
 		}
 
 		compoundTag2.putByte("Flight", (byte)i);

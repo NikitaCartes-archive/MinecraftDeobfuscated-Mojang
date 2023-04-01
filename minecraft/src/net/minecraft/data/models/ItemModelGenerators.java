@@ -155,6 +155,9 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.BLUE_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BONE_MEAL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BOOK, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BOTTLE_OF_VOID, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BOTTLE_OF_ENTITY, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SPLASH_BOTTLE_OF_ENTITY, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BOWL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BREAD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BRICK, ModelTemplates.FLAT_ITEM);
@@ -197,7 +200,6 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.DRAGON_BREATH, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.DRIED_KELP, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.EGG, ModelTemplates.FLAT_ITEM);
-		this.generateFlatItem(Items.EMERALD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.ENCHANTED_BOOK, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.ENDER_EYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.ENDER_PEARL, ModelTemplates.FLAT_ITEM);
@@ -212,6 +214,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.FURNACE_MINECART, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GHAST_TEAR, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLASS_BOTTLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.AIR_BLOCK, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLISTERING_MELON_SLICE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLOBE_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GLOW_BERRIES, ModelTemplates.FLAT_ITEM);
@@ -268,6 +271,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.MILK_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MINECART, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MOJANG_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.NEW_MOJANG_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MUSHROOM_STEW, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.DISC_FRAGMENT_5, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MUSIC_DISC_11, ModelTemplates.FLAT_ITEM);
@@ -409,6 +413,25 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SHELTER_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SKULL_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SNORT_POTTERY_SHARD, ModelTemplates.FLAT_ITEM);
+		ModelTemplates.MISSING.create(ModelLocationUtils.getModelLocation(Items.DUPE_HACK), new TextureMapping(), this.output);
+		this.generateFlatItem(Items.NAME, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.STRING_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BYTE_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SHORT_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.INT_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.LONG_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.FLOAT_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.DOUBLE_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.COMPOUND_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.LIST_TAG, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.LEFT_SQUARE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.RIGHT_SQUARE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.LEFT_CURLY, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.RIGHT_CURLY, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SYNTAX_ERROR, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BIT, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.LONG_STRING, ModelTemplates.FLAT_ITEM);
 	}
 
 	static record TrimModelData(String name, float itemModelIndex, Map<ArmorMaterial, String> overrideArmorMaterials) {

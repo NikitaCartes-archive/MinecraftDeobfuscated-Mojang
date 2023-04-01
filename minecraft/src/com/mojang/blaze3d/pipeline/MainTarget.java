@@ -16,7 +16,7 @@ public class MainTarget extends RenderTarget {
 	static final MainTarget.Dimension DEFAULT_DIMENSIONS = new MainTarget.Dimension(854, 480);
 
 	public MainTarget(int i, int j) {
-		super(true);
+		super(true, true);
 		RenderSystem.assertOnRenderThreadOrInit();
 		if (!RenderSystem.isOnRenderThread()) {
 			RenderSystem.recordRenderCall(() -> this.createFrameBuffer(i, j));
@@ -36,13 +36,13 @@ public class MainTarget extends RenderTarget {
 		GlStateManager._texParameter(3553, 10242, 33071);
 		GlStateManager._texParameter(3553, 10243, 33071);
 		GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
-		GlStateManager._bindTexture(this.depthBufferId);
+		GlStateManager._bindTexture(this.depthStencilBufferId);
 		GlStateManager._texParameter(3553, 34892, 0);
 		GlStateManager._texParameter(3553, 10241, 9728);
 		GlStateManager._texParameter(3553, 10240, 9728);
 		GlStateManager._texParameter(3553, 10242, 33071);
 		GlStateManager._texParameter(3553, 10243, 33071);
-		GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
+		GlStateManager._glFramebufferTexture2D(36160, 33306, 3553, this.depthStencilBufferId, 0);
 		GlStateManager._bindTexture(0);
 		this.viewWidth = dimension.width;
 		this.viewHeight = dimension.height;
@@ -55,7 +55,7 @@ public class MainTarget extends RenderTarget {
 	private MainTarget.Dimension allocateAttachments(int i, int j) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		this.colorTextureId = TextureUtil.generateTextureId();
-		this.depthBufferId = TextureUtil.generateTextureId();
+		this.depthStencilBufferId = TextureUtil.generateTextureId();
 		MainTarget.AttachmentState attachmentState = MainTarget.AttachmentState.NONE;
 
 		for (MainTarget.Dimension dimension : MainTarget.Dimension.listWithFallback(i, j)) {
@@ -87,8 +87,8 @@ public class MainTarget extends RenderTarget {
 	private boolean allocateDepthAttachment(MainTarget.Dimension dimension) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._getError();
-		GlStateManager._bindTexture(this.depthBufferId);
-		GlStateManager._texImage2D(3553, 0, 6402, dimension.width, dimension.height, 0, 6402, 5126, null);
+		GlStateManager._bindTexture(this.depthStencilBufferId);
+		GlStateManager._texImage2D(3553, 0, 35056, dimension.width, dimension.height, 0, 34041, 34042, null);
 		return GlStateManager._getError() != 1285;
 	}
 

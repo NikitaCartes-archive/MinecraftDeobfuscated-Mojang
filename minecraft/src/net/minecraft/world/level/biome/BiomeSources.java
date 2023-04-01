@@ -8,6 +8,7 @@ public class BiomeSources {
 		Registry.register(registry, "fixed", FixedBiomeSource.CODEC);
 		Registry.register(registry, "multi_noise", MultiNoiseBiomeSource.CODEC);
 		Registry.register(registry, "checkerboard", CheckerboardColumnBiomeSource.CODEC);
+		Registry.register(registry, "the_moon", TheMoonBiomeSource.CODEC);
 		return Registry.register(registry, "the_end", TheEndBiomeSource.CODEC);
 	}
 }

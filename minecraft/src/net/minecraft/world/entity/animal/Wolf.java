@@ -291,7 +291,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
@@ -304,7 +304,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 				f = (f + 1.0F) / 2.0F;
 			}
 
-			return super.hurt(damageSource, f);
+			return super.hurtInternal(damageSource, f);
 		}
 	}
 

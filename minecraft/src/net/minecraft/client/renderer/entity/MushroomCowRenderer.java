@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -27,5 +28,10 @@ public class MushroomCowRenderer extends MobRenderer<MushroomCow, CowModel<Mushr
 
 	public ResourceLocation getTextureLocation(MushroomCow mushroomCow) {
 		return (ResourceLocation)TEXTURES.get(mushroomCow.getVariant());
+	}
+
+	protected void scale(MushroomCow mushroomCow, PoseStack poseStack, float f) {
+		float g = mushroomCow.getBloatScale();
+		poseStack.scale(g, g, g);
 	}
 }

@@ -51,7 +51,7 @@ public class ShapelessRecipe implements CraftingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItemRaw(RegistryAccess registryAccess) {
 		return this.result;
 	}
 
@@ -75,7 +75,7 @@ public class ShapelessRecipe implements CraftingRecipe {
 		return i == this.ingredients.size() && stackedContents.canCraft(this, null);
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		return this.result.copy();
 	}
 

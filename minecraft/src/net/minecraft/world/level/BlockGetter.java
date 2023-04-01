@@ -8,10 +8,15 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.LightEngineMode;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -32,7 +37,29 @@ public interface BlockGetter extends LevelHeightAccessor {
 	FluidState getFluidState(BlockPos blockPos);
 
 	default int getLightEmission(BlockPos blockPos) {
-		return this.getBlockState(blockPos).getLightEmission();
+		BlockState blockState = this.getBlockState(blockPos);
+		int i = blockState.getLightEmission();
+		if (i == 0) {
+			return 0;
+		} else {
+			LightEngineMode lightEngineMode = Rules.OPTIMIZE_LIGHT_ENGINE.get();
+			if (lightEngineMode == LightEngineMode.NEVER_LIGHT || lightEngineMode == LightEngineMode.LOADSHEDDING) {
+				Level level = null;
+				if (this instanceof Level level2) {
+					level = level2;
+				} else if (this instanceof LevelChunk levelChunk) {
+					level = levelChunk.getLevel();
+				} else if (this instanceof ImposterProtoChunk imposterProtoChunk) {
+					level = imposterProtoChunk.getWrapped().getLevel();
+				}
+
+				if (level != null && lightEngineMode.isLightDisabled(level) && !blockState.is(BlockTags.CANDLES)) {
+					return 0;
+				}
+			}
+
+			return i;
+		}
 	}
 
 	default int getMaxLightLevel() {

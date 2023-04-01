@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -26,7 +27,8 @@ public class FaceAttachedHorizontalDirectionalBlock extends HorizontalDirectiona
 
 	public static boolean canAttach(LevelReader levelReader, BlockPos blockPos, Direction direction) {
 		BlockPos blockPos2 = blockPos.relative(direction);
-		return levelReader.getBlockState(blockPos2).isFaceSturdy(levelReader, blockPos2, direction.getOpposite());
+		return levelReader.getBlockState(blockPos2)
+			.isFaceSturdy(levelReader, blockPos2, direction.getOpposite(), Rules.BUTTONS_ON_THINGS.get() ? SupportType.CENTER : SupportType.FULL);
 	}
 
 	@Nullable

@@ -47,6 +47,7 @@ public class LevelEvent {
 	public static final int END_PORTAL_FRAME_FILL = 1503;
 	public static final int DRIPSTONE_DRIP = 1504;
 	public static final int PARTICLES_AND_SOUND_PLANT_GROWTH = 1505;
+	public static final int THE_JOKE_HAPPENED = 1506;
 	public static final int PARTICLES_SHOOT = 2000;
 	public static final int PARTICLES_DESTROY_BLOCK = 2001;
 	public static final int PARTICLES_SPELL_POTION_SPLASH = 2002;
@@ -57,6 +58,7 @@ public class LevelEvent {
 	public static final int PARTICLES_INSTANT_POTION_SPLASH = 2007;
 	public static final int PARTICLES_DRAGON_BLOCK_BREAK = 2008;
 	public static final int PARTICLES_WATER_EVAPORATING = 2009;
+	public static final int PARTICLES_EAT_CHEESE = 2010;
 	public static final int ANIMATION_END_GATEWAY_SPAWN = 3000;
 	public static final int ANIMATION_DRAGON_SUMMON_ROAR = 3001;
 	public static final int PARTICLES_ELECTRIC_SPARK = 3002;

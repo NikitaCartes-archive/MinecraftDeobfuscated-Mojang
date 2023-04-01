@@ -5,9 +5,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
@@ -96,6 +98,10 @@ public class DecoratedPotBlock extends BaseEntityBlock {
 			builder.withDynamicDrop(SHARDS, (lootContext, consumer) -> {
 				for (Item item : decoratedPotBlockEntity.getShards()) {
 					consumer.accept(item.getDefaultInstance());
+				}
+
+				if (Rules.POT_GEMS.get()) {
+					consumer.accept(new ItemStack(Items.EMERALD));
 				}
 			});
 		}

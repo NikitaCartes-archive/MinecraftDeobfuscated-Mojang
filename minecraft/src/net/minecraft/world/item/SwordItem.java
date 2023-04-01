@@ -55,6 +55,10 @@ public class SwordItem extends TieredItem implements Vanishable {
 	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		itemStack.hurtAndBreak(1, livingEntity2, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+		if (livingEntity instanceof Player player && itemStack.is(Items.LA_BAGUETTE)) {
+			player.getFoodData().eat(4, 0.8F);
+		}
+
 		return true;
 	}
 

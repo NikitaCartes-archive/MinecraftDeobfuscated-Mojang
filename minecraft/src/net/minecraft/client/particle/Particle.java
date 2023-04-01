@@ -115,7 +115,7 @@ public abstract class Particle {
 		if (this.age++ >= this.lifetime) {
 			this.remove();
 		} else {
-			this.yd = this.yd - 0.04 * (double)this.gravity;
+			this.yd = this.yd - 0.04 * this.level.getGravity() * (double)this.gravity;
 			this.move(this.xd, this.yd, this.zd);
 			if (this.speedUpWhenYMotionIsBlocked && this.y == this.yo) {
 				this.xd *= 1.1;

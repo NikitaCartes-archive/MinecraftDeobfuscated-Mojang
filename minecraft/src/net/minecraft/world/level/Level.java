@@ -3,11 +3,14 @@ package net.minecraft.world.level;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -33,6 +36,8 @@ import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.LightEngineMode;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
@@ -54,6 +59,8 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.LevelEntityGetter;
@@ -70,12 +77,14 @@ import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
+import org.joml.Vector3f;
 
 public abstract class Level implements LevelAccessor, AutoCloseable {
 	public static final Codec<ResourceKey<Level>> RESOURCE_KEY_CODEC = ResourceKey.codec(Registries.DIMENSION);
 	public static final ResourceKey<Level> OVERWORLD = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("overworld"));
 	public static final ResourceKey<Level> NETHER = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("the_nether"));
 	public static final ResourceKey<Level> END = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("the_end"));
+	public static final ResourceKey<Level> MOON = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("the_moon"));
 	public static final int MAX_LEVEL_SIZE = 30000000;
 	public static final int LONG_PARTICLE_CLIP_RANGE = 512;
 	public static final int SHORT_PARTICLE_CLIP_RANGE = 32;
@@ -110,6 +119,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	private final RegistryAccess registryAccess;
 	private final DamageSources damageSources;
 	private long subTickCount;
+	private double levelGravitas;
+	private boolean wasLightsOut;
+	private final Queue<ChunkAccess> queuedChunks = new ArrayDeque();
+	double moonSize = 0.0;
 
 	protected Level(
 		WritableLevelData writableLevelData,
@@ -127,6 +140,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.dimensionTypeRegistration = holder;
 		this.dimensionTypeId = (ResourceKey<DimensionType>)holder.unwrapKey()
 			.orElseThrow(() -> new IllegalArgumentException("Dimension must be registered, got " + holder));
+		this.levelGravitas = this.dimensionTypeId != BuiltinDimensionTypes.MOON ? 1.0 : 0.1;
 		final DimensionType dimensionType = holder.value();
 		this.dimension = resourceKey;
 		this.isClientSide = bl;
@@ -243,14 +257,18 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 						this.sendBlockUpdated(blockPos, blockState2, blockState, i);
 					}
 
+					boolean bl = (Boolean)Rules.UPDATES.get();
 					if ((i & 1) != 0) {
-						this.blockUpdated(blockPos, blockState2.getBlock());
+						if (bl) {
+							this.blockUpdated(blockPos, blockState2.getBlock());
+						}
+
 						if (!this.isClientSide && blockState.hasAnalogOutputSignal()) {
 							this.updateNeighbourForOutputSignal(blockPos, block);
 						}
 					}
 
-					if ((i & 16) == 0 && j > 0) {
+					if ((i & (bl ? 16 : -1)) == 0 && j > 0) {
 						int k = i & -34;
 						blockState2.updateIndirectNeighbourShapes(this, blockPos, k, j - 1);
 						blockState.updateNeighbourShapes(this, blockPos, k, j - 1);
@@ -434,6 +452,45 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	protected void tickBlockEntities() {
+		LightEngineMode lightEngineMode = Rules.OPTIMIZE_LIGHT_ENGINE.get();
+		boolean bl = lightEngineMode.isLightDisabled(this);
+		if (bl != this.wasLightsOut) {
+			this.allChunks().forEach(this.queuedChunks::add);
+			this.wasLightsOut = bl;
+		}
+
+		int i = 0;
+
+		while (!this.queuedChunks.isEmpty() && i < 10) {
+			ChunkAccess chunkAccess = (ChunkAccess)this.queuedChunks.poll();
+			if (this.hasChunk(chunkAccess.getPos().x, chunkAccess.getPos().z)) {
+				for (int j = chunkAccess.getMinSection(); j < chunkAccess.getMaxSection(); j++) {
+					LevelChunkSection levelChunkSection = chunkAccess.getSection(chunkAccess.getSectionIndexFromSectionY(j));
+					if (!levelChunkSection.hasOnlyAir() && levelChunkSection.maybeHas(blockState -> blockState.getLightEmission() != 0 || blockState.isSignalSource())) {
+						SectionPos sectionPos = SectionPos.of(chunkAccess.getPos(), j);
+						sectionPos.blocksInside()
+							.forEach(
+								blockPos -> {
+									BlockState blockState = levelChunkSection.getBlockState(
+										SectionPos.sectionRelative(blockPos.getX()), SectionPos.sectionRelative(blockPos.getY()), SectionPos.sectionRelative(blockPos.getZ())
+									);
+									if (blockState.getLightEmission() != 0) {
+										this.getLightEngine().checkBlock(blockPos);
+									}
+
+									if (!this.isClientSide && blockState.isSignalSource()) {
+										this.updateNeighborsAt(blockPos, blockState.getBlock());
+									}
+								}
+							);
+					}
+				}
+
+				chunkAccess.setLightsOut(bl);
+				i++;
+			}
+		}
+
 		ProfilerFiller profilerFiller = this.getProfiler();
 		profilerFiller.push("blockEntities");
 		this.tickingBlockEntities = true;
@@ -457,6 +514,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		profilerFiller.pop();
 	}
 
+	protected Stream<ChunkAccess> allChunks() {
+		return Stream.empty();
+	}
+
 	public <T extends Entity> void guardEntityTick(Consumer<T> consumer, T entity) {
 		try {
 			consumer.accept(entity);
@@ -478,6 +539,18 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public boolean shouldTickBlocksAt(BlockPos blockPos) {
 		return this.shouldTickBlocksAt(ChunkPos.asLong(blockPos));
+	}
+
+	public double getGravity() {
+		if (Rules.LESS_GRAVITY.get()) {
+			return this.levelGravitas == 1.0 ? 0.1 : 1.0;
+		} else {
+			return this.levelGravitas;
+		}
+	}
+
+	public boolean isMoon() {
+		return this.dimensionTypeId == BuiltinDimensionTypes.MOON;
 	}
 
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, Level.ExplosionInteraction explosionInteraction) {
@@ -767,7 +840,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean isRaining() {
-		return (double)this.getRainLevel(1.0F) > 0.2;
+		return (double)this.getRainLevel(1.0F) > 0.2 && this.dimensionTypeId != BuiltinDimensionTypes.MOON;
 	}
 
 	public boolean isRainingAt(BlockPos blockPos) {
@@ -937,6 +1010,34 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public DamageSources damageSources() {
 		return this.damageSources;
+	}
+
+	public double getMoonSize() {
+		if (!this.dimensionType().natural()) {
+			return 0.0;
+		} else {
+			double d = Rules.BIG_MOON_MODE.moonScale();
+			double e = 5.0E-4 * (double)(d > this.moonSize ? 1 : -1);
+			this.moonSize = Mth.clamp(this.moonSize + e, 0.0, d);
+			double f = Math.abs(((double)this.getDayTime() / 24000.0 + 0.25) % 1.0 - 0.5) * 2.0;
+			return this.moonSize * Math.pow(Math.max(f * 1.75 - 0.75, 0.0), 0.5);
+		}
+	}
+
+	public Vec3 getMoonPullVector() {
+		if (!this.dimensionType().hasSkyLight()) {
+			return new Vec3(0.0, 0.0, 0.0);
+		} else {
+			double d = (Math.PI * 2) * (double)this.getDayTime() / 24000.0;
+			Vector3f vector3f = new Vector3f(-0.1F * (float)this.getMoonSize(), 0.0F, 0.0F).rotateZ((float)d);
+			return new Vec3((double)vector3f.x, (double)vector3f.y, (double)vector3f.z);
+		}
+	}
+
+	@Override
+	public int getRawBrightness(BlockPos blockPos, int i) {
+		LightEngineMode lightEngineMode = Rules.OPTIMIZE_LIGHT_ENGINE.get();
+		return lightEngineMode.isLightForced(this) ? 15 : LevelAccessor.super.getRawBrightness(blockPos, i);
 	}
 
 	public static enum ExplosionInteraction {

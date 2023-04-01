@@ -51,7 +51,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, Signal
 
 	@Override
 	default int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
-		return colorResolver.getColor(this.getBiome(blockPos).value(), (double)blockPos.getX(), (double)blockPos.getZ());
+		return colorResolver.getColor(this.getBiome(blockPos), (double)blockPos.getX(), (double)blockPos.getZ());
 	}
 
 	@Override

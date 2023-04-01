@@ -29,6 +29,7 @@ import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.voting.rules.Rules;
 
 @Environment(EnvType.CLIENT)
 public class SkinManager {
@@ -132,10 +133,14 @@ public class SkinManager {
 	}
 
 	public ResourceLocation getInsecureSkinLocation(GameProfile gameProfile) {
-		MinecraftProfileTexture minecraftProfileTexture = (MinecraftProfileTexture)this.getInsecureSkinInformation(gameProfile).get(Type.SKIN);
-		return minecraftProfileTexture != null
-			? this.registerTexture(minecraftProfileTexture, Type.SKIN)
-			: DefaultPlayerSkin.getDefaultSkin(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
+		if (!Rules.ANONYMIZE_SKINS.get()) {
+			MinecraftProfileTexture minecraftProfileTexture = (MinecraftProfileTexture)this.getInsecureSkinInformation(gameProfile).get(Type.SKIN);
+			if (minecraftProfileTexture != null) {
+				return this.registerTexture(minecraftProfileTexture, Type.SKIN);
+			}
+		}
+
+		return DefaultPlayerSkin.getDefaultSkin(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
 	}
 
 	@Environment(EnvType.CLIENT)

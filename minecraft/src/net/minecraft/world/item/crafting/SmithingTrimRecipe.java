@@ -38,7 +38,7 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(Container container, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(Container container, RegistryAccess registryAccess) {
 		ItemStack itemStack = container.getItem(1);
 		if (this.base.test(itemStack)) {
 			Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(registryAccess, container.getItem(2));
@@ -64,7 +64,7 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItemRaw(RegistryAccess registryAccess) {
 		ItemStack itemStack = new ItemStack(Items.IRON_CHESTPLATE);
 		Optional<Holder.Reference<TrimPattern>> optional = registryAccess.registryOrThrow(Registries.TRIM_PATTERN).holders().findFirst();
 		if (optional.isPresent()) {

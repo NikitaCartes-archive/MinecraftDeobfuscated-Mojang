@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -98,6 +99,35 @@ public class Squid extends WaterAnimal {
 	}
 
 	@Override
+	public void transformedTick(EntityTransform entityTransform, LivingEntity livingEntity) {
+		super.transformedTick(entityTransform, livingEntity);
+		if (this.level.isClientSide) {
+			Vec3 vec3 = livingEntity.getDeltaMovement();
+			double d = vec3.horizontalDistance();
+			this.xBodyRotO = this.xBodyRot;
+			this.zBodyRotO = this.zBodyRot;
+			this.oldTentacleMovement = this.tentacleMovement;
+			this.oldTentacleAngle = this.tentacleAngle;
+			this.tentacleMovement = (float)((double)this.tentacleMovement + d);
+			if (this.tentacleMovement > (float) (Math.PI * 2)) {
+				this.tentacleMovement -= (float) (Math.PI * 2);
+			}
+
+			if (this.tentacleMovement < (float) Math.PI) {
+				float f = this.tentacleMovement / (float) Math.PI;
+				this.tentacleAngle = Mth.sin(f * f * (float) Math.PI) * (float) Math.PI * 0.25F;
+			} else {
+				this.tentacleAngle = 0.0F;
+			}
+
+			this.yBodyRot = this.yBodyRot + (-((float)Mth.atan2(vec3.x, vec3.z)) * (180.0F / (float)Math.PI) - this.yBodyRot) * 0.1F;
+			this.setYRot(this.yBodyRot);
+			this.zBodyRot = (float)((double)this.zBodyRot + (float) Math.PI * d * 1.5);
+			this.xBodyRot = this.xBodyRot + (-((float)Mth.atan2(d, vec3.y)) * (180.0F / (float)Math.PI) - this.xBodyRot) * 0.1F;
+		}
+	}
+
+	@Override
 	public void aiStep() {
 		super.aiStep();
 		this.xBodyRotO = this.xBodyRot;
@@ -162,8 +192,8 @@ public class Squid extends WaterAnimal {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (super.hurt(damageSource, f) && this.getLastHurtByMob() != null) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
+		if (super.hurtInternal(damageSource, f) && this.getLastHurtByMob() != null) {
 			if (!this.level.isClientSide) {
 				this.spawnInk();
 			}

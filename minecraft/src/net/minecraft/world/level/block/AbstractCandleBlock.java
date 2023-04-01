@@ -3,10 +3,12 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
@@ -91,5 +93,24 @@ public abstract class AbstractCandleBlock extends Block {
 
 	private static void setLit(LevelAccessor levelAccessor, BlockState blockState, BlockPos blockPos, boolean bl) {
 		levelAccessor.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(bl)), 11);
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if (Rules.HAUNTED_WORLD.get()) {
+			if ((Boolean)blockState.getValue(LIT)) {
+				extinguish(null, blockState, serverLevel, blockPos);
+			} else {
+				setLit(serverLevel, blockState, blockPos, true);
+				serverLevel.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
+			}
+		}
+
+		super.randomTick(blockState, serverLevel, blockPos, randomSource);
 	}
 }

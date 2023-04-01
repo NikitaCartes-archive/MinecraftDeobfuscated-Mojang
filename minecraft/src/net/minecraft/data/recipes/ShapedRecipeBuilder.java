@@ -35,6 +35,8 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 	@Nullable
 	private String group;
 	private boolean showNotification = true;
+	private boolean canXflip = true;
+	private boolean wob;
 
 	public ShapedRecipeBuilder(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
 		this.category = recipeCategory;
@@ -93,6 +95,16 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 		return this;
 	}
 
+	public ShapedRecipeBuilder canXflip(boolean bl) {
+		this.canXflip = bl;
+		return this;
+	}
+
+	public ShapedRecipeBuilder wob(boolean bl) {
+		this.wob = bl;
+		return this;
+	}
+
 	@Override
 	public Item getResult() {
 		return this.result;
@@ -117,7 +129,9 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 				this.key,
 				this.advancement,
 				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/"),
-				this.showNotification
+				this.showNotification,
+				this.canXflip,
+				this.wob
 			)
 		);
 	}
@@ -160,6 +174,8 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 		private final Advancement.Builder advancement;
 		private final ResourceLocation advancementId;
 		private final boolean showNotification;
+		private final boolean canXflip;
+		private final boolean wob;
 
 		public Result(
 			ResourceLocation resourceLocation,
@@ -171,7 +187,9 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 			Map<Character, Ingredient> map,
 			Advancement.Builder builder,
 			ResourceLocation resourceLocation2,
-			boolean bl
+			boolean bl,
+			boolean bl2,
+			boolean bl3
 		) {
 			super(craftingBookCategory);
 			this.id = resourceLocation;
@@ -183,6 +201,8 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 			this.advancement = builder;
 			this.advancementId = resourceLocation2;
 			this.showNotification = bl;
+			this.canXflip = bl2;
+			this.wob = bl3;
 		}
 
 		@Override
@@ -214,6 +234,13 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 
 			jsonObject.add("result", jsonObject3);
 			jsonObject.addProperty("show_notification", this.showNotification);
+			if (!this.canXflip) {
+				jsonObject.addProperty("can_x_flip", false);
+			}
+
+			if (this.wob) {
+				jsonObject.addProperty("nbt", "wob");
+			}
 		}
 
 		@Override

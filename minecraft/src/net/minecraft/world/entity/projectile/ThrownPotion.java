@@ -14,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.item.BottleOfEntityItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -61,18 +62,20 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		super.onHitBlock(blockHitResult);
 		if (!this.level.isClientSide) {
 			ItemStack itemStack = this.getItem();
-			Potion potion = PotionUtils.getPotion(itemStack);
-			List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-			boolean bl = potion == Potions.WATER && list.isEmpty();
-			Direction direction = blockHitResult.getDirection();
-			BlockPos blockPos = blockHitResult.getBlockPos();
-			BlockPos blockPos2 = blockPos.relative(direction);
-			if (bl) {
-				this.dowseFire(blockPos2);
-				this.dowseFire(blockPos2.relative(direction.getOpposite()));
+			if (!itemStack.is(Items.SPLASH_BOTTLE_OF_ENTITY)) {
+				Potion potion = PotionUtils.getPotion(itemStack);
+				List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
+				boolean bl = potion == Potions.WATER && list.isEmpty();
+				Direction direction = blockHitResult.getDirection();
+				BlockPos blockPos = blockHitResult.getBlockPos();
+				BlockPos blockPos2 = blockPos.relative(direction);
+				if (bl) {
+					this.dowseFire(blockPos2);
+					this.dowseFire(blockPos2.relative(direction.getOpposite()));
 
-				for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-					this.dowseFire(blockPos2.relative(direction2));
+					for (Direction direction2 : Direction.Plane.HORIZONTAL) {
+						this.dowseFire(blockPos2.relative(direction2));
+					}
 				}
 			}
 		}
@@ -83,22 +86,42 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		super.onHit(hitResult);
 		if (!this.level.isClientSide) {
 			ItemStack itemStack = this.getItem();
-			Potion potion = PotionUtils.getPotion(itemStack);
-			List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-			boolean bl = potion == Potions.WATER && list.isEmpty();
-			if (bl) {
-				this.applyWater();
-			} else if (!list.isEmpty()) {
-				if (this.isLingering()) {
-					this.makeAreaOfEffectCloud(itemStack, potion);
-				} else {
-					this.applySplash(list, hitResult.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)hitResult).getEntity() : null);
-				}
-			}
+			if (itemStack.is(Items.SPLASH_BOTTLE_OF_ENTITY)) {
+				AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
 
-			int i = potion.hasInstantEffects() ? 2007 : 2002;
-			this.level.levelEvent(i, this.blockPosition(), PotionUtils.getColor(itemStack));
-			this.discard();
+				for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, aABB)) {
+					double d = this.distanceToSqr(livingEntity);
+					if (d < 16.0) {
+						BottleOfEntityItem.transformToEntity(itemStack, this.level, livingEntity);
+					}
+				}
+
+				int i = 2007;
+				this.level.levelEvent(2007, this.blockPosition(), 16711680);
+				this.level.levelEvent(2007, this.blockPosition(), 65280);
+				this.level.levelEvent(2007, this.blockPosition(), 255);
+				this.level.levelEvent(2007, this.blockPosition(), 65535);
+				this.level.levelEvent(2007, this.blockPosition(), 16776960);
+				this.level.levelEvent(2007, this.blockPosition(), 16711935);
+				this.discard();
+			} else {
+				Potion potion = PotionUtils.getPotion(itemStack);
+				List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
+				boolean bl = potion == Potions.WATER && list.isEmpty();
+				if (bl) {
+					this.applyWater();
+				} else if (!list.isEmpty()) {
+					if (this.isLingering()) {
+						this.makeAreaOfEffectCloud(itemStack, potion);
+					} else {
+						this.applySplash(list, hitResult.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)hitResult).getEntity() : null);
+					}
+				}
+
+				int j = potion.hasInstantEffects() ? 2007 : 2002;
+				this.level.levelEvent(j, this.blockPosition(), PotionUtils.getColor(itemStack));
+				this.discard();
+			}
 		}
 	}
 

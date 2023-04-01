@@ -1,5 +1,9 @@
 package net.minecraft.world.food;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
@@ -82,6 +86,14 @@ public class Foods {
 	public static final FoodProperties SWEET_BERRIES = new FoodProperties.Builder().nutrition(2).saturationMod(0.1F).build();
 	public static final FoodProperties GLOW_BERRIES = new FoodProperties.Builder().nutrition(2).saturationMod(0.1F).build();
 	public static final FoodProperties TROPICAL_FISH = new FoodProperties.Builder().nutrition(1).saturationMod(0.1F).build();
+	public static final FoodProperties AIR = new FoodProperties.Builder().nutrition(0).saturationMod(0.0F).withMagic((itemStack, livingEntity) -> {
+		if (Rules.AIR_BLOCKS.get()) {
+			livingEntity.setAirSupply(livingEntity.getAirSupply() + 200);
+			if (livingEntity.getLevel() instanceof ServerLevel serverLevel) {
+				serverLevel.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), SoundEvents.CAT_HISS, SoundSource.PLAYERS, 1.0F, 0.5F);
+			}
+		}
+	}).build();
 
 	private static FoodProperties.Builder stew(int i) {
 		return new FoodProperties.Builder().nutrition(i).saturationMod(0.6F);

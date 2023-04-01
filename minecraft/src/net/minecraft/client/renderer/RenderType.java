@@ -303,6 +303,27 @@ public abstract class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.createCompositeState(false)
 	);
+	private static final RenderType DYNAMIC_LIGHT_STENCIL = create(
+		"dynamic_light_stencil",
+		DefaultVertexFormat.POSITION_COLOR,
+		VertexFormat.Mode.TRIANGLES,
+		256,
+		RenderType.CompositeState.builder()
+			.setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
+			.setOutputState(RenderStateShard.STENCIL_SETUP_AND_LEAK)
+			.createCompositeState(false)
+	);
+	private static final RenderType DYNAMIC_LIGHT_COLOR = create(
+		"dynamic_light_color",
+		DefaultVertexFormat.POSITION_COLOR,
+		VertexFormat.Mode.TRIANGLES,
+		256,
+		RenderType.CompositeState.builder()
+			.setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
+			.setOutputState(RenderStateShard.STENCIL_RENDER_AND_CLEAR)
+			.setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+			.createCompositeState(false)
+	);
 	private static final RenderType WATER_MASK = create(
 		"water_mask",
 		DefaultVertexFormat.POSITION,
@@ -400,6 +421,22 @@ public abstract class RenderType extends RenderStateShard {
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ENTITY_GLINT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
+			.setTexturingState(ENTITY_GLINT_TEXTURING)
+			.createCompositeState(false)
+	);
+	private static final RenderType GOLD_ENTITY_GLINT = create(
+		"gold_entity_glint",
+		DefaultVertexFormat.POSITION_TEX,
+		VertexFormat.Mode.QUADS,
+		256,
+		RenderType.CompositeState.builder()
+			.setShaderState(RENDERTYPE_ENTITY_GLINT_SHADER)
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_GOLD, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -846,6 +883,14 @@ public abstract class RenderType extends RenderStateShard {
 		return LEASH;
 	}
 
+	public static RenderType dynamicLightStencil() {
+		return DYNAMIC_LIGHT_STENCIL;
+	}
+
+	public static RenderType dynamicLightColor() {
+		return DYNAMIC_LIGHT_COLOR;
+	}
+
 	public static RenderType waterMask() {
 		return WATER_MASK;
 	}
@@ -876,6 +921,10 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType entityGlint() {
 		return ENTITY_GLINT;
+	}
+
+	public static RenderType goldEntityGlint() {
+		return GOLD_ENTITY_GLINT;
 	}
 
 	public static RenderType entityGlintDirect() {

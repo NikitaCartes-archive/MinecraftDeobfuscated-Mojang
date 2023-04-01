@@ -32,7 +32,7 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(Container container, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(Container container, RegistryAccess registryAccess) {
 		ItemStack itemStack = this.result.copy();
 		CompoundTag compoundTag = container.getItem(1).getTag();
 		if (compoundTag != null) {
@@ -43,7 +43,7 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItemRaw(RegistryAccess registryAccess) {
 		return this.result;
 	}
 

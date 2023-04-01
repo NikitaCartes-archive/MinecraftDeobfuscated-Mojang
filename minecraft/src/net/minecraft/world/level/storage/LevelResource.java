@@ -13,6 +13,8 @@ public class LevelResource {
 	public static final LevelResource DATAPACK_DIR = new LevelResource("datapacks");
 	public static final LevelResource MAP_RESOURCE_FILE = new LevelResource("resources.zip");
 	public static final LevelResource ROOT = new LevelResource(".");
+	public static final LevelResource VOTES = new LevelResource("votes.json");
+	public static final LevelResource OLD_VOTES = new LevelResource("votes.json_old");
 	private final String id;
 
 	private LevelResource(String string) {

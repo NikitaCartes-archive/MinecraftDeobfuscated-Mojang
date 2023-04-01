@@ -9,6 +9,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -149,7 +150,7 @@ public abstract class Enchantment {
 		}
 
 		public int getWeight() {
-			return this.weight;
+			return Rules.DREAM_MODE.get() ? (this.weight + 10) / 2 : this.weight;
 		}
 	}
 }

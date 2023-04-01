@@ -380,6 +380,17 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 	}
 
 	@Override
+	protected InteractionResult transformInteract(Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
+		if (livingEntity.getPassengers().size() < 2 && !this.isBaby() && !this.level.isClientSide) {
+			player.setYRot(this.getYRot());
+			player.setXRot(this.getXRot());
+			player.startRiding(livingEntity);
+		}
+
+		return InteractionResult.PASS;
+	}
+
+	@Override
 	protected void onLeashDistance(float f) {
 		if (f > 6.0F && this.isCamelSitting() && !this.isInPoseTransition()) {
 			this.standUp();

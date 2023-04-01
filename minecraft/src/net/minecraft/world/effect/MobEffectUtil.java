@@ -17,7 +17,7 @@ public final class MobEffectUtil {
 			return Component.translatable("effect.duration.infinite");
 		} else {
 			int i = Mth.floor((float)mobEffectInstance.getDuration() * f);
-			return Component.literal(StringUtil.formatTickDuration(i));
+			return Component.literal(StringUtil.formatTickDuration((long)i));
 		}
 	}
 

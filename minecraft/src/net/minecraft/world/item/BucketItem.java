@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -94,6 +95,9 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 
 	@Override
 	public void checkExtraContent(@Nullable Player player, Level level, ItemStack itemStack, BlockPos blockPos) {
+		if (Rules.OTHER_PORTAL.get() && this.content == Fluids.WATER) {
+			DispensibleContainerItem.tryPlacePortal(level, blockPos);
+		}
 	}
 
 	@Override

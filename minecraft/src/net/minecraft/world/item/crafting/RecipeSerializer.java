@@ -42,6 +42,8 @@ public interface RecipeSerializer<T extends Recipe<?>> {
 	RecipeSerializer<SmithingTransformRecipe> SMITHING_TRANSFORM = register("smithing_transform", new SmithingTransformRecipe.Serializer());
 	RecipeSerializer<SmithingTrimRecipe> SMITHING_TRIM = register("smithing_trim", new SmithingTrimRecipe.Serializer());
 	RecipeSerializer<DecoratedPotRecipe> DECORATED_POT_RECIPE = register("crafting_decorated_pot", new SimpleCraftingRecipeSerializer<>(DecoratedPotRecipe::new));
+	RecipeSerializer<DupeHackRecipe> DUPE_HACK = register("crafting_special_dupehack", new SimpleCraftingRecipeSerializer<>(DupeHackRecipe::new));
+	RecipeSerializer<NbtCraftingRecipe> NBT_CRAFTING_RECIPE = register("nbt_crafting_recipe", new SimpleCraftingRecipeSerializer<>(NbtCraftingRecipe::new));
 
 	T fromJson(ResourceLocation resourceLocation, JsonObject jsonObject);
 

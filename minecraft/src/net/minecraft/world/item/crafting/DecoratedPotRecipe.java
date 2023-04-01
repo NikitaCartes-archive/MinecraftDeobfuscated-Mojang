@@ -47,7 +47,7 @@ public class DecoratedPotRecipe extends CustomRecipe {
 		}
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		ItemStack itemStack = Items.DECORATED_POT.getDefaultInstance();
 		CompoundTag compoundTag = new CompoundTag();
 		DecoratedPotBlockEntity.saveShards(

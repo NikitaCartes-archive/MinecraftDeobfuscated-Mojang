@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -50,6 +51,7 @@ import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -70,6 +72,7 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTickList;
@@ -227,7 +230,7 @@ public class ClientLevel extends Level {
 	private void tickTime() {
 		this.setGameTime(this.levelData.getGameTime() + 1L);
 		if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
-			this.setDayTime(this.levelData.getDayTime() + 1L);
+			this.setDayTime(this.levelData.getDayTime() + (long)Rules.DAY_LENGTH.delta(this.random));
 		}
 	}
 
@@ -272,6 +275,7 @@ public class ClientLevel extends Level {
 		entity.tickCount++;
 		this.getProfiler().push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()));
 		entity.tick();
+		entity.postTick();
 		this.getProfiler().pop();
 
 		for (Entity entity2 : entity.getPassengers()) {
@@ -655,7 +659,10 @@ public class ClientLevel extends Level {
 		float g = this.getTimeOfDay(f);
 		Vec3 vec32 = vec3.subtract(2.0, 2.0, 2.0).scale(0.25);
 		BiomeManager biomeManager = this.getBiomeManager();
-		Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (ix, jx, kx) -> Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(ix, jx, kx).value().getSkyColor()));
+		Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (ix, jx, kx) -> {
+			Holder<Biome> holder = biomeManager.getNoiseBiomeAtQuart(ix, jx, kx);
+			return Vec3.fromRGB24(holder.value().getSkyColor(holder));
+		});
 		float h = Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.5F;
 		h = Mth.clamp(h, 0.0F, 1.0F);
 		float i = (float)vec33.x * h;
@@ -773,7 +780,7 @@ public class ClientLevel extends Level {
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
 		int i = Minecraft.getInstance().options.biomeBlendRadius().get();
 		if (i == 0) {
-			return colorResolver.getColor(this.getBiome(blockPos).value(), (double)blockPos.getX(), (double)blockPos.getZ());
+			return colorResolver.getColor(this.getBiome(blockPos), (double)blockPos.getX(), (double)blockPos.getZ());
 		} else {
 			int j = (i * 2 + 1) * (i * 2 + 1);
 			int k = 0;
@@ -784,7 +791,7 @@ public class ClientLevel extends Level {
 
 			while (cursor3D.advance()) {
 				mutableBlockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-				int n = colorResolver.getColor(this.getBiome(mutableBlockPos).value(), (double)mutableBlockPos.getX(), (double)mutableBlockPos.getZ());
+				int n = colorResolver.getColor(this.getBiome(mutableBlockPos), (double)mutableBlockPos.getX(), (double)mutableBlockPos.getZ());
 				k += (n & 0xFF0000) >> 16;
 				l += (n & 0xFF00) >> 8;
 				m += n & 0xFF;
@@ -844,6 +851,11 @@ public class ClientLevel extends Level {
 	@Override
 	public FeatureFlagSet enabledFeatures() {
 		return this.connection.enabledFeatures();
+	}
+
+	@Override
+	protected Stream<ChunkAccess> allChunks() {
+		return this.chunkSource.allChunks();
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -61,13 +61,13 @@ public class MinecartTNT extends AbstractMinecart {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow && abstractArrow.isOnFire()) {
 			DamageSource damageSource2 = this.damageSources().explosion(this, damageSource.getEntity());
 			this.explode(damageSource2, abstractArrow.getDeltaMovement().lengthSqr());
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtInternal(damageSource, f);
 	}
 
 	@Override

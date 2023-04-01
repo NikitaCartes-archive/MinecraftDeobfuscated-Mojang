@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -89,6 +90,14 @@ public class PotionBrewing {
 
 		for (int j = POTION_MIXES.size(); i < j; i++) {
 			PotionBrewing.Mix<Potion> mix = (PotionBrewing.Mix<Potion>)POTION_MIXES.get(i);
+			if (mix.to == Potions.BIG && !Rules.POTIONS_OF_BIG.get()) {
+				return false;
+			}
+
+			if (mix.to == Potions.SMALL && !Rules.POTIONS_OF_SMALL.get()) {
+				return false;
+			}
+
 			if (mix.from == potion && mix.ingredient.test(itemStack2)) {
 				return true;
 			}
@@ -98,29 +107,39 @@ public class PotionBrewing {
 	}
 
 	public static ItemStack mix(ItemStack itemStack, ItemStack itemStack2) {
-		if (!itemStack2.isEmpty()) {
-			Potion potion = PotionUtils.getPotion(itemStack2);
-			Item item = itemStack2.getItem();
-			int i = 0;
+		if (itemStack2.is(Items.BOTTLE_OF_ENTITY)) {
+			if (itemStack.is(Items.GUNPOWDER)) {
+				ItemStack itemStack3 = Items.SPLASH_BOTTLE_OF_ENTITY.getDefaultInstance();
+				itemStack3.setTag(itemStack2.getTag());
+				return itemStack3;
+			} else {
+				return itemStack2;
+			}
+		} else {
+			if (!itemStack2.isEmpty()) {
+				Potion potion = PotionUtils.getPotion(itemStack2);
+				Item item = itemStack2.getItem();
+				int i = 0;
 
-			for (int j = CONTAINER_MIXES.size(); i < j; i++) {
-				PotionBrewing.Mix<Item> mix = (PotionBrewing.Mix<Item>)CONTAINER_MIXES.get(i);
-				if (mix.from == item && mix.ingredient.test(itemStack)) {
-					return PotionUtils.setPotion(new ItemStack(mix.to), potion);
+				for (int j = CONTAINER_MIXES.size(); i < j; i++) {
+					PotionBrewing.Mix<Item> mix = (PotionBrewing.Mix<Item>)CONTAINER_MIXES.get(i);
+					if (mix.from == item && mix.ingredient.test(itemStack)) {
+						return PotionUtils.setPotion(new ItemStack(mix.to), potion);
+					}
+				}
+
+				i = 0;
+
+				for (int jx = POTION_MIXES.size(); i < jx; i++) {
+					PotionBrewing.Mix<Potion> mix = (PotionBrewing.Mix<Potion>)POTION_MIXES.get(i);
+					if (mix.from == potion && mix.ingredient.test(itemStack)) {
+						return PotionUtils.setPotion(new ItemStack(item), mix.to);
+					}
 				}
 			}
 
-			i = 0;
-
-			for (int jx = POTION_MIXES.size(); i < jx; i++) {
-				PotionBrewing.Mix<Potion> mix = (PotionBrewing.Mix<Potion>)POTION_MIXES.get(i);
-				if (mix.from == potion && mix.ingredient.test(itemStack)) {
-					return PotionUtils.setPotion(new ItemStack(item), mix.to);
-				}
-			}
+			return itemStack2;
 		}
-
-		return itemStack2;
 	}
 
 	public static void bootStrap() {
@@ -184,6 +203,12 @@ public class PotionBrewing {
 		addMix(Potions.WEAKNESS, Items.REDSTONE, Potions.LONG_WEAKNESS);
 		addMix(Potions.AWKWARD, Items.PHANTOM_MEMBRANE, Potions.SLOW_FALLING);
 		addMix(Potions.SLOW_FALLING, Items.REDSTONE, Potions.LONG_SLOW_FALLING);
+		addMix(Potions.AWKWARD, Items.EXPERIENCE_BOTTLE, Potions.BIG);
+		addMix(Potions.BIG, Items.REDSTONE, Potions.LONG_BIG);
+		addMix(Potions.BIG, Items.GLOWSTONE_DUST, Potions.STRONG_BIG);
+		addMix(Potions.AWKWARD, Items.RABBIT_HIDE, Potions.SMALL);
+		addMix(Potions.SMALL, Items.REDSTONE, Potions.LONG_SMALL);
+		addMix(Potions.SMALL, Items.GLOWSTONE_DUST, Potions.STRONG_SMALL);
 	}
 
 	private static void addContainerRecipe(Item item, Item item2, Item item3) {

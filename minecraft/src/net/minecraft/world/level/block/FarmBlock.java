@@ -134,4 +134,9 @@ public class FarmBlock extends Block {
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
+
+	@Override
+	public boolean canAirPass(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Direction direction) {
+		return false;
+	}
 }

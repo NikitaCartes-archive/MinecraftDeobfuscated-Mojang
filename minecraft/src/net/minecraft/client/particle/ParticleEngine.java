@@ -180,6 +180,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.REVERSE_PORTAL, ReversePortalParticle.ReversePortalProvider::new);
 		this.register(ParticleTypes.WHITE_ASH, WhiteAshParticle.Provider::new);
 		this.register(ParticleTypes.SMALL_FLAME, FlameParticle.SmallFlameProvider::new);
+		this.register(ParticleTypes.FOOTSTEP, FootprintParticle.Provider::new);
 		this.register(ParticleTypes.DRIPPING_DRIPSTONE_WATER, DripParticle::createDripstoneWaterHangParticle);
 		this.register(ParticleTypes.FALLING_DRIPSTONE_WATER, DripParticle::createDripstoneWaterFallParticle);
 		this.register(
@@ -474,36 +475,40 @@ public class ParticleEngine implements PreparableReloadListener {
 	public void destroy(BlockPos blockPos, BlockState blockState) {
 		if (!blockState.isAir() && blockState.shouldSpawnParticlesOnBreak()) {
 			VoxelShape voxelShape = blockState.getShape(this.level, blockPos);
-			double d = 0.25;
-			voxelShape.forAllBoxes(
-				(dx, e, f, g, h, i) -> {
-					double j = Math.min(1.0, g - dx);
-					double k = Math.min(1.0, h - e);
-					double l = Math.min(1.0, i - f);
-					int m = Math.max(2, Mth.ceil(j / 0.25));
-					int n = Math.max(2, Mth.ceil(k / 0.25));
-					int o = Math.max(2, Mth.ceil(l / 0.25));
+			this.spawnDestroyParticles(blockPos, blockState, voxelShape);
+		}
+	}
 
-					for (int p = 0; p < m; p++) {
-						for (int q = 0; q < n; q++) {
-							for (int r = 0; r < o; r++) {
-								double s = ((double)p + 0.5) / (double)m;
-								double t = ((double)q + 0.5) / (double)n;
-								double u = ((double)r + 0.5) / (double)o;
-								double v = s * j + dx;
-								double w = t * k + e;
-								double x = u * l + f;
-								this.add(
-									new TerrainParticle(
-										this.level, (double)blockPos.getX() + v, (double)blockPos.getY() + w, (double)blockPos.getZ() + x, s - 0.5, t - 0.5, u - 0.5, blockState, blockPos
-									)
-								);
-							}
+	public void spawnDestroyParticles(BlockPos blockPos, BlockState blockState, VoxelShape voxelShape) {
+		double d = 0.25;
+		voxelShape.forAllBoxes(
+			(dx, e, f, g, h, i) -> {
+				double j = Math.min(1.0, g - dx);
+				double k = Math.min(1.0, h - e);
+				double l = Math.min(1.0, i - f);
+				int m = Math.max(2, Mth.ceil(j / 0.25));
+				int n = Math.max(2, Mth.ceil(k / 0.25));
+				int o = Math.max(2, Mth.ceil(l / 0.25));
+
+				for (int p = 0; p < m; p++) {
+					for (int q = 0; q < n; q++) {
+						for (int r = 0; r < o; r++) {
+							double s = ((double)p + 0.5) / (double)m;
+							double t = ((double)q + 0.5) / (double)n;
+							double u = ((double)r + 0.5) / (double)o;
+							double v = s * j + dx;
+							double w = t * k + e;
+							double x = u * l + f;
+							this.add(
+								new TerrainParticle(
+									this.level, (double)blockPos.getX() + v, (double)blockPos.getY() + w, (double)blockPos.getZ() + x, s - 0.5, t - 0.5, u - 0.5, blockState, blockPos
+								)
+							);
 						}
 					}
 				}
-			);
-		}
+			}
+		);
 	}
 
 	public void crack(BlockPos blockPos, Direction direction) {

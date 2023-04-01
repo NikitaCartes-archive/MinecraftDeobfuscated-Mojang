@@ -12,6 +12,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.FoodType;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -53,7 +56,7 @@ public class BlockItem extends Item {
 	}
 
 	public InteractionResult place(BlockPlaceContext blockPlaceContext) {
-		if (!this.getBlock().isEnabled(blockPlaceContext.getLevel().enabledFeatures())) {
+		if (!this.getBlock().isEnabled(blockPlaceContext.getLevel().enabledFeatures()) || !RuleFeatureToggles.isEnabled(this.getBlock())) {
 			return InteractionResult.FAIL;
 		} else if (!blockPlaceContext.canPlace()) {
 			return InteractionResult.FAIL;
@@ -186,6 +189,17 @@ public class BlockItem extends Item {
 
 	@Override
 	public String getDescriptionId() {
+		FoodType foodType = Rules.FOOD_RESTRICTION.get();
+		if (foodType != FoodType.ANY && (this.foodProperties != null || FoodType.INEDIBLES.contains(this))) {
+			if (foodType.item() == this) {
+				return foodType.foodKey();
+			}
+
+			if (FoodType.INEDIBLES.contains(this)) {
+				return "rule.food_restriction.inedible." + this;
+			}
+		}
+
 		return this.getBlock().getDescriptionId();
 	}
 

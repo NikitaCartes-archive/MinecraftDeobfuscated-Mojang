@@ -160,9 +160,9 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.fixed) {
-			return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.isCreativePlayer() ? false : super.hurt(damageSource, f);
+			return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.isCreativePlayer() ? false : super.hurtInternal(damageSource, f);
 		} else if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!damageSource.is(DamageTypeTags.IS_EXPLOSION) && !this.getItem().isEmpty()) {
@@ -174,7 +174,7 @@ public class ItemFrame extends HangingEntity {
 
 			return true;
 		} else {
-			return super.hurt(damageSource, f);
+			return super.hurtInternal(damageSource, f);
 		}
 	}
 

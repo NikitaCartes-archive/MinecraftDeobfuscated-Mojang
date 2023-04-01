@@ -1,10 +1,14 @@
 package net.minecraft.world.inventory;
 
+import net.minecraft.voting.rules.actual.Goldifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
 public class ChestMenu extends AbstractContainerMenu {
 	private static final int SLOTS_PER_ROW = 9;
@@ -114,5 +118,22 @@ public class ChestMenu extends AbstractContainerMenu {
 
 	public int getRowCount() {
 		return this.containerRows;
+	}
+
+	@Override
+	public void tick(Level level) {
+		if (this.isGold() && level.random.nextInt(20) == 0) {
+			int i = level.random.nextInt(this.container.getContainerSize());
+			ItemStack itemStack = this.container.getItem(i);
+			this.container.setItem(i, Goldifier.apply(itemStack));
+		}
+	}
+
+	private boolean isGold() {
+		if (this.container instanceof ChestBlockEntity chestBlockEntity) {
+			return chestBlockEntity.isGold();
+		} else {
+			return this.container instanceof LivingEntity livingEntity ? livingEntity.isGold() : false;
+		}
 	}
 }

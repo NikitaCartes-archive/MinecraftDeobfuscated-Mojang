@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
+import net.minecraft.world.level.biome.TheMoonBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -34,7 +35,7 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
 				)
 				.apply(instance, instance.stable(WorldDimensions::new))
 	);
-	private static final Set<ResourceKey<LevelStem>> BUILTIN_ORDER = ImmutableSet.of(LevelStem.OVERWORLD, LevelStem.NETHER, LevelStem.END);
+	private static final Set<ResourceKey<LevelStem>> BUILTIN_ORDER = ImmutableSet.of(LevelStem.OVERWORLD, LevelStem.NETHER, LevelStem.END, LevelStem.MOON);
 	private static final int VANILLA_DIMENSION_COUNT = BUILTIN_ORDER.size();
 
 	public WorldDimensions(Registry<LevelStem> dimensions) {
@@ -122,8 +123,10 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
 			return isStableOverworld(levelStem);
 		} else if (resourceKey == LevelStem.NETHER) {
 			return isStableNether(levelStem);
+		} else if (resourceKey == LevelStem.END) {
+			return isStableEnd(levelStem);
 		} else {
-			return resourceKey == LevelStem.END ? isStableEnd(levelStem) : false;
+			return resourceKey == LevelStem.MOON ? isStableMoon(levelStem) : false;
 		}
 	}
 
@@ -154,6 +157,13 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
 			&& levelStem.generator() instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator
 			&& noiseBasedChunkGenerator.stable(NoiseGeneratorSettings.END)
 			&& noiseBasedChunkGenerator.getBiomeSource() instanceof TheEndBiomeSource;
+	}
+
+	private static boolean isStableMoon(LevelStem levelStem) {
+		return levelStem.type().is(BuiltinDimensionTypes.MOON)
+			&& levelStem.generator() instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator
+			&& noiseBasedChunkGenerator.stable(NoiseGeneratorSettings.MOON)
+			&& noiseBasedChunkGenerator.getBiomeSource() instanceof TheMoonBiomeSource;
 	}
 
 	public WorldDimensions.Complete bake(Registry<LevelStem> registry) {

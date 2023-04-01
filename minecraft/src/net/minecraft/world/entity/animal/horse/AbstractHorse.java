@@ -347,8 +347,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
+		boolean bl = super.hurtInternal(damageSource, f);
 		if (bl && this.random.nextInt(3) == 0) {
 			this.standIfPossible();
 		}
@@ -687,6 +687,17 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 			this.doPlayerRide(player);
 			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		}
+	}
+
+	@Override
+	protected InteractionResult transformInteract(Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
+		if (!this.level.isClientSide) {
+			player.setYRot(this.getYRot());
+			player.setXRot(this.getXRot());
+			player.startRiding(livingEntity);
+		}
+
+		return super.transformInteract(player, livingEntity, interactionHand);
 	}
 
 	private void openMouth() {

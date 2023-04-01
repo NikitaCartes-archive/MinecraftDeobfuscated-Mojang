@@ -33,8 +33,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -75,6 +77,8 @@ import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.WeatherOption;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -83,6 +87,7 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ReputationEventHandler;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
@@ -94,11 +99,14 @@ import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.monster.RayTracing;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.ChunkPos;
@@ -164,6 +172,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int EMPTY_TIME_NO_TICK = 300;
 	private static final int MAX_SCHEDULED_TICKS_PER_TICK = 65536;
+	public static final int START_OF_NIGHT = 13000;
 	final List<ServerPlayer> players = Lists.<ServerPlayer>newArrayList();
 	private final ServerChunkCache chunkSource;
 	private final MinecraftServer server;
@@ -190,6 +199,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final StructureManager structureManager;
 	private final StructureCheck structureCheck;
 	private final boolean tickTime;
+	private boolean frenchMode;
+	private boolean hasRayTracing;
+	private long rayJoinTime = -1L;
 
 	public ServerLevel(
 		MinecraftServer minecraftServer,
@@ -292,8 +304,46 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.structureManager;
 	}
 
+	@Nullable
+	public RayTracing addRayTracing() {
+		BlockPos blockPos = this.getHeightmapPos(
+			Heightmap.Types.MOTION_BLOCKING,
+			new BlockPos(
+				this.levelData.getXSpawn() + this.random.nextIntBetweenInclusive(-8, 8),
+				this.levelData.getYSpawn(),
+				this.levelData.getZSpawn() + this.random.nextIntBetweenInclusive(-8, 8)
+			)
+		);
+		RayTracing rayTracing = EntityType.RAY_TRACING.spawn(this, blockPos, MobSpawnType.EVENT);
+		if (rayTracing != null) {
+			rayTracing.setYRot(this.getSharedSpawnAngle());
+			rayTracing.restrictTo(
+				new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getXSpawn()), this.server.getSpawnProtectionRadius()
+			);
+		}
+
+		return rayTracing;
+	}
+
 	public void tick(BooleanSupplier booleanSupplier) {
 		ProfilerFiller profilerFiller = this.getProfiler();
+		if (this.hasRayTracing != Rules.RAY_TRACING.get() && this == this.getServer().overworld()) {
+			this.hasRayTracing = Rules.RAY_TRACING.get();
+			if (this.hasRayTracing) {
+				this.rayJoinTime = this.getGameTime() + (long)this.random.nextIntBetweenInclusive(80, 3600);
+			}
+		} else if (this.hasRayTracing && this.rayJoinTime != -1L && this.rayJoinTime <= this.getGameTime()) {
+			RayTracing rayTracing = this.addRayTracing();
+			if (rayTracing != null) {
+				rayTracing.firstJoin = true;
+				this.server
+					.getPlayerList()
+					.broadcastSystemMessage(Component.translatable("multiplayer.player.joined", "Ray Tracing").withStyle(ChatFormatting.YELLOW), false);
+			}
+
+			this.rayJoinTime = -1L;
+		}
+
 		this.handlingTick = true;
 		profilerFiller.push("world border");
 		this.getWorldBorder().tick();
@@ -302,8 +352,19 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		int i = this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
 		if (this.sleepStatus.areEnoughSleeping(i) && this.sleepStatus.areEnoughDeepSleeping(i, this.players)) {
 			if (this.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
-				long l = this.levelData.getDayTime() + 24000L;
-				this.setDayTime(l - l % 24000L);
+				if (Rules.DAY_BEDS.get()) {
+					long l = this.levelData.getDayTime();
+					long m = l % 24000L;
+					long n = 13000L - m;
+					if (n < 0L) {
+						n += 24000L;
+					}
+
+					this.setDayTime(l + n);
+				} else {
+					long l = this.levelData.getDayTime() + 24000L;
+					this.setDayTime(l - l % 24000L);
+				}
 			}
 
 			this.wakeUpAllPlayers();
@@ -313,6 +374,25 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		this.updateSkyBrightness();
+		if (this.frenchMode != Rules.FRENCH_MODE.get()) {
+			this.frenchMode = Rules.FRENCH_MODE.get();
+			if (this.frenchMode) {
+				this.players.forEach(serverPlayer -> {
+					serverPlayer.addItem(new ItemStack(Items.LA_BAGUETTE));
+					if (!serverPlayer.getInventory().hasAnyOf(Set.of(Items.LE_TRICOLORE))) {
+						serverPlayer.addItem(new ItemStack(Items.LE_TRICOLORE));
+					}
+
+					serverPlayer.containerMenu.broadcastChanges();
+				});
+			} else {
+				this.players.forEach(serverPlayer -> {
+					serverPlayer.getInventory().replaceAll(Items.LE_TRICOLORE, Items.AIR);
+					serverPlayer.containerMenu.broadcastChanges();
+				});
+			}
+		}
+
 		this.tickTime();
 		profilerFiller.popPush("tickPending");
 		if (!this.isDebug()) {
@@ -390,7 +470,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			this.serverLevelData.setGameTime(l);
 			this.serverLevelData.getScheduledEvents().tick(this.server, l);
 			if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
-				this.setDayTime(this.levelData.getDayTime() + 1L);
+				this.setDayTime(this.levelData.getDayTime() + (long)Rules.DAY_LENGTH.delta(this.random));
 			}
 		}
 	}
@@ -424,7 +504,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		int k = chunkPos.getMinBlockZ();
 		ProfilerFiller profilerFiller = this.getProfiler();
 		profilerFiller.push("thunder");
-		if (bl && this.isThundering() && this.random.nextInt(100000) == 0) {
+		if (bl && this.isThundering() && this.random.nextInt(Rules.DREAM_MODE.get() ? 80000 : 100000) == 0) {
 			BlockPos blockPos = this.findLightningTargetAround(this.getBlockRandomPos(j, 0, k, 15));
 			if (this.isRainingAt(blockPos)) {
 				DifficultyInstance difficultyInstance = this.getCurrentDifficultyAt(blockPos);
@@ -534,14 +614,20 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				LivingEntity.class, aABB, livingEntity -> livingEntity != null && livingEntity.isAlive() && this.canSeeSky(livingEntity.blockPosition())
 			);
 			if (!list.isEmpty()) {
-				return ((LivingEntity)list.get(this.random.nextInt(list.size()))).blockPosition();
-			} else {
-				if (blockPos2.getY() == this.getMinBuildHeight() - 1) {
-					blockPos2 = blockPos2.above(2);
+				if (Rules.DREAM_MODE.get()) {
+					list.removeIf(livingEntity -> livingEntity instanceof Player ? false : this.random.nextBoolean());
 				}
 
-				return blockPos2;
+				if (!list.isEmpty()) {
+					return ((LivingEntity)list.get(this.random.nextInt(list.size()))).blockPosition();
+				}
 			}
+
+			if (blockPos2.getY() == this.getMinBuildHeight() - 1) {
+				blockPos2 = blockPos2.above(2);
+			}
+
+			return blockPos2;
 		}
 	}
 
@@ -616,6 +702,26 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					} else {
 						k = RAIN_DELAY.sample(this.random);
 					}
+				}
+
+				switch ((WeatherOption)Rules.RAIN_OPTION.get()) {
+					case ALWAYS:
+						k = 1;
+						bl3 = true;
+						break;
+					case NEVER:
+						k = 0;
+						bl3 = false;
+				}
+
+				switch ((WeatherOption)Rules.THUNDER_OPTION.get()) {
+					case ALWAYS:
+						j = 1;
+						bl2 = true;
+						break;
+					case NEVER:
+						j = 0;
+						bl2 = false;
 				}
 
 				this.serverLevelData.setThunderTime(j);
@@ -697,6 +803,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.getProfiler().push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()));
 		profilerFiller.incrementCounter("tickNonPassenger");
 		entity.tick();
+		entity.postTick();
 		this.getProfiler().pop();
 
 		for (Entity entity2 : entity.getPassengers()) {
@@ -1589,6 +1696,13 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public void onStructureStartsAvailable(ChunkAccess chunkAccess) {
 		this.server.execute(() -> this.structureCheck.onStructureLoad(chunkAccess.getPos(), chunkAccess.getAllStarts()));
+	}
+
+	@Override
+	protected Stream<ChunkAccess> allChunks() {
+		return StreamSupport.stream(this.chunkSource.chunkMap.getChunks().spliterator(), false)
+			.map(chunkHolder -> chunkHolder.getFullChunk())
+			.filter(Objects::nonNull);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
@@ -16,6 +17,7 @@ public class RandomStrollGoal extends Goal {
 	protected int interval;
 	protected boolean forceTrigger;
 	private final boolean checkNoActionTime;
+	protected BooleanSupplier vehicleCheck = () -> false;
 
 	public RandomStrollGoal(PathfinderMob pathfinderMob, double d) {
 		this(pathfinderMob, d, 120);
@@ -35,7 +37,7 @@ public class RandomStrollGoal extends Goal {
 
 	@Override
 	public boolean canUse() {
-		if (this.mob.isVehicle()) {
+		if (this.vehicleCheck.getAsBoolean() && this.mob.isVehicle()) {
 			return false;
 		} else {
 			if (!this.forceTrigger) {
@@ -68,7 +70,7 @@ public class RandomStrollGoal extends Goal {
 
 	@Override
 	public boolean canContinueToUse() {
-		return !this.mob.getNavigation().isDone() && !this.mob.isVehicle();
+		return !this.mob.getNavigation().isDone() && (!this.mob.isVehicle() || !this.vehicleCheck.getAsBoolean());
 	}
 
 	@Override
@@ -80,6 +82,7 @@ public class RandomStrollGoal extends Goal {
 	public void stop() {
 		this.mob.getNavigation().stop();
 		super.stop();
+		this.mob.onDonePathing();
 	}
 
 	public void trigger() {

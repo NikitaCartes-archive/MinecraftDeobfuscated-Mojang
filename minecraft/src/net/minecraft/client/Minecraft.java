@@ -103,6 +103,7 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
+import net.minecraft.client.gui.screens.voting.VoteSelectionScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -161,6 +162,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -218,6 +220,7 @@ import net.minecraft.util.profiling.metrics.profiling.InactiveMetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
 import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -255,6 +258,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public static final ResourceLocation DEFAULT_FONT = new ResourceLocation("default");
 	public static final ResourceLocation UNIFORM_FONT = new ResourceLocation("uniform");
 	public static final ResourceLocation ALT_FONT = new ResourceLocation("alt");
+	public static final ResourceLocation ILLAGERALT_FONT = new ResourceLocation("illageralt");
 	private static final ResourceLocation REGIONAL_COMPLIANCIES = new ResourceLocation("regional_compliancies.json");
 	private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
 	private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE = Component.translatable("multiplayer.socialInteractions.not_available");
@@ -388,6 +392,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final ChatListener chatListener;
 	private ReportingContext reportingContext;
 	private String debugPath = "root";
+	private boolean frenchMode;
 
 	public Minecraft(GameConfig gameConfig) {
 		super("Client");
@@ -771,12 +776,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				list -> new FullTextSearchTree(
 						recipeCollection -> recipeCollection.getRecipes()
 								.stream()
-								.flatMap(recipe -> recipe.getResultItem(recipeCollection.registryAccess()).getTooltipLines(null, TooltipFlag.Default.NORMAL).stream())
+								.flatMap(recipe -> recipe.getResultItemRaw(recipeCollection.registryAccess()).getTooltipLines(null, TooltipFlag.Default.NORMAL).stream())
 								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
 								.filter(string -> !string.isEmpty()),
 						recipeCollection -> recipeCollection.getRecipes()
 								.stream()
-								.map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItem(recipeCollection.registryAccess()).getItem())),
+								.map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItemRaw(recipeCollection.registryAccess()).getItem())),
 						list
 					)
 			);
@@ -1710,6 +1715,21 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.rightClickDelay--;
 		}
 
+		if (this.frenchMode && this.level == null) {
+			this.languageManager.setSelected(this.options.languageCode);
+			this.languageManager.onResourceManagerReload(this.resourceManager);
+			this.frenchMode = false;
+		} else if (this.level != null && this.frenchMode != Rules.FRENCH_MODE.get()) {
+			this.frenchMode = Rules.FRENCH_MODE.get();
+			if (this.frenchMode && !this.languageManager.getSelected().equals("fr_fr")) {
+				this.languageManager.setSelected("fr_fr");
+				this.languageManager.onResourceManagerReload(this.resourceManager);
+			} else if (!this.frenchMode && !this.languageManager.getSelected().equals(this.options.languageCode)) {
+				this.languageManager.setSelected(this.options.languageCode);
+				this.languageManager.onResourceManagerReload(this.resourceManager);
+			}
+		}
+
 		this.profiler.push("gui");
 		this.chatListener.tick();
 		this.gui.tick(this.pause);
@@ -1878,6 +1898,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 		}
 
+		while (this.options.keyVoting.consumeClick()) {
+			this.setScreen(new VoteSelectionScreen());
+		}
+
 		while (this.options.keyInventory.consumeClick()) {
 			if (this.gameMode.isServerControlledInventory()) {
 				this.player.sendOpenInventory();
@@ -1943,7 +1967,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.startUseItem();
 		}
 
-		this.continueAttack(this.screen == null && !bl3 && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
+		if (Rules.EVIL_EYE.get() && this.player.getMainHandItem().isEmpty()) {
+			this.missTime = 0;
+		} else {
+			this.continueAttack(this.screen == null && !bl3 && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
+		}
 	}
 
 	public ClientTelemetryManager getTelemetryManager() {
@@ -2046,6 +2074,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		ClientPacketListener clientPacketListener = this.getConnection();
 		if (clientPacketListener != null) {
 			this.dropAllTasks();
+			if (!clientPacketListener.getConnection().isMemoryConnection()) {
+				clientPacketListener.registryAccess().registryOrThrow(Registries.RULE).forEach(rule -> rule.repealAll(true));
+			}
+
 			clientPacketListener.close();
 		}
 

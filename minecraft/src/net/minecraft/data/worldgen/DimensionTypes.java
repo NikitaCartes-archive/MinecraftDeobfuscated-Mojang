@@ -70,6 +70,26 @@ public class DimensionTypes {
 			)
 		);
 		bootstapContext.register(
+			BuiltinDimensionTypes.MOON,
+			new DimensionType(
+				OptionalLong.empty(),
+				false,
+				false,
+				false,
+				false,
+				1.0,
+				false,
+				false,
+				0,
+				256,
+				256,
+				BlockTags.INFINIBURN_END,
+				BuiltinDimensionTypes.MOON_EFFECTS,
+				0.0F,
+				new DimensionType.MonsterSettings(false, false, UniformInt.of(0, 7), 0)
+			)
+		);
+		bootstapContext.register(
 			BuiltinDimensionTypes.OVERWORLD_CAVES,
 			new DimensionType(
 				OptionalLong.empty(),

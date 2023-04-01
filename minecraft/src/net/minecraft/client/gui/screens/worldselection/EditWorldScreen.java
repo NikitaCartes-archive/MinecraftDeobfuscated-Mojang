@@ -16,6 +16,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -95,6 +96,15 @@ public class EditWorldScreen extends Screen {
 				.bounds(this.width / 2 - 100, this.height / 4 + 96 + 5, 200, 20)
 				.build()
 		);
+		Component component = Component.translatable("selectWorld.edit.resetVotes");
+		this.addRenderableWidget(Button.builder(component, buttonx -> this.minecraft.setScreen(new ConfirmScreen(bl -> {
+				if (bl) {
+					Path path = this.levelAccess.getLevelPath(LevelResource.VOTES);
+					FileUtils.deleteQuietly(path.toFile());
+				}
+
+				this.minecraft.setScreen(this);
+			}, component, Component.translatable("selectWorld.edit.resetVotes.msg")))).bounds(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20).build());
 		this.addRenderableWidget(this.renameButton);
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.callback.accept(false)).bounds(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20).build()

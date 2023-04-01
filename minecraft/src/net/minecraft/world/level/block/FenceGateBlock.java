@@ -2,8 +2,11 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -181,5 +184,36 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 
 	public static boolean connectsToDirection(BlockState blockState, Direction direction) {
 		return ((Direction)blockState.getValue(FACING)).getAxis() == direction.getClockWise().getAxis();
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if (Rules.HAUNTED_WORLD.get()) {
+			if ((Boolean)blockState.getValue(OPEN)) {
+				blockState = blockState.setValue(OPEN, Boolean.valueOf(false));
+				serverLevel.setBlock(blockPos, blockState, 10);
+			} else {
+				Direction direction = Direction.getRandom(randomSource);
+				if (blockState.getValue(FACING) == direction.getOpposite()) {
+					blockState = blockState.setValue(FACING, direction);
+				}
+
+				blockState = blockState.setValue(OPEN, Boolean.valueOf(true));
+				serverLevel.setBlock(blockPos, blockState, 10);
+			}
+
+			boolean bl = (Boolean)blockState.getValue(OPEN);
+			serverLevel.playSound(
+				null, blockPos, bl ? this.type.fenceGateOpen() : this.type.fenceGateClose(), SoundSource.BLOCKS, 1.0F, serverLevel.getRandom().nextFloat() * 0.1F + 0.9F
+			);
+			serverLevel.gameEvent(null, bl ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
+		}
+
+		super.randomTick(blockState, serverLevel, blockPos, randomSource);
 	}
 }

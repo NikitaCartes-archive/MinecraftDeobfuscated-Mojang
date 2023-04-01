@@ -25,6 +25,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -49,6 +51,7 @@ import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -92,6 +95,31 @@ public class EnderMan extends Monster implements NeutralMob {
 		super(entityType, level);
 		this.setMaxUpStep(1.0F);
 		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
+	}
+
+	@Override
+	public void transformedTick(EntityTransform entityTransform, LivingEntity livingEntity) {
+		super.transformedTick(entityTransform, livingEntity);
+		ItemStack itemStack = livingEntity.getItemInHand(InteractionHand.MAIN_HAND);
+		Block block = Block.byItem(itemStack.getItem());
+		if (block != Blocks.AIR) {
+			this.setCarriedBlock(block.defaultBlockState());
+		} else {
+			this.setCarriedBlock(null);
+		}
+
+		if (livingEntity.getRandom().nextInt(4) == 0) {
+			TargetingConditions targetingConditions = TargetingConditions.forCombat().range(this.getAttributeValue(Attributes.FOLLOW_RANGE)).selector(livingEntity2 -> {
+				if (livingEntity2 instanceof Player player && player != livingEntity) {
+					return isLookingAt(player, livingEntity);
+				}
+
+				return false;
+			});
+			if (this.level.getNearestPlayer(targetingConditions, livingEntity) != null) {
+				teleport(livingEntity);
+			}
+		}
 	}
 
 	@Override
@@ -215,16 +243,20 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	boolean isLookingAtMe(Player player) {
+		return isLookingAt(player, this);
+	}
+
+	private static boolean isLookingAt(Player player, LivingEntity livingEntity) {
 		ItemStack itemStack = player.getInventory().armor.get(3);
 		if (itemStack.is(Blocks.CARVED_PUMPKIN.asItem())) {
 			return false;
 		} else {
 			Vec3 vec3 = player.getViewVector(1.0F).normalize();
-			Vec3 vec32 = new Vec3(this.getX() - player.getX(), this.getEyeY() - player.getEyeY(), this.getZ() - player.getZ());
+			Vec3 vec32 = new Vec3(livingEntity.getX() - player.getX(), livingEntity.getEyeY() - player.getEyeY(), livingEntity.getZ() - player.getZ());
 			double d = vec32.length();
 			vec32 = vec32.normalize();
 			double e = vec3.dot(vec32);
-			return e > 1.0 - 0.025 / d ? player.hasLineOfSight(this) : false;
+			return e > 1.0 - 0.025 / d ? player.hasLineOfSight(livingEntity) : false;
 		}
 	}
 
@@ -277,11 +309,16 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	protected boolean teleport() {
-		if (!this.level.isClientSide() && this.isAlive()) {
-			double d = this.getX() + (this.random.nextDouble() - 0.5) * 64.0;
-			double e = this.getY() + (double)(this.random.nextInt(64) - 32);
-			double f = this.getZ() + (this.random.nextDouble() - 0.5) * 64.0;
-			return this.teleport(d, e, f);
+		return teleport(this);
+	}
+
+	private static boolean teleport(LivingEntity livingEntity) {
+		if (!livingEntity.level.isClientSide() && livingEntity.isAlive()) {
+			RandomSource randomSource = livingEntity.getRandom();
+			double d = livingEntity.getX() + (randomSource.nextDouble() - 0.5) * 64.0;
+			double e = livingEntity.getY() + (double)(randomSource.nextInt(64) - 32);
+			double f = livingEntity.getZ() + (randomSource.nextDouble() - 0.5) * 64.0;
+			return teleport(livingEntity, d, e, f);
 		} else {
 			return false;
 		}
@@ -298,23 +335,28 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	private boolean teleport(double d, double e, double f) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, e, f);
+		return teleport(this, d, e, f);
+	}
 
-		while (mutableBlockPos.getY() > this.level.getMinBuildHeight() && !this.level.getBlockState(mutableBlockPos).getMaterial().blocksMotion()) {
+	private static boolean teleport(LivingEntity livingEntity, double d, double e, double f) {
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, e, f);
+		Level level = livingEntity.level;
+
+		while (mutableBlockPos.getY() > level.getMinBuildHeight() && !level.getBlockState(mutableBlockPos).getMaterial().blocksMotion()) {
 			mutableBlockPos.move(Direction.DOWN);
 		}
 
-		BlockState blockState = this.level.getBlockState(mutableBlockPos);
+		BlockState blockState = level.getBlockState(mutableBlockPos);
 		boolean bl = blockState.getMaterial().blocksMotion();
 		boolean bl2 = blockState.getFluidState().is(FluidTags.WATER);
 		if (bl && !bl2) {
-			Vec3 vec3 = this.position();
-			boolean bl3 = this.randomTeleport(d, e, f, true);
+			Vec3 vec3 = livingEntity.position();
+			boolean bl3 = livingEntity.randomTeleport(d, e, f, true);
 			if (bl3) {
-				this.level.gameEvent(GameEvent.TELEPORT, vec3, GameEvent.Context.of(this));
-				if (!this.isSilent()) {
-					this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
-					this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+				level.gameEvent(GameEvent.TELEPORT, vec3, GameEvent.Context.of(livingEntity));
+				if (!livingEntity.isSilent()) {
+					level.playSound(null, livingEntity.xo, livingEntity.yo, livingEntity.zo, SoundEvents.ENDERMAN_TELEPORT, livingEntity.getSoundSource(), 1.0F, 1.0F);
+					livingEntity.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 				}
 			}
 
@@ -368,13 +410,13 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
 			boolean bl = damageSource.getDirectEntity() instanceof ThrownPotion;
 			if (!damageSource.is(DamageTypeTags.IS_PROJECTILE) && !bl) {
-				boolean bl2 = super.hurt(damageSource, f);
+				boolean bl2 = super.hurtInternal(damageSource, f);
 				if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
 					this.teleport();
 				}
@@ -399,7 +441,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		Potion potion = PotionUtils.getPotion(itemStack);
 		List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
 		boolean bl = potion == Potions.WATER && list.isEmpty();
-		return bl ? super.hurt(damageSource, f) : false;
+		return bl ? super.hurtInternal(damageSource, f) : false;
 	}
 
 	public boolean isCreepy() {
@@ -483,6 +525,10 @@ public class EnderMan extends Monster implements NeutralMob {
 				blockState3 = Block.updateFromNeighbourShapes(blockState3, this.enderman.level, blockPos);
 				if (this.canPlaceBlock(level, blockPos, blockState3, blockState, blockState2, blockPos2)) {
 					level.setBlock(blockPos, blockState3, 3);
+					if (Rules.ENDERMAN_BLOCK_UPDATE.get()) {
+						blockState3.getBlock().setPlacedBy(level, blockPos, blockState3, this.enderman, new ItemStack(blockState3.getBlock().asItem()));
+					}
+
 					level.gameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(this.enderman, blockState3));
 					this.enderman.setCarriedBlock(null);
 				}
@@ -621,7 +667,7 @@ public class EnderMan extends Monster implements NeutralMob {
 			Vec3 vec32 = new Vec3((double)i + 0.5, (double)j + 0.5, (double)k + 0.5);
 			BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.enderman));
 			boolean bl = blockHitResult.getBlockPos().equals(blockPos);
-			if (blockState.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
+			if ((blockState.is(BlockTags.ENDERMAN_HOLDABLE) || Rules.ENDERMEN_PICK_UP_ANYTHING.get() && !blockState.hasBlockEntity()) && bl) {
 				level.removeBlock(blockPos, false);
 				level.gameEvent(GameEvent.BLOCK_DESTROY, blockPos, GameEvent.Context.of(this.enderman, blockState));
 				this.enderman.setCarriedBlock(blockState.getBlock().defaultBlockState());

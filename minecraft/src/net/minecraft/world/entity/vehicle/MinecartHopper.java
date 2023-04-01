@@ -1,6 +1,8 @@
 package net.minecraft.world.entity.vehicle;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -17,6 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class MinecartHopper extends AbstractMinecartContainer implements Hopper {
 	private boolean enabled = true;
+	private int cooldownTime = -1;
+	private BlockPos lastPosition = BlockPos.ZERO;
 
 	public MinecartHopper(EntityType<? extends MinecartHopper> entityType, Level level) {
 		super(entityType, level);
@@ -80,8 +84,22 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.level.isClientSide && this.isAlive() && this.isEnabled() && this.suckInItems()) {
-			this.setChanged();
+		if (!this.level.isClientSide && this.isAlive() && this.isEnabled()) {
+			BlockPos blockPos = this.blockPosition();
+			if (blockPos.equals(this.lastPosition)) {
+				this.cooldownTime--;
+			} else {
+				this.cooldownTime = 0;
+			}
+
+			this.lastPosition = blockPos;
+			if (this.cooldownTime <= 0) {
+				this.cooldownTime = 0;
+				if (this.suckInItems()) {
+					this.cooldownTime = Rules.FAST_HOPPERS.get() ? 8 : 1;
+					this.setChanged();
+				}
+			}
 		}
 	}
 

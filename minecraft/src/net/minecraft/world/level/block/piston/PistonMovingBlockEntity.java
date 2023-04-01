@@ -2,6 +2,7 @@ package net.minecraft.world.level.block.piston;
 
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderGetter;
@@ -41,6 +42,8 @@ public class PistonMovingBlockEntity extends BlockEntity {
 	private float progressO;
 	private long lastTicked;
 	private int deathTicks;
+	@Nullable
+	private BlockEntity renderBlockEntity;
 
 	public PistonMovingBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.PISTON, blockPos, blockState);
@@ -52,6 +55,22 @@ public class PistonMovingBlockEntity extends BlockEntity {
 		this.direction = direction;
 		this.extending = bl;
 		this.isSourcePiston = bl2;
+	}
+
+	@Nullable
+	public BlockEntity getRenderBlockEntity() {
+		return this.renderBlockEntity;
+	}
+
+	public void setCarriedBlockEntity(@Nullable BlockEntity blockEntity, Level level) {
+		if (blockEntity == null) {
+			this.renderBlockEntity = null;
+		} else {
+			if (level.isClientSide) {
+				this.renderBlockEntity = blockEntity;
+				this.renderBlockEntity.setLevel(level);
+			}
+		}
 	}
 
 	@Override

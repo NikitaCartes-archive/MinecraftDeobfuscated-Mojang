@@ -120,6 +120,7 @@ public class ServerConnectionListener {
 					connection.setListener(new MemoryServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
 					ServerConnectionListener.this.connections.add(connection);
 					ChannelPipeline channelPipeline = channel.pipeline();
+					Connection.configureSerialization(channelPipeline, PacketFlow.SERVERBOUND);
 					channelPipeline.addLast("packet_handler", connection);
 				}
 			}).group(SERVER_EVENT_GROUP.get()).localAddress(LocalAddress.ANY).bind().syncUninterruptibly();

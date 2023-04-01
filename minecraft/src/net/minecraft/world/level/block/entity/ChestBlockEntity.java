@@ -5,9 +5,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -53,6 +55,7 @@ public class ChestBlockEntity extends RandomizableContainerBlockEntity implement
 		}
 	};
 	private final ChestLidController chestLidController = new ChestLidController();
+	private boolean gold;
 
 	protected ChestBlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
 		super(blockEntityType, blockPos, blockState);
@@ -79,6 +82,8 @@ public class ChestBlockEntity extends RandomizableContainerBlockEntity implement
 		if (!this.tryLoadLootTable(compoundTag)) {
 			ContainerHelper.loadAllItems(compoundTag, this.items);
 		}
+
+		this.setGold(compoundTag.getBoolean("gold"));
 	}
 
 	@Override
@@ -87,6 +92,19 @@ public class ChestBlockEntity extends RandomizableContainerBlockEntity implement
 		if (!this.trySaveLootTable(compoundTag)) {
 			ContainerHelper.saveAllItems(compoundTag, this.items);
 		}
+
+		compoundTag.putBoolean("gold", this.isGold());
+	}
+
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
+	}
+
+	@Override
+	public CompoundTag getUpdateTag() {
+		CompoundTag compoundTag = super.getUpdateTag();
+		compoundTag.putBoolean("gold", this.isGold());
+		return compoundTag;
 	}
 
 	public static void lidAnimateTick(Level level, BlockPos blockPos, BlockState blockState, ChestBlockEntity chestBlockEntity) {
@@ -122,6 +140,10 @@ public class ChestBlockEntity extends RandomizableContainerBlockEntity implement
 	@Override
 	public void startOpen(Player player) {
 		if (!this.remove && !player.isSpectator()) {
+			if (Rules.MIDAS_TOUCH.get()) {
+				this.setGold(true);
+			}
+
 			this.openersCounter.incrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
 		}
 	}
@@ -180,5 +202,17 @@ public class ChestBlockEntity extends RandomizableContainerBlockEntity implement
 	protected void signalOpenCount(Level level, BlockPos blockPos, BlockState blockState, int i, int j) {
 		Block block = blockState.getBlock();
 		level.blockEvent(blockPos, block, 1, j);
+	}
+
+	public boolean isGold() {
+		return this.gold;
+	}
+
+	public void setGold(boolean bl) {
+		if (this.gold != bl) {
+			this.gold = bl;
+			this.setChanged();
+			this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+		}
 	}
 }

@@ -52,7 +52,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final boolean spawnAnimals = this.get("spawn-animals", true);
 	public final boolean spawnNpcs = this.get("spawn-npcs", true);
 	public final boolean pvp = this.get("pvp", true);
-	public final boolean allowFlight = this.get("allow-flight", false);
+	public final boolean allowFlight = this.get("allow-flight", true);
 	public final String motd = this.get("motd", "A Minecraft Server");
 	public final boolean forceGameMode = this.get("force-gamemode", false);
 	public final boolean enforceWhitelist = this.get("enforce-whitelist", false);

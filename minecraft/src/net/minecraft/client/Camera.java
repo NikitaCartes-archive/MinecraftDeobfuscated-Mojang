@@ -9,6 +9,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
@@ -54,7 +55,9 @@ public class Camera {
 				this.setRotation(this.yRot + 180.0F, -this.xRot);
 			}
 
-			this.move(-this.getMaxZoom(4.0), 0.0, 0.0);
+			EntityTransform entityTransform = EntityTransform.get(entity);
+			double d = entityTransform.cameraDistance(4.0);
+			this.move(-this.getMaxZoom(d), 0.0, 0.0);
 		} else if (entity instanceof LivingEntity && ((LivingEntity)entity).isSleeping()) {
 			Direction direction = ((LivingEntity)entity).getBedOrientation();
 			this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);

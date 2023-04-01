@@ -16,6 +16,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
@@ -61,9 +63,11 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -77,6 +81,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	private static final Set<String> ALLOWED_PROTOCOLS = Sets.<String>newHashSet("http", "https");
 	private static final int EXTRA_SPACE_AFTER_FIRST_TOOLTIP_LINE = 2;
 	private static final Component USAGE_NARRATION = Component.translatable("narrator.screen.usage");
+	private static final int MAX_TOOLTIP_LINES = 10;
+	private static final MutableComponent TOOLTIP_TOO_LONG = Component.translatable("tooltip.too_long").withStyle(ChatFormatting.AQUA);
 	protected final Component title;
 	private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
 	private final List<NarratableEntry> narratables = Lists.<NarratableEntry>newArrayList();
@@ -248,9 +254,9 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	}
 
 	public List<Component> getTooltipFromItem(ItemStack itemStack) {
-		return itemStack.getTooltipLines(
-			this.minecraft.player, this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
-		);
+		return (List<Component>)(Rules.DISABLE_ITEM_TOOLTIPS.get()
+			? new ArrayList()
+			: itemStack.getTooltipLines(this.minecraft.player, this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL));
 	}
 
 	public void renderTooltip(PoseStack poseStack, Component component, int i, int j) {
@@ -345,21 +351,40 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	protected void renderComponentHoverEffect(PoseStack poseStack, @Nullable Style style, int i, int j) {
 		if (style != null && style.getHoverEvent() != null) {
 			HoverEvent hoverEvent = style.getHoverEvent();
-			HoverEvent.ItemStackInfo itemStackInfo = hoverEvent.getValue(HoverEvent.Action.SHOW_ITEM);
-			if (itemStackInfo != null) {
-				this.renderTooltip(poseStack, itemStackInfo.getItemStack(), i, j);
+			int k = Math.max(this.width / 2, 200);
+			List<FormattedCharSequence> list = this.getHoverEventLines(hoverEvent)
+				.stream()
+				.flatMap(component -> this.minecraft.font.split(component, k).stream())
+				.toList();
+			if (list.size() > 10) {
+				List<FormattedCharSequence> list2 = new ArrayList(11);
+				list2.addAll(list.subList(0, 10));
+				list2.add(TOOLTIP_TOO_LONG.getVisualOrderText());
+				list = list2;
+			}
+
+			if (!list.isEmpty()) {
+				this.renderTooltip(poseStack, list, i, j);
+			}
+		}
+	}
+
+	private List<SplitLineEntry> getSplitHoverEventLines(HoverEvent hoverEvent) {
+		List<Component> list = this.getHoverEventLines(hoverEvent);
+		return SplitLineEntry.splitToWidth(this.minecraft.font, list.stream(), Math.max(this.width / 2, 200)).toList();
+	}
+
+	private List<Component> getHoverEventLines(HoverEvent hoverEvent) {
+		HoverEvent.ItemStackInfo itemStackInfo = hoverEvent.getValue(HoverEvent.Action.SHOW_ITEM);
+		if (itemStackInfo != null) {
+			return this.getTooltipFromItem(itemStackInfo.getItemStack());
+		} else {
+			HoverEvent.EntityTooltipInfo entityTooltipInfo = hoverEvent.getValue(HoverEvent.Action.SHOW_ENTITY);
+			if (entityTooltipInfo != null) {
+				return this.minecraft.options.advancedItemTooltips ? entityTooltipInfo.getTooltipLines() : List.of();
 			} else {
-				HoverEvent.EntityTooltipInfo entityTooltipInfo = hoverEvent.getValue(HoverEvent.Action.SHOW_ENTITY);
-				if (entityTooltipInfo != null) {
-					if (this.minecraft.options.advancedItemTooltips) {
-						this.renderComponentTooltip(poseStack, entityTooltipInfo.getTooltipLines(), i, j);
-					}
-				} else {
-					Component component = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT);
-					if (component != null) {
-						this.renderTooltip(poseStack, this.minecraft.font.split(component, Math.max(this.width / 2, 200)), i, j);
-					}
-				}
+				Component component = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT);
+				return component != null ? List.of(component) : List.of();
 			}
 		}
 	}
@@ -372,7 +397,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 			return false;
 		} else {
 			ClickEvent clickEvent = style.getClickEvent();
-			if (hasShiftDown()) {
+			if (hasControlDown()) {
+				HoverEvent hoverEvent = style.getHoverEvent();
+				if (hoverEvent != null) {
+					List<SplitLineEntry> list = this.getSplitHoverEventLines(hoverEvent);
+					if (!list.isEmpty()) {
+						this.minecraft.setScreen(new SuperSimpleTextScreen(Component.translatable("tooltip.more_like_cooltip"), this, list));
+						return true;
+					}
+				}
+			} else if (hasShiftDown()) {
 				if (style.getInsertion() != null) {
 					this.insertText(style.getInsertion(), false);
 				}

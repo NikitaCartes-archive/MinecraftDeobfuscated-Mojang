@@ -15,6 +15,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -180,5 +181,15 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 
 	public ModelPart getRandomModelPart(RandomSource randomSource) {
 		return (ModelPart)this.parts.get(randomSource.nextInt(this.parts.size()));
+	}
+
+	@Override
+	public boolean miniMe() {
+		return Rules.MINI_ME_MODE.get();
+	}
+
+	@Override
+	protected boolean onlyHead() {
+		return Rules.FLOATING_HEAD_MODE.get();
 	}
 }

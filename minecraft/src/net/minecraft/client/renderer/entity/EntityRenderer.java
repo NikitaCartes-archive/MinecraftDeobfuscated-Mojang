@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.NameVisiblity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
@@ -46,7 +48,7 @@ public abstract class EntityRenderer<T extends Entity> {
 	public boolean shouldRender(T entity, Frustum frustum, double d, double e, double f) {
 		if (!entity.shouldRender(d, e, f)) {
 			return false;
-		} else if (entity.noCulling) {
+		} else if (entity.noCulling()) {
 			return true;
 		} else {
 			AABB aABB = entity.getBoundingBoxForCulling().inflate(0.5);
@@ -63,7 +65,11 @@ public abstract class EntityRenderer<T extends Entity> {
 	}
 
 	public void render(T entity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-		if (this.shouldShowName(entity)) {
+		if (!this.shouldShowName(entity)) {
+			if (Rules.BETA_ENTITY_IDS.get()) {
+				this.renderNameTag(entity, Component.literal(String.valueOf(entity.getId())), poseStack, multiBufferSource, i);
+			}
+		} else {
 			this.renderNameTag(entity, entity.getDisplayName(), poseStack, multiBufferSource, i);
 		}
 	}
@@ -81,24 +87,27 @@ public abstract class EntityRenderer<T extends Entity> {
 	protected void renderNameTag(T entity, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		double d = this.entityRenderDispatcher.distanceToSqr(entity);
 		if (!(d > 4096.0)) {
-			boolean bl = !entity.isDiscrete();
-			float f = entity.getBbHeight() + 0.5F;
-			int j = "deadmau5".equals(component.getString()) ? -10 : 0;
-			poseStack.pushPose();
-			poseStack.translate(0.0F, f, 0.0F);
-			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-			poseStack.scale(-0.025F, -0.025F, 0.025F);
-			Matrix4f matrix4f = poseStack.last().pose();
-			float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
-			int k = (int)(g * 255.0F) << 24;
-			Font font = this.getFont();
-			float h = (float)(-font.width(component) / 2);
-			font.drawInBatch(component, h, (float)j, 553648127, false, matrix4f, multiBufferSource, bl ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, k, i);
-			if (bl) {
-				font.drawInBatch(component, h, (float)j, -1, false, matrix4f, multiBufferSource, Font.DisplayMode.NORMAL, 0, i);
-			}
+			NameVisiblity nameVisiblity = entity.isDiscrete() ? Rules.SNEAKING_NAME_VISIBILITY.get() : Rules.NORMAL_NAME_VISIBILITY.get();
+			if (nameVisiblity != NameVisiblity.NONE) {
+				float f = entity.getBbHeight() + 0.5F;
+				int j = "deadmau5".equals(component.getString()) ? -10 : 0;
+				poseStack.pushPose();
+				poseStack.translate(0.0F, f, 0.0F);
+				poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+				poseStack.scale(-0.025F, -0.025F, 0.025F);
+				Matrix4f matrix4f = poseStack.last().pose();
+				float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
+				int k = (int)(g * 255.0F) << 24;
+				Font font = this.getFont();
+				float h = (float)(-font.width(component) / 2);
+				boolean bl = nameVisiblity == NameVisiblity.SEE_THROUGH;
+				font.drawInBatch(component, h, (float)j, 553648127, false, matrix4f, multiBufferSource, bl ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, k, i);
+				if (bl) {
+					font.drawInBatch(component, h, (float)j, -1, false, matrix4f, multiBufferSource, Font.DisplayMode.NORMAL, 0, i);
+				}
 
-			poseStack.popPose();
+				poseStack.popPose();
+			}
 		}
 	}
 }

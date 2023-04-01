@@ -13,8 +13,11 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -53,6 +56,11 @@ public class Phantom extends FlyingMob implements Enemy {
 		this.xpReward = 5;
 		this.moveControl = new Phantom.PhantomMoveControl(this);
 		this.lookControl = new Phantom.PhantomLookControl(this);
+	}
+
+	@Override
+	public boolean canTransformFly() {
+		return true;
 	}
 
 	@Override
@@ -118,6 +126,10 @@ public class Phantom extends FlyingMob implements Enemy {
 	@Override
 	public void tick() {
 		super.tick();
+		if (Rules.REMOVE_PHANTOMS.get()) {
+			this.kill();
+		}
+
 		if (this.level.isClientSide) {
 			float f = Mth.cos((float)(this.getUniqueFlapTickOffset() + this.tickCount) * 7.448451F * (float) (Math.PI / 180.0) + (float) Math.PI);
 			float g = Mth.cos((float)(this.getUniqueFlapTickOffset() + this.tickCount + 1) * 7.448451F * (float) (Math.PI / 180.0) + (float) Math.PI);
@@ -142,6 +154,11 @@ public class Phantom extends FlyingMob implements Enemy {
 			this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() + (double)h, this.getY() + (double)k, this.getZ() + (double)j, 0.0, 0.0, 0.0);
 			this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() - (double)h, this.getY() + (double)k, this.getZ() - (double)j, 0.0, 0.0, 0.0);
 		}
+	}
+
+	@Override
+	protected Vec3 collide(Vec3 vec3) {
+		return Rules.PHANTOM_PHANTOM.get() ? vec3 : super.collide(vec3);
 	}
 
 	@Override
@@ -236,6 +253,19 @@ public class Phantom extends FlyingMob implements Enemy {
 		EntityDimensions entityDimensions = super.getDimensions(pose);
 		float f = (entityDimensions.width + 0.2F * (float)i) / entityDimensions.width;
 		return entityDimensions.scale(f);
+	}
+
+	@Override
+	public boolean isInvulnerableTo(DamageSource damageSource) {
+		if (!Rules.PHANTOM_PHANTOM.get()) {
+			return super.isInvulnerableTo(damageSource);
+		} else {
+			if (damageSource.getEntity() instanceof Player player && player.getItemInHand(InteractionHand.MAIN_HAND).is(ItemTags.BEDS)) {
+				return false;
+			}
+
+			return true;
+		}
 	}
 
 	@Override
@@ -527,11 +557,21 @@ public class Phantom extends FlyingMob implements Enemy {
 			if (livingEntity != null) {
 				Phantom.this.moveTargetPoint = new Vec3(livingEntity.getX(), livingEntity.getY(0.5), livingEntity.getZ());
 				if (Phantom.this.getBoundingBox().inflate(0.2F).intersects(livingEntity.getBoundingBox())) {
-					Phantom.this.doHurtTarget(livingEntity);
-					Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
-					if (!Phantom.this.isSilent()) {
-						Phantom.this.level.levelEvent(1039, Phantom.this.blockPosition(), 0);
+					if (Rules.EXPLODING_PHANTOMS.get()) {
+						Phantom.this.dead = true;
+						Phantom.this.level.explode(Phantom.this, Phantom.this.getX(), Phantom.this.getY(), Phantom.this.getZ(), 3.0F, Level.ExplosionInteraction.MOB);
+						Phantom.this.discard();
+						return;
 					}
+
+					if (!Rules.PHANTOM_PHANTOM.get()) {
+						Phantom.this.doHurtTarget(livingEntity);
+						if (!Phantom.this.isSilent()) {
+							Phantom.this.level.levelEvent(1039, Phantom.this.blockPosition(), 0);
+						}
+					}
+
+					Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
 				} else if (Phantom.this.horizontalCollision || Phantom.this.hurtTime > 0) {
 					Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
 				}

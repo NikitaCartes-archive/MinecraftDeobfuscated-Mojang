@@ -37,7 +37,7 @@ public class BakedGlyph {
 		this.down = m;
 	}
 
-	public void render(boolean bl, float f, float g, Matrix4f matrix4f, VertexConsumer vertexConsumer, float h, float i, float j, float k, int l) {
+	public void render(boolean bl, boolean bl2, float f, float g, Matrix4f matrix4f, VertexConsumer vertexConsumer, float h, float i, float j, float k, int l) {
 		int m = 3;
 		float n = f + this.left;
 		float o = f + this.right;
@@ -45,12 +45,14 @@ public class BakedGlyph {
 		float q = this.down - 3.0F;
 		float r = g + p;
 		float s = g + q;
-		float t = bl ? 1.0F - 0.25F * p : 0.0F;
-		float u = bl ? 1.0F - 0.25F * q : 0.0F;
-		vertexConsumer.vertex(matrix4f, n + t, r, 0.0F).color(h, i, j, k).uv(this.u0, this.v0).uv2(l).endVertex();
-		vertexConsumer.vertex(matrix4f, n + u, s, 0.0F).color(h, i, j, k).uv(this.u0, this.v1).uv2(l).endVertex();
-		vertexConsumer.vertex(matrix4f, o + u, s, 0.0F).color(h, i, j, k).uv(this.u1, this.v1).uv2(l).endVertex();
-		vertexConsumer.vertex(matrix4f, o + t, r, 0.0F).color(h, i, j, k).uv(this.u1, this.v0).uv2(l).endVertex();
+		float t = bl2 ? 1.0F - 0.25F * p : 0.0F;
+		float u = bl2 ? 1.0F - 0.25F * q : 0.0F;
+		float v = bl ? this.u1 : this.u0;
+		float w = bl ? this.u0 : this.u1;
+		vertexConsumer.vertex(matrix4f, n + t, r, 0.0F).color(h, i, j, k).uv(v, this.v0).uv2(l).endVertex();
+		vertexConsumer.vertex(matrix4f, n + u, s, 0.0F).color(h, i, j, k).uv(v, this.v1).uv2(l).endVertex();
+		vertexConsumer.vertex(matrix4f, o + u, s, 0.0F).color(h, i, j, k).uv(w, this.v1).uv2(l).endVertex();
+		vertexConsumer.vertex(matrix4f, o + t, r, 0.0F).color(h, i, j, k).uv(w, this.v0).uv2(l).endVertex();
 	}
 
 	public void renderEffect(BakedGlyph.Effect effect, Matrix4f matrix4f, VertexConsumer vertexConsumer, int i) {

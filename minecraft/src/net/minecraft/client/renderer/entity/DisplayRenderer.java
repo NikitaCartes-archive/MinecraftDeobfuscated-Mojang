@@ -3,6 +3,8 @@ package net.minecraft.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Transformation;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -19,6 +21,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Display;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -135,6 +138,42 @@ public abstract class DisplayRenderer<T extends Display, S> extends EntityRender
 					itemDisplay.getLevel(),
 					itemDisplay.getId()
 				);
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class StencilDisplayRenderer extends DisplayRenderer<Display.StencilDisplay, Display.StencilDisplay.StencilRenderState> {
+		private static final Int2ObjectMap<StencilRenderer.Triangle[]> CONE_MESHES = new Int2ObjectArrayMap<>();
+		private static final Int2ObjectMap<StencilRenderer.Triangle[]> SPHERE_MESHES = new Int2ObjectArrayMap<>();
+
+		protected StencilDisplayRenderer(EntityRendererProvider.Context context) {
+			super(context);
+		}
+
+		@Nullable
+		protected Display.StencilDisplay.StencilRenderState getSubState(Display.StencilDisplay stencilDisplay) {
+			return stencilDisplay.stencilRenderState();
+		}
+
+		protected void renderInner(
+			Display.StencilDisplay stencilDisplay,
+			Display.StencilDisplay.StencilRenderState stencilRenderState,
+			PoseStack poseStack,
+			MultiBufferSource multiBufferSource,
+			int i,
+			float f
+		) {
+			int j = stencilRenderState.color().get(f);
+			int k = Mth.clamp(stencilRenderState.shape().get(f), 0, 1);
+			int l = stencilRenderState.lod().get(f);
+			StencilRenderer.Triangle[] triangles;
+			if (k == 1) {
+				triangles = CONE_MESHES.computeIfAbsent(Mth.clamp(l + 3, 3, 64), StencilRenderer::createNCone);
+			} else {
+				triangles = SPHERE_MESHES.computeIfAbsent(Mth.clamp(l, 0, 4), StencilRenderer::createNSphere);
+			}
+
+			StencilRenderer.render(triangles, poseStack.last().pose(), multiBufferSource, j);
 		}
 	}
 

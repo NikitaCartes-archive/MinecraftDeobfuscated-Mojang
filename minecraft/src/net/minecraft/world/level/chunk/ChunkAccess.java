@@ -75,6 +75,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	protected final Map<BlockPos, BlockEntity> blockEntities = Maps.<BlockPos, BlockEntity>newHashMap();
 	protected final LevelHeightAccessor levelHeightAccessor;
 	protected final LevelChunkSection[] sections;
+	protected boolean lightsOut;
 
 	public ChunkAccess(
 		ChunkPos chunkPos,
@@ -293,6 +294,14 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	public abstract TickContainerAccess<Block> getBlockTicks();
 
 	public abstract TickContainerAccess<Fluid> getFluidTicks();
+
+	public void setLightsOut(boolean bl) {
+		this.lightsOut = bl;
+	}
+
+	public boolean isLightsOut() {
+		return this.lightsOut;
+	}
 
 	public abstract ChunkAccess.TicksToSave getTicksForSerialization();
 

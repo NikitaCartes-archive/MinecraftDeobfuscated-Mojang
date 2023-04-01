@@ -26,6 +26,11 @@ public abstract class WaterAnimal extends PathfinderMob {
 	}
 
 	@Override
+	public boolean canTransformBreatheInAir() {
+		return false;
+	}
+
+	@Override
 	public MobType getMobType() {
 		return MobType.WATER;
 	}

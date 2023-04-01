@@ -20,6 +20,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
@@ -48,7 +50,8 @@ public class LootTable {
 
 	public static Consumer<ItemStack> createStackSplitter(LootContext lootContext, Consumer<ItemStack> consumer) {
 		return itemStack -> {
-			if (itemStack.isItemEnabled(lootContext.getLevel().enabledFeatures())) {
+			itemStack = Rules.DOUBLE_OR_HALF_ITEM_DROPS.adjustItemStack(Rules.REPLACE_LOOT_DROPS.adjustItemStack(lootContext.getLevel().registryAccess(), itemStack));
+			if (itemStack.isItemEnabled(lootContext.getLevel().enabledFeatures()) && RuleFeatureToggles.isEnabled(itemStack)) {
 				if (itemStack.getCount() < itemStack.getMaxStackSize()) {
 					consumer.accept(itemStack);
 				} else {

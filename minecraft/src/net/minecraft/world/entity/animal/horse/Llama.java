@@ -511,7 +511,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 	static class LlamaAttackWolfGoal extends NearestAttackableTargetGoal<Wolf> {
 		public LlamaAttackWolfGoal(Llama llama) {
-			super(llama, Wolf.class, 16, false, true, livingEntity -> !((Wolf)livingEntity).isTame());
+			super(llama, Wolf.class, 16, false, true, livingEntity -> livingEntity instanceof Wolf wolf ? !wolf.isTame() : false);
 		}
 
 		@Override

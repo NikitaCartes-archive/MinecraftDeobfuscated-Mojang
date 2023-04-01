@@ -8,6 +8,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -35,6 +36,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -82,6 +84,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerRecipeBook;
 import net.minecraft.stats.ServerStatsCounter;
@@ -91,6 +94,8 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.Goldifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
@@ -99,9 +104,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -131,6 +140,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.NetherPortalBlock;
@@ -167,6 +177,7 @@ public class ServerPlayer extends Player {
 	private int lastRecordedExperience = Integer.MIN_VALUE;
 	private float lastSentHealth = -1.0E8F;
 	private int lastSentFood = -99999999;
+	private int lastSentThirst = Integer.MIN_VALUE;
 	private boolean lastFoodSaturationZero = true;
 	private int lastSentExp = -99999999;
 	private int spawnInvulnerableTime = 60;
@@ -182,6 +193,7 @@ public class ServerPlayer extends Player {
 	private Vec3 levitationStartPos;
 	private int levitationStartTime;
 	private boolean disconnected;
+	private int blipsSinceBlop;
 	@Nullable
 	private Vec3 startingToFallPosition;
 	@Nullable
@@ -249,6 +261,7 @@ public class ServerPlayer extends Player {
 	private int containerCounter;
 	public int latency;
 	public boolean wonGame;
+	public boolean canTurnIntoGold = true;
 
 	public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile) {
 		super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile);
@@ -443,6 +456,60 @@ public class ServerPlayer extends Player {
 	@Override
 	public void tick() {
 		this.gameMode.tick();
+		if (Rules.MIDAS_TOUCH.get() && this.tickCount % 20 == 0) {
+			EquipmentSlot[] equipmentSlots = EquipmentSlot.values();
+			EquipmentSlot equipmentSlot = equipmentSlots[this.random.nextInt(equipmentSlots.length)];
+			ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+			this.setItemSlot(equipmentSlot, Goldifier.apply(itemStack));
+		}
+
+		if (Rules.KEEP_YOUR_FRIENDS_CLOSE.get() && this.isAlive() && !this.isSpectator() && !this.hasDisconnected()) {
+			List<ServerPlayer> list = this.getLevel()
+				.getPlayers(serverPlayer -> serverPlayer.isAlive() && serverPlayer != this && !serverPlayer.hasDisconnected() && !serverPlayer.isSpectator());
+			if (!list.isEmpty()) {
+				List<ServerPlayer> list2 = list.stream()
+					.sorted(Comparator.comparingDouble(serverPlayer -> (double)serverPlayer.getOnPos().distManhattan(this.getOnPos())))
+					.toList();
+				ServerPlayer serverPlayer = (ServerPlayer)list2.get(0);
+				if (serverPlayer.position().distanceTo(this.position()) >= 32.0) {
+					ServerPlayer serverPlayer2 = this.getRandom().nextBoolean() ? this : serverPlayer;
+					Vec3 vec3 = serverPlayer2 == this ? serverPlayer.position() : this.position();
+					serverPlayer2.teleportTo(vec3.x, vec3.y + 1.0, vec3.z);
+				}
+			}
+		}
+
+		if (Rules.UNDEAD_PLAYERS.get() && this.isAlive()) {
+			boolean bl = this.isSunBurnTick();
+			if (bl) {
+				ItemStack itemStack2 = this.getItemBySlot(EquipmentSlot.HEAD);
+				if (!itemStack2.isEmpty()) {
+					if (itemStack2.isDamageableItem()) {
+						itemStack2.setDamageValue(itemStack2.getDamageValue() + this.random.nextInt(2));
+						if (itemStack2.getDamageValue() >= itemStack2.getMaxDamage()) {
+							this.broadcastBreakEvent(EquipmentSlot.HEAD);
+							this.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+						}
+					}
+
+					bl = false;
+				}
+
+				if (bl) {
+					this.setSecondsOnFire(8);
+				}
+			}
+		}
+
+		if (Rules.TRAILS_AND_TAILS.get() && this.onGround && (double)this.random.nextFloat() < 0.05) {
+			BlockState blockState = this.level.getBlockState(this.blockPosition());
+			BlockState blockState2 = this.level.getBlockState(this.blockPosition().below());
+			if ((blockState.isAir() || blockState.is(Blocks.GRASS)) && blockState2.is(Blocks.GRASS_BLOCK)) {
+				this.level.setBlock(this.blockPosition(), Blocks.AIR.defaultBlockState(), 3);
+				this.level.setBlock(this.blockPosition().below(), Blocks.DIRT_PATH.defaultBlockState(), 3);
+			}
+		}
+
 		this.wardenSpawnTracker.tick();
 		this.spawnInvulnerableTime--;
 		if (this.invulnerableTime > 0) {
@@ -450,9 +517,12 @@ public class ServerPlayer extends Player {
 		}
 
 		this.containerMenu.broadcastChanges();
-		if (!this.level.isClientSide && !this.containerMenu.stillValid(this)) {
-			this.closeContainer();
-			this.containerMenu = this.inventoryMenu;
+		if (!this.level.isClientSide) {
+			this.containerMenu.tick(this.level);
+			if (!this.containerMenu.stillValid(this)) {
+				this.closeContainer();
+				this.containerMenu = this.inventoryMenu;
+			}
 		}
 
 		Entity entity = this.getCamera();
@@ -476,6 +546,16 @@ public class ServerPlayer extends Player {
 		this.trackStartFallingPosition();
 		this.trackEnteredOrExitedLavaOnVehicle();
 		this.advancements.flushDirty(this);
+		if (Rules.BOT_REPLACEMENTS.contains(this.getUUID())) {
+			if (this.blipsSinceBlop <= 0) {
+				PlayerChatMessage playerChatMessage = PlayerChatMessage.system("blip-blop");
+				ChatType.Bound bound = ChatType.bind(ChatType.CHAT, this);
+				this.server.getPlayerList().broadcastChatMessage(playerChatMessage, this, bound);
+				this.blipsSinceBlop = 20 * this.random.nextIntBetweenInclusive(60, 600);
+			} else {
+				this.blipsSinceBlop--;
+			}
+		}
 	}
 
 	public void doTick() {
@@ -496,11 +576,14 @@ public class ServerPlayer extends Player {
 
 			if (this.getHealth() != this.lastSentHealth
 				|| this.lastSentFood != this.foodData.getFoodLevel()
-				|| this.foodData.getSaturationLevel() == 0.0F != this.lastFoodSaturationZero) {
-				this.connection.send(new ClientboundSetHealthPacket(this.getHealth(), this.foodData.getFoodLevel(), this.foodData.getSaturationLevel()));
+				|| this.foodData.getSaturationLevel() == 0.0F != this.lastFoodSaturationZero
+				|| this.lastSentThirst != this.thirst.level()) {
+				this.connection
+					.send(new ClientboundSetHealthPacket(this.getHealth(), this.foodData.getFoodLevel(), this.foodData.getSaturationLevel(), this.thirst.level()));
 				this.lastSentHealth = this.getHealth();
 				this.lastSentFood = this.foodData.getFoodLevel();
 				this.lastFoodSaturationZero = this.foodData.getSaturationLevel() == 0.0F;
+				this.lastSentThirst = this.thirst.level();
 			}
 
 			if (this.getHealth() + this.getAbsorptionAmount() != this.lastRecordedHealthAndAbsorption) {
@@ -684,7 +767,7 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
@@ -701,7 +784,7 @@ public class ServerPlayer extends Player {
 					return false;
 				}
 
-				return super.hurt(damageSource, f);
+				return super.hurtInternal(damageSource, f);
 			}
 		}
 	}
@@ -869,35 +952,39 @@ public class ServerPlayer extends Player {
 			return Either.left(Player.BedSleepingProblem.OBSTRUCTED);
 		} else {
 			this.setRespawnPosition(this.level.dimension(), blockPos, this.getYRot(), false, true);
-			if (this.level.isDay()) {
+			if (Rules.DAY_BEDS.get()) {
+				if (this.level.isNight()) {
+					return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW_BUT_FOR_OTHER_REASONS);
+				}
+			} else if (this.level.isDay()) {
 				return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
-			} else {
-				if (!this.isCreative()) {
-					double d = 8.0;
-					double e = 5.0;
-					Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
-					List<Monster> list = this.level
-						.getEntitiesOfClass(
-							Monster.class,
-							new AABB(vec3.x() - 8.0, vec3.y() - 5.0, vec3.z() - 8.0, vec3.x() + 8.0, vec3.y() + 5.0, vec3.z() + 8.0),
-							monster -> monster.isPreventingPlayerRest(this)
-						);
-					if (!list.isEmpty()) {
-						return Either.left(Player.BedSleepingProblem.NOT_SAFE);
-					}
-				}
-
-				Either<Player.BedSleepingProblem, Unit> either = super.startSleepInBed(blockPos).ifRight(unit -> {
-					this.awardStat(Stats.SLEEP_IN_BED);
-					CriteriaTriggers.SLEPT_IN_BED.trigger(this);
-				});
-				if (!this.getLevel().canSleepThroughNights()) {
-					this.displayClientMessage(Component.translatable("sleep.not_possible"), true);
-				}
-
-				((ServerLevel)this.level).updateSleepingPlayerList();
-				return either;
 			}
+
+			if (!this.isCreative()) {
+				double d = 8.0;
+				double e = 5.0;
+				Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
+				List<Monster> list = this.level
+					.getEntitiesOfClass(
+						Monster.class,
+						new AABB(vec3.x() - 8.0, vec3.y() - 5.0, vec3.z() - 8.0, vec3.x() + 8.0, vec3.y() + 5.0, vec3.z() + 8.0),
+						monster -> monster.isPreventingPlayerRest(this)
+					);
+				if (!list.isEmpty()) {
+					return Either.left(Player.BedSleepingProblem.NOT_SAFE);
+				}
+			}
+
+			Either<Player.BedSleepingProblem, Unit> either = super.startSleepInBed(blockPos).ifRight(unit -> {
+				this.awardStat(Stats.SLEEP_IN_BED);
+				CriteriaTriggers.SLEPT_IN_BED.trigger(this);
+			});
+			if (!this.getLevel().canSleepThroughNights()) {
+				this.displayClientMessage(Component.translatable("sleep.not_possible"), true);
+			}
+
+			((ServerLevel)this.level).updateSleepingPlayerList();
+			return either;
 		}
 	}
 
@@ -919,6 +1006,11 @@ public class ServerPlayer extends Player {
 	private boolean bedBlocked(BlockPos blockPos, Direction direction) {
 		BlockPos blockPos2 = blockPos.above();
 		return !this.freeAt(blockPos2) || !this.freeAt(blockPos2.relative(direction.getOpposite()));
+	}
+
+	@Override
+	protected void stepOnBlock(BlockPos blockPos, BlockState blockState, Block block) {
+		block.playerStepOn(this.level, blockPos, blockState, this);
 	}
 
 	@Override
@@ -959,6 +1051,12 @@ public class ServerPlayer extends Player {
 		if (!this.touchingUnloadedChunk()) {
 			BlockPos blockPos = this.getOnPosLegacy();
 			super.checkFallDamage(d, bl, this.level.getBlockState(blockPos), blockPos);
+			if (Rules.BEELOONS.get()) {
+				int i = this.getBeeloons().size();
+				if (i > 0) {
+					this.fallDistance = Math.min(this.fallDistance, 20.0F / (float)i);
+				}
+			}
 		}
 	}
 
@@ -1217,7 +1315,7 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h) {
+	public Entity teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h) {
 		ChunkPos chunkPos = new ChunkPos(BlockPos.containing(d, e, f));
 		serverLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, this.getId());
 		this.stopRiding();
@@ -1232,7 +1330,7 @@ public class ServerPlayer extends Player {
 		}
 
 		this.setYHeadRot(g);
-		return true;
+		return this;
 	}
 
 	@Override
@@ -1414,10 +1512,24 @@ public class ServerPlayer extends Player {
 		}
 	}
 
+	public void summonLightning(Vec3 vec3) {
+		if (!this.isCrouching()) {
+			LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this.level);
+			if (lightningBolt != null) {
+				lightningBolt.moveTo(vec3);
+				lightningBolt.setCause(this);
+				this.level.addFreshEntity(lightningBolt);
+				this.playSound(SoundEvents.LIGHTNING_BOLT_THUNDER, 1.0F, 1.0F);
+			}
+		}
+	}
+
 	@Override
 	public void attack(Entity entity) {
 		if (this.gameMode.getGameModeForPlayer() == GameType.SPECTATOR) {
 			this.setCamera(entity);
+		} else if (Rules.GOD_OF_LIGHTNING.get()) {
+			this.summonLightning(entity.position());
 		} else {
 			super.attack(entity);
 		}
@@ -1652,9 +1764,11 @@ public class ServerPlayer extends Player {
 	@Override
 	public void onItemPickup(ItemEntity itemEntity) {
 		super.onItemPickup(itemEntity);
-		Entity entity = itemEntity.getOwner();
-		if (entity != null) {
-			CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.trigger(this, itemEntity.getItem(), entity);
+		if (itemEntity.isThrownIntentionally()) {
+			Entity entity = itemEntity.getOwner();
+			if (entity != null) {
+				CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.trigger(this, itemEntity.getItem(), entity);
+			}
 		}
 	}
 
@@ -1681,6 +1795,25 @@ public class ServerPlayer extends Player {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	@Override
+	public MobType getMobType() {
+		return Rules.UNDEAD_PLAYERS.get() ? MobType.UNDEAD : super.getMobType();
+	}
+
+	@Override
+	public boolean isInvertedHealAndHarm() {
+		return Rules.UNDEAD_PLAYERS.get() ? true : super.isInvertedHealAndHarm();
+	}
+
+	@Override
+	public void turnIntoGold() {
+		if (this.canTurnIntoGold) {
+			this.hurt(this.damageSources().midasTouch(), Float.MAX_VALUE);
+			this.spawnAtLocation(Items.GOLD_NUGGET);
+			this.canTurnIntoGold = false;
 		}
 	}
 }

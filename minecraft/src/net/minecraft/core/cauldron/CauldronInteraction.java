@@ -33,6 +33,8 @@ public interface CauldronInteraction {
 	Map<Item, CauldronInteraction> WATER = newInteractionMap();
 	Map<Item, CauldronInteraction> LAVA = newInteractionMap();
 	Map<Item, CauldronInteraction> POWDER_SNOW = newInteractionMap();
+	Map<Item, CauldronInteraction> EMPTY_SINK = newInteractionMap();
+	Map<Item, CauldronInteraction> WATER_SINK = newInteractionMap();
 	CauldronInteraction FILL_WATER = (blockState, level, blockPos, player, interactionHand, itemStack) -> emptyBucket(
 			level,
 			blockPos,
@@ -129,6 +131,27 @@ public interface CauldronInteraction {
 
 	static void bootStrap() {
 		addDefaultInteractions(EMPTY);
+		EMPTY_SINK.put(
+			Items.WATER_BUCKET,
+			(CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> emptyBucket(
+					level, blockPos, player, interactionHand, itemStack, Blocks.FILLED_COPPER_SINK.defaultBlockState(), SoundEvents.BUCKET_EMPTY
+				)
+		);
+		WATER_SINK.put(
+			Items.BUCKET,
+			(CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> fillBucket(
+					blockState,
+					level,
+					blockPos,
+					player,
+					interactionHand,
+					itemStack,
+					new ItemStack(Items.WATER_BUCKET),
+					blockStatex -> true,
+					SoundEvents.BUCKET_FILL,
+					Blocks.COPPER_SINK.defaultBlockState()
+				)
+		);
 		EMPTY.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
 			if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
 				return InteractionResult.PASS;
@@ -268,6 +291,21 @@ public interface CauldronInteraction {
 		Predicate<BlockState> predicate,
 		SoundEvent soundEvent
 	) {
+		return fillBucket(blockState, level, blockPos, player, interactionHand, itemStack, itemStack2, predicate, soundEvent, Blocks.CAULDRON.defaultBlockState());
+	}
+
+	static InteractionResult fillBucket(
+		BlockState blockState,
+		Level level,
+		BlockPos blockPos,
+		Player player,
+		InteractionHand interactionHand,
+		ItemStack itemStack,
+		ItemStack itemStack2,
+		Predicate<BlockState> predicate,
+		SoundEvent soundEvent,
+		BlockState blockState2
+	) {
 		if (!predicate.test(blockState)) {
 			return InteractionResult.PASS;
 		} else {
@@ -276,7 +314,7 @@ public interface CauldronInteraction {
 				player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, itemStack2));
 				player.awardStat(Stats.USE_CAULDRON);
 				player.awardStat(Stats.ITEM_USED.get(item));
-				level.setBlockAndUpdate(blockPos, Blocks.CAULDRON.defaultBlockState());
+				level.setBlockAndUpdate(blockPos, blockState2);
 				level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
 				level.gameEvent(null, GameEvent.FLUID_PICKUP, blockPos);
 			}

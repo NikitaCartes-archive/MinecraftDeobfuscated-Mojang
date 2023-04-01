@@ -35,10 +35,12 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FossilFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.CraterFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MultifaceGrowthConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RootSystemConfiguration;
@@ -81,6 +83,10 @@ public class CaveFeatures {
 	public static final ResourceKey<ConfiguredFeature<?, ?>> SCULK_PATCH_DEEP_DARK = FeatureUtils.createKey("sculk_patch_deep_dark");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> SCULK_PATCH_ANCIENT_CITY = FeatureUtils.createKey("sculk_patch_ancient_city");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> SCULK_VEIN = FeatureUtils.createKey("sculk_vein");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> MEGA_CRATER = FeatureUtils.createKey("mega_crater");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> LARGE_CRATER = FeatureUtils.createKey("large_crater");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> SMALL_CRATER = FeatureUtils.createKey("small_crater");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> LUNAR_BASE = FeatureUtils.createKey("lunar_base");
 
 	private static Holder<PlacedFeature> makeDripleaf(Direction direction) {
 		return PlacementUtils.inlinePlaced(
@@ -466,6 +472,10 @@ public class CaveFeatures {
 		FeatureUtils.register(
 			bootstapContext, SCULK_PATCH_ANCIENT_CITY, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, UniformInt.of(1, 3), 0.5F)
 		);
+		FeatureUtils.register(bootstapContext, MEGA_CRATER, Feature.CRATER, new CraterFeatureConfiguration(UniformInt.of(32, 48), UniformInt.of(8, 16)));
+		FeatureUtils.register(bootstapContext, LARGE_CRATER, Feature.CRATER, new CraterFeatureConfiguration(UniformInt.of(12, 15), UniformInt.of(3, 5)));
+		FeatureUtils.register(bootstapContext, SMALL_CRATER, Feature.CRATER, new CraterFeatureConfiguration(UniformInt.of(4, 7), UniformInt.of(2, 3)));
+		FeatureUtils.register(bootstapContext, LUNAR_BASE, Feature.LUNAR_BASE, new NoneFeatureConfiguration());
 		MultifaceBlock multifaceBlock2 = (MultifaceBlock)Blocks.SCULK_VEIN;
 		FeatureUtils.register(
 			bootstapContext,

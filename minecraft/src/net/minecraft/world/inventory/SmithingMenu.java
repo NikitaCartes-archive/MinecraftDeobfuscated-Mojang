@@ -3,6 +3,7 @@ package net.minecraft.world.inventory;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -95,7 +96,7 @@ public class SmithingMenu extends ItemCombinerMenu {
 		} else {
 			SmithingRecipe smithingRecipe = (SmithingRecipe)list.get(0);
 			ItemStack itemStack = smithingRecipe.assemble(this.inputSlots, this.level.registryAccess());
-			if (itemStack.isItemEnabled(this.level.enabledFeatures())) {
+			if (itemStack.isItemEnabled(this.level.enabledFeatures()) && RuleFeatureToggles.isEnabled(itemStack)) {
 				this.selectedRecipe = smithingRecipe;
 				this.resultSlots.setRecipeUsed(smithingRecipe);
 				this.resultSlots.setItem(0, itemStack);

@@ -12,6 +12,7 @@ public interface DamageTypes {
 	ResourceKey<DamageType> LAVA = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("lava"));
 	ResourceKey<DamageType> HOT_FLOOR = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("hot_floor"));
 	ResourceKey<DamageType> IN_WALL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("in_wall"));
+	ResourceKey<DamageType> ON_MOON = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("on_moon"));
 	ResourceKey<DamageType> CRAMMING = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("cramming"));
 	ResourceKey<DamageType> DROWN = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("drown"));
 	ResourceKey<DamageType> STARVE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("starve"));
@@ -48,6 +49,7 @@ public interface DamageTypes {
 	ResourceKey<DamageType> PLAYER_EXPLOSION = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("player_explosion"));
 	ResourceKey<DamageType> SONIC_BOOM = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("sonic_boom"));
 	ResourceKey<DamageType> BAD_RESPAWN_POINT = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("bad_respawn_point"));
+	ResourceKey<DamageType> MIDAS_CURSE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("midas_curse"));
 
 	static void bootstrap(BootstapContext<DamageType> bootstapContext) {
 		bootstapContext.register(IN_FIRE, new DamageType("inFire", 0.1F, DamageEffects.BURNING));
@@ -56,6 +58,7 @@ public interface DamageTypes {
 		bootstapContext.register(LAVA, new DamageType("lava", 0.1F, DamageEffects.BURNING));
 		bootstapContext.register(HOT_FLOOR, new DamageType("hotFloor", 0.1F, DamageEffects.BURNING));
 		bootstapContext.register(IN_WALL, new DamageType("inWall", 0.0F));
+		bootstapContext.register(ON_MOON, new DamageType("onMoon", 0.0F));
 		bootstapContext.register(CRAMMING, new DamageType("cramming", 0.0F));
 		bootstapContext.register(DROWN, new DamageType("drown", 0.0F, DamageEffects.DROWNING));
 		bootstapContext.register(STARVE, new DamageType("starve", 0.0F));
@@ -96,5 +99,6 @@ public interface DamageTypes {
 		bootstapContext.register(
 			BAD_RESPAWN_POINT, new DamageType("badRespawnPoint", DamageScaling.ALWAYS, 0.1F, DamageEffects.HURT, DeathMessageType.INTENTIONAL_GAME_DESIGN)
 		);
+		bootstapContext.register(MIDAS_CURSE, new DamageType("midas_curse", DamageScaling.ALWAYS, 0.1F, DamageEffects.HURT, DeathMessageType.MIDAS_CURSE));
 	}
 }

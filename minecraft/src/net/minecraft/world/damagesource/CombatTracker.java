@@ -117,6 +117,10 @@ public class CombatTracker {
 					return Component.translatable(string + ".message", this.mob.getDisplayName(), component4);
 				}
 
+				if (deathMessageType == DeathMessageType.MIDAS_CURSE) {
+					return Component.translatable("death.midas.turned_into_gold", this.mob.getDisplayName());
+				}
+
 				component3 = damageSource.getLocalizedDeathMessage(this.mob);
 			}
 

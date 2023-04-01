@@ -78,12 +78,12 @@ public class Ghast extends FlyingMob implements Enemy {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (isReflectedFireball(damageSource)) {
-			super.hurt(damageSource, 1000.0F);
+			super.hurtInternal(damageSource, 1000.0F);
 			return true;
 		} else {
-			return this.isInvulnerableTo(damageSource) ? false : super.hurt(damageSource, f);
+			return this.isInvulnerableTo(damageSource) ? false : super.hurtInternal(damageSource, f);
 		}
 	}
 
@@ -147,6 +147,11 @@ public class Ghast extends FlyingMob implements Enemy {
 		if (compoundTag.contains("ExplosionPower", 99)) {
 			this.explosionPower = compoundTag.getByte("ExplosionPower");
 		}
+	}
+
+	@Override
+	public boolean canTransformFly() {
+		return true;
 	}
 
 	@Override

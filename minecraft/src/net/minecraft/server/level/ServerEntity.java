@@ -80,7 +80,7 @@ public class ServerEntity {
 	public void sendChanges() {
 		List<Entity> list = this.entity.getPassengers();
 		if (!list.equals(this.lastPassengers)) {
-			this.broadcast.accept(new ClientboundSetPassengersPacket(this.entity));
+			this.level.getChunkSource().chunkMap.broadcastAndSend(this.entity, new ClientboundSetPassengersPacket(this.entity));
 			removedPassengers(list, this.lastPassengers).forEach(entity -> {
 				if (entity instanceof ServerPlayer serverPlayer) {
 					serverPlayer.connection.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());

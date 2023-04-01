@@ -23,13 +23,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.BannerBlock;
 import net.minecraft.world.level.block.WallBannerBlock;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatterns;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
+import org.joml.AxisAngle4f;
+import org.joml.Quaternionf;
 
 @Environment(EnvType.CLIENT)
 public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
@@ -42,12 +46,16 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 	private final ModelPart flag;
 	private final ModelPart pole;
 	private final ModelPart bar;
+	private final ModelPart bedFoot;
+	private final ModelPart bedHead;
 
 	public BannerRenderer(BlockEntityRendererProvider.Context context) {
 		ModelPart modelPart = context.bakeLayer(ModelLayers.BANNER);
 		this.flag = modelPart.getChild("flag");
 		this.pole = modelPart.getChild("pole");
 		this.bar = modelPart.getChild("bar");
+		this.bedFoot = context.bakeLayer(ModelLayers.BED_FOOT);
+		this.bedHead = context.bakeLayer(ModelLayers.BED_HEAD);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -64,6 +72,7 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		float g = 0.6666667F;
 		boolean bl = bannerBlockEntity.getLevel() == null;
 		poseStack.pushPose();
+		Material material = Sheets.BED_TEXTURES[bannerBlockEntity.getBaseColor().getId()];
 		long l;
 		if (bl) {
 			l = 0L;
@@ -93,9 +102,23 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		this.bar.render(poseStack, vertexConsumer, i, j);
 		BlockPos blockPos = bannerBlockEntity.getBlockPos();
 		float k = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + f) / 100.0F;
-		this.flag.xRot = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
+		float m = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
+		this.flag.xRot = m;
 		this.flag.y = -32.0F;
 		renderPatterns(poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true, list);
+		if (Rules.BEDS_ON_BANNERS.get()) {
+			poseStack.pushPose();
+			VertexConsumer vertexConsumer2 = material.buffer(multiBufferSource, RenderType::entitySolid);
+			poseStack.translate(0.0F, -2.0F, 0.01F);
+			poseStack.mulPose(new Quaternionf(new AxisAngle4f(m, 1.0F, 0.0F, 0.0F)));
+			poseStack.scale(1.2F, 1.25F, 1.0F);
+			poseStack.translate(-0.5, 0.0, -0.125);
+			this.bedHead.render(poseStack, vertexConsumer2, i, j);
+			poseStack.translate(0.0F, 1.0F, 0.0F);
+			this.bedFoot.render(poseStack, vertexConsumer2, i, j);
+			poseStack.popPose();
+		}
+
 		poseStack.popPose();
 		poseStack.popPose();
 	}
@@ -124,15 +147,20 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		List<Pair<Holder<BannerPattern>, DyeColor>> list,
 		boolean bl2
 	) {
-		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid, bl2), i, j);
+		boolean bl3 = bl && Rules.BEDS_ON_BANNERS.get();
+		if (!bl3) {
+			modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid, bl2), i, j);
+		}
 
 		for (int k = 0; k < 17 && k < list.size(); k++) {
 			Pair<Holder<BannerPattern>, DyeColor> pair = (Pair<Holder<BannerPattern>, DyeColor>)list.get(k);
 			float[] fs = pair.getSecond().getTextureDiffuseColors();
-			pair.getFirst()
-				.unwrapKey()
-				.map(resourceKey -> bl ? Sheets.getBannerMaterial(resourceKey) : Sheets.getShieldMaterial(resourceKey))
-				.ifPresent(materialx -> modelPart.render(poseStack, materialx.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F));
+			if (!bl3 || !pair.getFirst().is(BannerPatterns.BASE)) {
+				pair.getFirst()
+					.unwrapKey()
+					.map(resourceKey -> bl ? Sheets.getBannerMaterial(resourceKey) : Sheets.getShieldMaterial(resourceKey))
+					.ifPresent(materialx -> modelPart.render(poseStack, materialx.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F));
+			}
 		}
 	}
 }

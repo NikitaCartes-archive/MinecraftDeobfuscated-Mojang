@@ -3,12 +3,14 @@ package net.minecraft.world.entity.npc;
 import java.util.EnumSet;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,6 +37,7 @@ import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -134,7 +137,8 @@ public class WanderingTrader extends AbstractVillager {
 			this.addOffersFromItemListings(merchantOffers, itemListings, 5);
 			int i = this.random.nextInt(itemListings2.length);
 			VillagerTrades.ItemListing itemListing = itemListings2[i];
-			MerchantOffer merchantOffer = itemListing.getOffer(this, this.random);
+			Item item = (Item)Rules.VILLAGER_GEM.getValueForEntity(this).map(Holder::value).orElse(Items.EMERALD);
+			MerchantOffer merchantOffer = itemListing.getOffer(this, this.random, item);
 			if (merchantOffer != null) {
 				merchantOffers.add(merchantOffer);
 			}

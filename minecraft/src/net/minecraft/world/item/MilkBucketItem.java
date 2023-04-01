@@ -2,18 +2,28 @@ package net.minecraft.world.item;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 
-public class MilkBucketItem extends Item {
+public class MilkBucketItem extends SolidBucketItem {
 	private static final int DRINK_DURATION = 32;
 
 	public MilkBucketItem(Item.Properties properties) {
-		super(properties);
+		super(Blocks.CHEESE, SoundEvents.FUNGUS_PLACE, properties);
+	}
+
+	@Override
+	public InteractionResult useOn(UseOnContext useOnContext) {
+		return !Rules.INSTACHEESE.get() ? InteractionResult.PASS : super.useOn(useOnContext);
 	}
 
 	@Override

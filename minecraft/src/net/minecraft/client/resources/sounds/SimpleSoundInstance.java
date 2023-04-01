@@ -4,7 +4,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -26,13 +25,13 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 
 	public static SimpleSoundInstance forUI(SoundEvent soundEvent, float f, float g) {
 		return new SimpleSoundInstance(
-			soundEvent.getLocation(), SoundSource.MASTER, g, f, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
+			soundEvent, SoundSource.MASTER, g, f, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
 		);
 	}
 
 	public static SimpleSoundInstance forMusic(SoundEvent soundEvent) {
 		return new SimpleSoundInstance(
-			soundEvent.getLocation(), SoundSource.MUSIC, 1.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
+			soundEvent, SoundSource.MUSIC, 1.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
 		);
 	}
 
@@ -44,7 +43,7 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 
 	public static SimpleSoundInstance forLocalAmbience(SoundEvent soundEvent, float f, float g) {
 		return new SimpleSoundInstance(
-			soundEvent.getLocation(), SoundSource.AMBIENT, g, f, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
+			soundEvent, SoundSource.AMBIENT, g, f, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
 		);
 	}
 
@@ -57,7 +56,7 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 	}
 
 	public SimpleSoundInstance(SoundEvent soundEvent, SoundSource soundSource, float f, float g, RandomSource randomSource, double d, double e, double h) {
-		this(soundEvent, soundSource, f, g, randomSource, false, 0, SoundInstance.Attenuation.LINEAR, d, e, h);
+		this(soundEvent, soundSource, f, g, randomSource, false, 0, SoundInstance.Attenuation.LINEAR, d, e, h, false);
 	}
 
 	private SimpleSoundInstance(
@@ -73,11 +72,11 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 		double e,
 		double h
 	) {
-		this(soundEvent.getLocation(), soundSource, f, g, randomSource, bl, i, attenuation, d, e, h, false);
+		this(soundEvent, soundSource, f, g, randomSource, bl, i, attenuation, d, e, h, false);
 	}
 
 	public SimpleSoundInstance(
-		ResourceLocation resourceLocation,
+		SoundEvent soundEvent,
 		SoundSource soundSource,
 		float f,
 		float g,
@@ -90,7 +89,7 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 		double h,
 		boolean bl2
 	) {
-		super(resourceLocation, soundSource, randomSource);
+		super(soundEvent, soundSource, randomSource);
 		this.volume = f;
 		this.pitch = g;
 		this.x = d;

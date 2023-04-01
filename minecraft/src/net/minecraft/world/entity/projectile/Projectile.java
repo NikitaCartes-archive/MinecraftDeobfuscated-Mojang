@@ -10,8 +10,10 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
@@ -131,6 +133,11 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		float k = -Mth.sin(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
 		float l = -Mth.sin((f + h) * (float) (Math.PI / 180.0));
 		float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
+		if (entity instanceof LivingEntity livingEntity
+			&& (livingEntity.getItemInHand(InteractionHand.MAIN_HAND).isWob() || livingEntity.getItemInHand(InteractionHand.OFF_HAND).isWob())) {
+			i *= -1.0F;
+		}
+
 		this.shoot((double)k, (double)l, (double)m, i, j);
 		Vec3 vec3 = entity.getDeltaMovement();
 		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.isOnGround() ? 0.0 : vec3.y, vec3.z));

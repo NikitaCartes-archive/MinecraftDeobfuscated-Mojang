@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 
@@ -60,15 +60,11 @@ public class PistonStructureResolver {
 	}
 
 	private static boolean isSticky(BlockState blockState) {
-		return blockState.is(Blocks.SLIME_BLOCK) || blockState.is(Blocks.HONEY_BLOCK);
+		return blockState.canStickToStuff();
 	}
 
-	private static boolean canStickToEachOther(BlockState blockState, BlockState blockState2) {
-		if (blockState.is(Blocks.HONEY_BLOCK) && blockState2.is(Blocks.SLIME_BLOCK)) {
-			return false;
-		} else {
-			return blockState.is(Blocks.SLIME_BLOCK) && blockState2.is(Blocks.HONEY_BLOCK) ? false : isSticky(blockState) || isSticky(blockState2);
-		}
+	private boolean canStickToEachOther(BlockPos blockPos, BlockState blockState, BlockPos blockPos2, BlockState blockState2, Direction direction) {
+		return blockState.isStickyToNeighbour(this.level, blockPos, blockPos2, blockState2, direction, this.pushDirection);
 	}
 
 	private boolean addBlockLine(BlockPos blockPos, Direction direction) {
@@ -83,7 +79,7 @@ public class PistonStructureResolver {
 			return true;
 		} else {
 			int i = 1;
-			if (i + this.toPush.size() > 12) {
+			if (i + this.toPush.size() > (Integer)Rules.PUSH_LIMIT.get()) {
 				return false;
 			} else {
 				while (isSticky(blockState)) {
@@ -91,13 +87,13 @@ public class PistonStructureResolver {
 					BlockState blockState2 = blockState;
 					blockState = this.level.getBlockState(blockPos2);
 					if (blockState.isAir()
-						|| !canStickToEachOther(blockState2, blockState)
+						|| !this.canStickToEachOther(blockPos2.relative(this.pushDirection), blockState2, blockPos2, blockState, this.pushDirection.getOpposite())
 						|| !PistonBaseBlock.isPushable(blockState, this.level, blockPos2, this.pushDirection, false, this.pushDirection.getOpposite())
 						|| blockPos2.equals(this.pistonPos)) {
 						break;
 					}
 
-					if (++i + this.toPush.size() > 12) {
+					if (++i + this.toPush.size() > (Integer)Rules.PUSH_LIMIT.get()) {
 						return false;
 					}
 				}
@@ -141,7 +137,7 @@ public class PistonStructureResolver {
 						return true;
 					}
 
-					if (this.toPush.size() >= 12) {
+					if (this.toPush.size() >= (Integer)Rules.PUSH_LIMIT.get()) {
 						return false;
 					}
 
@@ -173,7 +169,7 @@ public class PistonStructureResolver {
 			if (direction.getAxis() != this.pushDirection.getAxis()) {
 				BlockPos blockPos2 = blockPos.relative(direction);
 				BlockState blockState2 = this.level.getBlockState(blockPos2);
-				if (canStickToEachOther(blockState2, blockState) && !this.addBlockLine(blockPos2, direction)) {
+				if (this.canStickToEachOther(blockPos, blockState, blockPos2, blockState2, direction) && !this.addBlockLine(blockPos2, direction)) {
 					return false;
 				}
 			}

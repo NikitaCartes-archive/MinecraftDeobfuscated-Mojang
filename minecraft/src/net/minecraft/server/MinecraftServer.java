@@ -5,6 +5,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,7 +38,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -49,6 +53,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
+import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
@@ -67,9 +72,16 @@ import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundRuleUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
+import net.minecraft.network.protocol.game.ClientboundVoteFinishPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteProgressInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteStartPacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
@@ -118,7 +130,17 @@ import net.minecraft.util.profiling.metrics.profiling.MetricsRecorder;
 import net.minecraft.util.profiling.metrics.profiling.ServerMetricsSamplersProvider;
 import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import net.minecraft.voting.rules.RuleAction;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.votes.FinishedVote;
+import net.minecraft.voting.votes.OptionId;
+import net.minecraft.voting.votes.OptionVotes;
+import net.minecraft.voting.votes.ServerVote;
+import net.minecraft.voting.votes.ServerVoteStorage;
+import net.minecraft.voting.votes.VoteStorage;
+import net.minecraft.voting.votes.Voter;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
 import net.minecraft.world.entity.npc.WanderingTraderSpawner;
@@ -248,6 +270,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private final StructureTemplateManager structureTemplateManager;
 	protected final WorldData worldData;
 	private volatile boolean isSaving;
+	private final ServerVoteStorage voteStorage;
+	private final List<TickTask> pendingTasks = Lists.<TickTask>newArrayList();
+	private final Queue<TickTask> queuedTasks = Queues.<TickTask>newArrayDeque();
 
 	public static <S extends MinecraftServer> S spin(Function<Thread, S> function) {
 		AtomicReference<S> atomicReference = new AtomicReference();
@@ -301,6 +326,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderGetter);
 			this.serverThread = thread;
 			this.executor = Util.backgroundExecutor();
+			this.voteStorage = new ServerVoteStorage(this.registries.compositeAccess());
 		}
 	}
 
@@ -559,6 +585,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		try {
 			this.isSaving = true;
 			this.getPlayerList().saveAll();
+			this.flushVotes();
 			var4 = this.saveAllChunks(bl, bl2, bl3);
 		} finally {
 			this.isSaving = false;
@@ -609,6 +636,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 
 		this.saveAllChunks(false, true, false);
+
+		try {
+			this.flushVotes();
+			this.voteStorage.resetAllRules();
+		} catch (Exception var6) {
+			LOGGER.error("Exception saving the votes", (Throwable)var6);
+		}
 
 		for (ServerLevel serverLevelx : this.getAllLevels()) {
 			if (serverLevelx != null) {
@@ -662,6 +696,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.nextTickTime = Util.getMillis();
 			this.statusIcon = (ServerStatus.Favicon)this.loadStatusIcon().orElse(null);
 			this.status = this.buildServerStatus();
+			this.loadVotes();
 
 			while (this.running) {
 				long l = Util.getMillis() - this.nextTickTime;
@@ -718,6 +753,90 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
+	public void flushVotes() {
+		VoteStorage voteStorage = this.voteStorage.save();
+		this.storageSource.saveVotes(voteStorage);
+	}
+
+	private VoteStorage loadVotes() {
+		VoteStorage voteStorage = this.storageSource.loadVotes();
+		this.voteStorage.load(voteStorage);
+		return voteStorage;
+	}
+
+	public void reloadVotes() {
+		this.voteStorage.resetAllRules();
+		VoteStorage voteStorage = this.loadVotes();
+		this.playerList.broadcastAll(new ClientboundRuleUpdatePacket(true, RuleAction.APPROVE, voteStorage.approved()));
+		this.playerList.getPlayers().forEach(serverPlayer -> serverPlayer.connection.send(this.playerList.createVoteReloadPacket(serverPlayer.getUUID())));
+	}
+
+	public void startVote(UUID uUID, ServerVote serverVote) {
+		this.voteStorage.startVote(uUID, serverVote);
+		this.playerList.broadcastAll(new ClientboundVoteStartPacket(uUID, serverVote.toClientVote()));
+	}
+
+	private FinishedVote.UnpackOptions gatherOptions() {
+		return new FinishedVote.UnpackOptions(
+			this.random,
+			!Rules.VOTE_RESULT_PASS_WITHOUT_VOTERS.get(),
+			this.getPlayerCount(),
+			(float)((Integer)Rules.QUORUM_PERCENT.get()).intValue() / 100.0F,
+			(float)((Integer)Rules.VOTES_NEEDED_PERCENT.get()).intValue() / 100.0F,
+			!Rules.VOTE_RESULT_DONT_SHOW_TALLY.get(),
+			Rules.VOTE_RESULT_SHOW_VOTERS.get(),
+			Rules.VOTE_RESULT_PICK_RANDOM_IF_VOTE_FAILS.get(),
+			!Rules.VOTE_RESULT_REVERSE_VOTES.get(),
+			!Rules.VOTE_RESULT_PASS_WITHOUT_VOTES.get(),
+			(Integer)Rules.VOTE_MAX_RESULTS.get(),
+			Rules.TIE_RESOLUTION_STRATEGY.get()
+		);
+	}
+
+	@Nullable
+	public FinishedVote finishVote(UUID uUID, boolean bl) {
+		FinishedVote finishedVote = this.voteStorage.finishVote(uUID);
+		if (finishedVote != null) {
+			this.finishVote(finishedVote, bl);
+		}
+
+		return finishedVote;
+	}
+
+	private void finishVote(FinishedVote finishedVote, boolean bl) {
+		List<ServerVote.Effect> list = new ArrayList();
+		List<Component> list2 = new ArrayList();
+		FinishedVote.UnpackOptions unpackOptions = this.gatherOptions();
+		finishedVote.unpack(list::add, list2::add, unpackOptions);
+
+		for (Component component : list2) {
+			this.sendSystemMessage(component);
+		}
+
+		int i = list2.size();
+		if (!Rules.SILENT_VOTE.get() && i > 0) {
+			MutableComponent mutableComponent = ((Component)list2.get(0)).copy();
+			if (list.isEmpty()) {
+				mutableComponent.withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
+			} else {
+				mutableComponent.withStyle(ChatFormatting.BOLD, ChatFormatting.GOLD);
+			}
+
+			if (i > 1) {
+				mutableComponent.withStyle(ChatFormatting.UNDERLINE);
+				Component component2 = CommonComponents.joinLines(list2);
+				mutableComponent.withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
+			}
+
+			this.playerList.broadcastSystemMessage(mutableComponent, false);
+		}
+
+		this.playerList.broadcastAll(new ClientboundVoteFinishPacket(finishedVote.id()));
+		if (bl) {
+			Lists.reverse(list).forEach(effect -> effect.apply(this));
+		}
+	}
+
 	private static CrashReport constructOrExtractCrashReport(Throwable throwable) {
 		ReportedException reportedException = null;
 
@@ -746,7 +865,33 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	protected void waitUntilNextTick() {
 		this.runAllTasks();
+		this.checkAllScheduledTasks();
 		this.managedBlock(() -> !this.haveTime());
+	}
+
+	public void executeLater(int i, Runnable runnable) {
+		synchronized (this.pendingTasks) {
+			this.pendingTasks.add(new TickTask(this.tickCount + i, runnable));
+		}
+	}
+
+	private void checkAllScheduledTasks() {
+		synchronized (this.pendingTasks) {
+			if (!this.pendingTasks.isEmpty()) {
+				this.queuedTasks.addAll(this.pendingTasks);
+				this.pendingTasks.clear();
+			}
+		}
+
+		Iterator<TickTask> iterator = this.queuedTasks.iterator();
+
+		while (iterator.hasNext()) {
+			TickTask tickTask = (TickTask)iterator.next();
+			if (tickTask.getTick() <= this.tickCount) {
+				iterator.remove();
+				tickTask.run();
+			}
+		}
 	}
 
 	protected TickTask wrapRunnable(Runnable runnable) {
@@ -877,6 +1022,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	public void tickChildren(BooleanSupplier booleanSupplier) {
 		this.profiler.push("commandFunctions");
 		this.getFunctions().tick();
+		this.voteStorage
+			.tick(
+				this.worldData.overworldData().getGameTime(),
+				this,
+				ServerVote.VoteGenerationOptions.createFromRules(this.random),
+				finishedVote -> this.finishVote(finishedVote, true),
+				this::startVote
+			);
 		this.profiler.popPush("levels");
 
 		for (ServerLevel serverLevel : this.getAllLevels()) {
@@ -1879,6 +2032,28 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public ChatDecorator getChatDecorator() {
 		return ChatDecorator.PLAIN;
+	}
+
+	public ServerVoteStorage getVoteStorage() {
+		return this.voteStorage;
+	}
+
+	public boolean vote(OptionId optionId, Entity entity, int i) {
+		ServerVoteStorage.OptionAccess optionAccess = this.voteStorage.getOptionAccess(optionId);
+		if (optionAccess != null) {
+			optionAccess.addVotes(entity, i);
+		}
+
+		return optionAccess != null;
+	}
+
+	public void syncVotesForPlayer(ServerPlayer serverPlayer, OptionId optionId) {
+		UUID uUID = serverPlayer.getUUID();
+		OptionVotes optionVotes = this.voteStorage.getCurrentVoteCountForOption(optionId);
+		Voter voter = (Voter)optionVotes.voters().get(uUID);
+		if (voter != null) {
+			serverPlayer.connection.send(new ClientboundVoteProgressInfoPacket(optionId, OptionVotes.singlePlayer(uUID, voter)));
+		}
 	}
 
 	static record ReloadableResources(CloseableResourceManager resourceManager, ReloadableServerResources managers) implements AutoCloseable {

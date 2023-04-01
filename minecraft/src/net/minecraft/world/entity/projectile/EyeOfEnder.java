@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -84,7 +85,7 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		}
 
 		this.life = 0;
-		this.surviveAfterDeath = this.random.nextInt(5) > 0;
+		this.surviveAfterDeath = Rules.DREAM_MODE.get() || this.random.nextInt(5) > 0;
 	}
 
 	@Override

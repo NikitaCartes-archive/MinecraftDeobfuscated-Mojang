@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL32C;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderStateShard {
@@ -261,6 +262,7 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.WriteMaskStateShard COLOR_DEPTH_WRITE = new RenderStateShard.WriteMaskStateShard(true, true);
 	protected static final RenderStateShard.WriteMaskStateShard COLOR_WRITE = new RenderStateShard.WriteMaskStateShard(true, false);
 	protected static final RenderStateShard.WriteMaskStateShard DEPTH_WRITE = new RenderStateShard.WriteMaskStateShard(false, true);
+	protected static final RenderStateShard.WriteMaskStateShard NO_WRITE = new RenderStateShard.WriteMaskStateShard(false, false);
 	protected static final RenderStateShard.LayeringStateShard NO_LAYERING = new RenderStateShard.LayeringStateShard("no_layering", () -> {
 	}, () -> {
 	});
@@ -337,6 +339,34 @@ public abstract class RenderStateShard {
 		}
 	});
 	protected static final RenderStateShard.LineStateShard DEFAULT_LINE = new RenderStateShard.LineStateShard(OptionalDouble.of(1.0));
+	public static RenderStateShard.OutputStateShard STENCIL_SETUP_AND_LEAK = new RenderStateShard.OutputStateShard("stencil_setup_and_leak", () -> {
+		GL32C.glClear(1024);
+		GL32C.glColorMask(false, false, false, false);
+		GL32C.glEnable(2929);
+		GL32C.glDepthMask(true);
+		GL32C.glEnable(2960);
+		GL32C.glDepthMask(false);
+		GL32C.glEnable(34383);
+		GL32C.glDisable(2884);
+		GL32C.glStencilFunc(519, 0, 255);
+		GL32C.glStencilOpSeparate(1029, 7680, 34055, 7680);
+		GL32C.glStencilOpSeparate(1028, 7680, 34056, 7680);
+	}, () -> {
+		GL32C.glDisable(34383);
+		GL32C.glEnable(2884);
+		GL32C.glColorMask(true, true, true, true);
+	});
+	public static RenderStateShard.OutputStateShard STENCIL_RENDER_AND_CLEAR = new RenderStateShard.OutputStateShard("stencil_render_and_clear", () -> {
+		GL32C.glStencilFunc(514, 1, 255);
+		GL32C.glDepthFunc(516);
+		GL32C.glCullFace(1028);
+		GL32C.glStencilOpSeparate(1028, 7680, 7680, 7680);
+	}, () -> {
+		GL32C.glDepthFunc(515);
+		GL32C.glCullFace(1029);
+		GL32C.glDepthMask(true);
+		GL32C.glDisable(2960);
+	});
 
 	public RenderStateShard(String string, Runnable runnable, Runnable runnable2) {
 		this.name = string;

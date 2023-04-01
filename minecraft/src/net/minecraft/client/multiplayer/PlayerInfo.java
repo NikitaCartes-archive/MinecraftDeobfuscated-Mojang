@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.chat.SignedMessageValidator;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.PlayerTeam;
 
@@ -98,7 +99,9 @@ public class PlayerInfo {
 
 	public ResourceLocation getSkinLocation() {
 		this.registerTextures();
-		return MoreObjects.firstNonNull((ResourceLocation)this.textureLocations.get(Type.SKIN), DefaultPlayerSkin.getDefaultSkin(this.profile.getId()));
+		return Rules.ANONYMIZE_SKINS.get()
+			? DefaultPlayerSkin.getDefaultSkin(this.profile.getId())
+			: MoreObjects.firstNonNull((ResourceLocation)this.textureLocations.get(Type.SKIN), DefaultPlayerSkin.getDefaultSkin(this.profile.getId()));
 	}
 
 	@Nullable

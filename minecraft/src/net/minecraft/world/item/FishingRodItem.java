@@ -10,6 +10,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
+import org.joml.Vector3f;
 
 public class FishingRodItem extends Item implements Vanishable {
 	public FishingRodItem(Item.Properties properties) {
@@ -50,7 +51,15 @@ public class FishingRodItem extends Item implements Vanishable {
 			if (!level.isClientSide) {
 				int i = EnchantmentHelper.getFishingSpeedBonus(itemStack);
 				int j = EnchantmentHelper.getFishingLuckBonus(itemStack);
-				level.addFreshEntity(new FishingHook(player, level, j, i));
+				FishingHook fishingHook = new FishingHook(player, level, j, i);
+				if (level.isNight()) {
+					Vector3f vector3f = new Vector3f(-1.0F, 0.0F, 0.0F).rotateZ((float)((Math.PI * 2) * (double)level.getDayTime() / 24000.0));
+					if (player.getViewVector(1.0F).toVector3f().dot(vector3f) > 0.98F) {
+						fishingHook.moon = true;
+					}
+				}
+
+				level.addFreshEntity(fishingHook);
 			}
 
 			player.awardStat(Stats.ITEM_USED.get(this));

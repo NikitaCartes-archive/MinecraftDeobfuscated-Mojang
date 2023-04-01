@@ -14,6 +14,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -123,6 +124,7 @@ public class ItemProperties {
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
 		register(Items.BUNDLE, new ResourceLocation("filled"), (itemStack, clientLevel, livingEntity, i) -> BundleItem.getFullnessDisplay(itemStack));
+		register(Items.EMERALD, new ResourceLocation("alt"), (itemStack, clientLevel, livingEntity, i) -> Rules.EMERALD_TO_RUBY.get() ? 1.0F : 0.0F);
 		register(Items.CLOCK, new ResourceLocation("time"), new ClampedItemPropertyFunction() {
 			private double rotation;
 			private double rota;
@@ -142,7 +144,7 @@ public class ItemProperties {
 						return 0.0F;
 					} else {
 						double d;
-						if (clientLevelx.dimensionType().natural()) {
+						if (!clientLevelx.dimensionType().hasFixedTime()) {
 							d = (double)clientLevelx.getTimeOfDay(1.0F);
 						} else {
 							d = Math.random();

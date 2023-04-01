@@ -12,6 +12,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.BlockFlammabilityRule;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
@@ -47,14 +49,14 @@ public class FireBlock extends BaseFireBlock {
 	private static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
 	private static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
 	private final Map<BlockState, VoxelShape> shapesCache;
-	private static final int IGNITE_INSTANT = 60;
-	private static final int IGNITE_EASY = 30;
-	private static final int IGNITE_MEDIUM = 15;
-	private static final int IGNITE_HARD = 5;
-	private static final int BURN_INSTANT = 100;
-	private static final int BURN_EASY = 60;
-	private static final int BURN_MEDIUM = 20;
-	private static final int BURN_HARD = 5;
+	public static final int IGNITE_INSTANT = 60;
+	public static final int IGNITE_EASY = 30;
+	public static final int IGNITE_MEDIUM = 15;
+	public static final int IGNITE_HARD = 5;
+	public static final int BURN_INSTANT = 100;
+	public static final int BURN_EASY = 60;
+	public static final int BURN_MEDIUM = 20;
+	public static final int BURN_HARD = 5;
 	private final Object2IntMap<Block> igniteOdds = new Object2IntOpenHashMap<>();
 	private final Object2IntMap<Block> burnOdds = new Object2IntOpenHashMap<>();
 
@@ -233,15 +235,23 @@ public class FireBlock extends BaseFireBlock {
 	}
 
 	private int getBurnOdds(BlockState blockState) {
-		return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED)
-			? 0
-			: this.burnOdds.getInt(blockState.getBlock());
+		if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && (Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
+			return 0;
+		} else {
+			Block block = blockState.getBlock();
+			BlockFlammabilityRule.Flammability flammability = Rules.BLOCK_FLAMMABILITY.get(block);
+			return flammability != null ? flammability.burnOdds() : this.burnOdds.getInt(block);
+		}
 	}
 
 	private int getIgniteOdds(BlockState blockState) {
-		return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED)
-			? 0
-			: this.igniteOdds.getInt(blockState.getBlock());
+		if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && (Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
+			return 0;
+		} else {
+			Block block = blockState.getBlock();
+			BlockFlammabilityRule.Flammability flammability = Rules.BLOCK_FLAMMABILITY.get(block);
+			return flammability != null ? flammability.igniteOdds() : this.igniteOdds.getInt(block);
+		}
 	}
 
 	private void checkBurnOut(Level level, BlockPos blockPos, int i, RandomSource randomSource, int j) {
@@ -257,7 +267,7 @@ public class FireBlock extends BaseFireBlock {
 
 			Block block = blockState.getBlock();
 			if (block instanceof TntBlock) {
-				TntBlock.explode(level, blockPos);
+				TntBlock.explode(level, blockPos, blockState);
 			}
 		}
 	}

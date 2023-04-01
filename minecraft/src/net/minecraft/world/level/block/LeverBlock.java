@@ -3,9 +3,11 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -156,5 +158,22 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACE, FACING, POWERED);
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if (Rules.HAUNTED_WORLD.get()) {
+			BlockState blockState2 = this.pull(blockState, serverLevel, blockPos);
+			float f = blockState2.getValue(POWERED) ? 0.6F : 0.5F;
+			serverLevel.playSound(null, blockPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3F, f);
+			serverLevel.gameEvent(null, blockState2.getValue(POWERED) ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, blockPos);
+		}
+
+		super.randomTick(blockState, serverLevel, blockPos, randomSource);
 	}
 }

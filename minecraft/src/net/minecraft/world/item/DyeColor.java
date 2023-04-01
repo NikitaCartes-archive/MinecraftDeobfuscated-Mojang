@@ -30,6 +30,7 @@ public enum DyeColor implements StringRepresentable {
 	BLACK(15, "black", 1908001, MaterialColor.COLOR_BLACK, 1973019, 0);
 
 	private static final IntFunction<DyeColor> BY_ID = ByIdMap.continuous(DyeColor::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+	public static final IntFunction<DyeColor> BY_ID_WRAP = ByIdMap.continuous(DyeColor::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
 	private static final Int2ObjectOpenHashMap<DyeColor> BY_FIREWORK_COLOR = new Int2ObjectOpenHashMap<>(
 		(Map<? extends Integer, ? extends DyeColor>)Arrays.stream(values()).collect(Collectors.toMap(dyeColor -> dyeColor.fireworkColor, dyeColor -> dyeColor))
 	);

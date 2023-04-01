@@ -1,11 +1,13 @@
 package net.minecraft.client.renderer.entity.player;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import com.mojang.math.Axis;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidArmorModel;
-import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
@@ -16,26 +18,25 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
 import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
+import net.minecraft.client.renderer.entity.layers.BeretLayer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.Deadmau5EarsLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.layers.MustacheLayer;
 import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
 import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
+import net.minecraft.client.renderer.entity.layers.TailLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.PlayerModelPart;
-import net.minecraft.world.item.CrossbowItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
@@ -48,8 +49,8 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		this.addLayer(
 			new HumanoidArmorLayer<>(
 				this,
-				new HumanoidArmorModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)),
-				new HumanoidArmorModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR)),
+				new PlayerRenderer.PlayerArmorModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)),
+				new PlayerRenderer.PlayerArmorModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR)),
 				context.getModelManager()
 			)
 		);
@@ -62,6 +63,9 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		this.addLayer(new ParrotOnShoulderLayer<>(this, context.getModelSet()));
 		this.addLayer(new SpinAttackEffectLayer<>(this, context.getModelSet()));
 		this.addLayer(new BeeStingerLayer<>(this));
+		this.addLayer(new BeretLayer<>(this, context.getModelSet()));
+		this.addLayer(new MustacheLayer<>(this, context.getModelSet()));
+		this.addLayer(new TailLayer<>(this, context.getModelSet()));
 	}
 
 	public void render(AbstractClientPlayer abstractClientPlayer, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -75,11 +79,8 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 
 	private void setModelProperties(AbstractClientPlayer abstractClientPlayer) {
 		PlayerModel<AbstractClientPlayer> playerModel = this.getModel();
-		if (abstractClientPlayer.isSpectator()) {
-			playerModel.setAllVisible(false);
-			playerModel.head.visible = true;
-			playerModel.hat.visible = true;
-		} else {
+		playerModel.setModelProperties(abstractClientPlayer);
+		if (!abstractClientPlayer.isSpectator()) {
 			playerModel.setAllVisible(true);
 			playerModel.hat.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.HAT);
 			playerModel.jacket.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.JACKET);
@@ -87,62 +88,6 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			playerModel.rightPants.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
 			playerModel.leftSleeve.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
 			playerModel.rightSleeve.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
-			playerModel.crouching = abstractClientPlayer.isCrouching();
-			HumanoidModel.ArmPose armPose = getArmPose(abstractClientPlayer, InteractionHand.MAIN_HAND);
-			HumanoidModel.ArmPose armPose2 = getArmPose(abstractClientPlayer, InteractionHand.OFF_HAND);
-			if (armPose.isTwoHanded()) {
-				armPose2 = abstractClientPlayer.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
-			}
-
-			if (abstractClientPlayer.getMainArm() == HumanoidArm.RIGHT) {
-				playerModel.rightArmPose = armPose;
-				playerModel.leftArmPose = armPose2;
-			} else {
-				playerModel.rightArmPose = armPose2;
-				playerModel.leftArmPose = armPose;
-			}
-		}
-	}
-
-	private static HumanoidModel.ArmPose getArmPose(AbstractClientPlayer abstractClientPlayer, InteractionHand interactionHand) {
-		ItemStack itemStack = abstractClientPlayer.getItemInHand(interactionHand);
-		if (itemStack.isEmpty()) {
-			return HumanoidModel.ArmPose.EMPTY;
-		} else {
-			if (abstractClientPlayer.getUsedItemHand() == interactionHand && abstractClientPlayer.getUseItemRemainingTicks() > 0) {
-				UseAnim useAnim = itemStack.getUseAnimation();
-				if (useAnim == UseAnim.BLOCK) {
-					return HumanoidModel.ArmPose.BLOCK;
-				}
-
-				if (useAnim == UseAnim.BOW) {
-					return HumanoidModel.ArmPose.BOW_AND_ARROW;
-				}
-
-				if (useAnim == UseAnim.SPEAR) {
-					return HumanoidModel.ArmPose.THROW_SPEAR;
-				}
-
-				if (useAnim == UseAnim.CROSSBOW && interactionHand == abstractClientPlayer.getUsedItemHand()) {
-					return HumanoidModel.ArmPose.CROSSBOW_CHARGE;
-				}
-
-				if (useAnim == UseAnim.SPYGLASS) {
-					return HumanoidModel.ArmPose.SPYGLASS;
-				}
-
-				if (useAnim == UseAnim.TOOT_HORN) {
-					return HumanoidModel.ArmPose.TOOT_HORN;
-				}
-
-				if (useAnim == UseAnim.BRUSH) {
-					return HumanoidModel.ArmPose.BRUSH;
-				}
-			} else if (!abstractClientPlayer.swinging && itemStack.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack)) {
-				return HumanoidModel.ArmPose.CROSSBOW_HOLD;
-			}
-
-			return HumanoidModel.ArmPose.ITEM;
 		}
 	}
 
@@ -157,6 +102,10 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 
 	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		double d = this.entityRenderDispatcher.distanceToSqr(abstractClientPlayer);
+		if (Rules.PRESIDENT.contains(abstractClientPlayer.getUUID())) {
+			component = Component.translatable("rule.president.tag", abstractClientPlayer.getDisplayName());
+		}
+
 		poseStack.pushPose();
 		if (d < 100.0) {
 			Scoreboard scoreboard = abstractClientPlayer.getScoreboard();
@@ -232,6 +181,31 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			}
 		} else {
 			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
+		}
+	}
+
+	@Nullable
+	protected VertexConsumer getVertexConsumer(
+		AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl, boolean bl2, boolean bl3
+	) {
+		if (Rules.MIDAS_TOUCH.get()) {
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.goldEntityGlint());
+			VertexConsumer vertexConsumer2 = super.getVertexConsumer(abstractClientPlayer, poseStack, multiBufferSource, bl, bl2, bl3);
+			return vertexConsumer2 == null ? null : VertexMultiConsumer.create(vertexConsumer, vertexConsumer2);
+		} else {
+			return super.getVertexConsumer(abstractClientPlayer, poseStack, multiBufferSource, bl, bl2, bl3);
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static class PlayerArmorModel<T extends LivingEntity> extends HumanoidArmorModel<T> {
+		public PlayerArmorModel(ModelPart modelPart) {
+			super(modelPart);
+		}
+
+		@Override
+		public boolean miniMe() {
+			return Rules.MINI_ME_MODE.get();
 		}
 	}
 }

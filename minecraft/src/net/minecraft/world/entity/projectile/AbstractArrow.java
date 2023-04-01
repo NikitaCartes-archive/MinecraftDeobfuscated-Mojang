@@ -230,10 +230,9 @@ public abstract class AbstractArrow extends Projectile {
 			this.setXRot(lerpRotation(this.xRotO, this.getXRot()));
 			this.setYRot(lerpRotation(this.yRotO, this.getYRot()));
 			float m = 0.99F;
-			float n = 0.05F;
 			if (this.isInWater()) {
-				for (int o = 0; o < 4; o++) {
-					float p = 0.25F;
+				for (int n = 0; n < 4; n++) {
+					float o = 0.25F;
 					this.level.addParticle(ParticleTypes.BUBBLE, h - e * 0.25, j - f * 0.25, k - g * 0.25, e, f, g);
 				}
 
@@ -243,12 +242,17 @@ public abstract class AbstractArrow extends Projectile {
 			this.setDeltaMovement(vec3.scale((double)m));
 			if (!this.isNoGravity() && !bl) {
 				Vec3 vec34 = this.getDeltaMovement();
-				this.setDeltaMovement(vec34.x, vec34.y - 0.05F, vec34.z);
+				this.setDeltaMovement(vec34.x, vec34.y - (double)this.getEffectiveGravity(), vec34.z);
 			}
 
 			this.setPos(h, j, k);
 			this.checkInsideBlocks();
 		}
+	}
+
+	@Override
+	protected float getGravity() {
+		return 0.05F;
 	}
 
 	private boolean shouldFall() {

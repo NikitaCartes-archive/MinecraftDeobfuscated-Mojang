@@ -26,6 +26,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -76,6 +77,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteCastResultPacket;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
@@ -90,6 +92,7 @@ import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ServerboundCrashVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
@@ -125,15 +128,21 @@ import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.network.protocol.game.ServerboundVoteCastPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.FutureChain;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.StringUtil;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
+import net.minecraft.voting.votes.ServerVoteStorage;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
@@ -143,12 +152,15 @@ import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.ai.behavior.CelebrateVillagersSurvivedRaid;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.BeaconMenu;
@@ -156,6 +168,7 @@ import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -184,10 +197,12 @@ import org.slf4j.Logger;
 public class ServerGamePacketListenerImpl implements ServerPlayerConnection, TickablePacketListener, ServerGamePacketListener {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int LATENCY_CHECK_INTERVAL = 15000;
-	public static final double MAX_INTERACTION_DISTANCE = Mth.square(6.0);
+	public static final float MAX_INTERACTION_DISTANCE = 6.0F;
 	private static final int NO_BLOCK_UPDATES_TO_ACK = -1;
 	private static final int TRACKED_MESSAGE_DISCONNECT_THRESHOLD = 4096;
 	private static final Component CHAT_VALIDATION_FAILED = Component.translatable("multiplayer.disconnect.chat_validation_failed");
+	private static final Component VOTE_NO_RESOURCES = Component.translatable("vote.no_resources");
+	private static final Component VOTE_NO_VOTES = Component.translatable("vote.no_more_votes");
 	private final Connection connection;
 	private final MinecraftServer server;
 	public ServerPlayer player;
@@ -212,6 +227,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	private double vehicleLastGoodX;
 	private double vehicleLastGoodY;
 	private double vehicleLastGoodZ;
+	public double vehicleSpeedSqr;
 	@Nullable
 	private Vec3 awaitingPositionFromClient;
 	private int awaitingTeleport;
@@ -458,6 +474,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				this.vehicleLastGoodX = entity.getX();
 				this.vehicleLastGoodY = entity.getY();
 				this.vehicleLastGoodZ = entity.getZ();
+				this.vehicleSpeedSqr = p;
 			}
 		}
 	}
@@ -949,7 +966,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 									&& !bl2
 									&& this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR
 									&& !this.server.isFlightAllowed()
-									&& !this.player.getAbilities().mayfly
+									&& !this.player.canFly()
 									&& !this.player.hasEffect(MobEffects.LEVITATION)
 									&& !this.player.isFallFlying()
 									&& !this.player.isAutoSpinAttack()
@@ -1041,18 +1058,31 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				this.player.releaseUsingItem();
 				return;
 			case START_DESTROY_BLOCK:
+				if (Rules.GOD_OF_LIGHTNING.get()) {
+					this.player.summonLightning(blockPos.getCenter());
+				}
 			case ABORT_DESTROY_BLOCK:
 			case STOP_DESTROY_BLOCK:
-				this.player
-					.gameMode
-					.handleBlockBreakAction(
-						blockPos, action, serverboundPlayerActionPacket.getDirection(), this.player.level.getMaxBuildHeight(), serverboundPlayerActionPacket.getSequence()
-					);
-				this.player.connection.ackBlockChangesUpTo(serverboundPlayerActionPacket.getSequence());
-				return;
+				break;
 			default:
 				throw new IllegalArgumentException("Invalid player action");
 		}
+
+		try {
+			if (Rules.LESS_INTERACTION_UPDATES.get()) {
+				Rules.UPDATES.set(false);
+			}
+
+			this.player
+				.gameMode
+				.handleBlockBreakAction(
+					blockPos, action, serverboundPlayerActionPacket.getDirection(), this.player.level.getMaxBuildHeight(), serverboundPlayerActionPacket.getSequence()
+				);
+		} finally {
+			Rules.UPDATES.set(true);
+		}
+
+		this.player.connection.ackBlockChangesUpTo(serverboundPlayerActionPacket.getSequence());
 	}
 
 	private static boolean wasBlockPlacementAttempt(ServerPlayer serverPlayer, ItemStack itemStack) {
@@ -1071,12 +1101,12 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 		ServerLevel serverLevel = this.player.getLevel();
 		InteractionHand interactionHand = serverboundUseItemOnPacket.getHand();
 		ItemStack itemStack = this.player.getItemInHand(interactionHand);
-		if (itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
+		if (itemStack.isItemEnabled(serverLevel.enabledFeatures()) && RuleFeatureToggles.isEnabled(itemStack)) {
 			BlockHitResult blockHitResult = serverboundUseItemOnPacket.getHitResult();
 			Vec3 vec3 = blockHitResult.getLocation();
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			Vec3 vec32 = Vec3.atCenterOf(blockPos);
-			if (!(this.player.getEyePosition().distanceToSqr(vec32) > MAX_INTERACTION_DISTANCE)) {
+			if (!(this.player.getEyePosition().distanceToSqr(vec32) > (double)this.maxInteractionDistanceSq())) {
 				Vec3 vec33 = vec3.subtract(vec32);
 				double d = 1.0000001;
 				if (Math.abs(vec33.x()) < 1.0000001 && Math.abs(vec33.y()) < 1.0000001 && Math.abs(vec33.z()) < 1.0000001) {
@@ -1085,9 +1115,20 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 					int i = this.player.level.getMaxBuildHeight();
 					if (blockPos.getY() < i) {
 						if (this.awaitingPositionFromClient == null
-							&& this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0
+							&& this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5)
+								< (double)(this.maxInteractionDistanceSq() * Mth.square(1.3333334F))
 							&& serverLevel.mayInteract(this.player, blockPos)) {
-							InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
+							InteractionResult interactionResult;
+							try {
+								if (Rules.LESS_INTERACTION_UPDATES.get()) {
+									Rules.UPDATES.set(false);
+								}
+
+								interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
+							} finally {
+								Rules.UPDATES.set(true);
+							}
+
 							if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
 								Component component = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
 								this.player.sendSystemMessage(component, true);
@@ -1117,8 +1158,18 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 		InteractionHand interactionHand = serverboundUseItemPacket.getHand();
 		ItemStack itemStack = this.player.getItemInHand(interactionHand);
 		this.player.resetLastActionTime();
-		if (!itemStack.isEmpty() && itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
-			InteractionResult interactionResult = this.player.gameMode.useItem(this.player, serverLevel, itemStack, interactionHand);
+		if (!itemStack.isEmpty() && itemStack.isItemEnabled(serverLevel.enabledFeatures()) && RuleFeatureToggles.isEnabled(itemStack)) {
+			InteractionResult interactionResult;
+			try {
+				if (Rules.LESS_INTERACTION_UPDATES.get()) {
+					Rules.UPDATES.set(false);
+				}
+
+				interactionResult = this.player.gameMode.useItem(this.player, serverLevel, itemStack, interactionHand);
+			} finally {
+				Rules.UPDATES.set(true);
+			}
+
 			if (interactionResult.shouldSwing()) {
 				this.player.swing(interactionHand, true);
 			}
@@ -1508,7 +1559,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 			}
 
 			AABB aABB = entity.getBoundingBox();
-			if (aABB.distanceToSqr(this.player.getEyePosition()) < MAX_INTERACTION_DISTANCE) {
+			if (aABB.distanceToSqr(this.player.getEyePosition()) < (double)this.maxInteractionDistanceSq()) {
 				serverboundInteractPacket.dispatch(
 					new ServerboundInteractPacket.Handler() {
 						private void performInteraction(InteractionHand interactionHand, ServerGamePacketListenerImpl.EntityInteraction entityInteraction) {
@@ -1554,6 +1605,11 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				);
 			}
 		}
+	}
+
+	public float maxInteractionDistanceSq() {
+		EntityTransform entityTransform = EntityTransform.get(this.player);
+		return Mth.square(entityTransform.reachDistance(Rules.EVIL_EYE.get() ? 200.0F : 6.0F));
 	}
 
 	@Override
@@ -1664,7 +1720,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 		if (this.player.gameMode.isCreative()) {
 			boolean bl = serverboundSetCreativeModeSlotPacket.getSlotNum() < 0;
 			ItemStack itemStack = serverboundSetCreativeModeSlotPacket.getItem();
-			if (!itemStack.isItemEnabled(this.player.getLevel().enabledFeatures())) {
+			if (!itemStack.isItemEnabled(this.player.getLevel().enabledFeatures()) || !RuleFeatureToggles.isEnabled(itemStack)) {
 				return;
 			}
 
@@ -1680,7 +1736,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 			}
 
 			boolean bl2 = serverboundSetCreativeModeSlotPacket.getSlotNum() >= 1 && serverboundSetCreativeModeSlotPacket.getSlotNum() <= 45;
-			boolean bl3 = itemStack.isEmpty() || itemStack.getDamageValue() >= 0 && itemStack.getCount() <= 64 && !itemStack.isEmpty();
+			boolean bl3 = itemStack.isEmpty() || itemStack.getDamageValue() >= 0 && itemStack.getCount() <= 1024 && !itemStack.isEmpty();
 			if (bl2 && bl3) {
 				this.player.inventoryMenu.getSlot(serverboundSetCreativeModeSlotPacket.getSlotNum()).setByPlayer(itemStack);
 				this.player.inventoryMenu.broadcastChanges();
@@ -1727,7 +1783,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	@Override
 	public void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket serverboundPlayerAbilitiesPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPlayerAbilitiesPacket, this, this.player.getLevel());
-		this.player.getAbilities().flying = serverboundPlayerAbilitiesPacket.isFlying() && this.player.getAbilities().mayfly;
+		this.player.getAbilities().flying = serverboundPlayerAbilitiesPacket.isFlying() && this.player.canFly();
 	}
 
 	@Override
@@ -1774,6 +1830,65 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 					this.disconnect(var6.getComponent());
 				}
 			}
+		}
+	}
+
+	@Override
+	public void handleVoteCast(ServerboundVoteCastPacket serverboundVoteCastPacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundVoteCastPacket, this, this.player.getLevel());
+		ServerVoteStorage.OptionAccess optionAccess = this.server.getVoteStorage().getOptionAccess(serverboundVoteCastPacket.optionId());
+		if (optionAccess == null) {
+			this.send(
+				ClientboundVoteCastResultPacket.failure(
+					serverboundVoteCastPacket.transactionId(), Component.literal("Option " + serverboundVoteCastPacket.optionId() + " not found")
+				)
+			);
+		} else {
+			ServerVoteStorage.VoteResult voteResult = optionAccess.consumeResources(this.player);
+			if (voteResult == ServerVoteStorage.VoteResult.OK) {
+				optionAccess.addVotes(this.player, 1);
+				this.send(ClientboundVoteCastResultPacket.success(serverboundVoteCastPacket.transactionId()));
+				this.server.syncVotesForPlayer(this.player, serverboundVoteCastPacket.optionId());
+				this.player.awardStat(Stats.VOTED);
+				CriteriaTriggers.VOTED.trigger(this.player);
+				if (Rules.VOTING_FIREWORKS.get()) {
+					this.fireworksYay();
+				}
+
+				if (Rules.SNITCH.get()) {
+					Component component = Component.translatable("rule.snitch.msg", this.player.getDisplayName(), optionAccess.proposalName(), optionAccess.optionName())
+						.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+					this.server.getPlayerList().broadcastSystemMessage(component, false);
+				}
+			} else {
+				this.send(
+					ClientboundVoteCastResultPacket.failure(
+						serverboundVoteCastPacket.transactionId(), voteResult == ServerVoteStorage.VoteResult.NOT_ENOUGH_RESOURCES ? VOTE_NO_RESOURCES : VOTE_NO_VOTES
+					)
+				);
+			}
+		}
+	}
+
+	private void fireworksYay() {
+		RandomSource randomSource = this.player.getRandom();
+		int i = randomSource.nextIntBetweenInclusive(1, 3);
+		int j = randomSource.nextIntBetweenInclusive(1, 3);
+		int[] is = IntStream.generate(() -> Util.getRandom(DyeColor.values(), randomSource).getFireworkColor())
+			.limit((long)randomSource.nextIntBetweenInclusive(1, 3))
+			.toArray();
+		ItemStack itemStack = CelebrateVillagersSurvivedRaid.getFirework(i, j, is);
+		FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
+			this.player.level, this.player, this.player.getX(), this.player.getEyeY(), this.player.getZ(), itemStack
+		);
+		this.player.level.addFreshEntity(fireworkRocketEntity);
+	}
+
+	@Override
+	public void handleCrashVehicle(ServerboundCrashVehiclePacket serverboundCrashVehiclePacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundCrashVehiclePacket, this, this.player.getLevel());
+		if (this.player.getVehicle() instanceof Boat boat) {
+			boat.handleCrash(serverboundCrashVehiclePacket.speed());
 		}
 	}
 

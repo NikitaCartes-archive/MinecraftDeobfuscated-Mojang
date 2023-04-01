@@ -28,7 +28,7 @@ public class StackedContents {
 	}
 
 	public void accountStack(ItemStack itemStack) {
-		this.accountStack(itemStack, 64);
+		this.accountStack(itemStack, 1024);
 	}
 
 	public void accountStack(ItemStack itemStack, int i) {

@@ -58,6 +58,7 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -91,6 +92,7 @@ public class GameRenderer implements AutoCloseable {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
 	public static final float PROJECTION_Z_NEAR = 0.05F;
+	private static final ResourceLocation BLOOM_EFFECT = new ResourceLocation("shaders/post/bloom.json");
 	final Minecraft minecraft;
 	private final ResourceManager resourceManager;
 	private final RandomSource random = RandomSource.create();
@@ -162,6 +164,8 @@ public class GameRenderer implements AutoCloseable {
 	private static ShaderInstance positionColorTexShader;
 	@Nullable
 	private static ShaderInstance positionTexShader;
+	@Nullable
+	private static ShaderInstance positionTexFunkyShader;
 	@Nullable
 	private static ShaderInstance positionTexColorShader;
 	@Nullable
@@ -350,23 +354,29 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	void loadEffect(ResourceLocation resourceLocation) {
-		if (this.postEffect != null) {
-			this.postEffect.close();
-		}
+		if (!this.isEffectActive(resourceLocation)) {
+			if (this.postEffect != null) {
+				this.postEffect.close();
+			}
 
-		try {
-			this.postEffect = new PostChain(this.minecraft.getTextureManager(), this.resourceManager, this.minecraft.getMainRenderTarget(), resourceLocation);
-			this.postEffect.resize(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
-			this.effectActive = true;
-		} catch (IOException var3) {
-			LOGGER.warn("Failed to load shader: {}", resourceLocation, var3);
-			this.effectIndex = EFFECT_NONE;
-			this.effectActive = false;
-		} catch (JsonSyntaxException var4) {
-			LOGGER.warn("Failed to parse shader: {}", resourceLocation, var4);
-			this.effectIndex = EFFECT_NONE;
-			this.effectActive = false;
+			try {
+				this.postEffect = new PostChain(this.minecraft.getTextureManager(), this.resourceManager, this.minecraft.getMainRenderTarget(), resourceLocation);
+				this.postEffect.resize(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
+				this.effectActive = true;
+			} catch (IOException var3) {
+				LOGGER.warn("Failed to load shader: {}", resourceLocation, var3);
+				this.effectIndex = EFFECT_NONE;
+				this.effectActive = false;
+			} catch (JsonSyntaxException var4) {
+				LOGGER.warn("Failed to parse shader: {}", resourceLocation, var4);
+				this.effectIndex = EFFECT_NONE;
+				this.effectActive = false;
+			}
 		}
+	}
+
+	private boolean isEffectActive(ResourceLocation resourceLocation) {
+		return this.effectActive && this.postEffect != null && this.postEffect.getName().equals(resourceLocation.toString());
 	}
 
 	public PreparableReloadListener createReloadListener() {
@@ -500,6 +510,11 @@ public class GameRenderer implements AutoCloseable {
 			);
 			list2.add(
 				Pair.of(new ShaderInstance(resourceProvider, "position_tex", DefaultVertexFormat.POSITION_TEX), shaderInstance -> positionTexShader = shaderInstance)
+			);
+			list2.add(
+				Pair.of(
+					new ShaderInstance(resourceProvider, "position_tex_funky", DefaultVertexFormat.POSITION_TEX), shaderInstance -> positionTexFunkyShader = shaderInstance
+				)
 			);
 			list2.add(
 				Pair.of(
@@ -847,13 +862,13 @@ public class GameRenderer implements AutoCloseable {
 				this.minecraft.hitResult = entity.pick(d, f, false);
 				Vec3 vec3 = entity.getEyePosition(f);
 				boolean bl = false;
-				int i = 3;
+				int i = Rules.EVIL_EYE.get() && this.minecraft.player.getMainHandItem().isEmpty() ? 200 : 3;
 				double e = d;
 				if (this.minecraft.gameMode.hasFarPickRange()) {
-					e = 6.0;
+					e = Math.max(d, 6.0);
 					d = e;
 				} else {
-					if (d > 3.0) {
+					if (d > (double)i) {
 						bl = true;
 					}
 
@@ -874,7 +889,7 @@ public class GameRenderer implements AutoCloseable {
 					Entity entity2 = entityHitResult.getEntity();
 					Vec3 vec34 = entityHitResult.getLocation();
 					double h = vec3.distanceToSqr(vec34);
-					if (bl && h > 9.0) {
+					if (bl && h > (double)(i * i)) {
 						this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), BlockPos.containing(vec34));
 					} else if (h < e || this.minecraft.hitResult == null) {
 						this.minecraft.hitResult = entityHitResult;
@@ -1062,6 +1077,14 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		if (!this.minecraft.noRender) {
+			boolean bl2 = Rules.ULTRA_REALISTIC_MODE.get() || Rules.DREAM_MODE.get();
+			boolean bl3 = this.isEffectActive(BLOOM_EFFECT);
+			if (bl2 && !bl3) {
+				this.loadEffect(BLOOM_EFFECT);
+			} else if (!bl2 && bl3) {
+				this.shutdownEffect();
+			}
+
 			int i = (int)(
 				this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth()
 			);
@@ -1120,8 +1143,8 @@ public class GameRenderer implements AutoCloseable {
 			if (this.minecraft.getOverlay() != null) {
 				try {
 					this.minecraft.getOverlay().render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var16) {
-					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering overlay");
+				} catch (Throwable var18) {
+					CrashReport crashReport = CrashReport.forThrowable(var18, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.getOverlay().getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -1129,8 +1152,8 @@ public class GameRenderer implements AutoCloseable {
 			} else if (this.minecraft.screen != null) {
 				try {
 					this.minecraft.screen.renderWithTooltip(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var15) {
-					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering screen");
+				} catch (Throwable var17) {
+					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(
@@ -1158,8 +1181,8 @@ public class GameRenderer implements AutoCloseable {
 					if (this.minecraft.screen != null) {
 						this.minecraft.screen.handleDelayedNarration();
 					}
-				} catch (Throwable var14) {
-					CrashReport crashReport = CrashReport.forThrowable(var14, "Narrating screen");
+				} catch (Throwable var16) {
+					CrashReport crashReport = CrashReport.forThrowable(var16, "Narrating screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -1249,6 +1272,13 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	public void renderLevel(float f, long l, PoseStack poseStack) {
+		if (Rules.BIOME_WATER_COLOR.getAndClearDirtyStatus()
+			| Rules.BIOME_FOLIAGE_COLOR.getAndClearDirtyStatus()
+			| Rules.BIOME_GRASS_COLOR.getAndClearDirtyStatus()
+			| Rules.REPLACE_BLOCK_MODEL.getAndClearDirtyStatus()) {
+			this.minecraft.levelRenderer.allChanged();
+		}
+
 		this.lightTexture.updateLightTexture(f);
 		if (this.minecraft.getCameraEntity() == null) {
 			this.minecraft.setCameraEntity(this.minecraft.player);
@@ -1431,6 +1461,11 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	public static ShaderInstance getPositionTexShader() {
 		return positionTexShader;
+	}
+
+	@Nullable
+	public static ShaderInstance getPositionTexFunkyShader() {
+		return positionTexFunkyShader;
 	}
 
 	@Nullable

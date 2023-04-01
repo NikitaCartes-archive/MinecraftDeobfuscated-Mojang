@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
@@ -32,6 +33,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 
 public class HopperBlockEntity extends RandomizableContainerBlockEntity implements Hopper {
 	public static final int MOVE_ITEM_SPEED = 8;
+	public static final int ALTERNATE_MOVE_ITEM_SPEED = 1;
 	public static final int HOPPER_CONTAINER_SIZE = 5;
 	private NonNullList<ItemStack> items = NonNullList.withSize(5, ItemStack.EMPTY);
 	private int cooldownTime = -1;
@@ -113,7 +115,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 				}
 
 				if (bl) {
-					hopperBlockEntity.setCooldown(8);
+					hopperBlockEntity.setCooldown(Rules.FAST_HOPPERS.get() ? 1 : 8);
 					setChanged(level, blockPos, blockState);
 					return true;
 				}
@@ -160,7 +162,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 		}
 	}
 
-	private static IntStream getSlots(Container container, Direction direction) {
+	public static IntStream getSlots(Container container, Direction direction) {
 		return container instanceof WorldlyContainer
 			? IntStream.of(((WorldlyContainer)container).getSlotsForFace(direction))
 			: IntStream.range(0, container.getContainerSize());
@@ -291,7 +293,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 						k = 1;
 					}
 
-					hopperBlockEntity.setCooldown(8 - k);
+					hopperBlockEntity.setCooldown((Rules.FAST_HOPPERS.get() ? 1 : 8) - k);
 				}
 
 				container2.setChanged();
@@ -392,7 +394,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 	}
 
 	private boolean isOnCustomCooldown() {
-		return this.cooldownTime > 8;
+		return this.cooldownTime > (Rules.FAST_HOPPERS.get() ? 1 : 8);
 	}
 
 	@Override

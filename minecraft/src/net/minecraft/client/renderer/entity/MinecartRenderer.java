@@ -11,8 +11,10 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,7 +48,7 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 		double n = 0.3F;
 		Vec3 vec3 = abstractMinecart.getPos(d, e, m);
 		float o = Mth.lerp(g, abstractMinecart.xRotO, abstractMinecart.getXRot());
-		if (vec3 != null) {
+		if (!Rules.MINECART_LIES.get() && vec3 != null) {
 			Vec3 vec32 = abstractMinecart.getPosOffs(d, e, m, 0.3F);
 			Vec3 vec33 = abstractMinecart.getPosOffs(d, e, m, -0.3F);
 			if (vec32 == null) {
@@ -91,8 +93,9 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 			poseStack.popPose();
 		}
 
+		double t = Direction.fromYRot((double)f).getClockWise().getAxis().choose(d, e, m);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		this.model.setupAnim(abstractMinecart, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+		this.model.setupAnim(abstractMinecart, (float)(-t), 0.0F, 0.0F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(abstractMinecart)));
 		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		poseStack.popPose();

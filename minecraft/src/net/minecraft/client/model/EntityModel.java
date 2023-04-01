@@ -31,4 +31,8 @@ public abstract class EntityModel<T extends Entity> extends Model {
 		entityModel.riding = this.riding;
 		entityModel.young = this.young;
 	}
+
+	public boolean miniMe() {
+		return false;
+	}
 }

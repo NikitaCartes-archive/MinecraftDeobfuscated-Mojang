@@ -56,6 +56,11 @@ public class Witch extends Raider implements RangedAttackMob {
 	}
 
 	@Override
+	protected boolean isItAwkwardToMilk() {
+		return true;
+	}
+
+	@Override
 	protected void registerGoals() {
 		super.registerGoals();
 		this.healRaidersGoal = new NearestHealableRaiderTargetGoal<>(

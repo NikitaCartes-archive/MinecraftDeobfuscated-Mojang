@@ -3,7 +3,10 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -171,5 +174,25 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if (Rules.HAUNTED_WORLD.get() && this.material != Material.METAL) {
+			blockState = blockState.cycle(OPEN);
+			serverLevel.setBlock(blockPos, blockState, 2);
+			if ((Boolean)blockState.getValue(WATERLOGGED)) {
+				serverLevel.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(serverLevel));
+			}
+
+			this.playSound(null, serverLevel, blockPos, (Boolean)blockState.getValue(OPEN));
+		}
+
+		super.randomTick(blockState, serverLevel, blockPos, randomSource);
 	}
 }

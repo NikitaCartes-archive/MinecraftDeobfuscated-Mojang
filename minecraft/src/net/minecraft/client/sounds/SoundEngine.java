@@ -33,6 +33,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -420,7 +421,7 @@ public class SoundEngine {
 	}
 
 	private float calculatePitch(SoundInstance soundInstance) {
-		return Mth.clamp(soundInstance.getPitch(), 0.5F, 2.0F);
+		return Mth.clamp(soundInstance.getPitch(), 0.5F, 2.0F) * (Float)Rules.GLOBAL_PITCH.get();
 	}
 
 	private float calculateVolume(SoundInstance soundInstance) {

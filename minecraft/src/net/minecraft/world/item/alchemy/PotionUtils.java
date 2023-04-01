@@ -147,6 +147,7 @@ public class PotionUtils {
 			}
 
 			compoundTag.put("CustomPotionEffects", listTag);
+			compoundTag.putInt("CustomPotionColor", getColor(collection));
 			return itemStack;
 		}
 	}

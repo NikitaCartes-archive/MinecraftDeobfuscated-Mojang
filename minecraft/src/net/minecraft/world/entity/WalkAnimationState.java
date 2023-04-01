@@ -36,4 +36,10 @@ public class WalkAnimationState {
 	public boolean isMoving() {
 		return this.speed > 1.0E-5F;
 	}
+
+	public void copyFrom(WalkAnimationState walkAnimationState) {
+		this.speedOld = walkAnimationState.speedOld;
+		this.speed = walkAnimationState.speed;
+		this.position = walkAnimationState.position;
+	}
 }

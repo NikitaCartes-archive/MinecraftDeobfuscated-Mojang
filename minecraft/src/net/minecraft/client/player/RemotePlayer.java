@@ -33,7 +33,7 @@ public class RemotePlayer extends AbstractClientPlayer {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		return true;
 	}
 

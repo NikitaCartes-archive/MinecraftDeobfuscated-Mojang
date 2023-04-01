@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -147,7 +148,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 		if (!this.recipes.isEmpty() && this.isValidRecipeIndex(this.selectedRecipeIndex.get())) {
 			StonecutterRecipe stonecutterRecipe = (StonecutterRecipe)this.recipes.get(this.selectedRecipeIndex.get());
 			ItemStack itemStack = stonecutterRecipe.assemble(this.container, this.level.registryAccess());
-			if (itemStack.isItemEnabled(this.level.enabledFeatures())) {
+			if (itemStack.isItemEnabled(this.level.enabledFeatures()) && RuleFeatureToggles.isEnabled(itemStack)) {
 				this.resultContainer.setRecipeUsed(stonecutterRecipe);
 				this.resultSlot.set(itemStack);
 			} else {

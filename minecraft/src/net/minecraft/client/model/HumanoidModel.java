@@ -1,7 +1,7 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.List;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,9 +14,15 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.FlailingLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.UseAnim;
 
 @Environment(EnvType.CLIENT)
 public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> implements ArmedModel, HeadedModel {
@@ -93,12 +99,14 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 
 	@Override
 	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.<ModelPart>of(this.head);
+		return !this.bigHead() && !this.onlyHead() ? List.of(this.head) : List.of(this.head, this.hat);
 	}
 
 	@Override
 	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg, this.hat);
+		return !this.bigHead() && !this.onlyHead()
+			? List.of(this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg, this.hat)
+			: List.of(this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg);
 	}
 
 	public void prepareMobModel(T livingEntity, float f, float g, float h) {
@@ -138,12 +146,42 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			k = 1.0F;
 		}
 
-		this.rightArm.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 2.0F * g * 0.5F / k;
-		this.leftArm.xRot = Mth.cos(f * 0.6662F) * 2.0F * g * 0.5F / k;
 		this.rightArm.zRot = 0.0F;
 		this.leftArm.zRot = 0.0F;
-		this.rightLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g / k;
-		this.leftLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k;
+		FlailingLevel flailingLevel = Rules.FLAILING_LEVEL.get();
+		switch (flailingLevel) {
+			case NONE:
+				this.rightArm.xRot = 0.0F;
+				this.leftArm.xRot = 0.0F;
+				this.rightLeg.xRot = 0.0F;
+				this.leftLeg.xRot = 0.0F;
+				break;
+			case WINDMILL:
+				this.rightArm.xRot = f * 2.0F * 0.5F / k;
+				this.leftArm.xRot = f * 2.0F * 0.5F / k;
+				this.rightLeg.xRot = f * 1.4F / k;
+				this.leftLeg.xRot = (f + (float) Math.PI) * 1.4F / k;
+				break;
+			default:
+				float l = switch (flailingLevel) {
+					case MILD -> 0.3331F;
+					case WILD -> 0.9993F;
+					case EXTREME -> 1.3324F;
+					default -> 0.6662F;
+				};
+
+				float m = switch (flailingLevel) {
+					case MILD -> 0.5F;
+					case WILD -> 2.0F;
+					case EXTREME -> 4.0F;
+					default -> 1.0F;
+				};
+				this.rightArm.xRot = Mth.cos(f * l + (float) Math.PI) * m * 2.0F * g * 0.5F / k;
+				this.leftArm.xRot = Mth.cos(f * l) * m * 2.0F * g * 0.5F / k;
+				this.rightLeg.xRot = Mth.cos(f * l) * m * 1.4F * g / k;
+				this.leftLeg.xRot = Mth.cos(f * l + (float) Math.PI) * m * 1.4F * g / k;
+		}
+
 		this.rightLeg.yRot = 0.005F;
 		this.leftLeg.yRot = -0.005F;
 		this.rightLeg.zRot = 0.005F;
@@ -214,39 +252,39 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 		}
 
 		if (this.swimAmount > 0.0F) {
-			float l = f % 26.0F;
+			float m = f % 26.0F;
 			HumanoidArm humanoidArm = this.getAttackArm(livingEntity);
-			float m = humanoidArm == HumanoidArm.RIGHT && this.attackTime > 0.0F ? 0.0F : this.swimAmount;
-			float n = humanoidArm == HumanoidArm.LEFT && this.attackTime > 0.0F ? 0.0F : this.swimAmount;
+			float n = humanoidArm == HumanoidArm.RIGHT && this.attackTime > 0.0F ? 0.0F : this.swimAmount;
+			float o = humanoidArm == HumanoidArm.LEFT && this.attackTime > 0.0F ? 0.0F : this.swimAmount;
 			if (!livingEntity.isUsingItem()) {
-				if (l < 14.0F) {
-					this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, 0.0F);
-					this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 0.0F);
-					this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float) Math.PI);
-					this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float) Math.PI);
-					this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, (float) Math.PI + 1.8707964F * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0F));
-					this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float) Math.PI - 1.8707964F * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0F));
-				} else if (l >= 14.0F && l < 22.0F) {
-					float o = (l - 14.0F) / 8.0F;
-					this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, (float) (Math.PI / 2) * o);
-					this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, (float) (Math.PI / 2) * o);
-					this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float) Math.PI);
-					this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float) Math.PI);
-					this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, 5.012389F - 1.8707964F * o);
-					this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, 1.2707963F + 1.8707964F * o);
-				} else if (l >= 22.0F && l < 26.0F) {
-					float o = (l - 22.0F) / 4.0F;
-					this.leftArm.xRot = this.rotlerpRad(n, this.leftArm.xRot, (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
-					this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
-					this.leftArm.yRot = this.rotlerpRad(n, this.leftArm.yRot, (float) Math.PI);
-					this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float) Math.PI);
-					this.leftArm.zRot = this.rotlerpRad(n, this.leftArm.zRot, (float) Math.PI);
-					this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float) Math.PI);
+				if (m < 14.0F) {
+					this.leftArm.xRot = this.rotlerpRad(o, this.leftArm.xRot, 0.0F);
+					this.rightArm.xRot = Mth.lerp(n, this.rightArm.xRot, 0.0F);
+					this.leftArm.yRot = this.rotlerpRad(o, this.leftArm.yRot, (float) Math.PI);
+					this.rightArm.yRot = Mth.lerp(n, this.rightArm.yRot, (float) Math.PI);
+					this.leftArm.zRot = this.rotlerpRad(o, this.leftArm.zRot, (float) Math.PI + 1.8707964F * this.quadraticArmUpdate(m) / this.quadraticArmUpdate(14.0F));
+					this.rightArm.zRot = Mth.lerp(n, this.rightArm.zRot, (float) Math.PI - 1.8707964F * this.quadraticArmUpdate(m) / this.quadraticArmUpdate(14.0F));
+				} else if (m >= 14.0F && m < 22.0F) {
+					float p = (m - 14.0F) / 8.0F;
+					this.leftArm.xRot = this.rotlerpRad(o, this.leftArm.xRot, (float) (Math.PI / 2) * p);
+					this.rightArm.xRot = Mth.lerp(n, this.rightArm.xRot, (float) (Math.PI / 2) * p);
+					this.leftArm.yRot = this.rotlerpRad(o, this.leftArm.yRot, (float) Math.PI);
+					this.rightArm.yRot = Mth.lerp(n, this.rightArm.yRot, (float) Math.PI);
+					this.leftArm.zRot = this.rotlerpRad(o, this.leftArm.zRot, 5.012389F - 1.8707964F * p);
+					this.rightArm.zRot = Mth.lerp(n, this.rightArm.zRot, 1.2707963F + 1.8707964F * p);
+				} else if (m >= 22.0F && m < 26.0F) {
+					float p = (m - 22.0F) / 4.0F;
+					this.leftArm.xRot = this.rotlerpRad(o, this.leftArm.xRot, (float) (Math.PI / 2) - (float) (Math.PI / 2) * p);
+					this.rightArm.xRot = Mth.lerp(n, this.rightArm.xRot, (float) (Math.PI / 2) - (float) (Math.PI / 2) * p);
+					this.leftArm.yRot = this.rotlerpRad(o, this.leftArm.yRot, (float) Math.PI);
+					this.rightArm.yRot = Mth.lerp(n, this.rightArm.yRot, (float) Math.PI);
+					this.leftArm.zRot = this.rotlerpRad(o, this.leftArm.zRot, (float) Math.PI);
+					this.rightArm.zRot = Mth.lerp(n, this.rightArm.zRot, (float) Math.PI);
 				}
 			}
 
-			float o = 0.3F;
-			float p = 0.33333334F;
+			float p = 0.3F;
+			float q = 0.33333334F;
 			this.leftLeg.xRot = Mth.lerp(this.swimAmount, this.leftLeg.xRot, 0.3F * Mth.cos(f * 0.33333334F + (float) Math.PI));
 			this.rightLeg.xRot = Mth.lerp(this.swimAmount, this.rightLeg.xRot, 0.3F * Mth.cos(f * 0.33333334F));
 		}
@@ -427,6 +465,77 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 	private HumanoidArm getAttackArm(T livingEntity) {
 		HumanoidArm humanoidArm = livingEntity.getMainArm();
 		return livingEntity.swingingArm == InteractionHand.MAIN_HAND ? humanoidArm : humanoidArm.getOpposite();
+	}
+
+	public void setModelProperties(LivingEntity livingEntity) {
+		if (livingEntity.isSpectator()) {
+			this.setAllVisible(false);
+			this.head.visible = true;
+			this.hat.visible = true;
+		} else {
+			this.setAllVisible(true);
+			this.crouching = livingEntity.isCrouching();
+			HumanoidModel.ArmPose armPose = getArmPose(livingEntity, InteractionHand.MAIN_HAND);
+			HumanoidModel.ArmPose armPose2 = getArmPose(livingEntity, InteractionHand.OFF_HAND);
+			if (armPose.isTwoHanded()) {
+				armPose2 = livingEntity.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
+			}
+
+			if (livingEntity.getMainArm() == HumanoidArm.RIGHT) {
+				this.rightArmPose = armPose;
+				this.leftArmPose = armPose2;
+			} else {
+				this.rightArmPose = armPose2;
+				this.leftArmPose = armPose;
+			}
+		}
+	}
+
+	private static HumanoidModel.ArmPose getArmPose(LivingEntity livingEntity, InteractionHand interactionHand) {
+		ItemStack itemStack = livingEntity.getItemInHand(interactionHand);
+		if (itemStack.isEmpty()) {
+			return HumanoidModel.ArmPose.EMPTY;
+		} else {
+			if (livingEntity.getUsedItemHand() == interactionHand && livingEntity.getUseItemRemainingTicks() > 0) {
+				UseAnim useAnim = itemStack.getUseAnimation();
+				if (useAnim == UseAnim.BLOCK) {
+					return HumanoidModel.ArmPose.BLOCK;
+				}
+
+				if (useAnim == UseAnim.BOW) {
+					return HumanoidModel.ArmPose.BOW_AND_ARROW;
+				}
+
+				if (useAnim == UseAnim.SPEAR) {
+					return HumanoidModel.ArmPose.THROW_SPEAR;
+				}
+
+				if (useAnim == UseAnim.CROSSBOW && interactionHand == livingEntity.getUsedItemHand()) {
+					return HumanoidModel.ArmPose.CROSSBOW_CHARGE;
+				}
+
+				if (useAnim == UseAnim.SPYGLASS) {
+					return HumanoidModel.ArmPose.SPYGLASS;
+				}
+
+				if (useAnim == UseAnim.TOOT_HORN) {
+					return HumanoidModel.ArmPose.TOOT_HORN;
+				}
+
+				if (useAnim == UseAnim.BRUSH) {
+					return HumanoidModel.ArmPose.BRUSH;
+				}
+			} else if (!livingEntity.swinging && itemStack.is(Items.CROSSBOW) && CrossbowItem.isCharged(itemStack)) {
+				return HumanoidModel.ArmPose.CROSSBOW_HOLD;
+			}
+
+			return HumanoidModel.ArmPose.ITEM;
+		}
+	}
+
+	@Override
+	protected boolean bigHead() {
+		return Rules.BIG_HEAD_MODE.get();
 	}
 
 	@Environment(EnvType.CLIENT)

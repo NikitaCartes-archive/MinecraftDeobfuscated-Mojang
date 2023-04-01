@@ -18,6 +18,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +31,8 @@ public abstract class AbstractClientPlayer extends Player {
 	private static final String SKIN_URL_TEMPLATE = "http://skins.minecraft.net/MinecraftSkins/%s.png";
 	@Nullable
 	private PlayerInfo playerInfo;
+	@Nullable
+	private PlayerInfo visiblePlayerInfo;
 	protected Vec3 deltaMovementOnPreviousTick = Vec3.ZERO;
 	public float elytraRotX;
 	public float elytraRotY;
@@ -54,7 +57,24 @@ public abstract class AbstractClientPlayer extends Player {
 	}
 
 	public boolean isCapeLoaded() {
-		return this.getPlayerInfo() != null;
+		return this.getVisiblePlayerInfo() != null;
+	}
+
+	@Nullable
+	protected PlayerInfo getVisiblePlayerInfo() {
+		GameProfile gameProfile = this.transform.playerSkin();
+		if (gameProfile == null) {
+			return this.getPlayerInfo();
+		} else {
+			if (this.visiblePlayerInfo == null || !this.visiblePlayerInfo.getProfile().equals(gameProfile)) {
+				this.visiblePlayerInfo = Minecraft.getInstance().getConnection().getPlayerInfo(gameProfile.getId());
+				if (this.visiblePlayerInfo == null) {
+					this.visiblePlayerInfo = new PlayerInfo(gameProfile, false);
+				}
+			}
+
+			return this.visiblePlayerInfo;
+		}
 	}
 
 	@Nullable
@@ -77,28 +97,32 @@ public abstract class AbstractClientPlayer extends Player {
 	}
 
 	public boolean isSkinLoaded() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
+		PlayerInfo playerInfo = this.getVisiblePlayerInfo();
 		return playerInfo != null && playerInfo.isSkinLoaded();
 	}
 
 	public ResourceLocation getSkinTextureLocation() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
-		return playerInfo == null ? DefaultPlayerSkin.getDefaultSkin(this.getUUID()) : playerInfo.getSkinLocation();
+		if (Rules.ANONYMIZE_SKINS.get()) {
+			return DefaultPlayerSkin.getDefaultSkin(this.getUUID());
+		} else {
+			PlayerInfo playerInfo = this.getVisiblePlayerInfo();
+			return playerInfo == null ? DefaultPlayerSkin.getDefaultSkin(this.getUUID()) : playerInfo.getSkinLocation();
+		}
 	}
 
 	@Nullable
 	public ResourceLocation getCloakTextureLocation() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
+		PlayerInfo playerInfo = this.getVisiblePlayerInfo();
 		return playerInfo == null ? null : playerInfo.getCapeLocation();
 	}
 
 	public boolean isElytraLoaded() {
-		return this.getPlayerInfo() != null;
+		return this.getVisiblePlayerInfo() != null;
 	}
 
 	@Nullable
 	public ResourceLocation getElytraTextureLocation() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
+		PlayerInfo playerInfo = this.getVisiblePlayerInfo();
 		return playerInfo == null ? null : playerInfo.getElytraLocation();
 	}
 
@@ -122,7 +146,7 @@ public abstract class AbstractClientPlayer extends Player {
 	}
 
 	public String getModelName() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
+		PlayerInfo playerInfo = this.getVisiblePlayerInfo();
 		return playerInfo == null ? DefaultPlayerSkin.getSkinModelName(this.getUUID()) : playerInfo.getModelName();
 	}
 

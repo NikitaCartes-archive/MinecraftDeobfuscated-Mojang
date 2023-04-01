@@ -70,7 +70,7 @@ public class SmallFireball extends Fireball {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		return false;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -48,7 +49,9 @@ public class MovingPistonBlock extends BaseEntityBlock {
 		return null;
 	}
 
-	public static BlockEntity newMovingBlockEntity(BlockPos blockPos, BlockState blockState, BlockState blockState2, Direction direction, boolean bl, boolean bl2) {
+	public static PistonMovingBlockEntity newMovingBlockEntity(
+		BlockPos blockPos, BlockState blockState, BlockState blockState2, Direction direction, boolean bl, boolean bl2
+	) {
 		return new PistonMovingBlockEntity(blockPos, blockState, blockState2, direction, bl, bl2);
 	}
 
@@ -134,6 +137,11 @@ public class MovingPistonBlock extends BaseEntityBlock {
 
 	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+		return false;
+	}
+
+	@Override
+	public boolean canAirPass(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Direction direction) {
 		return false;
 	}
 }

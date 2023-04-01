@@ -55,10 +55,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 @Environment(EnvType.CLIENT)
 public class ItemRenderer implements ResourceManagerReloadListener {
 	public static final ResourceLocation ENCHANTED_GLINT_ENTITY = new ResourceLocation("textures/misc/enchanted_glint_entity.png");
+	public static final ResourceLocation ENCHANTED_GLINT_GOLD = new ResourceLocation("textures/misc/enchanted_glint_gold.png");
 	public static final ResourceLocation ENCHANTED_GLINT_ITEM = new ResourceLocation("textures/misc/enchanted_glint_item.png");
 	private static final Set<Item> IGNORED = Sets.<Item>newHashSet(Items.AIR);
 	private static final int GUI_SLOT_CENTER_X = 8;
@@ -139,6 +141,10 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			}
 
 			bakedModel.getTransforms().getTransform(itemDisplayContext).apply(bl, poseStack);
+			if (itemStack.isWob()) {
+				poseStack.mulPose(new Quaternionf().rotationAxis((float) Math.PI, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F, 0.0F));
+			}
+
 			poseStack.translate(-0.5F, -0.5F, -0.5F);
 			if (!bakedModel.isCustomRenderer() && (!itemStack.is(Items.TRIDENT) || bl2)) {
 				boolean bl3;

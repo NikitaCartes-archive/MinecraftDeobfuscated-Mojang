@@ -152,6 +152,19 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
+	protected InteractionResult transformInteract(Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
+		if (!livingEntity.isVehicle() && !player.isSecondaryUseActive()) {
+			if (!this.level.isClientSide) {
+				player.startRiding(livingEntity);
+			}
+
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
+		} else {
+			return InteractionResult.PASS;
+		}
+	}
+
+	@Override
 	public boolean isSaddleable() {
 		return this.isAlive() && !this.isBaby();
 	}

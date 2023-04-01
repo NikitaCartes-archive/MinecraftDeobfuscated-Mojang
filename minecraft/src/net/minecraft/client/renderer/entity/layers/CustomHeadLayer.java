@@ -20,6 +20,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.WalkAnimationState;
+import net.minecraft.world.entity.animal.MoonCow;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.ArmorItem;
@@ -69,6 +70,15 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 			}
 
 			this.getParentModel().getHead().translateAndRotate(poseStack);
+			if (livingEntity instanceof MoonCow) {
+				if (livingEntity.isBaby()) {
+					float m = 1.5F;
+					poseStack.scale(1.5F, 1.5F, 1.5F);
+				}
+
+				poseStack.translate(0.0F, 0.2F, -0.2F);
+			}
+
 			if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
 				float n = 1.1875F;
 				poseStack.scale(1.1875F, -1.1875F, -1.1875F);

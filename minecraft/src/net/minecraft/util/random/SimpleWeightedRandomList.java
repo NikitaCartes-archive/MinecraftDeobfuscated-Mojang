@@ -36,6 +36,10 @@ public class SimpleWeightedRandomList<E> extends WeightedRandomList<WeightedEntr
 		return this.getRandom(randomSource).map(WeightedEntry.Wrapper::getData);
 	}
 
+	public Optional<E> getRandomValueUnweighted(RandomSource randomSource) {
+		return this.getRandomUnweighted(randomSource).map(WeightedEntry.Wrapper::getData);
+	}
+
 	public static class Builder<E> {
 		private final ImmutableList.Builder<WeightedEntry.Wrapper<E>> result = ImmutableList.builder();
 

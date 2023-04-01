@@ -44,7 +44,7 @@ public class FireworkStarFadeRecipe extends CustomRecipe {
 		return bl2 && bl;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		List<Integer> list = Lists.<Integer>newArrayList();
 		ItemStack itemStack = null;
 

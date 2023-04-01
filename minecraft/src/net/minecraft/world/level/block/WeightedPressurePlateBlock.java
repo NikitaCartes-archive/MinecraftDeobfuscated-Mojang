@@ -1,15 +1,19 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.DropperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.levelgen.MoonBaseBuilder;
 
 public class WeightedPressurePlateBlock extends BasePressurePlateBlock {
 	public static final IntegerProperty POWER = BlockStateProperties.POWER;
@@ -29,6 +33,18 @@ public class WeightedPressurePlateBlock extends BasePressurePlateBlock {
 			return Mth.ceil(f * 15.0F);
 		} else {
 			return 0;
+		}
+	}
+
+	@Override
+	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+		super.entityInside(blockState, level, blockPos, entity);
+		if (entity instanceof ServerPlayer
+			&& level.getBlockEntity(blockPos.below()) instanceof DropperBlockEntity dropperBlockEntity
+			&& level instanceof ServerLevel serverLevel
+			&& dropperBlockEntity.isLunar()) {
+			level.setBlock(blockPos.below(), Blocks.LAVA.defaultBlockState(), 3);
+			MoonBaseBuilder.expandContraption(serverLevel, blockPos.below().below());
 		}
 	}
 

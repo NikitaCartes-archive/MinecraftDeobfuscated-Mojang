@@ -7,6 +7,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
@@ -26,9 +29,11 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -39,13 +44,14 @@ public class Chicken extends Animal {
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(
 		Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD
 	);
+	private static final IntProvider EGG_TIME = UniformInt.of(6000, 12000);
 	public float flap;
 	public float flapSpeed;
 	public float oFlapSpeed;
 	public float oFlap;
 	public float flapping = 1.0F;
 	private float nextFlap = 1.0F;
-	public int eggTime = this.random.nextInt(6000) + 6000;
+	public int eggTime = EGG_TIME.sample(this.random);
 	public boolean isChickenJockey;
 
 	public Chicken(EntityType<? extends Chicken> entityType, Level level) {
@@ -75,8 +81,35 @@ public class Chicken extends Animal {
 	}
 
 	@Override
+	public void transformedTick(EntityTransform entityTransform, LivingEntity livingEntity) {
+		super.transformedTick(entityTransform, livingEntity);
+		this.tickFlapping();
+		Vec3 vec3 = livingEntity.getDeltaMovement();
+		if (!livingEntity.isOnGround() && vec3.y < 0.0) {
+			livingEntity.setDeltaMovement(vec3.multiply(1.0, 0.6, 1.0));
+		}
+	}
+
+	@Override
 	public void aiStep() {
 		super.aiStep();
+		this.tickFlapping();
+		Vec3 vec3 = this.getDeltaMovement();
+		if (!this.onGround && vec3.y < 0.0) {
+			this.setDeltaMovement(vec3.multiply(1.0, 0.6, 1.0));
+		}
+
+		if (!this.level.isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
+			Rules.EGG_FREE.getValueForEntity(this).ifPresent(reference -> {
+				this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+				this.spawnAtLocation((ItemLike)reference.value());
+				this.gameEvent(GameEvent.ENTITY_PLACE);
+				this.eggTime = EGG_TIME.sample(this.random);
+			});
+		}
+	}
+
+	private void tickFlapping() {
 		this.oFlap = this.flap;
 		this.oFlapSpeed = this.flapSpeed;
 		this.flapSpeed = this.flapSpeed + (this.onGround ? -1.0F : 4.0F) * 0.3F;
@@ -86,18 +119,7 @@ public class Chicken extends Animal {
 		}
 
 		this.flapping *= 0.9F;
-		Vec3 vec3 = this.getDeltaMovement();
-		if (!this.onGround && vec3.y < 0.0) {
-			this.setDeltaMovement(vec3.multiply(1.0, 0.6, 1.0));
-		}
-
 		this.flap = this.flap + this.flapping * 2.0F;
-		if (!this.level.isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
-			this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-			this.spawnAtLocation(Items.EGG);
-			this.gameEvent(GameEvent.ENTITY_PLACE);
-			this.eggTime = this.random.nextInt(6000) + 6000;
-		}
 	}
 
 	@Override

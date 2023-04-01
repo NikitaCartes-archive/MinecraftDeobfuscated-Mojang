@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.Matrix4f;
@@ -162,6 +163,10 @@ public class VertexBuffer implements AutoCloseable {
 
 		if (shaderInstance.GAME_TIME != null) {
 			shaderInstance.GAME_TIME.set(RenderSystem.getShaderGameTime());
+		}
+
+		if (shaderInstance.WALL_TIME != null) {
+			shaderInstance.WALL_TIME.set((float)Util.getMillis());
 		}
 
 		if (shaderInstance.SCREEN_SIZE != null) {

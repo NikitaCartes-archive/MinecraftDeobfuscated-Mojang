@@ -159,7 +159,7 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 		} else {
 			for (int i = 0; i < 3; i++) {
 				ItemStack itemStack2 = nonNullList.get(i);
-				if (!itemStack2.isEmpty() && PotionBrewing.hasMix(itemStack2, itemStack)) {
+				if (!itemStack2.isEmpty() && (PotionBrewing.hasMix(itemStack2, itemStack) || itemStack2.is(Items.BOTTLE_OF_ENTITY) && itemStack.is(Items.GUNPOWDER))) {
 					return true;
 				}
 			}
@@ -240,7 +240,13 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 		} else {
 			return i == 4
 				? itemStack.is(Items.BLAZE_POWDER)
-				: (itemStack.is(Items.POTION) || itemStack.is(Items.SPLASH_POTION) || itemStack.is(Items.LINGERING_POTION) || itemStack.is(Items.GLASS_BOTTLE))
+				: (
+						itemStack.is(Items.BOTTLE_OF_ENTITY)
+							|| itemStack.is(Items.POTION)
+							|| itemStack.is(Items.SPLASH_POTION)
+							|| itemStack.is(Items.LINGERING_POTION)
+							|| itemStack.is(Items.GLASS_BOTTLE)
+					)
 					&& this.getItem(i).isEmpty();
 		}
 	}

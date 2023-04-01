@@ -363,6 +363,7 @@ public class Options {
 	public TutorialSteps tutorialStep = TutorialSteps.MOVEMENT;
 	public boolean joinedFirstServer = false;
 	public boolean hideBundleTutorial = false;
+	public boolean hasSeenVotingScreen;
 	private final OptionInstance<Integer> biomeBlendRadius = new OptionInstance<>(
 		"options.biomeBlendRadius", OptionInstance.noTooltip(), (component, integer) -> {
 			int i = integer * 2 + 1;
@@ -505,6 +506,7 @@ public class Options {
 	public final KeyMapping keyFullscreen = new KeyMapping("key.fullscreen", 300, "key.categories.misc");
 	public final KeyMapping keySpectatorOutlines = new KeyMapping("key.spectatorOutlines", InputConstants.UNKNOWN.getValue(), "key.categories.misc");
 	public final KeyMapping keyAdvancements = new KeyMapping("key.advancements", 76, "key.categories.misc");
+	public final KeyMapping keyVoting = new KeyMapping("key.voting", 86, "key.categories.misc");
 	public final KeyMapping[] keyHotbarSlots = new KeyMapping[]{
 		new KeyMapping("key.hotbar.1", 49, "key.categories.inventory"),
 		new KeyMapping("key.hotbar.2", 50, "key.categories.inventory"),
@@ -1162,6 +1164,7 @@ public class Options {
 		fieldAccess.process("hideMatchedNames", this.hideMatchedNames);
 		this.joinedFirstServer = fieldAccess.process("joinedFirstServer", this.joinedFirstServer);
 		this.hideBundleTutorial = fieldAccess.process("hideBundleTutorial", this.hideBundleTutorial);
+		this.hasSeenVotingScreen = fieldAccess.process("hasSeenVotingScreen", this.hasSeenVotingScreen);
 		this.syncWrites = fieldAccess.process("syncChunkWrites", this.syncWrites);
 		fieldAccess.process("showAutosaveIndicator", this.showAutosaveIndicator);
 		fieldAccess.process("allowServerListing", this.allowServerListing);

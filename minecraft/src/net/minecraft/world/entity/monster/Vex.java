@@ -62,6 +62,11 @@ public class Vex extends Monster implements TraceableEntity {
 	}
 
 	@Override
+	public boolean canTransformFly() {
+		return true;
+	}
+
+	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
 		return entityDimensions.height - 0.28125F;
 	}

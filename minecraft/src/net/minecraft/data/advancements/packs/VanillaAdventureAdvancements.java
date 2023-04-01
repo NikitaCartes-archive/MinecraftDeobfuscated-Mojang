@@ -589,6 +589,34 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("avoid_vibration", PlayerTrigger.TriggerInstance.avoidVibration())
 			.save(consumer, "adventure/avoid_vibration");
+		Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.FIREWORK_ROCKET,
+				Component.translatable("advancements.adventure.vote_1.title"),
+				Component.translatable("advancements.adventure.vote_1.description"),
+				null,
+				FrameType.GOAL,
+				true,
+				true,
+				false
+			)
+			.addCriterion("vote_1", PlayerTrigger.TriggerInstance.vote(MinMaxBounds.Ints.atLeast(1)))
+			.save(consumer, "adventure/vote_1");
+		Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.POISONOUS_POTATO,
+				Component.translatable("advancements.adventure.vote_256.title"),
+				Component.translatable("advancements.adventure.vote_256.description"),
+				null,
+				FrameType.GOAL,
+				true,
+				true,
+				false
+			)
+			.addCriterion("vote_256", PlayerTrigger.TriggerInstance.vote(MinMaxBounds.Ints.atLeast(256)))
+			.save(consumer, "adventure/vote_256");
 	}
 
 	protected static void createAdventuringTime(Consumer<Advancement> consumer, Advancement advancement, MultiNoiseBiomeSourceParameterList.Preset preset) {

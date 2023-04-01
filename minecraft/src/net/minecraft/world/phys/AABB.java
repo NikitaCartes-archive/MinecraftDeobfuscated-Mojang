@@ -403,4 +403,16 @@ public class AABB {
 	public static AABB ofSize(Vec3 vec3, double d, double e, double f) {
 		return new AABB(vec3.x - d / 2.0, vec3.y - e / 2.0, vec3.z - f / 2.0, vec3.x + d / 2.0, vec3.y + e / 2.0, vec3.z + f / 2.0);
 	}
+
+	public AABB scale(float f) {
+		if (f == 1.0F) {
+			return this;
+		} else {
+			Vec3 vec3 = this.getCenter();
+			double d = this.getXsize() * (double)f;
+			double e = this.getYsize() * (double)f;
+			double g = this.getZsize() * (double)f;
+			return new AABB(vec3.x - d / 2.0, vec3.y - e / 2.0, vec3.z - g / 2.0, vec3.x + d / 2.0, vec3.y + e / 2.0, vec3.z + g / 2.0);
+		}
+	}
 }

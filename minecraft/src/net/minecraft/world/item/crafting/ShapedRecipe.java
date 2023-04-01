@@ -14,9 +14,12 @@ import java.util.Map.Entry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.RecipeFlip;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +27,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 public class ShapedRecipe implements CraftingRecipe {
+	public static final String WOB = "wob";
+	public static final String RECIPE_NBT = "nbt";
 	final int width;
 	final int height;
 	final NonNullList<Ingredient> recipeItems;
@@ -32,6 +37,8 @@ public class ShapedRecipe implements CraftingRecipe {
 	final String group;
 	final CraftingBookCategory category;
 	final boolean showNotification;
+	final boolean canXflip;
+	final boolean wob;
 
 	public ShapedRecipe(
 		ResourceLocation resourceLocation,
@@ -41,7 +48,9 @@ public class ShapedRecipe implements CraftingRecipe {
 		int j,
 		NonNullList<Ingredient> nonNullList,
 		ItemStack itemStack,
-		boolean bl
+		boolean bl,
+		boolean bl2,
+		boolean bl3
 	) {
 		this.id = resourceLocation;
 		this.group = string;
@@ -51,6 +60,8 @@ public class ShapedRecipe implements CraftingRecipe {
 		this.recipeItems = nonNullList;
 		this.result = itemStack;
 		this.showNotification = bl;
+		this.canXflip = bl2;
+		this.wob = bl3;
 	}
 
 	public ShapedRecipe(
@@ -62,7 +73,7 @@ public class ShapedRecipe implements CraftingRecipe {
 		NonNullList<Ingredient> nonNullList,
 		ItemStack itemStack
 	) {
-		this(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, true);
+		this(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, true, true, false);
 	}
 
 	@Override
@@ -86,7 +97,7 @@ public class ShapedRecipe implements CraftingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItemRaw(RegistryAccess registryAccess) {
 		return this.result;
 	}
 
@@ -108,12 +119,19 @@ public class ShapedRecipe implements CraftingRecipe {
 	public boolean matches(CraftingContainer craftingContainer, Level level) {
 		for (int i = 0; i <= craftingContainer.getWidth() - this.width; i++) {
 			for (int j = 0; j <= craftingContainer.getHeight() - this.height; j++) {
-				if (this.matches(craftingContainer, i, j, true)) {
-					return true;
-				}
+				if (!this.canXflip) {
+					if (this.matches(craftingContainer, i, j, false)) {
+						return true;
+					}
+				} else {
+					RecipeFlip recipeFlip = Rules.RECIPE_FLIP.get();
+					if (recipeFlip != RecipeFlip.FLIPPED_ONLY && this.matches(craftingContainer, i, j, false)) {
+						return true;
+					}
 
-				if (this.matches(craftingContainer, i, j, false)) {
-					return true;
+					if (recipeFlip != RecipeFlip.NORMAL_ONLY && this.matches(craftingContainer, i, j, true)) {
+						return true;
+					}
 				}
 			}
 		}
@@ -144,8 +162,14 @@ public class ShapedRecipe implements CraftingRecipe {
 		return true;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
-		return this.getResultItem(registryAccess).copy();
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+		ItemStack itemStack = this.result.copy();
+		if (this.wob) {
+			CompoundTag compoundTag = itemStack.getOrCreateTag();
+			compoundTag.putBoolean("wob", true);
+		}
+
+		return itemStack;
 	}
 
 	public int getWidth() {
@@ -324,7 +348,9 @@ public class ShapedRecipe implements CraftingRecipe {
 			NonNullList<Ingredient> nonNullList = ShapedRecipe.dissolvePattern(strings, map, i, j);
 			ItemStack itemStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
 			boolean bl = GsonHelper.getAsBoolean(jsonObject, "show_notification", true);
-			return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, bl);
+			boolean bl2 = GsonHelper.getAsBoolean(jsonObject, "can_x_flip", true);
+			boolean bl3 = "wob".equals(GsonHelper.getAsString(jsonObject, "nbt", ""));
+			return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, bl, bl2, bl3);
 		}
 
 		public ShapedRecipe fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
@@ -340,7 +366,9 @@ public class ShapedRecipe implements CraftingRecipe {
 
 			ItemStack itemStack = friendlyByteBuf.readItem();
 			boolean bl = friendlyByteBuf.readBoolean();
-			return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, bl);
+			boolean bl2 = friendlyByteBuf.readBoolean();
+			boolean bl3 = friendlyByteBuf.readBoolean();
+			return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, bl, bl2, bl3);
 		}
 
 		public void toNetwork(FriendlyByteBuf friendlyByteBuf, ShapedRecipe shapedRecipe) {
@@ -355,6 +383,8 @@ public class ShapedRecipe implements CraftingRecipe {
 
 			friendlyByteBuf.writeItem(shapedRecipe.result);
 			friendlyByteBuf.writeBoolean(shapedRecipe.showNotification);
+			friendlyByteBuf.writeBoolean(shapedRecipe.canXflip);
+			friendlyByteBuf.writeBoolean(shapedRecipe.wob);
 		}
 	}
 }

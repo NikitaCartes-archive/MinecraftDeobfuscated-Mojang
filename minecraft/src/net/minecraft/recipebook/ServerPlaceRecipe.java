@@ -108,7 +108,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 		if (bl) {
 			j = i;
 		} else if (bl2) {
-			j = 64;
+			j = 1024;
 
 			for (int k = 0; k < this.menu.getGridWidth() * this.menu.getGridHeight() + 1; k++) {
 				if (k != this.menu.getResultSlotIndex()) {
@@ -119,7 +119,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 				}
 			}
 
-			if (j < 64) {
+			if (j < 1024) {
 				j++;
 			}
 		}

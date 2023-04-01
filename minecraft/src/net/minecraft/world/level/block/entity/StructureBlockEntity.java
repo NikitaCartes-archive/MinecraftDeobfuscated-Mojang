@@ -177,7 +177,7 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	public void createdBy(LivingEntity livingEntity) {
-		this.author = livingEntity.getName().getString();
+		this.author = livingEntity.getType().getDescription().getString();
 	}
 
 	public BlockPos getStructurePos() {

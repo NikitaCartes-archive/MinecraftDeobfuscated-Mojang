@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -49,9 +48,7 @@ public class BrushItem extends Item {
 
 	@NotNull
 	private HitResult calculateUseHit(LivingEntity livingEntity) {
-		return ProjectileUtil.getHitResultOnViewVector(
-			livingEntity, Predicate.not(Entity::isSpectator), Math.sqrt(ServerGamePacketListenerImpl.MAX_INTERACTION_DISTANCE) - 1.0
-		);
+		return ProjectileUtil.getHitResultOnViewVector(livingEntity, Predicate.not(Entity::isSpectator), Math.sqrt(6.0) - 1.0);
 	}
 
 	@Override

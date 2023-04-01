@@ -23,6 +23,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class Inventory implements Container, Nameable {
@@ -583,5 +584,27 @@ public class Inventory implements Container, Nameable {
 	public ItemStack removeFromSelected(boolean bl) {
 		ItemStack itemStack = this.getSelected();
 		return itemStack.isEmpty() ? ItemStack.EMPTY : this.removeItem(this.selected, bl ? itemStack.getCount() : 1);
+	}
+
+	public void replaceAll(Item item, Item item2) {
+		for (int i = 0; i < this.getContainerSize(); i++) {
+			ItemStack itemStack = this.getItem(i);
+			if (itemStack.is(item)) {
+				this.setItem(i, this.replaceItem(itemStack, item2));
+			}
+		}
+	}
+
+	private ItemStack replaceItem(ItemStack itemStack, Item item) {
+		if (item == Items.AIR) {
+			return ItemStack.EMPTY;
+		} else {
+			ItemStack itemStack2 = new ItemStack(item, itemStack.getCount());
+			if (itemStack.hasTag()) {
+				itemStack2.setTag(itemStack.getOrCreateTag().copy());
+			}
+
+			return itemStack2;
+		}
 	}
 }

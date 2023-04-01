@@ -12,6 +12,8 @@ public class BuiltInLootTables {
 	public static final ResourceLocation SPAWN_BONUS_CHEST = register("chests/spawn_bonus_chest");
 	public static final ResourceLocation END_CITY_TREASURE = register("chests/end_city_treasure");
 	public static final ResourceLocation SIMPLE_DUNGEON = register("chests/simple_dungeon");
+	public static final ResourceLocation MOON_RESUPLY = register("chests/moon_resuply");
+	public static final ResourceLocation MOON_LAB = register("chests/moon_lab");
 	public static final ResourceLocation VILLAGE_WEAPONSMITH = register("chests/village/village_weaponsmith");
 	public static final ResourceLocation VILLAGE_TOOLSMITH = register("chests/village/village_toolsmith");
 	public static final ResourceLocation VILLAGE_ARMORER = register("chests/village/village_armorer");
@@ -87,6 +89,7 @@ public class BuiltInLootTables {
 	public static final ResourceLocation TOOLSMITH_GIFT = register("gameplay/hero_of_the_village/toolsmith_gift");
 	public static final ResourceLocation WEAPONSMITH_GIFT = register("gameplay/hero_of_the_village/weaponsmith_gift");
 	public static final ResourceLocation PIGLIN_BARTERING = register("gameplay/piglin_bartering");
+	public static final ResourceLocation DREAM_PIGLIN_BARTERING = register("gameplay/dream_piglin_bartering");
 	public static final ResourceLocation DESERT_WELL_ARCHAEOLOGY = register("archaeology/desert_well");
 	public static final ResourceLocation DESERT_PYRAMID_ARCHAEOLOGY = register("archaeology/desert_pyramid");
 	public static final ResourceLocation TRAIL_RUINS_ARCHAEOLOGY = register("archaeology/trail_ruins");

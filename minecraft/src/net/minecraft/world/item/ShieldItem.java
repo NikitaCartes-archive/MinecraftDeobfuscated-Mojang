@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -39,14 +40,18 @@ public class ShieldItem extends Item implements Equipable {
 
 	@Override
 	public int getUseDuration(ItemStack itemStack) {
-		return 72000;
+		return Rules.DISABLE_SHIELD.get() ? 0 : 72000;
 	}
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		player.startUsingItem(interactionHand);
-		return InteractionResultHolder.consume(itemStack);
+		if (!Rules.DISABLE_SHIELD.get()) {
+			player.startUsingItem(interactionHand);
+			return InteractionResultHolder.consume(itemStack);
+		} else {
+			return InteractionResultHolder.pass(itemStack);
+		}
 	}
 
 	@Override

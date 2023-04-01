@@ -220,4 +220,16 @@ public interface ClientGamePacketListener extends PacketListener {
 	void handleBundlePacket(ClientboundBundlePacket clientboundBundlePacket);
 
 	void handleDamageEvent(ClientboundDamageEventPacket clientboundDamageEventPacket);
+
+	void handleRuleUpdatePacket(ClientboundRuleUpdatePacket clientboundRuleUpdatePacket);
+
+	void handleVoteStart(ClientboundVoteStartPacket clientboundVoteStartPacket);
+
+	void handleVoteFinish(ClientboundVoteFinishPacket clientboundVoteFinishPacket);
+
+	void handleVoteOptionInfo(ClientboundVoteProgressInfoPacket clientboundVoteProgressInfoPacket);
+
+	void handleVoteCastResult(ClientboundVoteCastResultPacket clientboundVoteCastResultPacket);
+
+	void handleBulkVoteInfoPacket(ClientboundBulkVoteInfoPacket clientboundBulkVoteInfoPacket);
 }

@@ -291,6 +291,11 @@ public class RenderSystem {
 		GlStateManager._disableCull();
 	}
 
+	public static void cullFace(int i) {
+		assertOnRenderThread();
+		GlStateManager._cullFace(i);
+	}
+
 	public static void polygonMode(int i, int j) {
 		assertOnRenderThread();
 		GlStateManager._polygonMode(i, j);

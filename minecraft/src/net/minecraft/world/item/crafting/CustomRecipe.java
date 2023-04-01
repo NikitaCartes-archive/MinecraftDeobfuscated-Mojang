@@ -24,7 +24,7 @@ public abstract class CustomRecipe implements CraftingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItemRaw(RegistryAccess registryAccess) {
 		return ItemStack.EMPTY;
 	}
 

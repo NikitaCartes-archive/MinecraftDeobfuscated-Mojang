@@ -3,8 +3,11 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -259,5 +262,22 @@ public class DoorBlock extends Block {
 
 	public static boolean isWoodenDoor(BlockState blockState) {
 		return blockState.getBlock() instanceof DoorBlock && blockState.getMaterial() == Material.WOOD;
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if (Rules.HAUNTED_WORLD.get() && this.material != Material.METAL) {
+			blockState = blockState.cycle(OPEN);
+			serverLevel.setBlock(blockPos, blockState, 10);
+			this.playSound(null, serverLevel, blockPos, (Boolean)blockState.getValue(OPEN));
+			serverLevel.gameEvent(null, this.isOpen(blockState) ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
+		}
+
+		super.randomTick(blockState, serverLevel, blockPos, randomSource);
 	}
 }

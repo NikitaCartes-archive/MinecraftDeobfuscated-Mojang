@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
@@ -18,12 +19,17 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.scores.Team;
 import org.slf4j.Logger;
 
@@ -31,6 +37,7 @@ import org.slf4j.Logger;
 public abstract class LivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> implements RenderLayerParent<T, M> {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final float EYE_BED_OFFSET = 0.1F;
+	public static final ResourceLocation GOLD_BLOCK = new ResourceLocation("textures/block/gold_block.png");
 	protected M model;
 	protected final List<RenderLayer<T, M>> layers = Lists.<RenderLayer<T, M>>newArrayList();
 
@@ -93,6 +100,10 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		}
 
 		float lx = this.getBob(livingEntity, g);
+		if (livingEntity.isGold()) {
+			lx = 0.0F;
+		}
+
 		this.setupRotations(livingEntity, poseStack, lx, h, g);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		this.scale(livingEntity, poseStack, g);
@@ -111,17 +122,38 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			}
 		}
 
+		if (livingEntity.isGold()) {
+			o = 0.0F;
+			n = 0.0F;
+		}
+
 		this.model.prepareMobModel(livingEntity, o, n, g);
 		this.model.setupAnim(livingEntity, o, n, lx, k, m);
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean bl = this.isBodyVisible(livingEntity);
-		boolean bl2 = !bl && !livingEntity.isInvisibleTo(minecraft.player);
+		boolean bl2 = livingEntity instanceof Player && Rules.TRANSPARENT_PLAYERS.get() || !bl && !livingEntity.isInvisibleTo(minecraft.player);
 		boolean bl3 = minecraft.shouldEntityAppearGlowing(livingEntity);
-		RenderType renderType = this.getRenderType(livingEntity, bl, bl2, bl3);
-		if (renderType != null) {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
+		VertexConsumer vertexConsumer = this.getVertexConsumer(livingEntity, poseStack, multiBufferSource, bl, bl2, bl3);
+		if (vertexConsumer != null) {
 			int p = getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g));
-			this.model.renderToBuffer(poseStack, vertexConsumer, i, p, 1.0F, 1.0F, 1.0F, bl2 ? 0.15F : 1.0F);
+			float q = 1.0F;
+			float r = 1.0F;
+			float s = 1.0F;
+			if (Rules.UNIVERSAL_JEB.get() && livingEntity.hasCustomName() && "jeb_".equals(livingEntity.getSkinName())) {
+				int t = 25;
+				int u = livingEntity.tickCount / 25 + livingEntity.getId();
+				int v = DyeColor.values().length;
+				int w = u % v;
+				int x = (u + 1) % v;
+				float y = ((float)(livingEntity.tickCount % 25) + g) / 25.0F;
+				float[] fs = Sheep.getColorArray(DyeColor.byId(w));
+				float[] gs = Sheep.getColorArray(DyeColor.byId(x));
+				q = fs[0] * (1.0F - y) + gs[0] * y;
+				r = fs[1] * (1.0F - y) + gs[1] * y;
+				s = fs[2] * (1.0F - y) + gs[2] * y;
+			}
+
+			this.model.renderToBuffer(poseStack, vertexConsumer, i, p, q, r, s, bl2 ? 0.15F : 1.0F);
 		}
 
 		if (!livingEntity.isSpectator()) {
@@ -132,6 +164,18 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 
 		poseStack.popPose();
 		super.render(livingEntity, f, g, poseStack, multiBufferSource, i);
+	}
+
+	@Nullable
+	protected VertexConsumer getVertexConsumer(T livingEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl, boolean bl2, boolean bl3) {
+		if (livingEntity.isGold()) {
+			return new SheetedDecalTextureGenerator(
+				multiBufferSource.getBuffer(RenderType.entitySolid(GOLD_BLOCK)), poseStack.last().pose(), poseStack.last().normal(), 1.0F
+			);
+		} else {
+			RenderType renderType = this.getRenderType(livingEntity, bl, bl2, bl3);
+			return renderType != null ? multiBufferSource.getBuffer(renderType) : null;
+		}
 	}
 
 	@Nullable
@@ -258,13 +302,17 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 	}
 
 	public static boolean isEntityUpsideDown(LivingEntity livingEntity) {
+		ResourceKey<EntityType<?>> resourceKey = livingEntity.getType().builtInRegistryHolder().key();
+		boolean bl = Rules.INVERTED_ENTITIES_A.contains(resourceKey);
+		boolean bl2 = Rules.INVERTED_ENTITIES_B.contains(resourceKey);
 		if (livingEntity instanceof Player || livingEntity.hasCustomName()) {
 			String string = ChatFormatting.stripFormatting(livingEntity.getName().getString());
-			if ("Dinnerbone".equals(string) || "Grumm".equals(string)) {
+			boolean bl3 = "Dinnerbone".equals(string) || "Grumm".equals(string);
+			if (bl3 ^ bl ^ bl2) {
 				return !(livingEntity instanceof Player) || ((Player)livingEntity).isModelPartShown(PlayerModelPart.CAPE);
 			}
 		}
 
-		return false;
+		return bl ^ bl2;
 	}
 }

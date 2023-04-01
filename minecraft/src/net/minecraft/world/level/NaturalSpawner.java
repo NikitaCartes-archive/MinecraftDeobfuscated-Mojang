@@ -15,6 +15,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
@@ -23,6 +24,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -147,8 +149,9 @@ public final class NaturalSpawner {
 		if (!blockState.isRedstoneConductor(chunkAccess, blockPos)) {
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 			int j = 0;
+			int k = 0;
 
-			for (int k = 0; k < 3; k++) {
+			while (k < 3) {
 				int l = blockPos.getX();
 				int m = blockPos.getZ();
 				int n = 6;
@@ -157,7 +160,7 @@ public final class NaturalSpawner {
 				int o = Mth.ceil(serverLevel.random.nextFloat() * 4.0F);
 				int p = 0;
 
-				for (int q = 0; q < o; q++) {
+				for (int q = 0; q < o; k++) {
 					l += serverLevel.random.nextInt(6) - serverLevel.random.nextInt(6);
 					m += serverLevel.random.nextInt(6) - serverLevel.random.nextInt(6);
 					mutableBlockPos.set(l, i, m);
@@ -172,7 +175,7 @@ public final class NaturalSpawner {
 									serverLevel, structureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos
 								);
 								if (optional.isEmpty()) {
-									break;
+									continue;
 								}
 
 								spawnerData = (MobSpawnSettings.SpawnerData)optional.get();
@@ -181,7 +184,12 @@ public final class NaturalSpawner {
 
 							if (isValidSpawnPostitionForType(serverLevel, mobCategory, structureManager, chunkGenerator, spawnerData, mutableBlockPos, f)
 								&& spawnPredicate.test(spawnerData.type, mutableBlockPos, chunkAccess)) {
-								Mob mob = getMobForSpawn(serverLevel, spawnerData.type);
+								EntityType<?> entityType = replaceSpawnData(spawnerData.type);
+								if (entityType == null) {
+									return;
+								}
+
+								Mob mob = getMobForSpawn(serverLevel, entityType);
 								if (mob == null) {
 									return;
 								}
@@ -198,13 +206,32 @@ public final class NaturalSpawner {
 									}
 
 									if (mob.isMaxGroupSizeReached(p)) {
-										break;
+										continue;
 									}
 								}
 							}
 						}
 					}
+
+					q++;
 				}
+
+				return;
+			}
+		}
+	}
+
+	@Nullable
+	private static EntityType<?> replaceSpawnData(EntityType<?> entityType) {
+		ResourceKey<EntityType<?>> resourceKey = (ResourceKey<EntityType<?>>)BuiltInRegistries.ENTITY_TYPE.getResourceKey(entityType).orElse(null);
+		if (resourceKey == null) {
+			return entityType;
+		} else {
+			ResourceKey<EntityType<?>> resourceKey2 = Rules.NATURAL_SPAWN_REPLACEMENT.get(resourceKey);
+			if (resourceKey2 == null) {
+				return Rules.NATURAL_SPAWN_DISABLE.contains(resourceKey) ? null : entityType;
+			} else {
+				return Rules.NATURAL_SPAWN_DISABLE.contains(resourceKey2) ? null : BuiltInRegistries.ENTITY_TYPE.get(resourceKey2);
 			}
 		}
 	}

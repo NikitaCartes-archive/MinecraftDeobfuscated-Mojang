@@ -37,12 +37,14 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -94,12 +96,14 @@ public final class ItemStack {
 	public static final String TAG_LORE = "Lore";
 	public static final String TAG_DAMAGE = "Damage";
 	public static final String TAG_COLOR = "color";
+	public static final String TAG_WOB = "wob";
 	private static final String TAG_UNBREAKABLE = "Unbreakable";
 	private static final String TAG_REPAIR_COST = "RepairCost";
 	private static final String TAG_CAN_DESTROY_BLOCK_LIST = "CanDestroy";
 	private static final String TAG_CAN_PLACE_ON_BLOCK_LIST = "CanPlaceOn";
 	private static final String TAG_HIDE_FLAGS = "HideFlags";
 	private static final Component DISABLED_ITEM_TOOLTIP = Component.translatable("item.disabled").withStyle(ChatFormatting.RED);
+	private static final Component RULE_DISABLED_ITEM_TOOLTIP = Component.translatable("rule.item.disabled").withStyle(ChatFormatting.RED);
 	private static final int DONT_HIDE_TOOLTIP = 0;
 	private static final Style LORE_STYLE = Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE).withItalic(true);
 	private int count;
@@ -154,7 +158,7 @@ public final class ItemStack {
 
 	private ItemStack(CompoundTag compoundTag) {
 		this.item = BuiltInRegistries.ITEM.get(new ResourceLocation(compoundTag.getString("id")));
-		this.count = compoundTag.getByte("Count");
+		this.count = compoundTag.getShort("Count");
 		if (compoundTag.contains("tag", 10)) {
 			this.tag = compoundTag.getCompound("tag");
 			this.getItem().verifyTagAfterLoad(this.tag);
@@ -208,6 +212,10 @@ public final class ItemStack {
 		return this.getItem().builtInRegistryHolder().is(tagKey);
 	}
 
+	public boolean is(ResourceKey<Item> resourceKey) {
+		return this.getItem().builtInRegistryHolder().is(resourceKey);
+	}
+
 	public boolean is(Item item) {
 		return this.getItem() == item;
 	}
@@ -225,21 +233,25 @@ public final class ItemStack {
 	}
 
 	public InteractionResult useOn(UseOnContext useOnContext) {
-		Player player = useOnContext.getPlayer();
-		BlockPos blockPos = useOnContext.getClickedPos();
-		BlockInWorld blockInWorld = new BlockInWorld(useOnContext.getLevel(), blockPos, false);
-		if (player != null
-			&& !player.getAbilities().mayBuild
-			&& !this.hasAdventureModePlaceTagForBlock(useOnContext.getLevel().registryAccess().registryOrThrow(Registries.BLOCK), blockInWorld)) {
-			return InteractionResult.PASS;
+		if (!RuleFeatureToggles.isEnabled(this.getItem())) {
+			return InteractionResult.FAIL;
 		} else {
-			Item item = this.getItem();
-			InteractionResult interactionResult = item.useOn(useOnContext);
-			if (player != null && interactionResult.shouldAwardStats()) {
-				player.awardStat(Stats.ITEM_USED.get(item));
-			}
+			Player player = useOnContext.getPlayer();
+			BlockPos blockPos = useOnContext.getClickedPos();
+			BlockInWorld blockInWorld = new BlockInWorld(useOnContext.getLevel(), blockPos, false);
+			if (player != null
+				&& !player.getAbilities().mayBuild
+				&& !this.hasAdventureModePlaceTagForBlock(useOnContext.getLevel().registryAccess().registryOrThrow(Registries.BLOCK), blockInWorld)) {
+				return InteractionResult.PASS;
+			} else {
+				Item item = this.getItem();
+				InteractionResult interactionResult = item.useOn(useOnContext);
+				if (player != null && interactionResult.shouldAwardStats()) {
+					player.awardStat(Stats.ITEM_USED.get(item));
+				}
 
-			return interactionResult;
+				return interactionResult;
+			}
 		}
 	}
 
@@ -248,7 +260,7 @@ public final class ItemStack {
 	}
 
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-		return this.getItem().use(level, player, interactionHand);
+		return !RuleFeatureToggles.isEnabled(this.getItem()) ? InteractionResultHolder.fail(this) : this.getItem().use(level, player, interactionHand);
 	}
 
 	public ItemStack finishUsingItem(Level level, LivingEntity livingEntity) {
@@ -547,7 +559,17 @@ public final class ItemStack {
 		}
 	}
 
+	public boolean isWob() {
+		CompoundTag compoundTag = this.getTag();
+		return compoundTag != null && compoundTag.getBoolean("wob");
+	}
+
 	public Component getHoverName() {
+		Component component = this.getDefaultHoverName();
+		return (Component)(this.isWob() ? component.copy().withStyle(style -> style.withReversed(true)) : component);
+	}
+
+	private Component getDefaultHoverName() {
 		CompoundTag compoundTag = this.getTagElement("display");
 		if (compoundTag != null && compoundTag.contains("Name", 8)) {
 			try {
@@ -765,6 +787,10 @@ public final class ItemStack {
 
 		if (player != null && !this.getItem().isEnabled(player.getLevel().enabledFeatures())) {
 			list.add(DISABLED_ITEM_TOOLTIP);
+		}
+
+		if (!RuleFeatureToggles.isEnabled(this)) {
+			list.add(RULE_DISABLED_ITEM_TOOLTIP);
 		}
 
 		return list;

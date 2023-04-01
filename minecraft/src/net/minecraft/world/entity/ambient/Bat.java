@@ -44,6 +44,11 @@ public class Bat extends AmbientCreature {
 	}
 
 	@Override
+	public boolean canTransformFly() {
+		return true;
+	}
+
+	@Override
 	public boolean isFlapping() {
 		return !this.isResting() && this.tickCount % TICKS_PER_FLAP == 0;
 	}
@@ -189,7 +194,7 @@ public class Bat extends AmbientCreature {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
@@ -197,7 +202,7 @@ public class Bat extends AmbientCreature {
 				this.setResting(false);
 			}
 
-			return super.hurt(damageSource, f);
+			return super.hurtInternal(damageSource, f);
 		}
 	}
 

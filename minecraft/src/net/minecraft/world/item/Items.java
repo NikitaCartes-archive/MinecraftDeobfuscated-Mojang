@@ -3,6 +3,15 @@ package net.minecraft.world.item;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.ByteTag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.ShortTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BannerPatternTags;
@@ -181,6 +190,7 @@ public class Items {
 	public static final Item MANGROVE_LEAVES = registerBlock(Blocks.MANGROVE_LEAVES);
 	public static final Item AZALEA_LEAVES = registerBlock(Blocks.AZALEA_LEAVES);
 	public static final Item FLOWERING_AZALEA_LEAVES = registerBlock(Blocks.FLOWERING_AZALEA_LEAVES);
+	public static final Item SPLEAVES = registerBlock(Blocks.COPPER_SPLEAVES);
 	public static final Item SPONGE = registerBlock(Blocks.SPONGE);
 	public static final Item WET_SPONGE = registerBlock(Blocks.WET_SPONGE);
 	public static final Item GLASS = registerBlock(Blocks.GLASS);
@@ -688,6 +698,8 @@ public class Items {
 	public static final Item SLIME_BLOCK = registerBlock(Blocks.SLIME_BLOCK);
 	public static final Item HONEY_BLOCK = registerBlock(Blocks.HONEY_BLOCK);
 	public static final Item OBSERVER = registerBlock(Blocks.OBSERVER);
+	public static final Item PICKAXE_BLOCK = registerBlock(Blocks.PICKAXE_BLOCK);
+	public static final Item PLACE_BLOCK = registerBlock(Blocks.PLACE_BLOCK);
 	public static final Item HOPPER = registerBlock(Blocks.HOPPER);
 	public static final Item DISPENSER = registerBlock(Blocks.DISPENSER);
 	public static final Item DROPPER = registerBlock(Blocks.DROPPER);
@@ -812,7 +824,7 @@ public class Items {
 	public static final Item COAL = registerItem("coal", new Item(new Item.Properties()));
 	public static final Item CHARCOAL = registerItem("charcoal", new Item(new Item.Properties()));
 	public static final Item DIAMOND = registerItem("diamond", new Item(new Item.Properties()));
-	public static final Item EMERALD = registerItem("emerald", new Item(new Item.Properties()));
+	public static final Item EMERALD = registerItem("emerald", new EmeraldItem(new Item.Properties()));
 	public static final Item LAPIS_LAZULI = registerItem("lapis_lazuli", new Item(new Item.Properties()));
 	public static final Item QUARTZ = registerItem("quartz", new Item(new Item.Properties()));
 	public static final Item AMETHYST_SHARD = registerItem("amethyst_shard", new Item(new Item.Properties()));
@@ -862,6 +874,7 @@ public class Items {
 	public static final Item BOWL = registerItem("bowl", new Item(new Item.Properties()));
 	public static final Item MUSHROOM_STEW = registerItem("mushroom_stew", new BowlFoodItem(new Item.Properties().stacksTo(1).food(Foods.MUSHROOM_STEW)));
 	public static final Item STRING = registerItem("string", new ItemNameBlockItem(Blocks.TRIPWIRE, new Item.Properties()));
+	public static final Item LONG_STRING = registerItem("string2", new Item(new Item.Properties()));
 	public static final Item FEATHER = registerItem("feather", new Item(new Item.Properties()));
 	public static final Item GUNPOWDER = registerItem("gunpowder", new Item(new Item.Properties()));
 	public static final Item WHEAT_SEEDS = registerItem("wheat_seeds", new ItemNameBlockItem(Blocks.WHEAT, new Item.Properties()));
@@ -1094,12 +1107,18 @@ public class Items {
 	public static final Item NETHER_WART = registerItem("nether_wart", new ItemNameBlockItem(Blocks.NETHER_WART, new Item.Properties()));
 	public static final Item POTION = registerItem("potion", new PotionItem(new Item.Properties().stacksTo(1)));
 	public static final Item GLASS_BOTTLE = registerItem("glass_bottle", new BottleItem(new Item.Properties()));
+	public static final Item AIR_BLOCK = registerItem("air_block", new Item(new Item.Properties().food(Foods.AIR)));
+	public static final Item PACKED_AIR = registerBlock(Blocks.PACKED_AIR);
+	public static final Item BOTTLE_OF_VOID = registerItem("bottle_of_void", new BottleOfVoidItem(new Item.Properties().stacksTo(1)));
+	public static final Item BOTTLE_OF_ENTITY = registerItem("bottle_of_entity", new BottleOfEntityItem(new Item.Properties().stacksTo(1)));
+	public static final Item SPLASH_BOTTLE_OF_ENTITY = registerItem("splash_bottle_of_entity", new SplashBottleOfEntityItem(new Item.Properties().stacksTo(1)));
 	public static final Item SPIDER_EYE = registerItem("spider_eye", new Item(new Item.Properties().food(Foods.SPIDER_EYE)));
 	public static final Item FERMENTED_SPIDER_EYE = registerItem("fermented_spider_eye", new Item(new Item.Properties()));
 	public static final Item BLAZE_POWDER = registerItem("blaze_powder", new Item(new Item.Properties()));
 	public static final Item MAGMA_CREAM = registerItem("magma_cream", new Item(new Item.Properties()));
 	public static final Item BREWING_STAND = registerBlock(Blocks.BREWING_STAND);
 	public static final Item CAULDRON = registerBlock(Blocks.CAULDRON, Blocks.WATER_CAULDRON, Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON);
+	public static final Item COPPER_SINK = registerBlock(Blocks.COPPER_SINK, Blocks.FILLED_COPPER_SINK);
 	public static final Item ENDER_EYE = registerItem("ender_eye", new EnderEyeItem(new Item.Properties()));
 	public static final Item GLISTERING_MELON_SLICE = registerItem("glistering_melon_slice", new Item(new Item.Properties()));
 	public static final Item ALLAY_SPAWN_EGG = registerItem("allay_spawn_egg", new SpawnEggItem(EntityType.ALLAY, 56063, 44543, new Item.Properties()));
@@ -1152,6 +1171,9 @@ public class Items {
 	);
 	public static final Item MOOSHROOM_SPAWN_EGG = registerItem(
 		"mooshroom_spawn_egg", new SpawnEggItem(EntityType.MOOSHROOM, 10489616, 12040119, new Item.Properties())
+	);
+	public static final Item MOON_COW_SPAWN_EGG = registerItem(
+		"moon_cow_spawn_egg", new SpawnEggItem(EntityType.MOON_COW, 2370111, 15520630, new Item.Properties())
 	);
 	public static final Item MULE_SPAWN_EGG = registerItem("mule_spawn_egg", new SpawnEggItem(EntityType.MULE, 1769984, 5321501, new Item.Properties()));
 	public static final Item OCELOT_SPAWN_EGG = registerItem("ocelot_spawn_egg", new SpawnEggItem(EntityType.OCELOT, 15720061, 5653556, new Item.Properties()));
@@ -1422,6 +1444,9 @@ public class Items {
 	public static final Item MOJANG_BANNER_PATTERN = registerItem(
 		"mojang_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_MOJANG, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC))
 	);
+	public static final Item NEW_MOJANG_BANNER_PATTERN = registerItem(
+		"m_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_M, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC))
+	);
 	public static final Item GLOBE_BANNER_PATTERN = registerItem(
 		"globe_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_GLOBE, new Item.Properties().stacksTo(1))
 	);
@@ -1569,6 +1594,27 @@ public class Items {
 	public static final Item SHELTER_POTTERY_SHARD = registerItem("shelter_pottery_shard", new Item(new Item.Properties()));
 	public static final Item SKULL_POTTERY_SHARD = registerItem("skull_pottery_shard", new Item(new Item.Properties()));
 	public static final Item SNORT_POTTERY_SHARD = registerItem("snort_pottery_shard", new Item(new Item.Properties()));
+	public static final Item DUPE_HACK = registerItem("dupe_hack", new DupeHackItem(new Item.Properties().stacksTo(1)));
+	public static final Item CHEESE = registerBlock(Blocks.CHEESE);
+	public static final Item NAME = registerItem("name", new NameItem(new Item.Properties()));
+	public static final Item TAG = registerItem("tag", new Item(new Item.Properties()));
+	public static final Item STRING_TAG = registerItem("string_tag", new TagContainerItem<>(new Item.Properties(), StringTag.TYPE));
+	public static final Item BYTE_TAG = registerItem("byte_tag", new TagContainerItem<>(new Item.Properties(), ByteTag.TYPE));
+	public static final Item SHORT_TAG = registerItem("short_tag", new TagContainerItem<>(new Item.Properties(), ShortTag.TYPE));
+	public static final Item INT_TAG = registerItem("int_tag", new TagContainerItem<>(new Item.Properties(), IntTag.TYPE));
+	public static final Item LONG_TAG = registerItem("long_tag", new TagContainerItem<>(new Item.Properties(), LongTag.TYPE));
+	public static final Item FLOAT_TAG = registerItem("float_tag", new TagContainerItem<>(new Item.Properties(), FloatTag.TYPE));
+	public static final Item DOUBLE_TAG = registerItem("double_tag", new TagContainerItem<>(new Item.Properties(), DoubleTag.TYPE));
+	public static final Item COMPOUND_TAG = registerItem("compound_tag", new TagContainerItem<>(new Item.Properties(), CompoundTag.TYPE));
+	public static final Item LIST_TAG = registerItem("list_tag", new TagContainerItem<>(new Item.Properties(), ListTag.TYPE));
+	public static final Item LEFT_SQUARE = registerItem("left_square", new Item(new Item.Properties()));
+	public static final Item RIGHT_SQUARE = registerItem("right_square", new Item(new Item.Properties()));
+	public static final Item LEFT_CURLY = registerItem("left_curly", new Item(new Item.Properties()));
+	public static final Item RIGHT_CURLY = registerItem("right_curly", new Item(new Item.Properties()));
+	public static final Item SYNTAX_ERROR = registerItem("syntax_error", new Item(new Item.Properties()));
+	public static final Item BIT = registerItem("bit", new Item(new Item.Properties()));
+	public static final Item LE_TRICOLORE = registerItem("le_tricolore", new Item(new Item.Properties()));
+	public static final Item LA_BAGUETTE = registerItem("la_baguette", new SwordItem(Tiers.WOOD, 3, -2.4F, new Item.Properties()));
 
 	private static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));

@@ -46,6 +46,10 @@ public class CavePlacements {
 	public static final ResourceKey<PlacedFeature> SCULK_PATCH_DEEP_DARK = PlacementUtils.createKey("sculk_patch_deep_dark");
 	public static final ResourceKey<PlacedFeature> SCULK_PATCH_ANCIENT_CITY = PlacementUtils.createKey("sculk_patch_ancient_city");
 	public static final ResourceKey<PlacedFeature> SCULK_VEIN = PlacementUtils.createKey("sculk_vein");
+	public static final ResourceKey<PlacedFeature> CRATER_MEGA = PlacementUtils.createKey("crater_mega");
+	public static final ResourceKey<PlacedFeature> CRATER_LARGE = PlacementUtils.createKey("crater_large");
+	public static final ResourceKey<PlacedFeature> CRATER_SMALL = PlacementUtils.createKey("crater_small");
+	public static final ResourceKey<PlacedFeature> LUNAR_BASE = PlacementUtils.createKey("lunar_base");
 
 	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
 		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
@@ -68,6 +72,10 @@ public class CavePlacements {
 		Holder<ConfiguredFeature<?, ?>> holder17 = holderGetter.getOrThrow(CaveFeatures.SCULK_PATCH_DEEP_DARK);
 		Holder<ConfiguredFeature<?, ?>> holder18 = holderGetter.getOrThrow(CaveFeatures.SCULK_PATCH_ANCIENT_CITY);
 		Holder<ConfiguredFeature<?, ?>> holder19 = holderGetter.getOrThrow(CaveFeatures.SCULK_VEIN);
+		Holder<ConfiguredFeature<?, ?>> holder20 = holderGetter.getOrThrow(CaveFeatures.MEGA_CRATER);
+		Holder<ConfiguredFeature<?, ?>> holder21 = holderGetter.getOrThrow(CaveFeatures.LARGE_CRATER);
+		Holder<ConfiguredFeature<?, ?>> holder22 = holderGetter.getOrThrow(CaveFeatures.SMALL_CRATER);
+		Holder<ConfiguredFeature<?, ?>> holder23 = holderGetter.getOrThrow(CaveFeatures.LUNAR_BASE);
 		PlacementUtils.register(
 			bootstapContext,
 			MONSTER_ROOM,
@@ -242,6 +250,42 @@ public class CavePlacements {
 			SCULK_PATCH_DEEP_DARK,
 			holder17,
 			CountPlacement.of(ConstantInt.of(256)),
+			InSquarePlacement.spread(),
+			PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
+			BiomeFilter.biome()
+		);
+		PlacementUtils.register(
+			bootstapContext,
+			CRATER_MEGA,
+			holder20,
+			RarityFilter.onAverageOnceEvery(256),
+			InSquarePlacement.spread(),
+			PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
+			BiomeFilter.biome()
+		);
+		PlacementUtils.register(
+			bootstapContext,
+			CRATER_LARGE,
+			holder21,
+			RarityFilter.onAverageOnceEvery(12),
+			InSquarePlacement.spread(),
+			PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
+			BiomeFilter.biome()
+		);
+		PlacementUtils.register(
+			bootstapContext,
+			CRATER_SMALL,
+			holder22,
+			RarityFilter.onAverageOnceEvery(4),
+			InSquarePlacement.spread(),
+			PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
+			BiomeFilter.biome()
+		);
+		PlacementUtils.register(
+			bootstapContext,
+			LUNAR_BASE,
+			holder23,
+			RarityFilter.onAverageOnceEvery(1024),
 			InSquarePlacement.spread(),
 			PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 			BiomeFilter.biome()

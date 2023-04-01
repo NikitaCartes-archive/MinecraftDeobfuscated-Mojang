@@ -78,8 +78,8 @@ public class GlowSquid extends Squid {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
+		boolean bl = super.hurtInternal(damageSource, f);
 		if (bl) {
 			this.setDarkTicks(100);
 		}

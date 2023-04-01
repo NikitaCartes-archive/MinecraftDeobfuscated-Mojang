@@ -19,6 +19,11 @@ public abstract class AbstractIllager extends Raider {
 	}
 
 	@Override
+	protected boolean isItAwkwardToMilk() {
+		return true;
+	}
+
+	@Override
 	public MobType getMobType() {
 		return MobType.ILLAGER;
 	}

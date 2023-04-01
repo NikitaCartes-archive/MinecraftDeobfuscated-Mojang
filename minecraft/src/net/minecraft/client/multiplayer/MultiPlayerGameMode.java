@@ -34,12 +34,14 @@ import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
@@ -152,25 +154,33 @@ public class MultiPlayerGameMode {
 
 				BlockState blockState = this.minecraft.level.getBlockState(blockPos);
 				this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, 0.0F);
-				this.startPrediction(this.minecraft.level, i -> {
-					boolean bl = !blockState.isAir();
-					if (bl && this.destroyProgress == 0.0F) {
-						blockState.attack(this.minecraft.level, blockPos, this.minecraft.player);
-					}
+				this.startPrediction(
+					this.minecraft.level,
+					i -> {
+						boolean bl = !blockState.isAir();
+						if (bl && this.destroyProgress == 0.0F) {
+							blockState.attack(this.minecraft.level, blockPos, this.minecraft.player);
+						}
 
-					if (bl && blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos) >= 1.0F) {
-						this.destroyBlock(blockPos);
-					} else {
-						this.isDestroying = true;
-						this.destroyBlockPos = blockPos;
-						this.destroyingItem = this.minecraft.player.getMainHandItem();
-						this.destroyProgress = 0.0F;
-						this.destroyTicks = 0.0F;
-						this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, (int)(this.destroyProgress * 10.0F) - 1);
-					}
+						if (Rules.EVIL_EYE.get()
+							&& bl
+							&& this.minecraft.player.getMainHandItem().isEmpty()
+							&& blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos) > 0.0F) {
+							this.destroyBlock(blockPos);
+						} else if (bl && blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos) >= 1.0F) {
+							this.destroyBlock(blockPos);
+						} else {
+							this.isDestroying = true;
+							this.destroyBlockPos = blockPos;
+							this.destroyingItem = this.minecraft.player.getMainHandItem();
+							this.destroyProgress = 0.0F;
+							this.destroyTicks = 0.0F;
+							this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, (int)(this.destroyProgress * 10.0F) - 1);
+						}
 
-					return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, i);
-				});
+						return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, i);
+					}
+				);
 			}
 
 			return true;
@@ -256,7 +266,16 @@ public class MultiPlayerGameMode {
 	}
 
 	public float getPickRange() {
-		return this.localPlayerMode.isCreative() ? 5.0F : 4.5F;
+		EntityTransform entityTransform = EntityTransform.get(this.minecraft.player);
+		return entityTransform.reachDistance(this.getBasePickRange());
+	}
+
+	private float getBasePickRange() {
+		if (this.localPlayerMode.isCreative()) {
+			return 5.0F;
+		} else {
+			return Rules.EVIL_EYE.get() && this.minecraft.player.getMainHandItem().isEmpty() ? 200.0F : 4.5F;
+		}
 	}
 
 	public void tick() {

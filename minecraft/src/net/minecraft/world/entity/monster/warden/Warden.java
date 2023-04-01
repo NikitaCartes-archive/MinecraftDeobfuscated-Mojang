@@ -519,8 +519,8 @@ public class Warden extends Monster implements VibrationListener.Config {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
+		boolean bl = super.hurtInternal(damageSource, f);
 		if (!this.level.isClientSide && !this.isNoAi() && !this.isDiggingOrEmerging()) {
 			Entity entity = damageSource.getEntity();
 			this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);

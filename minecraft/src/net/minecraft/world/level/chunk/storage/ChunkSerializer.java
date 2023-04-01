@@ -346,12 +346,14 @@ public class ChunkSerializer {
 					compoundTag2.put("biomes", codec.encodeStart(NbtOps.INSTANCE, levelChunkSection.getBiomes()).getOrThrow(false, LOGGER::error));
 				}
 
-				if (dataLayer != null && !dataLayer.isEmpty()) {
-					compoundTag2.putByteArray("BlockLight", dataLayer.getData());
-				}
+				if (!chunkAccess.isLightsOut()) {
+					if (dataLayer != null && !dataLayer.isEmpty()) {
+						compoundTag2.putByteArray("BlockLight", dataLayer.getData());
+					}
 
-				if (dataLayer2 != null && !dataLayer2.isEmpty()) {
-					compoundTag2.putByteArray("SkyLight", dataLayer2.getData());
+					if (dataLayer2 != null && !dataLayer2.isEmpty()) {
+						compoundTag2.putByteArray("SkyLight", dataLayer2.getData());
+					}
 				}
 
 				if (!compoundTag2.isEmpty()) {
@@ -362,7 +364,7 @@ public class ChunkSerializer {
 		}
 
 		compoundTag.put("sections", listTag);
-		if (bl) {
+		if (bl && !chunkAccess.isLightsOut()) {
 			compoundTag.putBoolean("isLightOn", true);
 		}
 

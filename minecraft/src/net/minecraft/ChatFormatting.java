@@ -41,6 +41,11 @@ public enum ChatFormatting implements StringRepresentable {
 	private static final Map<String, ChatFormatting> FORMATTING_BY_NAME = (Map<String, ChatFormatting>)Arrays.stream(values())
 		.collect(Collectors.toMap(chatFormatting -> cleanName(chatFormatting.name), chatFormatting -> chatFormatting));
 	private static final Pattern STRIP_FORMATTING_PATTERN = Pattern.compile("(?i)§[0-9A-FK-OR]");
+	public static final List<ChatFormatting> COLORS = Arrays.stream(values()).filter(ChatFormatting::isColor).toList();
+	public static final List<ChatFormatting> FORMAT = Arrays.stream(values())
+		.filter(ChatFormatting::isFormat)
+		.filter(chatFormatting -> chatFormatting != OBFUSCATED)
+		.toList();
 	private final String name;
 	private final char code;
 	private final boolean isFormat;

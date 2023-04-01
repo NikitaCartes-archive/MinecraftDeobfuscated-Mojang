@@ -93,7 +93,7 @@ public class Silverfish extends Monster {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
@@ -101,7 +101,7 @@ public class Silverfish extends Monster {
 				this.friendsGoal.notifyHurt();
 			}
 
-			return super.hurt(damageSource, f);
+			return super.hurtInternal(damageSource, f);
 		}
 	}
 

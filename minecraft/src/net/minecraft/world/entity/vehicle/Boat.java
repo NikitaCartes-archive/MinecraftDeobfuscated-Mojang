@@ -13,12 +13,15 @@ import net.minecraft.network.protocol.game.ServerboundPaddleBoatPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.VehicleCollisionRule;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -88,6 +91,9 @@ public class Boat extends Entity implements VariantHolder<Boat.Type> {
 	private float bubbleMultiplier;
 	private float bubbleAngle;
 	private float bubbleAngleO;
+	private static final double MAX_SPEED = 0.35;
+	private static final double MAX_COLLISION_SPEED = 0.2975;
+	private static final double MAX_COLLISION_SPEED_SQR = 0.08850625;
 
 	public Boat(EntityType<? extends Boat> entityType, Level level) {
 		super(entityType, level);
@@ -100,6 +106,11 @@ public class Boat extends Entity implements VariantHolder<Boat.Type> {
 		this.xo = d;
 		this.yo = e;
 		this.zo = f;
+	}
+
+	@Override
+	public float maxUpStep() {
+		return Rules.ROWING_UP_THAT_HILL.get() ? 100.0F : super.maxUpStep();
 	}
 
 	@Override
@@ -153,7 +164,7 @@ public class Boat extends Entity implements VariantHolder<Boat.Type> {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!this.level.isClientSide && !this.isRemoved()) {
@@ -256,6 +267,13 @@ public class Boat extends Entity implements VariantHolder<Boat.Type> {
 
 	@Override
 	public void tick() {
+		double d;
+		if (this.getControllingPassenger() instanceof ServerPlayer serverPlayer) {
+			d = serverPlayer.connection.vehicleSpeedSqr;
+		} else {
+			d = this.getDeltaMovement().lengthSqr();
+		}
+
 		this.oldStatus = this.status;
 		this.status = this.getStatus();
 		if (this.status != Boat.Status.UNDER_WATER && this.status != Boat.Status.UNDER_FLOWING_WATER) {
@@ -304,9 +322,9 @@ public class Boat extends Entity implements VariantHolder<Boat.Type> {
 					SoundEvent soundEvent = this.getPaddleSound();
 					if (soundEvent != null) {
 						Vec3 vec3 = this.getViewVector(1.0F);
-						double d = i == 1 ? -vec3.z : vec3.z;
-						double e = i == 1 ? vec3.x : -vec3.x;
-						this.level.playSound(null, this.getX() + d, this.getY(), this.getZ() + e, soundEvent, this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat());
+						double e = i == 1 ? -vec3.z : vec3.z;
+						double f = i == 1 ? vec3.x : -vec3.x;
+						this.level.playSound(null, this.getX() + e, this.getY(), this.getZ() + f, soundEvent, this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat());
 					}
 				}
 
@@ -336,6 +354,30 @@ public class Boat extends Entity implements VariantHolder<Boat.Type> {
 						this.push(entity);
 					}
 				}
+			}
+		}
+
+		if (Rules.BOAT_COLLISIONS.get() != VehicleCollisionRule.NONE
+			&& this.level.isClientSide
+			&& this.isControlledByLocalInstance()
+			&& this.horizontalCollision
+			&& d > 0.08850625) {
+			((Player)this.getControllingPassenger()).callInsurance((float)Math.sqrt(d));
+		}
+	}
+
+	public void handleCrash(float f) {
+		if ((double)f > 0.2975 && !this.isRemoved()) {
+			VehicleCollisionRule vehicleCollisionRule = Rules.BOAT_COLLISIONS.get();
+			if (vehicleCollisionRule == VehicleCollisionRule.BREAK) {
+				if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+					this.destroy(this.level.damageSources().fall());
+				}
+
+				this.discard();
+			} else if (vehicleCollisionRule == VehicleCollisionRule.EXPLODE) {
+				this.level.explode(this, this.getX(), this.getY() + 1.0, this.getZ(), Math.min(3.0F * f, 5.0F), Level.ExplosionInteraction.MOB);
+				this.discard();
 			}
 		}
 	}

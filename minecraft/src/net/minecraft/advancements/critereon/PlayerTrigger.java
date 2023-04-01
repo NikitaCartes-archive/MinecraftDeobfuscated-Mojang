@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -56,6 +57,15 @@ public class PlayerTrigger extends SimpleCriterionTrigger<PlayerTrigger.TriggerI
 
 		public static PlayerTrigger.TriggerInstance tick() {
 			return new PlayerTrigger.TriggerInstance(CriteriaTriggers.TICK.id, EntityPredicate.Composite.ANY);
+		}
+
+		public static PlayerTrigger.TriggerInstance vote(MinMaxBounds.Ints ints) {
+			return new PlayerTrigger.TriggerInstance(
+				CriteriaTriggers.VOTED.id,
+				EntityPredicate.Composite.wrap(
+					EntityPredicate.Builder.entity().subPredicate(PlayerPredicate.Builder.player().addStat(Stats.CUSTOM.get(Stats.VOTED), ints).build()).build()
+				)
+			);
 		}
 
 		public static PlayerTrigger.TriggerInstance walkOnBlockWithEquipment(Block block, Item item) {

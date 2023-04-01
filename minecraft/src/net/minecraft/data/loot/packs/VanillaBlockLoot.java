@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.BeetrootBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CarrotBlock;
+import net.minecraft.world.level.block.CheeseBlock;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.CropBlock;
@@ -166,6 +167,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.STRIPPED_CRIMSON_HYPHAE);
 		this.dropSelf(Blocks.STRIPPED_WARPED_HYPHAE);
 		this.dropSelf(Blocks.SPONGE);
+		this.add(Blocks.COPPER_SPLEAVES, noDrop());
 		this.dropSelf(Blocks.WET_SPONGE);
 		this.dropSelf(Blocks.LAPIS_BLOCK);
 		this.dropSelf(Blocks.SANDSTONE);
@@ -299,6 +301,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.NETHER_BRICK_FENCE);
 		this.dropSelf(Blocks.NETHER_BRICK_STAIRS);
 		this.dropSelf(Blocks.CAULDRON);
+		this.dropSelf(Blocks.COPPER_SINK);
 		this.dropSelf(Blocks.END_STONE);
 		this.dropSelf(Blocks.REDSTONE_LAMP);
 		this.dropSelf(Blocks.SANDSTONE_STAIRS);
@@ -414,6 +417,8 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.RED_NETHER_BRICKS);
 		this.dropSelf(Blocks.BONE_BLOCK);
 		this.dropSelf(Blocks.OBSERVER);
+		this.dropSelf(Blocks.PICKAXE_BLOCK);
+		this.dropSelf(Blocks.PLACE_BLOCK);
 		this.dropSelf(Blocks.TARGET);
 		this.dropSelf(Blocks.WHITE_GLAZED_TERRACOTTA);
 		this.dropSelf(Blocks.ORANGE_GLAZED_TERRACOTTA);
@@ -633,6 +638,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropOther(Blocks.WATER_CAULDRON, Blocks.CAULDRON);
 		this.dropOther(Blocks.LAVA_CAULDRON, Blocks.CAULDRON);
 		this.dropOther(Blocks.POWDER_SNOW_CAULDRON, Blocks.CAULDRON);
+		this.dropOther(Blocks.FILLED_COPPER_SINK, Blocks.COPPER_SINK);
 		this.dropOther(Blocks.BIG_DRIPLEAF_STEM, Blocks.BIG_DRIPLEAF);
 		this.add(Blocks.STONE, block -> this.createSingleItemTableWithSilkTouch(block, Blocks.COBBLESTONE));
 		this.add(Blocks.DEEPSLATE, block -> this.createSingleItemTableWithSilkTouch(block, Blocks.COBBLED_DEEPSLATE));
@@ -1350,6 +1356,18 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.otherWhenSilkTouch(Blocks.INFESTED_DEEPSLATE, Blocks.DEEPSLATE);
 		this.addNetherVinesDropTable(Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT);
 		this.addNetherVinesDropTable(Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT);
+		this.add(
+			Blocks.CHEESE,
+			block -> LootTable.lootTable()
+					.withPool(
+						LootPool.lootPool()
+							.when(
+								LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
+									.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CheeseBlock.SLICES, 255))
+							)
+							.add(LootItem.lootTableItem(Blocks.CHEESE))
+					)
+		);
 		this.add(Blocks.CAKE, noDrop());
 		this.add(Blocks.CANDLE_CAKE, createCandleCakeDrops(Blocks.CANDLE));
 		this.add(Blocks.WHITE_CANDLE_CAKE, createCandleCakeDrops(Blocks.WHITE_CANDLE));
@@ -1373,6 +1391,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.add(Blocks.FIRE, noDrop());
 		this.add(Blocks.SOUL_FIRE, noDrop());
 		this.add(Blocks.NETHER_PORTAL, noDrop());
+		this.add(Blocks.OTHER_PORTAL, noDrop());
 		this.add(Blocks.BUDDING_AMETHYST, noDrop());
 		this.add(Blocks.POWDER_SNOW, noDrop());
 		this.add(Blocks.FROGSPAWN, noDrop());

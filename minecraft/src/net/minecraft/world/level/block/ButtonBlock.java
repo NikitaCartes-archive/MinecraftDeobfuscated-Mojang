@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
@@ -89,6 +91,13 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 					return bl ? PRESSED_CEILING_AABB_Z : CEILING_AABB_Z;
 				}
 		}
+	}
+
+	@Override
+	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return blockState.is(Blocks.POLISHED_BLACKSTONE_BUTTON) && !blockState.getValue(POWERED)
+			? this.getShape(blockState, blockGetter, blockPos, collisionContext)
+			: Shapes.empty();
 	}
 
 	@Override
@@ -188,5 +197,33 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACING, POWERED, FACE);
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		if (Rules.HAUNTED_WORLD.get()) {
+			this.press(blockState, serverLevel, blockPos);
+			this.playSound(null, serverLevel, blockPos, true);
+			serverLevel.gameEvent(null, GameEvent.BLOCK_ACTIVATE, blockPos);
+		}
+
+		super.randomTick(blockState, serverLevel, blockPos, randomSource);
+	}
+
+	public static BlockState getValidAttachedState(BlockState blockState, Direction direction, Direction direction2) {
+		if (direction.getAxis() == direction2.getAxis()) {
+			throw new IllegalArgumentException("Invalid facing " + direction + " towards " + direction2 + " should be on a different axis");
+		} else {
+			return switch (direction) {
+				case UP -> (BlockState)blockState.setValue(FACE, AttachFace.CEILING).setValue(FACING, direction2);
+				case DOWN -> (BlockState)blockState.setValue(FACE, AttachFace.FLOOR).setValue(FACING, direction2.getClockWise());
+				default -> (BlockState)blockState.setValue(FACE, AttachFace.WALL).setValue(FACING, direction.getOpposite());
+			};
+		}
 	}
 }

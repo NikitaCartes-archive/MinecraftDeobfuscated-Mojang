@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -40,10 +41,14 @@ public class SaplingBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	public void advanceTree(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, RandomSource randomSource) {
-		if ((Integer)blockState.getValue(STAGE) == 0) {
-			serverLevel.setBlock(blockPos, blockState.cycle(STAGE), 4);
+		if (Rules.DEAD_BUSH_RENEWABILITY.get() && !serverLevel.getBlockState(blockPos.above()).getMaterial().isLiquid()) {
+			serverLevel.setBlock(blockPos, Blocks.DEAD_BUSH.defaultBlockState(), 3);
 		} else {
-			this.treeGrower.growTree(serverLevel, serverLevel.getChunkSource().getGenerator(), blockPos, blockState, randomSource);
+			if ((Integer)blockState.getValue(STAGE) == 0) {
+				serverLevel.setBlock(blockPos, blockState.cycle(STAGE), 4);
+			} else {
+				this.treeGrower.growTree(serverLevel, serverLevel.getChunkSource().getGenerator(), blockPos, blockState, randomSource);
+			}
 		}
 	}
 

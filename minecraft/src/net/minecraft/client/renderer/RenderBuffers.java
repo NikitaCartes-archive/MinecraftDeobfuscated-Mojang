@@ -31,6 +31,9 @@ public class RenderBuffers {
 		put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
 		put(object2ObjectLinkedOpenHashMap, RenderType.entityGlintDirect());
 		put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
+		put(object2ObjectLinkedOpenHashMap, RenderType.goldEntityGlint());
+		put(object2ObjectLinkedOpenHashMap, RenderType.dynamicLightStencil());
+		put(object2ObjectLinkedOpenHashMap, RenderType.dynamicLightColor());
 		ModelBakery.DESTROY_TYPES.forEach(renderType -> put(object2ObjectLinkedOpenHashMap, renderType));
 	});
 	private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediateWithBuffers(this.fixedBuffers, new BufferBuilder(256));

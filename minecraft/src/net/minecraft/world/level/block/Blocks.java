@@ -391,6 +391,18 @@ public class Blocks {
 	);
 	public static final Block AZALEA_LEAVES = register("azalea_leaves", leaves(SoundType.AZALEA_LEAVES));
 	public static final Block FLOWERING_AZALEA_LEAVES = register("flowering_azalea_leaves", leaves(SoundType.AZALEA_LEAVES));
+	public static final Block COPPER_SPLEAVES = register(
+		"copper_spleaves",
+		new SpleavesBlock(
+			BlockBehaviour.Properties.of(Material.LEAVES, MaterialColor.WARPED_STEM)
+				.strength(0.1F, 0.3F)
+				.sound(SoundType.COPPER)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.isSuffocating(Blocks::never)
+				.isViewBlocking(Blocks::never)
+		)
+	);
 	public static final Block SPONGE = register("sponge", new SpongeBlock(BlockBehaviour.Properties.of(Material.SPONGE).strength(0.6F).sound(SoundType.GRASS)));
 	public static final Block WET_SPONGE = register(
 		"wet_sponge", new WetSpongeBlock(BlockBehaviour.Properties.of(Material.SPONGE).strength(0.6F).sound(SoundType.GRASS))
@@ -1463,7 +1475,21 @@ public class Blocks {
 				.strength(-1.0F)
 				.sound(SoundType.GLASS)
 				.lightLevel(blockStatex -> 11)
-				.pushReaction(PushReaction.BLOCK)
+				.pushReaction(PushReaction.BLOCK),
+			false
+		)
+	);
+	public static final Block OTHER_PORTAL = register(
+		"other_portal",
+		new NetherPortalBlock(
+			BlockBehaviour.Properties.of(Material.PORTAL)
+				.noCollission()
+				.randomTicks()
+				.strength(-1.0F)
+				.sound(SoundType.GLASS)
+				.lightLevel(blockStatex -> 11)
+				.pushReaction(PushReaction.BLOCK),
+			true
 		)
 	);
 	public static final Block CARVED_PUMPKIN = register(
@@ -1759,6 +1785,13 @@ public class Blocks {
 	public static final Block POWDER_SNOW_CAULDRON = register(
 		"powder_snow_cauldron", new PowderSnowCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON), LayeredCauldronBlock.SNOW, CauldronInteraction.POWDER_SNOW)
 	);
+	public static final Block COPPER_SINK = register(
+		"copper_sink",
+		new CopperSinkBlock(
+			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.COLOR_ORANGE).sound(SoundType.COPPER).requiresCorrectToolForDrops().strength(2.0F).noOcclusion()
+		)
+	);
+	public static final Block FILLED_COPPER_SINK = register("filled_copper_sink", new FilledCopperSinkBlock(BlockBehaviour.Properties.copy(COPPER_SINK)));
 	public static final Block END_PORTAL = register(
 		"end_portal",
 		new EndPortalBlock(
@@ -3027,6 +3060,13 @@ public class Blocks {
 	public static final Block OBSERVER = register(
 		"observer", new ObserverBlock(BlockBehaviour.Properties.of(Material.STONE).strength(3.0F).requiresCorrectToolForDrops().isRedstoneConductor(Blocks::never))
 	);
+	public static final Block PICKAXE_BLOCK = register(
+		"pickaxe_block",
+		new PickaxeBlock(BlockBehaviour.Properties.of(Material.STONE).strength(3.0F).requiresCorrectToolForDrops().isRedstoneConductor(Blocks::always))
+	);
+	public static final Block PLACE_BLOCK = register(
+		"place_block", new PlaceBlock(BlockBehaviour.Properties.of(Material.STONE).strength(3.0F).requiresCorrectToolForDrops().isRedstoneConductor(Blocks::always))
+	);
 	public static final Block SHULKER_BOX = register("shulker_box", shulkerBox(null, BlockBehaviour.Properties.of(Material.SHULKER_SHELL)));
 	public static final Block WHITE_SHULKER_BOX = register(
 		"white_shulker_box", shulkerBox(DyeColor.WHITE, BlockBehaviour.Properties.of(Material.SHULKER_SHELL, MaterialColor.SNOW))
@@ -3673,6 +3713,10 @@ public class Blocks {
 	public static final Block POTTED_BAMBOO = register("potted_bamboo", flowerPot(BAMBOO));
 	public static final Block VOID_AIR = register("void_air", new AirBlock(BlockBehaviour.Properties.of(Material.AIR).noCollission().noLootTable().air()));
 	public static final Block CAVE_AIR = register("cave_air", new AirBlock(BlockBehaviour.Properties.of(Material.AIR).noCollission().noLootTable().air()));
+	public static final Block PACKED_AIR = register(
+		"packed_air",
+		new PackedAirBlock(BlockBehaviour.Properties.of(Material.AIR).sound(SoundType.MOSS_CARPET).noCollission().lightLevel(blockStatex -> 4).noLootTable().air())
+	);
 	public static final Block BUBBLE_COLUMN = register(
 		"bubble_column", new BubbleColumnBlock(BlockBehaviour.Properties.of(Material.BUBBLE_COLUMN).noCollission().noLootTable().pushReaction(PushReaction.DESTROY))
 	);
@@ -4702,6 +4746,7 @@ public class Blocks {
 		"decorated_pot",
 		new DecoratedPotBlock(BlockBehaviour.Properties.of(Material.DECORATED_POT).strength(0.0F, 0.0F).pushReaction(PushReaction.DESTROY).noOcclusion())
 	);
+	public static final Block CHEESE = register("cheese", new CheeseBlock(BlockBehaviour.Properties.of(Material.STONE).strength(0.1F).sound(SoundType.FUNGUS)));
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {
 		return blockState -> blockState.getValue(BlockStateProperties.LIT) ? i : 0;

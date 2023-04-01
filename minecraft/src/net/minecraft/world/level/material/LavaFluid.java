@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -153,7 +154,11 @@ public abstract class LavaFluid extends FlowingFluid {
 
 	@Override
 	public int getDropOff(LevelReader levelReader) {
-		return levelReader.dimensionType().ultraWarm() ? 1 : 2;
+		if (Rules.UNCONTROLABLE_LAVE.get()) {
+			return 0;
+		} else {
+			return levelReader.dimensionType().ultraWarm() ? 1 : 2;
+		}
 	}
 
 	@Override
@@ -163,7 +168,12 @@ public abstract class LavaFluid extends FlowingFluid {
 
 	@Override
 	public int getTickDelay(LevelReader levelReader) {
-		return levelReader.dimensionType().ultraWarm() ? 10 : 30;
+		int i = (Integer)Rules.LAVA_SPREAD_TICK_DELAY.get();
+		if (i != 30) {
+			return i;
+		} else {
+			return levelReader.dimensionType().ultraWarm() ? 10 : 30;
+		}
 	}
 
 	@Override
@@ -196,7 +206,7 @@ public abstract class LavaFluid extends FlowingFluid {
 			FluidState fluidState2 = levelAccessor.getFluidState(blockPos);
 			if (this.is(FluidTags.LAVA) && fluidState2.is(FluidTags.WATER)) {
 				if (blockState.getBlock() instanceof LiquidBlock) {
-					levelAccessor.setBlock(blockPos, Blocks.STONE.defaultBlockState(), 3);
+					levelAccessor.setBlock(blockPos, Rules.STONE_GEN_REPLACE.get().defaultBlockState(), 3);
 				}
 
 				this.fizz(levelAccessor, blockPos);

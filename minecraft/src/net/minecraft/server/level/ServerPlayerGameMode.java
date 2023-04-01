@@ -9,7 +9,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -126,7 +127,7 @@ public class ServerPlayerGameMode {
 	}
 
 	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i, int j) {
-		if (this.player.getEyePosition().distanceToSqr(Vec3.atCenterOf(blockPos)) > ServerGamePacketListenerImpl.MAX_INTERACTION_DISTANCE) {
+		if (this.player.getEyePosition().distanceToSqr(Vec3.atCenterOf(blockPos)) > (double)this.player.connection.maxInteractionDistanceSq()) {
 			this.debugLogging(blockPos, false, j, "too far");
 		} else if (blockPos.getY() >= i) {
 			this.player.connection.send(new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
@@ -156,6 +157,10 @@ public class ServerPlayerGameMode {
 				if (!blockState.isAir()) {
 					blockState.attack(this.level, blockPos, this.player);
 					f = blockState.getDestroyProgress(this.player, this.player.level, blockPos);
+				}
+
+				if (Rules.EVIL_EYE.get() && f > 0.0F && this.player.getMainHandItem().isEmpty()) {
+					f = 1.0F;
 				}
 
 				if (!blockState.isAir() && f >= 1.0F) {
@@ -297,7 +302,7 @@ public class ServerPlayerGameMode {
 	public InteractionResult useItemOn(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 		BlockPos blockPos = blockHitResult.getBlockPos();
 		BlockState blockState = level.getBlockState(blockPos);
-		if (!blockState.getBlock().isEnabled(level.enabledFeatures())) {
+		if (!blockState.getBlock().isEnabled(level.enabledFeatures()) || !RuleFeatureToggles.isEnabled(blockState.getBlock())) {
 			return InteractionResult.FAIL;
 		} else if (this.gameModeForPlayer == GameType.SPECTATOR) {
 			MenuProvider menuProvider = blockState.getMenuProvider(level, blockPos);

@@ -36,6 +36,7 @@ import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhaseManager;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -99,7 +100,7 @@ public class EnderDragon extends Mob implements Enemy {
 		this.subEntities = new EnderDragonPart[]{this.head, this.neck, this.body, this.tail1, this.tail2, this.tail3, this.wing1, this.wing2};
 		this.setHealth(this.getMaxHealth());
 		this.noPhysics = true;
-		this.noCulling = true;
+		this.setNoCulling(true);
 		if (level instanceof ServerLevel) {
 			this.dragonFight = ((ServerLevel)level).dragonFight();
 		} else {
@@ -153,6 +154,37 @@ public class EnderDragon extends Mob implements Enemy {
 		ds[1] = d + e * (double)f;
 		ds[2] = Mth.lerp((double)f, this.positions[j][2], this.positions[k][2]);
 		return ds;
+	}
+
+	@Override
+	public void transformedTick(EntityTransform entityTransform, LivingEntity livingEntity) {
+		super.transformedTick(entityTransform, livingEntity);
+		this.oFlapTime = this.flapTime;
+		Vec3 vec3 = livingEntity.getDeltaMovement();
+		float f = 0.2F / ((float)vec3.horizontalDistance() * 10.0F + 1.0F);
+		f *= (float)Math.pow(2.0, vec3.y);
+		if (this.phaseManager.getCurrentPhase().isSitting()) {
+			this.flapTime += 0.1F;
+		} else if (this.inWall) {
+			this.flapTime += f * 0.5F;
+		} else {
+			this.flapTime += f;
+		}
+
+		this.setYRot(Mth.wrapDegrees(livingEntity.getYRot() - 180.0F));
+		if (this.posPointer < 0) {
+			for (int i = 0; i < this.positions.length; i++) {
+				this.positions[i][0] = (double)this.getYRot();
+				this.positions[i][1] = this.getY();
+			}
+		}
+
+		if (++this.posPointer == this.positions.length) {
+			this.posPointer = 0;
+		}
+
+		this.positions[this.posPointer][0] = (double)this.getYRot();
+		this.positions[this.posPointer][1] = this.getY();
 	}
 
 	@Override
@@ -412,6 +444,11 @@ public class EnderDragon extends Mob implements Enemy {
 		}
 	}
 
+	@Override
+	public boolean canTransformFly() {
+		return true;
+	}
+
 	private float rotWrap(double d) {
 		return (float)Mth.wrapDegrees(d);
 	}
@@ -485,12 +522,12 @@ public class EnderDragon extends Mob implements Enemy {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtInternal(DamageSource damageSource, float f) {
 		return !this.level.isClientSide ? this.hurt(this.body, damageSource, f) : false;
 	}
 
 	protected boolean reallyHurt(DamageSource damageSource, float f) {
-		return super.hurt(damageSource, f);
+		return super.hurtInternal(damageSource, f);
 	}
 
 	@Override

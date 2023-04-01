@@ -719,6 +719,13 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			);
 		this.tag(BlockTags.UNSTABLE_BOTTOM_CENTER).addTag(BlockTags.FENCE_GATES);
 		this.tag(BlockTags.MUSHROOM_GROW_BLOCK).add(Blocks.MYCELIUM).add(Blocks.PODZOL).add(Blocks.CRIMSON_NYLIUM).add(Blocks.WARPED_NYLIUM);
+		this.tag(BlockTags.CORDYCEP_BLOCK)
+			.add(Blocks.MYCELIUM)
+			.add(Blocks.CRIMSON_NYLIUM)
+			.add(Blocks.WARPED_NYLIUM)
+			.add(Blocks.NETHER_WART_BLOCK)
+			.add(Blocks.BROWN_MUSHROOM)
+			.add(Blocks.RED_MUSHROOM);
 		this.tag(BlockTags.INFINIBURN_OVERWORLD).add(Blocks.NETHERRACK, Blocks.MAGMA_BLOCK);
 		this.tag(BlockTags.INFINIBURN_NETHER).addTag(BlockTags.INFINIBURN_OVERWORLD);
 		this.tag(BlockTags.INFINIBURN_END).addTag(BlockTags.INFINIBURN_OVERWORLD).add(Blocks.BEDROCK);
@@ -1271,7 +1278,9 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			.add(Blocks.MUD_BRICKS)
 			.add(Blocks.MUD_BRICK_STAIRS)
 			.add(Blocks.MUD_BRICK_SLAB)
-			.add(Blocks.PACKED_MUD);
+			.add(Blocks.PACKED_MUD)
+			.add(Blocks.PICKAXE_BLOCK)
+			.add(Blocks.PLACE_BLOCK);
 		this.tag(BlockTags.MINEABLE_WITH_SHOVEL)
 			.add(
 				Blocks.CLAY,
@@ -1427,6 +1436,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			.addTag(BlockTags.BASE_STONE_OVERWORLD)
 			.addTag(BlockTags.DIRT)
 			.addTag(BlockTags.TERRACOTTA)
+			.add(Blocks.CHEESE)
 			.addTag(BlockTags.NYLIUM)
 			.addTag(BlockTags.BASE_STONE_NETHER)
 			.addTag(BlockTags.SAND)

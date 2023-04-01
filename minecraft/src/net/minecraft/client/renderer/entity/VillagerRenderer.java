@@ -5,8 +5,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.layers.BeretLayer;
 import net.minecraft.client.renderer.entity.layers.CrossedArmsItemLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
+import net.minecraft.client.renderer.entity.layers.MustacheLayer;
 import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.Villager;
@@ -20,6 +22,8 @@ public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villag
 		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemInHandRenderer()));
 		this.addLayer(new VillagerProfessionLayer<>(this, context.getResourceManager(), "villager"));
 		this.addLayer(new CrossedArmsItemLayer<>(this, context.getItemInHandRenderer()));
+		this.addLayer(new MustacheLayer<>(this, context.getModelSet()));
+		this.addLayer(new BeretLayer<>(this, context.getModelSet()));
 	}
 
 	public ResourceLocation getTextureLocation(Villager villager) {

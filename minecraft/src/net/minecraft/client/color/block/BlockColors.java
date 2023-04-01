@@ -76,7 +76,8 @@ public class BlockColors {
 					: -1,
 			Blocks.WATER,
 			Blocks.BUBBLE_COLUMN,
-			Blocks.WATER_CAULDRON
+			Blocks.WATER_CAULDRON,
+			Blocks.FILLED_COPPER_SINK
 		);
 		blockColors.register(
 			(blockState, blockAndTintGetter, blockPos, i) -> RedStoneWireBlock.getColorForPower((Integer)blockState.getValue(RedStoneWireBlock.POWER)),

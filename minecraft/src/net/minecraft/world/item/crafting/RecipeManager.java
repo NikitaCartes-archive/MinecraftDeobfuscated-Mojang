@@ -28,6 +28,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -73,7 +74,12 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 	}
 
 	public <C extends Container, T extends Recipe<C>> Optional<T> getRecipeFor(RecipeType<T> recipeType, C container, Level level) {
-		return this.byType(recipeType).values().stream().filter(recipe -> recipe.matches(container, level)).findFirst();
+		return this.byType(recipeType)
+			.entrySet()
+			.stream()
+			.filter(entry -> Rules.SPECIAL_RECIPE.isEnabled((ResourceLocation)entry.getKey()) && ((Recipe)entry.getValue()).matches(container, level))
+			.findFirst()
+			.map(Entry::getValue);
 	}
 
 	public <C extends Container, T extends Recipe<C>> Optional<Pair<ResourceLocation, T>> getRecipeFor(
@@ -83,26 +89,36 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 		if (resourceLocation != null) {
 			T recipe = (T)map.get(resourceLocation);
 			if (recipe != null && recipe.matches(container, level)) {
+				if (!Rules.SPECIAL_RECIPE.isEnabled(resourceLocation)) {
+					return Optional.empty();
+				}
+
 				return Optional.of(Pair.of(resourceLocation, recipe));
 			}
 		}
 
 		return map.entrySet()
 			.stream()
-			.filter(entry -> ((Recipe)entry.getValue()).matches(container, level))
+			.filter(entry -> Rules.SPECIAL_RECIPE.isEnabled((ResourceLocation)entry.getKey()) && ((Recipe)entry.getValue()).matches(container, level))
 			.findFirst()
 			.map(entry -> Pair.of((ResourceLocation)entry.getKey(), (Recipe)entry.getValue()));
 	}
 
 	public <C extends Container, T extends Recipe<C>> List<T> getAllRecipesFor(RecipeType<T> recipeType) {
-		return List.copyOf(this.byType(recipeType).values());
+		return this.byType(recipeType)
+			.entrySet()
+			.stream()
+			.filter(entry -> Rules.SPECIAL_RECIPE.isEnabled((ResourceLocation)entry.getKey()))
+			.map(Entry::getValue)
+			.toList();
 	}
 
 	public <C extends Container, T extends Recipe<C>> List<T> getRecipesFor(RecipeType<T> recipeType, C container, Level level) {
 		return (List<T>)this.byType(recipeType)
-			.values()
+			.entrySet()
 			.stream()
-			.filter(recipe -> recipe.matches(container, level))
+			.filter(entry -> Rules.SPECIAL_RECIPE.isEnabled((ResourceLocation)entry.getKey()) && ((Recipe)entry.getValue()).matches(container, level))
+			.map(Entry::getValue)
 			.sorted(Comparator.comparing(recipe -> recipe.getResultItem(level.registryAccess()).getDescriptionId()))
 			.collect(Collectors.toList());
 	}
@@ -127,15 +143,19 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 	}
 
 	public Optional<? extends Recipe<?>> byKey(ResourceLocation resourceLocation) {
-		return Optional.ofNullable((Recipe)this.byName.get(resourceLocation));
+		return !Rules.SPECIAL_RECIPE.isEnabled(resourceLocation) ? Optional.empty() : Optional.ofNullable((Recipe)this.byName.get(resourceLocation));
 	}
 
 	public Collection<Recipe<?>> getRecipes() {
-		return (Collection<Recipe<?>>)this.recipes.values().stream().flatMap(map -> map.values().stream()).collect(Collectors.toSet());
+		return (Collection<Recipe<?>>)this.recipes
+			.values()
+			.stream()
+			.flatMap(map -> map.entrySet().stream().filter(entry -> Rules.SPECIAL_RECIPE.isEnabled((ResourceLocation)entry.getKey())).map(Entry::getValue))
+			.collect(Collectors.toSet());
 	}
 
 	public Stream<ResourceLocation> getRecipeIds() {
-		return this.recipes.values().stream().flatMap(map -> map.keySet().stream());
+		return this.recipes.values().stream().flatMap(map -> map.keySet().stream().filter(Rules.SPECIAL_RECIPE::isEnabled));
 	}
 
 	public static Recipe<?> fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {

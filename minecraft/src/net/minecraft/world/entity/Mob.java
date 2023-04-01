@@ -23,9 +23,11 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -57,6 +59,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SpawnEggItem;
@@ -1068,7 +1071,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 				this.gameEvent(GameEvent.ENTITY_INTERACT, player);
 				return interactionResult;
 			} else {
-				interactionResult = this.mobInteract(player, interactionHand);
+				interactionResult = this.mobInteractButEarly(player, interactionHand);
+				if (interactionResult == InteractionResult.PASS) {
+					interactionResult = this.mobInteract(player, interactionHand);
+				}
+
 				if (interactionResult.consumesAction()) {
 					this.gameEvent(GameEvent.ENTITY_INTERACT, player);
 					return interactionResult;
@@ -1111,6 +1118,28 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	protected void onOffspringSpawnedFromEgg(Player player, Mob mob) {
+	}
+
+	protected boolean isItAwkwardToMilk() {
+		return false;
+	}
+
+	protected InteractionResult mobInteractButEarly(Player player, InteractionHand interactionHand) {
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		if (Rules.MILK_EVERY_MOB.get() && !this.isItAwkwardToMilk() && itemStack.is(Items.BUCKET) && !this.isBaby()) {
+			player.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
+			ItemStack itemStack2 = ItemUtils.createFilledResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
+			player.setItemInHand(interactionHand, itemStack2);
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
+		} else {
+			return InteractionResult.PASS;
+		}
+	}
+
+	protected InteractionResult transformInteract(Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
+		return !livingEntity.isVehicle() && Rules.RIDEABLE_ENTITIES.contains(this.getType().builtInRegistryHolder().key()) && player.startRiding(livingEntity, true)
+			? InteractionResult.SUCCESS
+			: InteractionResult.PASS;
 	}
 
 	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
@@ -1307,7 +1336,17 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	public boolean isNoAi() {
-		return (this.entityData.get(DATA_MOB_FLAGS_ID) & 1) != 0;
+		return this.isGold() ? true : (this.entityData.get(DATA_MOB_FLAGS_ID) & 1) != 0;
+	}
+
+	@Override
+	public void turnIntoGold() {
+		this.setGold(true);
+	}
+
+	@Override
+	public boolean canBeCollidedWith() {
+		return super.canBeCollidedWith() || this.isGold();
 	}
 
 	public boolean isLeftHanded() {
@@ -1342,6 +1381,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	@Override
 	public boolean doHurtTarget(Entity entity) {
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		f = this.adjustDamage(f);
 		float g = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
 		if (entity instanceof LivingEntity) {
 			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
@@ -1354,6 +1394,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		}
 
 		boolean bl = entity.hurt(this.damageSources().mobAttack(this), f);
+		g *= Rules.ATTACK_KNOCKBACK.get();
 		if (bl) {
 			if (g > 0.0F && entity instanceof LivingEntity) {
 				((LivingEntity)entity)
@@ -1363,6 +1404,9 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 			if (entity instanceof Player player) {
 				this.maybeDisableShield(player, this.getMainHandItem(), player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY);
+				if (this.getMainHandItem().is(Items.LA_BAGUETTE)) {
+					player.getFoodData().eat(4, 0.8F);
+				}
 			}
 
 			this.doEnchantDamageEffects(this, entity);
@@ -1370,6 +1414,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		}
 
 		return bl;
+	}
+
+	protected float adjustDamage(float f) {
+		return f;
 	}
 
 	private void maybeDisableShield(Player player, ItemStack itemStack, ItemStack itemStack2) {
@@ -1380,19 +1428,6 @@ public abstract class Mob extends LivingEntity implements Targeting {
 				this.level.broadcastEntityEvent(player, (byte)30);
 			}
 		}
-	}
-
-	protected boolean isSunBurnTick() {
-		if (this.level.isDay() && !this.level.isClientSide) {
-			float f = this.getLightLevelDependentMagicValue();
-			BlockPos blockPos = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
-			boolean bl = this.isInWaterRainOrBubble() || this.isInPowderSnow || this.wasInPowderSnow;
-			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && !bl && this.level.canSeeSky(blockPos)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	@Override
@@ -1425,5 +1460,12 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	public ItemStack getPickResult() {
 		SpawnEggItem spawnEggItem = SpawnEggItem.byId(this.getType());
 		return spawnEggItem == null ? null : new ItemStack(spawnEggItem);
+	}
+
+	@Override
+	protected float getScaleModifier() {
+		return Rules.WORLD_OF_GIANTS.get()
+			? Math.min(super.getScaleModifier() * 2.5F, Math.max(8.0F / this.getType().getDimensions().height, 1.0F))
+			: super.getScaleModifier();
 	}
 }

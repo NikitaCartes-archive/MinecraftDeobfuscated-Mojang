@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,13 +35,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.GlowSquid;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.RenderShape;
@@ -56,6 +61,7 @@ import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class EntityRenderDispatcher implements ResourceManagerReloadListener {
+	public static final StencilRenderer.Triangle[] SHADOW_VOLUME = StencilRenderer.createNCone(12);
 	private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityShadow(new ResourceLocation("textures/misc/shadow.png"));
 	private static final float MAX_SHADOW_RADIUS = 32.0F;
 	private static final float SHADOW_POWER_FALLOFF_Y = 0.5F;
@@ -131,6 +137,12 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	}
 
 	public <E extends Entity> boolean shouldRender(E entity, Frustum frustum, double d, double e, double f) {
+		EntityTransform entityTransform = EntityTransform.get(entity);
+		Entity entity2 = (Entity)Objects.requireNonNullElse(entityTransform.entity(), entity);
+		return this.shouldRender0(entity2, frustum, d, e, f);
+	}
+
+	private <E extends Entity> boolean shouldRender0(E entity, Frustum frustum, double d, double e, double f) {
 		EntityRenderer<? super E> entityRenderer = this.getRenderer(entity);
 		return entityRenderer.shouldRender(entity, frustum, d, e, f);
 	}
@@ -138,43 +150,69 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	public <E extends Entity> void render(
 		E entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource, int i
 	) {
+		EntityTransform entityTransform = EntityTransform.get(entity);
+		float j = 1.0F;
+		if (entity instanceof LivingEntity livingEntity) {
+			if (entityTransform.entity() != null) {
+				entityTransform.copyProperties(livingEntity);
+			}
+
+			j = livingEntity.getTransformScale(h);
+		}
+
+		Entity entity2 = (Entity)Objects.requireNonNullElse(entityTransform.entity(), entity);
+		this.render0(entity2, j, d, e, f, g, h, poseStack, multiBufferSource, i);
+	}
+
+	private <E extends Entity> void render0(
+		E entity, float f, double d, double e, double g, float h, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j
+	) {
 		EntityRenderer<? super E> entityRenderer = this.getRenderer(entity);
 
 		try {
-			Vec3 vec3 = entityRenderer.getRenderOffset(entity, h);
-			double j = d + vec3.x();
-			double k = e + vec3.y();
-			double l = f + vec3.z();
+			Vec3 vec3 = entityRenderer.getRenderOffset(entity, i);
+			double k = d + vec3.x();
+			double l = e + vec3.y();
+			double m = g + vec3.z();
 			poseStack.pushPose();
-			poseStack.translate(j, k, l);
-			entityRenderer.render(entity, g, h, poseStack, multiBufferSource, i);
+			poseStack.translate(k, l, m);
+			if (f != 1.0F) {
+				poseStack.pushPose();
+				poseStack.scale(f, f, f);
+			}
+
+			entityRenderer.render(entity, h, i, poseStack, multiBufferSource, j);
 			if (entity.displayFireAnimation()) {
 				this.renderFlame(poseStack, multiBufferSource, entity);
 			}
 
 			poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
+			if (f != 1.0F) {
+				poseStack.popPose();
+			}
+
 			if (this.options.entityShadows().get() && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0F && !entity.isInvisible()) {
-				double m = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
-				float n = (float)((1.0 - m / 256.0) * (double)entityRenderer.shadowStrength);
-				if (n > 0.0F) {
-					renderShadow(poseStack, multiBufferSource, entity, n, h, this.level, Math.min(entityRenderer.shadowRadius, 32.0F));
+				double n = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
+				float o = (float)((1.0 - n / 256.0) * (double)entityRenderer.shadowStrength);
+				if (o > 0.0F) {
+					renderShadow(poseStack, multiBufferSource, entity, o, i, this.level, Math.min(entityRenderer.shadowRadius, 32.0F));
 				}
 			}
 
 			if (this.renderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
-				renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, h);
+				renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, i);
 			}
 
 			poseStack.popPose();
-		} catch (Throwable var24) {
-			CrashReport crashReport = CrashReport.forThrowable(var24, "Rendering entity in world");
+		} catch (Throwable var25) {
+			CrashReport crashReport = CrashReport.forThrowable(var25, "Rendering entity in world");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being rendered");
 			entity.fillCrashReportCategory(crashReportCategory);
 			CrashReportCategory crashReportCategory2 = crashReport.addCategory("Renderer details");
 			crashReportCategory2.setDetail("Assigned renderer", entityRenderer);
-			crashReportCategory2.setDetail("Location", CrashReportCategory.formatLocation(this.level, d, e, f));
-			crashReportCategory2.setDetail("Rotation", g);
-			crashReportCategory2.setDetail("Delta", h);
+			crashReportCategory2.setDetail("Location", CrashReportCategory.formatLocation(this.level, d, e, g));
+			crashReportCategory2.setDetail("Rotation", h);
+			crashReportCategory2.setDetail("Delta", i);
 			throw new ReportedException(crashReport);
 		}
 	}
@@ -294,32 +332,55 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			i = h * 0.5F;
 		}
 
-		double d = Mth.lerp((double)g, entity.xOld, entity.getX());
-		double e = Mth.lerp((double)g, entity.yOld, entity.getY());
-		double j = Mth.lerp((double)g, entity.zOld, entity.getZ());
-		float k = Math.min(f / 0.5F, i);
-		int l = Mth.floor(d - (double)i);
-		int m = Mth.floor(d + (double)i);
-		int n = Mth.floor(e - (double)k);
-		int o = Mth.floor(e);
-		int p = Mth.floor(j - (double)i);
-		int q = Mth.floor(j + (double)i);
-		PoseStack.Pose pose = poseStack.last();
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(SHADOW_RENDER_TYPE);
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		if (Rules.BEDROCK_SHADOWS.get()) {
+			if (Rules.GLOWING_GLOW_SQUIDS.get()) {
+				if (entity instanceof GlowSquid) {
+					return;
+				}
 
-		for (int r = p; r <= q; r++) {
-			for (int s = l; s <= m; s++) {
-				mutableBlockPos.set(s, 0, r);
-				ChunkAccess chunkAccess = levelReader.getChunk(mutableBlockPos);
+				if (entity instanceof Bee && Rules.GLOW_BEES.get() && BeeRenderer.isGlowTime(entity.level)) {
+					return;
+				}
+			}
 
-				for (int t = n; t <= o; t++) {
-					mutableBlockPos.setY(t);
-					float u = f - (float)(e - (double)mutableBlockPos.getY()) * 0.5F;
-					renderBlockShadow(pose, vertexConsumer, chunkAccess, levelReader, mutableBlockPos, d, e, j, i, u);
+			renderDynamicShadow(poseStack, multiBufferSource, i, Math.min(f / 0.5F, i));
+		} else {
+			double d = Mth.lerp((double)g, entity.xOld, entity.getX());
+			double e = Mth.lerp((double)g, entity.yOld, entity.getY());
+			double j = Mth.lerp((double)g, entity.zOld, entity.getZ());
+			float k = Math.min(f / 0.5F, i);
+			int l = Mth.floor(d - (double)i);
+			int m = Mth.floor(d + (double)i);
+			int n = Mth.floor(e - (double)k);
+			int o = Mth.floor(e);
+			int p = Mth.floor(j - (double)i);
+			int q = Mth.floor(j + (double)i);
+			PoseStack.Pose pose = poseStack.last();
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(SHADOW_RENDER_TYPE);
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+			for (int r = p; r <= q; r++) {
+				for (int s = l; s <= m; s++) {
+					mutableBlockPos.set(s, 0, r);
+					ChunkAccess chunkAccess = levelReader.getChunk(mutableBlockPos);
+
+					for (int t = n; t <= o; t++) {
+						mutableBlockPos.setY(t);
+						float u = f - (float)(e - (double)mutableBlockPos.getY()) * 0.5F;
+						renderBlockShadow(pose, vertexConsumer, chunkAccess, levelReader, mutableBlockPos, d, e, j, i, u);
+					}
 				}
 			}
 		}
+	}
+
+	private static void renderDynamicShadow(PoseStack poseStack, MultiBufferSource multiBufferSource, float f, float g) {
+		poseStack.pushPose();
+		poseStack.scale(f, f * g * 4.0F, f);
+		poseStack.translate(0.0F, 0.01F, 0.0F);
+		Matrix4f matrix4f = poseStack.last().pose();
+		StencilRenderer.render(SHADOW_VOLUME, matrix4f, multiBufferSource, 1610612736);
+		poseStack.popPose();
 	}
 
 	private static void renderBlockShadow(

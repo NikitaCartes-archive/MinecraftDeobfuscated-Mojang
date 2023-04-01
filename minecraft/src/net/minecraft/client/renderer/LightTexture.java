@@ -8,10 +8,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.LightEngineMode;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.joml.Vector3f;
 
@@ -116,9 +120,18 @@ public class LightTexture implements AutoCloseable {
 					for (int p = 0; p < 16; p++) {
 						float q = getBrightness(clientLevel.dimensionType(), o) * h;
 						float r = getBrightness(clientLevel.dimensionType(), p) * n;
+						float s = r;
 						float t = r * ((r * 0.6F + 0.4F) * 0.6F + 0.4F);
 						float u = r * (r * r * 0.6F + 0.4F);
-						vector3f2.set(r, t, u);
+						DyeColor dyeColor = Rules.COLORED_LIGHT.get();
+						if (dyeColor != DyeColor.WHITE) {
+							int v = dyeColor.getTextColor();
+							s = r * ((float)FastColor.ARGB32.red(v) / 255.0F);
+							t *= (float)FastColor.ARGB32.green(v) / 255.0F;
+							u *= (float)FastColor.ARGB32.blue(v) / 255.0F;
+						}
+
+						vector3f2.set(s, t, u);
 						boolean bl = clientLevel.effects().forceBrightLightmap();
 						if (bl) {
 							vector3f2.lerp(new Vector3f(0.99F, 1.12F, 1.0F), 0.25F);
@@ -128,17 +141,17 @@ public class LightTexture implements AutoCloseable {
 							vector3f2.add(vector3f3);
 							vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
 							if (this.renderer.getDarkenWorldAmount(f) > 0.0F) {
-								float v = this.renderer.getDarkenWorldAmount(f);
+								float w = this.renderer.getDarkenWorldAmount(f);
 								Vector3f vector3f4 = new Vector3f(vector3f2).mul(0.7F, 0.6F, 0.6F);
-								vector3f2.lerp(vector3f4, v);
+								vector3f2.lerp(vector3f4, w);
 							}
 						}
 
 						if (m > 0.0F) {
-							float w = Math.max(vector3f2.x(), Math.max(vector3f2.y(), vector3f2.z()));
-							if (w < 1.0F) {
-								float v = 1.0F / w;
-								Vector3f vector3f4 = new Vector3f(vector3f2).mul(v);
+							float x = Math.max(vector3f2.x(), Math.max(vector3f2.y(), vector3f2.z()));
+							if (x < 1.0F) {
+								float w = 1.0F / x;
+								Vector3f vector3f4 = new Vector3f(vector3f2).mul(w);
 								vector3f2.lerp(vector3f4, m);
 							}
 						}
@@ -151,17 +164,22 @@ public class LightTexture implements AutoCloseable {
 							clampColor(vector3f2);
 						}
 
+						LightEngineMode lightEngineMode = Rules.OPTIMIZE_LIGHT_ENGINE.get();
+						if (lightEngineMode.isLightForced(clientLevel)) {
+							vector3f2.set(1.0F, 1.0F, 1.0F);
+						}
+
 						float w = this.minecraft.options.gamma().get().floatValue();
-						Vector3f vector3f5 = new Vector3f(this.notGamma(vector3f2.x), this.notGamma(vector3f2.y), this.notGamma(vector3f2.z));
-						vector3f2.lerp(vector3f5, Math.max(0.0F, w - j));
+						Vector3f vector3f4 = new Vector3f(this.notGamma(vector3f2.x), this.notGamma(vector3f2.y), this.notGamma(vector3f2.z));
+						vector3f2.lerp(vector3f4, Math.max(0.0F, w - j));
 						vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
 						clampColor(vector3f2);
 						vector3f2.mul(255.0F);
-						int x = 255;
-						int y = (int)vector3f2.x();
-						int z = (int)vector3f2.y();
-						int aa = (int)vector3f2.z();
-						this.lightPixels.setPixelRGBA(p, o, 0xFF000000 | aa << 16 | z << 8 | y);
+						int y = 255;
+						int z = (int)vector3f2.x();
+						int aa = (int)vector3f2.y();
+						int ab = (int)vector3f2.z();
+						this.lightPixels.setPixelRGBA(p, o, 0xFF000000 | ab << 16 | aa << 8 | z);
 					}
 				}
 

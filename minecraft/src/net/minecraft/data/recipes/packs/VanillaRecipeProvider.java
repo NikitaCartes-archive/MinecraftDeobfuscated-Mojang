@@ -424,6 +424,15 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern(" #X")
 			.unlockedBy("has_string", has(Items.STRING))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.BOW)
+			.define('X', Items.STICK)
+			.define('#', Items.STRING)
+			.pattern(" #X")
+			.pattern("# X")
+			.pattern(" #X")
+			.unlockedBy("has_string", has(Items.STRING))
+			.wob(true)
+			.save(consumer, "wob");
 		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Items.BOWL, 4)
 			.define('#', ItemTags.PLANKS)
 			.pattern("# #")
@@ -497,6 +506,13 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("# #")
 			.pattern("###")
 			.unlockedBy("has_water_bucket", has(Items.WATER_BUCKET))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(RecipeCategory.BREWING, Blocks.COPPER_SINK)
+			.define('#', Blocks.COPPER_BLOCK)
+			.pattern("# #")
+			.pattern("# #")
+			.pattern("###")
+			.unlockedBy("has_copper", has(Blocks.COPPER_BLOCK))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, Blocks.COMPOSTER)
 			.define('#', ItemTags.WOODEN_SLABS)
@@ -735,6 +751,15 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("#")
 			.unlockedBy("has_diamond", has(Items.DIAMOND))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.DIAMOND_SWORD)
+			.define('#', Items.STICK)
+			.define('X', Items.DIAMOND)
+			.pattern("#")
+			.pattern("#")
+			.pattern("X")
+			.unlockedBy("has_diamond", has(Items.DIAMOND))
+			.wob(true)
+			.save(consumer, "diamond_drows");
 		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, Blocks.DIORITE, 2)
 			.define('Q', Items.QUARTZ)
 			.define('C', Blocks.COBBLESTONE)
@@ -990,6 +1015,8 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.save(consumer);
 		twoByTwoPacker(consumer, RecipeCategory.REDSTONE, Blocks.HONEY_BLOCK, Items.HONEY_BOTTLE);
 		twoByTwoPacker(consumer, RecipeCategory.DECORATIONS, Blocks.HONEYCOMB_BLOCK, Items.HONEYCOMB);
+		twoByTwoPacker(consumer, RecipeCategory.BUILDING_BLOCKS, Items.AIR_BLOCK, Items.GLASS_BOTTLE);
+		threeByThreePacker(consumer, RecipeCategory.BUILDING_BLOCKS, Blocks.PACKED_AIR, Items.AIR_BLOCK);
 		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Blocks.HOPPER)
 			.define('C', Blocks.CHEST)
 			.define('I', Items.IRON_INGOT)
@@ -1314,6 +1341,25 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("###")
 			.unlockedBy("has_quartz", has(Items.QUARTZ))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Blocks.PICKAXE_BLOCK)
+			.define('P', ItemTags.PICKAXES)
+			.define('R', Items.REDSTONE)
+			.define('#', Blocks.COBBLESTONE)
+			.pattern("#P#")
+			.pattern("# #")
+			.pattern("#R#")
+			.unlockedBy("has_pickaxe", has(ItemTags.PICKAXES))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Blocks.PLACE_BLOCK)
+			.define('B', Items.BOW)
+			.define('R', Items.REDSTONE)
+			.define('H', Items.HOPPER)
+			.define('#', Blocks.COBBLESTONE)
+			.pattern("#H#")
+			.pattern("#R#")
+			.pattern("#B#")
+			.unlockedBy("has_hopper", has(Items.HOPPER))
+			.save(consumer);
 		oneToOneConversionRecipe(consumer, Items.ORANGE_DYE, Blocks.ORANGE_TULIP, "orange_dye");
 		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.ORANGE_DYE, 2)
 			.requires(Items.RED_DYE)
@@ -1353,6 +1399,10 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_white_dye", has(Items.WHITE_DYE))
 			.unlockedBy("has_red_dye", has(Items.RED_DYE))
 			.save(consumer, "pink_dye_from_red_white_dye");
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.LONG_STRING)
+			.requires(Items.STRING, 2)
+			.unlockedBy("has_a_bucket_full_of_shut_up", has(Blocks.CAVE_AIR))
+			.save(consumer, "string_concatenation");
 		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Blocks.PISTON)
 			.define('R', Items.REDSTONE)
 			.define('#', Blocks.COBBLESTONE)
@@ -1830,6 +1880,11 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.requires(Items.ENCHANTED_GOLDEN_APPLE)
 			.unlockedBy("has_enchanted_golden_apple", has(Items.ENCHANTED_GOLDEN_APPLE))
 			.save(consumer);
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.NEW_MOJANG_BANNER_PATTERN)
+			.requires(Items.PAPER)
+			.requires(Items.SUSPICIOUS_STEW)
+			.unlockedBy("is_sus", has(Items.SUSPICIOUS_SAND))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, Blocks.SCAFFOLDING, 6)
 			.define('~', Items.STRING)
 			.define('I', Blocks.BAMBOO)
@@ -1972,6 +2027,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		SpecialRecipeBuilder.special(RecipeSerializer.SHULKER_BOX_COLORING).save(consumer, "shulker_box_coloring");
 		SpecialRecipeBuilder.special(RecipeSerializer.TIPPED_ARROW).save(consumer, "tipped_arrow");
 		SpecialRecipeBuilder.special(RecipeSerializer.SUSPICIOUS_STEW).save(consumer, "suspicious_stew");
+		SpecialRecipeBuilder.special(RecipeSerializer.DUPE_HACK).save(consumer, "dupe_hack");
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.POTATO), RecipeCategory.FOOD, Items.BAKED_POTATO, 0.35F, 200)
 			.unlockedBy("has_potato", has(Items.POTATO))
 			.save(consumer);
@@ -2585,5 +2641,42 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_brick", has(ItemTags.DECORATED_POT_SHARDS))
 			.save(consumer, "decorated_pot_simple");
 		SpecialRecipeBuilder.special(RecipeSerializer.DECORATED_POT_RECIPE).save(consumer, "decorated_pot");
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Items.LEFT_SQUARE)
+			.define('x', Items.BIT)
+			.pattern("xx")
+			.pattern("x ")
+			.pattern("xx")
+			.canXflip(false)
+			.unlockedBy("has_bit", has(Items.BIT))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Items.RIGHT_SQUARE)
+			.define('x', Items.BIT)
+			.pattern("xx")
+			.pattern(" x")
+			.pattern("xx")
+			.canXflip(false)
+			.unlockedBy("has_bit", has(Items.BIT))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Items.LEFT_CURLY)
+			.define('x', Items.BIT)
+			.pattern(" x")
+			.pattern("x ")
+			.pattern(" x")
+			.canXflip(false)
+			.unlockedBy("has_bit", has(Items.BIT))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Items.RIGHT_CURLY)
+			.define('x', Items.BIT)
+			.pattern("x ")
+			.pattern(" x")
+			.pattern("x ")
+			.canXflip(false)
+			.unlockedBy("has_bit", has(Items.BIT))
+			.save(consumer);
+		stonecutterResultFromBase(consumer, RecipeCategory.REDSTONE, Items.NAME, Items.NAME_TAG, 16);
+		stonecutterResultFromBase(consumer, RecipeCategory.REDSTONE, Items.TAG, Items.NAME_TAG, 16);
+		stonecutterResultFromBase(consumer, RecipeCategory.REDSTONE, Items.BIT, Items.NAME, 16);
+		stonecutterResultFromBase(consumer, RecipeCategory.REDSTONE, Items.BIT, Items.TAG, 16);
+		SpecialRecipeBuilder.special(RecipeSerializer.NBT_CRAFTING_RECIPE).save(consumer, "nbt_crafting");
 	}
 }

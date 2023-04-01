@@ -43,7 +43,7 @@ public class SheepFurLayer extends RenderLayer<Sheep, SheepModel<Sheep>> {
 				float s;
 				float t;
 				float u;
-				if (sheep.hasCustomName() && "jeb_".equals(sheep.getName().getString())) {
+				if (sheep.hasCustomName() && "jeb_".equals(sheep.getSkinName())) {
 					int m = 25;
 					int n = sheep.tickCount / 25 + sheep.getId();
 					int o = DyeColor.values().length;

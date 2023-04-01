@@ -20,6 +20,7 @@ public abstract class DimensionSpecialEffects {
 		object2ObjectArrayMap.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, overworldEffects);
 		object2ObjectArrayMap.put(BuiltinDimensionTypes.NETHER_EFFECTS, new DimensionSpecialEffects.NetherEffects());
 		object2ObjectArrayMap.put(BuiltinDimensionTypes.END_EFFECTS, new DimensionSpecialEffects.EndEffects());
+		object2ObjectArrayMap.put(BuiltinDimensionTypes.MOON_EFFECTS, new DimensionSpecialEffects.MoonEffects());
 	});
 	private final float[] sunriseCol = new float[4];
 	private final float cloudLevel;
@@ -87,6 +88,29 @@ public abstract class DimensionSpecialEffects {
 	public static class EndEffects extends DimensionSpecialEffects {
 		public EndEffects() {
 			super(Float.NaN, false, DimensionSpecialEffects.SkyType.END, true, false);
+		}
+
+		@Override
+		public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
+			return vec3.scale(0.15F);
+		}
+
+		@Override
+		public boolean isFoggyAt(int i, int j) {
+			return false;
+		}
+
+		@Nullable
+		@Override
+		public float[] getSunriseColor(float f, float g) {
+			return null;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class MoonEffects extends DimensionSpecialEffects {
+		public MoonEffects() {
+			super(Float.NaN, false, DimensionSpecialEffects.SkyType.NORMAL, true, false);
 		}
 
 		@Override

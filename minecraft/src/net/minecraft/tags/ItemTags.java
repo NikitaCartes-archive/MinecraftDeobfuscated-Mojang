@@ -101,6 +101,8 @@ public final class ItemTags {
 	public static final TagKey<Item> SHOVELS = bind("shovels");
 	public static final TagKey<Item> TOOLS = bind("tools");
 	public static final TagKey<Item> BREAKS_DECORATED_POTS = bind("breaks_decorated_pots");
+	public static final TagKey<Item> HEAVY = bind("heavy");
+	public static final TagKey<Item> COPPER = bind("copper");
 
 	private ItemTags() {
 	}

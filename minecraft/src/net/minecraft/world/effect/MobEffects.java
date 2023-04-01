@@ -111,6 +111,18 @@ public class MobEffects {
 	public static final MobEffect DARKNESS = register(
 		33, "darkness", new MobEffect(MobEffectCategory.HARMFUL, 2696993).setFactorDataFactory(() -> new MobEffectInstance.FactorData(22))
 	);
+	public static final MobEffect BIG = register(
+		34,
+		"big",
+		new MobEffect(MobEffectCategory.NEUTRAL, 9687858)
+			.addAttributeModifier(Attributes.SCALE, "295dc741-db10-49e8-9c39-e05f0145d312", 1.0, AttributeModifier.Operation.ADDITION)
+	);
+	public static final MobEffect SMALL = register(
+		35,
+		"small",
+		new MobEffect(MobEffectCategory.NEUTRAL, 13841099)
+			.addAttributeModifier(Attributes.SCALE, "22cfbc53-1031-4378-b826-8c5ef503dd5c", -0.5, AttributeModifier.Operation.ADDITION)
+	);
 
 	private static MobEffect register(int i, String string, MobEffect mobEffect) {
 		return Registry.registerMapping(BuiltInRegistries.MOB_EFFECT, i, string, mobEffect);

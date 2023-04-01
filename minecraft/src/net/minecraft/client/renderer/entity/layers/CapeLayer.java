@@ -12,6 +12,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.CaepType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.ItemStack;
@@ -35,10 +37,12 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 		float k,
 		float l
 	) {
-		if (abstractClientPlayer.isCapeLoaded()
-			&& !abstractClientPlayer.isInvisible()
-			&& abstractClientPlayer.isModelPartShown(PlayerModelPart.CAPE)
-			&& abstractClientPlayer.getCloakTextureLocation() != null) {
+		CaepType caepType = Rules.CAEP.get();
+		if (caepType != CaepType.NONE
+			|| abstractClientPlayer.isCapeLoaded()
+				&& !abstractClientPlayer.isInvisible()
+				&& abstractClientPlayer.isModelPartShown(PlayerModelPart.CAPE)
+				&& abstractClientPlayer.getCloakTextureLocation() != null) {
 			ItemStack itemStack = abstractClientPlayer.getItemBySlot(EquipmentSlot.CHEST);
 			if (!itemStack.is(Items.ELYTRA)) {
 				poseStack.pushPose();
@@ -71,7 +75,9 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 				poseStack.mulPose(Axis.XP.rotationDegrees(6.0F + r / 2.0F + q));
 				poseStack.mulPose(Axis.ZP.rotationDegrees(s / 2.0F));
 				poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - s / 2.0F));
-				VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getCloakTextureLocation()));
+				VertexConsumer vertexConsumer = multiBufferSource.getBuffer(
+					RenderType.entitySolid(caepType != CaepType.NONE ? caepType.getTextureId() : abstractClientPlayer.getCloakTextureLocation())
+				);
 				this.getParentModel().renderCloak(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 				poseStack.popPose();
 			}

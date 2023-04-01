@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -110,6 +111,7 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 	}
 
 	public void renderSingleBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+		blockState = Rules.REPLACE_BLOCK_MODEL.getReplacement(blockState);
 		RenderShape renderShape = blockState.getRenderShape();
 		if (renderShape != RenderShape.INVISIBLE) {
 			switch (renderShape) {

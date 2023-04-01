@@ -51,6 +51,8 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.OptimizationRule;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobCategory;
@@ -240,6 +242,11 @@ public class DebugScreenOverlay extends GuiComponent {
 				"P: " + this.minecraft.particleEngine.countParticles() + ". T: " + this.minecraft.level.getEntityCount(),
 				this.minecraft.level.gatherChunkSourceStats()
 			);
+			int i = Rules.OPTIMIZATION_LEVEL.currentCount();
+			if (i > 0) {
+				list.add("Optimization level: " + OptimizationRule.get(i));
+			}
+
 			String string3 = this.getServerChunkStats();
 			if (string3 != null) {
 				list.add(string3);
@@ -288,10 +295,10 @@ public class DebugScreenOverlay extends GuiComponent {
 			if (levelChunk.isEmpty()) {
 				list.add("Waiting for chunk...");
 			} else {
-				int i = this.minecraft.level.getChunkSource().getLightEngine().getRawBrightness(blockPos, 0);
-				int j = this.minecraft.level.getBrightness(LightLayer.SKY, blockPos);
-				int k = this.minecraft.level.getBrightness(LightLayer.BLOCK, blockPos);
-				list.add("Client Light: " + i + " (" + j + " sky, " + k + " block)");
+				int j = this.minecraft.level.getChunkSource().getLightEngine().getRawBrightness(blockPos, 0);
+				int k = this.minecraft.level.getBrightness(LightLayer.SKY, blockPos);
+				int l = this.minecraft.level.getBrightness(LightLayer.BLOCK, blockPos);
+				list.add("Client Light: " + j + " (" + k + " sky, " + l + " block)");
 				LevelChunk levelChunk2 = this.getServerChunk();
 				StringBuilder stringBuilder = new StringBuilder("CH");
 
@@ -319,14 +326,14 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add(stringBuilder.toString());
 				if (blockPos.getY() >= this.minecraft.level.getMinBuildHeight() && blockPos.getY() < this.minecraft.level.getMaxBuildHeight()) {
 					list.add("Biome: " + printBiome(this.minecraft.level.getBiome(blockPos)));
-					long l = 0L;
+					long m = 0L;
 					float h = 0.0F;
 					if (levelChunk2 != null) {
 						h = level.getMoonBrightness();
-						l = levelChunk2.getInhabitedTime();
+						m = levelChunk2.getInhabitedTime();
 					}
 
-					DifficultyInstance difficultyInstance = new DifficultyInstance(level.getDifficulty(), level.getDayTime(), l, h);
+					DifficultyInstance difficultyInstance = new DifficultyInstance(level.getDifficulty(), level.getDayTime(), m, h);
 					list.add(
 						String.format(
 							Locale.ROOT,
@@ -355,10 +362,10 @@ public class DebugScreenOverlay extends GuiComponent {
 				NaturalSpawner.SpawnState spawnState = serverChunkCache.getLastSpawnState();
 				if (spawnState != null) {
 					Object2IntMap<MobCategory> object2IntMap = spawnState.getMobCategoryCounts();
-					int m = spawnState.getSpawnableChunkCount();
+					int n = spawnState.getSpawnableChunkCount();
 					list.add(
 						"SC: "
-							+ m
+							+ n
 							+ ", "
 							+ (String)Stream.of(MobCategory.values())
 								.map(mobCategory -> Character.toUpperCase(mobCategory.getName().charAt(0)) + ": " + object2IntMap.getInt(mobCategory))

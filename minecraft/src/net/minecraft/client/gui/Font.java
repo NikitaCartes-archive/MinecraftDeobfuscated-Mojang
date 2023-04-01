@@ -13,6 +13,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
@@ -29,6 +31,8 @@ import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringDecomposer;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.CodepointStyleRule;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -268,6 +272,7 @@ public class Font {
 		BakedGlyph bakedGlyph,
 		boolean bl,
 		boolean bl2,
+		boolean bl3,
 		float f,
 		float g,
 		float h,
@@ -279,9 +284,9 @@ public class Font {
 		float l,
 		int m
 	) {
-		bakedGlyph.render(bl2, g, h, matrix4f, vertexConsumer, i, j, k, l, m);
+		bakedGlyph.render(bl3, bl2, g, h, matrix4f, vertexConsumer, i, j, k, l, m);
 		if (bl) {
-			bakedGlyph.render(bl2, g + f, h, matrix4f, vertexConsumer, i, j, k, l, m);
+			bakedGlyph.render(bl3, bl2, g + f, h, matrix4f, vertexConsumer, i, j, k, l, m);
 		}
 	}
 
@@ -387,45 +392,88 @@ public class Font {
 
 		@Override
 		public boolean accept(int i, Style style, int j) {
-			FontSet fontSet = Font.this.getFontSet(style.getFont());
-			GlyphInfo glyphInfo = fontSet.getGlyphInfo(j, Font.this.filterFishyGlyphs);
-			BakedGlyph bakedGlyph = style.isObfuscated() && j != 32 ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(j);
-			boolean bl = style.isBold();
-			float f = this.a;
-			TextColor textColor = style.getColor();
-			float g;
-			float h;
-			float l;
-			if (textColor != null) {
-				int k = textColor.getValue();
-				g = (float)(k >> 16 & 0xFF) / 255.0F * this.dimFactor;
-				h = (float)(k >> 8 & 0xFF) / 255.0F * this.dimFactor;
-				l = (float)(k & 0xFF) / 255.0F * this.dimFactor;
+			j = Rules.CODEPOINT_REPLACE.getChange(j);
+			CodepointStyleRule.CodepointChange codepointChange = Rules.CODEPOINT_STYLE.getChange(j);
+			if (codepointChange == CodepointStyleRule.CodepointChange.HIDE) {
+				return true;
 			} else {
-				g = this.r;
-				h = this.g;
-				l = this.b;
-			}
+				style = adjustStyle(style, codepointChange);
+				FontSet fontSet = Font.this.getFontSet(style.getFont());
+				GlyphInfo glyphInfo = fontSet.getGlyphInfo(j, Font.this.filterFishyGlyphs);
+				BakedGlyph bakedGlyph = style.isObfuscated() && j != 32 ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(j);
+				boolean bl = style.isBold();
+				float f = this.a;
+				TextColor textColor = style.getColor();
+				float g;
+				float h;
+				float l;
+				if (textColor != null) {
+					int k = textColor.getValue();
+					g = (float)(k >> 16 & 0xFF) / 255.0F * this.dimFactor;
+					h = (float)(k >> 8 & 0xFF) / 255.0F * this.dimFactor;
+					l = (float)(k & 0xFF) / 255.0F * this.dimFactor;
+				} else {
+					g = this.r;
+					h = this.g;
+					l = this.b;
+				}
 
-			if (!(bakedGlyph instanceof EmptyGlyph)) {
-				float m = bl ? glyphInfo.getBoldOffset() : 0.0F;
-				float n = this.dropShadow ? glyphInfo.getShadowOffset() : 0.0F;
-				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
-				Font.this.renderChar(bakedGlyph, bl, style.isItalic(), m, this.x + n, this.y + n, this.pose, vertexConsumer, g, h, l, f, this.packedLightCoords);
-			}
+				if (codepointChange != CodepointStyleRule.CodepointChange.BLANK && !(bakedGlyph instanceof EmptyGlyph)) {
+					float m = bl ? glyphInfo.getBoldOffset() : 0.0F;
+					float n = this.dropShadow ? glyphInfo.getShadowOffset() : 0.0F;
+					VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
+					Font.this.renderChar(
+						bakedGlyph, bl, style.isItalic(), style.isReversed(), m, this.x + n, this.y + n, this.pose, vertexConsumer, g, h, l, f, this.packedLightCoords
+					);
+				}
 
-			float m = glyphInfo.getAdvance(bl);
-			float n = this.dropShadow ? 1.0F : 0.0F;
-			if (style.isStrikethrough()) {
-				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 4.5F, this.x + n + m, this.y + n + 4.5F - 1.0F, 0.01F, g, h, l, f));
-			}
+				float m = glyphInfo.getAdvance(bl);
+				float n = this.dropShadow ? 1.0F : 0.0F;
+				if (style.isStrikethrough()) {
+					this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 4.5F, this.x + n + m, this.y + n + 4.5F - 1.0F, 0.01F, g, h, l, f));
+				}
 
-			if (style.isUnderlined()) {
-				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 9.0F, this.x + n + m, this.y + n + 9.0F - 1.0F, 0.01F, g, h, l, f));
-			}
+				if (style.isUnderlined()) {
+					this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 9.0F, this.x + n + m, this.y + n + 9.0F - 1.0F, 0.01F, g, h, l, f));
+				}
 
-			this.x += m;
-			return true;
+				this.x += m;
+				return true;
+			}
+		}
+
+		private static Style adjustStyle(Style style, @Nullable CodepointStyleRule.CodepointChange codepointChange) {
+			if (codepointChange == null) {
+				return style;
+			} else {
+				return switch (codepointChange) {
+					case RED -> style.withColor(ChatFormatting.RED);
+					case AQUA -> style.withColor(ChatFormatting.AQUA);
+					case BLACK -> style.withColor(ChatFormatting.BLACK);
+					case BLUE -> style.withColor(ChatFormatting.BLUE);
+					case BOLD -> style.withBold(true);
+					case DARK_AQUA -> style.withColor(ChatFormatting.DARK_AQUA);
+					case DARK_BLUE -> style.withColor(ChatFormatting.DARK_BLUE);
+					case DARK_GRAY -> style.withColor(ChatFormatting.DARK_GRAY);
+					case DARK_GREEN -> style.withColor(ChatFormatting.DARK_GREEN);
+					case DARK_PURPLE -> style.withColor(ChatFormatting.DARK_PURPLE);
+					case DARK_RED -> style.withColor(ChatFormatting.DARK_RED);
+					case GOLD -> style.withColor(ChatFormatting.GOLD);
+					case GRAY -> style.withColor(ChatFormatting.GRAY);
+					case GREEN -> style.withColor(ChatFormatting.GREEN);
+					case ILLAGER -> style.withFont(Minecraft.ILLAGERALT_FONT);
+					case ITALIC -> style.withItalic(true);
+					case LIGHT_PURPLE -> style.withColor(ChatFormatting.LIGHT_PURPLE);
+					case SGA -> style.withFont(Minecraft.ALT_FONT);
+					case OBFUSCATED -> style.withObfuscated(true);
+					case STRIKETHROUGH -> style.withStrikethrough(true);
+					case THIN -> style.withFont(Minecraft.UNIFORM_FONT);
+					case UNDERLINE -> style.withUnderlined(true);
+					case WHITE -> style.withColor(ChatFormatting.WHITE);
+					case YELLOW -> style.withColor(ChatFormatting.YELLOW);
+					case HIDE, BLANK -> style;
+				};
+			}
 		}
 
 		public float finish(int i, float f) {

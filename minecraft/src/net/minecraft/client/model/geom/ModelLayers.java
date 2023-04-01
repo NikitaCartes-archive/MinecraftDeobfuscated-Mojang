@@ -143,6 +143,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation STRIDER = register("strider");
 	public static final ModelLayerLocation STRIDER_SADDLE = register("strider", "saddle");
 	public static final ModelLayerLocation TADPOLE = register("tadpole");
+	public static final ModelLayerLocation TAIL = register("tail");
 	public static final ModelLayerLocation TNT_MINECART = register("tnt_minecart");
 	public static final ModelLayerLocation TRADER_LLAMA = register("trader_llama");
 	public static final ModelLayerLocation TRIDENT = register("trident");
@@ -177,6 +178,9 @@ public class ModelLayers {
 	public static final ModelLayerLocation ZOMBIFIED_PIGLIN = register("zombified_piglin");
 	public static final ModelLayerLocation ZOMBIFIED_PIGLIN_INNER_ARMOR = registerInnerArmor("zombified_piglin");
 	public static final ModelLayerLocation ZOMBIFIED_PIGLIN_OUTER_ARMOR = registerOuterArmor("zombified_piglin");
+	public static final ModelLayerLocation BERET = register("beret");
+	public static final ModelLayerLocation MUSTACHE = register("mustache");
+	public static final ModelLayerLocation CROWN = register("crown");
 
 	private static ModelLayerLocation register(String string) {
 		return register(string, "main");

@@ -60,7 +60,7 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 		return itemStack != null && itemStack2 != null;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
 			ItemStack itemStack = craftingContainer.getItem(i);
 			if (!itemStack.isEmpty()) {

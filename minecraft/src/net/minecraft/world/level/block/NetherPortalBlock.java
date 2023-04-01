@@ -29,9 +29,11 @@ public class NetherPortalBlock extends Block {
 	protected static final int AABB_OFFSET = 2;
 	protected static final VoxelShape X_AXIS_AABB = Block.box(0.0, 0.0, 6.0, 16.0, 16.0, 10.0);
 	protected static final VoxelShape Z_AXIS_AABB = Block.box(6.0, 0.0, 0.0, 10.0, 16.0, 16.0);
+	private final boolean otherPortal;
 
-	public NetherPortalBlock(BlockBehaviour.Properties properties) {
+	public NetherPortalBlock(BlockBehaviour.Properties properties, boolean bl) {
 		super(properties);
+		this.otherPortal = bl;
 		this.registerDefaultState(this.stateDefinition.any().setValue(AXIS, Direction.Axis.X));
 	}
 
@@ -71,15 +73,15 @@ public class NetherPortalBlock extends Block {
 		Direction.Axis axis = direction.getAxis();
 		Direction.Axis axis2 = blockState.getValue(AXIS);
 		boolean bl = axis2 != axis && axis.isHorizontal();
-		return !bl && !blockState2.is(this) && !new PortalShape(levelAccessor, blockPos, axis2).isComplete()
+		return !bl && !blockState2.is(this) && !new PortalShape(levelAccessor, blockPos, axis2, this.otherPortal).isComplete()
 			? Blocks.AIR.defaultBlockState()
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (entity.canChangeDimensions()) {
-			entity.handleInsidePortal(blockPos);
+		if (this.otherPortal || entity.canChangeDimensions()) {
+			entity.handleInsidePortal(blockPos, this.otherPortal);
 		}
 	}
 

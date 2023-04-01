@@ -14,6 +14,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -438,7 +439,10 @@ public class PiglinAi {
 	}
 
 	private static List<ItemStack> getBarterResponseItems(Piglin piglin) {
-		LootTable lootTable = piglin.level.getServer().getLootTables().get(BuiltInLootTables.PIGLIN_BARTERING);
+		LootTable lootTable = piglin.level
+			.getServer()
+			.getLootTables()
+			.get(Rules.DREAM_MODE.get() ? BuiltInLootTables.DREAM_PIGLIN_BARTERING : BuiltInLootTables.PIGLIN_BARTERING);
 		List<ItemStack> list = lootTable.getRandomItems(
 			new LootContext.Builder((ServerLevel)piglin.level)
 				.withParameter(LootContextParams.THIS_ENTITY, piglin)

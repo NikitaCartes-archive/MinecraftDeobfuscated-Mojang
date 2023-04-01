@@ -329,6 +329,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 			@Override
 			protected void initChannel(Channel channel) {
 				ChannelPipeline channelPipeline = channel.pipeline();
+				Connection.configureSerialization(channelPipeline, PacketFlow.CLIENTBOUND);
 				channelPipeline.addLast("packet_handler", connection);
 			}
 		}).channel(LocalChannel.class).connect(socketAddress).syncUninterruptibly();

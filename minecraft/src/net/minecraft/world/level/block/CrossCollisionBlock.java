@@ -7,6 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -166,5 +167,12 @@ public class CrossCollisionBlock extends Block implements SimpleWaterloggedBlock
 			default:
 				return super.mirror(blockState, mirror);
 		}
+	}
+
+	@Override
+	public boolean isStickyToNeighbour(
+		Level level, BlockPos blockPos, BlockState blockState, BlockPos blockPos2, BlockState blockState2, Direction direction, Direction direction2
+	) {
+		return blockState2.is(this);
 	}
 }

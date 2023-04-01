@@ -10,6 +10,7 @@ public class BannerPatternTags {
 	public static final TagKey<BannerPattern> PATTERN_ITEM_CREEPER = create("pattern_item/creeper");
 	public static final TagKey<BannerPattern> PATTERN_ITEM_SKULL = create("pattern_item/skull");
 	public static final TagKey<BannerPattern> PATTERN_ITEM_MOJANG = create("pattern_item/mojang");
+	public static final TagKey<BannerPattern> PATTERN_ITEM_M = create("pattern_item/m");
 	public static final TagKey<BannerPattern> PATTERN_ITEM_GLOBE = create("pattern_item/globe");
 	public static final TagKey<BannerPattern> PATTERN_ITEM_PIGLIN = create("pattern_item/piglin");
 

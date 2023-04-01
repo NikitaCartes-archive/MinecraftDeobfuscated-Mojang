@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
@@ -23,9 +24,11 @@ import net.minecraft.world.level.block.state.properties.PistonType;
 @Environment(EnvType.CLIENT)
 public class PistonHeadRenderer implements BlockEntityRenderer<PistonMovingBlockEntity> {
 	private final BlockRenderDispatcher blockRenderer;
+	private final BlockEntityRenderDispatcher blockEntityRenderer;
 
 	public PistonHeadRenderer(BlockEntityRendererProvider.Context context) {
 		this.blockRenderer = context.getBlockRenderDispatcher();
+		this.blockEntityRenderer = context.getBlockEntityRenderDispatcher();
 	}
 
 	public void render(PistonMovingBlockEntity pistonMovingBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
@@ -59,6 +62,13 @@ public class PistonHeadRenderer implements BlockEntityRenderer<PistonMovingBlock
 
 				poseStack.popPose();
 				ModelBlockRenderer.clearCache();
+				BlockEntity blockEntity = pistonMovingBlockEntity.getRenderBlockEntity();
+				if (blockEntity != null) {
+					poseStack.pushPose();
+					poseStack.translate(pistonMovingBlockEntity.getXOff(f), pistonMovingBlockEntity.getYOff(f), pistonMovingBlockEntity.getZOff(f));
+					this.blockEntityRenderer.render(blockEntity, f, poseStack, multiBufferSource);
+					poseStack.popPose();
+				}
 			}
 		}
 	}

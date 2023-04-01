@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CowModel;
@@ -17,5 +18,10 @@ public class CowRenderer extends MobRenderer<Cow, CowModel<Cow>> {
 
 	public ResourceLocation getTextureLocation(Cow cow) {
 		return COW_LOCATION;
+	}
+
+	protected void scale(Cow cow, PoseStack poseStack, float f) {
+		float g = cow.getBloatScale();
+		poseStack.scale(g, g, g);
 	}
 }

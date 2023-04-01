@@ -92,7 +92,7 @@ public class MoveControl implements Control {
 				return;
 			}
 
-			float n = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI) - 90.0F;
+			float n = this.targetYRot(d, e);
 			this.mob.setYRot(this.rotlerp(this.mob.getYRot(), n, 90.0F));
 			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
 			BlockPos blockPos = this.mob.blockPosition();
@@ -114,6 +114,10 @@ public class MoveControl implements Control {
 		} else {
 			this.mob.setZza(0.0F);
 		}
+	}
+
+	protected float targetYRot(double d, double e) {
+		return (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI) - 90.0F;
 	}
 
 	private boolean isWalkable(float f, float g) {

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.Util;
 import net.minecraft.util.RandomSource;
 
 public class WeightedRandomList<E extends WeightedEntry> {
@@ -39,6 +40,10 @@ public class WeightedRandomList<E extends WeightedEntry> {
 			int i = randomSource.nextInt(this.totalWeight);
 			return WeightedRandom.getWeightedItem(this.items, i);
 		}
+	}
+
+	public Optional<E> getRandomUnweighted(RandomSource randomSource) {
+		return Util.getRandomSafe(this.items, randomSource);
 	}
 
 	public List<E> unwrap() {

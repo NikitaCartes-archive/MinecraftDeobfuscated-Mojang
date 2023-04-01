@@ -11,13 +11,13 @@ public class StringUtil {
 	private static final Pattern LINE_PATTERN = Pattern.compile("\\r\\n|\\v");
 	private static final Pattern LINE_END_PATTERN = Pattern.compile("(?:\\r\\n|\\v)$");
 
-	public static String formatTickDuration(int i) {
-		int j = i / 20;
-		int k = j / 60;
-		j %= 60;
-		int l = k / 60;
-		k %= 60;
-		return l > 0 ? String.format(Locale.ROOT, "%02d:%02d:%02d", l, k, j) : String.format(Locale.ROOT, "%02d:%02d", k, j);
+	public static String formatTickDuration(long l) {
+		long m = l / 20L;
+		long n = m / 60L;
+		m %= 60L;
+		long o = n / 60L;
+		n %= 60L;
+		return o > 0L ? String.format(Locale.ROOT, "%02d:%02d:%02d", o, n, m) : String.format(Locale.ROOT, "%02d:%02d", n, m);
 	}
 
 	public static String stripColor(String string) {

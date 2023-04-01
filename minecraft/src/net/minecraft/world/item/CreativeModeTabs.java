@@ -12,12 +12,15 @@ import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.InstrumentTags;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.raid.Raid;
@@ -386,6 +389,7 @@ public class CreativeModeTabs {
 			output.accept(Items.WAXED_OXIDIZED_CUT_COPPER);
 			output.accept(Items.WAXED_OXIDIZED_CUT_COPPER_STAIRS);
 			output.accept(Items.WAXED_OXIDIZED_CUT_COPPER_SLAB);
+			output.accept(Items.SPLEAVES);
 		})
 		.build();
 	private static final CreativeModeTab COLORED_BLOCKS = CreativeModeTab.builder(CreativeModeTab.Row.TOP, 1)
@@ -868,6 +872,7 @@ public class CreativeModeTabs {
 				output.accept(Items.END_CRYSTAL);
 				output.accept(Items.BREWING_STAND);
 				output.accept(Items.CAULDRON);
+				output.accept(Items.COPPER_SINK);
 				output.accept(Items.BELL);
 				output.accept(Items.BEACON);
 				output.accept(Items.CONDUIT);
@@ -1006,6 +1011,8 @@ public class CreativeModeTabs {
 				output.accept(Items.INFESTED_CRACKED_STONE_BRICKS);
 				output.accept(Items.INFESTED_CHISELED_STONE_BRICKS);
 				output.accept(Items.INFESTED_DEEPSLATE);
+				output.accept(Items.AIR_BLOCK);
+				output.accept(Items.PACKED_AIR);
 			}
 		)
 		.build();
@@ -1047,6 +1054,8 @@ public class CreativeModeTabs {
 			output.accept(Items.FURNACE);
 			output.accept(Items.TRAPPED_CHEST);
 			output.accept(Items.OBSERVER);
+			output.accept(Items.PICKAXE_BLOCK);
+			output.accept(Items.PLACE_BLOCK);
 			output.accept(Items.NOTE_BLOCK);
 			output.accept(Items.COMPOSTER);
 			output.accept(Items.CAULDRON);
@@ -1072,6 +1081,23 @@ public class CreativeModeTabs {
 			output.accept(Items.BIG_DRIPLEAF);
 			output.accept(Items.ARMOR_STAND);
 			output.accept(Items.REDSTONE_ORE);
+			output.accept(Items.NAME);
+			output.accept(Items.TAG);
+			output.accept(Items.STRING_TAG);
+			output.accept(Items.BYTE_TAG);
+			output.accept(Items.SHORT_TAG);
+			output.accept(Items.INT_TAG);
+			output.accept(Items.LONG_TAG);
+			output.accept(Items.FLOAT_TAG);
+			output.accept(Items.DOUBLE_TAG);
+			output.accept(Items.COMPOUND_TAG);
+			output.accept(Items.LIST_TAG);
+			output.accept(Items.LEFT_SQUARE);
+			output.accept(Items.RIGHT_SQUARE);
+			output.accept(Items.LEFT_CURLY);
+			output.accept(Items.RIGHT_CURLY);
+			output.accept(Items.SYNTAX_ERROR);
+			output.accept(Items.BIT);
 		})
 		.build();
 	private static final CreativeModeTab HOTBAR = CreativeModeTab.builder(CreativeModeTab.Row.TOP, 5)
@@ -1316,6 +1342,7 @@ public class CreativeModeTabs {
 			output.accept(Items.BREAD);
 			output.accept(Items.COOKIE);
 			output.accept(Items.CAKE);
+			output.accept(Items.CHEESE);
 			output.accept(Items.PUMPKIN_PIE);
 			output.accept(Items.ROTTEN_FLESH);
 			output.accept(Items.SPIDER_EYE);
@@ -1330,6 +1357,9 @@ public class CreativeModeTabs {
 				generatePotionEffectTypes(output, registryLookup, Items.SPLASH_POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 				generatePotionEffectTypes(output, registryLookup, Items.LINGERING_POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 			});
+			output.accept(Items.BOTTLE_OF_VOID);
+			generateEntityPotions(output, BuiltInRegistries.ENTITY_TYPE.asLookup(), Items.BOTTLE_OF_ENTITY, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+			generateEntityPotions(output, BuiltInRegistries.ENTITY_TYPE.asLookup(), Items.SPLASH_BOTTLE_OF_ENTITY, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 		})
 		.build();
 	private static final CreativeModeTab INGREDIENTS = CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 3)
@@ -1638,6 +1668,20 @@ public class CreativeModeTabs {
 		return BUILDING_BLOCKS;
 	}
 
+	private static void generateEntityPotions(
+		CreativeModeTab.Output output, HolderLookup<EntityType<?>> holderLookup, Item item, CreativeModeTab.TabVisibility tabVisibility
+	) {
+		holderLookup.listElements().filter(reference -> ((EntityType)reference.value()).getCategory() != MobCategory.MISC).map(reference -> {
+			ItemStack itemStack = item.getDefaultInstance();
+			CompoundTag compoundTag = new CompoundTag();
+			CompoundTag compoundTag2 = new CompoundTag();
+			compoundTag2.putString("id", reference.key().location().toString());
+			compoundTag.put("entityTag", compoundTag2);
+			itemStack.setTag(compoundTag);
+			return itemStack;
+		}).forEach(itemStack -> output.accept(itemStack, tabVisibility));
+	}
+
 	private static void generatePotionEffectTypes(
 		CreativeModeTab.Output output, HolderLookup<Potion> holderLookup, Item item, CreativeModeTab.TabVisibility tabVisibility
 	) {
@@ -1741,5 +1785,9 @@ public class CreativeModeTabs {
 			buildAllTabContents(CACHED_PARAMETERS);
 			return true;
 		}
+	}
+
+	public static void resetTabContents() {
+		CACHED_PARAMETERS = null;
 	}
 }

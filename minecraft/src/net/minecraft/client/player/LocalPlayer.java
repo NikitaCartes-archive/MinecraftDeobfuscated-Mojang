@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -37,6 +38,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ServerboundCrashVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
@@ -52,6 +54,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.AutoJumpAlternatives;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -133,6 +137,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean wasFallFlying;
 	private int waterVisionTime;
 	private boolean showDeathScreen = true;
+	private final OptionInstance<Boolean> autoJumpInstance = Minecraft.getInstance().options.autoJump();
 
 	public LocalPlayer(
 		Minecraft minecraft,
@@ -156,7 +161,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		return false;
 	}
 
@@ -273,8 +278,21 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			this.lastOnGround = this.onGround;
-			this.autoJumpEnabled = this.minecraft.options.autoJump().get();
+
+			boolean bl4 = switch ((AutoJumpAlternatives)Rules.AUTO_JUMP_ALTERNATIVES.get()) {
+				case OFF -> false;
+				default -> true;
+			};
+			this.autoJumpEnabled = this.autoJumpVote(bl4);
 		}
+	}
+
+	public boolean autoJumpVote(boolean bl) {
+		if (bl != this.autoJumpEnabled && bl != this.autoJumpInstance.get()) {
+			this.autoJumpInstance.set(bl);
+		}
+
+		return this.autoJumpInstance.get();
 	}
 
 	private void sendIsSprintingIfNeeded() {
@@ -723,7 +741,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		boolean bl8 = false;
-		if (this.getAbilities().mayfly) {
+		if (this.canFly()) {
 			if (this.minecraft.gameMode.isAlwaysFlying()) {
 				if (!this.getAbilities().flying) {
 					this.getAbilities().flying = true;
@@ -822,7 +840,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	private void handleNetherPortalClient() {
 		this.oPortalTime = this.portalTime;
-		if (this.isInsidePortal) {
+		if (this.inPortal != Entity.InPortal.NO) {
 			if (this.minecraft.screen != null
 				&& !this.minecraft.screen.isPauseScreen()
 				&& !(this.minecraft.screen instanceof DeathScreen)
@@ -843,7 +861,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 				this.portalTime = 1.0F;
 			}
 
-			this.isInsidePortal = false;
+			this.inPortal = Entity.InPortal.NO;
 		} else if (this.hasEffect(MobEffects.CONFUSION) && !this.getEffect(MobEffects.CONFUSION).endsWithin(60)) {
 			this.portalTime += 0.006666667F;
 			if (this.portalTime > 1.0F) {
@@ -1049,7 +1067,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	private boolean hasEnoughFoodToStartSprinting() {
-		return this.isPassenger() || (float)this.getFoodData().getFoodLevel() > 6.0F || this.getAbilities().mayfly;
+		return this.isPassenger() || (float)this.getFoodData().getFoodLevel() > 6.0F || this.canFly();
 	}
 
 	public float getWaterVision() {
@@ -1114,5 +1132,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 	@Override
 	public float getVisualRotationYInDegrees() {
 		return this.getYRot();
+	}
+
+	@Override
+	public void callInsurance(float f) {
+		this.connection.send(new ServerboundCrashVehiclePacket(f));
 	}
 }

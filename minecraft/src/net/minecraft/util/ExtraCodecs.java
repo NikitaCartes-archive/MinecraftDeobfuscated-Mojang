@@ -317,6 +317,10 @@ public class ExtraCodecs {
 		return intRangeWithMessage(i, j, integer -> "Value must be within range [" + i + ";" + j + "]: " + integer);
 	}
 
+	public static Codec<Float> floatRange(float f, float g) {
+		return floatRangeMinExclusiveWithMessage(f, g, float_ -> "Value must be within range [" + f + ";" + g + "]: " + float_);
+	}
+
 	private static Codec<Float> floatRangeMinExclusiveWithMessage(float f, float g, Function<Float, String> function) {
 		return validate(
 			Codec.FLOAT,

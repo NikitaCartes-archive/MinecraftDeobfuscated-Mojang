@@ -104,6 +104,7 @@ public class CriteriaTriggers {
 		new ItemInteractWithBlockTrigger(new ResourceLocation("allay_drop_item_on_block"))
 	);
 	public static final PlayerTrigger AVOID_VIBRATION = register(new PlayerTrigger(new ResourceLocation("avoid_vibration")));
+	public static final PlayerTrigger VOTED = register(new PlayerTrigger(new ResourceLocation("voted")));
 
 	private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
 		if (CRITERIA.containsKey(criterionTrigger.getId())) {

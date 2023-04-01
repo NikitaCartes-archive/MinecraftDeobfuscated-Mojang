@@ -7,6 +7,11 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 @DontObfuscate
 public class GlConst {
+	public static final int GL_DEPTH24_STENCIL8 = 35056;
+	public static final int GL_DEPTH_STENCIL = 34041;
+	public static final int GL_UNSIGNED_INT_24_8 = 34042;
+	public static final int GL_DEPTH_STENCIL_ATTACHMENT = 33306;
+	public static final int GL_STENCIL_BUFFER_BIT = 1024;
 	public static final int GL_READ_FRAMEBUFFER = 36008;
 	public static final int GL_DRAW_FRAMEBUFFER = 36009;
 	public static final int GL_TRUE = 1;
@@ -33,6 +38,7 @@ public class GlConst {
 	public static final int GL_LINEAR_MIPMAP_LINEAR = 9987;
 	public static final int GL_CLAMP_TO_EDGE = 33071;
 	public static final int GL_FRONT = 1028;
+	public static final int GL_BACK = 1029;
 	public static final int GL_FRONT_AND_BACK = 1032;
 	public static final int GL_LINE = 6913;
 	public static final int GL_FILL = 6914;

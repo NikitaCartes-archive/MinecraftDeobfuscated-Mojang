@@ -20,6 +20,8 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.VehicleCollisionRule;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -46,6 +48,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractMinecart extends Entity {
+	private static final double MAX_SPEED = 0.35;
+	private static final double MAX_COLLISION_SPEED = 0.2975;
+	private static final double MAX_COLLISION_SPEED_SQR = 0.08850625;
 	private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_ID_HURTDIR = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> DATA_ID_DAMAGE = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.FLOAT);
@@ -203,7 +208,7 @@ public abstract class AbstractMinecart extends Entity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.level.isClientSide || this.isRemoved()) {
 			return true;
 		} else if (this.isInvulnerableTo(damageSource)) {
@@ -271,6 +276,7 @@ public abstract class AbstractMinecart extends Entity {
 
 	@Override
 	public void tick() {
+		double d = this.getDeltaMovement().lengthSqr();
 		if (this.getHurtTime() > 0) {
 			this.setHurtTime(this.getHurtTime() - 1);
 		}
@@ -283,14 +289,14 @@ public abstract class AbstractMinecart extends Entity {
 		this.handleNetherPortal();
 		if (this.level.isClientSide) {
 			if (this.lSteps > 0) {
-				double d = this.getX() + (this.lx - this.getX()) / (double)this.lSteps;
-				double e = this.getY() + (this.ly - this.getY()) / (double)this.lSteps;
-				double f = this.getZ() + (this.lz - this.getZ()) / (double)this.lSteps;
-				double g = Mth.wrapDegrees(this.lyr - (double)this.getYRot());
-				this.setYRot(this.getYRot() + (float)g / (float)this.lSteps);
+				double e = this.getX() + (this.lx - this.getX()) / (double)this.lSteps;
+				double f = this.getY() + (this.ly - this.getY()) / (double)this.lSteps;
+				double g = this.getZ() + (this.lz - this.getZ()) / (double)this.lSteps;
+				double h = Mth.wrapDegrees(this.lyr - (double)this.getYRot());
+				this.setYRot(this.getYRot() + (float)h / (float)this.lSteps);
 				this.setXRot(this.getXRot() + (float)(this.lxr - (double)this.getXRot()) / (float)this.lSteps);
 				this.lSteps--;
-				this.setPos(d, e, f);
+				this.setPos(e, f, g);
 				this.setRot(this.getYRot(), this.getXRot());
 			} else {
 				this.reapplyPosition();
@@ -298,8 +304,8 @@ public abstract class AbstractMinecart extends Entity {
 			}
 		} else {
 			if (!this.isNoGravity()) {
-				double d = this.isInWater() ? -0.005 : -0.04;
-				this.setDeltaMovement(this.getDeltaMovement().add(0.0, d, 0.0));
+				double e = this.isInWater() ? -0.005 : -0.04;
+				this.setDeltaMovement(this.getDeltaMovement().add(0.0, e, 0.0));
 			}
 
 			int i = Mth.floor(this.getX());
@@ -322,17 +328,17 @@ public abstract class AbstractMinecart extends Entity {
 
 			this.checkInsideBlocks();
 			this.setXRot(0.0F);
-			double h = this.xo - this.getX();
-			double l = this.zo - this.getZ();
-			if (h * h + l * l > 0.001) {
-				this.setYRot((float)(Mth.atan2(l, h) * 180.0 / Math.PI));
+			double l = this.xo - this.getX();
+			double m = this.zo - this.getZ();
+			if (l * l + m * m > 0.001) {
+				this.setYRot((float)(Mth.atan2(m, l) * 180.0 / Math.PI));
 				if (this.flipped) {
 					this.setYRot(this.getYRot() + 180.0F);
 				}
 			}
 
-			double m = (double)Mth.wrapDegrees(this.getYRot() - this.yRotO);
-			if (m < -170.0 || m >= 170.0) {
+			double n = (double)Mth.wrapDegrees(this.getYRot() - this.yRotO);
+			if (n < -170.0 || n >= 170.0) {
 				this.setYRot(this.getYRot() + 180.0F);
 				this.flipped = !this.flipped;
 			}
@@ -341,8 +347,8 @@ public abstract class AbstractMinecart extends Entity {
 			if (this.getMinecartType() == AbstractMinecart.Type.RIDEABLE && this.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
 				List<Entity> list = this.level.getEntities(this, this.getBoundingBox().inflate(0.2F, 0.0, 0.2F), EntitySelector.pushableBy(this));
 				if (!list.isEmpty()) {
-					for (int n = 0; n < list.size(); n++) {
-						Entity entity = (Entity)list.get(n);
+					for (int o = 0; o < list.size(); o++) {
+						Entity entity = (Entity)list.get(o);
 						if (!(entity instanceof Player) && !(entity instanceof IronGolem) && !(entity instanceof AbstractMinecart) && !this.isVehicle() && !entity.isPassenger()) {
 							entity.startRiding(this);
 						} else {
@@ -365,6 +371,22 @@ public abstract class AbstractMinecart extends Entity {
 			}
 
 			this.firstTick = false;
+			VehicleCollisionRule vehicleCollisionRule = Rules.MINECART_COLLISIONS.get();
+			if (vehicleCollisionRule != VehicleCollisionRule.NONE && this.horizontalCollision && d > 0.08850625) {
+				if (vehicleCollisionRule == VehicleCollisionRule.BREAK) {
+					this.discard();
+					if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+						this.destroy(this.level.damageSources().fall());
+					}
+				} else if (vehicleCollisionRule == VehicleCollisionRule.EXPLODE) {
+					double p = Math.sqrt(d);
+					this.level.explode(this, this.getX(), this.getY(), this.getZ(), (float)Math.min(3.0 * p, 5.0), Level.ExplosionInteraction.MOB);
+				}
+
+				if (!this.level.isClientSide && !this.isRemoved()) {
+					this.destroy(this.level.damageSources().fall());
+				}
+			}
 		}
 	}
 

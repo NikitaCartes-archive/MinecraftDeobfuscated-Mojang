@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -138,14 +139,14 @@ public class LiquidBlock extends Block implements BucketPickup {
 			for (Direction direction : POSSIBLE_FLOW_DIRECTIONS) {
 				BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
 				if (level.getFluidState(blockPos2).is(FluidTags.WATER)) {
-					Block block = level.getFluidState(blockPos).isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
+					Block block = level.getFluidState(blockPos).isSource() ? Rules.OBSIDIAN_GEN_REPLACE.get() : Rules.COBBLESTONE_GEN_REPLACE.get();
 					level.setBlockAndUpdate(blockPos, block.defaultBlockState());
 					this.fizz(level, blockPos);
 					return false;
 				}
 
 				if (bl && level.getBlockState(blockPos2).is(Blocks.BLUE_ICE)) {
-					level.setBlockAndUpdate(blockPos, Blocks.BASALT.defaultBlockState());
+					level.setBlockAndUpdate(blockPos, Rules.BASALT_GEN_REPLACE.get().defaultBlockState());
 					this.fizz(level, blockPos);
 					return false;
 				}
@@ -177,5 +178,20 @@ public class LiquidBlock extends Block implements BucketPickup {
 	@Override
 	public Optional<SoundEvent> getPickupSound() {
 		return this.fluid.getPickupSound();
+	}
+
+	@Override
+	public boolean canStickToStuff(BlockState blockState) {
+		return false;
+	}
+
+	@Override
+	public boolean canAirPass(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Direction direction) {
+		if (direction == Direction.DOWN) {
+			return false;
+		} else {
+			int i = (Integer)blockState.getValue(LEVEL);
+			return i < 8 && i > 0 && !blockState.getFluidState().isSource();
+		}
 	}
 }

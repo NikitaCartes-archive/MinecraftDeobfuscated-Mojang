@@ -32,6 +32,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -50,6 +51,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -190,7 +192,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (damageSource.getEntity() instanceof Player player) {
 			Optional<UUID> optional = this.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
 			if (optional.isPresent() && player.getUUID().equals(optional.get())) {
@@ -198,7 +200,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier {
 			}
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtInternal(damageSource, f);
 	}
 
 	@Override
@@ -256,36 +258,46 @@ public class Allay extends PathfinderMob implements InventoryCarrier {
 	}
 
 	@Override
+	public void transformedTick(EntityTransform entityTransform, LivingEntity livingEntity) {
+		super.transformedTick(entityTransform, livingEntity);
+		this.tickAnimation();
+	}
+
+	@Override
 	public void tick() {
 		super.tick();
 		if (this.level.isClientSide) {
-			this.holdingItemAnimationTicks0 = this.holdingItemAnimationTicks;
-			if (this.hasItemInHand()) {
-				this.holdingItemAnimationTicks = Mth.clamp(this.holdingItemAnimationTicks + 1.0F, 0.0F, 5.0F);
-			} else {
-				this.holdingItemAnimationTicks = Mth.clamp(this.holdingItemAnimationTicks - 1.0F, 0.0F, 5.0F);
-			}
-
-			if (this.isDancing()) {
-				this.dancingAnimationTicks++;
-				this.spinningAnimationTicks0 = this.spinningAnimationTicks;
-				if (this.isSpinning()) {
-					this.spinningAnimationTicks++;
-				} else {
-					this.spinningAnimationTicks--;
-				}
-
-				this.spinningAnimationTicks = Mth.clamp(this.spinningAnimationTicks, 0.0F, 15.0F);
-			} else {
-				this.dancingAnimationTicks = 0.0F;
-				this.spinningAnimationTicks = 0.0F;
-				this.spinningAnimationTicks0 = 0.0F;
-			}
+			this.tickAnimation();
 		} else {
 			this.dynamicVibrationListener.getListener().tick(this.level);
 			if (this.isPanicking()) {
 				this.setDancing(false);
 			}
+		}
+	}
+
+	private void tickAnimation() {
+		this.holdingItemAnimationTicks0 = this.holdingItemAnimationTicks;
+		if (this.hasItemInHand()) {
+			this.holdingItemAnimationTicks = Mth.clamp(this.holdingItemAnimationTicks + 1.0F, 0.0F, 5.0F);
+		} else {
+			this.holdingItemAnimationTicks = Mth.clamp(this.holdingItemAnimationTicks - 1.0F, 0.0F, 5.0F);
+		}
+
+		if (this.isDancing()) {
+			this.dancingAnimationTicks++;
+			this.spinningAnimationTicks0 = this.spinningAnimationTicks;
+			if (this.isSpinning()) {
+				this.spinningAnimationTicks++;
+			} else {
+				this.spinningAnimationTicks--;
+			}
+
+			this.spinningAnimationTicks = Mth.clamp(this.spinningAnimationTicks, 0.0F, 15.0F);
+		} else {
+			this.dancingAnimationTicks = 0.0F;
+			this.spinningAnimationTicks = 0.0F;
+			this.spinningAnimationTicks0 = 0.0F;
 		}
 	}
 
@@ -571,6 +583,11 @@ public class Allay extends PathfinderMob implements InventoryCarrier {
 		double e = this.random.nextGaussian() * 0.02;
 		double f = this.random.nextGaussian() * 0.02;
 		this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d, e, f);
+	}
+
+	@Override
+	public boolean canTransformFly() {
+		return true;
 	}
 
 	class AllayVibrationListenerConfig implements VibrationListener.Config {

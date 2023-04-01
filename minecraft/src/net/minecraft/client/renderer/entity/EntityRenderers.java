@@ -135,6 +135,7 @@ public class EntityRenderers {
 		register(EntityType.MARKER, NoopRenderer::new);
 		register(EntityType.MINECART, context -> new MinecartRenderer<>(context, ModelLayers.MINECART));
 		register(EntityType.MOOSHROOM, MushroomCowRenderer::new);
+		register(EntityType.MOON_COW, MoonCowRenderer::new);
 		register(EntityType.MULE, context -> new ChestedHorseRenderer<>(context, 0.92F, ModelLayers.MULE));
 		register(EntityType.OCELOT, OcelotRenderer::new);
 		register(EntityType.PAINTING, PaintingRenderer::new);
@@ -169,6 +170,7 @@ public class EntityRenderers {
 		register(EntityType.SPECTRAL_ARROW, SpectralArrowRenderer::new);
 		register(EntityType.SPIDER, SpiderRenderer::new);
 		register(EntityType.SQUID, context -> new SquidRenderer<>(context, new SquidModel<>(context.bakeLayer(ModelLayers.SQUID))));
+		register(EntityType.STENCIL_DISPLAY, DisplayRenderer.StencilDisplayRenderer::new);
 		register(EntityType.STRAY, StrayRenderer::new);
 		register(EntityType.STRIDER, StriderRenderer::new);
 		register(EntityType.TADPOLE, TadpoleRenderer::new);
@@ -199,5 +201,6 @@ public class EntityRenderers {
 					context, ModelLayers.ZOMBIFIED_PIGLIN, ModelLayers.ZOMBIFIED_PIGLIN_INNER_ARMOR, ModelLayers.ZOMBIFIED_PIGLIN_OUTER_ARMOR, true
 				)
 		);
+		register(EntityType.RAY_TRACING, RayTracingRenderer::new);
 	}
 }

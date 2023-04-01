@@ -23,6 +23,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfig
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.CraterFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
@@ -150,6 +151,8 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"pointed_dripstone", new PointedDripstoneFeature(PointedDripstoneConfiguration.CODEC)
 	);
 	public static final Feature<SculkPatchConfiguration> SCULK_PATCH = register("sculk_patch", new SculkPatchFeature(SculkPatchConfiguration.CODEC));
+	public static final Feature<CraterFeatureConfiguration> CRATER = register("crater", new CraterFeature(CraterFeatureConfiguration.CODEC));
+	public static final Feature<NoneFeatureConfiguration> LUNAR_BASE = register("lunar_base", new LunarBaseFeature(NoneFeatureConfiguration.CODEC));
 	private final Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec;
 
 	private static <C extends FeatureConfiguration, F extends Feature<C>> F register(String string, F feature) {

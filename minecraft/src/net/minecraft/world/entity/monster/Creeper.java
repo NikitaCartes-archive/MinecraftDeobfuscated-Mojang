@@ -11,6 +11,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,7 +22,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PowerableMob;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -39,6 +43,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class Creeper extends Monster implements PowerableMob {
@@ -66,6 +71,7 @@ public class Creeper extends Monster implements PowerableMob {
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, true));
+		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal(this, RayTracing.class, true));
 		this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 	}
 
@@ -233,6 +239,10 @@ public class Creeper extends Monster implements PowerableMob {
 	private void explodeCreeper() {
 		if (!this.level.isClientSide) {
 			float f = this.isPowered() ? 2.0F : 1.0F;
+			if (this.transform.scale() > 1.0F) {
+				f *= Math.min(this.transform.scale(), 4.0F);
+			}
+
 			this.dead = true;
 			this.level.explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * f, Level.ExplosionInteraction.MOB);
 			this.discard();
@@ -272,5 +282,21 @@ public class Creeper extends Monster implements PowerableMob {
 
 	public void increaseDroppedSkulls() {
 		this.droppedSkulls++;
+	}
+
+	@Nullable
+	@Override
+	public SpawnGroupData finalizeSpawn(
+		ServerLevelAccessor serverLevelAccessor,
+		DifficultyInstance difficultyInstance,
+		MobSpawnType mobSpawnType,
+		@Nullable SpawnGroupData spawnGroupData,
+		@Nullable CompoundTag compoundTag
+	) {
+		if (Rules.CHARGED_CREEPERS.get()) {
+			this.entityData.set(DATA_IS_POWERED, true);
+		}
+
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 }

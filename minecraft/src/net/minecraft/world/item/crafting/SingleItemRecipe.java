@@ -50,7 +50,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItemRaw(RegistryAccess registryAccess) {
 		return this.result;
 	}
 
@@ -67,7 +67,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public ItemStack assemble(Container container, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(Container container, RegistryAccess registryAccess) {
 		return this.result.copy();
 	}
 

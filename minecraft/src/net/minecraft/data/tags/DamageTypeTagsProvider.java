@@ -20,6 +20,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 			.add(
 				DamageTypes.ON_FIRE,
 				DamageTypes.IN_WALL,
+				DamageTypes.ON_MOON,
 				DamageTypes.CRAMMING,
 				DamageTypes.DROWN,
 				DamageTypes.FLY_INTO_WALL,

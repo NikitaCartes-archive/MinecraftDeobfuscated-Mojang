@@ -77,4 +77,7 @@ public abstract class PathfinderMob extends Mob {
 
 	protected void onLeashDistance(float f) {
 	}
+
+	public void onDonePathing() {
+	}
 }

@@ -24,6 +24,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -54,6 +55,7 @@ import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -177,6 +179,25 @@ public abstract class BlockBehaviour implements FeatureElement {
 	@Deprecated
 	public boolean isSignalSource(BlockState blockState) {
 		return false;
+	}
+
+	@Deprecated
+	public boolean canStickToStuff(BlockState blockState) {
+		return Rules.STICKY.get();
+	}
+
+	@Deprecated
+	public boolean isStickyToNeighbour(
+		Level level, BlockPos blockPos, BlockState blockState, BlockPos blockPos2, BlockState blockState2, Direction direction, Direction direction2
+	) {
+		return false;
+	}
+
+	@Deprecated
+	public boolean canAirPass(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Direction direction) {
+		return blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED)
+			? false
+			: !blockState.isFaceSturdy(serverLevel, blockPos, direction);
 	}
 
 	@Deprecated
@@ -517,6 +538,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 		}
 
 		public int getSignal(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+			if (blockGetter instanceof Level level && Rules.OPTIMIZE_LIGHT_ENGINE.get().isLightDisabled(level)) {
+				return 0;
+			}
+
 			return this.getBlock().getSignal(this.asState(), blockGetter, blockPos, direction);
 		}
 
@@ -537,11 +562,29 @@ public abstract class BlockBehaviour implements FeatureElement {
 		}
 
 		public int getDirectSignal(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+			if (blockGetter instanceof Level level && Rules.OPTIMIZE_LIGHT_ENGINE.get().isLightDisabled(level)) {
+				return 0;
+			}
+
 			return this.getBlock().getDirectSignal(this.asState(), blockGetter, blockPos, direction);
 		}
 
 		public PushReaction getPistonPushReaction() {
 			return this.pushReaction;
+		}
+
+		public boolean canStickToStuff() {
+			return this.getBlock().canStickToStuff(this.asState());
+		}
+
+		public boolean isStickyToNeighbour(Level level, BlockPos blockPos, BlockPos blockPos2, BlockState blockState, Direction direction, Direction direction2) {
+			return this.getBlock().isStickyToNeighbour(level, blockPos, this.asState(), blockPos2, blockState, direction, direction2)
+				|| blockState.canStickToStuff()
+					&& blockState.getBlock().isStickyToNeighbour(level, blockPos2, blockState, blockPos, this.asState(), direction.getOpposite(), direction2);
+		}
+
+		public boolean canAirPass(ServerLevel serverLevel, BlockPos blockPos, Direction direction) {
+			return this.getBlock().canAirPass(this.asState(), serverLevel, blockPos, direction);
 		}
 
 		public boolean isSolidRender(BlockGetter blockGetter, BlockPos blockPos) {

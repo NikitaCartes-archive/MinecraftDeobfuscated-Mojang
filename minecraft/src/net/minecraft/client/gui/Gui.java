@@ -6,7 +6,12 @@ import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import java.util.Collection;
@@ -29,6 +34,7 @@ import net.minecraft.client.gui.components.SubtitleOverlay;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -44,6 +50,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringUtil;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -67,6 +74,7 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class Gui extends GuiComponent {
@@ -86,6 +94,7 @@ public class Gui extends GuiComponent {
 	private static final int HEART_SIZE = 9;
 	private static final int HEART_SEPARATION = 8;
 	private static final float AUTOSAVE_FADE_SPEED_FACTOR = 0.2F;
+	private static final ResourceLocation TVPI_LOCATION = new ResourceLocation("textures/gui/tvpi.png");
 	private final RandomSource random = RandomSource.create();
 	private final Minecraft minecraft;
 	private final ItemRenderer itemRenderer;
@@ -172,7 +181,7 @@ public class Gui extends GuiComponent {
 
 		float h = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
 		if (h > 0.0F && !this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
-			this.renderPortalOverlay(poseStack, h);
+			this.renderPortalOverlay(poseStack, h, this.minecraft.player.inPortal == Entity.InPortal.OTHER);
 		}
 
 		if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
@@ -302,6 +311,10 @@ public class Gui extends GuiComponent {
 				this.minecraft.getProfiler().pop();
 			}
 
+			if (Rules.TEST_RULE_PLEASE_IGNORE.get()) {
+				this.renderTestVote(poseStack);
+			}
+
 			this.subtitleOverlay.render(poseStack);
 			Scoreboard scoreboard = this.minecraft.level.getScoreboard();
 			Objective objective = null;
@@ -335,6 +348,28 @@ public class Gui extends GuiComponent {
 
 			this.renderSavingIndicator(poseStack);
 		}
+	}
+
+	private void renderTestVote(PoseStack poseStack) {
+		RenderSystem.setShader(GameRenderer::getPositionTexFunkyShader);
+		RenderSystem.setShaderTexture(0, TVPI_LOCATION);
+		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+		int i = 0;
+		int j = 0;
+		int k = 320;
+		int l = 32;
+		int m = 0;
+		float f = 0.0F;
+		float g = 0.0F;
+		float h = 1.0F;
+		float n = 1.0F;
+		Matrix4f matrix4f = poseStack.last().pose();
+		bufferBuilder.vertex(matrix4f, 0.0F, 32.0F, 0.0F).uv(0.0F, 1.0F).endVertex();
+		bufferBuilder.vertex(matrix4f, 320.0F, 32.0F, 0.0F).uv(1.0F, 1.0F).endVertex();
+		bufferBuilder.vertex(matrix4f, 320.0F, 0.0F, 0.0F).uv(1.0F, 0.0F).endVertex();
+		bufferBuilder.vertex(matrix4f, 0.0F, 0.0F, 0.0F).uv(0.0F, 0.0F).endVertex();
+		BufferUploader.drawWithShader(bufferBuilder.end());
 	}
 
 	private void drawBackdrop(PoseStack poseStack, Font font, int i, int j, int k) {
@@ -613,7 +648,7 @@ public class Gui extends GuiComponent {
 		if (this.minecraft.level.getGameTime() >= 120500L) {
 			component = DEMO_EXPIRED_TEXT;
 		} else {
-			component = Component.translatable("demo.remainingTime", StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime())));
+			component = Component.translatable("demo.remainingTime", StringUtil.formatTickDuration((long)((int)(120500L - this.minecraft.level.getGameTime()))));
 		}
 
 		int i = this.getFont().width(component);
@@ -801,16 +836,32 @@ public class Gui extends GuiComponent {
 				}
 
 				t -= 10;
+				if (Rules.ULTRA_REALISTIC_MODE.get()) {
+					int y = player.thirst().level();
+
+					for (int zx = 0; zx < 10; zx++) {
+						int aax = n - zx * 8 - 9;
+						int abx = o - 10;
+						if (zx < y) {
+							blit(poseStack, aax, abx, 247, 0, 9, 9);
+						} else {
+							blit(poseStack, aax, abx, 238, 0, 9, 9);
+						}
+					}
+
+					t -= 10;
+				}
 			}
 
 			this.minecraft.getProfiler().popPush("air");
 			int y = player.getMaxAirSupply();
-			int zx = Math.min(player.getAirSupply(), y);
-			if (player.isEyeInFluid(FluidTags.WATER) || zx < y) {
+			int zxx = Math.min(player.getAirSupply(), y);
+			if ((!player.getTransform().canBreatheInAir() || !player.getTransform().canBreatheUnderwater())
+				&& (player.isEyeInFluid(FluidTags.WATER) != player.getTransform().canBreatheUnderwater() || zxx < y)) {
 				int aax = this.getVisibleVehicleHeartRows(xx) - 1;
 				t -= aax * 10;
-				int abx = Mth.ceil((double)(zx - 2) * 10.0 / (double)y);
-				int acx = Mth.ceil((double)zx * 10.0 / (double)y) - abx;
+				int abx = Mth.ceil((double)(zxx - 2) * 10.0 / (double)y);
+				int acx = Mth.ceil((double)zxx * 10.0 / (double)y) - abx;
 
 				for (int ad = 0; ad < abx + acx; ad++) {
 					if (ad < abx) {
@@ -982,7 +1033,7 @@ public class Gui extends GuiComponent {
 		RenderSystem.defaultBlendFunc();
 	}
 
-	private void renderPortalOverlay(PoseStack poseStack, float f) {
+	private void renderPortalOverlay(PoseStack poseStack, float f, boolean bl) {
 		if (f < 1.0F) {
 			f *= f;
 			f *= f;
@@ -993,7 +1044,10 @@ public class Gui extends GuiComponent {
 		RenderSystem.depthMask(false);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, f);
 		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
-		TextureAtlasSprite textureAtlasSprite = this.minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.NETHER_PORTAL.defaultBlockState());
+		TextureAtlasSprite textureAtlasSprite = this.minecraft
+			.getBlockRenderer()
+			.getBlockModelShaper()
+			.getParticleIcon((bl ? Blocks.OTHER_PORTAL : Blocks.NETHER_PORTAL).defaultBlockState());
 		blit(poseStack, 0, 0, -90, this.screenWidth, this.screenHeight, textureAtlasSprite);
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();

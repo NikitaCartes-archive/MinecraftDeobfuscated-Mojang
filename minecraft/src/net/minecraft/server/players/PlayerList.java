@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.Connection;
@@ -39,6 +41,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBulkVoteInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -49,6 +52,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.protocol.game.ClientboundRuleUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderSizePacket;
@@ -82,6 +86,14 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rule;
+import net.minecraft.voting.rules.RuleAction;
+import net.minecraft.voting.rules.RuleChange;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.votes.ClientVote;
+import net.minecraft.voting.votes.OptionId;
+import net.minecraft.voting.votes.OptionVotes;
+import net.minecraft.voting.votes.ServerVoteStorage;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -215,6 +227,10 @@ public abstract class PlayerList {
 		serverGamePacketListenerImpl.send(new ClientboundSetCarriedItemPacket(serverPlayer.getInventory().selected));
 		serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes()));
 		serverGamePacketListenerImpl.send(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(this.registries)));
+		List<RuleChange> list = this.registries.compositeAccess().registryOrThrow(Registries.RULE).stream().flatMap(Rule::approvedChanges).toList();
+		serverGamePacketListenerImpl.send(new ClientboundRuleUpdatePacket(true, RuleAction.APPROVE, list));
+		UUID uUID = serverPlayer.getUUID();
+		serverGamePacketListenerImpl.send(this.createVoteReloadPacket(uUID));
 		this.sendPlayerPermissionLevel(serverPlayer);
 		serverPlayer.getStats().markAllDirty();
 		serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
@@ -236,9 +252,10 @@ public abstract class PlayerList {
 
 		serverPlayer.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(this.players));
 		this.players.add(serverPlayer);
-		this.playersByUUID.put(serverPlayer.getUUID(), serverPlayer);
+		this.playersByUUID.put(uUID, serverPlayer);
 		this.broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(serverPlayer)));
 		this.sendLevelInfo(serverPlayer, serverLevel2);
+		Rules.PERMA_EFFECT.applyToNewPlayer(serverPlayer);
 		serverLevel2.addNewPlayer(serverPlayer);
 		this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
 		this.server
@@ -259,18 +276,18 @@ public abstract class PlayerList {
 				compoundTag2.getCompound("Entity"), serverLevel2, entityx -> !serverLevel2.addWithUUID(entityx) ? null : entityx
 			);
 			if (entity != null) {
-				UUID uUID;
+				UUID uUID2;
 				if (compoundTag2.hasUUID("Attach")) {
-					uUID = compoundTag2.getUUID("Attach");
+					uUID2 = compoundTag2.getUUID("Attach");
 				} else {
-					uUID = null;
+					uUID2 = null;
 				}
 
-				if (entity.getUUID().equals(uUID)) {
+				if (entity.getUUID().equals(uUID2)) {
 					serverPlayer.startRiding(entity, true);
 				} else {
 					for (Entity entity2 : entity.getIndirectPassengers()) {
-						if (entity2.getUUID().equals(uUID)) {
+						if (entity2.getUUID().equals(uUID2)) {
 							serverPlayer.startRiding(entity2, true);
 							break;
 						}
@@ -289,6 +306,15 @@ public abstract class PlayerList {
 		}
 
 		serverPlayer.initInventoryMenu();
+	}
+
+	public ClientboundBulkVoteInfoPacket createVoteReloadPacket(UUID uUID) {
+		ServerVoteStorage serverVoteStorage = this.server.getVoteStorage();
+		Map<UUID, ClientVote> map = new HashMap();
+		serverVoteStorage.visitAllPendingVotes((uUIDx, serverVote) -> map.put(uUIDx, serverVote.toClientVote()));
+		Map<OptionId, OptionVotes> map2 = new HashMap();
+		serverVoteStorage.visitVotesFromPlayer(uUID, (optionId, voter) -> map2.put(optionId, OptionVotes.singlePlayer(uUID, voter)));
+		return new ClientboundBulkVoteInfoPacket(true, map, map2);
 	}
 
 	protected void updateEntireScoreboard(ServerScoreboard serverScoreboard, ServerPlayer serverPlayer) {
@@ -526,6 +552,7 @@ public abstract class PlayerList {
 			.send(new ClientboundSetExperiencePacket(serverPlayer2.experienceProgress, serverPlayer2.totalExperience, serverPlayer2.experienceLevel));
 		this.sendLevelInfo(serverPlayer2, serverLevel2);
 		this.sendPlayerPermissionLevel(serverPlayer2);
+		Rules.PERMA_EFFECT.applyToNewPlayer(serverPlayer2);
 		serverLevel2.addRespawnedPlayer(serverPlayer2);
 		this.players.add(serverPlayer2);
 		this.playersByUUID.put(serverPlayer2.getUUID(), serverPlayer2);
@@ -547,6 +574,7 @@ public abstract class PlayerList {
 				);
 		}
 
+		serverPlayer2.canTurnIntoGold = true;
 		return serverPlayer2;
 	}
 

@@ -26,6 +26,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -262,7 +263,11 @@ public class LevelChunk extends ChunkAccess {
 
 				boolean bl4 = blockState2.hasBlockEntity();
 				if (!this.level.isClientSide) {
-					blockState2.onRemove(this.level, blockPos, blockState, bl);
+					if ((Boolean)Rules.UPDATES.get()) {
+						blockState2.onRemove(this.level, blockPos, blockState, bl);
+					} else if (blockState2.hasBlockEntity() && !blockState2.is(blockState.getBlock())) {
+						this.level.removeBlockEntity(blockPos);
+					}
 				} else if (!blockState2.is(block) && bl4) {
 					this.removeBlockEntity(blockPos);
 				}
@@ -270,7 +275,7 @@ public class LevelChunk extends ChunkAccess {
 				if (!levelChunkSection.getBlockState(j, k, l).is(block)) {
 					return null;
 				} else {
-					if (!this.level.isClientSide) {
+					if (!this.level.isClientSide && (Boolean)Rules.UPDATES.get()) {
 						blockState.onPlace(this.level, blockPos, blockState2, bl);
 					}
 

@@ -9,6 +9,7 @@ import java.util.Set;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -39,6 +40,10 @@ public class BonusLevelTableCondition implements LootItemCondition {
 		ItemStack itemStack = lootContext.getParamOrNull(LootContextParams.TOOL);
 		int i = itemStack != null ? EnchantmentHelper.getItemEnchantmentLevel(this.enchantment, itemStack) : 0;
 		float f = this.values[Math.min(i, this.values.length - 1)];
+		if (Rules.DREAM_MODE.get()) {
+			f *= 2.0F;
+		}
+
 		return lootContext.getRandom().nextFloat() < f;
 	}
 

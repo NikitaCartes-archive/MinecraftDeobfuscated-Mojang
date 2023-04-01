@@ -231,7 +231,7 @@ public class CreativeModeTab {
 							+ this.tab.getDisplayName().getString()
 					);
 				} else {
-					if (itemStack.getItem().isEnabled(this.featureFlagSet)) {
+					if (itemStack.isItemEnabled(this.featureFlagSet)) {
 						switch (tabVisibility) {
 							case PARENT_AND_SEARCH_TABS:
 								this.tabContents.add(itemStack);

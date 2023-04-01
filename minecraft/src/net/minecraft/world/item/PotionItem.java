@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class PotionItem extends Item {
-	private static final int DRINK_DURATION = 32;
+	public static final int DRINK_DURATION = 32;
 
 	public PotionItem(Item.Properties properties) {
 		super(properties);
@@ -60,6 +60,10 @@ public class PotionItem extends Item {
 			player.awardStat(Stats.ITEM_USED.get(this));
 			if (!player.getAbilities().instabuild) {
 				itemStack.shrink(1);
+			}
+
+			if (!level.isClientSide) {
+				player.thirst().drink(10);
 			}
 		}
 

@@ -2,13 +2,17 @@ package net.minecraft.world.inventory;
 
 import com.mojang.logging.LogUtils;
 import java.util.Map;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.NameItem;
+import net.minecraft.world.item.TagContainerItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.AnvilBlock;
@@ -230,12 +234,12 @@ public class AnvilMenu extends ItemCombinerMenu {
 				if (itemStack.hasCustomHoverName()) {
 					k = 1;
 					i += k;
-					itemStack2.resetHoverName();
+					clearName(itemStack2);
 				}
 			} else if (!this.itemName.equals(itemStack.getHoverName().getString())) {
 				k = 1;
 				i += k;
-				itemStack2.setHoverName(Component.literal(this.itemName));
+				this.setName(itemStack2);
 			}
 
 			this.cost.set(j + i);
@@ -270,6 +274,32 @@ public class AnvilMenu extends ItemCombinerMenu {
 		}
 	}
 
+	private void setName(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof NameItem) {
+			NameItem.setContainedName(itemStack, this.itemName);
+		} else if (item instanceof TagContainerItem<?> tagContainerItem) {
+			if (tagContainerItem.getTagType() == StringTag.TYPE) {
+				((TagContainerItem<StringTag>)tagContainerItem).setTag(itemStack, StringTag.valueOf(this.itemName));
+			}
+		} else {
+			itemStack.setHoverName(Component.literal(this.itemName));
+		}
+	}
+
+	private static void clearName(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof NameItem) {
+			NameItem.setContainedName(itemStack, "");
+		} else if (item instanceof TagContainerItem<?> tagContainerItem) {
+			if (tagContainerItem.getTagType() == StringTag.TYPE) {
+				((TagContainerItem<StringTag>)tagContainerItem).setTag(itemStack, StringTag.valueOf(""));
+			}
+		} else {
+			itemStack.resetHoverName();
+		}
+	}
+
 	public static int calculateIncreasedRepairCost(int i) {
 		return i * 2 + 1;
 	}
@@ -279,9 +309,9 @@ public class AnvilMenu extends ItemCombinerMenu {
 		if (this.getSlot(2).hasItem()) {
 			ItemStack itemStack = this.getSlot(2).getItem();
 			if (StringUtils.isBlank(string)) {
-				itemStack.resetHoverName();
+				clearName(itemStack);
 			} else {
-				itemStack.setHoverName(Component.literal(this.itemName));
+				this.setName(itemStack);
 			}
 		}
 

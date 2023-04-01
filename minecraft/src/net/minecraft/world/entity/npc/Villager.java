@@ -330,7 +330,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			if (bl) {
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			} else {
-				if (!this.level.isClientSide && !this.offers.isEmpty()) {
+				if (!this.level.isClientSide) {
 					this.startTrading(player);
 				}
 

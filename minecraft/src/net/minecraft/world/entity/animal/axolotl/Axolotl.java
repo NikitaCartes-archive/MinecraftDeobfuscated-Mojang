@@ -332,7 +332,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		float g = this.getHealth();
 		if (!this.level.isClientSide
 			&& !this.isNoAi()
@@ -345,7 +345,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 			this.brain.setMemory(MemoryModuleType.PLAY_DEAD_TICKS, 200);
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtInternal(damageSource, f);
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -58,7 +59,7 @@ public class BlockInput implements Predicate<BlockInWorld> {
 	}
 
 	public boolean place(ServerLevel serverLevel, BlockPos blockPos, int i) {
-		BlockState blockState = Block.updateFromNeighbourShapes(this.state, serverLevel, blockPos);
+		BlockState blockState = Rules.UPDATES.get() ? Block.updateFromNeighbourShapes(this.state, serverLevel, blockPos) : this.state;
 		if (blockState.isAir()) {
 			blockState = this.state;
 		}

@@ -213,6 +213,10 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 		float i
 	) {
 		if (!level.isClientSide) {
+			if (itemStack.isWob()) {
+				g *= -1.0F;
+			}
+
 			boolean bl2 = itemStack2.is(Items.FIREWORK_ROCKET);
 			Projectile projectile;
 			if (bl2) {

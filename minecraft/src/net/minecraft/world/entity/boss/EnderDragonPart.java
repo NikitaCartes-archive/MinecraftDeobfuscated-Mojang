@@ -48,7 +48,7 @@ public class EnderDragonPart extends Entity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		return this.isInvulnerableTo(damageSource) ? false : this.parentMob.hurt(this, damageSource, f);
 	}
 

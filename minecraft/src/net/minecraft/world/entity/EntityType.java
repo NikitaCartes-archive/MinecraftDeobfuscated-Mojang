@@ -36,6 +36,7 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Dolphin;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.MoonCow;
 import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Ocelot;
 import net.minecraft.world.entity.animal.Panda;
@@ -93,6 +94,7 @@ import net.minecraft.world.entity.monster.MagmaCube;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.Ravager;
+import net.minecraft.world.entity.monster.RayTracing;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.monster.Skeleton;
@@ -361,6 +363,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<MushroomCow> MOOSHROOM = register(
 		"mooshroom", EntityType.Builder.of(MushroomCow::new, MobCategory.CREATURE).sized(0.9F, 1.4F).clientTrackingRange(10)
 	);
+	public static final EntityType<MoonCow> MOON_COW = register(
+		"moon_cow", EntityType.Builder.of(MoonCow::new, MobCategory.CREATURE).sized(0.9F, 1.4F).clientTrackingRange(10)
+	);
 	public static final EntityType<Mule> MULE = register(
 		"mule", EntityType.Builder.of(Mule::new, MobCategory.CREATURE).sized(1.3964844F, 1.6F).clientTrackingRange(8)
 	);
@@ -453,6 +458,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<Squid> SQUID = register(
 		"squid", EntityType.Builder.of(Squid::new, MobCategory.WATER_CREATURE).sized(0.8F, 0.8F).clientTrackingRange(8)
 	);
+	public static final EntityType<Display.StencilDisplay> STENCIL_DISPLAY = register(
+		"stencil_display", EntityType.Builder.of(Display.StencilDisplay::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(10).updateInterval(1)
+	);
 	public static final EntityType<Stray> STRAY = register(
 		"stray", EntityType.Builder.of(Stray::new, MobCategory.MONSTER).sized(0.6F, 1.99F).immuneTo(Blocks.POWDER_SNOW).clientTrackingRange(8)
 	);
@@ -526,6 +534,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = register(
 		"zombified_piglin", EntityType.Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.95F).clientTrackingRange(8)
+	);
+	public static final EntityType<RayTracing> RAY_TRACING = register(
+		"ray_tracing", EntityType.Builder.of(RayTracing::new, MobCategory.AMBIENT).noSave().noSummon().sized(0.6F, 1.8F).clientTrackingRange(8)
 	);
 	public static final EntityType<Player> PLAYER = register(
 		"player", EntityType.Builder.<Player>createNothing(MobCategory.MISC).noSave().noSummon().sized(0.6F, 1.8F).clientTrackingRange(32).updateInterval(2)

@@ -35,6 +35,7 @@ public class Attributes {
 	public static final Attribute JUMP_STRENGTH = register(
 		"horse.jump_strength", new RangedAttribute("attribute.name.horse.jump_strength", 0.7, 0.0, 2.0).setSyncable(true)
 	);
+	public static final Attribute SCALE = register("generic.scale", new RangedAttribute("attribute.name.generic.scale", 1.0, 0.1F, 16.0).setSyncable(true));
 
 	private static Attribute register(String string, Attribute attribute) {
 		return Registry.register(BuiltInRegistries.ATTRIBUTE, string, attribute);

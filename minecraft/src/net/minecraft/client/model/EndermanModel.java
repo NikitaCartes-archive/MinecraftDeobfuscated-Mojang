@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -121,5 +122,10 @@ public class EndermanModel<T extends LivingEntity> extends HumanoidModel<T> {
 		int n = -14;
 		this.rightArm.setPos(-5.0F, -12.0F, 0.0F);
 		this.leftArm.setPos(5.0F, -12.0F, 0.0F);
+	}
+
+	@Override
+	protected Iterable<ModelPart> headParts() {
+		return ImmutableList.<ModelPart>of(this.head, this.hat);
 	}
 }

@@ -1,15 +1,25 @@
 package net.minecraft.world.level.storage;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -56,6 +66,7 @@ import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.voting.votes.VoteStorage;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.Level;
@@ -341,6 +352,7 @@ public class LevelStorageSource {
 	}
 
 	public static record LevelDirectory(Path path) {
+
 		public String directoryName() {
 			return this.path.getFileName().toString();
 		}
@@ -556,6 +568,112 @@ public class LevelStorageSource {
 
 		public void close() throws IOException {
 			this.lock.close();
+		}
+
+		public VoteStorage loadVotes() {
+			this.checkLock();
+			Path path = this.getLevelPath(LevelResource.VOTES);
+			if (Files.exists(path, new LinkOption[0])) {
+				try {
+					BufferedReader bufferedReader = Files.newBufferedReader(path, Charsets.UTF_8);
+
+					VoteStorage var5;
+					try {
+						JsonReader jsonReader = new JsonReader(bufferedReader);
+
+						try {
+							JsonElement jsonElement = Streams.parse(jsonReader);
+							if (!jsonElement.isJsonNull() && jsonReader.peek() != JsonToken.END_DOCUMENT) {
+								throw new JsonSyntaxException("Did not consume the entire document.");
+							}
+
+							var5 = (VoteStorage)VoteStorage.CODEC
+								.parse(new Dynamic<>(JsonOps.INSTANCE, jsonElement))
+								.resultOrPartial(Util.prefix("Rule decoding: ", LevelStorageSource.LOGGER::error))
+								.orElseGet(VoteStorage::new);
+						} catch (Throwable var8) {
+							try {
+								jsonReader.close();
+							} catch (Throwable var7) {
+								var8.addSuppressed(var7);
+							}
+
+							throw var8;
+						}
+
+						jsonReader.close();
+					} catch (Throwable var9) {
+						if (bufferedReader != null) {
+							try {
+								bufferedReader.close();
+							} catch (Throwable var6) {
+								var9.addSuppressed(var6);
+							}
+						}
+
+						throw var9;
+					}
+
+					if (bufferedReader != null) {
+						bufferedReader.close();
+					}
+
+					return var5;
+				} catch (Exception var10) {
+					LevelStorageSource.LOGGER.warn("Failed to read votes from {}", path, var10);
+				}
+			}
+
+			return new VoteStorage();
+		}
+
+		public void saveVotes(VoteStorage voteStorage) {
+			this.checkLock();
+			Path path = this.getLevelPath(LevelResource.VOTES);
+
+			try {
+				Path path2 = Files.createTempFile(this.levelDirectory.path, "votes", ".json");
+				BufferedWriter bufferedWriter = Files.newBufferedWriter(path2, Charsets.UTF_8);
+
+				try {
+					DataResult<JsonElement> dataResult = VoteStorage.CODEC.encodeStart(JsonOps.INSTANCE, voteStorage);
+					JsonWriter jsonWriter = new JsonWriter(bufferedWriter);
+
+					try {
+						jsonWriter.setIndent("  ");
+						Streams.write(Util.getOrThrow(dataResult, IOException::new), jsonWriter);
+					} catch (Throwable var11) {
+						try {
+							jsonWriter.close();
+						} catch (Throwable var10) {
+							var11.addSuppressed(var10);
+						}
+
+						throw var11;
+					}
+
+					jsonWriter.close();
+				} catch (Throwable var12) {
+					if (bufferedWriter != null) {
+						try {
+							bufferedWriter.close();
+						} catch (Throwable var9) {
+							var12.addSuppressed(var9);
+						}
+					}
+
+					throw var12;
+				}
+
+				if (bufferedWriter != null) {
+					bufferedWriter.close();
+				}
+
+				Path path3 = this.getLevelPath(LevelResource.OLD_VOTES);
+				Util.safeReplaceFile(path, path2, path3);
+			} catch (Exception var13) {
+				LevelStorageSource.LOGGER.warn("Failed to write votes to {}", path, var13);
+			}
 		}
 	}
 }

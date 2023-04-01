@@ -11,6 +11,12 @@ public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacket
 	private final int xa;
 	private final int ya;
 	private final int za;
+	public boolean moon;
+
+	public ClientboundSetEntityMotionPacket(Entity entity, boolean bl) {
+		this(entity);
+		this.moon = bl;
+	}
 
 	public ClientboundSetEntityMotionPacket(Entity entity) {
 		this(entity.getId(), entity.getDeltaMovement());
@@ -32,6 +38,7 @@ public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacket
 		this.xa = friendlyByteBuf.readShort();
 		this.ya = friendlyByteBuf.readShort();
 		this.za = friendlyByteBuf.readShort();
+		this.moon = friendlyByteBuf.readBoolean();
 	}
 
 	@Override
@@ -40,6 +47,7 @@ public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacket
 		friendlyByteBuf.writeShort(this.xa);
 		friendlyByteBuf.writeShort(this.ya);
 		friendlyByteBuf.writeShort(this.za);
+		friendlyByteBuf.writeBoolean(this.moon);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

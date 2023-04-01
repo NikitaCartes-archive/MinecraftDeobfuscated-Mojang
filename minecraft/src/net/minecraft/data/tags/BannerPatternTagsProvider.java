@@ -56,6 +56,7 @@ public class BannerPatternTagsProvider extends TagsProvider<BannerPattern> {
 		this.tag(BannerPatternTags.PATTERN_ITEM_CREEPER).add(BannerPatterns.CREEPER);
 		this.tag(BannerPatternTags.PATTERN_ITEM_SKULL).add(BannerPatterns.SKULL);
 		this.tag(BannerPatternTags.PATTERN_ITEM_MOJANG).add(BannerPatterns.MOJANG);
+		this.tag(BannerPatternTags.PATTERN_ITEM_M).add(BannerPatterns.NEW_MOJANG);
 		this.tag(BannerPatternTags.PATTERN_ITEM_GLOBE).add(BannerPatterns.GLOBE);
 		this.tag(BannerPatternTags.PATTERN_ITEM_PIGLIN).add(BannerPatterns.PIGLIN);
 	}

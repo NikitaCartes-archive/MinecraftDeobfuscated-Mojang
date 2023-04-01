@@ -27,17 +27,19 @@ public abstract class RenderTarget {
 	public int viewWidth;
 	public int viewHeight;
 	public final boolean useDepth;
+	public final boolean useStencil;
 	public int frameBufferId;
 	protected int colorTextureId;
-	protected int depthBufferId;
+	protected int depthStencilBufferId;
 	private final float[] clearChannels = Util.make(() -> new float[]{1.0F, 1.0F, 1.0F, 0.0F});
 	public int filterMode;
 
-	public RenderTarget(boolean bl) {
+	public RenderTarget(boolean bl, boolean bl2) {
 		this.useDepth = bl;
+		this.useStencil = bl2;
 		this.frameBufferId = -1;
 		this.colorTextureId = -1;
-		this.depthBufferId = -1;
+		this.depthStencilBufferId = -1;
 	}
 
 	public void resize(int i, int j, boolean bl) {
@@ -63,9 +65,9 @@ public abstract class RenderTarget {
 		RenderSystem.assertOnRenderThreadOrInit();
 		this.unbindRead();
 		this.unbindWrite();
-		if (this.depthBufferId > -1) {
-			TextureUtil.releaseTextureId(this.depthBufferId);
-			this.depthBufferId = -1;
+		if (this.depthStencilBufferId > -1) {
+			TextureUtil.releaseTextureId(this.depthStencilBufferId);
+			this.depthStencilBufferId = -1;
 		}
 
 		if (this.colorTextureId > -1) {
@@ -98,15 +100,19 @@ public abstract class RenderTarget {
 			this.height = j;
 			this.frameBufferId = GlStateManager.glGenFramebuffers();
 			this.colorTextureId = TextureUtil.generateTextureId();
-			if (this.useDepth) {
-				this.depthBufferId = TextureUtil.generateTextureId();
-				GlStateManager._bindTexture(this.depthBufferId);
+			if (this.useDepth || this.useStencil) {
+				this.depthStencilBufferId = TextureUtil.generateTextureId();
+				GlStateManager._bindTexture(this.depthStencilBufferId);
 				GlStateManager._texParameter(3553, 10241, 9728);
 				GlStateManager._texParameter(3553, 10240, 9728);
 				GlStateManager._texParameter(3553, 34892, 0);
 				GlStateManager._texParameter(3553, 10242, 33071);
 				GlStateManager._texParameter(3553, 10243, 33071);
-				GlStateManager._texImage2D(3553, 0, 6402, this.width, this.height, 0, 6402, 5126, null);
+				if (this.useStencil) {
+					GlStateManager._texImage2D(3553, 0, 35056, this.width, this.height, 0, 34041, 34042, null);
+				} else {
+					GlStateManager._texImage2D(3553, 0, 6402, this.width, this.height, 0, 6402, 5126, null);
+				}
 			}
 
 			this.setFilterMode(9728);
@@ -117,7 +123,11 @@ public abstract class RenderTarget {
 			GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
 			GlStateManager._glFramebufferTexture2D(36160, 36064, 3553, this.colorTextureId, 0);
 			if (this.useDepth) {
-				GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthBufferId, 0);
+				if (this.useStencil) {
+					GlStateManager._glFramebufferTexture2D(36160, 33306, 3553, this.depthStencilBufferId, 0);
+				} else {
+					GlStateManager._glFramebufferTexture2D(36160, 36096, 3553, this.depthStencilBufferId, 0);
+				}
 			}
 
 			this.checkStatus();
@@ -268,11 +278,21 @@ public abstract class RenderTarget {
 		this.unbindWrite();
 	}
 
+	public void clearStencil(boolean bl) {
+		RenderSystem.assertOnRenderThread();
+		if (this.useStencil) {
+			this.bindWrite(true);
+			GlStateManager._clearStencil(0);
+			GlStateManager._clear(1024, bl);
+			this.unbindWrite();
+		}
+	}
+
 	public int getColorTextureId() {
 		return this.colorTextureId;
 	}
 
 	public int getDepthTextureId() {
-		return this.depthBufferId;
+		return this.depthStencilBufferId;
 	}
 }

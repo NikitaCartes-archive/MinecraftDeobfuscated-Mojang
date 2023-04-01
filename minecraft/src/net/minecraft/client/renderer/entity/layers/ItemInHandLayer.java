@@ -29,7 +29,7 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 		ItemStack itemStack2 = bl ? livingEntity.getMainHandItem() : livingEntity.getOffhandItem();
 		if (!itemStack.isEmpty() || !itemStack2.isEmpty()) {
 			poseStack.pushPose();
-			if (this.getParentModel().young) {
+			if (this.getParentModel().miniMe() || this.getParentModel().young) {
 				float m = 0.5F;
 				poseStack.translate(0.0F, 0.75F, 0.0F);
 				poseStack.scale(0.5F, 0.5F, 0.5F);

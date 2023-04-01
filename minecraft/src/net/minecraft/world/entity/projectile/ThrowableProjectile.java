@@ -48,7 +48,10 @@ public abstract class ThrowableProjectile extends Projectile {
 			BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
 			BlockState blockState = this.level.getBlockState(blockPos);
 			if (blockState.is(Blocks.NETHER_PORTAL)) {
-				this.handleInsidePortal(blockPos);
+				this.handleInsidePortal(blockPos, false);
+				bl = true;
+			} else if (blockState.is(Blocks.OTHER_PORTAL)) {
+				this.handleInsidePortal(blockPos, true);
 				bl = true;
 			} else if (blockState.is(Blocks.END_GATEWAY)) {
 				BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
@@ -85,12 +88,13 @@ public abstract class ThrowableProjectile extends Projectile {
 		this.setDeltaMovement(vec3.scale((double)h));
 		if (!this.isNoGravity()) {
 			Vec3 vec32 = this.getDeltaMovement();
-			this.setDeltaMovement(vec32.x, vec32.y - (double)this.getGravity(), vec32.z);
+			this.setDeltaMovement(vec32.x, vec32.y - (double)this.getEffectiveGravity(), vec32.z);
 		}
 
 		this.setPos(d, e, f);
 	}
 
+	@Override
 	protected float getGravity() {
 		return 0.03F;
 	}

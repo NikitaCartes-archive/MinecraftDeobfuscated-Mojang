@@ -96,6 +96,8 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	@Nullable
 	public final Uniform GAME_TIME;
 	@Nullable
+	public final Uniform WALL_TIME;
+	@Nullable
 	public final Uniform CHUNK_OFFSET;
 
 	public ShaderInstance(ResourceProvider resourceProvider, String string, VertexFormat vertexFormat) throws IOException {
@@ -219,6 +221,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		this.FOG_SHAPE = this.getUniform("FogShape");
 		this.LINE_WIDTH = this.getUniform("LineWidth");
 		this.GAME_TIME = this.getUniform("GameTime");
+		this.WALL_TIME = this.getUniform("WallTime");
 		this.CHUNK_OFFSET = this.getUniform("ChunkOffset");
 	}
 

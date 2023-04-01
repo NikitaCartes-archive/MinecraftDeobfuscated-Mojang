@@ -43,8 +43,23 @@ public abstract class AgeableListModel<E extends Entity> extends EntityModel<E> 
 
 	@Override
 	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-		if (this.young) {
+		if (!this.miniMe() && !this.young) {
 			poseStack.pushPose();
+			if (this.bigHead()) {
+				poseStack.scale(2.0F, 2.0F, 2.0F);
+			}
+
+			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+			poseStack.popPose();
+			if (!this.onlyHead()) {
+				this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+			}
+		} else {
+			poseStack.pushPose();
+			if (this.bigHead()) {
+				poseStack.scale(2.0F, 2.0F, 2.0F);
+			}
+
 			if (this.scaleHead) {
 				float l = 1.5F / this.babyHeadScale;
 				poseStack.scale(l, l, l);
@@ -53,16 +68,23 @@ public abstract class AgeableListModel<E extends Entity> extends EntityModel<E> 
 			poseStack.translate(0.0F, this.babyYHeadOffset / 16.0F, this.babyZHeadOffset / 16.0F);
 			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
 			poseStack.popPose();
-			poseStack.pushPose();
-			float l = 1.0F / this.babyBodyScale;
-			poseStack.scale(l, l, l);
-			poseStack.translate(0.0F, this.bodyYOffset / 16.0F, 0.0F);
-			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
-			poseStack.popPose();
-		} else {
-			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
-			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+			if (!this.onlyHead()) {
+				poseStack.pushPose();
+				float l = 1.0F / this.babyBodyScale;
+				poseStack.scale(l, l, l);
+				poseStack.translate(0.0F, this.bodyYOffset / 16.0F, 0.0F);
+				this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+				poseStack.popPose();
+			}
 		}
+	}
+
+	protected boolean bigHead() {
+		return false;
+	}
+
+	protected boolean onlyHead() {
+		return false;
 	}
 
 	protected abstract Iterable<ModelPart> headParts();

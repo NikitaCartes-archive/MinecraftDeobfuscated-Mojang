@@ -3,6 +3,7 @@ package net.minecraft.world.inventory;
 import java.util.Optional;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -65,7 +66,7 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 				CraftingRecipe craftingRecipe = (CraftingRecipe)optional.get();
 				if (resultContainer.setRecipeUsed(level, serverPlayer, craftingRecipe)) {
 					ItemStack itemStack2 = craftingRecipe.assemble(craftingContainer, level.registryAccess());
-					if (itemStack2.isItemEnabled(level.enabledFeatures())) {
+					if (itemStack2.isItemEnabled(level.enabledFeatures()) && RuleFeatureToggles.isEnabled(itemStack2)) {
 						itemStack = itemStack2;
 					}
 				}

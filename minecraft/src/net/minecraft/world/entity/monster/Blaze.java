@@ -40,6 +40,11 @@ public class Blaze extends Monster {
 	}
 
 	@Override
+	public boolean canTransformFly() {
+		return true;
+	}
+
+	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(4, new Blaze.BlazeAttackGoal(this));
 		this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));

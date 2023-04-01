@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
@@ -83,6 +84,7 @@ public class Sheets {
 	public static final Material CHEST_LOCATION_LEFT = chestMaterial("normal_left");
 	public static final Material CHEST_LOCATION_RIGHT = chestMaterial("normal_right");
 	public static final Material ENDER_CHEST_LOCATION = chestMaterial("ender");
+	public static final Material GOLD_CHEST_LOCATION = chestMaterial("gold");
 
 	public static RenderType bannerSheet() {
 		return BANNER_SHEET_TYPE;
@@ -202,6 +204,10 @@ public class Sheets {
 	}
 
 	public static Material chooseMaterial(BlockEntity blockEntity, ChestType chestType, boolean bl) {
+		if (blockEntity instanceof ChestBlockEntity chestBlockEntity && chestBlockEntity.isGold()) {
+			return GOLD_CHEST_LOCATION;
+		}
+
 		if (blockEntity instanceof EnderChestBlockEntity) {
 			return ENDER_CHEST_LOCATION;
 		} else if (bl) {

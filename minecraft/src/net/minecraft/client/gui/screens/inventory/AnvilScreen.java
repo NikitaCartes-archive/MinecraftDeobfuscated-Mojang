@@ -1,10 +1,12 @@
 package net.minecraft.client.gui.screens.inventory;
 
+import com.google.common.base.Strings;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +15,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.NameItem;
+import net.minecraft.world.item.TagContainerItem;
 
 @Environment(EnvType.CLIENT)
 public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
@@ -129,9 +134,24 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	@Override
 	public void slotChanged(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
 		if (i == 0) {
-			this.name.setValue(itemStack.isEmpty() ? "" : itemStack.getHoverName().getString());
+			this.name.setValue(getName(itemStack));
 			this.name.setEditable(!itemStack.isEmpty());
 			this.setFocused(this.name);
+		}
+	}
+
+	private static String getName(ItemStack itemStack) {
+		if (itemStack.isEmpty()) {
+			return "";
+		} else {
+			Item item = itemStack.getItem();
+			if (item instanceof NameItem) {
+				return Strings.nullToEmpty(NameItem.getContainedName(itemStack));
+			} else if (item instanceof TagContainerItem<?> tagContainerItem) {
+				return tagContainerItem.getTag(itemStack) instanceof StringTag stringTag ? stringTag.getAsString() : "";
+			} else {
+				return itemStack.getHoverName().getString();
+			}
 		}
 	}
 }

@@ -422,7 +422,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isClosed()) {
 			Entity entity = damageSource.getDirectEntity();
 			if (entity instanceof AbstractArrow) {
@@ -430,7 +430,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 			}
 		}
 
-		if (!super.hurt(damageSource, f)) {
+		if (!super.hurtInternal(damageSource, f)) {
 			return false;
 		} else {
 			if ((double)this.getHealth() < (double)this.getMaxHealth() * 0.5 && this.random.nextInt(4) == 0) {

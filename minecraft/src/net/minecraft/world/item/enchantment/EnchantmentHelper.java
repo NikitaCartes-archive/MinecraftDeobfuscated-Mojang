@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -138,13 +139,13 @@ public class EnchantmentHelper {
 	public static int getDamageProtection(Iterable<ItemStack> iterable, DamageSource damageSource) {
 		MutableInt mutableInt = new MutableInt();
 		runIterationOnInventory((enchantment, i) -> mutableInt.add(enchantment.getDamageProtection(i, damageSource)), iterable);
-		return mutableInt.intValue();
+		return Rules.DREAM_MODE.get() ? mutableInt.intValue() * 2 : mutableInt.intValue();
 	}
 
 	public static float getDamageBonus(ItemStack itemStack, MobType mobType) {
 		MutableFloat mutableFloat = new MutableFloat();
 		runIterationOnItem((enchantment, i) -> mutableFloat.add(enchantment.getDamageBonus(i, mobType)), itemStack);
-		return mutableFloat.floatValue();
+		return Rules.DREAM_MODE.get() ? mutableFloat.floatValue() * 2.0F : mutableFloat.floatValue();
 	}
 
 	public static float getSweepingDamageRatio(LivingEntity livingEntity) {
@@ -217,15 +218,18 @@ public class EnchantmentHelper {
 	}
 
 	public static int getFishingLuckBonus(ItemStack itemStack) {
-		return getItemEnchantmentLevel(Enchantments.FISHING_LUCK, itemStack);
+		int i = getItemEnchantmentLevel(Enchantments.FISHING_LUCK, itemStack);
+		return Rules.DREAM_MODE.get() ? i + 3 : i;
 	}
 
 	public static int getFishingSpeedBonus(ItemStack itemStack) {
-		return getItemEnchantmentLevel(Enchantments.FISHING_SPEED, itemStack);
+		int i = getItemEnchantmentLevel(Enchantments.FISHING_SPEED, itemStack);
+		return Rules.DREAM_MODE.get() ? i + 3 : i;
 	}
 
 	public static int getMobLooting(LivingEntity livingEntity) {
-		return getEnchantmentLevel(Enchantments.MOB_LOOTING, livingEntity);
+		int i = getEnchantmentLevel(Enchantments.MOB_LOOTING, livingEntity);
+		return Rules.DREAM_MODE.get() ? i + 3 : i;
 	}
 
 	public static boolean hasAquaAffinity(LivingEntity livingEntity) {
@@ -332,10 +336,14 @@ public class EnchantmentHelper {
 		if (j <= 0) {
 			return list;
 		} else {
+			if (Rules.DREAM_MODE.get()) {
+				j *= 2;
+			}
+
 			i += 1 + randomSource.nextInt(j / 4 + 1) + randomSource.nextInt(j / 4 + 1);
 			float f = (randomSource.nextFloat() + randomSource.nextFloat() - 1.0F) * 0.15F;
 			i = Mth.clamp(Math.round((float)i + (float)i * f), 1, Integer.MAX_VALUE);
-			List<EnchantmentInstance> list2 = getAvailableEnchantmentResults(i, itemStack, bl);
+			List<EnchantmentInstance> list2 = getAvailableEnchantmentResults(i, itemStack, bl || Rules.DREAM_MODE.get());
 			if (!list2.isEmpty()) {
 				WeightedRandom.getRandomItem(randomSource, list2).ifPresent(list::add);
 

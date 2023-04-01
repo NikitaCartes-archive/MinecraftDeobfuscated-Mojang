@@ -127,8 +127,8 @@ public class PiglinBrute extends AbstractPiglin {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
+		boolean bl = super.hurtInternal(damageSource, f);
 		if (this.level.isClientSide) {
 			return false;
 		} else {

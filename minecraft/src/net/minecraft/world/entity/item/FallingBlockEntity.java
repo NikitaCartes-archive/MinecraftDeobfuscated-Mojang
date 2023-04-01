@@ -124,7 +124,7 @@ public class FallingBlockEntity extends Entity {
 			Block block = this.blockState.getBlock();
 			this.time++;
 			if (!this.isNoGravity()) {
-				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
+				this.setDeltaMovement(this.getDeltaMovement().add(0.0, (double)(-this.getEffectiveGravity()), 0.0));
 			}
 
 			this.move(MoverType.SELF, this.getDeltaMovement());

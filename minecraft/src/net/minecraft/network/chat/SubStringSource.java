@@ -37,7 +37,7 @@ public class SubStringSource {
 				Style style2 = (Style)this.charStyles.get(m);
 				if (!style2.equals(style)) {
 					String string = this.plainText.substring(k, m);
-					list.add(bl ? FormattedCharSequence.backward(string, style, this.reverseCharModifier) : FormattedCharSequence.forward(string, style));
+					list.add(bl ^ style2.isReversed() ? FormattedCharSequence.backward(string, style, this.reverseCharModifier) : FormattedCharSequence.forward(string, style));
 					style = style2;
 					k = m;
 				}
@@ -45,7 +45,7 @@ public class SubStringSource {
 
 			if (k < i + j) {
 				String string2 = this.plainText.substring(k, i + j);
-				list.add(bl ? FormattedCharSequence.backward(string2, style, this.reverseCharModifier) : FormattedCharSequence.forward(string2, style));
+				list.add(bl ^ style.isReversed() ? FormattedCharSequence.backward(string2, style, this.reverseCharModifier) : FormattedCharSequence.forward(string2, style));
 			}
 
 			return bl ? Lists.reverse(list) : list;

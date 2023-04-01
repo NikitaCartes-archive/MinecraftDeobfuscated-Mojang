@@ -20,6 +20,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.FoodType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -55,7 +57,8 @@ public class Item implements FeatureElement, ItemLike {
 	public static final Map<Block, Item> BY_BLOCK = Maps.<Block, Item>newHashMap();
 	protected static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
 	protected static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
-	public static final int MAX_STACK_SIZE = 64;
+	public static final int DEFAULT_STACK_SIZE = 64;
+	public static final int MAX_STACK_SIZE = 1024;
 	public static final int EAT_DURATION = 32;
 	public static final int MAX_BAR_WIDTH = 13;
 	private final Holder.Reference<Item> builtInRegistryHolder = BuiltInRegistries.ITEM.createIntrusiveHolder(this);
@@ -68,7 +71,7 @@ public class Item implements FeatureElement, ItemLike {
 	@Nullable
 	private String descriptionId;
 	@Nullable
-	private final FoodProperties foodProperties;
+	protected final FoodProperties foodProperties;
 	private final FeatureFlagSet requiredFeatures;
 
 	public static int getId(Item item) {
@@ -150,7 +153,8 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public final int getMaxStackSize() {
-		return this.maxStackSize;
+		float f = Rules.DOUBLE_OR_HALF_STACK_SIZE.getFloat(this.builtInRegistryHolder.key());
+		return Math.max(Math.round((float)this.maxStackSize * f), 1);
 	}
 
 	public final int getMaxDamage() {
@@ -215,6 +219,17 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public String getDescriptionId() {
+		FoodType foodType = Rules.FOOD_RESTRICTION.get();
+		if (foodType != FoodType.ANY && this.foodProperties != null) {
+			if (foodType.item() == this) {
+				return foodType.foodKey();
+			}
+
+			if (FoodType.INEDIBLES.contains(this)) {
+				return "rule.food_restriction.inedible." + this;
+			}
+		}
+
 		return this.getOrCreateDescriptionId();
 	}
 
@@ -227,7 +242,7 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	@Nullable
-	public final Item getCraftingRemainingItem() {
+	public Item getCraftingRemainingItem() {
 		return this.craftingRemainingItem;
 	}
 
@@ -332,12 +347,13 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public boolean isEdible() {
-		return this.foodProperties != null;
+		return this.getFoodProperties() != null;
 	}
 
 	@Nullable
 	public FoodProperties getFoodProperties() {
-		return this.foodProperties;
+		FoodType foodType = Rules.FOOD_RESTRICTION.get();
+		return foodType != FoodType.ANY && foodType.item() != this ? null : this.foodProperties;
 	}
 
 	public SoundEvent getDrinkingSound() {

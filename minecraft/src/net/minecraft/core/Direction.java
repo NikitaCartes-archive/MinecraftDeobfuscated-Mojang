@@ -47,6 +47,9 @@ public enum Direction implements StringRepresentable {
 		.filter(direction -> direction.getAxis().isHorizontal())
 		.sorted(Comparator.comparingInt(direction -> direction.data2d))
 		.toArray(Direction[]::new);
+	static final Direction[] HORIZONTALS = new Direction[]{NORTH, EAST, SOUTH, WEST};
+	static final Direction[] X_ORTHOGONALS = new Direction[]{UP, NORTH, SOUTH, DOWN};
+	static final Direction[] Z_ORTHOGONALS = new Direction[]{UP, EAST, DOWN, WEST};
 
 	private Direction(int j, int k, int l, String string2, Direction.AxisDirection axisDirection, Direction.Axis axis, Vec3i vec3i) {
 		this.data3d = j;
@@ -368,6 +371,11 @@ public enum Direction implements StringRepresentable {
 			public double choose(double d, double e, double f) {
 				return d;
 			}
+
+			@Override
+			public Direction[] getOrthogonalDirections() {
+				return Direction.X_ORTHOGONALS;
+			}
 		},
 		Y("y") {
 			@Override
@@ -379,6 +387,11 @@ public enum Direction implements StringRepresentable {
 			public double choose(double d, double e, double f) {
 				return e;
 			}
+
+			@Override
+			public Direction[] getOrthogonalDirections() {
+				return Direction.HORIZONTALS;
+			}
 		},
 		Z("z") {
 			@Override
@@ -389,6 +402,11 @@ public enum Direction implements StringRepresentable {
 			@Override
 			public double choose(double d, double e, double f) {
 				return f;
+			}
+
+			@Override
+			public Direction[] getOrthogonalDirections() {
+				return Direction.Z_ORTHOGONALS;
 			}
 		};
 
@@ -444,6 +462,8 @@ public enum Direction implements StringRepresentable {
 		public abstract int choose(int i, int j, int k);
 
 		public abstract double choose(double d, double e, double f);
+
+		public abstract Direction[] getOrthogonalDirections();
 	}
 
 	public static enum AxisDirection {

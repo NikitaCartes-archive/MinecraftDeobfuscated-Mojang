@@ -221,9 +221,9 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		IronGolem.Crackiness crackiness = this.getCrackiness();
-		boolean bl = super.hurt(damageSource, f);
+		boolean bl = super.hurtInternal(damageSource, f);
 		if (bl && this.getCrackiness() != crackiness) {
 			this.playSound(SoundEvents.IRON_GOLEM_DAMAGE, 1.0F, 1.0F);
 		}

@@ -8,9 +8,11 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.IntFunction;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -95,7 +97,7 @@ public abstract class Display extends Entity {
 	public Display(EntityType<?> entityType, Level level) {
 		super(entityType, level);
 		this.noPhysics = true;
-		this.noCulling = true;
+		this.setNoCulling(true);
 		this.cullingBoundingBox = this.getBoundingBox();
 	}
 
@@ -240,7 +242,7 @@ public abstract class Display extends Entity {
 		}
 	}
 
-	private void setTransformation(Transformation transformation) {
+	protected void setTransformation(Transformation transformation) {
 		this.entityData.set(DATA_TRANSLATION_ID, transformation.getTranslation());
 		this.entityData.set(DATA_LEFT_ROTATION_ID, transformation.getLeftRotation());
 		this.entityData.set(DATA_SCALE_ID, transformation.getScale());
@@ -291,7 +293,7 @@ public abstract class Display extends Entity {
 		return this.renderState;
 	}
 
-	private void setInterpolationDuration(int i) {
+	protected void setInterpolationDuration(int i) {
 		this.entityData.set(DATA_INTERPOLATION_DURATION_ID, i);
 	}
 
@@ -299,11 +301,11 @@ public abstract class Display extends Entity {
 		return this.entityData.get(DATA_INTERPOLATION_DURATION_ID);
 	}
 
-	private void setInterpolationDelay(int i) {
+	protected void setInterpolationDelay(int i) {
 		this.entityData.set(DATA_INTERPOLATION_START_DELTA_TICKS_ID, i, true);
 	}
 
-	private int getInterpolationDelay() {
+	protected int getInterpolationDelay() {
 		return this.entityData.get(DATA_INTERPOLATION_START_DELTA_TICKS_ID);
 	}
 
@@ -400,14 +402,14 @@ public abstract class Display extends Entity {
 		float f = this.getWidth();
 		float g = this.getHeight();
 		if (f != 0.0F && g != 0.0F) {
-			this.noCulling = false;
+			this.setNoCulling(false);
 			float h = f / 2.0F;
 			double d = this.getX();
 			double e = this.getY();
 			double i = this.getZ();
 			this.cullingBoundingBox = new AABB(d - (double)h, e, i - (double)h, d + (double)h, e + (double)g, i + (double)h);
 		} else {
-			this.noCulling = true;
+			this.setNoCulling(true);
 		}
 	}
 
@@ -521,7 +523,7 @@ public abstract class Display extends Entity {
 			return this.entityData.get(DATA_BLOCK_STATE_ID);
 		}
 
-		private void setBlockState(BlockState blockState) {
+		protected void setBlockState(BlockState blockState) {
 			this.entityData.set(DATA_BLOCK_STATE_ID, blockState);
 		}
 
@@ -680,6 +682,9 @@ public abstract class Display extends Entity {
 		}
 	}
 
+	public static record KeyFrame(BlockPos pos, float scale, int ticks) {
+	}
+
 	static record LinearFloatInterpolator(float previous, float current) implements Display.FloatInterpolator {
 		@Override
 		public float get(float f) {
@@ -694,6 +699,81 @@ public abstract class Display extends Entity {
 		}
 	}
 
+	public static class LinearlyInterpolatedBlockAnimator extends Display.BlockDisplay {
+		private final BlockPos end;
+		private final int ttl;
+		private final int extraLife;
+		private int tick;
+		private final BlockState state;
+		private final Display.KeyFrame[] frames;
+		private int currentFrame = 0;
+		private int currentFrameTime = 0;
+		private int currentTime = 0;
+
+		public LinearlyInterpolatedBlockAnimator(Level level, BlockState blockState, BlockPos blockPos, Display.KeyFrame... keyFrames) {
+			super(EntityType.BLOCK_DISPLAY, level);
+			this.setBlockState(blockState);
+			this.frames = keyFrames;
+			this.ttl = Stream.of(keyFrames).mapToInt(Display.KeyFrame::ticks).sum();
+			this.extraLife = this.random.nextInt(4) + 4;
+			this.state = blockState;
+			this.currentFrame = 0;
+			this.currentTime = 0;
+			this.end = blockPos;
+			this.tick = 0;
+			this.directTo(0);
+			this.setPos((double)keyFrames[0].pos().getX(), (double)keyFrames[0].pos().getY(), (double)keyFrames[0].pos().getZ());
+			if (level.getBlockState(blockPos).isAir()) {
+				level.setBlock(blockPos, Blocks.BARRIER.defaultBlockState(), 2);
+			}
+		}
+
+		void directTo(int i) {
+			this.currentFrame = i;
+			this.currentTime = 0;
+			boolean bl = i == 0;
+			boolean bl2 = i == this.frames.length;
+			BlockPos blockPos = this.frames[0].pos();
+			BlockPos blockPos2 = bl2 ? this.end : this.frames[i].pos();
+			Vector3f vector3f = new Vector3f(
+				(float)(blockPos2.getX() - blockPos.getX()), (float)(blockPos2.getY() - blockPos.getY()), (float)(blockPos2.getZ() - blockPos.getZ())
+			);
+			float f = bl2 ? 0.995F : this.frames[this.currentFrame].scale;
+			float g = (1.0F - f) / 2.0F;
+			this.setTransformation(new Transformation(vector3f.add(g, g, g), null, new Vector3f(f, f, f), null));
+			this.currentFrameTime = bl ? 0 : this.frames[this.currentFrame - 1].ticks();
+			if (bl2) {
+				this.currentFrameTime++;
+			}
+
+			this.setInterpolationDuration(this.currentFrameTime);
+			this.setInterpolationDelay(0);
+		}
+
+		@Override
+		public void tick() {
+			super.tick();
+			if (this.currentTime == this.currentFrameTime && this.currentFrame < this.frames.length) {
+				this.directTo(this.currentFrame + 1);
+			}
+
+			if (this.tick == this.ttl + 1) {
+				if (this.level.getBlockState(this.end).getBlock() != Blocks.BARRIER) {
+					this.level.destroyBlock(this.end, true);
+				}
+
+				this.level.setBlock(this.end, this.state, 3);
+			}
+
+			if (this.tick > this.ttl + this.extraLife) {
+				this.discard();
+			}
+
+			this.tick++;
+			this.currentTime++;
+		}
+	}
+
 	public static record RenderState(
 		Display.GenericInterpolator<Transformation> transformation,
 		Display.BillboardConstraints billboardConstraints,
@@ -702,6 +782,113 @@ public abstract class Display extends Entity {
 		Display.FloatInterpolator shadowStrength,
 		int glowColorOverride
 	) {
+	}
+
+	public static class StencilDisplay extends Display {
+		private static final String TAG_COLOR = "color";
+		private static final String TAG_LOD = "lod";
+		private static final String TAG_SHAPE = "shape";
+		private static final EntityDataAccessor<Integer> DATA_COLOR_ID = SynchedEntityData.defineId(Display.StencilDisplay.class, EntityDataSerializers.INT);
+		private static final EntityDataAccessor<Integer> DATA_LOD_ID = SynchedEntityData.defineId(Display.StencilDisplay.class, EntityDataSerializers.INT);
+		private static final EntityDataAccessor<Integer> DATA_SHAPE_ID = SynchedEntityData.defineId(Display.StencilDisplay.class, EntityDataSerializers.INT);
+		private static final IntSet STENCIL_RENDER_STATE_IDS = IntSet.of(DATA_COLOR_ID.getId(), DATA_LOD_ID.getId(), DATA_SHAPE_ID.getId());
+		@Nullable
+		private Display.StencilDisplay.StencilRenderState stencilRenderState;
+
+		public StencilDisplay(EntityType<?> entityType, Level level) {
+			super(entityType, level);
+			this.updateRenderState = true;
+		}
+
+		@Override
+		protected void readAdditionalSaveData(CompoundTag compoundTag) {
+			super.readAdditionalSaveData(compoundTag);
+			if (compoundTag.contains("color", 99)) {
+				this.setColor(compoundTag.getInt("color"));
+			}
+
+			if (compoundTag.contains("lod", 99)) {
+				this.setLod(compoundTag.getInt("lod"));
+			}
+
+			if (compoundTag.contains("shape", 99)) {
+				this.setShape(compoundTag.getInt("shape"));
+			}
+		}
+
+		@Override
+		protected void addAdditionalSaveData(CompoundTag compoundTag) {
+			super.addAdditionalSaveData(compoundTag);
+			compoundTag.putInt("color", this.getColor());
+			compoundTag.putInt("lod", this.getLod());
+			compoundTag.putInt("shape", this.getShape());
+		}
+
+		@Override
+		protected void defineSynchedData() {
+			super.defineSynchedData();
+			this.entityData.define(DATA_COLOR_ID, -1);
+			this.entityData.define(DATA_LOD_ID, 0);
+			this.entityData.define(DATA_SHAPE_ID, 0);
+		}
+
+		@Override
+		public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
+			super.onSyncedDataUpdated(entityDataAccessor);
+			if (STENCIL_RENDER_STATE_IDS.contains(entityDataAccessor.getId())) {
+				this.updateRenderState = true;
+			}
+		}
+
+		@Override
+		protected void updateRenderSubState(boolean bl, float f) {
+			if (bl && this.stencilRenderState != null) {
+				int i = this.stencilRenderState.color.get(f);
+				int j = this.stencilRenderState.lod.get(f);
+				int k = this.stencilRenderState.shape.get(f);
+				this.stencilRenderState = new Display.StencilDisplay.StencilRenderState(
+					new Display.ColorInterpolator(i, this.getColor()),
+					new Display.LinearIntInterpolator(j, this.getLod()),
+					new Display.LinearIntInterpolator(k, this.getShape())
+				);
+			} else {
+				this.stencilRenderState = new Display.StencilDisplay.StencilRenderState(
+					Display.IntInterpolator.constant(this.getColor()), Display.IntInterpolator.constant(this.getLod()), Display.IntInterpolator.constant(this.getShape())
+				);
+			}
+		}
+
+		@Nullable
+		public Display.StencilDisplay.StencilRenderState stencilRenderState() {
+			return this.stencilRenderState;
+		}
+
+		private int getColor() {
+			return this.entityData.get(DATA_COLOR_ID);
+		}
+
+		private void setColor(int i) {
+			this.entityData.set(DATA_COLOR_ID, i);
+		}
+
+		private int getLod() {
+			return this.entityData.get(DATA_LOD_ID);
+		}
+
+		private void setLod(int i) {
+			this.entityData.set(DATA_LOD_ID, i);
+		}
+
+		private int getShape() {
+			return this.entityData.get(DATA_SHAPE_ID);
+		}
+
+		private void setShape(int i) {
+			this.entityData.set(DATA_SHAPE_ID, i);
+		}
+
+		public static record StencilRenderState(Display.IntInterpolator color, Display.IntInterpolator lod, Display.IntInterpolator shape) {
+		}
 	}
 
 	public static class TextDisplay extends Display {

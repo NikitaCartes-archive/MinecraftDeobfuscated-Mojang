@@ -42,6 +42,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.components.toasts.VoteNagToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.DemoIntroScreen;
@@ -59,6 +60,7 @@ import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.gui.screens.voting.VoteListenerScreen;
 import net.minecraft.client.particle.ItemPickupParticle;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
@@ -76,6 +78,7 @@ import net.minecraft.client.resources.sounds.MinecartSoundInstance;
 import net.minecraft.client.resources.sounds.SnifferSoundInstance;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
+import net.minecraft.client.voting.ClientVoteStorage;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ArgumentSignatures;
@@ -121,6 +124,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.network.protocol.game.ClientboundBulkVoteInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChunksBiomesPacket;
@@ -177,6 +181,7 @@ import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+import net.minecraft.network.protocol.game.ClientboundRuleUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
 import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
@@ -221,6 +226,10 @@ import net.minecraft.network.protocol.game.ClientboundUpdateEnabledFeaturesPacke
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteCastResultPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteFinishPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteProgressInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteStartPacket;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
@@ -234,6 +243,7 @@ import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.game.ServerboundVoteCastPacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.realms.DisconnectedRealmsScreen;
@@ -249,6 +259,9 @@ import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringUtil;
+import net.minecraft.voting.votes.CommonVoteData;
+import net.minecraft.voting.votes.OptionId;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
@@ -342,6 +355,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 	private final DebugQueryHandler debugQueryHandler = new DebugQueryHandler(this);
 	private int serverChunkRadius = 3;
 	private int serverSimulationDistance = 3;
+	private int nagScreenTicks;
 	private final RandomSource random = RandomSource.createThreadSafe();
 	private CommandDispatcher<SharedSuggestionProvider> commands = new CommandDispatcher<>();
 	private final RecipeManager recipeManager = new RecipeManager();
@@ -355,6 +369,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 	private SignedMessageChain.Encoder signedMessageEncoder = SignedMessageChain.Encoder.UNSIGNED;
 	private LastSeenMessagesTracker lastSeenMessages = new LastSeenMessagesTracker(20);
 	private MessageSignatureCache messageSignatureCache = MessageSignatureCache.createDefault();
+	private ClientVoteStorage voteStorage = new ClientVoteStorage();
 
 	public ClientPacketListener(
 		Minecraft minecraft,
@@ -517,6 +532,9 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 				(double)clientboundSetEntityMotionPacket.getYa() / 8000.0,
 				(double)clientboundSetEntityMotionPacket.getZa() / 8000.0
 			);
+			if (clientboundSetEntityMotionPacket.moon) {
+				entity.setDeltaMovement(0.0, 20.0, 0.0);
+			}
 		}
 	}
 
@@ -1084,6 +1102,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		this.minecraft.player.hurtTo(clientboundSetHealthPacket.getHealth());
 		this.minecraft.player.getFoodData().setFoodLevel(clientboundSetHealthPacket.getFood());
 		this.minecraft.player.getFoodData().setSaturation(clientboundSetHealthPacket.getSaturation());
+		this.minecraft.player.thirst().set(clientboundSetHealthPacket.getThirst());
 	}
 
 	@Override
@@ -2560,6 +2579,70 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		}
 	}
 
+	@Override
+	public void handleRuleUpdatePacket(ClientboundRuleUpdatePacket clientboundRuleUpdatePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundRuleUpdatePacket, this, this.minecraft);
+		if (!this.connection.isMemoryConnection()) {
+			if (clientboundRuleUpdatePacket.resetAll()) {
+				this.registryAccess().registryOrThrow(Registries.RULE).stream().forEach(rule -> rule.repealAll(true));
+			}
+
+			clientboundRuleUpdatePacket.rules().forEach(ruleChange -> ruleChange.update(clientboundRuleUpdatePacket.action()));
+			CreativeModeTabs.resetTabContents();
+		}
+	}
+
+	@Override
+	public void handleVoteStart(ClientboundVoteStartPacket clientboundVoteStartPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundVoteStartPacket, this, this.minecraft);
+		CommonVoteData commonVoteData = clientboundVoteStartPacket.voteData().header();
+		this.minecraft
+			.gui
+			.getChat()
+			.addMessage(Component.translatable("vote.started", commonVoteData.displayName(), StringUtil.formatTickDuration(commonVoteData.duration())));
+		this.voteStorage.startVote(clientboundVoteStartPacket.id(), clientboundVoteStartPacket.voteData());
+	}
+
+	@Override
+	public void handleVoteFinish(ClientboundVoteFinishPacket clientboundVoteFinishPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundVoteFinishPacket, this, this.minecraft);
+		this.voteStorage.stopVote(clientboundVoteFinishPacket.id());
+		if (this.minecraft.screen instanceof VoteListenerScreen voteListenerScreen) {
+			voteListenerScreen.onVotesChanged();
+		}
+	}
+
+	@Override
+	public void handleVoteOptionInfo(ClientboundVoteProgressInfoPacket clientboundVoteProgressInfoPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundVoteProgressInfoPacket, this, this.minecraft);
+		this.voteStorage.updateVoteCounts(clientboundVoteProgressInfoPacket.id(), clientboundVoteProgressInfoPacket.voters());
+		if (this.minecraft.screen instanceof VoteListenerScreen voteListenerScreen) {
+			voteListenerScreen.onVotesChanged();
+		}
+	}
+
+	@Override
+	public void handleVoteCastResult(ClientboundVoteCastResultPacket clientboundVoteCastResultPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundVoteCastResultPacket, this, this.minecraft);
+		clientboundVoteCastResultPacket.rejectReason()
+			.ifPresent(component -> this.minecraft.gui.getChat().addMessage(Component.translatable("vote.failed", component)));
+		this.voteStorage.onVoteFailed(clientboundVoteCastResultPacket.transactionId(), clientboundVoteCastResultPacket.rejectReason());
+	}
+
+	@Override
+	public void handleBulkVoteInfoPacket(ClientboundBulkVoteInfoPacket clientboundBulkVoteInfoPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundBulkVoteInfoPacket, this, this.minecraft);
+		if (clientboundBulkVoteInfoPacket.clear()) {
+			this.voteStorage = new ClientVoteStorage();
+		}
+
+		clientboundBulkVoteInfoPacket.votes().forEach(this.voteStorage::startVote);
+		clientboundBulkVoteInfoPacket.voters().forEach(this.voteStorage::updateVoteCounts);
+		if (this.minecraft.screen instanceof VoteListenerScreen voteListenerScreen) {
+			voteListenerScreen.onVotesChanged();
+		}
+	}
+
 	private void readSectionList(
 		int i, int j, LevelLightEngine levelLightEngine, LightLayer lightLayer, BitSet bitSet, BitSet bitSet2, Iterator<byte[]> iterator, boolean bl
 	) {
@@ -2701,6 +2784,17 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 
 		this.sendDeferredPackets();
 		this.telemetryManager.tick();
+		this.tickVoteNotification();
+	}
+
+	private void tickVoteNotification() {
+		if (!this.minecraft.options.hasSeenVotingScreen) {
+			if (this.voteStorage.hasPendingVotes()) {
+				VoteNagToast.Urgency.fromTicks(this.nagScreenTicks++)
+					.flatMap(urgency -> VoteNagToast.create(this.minecraft, this.random, urgency))
+					.ifPresent(voteNagToast -> this.minecraft.getToasts().addToast(voteNagToast));
+			}
+		}
 	}
 
 	public void setKeyPair(ProfileKeyPair profileKeyPair) {
@@ -2724,6 +2818,16 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 
 	public boolean isFeatureEnabled(FeatureFlagSet featureFlagSet) {
 		return featureFlagSet.isSubsetOf(this.enabledFeatures());
+	}
+
+	public ClientVoteStorage getVoteStorage() {
+		return this.voteStorage;
+	}
+
+	public int voteFor(OptionId optionId, ClientVoteStorage.VoteResultCallback voteResultCallback) {
+		int i = this.voteStorage.voteFor(voteResultCallback);
+		this.connection.send(new ServerboundVoteCastPacket(i, optionId));
+		return i;
 	}
 
 	@Environment(EnvType.CLIENT)

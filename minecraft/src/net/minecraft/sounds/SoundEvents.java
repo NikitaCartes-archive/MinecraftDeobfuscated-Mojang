@@ -1468,6 +1468,7 @@ public class SoundEvents {
 	public static final SoundEvent ZOMBIE_VILLAGER_DEATH = register("entity.zombie_villager.death");
 	public static final SoundEvent ZOMBIE_VILLAGER_HURT = register("entity.zombie_villager.hurt");
 	public static final SoundEvent ZOMBIE_VILLAGER_STEP = register("entity.zombie_villager.step");
+	public static final SoundEvent THE_JOKE = register(new ResourceLocation("the_joke"), new ResourceLocation("nothingtoseeheremovealong:the_joke"));
 
 	private static Holder<SoundEvent> register(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, float f) {
 		return Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, resourceLocation, SoundEvent.createFixedRangeEvent(resourceLocation2, f));

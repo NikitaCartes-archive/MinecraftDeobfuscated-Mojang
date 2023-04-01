@@ -44,7 +44,7 @@ public class FireworkRocketRecipe extends CustomRecipe {
 		return bl && i >= 1;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET, 3);
 		CompoundTag compoundTag = itemStack.getOrCreateTagElement("Fireworks");
 		ListTag listTag = new ListTag();
@@ -78,7 +78,7 @@ public class FireworkRocketRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItemRaw(RegistryAccess registryAccess) {
 		return new ItemStack(Items.FIREWORK_ROCKET);
 	}
 

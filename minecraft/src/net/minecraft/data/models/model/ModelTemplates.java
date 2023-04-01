@@ -5,6 +5,7 @@ import java.util.stream.IntStream;
 import net.minecraft.resources.ResourceLocation;
 
 public class ModelTemplates {
+	public static final ModelTemplate MISSING = new ModelTemplate(Optional.of(new ResourceLocation("minecraft", "builtin/missing")), Optional.empty());
 	public static final ModelTemplate CUBE = create(
 		"cube", TextureSlot.PARTICLE, TextureSlot.NORTH, TextureSlot.SOUTH, TextureSlot.EAST, TextureSlot.WEST, TextureSlot.UP, TextureSlot.DOWN
 	);
@@ -149,6 +150,9 @@ public class ModelTemplates {
 	);
 	public static final ModelTemplate CAULDRON_FULL = create(
 		"template_cauldron_full", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE
+	);
+	public static final ModelTemplate COPPER_SINK_FULL = create(
+		"template_copper_sink_full", TextureSlot.CONTENT, TextureSlot.INSIDE, TextureSlot.PARTICLE, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE
 	);
 	public static final ModelTemplate AZALEA = create("template_azalea", TextureSlot.TOP, TextureSlot.SIDE);
 	public static final ModelTemplate POTTED_AZALEA = create("template_potted_azalea_bush", TextureSlot.PLANT, TextureSlot.TOP, TextureSlot.SIDE);

@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -14,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -26,7 +28,13 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.EnchantedBookItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
@@ -44,11 +52,18 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 	@Nullable
 	protected MerchantOffers offers;
 	private final SimpleContainer inventory = new SimpleContainer(8);
+	@Nullable
+	protected MerchantOffers mendingOffers;
 
 	public AbstractVillager(EntityType<? extends AbstractVillager> entityType, Level level) {
 		super(entityType, level);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
 		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+	}
+
+	@Override
+	protected boolean isItAwkwardToMilk() {
+		return true;
 	}
 
 	@Override
@@ -107,6 +122,24 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 
 	@Override
 	public MerchantOffers getOffers() {
+		MerchantOffers merchantOffers = this.getDefaultOffers();
+		if (Rules.ONLY_MENDING_TRADES.get() && !merchantOffers.isEmpty()) {
+			if (this.mendingOffers == null) {
+				this.mendingOffers = new MerchantOffers();
+				Enchantment enchantment = Enchantments.MENDING;
+				ItemStack itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, 1));
+				Item item = (Item)Rules.VILLAGER_GEM.getValueForEntity(this).map(Holder::value).orElse(Items.EMERALD);
+				int i = this.random.nextInt(30) + 10;
+				this.mendingOffers.add(new MerchantOffer(new ItemStack(item, i), itemStack, 12, 10, 0.2F));
+			}
+
+			return this.mendingOffers;
+		} else {
+			return merchantOffers;
+		}
+	}
+
+	private MerchantOffers getDefaultOffers() {
 		if (this.offers == null) {
 			this.offers = new MerchantOffers();
 			this.updateTrades();
@@ -164,7 +197,7 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		MerchantOffers merchantOffers = this.getOffers();
+		MerchantOffers merchantOffers = this.getDefaultOffers();
 		if (!merchantOffers.isEmpty()) {
 			compoundTag.put("Offers", merchantOffers.createTag());
 		}
@@ -238,9 +271,11 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 			}
 		}
 
+		Item item = (Item)Rules.VILLAGER_GEM.getValueForEntity(this).map(Holder::value).orElse(Items.EMERALD);
+
 		for (Integer integer : set) {
 			VillagerTrades.ItemListing itemListing = itemListings[integer];
-			MerchantOffer merchantOffer = itemListing.getOffer(this, this.random);
+			MerchantOffer merchantOffer = itemListing.getOffer(this, this.random, item);
 			if (merchantOffer != null) {
 				merchantOffers.add(merchantOffer);
 			}

@@ -440,6 +440,11 @@ public class GlStateManager {
 		CULL.enable.disable();
 	}
 
+	public static void _cullFace(int i) {
+		RenderSystem.assertOnRenderThread();
+		GL11.glCullFace(i);
+	}
+
 	public static void _polygonMode(int i, int j) {
 		RenderSystem.assertOnRenderThread();
 		GL11.glPolygonMode(i, j);

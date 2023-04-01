@@ -16,6 +16,9 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.Goldifier;
+import net.minecraft.voting.rules.actual.ItemEntityDespawn;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -41,6 +44,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	private UUID thrower;
 	@Nullable
 	private UUID target;
+	private boolean thrownIntentionally;
 	public final float bobOffs;
 
 	public ItemEntity(EntityType<? extends ItemEntity> entityType, Level level) {
@@ -79,6 +83,10 @@ public class ItemEntity extends Entity implements TraceableEntity {
 		return this.thrower != null && this.level instanceof ServerLevel serverLevel ? serverLevel.getEntity(this.thrower) : null;
 	}
 
+	public boolean isThrownIntentionally() {
+		return this.thrownIntentionally;
+	}
+
 	@Override
 	protected Entity.MovementEmission getMovementEmission() {
 		return Entity.MovementEmission.NONE;
@@ -109,7 +117,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 			} else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > (double)f) {
 				this.setUnderLavaMovement();
 			} else if (!this.isNoGravity()) {
-				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
+				this.setDeltaMovement(this.getDeltaMovement().add(0.0, (double)(-this.getEffectiveGravity()), 0.0));
 			}
 
 			if (this.level.isClientSide) {
@@ -155,7 +163,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 				}
 			}
 
-			if (!this.level.isClientSide && this.age >= 6000) {
+			if (!this.level.isClientSide && this.getAge() >= Rules.ITEM_DESPAWN_TIME.currentCount()) {
 				this.discard();
 			}
 		}
@@ -187,7 +195,12 @@ public class ItemEntity extends Entity implements TraceableEntity {
 
 	private boolean isMergable() {
 		ItemStack itemStack = this.getItem();
-		return this.isAlive() && this.pickupDelay != 32767 && this.age != -32768 && this.age < 6000 && itemStack.getCount() < itemStack.getMaxStackSize();
+		int i = this.getAge();
+		return this.isAlive()
+			&& this.pickupDelay != 32767
+			&& i != -32768
+			&& i < Rules.ITEM_DESPAWN_TIME.currentCount()
+			&& itemStack.getCount() < itemStack.getMaxStackSize();
 	}
 
 	private void tryToMerge(ItemEntity itemEntity) {
@@ -221,7 +234,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	}
 
 	private static void merge(ItemEntity itemEntity, ItemStack itemStack, ItemStack itemStack2) {
-		ItemStack itemStack3 = merge(itemStack, itemStack2, 64);
+		ItemStack itemStack3 = merge(itemStack, itemStack2, 1024);
 		itemEntity.setItem(itemStack3);
 	}
 
@@ -240,7 +253,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!this.getItem().isEmpty() && this.getItem().is(Items.NETHER_STAR) && damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
@@ -275,6 +288,10 @@ public class ItemEntity extends Entity implements TraceableEntity {
 			compoundTag.putUUID("Owner", this.target);
 		}
 
+		if (this.thrownIntentionally) {
+			compoundTag.putBoolean("not_accidental", true);
+		}
+
 		if (!this.getItem().isEmpty()) {
 			compoundTag.put("Item", this.getItem().save(new CompoundTag()));
 		}
@@ -296,6 +313,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 			this.thrower = compoundTag.getUUID("Thrower");
 		}
 
+		this.thrownIntentionally = compoundTag.getBoolean("not_accidental");
 		CompoundTag compoundTag2 = compoundTag.getCompound("Item");
 		this.setItem(ItemStack.of(compoundTag2));
 		if (this.getItem().isEmpty()) {
@@ -364,12 +382,17 @@ public class ItemEntity extends Entity implements TraceableEntity {
 		this.target = uUID;
 	}
 
-	public void setThrower(@Nullable UUID uUID) {
+	public void setThrower(UUID uUID, boolean bl) {
 		this.thrower = uUID;
+		this.thrownIntentionally = bl;
 	}
 
 	public int getAge() {
-		return this.age;
+		return switch ((ItemEntityDespawn)Rules.ITEM_DESPAWN.get()) {
+			case DESPAWN_NONE -> -32768;
+			case DESPAWN_ALL -> this.age;
+			case KEEP_PLAYER_DROPS -> this.getOwner() instanceof Player ? -32768 : this.age;
+		};
 	}
 
 	public void setDefaultPickUpDelay() {
@@ -421,5 +444,10 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	@Override
 	public float getVisualRotationYInDegrees() {
 		return 180.0F - this.getSpin(0.5F) / (float) (Math.PI * 2) * 360.0F;
+	}
+
+	@Override
+	public void turnIntoGold() {
+		this.setItem(Goldifier.apply(this.getItem()));
 	}
 }

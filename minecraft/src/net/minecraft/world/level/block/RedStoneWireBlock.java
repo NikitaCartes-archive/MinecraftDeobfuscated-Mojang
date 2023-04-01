@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -20,6 +21,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.piston.MovingPistonBlock;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -250,7 +253,7 @@ public class RedStoneWireBlock extends Block {
 		if (bl) {
 			boolean bl2 = this.canSurviveOn(blockGetter, blockPos2, blockState);
 			if (bl2 && shouldConnectTo(blockGetter.getBlockState(blockPos2.above()))) {
-				if (blockState.isFaceSturdy(blockGetter, blockPos2, direction.getOpposite())) {
+				if (blockState.isFaceSturdy(blockGetter, blockPos2, direction.getOpposite(), Rules.BUTTONS_ON_THINGS.get() ? SupportType.CENTER : SupportType.FULL)) {
 					return RedstoneSide.UP;
 				}
 
@@ -272,7 +275,8 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	private boolean canSurviveOn(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) || blockState.is(Blocks.HOPPER);
+		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP, Rules.BUTTONS_ON_THINGS.get() ? SupportType.CENTER : SupportType.FULL)
+			|| blockState.is(Blocks.HOPPER);
 	}
 
 	private void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState) {
@@ -419,8 +423,17 @@ public class RedStoneWireBlock extends Block {
 		} else if (blockState.is(Blocks.REPEATER)) {
 			Direction direction2 = blockState.getValue(RepeaterBlock.FACING);
 			return direction2 == direction || direction2.getOpposite() == direction;
+		} else if (blockState.is(Blocks.OBSERVER)) {
+			return direction == blockState.getValue(ObserverBlock.FACING);
 		} else {
-			return blockState.is(Blocks.OBSERVER) ? direction == blockState.getValue(ObserverBlock.FACING) : blockState.isSignalSource() && direction != null;
+			if (Rules.FIX_QC.get()) {
+				Block block = blockState.getBlock();
+				if (block instanceof PistonBaseBlock || block instanceof MovingPistonBlock) {
+					return direction == blockState.getValue(PistonBaseBlock.FACING);
+				}
+			}
+
+			return blockState.isSignalSource() && direction != null;
 		}
 	}
 

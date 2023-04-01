@@ -334,6 +334,16 @@ public class TextureMapping {
 			.put(TextureSlot.CONTENT, resourceLocation);
 	}
 
+	public static TextureMapping copperSink(ResourceLocation resourceLocation) {
+		return new TextureMapping()
+			.put(TextureSlot.PARTICLE, getBlockTexture(Blocks.COPPER_SINK, "_side"))
+			.put(TextureSlot.SIDE, getBlockTexture(Blocks.COPPER_SINK, "_side"))
+			.put(TextureSlot.TOP, getBlockTexture(Blocks.COPPER_SINK, "_top"))
+			.put(TextureSlot.BOTTOM, getBlockTexture(Blocks.COPPER_SINK, "_bottom"))
+			.put(TextureSlot.INSIDE, getBlockTexture(Blocks.COPPER_SINK, "_inner"))
+			.put(TextureSlot.CONTENT, resourceLocation);
+	}
+
 	public static TextureMapping sculkShrieker(boolean bl) {
 		String string = bl ? "_can_summon" : "";
 		return new TextureMapping()

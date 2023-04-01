@@ -11,7 +11,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class CowModel<T extends Entity> extends QuadrupedModel<T> {
+public class CowModel<T extends Entity> extends QuadrupedModel<T> implements HeadedModel {
 	public CowModel(ModelPart modelPart) {
 		super(modelPart, false, 10.0F, 4.0F, 2.0F, 2.0F, 24);
 	}
@@ -44,6 +44,7 @@ public class CowModel<T extends Entity> extends QuadrupedModel<T> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
+	@Override
 	public ModelPart getHead() {
 		return this.head;
 	}

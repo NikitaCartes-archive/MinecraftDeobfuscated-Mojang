@@ -39,7 +39,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	protected final T menu;
 	protected final Component playerInventoryTitle;
 	@Nullable
-	protected Slot hoveredSlot;
+	public Slot hoveredSlot;
 	@Nullable
 	private Slot clickedSlot;
 	@Nullable
@@ -94,7 +94,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		super.render(poseStack, i, j, f);
 		poseStack.pushPose();
 		poseStack.translate((float)k, (float)l, 0.0F);
-		this.hoveredSlot = null;
+		this.setHoveredSlot(null);
 
 		for (int m = 0; m < this.menu.slots.size(); m++) {
 			Slot slot = this.menu.slots.get(m);
@@ -103,7 +103,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			}
 
 			if (this.isHovering(slot, (double)i, (double)j) && slot.isActive()) {
-				this.hoveredSlot = slot;
+				this.setHoveredSlot(slot);
 				int n = slot.x;
 				int o = slot.y;
 				renderSlotHighlight(poseStack, n, o, 0);
@@ -259,7 +259,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	}
 
 	@Nullable
-	private Slot findSlot(double d, double e) {
+	protected Slot findSlot(double d, double e) {
 		for (int i = 0; i < this.menu.slots.size(); i++) {
 			Slot slot = this.menu.slots.get(i);
 			if (this.isHovering(slot, d, e) && slot.isActive()) {
@@ -622,5 +622,9 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	public void onClose() {
 		this.minecraft.player.closeContainer();
 		super.onClose();
+	}
+
+	protected void setHoveredSlot(@Nullable Slot slot) {
+		this.hoveredSlot = slot;
 	}
 }

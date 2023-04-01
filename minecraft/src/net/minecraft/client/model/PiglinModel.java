@@ -134,4 +134,9 @@ public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 			this.rightArm.xRot = -1.8F;
 		}
 	}
+
+	@Override
+	public boolean miniMe() {
+		return false;
+	}
 }

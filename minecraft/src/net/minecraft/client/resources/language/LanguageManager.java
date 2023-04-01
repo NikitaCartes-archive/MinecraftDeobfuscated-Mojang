@@ -18,6 +18,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.voting.rules.Rules;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -53,6 +54,10 @@ public class LanguageManager implements ResourceManagerReloadListener {
 		List<String> list = new ArrayList(2);
 		boolean bl = DEFAULT_LANGUAGE.bidirectional();
 		list.add("en_us");
+		if (Rules.FRENCH_MODE.get()) {
+			list.add("fr_fr");
+		}
+
 		if (!this.currentCode.equals("en_us")) {
 			LanguageInfo languageInfo = (LanguageInfo)this.languages.get(this.currentCode);
 			if (languageInfo != null) {

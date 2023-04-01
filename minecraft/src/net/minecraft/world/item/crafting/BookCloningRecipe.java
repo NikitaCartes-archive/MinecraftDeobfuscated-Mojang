@@ -41,7 +41,7 @@ public class BookCloningRecipe extends CustomRecipe {
 		return !itemStack.isEmpty() && itemStack.hasTag() && i > 0;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		int i = 0;
 		ItemStack itemStack = ItemStack.EMPTY;
 

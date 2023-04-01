@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -33,11 +35,18 @@ public class TntBlock extends Block {
 		this.registerDefaultState(this.defaultBlockState().setValue(UNSTABLE, Boolean.valueOf(false)));
 	}
 
+	@Nullable
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+		BlockState blockState = super.getStateForPlacement(blockPlaceContext);
+		return blockState != null && Rules.UNSTABLE_TNT.get() ? blockState.setValue(UNSTABLE, Boolean.valueOf(true)) : blockState;
+	}
+
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			if (level.hasNeighborSignal(blockPos)) {
-				explode(level, blockPos);
+				this.explode(level, blockPos);
 				level.removeBlock(blockPos, false);
 			}
 		}
@@ -46,7 +55,7 @@ public class TntBlock extends Block {
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (level.hasNeighborSignal(blockPos)) {
-			explode(level, blockPos);
+			this.explode(level, blockPos);
 			level.removeBlock(blockPos, false);
 		}
 	}
@@ -54,7 +63,7 @@ public class TntBlock extends Block {
 	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide() && !player.isCreative() && (Boolean)blockState.getValue(UNSTABLE)) {
-			explode(level, blockPos);
+			this.explode(level, blockPos);
 		}
 
 		super.playerWillDestroy(level, blockPos, blockState, player);
@@ -72,13 +81,18 @@ public class TntBlock extends Block {
 		}
 	}
 
-	public static void explode(Level level, BlockPos blockPos) {
-		explode(level, blockPos, null);
+	private void explode(Level level, BlockPos blockPos) {
+		explode(level, blockPos, null, this.defaultBlockState());
 	}
 
-	private static void explode(Level level, BlockPos blockPos, @Nullable LivingEntity livingEntity) {
+	public static void explode(Level level, BlockPos blockPos, BlockState blockState) {
+		explode(level, blockPos, null, blockState);
+	}
+
+	public static void explode(Level level, BlockPos blockPos, @Nullable LivingEntity livingEntity, BlockState blockState) {
 		if (!level.isClientSide) {
 			PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, livingEntity);
+			primedTnt.setBlockState(blockState);
 			level.addFreshEntity(primedTnt);
 			level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
 			level.gameEvent(livingEntity, GameEvent.PRIME_FUSE, blockPos);
@@ -93,7 +107,7 @@ public class TntBlock extends Block {
 		if (!itemStack.is(Items.FLINT_AND_STEEL) && !itemStack.is(Items.FIRE_CHARGE)) {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
 		} else {
-			explode(level, blockPos, player);
+			explode(level, blockPos, player, this.defaultBlockState());
 			level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 11);
 			Item item = itemStack.getItem();
 			if (!player.isCreative()) {
@@ -115,7 +129,7 @@ public class TntBlock extends Block {
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			Entity entity = projectile.getOwner();
 			if (projectile.isOnFire() && projectile.mayInteract(level, blockPos)) {
-				explode(level, blockPos, entity instanceof LivingEntity ? (LivingEntity)entity : null);
+				explode(level, blockPos, entity instanceof LivingEntity ? (LivingEntity)entity : null, this.defaultBlockState());
 				level.removeBlock(blockPos, false);
 			}
 		}

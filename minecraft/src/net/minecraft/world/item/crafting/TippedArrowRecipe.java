@@ -38,7 +38,7 @@ public class TippedArrowRecipe extends CustomRecipe {
 		}
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		ItemStack itemStack = craftingContainer.getItem(1 + craftingContainer.getWidth());
 		if (!itemStack.is(Items.LINGERING_POTION)) {
 			return ItemStack.EMPTY;

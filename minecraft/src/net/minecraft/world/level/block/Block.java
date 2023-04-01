@@ -25,6 +25,9 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.Goldifier;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -230,7 +233,9 @@ public class Block extends BlockBehaviour implements ItemLike {
 	}
 
 	public static boolean canSupportRigidBlock(BlockGetter blockGetter, BlockPos blockPos) {
-		return blockGetter.getBlockState(blockPos).isFaceSturdy(blockGetter, blockPos, Direction.UP, SupportType.RIGID);
+		return Rules.BUTTONS_ON_THINGS.get() && blockGetter.getBlockState(blockPos).isFaceSturdy(blockGetter, blockPos, Direction.UP, SupportType.CENTER)
+			? true
+			: blockGetter.getBlockState(blockPos).isFaceSturdy(blockGetter, blockPos, Direction.UP, SupportType.RIGID);
 	}
 
 	public static boolean canSupportCenter(LevelReader levelReader, BlockPos blockPos, Direction direction) {
@@ -355,6 +360,20 @@ public class Block extends BlockBehaviour implements ItemLike {
 	public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
 	}
 
+	public void playerStepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
+		if (Rules.MIDAS_TOUCH.get() && !blockState.isAir()) {
+			BlockEntity blockEntity = level.getBlockEntity(blockPos);
+			if (blockEntity != null) {
+				return;
+			}
+
+			BlockState blockState2 = Goldifier.apply(blockState);
+			if (blockState2 != blockState) {
+				level.setBlock(blockPos, blockState2, 3);
+			}
+		}
+	}
+
 	@Nullable
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		return this.defaultBlockState();
@@ -364,6 +383,9 @@ public class Block extends BlockBehaviour implements ItemLike {
 		player.awardStat(Stats.BLOCK_MINED.get(this));
 		player.causeFoodExhaustion(0.005F);
 		dropResources(blockState, level, blockPos, blockEntity, player, itemStack);
+		if (Rules.ULTRA_REALISTIC_MODE.get() && player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
+			player.hurt(player.damageSources().generic(), 2.0F);
+		}
 	}
 
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {

@@ -22,6 +22,7 @@ import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.animal.sniffer.Sniffer;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerData;
+import net.minecraft.world.entity.transform.EntityTransformType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -151,6 +152,9 @@ public class EntityDataSerializers {
 	public static final EntityDataSerializer<Quaternionf> QUATERNION = EntityDataSerializer.simple(
 		FriendlyByteBuf::writeQuaternion, FriendlyByteBuf::readQuaternion
 	);
+	public static final EntityDataSerializer<EntityTransformType> TRANSFORM = EntityDataSerializer.simple(
+		(friendlyByteBuf, entityTransformType) -> entityTransformType.write(friendlyByteBuf), EntityTransformType::read
+	);
 
 	public static void registerSerializer(EntityDataSerializer<?> entityDataSerializer) {
 		SERIALIZERS.add(entityDataSerializer);
@@ -197,5 +201,6 @@ public class EntityDataSerializers {
 		registerSerializer(SNIFFER_STATE);
 		registerSerializer(VECTOR3);
 		registerSerializer(QUATERNION);
+		registerSerializer(TRANSFORM);
 	}
 }

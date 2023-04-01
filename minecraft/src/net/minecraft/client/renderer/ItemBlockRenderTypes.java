@@ -40,6 +40,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.FLOWERING_AZALEA_LEAVES, renderType2);
 		hashMap.put(Blocks.MANGROVE_ROOTS, renderType2);
 		hashMap.put(Blocks.MANGROVE_LEAVES, renderType2);
+		hashMap.put(Blocks.COPPER_SPLEAVES, renderType2);
 		RenderType renderType3 = RenderType.cutout();
 		hashMap.put(Blocks.OAK_SAPLING, renderType3);
 		hashMap.put(Blocks.SPRUCE_SAPLING, renderType3);
@@ -49,6 +50,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.CHERRY_SAPLING, renderType3);
 		hashMap.put(Blocks.DARK_OAK_SAPLING, renderType3);
 		hashMap.put(Blocks.GLASS, renderType3);
+		hashMap.put(Blocks.PACKED_AIR, renderType3);
 		hashMap.put(Blocks.WHITE_BED, renderType3);
 		hashMap.put(Blocks.ORANGE_BED, renderType3);
 		hashMap.put(Blocks.MAGENTA_BED, renderType3);
@@ -272,6 +274,7 @@ public class ItemBlockRenderTypes {
 		RenderType renderType4 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType4);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType4);
+		hashMap.put(Blocks.OTHER_PORTAL, renderType4);
 		hashMap.put(Blocks.WHITE_STAINED_GLASS, renderType4);
 		hashMap.put(Blocks.ORANGE_STAINED_GLASS, renderType4);
 		hashMap.put(Blocks.MAGENTA_STAINED_GLASS, renderType4);

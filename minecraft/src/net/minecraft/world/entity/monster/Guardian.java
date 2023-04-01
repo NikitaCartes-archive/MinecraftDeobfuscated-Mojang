@@ -112,6 +112,11 @@ public class Guardian extends Monster {
 	}
 
 	@Override
+	public boolean canTransformBreatheInAir() {
+		return false;
+	}
+
+	@Override
 	public MobType getMobType() {
 		return MobType.WATER;
 	}
@@ -328,7 +333,7 @@ public class Guardian extends Monster {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.level.isClientSide) {
 			return false;
 		} else {
@@ -343,7 +348,7 @@ public class Guardian extends Monster {
 				this.randomStrollGoal.trigger();
 			}
 
-			return super.hurt(damageSource, f);
+			return super.hurtInternal(damageSource, f);
 		}
 	}
 

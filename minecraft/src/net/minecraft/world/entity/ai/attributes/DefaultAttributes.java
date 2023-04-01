@@ -60,6 +60,7 @@ import net.minecraft.world.entity.monster.MagmaCube;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.Ravager;
+import net.minecraft.world.entity.monster.RayTracing;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.monster.Spider;
@@ -117,6 +118,8 @@ public class DefaultAttributes {
 		.put(EntityType.LLAMA, Llama.createAttributes().build())
 		.put(EntityType.MAGMA_CUBE, MagmaCube.createAttributes().build())
 		.put(EntityType.MOOSHROOM, Cow.createAttributes().build())
+		.put(EntityType.RAY_TRACING, RayTracing.createAttributes().build())
+		.put(EntityType.MOON_COW, Cow.createAttributes().build())
 		.put(EntityType.MULE, AbstractChestedHorse.createBaseChestedHorseAttributes().build())
 		.put(EntityType.OCELOT, Ocelot.createAttributes().build())
 		.put(EntityType.PANDA, Panda.createAttributes().build())

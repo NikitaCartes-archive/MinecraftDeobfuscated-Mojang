@@ -1,8 +1,8 @@
 package net.minecraft.world.level.block.state;
 
-import com.google.common.collect.ArrayTable;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.mojang.serialization.Codec;
@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -104,7 +105,7 @@ public abstract class StateHolder<O, S> {
 		Comparable<?> comparable2 = this.values.get(property);
 		if (comparable2 == null) {
 			throw new IllegalArgumentException("Cannot set property " + property + " as it does not exist in " + this.owner);
-		} else if (comparable2 == comparable) {
+		} else if (Objects.equals(comparable2, comparable)) {
 			return (S)this;
 		} else {
 			S object = this.neighbours.get(property, comparable);
@@ -140,13 +141,13 @@ public abstract class StateHolder<O, S> {
 				Property<?> property = (Property<?>)entry.getKey();
 
 				for (Comparable<?> comparable : property.getPossibleValues()) {
-					if (comparable != entry.getValue()) {
+					if (!Objects.equals(comparable, entry.getValue())) {
 						table.put(property, comparable, (S)map.get(this.makeNeighbourValues(property, comparable)));
 					}
 				}
 			}
 
-			this.neighbours = (Table<Property<?>, Comparable<?>, S>)(table.isEmpty() ? table : ArrayTable.create(table));
+			this.neighbours = (Table<Property<?>, Comparable<?>, S>)(table.isEmpty() ? table : ImmutableTable.copyOf(table));
 		}
 	}
 

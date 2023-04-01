@@ -247,6 +247,7 @@ import net.minecraft.util.datafix.schemas.V3326;
 import net.minecraft.util.datafix.schemas.V3327;
 import net.minecraft.util.datafix.schemas.V3328;
 import net.minecraft.util.datafix.schemas.V3438;
+import net.minecraft.util.datafix.schemas.V3444;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1099,6 +1100,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new FeatureFlagRemoveFix(schema182, "Remove 1.20 feature toggle", Set.of("minecraft:update_1_20")));
 		Schema schema183 = dataFixerBuilder.addSchema(3441, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new BlendingDataFix(schema183));
+		Schema schema184 = dataFixerBuilder.addSchema(3444, V3444::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema184, "Who is this datafixer for anyway?", References.ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -55,6 +57,7 @@ import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -94,6 +97,16 @@ public class Zombie extends Monster {
 	}
 
 	@Override
+	public float getSpeed() {
+		float f = super.getSpeed();
+		if (Rules.ZOMBIE_APOCALYPSE.get() && !this.level.isDay()) {
+			f *= 2.0F;
+		}
+
+		return f;
+	}
+
+	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(4, new Zombie.ZombieAttackTurtleEggGoal(this, 1.0, 3));
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -107,9 +120,17 @@ public class Zombie extends Monster {
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(ZombifiedPiglin.class));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, RayTracing.class, true));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, AbstractVillager.class, false));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, IronGolem.class, true));
 		this.targetSelector.addGoal(5, new NearestAttackableTargetGoal(this, Turtle.class, 10, true, false, Turtle.BABY_ON_LAND_SELECTOR));
+		this.targetSelector
+			.addGoal(2, new NearestAttackableTargetGoal<LivingEntity>(this, entity -> !Zombie.class.isAssignableFrom(entity.getClass()), 10, false, true, null) {
+				@Override
+				public boolean canUse() {
+					return !Rules.ZOMBIE_APOCALYPSE.get() ? false : super.canUse();
+				}
+			});
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -222,16 +243,30 @@ public class Zombie extends Monster {
 
 	@Override
 	public void aiStep() {
+		if (this.transform.entity() == null) {
+			this.burnInSun(this);
+		}
+
+		super.aiStep();
+	}
+
+	@Override
+	public void transformedTick(EntityTransform entityTransform, LivingEntity livingEntity) {
+		super.transformedTick(entityTransform, livingEntity);
+		this.burnInSun(livingEntity);
+	}
+
+	private void burnInSun(LivingEntity livingEntity) {
 		if (this.isAlive()) {
 			boolean bl = this.isSunSensitive() && this.isSunBurnTick();
 			if (bl) {
-				ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
+				ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.HEAD);
 				if (!itemStack.isEmpty()) {
 					if (itemStack.isDamageableItem()) {
 						itemStack.setDamageValue(itemStack.getDamageValue() + this.random.nextInt(2));
 						if (itemStack.getDamageValue() >= itemStack.getMaxDamage()) {
-							this.broadcastBreakEvent(EquipmentSlot.HEAD);
-							this.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+							livingEntity.broadcastBreakEvent(EquipmentSlot.HEAD);
+							livingEntity.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
 						}
 					}
 
@@ -239,12 +274,10 @@ public class Zombie extends Monster {
 				}
 
 				if (bl) {
-					this.setSecondsOnFire(8);
+					livingEntity.setSecondsOnFire(8);
 				}
 			}
 		}
-
-		super.aiStep();
 	}
 
 	private void startUnderWaterConversion(int i) {
@@ -268,12 +301,12 @@ public class Zombie extends Monster {
 	}
 
 	protected boolean isSunSensitive() {
-		return true;
+		return !Rules.ZOMBIE_APOCALYPSE.get();
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (!super.hurt(damageSource, f)) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
+		if (!super.hurtInternal(damageSource, f)) {
 			return false;
 		} else if (!(this.level instanceof ServerLevel serverLevel)) {
 			return false;
@@ -324,8 +357,17 @@ public class Zombie extends Monster {
 	}
 
 	@Override
+	protected float adjustDamage(float f) {
+		return Rules.ZOMBIE_APOCALYPSE.get() ? f * 2.0F : super.adjustDamage(f);
+	}
+
+	@Override
 	public boolean doHurtTarget(Entity entity) {
 		boolean bl = super.doHurtTarget(entity);
+		if (Rules.ZOMBIE_APOCALYPSE.get() && entity instanceof Mob mob) {
+			mob.convertTo(EntityType.ZOMBIE, false);
+		}
+
 		if (bl) {
 			float f = this.level.getCurrentDifficultyAt(this.blockPosition()).getEffectiveDifficulty();
 			if (this.getMainHandItem().isEmpty() && this.isOnFire() && this.random.nextFloat() < f * 0.3F) {

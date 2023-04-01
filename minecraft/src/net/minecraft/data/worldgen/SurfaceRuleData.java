@@ -45,6 +45,7 @@ public class SurfaceRuleData {
 	private static final SurfaceRules.RuleSource NETHER_WART_BLOCK = makeStateRule(Blocks.NETHER_WART_BLOCK);
 	private static final SurfaceRules.RuleSource CRIMSON_NYLIUM = makeStateRule(Blocks.CRIMSON_NYLIUM);
 	private static final SurfaceRules.RuleSource ENDSTONE = makeStateRule(Blocks.END_STONE);
+	private static final SurfaceRules.RuleSource CHEESE = makeStateRule(Blocks.CHEESE);
 
 	private static SurfaceRules.RuleSource makeStateRule(Block block) {
 		return SurfaceRules.state(block.defaultBlockState());
@@ -360,6 +361,12 @@ public class SurfaceRuleData {
 				)
 			),
 			NETHERRACK
+		);
+	}
+
+	public static SurfaceRules.RuleSource moon() {
+		return SurfaceRules.sequence(
+			SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), BEDROCK), CHEESE
 		);
 	}
 

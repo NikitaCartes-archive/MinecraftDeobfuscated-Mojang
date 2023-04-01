@@ -1,9 +1,11 @@
 package net.minecraft.world.entity.projectile;
 
 import com.mojang.logging.LogUtils;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -11,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -22,12 +25,16 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -64,10 +71,11 @@ public class FishingHook extends Projectile {
 	private FishingHook.FishHookState currentState = FishingHook.FishHookState.FLYING;
 	private final int luck;
 	private final int lureSpeed;
+	public boolean moon;
 
 	private FishingHook(EntityType<? extends FishingHook> entityType, Level level, int i, int j) {
 		super(entityType, level);
-		this.noCulling = true;
+		this.setNoCulling(true);
 		this.luck = Math.max(0, i);
 		this.lureSpeed = Math.max(0, j);
 	}
@@ -91,9 +99,8 @@ public class FishingHook extends Projectile {
 		this.moveTo(d, e, n, g, f);
 		Vec3 vec3 = new Vec3((double)(-k), (double)Mth.clamp(-(m / l), -5.0F, 5.0F), (double)(-h));
 		double o = vec3.length();
-		vec3 = vec3.multiply(
-			0.6 / o + this.random.triangle(0.5, 0.0103365), 0.6 / o + this.random.triangle(0.5, 0.0103365), 0.6 / o + this.random.triangle(0.5, 0.0103365)
-		);
+		double p = Rules.GRAPPLING_FISHING_RODS.get() ? 3.0 : 0.6;
+		vec3 = vec3.multiply(p / o + this.random.triangle(0.5, 0.0103365), p / o + this.random.triangle(0.5, 0.0103365), p / o + this.random.triangle(0.5, 0.0103365));
 		this.setDeltaMovement(vec3);
 		this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
 		this.setXRot((float)(Mth.atan2(vec3.y, vec3.horizontalDistance()) * 180.0F / (float)Math.PI));
@@ -141,7 +148,11 @@ public class FishingHook extends Projectile {
 		Player player = this.getPlayerOwner();
 		if (player == null) {
 			this.discard();
-		} else if (this.level.isClientSide || !this.shouldStopFishing(player)) {
+		} else if (!this.level.isClientSide && this.shouldStopFishing(player)) {
+			if (Rules.GRAPPLING_FISHING_RODS.get()) {
+				this.grapplingHook(player);
+			}
+		} else {
 			if (this.onGround) {
 				this.life++;
 				if (this.life >= 1200) {
@@ -219,7 +230,7 @@ public class FishingHook extends Projectile {
 				}
 			}
 
-			if (!fluidState.is(FluidTags.WATER)) {
+			if (!fluidState.is(FluidTags.WATER) && !Rules.GRAPPLING_FISHING_RODS.get()) {
 				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.03, 0.0));
 			}
 
@@ -229,8 +240,11 @@ public class FishingHook extends Projectile {
 				this.setDeltaMovement(Vec3.ZERO);
 			}
 
-			double e = 0.92;
-			this.setDeltaMovement(this.getDeltaMovement().scale(0.92));
+			if (!Rules.GRAPPLING_FISHING_RODS.get()) {
+				double e = 0.92;
+				this.setDeltaMovement(this.getDeltaMovement().scale(0.92));
+			}
+
 			this.reapplyPosition();
 		}
 	}
@@ -240,7 +254,8 @@ public class FishingHook extends Projectile {
 		ItemStack itemStack2 = player.getOffhandItem();
 		boolean bl = itemStack.is(Items.FISHING_ROD);
 		boolean bl2 = itemStack2.is(Items.FISHING_ROD);
-		if (!player.isRemoved() && player.isAlive() && (bl || bl2) && !(this.distanceToSqr(player) > 1024.0)) {
+		int i = Rules.GRAPPLING_FISHING_RODS.get() ? 100 : 32;
+		if (!player.isRemoved() && player.isAlive() && (bl || bl2) && !(this.distanceToSqr(player) > (double)(i * i))) {
 			return false;
 		} else {
 			this.discard();
@@ -279,6 +294,11 @@ public class FishingHook extends Projectile {
 
 	private void catchingFish(BlockPos blockPos) {
 		ServerLevel serverLevel = (ServerLevel)this.level;
+		Player player = this.getPlayerOwner();
+		if (Rules.BUFF_FISHING.get()) {
+			this.getLoot(player.getItemInHand(InteractionHand.MAIN_HAND), player);
+		}
+
 		int i = 1;
 		BlockPos blockPos2 = blockPos.above();
 		if (this.random.nextFloat() < 0.25F && this.level.isRainingAt(blockPos2)) {
@@ -437,6 +457,10 @@ public class FishingHook extends Projectile {
 	public int retrieve(ItemStack itemStack) {
 		Player player = this.getPlayerOwner();
 		if (!this.level.isClientSide && player != null && !this.shouldStopFishing(player)) {
+			if (Rules.GRAPPLING_FISHING_RODS.get()) {
+				this.grapplingHook(player);
+			}
+
 			int i = 0;
 			if (this.hookedIn != null) {
 				this.pullEntity(this.hookedIn);
@@ -444,30 +468,7 @@ public class FishingHook extends Projectile {
 				this.level.broadcastEntityEvent(this, (byte)31);
 				i = this.hookedIn instanceof ItemEntity ? 3 : 5;
 			} else if (this.nibble > 0) {
-				LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
-					.withParameter(LootContextParams.ORIGIN, this.position())
-					.withParameter(LootContextParams.TOOL, itemStack)
-					.withParameter(LootContextParams.THIS_ENTITY, this)
-					.withRandom(this.random)
-					.withLuck((float)this.luck + player.getLuck());
-				LootTable lootTable = this.level.getServer().getLootTables().get(BuiltInLootTables.FISHING);
-				List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.FISHING));
-				CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)player, itemStack, this, list);
-
-				for (ItemStack itemStack2 : list) {
-					ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), itemStack2);
-					double d = player.getX() - this.getX();
-					double e = player.getY() - this.getY();
-					double f = player.getZ() - this.getZ();
-					double g = 0.1;
-					itemEntity.setDeltaMovement(d * 0.1, e * 0.1 + Math.sqrt(Math.sqrt(d * d + e * e + f * f)) * 0.08, f * 0.1);
-					this.level.addFreshEntity(itemEntity);
-					player.level.addFreshEntity(new ExperienceOrb(player.level, player.getX(), player.getY() + 0.5, player.getZ() + 0.5, this.random.nextInt(6) + 1));
-					if (itemStack2.is(ItemTags.FISHES)) {
-						player.awardStat(Stats.FISH_CAUGHT, 1);
-					}
-				}
-
+				this.getLoot(itemStack, player);
 				i = 1;
 			}
 
@@ -479,6 +480,76 @@ public class FishingHook extends Projectile {
 			return i;
 		} else {
 			return 0;
+		}
+	}
+
+	private void grapplingHook(Player player) {
+		Vec3 vec3 = null;
+		if (this.hookedIn != null) {
+			vec3 = this.hookedIn.position();
+		} else if (!this.level.noCollision(this.getBoundingBox().inflate(0.5))) {
+			vec3 = this.position();
+		}
+
+		if (vec3 != null) {
+			Vec3 vec32 = vec3.subtract(player.position());
+			if (vec32.length() > 0.01) {
+				player.addDeltaMovement(vec32.normalize().scale(10.0));
+				player.hasImpulse = true;
+				if (player instanceof ServerPlayer serverPlayer) {
+					serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
+				}
+			}
+		} else if (this.moon) {
+			player.addDeltaMovement(new Vec3(0.0, 20.0, 0.0));
+			player.hasImpulse = true;
+			if (player instanceof ServerPlayer serverPlayer2) {
+				serverPlayer2.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer2, true));
+			}
+		}
+	}
+
+	private void getLoot(ItemStack itemStack, Player player) {
+		LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
+			.withParameter(LootContextParams.ORIGIN, this.position())
+			.withParameter(LootContextParams.TOOL, itemStack)
+			.withParameter(LootContextParams.THIS_ENTITY, this)
+			.withRandom(this.random)
+			.withLuck((float)this.luck + player.getLuck());
+		LootTable lootTable = this.level.getServer().getLootTables().get(BuiltInLootTables.FISHING);
+		List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.FISHING));
+		CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)player, itemStack, this, list);
+		if (Rules.FISH_ANYTHING.get()) {
+			CreativeModeTabs.tryRebuildTabContents(this.level.enabledFeatures(), false, this.level.registryAccess());
+			List<ItemStack> list2 = new ArrayList();
+
+			for (CreativeModeTab creativeModeTab : CreativeModeTabs.tabs()) {
+				if (creativeModeTab.getType() == CreativeModeTab.Type.CATEGORY) {
+					list2.addAll(creativeModeTab.getDisplayItems());
+				}
+			}
+
+			if (!list2.isEmpty()) {
+				this.spawnLoot(player, Util.getRandom(list2, this.random));
+			}
+		} else {
+			for (ItemStack itemStack2 : list) {
+				this.spawnLoot(player, itemStack2);
+			}
+		}
+	}
+
+	private void spawnLoot(Player player, ItemStack itemStack) {
+		ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), itemStack);
+		double d = player.getX() - this.getX();
+		double e = player.getY() - this.getY();
+		double f = player.getZ() - this.getZ();
+		double g = 0.1;
+		itemEntity.setDeltaMovement(d * 0.1, e * 0.1 + Math.sqrt(Math.sqrt(d * d + e * e + f * f)) * 0.08, f * 0.1);
+		this.level.addFreshEntity(itemEntity);
+		player.level.addFreshEntity(new ExperienceOrb(player.level, player.getX(), player.getY() + 0.5, player.getZ() + 0.5, this.random.nextInt(6) + 1));
+		if (itemStack.is(ItemTags.FISHES)) {
+			player.awardStat(Stats.FISH_CAUGHT, 1);
 		}
 	}
 

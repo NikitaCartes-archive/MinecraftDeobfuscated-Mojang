@@ -50,6 +50,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.thread.ProcessorMailbox;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -591,7 +592,8 @@ public class ChunkRenderDispatcher {
 
 					for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos, blockPos2)) {
 						BlockState blockState = renderChunkRegion.getBlockState(blockPos3);
-						if (blockState.isSolidRender(renderChunkRegion, blockPos3)) {
+						BlockState blockState2 = Rules.REPLACE_BLOCK_MODEL.getReplacement(blockState);
+						if (blockState2.isSolidRender(renderChunkRegion, blockPos3)) {
 							visGraph.setOpaque(blockPos3);
 						}
 
@@ -602,8 +604,8 @@ public class ChunkRenderDispatcher {
 							}
 						}
 
-						BlockState blockState2 = renderChunkRegion.getBlockState(blockPos3);
-						FluidState fluidState = blockState2.getFluidState();
+						BlockState blockState3 = renderChunkRegion.getBlockState(blockPos3);
+						FluidState fluidState = blockState3.getFluidState();
 						if (!fluidState.isEmpty()) {
 							RenderType renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
 							BufferBuilder bufferBuilder = chunkBufferBuilderPack.builder(renderType);
@@ -611,11 +613,11 @@ public class ChunkRenderDispatcher {
 								RenderChunk.this.beginLayer(bufferBuilder);
 							}
 
-							blockRenderDispatcher.renderLiquid(blockPos3, renderChunkRegion, bufferBuilder, blockState2, fluidState);
+							blockRenderDispatcher.renderLiquid(blockPos3, renderChunkRegion, bufferBuilder, blockState3, fluidState);
 						}
 
-						if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
-							RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
+						if (blockState2.getRenderShape() != RenderShape.INVISIBLE) {
+							RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState2);
 							BufferBuilder bufferBuilder = chunkBufferBuilderPack.builder(renderType);
 							if (set.add(renderType)) {
 								RenderChunk.this.beginLayer(bufferBuilder);
@@ -623,7 +625,7 @@ public class ChunkRenderDispatcher {
 
 							poseStack.pushPose();
 							poseStack.translate((float)(blockPos3.getX() & 15), (float)(blockPos3.getY() & 15), (float)(blockPos3.getZ() & 15));
-							blockRenderDispatcher.renderBatched(blockState, blockPos3, renderChunkRegion, poseStack, bufferBuilder, true, randomSource);
+							blockRenderDispatcher.renderBatched(blockState2, blockPos3, renderChunkRegion, poseStack, bufferBuilder, true, randomSource);
 							poseStack.popPose();
 						}
 					}

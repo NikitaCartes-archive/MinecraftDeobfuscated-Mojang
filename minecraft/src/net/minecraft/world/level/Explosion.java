@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -86,7 +87,7 @@ public class Explosion {
 	) {
 		this.level = level;
 		this.source = entity;
-		this.radius = g;
+		this.radius = g + (float)Rules.EXTRA_EXPLOSION_POWER.currentCount();
 		this.x = d;
 		this.y = e;
 		this.z = f;

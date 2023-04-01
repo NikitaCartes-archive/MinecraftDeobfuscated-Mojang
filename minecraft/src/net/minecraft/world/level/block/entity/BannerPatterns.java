@@ -46,6 +46,7 @@ public class BannerPatterns {
 	public static final ResourceKey<BannerPattern> SKULL = create("skull");
 	public static final ResourceKey<BannerPattern> FLOWER = create("flower");
 	public static final ResourceKey<BannerPattern> MOJANG = create("mojang");
+	public static final ResourceKey<BannerPattern> NEW_MOJANG = create("m");
 	public static final ResourceKey<BannerPattern> PIGLIN = create("piglin");
 
 	private static ResourceKey<BannerPattern> create(String string) {
@@ -93,6 +94,7 @@ public class BannerPatterns {
 		Registry.register(registry, SKULL, new BannerPattern("sku"));
 		Registry.register(registry, FLOWER, new BannerPattern("flo"));
 		Registry.register(registry, MOJANG, new BannerPattern("moj"));
+		Registry.register(registry, NEW_MOJANG, new BannerPattern("sus"));
 		return Registry.register(registry, PIGLIN, new BannerPattern("pig"));
 	}
 }

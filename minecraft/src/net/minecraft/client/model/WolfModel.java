@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Wolf;
 
 @Environment(EnvType.CLIENT)
-public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
+public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> implements HeadedModel {
 	private static final String REAL_HEAD = "real_head";
 	private static final String UPPER_BODY = "upper_body";
 	private static final String REAL_TAIL = "real_tail";
@@ -140,5 +140,10 @@ public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.tail.xRot = h;
+	}
+
+	@Override
+	public ModelPart getHead() {
+		return this.head;
 	}
 }

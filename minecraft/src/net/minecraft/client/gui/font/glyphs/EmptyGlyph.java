@@ -28,6 +28,6 @@ public class EmptyGlyph extends BakedGlyph {
 	}
 
 	@Override
-	public void render(boolean bl, float f, float g, Matrix4f matrix4f, VertexConsumer vertexConsumer, float h, float i, float j, float k, int l) {
+	public void render(boolean bl, boolean bl2, float f, float g, Matrix4f matrix4f, VertexConsumer vertexConsumer, float h, float i, float j, float k, int l) {
 	}
 }

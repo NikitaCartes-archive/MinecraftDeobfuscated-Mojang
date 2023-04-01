@@ -458,6 +458,20 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
+	protected InteractionResult transformInteract(Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
+		if (this.isSaddled() && !livingEntity.isVehicle() && !player.isSecondaryUseActive()) {
+			if (!this.level.isClientSide) {
+				player.startRiding(livingEntity);
+			}
+
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
+		} else {
+			ItemStack itemStack = player.getItemInHand(interactionHand);
+			return itemStack.is(Items.SADDLE) ? itemStack.interactLivingEntity(player, this, interactionHand) : InteractionResult.PASS;
+		}
+	}
+
+	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.6F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
 	}

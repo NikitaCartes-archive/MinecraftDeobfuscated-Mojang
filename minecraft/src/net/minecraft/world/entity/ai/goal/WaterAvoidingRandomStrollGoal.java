@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai.goal;
 
+import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
@@ -11,6 +12,11 @@ public class WaterAvoidingRandomStrollGoal extends RandomStrollGoal {
 
 	public WaterAvoidingRandomStrollGoal(PathfinderMob pathfinderMob, double d) {
 		this(pathfinderMob, d, 0.001F);
+	}
+
+	public WaterAvoidingRandomStrollGoal(PathfinderMob pathfinderMob, double d, BooleanSupplier booleanSupplier) {
+		this(pathfinderMob, d, 0.001F);
+		this.vehicleCheck = booleanSupplier;
 	}
 
 	public WaterAvoidingRandomStrollGoal(PathfinderMob pathfinderMob, double d, float f) {

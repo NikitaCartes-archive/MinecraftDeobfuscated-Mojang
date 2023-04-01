@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -297,18 +298,26 @@ public class Sheep extends Animal implements Shearable {
 		}
 	}
 
+	private static DyeColor shiftColor(DyeColor dyeColor, int i) {
+		return (DyeColor)DyeColor.BY_ID_WRAP.apply(dyeColor.getId() + i);
+	}
+
 	public static DyeColor getRandomSheepColor(RandomSource randomSource) {
-		int i = randomSource.nextInt(100);
-		if (i < 5) {
-			return DyeColor.BLACK;
-		} else if (i < 10) {
-			return DyeColor.GRAY;
-		} else if (i < 15) {
-			return DyeColor.LIGHT_GRAY;
-		} else if (i < 18) {
-			return DyeColor.BROWN;
+		DyeColor dyeColor = Rules.DEFAULT_SHEEP_COLOR_RULE.get();
+		int i = dyeColor.getId() - DyeColor.WHITE.getId();
+		int j = randomSource.nextInt(100);
+		if (j < 5) {
+			return shiftColor(DyeColor.BLACK, i);
+		} else if (j < 10) {
+			return shiftColor(DyeColor.GRAY, i);
+		} else if (j < 15) {
+			return shiftColor(DyeColor.LIGHT_GRAY, i);
+		} else if (j < 18) {
+			return shiftColor(DyeColor.BROWN, i);
 		} else {
-			return randomSource.nextInt(500) == 0 ? DyeColor.PINK : DyeColor.WHITE;
+			return randomSource.nextInt(500) != 0 && (!Rules.DREAM_MODE.get() || randomSource.nextInt(100) != 0)
+				? shiftColor(DyeColor.WHITE, i)
+				: shiftColor(DyeColor.PINK, i);
 		}
 	}
 

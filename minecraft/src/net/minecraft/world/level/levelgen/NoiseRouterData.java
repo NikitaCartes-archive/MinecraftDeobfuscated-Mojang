@@ -393,6 +393,10 @@ public class NoiseRouterData {
 		return slide(densityFunction, -64, 384, bl ? 16 : 80, bl ? 0 : 64, -0.078125, 0, 24, bl ? 0.4 : 0.1171875);
 	}
 
+	private static DensityFunction slideMoon(DensityFunction densityFunction) {
+		return slide(densityFunction, 0, 128, 80, 64, -0.1, 0, 24, 0.1);
+	}
+
 	private static DensityFunction slideNetherLike(HolderGetter<DensityFunction> holderGetter, int i, int j) {
 		return slide(getFunction(holderGetter, BASE_3D_NOISE_NETHER), i, j, 24, 0, 0.9375, -8, 24, 2.5);
 	}
@@ -415,6 +419,27 @@ public class NoiseRouterData {
 
 	private static DensityFunction slideEnd(DensityFunction densityFunction) {
 		return slideEndLike(densityFunction, 0, 128);
+	}
+
+	protected static NoiseRouter moon(HolderGetter<DensityFunction> holderGetter) {
+		DensityFunction densityFunction = postProcess(slideMoon(getFunction(holderGetter, DEPTH)));
+		return new NoiseRouter(
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			slideMoon(DensityFunctions.constant(-0.703125)),
+			densityFunction,
+			DensityFunctions.zero(),
+			DensityFunctions.zero(),
+			DensityFunctions.zero()
+		);
 	}
 
 	protected static NoiseRouter end(HolderGetter<DensityFunction> holderGetter) {

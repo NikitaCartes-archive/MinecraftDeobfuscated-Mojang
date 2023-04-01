@@ -37,6 +37,7 @@ import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.transform.EntityTransform;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -76,6 +77,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 		this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, RayTracing.class, true));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, IronGolem.class, true));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Turtle.class, 10, true, false, Turtle.BABY_ON_LAND_SELECTOR));
 	}
@@ -98,15 +100,29 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 
 	@Override
 	public void aiStep() {
+		if (this.transform.entity() == null) {
+			this.burnInSun(this);
+		}
+
+		super.aiStep();
+	}
+
+	@Override
+	public void transformedTick(EntityTransform entityTransform, LivingEntity livingEntity) {
+		super.transformedTick(entityTransform, livingEntity);
+		this.burnInSun(livingEntity);
+	}
+
+	private void burnInSun(LivingEntity livingEntity) {
 		boolean bl = this.isSunBurnTick();
 		if (bl) {
-			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
+			ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.HEAD);
 			if (!itemStack.isEmpty()) {
 				if (itemStack.isDamageableItem()) {
 					itemStack.setDamageValue(itemStack.getDamageValue() + this.random.nextInt(2));
 					if (itemStack.getDamageValue() >= itemStack.getMaxDamage()) {
-						this.broadcastBreakEvent(EquipmentSlot.HEAD);
-						this.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+						livingEntity.broadcastBreakEvent(EquipmentSlot.HEAD);
+						livingEntity.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
 					}
 				}
 
@@ -114,11 +130,9 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 			}
 
 			if (bl) {
-				this.setSecondsOnFire(8);
+				livingEntity.setSecondsOnFire(8);
 			}
 		}
-
-		super.aiStep();
 	}
 
 	@Override

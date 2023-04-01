@@ -6,7 +6,8 @@ import net.minecraft.util.StringRepresentable;
 public enum DeathMessageType implements StringRepresentable {
 	DEFAULT("default"),
 	FALL_VARIANTS("fall_variants"),
-	INTENTIONAL_GAME_DESIGN("intentional_game_design");
+	INTENTIONAL_GAME_DESIGN("intentional_game_design"),
+	MIDAS_CURSE("midas_curse");
 
 	public static final Codec<DeathMessageType> CODEC = StringRepresentable.fromEnum(DeathMessageType::values);
 	private final String id;

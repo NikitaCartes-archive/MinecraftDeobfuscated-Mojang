@@ -14,6 +14,7 @@ import java.util.function.IntSupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.joml.Matrix4f;
 
@@ -69,6 +70,13 @@ public class PostPass implements AutoCloseable {
 		this.effect.safeGetUniform("InSize").set((float)this.inTarget.width, (float)this.inTarget.height);
 		this.effect.safeGetUniform("OutSize").set(g, h);
 		this.effect.safeGetUniform("Time").set(f);
+		LocalPlayer localPlayer = Minecraft.getInstance().player;
+		if (localPlayer != null) {
+			this.effect.safeGetUniform("Thirst").set((float)localPlayer.thirst().level() / 10.0F);
+		} else {
+			this.effect.safeGetUniform("Thirst").set(1.0F);
+		}
+
 		Minecraft minecraft = Minecraft.getInstance();
 		this.effect.safeGetUniform("ScreenSize").set((float)minecraft.getWindow().getWidth(), (float)minecraft.getWindow().getHeight());
 		this.effect.apply();

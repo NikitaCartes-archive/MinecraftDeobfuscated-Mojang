@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -56,8 +57,10 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
@@ -74,12 +77,15 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.transform.EntityTransform;
+import net.minecraft.world.entity.transform.EntityTransformType;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ElytraItem;
@@ -87,6 +93,7 @@ import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -103,6 +110,7 @@ import net.minecraft.world.level.block.PowderSnowBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
@@ -152,6 +160,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private static final EntityDataAccessor<Optional<BlockPos>> SLEEPING_POS_ID = SynchedEntityData.defineId(
 		LivingEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS
 	);
+	private static final EntityDataAccessor<EntityTransformType> DATA_TRANSFORM_ID = SynchedEntityData.defineId(
+		LivingEntity.class, EntityDataSerializers.TRANSFORM
+	);
+	private static final EntityDataAccessor<Boolean> DATA_GOLD_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
 	protected static final float DEFAULT_EYE_HEIGHT = 1.74F;
 	protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F);
 	public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
@@ -227,6 +239,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private float swimAmountO;
 	protected Brain<?> brain;
 	private boolean skipDropExperience;
+	protected EntityTransform transform = EntityTransform.IDENTITY;
+	private float scaleOld = 1.0F;
+	private float lastScaleModifier = 1.0F;
 
 	protected LivingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
 		super(entityType, level);
@@ -273,6 +288,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.entityData.define(DATA_STINGER_COUNT_ID, 0);
 		this.entityData.define(DATA_HEALTH_ID, 1.0F);
 		this.entityData.define(SLEEPING_POS_ID, Optional.empty());
+		this.entityData.define(DATA_TRANSFORM_ID, EntityTransformType.IDENTITY);
+		this.entityData.define(DATA_GOLD_ID, false);
 	}
 
 	public static AttributeSupplier.Builder createLivingAttributes() {
@@ -281,7 +298,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			.add(Attributes.KNOCKBACK_RESISTANCE)
 			.add(Attributes.MOVEMENT_SPEED)
 			.add(Attributes.ARMOR)
-			.add(Attributes.ARMOR_TOUGHNESS);
+			.add(Attributes.ARMOR_TOUGHNESS)
+			.add(Attributes.SCALE, 1.0);
 	}
 
 	@Override
@@ -309,7 +327,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean canBreatheUnderwater() {
-		return this.getMobType() == MobType.UNDEAD;
+		return this.transform.canBreatheUnderwater() ? true : this.getMobType() == MobType.UNDEAD;
 	}
 
 	public float getSwimAmount(float f) {
@@ -349,21 +367,31 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 			}
 
-			if (this.isEyeInFluid(FluidTags.WATER) && !this.level.getBlockState(BlockPos.containing(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
-				boolean bl2 = !this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && (!bl || !((Player)this).getAbilities().invulnerable);
-				if (bl2) {
+			boolean bl2 = this.level.getBlockState(BlockPos.containing(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN);
+			if (!this.transform.canBreatheInAir()) {
+				if (this.isEyeInFluid(FluidTags.WATER) && !bl2) {
+					if (this.getAirSupply() < this.getMaxAirSupply()) {
+						this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
+					}
+				} else {
 					this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()));
 					if (this.getAirSupply() == -20) {
 						this.setAirSupply(0);
-						Vec3 vec3 = this.getDeltaMovement();
-
-						for (int i = 0; i < 8; i++) {
-							double f = this.random.nextDouble() - this.random.nextDouble();
-							double g = this.random.nextDouble() - this.random.nextDouble();
-							double h = this.random.nextDouble() - this.random.nextDouble();
-							this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + f, this.getY() + g, this.getZ() + h, vec3.x, vec3.y, vec3.z);
-						}
-
+						this.spawnDrownParticles();
+						this.hurt(this.damageSources().dryOut(), 2.0F);
+					}
+				}
+			} else if (this.transform.canBreatheUnderwater()) {
+				if (this.getAirSupply() < this.getMaxAirSupply()) {
+					this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
+				}
+			} else if (this.isEyeInFluid(FluidTags.WATER) && !bl2) {
+				boolean bl3 = !this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && (!bl || !((Player)this).getAbilities().invulnerable);
+				if (bl3) {
+					this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()));
+					if (this.getAirSupply() == -20) {
+						this.setAirSupply(0);
+						this.spawnDrownParticles();
 						this.hurt(this.damageSources().drown(), 2.0F);
 					}
 				}
@@ -371,8 +399,42 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				if (!this.level.isClientSide && this.isPassenger() && this.getVehicle() != null && this.getVehicle().dismountsUnderwater()) {
 					this.stopRiding();
 				}
-			} else if (this.getAirSupply() < this.getMaxAirSupply()) {
-				this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
+			} else {
+				label191: {
+					if (!bl2 && this instanceof Player player && this.level.dimensionTypeId() == BuiltinDimensionTypes.MOON) {
+						if (this.level.getGameTime() % 20L != 0L) {
+							break label191;
+						}
+
+						BlockState blockState = this.level.getBlockState(BlockPos.containing(this.getEyePosition()));
+						if (blockState.is(Blocks.PACKED_AIR)) {
+							this.setAirSupply(this.increaseAirSupply(this.getAirSupply() + 10));
+							break label191;
+						}
+
+						if (!blockState.isAir() && this.getAirSupply() < this.getMaxAirSupply()) {
+							break label191;
+						}
+
+						if (this.getAirSupply() >= this.getMaxAirSupply()) {
+							this.setAirSupply(this.getMaxAirSupply());
+						}
+
+						if (!player.getAbilities().invulnerable) {
+							this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()));
+						}
+
+						if (this.getAirSupply() <= -2) {
+							this.setAirSupply(0);
+							this.hurt(this.damageSources().onMoon(), 1.0F);
+						}
+						break label191;
+					}
+
+					if (this.getAirSupply() < this.getMaxAirSupply()) {
+						this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
+					}
+				}
 			}
 
 			if (!this.level.isClientSide) {
@@ -425,6 +487,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.yRotO = this.getYRot();
 		this.xRotO = this.getXRot();
 		this.level.getProfiler().pop();
+	}
+
+	private void spawnDrownParticles() {
+		Vec3 vec3 = this.getDeltaMovement();
+
+		for (int i = 0; i < 8; i++) {
+			double d = this.random.nextDouble() - this.random.nextDouble();
+			double e = this.random.nextDouble() - this.random.nextDouble();
+			double f = this.random.nextDouble() - this.random.nextDouble();
+			this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + d, this.getY() + e, this.getZ() + f, vec3.x, vec3.y, vec3.z);
+		}
 	}
 
 	public boolean canSpawnSoulSpeedParticle() {
@@ -695,6 +768,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		});
 		DataResult<Tag> dataResult = this.brain.serializeStart(NbtOps.INSTANCE);
 		dataResult.resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Brain", tag));
+		if (!this.transform.isIdentity()) {
+			EntityTransformType.CODEC
+				.encodeStart(NbtOps.INSTANCE, this.transform.type())
+				.resultOrPartial(LOGGER::error)
+				.ifPresent(tag -> compoundTag.put("transform", tag));
+		}
+
+		compoundTag.putBoolean("gold", this.isGold());
+		compoundTag.putFloat("last_scale_modifier", this.lastScaleModifier);
 	}
 
 	@Override
@@ -747,6 +829,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		if (compoundTag.contains("Brain", 10)) {
 			this.brain = this.makeBrain(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Brain")));
+		}
+
+		if (compoundTag.contains("transform")) {
+			EntityTransformType.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("transform")).resultOrPartial(LOGGER::error).ifPresent(this::setTransform);
+		}
+
+		this.setGold(compoundTag.getBoolean("gold"));
+		if (compoundTag.contains("last_scale_modifier", 5)) {
+			this.lastScaleModifier = compoundTag.getFloat("last_scale_modifier");
 		}
 	}
 
@@ -1023,7 +1114,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (this.level.isClientSide) {
@@ -1117,7 +1208,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
 						d = (Math.random() - Math.random()) * 0.01;
 					}
 
-					this.knockback(0.4F, d, e);
+					boolean var10000;
+					label132: {
+						if (entity2 instanceof LivingEntity livingEntity3 && livingEntity3.getMainHandItem().isWob()) {
+							var10000 = true;
+							break label132;
+						}
+
+						var10000 = false;
+					}
+
+					boolean bl3 = var10000;
+					this.knockback(0.4F, d, e, bl3);
 					if (!bl) {
 						this.indicateDamage(d, e);
 					}
@@ -1125,10 +1227,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			}
 
 			if (this.isDeadOrDying()) {
-				if (!this.checkTotemDeathProtection(damageSource)) {
-					SoundEvent soundEvent = this.getDeathSound();
+				if (this.canDie(damageSource)) {
+					SoundEvent soundEvent = this.effectiveLivingEntity().getDeathSound();
 					if (bl2 && soundEvent != null) {
-						this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
+						this.playSound(soundEvent, this.effectiveLivingEntity().getSoundVolume(), this.effectiveLivingEntity().getVoicePitch());
 					}
 
 					this.die(damageSource);
@@ -1137,8 +1239,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				this.playHurtSound(damageSource);
 			}
 
-			boolean bl3 = !bl || f > 0.0F;
-			if (bl3) {
+			boolean bl4 = !bl || f > 0.0F;
+			if (bl4) {
 				this.lastDamageSource = damageSource;
 				this.lastDamageStamp = this.level.getGameTime();
 			}
@@ -1154,7 +1256,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
 			}
 
-			return bl3;
+			return bl4;
+		}
+	}
+
+	protected boolean canDie(DamageSource damageSource) {
+		if (this.getTransform().entity() != null) {
+			this.updateTransform(entityTransformType -> entityTransformType.withEntity(Optional.empty()));
+			this.setHealth(this.getMaxHealth());
+			return false;
+		} else {
+			return !this.checkTotemDeathProtection(damageSource);
 		}
 	}
 
@@ -1209,7 +1321,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void playHurtSound(DamageSource damageSource) {
-		SoundEvent soundEvent = this.getHurtSound(damageSource);
+		SoundEvent soundEvent = this.effectiveLivingEntity().getHurtSound(damageSource);
 		if (soundEvent != null) {
 			this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
 		}
@@ -1320,6 +1432,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		this.dropEquipment();
 		this.dropExperience();
+		int j = (Integer)Rules.SPAWN_EGG_CHANCE.get();
+		if (j > 0 && this.random.nextFloat() < (float)j / 100.0F) {
+			SpawnEggItem spawnEggItem = SpawnEggItem.byId(this.getType());
+			if (spawnEggItem != null) {
+				this.spawnAtLocation(new ItemStack(spawnEggItem));
+			}
+		}
 	}
 
 	protected void dropEquipment() {
@@ -1332,7 +1451,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				this.isAlwaysExperienceDropper()
 					|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
 			)) {
-			ExperienceOrb.award((ServerLevel)this.level, this.position(), this.getExperienceReward());
+			ExperienceOrb.award((ServerLevel)this.level, this.position(), Math.round((float)this.getExperienceReward() * this.transformScaleDropModifier()));
 		}
 	}
 
@@ -1340,14 +1459,43 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public ResourceLocation getLootTable() {
-		return this.getType().getDefaultLootTable();
+		return this.getTransform().entity() instanceof LivingEntity livingEntity ? livingEntity.getLootTable() : this.getType().getDefaultLootTable();
 	}
 
 	protected void dropFromLootTable(DamageSource damageSource, boolean bl) {
-		ResourceLocation resourceLocation = this.getLootTable();
-		LootTable lootTable = this.level.getServer().getLootTables().get(resourceLocation);
-		LootContext.Builder builder = this.createLootContext(bl, damageSource);
-		lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY), this::spawnAtLocation);
+		if (this.isGold()) {
+			AABB aABB = this.getBoundingBox();
+			double d = aABB.getXsize() * aABB.getYsize() * aABB.getZsize();
+
+			int i;
+			for (i = Math.max(Mth.floor(d * 9.0 * 9.0), 1); i >= 81; i -= 81) {
+				this.spawnAtLocation(Items.GOLD_BLOCK);
+			}
+
+			while (i >= 9) {
+				this.spawnAtLocation(Items.GOLD_INGOT);
+				i -= 9;
+			}
+
+			while (i > 0) {
+				this.spawnAtLocation(Items.GOLD_NUGGET);
+				i--;
+			}
+		} else {
+			ResourceLocation resourceLocation = this.getLootTable();
+			LootTable lootTable = this.level.getServer().getLootTables().get(resourceLocation);
+			LootContext.Builder builder = this.createLootContext(bl, damageSource);
+			float f = this.transformScaleDropModifier();
+			int j = Mth.floor(f) + (this.random.nextFloat() < Mth.frac(f) ? 1 : 0);
+
+			for (int k = 0; k < j; k++) {
+				lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY), this::spawnAtLocation);
+			}
+		}
+	}
+
+	private float transformScaleDropModifier() {
+		return Mth.clamp(this.transform.scale() * this.transform.scale() * this.transform.scale(), 0.5F, 256.0F);
 	}
 
 	protected LootContext.Builder createLootContext(boolean bl, DamageSource damageSource) {
@@ -1366,11 +1514,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public void knockback(double d, double e, double f) {
+		this.knockback(d, e, f, false);
+	}
+
+	public void knockback(double d, double e, double f, boolean bl) {
 		d *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 		if (!(d <= 0.0)) {
 			this.hasImpulse = true;
 			Vec3 vec3 = this.getDeltaMovement();
-			Vec3 vec32 = new Vec3(e, 0.0, f).normalize().scale(d);
+			Vec3 vec32 = new Vec3(e, 0.0, f).normalize().scale(bl ? -d : d);
 			this.setDeltaMovement(vec3.x / 2.0 - vec32.x, this.onGround ? Math.min(0.4, vec3.y / 2.0 + d) : vec3.y, vec3.z / 2.0 - vec32.z);
 		}
 	}
@@ -1410,6 +1562,22 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return 0.0F;
 	}
 
+	public void setGold(boolean bl) {
+		this.entityData.set(DATA_GOLD_ID, bl);
+	}
+
+	public boolean isGold() {
+		return this.entityData.get(DATA_GOLD_ID);
+	}
+
+	public boolean canTransformBreatheInAir() {
+		return true;
+	}
+
+	public float getTransformScale(float f) {
+		return Mth.lerp(f, this.scaleOld, this.transform.scale());
+	}
+
 	public LivingEntity.Fallsounds getFallSounds() {
 		return new LivingEntity.Fallsounds(SoundEvents.GENERIC_SMALL_FALL, SoundEvents.GENERIC_BIG_FALL);
 	}
@@ -1438,6 +1606,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		if (this.isSpectator()) {
 			return false;
 		} else {
+			if (this.getTransform().entity() instanceof LivingEntity livingEntity && livingEntity.onClimbable()) {
+				return true;
+			}
+
 			BlockPos blockPos = this.blockPosition();
 			BlockState blockState = this.getFeetBlockState();
 			if (blockState.is(BlockTags.CLIMBABLE)) {
@@ -1473,7 +1645,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		boolean bl = super.causeFallDamage(f, g, damageSource);
 		int i = this.calculateFallDamage(f, g);
 		if (i > 0) {
-			this.playSound(this.getFallDamageSound(i), 1.0F, 1.0F);
+			this.playSound(this.effectiveLivingEntity().getFallDamageSound(i), 1.0F, 1.0F);
 			this.playBlockFallSound();
 			this.hurt(damageSource, (float)i);
 			return true;
@@ -1488,7 +1660,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		} else {
 			MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.JUMP);
 			float h = mobEffectInstance == null ? 0.0F : (float)(mobEffectInstance.getAmplifier() + 1);
-			return Mth.ceil((f - 3.0F - h) * g);
+			int i = Mth.ceil((f - 3.0F - h) * g);
+			return Rules.DREAM_MODE.get() && this.random.nextFloat() > 0.5F ? i / 3 : i;
 		}
 	}
 
@@ -1659,9 +1832,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.invulnerableTime = 20;
 		this.hurtDuration = 10;
 		this.hurtTime = this.hurtDuration;
-		SoundEvent soundEvent = this.getHurtSound(damageSource);
+		SoundEvent soundEvent = this.effectiveLivingEntity().getHurtSound(damageSource);
 		if (soundEvent != null) {
-			this.playSound(soundEvent, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+			this.playSound(soundEvent, this.effectiveLivingEntity().getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 		}
 
 		this.hurt(this.damageSources().generic(), 0.0F);
@@ -1673,9 +1846,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public void handleEntityEvent(byte b) {
 		switch (b) {
 			case 3:
-				SoundEvent soundEvent = this.getDeathSound();
+				SoundEvent soundEvent = this.effectiveLivingEntity().getDeathSound();
 				if (soundEvent != null) {
-					this.playSound(soundEvent, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+					this.playSound(soundEvent, this.effectiveLivingEntity().getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 				}
 
 				if (!(this instanceof Player)) {
@@ -1920,7 +2093,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public boolean shouldShowName() {
-		return this.isCustomNameVisible();
+		return this.transformDisplayName != null || this.isCustomNameVisible();
 	}
 
 	protected float getJumpPower() {
@@ -1961,57 +2134,92 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public void travel(Vec3 vec3) {
 		if (this.isControlledByLocalInstance()) {
-			double d = 0.08;
-			boolean bl = this.getDeltaMovement().y <= 0.0;
-			if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
+			Vec3 vec32 = this.level.getMoonPullVector();
+			boolean bl = Rules.LESS_GRAVITY.get();
+			double d;
+			if (this.level.dimensionTypeId() != BuiltinDimensionTypes.MOON) {
+				d = bl ? 0.008 : 0.08;
+			} else if (!bl) {
+				double e = this.getY();
+				if (e < 128.0) {
+					double f = 1.0 - e / 128.0;
+					double g = Math.signum(f);
+					double h = g * Math.max(Math.abs(f), 0.2);
+					d = 0.02 * h;
+				} else {
+					double f = this.getDeltaMovement().y;
+					d = Math.signum(f == 0.0 ? 1.0 : -f) * 0.02;
+				}
+			} else {
+				d = 0.08;
+			}
+
+			boolean bl2 = this.getDeltaMovement().y <= 0.0;
+			if (bl2 && this.hasEffect(MobEffects.SLOW_FALLING)) {
 				d = 0.01;
 				this.resetFallDistance();
 			}
 
+			int i = 0;
+			if (Rules.BEELOONS.get()) {
+				if (this instanceof Player player) {
+					i = player.getBeeloons().size();
+					if (i > 0) {
+						if (i > 2) {
+							d = (double)(-(i - 2)) * 0.004;
+						} else if (d > 0.0) {
+							d = Math.max(0.004, d / Math.pow(2.0, (double)i));
+						}
+					}
+				} else if (this instanceof Bee bee && bee.isLeashed()) {
+					d -= 0.1;
+				}
+			}
+
 			FluidState fluidState = this.level.getFluidState(this.blockPosition());
 			if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState)) {
-				double e = this.getY();
-				float f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
-				float g = 0.02F;
-				float h = (float)EnchantmentHelper.getDepthStrider(this);
-				if (h > 3.0F) {
-					h = 3.0F;
+				double j = this.getY();
+				float k = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
+				float l = this.getInWaterSpeed();
+				float m = (float)EnchantmentHelper.getDepthStrider(this);
+				if (m > 3.0F) {
+					m = 3.0F;
 				}
 
 				if (!this.onGround) {
-					h *= 0.5F;
+					m *= 0.5F;
 				}
 
-				if (h > 0.0F) {
-					f += (0.54600006F - f) * h / 3.0F;
-					g += (this.getSpeed() - g) * h / 3.0F;
+				if (m > 0.0F) {
+					k += (0.54600006F - k) * m / 3.0F;
+					l += (this.getSpeed() - l) * m / 3.0F;
 				}
 
 				if (this.hasEffect(MobEffects.DOLPHINS_GRACE)) {
-					f = 0.96F;
+					k = 0.96F;
 				}
 
-				this.moveRelative(g, vec3);
-				this.move(MoverType.SELF, this.getDeltaMovement());
-				Vec3 vec32 = this.getDeltaMovement();
+				this.moveRelative(l, vec3);
+				this.move(MoverType.SELF, this.getDeltaMovement().add(vec32));
+				Vec3 vec33 = this.getDeltaMovement();
 				if (this.horizontalCollision && this.onClimbable()) {
-					vec32 = new Vec3(vec32.x, 0.2, vec32.z);
+					vec33 = new Vec3(vec33.x, 0.2, vec33.z);
 				}
 
-				this.setDeltaMovement(vec32.multiply((double)f, 0.8F, (double)f));
-				Vec3 vec33 = this.getFluidFallingAdjustedMovement(d, bl, this.getDeltaMovement());
-				this.setDeltaMovement(vec33);
-				if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + 0.6F - this.getY() + e, vec33.z)) {
-					this.setDeltaMovement(vec33.x, 0.3F, vec33.z);
+				this.setDeltaMovement(vec33.multiply((double)k, 0.8F, (double)k));
+				Vec3 vec34 = this.getFluidFallingAdjustedMovement(d, bl2, this.getDeltaMovement());
+				this.setDeltaMovement(vec34);
+				if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + 0.6F - this.getY() + j, vec34.z)) {
+					this.setDeltaMovement(vec34.x, 0.3F, vec34.z);
 				}
 			} else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState)) {
-				double ex = this.getY();
+				double jx = this.getY();
 				this.moveRelative(0.02F, vec3);
 				this.move(MoverType.SELF, this.getDeltaMovement());
 				if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
 					this.setDeltaMovement(this.getDeltaMovement().multiply(0.5, 0.8F, 0.5));
-					Vec3 vec34 = this.getFluidFallingAdjustedMovement(d, bl, this.getDeltaMovement());
-					this.setDeltaMovement(vec34);
+					Vec3 vec35 = this.getFluidFallingAdjustedMovement(d, bl2, this.getDeltaMovement());
+					this.setDeltaMovement(vec35);
 				} else {
 					this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
 				}
@@ -2020,44 +2228,44 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d / 4.0, 0.0));
 				}
 
-				Vec3 vec34 = this.getDeltaMovement();
-				if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + 0.6F - this.getY() + ex, vec34.z)) {
-					this.setDeltaMovement(vec34.x, 0.3F, vec34.z);
+				Vec3 vec35 = this.getDeltaMovement();
+				if (this.horizontalCollision && this.isFree(vec35.x, vec35.y + 0.6F - this.getY() + jx, vec35.z)) {
+					this.setDeltaMovement(vec35.x, 0.3F, vec35.z);
 				}
 			} else if (this.isFallFlying()) {
 				this.checkSlowFallDistance();
-				Vec3 vec35 = this.getDeltaMovement();
-				Vec3 vec36 = this.getLookAngle();
-				float fx = this.getXRot() * (float) (Math.PI / 180.0);
-				double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
-				double j = vec35.horizontalDistance();
-				double k = vec36.length();
-				double l = Math.cos((double)fx);
-				l = l * l * Math.min(1.0, k / 0.4);
-				vec35 = this.getDeltaMovement().add(0.0, d * (-1.0 + l * 0.75), 0.0);
-				if (vec35.y < 0.0 && i > 0.0) {
-					double m = vec35.y * -0.1 * l;
-					vec35 = vec35.add(vec36.x * m / i, m, vec36.z * m / i);
+				Vec3 vec36 = this.getDeltaMovement();
+				Vec3 vec37 = this.getLookAngle();
+				float kx = this.getXRot() * (float) (Math.PI / 180.0);
+				double h = Math.sqrt(vec37.x * vec37.x + vec37.z * vec37.z);
+				double n = vec36.horizontalDistance();
+				double o = vec37.length();
+				double p = Math.cos((double)kx);
+				p = p * p * Math.min(1.0, o / 0.4);
+				vec36 = this.getDeltaMovement().add(0.0, d * (-1.0 + p * 0.75), 0.0);
+				if (vec36.y < 0.0 && h > 0.0) {
+					double q = vec36.y * -0.1 * p;
+					vec36 = vec36.add(vec37.x * q / h, q, vec37.z * q / h);
 				}
 
-				if (fx < 0.0F && i > 0.0) {
-					double m = j * (double)(-Mth.sin(fx)) * 0.04;
-					vec35 = vec35.add(-vec36.x * m / i, m * 3.2, -vec36.z * m / i);
+				if (kx < 0.0F && h > 0.0) {
+					double q = n * (double)(-Mth.sin(kx)) * 0.04;
+					vec36 = vec36.add(-vec37.x * q / h, q * 3.2, -vec37.z * q / h);
 				}
 
-				if (i > 0.0) {
-					vec35 = vec35.add((vec36.x / i * j - vec35.x) * 0.1, 0.0, (vec36.z / i * j - vec35.z) * 0.1);
+				if (h > 0.0) {
+					vec36 = vec36.add((vec37.x / h * n - vec36.x) * 0.1, 0.0, (vec37.z / h * n - vec36.z) * 0.1);
 				}
 
-				this.setDeltaMovement(vec35.multiply(0.99F, 0.98F, 0.99F));
-				this.move(MoverType.SELF, this.getDeltaMovement());
+				this.setDeltaMovement(vec36.multiply(0.99F, 0.98F, 0.99F));
+				this.move(MoverType.SELF, this.getDeltaMovement().add(vec32));
 				if (this.horizontalCollision && !this.level.isClientSide) {
-					double m = this.getDeltaMovement().horizontalDistance();
-					double n = j - m;
-					float o = (float)(n * 10.0 - 3.0);
-					if (o > 0.0F) {
-						this.playSound(this.getFallDamageSound((int)o), 1.0F, 1.0F);
-						this.hurt(this.damageSources().flyIntoWall(), o);
+					double q = this.getDeltaMovement().horizontalDistance();
+					double r = n - q;
+					float s = (float)(r * 10.0 - 3.0);
+					if (s > 0.0F) {
+						this.playSound(this.getFallDamageSound((int)s), 1.0F, 1.0F);
+						this.hurt(this.damageSources().flyIntoWall(), s);
 					}
 				}
 
@@ -2066,32 +2274,42 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 			} else {
 				BlockPos blockPos = this.getBlockPosBelowThatAffectsMyMovement();
-				float p = this.level.getBlockState(blockPos).getBlock().getFriction();
-				float fxx = this.onGround ? p * 0.91F : 0.91F;
-				Vec3 vec37 = this.handleRelativeFrictionAndCalculateMovement(vec3, p);
-				double q = vec37.y;
+				float t = this.level.getBlockState(blockPos).getBlock().getFriction();
+				float kxx = this.onGround ? t * 0.91F : 0.91F;
+				Vec3 vec38 = this.handleRelativeFrictionAndCalculateMovement(vec3, t);
+				double u = vec38.y;
 				if (this.hasEffect(MobEffects.LEVITATION)) {
-					q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
+					u += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec38.y) * 0.2;
 					this.resetFallDistance();
 				} else if (this.level.isClientSide && !this.level.hasChunkAt(blockPos)) {
 					if (this.getY() > (double)this.level.getMinBuildHeight()) {
-						q = -0.1;
+						u = -0.1;
 					} else {
-						q = 0.0;
+						u = 0.0;
 					}
 				} else if (!this.isNoGravity()) {
-					q -= d;
+					u -= d;
+					if (i > 0) {
+						double v = (double)(-Math.max(5 - i, 0)) / 5.0;
+						u = Math.max(v, u);
+					}
 				}
 
 				if (this.shouldDiscardFriction()) {
-					this.setDeltaMovement(vec37.x, q, vec37.z);
+					this.setDeltaMovement(vec38.x, u, vec38.z);
 				} else {
-					this.setDeltaMovement(vec37.x * (double)fxx, q * 0.98F, vec37.z * (double)fxx);
+					this.setDeltaMovement(vec38.x * (double)kxx, u * 0.98F, vec38.z * (double)kxx);
 				}
+
+				this.setDeltaMovement(this.getDeltaMovement().add(vec32));
 			}
 		}
 
 		this.calculateEntityAnimation(this instanceof FlyingAnimal);
+	}
+
+	public float getInWaterSpeed() {
+		return 0.02F;
 	}
 
 	private void travelRidden(Player player, Vec3 vec3) {
@@ -2195,8 +2413,29 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
+	public void postTick() {
+		super.postTick();
+		this.transform.copyProperties(this);
+	}
+
+	@Override
 	public void tick() {
 		super.tick();
+		this.scaleOld = this.transform.scale();
+		if (!this.level.isClientSide) {
+			float f = this.getScaleModifier();
+			if (Math.abs(f - this.lastScaleModifier) > 1.0E-5F) {
+				float g = f / this.lastScaleModifier;
+				this.updateTransform(entityTransformType -> entityTransformType.withScale(entityTransformType.scale() * g));
+				this.lastScaleModifier = f;
+			}
+		}
+
+		Entity entity = this.transform.entity();
+		if (entity != null) {
+			entity.transformedTick(this.transform, this);
+		}
+
 		this.updatingUsingItem();
 		this.updateSwimAmount();
 		if (!this.level.isClientSide) {
@@ -2240,34 +2479,34 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		double d = this.getX() - this.xo;
 		double e = this.getZ() - this.zo;
-		float f = (float)(d * d + e * e);
-		float g = this.yBodyRot;
-		float h = 0.0F;
+		float h = (float)(d * d + e * e);
+		float k = this.yBodyRot;
+		float l = 0.0F;
 		this.oRun = this.run;
-		float k = 0.0F;
-		if (f > 0.0025000002F) {
-			k = 1.0F;
-			h = (float)Math.sqrt((double)f) * 3.0F;
-			float l = (float)Mth.atan2(e, d) * (180.0F / (float)Math.PI) - 90.0F;
-			float m = Mth.abs(Mth.wrapDegrees(this.getYRot()) - l);
-			if (95.0F < m && m < 265.0F) {
-				g = l - 180.0F;
+		float m = 0.0F;
+		if (h > 0.0025000002F) {
+			m = 1.0F;
+			l = (float)Math.sqrt((double)h) * 3.0F;
+			float n = (float)Mth.atan2(e, d) * (180.0F / (float)Math.PI) - 90.0F;
+			float o = Mth.abs(Mth.wrapDegrees(this.getYRot()) - n);
+			if (95.0F < o && o < 265.0F) {
+				k = n - 180.0F;
 			} else {
-				g = l;
+				k = n;
 			}
 		}
 
 		if (this.attackAnim > 0.0F) {
-			g = this.getYRot();
+			k = this.getYRot();
 		}
 
 		if (!this.onGround) {
-			k = 0.0F;
+			m = 0.0F;
 		}
 
-		this.run = this.run + (k - this.run) * 0.3F;
+		this.run = this.run + (m - this.run) * 0.3F;
 		this.level.getProfiler().push("headTurn");
-		h = this.tickHeadTurn(g, h);
+		l = this.tickHeadTurn(k, l);
 		this.level.getProfiler().pop();
 		this.level.getProfiler().push("rangeChecks");
 
@@ -2304,7 +2543,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		this.level.getProfiler().pop();
-		this.animStep += h;
+		this.animStep += l;
 		if (this.isFallFlying()) {
 			this.fallFlyTicks++;
 		} else {
@@ -2467,7 +2706,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			h = 0.0;
 		}
 
-		if (Math.abs(vec3.y) < 0.003) {
+		if (Math.abs(vec3.y) < 0.003 && !Rules.BIG_MOON_MODE.isBiggerThanNormal()) {
 			i = 0.0;
 		}
 
@@ -2516,7 +2755,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		AABB aABB;
-		label101: {
+		label103: {
 			this.level.getProfiler().pop();
 			this.level.getProfiler().push("travel");
 			this.xxa *= 0.98F;
@@ -2526,7 +2765,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
 			if (this.getControllingPassenger() instanceof Player player && this.isAlive()) {
 				this.travelRidden(player, vec32);
-				break label101;
+				break label103;
 			}
 
 			this.travel(vec32);
@@ -2563,8 +2802,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
+	@Override
+	public boolean fireImmune() {
+		return this.isGold() ? true : this.transform.entity() != null && this.transform.entity().fireImmune() || super.fireImmune();
+	}
+
+	@Override
+	public boolean isSilent() {
+		return this.isGold() || super.isSilent();
+	}
+
 	public boolean isSensitiveToWater() {
-		return false;
+		return this.transform.isSensitiveToWater();
 	}
 
 	private void updateFallFlying() {
@@ -2697,9 +2946,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public void onItemPickup(ItemEntity itemEntity) {
-		Entity entity = itemEntity.getOwner();
-		if (entity instanceof ServerPlayer) {
-			CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)entity, itemEntity.getItem(), this);
+		if (itemEntity.isThrownIntentionally() && itemEntity.getOwner() instanceof ServerPlayer serverPlayer) {
+			CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.trigger(serverPlayer, itemEntity.getItem(), this);
 		}
 	}
 
@@ -2727,12 +2975,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public float getAttackAnim(float f) {
-		float g = this.attackAnim - this.oAttackAnim;
-		if (g < 0.0F) {
-			g++;
-		}
+		if (Rules.EVIL_EYE.get() && this.getMainHandItem().isEmpty()) {
+			return 0.0F;
+		} else {
+			float g = this.attackAnim - this.oAttackAnim;
+			if (g < 0.0F) {
+				g++;
+			}
 
-		return this.oAttackAnim + g * f;
+			return this.oAttackAnim + g * f;
+		}
 	}
 
 	@Override
@@ -2881,7 +3133,14 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				this.useItem = ItemStack.EMPTY;
 				this.useItemRemaining = 0;
 			}
+		} else if (DATA_TRANSFORM_ID.equals(entityDataAccessor)) {
+			this.transform = this.getTransformType().create(this);
+			this.onTransformChange();
 		}
+	}
+
+	protected void onTransformChange() {
+		this.refreshDimensions();
 	}
 
 	@Override
@@ -2990,7 +3249,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean isFallFlying() {
-		return this.getSharedFlag(7);
+		return Rules.ALWAYS_FLYING.get() ? true : this.getSharedFlag(7);
 	}
 
 	@Override
@@ -3065,7 +3324,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public EntityDimensions getDimensions(Pose pose) {
-		return pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : super.getDimensions(pose).scale(this.getScale());
+		EntityDimensions entityDimensions = pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : super.getDimensions(pose).scale(this.getScale());
+		return this.transform.getDimensions(pose, entityDimensions);
 	}
 
 	public ImmutableList<Pose> getDismountPoses() {
@@ -3166,7 +3426,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	protected final float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return pose == Pose.SLEEPING ? 0.2F : this.getStandingEyeHeight(pose, entityDimensions);
+		float f = pose == Pose.SLEEPING ? 0.2F : this.getStandingEyeHeight(pose, entityDimensions);
+		return this.getTransform().getEyeHeight(pose, f);
 	}
 
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
@@ -3208,6 +3469,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					livingEntity.addEffect(new MobEffectInstance(pair.getFirst()));
 				}
 			}
+
+			item.getFoodProperties().getOnEaten().accept(itemStack, livingEntity);
 		}
 	}
 
@@ -3328,9 +3591,120 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
+	public boolean canSpawnFootprintParticle() {
+		return Rules.FOOTPRINTS.footprintsEnabled() && !this.isInWater() && !this.isSpectator() && !this.isInLava() && this.isAlive();
+	}
+
+	@Override
 	public float maxUpStep() {
 		float f = super.maxUpStep();
-		return this.getControllingPassenger() instanceof Player ? Math.max(f, 1.0F) : f;
+		return this.transform.maxUpStep(this.getControllingPassenger() instanceof Player ? Math.max(f, 1.0F) : f);
+	}
+
+	@Override
+	public boolean noCulling() {
+		Entity entity = this.transform.entity();
+		return entity != null ? entity.noCulling() : super.noCulling();
+	}
+
+	public void updateTransform(UnaryOperator<EntityTransformType> unaryOperator) {
+		this.setTransform((EntityTransformType)unaryOperator.apply(this.getTransformType()));
+	}
+
+	public void setTransform(EntityTransformType entityTransformType) {
+		if (entityTransformType.entity().isPresent()
+			&& ((EntityTransformType.TypeModifier)entityTransformType.entity().get()).type() == this.getType()
+			&& ((EntityTransformType.TypeModifier)entityTransformType.entity().get()).tag().isEmpty()) {
+			entityTransformType = entityTransformType.withEntity(Optional.empty());
+		}
+
+		this.entityData.set(DATA_TRANSFORM_ID, entityTransformType);
+	}
+
+	public EntityTransformType getTransformType() {
+		return this.entityData.get(DATA_TRANSFORM_ID);
+	}
+
+	public EntityTransform getTransform() {
+		return this.transform == null ? EntityTransform.IDENTITY : this.transform;
+	}
+
+	protected float getScaleModifier() {
+		return (float)this.getAttributeValue(Attributes.SCALE);
+	}
+
+	@Override
+	public Entity effectiveEntity() {
+		return (Entity)java.util.Objects.requireNonNullElse(this.getTransform().entity(), this);
+	}
+
+	public LivingEntity effectiveLivingEntity() {
+		Entity var2 = this.getTransform().entity();
+		return var2 instanceof LivingEntity ? (LivingEntity)var2 : this;
+	}
+
+	@Override
+	public void copyTransformedProperties(LivingEntity livingEntity) {
+		super.copyTransformedProperties(livingEntity);
+		this.yBodyRot = livingEntity.yBodyRot;
+		this.yBodyRotO = livingEntity.yBodyRotO;
+		this.yHeadRot = livingEntity.yHeadRot;
+		this.yHeadRotO = livingEntity.yHeadRotO;
+		this.walkAnimation.copyFrom(livingEntity.walkAnimation);
+		this.attackAnim = livingEntity.attackAnim;
+		this.oAttackAnim = livingEntity.oAttackAnim;
+		this.swinging = livingEntity.swinging;
+		this.setSprinting(livingEntity.isSprinting());
+		this.setArrowCount(livingEntity.getArrowCount());
+		this.hurtTime = livingEntity.hurtTime;
+		this.hurtDuration = livingEntity.hurtDuration;
+		this.deathTime = livingEntity.deathTime;
+		this.setHealth(livingEntity.getHealth());
+	}
+
+	protected boolean isSunBurnTick() {
+		if (this.level.isDay() && !this.level.isClientSide) {
+			float f = this.getLightLevelDependentMagicValue();
+			BlockPos blockPos = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
+			boolean bl = this.isInWaterRainOrBubble() || this.isInPowderSnow || this.wasInPowderSnow;
+			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && !bl && this.level.canSeeSky(blockPos)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
+		if (this.transform.entity() instanceof Mob mob) {
+			InteractionResult interactionResult = mob.transformInteract(player, this, interactionHand);
+			if (interactionResult.consumesAction()) {
+				return interactionResult;
+			}
+		}
+
+		return super.interact(player, interactionHand);
+	}
+
+	@Override
+	public double getPassengersRidingOffset() {
+		return this.transform.entity() != null ? this.transform.entity().getPassengersRidingOffset() : super.getPassengersRidingOffset();
+	}
+
+	@Override
+	public double getMyRidingOffset() {
+		return this.transform.entity() != null ? this.transform.entity().getMyRidingOffset() : super.getMyRidingOffset();
+	}
+
+	@Override
+	public void positionRider(Entity entity) {
+		if (this.transform.entity() != null) {
+			this.transform.entity().copyTransformedProperties(this);
+			this.transform.entity().positionRider(entity);
+		} else {
+			super.positionRider(entity);
+		}
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {

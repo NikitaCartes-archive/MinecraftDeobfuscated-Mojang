@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.actual.RuleFeatureToggles;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -51,7 +52,7 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 						.getRecipeFor(container, level)
 						.map(campfireCookingRecipe -> campfireCookingRecipe.assemble(container, level.registryAccess()))
 						.orElse(itemStack);
-					if (itemStack2.isItemEnabled(level.enabledFeatures())) {
+					if (itemStack2.isItemEnabled(level.enabledFeatures()) && RuleFeatureToggles.isEnabled(itemStack2)) {
 						Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack2);
 						campfireBlockEntity.items.set(i, ItemStack.EMPTY);
 						level.sendBlockUpdated(blockPos, blockState, blockState, 3);

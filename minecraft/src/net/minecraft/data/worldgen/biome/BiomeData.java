@@ -76,5 +76,6 @@ public abstract class BiomeData {
 		bootstapContext.register(Biomes.END_MIDLANDS, EndBiomes.endMidlands(holderGetter, holderGetter2));
 		bootstapContext.register(Biomes.SMALL_END_ISLANDS, EndBiomes.smallEndIslands(holderGetter, holderGetter2));
 		bootstapContext.register(Biomes.END_BARRENS, EndBiomes.endBarrens(holderGetter, holderGetter2));
+		bootstapContext.register(Biomes.THE_MOON, MoonBiomes.theMoon(holderGetter, holderGetter2));
 	}
 }

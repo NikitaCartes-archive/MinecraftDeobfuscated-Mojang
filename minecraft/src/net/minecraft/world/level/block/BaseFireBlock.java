@@ -138,7 +138,7 @@ public abstract class BaseFireBlock extends Block {
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			if (inPortalDimension(level)) {
-				Optional<PortalShape> optional = PortalShape.findEmptyPortalShape(level, blockPos, Direction.Axis.X);
+				Optional<PortalShape> optional = PortalShape.findEmptyPortalShape(level, blockPos, Direction.Axis.X, false);
 				if (optional.isPresent()) {
 					((PortalShape)optional.get()).createPortalBlocks();
 					return;
@@ -193,7 +193,7 @@ public abstract class BaseFireBlock extends Block {
 				Direction.Axis axis = direction.getAxis().isHorizontal()
 					? direction.getCounterClockWise().getAxis()
 					: Direction.Plane.HORIZONTAL.getRandomAxis(level.random);
-				return PortalShape.findEmptyPortalShape(level, blockPos, axis).isPresent();
+				return PortalShape.findEmptyPortalShape(level, blockPos, axis, false).isPresent();
 			}
 		}
 	}

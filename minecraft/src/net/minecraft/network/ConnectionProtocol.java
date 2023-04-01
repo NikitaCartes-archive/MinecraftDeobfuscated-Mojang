@@ -32,6 +32,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.network.protocol.game.ClientboundBulkVoteInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChunksBiomesPacket;
@@ -86,6 +87,7 @@ import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+import net.minecraft.network.protocol.game.ClientboundRuleUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
 import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
@@ -130,6 +132,10 @@ import net.minecraft.network.protocol.game.ClientboundUpdateEnabledFeaturesPacke
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteCastResultPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteFinishPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteProgressInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundVoteStartPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
@@ -143,6 +149,7 @@ import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ServerboundCrashVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
@@ -178,6 +185,7 @@ import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.network.protocol.game.ServerboundVoteCastPacket;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
@@ -315,6 +323,12 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 					.addPacket(ClientboundUpdateMobEffectPacket.class, ClientboundUpdateMobEffectPacket::new)
 					.addPacket(ClientboundUpdateRecipesPacket.class, ClientboundUpdateRecipesPacket::new)
 					.addPacket(ClientboundUpdateTagsPacket.class, ClientboundUpdateTagsPacket::new)
+					.addPacket(ClientboundRuleUpdatePacket.class, ClientboundRuleUpdatePacket::new)
+					.addPacket(ClientboundVoteStartPacket.class, ClientboundVoteStartPacket::new)
+					.addPacket(ClientboundVoteFinishPacket.class, ClientboundVoteFinishPacket::new)
+					.addPacket(ClientboundVoteProgressInfoPacket.class, ClientboundVoteProgressInfoPacket::new)
+					.addPacket(ClientboundVoteCastResultPacket.class, ClientboundVoteCastResultPacket::new)
+					.addPacket(ClientboundBulkVoteInfoPacket.class, ClientboundBulkVoteInfoPacket::new)
 			)
 			.addFlow(
 				PacketFlow.SERVERBOUND,
@@ -370,6 +384,8 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 					.addPacket(ServerboundTeleportToEntityPacket.class, ServerboundTeleportToEntityPacket::new)
 					.addPacket(ServerboundUseItemOnPacket.class, ServerboundUseItemOnPacket::new)
 					.addPacket(ServerboundUseItemPacket.class, ServerboundUseItemPacket::new)
+					.addPacket(ServerboundVoteCastPacket.class, ServerboundVoteCastPacket::new)
+					.addPacket(ServerboundCrashVehiclePacket.class, ServerboundCrashVehiclePacket::new)
 			)
 	),
 	STATUS(

@@ -67,4 +67,9 @@ public class SoulSandBlock extends Block {
 	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return 0.2F;
 	}
+
+	@Override
+	public boolean canAirPass(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Direction direction) {
+		return false;
+	}
 }

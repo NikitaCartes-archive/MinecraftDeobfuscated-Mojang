@@ -1,19 +1,19 @@
 package net.minecraft.world.entity.ai.goal.target;
 
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
 public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetGoal {
 	private static final int DEFAULT_RANDOM_INTERVAL = 10;
-	protected final Class<T> targetType;
+	private final Predicate<Entity> targetFilter;
 	protected final int randomInterval;
 	@Nullable
 	protected LivingEntity target;
@@ -32,11 +32,15 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
 	}
 
 	public NearestAttackableTargetGoal(Mob mob, Class<T> class_, int i, boolean bl, boolean bl2, @Nullable Predicate<LivingEntity> predicate) {
+		this(mob, (Predicate<Entity>)(entity -> class_.isAssignableFrom(entity.getClass())), i, bl, bl2, predicate);
+	}
+
+	public NearestAttackableTargetGoal(Mob mob, Predicate<Entity> predicate, int i, boolean bl, boolean bl2, @Nullable Predicate<LivingEntity> predicate2) {
 		super(mob, bl, bl2);
-		this.targetType = class_;
+		this.targetFilter = predicate;
 		this.randomInterval = reducedTickDelay(i);
 		this.setFlags(EnumSet.of(Goal.Flag.TARGET));
-		this.targetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(predicate);
+		this.targetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(predicate2);
 	}
 
 	@Override
@@ -54,20 +58,12 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
 	}
 
 	protected void findTarget() {
-		if (this.targetType != Player.class && this.targetType != ServerPlayer.class) {
-			this.target = this.mob
-				.level
-				.getNearestEntity(
-					this.mob.level.getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance()), livingEntity -> true),
-					this.targetConditions,
-					this.mob,
-					this.mob.getX(),
-					this.mob.getEyeY(),
-					this.mob.getZ()
-				);
-		} else {
-			this.target = this.mob.level.getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
-		}
+		this.target = this.mob
+			.level
+			.getNearestEntity(this.mob.level.getEntitiesOfClass(LivingEntity.class, this.getTargetSearchArea(this.getFollowDistance()), livingEntity -> {
+				Entity entity = (Entity)Objects.requireNonNullElse(livingEntity.getTransform().entity(), livingEntity);
+				return this.targetFilter.test(entity);
+			}), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 	}
 
 	@Override

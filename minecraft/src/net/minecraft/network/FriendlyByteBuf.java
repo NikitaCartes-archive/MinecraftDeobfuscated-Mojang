@@ -59,6 +59,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.EndTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
@@ -116,14 +117,14 @@ public class FriendlyByteBuf extends ByteBuf {
 
 	@Deprecated
 	public <T> T readWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec) {
-		CompoundTag compoundTag = this.readAnySizeNbt();
-		return Util.getOrThrow(codec.parse(dynamicOps, compoundTag), string -> new DecoderException("Failed to decode: " + string + " " + compoundTag));
+		Tag tag = this.readNbt(NbtAccounter.UNLIMITED);
+		return Util.getOrThrow(codec.parse(dynamicOps, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag));
 	}
 
 	@Deprecated
 	public <T> void writeWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec, T object) {
 		Tag tag = Util.getOrThrow(codec.encodeStart(dynamicOps, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
-		this.writeNbt((CompoundTag)tag);
+		this.writeNbt(tag);
 	}
 
 	public <T> T readJsonWithCodec(Codec<T> codec) {
@@ -289,6 +290,10 @@ public class FriendlyByteBuf extends ByteBuf {
 		return enumSet;
 	}
 
+	public <T> void write(FriendlyByteBuf.Writer<T> writer, T object) {
+		writer.accept(this, object);
+	}
+
 	public <T> void writeOptional(Optional<T> optional, FriendlyByteBuf.Writer<T> writer) {
 		if (optional.isPresent()) {
 			this.writeBoolean(true);
@@ -296,6 +301,10 @@ public class FriendlyByteBuf extends ByteBuf {
 		} else {
 			this.writeBoolean(false);
 		}
+	}
+
+	public <T> T read(FriendlyByteBuf.Reader<T> reader) {
+		return (T)reader.apply(this);
 	}
 
 	public <T> Optional<T> readOptional(FriendlyByteBuf.Reader<T> reader) {
@@ -565,44 +574,45 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this;
 	}
 
-	public FriendlyByteBuf writeNbt(@Nullable CompoundTag compoundTag) {
-		if (compoundTag == null) {
-			this.writeByte(0);
-		} else {
-			try {
-				NbtIo.write(compoundTag, new ByteBufOutputStream(this));
-			} catch (IOException var3) {
-				throw new EncoderException(var3);
-			}
+	public FriendlyByteBuf writeNbt(@Nullable Tag tag) {
+		if (tag == null) {
+			tag = EndTag.INSTANCE;
 		}
 
-		return this;
+		try {
+			NbtIo.writeAnyTag(tag, new ByteBufOutputStream(this));
+			return this;
+		} catch (IOException var3) {
+			throw new EncoderException(var3);
+		}
 	}
 
 	@Nullable
 	public CompoundTag readNbt() {
-		return this.readNbt(new NbtAccounter(2097152L));
+		return this.castToCompound(this.readNbt(new NbtAccounter(2097152L)));
 	}
 
 	@Nullable
 	public CompoundTag readAnySizeNbt() {
-		return this.readNbt(NbtAccounter.UNLIMITED);
+		return this.castToCompound(this.readNbt(NbtAccounter.UNLIMITED));
 	}
 
 	@Nullable
-	public CompoundTag readNbt(NbtAccounter nbtAccounter) {
-		int i = this.readerIndex();
-		byte b = this.readByte();
-		if (b == 0) {
-			return null;
+	private CompoundTag castToCompound(@Nullable Tag tag) {
+		if (tag != null && !(tag instanceof CompoundTag)) {
+			throw new DecoderException("Not a compound tag: " + tag);
 		} else {
-			this.readerIndex(i);
+			return (CompoundTag)tag;
+		}
+	}
 
-			try {
-				return NbtIo.read(new ByteBufInputStream(this), nbtAccounter);
-			} catch (IOException var5) {
-				throw new EncoderException(var5);
-			}
+	@Nullable
+	public Tag readNbt(NbtAccounter nbtAccounter) {
+		try {
+			Tag tag = NbtIo.readAnyTag(new ByteBufInputStream(this), nbtAccounter);
+			return tag.getId() == 0 ? null : tag;
+		} catch (IOException var3) {
+			throw new EncoderException(var3);
 		}
 	}
 
@@ -613,7 +623,7 @@ public class FriendlyByteBuf extends ByteBuf {
 			this.writeBoolean(true);
 			Item item = itemStack.getItem();
 			this.writeId(BuiltInRegistries.ITEM, item);
-			this.writeByte(itemStack.getCount());
+			this.writeVarInt(itemStack.getCount());
 			CompoundTag compoundTag = null;
 			if (item.canBeDepleted() || item.shouldOverrideMultiplayerNbt()) {
 				compoundTag = itemStack.getTag();
@@ -630,7 +640,7 @@ public class FriendlyByteBuf extends ByteBuf {
 			return ItemStack.EMPTY;
 		} else {
 			Item item = this.readById(BuiltInRegistries.ITEM);
-			int i = this.readByte();
+			int i = this.readVarInt();
 			ItemStack itemStack = new ItemStack(item, i);
 			itemStack.setTag(this.readNbt());
 			return itemStack;

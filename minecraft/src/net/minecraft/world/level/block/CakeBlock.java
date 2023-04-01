@@ -6,6 +6,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.voting.rules.Rules;
+import net.minecraft.voting.rules.actual.FoodType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -90,18 +92,25 @@ public class CakeBlock extends Block {
 		if (!player.canEat(false)) {
 			return InteractionResult.PASS;
 		} else {
-			player.awardStat(Stats.EAT_CAKE_SLICE);
-			player.getFoodData().eat(2, 0.1F);
-			int i = (Integer)blockState.getValue(BITES);
-			levelAccessor.gameEvent(player, GameEvent.EAT, blockPos);
-			if (i < 6) {
-				levelAccessor.setBlock(blockPos, blockState.setValue(BITES, Integer.valueOf(i + 1)), 3);
+			FoodType foodType = Rules.FOOD_RESTRICTION.get();
+			if (foodType != FoodType.ANY && foodType != FoodType.CAKE) {
+				return InteractionResult.FAIL;
 			} else {
-				levelAccessor.removeBlock(blockPos, false);
-				levelAccessor.gameEvent(player, GameEvent.BLOCK_DESTROY, blockPos);
-			}
+				player.awardStat(Stats.EAT_CAKE_SLICE);
+				player.getFoodData().eat(2, 0.1F);
+				levelAccessor.gameEvent(player, GameEvent.EAT, blockPos);
+				if (!Rules.INFINITE_CAKES.get()) {
+					int i = (Integer)blockState.getValue(BITES);
+					if (i < 6) {
+						levelAccessor.setBlock(blockPos, blockState.setValue(BITES, Integer.valueOf(i + 1)), 3);
+					} else {
+						levelAccessor.removeBlock(blockPos, false);
+						levelAccessor.gameEvent(player, GameEvent.BLOCK_DESTROY, blockPos);
+					}
+				}
 
-			return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS;
+			}
 		}
 	}
 

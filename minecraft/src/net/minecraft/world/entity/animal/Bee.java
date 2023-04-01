@@ -30,6 +30,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -86,6 +87,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
@@ -161,7 +163,13 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
+	public boolean canTransformFly() {
+		return true;
+	}
+
+	@Override
 	protected void registerGoals() {
+		this.goalSelector.addGoal(0, new Bee.BeelooningGoal(this));
 		this.goalSelector.addGoal(0, new Bee.BeeAttackGoal(this, 1.4F, true));
 		this.goalSelector.addGoal(1, new Bee.BeeEnterHiveGoal());
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
@@ -177,6 +185,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		this.goalSelector.addGoal(7, new Bee.BeeGrowCropGoal());
 		this.goalSelector.addGoal(8, new Bee.BeeWanderGoal());
 		this.goalSelector.addGoal(9, new FloatGoal(this));
+		this.goalSelector.addGoal(10, new Bee.FloatDownGoal(this));
 		this.targetSelector.addGoal(1, new Bee.BeeHurtByOtherGoal(this).setAlertOthers(new Class[0]));
 		this.targetSelector.addGoal(2, new Bee.BeeBecomeAngryTargetGoal(this));
 		this.targetSelector.addGoal(3, new ResetUniversalAngerTargetGoal<>(this, true));
@@ -475,6 +484,10 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 				this.hivePos = null;
 			}
 		}
+
+		if (Rules.GLOW_BEES.get()) {
+			this.level.addParticle(ParticleTypes.GLOW, this.getRandomX(0.6), this.getRandomY(), this.getRandomZ(0.6), 0.0, 0.0, 0.0);
+		}
 	}
 
 	boolean isHiveValid() {
@@ -625,7 +638,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
@@ -633,7 +646,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 				this.beePollinateGoal.stopPollinating();
 			}
 
-			return super.hurt(damageSource, f);
+			return super.hurtInternal(damageSource, f);
 		}
 	}
 
@@ -1280,6 +1293,71 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 			int i = 8;
 			Vec3 vec33 = HoverRandomPos.getPos(Bee.this, 8, 7, vec32.x, vec32.z, (float) (Math.PI / 2), 3, 1);
 			return vec33 != null ? vec33 : AirAndWaterRandomPos.getPos(Bee.this, 8, 4, -2, vec32.x, vec32.z, (float) (Math.PI / 2));
+		}
+	}
+
+	static class BeelooningGoal extends Bee.MoveWithoutPathfindingGoal {
+		public BeelooningGoal(Bee bee) {
+			super(bee);
+		}
+
+		@Override
+		public boolean canUse() {
+			return Rules.BEELOONS.get() && this.bee.getLeashHolder() instanceof Player;
+		}
+
+		@Override
+		protected Vec3 getTargetPos() {
+			return this.bee.getLeashHolder().position().add(0.0, 5.0, 0.0);
+		}
+	}
+
+	static class FloatDownGoal extends Bee.MoveWithoutPathfindingGoal {
+		FloatDownGoal(Bee bee) {
+			super(bee);
+		}
+
+		@Override
+		public boolean canUse() {
+			return this.bee.position().y > 256.0;
+		}
+
+		@Override
+		protected Vec3 getTargetPos() {
+			return this.bee.position().add(0.0, -2.0, 0.0);
+		}
+
+		@Override
+		protected float speedModifier() {
+			return 0.2F;
+		}
+	}
+
+	abstract static class MoveWithoutPathfindingGoal extends Goal {
+		protected final Bee bee;
+
+		MoveWithoutPathfindingGoal(Bee bee) {
+			this.bee = bee;
+			this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			if (!super.canContinueToUse()) {
+				return false;
+			} else {
+				Vec3 vec3 = this.getTargetPos();
+				BlockPos blockPos = BlockPos.containing(vec3);
+				Path path = new Path(List.of(new Node(blockPos.getX(), blockPos.getY(), blockPos.getZ())), blockPos, false);
+				this.bee.getNavigation().moveTo(path, (double)this.speedModifier());
+				return true;
+			}
+		}
+
+		protected abstract Vec3 getTargetPos();
+
+		protected float speedModifier() {
+			return 1.0F;
 		}
 	}
 }

@@ -32,6 +32,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -627,35 +628,37 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 	@Override
 	protected void renderTooltip(PoseStack poseStack, ItemStack itemStack, int i, int j) {
-		boolean bl = this.hoveredSlot != null && this.hoveredSlot instanceof CreativeModeInventoryScreen.CustomCreativeSlot;
-		boolean bl2 = selectedTab.getType() == CreativeModeTab.Type.CATEGORY;
-		boolean bl3 = selectedTab.getType() == CreativeModeTab.Type.SEARCH;
-		TooltipFlag.Default default_ = this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
-		TooltipFlag tooltipFlag = bl ? default_.asCreative() : default_;
-		List<Component> list = itemStack.getTooltipLines(this.minecraft.player, tooltipFlag);
-		List<Component> list2;
-		if (bl2 && bl) {
-			list2 = list;
-		} else {
-			list2 = Lists.<Component>newArrayList(list);
-			if (bl3 && bl) {
-				this.visibleTags.forEach(tagKey -> {
-					if (itemStack.is(tagKey)) {
-						list2.add(1, Component.literal("#" + tagKey.location()).withStyle(ChatFormatting.DARK_PURPLE));
+		if (!Rules.DISABLE_ITEM_TOOLTIPS.get()) {
+			boolean bl = this.hoveredSlot != null && this.hoveredSlot instanceof CreativeModeInventoryScreen.CustomCreativeSlot;
+			boolean bl2 = selectedTab.getType() == CreativeModeTab.Type.CATEGORY;
+			boolean bl3 = selectedTab.getType() == CreativeModeTab.Type.SEARCH;
+			TooltipFlag.Default default_ = this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
+			TooltipFlag tooltipFlag = bl ? default_.asCreative() : default_;
+			List<Component> list = itemStack.getTooltipLines(this.minecraft.player, tooltipFlag);
+			List<Component> list2;
+			if (bl2 && bl) {
+				list2 = list;
+			} else {
+				list2 = Lists.<Component>newArrayList(list);
+				if (bl3 && bl) {
+					this.visibleTags.forEach(tagKey -> {
+						if (itemStack.is(tagKey)) {
+							list2.add(1, Component.literal("#" + tagKey.location()).withStyle(ChatFormatting.DARK_PURPLE));
+						}
+					});
+				}
+
+				int k = 1;
+
+				for (CreativeModeTab creativeModeTab : CreativeModeTabs.tabs()) {
+					if (creativeModeTab.getType() != CreativeModeTab.Type.SEARCH && creativeModeTab.contains(itemStack)) {
+						list2.add(k++, creativeModeTab.getDisplayName().copy().withStyle(ChatFormatting.BLUE));
 					}
-				});
-			}
-
-			int k = 1;
-
-			for (CreativeModeTab creativeModeTab : CreativeModeTabs.tabs()) {
-				if (creativeModeTab.getType() != CreativeModeTab.Type.SEARCH && creativeModeTab.contains(itemStack)) {
-					list2.add(k++, creativeModeTab.getDisplayName().copy().withStyle(ChatFormatting.BLUE));
 				}
 			}
-		}
 
-		this.renderTooltip(poseStack, list2, itemStack.getTooltipImage(), i, j);
+			this.renderTooltip(poseStack, list2, itemStack.getTooltipImage(), i, j);
+		}
 	}
 
 	@Override
@@ -899,12 +902,16 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	}
 
 	@Environment(EnvType.CLIENT)
-	static class SlotWrapper extends Slot {
+	public static class SlotWrapper extends Slot {
 		final Slot target;
 
 		public SlotWrapper(Slot slot, int i, int j, int k) {
 			super(slot.container, i, j, k);
 			this.target = slot;
+		}
+
+		public Slot getTarget() {
+			return this.target;
 		}
 
 		@Override

@@ -50,6 +50,7 @@ public record NoiseGeneratorSettings(
 	public static final ResourceKey<NoiseGeneratorSettings> AMPLIFIED = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("amplified"));
 	public static final ResourceKey<NoiseGeneratorSettings> NETHER = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("nether"));
 	public static final ResourceKey<NoiseGeneratorSettings> END = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("end"));
+	public static final ResourceKey<NoiseGeneratorSettings> MOON = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("moon"));
 	public static final ResourceKey<NoiseGeneratorSettings> CAVES = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("caves"));
 	public static final ResourceKey<NoiseGeneratorSettings> FLOATING_ISLANDS = ResourceKey.create(
 		Registries.NOISE_SETTINGS, new ResourceLocation("floating_islands")
@@ -69,8 +70,25 @@ public record NoiseGeneratorSettings(
 		bootstapContext.register(AMPLIFIED, overworld(bootstapContext, true, false));
 		bootstapContext.register(NETHER, nether(bootstapContext));
 		bootstapContext.register(END, end(bootstapContext));
+		bootstapContext.register(MOON, moon(bootstapContext));
 		bootstapContext.register(CAVES, caves(bootstapContext));
 		bootstapContext.register(FLOATING_ISLANDS, floatingIslands(bootstapContext));
+	}
+
+	private static NoiseGeneratorSettings moon(BootstapContext<?> bootstapContext) {
+		return new NoiseGeneratorSettings(
+			NoiseSettings.END_NOISE_SETTINGS,
+			Blocks.END_STONE.defaultBlockState(),
+			Blocks.AIR.defaultBlockState(),
+			NoiseRouterData.moon(bootstapContext.lookup(Registries.DENSITY_FUNCTION)),
+			SurfaceRuleData.moon(),
+			List.of(),
+			0,
+			false,
+			false,
+			true,
+			false
+		);
 	}
 
 	private static NoiseGeneratorSettings end(BootstapContext<?> bootstapContext) {

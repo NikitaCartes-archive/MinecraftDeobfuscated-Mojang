@@ -12,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -46,6 +47,10 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 		ItemStack itemStack2 = lootContext.getParamOrNull(LootContextParams.TOOL);
 		if (itemStack2 != null) {
 			int i = EnchantmentHelper.getItemEnchantmentLevel(this.enchantment, itemStack2);
+			if (Rules.DREAM_MODE.get()) {
+				i += 2;
+			}
+
 			int j = this.formula.calculateNewCount(lootContext.getRandom(), itemStack.getCount(), i);
 			itemStack.setCount(j);
 		}

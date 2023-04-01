@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSoundInstance implements SoundInstance {
@@ -26,10 +27,10 @@ public abstract class AbstractSoundInstance implements SoundInstance {
 	protected RandomSource random;
 
 	protected AbstractSoundInstance(SoundEvent soundEvent, SoundSource soundSource, RandomSource randomSource) {
-		this(soundEvent.getLocation(), soundSource, randomSource);
+		this(Rules.SOUND_REPLACE.replace(soundEvent).getLocation(), soundSource, randomSource);
 	}
 
-	protected AbstractSoundInstance(ResourceLocation resourceLocation, SoundSource soundSource, RandomSource randomSource) {
+	private AbstractSoundInstance(ResourceLocation resourceLocation, SoundSource soundSource, RandomSource randomSource) {
 		this.location = resourceLocation;
 		this.source = soundSource;
 		this.random = randomSource;

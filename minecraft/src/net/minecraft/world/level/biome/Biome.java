@@ -18,6 +18,7 @@ import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.LevelReader;
@@ -87,8 +88,8 @@ public final class Biome {
 		this.specialEffects = biomeSpecialEffects;
 	}
 
-	public int getSkyColor() {
-		return this.specialEffects.getSkyColor();
+	public int getSkyColor(Holder<Biome> holder) {
+		return Rules.BIOME_SKY_COLOR.getColor(holder, this.specialEffects.getSkyColor());
 	}
 
 	public MobSpawnSettings getMobSettings() {
@@ -175,6 +176,10 @@ public final class Biome {
 		return this.getTemperature(blockPos) >= 0.15F;
 	}
 
+	public boolean increasedThirst(BlockPos blockPos) {
+		return this.getTemperature(blockPos) >= 1.8F;
+	}
+
 	public boolean shouldMeltFrozenOceanIcebergSlightly(BlockPos blockPos) {
 		return this.getTemperature(blockPos) > 0.1F;
 	}
@@ -200,12 +205,12 @@ public final class Biome {
 		return this.generationSettings;
 	}
 
-	public int getFogColor() {
-		return this.specialEffects.getFogColor();
+	public int getFogColor(Holder<Biome> holder) {
+		return Rules.BIOME_FOG_COLOR.getColor(holder, this.specialEffects.getFogColor());
 	}
 
-	public int getGrassColor(double d, double e) {
-		int i = (Integer)this.specialEffects.getGrassColorOverride().orElseGet(this::getGrassColorFromTexture);
+	public int getGrassColor(Holder<Biome> holder, double d, double e) {
+		int i = (Integer)Rules.BIOME_GRASS_COLOR.getColor(holder).or(this.specialEffects::getGrassColorOverride).orElseGet(this::getGrassColorFromTexture);
 		return this.specialEffects.getGrassColorModifier().modifyColor(d, e, i);
 	}
 
@@ -215,8 +220,8 @@ public final class Biome {
 		return GrassColor.get(d, e);
 	}
 
-	public int getFoliageColor() {
-		return (Integer)this.specialEffects.getFoliageColorOverride().orElseGet(this::getFoliageColorFromTexture);
+	public int getFoliageColor(Holder<Biome> holder) {
+		return (Integer)Rules.BIOME_FOLIAGE_COLOR.getColor(holder).or(this.specialEffects::getFoliageColorOverride).orElseGet(this::getFoliageColorFromTexture);
 	}
 
 	private int getFoliageColorFromTexture() {
@@ -233,12 +238,12 @@ public final class Biome {
 		return this.specialEffects;
 	}
 
-	public int getWaterColor() {
-		return this.specialEffects.getWaterColor();
+	public int getWaterColor(Holder<Biome> holder) {
+		return Rules.BIOME_WATER_COLOR.getColor(holder, this.specialEffects.getWaterColor());
 	}
 
-	public int getWaterFogColor() {
-		return this.specialEffects.getWaterFogColor();
+	public int getWaterFogColor(Holder<Biome> holder) {
+		return Rules.BIOME_WATER_FOG_COLOR.getColor(holder, this.specialEffects.getWaterFogColor());
 	}
 
 	public Optional<AmbientParticleSettings> getAmbientParticle() {

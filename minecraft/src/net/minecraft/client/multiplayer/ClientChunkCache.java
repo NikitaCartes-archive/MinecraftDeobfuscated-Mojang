@@ -4,9 +4,12 @@ import com.mojang.logging.LogUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,6 +23,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
@@ -171,6 +175,10 @@ public class ClientChunkCache extends ChunkSource {
 	@Override
 	public void onLightUpdate(LightLayer lightLayer, SectionPos sectionPos) {
 		Minecraft.getInstance().levelRenderer.setSectionDirty(sectionPos.x(), sectionPos.y(), sectionPos.z());
+	}
+
+	public Stream<ChunkAccess> allChunks() {
+		return IntStream.range(0, this.storage.chunks.length()).mapToObj(i -> (ChunkAccess)this.storage.chunks.get(i)).filter(Objects::nonNull);
 	}
 
 	@Environment(EnvType.CLIENT)

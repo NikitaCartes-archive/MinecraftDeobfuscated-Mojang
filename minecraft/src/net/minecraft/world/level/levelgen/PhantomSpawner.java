@@ -7,6 +7,7 @@ import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.voting.rules.Rules;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -24,7 +25,9 @@ public class PhantomSpawner implements CustomSpawner {
 
 	@Override
 	public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
-		if (!bl) {
+		if (Rules.REMOVE_PHANTOMS.get()) {
+			return 0;
+		} else if (!bl) {
 			return 0;
 		} else if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DOINSOMNIA)) {
 			return 0;
@@ -34,7 +37,7 @@ public class PhantomSpawner implements CustomSpawner {
 			if (this.nextTick > 0) {
 				return 0;
 			} else {
-				this.nextTick = this.nextTick + (60 + randomSource.nextInt(60)) * 20;
+				this.nextTick = this.nextTick + (60 + randomSource.nextInt(Rules.DREAM_MODE.get() ? 30 : 60)) * 20;
 				if (serverLevel.getSkyDarken() < 5 && serverLevel.dimensionType().hasSkyLight()) {
 					return 0;
 				} else {

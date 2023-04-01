@@ -267,12 +267,12 @@ public abstract class Raider extends PatrollingMonster {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	protected boolean hurtInternal(DamageSource damageSource, float f) {
 		if (this.hasActiveRaid()) {
 			this.getCurrentRaid().updateBossbar();
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtInternal(damageSource, f);
 	}
 
 	@Nullable

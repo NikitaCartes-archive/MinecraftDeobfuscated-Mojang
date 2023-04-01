@@ -38,7 +38,7 @@ public class RepairItemRecipe extends CustomRecipe {
 		return list.size() == 2;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assembleRaw(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		List<ItemStack> list = Lists.<ItemStack>newArrayList();
 
 		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
