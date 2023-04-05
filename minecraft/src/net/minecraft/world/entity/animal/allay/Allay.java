@@ -318,8 +318,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier {
 			this.removeInteractionItem(player, itemStack);
 			return InteractionResult.SUCCESS;
 		} else if (itemStack2.isEmpty() && !itemStack.isEmpty()) {
-			ItemStack itemStack3 = itemStack.copy();
-			itemStack3.setCount(1);
+			ItemStack itemStack3 = itemStack.copyWithCount(1);
 			this.setItemInHand(InteractionHand.MAIN_HAND, itemStack3);
 			this.removeInteractionItem(player, itemStack);
 			this.level.playSound(player, this, SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.NEUTRAL, 2.0F, 1.0F);

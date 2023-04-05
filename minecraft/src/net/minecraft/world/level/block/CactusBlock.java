@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -95,8 +96,7 @@ public class CactusBlock extends Block {
 		}
 
 		BlockState blockState3 = levelReader.getBlockState(blockPos.below());
-		return (blockState3.is(Blocks.CACTUS) || blockState3.is(Blocks.SAND) || blockState3.is(Blocks.RED_SAND))
-			&& !levelReader.getBlockState(blockPos.above()).getMaterial().isLiquid();
+		return (blockState3.is(Blocks.CACTUS) || blockState3.is(BlockTags.SAND)) && !levelReader.getBlockState(blockPos.above()).liquid();
 	}
 
 	@Override

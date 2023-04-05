@@ -27,7 +27,6 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -59,6 +58,10 @@ public class DoorBlock extends Block {
 				.setValue(POWERED, Boolean.valueOf(false))
 				.setValue(HALF, DoubleBlockHalf.LOWER)
 		);
+	}
+
+	public BlockSetType type() {
+		return this.type;
 	}
 
 	@Override
@@ -185,7 +188,7 @@ public class DoorBlock extends Block {
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if (this.material == Material.METAL) {
+		if (!this.type.canOpenByHand()) {
 			return InteractionResult.PASS;
 		} else {
 			blockState = blockState.cycle(OPEN);
@@ -258,6 +261,10 @@ public class DoorBlock extends Block {
 	}
 
 	public static boolean isWoodenDoor(BlockState blockState) {
-		return blockState.getBlock() instanceof DoorBlock && blockState.getMaterial() == Material.WOOD;
+		if (blockState.getBlock() instanceof DoorBlock doorBlock && doorBlock.type().canOpenByHand()) {
+			return true;
+		}
+
+		return false;
 	}
 }

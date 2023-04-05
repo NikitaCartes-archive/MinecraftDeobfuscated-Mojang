@@ -35,9 +35,7 @@ public class SmeltItemFunction extends LootItemConditionalFunction {
 			if (optional.isPresent()) {
 				ItemStack itemStack2 = ((SmeltingRecipe)optional.get()).getResultItem(lootContext.getLevel().registryAccess());
 				if (!itemStack2.isEmpty()) {
-					ItemStack itemStack3 = itemStack2.copy();
-					itemStack3.setCount(itemStack.getCount());
-					return itemStack3;
+					return itemStack2.copyWithCount(itemStack.getCount());
 				}
 			}
 

@@ -26,7 +26,6 @@ public class ServerList {
 
 	public ServerList(Minecraft minecraft) {
 		this.minecraft = minecraft;
-		this.load();
 	}
 
 	public void load() {

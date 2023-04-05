@@ -230,7 +230,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 		} else {
 			LootContext lootContext = builder.withParameter(LootContextParams.BLOCK_STATE, blockState).create(LootContextParamSets.BLOCK);
 			ServerLevel serverLevel = lootContext.getLevel();
-			LootTable lootTable = serverLevel.getServer().getLootTables().get(resourceLocation);
+			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(resourceLocation);
 			return lootTable.getRandomItems(lootContext);
 		}
 	}
@@ -382,6 +382,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		private final boolean useShapeForLightOcclusion;
 		private final boolean isAir;
 		private final boolean ignitedByLava;
+		@Deprecated
+		private final boolean liquid;
 		private final PushReaction pushReaction;
 		private final Material material;
 		private final MaterialColor materialColor;
@@ -407,6 +409,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 			this.useShapeForLightOcclusion = block.useShapeForLightOcclusion(this.asState());
 			this.isAir = properties.isAir;
 			this.ignitedByLava = properties.ignitedByLava;
+			this.liquid = properties.liquid;
 			this.pushReaction = properties.pushReaction;
 			this.material = properties.material;
 			this.materialColor = (MaterialColor)properties.materialColor.apply(this.asState());
@@ -482,6 +485,11 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public boolean ignitedByLava() {
 			return this.ignitedByLava;
+		}
+
+		@Deprecated
+		public boolean liquid() {
+			return this.liquid;
 		}
 
 		public MaterialColor getMapColor(BlockGetter blockGetter, BlockPos blockPos) {
@@ -873,6 +881,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		boolean canOcclude = true;
 		boolean isAir;
 		boolean ignitedByLava;
+		@Deprecated
+		boolean liquid;
 		PushReaction pushReaction = PushReaction.NORMAL;
 		boolean spawnParticlesOnBreak = true;
 		BlockBehaviour.StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(
@@ -931,11 +941,13 @@ public abstract class BlockBehaviour implements FeatureElement {
 			properties.canOcclude = blockBehaviour.properties.canOcclude;
 			properties.isAir = blockBehaviour.properties.isAir;
 			properties.ignitedByLava = blockBehaviour.properties.ignitedByLava;
+			properties.liquid = blockBehaviour.properties.liquid;
 			properties.pushReaction = blockBehaviour.properties.pushReaction;
 			properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
 			properties.offsetFunction = blockBehaviour.properties.offsetFunction;
 			properties.spawnParticlesOnBreak = blockBehaviour.properties.spawnParticlesOnBreak;
 			properties.requiredFeatures = blockBehaviour.properties.requiredFeatures;
+			properties.emissiveRendering = blockBehaviour.properties.emissiveRendering;
 			return properties;
 		}
 
@@ -1010,6 +1022,11 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public BlockBehaviour.Properties ignitedByLava() {
 			this.ignitedByLava = true;
+			return this;
+		}
+
+		public BlockBehaviour.Properties liquid() {
+			this.liquid = true;
 			return this;
 		}
 

@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.projectile;
 
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -28,7 +27,7 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
 
 	public void setItem(ItemStack itemStack) {
 		if (!itemStack.is(Items.FIRE_CHARGE) || itemStack.hasTag()) {
-			this.getEntityData().set(DATA_ITEM_STACK, Util.make(itemStack.copy(), itemStackx -> itemStackx.setCount(1)));
+			this.getEntityData().set(DATA_ITEM_STACK, itemStack.copyWithCount(1));
 		}
 	}
 

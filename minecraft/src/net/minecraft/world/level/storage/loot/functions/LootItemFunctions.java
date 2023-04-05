@@ -36,6 +36,7 @@ public class LootItemFunctions {
 	public static final LootItemFunctionType SET_BANNER_PATTERN = register("set_banner_pattern", new SetBannerPatternFunction.Serializer());
 	public static final LootItemFunctionType SET_POTION = register("set_potion", new SetPotionFunction.Serializer());
 	public static final LootItemFunctionType SET_INSTRUMENT = register("set_instrument", new SetInstrumentFunction.Serializer());
+	public static final LootItemFunctionType REFERENCE = register("reference", new FunctionReference.Serializer());
 
 	private static LootItemFunctionType register(String string, Serializer<? extends LootItemFunction> serializer) {
 		return Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, new ResourceLocation(string), new LootItemFunctionType(serializer));

@@ -120,7 +120,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<GlobalPos> LIKED_NOTEBLOCK_POSITION = register("liked_noteblock", GlobalPos.CODEC);
 	public static final MemoryModuleType<Integer> LIKED_NOTEBLOCK_COOLDOWN_TICKS = register("liked_noteblock_cooldown_ticks", Codec.INT);
 	public static final MemoryModuleType<Integer> ITEM_PICKUP_COOLDOWN_TICKS = register("item_pickup_cooldown_ticks", Codec.INT);
-	public static final MemoryModuleType<List<BlockPos>> SNIFFER_EXPLORED_POSITIONS = register("sniffer_explored_positions", Codec.list(BlockPos.CODEC));
+	public static final MemoryModuleType<List<GlobalPos>> SNIFFER_EXPLORED_POSITIONS = register("sniffer_explored_positions", Codec.list(GlobalPos.CODEC));
 	public static final MemoryModuleType<BlockPos> SNIFFER_SNIFFING_TARGET = register("sniffer_sniffing_target");
 	public static final MemoryModuleType<Boolean> SNIFFER_DIGGING = register("sniffer_digging");
 	public static final MemoryModuleType<Boolean> SNIFFER_HAPPY = register("sniffer_happy");

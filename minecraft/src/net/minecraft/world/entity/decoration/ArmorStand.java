@@ -365,9 +365,7 @@ public class ArmorStand extends LivingEntity {
 		} else if (itemStack2.isEmpty() && (this.disabledSlots & 1 << equipmentSlot.getFilterFlag() + 16) != 0) {
 			return false;
 		} else if (player.getAbilities().instabuild && itemStack2.isEmpty() && !itemStack.isEmpty()) {
-			ItemStack itemStack3 = itemStack.copy();
-			itemStack3.setCount(1);
-			this.setItemSlot(equipmentSlot, itemStack3);
+			this.setItemSlot(equipmentSlot, itemStack.copyWithCount(1));
 			return true;
 		} else if (itemStack.isEmpty() || itemStack.getCount() <= 1) {
 			this.setItemSlot(equipmentSlot, itemStack);
@@ -376,10 +374,7 @@ public class ArmorStand extends LivingEntity {
 		} else if (!itemStack2.isEmpty()) {
 			return false;
 		} else {
-			ItemStack itemStack3 = itemStack.copy();
-			itemStack3.setCount(1);
-			this.setItemSlot(equipmentSlot, itemStack3);
-			itemStack.shrink(1);
+			this.setItemSlot(equipmentSlot, itemStack.split(1));
 			return true;
 		}
 	}

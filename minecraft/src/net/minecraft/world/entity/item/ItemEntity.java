@@ -214,8 +214,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 
 	public static ItemStack merge(ItemStack itemStack, ItemStack itemStack2, int i) {
 		int j = Math.min(Math.min(itemStack.getMaxStackSize(), i) - itemStack.getCount(), itemStack2.getCount());
-		ItemStack itemStack3 = itemStack.copy();
-		itemStack3.grow(j);
+		ItemStack itemStack3 = itemStack.copyWithCount(itemStack.getCount() + j);
 		itemStack2.shrink(j);
 		return itemStack3;
 	}

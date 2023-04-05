@@ -727,6 +727,7 @@ public class CreativeModeTabs {
 			output.accept(Items.OXEYE_DAISY);
 			output.accept(Items.CORNFLOWER);
 			output.accept(Items.LILY_OF_THE_VALLEY);
+			output.accept(Items.TORCHFLOWER);
 			output.accept(Items.PINK_PETALS);
 			output.accept(Items.SPORE_BLOSSOM);
 			output.accept(Items.BAMBOO);
@@ -736,8 +737,6 @@ public class CreativeModeTabs {
 			output.accept(Items.CRIMSON_ROOTS);
 			output.accept(Items.WARPED_ROOTS);
 			output.accept(Items.NETHER_SPROUTS);
-			output.accept(Items.TORCHFLOWER);
-			output.accept(Items.PITCHER_PLANT);
 			output.accept(Items.WEEPING_VINES);
 			output.accept(Items.TWISTING_VINES);
 			output.accept(Items.VINE);
@@ -747,6 +746,7 @@ public class CreativeModeTabs {
 			output.accept(Items.LILAC);
 			output.accept(Items.ROSE_BUSH);
 			output.accept(Items.PEONY);
+			output.accept(Items.PITCHER_PLANT);
 			output.accept(Items.BIG_DRIPLEAF);
 			output.accept(Items.SMALL_DRIPLEAF);
 			output.accept(Items.CHORUS_PLANT);
@@ -1028,6 +1028,8 @@ public class CreativeModeTabs {
 			output.accept(Items.HEAVY_WEIGHTED_PRESSURE_PLATE);
 			output.accept(Items.SCULK_SENSOR);
 			output.accept(Items.CALIBRATED_SCULK_SENSOR);
+			output.accept(Items.SCULK_SHRIEKER);
+			output.accept(Items.AMETHYST_BLOCK);
 			output.accept(Items.WHITE_WOOL);
 			output.accept(Items.TRIPWIRE_HOOK);
 			output.accept(Items.STRING);

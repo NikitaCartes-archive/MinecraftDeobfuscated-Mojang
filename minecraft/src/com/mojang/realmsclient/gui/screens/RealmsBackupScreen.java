@@ -1,6 +1,5 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
@@ -12,15 +11,18 @@ import com.mojang.realmsclient.util.RealmsUtil;
 import com.mojang.realmsclient.util.task.DownloadTask;
 import com.mojang.realmsclient.util.task.RestoreTask;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -37,11 +39,8 @@ public class RealmsBackupScreen extends RealmsScreen {
 	static final Component HAS_CHANGES_TOOLTIP = Component.translatable("mco.backup.changes.tooltip");
 	private static final Component TITLE = Component.translatable("mco.configure.world.backup");
 	private static final Component NO_BACKUPS_LABEL = Component.translatable("mco.backup.nobackups");
-	static int lastScrollPosition = -1;
 	private final RealmsConfigureWorldScreen lastScreen;
 	List<Backup> backups = Collections.emptyList();
-	@Nullable
-	Component toolTip;
 	RealmsBackupScreen.BackupObjectSelectionList backupObjectSelectionList;
 	int selectedBackup = -1;
 	private final int slotId;
@@ -62,10 +61,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.backupObjectSelectionList = new RealmsBackupScreen.BackupObjectSelectionList();
-		if (lastScrollPosition != -1) {
-			this.backupObjectSelectionList.setScrollAmount((double)lastScrollPosition);
-		}
-
 		(new Thread("Realms-fetch-backups") {
 			public void run() {
 				RealmsClient realmsClient = RealmsClient.create();
@@ -80,8 +75,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 						for (Backup backup : RealmsBackupScreen.this.backups) {
 							RealmsBackupScreen.this.backupObjectSelectionList.addEntry(backup);
 						}
-
-						RealmsBackupScreen.this.generateChangeList();
 					});
 				} catch (RealmsServiceException var3) {
 					RealmsBackupScreen.LOGGER.error("Couldn't request backups", (Throwable)var3);
@@ -106,36 +99,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 		this.addWidget(this.backupObjectSelectionList);
 		this.magicalSpecialHackyFocus(this.backupObjectSelectionList);
 		this.updateButtonStates();
-	}
-
-	void generateChangeList() {
-		if (this.backups.size() > 1) {
-			for (int i = 0; i < this.backups.size() - 1; i++) {
-				Backup backup = (Backup)this.backups.get(i);
-				Backup backup2 = (Backup)this.backups.get(i + 1);
-				if (!backup.metadata.isEmpty() && !backup2.metadata.isEmpty()) {
-					for (String string : backup.metadata.keySet()) {
-						if (!string.contains("Uploaded") && backup2.metadata.containsKey(string)) {
-							if (!((String)backup.metadata.get(string)).equals(backup2.metadata.get(string))) {
-								this.addToChangeList(backup, string);
-							}
-						} else {
-							this.addToChangeList(backup, string);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void addToChangeList(Backup backup, String string) {
-		if (string.contains("Uploaded")) {
-			String string2 = DateFormat.getDateTimeInstance(3, 3).format(backup.lastModifiedDate);
-			backup.changeList.put(string, string2);
-			backup.setUploadedVersion(true);
-		} else {
-			backup.changeList.put(string, (String)backup.metadata.get(string));
-		}
 	}
 
 	void updateButtonStates() {
@@ -215,7 +178,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.toolTip = null;
 		this.renderBackground(poseStack);
 		this.backupObjectSelectionList.render(poseStack, i, j, f);
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 12, 16777215);
@@ -226,19 +188,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 		this.downloadButton.active = !this.noBackups;
 		super.render(poseStack, i, j, f);
-		if (this.toolTip != null) {
-			this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
-		}
-	}
-
-	protected void renderMousehoverTooltip(PoseStack poseStack, @Nullable Component component, int i, int j) {
-		if (component != null) {
-			int k = i + 12;
-			int l = j - 12;
-			int m = this.font.width(component);
-			fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-			this.font.drawShadow(poseStack, component, (float)k, (float)l, 16777215);
-		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -267,46 +216,8 @@ public class RealmsBackupScreen extends RealmsScreen {
 		}
 
 		@Override
-		public boolean mouseClicked(double d, double e, int i) {
-			if (i != 0) {
-				return false;
-			} else if (d < (double)this.getScrollbarPosition() && e >= (double)this.y0 && e <= (double)this.y1) {
-				int j = this.width / 2 - 92;
-				int k = this.width;
-				int l = (int)Math.floor(e - (double)this.y0) - this.headerHeight + (int)this.getScrollAmount();
-				int m = l / this.itemHeight;
-				if (d >= (double)j && d <= (double)k && m >= 0 && l >= 0 && m < this.getItemCount()) {
-					this.selectItem(m);
-					this.itemClicked(l, m, d, e, this.width, i);
-				}
-
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		@Override
 		public int getScrollbarPosition() {
 			return this.width - 5;
-		}
-
-		@Override
-		public void itemClicked(int i, int j, double d, double e, int k, int l) {
-			int m = this.width - 35;
-			int n = j * this.itemHeight + 36 - (int)this.getScrollAmount();
-			int o = m + 10;
-			int p = n - 3;
-			if (d >= (double)m && d <= (double)(m + 9) && e >= (double)n && e <= (double)(n + 9)) {
-				if (!((Backup)RealmsBackupScreen.this.backups.get(j)).changeList.isEmpty()) {
-					RealmsBackupScreen.this.selectedBackup = -1;
-					RealmsBackupScreen.lastScrollPosition = (int)this.getScrollAmount();
-					this.minecraft.setScreen(new RealmsBackupInfoScreen(RealmsBackupScreen.this, (Backup)RealmsBackupScreen.this.backups.get(j)));
-				}
-			} else if (d >= (double)o && d < (double)(o + 13) && e >= (double)p && e < (double)(p + 15)) {
-				RealmsBackupScreen.lastScrollPosition = (int)this.getScrollAmount();
-				RealmsBackupScreen.this.restoreClicked(j);
-			}
 		}
 
 		@Override
@@ -329,63 +240,125 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 	@Environment(EnvType.CLIENT)
 	class Entry extends ObjectSelectionList.Entry<RealmsBackupScreen.Entry> {
+		private static final int Y_PADDING = 2;
+		private static final int X_PADDING = 7;
 		private final Backup backup;
+		private final List<AbstractWidget> children = new ArrayList();
+		@Nullable
+		private ImageButton restoreButton;
+		@Nullable
+		private ImageButton changesButton;
 
 		public Entry(Backup backup) {
 			this.backup = backup;
+			this.populateChangeList(backup);
+			if (!backup.changeList.isEmpty()) {
+				this.addChangesButton();
+			}
+
+			if (!RealmsBackupScreen.this.serverData.expired) {
+				this.addRestoreButton();
+			}
+		}
+
+		private void populateChangeList(Backup backup) {
+			int i = RealmsBackupScreen.this.backups.indexOf(backup);
+			if (i != RealmsBackupScreen.this.backups.size() - 1) {
+				Backup backup2 = (Backup)RealmsBackupScreen.this.backups.get(i + 1);
+
+				for (String string : backup.metadata.keySet()) {
+					if (!string.contains("Uploaded") && backup2.metadata.containsKey(string)) {
+						if (!((String)backup.metadata.get(string)).equals(backup2.metadata.get(string))) {
+							this.addToChangeList(string);
+						}
+					} else {
+						this.addToChangeList(string);
+					}
+				}
+			}
+		}
+
+		private void addToChangeList(String string) {
+			if (string.contains("Uploaded")) {
+				String string2 = DateFormat.getDateTimeInstance(3, 3).format(this.backup.lastModifiedDate);
+				this.backup.changeList.put(string, string2);
+				this.backup.setUploadedVersion(true);
+			} else {
+				this.backup.changeList.put(string, (String)this.backup.metadata.get(string));
+			}
+		}
+
+		private void addChangesButton() {
+			int i = 9;
+			int j = 9;
+			int k = RealmsBackupScreen.this.backupObjectSelectionList.getRowRight() - 9 - 28;
+			int l = RealmsBackupScreen.this.backupObjectSelectionList.getRowTop(RealmsBackupScreen.this.backups.indexOf(this.backup)) + 2;
+			this.changesButton = new ImageButton(
+				k,
+				l,
+				9,
+				9,
+				0,
+				0,
+				9,
+				RealmsBackupScreen.PLUS_ICON_LOCATION,
+				9,
+				18,
+				button -> RealmsBackupScreen.this.minecraft.setScreen(new RealmsBackupInfoScreen(RealmsBackupScreen.this, this.backup))
+			);
+			this.changesButton.setTooltip(Tooltip.create(RealmsBackupScreen.HAS_CHANGES_TOOLTIP));
+			this.children.add(this.changesButton);
+		}
+
+		private void addRestoreButton() {
+			int i = 17;
+			int j = 10;
+			int k = RealmsBackupScreen.this.backupObjectSelectionList.getRowRight() - 17 - 7;
+			int l = RealmsBackupScreen.this.backupObjectSelectionList.getRowTop(RealmsBackupScreen.this.backups.indexOf(this.backup)) + 2;
+			this.restoreButton = new ImageButton(
+				k,
+				l,
+				17,
+				10,
+				0,
+				0,
+				10,
+				RealmsBackupScreen.RESTORE_ICON_LOCATION,
+				17,
+				20,
+				button -> RealmsBackupScreen.this.restoreClicked(RealmsBackupScreen.this.backups.indexOf(this.backup))
+			);
+			this.restoreButton.setTooltip(Tooltip.create(RealmsBackupScreen.RESTORE_TOOLTIP));
+			this.children.add(this.restoreButton);
+		}
+
+		@Override
+		public boolean mouseClicked(double d, double e, int i) {
+			if (this.restoreButton != null) {
+				this.restoreButton.mouseClicked(d, e, i);
+			}
+
+			if (this.changesButton != null) {
+				this.changesButton.mouseClicked(d, e, i);
+			}
+
+			return true;
 		}
 
 		@Override
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			this.renderBackupItem(poseStack, this.backup, k - 40, j, n, o);
-		}
-
-		private void renderBackupItem(PoseStack poseStack, Backup backup, int i, int j, int k, int l) {
-			int m = backup.isUploadedVersion() ? -8388737 : 16777215;
+			int p = this.backup.isUploadedVersion() ? -8388737 : 16777215;
 			RealmsBackupScreen.this.font
-				.draw(poseStack, "Backup (" + RealmsUtil.convertToAgePresentationFromInstant(backup.lastModifiedDate) + ")", (float)(i + 40), (float)(j + 1), m);
-			RealmsBackupScreen.this.font.draw(poseStack, this.getMediumDatePresentation(backup.lastModifiedDate), (float)(i + 40), (float)(j + 12), 5000268);
-			int n = RealmsBackupScreen.this.width - 175;
-			int o = -3;
-			int p = n - 10;
-			int q = 0;
-			if (!RealmsBackupScreen.this.serverData.expired) {
-				this.drawRestore(poseStack, n, j + -3, k, l);
-			}
-
-			if (!backup.changeList.isEmpty()) {
-				this.drawInfo(poseStack, p, j + 0, k, l);
-			}
+				.draw(poseStack, "Backup (" + RealmsUtil.convertToAgePresentationFromInstant(this.backup.lastModifiedDate) + ")", (float)k, (float)(j + 1), p);
+			RealmsBackupScreen.this.font.draw(poseStack, this.getMediumDatePresentation(this.backup.lastModifiedDate), (float)k, (float)(j + 12), 5000268);
+			this.children.forEach(abstractWidget -> {
+				abstractWidget.setY(j + 2);
+				abstractWidget.render(poseStack, n, o, f);
+			});
 		}
 
 		private String getMediumDatePresentation(Date date) {
 			return DateFormat.getDateTimeInstance(3, 3).format(date);
-		}
-
-		private void drawRestore(PoseStack poseStack, int i, int j, int k, int l) {
-			boolean bl = k >= i && k <= i + 12 && l >= j && l <= j + 14 && l < RealmsBackupScreen.this.height - 15 && l > 32;
-			RenderSystem.setShaderTexture(0, RealmsBackupScreen.RESTORE_ICON_LOCATION);
-			poseStack.pushPose();
-			poseStack.scale(0.5F, 0.5F, 0.5F);
-			float f = bl ? 28.0F : 0.0F;
-			GuiComponent.blit(poseStack, i * 2, j * 2, 0.0F, f, 23, 28, 23, 56);
-			poseStack.popPose();
-			if (bl) {
-				RealmsBackupScreen.this.toolTip = RealmsBackupScreen.RESTORE_TOOLTIP;
-			}
-		}
-
-		private void drawInfo(PoseStack poseStack, int i, int j, int k, int l) {
-			boolean bl = k >= i && k <= i + 8 && l >= j && l <= j + 8 && l < RealmsBackupScreen.this.height - 15 && l > 32;
-			RenderSystem.setShaderTexture(0, RealmsBackupScreen.PLUS_ICON_LOCATION);
-			poseStack.pushPose();
-			poseStack.scale(0.5F, 0.5F, 0.5F);
-			float f = bl ? 15.0F : 0.0F;
-			GuiComponent.blit(poseStack, i * 2, j * 2, 0.0F, f, 15, 15, 15, 30);
-			poseStack.popPose();
-			if (bl) {
-				RealmsBackupScreen.this.toolTip = RealmsBackupScreen.HAS_CHANGES_TOOLTIP;
-			}
 		}
 
 		@Override

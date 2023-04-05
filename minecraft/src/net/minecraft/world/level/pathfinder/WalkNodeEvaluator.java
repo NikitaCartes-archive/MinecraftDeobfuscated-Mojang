@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -516,7 +515,6 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	protected static BlockPathTypes getBlockPathTypeRaw(BlockGetter blockGetter, BlockPos blockPos) {
 		BlockState blockState = blockGetter.getBlockState(blockPos);
 		Block block = blockState.getBlock();
-		Material material = blockState.getMaterial();
 		if (blockState.isAir()) {
 			return BlockPathTypes.OPEN;
 		} else if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD) || blockState.is(Blocks.BIG_DRIPLEAF)) {
@@ -535,12 +533,12 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				return BlockPathTypes.LAVA;
 			} else if (isBurningBlock(blockState)) {
 				return BlockPathTypes.DAMAGE_FIRE;
-			} else if (DoorBlock.isWoodenDoor(blockState) && !(Boolean)blockState.getValue(DoorBlock.OPEN)) {
-				return BlockPathTypes.DOOR_WOOD_CLOSED;
-			} else if (block instanceof DoorBlock && material == Material.METAL && !(Boolean)blockState.getValue(DoorBlock.OPEN)) {
-				return BlockPathTypes.DOOR_IRON_CLOSED;
-			} else if (block instanceof DoorBlock && (Boolean)blockState.getValue(DoorBlock.OPEN)) {
-				return BlockPathTypes.DOOR_OPEN;
+			} else if (block instanceof DoorBlock doorBlock) {
+				if ((Boolean)blockState.getValue(DoorBlock.OPEN)) {
+					return BlockPathTypes.DOOR_OPEN;
+				} else {
+					return doorBlock.type().canOpenByHand() ? BlockPathTypes.DOOR_WOOD_CLOSED : BlockPathTypes.DOOR_IRON_CLOSED;
+				}
 			} else if (block instanceof BaseRailBlock) {
 				return BlockPathTypes.RAIL;
 			} else if (block instanceof LeavesBlock) {

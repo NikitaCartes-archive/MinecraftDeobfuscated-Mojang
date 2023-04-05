@@ -6,9 +6,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.FrostedIceBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class FrostWalkerEnchantment extends Enchantment {
@@ -48,8 +47,7 @@ public class FrostWalkerEnchantment extends Enchantment {
 					BlockState blockState2 = level.getBlockState(mutableBlockPos);
 					if (blockState2.isAir()) {
 						BlockState blockState3 = level.getBlockState(blockPos2);
-						if (blockState3.getMaterial() == Material.WATER
-							&& (Integer)blockState3.getValue(LiquidBlock.LEVEL) == 0
+						if (blockState3 == FrostedIceBlock.meltsInto()
 							&& blockState.canSurvive(level, blockPos2)
 							&& level.isUnobstructed(blockState, blockPos2, CollisionContext.empty())) {
 							level.setBlockAndUpdate(blockPos2, blockState);

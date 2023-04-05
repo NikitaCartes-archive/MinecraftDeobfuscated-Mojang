@@ -627,6 +627,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.CYAN_DYE, 2)
 			.requires(Items.BLUE_DYE)
 			.requires(Items.GREEN_DYE)
+			.group("cyan_dye")
 			.unlockedBy("has_green_dye", has(Items.GREEN_DYE))
 			.unlockedBy("has_blue_dye", has(Items.BLUE_DYE))
 			.save(consumer);
@@ -2561,7 +2562,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_book", has(Items.BOOK))
 			.save(consumer);
 		oneToOneConversionRecipe(consumer, Items.ORANGE_DYE, Blocks.TORCHFLOWER, "orange_dye");
-		oneToOneConversionRecipe(consumer, Items.CYAN_DYE, Blocks.PITCHER_PLANT, "cyan_dye");
+		oneToOneConversionRecipe(consumer, Items.CYAN_DYE, Blocks.PITCHER_PLANT, "cyan_dye", 2);
 		planksFromLog(consumer, Blocks.CHERRY_PLANKS, ItemTags.CHERRY_LOGS, 4);
 		woodFromLogs(consumer, Blocks.CHERRY_WOOD, Blocks.CHERRY_LOG);
 		woodFromLogs(consumer, Blocks.STRIPPED_CHERRY_WOOD, Blocks.STRIPPED_CHERRY_LOG);

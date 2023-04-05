@@ -131,8 +131,7 @@ public class BundleItem extends Item {
 					listTag.remove(compoundTag2);
 					listTag.add(0, compoundTag2);
 				} else {
-					ItemStack itemStack4 = itemStack2.copy();
-					itemStack4.setCount(k);
+					ItemStack itemStack4 = itemStack2.copyWithCount(k);
 					CompoundTag compoundTag3 = new CompoundTag();
 					itemStack4.save(compoundTag3);
 					listTag.add(0, compoundTag3);

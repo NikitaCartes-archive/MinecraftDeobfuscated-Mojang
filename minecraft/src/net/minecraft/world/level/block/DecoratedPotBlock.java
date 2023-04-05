@@ -30,7 +30,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class DecoratedPotBlock extends BaseEntityBlock {
+public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	private static final VoxelShape BOUNDING_BOX = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 	public static final ResourceLocation SHARDS = new ResourceLocation("shards");
 	private static final DirectionProperty HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;

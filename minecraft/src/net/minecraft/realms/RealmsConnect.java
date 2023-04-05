@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.quickplay.QuickPlayLog;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
@@ -75,6 +76,7 @@ public class RealmsConnect {
 						UUID uUID = minecraft.getUser().getProfileId();
 						RealmsConnect.this.connection.send(new ServerboundHelloPacket(string, Optional.ofNullable(uUID)));
 						minecraft.updateReportEnvironment(ReportEnvironment.realm(realmsServer));
+						minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.REALMS, String.valueOf(realmsServer.id), realmsServer.name);
 					} catch (Exception var5) {
 						minecraft.getDownloadedPackSource().clearServerPack();
 						if (RealmsConnect.this.aborted) {

@@ -4,8 +4,7 @@ import net.minecraft.util.StringRepresentable;
 
 public enum SculkSensorPhase implements StringRepresentable {
 	INACTIVE("inactive"),
-	ACTIVE("active"),
-	COOLDOWN("cooldown");
+	ACTIVE("active");
 
 	private final String name;
 

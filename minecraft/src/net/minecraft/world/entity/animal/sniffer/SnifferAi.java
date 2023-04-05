@@ -7,16 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
 import net.minecraft.world.entity.ai.behavior.AnimalPanic;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.CountDownCooldownTicks;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
+import net.minecraft.world.entity.ai.behavior.FollowTemptation;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
@@ -30,14 +34,17 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.slf4j.Logger;
 
 public class SnifferAi {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int MAX_LOOK_DISTANCE = 6;
 	static final List<SensorType<? extends Sensor<? super Sniffer>>> SENSOR_TYPES = ImmutableList.of(
-		SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY, SensorType.NEAREST_PLAYERS
+		SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY, SensorType.NEAREST_PLAYERS, SensorType.SNIFFER_TEMPTATIONS
 	);
 	static final List<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.LOOK_TARGET,
@@ -51,12 +58,20 @@ public class SnifferAi {
 		MemoryModuleType.SNIFF_COOLDOWN,
 		MemoryModuleType.SNIFFER_EXPLORED_POSITIONS,
 		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
-		MemoryModuleType.BREED_TARGET
+		MemoryModuleType.BREED_TARGET,
+		MemoryModuleType.TEMPTING_PLAYER,
+		MemoryModuleType.TEMPTATION_COOLDOWN_TICKS,
+		MemoryModuleType.IS_TEMPTED
 	);
 	private static final int SNIFFING_COOLDOWN_TICKS = 9600;
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_SNIFFING = 1.25F;
+	private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
+
+	public static Ingredient getTemptations() {
+		return Ingredient.of(Items.TORCHFLOWER_SEEDS);
+	}
 
 	protected static Brain<?> makeBrain(Brain<Sniffer> brain) {
 		initCoreActivity(brain);
@@ -69,16 +84,20 @@ public class SnifferAi {
 		return brain;
 	}
 
+	static Sniffer resetSniffing(Sniffer sniffer) {
+		sniffer.getBrain().eraseMemory(MemoryModuleType.SNIFFER_DIGGING);
+		sniffer.getBrain().eraseMemory(MemoryModuleType.SNIFFER_SNIFFING_TARGET);
+		return sniffer.transitionTo(Sniffer.State.IDLING);
+	}
+
 	private static void initCoreActivity(Brain<Sniffer> brain) {
 		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new AnimalPanic(2.0F) {
 			@Override
 			protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-				pathfinderMob.getBrain().eraseMemory(MemoryModuleType.SNIFFER_DIGGING);
-				pathfinderMob.getBrain().eraseMemory(MemoryModuleType.SNIFFER_SNIFFING_TARGET);
-				((Sniffer)pathfinderMob).transitionTo(Sniffer.State.IDLING);
+				SnifferAi.resetSniffing((Sniffer)pathfinderMob);
 				super.start(serverLevel, pathfinderMob, l);
 			}
-		}, new MoveToTargetSink(10000, 15000)));
+		}, new MoveToTargetSink(10000, 15000), new CountDownCooldownTicks(MemoryModuleType.TEMPTATION_COOLDOWN_TICKS)));
 	}
 
 	private static void initSniffingActivity(Brain<Sniffer> brain) {
@@ -109,14 +128,27 @@ public class SnifferAi {
 		brain.addActivityWithConditions(
 			Activity.IDLE,
 			ImmutableList.of(
-				Pair.of(0, new AnimalMakeLove(EntityType.SNIFFER, 1.0F)),
-				Pair.of(0, new LookAtTargetSink(45, 90)),
-				Pair.of(0, new SnifferAi.FeelingHappy(40, 100)),
+				Pair.of(0, new AnimalMakeLove(EntityType.SNIFFER, 1.0F) {
+					@Override
+					protected void start(ServerLevel serverLevel, Animal animal, long l) {
+						SnifferAi.resetSniffing((Sniffer)animal);
+						super.start(serverLevel, animal, l);
+					}
+				}),
+				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F) {
+					@Override
+					protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
+						SnifferAi.resetSniffing((Sniffer)pathfinderMob);
+						super.start(serverLevel, pathfinderMob, l);
+					}
+				}),
+				Pair.of(2, new LookAtTargetSink(45, 90)),
+				Pair.of(3, new SnifferAi.FeelingHappy(40, 100)),
 				Pair.of(
-					0,
+					4,
 					new RunOne<>(
 						ImmutableList.of(
-							Pair.of(SetWalkTargetFromLookTarget.create(1.0F, 3), 1),
+							Pair.of(SetWalkTargetFromLookTarget.create(1.0F, 3), 2),
 							Pair.of(new SnifferAi.Scenting(40, 80), 1),
 							Pair.of(new SnifferAi.Sniffing(40, 80), 1),
 							Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 6.0F), 1),
@@ -153,11 +185,11 @@ public class SnifferAi {
 		}
 
 		protected boolean checkExtraStartConditions(ServerLevel serverLevel, Sniffer sniffer) {
-			return !sniffer.isPanicking() && !sniffer.isInWater();
+			return sniffer.canSniff();
 		}
 
 		protected boolean canStillUse(ServerLevel serverLevel, Sniffer sniffer, long l) {
-			return sniffer.getBrain().getMemory(MemoryModuleType.SNIFFER_DIGGING).isPresent() && !sniffer.isPanicking();
+			return sniffer.getBrain().getMemory(MemoryModuleType.SNIFFER_DIGGING).isPresent() && sniffer.canSniff();
 		}
 
 		protected void start(ServerLevel serverLevel, Sniffer sniffer, long l) {
@@ -165,7 +197,10 @@ public class SnifferAi {
 		}
 
 		protected void stop(ServerLevel serverLevel, Sniffer sniffer, long l) {
-			sniffer.getBrain().setMemoryWithExpiry(MemoryModuleType.SNIFF_COOLDOWN, Unit.INSTANCE, 9600L);
+			boolean bl = this.timedOut(l);
+			if (bl) {
+				sniffer.getBrain().setMemoryWithExpiry(MemoryModuleType.SNIFF_COOLDOWN, Unit.INSTANCE, 9600L);
+			}
 		}
 	}
 
@@ -242,6 +277,10 @@ public class SnifferAi {
 			);
 		}
 
+		protected boolean checkExtraStartConditions(ServerLevel serverLevel, Sniffer sniffer) {
+			return !sniffer.isTempted();
+		}
+
 		protected boolean canStillUse(ServerLevel serverLevel, Sniffer sniffer, long l) {
 			return true;
 		}
@@ -271,11 +310,12 @@ public class SnifferAi {
 		}
 
 		protected boolean checkExtraStartConditions(ServerLevel serverLevel, Sniffer sniffer) {
-			return !sniffer.isPanicking() && !sniffer.isInWater();
+			return sniffer.canSniff();
 		}
 
 		protected boolean canStillUse(ServerLevel serverLevel, Sniffer sniffer, long l) {
-			if (sniffer.isPanicking() && !sniffer.isInWater()) {
+			if (!sniffer.canSniff()) {
+				sniffer.transitionTo(Sniffer.State.IDLING);
 				return false;
 			} else {
 				Optional<BlockPos> optional = sniffer.getBrain()
@@ -292,7 +332,7 @@ public class SnifferAi {
 		}
 
 		protected void stop(ServerLevel serverLevel, Sniffer sniffer, long l) {
-			if (sniffer.canDig()) {
+			if (sniffer.canDig() && sniffer.canSniff()) {
 				sniffer.getBrain().setMemory(MemoryModuleType.SNIFFER_DIGGING, true);
 			}
 
@@ -318,11 +358,11 @@ public class SnifferAi {
 		}
 
 		protected boolean checkExtraStartConditions(ServerLevel serverLevel, Sniffer sniffer) {
-			return !sniffer.isBaby() && !sniffer.isInWater();
+			return !sniffer.isBaby() && sniffer.canSniff();
 		}
 
 		protected boolean canStillUse(ServerLevel serverLevel, Sniffer sniffer, long l) {
-			return !sniffer.isPanicking();
+			return sniffer.canSniff();
 		}
 
 		protected void start(ServerLevel serverLevel, Sniffer sniffer, long l) {

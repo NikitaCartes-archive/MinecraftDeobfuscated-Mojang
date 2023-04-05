@@ -39,15 +39,7 @@ public class MapExtendingRecipe extends ShapedRecipe {
 		if (!super.matches(craftingContainer, level)) {
 			return false;
 		} else {
-			ItemStack itemStack = ItemStack.EMPTY;
-
-			for (int i = 0; i < craftingContainer.getContainerSize() && itemStack.isEmpty(); i++) {
-				ItemStack itemStack2 = craftingContainer.getItem(i);
-				if (itemStack2.is(Items.FILLED_MAP)) {
-					itemStack = itemStack2;
-				}
-			}
-
+			ItemStack itemStack = findFilledMap(craftingContainer);
 			if (itemStack.isEmpty()) {
 				return false;
 			} else {
@@ -63,19 +55,20 @@ public class MapExtendingRecipe extends ShapedRecipe {
 
 	@Override
 	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
-		ItemStack itemStack = ItemStack.EMPTY;
+		ItemStack itemStack = findFilledMap(craftingContainer).copyWithCount(1);
+		itemStack.getOrCreateTag().putInt("map_scale_direction", 1);
+		return itemStack;
+	}
 
-		for (int i = 0; i < craftingContainer.getContainerSize() && itemStack.isEmpty(); i++) {
-			ItemStack itemStack2 = craftingContainer.getItem(i);
-			if (itemStack2.is(Items.FILLED_MAP)) {
-				itemStack = itemStack2;
+	private static ItemStack findFilledMap(CraftingContainer craftingContainer) {
+		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
+			ItemStack itemStack = craftingContainer.getItem(i);
+			if (itemStack.is(Items.FILLED_MAP)) {
+				return itemStack;
 			}
 		}
 
-		itemStack = itemStack.copy();
-		itemStack.setCount(1);
-		itemStack.getOrCreateTag().putInt("map_scale_direction", 1);
-		return itemStack;
+		return ItemStack.EMPTY;
 	}
 
 	@Override

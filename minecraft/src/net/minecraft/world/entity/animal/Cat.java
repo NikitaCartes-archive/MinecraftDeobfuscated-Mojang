@@ -572,7 +572,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 					false
 				);
 			mutableBlockPos.set(this.cat.blockPosition());
-			LootTable lootTable = this.cat.level.getServer().getLootTables().get(BuiltInLootTables.CAT_MORNING_GIFT);
+			LootTable lootTable = this.cat.level.getServer().getLootData().getLootTable(BuiltInLootTables.CAT_MORNING_GIFT);
 			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level)
 				.withParameter(LootContextParams.ORIGIN, this.cat.position())
 				.withParameter(LootContextParams.THIS_ENTITY, this.cat)

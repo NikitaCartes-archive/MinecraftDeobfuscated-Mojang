@@ -460,6 +460,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		}
 
 		this.telemetryManager.onPlayerInfoReceived(clientboundLoginPacket.gameType(), clientboundLoginPacket.hardcore());
+		this.minecraft.quickPlayLog().log(this.minecraft);
 	}
 
 	@Override
@@ -866,7 +867,10 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 				.add(new ItemPickupParticle(this.minecraft.getEntityRenderDispatcher(), this.minecraft.renderBuffers(), this.level, entity, livingEntity));
 			if (entity instanceof ItemEntity itemEntity) {
 				ItemStack itemStack = itemEntity.getItem();
-				itemStack.shrink(clientboundTakeItemEntityPacket.getAmount());
+				if (!itemStack.isEmpty()) {
+					itemStack.shrink(clientboundTakeItemEntityPacket.getAmount());
+				}
+
 				if (itemStack.isEmpty()) {
 					this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId(), Entity.RemovalReason.DISCARDED);
 				}

@@ -157,6 +157,7 @@ public class ModelTemplates {
 		"sniffer_egg", TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.NORTH, TextureSlot.SOUTH, TextureSlot.EAST, TextureSlot.WEST
 	);
 	public static final ModelTemplate FLAT_ITEM = createItem("generated", TextureSlot.LAYER0);
+	public static final ModelTemplate MUSIC_DISC = createItem("template_music_disc", TextureSlot.LAYER0);
 	public static final ModelTemplate FLAT_HANDHELD_ITEM = createItem("handheld", TextureSlot.LAYER0);
 	public static final ModelTemplate FLAT_HANDHELD_ROD_ITEM = createItem("handheld_rod", TextureSlot.LAYER0);
 	public static final ModelTemplate TWO_LAYERED_ITEM = createItem("generated", TextureSlot.LAYER0, TextureSlot.LAYER1);

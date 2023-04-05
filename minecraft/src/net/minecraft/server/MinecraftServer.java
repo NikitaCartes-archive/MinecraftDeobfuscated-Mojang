@@ -155,9 +155,7 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
-import net.minecraft.world.level.storage.loot.ItemModifierManager;
-import net.minecraft.world.level.storage.loot.LootTables;
-import net.minecraft.world.level.storage.loot.PredicateManager;
+import net.minecraft.world.level.storage.loot.LootDataManager;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -1500,16 +1498,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	public LootTables getLootTables() {
-		return this.resources.managers.getLootTables();
-	}
-
-	public PredicateManager getPredicateManager() {
-		return this.resources.managers.getPredicateManager();
-	}
-
-	public ItemModifierManager getItemModifierManager() {
-		return this.resources.managers.getItemModifierManager();
+	public LootDataManager getLootData() {
+		return this.resources.managers.getLootData();
 	}
 
 	public GameRules getGameRules() {

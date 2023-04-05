@@ -19,6 +19,8 @@ import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
+import net.minecraft.client.quickplay.QuickPlay;
+import net.minecraft.client.quickplay.QuickPlayLog;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
@@ -39,17 +41,20 @@ public class ConnectScreen extends Screen {
 	final Screen parent;
 	private Component status = Component.translatable("connect.connecting");
 	private long lastNarration = -1L;
+	final Component connectFailedTitle;
 
-	private ConnectScreen(Screen screen) {
+	private ConnectScreen(Screen screen, Component component) {
 		super(GameNarrator.NO_TITLE);
 		this.parent = screen;
+		this.connectFailedTitle = component;
 	}
 
-	public static void startConnecting(Screen screen, Minecraft minecraft, ServerAddress serverAddress, ServerData serverData) {
-		ConnectScreen connectScreen = new ConnectScreen(screen);
+	public static void startConnecting(Screen screen, Minecraft minecraft, ServerAddress serverAddress, ServerData serverData, boolean bl) {
+		ConnectScreen connectScreen = new ConnectScreen(screen, bl ? QuickPlay.ERROR_TITLE : CommonComponents.CONNECT_FAILED);
 		minecraft.clearLevel();
 		minecraft.prepareForMultiplayer();
 		minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(serverData != null ? serverData.ip : serverAddress.getHost()));
+		minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.MULTIPLAYER, serverData.ip, serverData.name);
 		minecraft.setScreen(connectScreen);
 		connectScreen.connect(minecraft, serverAddress, serverData);
 	}
@@ -72,7 +77,7 @@ public class ConnectScreen extends Screen {
 
 					if (!optional.isPresent()) {
 						minecraft.execute(
-							() -> minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, ConnectScreen.UNKNOWN_HOST_MESSAGE))
+							() -> minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, ConnectScreen.this.connectFailedTitle, ConnectScreen.UNKNOWN_HOST_MESSAGE))
 						);
 						return;
 					}
@@ -107,7 +112,7 @@ public class ConnectScreen extends Screen {
 							.replaceAll(inetSocketAddress.toString(), "");
 					minecraft.execute(
 						() -> minecraft.setScreen(
-								new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, Component.translatable("disconnect.genericReason", string))
+								new DisconnectedScreen(ConnectScreen.this.parent, ConnectScreen.this.connectFailedTitle, Component.translatable("disconnect.genericReason", string))
 							)
 					);
 				}

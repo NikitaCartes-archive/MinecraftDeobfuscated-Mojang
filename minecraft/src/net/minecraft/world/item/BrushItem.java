@@ -82,11 +82,12 @@ public class BrushItem extends Item {
 						soundEvent = SoundEvents.BRUSH_GENERIC;
 					}
 
-					level.playSound(player, blockPos, soundEvent, SoundSource.PLAYERS);
+					level.playSound(player, blockPos, soundEvent, SoundSource.BLOCKS);
 					if (!level.isClientSide() && level.getBlockEntity(blockPos) instanceof BrushableBlockEntity brushableBlockEntity) {
 						boolean bl2 = brushableBlockEntity.brush(level.getGameTime(), player, blockHitResult.getDirection());
 						if (bl2) {
-							itemStack.hurtAndBreak(1, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+							EquipmentSlot equipmentSlot = itemStack.equals(player.getItemBySlot(EquipmentSlot.OFFHAND)) ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+							itemStack.hurtAndBreak(1, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(equipmentSlot));
 						}
 					}
 				}

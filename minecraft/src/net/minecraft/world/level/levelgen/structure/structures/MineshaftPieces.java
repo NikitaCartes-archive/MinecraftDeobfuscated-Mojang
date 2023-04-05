@@ -985,11 +985,11 @@ public class MineshaftPieces {
 			} else {
 				for (int o = i; o <= l; o++) {
 					for (int p = k; p <= n; p++) {
-						if (levelAccessor.getBlockState(mutableBlockPos.set(o, j, p)).getMaterial().isLiquid()) {
+						if (levelAccessor.getBlockState(mutableBlockPos.set(o, j, p)).liquid()) {
 							return true;
 						}
 
-						if (levelAccessor.getBlockState(mutableBlockPos.set(o, m, p)).getMaterial().isLiquid()) {
+						if (levelAccessor.getBlockState(mutableBlockPos.set(o, m, p)).liquid()) {
 							return true;
 						}
 					}
@@ -997,11 +997,11 @@ public class MineshaftPieces {
 
 				for (int o = i; o <= l; o++) {
 					for (int p = j; p <= m; p++) {
-						if (levelAccessor.getBlockState(mutableBlockPos.set(o, p, k)).getMaterial().isLiquid()) {
+						if (levelAccessor.getBlockState(mutableBlockPos.set(o, p, k)).liquid()) {
 							return true;
 						}
 
-						if (levelAccessor.getBlockState(mutableBlockPos.set(o, p, n)).getMaterial().isLiquid()) {
+						if (levelAccessor.getBlockState(mutableBlockPos.set(o, p, n)).liquid()) {
 							return true;
 						}
 					}
@@ -1009,11 +1009,11 @@ public class MineshaftPieces {
 
 				for (int o = k; o <= n; o++) {
 					for (int p = j; p <= m; p++) {
-						if (levelAccessor.getBlockState(mutableBlockPos.set(i, p, o)).getMaterial().isLiquid()) {
+						if (levelAccessor.getBlockState(mutableBlockPos.set(i, p, o)).liquid()) {
 							return true;
 						}
 
-						if (levelAccessor.getBlockState(mutableBlockPos.set(l, p, o)).getMaterial().isLiquid()) {
+						if (levelAccessor.getBlockState(mutableBlockPos.set(l, p, o)).liquid()) {
 							return true;
 						}
 					}

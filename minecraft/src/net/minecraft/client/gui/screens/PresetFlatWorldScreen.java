@@ -19,6 +19,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
@@ -294,7 +295,7 @@ public class PresetFlatWorldScreen extends Screen {
 			if (super.keyPressed(i, j, k)) {
 				return true;
 			} else {
-				if ((i == 257 || i == 335) && this.getSelected() != null) {
+				if (CommonInputs.selected(i) && this.getSelected() != null) {
 					this.getSelected().select();
 				}
 

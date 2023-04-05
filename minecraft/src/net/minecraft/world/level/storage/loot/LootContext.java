@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -19,6 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -28,10 +28,8 @@ public class LootContext {
 	private final RandomSource random;
 	private final float luck;
 	private final ServerLevel level;
-	private final Function<ResourceLocation, LootTable> lootTables;
-	private final Set<LootTable> visitedTables = Sets.<LootTable>newLinkedHashSet();
-	private final Function<ResourceLocation, LootItemCondition> conditions;
-	private final Set<LootItemCondition> visitedConditions = Sets.<LootItemCondition>newLinkedHashSet();
+	private final LootDataResolver lootDataResolver;
+	private final Set<LootContext.VisitedEntry<?>> visitedElements = Sets.<LootContext.VisitedEntry<?>>newLinkedHashSet();
 	private final Map<LootContextParam<?>, Object> params;
 	private final Map<ResourceLocation, LootContext.DynamicDrop> dynamicDrops;
 
@@ -39,16 +37,14 @@ public class LootContext {
 		RandomSource randomSource,
 		float f,
 		ServerLevel serverLevel,
-		Function<ResourceLocation, LootTable> function,
-		Function<ResourceLocation, LootItemCondition> function2,
+		LootDataResolver lootDataResolver,
 		Map<LootContextParam<?>, Object> map,
 		Map<ResourceLocation, LootContext.DynamicDrop> map2
 	) {
 		this.random = randomSource;
 		this.luck = f;
 		this.level = serverLevel;
-		this.lootTables = function;
-		this.conditions = function2;
+		this.lootDataResolver = lootDataResolver;
 		this.params = ImmutableMap.copyOf(map);
 		this.dynamicDrops = ImmutableMap.copyOf(map2);
 	}
@@ -78,29 +74,20 @@ public class LootContext {
 		return (T)this.params.get(lootContextParam);
 	}
 
-	public boolean addVisitedTable(LootTable lootTable) {
-		return this.visitedTables.add(lootTable);
+	public boolean hasVisitedElement(LootContext.VisitedEntry<?> visitedEntry) {
+		return this.visitedElements.contains(visitedEntry);
 	}
 
-	public void removeVisitedTable(LootTable lootTable) {
-		this.visitedTables.remove(lootTable);
+	public boolean pushVisitedElement(LootContext.VisitedEntry<?> visitedEntry) {
+		return this.visitedElements.add(visitedEntry);
 	}
 
-	public boolean addVisitedCondition(LootItemCondition lootItemCondition) {
-		return this.visitedConditions.add(lootItemCondition);
+	public void popVisitedElement(LootContext.VisitedEntry<?> visitedEntry) {
+		this.visitedElements.remove(visitedEntry);
 	}
 
-	public void removeVisitedCondition(LootItemCondition lootItemCondition) {
-		this.visitedConditions.remove(lootItemCondition);
-	}
-
-	public LootTable getLootTable(ResourceLocation resourceLocation) {
-		return (LootTable)this.lootTables.apply(resourceLocation);
-	}
-
-	@Nullable
-	public LootItemCondition getCondition(ResourceLocation resourceLocation) {
-		return (LootItemCondition)this.conditions.apply(resourceLocation);
+	public LootDataResolver getResolver() {
+		return this.lootDataResolver;
 	}
 
 	public RandomSource getRandom() {
@@ -115,10 +102,23 @@ public class LootContext {
 		return this.level;
 	}
 
+	public static LootContext.VisitedEntry<LootTable> createVisitedEntry(LootTable lootTable) {
+		return new LootContext.VisitedEntry<>(LootDataType.TABLE, lootTable);
+	}
+
+	public static LootContext.VisitedEntry<LootItemCondition> createVisitedEntry(LootItemCondition lootItemCondition) {
+		return new LootContext.VisitedEntry<>(LootDataType.PREDICATE, lootItemCondition);
+	}
+
+	public static LootContext.VisitedEntry<LootItemFunction> createVisitedEntry(LootItemFunction lootItemFunction) {
+		return new LootContext.VisitedEntry<>(LootDataType.MODIFIER, lootItemFunction);
+	}
+
 	public static class Builder {
 		private final ServerLevel level;
 		private final Map<LootContextParam<?>, Object> params = Maps.<LootContextParam<?>, Object>newIdentityHashMap();
 		private final Map<ResourceLocation, LootContext.DynamicDrop> dynamicDrops = Maps.<ResourceLocation, LootContext.DynamicDrop>newHashMap();
+		@Nullable
 		private RandomSource random;
 		private float luck;
 
@@ -211,9 +211,7 @@ public class LootContext {
 					}
 
 					MinecraftServer minecraftServer = this.level.getServer();
-					return new LootContext(
-						randomSource, this.luck, this.level, minecraftServer.getLootTables()::get, minecraftServer.getPredicateManager()::get, this.params, this.dynamicDrops
-					);
+					return new LootContext(randomSource, this.luck, this.level, minecraftServer.getLootData(), this.params, this.dynamicDrops);
 				}
 			}
 		}
@@ -261,5 +259,8 @@ public class LootContext {
 				return LootContext.EntityTarget.getByName(jsonReader.nextString());
 			}
 		}
+	}
+
+	public static record VisitedEntry<T>(LootDataType<T> type, T value) {
 	}
 }

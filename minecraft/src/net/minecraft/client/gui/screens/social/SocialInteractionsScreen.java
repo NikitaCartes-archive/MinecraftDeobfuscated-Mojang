@@ -217,15 +217,6 @@ public class SocialInteractionsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double d, double e, int i) {
-		if (this.searchBox.isFocused()) {
-			this.searchBox.mouseClicked(d, e, i);
-		}
-
-		return super.mouseClicked(d, e, i) || this.socialInteractionsPlayerList.mouseClicked(d, e, i);
-	}
-
-	@Override
 	public boolean keyPressed(int i, int j, int k) {
 		if (!this.searchBox.isFocused() && this.minecraft.options.keySocialInteractions.matches(i, j)) {
 			this.minecraft.setScreen(null);

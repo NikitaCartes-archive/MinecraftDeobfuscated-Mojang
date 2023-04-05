@@ -38,8 +38,7 @@ public interface DyeableLeatherItem {
 		Item item = itemStack.getItem();
 		if (item instanceof DyeableLeatherItem) {
 			dyeableLeatherItem = (DyeableLeatherItem)item;
-			itemStack2 = itemStack.copy();
-			itemStack2.setCount(1);
+			itemStack2 = itemStack.copyWithCount(1);
 			if (dyeableLeatherItem.hasCustomColor(itemStack)) {
 				int k = dyeableLeatherItem.getColor(itemStack2);
 				float f = (float)(k >> 16 & 0xFF) / 255.0F;

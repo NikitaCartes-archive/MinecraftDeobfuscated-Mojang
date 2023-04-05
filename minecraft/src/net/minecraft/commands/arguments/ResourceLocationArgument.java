@@ -13,8 +13,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.storage.loot.ItemModifierManager;
-import net.minecraft.world.level.storage.loot.PredicateManager;
+import net.minecraft.world.level.storage.loot.LootDataManager;
+import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
@@ -55,8 +55,8 @@ public class ResourceLocationArgument implements ArgumentType<ResourceLocation> 
 
 	public static LootItemCondition getPredicate(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
 		ResourceLocation resourceLocation = getId(commandContext, string);
-		PredicateManager predicateManager = commandContext.getSource().getServer().getPredicateManager();
-		LootItemCondition lootItemCondition = predicateManager.get(resourceLocation);
+		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
+		LootItemCondition lootItemCondition = lootDataManager.getElement(LootDataType.PREDICATE, resourceLocation);
 		if (lootItemCondition == null) {
 			throw ERROR_UNKNOWN_PREDICATE.create(resourceLocation);
 		} else {
@@ -66,8 +66,8 @@ public class ResourceLocationArgument implements ArgumentType<ResourceLocation> 
 
 	public static LootItemFunction getItemModifier(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
 		ResourceLocation resourceLocation = getId(commandContext, string);
-		ItemModifierManager itemModifierManager = commandContext.getSource().getServer().getItemModifierManager();
-		LootItemFunction lootItemFunction = itemModifierManager.get(resourceLocation);
+		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
+		LootItemFunction lootItemFunction = lootDataManager.getElement(LootDataType.MODIFIER, resourceLocation);
 		if (lootItemFunction == null) {
 			throw ERROR_UNKNOWN_ITEM_MODIFIER.create(resourceLocation);
 		} else {

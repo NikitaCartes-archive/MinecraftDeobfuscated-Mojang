@@ -1,90 +1,35 @@
 package net.minecraft.world.level.material;
 
 public final class Material {
-	public static final Material AIR = new Material.Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().replaceable().build();
-	public static final Material STRUCTURAL_AIR = new Material.Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().replaceable().build();
-	public static final Material PORTAL = new Material.Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().build();
-	public static final Material CLOTH_DECORATION = new Material.Builder(MaterialColor.WOOL).noCollider().notSolidBlocking().nonSolid().build();
 	public static final Material PLANT = new Material.Builder(MaterialColor.PLANT).noCollider().notSolidBlocking().nonSolid().build();
-	public static final Material WATER_PLANT = new Material.Builder(MaterialColor.WATER).noCollider().notSolidBlocking().nonSolid().build();
-	public static final Material REPLACEABLE_PLANT = new Material.Builder(MaterialColor.PLANT).noCollider().notSolidBlocking().nonSolid().replaceable().build();
-	public static final Material REPLACEABLE_FIREPROOF_PLANT = new Material.Builder(MaterialColor.PLANT)
-		.noCollider()
-		.notSolidBlocking()
-		.nonSolid()
-		.replaceable()
-		.build();
-	public static final Material REPLACEABLE_WATER_PLANT = new Material.Builder(MaterialColor.WATER)
-		.noCollider()
-		.notSolidBlocking()
-		.nonSolid()
-		.replaceable()
-		.build();
-	public static final Material WATER = new Material.Builder(MaterialColor.WATER).noCollider().notSolidBlocking().nonSolid().replaceable().liquid().build();
-	public static final Material BUBBLE_COLUMN = new Material.Builder(MaterialColor.WATER)
-		.noCollider()
-		.notSolidBlocking()
-		.nonSolid()
-		.replaceable()
-		.liquid()
-		.build();
-	public static final Material LAVA = new Material.Builder(MaterialColor.FIRE).noCollider().notSolidBlocking().nonSolid().replaceable().liquid().build();
-	public static final Material TOP_SNOW = new Material.Builder(MaterialColor.SNOW).noCollider().notSolidBlocking().nonSolid().replaceable().build();
-	public static final Material FIRE = new Material.Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().replaceable().build();
-	public static final Material DECORATION = new Material.Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().build();
-	public static final Material WEB = new Material.Builder(MaterialColor.WOOL).noCollider().notSolidBlocking().build();
-	public static final Material SCULK = new Material.Builder(MaterialColor.COLOR_BLACK).build();
-	public static final Material BUILDABLE_GLASS = new Material.Builder(MaterialColor.NONE).build();
-	public static final Material CLAY = new Material.Builder(MaterialColor.CLAY).build();
-	public static final Material DIRT = new Material.Builder(MaterialColor.DIRT).build();
-	public static final Material GRASS = new Material.Builder(MaterialColor.GRASS).build();
-	public static final Material ICE_SOLID = new Material.Builder(MaterialColor.ICE).build();
 	public static final Material SAND = new Material.Builder(MaterialColor.SAND).build();
-	public static final Material SPONGE = new Material.Builder(MaterialColor.COLOR_YELLOW).build();
-	public static final Material SHULKER_SHELL = new Material.Builder(MaterialColor.COLOR_PURPLE).build();
 	public static final Material WOOD = new Material.Builder(MaterialColor.WOOD).build();
-	public static final Material BAMBOO_SAPLING = new Material.Builder(MaterialColor.WOOD).noCollider().build();
-	public static final Material BAMBOO = new Material.Builder(MaterialColor.WOOD).build();
-	public static final Material WOOL = new Material.Builder(MaterialColor.WOOL).build();
-	public static final Material EXPLOSIVE = new Material.Builder(MaterialColor.FIRE).notSolidBlocking().build();
-	public static final Material LEAVES = new Material.Builder(MaterialColor.PLANT).notSolidBlocking().build();
-	public static final Material GLASS = new Material.Builder(MaterialColor.NONE).notSolidBlocking().build();
-	public static final Material ICE = new Material.Builder(MaterialColor.ICE).notSolidBlocking().build();
-	public static final Material CACTUS = new Material.Builder(MaterialColor.PLANT).notSolidBlocking().build();
 	public static final Material STONE = new Material.Builder(MaterialColor.STONE).build();
-	public static final Material METAL = new Material.Builder(MaterialColor.METAL).build();
-	public static final Material SNOW = new Material.Builder(MaterialColor.SNOW).build();
-	public static final Material HEAVY_METAL = new Material.Builder(MaterialColor.METAL).build();
-	public static final Material BARRIER = new Material.Builder(MaterialColor.NONE).build();
-	public static final Material PISTON = new Material.Builder(MaterialColor.STONE).build();
-	public static final Material MOSS = new Material.Builder(MaterialColor.PLANT).build();
-	public static final Material VEGETABLE = new Material.Builder(MaterialColor.PLANT).build();
-	public static final Material EGG = new Material.Builder(MaterialColor.PLANT).build();
-	public static final Material STRONG_EGG = new Material.Builder(MaterialColor.PLANT).build();
-	public static final Material CAKE = new Material.Builder(MaterialColor.NONE).build();
-	public static final Material AMETHYST = new Material.Builder(MaterialColor.COLOR_PURPLE).build();
-	public static final Material POWDER_SNOW = new Material.Builder(MaterialColor.SNOW).nonSolid().noCollider().build();
-	public static final Material FROGSPAWN = new Material.Builder(MaterialColor.WATER).noCollider().notSolidBlocking().nonSolid().build();
-	public static final Material FROGLIGHT = new Material.Builder(MaterialColor.NONE).build();
-	public static final Material DECORATED_POT = new Material.Builder(MaterialColor.TERRACOTTA_RED).build();
+	public static final Material GLASS = new Material.Builder(MaterialColor.NONE).notSolidBlocking().build();
+	public static final Material DEPRECATED_REPLACEABLE = new Material.Builder(MaterialColor.NONE)
+		.noCollider()
+		.notSolidBlocking()
+		.nonSolid()
+		.replaceable()
+		.build();
+	public static final Material DEPRECATED_NONSOLID = new Material.Builder(MaterialColor.NONE).noCollider().notSolidBlocking().nonSolid().build();
+	public static final Material DEPRECATED_NOCOLLIDER = new Material.Builder(MaterialColor.NONE).noCollider().build();
+	public static final Material DEPRECATED_NOTSOLIDBLOCKING = new Material.Builder(MaterialColor.NONE).notSolidBlocking().build();
+	public static final Material DEPRECATED_NOCOLLIDER_NONSOLIDBLOCKING = new Material.Builder(MaterialColor.NONE).noCollider().notSolidBlocking().build();
+	public static final Material DEPRECATED_NOCOLLIDER_NONSOLID = new Material.Builder(MaterialColor.NONE).nonSolid().noCollider().build();
+	public static final Material DEPRECATED = new Material.Builder(MaterialColor.NONE).build();
 	private final MaterialColor color;
 	private final boolean blocksMotion;
-	private final boolean liquid;
 	private final boolean solidBlocking;
 	private final boolean replaceable;
 	private final boolean solid;
 
-	public Material(MaterialColor materialColor, boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+	public Material(MaterialColor materialColor, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
 		this.color = materialColor;
-		this.liquid = bl;
-		this.solid = bl2;
-		this.blocksMotion = bl3;
-		this.solidBlocking = bl4;
-		this.replaceable = bl5;
-	}
-
-	public boolean isLiquid() {
-		return this.liquid;
+		this.solid = bl;
+		this.blocksMotion = bl2;
+		this.solidBlocking = bl3;
+		this.replaceable = bl4;
 	}
 
 	public boolean isSolid() {
@@ -109,7 +54,6 @@ public final class Material {
 
 	public static class Builder {
 		private boolean blocksMotion = true;
-		private boolean liquid;
 		private boolean replaceable;
 		private boolean solid = true;
 		private final MaterialColor color;
@@ -117,11 +61,6 @@ public final class Material {
 
 		public Builder(MaterialColor materialColor) {
 			this.color = materialColor;
-		}
-
-		public Material.Builder liquid() {
-			this.liquid = true;
-			return this;
 		}
 
 		public Material.Builder nonSolid() {
@@ -145,7 +84,7 @@ public final class Material {
 		}
 
 		public Material build() {
-			return new Material(this.color, this.liquid, this.solid, this.blocksMotion, this.solidBlocking, this.replaceable);
+			return new Material(this.color, this.solid, this.blocksMotion, this.solidBlocking, this.replaceable);
 		}
 	}
 }

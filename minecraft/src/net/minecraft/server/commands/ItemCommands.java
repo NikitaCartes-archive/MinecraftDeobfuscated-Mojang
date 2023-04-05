@@ -31,8 +31,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.storage.loot.ItemModifierManager;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootDataManager;
+import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -57,8 +58,8 @@ public class ItemCommands {
 		(object, object2) -> Component.translatable("commands.item.target.no_changed.known_item", object, object2)
 	);
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_MODIFIER = (commandContext, suggestionsBuilder) -> {
-		ItemModifierManager itemModifierManager = commandContext.getSource().getServer().getItemModifierManager();
-		return SharedSuggestionProvider.suggestResource(itemModifierManager.getKeys(), suggestionsBuilder);
+		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
+		return SharedSuggestionProvider.suggestResource(lootDataManager.getKeys(LootDataType.MODIFIER), suggestionsBuilder);
 	};
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
@@ -455,10 +456,12 @@ public class ItemCommands {
 
 	private static ItemStack applyModifier(CommandSourceStack commandSourceStack, LootItemFunction lootItemFunction, ItemStack itemStack) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		LootContext.Builder builder = new LootContext.Builder(serverLevel)
+		LootContext lootContext = new LootContext.Builder(serverLevel)
 			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition())
-			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity());
-		return (ItemStack)lootItemFunction.apply(itemStack, builder.create(LootContextParamSets.COMMAND));
+			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
+			.create(LootContextParamSets.COMMAND);
+		lootContext.pushVisitedElement(LootContext.createVisitedEntry(lootItemFunction));
+		return (ItemStack)lootItemFunction.apply(itemStack, lootContext);
 	}
 
 	private static ItemStack getEntityItem(Entity entity, int i) throws CommandSyntaxException {

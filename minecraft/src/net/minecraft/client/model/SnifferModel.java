@@ -79,7 +79,7 @@ public class SnifferModel<T extends Sniffer> extends AgeableHierarchicalModel<T>
 				.addBox(-6.5F, -7.5F, -11.5F, 13.0F, 18.0F, 11.0F, new CubeDeformation(0.0F))
 				.texOffs(8, 4)
 				.addBox(-6.5F, 7.5F, -11.5F, 13.0F, 0.0F, 11.0F, new CubeDeformation(0.0F)),
-			PartPose.offset(0.0F, 6.5F, -19.5F)
+			PartPose.offset(0.0F, 6.5F, -19.48F)
 		);
 		partDefinition4.addOrReplaceChild(
 			"left_ear",

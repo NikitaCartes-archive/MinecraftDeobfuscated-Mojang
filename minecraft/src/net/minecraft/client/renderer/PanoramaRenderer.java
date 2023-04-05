@@ -3,7 +3,6 @@ package net.minecraft.client.renderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class PanoramaRenderer {
@@ -21,7 +20,7 @@ public class PanoramaRenderer {
 		float h = (float)((double)f * this.minecraft.options.panoramaSpeed().get());
 		this.spin = wrap(this.spin + h * 0.1F, 360.0F);
 		this.bob = wrap(this.bob + h * 0.001F, (float) (Math.PI * 2));
-		this.cubeMap.render(this.minecraft, Mth.sin(this.bob) * 5.0F + 25.0F, -this.spin, g);
+		this.cubeMap.render(this.minecraft, 10.0F, -this.spin, g);
 	}
 
 	private static float wrap(float f, float g) {

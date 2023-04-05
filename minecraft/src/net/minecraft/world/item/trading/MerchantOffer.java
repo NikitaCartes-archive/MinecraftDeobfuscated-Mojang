@@ -72,11 +72,13 @@ public class MerchantOffer {
 	}
 
 	public ItemStack getCostA() {
-		int i = this.baseCostA.getCount();
-		ItemStack itemStack = this.baseCostA.copy();
-		int j = Math.max(0, Mth.floor((float)(i * this.demand) * this.priceMultiplier));
-		itemStack.setCount(Mth.clamp(i + j + this.specialPriceDiff, 1, this.baseCostA.getItem().getMaxStackSize()));
-		return itemStack;
+		if (this.baseCostA.isEmpty()) {
+			return ItemStack.EMPTY;
+		} else {
+			int i = this.baseCostA.getCount();
+			int j = Math.max(0, Mth.floor((float)(i * this.demand) * this.priceMultiplier));
+			return this.baseCostA.copyWithCount(Mth.clamp(i + j + this.specialPriceDiff, 1, this.baseCostA.getItem().getMaxStackSize()));
+		}
 	}
 
 	public ItemStack getCostB() {

@@ -1174,9 +1174,8 @@ public abstract class Mob extends LivingEntity implements Targeting {
 					for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 						ItemStack itemStack = this.getItemBySlot(equipmentSlot);
 						if (!itemStack.isEmpty()) {
-							mob.setItemSlot(equipmentSlot, itemStack.copy());
+							mob.setItemSlot(equipmentSlot, itemStack.copyAndClear());
 							mob.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
-							itemStack.setCount(0);
 						}
 					}
 				}
@@ -1417,7 +1416,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	protected void removeAfterChangingDimensions() {
 		super.removeAfterChangingDimensions();
 		this.dropLeash(true, false);
-		this.getAllSlots().forEach(itemStack -> itemStack.setCount(0));
+		this.getAllSlots().forEach(itemStack -> {
+			if (!itemStack.isEmpty()) {
+				itemStack.setCount(0);
+			}
+		});
 	}
 
 	@Nullable

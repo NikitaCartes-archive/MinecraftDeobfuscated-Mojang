@@ -1,11 +1,12 @@
 package net.minecraft.world.level.block;
 
+import java.util.Arrays;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -64,7 +65,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public boolean isPossibleToRespawnInThis() {
+	public boolean isPossibleToRespawnInThis(BlockState blockState) {
 		return true;
 	}
 
@@ -80,19 +81,15 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
 		SignApplicator signApplicator2 = itemStack.getItem() instanceof SignApplicator signApplicator ? signApplicator : null;
-		boolean bl = signApplicator2 != null && player.getAbilities().mayBuild;
+		boolean bl = signApplicator2 != null && player.mayBuild();
 		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
 			if (!level.isClientSide) {
 				boolean bl2 = signBlockEntity.isFacingFrontText(player);
 				SignText signText = signBlockEntity.getText(bl2);
+				boolean bl3 = signBlockEntity.executeClickCommandsIfPresent(player, level, blockPos, bl2);
 				if (signBlockEntity.isWaxed()) {
-					boolean bl3 = signBlockEntity.executeClickCommandsIfPresent((ServerPlayer)player, (ServerLevel)level, blockPos, bl2);
-					if (!bl3) {
-						level.playSound(null, signBlockEntity.getBlockPos(), SoundEvents.WAXED_SIGN_INTERACT_FAIL, SoundSource.BLOCKS);
-						return InteractionResult.PASS;
-					} else {
-						return bl ? InteractionResult.PASS : InteractionResult.SUCCESS;
-					}
+					level.playSound(null, signBlockEntity.getBlockPos(), SoundEvents.WAXED_SIGN_INTERACT_FAIL, SoundSource.BLOCKS);
+					return InteractionResult.PASS;
 				} else if (bl
 					&& !this.otherPlayerIsEditingSign(player, signBlockEntity)
 					&& signApplicator2.canApplyToSign(signText, player)
@@ -104,7 +101,9 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 					level.gameEvent(GameEvent.BLOCK_CHANGE, signBlockEntity.getBlockPos(), GameEvent.Context.of(player, signBlockEntity.getBlockState()));
 					player.awardStat(Stats.ITEM_USED.get(item));
 					return InteractionResult.SUCCESS;
-				} else if (!this.otherPlayerIsEditingSign(player, signBlockEntity)) {
+				} else if (bl3) {
+					return InteractionResult.SUCCESS;
+				} else if (!this.otherPlayerIsEditingSign(player, signBlockEntity) && player.mayBuild() && this.hasEditableText(player, signBlockEntity, bl2)) {
 					this.openTextEdit(player, signBlockEntity, bl2);
 					return InteractionResult.SUCCESS;
 				} else {
@@ -116,6 +115,12 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 		} else {
 			return InteractionResult.PASS;
 		}
+	}
+
+	private boolean hasEditableText(Player player, SignBlockEntity signBlockEntity, boolean bl) {
+		SignText signText = signBlockEntity.getText(bl);
+		return Arrays.stream(signText.getMessages(player.isTextFilteringEnabled()))
+			.allMatch(component -> component.equals(CommonComponents.EMPTY) || component.getContents() instanceof LiteralContents);
 	}
 
 	public abstract float getYRotationDegrees(BlockState blockState);

@@ -274,7 +274,7 @@ public class ServerPlayerGameMode {
 					serverPlayer.setItemInHand(interactionHand, itemStack2);
 				}
 
-				if (this.isCreative()) {
+				if (this.isCreative() && itemStack2 != ItemStack.EMPTY) {
 					itemStack2.setCount(i);
 					if (itemStack2.isDamageableItem() && itemStack2.getDamageValue() != j) {
 						itemStack2.setDamageValue(j);

@@ -21,6 +21,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -111,7 +112,7 @@ public abstract class FlowingFluid extends Fluid {
 		} else if (direction == Direction.UP) {
 			return true;
 		} else {
-			return blockState.getMaterial() == Material.ICE ? false : blockState.isFaceSturdy(blockGetter, blockPos, direction);
+			return blockState.getBlock() instanceof IceBlock ? false : blockState.isFaceSturdy(blockGetter, blockPos, direction);
 		}
 	}
 
@@ -395,20 +396,19 @@ public abstract class FlowingFluid extends Fluid {
 		Block block = blockState.getBlock();
 		if (block instanceof LiquidBlockContainer) {
 			return ((LiquidBlockContainer)block).canPlaceLiquid(blockGetter, blockPos, blockState, fluid);
-		} else if (!(block instanceof DoorBlock)
-			&& !blockState.is(BlockTags.SIGNS)
-			&& !blockState.is(Blocks.LADDER)
-			&& !blockState.is(Blocks.SUGAR_CANE)
-			&& !blockState.is(Blocks.BUBBLE_COLUMN)) {
-			Material material = blockState.getMaterial();
-			return material != Material.PORTAL
-					&& material != Material.STRUCTURAL_AIR
-					&& material != Material.WATER_PLANT
-					&& material != Material.REPLACEABLE_WATER_PLANT
-				? !material.blocksMotion()
-				: false;
-		} else {
+		} else if (block instanceof DoorBlock
+			|| blockState.is(BlockTags.SIGNS)
+			|| blockState.is(Blocks.LADDER)
+			|| blockState.is(Blocks.SUGAR_CANE)
+			|| blockState.is(Blocks.BUBBLE_COLUMN)) {
 			return false;
+		} else {
+			return !blockState.is(Blocks.NETHER_PORTAL)
+					&& !blockState.is(Blocks.END_PORTAL)
+					&& !blockState.is(Blocks.END_GATEWAY)
+					&& !blockState.is(Blocks.STRUCTURE_VOID)
+				? !blockState.getMaterial().blocksMotion()
+				: false;
 		}
 	}
 

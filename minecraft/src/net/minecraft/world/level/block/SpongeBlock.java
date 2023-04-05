@@ -8,7 +8,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Material;
 
 public class SpongeBlock extends Block {
 	public static final int MAX_DEPTH = 6;
@@ -50,22 +49,23 @@ public class SpongeBlock extends Block {
 			} else {
 				BlockState blockState = level.getBlockState(blockPos2);
 				FluidState fluidState = level.getFluidState(blockPos2);
-				Material material = blockState.getMaterial();
 				if (!fluidState.is(FluidTags.WATER)) {
 					return false;
 				} else {
-					if (!(blockState.getBlock() instanceof BucketPickup bucketPickup) || bucketPickup.pickupBlock(level, blockPos2, blockState).isEmpty()) {
-						if (blockState.getBlock() instanceof LiquidBlock) {
-							level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 3);
-						} else {
-							if (material != Material.WATER_PLANT && material != Material.REPLACEABLE_WATER_PLANT) {
-								return false;
-							}
+					if (blockState.getBlock() instanceof BucketPickup bucketPickup && !bucketPickup.pickupBlock(level, blockPos2, blockState).isEmpty()) {
+						return true;
+					}
 
-							BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos2) : null;
-							dropResources(blockState, level, blockPos2, blockEntity);
-							level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 3);
+					if (blockState.getBlock() instanceof LiquidBlock) {
+						level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 3);
+					} else {
+						if (!blockState.is(Blocks.KELP) && !blockState.is(Blocks.KELP_PLANT) && !blockState.is(Blocks.SEAGRASS) && !blockState.is(Blocks.TALL_SEAGRASS)) {
+							return false;
 						}
+
+						BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos2) : null;
+						dropResources(blockState, level, blockPos2, blockEntity);
+						level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 3);
 					}
 
 					return true;

@@ -54,8 +54,7 @@ public class FireworkStarFadeRecipe extends CustomRecipe {
 			if (item instanceof DyeItem) {
 				list.add(((DyeItem)item).getDyeColor().getFireworkColor());
 			} else if (STAR_INGREDIENT.test(itemStack2)) {
-				itemStack = itemStack2.copy();
-				itemStack.setCount(1);
+				itemStack = itemStack2.copyWithCount(1);
 			}
 		}
 

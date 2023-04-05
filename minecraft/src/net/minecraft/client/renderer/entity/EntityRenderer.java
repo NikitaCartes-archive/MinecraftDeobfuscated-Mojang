@@ -82,7 +82,7 @@ public abstract class EntityRenderer<T extends Entity> {
 		double d = this.entityRenderDispatcher.distanceToSqr(entity);
 		if (!(d > 4096.0)) {
 			boolean bl = !entity.isDiscrete();
-			float f = entity.getBbHeight() + 0.5F;
+			float f = entity.getNameTagOffsetY();
 			int j = "deadmau5".equals(component.getString()) ? -10 : 0;
 			poseStack.pushPose();
 			poseStack.translate(0.0F, f, 0.0F);

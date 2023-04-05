@@ -27,6 +27,11 @@ public class CalibratedSculkSensorBlockEntity extends SculkSensorBlockEntity {
 		}
 
 		@Override
+		public int getListenerRadius() {
+			return 16;
+		}
+
+		@Override
 		public boolean shouldListen(
 			ServerLevel serverLevel, GameEventListener gameEventListener, BlockPos blockPos, GameEvent gameEvent, @Nullable GameEvent.Context context
 		) {
@@ -39,7 +44,7 @@ public class CalibratedSculkSensorBlockEntity extends SculkSensorBlockEntity {
 
 		private int getBackSignal(Level level, BlockPos blockPos, BlockState blockState) {
 			Direction direction = ((Direction)blockState.getValue(CalibratedSculkSensorBlock.FACING)).getOpposite();
-			return level.getControlInputSignal(blockPos.relative(direction), direction, false);
+			return level.getSignal(blockPos.relative(direction), direction);
 		}
 	}
 }

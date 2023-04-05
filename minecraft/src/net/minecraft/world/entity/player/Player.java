@@ -929,6 +929,8 @@ public abstract class Player extends LivingEntity {
 				if (var8 < 3.4028235E37F) {
 					this.awardStat(Stats.DAMAGE_TAKEN, Math.round(var8 * 10.0F));
 				}
+
+				this.gameEvent(GameEvent.ENTITY_DAMAGE);
 			}
 		}
 	}
@@ -1367,8 +1369,9 @@ public abstract class Player extends LivingEntity {
 		} else if (!bl) {
 			return Optional.empty();
 		} else {
-			boolean bl3 = block.isPossibleToRespawnInThis();
-			boolean bl4 = serverLevel.getBlockState(blockPos.above()).getBlock().isPossibleToRespawnInThis();
+			boolean bl3 = block.isPossibleToRespawnInThis(blockState);
+			BlockState blockState2 = serverLevel.getBlockState(blockPos.above());
+			boolean bl4 = blockState2.getBlock().isPossibleToRespawnInThis(blockState2);
 			return bl3 && bl4 ? Optional.of(new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.1, (double)blockPos.getZ() + 0.5)) : Optional.empty();
 		}
 	}
@@ -1587,7 +1590,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public boolean wasKilled(ServerLevel serverLevel, LivingEntity livingEntity) {
+	public boolean killedEntity(ServerLevel serverLevel, LivingEntity livingEntity) {
 		this.awardStat(Stats.ENTITY_KILLED.get(livingEntity.getType()));
 		return true;
 	}

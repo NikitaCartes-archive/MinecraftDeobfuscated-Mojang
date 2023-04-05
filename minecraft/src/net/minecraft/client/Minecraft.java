@@ -85,7 +85,6 @@ import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.BanNoticeScreen;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.InBedChatScreen;
@@ -115,10 +114,11 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.profiling.ClientMetricsSamplersProvider;
+import net.minecraft.client.quickplay.QuickPlay;
+import net.minecraft.client.quickplay.QuickPlayLog;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -325,6 +325,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final ClientTelemetryManager telemetryManager;
 	private final ProfileKeyPairManager profileKeyPairManager;
 	private final RealmsDataFetcher realmsDataFetcher;
+	private final QuickPlayLog quickPlayLog;
 	@Nullable
 	public MultiPlayerGameMode gameMode;
 	@Nullable
@@ -416,16 +417,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.allowsChat = !gameConfig.game.disableChat;
 		this.is64bit = checkIs64Bit();
 		this.singleplayerServer = null;
-		String string;
-		int i;
-		if (this.allowsMultiplayer() && gameConfig.server.hostname != null) {
-			string = gameConfig.server.hostname;
-			i = gameConfig.server.port;
-		} else {
-			string = null;
-			i = 0;
-		}
-
 		KeybindResolver.setKeyResolver(KeyMapping::createNameSupplier);
 		this.fixerUpper = DataFixers.getDataFixer();
 		this.toast = new ToastComponent(this);
@@ -460,8 +451,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			} else {
 				this.window.setIcon(this.getIconFile("icons", "icon_16x16.png"), this.getIconFile("icons", "icon_32x32.png"));
 			}
-		} catch (IOException var12) {
-			LOGGER.error("Couldn't set icon", (Throwable)var12);
+		} catch (IOException var10) {
+			LOGGER.error("Couldn't set icon", (Throwable)var10);
 		}
 
 		this.window.setFramerateLimit(this.options.framerateLimit().get());
@@ -536,7 +527,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager.registerReloadListener(this.regionalCompliancies);
 		this.gui = new Gui(this, this.itemRenderer);
 		this.debugRenderer = new DebugRenderer(this);
-		this.realmsDataFetcher = new RealmsDataFetcher(RealmsClient.create(this));
+		RealmsClient realmsClient = RealmsClient.create(this);
+		this.realmsDataFetcher = new RealmsDataFetcher(realmsClient);
 		RenderSystem.setErrorCallback(this::onFullscreenError);
 		if (this.mainRenderTarget.width != this.window.getWidth() || this.mainRenderTarget.height != this.window.getHeight()) {
 			StringBuilder stringBuilder = new StringBuilder(
@@ -580,23 +572,23 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 				this.reloadStateTracker.finishReload();
 			}), false));
-		if (string != null) {
-			ServerAddress serverAddress = new ServerAddress(string, i);
-			reloadInstance.done()
-				.thenRunAsync(
-					() -> ConnectScreen.startConnecting(
-							new TitleScreen(), this, serverAddress, new ServerData(I18n.get("selectServer.defaultName"), serverAddress.toString(), false)
-						),
-					this
-				);
-		} else if (this.shouldShowBanNotice()) {
+		this.quickPlayLog = QuickPlayLog.of(gameConfig.quickPlay.path());
+		if (this.shouldShowBanNotice()) {
 			this.setScreen(BanNoticeScreen.create(bl -> {
 				if (bl) {
 					Util.getPlatform().openUri("https://aka.ms/mcjavamoderation");
 				}
 
-				this.setScreen(new TitleScreen(true));
+				this.setInitialScreen(realmsClient, reloadInstance, gameConfig.quickPlay);
 			}, this.multiplayerBan()));
+		} else {
+			this.setInitialScreen(realmsClient, reloadInstance, gameConfig.quickPlay);
+		}
+	}
+
+	private void setInitialScreen(RealmsClient realmsClient, ReloadInstance reloadInstance, GameConfig.QuickPlayData quickPlayData) {
+		if (quickPlayData.isEnabled()) {
+			QuickPlay.connect(this, quickPlayData, reloadInstance, realmsClient);
 		} else if (this.options.onboardAccessibility) {
 			this.setScreen(new AccessibilityOnboardingScreen(this.options));
 		} else {
@@ -1982,6 +1974,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				}));
 			this.isLocalServer = true;
 			this.updateReportEnvironment(ReportEnvironment.local());
+			this.quickPlayLog.setWorldData(QuickPlayLog.Type.SINGLEPLAYER, string, worldStem.worldData().getLevelName());
 		} catch (Throwable var12) {
 			CrashReport crashReport = CrashReport.forThrowable(var12, "Starting integrated server");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Starting integrated server");
@@ -2787,6 +2780,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public RealmsDataFetcher realmsDataFetcher() {
 		return this.realmsDataFetcher;
+	}
+
+	public QuickPlayLog quickPlayLog() {
+		return this.quickPlayLog;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -22,7 +22,7 @@ public abstract class AbstractBannerBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean isPossibleToRespawnInThis() {
+	public boolean isPossibleToRespawnInThis(BlockState blockState) {
 		return true;
 	}
 

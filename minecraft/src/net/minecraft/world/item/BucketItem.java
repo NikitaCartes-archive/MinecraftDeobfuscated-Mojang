@@ -128,7 +128,7 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 				this.playEmptySound(player, level, blockPos);
 				return true;
 			} else {
-				if (!level.isClientSide && bl && !material.isLiquid()) {
+				if (!level.isClientSide && bl && !blockState.liquid()) {
 					level.destroyBlock(blockPos, true);
 				}
 

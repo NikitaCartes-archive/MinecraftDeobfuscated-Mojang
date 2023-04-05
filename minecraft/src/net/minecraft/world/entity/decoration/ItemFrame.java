@@ -285,8 +285,7 @@ public class ItemFrame extends HangingEntity {
 
 	public void setItem(ItemStack itemStack, boolean bl) {
 		if (!itemStack.isEmpty()) {
-			itemStack = itemStack.copy();
-			itemStack.setCount(1);
+			itemStack = itemStack.copyWithCount(1);
 		}
 
 		this.onItemChanged(itemStack);

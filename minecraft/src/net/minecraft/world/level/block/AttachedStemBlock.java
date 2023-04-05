@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class AttachedStemBlock extends BushBlock {
+public class AttachedStemBlock extends BushBlock implements FarmableBlock {
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	protected static final float AABB_OFFSET = 2.0F;
 	private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(

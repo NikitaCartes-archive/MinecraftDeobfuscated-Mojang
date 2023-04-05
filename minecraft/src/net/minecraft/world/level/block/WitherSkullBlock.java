@@ -20,9 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
-import net.minecraft.world.level.block.state.predicate.BlockMaterialPredicate;
 import net.minecraft.world.level.block.state.predicate.BlockStatePredicate;
-import net.minecraft.world.level.material.Material;
 
 public class WitherSkullBlock extends SkullBlock {
 	@Nullable
@@ -93,7 +91,7 @@ public class WitherSkullBlock extends SkullBlock {
 				.where(
 					'^', BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_SKULL).or(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_WALL_SKULL)))
 				)
-				.where('~', BlockInWorld.hasState(BlockMaterialPredicate.forMaterial(Material.AIR)))
+				.where('~', blockInWorld -> blockInWorld.getState().isAir())
 				.build();
 		}
 
@@ -105,7 +103,7 @@ public class WitherSkullBlock extends SkullBlock {
 			witherPatternBase = BlockPatternBuilder.start()
 				.aisle("   ", "###", "~#~")
 				.where('#', blockInWorld -> blockInWorld.getState().is(BlockTags.WITHER_SUMMON_BASE_BLOCKS))
-				.where('~', BlockInWorld.hasState(BlockMaterialPredicate.forMaterial(Material.AIR)))
+				.where('~', blockInWorld -> blockInWorld.getState().isAir())
 				.build();
 		}
 

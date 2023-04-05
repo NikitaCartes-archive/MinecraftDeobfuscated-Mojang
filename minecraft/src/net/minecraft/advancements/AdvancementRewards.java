@@ -54,7 +54,7 @@ public class AdvancementRewards {
 		boolean bl = false;
 
 		for (ResourceLocation resourceLocation : this.loot) {
-			for (ItemStack itemStack : serverPlayer.server.getLootTables().get(resourceLocation).getRandomItems(lootContext)) {
+			for (ItemStack itemStack : serverPlayer.server.getLootData().getLootTable(resourceLocation).getRandomItems(lootContext)) {
 				if (serverPlayer.addItem(itemStack)) {
 					serverPlayer.level
 						.playSound(

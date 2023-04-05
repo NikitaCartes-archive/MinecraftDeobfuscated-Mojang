@@ -222,11 +222,12 @@ public class KeyboardHandler {
 					chatComponent.addMessage(Component.translatable("debug.gamemodes.help"));
 					return true;
 				case 83:
-					Path path = TextureUtil.getDebugTexturePath(this.minecraft.gameDirectory.toPath()).toAbsolutePath();
-					this.minecraft.getTextureManager().dumpAllSheets(path);
-					Component component = Component.literal(path.toString())
+					Path path = this.minecraft.gameDirectory.toPath().toAbsolutePath();
+					Path path2 = TextureUtil.getDebugTexturePath(path);
+					this.minecraft.getTextureManager().dumpAllSheets(path2);
+					Component component = Component.literal(path.relativize(path2).toString())
 						.withStyle(ChatFormatting.UNDERLINE)
-						.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.toFile().toString())));
+						.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path2.toFile().toString())));
 					this.debugFeedbackTranslated("debug.dump_dynamic_textures", component);
 					return true;
 				case 84:

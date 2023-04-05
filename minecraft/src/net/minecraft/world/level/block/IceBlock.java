@@ -20,6 +20,10 @@ public class IceBlock extends HalfTransparentBlock {
 		super(properties);
 	}
 
+	public static BlockState meltsInto() {
+		return Blocks.WATER.defaultBlockState();
+	}
+
 	@Override
 	public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
 		super.playerDestroy(level, player, blockPos, blockState, blockEntity, itemStack);
@@ -29,9 +33,10 @@ public class IceBlock extends HalfTransparentBlock {
 				return;
 			}
 
-			Material material = level.getBlockState(blockPos.below()).getMaterial();
-			if (material.blocksMotion() || material.isLiquid()) {
-				level.setBlockAndUpdate(blockPos, Blocks.WATER.defaultBlockState());
+			BlockState blockState2 = level.getBlockState(blockPos.below());
+			Material material = blockState2.getMaterial();
+			if (material.blocksMotion() || blockState2.liquid()) {
+				level.setBlockAndUpdate(blockPos, meltsInto());
 			}
 		}
 	}
@@ -47,8 +52,8 @@ public class IceBlock extends HalfTransparentBlock {
 		if (level.dimensionType().ultraWarm()) {
 			level.removeBlock(blockPos, false);
 		} else {
-			level.setBlockAndUpdate(blockPos, Blocks.WATER.defaultBlockState());
-			level.neighborChanged(blockPos, Blocks.WATER, blockPos);
+			level.setBlockAndUpdate(blockPos, meltsInto());
+			level.neighborChanged(blockPos, meltsInto().getBlock(), blockPos);
 		}
 	}
 }

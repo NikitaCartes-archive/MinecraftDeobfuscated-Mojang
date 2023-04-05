@@ -317,32 +317,36 @@ public class RecipeBookComponent extends GuiComponent implements PlaceRecipe<Ing
 
 				return true;
 			} else if (this.searchBox.mouseClicked(d, e, i)) {
-				return true;
-			} else if (this.filterButton.mouseClicked(d, e, i)) {
-				boolean bl = this.toggleFiltering();
-				this.filterButton.setStateTriggered(bl);
-				this.updateFilterButtonTooltip();
-				this.sendUpdateSettings();
-				this.updateCollections(false);
+				this.searchBox.setFocused(true);
 				return true;
 			} else {
-				for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
-					if (recipeBookTabButton.mouseClicked(d, e, i)) {
-						if (this.selectedTab != recipeBookTabButton) {
-							if (this.selectedTab != null) {
-								this.selectedTab.setStateTriggered(false);
+				this.searchBox.setFocused(false);
+				if (this.filterButton.mouseClicked(d, e, i)) {
+					boolean bl = this.toggleFiltering();
+					this.filterButton.setStateTriggered(bl);
+					this.updateFilterButtonTooltip();
+					this.sendUpdateSettings();
+					this.updateCollections(false);
+					return true;
+				} else {
+					for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
+						if (recipeBookTabButton.mouseClicked(d, e, i)) {
+							if (this.selectedTab != recipeBookTabButton) {
+								if (this.selectedTab != null) {
+									this.selectedTab.setStateTriggered(false);
+								}
+
+								this.selectedTab = recipeBookTabButton;
+								this.selectedTab.setStateTriggered(true);
+								this.updateCollections(true);
 							}
 
-							this.selectedTab = recipeBookTabButton;
-							this.selectedTab.setStateTriggered(true);
-							this.updateCollections(true);
+							return true;
 						}
-
-						return true;
 					}
-				}
 
-				return false;
+					return false;
+				}
 			}
 		} else {
 			return false;

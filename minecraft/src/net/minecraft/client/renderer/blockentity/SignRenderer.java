@@ -43,7 +43,8 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 	private static final String STICK = "stick";
 	private static final int BLACK_TEXT_OUTLINE_COLOR = -988212;
 	private static final int OUTLINE_RENDER_DISTANCE = Mth.square(16);
-	private static final float SIZE = 0.6666667F;
+	private static final float RENDER_SCALE = 0.6666667F;
+	private static final Vec3 TEXT_OFFSET = new Vec3(0.0, 0.33333334F, 0.046666667F);
 	private final Map<WoodType, SignRenderer.SignModel> signModels;
 	private final Font font;
 
@@ -61,7 +62,15 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 		WoodType woodType = SignBlock.getWoodType(signBlock);
 		SignRenderer.SignModel signModel = (SignRenderer.SignModel)this.signModels.get(woodType);
 		signModel.stick.visible = blockState.getBlock() instanceof StandingSignBlock;
-		this.renderSignWithText(signBlockEntity, poseStack, multiBufferSource, i, j, blockState, signBlock, woodType, signModel, 0.6666667F);
+		this.renderSignWithText(signBlockEntity, poseStack, multiBufferSource, i, j, blockState, signBlock, woodType, signModel);
+	}
+
+	public float getSignModelRenderScale() {
+		return 0.6666667F;
+	}
+
+	public float getSignTextRenderScale() {
+		return 0.6666667F;
 	}
 
 	void renderSignWithText(
@@ -73,20 +82,17 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 		BlockState blockState,
 		SignBlock signBlock,
 		WoodType woodType,
-		Model model,
-		float f
+		Model model
 	) {
 		poseStack.pushPose();
 		this.translateSign(poseStack, -signBlock.getYRotationDegrees(blockState), blockState);
-		this.renderSign(poseStack, multiBufferSource, i, j, f, woodType, model);
+		this.renderSign(poseStack, multiBufferSource, i, j, woodType, model);
 		this.renderSignText(
 			signBlockEntity.getBlockPos(),
 			signBlockEntity.getFrontText(),
 			poseStack,
 			multiBufferSource,
 			i,
-			f,
-			this.getTextOffset(f),
 			signBlockEntity.getTextLineHeight(),
 			signBlockEntity.getMaxTextLineWidth(),
 			true
@@ -97,8 +103,6 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 			poseStack,
 			multiBufferSource,
 			i,
-			f,
-			this.getTextOffset(f),
 			signBlockEntity.getTextLineHeight(),
 			signBlockEntity.getMaxTextLineWidth(),
 			false
@@ -107,15 +111,16 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 	}
 
 	void translateSign(PoseStack poseStack, float f, BlockState blockState) {
-		poseStack.translate(0.5F, 0.5F, 0.5F);
+		poseStack.translate(0.5F, 0.75F * this.getSignModelRenderScale(), 0.5F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(f));
 		if (!(blockState.getBlock() instanceof StandingSignBlock)) {
 			poseStack.translate(0.0F, -0.3125F, -0.4375F);
 		}
 	}
 
-	void renderSign(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, float f, WoodType woodType, Model model) {
+	void renderSign(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, WoodType woodType, Model model) {
 		poseStack.pushPose();
+		float f = this.getSignModelRenderScale();
 		poseStack.scale(f, -f, -f);
 		Material material = this.getSignMaterial(woodType);
 		VertexConsumer vertexConsumer = material.buffer(multiBufferSource, model::renderType);
@@ -132,11 +137,9 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 		return Sheets.getSignMaterial(woodType);
 	}
 
-	void renderSignText(
-		BlockPos blockPos, SignText signText, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, Vec3 vec3, int j, int k, boolean bl
-	) {
+	void renderSignText(BlockPos blockPos, SignText signText, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, int k, boolean bl) {
 		poseStack.pushPose();
-		this.translateSignText(f, poseStack, bl, vec3);
+		this.translateSignText(poseStack, bl, this.getTextOffset());
 		int l = getDarkColor(signText);
 		int m = 4 * j / 2;
 		FormattedCharSequence[] formattedCharSequences = signText.getRenderMessages(Minecraft.getInstance().isTextFilteringEnabled(), component -> {
@@ -158,30 +161,30 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 
 		for (int p = 0; p < 4; p++) {
 			FormattedCharSequence formattedCharSequence = formattedCharSequences[p];
-			float g = (float)(-this.font.width(formattedCharSequence) / 2);
+			float f = (float)(-this.font.width(formattedCharSequence) / 2);
 			if (bl2) {
-				this.font.drawInBatch8xOutline(formattedCharSequence, g, (float)(p * j - m), n, l, poseStack.last().pose(), multiBufferSource, o);
+				this.font.drawInBatch8xOutline(formattedCharSequence, f, (float)(p * j - m), n, l, poseStack.last().pose(), multiBufferSource, o);
 			} else {
 				this.font
-					.drawInBatch(formattedCharSequence, g, (float)(p * j - m), n, false, poseStack.last().pose(), multiBufferSource, Font.DisplayMode.POLYGON_OFFSET, 0, o);
+					.drawInBatch(formattedCharSequence, f, (float)(p * j - m), n, false, poseStack.last().pose(), multiBufferSource, Font.DisplayMode.POLYGON_OFFSET, 0, o);
 			}
 		}
 
 		poseStack.popPose();
 	}
 
-	private void translateSignText(float f, PoseStack poseStack, boolean bl, Vec3 vec3) {
+	private void translateSignText(PoseStack poseStack, boolean bl, Vec3 vec3) {
 		if (!bl) {
 			poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 		}
 
-		float g = 0.015625F * f;
+		float f = 0.015625F * this.getSignTextRenderScale();
 		poseStack.translate(vec3.x, vec3.y, vec3.z);
-		poseStack.scale(g, -g, g);
+		poseStack.scale(f, -f, f);
 	}
 
-	Vec3 getTextOffset(float f) {
-		return new Vec3(0.0, (double)(0.5F * f), (double)(0.07F * f));
+	Vec3 getTextOffset() {
+		return TEXT_OFFSET;
 	}
 
 	static boolean isOutlineVisible(BlockPos blockPos, int i) {

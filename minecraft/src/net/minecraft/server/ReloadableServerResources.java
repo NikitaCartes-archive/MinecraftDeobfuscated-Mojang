@@ -23,9 +23,7 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.storage.loot.ItemModifierManager;
-import net.minecraft.world.level.storage.loot.LootTables;
-import net.minecraft.world.level.storage.loot.PredicateManager;
+import net.minecraft.world.level.storage.loot.LootDataManager;
 import org.slf4j.Logger;
 
 public class ReloadableServerResources {
@@ -35,10 +33,8 @@ public class ReloadableServerResources {
 	private final Commands commands;
 	private final RecipeManager recipes = new RecipeManager();
 	private final TagManager tagManager;
-	private final PredicateManager predicateManager = new PredicateManager();
-	private final LootTables lootTables = new LootTables(this.predicateManager);
-	private final ItemModifierManager itemModifierManager = new ItemModifierManager(this.predicateManager, this.lootTables);
-	private final ServerAdvancementManager advancements = new ServerAdvancementManager(this.predicateManager);
+	private final LootDataManager lootData = new LootDataManager();
+	private final ServerAdvancementManager advancements = new ServerAdvancementManager(this.lootData);
 	private final ServerFunctionLibrary functionLibrary;
 
 	public ReloadableServerResources(RegistryAccess.Frozen frozen, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, int i) {
@@ -53,16 +49,8 @@ public class ReloadableServerResources {
 		return this.functionLibrary;
 	}
 
-	public PredicateManager getPredicateManager() {
-		return this.predicateManager;
-	}
-
-	public LootTables getLootTables() {
-		return this.lootTables;
-	}
-
-	public ItemModifierManager getItemModifierManager() {
-		return this.itemModifierManager;
+	public LootDataManager getLootData() {
+		return this.lootData;
 	}
 
 	public RecipeManager getRecipeManager() {
@@ -78,7 +66,7 @@ public class ReloadableServerResources {
 	}
 
 	public List<PreparableReloadListener> listeners() {
-		return List.of(this.tagManager, this.predicateManager, this.recipes, this.lootTables, this.itemModifierManager, this.functionLibrary, this.advancements);
+		return List.of(this.tagManager, this.lootData, this.recipes, this.functionLibrary, this.advancements);
 	}
 
 	public static CompletableFuture<ReloadableServerResources> loadResources(

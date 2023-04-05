@@ -56,9 +56,7 @@ public class SpawnUtil {
 	}
 
 	public interface Strategy {
-		SpawnUtil.Strategy LEGACY_IRON_GOLEM = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> (
-					blockState2.isAir() || blockState2.getMaterial().isLiquid()
-				)
+		SpawnUtil.Strategy LEGACY_IRON_GOLEM = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> (blockState2.isAir() || blockState2.liquid())
 				&& blockState.getMaterial().isSolidBlocking();
 		SpawnUtil.Strategy ON_TOP_OF_COLLIDER = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> blockState2.getCollisionShape(serverLevel, blockPos2)
 					.isEmpty()

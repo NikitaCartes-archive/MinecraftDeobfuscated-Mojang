@@ -17,7 +17,6 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.FilteredText;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -137,8 +136,10 @@ public class SignBlockEntity extends BlockEntity {
 	}
 
 	public void updateSignText(Player player, boolean bl, List<FilteredText> list) {
-		if (!this.isWaxed() && player.getUUID().equals(this.getPlayerWhoMayEdit())) {
+		if (!this.isWaxed() && player.getUUID().equals(this.getPlayerWhoMayEdit()) && this.level != null) {
 			this.updateText(signText -> this.setMessages(player, list, signText), bl);
+			this.setAllowedPlayerEditor(null);
+			this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 		} else {
 			LOGGER.warn("Player {} just tried to change non-editable sign", player.getName().getString());
 		}
@@ -191,14 +192,14 @@ public class SignBlockEntity extends BlockEntity {
 		return this.isWaxed() && this.getText(bl).hasAnyClickCommands(player);
 	}
 
-	public boolean executeClickCommandsIfPresent(ServerPlayer serverPlayer, ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
+	public boolean executeClickCommandsIfPresent(Player player, Level level, BlockPos blockPos, boolean bl) {
 		boolean bl2 = false;
 
-		for (Component component : this.getText(bl).getMessages(serverPlayer.isTextFilteringEnabled())) {
+		for (Component component : this.getText(bl).getMessages(player.isTextFilteringEnabled())) {
 			Style style = component.getStyle();
 			ClickEvent clickEvent = style.getClickEvent();
 			if (clickEvent != null && clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-				serverPlayer.getServer().getCommands().performPrefixedCommand(createCommandSourceStack(serverPlayer, serverLevel, blockPos), clickEvent.getValue());
+				player.getServer().getCommands().performPrefixedCommand(createCommandSourceStack(player, level, blockPos), clickEvent.getValue());
 				bl2 = true;
 			}
 		}
@@ -206,12 +207,10 @@ public class SignBlockEntity extends BlockEntity {
 		return bl2;
 	}
 
-	private static CommandSourceStack createCommandSourceStack(@Nullable ServerPlayer serverPlayer, ServerLevel serverLevel, BlockPos blockPos) {
-		String string = serverPlayer == null ? "Sign" : serverPlayer.getName().getString();
-		Component component = (Component)(serverPlayer == null ? Component.literal("Sign") : serverPlayer.getDisplayName());
-		return new CommandSourceStack(
-			CommandSource.NULL, Vec3.atCenterOf(blockPos), Vec2.ZERO, serverLevel, 2, string, component, serverLevel.getServer(), serverPlayer
-		);
+	private static CommandSourceStack createCommandSourceStack(@Nullable Player player, Level level, BlockPos blockPos) {
+		String string = player == null ? "Sign" : player.getName().getString();
+		Component component = (Component)(player == null ? Component.literal("Sign") : player.getDisplayName());
+		return new CommandSourceStack(CommandSource.NULL, Vec3.atCenterOf(blockPos), Vec2.ZERO, (ServerLevel)level, 2, string, component, level.getServer(), player);
 	}
 
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {

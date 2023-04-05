@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.SoundType;
 
 public record BlockSetType(
 	String name,
+	boolean canOpenByHand,
 	SoundType soundType,
 	SoundEvent doorClose,
 	SoundEvent doorOpen,
@@ -23,6 +24,7 @@ public record BlockSetType(
 	public static final BlockSetType IRON = register(
 		new BlockSetType(
 			"iron",
+			false,
 			SoundType.METAL,
 			SoundEvents.IRON_DOOR_CLOSE,
 			SoundEvents.IRON_DOOR_OPEN,
@@ -37,6 +39,7 @@ public record BlockSetType(
 	public static final BlockSetType GOLD = register(
 		new BlockSetType(
 			"gold",
+			false,
 			SoundType.METAL,
 			SoundEvents.IRON_DOOR_CLOSE,
 			SoundEvents.IRON_DOOR_OPEN,
@@ -51,6 +54,7 @@ public record BlockSetType(
 	public static final BlockSetType STONE = register(
 		new BlockSetType(
 			"stone",
+			true,
 			SoundType.STONE,
 			SoundEvents.IRON_DOOR_CLOSE,
 			SoundEvents.IRON_DOOR_OPEN,
@@ -65,6 +69,7 @@ public record BlockSetType(
 	public static final BlockSetType POLISHED_BLACKSTONE = register(
 		new BlockSetType(
 			"polished_blackstone",
+			true,
 			SoundType.STONE,
 			SoundEvents.IRON_DOOR_CLOSE,
 			SoundEvents.IRON_DOOR_OPEN,
@@ -83,6 +88,7 @@ public record BlockSetType(
 	public static final BlockSetType CHERRY = register(
 		new BlockSetType(
 			"cherry",
+			true,
 			SoundType.CHERRY_WOOD,
 			SoundEvents.CHERRY_WOOD_DOOR_CLOSE,
 			SoundEvents.CHERRY_WOOD_DOOR_OPEN,
@@ -99,6 +105,7 @@ public record BlockSetType(
 	public static final BlockSetType CRIMSON = register(
 		new BlockSetType(
 			"crimson",
+			true,
 			SoundType.NETHER_WOOD,
 			SoundEvents.NETHER_WOOD_DOOR_CLOSE,
 			SoundEvents.NETHER_WOOD_DOOR_OPEN,
@@ -113,6 +120,7 @@ public record BlockSetType(
 	public static final BlockSetType WARPED = register(
 		new BlockSetType(
 			"warped",
+			true,
 			SoundType.NETHER_WOOD,
 			SoundEvents.NETHER_WOOD_DOOR_CLOSE,
 			SoundEvents.NETHER_WOOD_DOOR_OPEN,
@@ -128,6 +136,7 @@ public record BlockSetType(
 	public static final BlockSetType BAMBOO = register(
 		new BlockSetType(
 			"bamboo",
+			true,
 			SoundType.BAMBOO_WOOD,
 			SoundEvents.BAMBOO_WOOD_DOOR_CLOSE,
 			SoundEvents.BAMBOO_WOOD_DOOR_OPEN,
@@ -143,6 +152,7 @@ public record BlockSetType(
 	public BlockSetType(String string) {
 		this(
 			string,
+			true,
 			SoundType.WOOD,
 			SoundEvents.WOODEN_DOOR_CLOSE,
 			SoundEvents.WOODEN_DOOR_OPEN,

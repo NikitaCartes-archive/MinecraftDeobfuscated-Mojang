@@ -83,8 +83,10 @@ public class SmithingMenu extends ItemCombinerMenu {
 
 	private void shrinkStackInSlot(int i) {
 		ItemStack itemStack = this.inputSlots.getItem(i);
-		itemStack.shrink(1);
-		this.inputSlots.setItem(i, itemStack);
+		if (!itemStack.isEmpty()) {
+			itemStack.shrink(1);
+			this.inputSlots.setItem(i, itemStack);
+		}
 	}
 
 	@Override

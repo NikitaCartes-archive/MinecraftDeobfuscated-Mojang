@@ -629,7 +629,22 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 					this.walkDist = this.walkDist + (float)vec32.horizontalDistance() * 0.6F;
 					this.moveDist = this.moveDist + (float)Math.sqrt(e * e + f * f + g * g) * 0.6F;
 					if (this.moveDist > this.nextStep && !blockState.isAir()) {
-						if (this.onGround || bl3) {
+						if (!this.onGround && !bl3 && (!this.isCrouching() || vec3.y != 0.0)) {
+							if (this.isInWater()) {
+								this.nextStep = this.nextStep();
+								if (movementEmission.emitsSounds()) {
+									Entity entity = (Entity)(this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this);
+									float h = entity == this ? 0.35F : 0.4F;
+									Vec3 vec34 = entity.getDeltaMovement();
+									float i = Math.min(1.0F, (float)Math.sqrt(vec34.x * vec34.x * 0.2F + vec34.y * vec34.y + vec34.z * vec34.z * 0.2F) * h);
+									this.playSwimSound(i);
+								}
+
+								if (movementEmission.emitsEvents()) {
+									this.gameEvent(GameEvent.SWIM);
+								}
+							}
+						} else {
 							this.nextStep = this.nextStep();
 							if (movementEmission.emitsSounds()) {
 								this.handleStepSounds(blockPos, blockState);
@@ -637,19 +652,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 							if (movementEmission.emitsEvents()) {
 								this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
-							}
-						} else if (this.isInWater()) {
-							this.nextStep = this.nextStep();
-							if (movementEmission.emitsSounds()) {
-								Entity entity = (Entity)(this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this);
-								float h = entity == this ? 0.35F : 0.4F;
-								Vec3 vec34 = entity.getDeltaMovement();
-								float i = Math.min(1.0F, (float)Math.sqrt(vec34.x * vec34.x * 0.2F + vec34.y * vec34.y + vec34.z * vec34.z * 0.2F) * h);
-								this.playSwimSound(i);
-							}
-
-							if (movementEmission.emitsEvents()) {
-								this.gameEvent(GameEvent.SWIM);
 							}
 						}
 					} else if (blockState.isAir()) {
@@ -2189,7 +2191,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.resetFallDistance();
 	}
 
-	public boolean wasKilled(ServerLevel serverLevel, LivingEntity livingEntity) {
+	public boolean killedEntity(ServerLevel serverLevel, LivingEntity livingEntity) {
 		return true;
 	}
 
@@ -3016,6 +3018,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public final float getBbHeight() {
 		return this.dimensions.height;
+	}
+
+	public float getNameTagOffsetY() {
+		return this.getBbHeight() + 0.5F;
 	}
 
 	public Packet<ClientGamePacketListener> getAddEntityPacket() {

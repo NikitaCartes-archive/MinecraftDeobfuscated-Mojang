@@ -81,7 +81,8 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.PredicateManager;
+import net.minecraft.world.level.storage.loot.LootDataManager;
+import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -106,8 +107,8 @@ public class ExecuteCommand {
 			resultConsumer2.onCommandComplete(commandContext, bl, i);
 		};
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_PREDICATE = (commandContext, suggestionsBuilder) -> {
-		PredicateManager predicateManager = commandContext.getSource().getServer().getPredicateManager();
-		return SharedSuggestionProvider.suggestResource(predicateManager.getKeys(), suggestionsBuilder);
+		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
+		return SharedSuggestionProvider.suggestResource(lootDataManager.getKeys(LootDataType.PREDICATE), suggestionsBuilder);
 	};
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
@@ -706,10 +707,12 @@ public class ExecuteCommand {
 
 	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, LootItemCondition lootItemCondition) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		LootContext.Builder builder = new LootContext.Builder(serverLevel)
+		LootContext lootContext = new LootContext.Builder(serverLevel)
 			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition())
-			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity());
-		return lootItemCondition.test(builder.create(LootContextParamSets.COMMAND));
+			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
+			.create(LootContextParamSets.COMMAND);
+		lootContext.pushVisitedElement(LootContext.createVisitedEntry(lootItemCondition));
+		return lootItemCondition.test(lootContext);
 	}
 
 	private static Collection<CommandSourceStack> expect(CommandContext<CommandSourceStack> commandContext, boolean bl, boolean bl2) {

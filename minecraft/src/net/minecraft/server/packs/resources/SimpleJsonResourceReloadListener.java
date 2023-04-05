@@ -1,12 +1,12 @@
 package net.minecraft.server.packs.resources;
 
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.resources.FileToIdConverter;
@@ -26,8 +26,13 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 	}
 
 	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-		Map<ResourceLocation, JsonElement> map = Maps.<ResourceLocation, JsonElement>newHashMap();
-		FileToIdConverter fileToIdConverter = FileToIdConverter.json(this.directory);
+		Map<ResourceLocation, JsonElement> map = new HashMap();
+		scanDirectory(resourceManager, this.directory, this.gson, map);
+		return map;
+	}
+
+	public static void scanDirectory(ResourceManager resourceManager, String string, Gson gson, Map<ResourceLocation, JsonElement> map) {
+		FileToIdConverter fileToIdConverter = FileToIdConverter.json(string);
 
 		for (Entry<ResourceLocation, Resource> entry : fileToIdConverter.listMatchingResources(resourceManager).entrySet()) {
 			ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
@@ -37,7 +42,7 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 				Reader reader = ((Resource)entry.getValue()).openAsReader();
 
 				try {
-					JsonElement jsonElement = GsonHelper.fromJson(this.gson, reader, JsonElement.class);
+					JsonElement jsonElement = GsonHelper.fromJson(gson, reader, JsonElement.class);
 					JsonElement jsonElement2 = (JsonElement)map.put(resourceLocation2, jsonElement);
 					if (jsonElement2 != null) {
 						throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
@@ -61,7 +66,5 @@ public abstract class SimpleJsonResourceReloadListener extends SimplePreparableR
 				LOGGER.error("Couldn't parse data file {} from {}", resourceLocation2, resourceLocation, var14);
 			}
 		}
-
-		return map;
 	}
 }

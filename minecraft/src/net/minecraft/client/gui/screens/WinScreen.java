@@ -210,7 +210,7 @@ public class WinScreen extends Screen {
 	}
 
 	private void addPoemLines(String string) {
-		this.lines.addAll(this.minecraft.font.split(Component.literal(string), 274));
+		this.lines.addAll(this.minecraft.font.split(Component.literal(string), 256));
 	}
 
 	private void addCreditsLine(Component component, boolean bl) {
@@ -249,7 +249,7 @@ public class WinScreen extends Screen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.scroll = this.scroll + f * this.scrollSpeed;
 		this.renderBg(poseStack);
-		int k = this.width / 2 - 137;
+		int k = this.width / 2 - 128;
 		int l = this.height + 50;
 		float g = -this.scroll;
 		poseStack.pushPose();
@@ -268,7 +268,7 @@ public class WinScreen extends Screen {
 			if ((float)m + g + 12.0F + 8.0F > 0.0F && (float)m + g < (float)this.height) {
 				FormattedCharSequence formattedCharSequence = (FormattedCharSequence)this.lines.get(n);
 				if (this.centeredLines.contains(n)) {
-					this.font.drawShadow(poseStack, formattedCharSequence, (float)(k + (274 - this.font.width(formattedCharSequence)) / 2), (float)m, 16777215);
+					this.font.drawShadow(poseStack, formattedCharSequence, (float)(k + (256 - this.font.width(formattedCharSequence)) / 2), (float)m, 16777215);
 				} else {
 					this.font.drawShadow(poseStack, formattedCharSequence, (float)k, (float)m, 16777215);
 				}

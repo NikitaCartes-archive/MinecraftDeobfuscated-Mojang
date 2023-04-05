@@ -95,7 +95,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public static final Map<Item, Integer> FOOD_POINTS = ImmutableMap.of(Items.BREAD, 4, Items.POTATO, 1, Items.CARROT, 1, Items.BEETROOT, 1);
 	private static final int TRADES_PER_LEVEL = 2;
 	private static final Set<Item> WANTED_ITEMS = ImmutableSet.of(
-		Items.BREAD, Items.POTATO, Items.CARROT, Items.WHEAT, Items.WHEAT_SEEDS, Items.BEETROOT, Items.BEETROOT_SEEDS
+		Items.BREAD, Items.POTATO, Items.CARROT, Items.WHEAT, Items.WHEAT_SEEDS, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD
 	);
 	private static final int MAX_GOSSIP_TOPICS = 10;
 	private static final int GOSSIP_COOLDOWN = 1200;

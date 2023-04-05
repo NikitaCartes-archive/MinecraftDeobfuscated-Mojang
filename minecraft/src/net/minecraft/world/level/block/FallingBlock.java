@@ -14,7 +14,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 
 public class FallingBlock extends Block implements Fallable {
 	public FallingBlock(BlockBehaviour.Properties properties) {
@@ -50,8 +49,7 @@ public class FallingBlock extends Block implements Fallable {
 	}
 
 	public static boolean isFree(BlockState blockState) {
-		Material material = blockState.getMaterial();
-		return blockState.isAir() || blockState.is(BlockTags.FIRE) || material.isLiquid() || blockState.canBeReplaced();
+		return blockState.isAir() || blockState.is(BlockTags.FIRE) || blockState.liquid() || blockState.canBeReplaced();
 	}
 
 	@Override

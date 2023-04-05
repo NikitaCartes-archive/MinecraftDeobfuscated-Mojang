@@ -180,7 +180,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		this.progress = String.format(Locale.ROOT, "%.1f", d * 100.0);
 		int i = (this.width - 200) / 2;
 		int j = i + (int)Math.round(200.0 * d);
-		fill(poseStack, i - 1, 79, j + 1, 175, -2501934);
+		fill(poseStack, i - 1, 79, j + 1, 96, -2501934);
 		fill(poseStack, i, 80, j, 95, -8355712);
 		drawCenteredString(poseStack, this.font, this.progress + " %", this.width / 2, 84, 16777215);
 	}

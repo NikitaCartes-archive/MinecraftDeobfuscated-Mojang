@@ -19,13 +19,14 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SnifferEggBlock extends Block {
-	public static final int MAX_AGE = 2;
-	public static final IntegerProperty AGE = BlockStateProperties.AGE_2;
+	public static final int MAX_HATCH_LEVEL = 2;
+	public static final IntegerProperty HATCH = BlockStateProperties.HATCH;
 	private static final int REGULAR_HATCH_TIME_TICKS = 24000;
 	private static final int BOOSTED_HATCH_TIME_TICKS = 12000;
 	private static final int RANDOM_HATCH_OFFSET_TICKS = 300;
@@ -33,12 +34,12 @@ public class SnifferEggBlock extends Block {
 
 	public SnifferEggBlock(BlockBehaviour.Properties properties) {
 		super(properties);
-		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
+		this.registerDefaultState(this.stateDefinition.any().setValue(HATCH, Integer.valueOf(0)));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(AGE);
+		builder.add(HATCH);
 	}
 
 	@Override
@@ -46,12 +47,12 @@ public class SnifferEggBlock extends Block {
 		return SHAPE;
 	}
 
-	public int getAge(BlockState blockState) {
-		return (Integer)blockState.getValue(AGE);
+	public int getHatchLevel(BlockState blockState) {
+		return (Integer)blockState.getValue(HATCH);
 	}
 
 	private boolean isReadyToHatch(BlockState blockState) {
-		return this.getAge(blockState) == 2;
+		return this.getHatchLevel(blockState) == 2;
 	}
 
 	@Override
@@ -63,7 +64,7 @@ public class SnifferEggBlock extends Block {
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!this.isReadyToHatch(blockState)) {
 			serverLevel.playSound(null, blockPos, SoundEvents.SNIFFER_EGG_CRACK, SoundSource.BLOCKS, 0.7F, 0.9F + randomSource.nextFloat() * 0.2F);
-			serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(this.getAge(blockState) + 1)), 2);
+			serverLevel.setBlock(blockPos, blockState.setValue(HATCH, Integer.valueOf(this.getHatchLevel(blockState) + 1)), 2);
 		} else {
 			serverLevel.playSound(null, blockPos, SoundEvents.SNIFFER_EGG_HATCH, SoundSource.BLOCKS, 0.7F, 0.9F + randomSource.nextFloat() * 0.2F);
 			serverLevel.destroyBlock(blockPos, false);
@@ -88,6 +89,11 @@ public class SnifferEggBlock extends Block {
 		int j = i / 3;
 		level.gameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(blockState));
 		level.scheduleTick(blockPos, this, j + level.random.nextInt(300));
+	}
+
+	@Override
+	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+		return false;
 	}
 
 	public static boolean hatchBoost(BlockGetter blockGetter, BlockPos blockPos) {

@@ -1233,8 +1233,8 @@ public class SoundEvents {
 	public static final SoundEvent SNIFFER_DIGGING = register("entity.sniffer.digging");
 	public static final SoundEvent SNIFFER_DIGGING_STOP = register("entity.sniffer.digging_stop");
 	public static final SoundEvent SNIFFER_HAPPY = register("entity.sniffer.happy");
-	public static final SoundEvent SNIFFER_EGG_CRACK = register("entity.sniffer.egg_crack");
-	public static final SoundEvent SNIFFER_EGG_HATCH = register("entity.sniffer.egg_hatch");
+	public static final SoundEvent SNIFFER_EGG_CRACK = register("block.sniffer.egg_crack");
+	public static final SoundEvent SNIFFER_EGG_HATCH = register("block.sniffer.egg_hatch");
 	public static final SoundEvent SNOWBALL_THROW = register("entity.snowball.throw");
 	public static final SoundEvent SNOW_BREAK = register("block.snow.break");
 	public static final SoundEvent SNOW_FALL = register("block.snow.fall");

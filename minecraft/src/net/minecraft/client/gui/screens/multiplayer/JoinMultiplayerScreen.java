@@ -11,6 +11,7 @@ import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.layouts.SpacerElement;
+import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DirectJoinServerScreen;
@@ -222,11 +223,11 @@ public class JoinMultiplayerScreen extends Screen {
 			this.refreshServerList();
 			return true;
 		} else if (this.serverSelectionList.getSelected() != null) {
-			if (i != 257 && i != 335) {
-				return this.serverSelectionList.keyPressed(i, j, k);
-			} else {
+			if (CommonInputs.selected(i)) {
 				this.joinSelectedServer();
 				return true;
+			} else {
+				return this.serverSelectionList.keyPressed(i, j, k);
 			}
 		} else {
 			return false;
@@ -256,7 +257,7 @@ public class JoinMultiplayerScreen extends Screen {
 	}
 
 	private void join(ServerData serverData) {
-		ConnectScreen.startConnecting(this, this.minecraft, ServerAddress.parseString(serverData.ip), serverData);
+		ConnectScreen.startConnecting(this, this.minecraft, ServerAddress.parseString(serverData.ip), serverData, false);
 	}
 
 	public void setSelected(ServerSelectionList.Entry entry) {

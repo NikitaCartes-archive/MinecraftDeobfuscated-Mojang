@@ -63,7 +63,7 @@ public class WoodlandMansionStructure extends Structure {
 				if (!worldGenLevel.isEmptyBlock(mutableBlockPos) && boundingBox2.isInside(mutableBlockPos) && piecesContainer.isInsidePiece(mutableBlockPos)) {
 					for (int m = j - 1; m > i; m--) {
 						mutableBlockPos.setY(m);
-						if (!worldGenLevel.isEmptyBlock(mutableBlockPos) && !worldGenLevel.getBlockState(mutableBlockPos).getMaterial().isLiquid()) {
+						if (!worldGenLevel.isEmptyBlock(mutableBlockPos) && !worldGenLevel.getBlockState(mutableBlockPos).liquid()) {
 							break;
 						}
 

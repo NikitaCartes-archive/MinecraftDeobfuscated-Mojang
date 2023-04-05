@@ -117,11 +117,9 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			int n = this.draggingItem.isEmpty() ? 8 : 16;
 			String string = null;
 			if (!this.draggingItem.isEmpty() && this.isSplittingStack) {
-				itemStack = itemStack.copy();
-				itemStack.setCount(Mth.ceil((float)itemStack.getCount() / 2.0F));
+				itemStack = itemStack.copyWithCount(Mth.ceil((float)itemStack.getCount() / 2.0F));
 			} else if (this.isQuickCrafting && this.quickCraftSlots.size() > 1) {
-				itemStack = itemStack.copy();
-				itemStack.setCount(this.quickCraftingRemainder);
+				itemStack = itemStack.copyWithCount(this.quickCraftingRemainder);
 				if (itemStack.isEmpty()) {
 					string = ChatFormatting.YELLOW + "0";
 				}
@@ -186,24 +184,23 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		ItemStack itemStack2 = this.menu.getCarried();
 		String string = null;
 		if (slot == this.clickedSlot && !this.draggingItem.isEmpty() && this.isSplittingStack && !itemStack.isEmpty()) {
-			itemStack = itemStack.copy();
-			itemStack.setCount(itemStack.getCount() / 2);
+			itemStack = itemStack.copyWithCount(itemStack.getCount() / 2);
 		} else if (this.isQuickCrafting && this.quickCraftSlots.contains(slot) && !itemStack2.isEmpty()) {
 			if (this.quickCraftSlots.size() == 1) {
 				return;
 			}
 
 			if (AbstractContainerMenu.canItemQuickReplace(slot, itemStack2, true) && this.menu.canDragTo(slot)) {
-				itemStack = itemStack2.copy();
 				bl = true;
-				AbstractContainerMenu.getQuickCraftSlotCount(
-					this.quickCraftSlots, this.quickCraftingType, itemStack, slot.getItem().isEmpty() ? 0 : slot.getItem().getCount()
-				);
-				int k = Math.min(itemStack.getMaxStackSize(), slot.getMaxStackSize(itemStack));
-				if (itemStack.getCount() > k) {
+				int k = Math.min(itemStack2.getMaxStackSize(), slot.getMaxStackSize(itemStack2));
+				int l = slot.getItem().isEmpty() ? 0 : slot.getItem().getCount();
+				int m = AbstractContainerMenu.getQuickCraftPlaceCount(this.quickCraftSlots, this.quickCraftingType, itemStack2) + l;
+				if (m > k) {
+					m = k;
 					string = ChatFormatting.YELLOW.toString() + k;
-					itemStack.setCount(k);
 				}
+
+				itemStack = itemStack2.copyWithCount(m);
 			} else {
 				this.quickCraftSlots.remove(slot);
 				this.recalculateQuickCraftRemaining();
@@ -243,16 +240,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				this.quickCraftingRemainder = itemStack.getCount();
 
 				for (Slot slot : this.quickCraftSlots) {
-					ItemStack itemStack2 = itemStack.copy();
-					ItemStack itemStack3 = slot.getItem();
-					int i = itemStack3.isEmpty() ? 0 : itemStack3.getCount();
-					AbstractContainerMenu.getQuickCraftSlotCount(this.quickCraftSlots, this.quickCraftingType, itemStack2, i);
-					int j = Math.min(itemStack2.getMaxStackSize(), slot.getMaxStackSize(itemStack2));
-					if (itemStack2.getCount() > j) {
-						itemStack2.setCount(j);
-					}
-
-					this.quickCraftingRemainder = this.quickCraftingRemainder - (itemStack2.getCount() - i);
+					ItemStack itemStack2 = slot.getItem();
+					int i = itemStack2.isEmpty() ? 0 : itemStack2.getCount();
+					int j = Math.min(itemStack.getMaxStackSize(), slot.getMaxStackSize(itemStack));
+					int k = Math.min(AbstractContainerMenu.getQuickCraftPlaceCount(this.quickCraftSlots, this.quickCraftingType, itemStack) + i, j);
+					this.quickCraftingRemainder -= k - i;
 				}
 			}
 		}

@@ -87,13 +87,17 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	}
 
 	public ItemStack addItem(ItemStack itemStack) {
-		ItemStack itemStack2 = itemStack.copy();
-		this.moveItemToOccupiedSlotsWithSameType(itemStack2);
-		if (itemStack2.isEmpty()) {
+		if (itemStack.isEmpty()) {
 			return ItemStack.EMPTY;
 		} else {
-			this.moveItemToEmptySlots(itemStack2);
-			return itemStack2.isEmpty() ? ItemStack.EMPTY : itemStack2;
+			ItemStack itemStack2 = itemStack.copy();
+			this.moveItemToOccupiedSlotsWithSameType(itemStack2);
+			if (itemStack2.isEmpty()) {
+				return ItemStack.EMPTY;
+			} else {
+				this.moveItemToEmptySlots(itemStack2);
+				return itemStack2.isEmpty() ? ItemStack.EMPTY : itemStack2;
+			}
 		}
 	}
 
@@ -182,8 +186,7 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 		for (int i = 0; i < this.size; i++) {
 			ItemStack itemStack2 = this.getItem(i);
 			if (itemStack2.isEmpty()) {
-				this.setItem(i, itemStack.copy());
-				itemStack.setCount(0);
+				this.setItem(i, itemStack.copyAndClear());
 				return;
 			}
 		}

@@ -17,16 +17,16 @@ public class GameConfig {
 	public final DisplayData display;
 	public final GameConfig.FolderData location;
 	public final GameConfig.GameData game;
-	public final GameConfig.ServerData server;
+	public final GameConfig.QuickPlayData quickPlay;
 
 	public GameConfig(
-		GameConfig.UserData userData, DisplayData displayData, GameConfig.FolderData folderData, GameConfig.GameData gameData, GameConfig.ServerData serverData
+		GameConfig.UserData userData, DisplayData displayData, GameConfig.FolderData folderData, GameConfig.GameData gameData, GameConfig.QuickPlayData quickPlayData
 	) {
 		this.user = userData;
 		this.display = displayData;
 		this.location = folderData;
 		this.game = gameData;
-		this.server = serverData;
+		this.quickPlay = quickPlayData;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -67,14 +67,9 @@ public class GameConfig {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class ServerData {
-		@Nullable
-		public final String hostname;
-		public final int port;
-
-		public ServerData(@Nullable String string, int i) {
-			this.hostname = string;
-			this.port = i;
+	public static record QuickPlayData(@Nullable String path, @Nullable String singleplayer, @Nullable String multiplayer, @Nullable String realms) {
+		public boolean isEnabled() {
+			return this.singleplayer != null || this.multiplayer != null || this.realms != null;
 		}
 	}
 

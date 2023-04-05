@@ -40,7 +40,7 @@ public abstract class BasePressurePlateBlock extends Block {
 	}
 
 	@Override
-	public boolean isPossibleToRespawnInThis() {
+	public boolean isPossibleToRespawnInThis(BlockState blockState) {
 		return true;
 	}
 

@@ -105,6 +105,11 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 		this.tooltip = tooltip;
 	}
 
+	@Nullable
+	public Tooltip getTooltip() {
+		return this.tooltip;
+	}
+
 	public void setTooltipDelay(int i) {
 		this.tooltipMsDelay = i;
 	}

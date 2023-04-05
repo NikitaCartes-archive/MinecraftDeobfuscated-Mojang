@@ -68,4 +68,9 @@ public class CalibratedSculkSensorBlock extends SculkSensorBlock {
 	public BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
+
+	@Override
+	public int getActiveTicks() {
+		return 20;
+	}
 }

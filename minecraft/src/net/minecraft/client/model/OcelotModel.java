@@ -60,6 +60,7 @@ public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
 	public static MeshDefinition createBodyMesh(CubeDeformation cubeDeformation) {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
+		CubeDeformation cubeDeformation2 = new CubeDeformation(-0.02F);
 		partDefinition.addOrReplaceChild(
 			"head",
 			CubeListBuilder.create()
@@ -80,7 +81,7 @@ public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
 			PartPose.offsetAndRotation(0.0F, 15.0F, 8.0F, 0.9F, 0.0F, 0.0F)
 		);
 		partDefinition.addOrReplaceChild(
-			"tail2", CubeListBuilder.create().texOffs(4, 15).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, cubeDeformation), PartPose.offset(0.0F, 20.0F, 14.0F)
+			"tail2", CubeListBuilder.create().texOffs(4, 15).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 8.0F, 1.0F, cubeDeformation2), PartPose.offset(0.0F, 20.0F, 14.0F)
 		);
 		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(8, 13).addBox(-1.0F, 0.0F, 1.0F, 2.0F, 6.0F, 2.0F, cubeDeformation);
 		partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(1.1F, 18.0F, 5.0F));

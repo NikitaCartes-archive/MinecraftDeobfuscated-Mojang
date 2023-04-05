@@ -192,9 +192,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 				ItemStack itemStack2 = slot.getItem();
 				if (clickType == ClickType.SWAP) {
 					if (!itemStack2.isEmpty()) {
-						ItemStack itemStack3 = itemStack2.copy();
-						itemStack3.setCount(itemStack3.getMaxStackSize());
-						this.minecraft.player.getInventory().setItem(j, itemStack3);
+						this.minecraft.player.getInventory().setItem(j, itemStack2.copyWithCount(itemStack2.getMaxStackSize()));
 						this.minecraft.player.inventoryMenu.broadcastChanges();
 					}
 
@@ -203,9 +201,8 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 				if (clickType == ClickType.CLONE) {
 					if (this.menu.getCarried().isEmpty() && slot.hasItem()) {
-						ItemStack itemStack3 = slot.getItem().copy();
-						itemStack3.setCount(itemStack3.getMaxStackSize());
-						this.menu.setCarried(itemStack3);
+						ItemStack itemStack3 = slot.getItem();
+						this.menu.setCarried(itemStack3.copyWithCount(itemStack3.getMaxStackSize()));
 					}
 
 					return;
@@ -213,8 +210,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 				if (clickType == ClickType.THROW) {
 					if (!itemStack2.isEmpty()) {
-						ItemStack itemStack3 = itemStack2.copy();
-						itemStack3.setCount(j == 0 ? 1 : itemStack3.getMaxStackSize());
+						ItemStack itemStack3 = itemStack2.copyWithCount(j == 0 ? 1 : itemStack2.getMaxStackSize());
 						this.minecraft.player.drop(itemStack3, true);
 						this.minecraft.gameMode.handleCreativeModeItemDrop(itemStack3);
 					}
@@ -233,32 +229,28 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 						itemStack.shrink(1);
 					}
 				} else if (!itemStack2.isEmpty() && itemStack.isEmpty()) {
-					this.menu.setCarried(itemStack2.copy());
-					itemStack = this.menu.getCarried();
-					if (bl) {
-						itemStack.setCount(itemStack.getMaxStackSize());
-					}
+					int l = bl ? itemStack2.getMaxStackSize() : itemStack2.getCount();
+					this.menu.setCarried(itemStack2.copyWithCount(l));
 				} else if (j == 0) {
 					this.menu.setCarried(ItemStack.EMPTY);
-				} else {
+				} else if (!this.menu.getCarried().isEmpty()) {
 					this.menu.getCarried().shrink(1);
 				}
 			} else if (this.menu != null) {
 				ItemStack itemStackx = slot == null ? ItemStack.EMPTY : this.menu.getSlot(slot.index).getItem();
 				this.menu.clicked(slot == null ? i : slot.index, j, clickType, this.minecraft.player);
 				if (AbstractContainerMenu.getQuickcraftHeader(j) == 2) {
-					for (int l = 0; l < 9; l++) {
-						this.minecraft.gameMode.handleCreativeModeItemAdd(this.menu.getSlot(45 + l).getItem(), 36 + l);
+					for (int m = 0; m < 9; m++) {
+						this.minecraft.gameMode.handleCreativeModeItemAdd(this.menu.getSlot(45 + m).getItem(), 36 + m);
 					}
 				} else if (slot != null) {
 					ItemStack itemStack2x = this.menu.getSlot(slot.index).getItem();
 					this.minecraft.gameMode.handleCreativeModeItemAdd(itemStack2x, slot.index - this.menu.slots.size() + 9 + 36);
-					int m = 45 + j;
+					int l = 45 + j;
 					if (clickType == ClickType.SWAP) {
-						this.minecraft.gameMode.handleCreativeModeItemAdd(itemStackx, m - this.menu.slots.size() + 9 + 36);
+						this.minecraft.gameMode.handleCreativeModeItemAdd(itemStackx, l - this.menu.slots.size() + 9 + 36);
 					} else if (clickType == ClickType.THROW && !itemStackx.isEmpty()) {
-						ItemStack itemStack4 = itemStackx.copy();
-						itemStack4.setCount(j == 0 ? 1 : itemStack4.getMaxStackSize());
+						ItemStack itemStack4 = itemStackx.copyWithCount(j == 0 ? 1 : itemStackx.getMaxStackSize());
 						this.minecraft.player.drop(itemStack4, true);
 						this.minecraft.gameMode.handleCreativeModeItemDrop(itemStack4);
 					}

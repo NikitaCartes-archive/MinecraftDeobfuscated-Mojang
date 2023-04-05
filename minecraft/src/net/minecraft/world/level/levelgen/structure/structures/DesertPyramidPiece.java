@@ -25,6 +25,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 	public static final int DEPTH = 21;
 	private final boolean[] hasPlacedChest = new boolean[4];
 	private final List<BlockPos> potentialSuspiciousSandWorldPositions = new ArrayList();
+	private BlockPos randomCollapsedRoofPos = BlockPos.ZERO;
 
 	public DesertPyramidPiece(RandomSource randomSource, int i, int j) {
 		super(StructurePieceType.DESERT_PYRAMID_PIECE, i, 64, j, 21, 15, 21, getRandomHorizontalDirection(randomSource));
@@ -322,7 +323,6 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 		int j = blockPos.getY();
 		int k = blockPos.getZ();
 		BlockState blockState = Blocks.SANDSTONE_STAIRS.defaultBlockState();
-		this.placeBlock(worldGenLevel, blockState.rotate(Rotation.COUNTERCLOCKWISE_90), 12, 0, 17, boundingBox);
 		this.placeBlock(worldGenLevel, blockState.rotate(Rotation.COUNTERCLOCKWISE_90), 13, -1, 17, boundingBox);
 		this.placeBlock(worldGenLevel, blockState.rotate(Rotation.COUNTERCLOCKWISE_90), 14, -2, 17, boundingBox);
 		this.placeBlock(worldGenLevel, blockState.rotate(Rotation.COUNTERCLOCKWISE_90), 15, -3, 17, boundingBox);
@@ -335,11 +335,11 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 		this.placeBlock(worldGenLevel, blockState2, i - 1, j + 4, k + 4, boundingBox);
 		this.placeBlock(worldGenLevel, blockState2, i, j + 4, k + 4, boundingBox);
 		this.placeBlock(worldGenLevel, blockState2, i - 2, j + 3, k + 4, boundingBox);
-		this.placeBlock(worldGenLevel, blockState2, i - 1, j + 3, k + 4, boundingBox);
-		this.placeBlock(worldGenLevel, blockState2, i, j + 3, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, bl ? blockState2 : blockState3, i - 1, j + 3, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, !bl ? blockState2 : blockState3, i, j + 3, k + 4, boundingBox);
 		this.placeBlock(worldGenLevel, blockState2, i - 1, j + 2, k + 4, boundingBox);
-		this.placeBlock(worldGenLevel, bl ? blockState2 : blockState3, i, j + 2, k + 4, boundingBox);
-		this.placeBlock(worldGenLevel, bl ? blockState2 : blockState3, i, j + 1, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState3, i, j + 2, k + 4, boundingBox);
+		this.placeBlock(worldGenLevel, blockState2, i, j + 1, k + 4, boundingBox);
 	}
 
 	private void addCellarRoom(BlockPos blockPos, WorldGenLevel worldGenLevel, BoundingBox boundingBox) {
@@ -360,7 +360,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 		this.generateBox(worldGenLevel, boundingBox, i + 3, -1, k - 3, i + 3, -1, k + 2, blockState, blockState, true);
 		this.generateBox(worldGenLevel, boundingBox, i - 3, -1, k - 3, i + 3, -1, k - 2, blockState, blockState, true);
 		this.generateBox(worldGenLevel, boundingBox, i - 3, -1, k + 3, i + 3, -1, k + 3, blockState, blockState, true);
-		this.placeSandBox(boundingBox, i - 2, j + 1, k - 2, i + 2, j + 3, k + 2);
+		this.placeSandBox(i - 2, j + 1, k - 2, i + 2, j + 3, k + 2);
 		this.placeCollapsedRoof(worldGenLevel, boundingBox, i - 2, j + 4, k - 2, i + 2, k + 2);
 		BlockState blockState3 = Blocks.ORANGE_TERRACOTTA.defaultBlockState();
 		BlockState blockState4 = Blocks.BLUE_TERRACOTTA.defaultBlockState();
@@ -374,44 +374,42 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 		this.placeBlock(worldGenLevel, blockState3, i, j, k + 2, boundingBox);
 		this.placeBlock(worldGenLevel, blockState3, i, j, k - 2, boundingBox);
 		this.placeBlock(worldGenLevel, blockState3, i + 3, j, k, boundingBox);
-		this.placeSand(i + 3, j + 1, k, boundingBox);
-		this.placeSand(i + 3, j + 2, k, boundingBox);
+		this.placeSand(i + 3, j + 1, k);
+		this.placeSand(i + 3, j + 2, k);
 		this.placeBlock(worldGenLevel, blockState, i + 4, j + 1, k, boundingBox);
 		this.placeBlock(worldGenLevel, blockState2, i + 4, j + 2, k, boundingBox);
 		this.placeBlock(worldGenLevel, blockState3, i - 3, j, k, boundingBox);
-		this.placeSand(i - 3, j + 1, k, boundingBox);
-		this.placeSand(i - 3, j + 2, k, boundingBox);
+		this.placeSand(i - 3, j + 1, k);
+		this.placeSand(i - 3, j + 2, k);
 		this.placeBlock(worldGenLevel, blockState, i - 4, j + 1, k, boundingBox);
 		this.placeBlock(worldGenLevel, blockState2, i - 4, j + 2, k, boundingBox);
 		this.placeBlock(worldGenLevel, blockState3, i, j, k + 3, boundingBox);
-		this.placeSand(i, j + 1, k + 3, boundingBox);
-		this.placeSand(i, j + 2, k + 3, boundingBox);
+		this.placeSand(i, j + 1, k + 3);
+		this.placeSand(i, j + 2, k + 3);
 		this.placeBlock(worldGenLevel, blockState3, i, j, k - 3, boundingBox);
-		this.placeSand(i, j + 1, k - 3, boundingBox);
-		this.placeSand(i, j + 2, k - 3, boundingBox);
+		this.placeSand(i, j + 1, k - 3);
+		this.placeSand(i, j + 2, k - 3);
 		this.placeBlock(worldGenLevel, blockState, i, j + 1, k - 4, boundingBox);
 		this.placeBlock(worldGenLevel, blockState2, i, -2, k - 4, boundingBox);
 	}
 
-	private void placeSand(int i, int j, int k, BoundingBox boundingBox) {
+	private void placeSand(int i, int j, int k) {
 		BlockPos blockPos = this.getWorldPos(i, j, k);
-		if (boundingBox.isInside(blockPos)) {
-			this.potentialSuspiciousSandWorldPositions.add(blockPos);
-		}
+		this.potentialSuspiciousSandWorldPositions.add(blockPos);
 	}
 
-	private void placeSandBox(BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {
+	private void placeSandBox(int i, int j, int k, int l, int m, int n) {
 		for (int o = j; o <= m; o++) {
 			for (int p = i; p <= l; p++) {
 				for (int q = k; q <= n; q++) {
-					this.placeSand(p, o, q, boundingBox);
+					this.placeSand(p, o, q);
 				}
 			}
 		}
 	}
 
 	private void placeCollapsedRoofPiece(WorldGenLevel worldGenLevel, int i, int j, int k, BoundingBox boundingBox) {
-		if (worldGenLevel.getRandom().nextBoolean()) {
+		if (worldGenLevel.getRandom().nextFloat() < 0.33F) {
 			BlockState blockState = Blocks.SANDSTONE.defaultBlockState();
 			this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
 		} else {
@@ -426,9 +424,18 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 				this.placeCollapsedRoofPiece(worldGenLevel, n, j, o, boundingBox);
 			}
 		}
+
+		RandomSource randomSource = RandomSource.create(worldGenLevel.getSeed()).forkPositional().at(this.getWorldPos(i, j, k));
+		int o = randomSource.nextIntBetweenInclusive(i, l);
+		int p = randomSource.nextIntBetweenInclusive(k, m);
+		this.randomCollapsedRoofPos = new BlockPos(this.getWorldX(o, p), this.getWorldY(j), this.getWorldZ(o, p));
 	}
 
 	public List<BlockPos> getPotentialSuspiciousSandWorldPositions() {
 		return this.potentialSuspiciousSandWorldPositions;
+	}
+
+	public BlockPos getRandomCollapsedRoofPos() {
+		return this.randomCollapsedRoofPos;
 	}
 }

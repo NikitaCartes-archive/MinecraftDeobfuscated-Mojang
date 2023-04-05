@@ -20,6 +20,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -345,28 +346,18 @@ public class EditBox extends AbstractWidget implements Renderable {
 	}
 
 	@Override
-	public boolean mouseClicked(double d, double e, int i) {
-		if (this.isVisible() && i == 0) {
-			boolean bl = d >= (double)this.getX() && d < (double)(this.getX() + this.width) && e >= (double)this.getY() && e < (double)(this.getY() + this.height);
-			if (this.canLoseFocus) {
-				this.setFocused(bl);
-			}
-
-			if (this.isFocused() && bl && i == 0) {
-				int j = Mth.floor(d) - this.getX();
-				if (this.bordered) {
-					j -= 4;
-				}
-
-				String string = this.font.plainSubstrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
-				this.moveCursorTo(this.font.plainSubstrByWidth(string, j).length() + this.displayPos);
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
+	public void onClick(double d, double e) {
+		int i = Mth.floor(d) - this.getX();
+		if (this.bordered) {
+			i -= 4;
 		}
+
+		String string = this.font.plainSubstrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
+		this.moveCursorTo(this.font.plainSubstrByWidth(string, i).length() + this.displayPos);
+	}
+
+	@Override
+	public void playDownSound(SoundManager soundManager) {
 	}
 
 	@Override

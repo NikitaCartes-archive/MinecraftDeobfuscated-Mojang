@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -61,12 +62,12 @@ public abstract class AbstractButton extends AbstractWidget {
 	public boolean keyPressed(int i, int j, int k) {
 		if (!this.active || !this.visible) {
 			return false;
-		} else if (i != 257 && i != 32 && i != 335) {
-			return false;
-		} else {
+		} else if (CommonInputs.selected(i)) {
 			this.playDownSound(Minecraft.getInstance().getSoundManager());
 			this.onPress();
 			return true;
+		} else {
+			return false;
 		}
 	}
 }

@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -41,8 +42,8 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 	}
 
 	public static boolean isValidBookShelf(Level level, BlockPos blockPos, BlockPos blockPos2) {
-		return level.getBlockState(blockPos.offset(blockPos2)).is(Blocks.BOOKSHELF)
-			&& level.isEmptyBlock(blockPos.offset(blockPos2.getX() / 2, blockPos2.getY(), blockPos2.getZ() / 2));
+		return level.getBlockState(blockPos.offset(blockPos2)).is(BlockTags.ENCHANTMENT_POWER_PROVIDER)
+			&& level.getBlockState(blockPos.offset(blockPos2.getX() / 2, blockPos2.getY(), blockPos2.getZ() / 2)).is(BlockTags.ENCHANTMENT_POWER_TRANSMITTER);
 	}
 
 	@Override
