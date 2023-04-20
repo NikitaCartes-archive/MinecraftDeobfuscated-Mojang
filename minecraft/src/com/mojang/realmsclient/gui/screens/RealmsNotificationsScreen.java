@@ -1,7 +1,5 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsNotification;
 import com.mojang.realmsclient.exception.RealmsServiceException;
@@ -13,7 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -142,15 +140,15 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (validClient) {
-			this.drawIcons(poseStack, i, j);
+			this.drawIcons(guiGraphics, i, j);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
-	private void drawIcons(PoseStack poseStack, int i, int j) {
+	private void drawIcons(GuiGraphics guiGraphics, int i, int j) {
 		int k = this.numberOfPendingInvites;
 		int l = 24;
 		int m = this.height / 4 + 48;
@@ -158,35 +156,31 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 		int o = m + 48 + 2;
 		int p = 0;
 		if (hasUnseenNotifications) {
-			RenderSystem.setShaderTexture(0, UNSEEN_NOTIFICATION_ICON_LOCATION);
-			GuiComponent.blit(poseStack, n - p + 5, o + 3, 0.0F, 0.0F, 10, 10, 10, 10);
+			guiGraphics.blit(UNSEEN_NOTIFICATION_ICON_LOCATION, n - p + 5, o + 3, 0.0F, 0.0F, 10, 10, 10, 10);
 			p += 14;
 		}
 
 		if (this.currentConfiguration != null && this.currentConfiguration.showOldNotifications()) {
 			if (hasUnreadNews) {
-				RenderSystem.setShaderTexture(0, NEWS_ICON_LOCATION);
-				poseStack.pushPose();
-				poseStack.scale(0.4F, 0.4F, 0.4F);
-				GuiComponent.blit(poseStack, (int)((double)(n + 2 - p) * 2.5), (int)((double)o * 2.5), 0.0F, 0.0F, 40, 40, 40, 40);
-				poseStack.popPose();
+				guiGraphics.pose().pushPose();
+				guiGraphics.pose().scale(0.4F, 0.4F, 0.4F);
+				guiGraphics.blit(NEWS_ICON_LOCATION, (int)((double)(n + 2 - p) * 2.5), (int)((double)o * 2.5), 0.0F, 0.0F, 40, 40, 40, 40);
+				guiGraphics.pose().popPose();
 				p += 14;
 			}
 
 			if (k != 0) {
-				RenderSystem.setShaderTexture(0, INVITE_ICON_LOCATION);
-				GuiComponent.blit(poseStack, n - p, o - 6, 0.0F, 0.0F, 15, 25, 31, 25);
+				guiGraphics.blit(INVITE_ICON_LOCATION, n - p, o - 6, 0.0F, 0.0F, 15, 25, 31, 25);
 				p += 16;
 			}
 
 			if (trialAvailable) {
-				RenderSystem.setShaderTexture(0, TRIAL_ICON_LOCATION);
 				int q = 0;
 				if ((Util.getMillis() / 800L & 1L) == 1L) {
 					q = 8;
 				}
 
-				GuiComponent.blit(poseStack, n + 4 - p, o + 4, 0.0F, (float)q, 8, 8, 8, 16);
+				guiGraphics.blit(TRIAL_ICON_LOCATION, n + 4 - p, o + 4, 0.0F, (float)q, 8, 8, 8, 16);
 			}
 		}
 	}

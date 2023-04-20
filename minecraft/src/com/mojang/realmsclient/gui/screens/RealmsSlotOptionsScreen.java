@@ -1,7 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -257,12 +257,12 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
-		this.font.draw(poseStack, NAME_LABEL, (float)(this.column1X + this.columnWidth / 2 - this.font.width(NAME_LABEL) / 2), (float)(row(0) - 5), 16777215);
-		this.nameEdit.render(poseStack, i, j, f);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, 16777215);
+		guiGraphics.drawString(this.font, NAME_LABEL, this.column1X + this.columnWidth / 2 - this.font.width(NAME_LABEL) / 2, row(0) - 5, 16777215, false);
+		this.nameEdit.render(guiGraphics, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	private void setWorldName(String string) {

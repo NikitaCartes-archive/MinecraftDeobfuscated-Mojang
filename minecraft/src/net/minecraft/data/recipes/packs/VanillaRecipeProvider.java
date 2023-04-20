@@ -2583,7 +2583,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern(" # ")
 			.pattern("# #")
 			.pattern(" # ")
-			.unlockedBy("has_brick", has(ItemTags.DECORATED_POT_SHARDS))
+			.unlockedBy("has_brick", has(ItemTags.DECORATED_POT_SHERDS))
 			.save(consumer, "decorated_pot_simple");
 		SpecialRecipeBuilder.special(RecipeSerializer.DECORATED_POT_RECIPE).save(consumer, "decorated_pot");
 	}

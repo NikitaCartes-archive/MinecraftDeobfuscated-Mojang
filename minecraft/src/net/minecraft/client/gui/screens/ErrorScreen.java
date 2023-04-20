@@ -1,8 +1,8 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -25,11 +25,11 @@ public class ErrorScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		fillGradient(poseStack, 0, 0, this.width, this.height, -12574688, -11530224);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 90, 16777215);
-		drawCenteredString(poseStack, this.font, this.message, this.width / 2, 110, 16777215);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		guiGraphics.fillGradient(0, 0, this.width, this.height, -12574688, -11530224);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 90, 16777215);
+		guiGraphics.drawCenteredString(this.font, this.message, this.width / 2, 110, 16777215);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

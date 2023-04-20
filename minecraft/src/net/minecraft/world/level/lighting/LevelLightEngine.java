@@ -104,6 +104,18 @@ public class LevelLightEngine implements LightEventListener {
 		return "n/a";
 	}
 
+	public int getDebugSectionLevel(LightLayer lightLayer, SectionPos sectionPos) {
+		if (lightLayer == LightLayer.BLOCK) {
+			if (this.blockEngine != null) {
+				return this.blockEngine.getDebugSectionLevel(sectionPos.asLong());
+			}
+		} else if (this.skyEngine != null) {
+			return this.skyEngine.getDebugSectionLevel(sectionPos.asLong());
+		}
+
+		return 2;
+	}
+
 	public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer, boolean bl) {
 		if (lightLayer == LightLayer.BLOCK) {
 			if (this.blockEngine != null) {

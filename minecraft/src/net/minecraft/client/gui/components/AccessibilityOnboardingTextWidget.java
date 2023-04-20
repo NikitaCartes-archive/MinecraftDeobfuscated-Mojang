@@ -1,9 +1,9 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.sounds.SoundManager;
@@ -30,18 +30,18 @@ public class AccessibilityOnboardingTextWidget extends MultiLineTextWidget {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		int k = this.getX() - 3;
 		int l = this.getY() - 3;
 		int m = this.getX() + this.getWidth() + 3;
 		int n = this.getY() + this.getHeight() + 3;
 		int o = this.isFocused() ? -1 : -6250336;
-		fill(poseStack, k - 1, l - 1, k, n + 1, o);
-		fill(poseStack, m, l - 1, m + 1, n + 1, o);
-		fill(poseStack, k, l, m, l - 1, o);
-		fill(poseStack, k, n, m, n + 1, o);
-		fill(poseStack, k, l, m, n, 1426063360);
-		super.renderWidget(poseStack, i, j, f);
+		guiGraphics.fill(k - 1, l - 1, k, n + 1, o);
+		guiGraphics.fill(m, l - 1, m + 1, n + 1, o);
+		guiGraphics.fill(k, l, m, l - 1, o);
+		guiGraphics.fill(k, n, m, n + 1, o);
+		guiGraphics.fill(k, l, m, n, 1426063360);
+		super.renderWidget(guiGraphics, i, j, f);
 	}
 
 	@Override

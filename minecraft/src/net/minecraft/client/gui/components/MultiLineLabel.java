@@ -1,13 +1,12 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Arrays;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
@@ -16,27 +15,27 @@ import net.minecraft.util.FormattedCharSequence;
 public interface MultiLineLabel {
 	MultiLineLabel EMPTY = new MultiLineLabel() {
 		@Override
-		public int renderCentered(PoseStack poseStack, int i, int j) {
+		public int renderCentered(GuiGraphics guiGraphics, int i, int j) {
 			return j;
 		}
 
 		@Override
-		public int renderCentered(PoseStack poseStack, int i, int j, int k, int l) {
+		public int renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 			return j;
 		}
 
 		@Override
-		public int renderLeftAligned(PoseStack poseStack, int i, int j, int k, int l) {
+		public int renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 			return j;
 		}
 
 		@Override
-		public int renderLeftAlignedNoShadow(PoseStack poseStack, int i, int j, int k, int l) {
+		public int renderLeftAlignedNoShadow(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 			return j;
 		}
 
 		@Override
-		public void renderBackgroundCentered(PoseStack poseStack, int i, int j, int k, int l, int m) {
+		public void renderBackgroundCentered(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 		}
 
 		@Override
@@ -96,16 +95,16 @@ public interface MultiLineLabel {
 			private final int width = list.stream().mapToInt(textWithWidth -> textWithWidth.width).max().orElse(0);
 
 			@Override
-			public int renderCentered(PoseStack poseStack, int i, int j) {
-				return this.renderCentered(poseStack, i, j, 9, 16777215);
+			public int renderCentered(GuiGraphics guiGraphics, int i, int j) {
+				return this.renderCentered(guiGraphics, i, j, 9, 16777215);
 			}
 
 			@Override
-			public int renderCentered(PoseStack poseStack, int i, int j, int k, int l) {
+			public int renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 				int m = j;
 
 				for (MultiLineLabel.TextWithWidth textWithWidth : list) {
-					font.drawShadow(poseStack, textWithWidth.text, (float)(i - textWithWidth.width / 2), (float)m, l);
+					guiGraphics.drawString(font, textWithWidth.text, i - textWithWidth.width / 2, m, l);
 					m += k;
 				}
 
@@ -113,11 +112,11 @@ public interface MultiLineLabel {
 			}
 
 			@Override
-			public int renderLeftAligned(PoseStack poseStack, int i, int j, int k, int l) {
+			public int renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 				int m = j;
 
 				for (MultiLineLabel.TextWithWidth textWithWidth : list) {
-					font.drawShadow(poseStack, textWithWidth.text, (float)i, (float)m, l);
+					guiGraphics.drawString(font, textWithWidth.text, i, m, l);
 					m += k;
 				}
 
@@ -125,11 +124,11 @@ public interface MultiLineLabel {
 			}
 
 			@Override
-			public int renderLeftAlignedNoShadow(PoseStack poseStack, int i, int j, int k, int l) {
+			public int renderLeftAlignedNoShadow(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 				int m = j;
 
 				for (MultiLineLabel.TextWithWidth textWithWidth : list) {
-					font.draw(poseStack, textWithWidth.text, (float)i, (float)m, l);
+					guiGraphics.drawString(font, textWithWidth.text, i, m, l, false);
 					m += k;
 				}
 
@@ -137,10 +136,10 @@ public interface MultiLineLabel {
 			}
 
 			@Override
-			public void renderBackgroundCentered(PoseStack poseStack, int i, int j, int k, int l, int m) {
+			public void renderBackgroundCentered(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 				int n = list.stream().mapToInt(textWithWidth -> textWithWidth.width).max().orElse(0);
 				if (n > 0) {
-					GuiComponent.fill(poseStack, i - n / 2 - l, j - l, i + n / 2 + l, j + list.size() * k + l, m);
+					guiGraphics.fill(i - n / 2 - l, j - l, i + n / 2 + l, j + list.size() * k + l, m);
 				}
 			}
 
@@ -156,15 +155,15 @@ public interface MultiLineLabel {
 		};
 	}
 
-	int renderCentered(PoseStack poseStack, int i, int j);
+	int renderCentered(GuiGraphics guiGraphics, int i, int j);
 
-	int renderCentered(PoseStack poseStack, int i, int j, int k, int l);
+	int renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l);
 
-	int renderLeftAligned(PoseStack poseStack, int i, int j, int k, int l);
+	int renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l);
 
-	int renderLeftAlignedNoShadow(PoseStack poseStack, int i, int j, int k, int l);
+	int renderLeftAlignedNoShadow(GuiGraphics guiGraphics, int i, int j, int k, int l);
 
-	void renderBackgroundCentered(PoseStack poseStack, int i, int j, int k, int l, int m);
+	void renderBackgroundCentered(GuiGraphics guiGraphics, int i, int j, int k, int l, int m);
 
 	int getLineCount();
 

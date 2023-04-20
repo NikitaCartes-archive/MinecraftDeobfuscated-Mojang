@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -11,6 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Registry;
@@ -105,32 +105,32 @@ public class OptimizeWorldScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
 		int k = this.width / 2 - 150;
 		int l = this.width / 2 + 150;
 		int m = this.height / 4 + 100;
 		int n = m + 10;
-		drawCenteredString(poseStack, this.font, this.upgrader.getStatus(), this.width / 2, m - 9 - 2, 10526880);
+		guiGraphics.drawCenteredString(this.font, this.upgrader.getStatus(), this.width / 2, m - 9 - 2, 10526880);
 		if (this.upgrader.getTotalChunks() > 0) {
-			fill(poseStack, k - 1, m - 1, l + 1, n + 1, -16777216);
-			drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 10526880);
-			drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + 9 + 3, 10526880);
-			drawString(poseStack, this.font, Component.translatable("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (9 + 3) * 2, 10526880);
+			guiGraphics.fill(k - 1, m - 1, l + 1, n + 1, -16777216);
+			guiGraphics.drawString(this.font, Component.translatable("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 10526880);
+			guiGraphics.drawString(this.font, Component.translatable("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + 9 + 3, 10526880);
+			guiGraphics.drawString(this.font, Component.translatable("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (9 + 3) * 2, 10526880);
 			int o = 0;
 
 			for (ResourceKey<Level> resourceKey : this.upgrader.levels()) {
 				int p = Mth.floor(this.upgrader.dimensionProgress(resourceKey) * (float)(l - k));
-				fill(poseStack, k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(resourceKey));
+				guiGraphics.fill(k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(resourceKey));
 				o += p;
 			}
 
 			int q = this.upgrader.getConverted() + this.upgrader.getSkipped();
-			drawCenteredString(poseStack, this.font, q + " / " + this.upgrader.getTotalChunks(), this.width / 2, m + 2 * 9 + 2, 10526880);
-			drawCenteredString(poseStack, this.font, Mth.floor(this.upgrader.getProgress() * 100.0F) + "%", this.width / 2, m + (n - m) / 2 - 9 / 2, 10526880);
+			guiGraphics.drawCenteredString(this.font, q + " / " + this.upgrader.getTotalChunks(), this.width / 2, m + 2 * 9 + 2, 10526880);
+			guiGraphics.drawCenteredString(this.font, Mth.floor(this.upgrader.getProgress() * 100.0F) + "%", this.width / 2, m + (n - m) / 2 - 9 / 2, 10526880);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 }

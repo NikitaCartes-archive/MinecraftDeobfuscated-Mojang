@@ -1,11 +1,11 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -26,20 +26,19 @@ public abstract class AbstractButton extends AbstractWidget {
 	public abstract void onPress();
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		Minecraft minecraft = Minecraft.getInstance();
-		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
 		RenderSystem.enableBlend();
 		RenderSystem.enableDepthTest();
-		blitNineSliced(poseStack, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.blitNineSliced(WIDGETS_LOCATION, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		int k = this.active ? 16777215 : 10526880;
-		this.renderString(poseStack, minecraft.font, k | Mth.ceil(this.alpha * 255.0F) << 24);
+		this.renderString(guiGraphics, minecraft.font, k | Mth.ceil(this.alpha * 255.0F) << 24);
 	}
 
-	public void renderString(PoseStack poseStack, Font font, int i) {
-		this.renderScrollingString(poseStack, font, 2, i);
+	public void renderString(GuiGraphics guiGraphics, Font font, int i) {
+		this.renderScrollingString(guiGraphics, font, 2, i);
 	}
 
 	private int getTextureY() {

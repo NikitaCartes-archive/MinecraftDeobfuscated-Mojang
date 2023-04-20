@@ -1,12 +1,12 @@
 package net.minecraft.client.gui.screens.telemetry;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.nio.file.Path;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
@@ -105,9 +105,9 @@ public class TelemetryInfoScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderDirtBackground(poseStack);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	private GridLayout twoButtonContainer(AbstractWidget abstractWidget, AbstractWidget abstractWidget2) {

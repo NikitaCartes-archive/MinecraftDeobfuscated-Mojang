@@ -120,7 +120,7 @@ public abstract class HangingEntity extends Entity {
 					int n = (j - 1) / -2;
 					mutableBlockPos.set(blockPos).move(direction, k + m).move(Direction.UP, l + n);
 					BlockState blockState = this.level.getBlockState(mutableBlockPos);
-					if (!blockState.getMaterial().isSolid() && !DiodeBlock.isDiode(blockState)) {
+					if (!blockState.isSolid() && !DiodeBlock.isDiode(blockState)) {
 						return false;
 					}
 				}

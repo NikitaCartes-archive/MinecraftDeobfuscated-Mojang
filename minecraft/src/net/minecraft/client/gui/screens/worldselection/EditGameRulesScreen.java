@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableList.Builder;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -70,11 +69,11 @@ public class EditGameRulesScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.tooltip = null;
-		this.rules.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
-		super.render(poseStack, i, j, f);
+		this.rules.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	private void updateDoneButton() {
@@ -105,11 +104,11 @@ public class EditGameRulesScreen extends Screen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			this.renderLabel(poseStack, j, k);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			this.renderLabel(guiGraphics, j, k);
 			this.checkbox.setX(k + l - 45);
 			this.checkbox.setY(j);
-			this.checkbox.render(poseStack, n, o, f);
+			this.checkbox.render(guiGraphics, n, o, f);
 		}
 	}
 
@@ -123,8 +122,8 @@ public class EditGameRulesScreen extends Screen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			GuiComponent.drawCenteredString(poseStack, EditGameRulesScreen.this.minecraft.font, this.label, k + l / 2, j + 5, 16777215);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			guiGraphics.drawCenteredString(EditGameRulesScreen.this.minecraft.font, this.label, k + l / 2, j + 5, 16777215);
 		}
 
 		@Override
@@ -174,12 +173,12 @@ public class EditGameRulesScreen extends Screen {
 			return this.children;
 		}
 
-		protected void renderLabel(PoseStack poseStack, int i, int j) {
+		protected void renderLabel(GuiGraphics guiGraphics, int i, int j) {
 			if (this.label.size() == 1) {
-				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedCharSequence)this.label.get(0), (float)j, (float)(i + 5), 16777215);
+				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(0), j, i + 5, 16777215, false);
 			} else if (this.label.size() >= 2) {
-				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedCharSequence)this.label.get(0), (float)j, (float)i, 16777215);
-				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedCharSequence)this.label.get(1), (float)j, (float)(i + 10), 16777215);
+				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(0), j, i, 16777215, false);
+				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(1), j, i + 10, 16777215, false);
 			}
 		}
 	}
@@ -205,11 +204,11 @@ public class EditGameRulesScreen extends Screen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			this.renderLabel(poseStack, j, k);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			this.renderLabel(guiGraphics, j, k);
 			this.input.setX(k + l - 44);
 			this.input.setY(j);
-			this.input.render(poseStack, n, o, f);
+			this.input.render(guiGraphics, n, o, f);
 		}
 	}
 
@@ -282,8 +281,8 @@ public class EditGameRulesScreen extends Screen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, float f) {
-			super.render(poseStack, i, j, f);
+		public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+			super.render(guiGraphics, i, j, f);
 			EditGameRulesScreen.RuleEntry ruleEntry = this.getHovered();
 			if (ruleEntry != null && ruleEntry.tooltip != null) {
 				EditGameRulesScreen.this.setTooltipForNextRenderPass(ruleEntry.tooltip);

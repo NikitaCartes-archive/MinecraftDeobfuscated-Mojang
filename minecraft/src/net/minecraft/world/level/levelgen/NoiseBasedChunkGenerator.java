@@ -369,50 +369,52 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 			noiseChunk.advanceCellX(q);
 
 			for (int r = 0; r < p; r++) {
-				LevelChunkSection levelChunkSection = chunkAccess.getSection(chunkAccess.getSectionsCount() - 1);
+				int s = chunkAccess.getSectionsCount() - 1;
+				LevelChunkSection levelChunkSection = chunkAccess.getSection(s);
 
-				for (int s = j - 1; s >= 0; s--) {
-					noiseChunk.selectCellYZ(s, r);
+				for (int t = j - 1; t >= 0; t--) {
+					noiseChunk.selectCellYZ(t, r);
 
-					for (int t = n - 1; t >= 0; t--) {
-						int u = (i + s) * n + t;
-						int v = u & 15;
-						int w = chunkAccess.getSectionIndex(u);
-						if (chunkAccess.getSectionIndex(levelChunkSection.bottomBlockY()) != w) {
-							levelChunkSection = chunkAccess.getSection(w);
+					for (int u = n - 1; u >= 0; u--) {
+						int v = (i + t) * n + u;
+						int w = v & 15;
+						int x = chunkAccess.getSectionIndex(v);
+						if (s != x) {
+							s = x;
+							levelChunkSection = chunkAccess.getSection(x);
 						}
 
-						double d = (double)t / (double)n;
-						noiseChunk.updateForY(u, d);
+						double d = (double)u / (double)n;
+						noiseChunk.updateForY(v, d);
 
-						for (int x = 0; x < m; x++) {
-							int y = k + q * m + x;
-							int z = y & 15;
-							double e = (double)x / (double)m;
-							noiseChunk.updateForX(y, e);
+						for (int y = 0; y < m; y++) {
+							int z = k + q * m + y;
+							int aa = z & 15;
+							double e = (double)y / (double)m;
+							noiseChunk.updateForX(z, e);
 
-							for (int aa = 0; aa < m; aa++) {
-								int ab = l + r * m + aa;
-								int ac = ab & 15;
-								double f = (double)aa / (double)m;
-								noiseChunk.updateForZ(ab, f);
+							for (int ab = 0; ab < m; ab++) {
+								int ac = l + r * m + ab;
+								int ad = ac & 15;
+								double f = (double)ab / (double)m;
+								noiseChunk.updateForZ(ac, f);
 								BlockState blockState = noiseChunk.getInterpolatedState();
 								if (blockState == null) {
 									blockState = this.settings.value().defaultBlock();
 								}
 
-								blockState = this.debugPreliminarySurfaceLevel(noiseChunk, y, u, ab, blockState);
+								blockState = this.debugPreliminarySurfaceLevel(noiseChunk, z, v, ac, blockState);
 								if (blockState != AIR && !SharedConstants.debugVoidTerrain(chunkAccess.getPos())) {
 									if (blockState.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
-										mutableBlockPos.set(y, u, ab);
+										mutableBlockPos.set(z, v, ac);
 										((ProtoChunk)chunkAccess).addLight(mutableBlockPos);
 									}
 
-									levelChunkSection.setBlockState(z, v, ac, blockState, false);
-									heightmap.update(z, u, ac, blockState);
-									heightmap2.update(z, u, ac, blockState);
+									levelChunkSection.setBlockState(aa, w, ad, blockState, false);
+									heightmap.update(aa, v, ad, blockState);
+									heightmap2.update(aa, v, ad, blockState);
 									if (aquifer.shouldScheduleFluidUpdate() && !blockState.getFluidState().isEmpty()) {
-										mutableBlockPos.set(y, u, ab);
+										mutableBlockPos.set(z, v, ac);
 										chunkAccess.markPosForPostprocessing(mutableBlockPos);
 									}
 								}

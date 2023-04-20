@@ -1,11 +1,10 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -36,30 +35,29 @@ public class TabButton extends AbstractWidget {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-		RenderSystem.setShaderTexture(0, TEXTURE_LOCATION);
-		blitNineSliced(poseStack, this.getX(), this.getY(), this.width, this.height, 2, 2, 2, 0, 130, 24, 0, this.getTextureY());
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+		guiGraphics.blitNineSliced(TEXTURE_LOCATION, this.getX(), this.getY(), this.width, this.height, 2, 2, 2, 0, 130, 24, 0, this.getTextureY());
 		Font font = Minecraft.getInstance().font;
 		int k = this.active ? -1 : -6250336;
-		this.renderString(poseStack, font, k);
+		this.renderString(guiGraphics, font, k);
 		if (this.isSelected()) {
-			this.renderFocusUnderline(poseStack, font, k);
+			this.renderFocusUnderline(guiGraphics, font, k);
 		}
 	}
 
-	public void renderString(PoseStack poseStack, Font font, int i) {
+	public void renderString(GuiGraphics guiGraphics, Font font, int i) {
 		int j = this.getX() + 1;
 		int k = this.getY() + (this.isSelected() ? 0 : 3);
 		int l = this.getX() + this.getWidth() - 1;
 		int m = this.getY() + this.getHeight();
-		renderScrollingString(poseStack, font, this.getMessage(), j, k, l, m, i);
+		renderScrollingString(guiGraphics, font, this.getMessage(), j, k, l, m, i);
 	}
 
-	private void renderFocusUnderline(PoseStack poseStack, Font font, int i) {
+	private void renderFocusUnderline(GuiGraphics guiGraphics, Font font, int i) {
 		int j = Math.min(font.width(this.getMessage()), this.getWidth() - 4);
 		int k = this.getX() + (this.getWidth() - j) / 2;
 		int l = this.getY() + this.getHeight() - 2;
-		fill(poseStack, k, l, k + j, l + 1, i);
+		guiGraphics.fill(k, l, k + j, l + 1, i);
 	}
 
 	protected int getTextureY() {

@@ -1,9 +1,9 @@
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -98,11 +98,11 @@ public class SelectWorldScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.list.render(poseStack, i, j, f);
-		this.searchBox.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.list.render(guiGraphics, i, j, f);
+		this.searchBox.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	public void updateButtonStatus(boolean bl, boolean bl2) {

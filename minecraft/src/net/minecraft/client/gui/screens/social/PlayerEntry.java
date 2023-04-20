@@ -1,8 +1,6 @@
 package net.minecraft.client.gui.screens.social;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -156,47 +154,45 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 		int p = k + 4;
 		int q = j + (m - 24) / 2;
 		int r = p + 24 + 4;
 		Component component = this.getStatusComponent();
 		int s;
 		if (component == CommonComponents.EMPTY) {
-			GuiComponent.fill(poseStack, k, j, k + l, j + m, BG_FILL);
+			guiGraphics.fill(k, j, k + l, j + m, BG_FILL);
 			s = j + (m - 9) / 2;
 		} else {
-			GuiComponent.fill(poseStack, k, j, k + l, j + m, BG_FILL_REMOVED);
+			guiGraphics.fill(k, j, k + l, j + m, BG_FILL_REMOVED);
 			s = j + (m - (9 + 9)) / 2;
-			this.minecraft.font.draw(poseStack, component, (float)r, (float)(s + 12), PLAYER_STATUS_COLOR);
+			guiGraphics.drawString(this.minecraft.font, component, r, s + 12, PLAYER_STATUS_COLOR, false);
 		}
 
-		RenderSystem.setShaderTexture(0, (ResourceLocation)this.skinGetter.get());
-		PlayerFaceRenderer.draw(poseStack, p, q, 24);
-		this.minecraft.font.draw(poseStack, this.playerName, (float)r, (float)s, PLAYERNAME_COLOR);
+		PlayerFaceRenderer.draw(guiGraphics, (ResourceLocation)this.skinGetter.get(), p, q, 24);
+		guiGraphics.drawString(this.minecraft.font, this.playerName, r, s, PLAYERNAME_COLOR, false);
 		if (this.isRemoved) {
-			GuiComponent.fill(poseStack, p, q, p + 24, q + 24, SKIN_SHADE);
+			guiGraphics.fill(p, q, p + 24, q + 24, SKIN_SHADE);
 		}
 
 		if (this.hideButton != null && this.showButton != null && this.reportButton != null) {
 			float g = this.tooltipHoverTime;
 			this.hideButton.setX(k + (l - this.hideButton.getWidth() - 4) - 20 - 4);
 			this.hideButton.setY(j + (m - this.hideButton.getHeight()) / 2);
-			this.hideButton.render(poseStack, n, o, f);
+			this.hideButton.render(guiGraphics, n, o, f);
 			this.showButton.setX(k + (l - this.showButton.getWidth() - 4) - 20 - 4);
 			this.showButton.setY(j + (m - this.showButton.getHeight()) / 2);
-			this.showButton.render(poseStack, n, o, f);
+			this.showButton.render(guiGraphics, n, o, f);
 			this.reportButton.setX(k + (l - this.showButton.getWidth() - 4));
 			this.reportButton.setY(j + (m - this.showButton.getHeight()) / 2);
-			this.reportButton.render(poseStack, n, o, f);
+			this.reportButton.render(guiGraphics, n, o, f);
 			if (g == this.tooltipHoverTime) {
 				this.tooltipHoverTime = 0.0F;
 			}
 		}
 
 		if (this.hasDraftReport && this.reportButton != null) {
-			RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-			GuiComponent.blit(poseStack, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 182.0F, 24.0F, 15, 15, 256, 256);
+			guiGraphics.blit(AbstractWidget.WIDGETS_LOCATION, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 182.0F, 24.0F, 15, 15, 256, 256);
 		}
 	}
 

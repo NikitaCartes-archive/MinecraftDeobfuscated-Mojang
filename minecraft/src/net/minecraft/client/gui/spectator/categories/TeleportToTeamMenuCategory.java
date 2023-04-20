@@ -1,15 +1,13 @@
 package net.minecraft.client.gui.spectator.categories;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
@@ -63,9 +61,8 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 	}
 
 	@Override
-	public void renderIcon(PoseStack poseStack, float f, int i) {
-		RenderSystem.setShaderTexture(0, SpectatorGui.SPECTATOR_LOCATION);
-		GuiComponent.blit(poseStack, 0, 0, 16.0F, 0.0F, 16, 16, 256, 256);
+	public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
+		guiGraphics.blit(SpectatorGui.SPECTATOR_LOCATION, 0, 0, 16.0F, 0.0F, 16, 16, 256, 256);
 	}
 
 	@Override
@@ -115,19 +112,18 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 		}
 
 		@Override
-		public void renderIcon(PoseStack poseStack, float f, int i) {
+		public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
 			Integer integer = this.team.getColor().getColor();
 			if (integer != null) {
 				float g = (float)(integer >> 16 & 0xFF) / 255.0F;
 				float h = (float)(integer >> 8 & 0xFF) / 255.0F;
 				float j = (float)(integer & 0xFF) / 255.0F;
-				GuiComponent.fill(poseStack, 1, 1, 15, 15, Mth.color(g * f, h * f, j * f) | i << 24);
+				guiGraphics.fill(1, 1, 15, 15, Mth.color(g * f, h * f, j * f) | i << 24);
 			}
 
-			RenderSystem.setShaderTexture(0, this.iconSkin);
-			RenderSystem.setShaderColor(f, f, f, (float)i / 255.0F);
-			PlayerFaceRenderer.draw(poseStack, 2, 2, 12);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			guiGraphics.setColor(f, f, f, (float)i / 255.0F);
+			PlayerFaceRenderer.draw(guiGraphics, this.iconSkin, 2, 2, 12);
+			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		}
 
 		@Override

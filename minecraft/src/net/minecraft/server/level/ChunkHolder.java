@@ -179,7 +179,7 @@ public class ChunkHolder {
 
 	public void sectionLightChanged(LightLayer lightLayer, int i) {
 		Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either = (Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>)this.getFutureIfPresent(
-				ChunkStatus.FEATURES
+				ChunkStatus.INITIALIZE_LIGHT
 			)
 			.getNow(null);
 		if (either != null) {
@@ -411,7 +411,7 @@ public class ChunkHolder {
 				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException());
 			}
 
-			this.entityTickingChunkFuture = chunkMap.prepareEntityTickingChunk(this.pos);
+			this.entityTickingChunkFuture = chunkMap.prepareEntityTickingChunk(this);
 			this.scheduleFullChunkPromotion(chunkMap, this.entityTickingChunkFuture, executor, ChunkHolder.FullChunkStatus.ENTITY_TICKING);
 			this.updateChunkToSave(this.entityTickingChunkFuture, "entity ticking");
 		}

@@ -1,7 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -11,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.CommonComponents;
@@ -98,11 +98,11 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.worldSelectionList.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 13, 16777215);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.worldSelectionList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 13, 16777215);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override
@@ -149,8 +149,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			this.renderItem(poseStack, i, k, j);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			this.renderItem(guiGraphics, i, k, j);
 		}
 
 		@Override
@@ -159,7 +159,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 			return true;
 		}
 
-		protected void renderItem(PoseStack poseStack, int i, int j, int k) {
+		protected void renderItem(GuiGraphics guiGraphics, int i, int j, int k) {
 			String string;
 			if (this.name.isEmpty()) {
 				string = RealmsSelectFileToUploadScreen.WORLD_TEXT + " " + (i + 1);
@@ -167,9 +167,9 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 				string = this.name;
 			}
 
-			RealmsSelectFileToUploadScreen.this.font.draw(poseStack, string, (float)(j + 2), (float)(k + 1), 16777215);
-			RealmsSelectFileToUploadScreen.this.font.draw(poseStack, this.id, (float)(j + 2), (float)(k + 12), 8421504);
-			RealmsSelectFileToUploadScreen.this.font.draw(poseStack, this.info, (float)(j + 2), (float)(k + 12 + 10), 8421504);
+			guiGraphics.drawString(RealmsSelectFileToUploadScreen.this.font, string, j + 2, k + 1, 16777215, false);
+			guiGraphics.drawString(RealmsSelectFileToUploadScreen.this.font, this.id, j + 2, k + 12, 8421504, false);
+			guiGraphics.drawString(RealmsSelectFileToUploadScreen.this.font, this.info, j + 2, k + 12 + 10, 8421504, false);
 		}
 
 		@Override
@@ -205,8 +205,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderBackground(PoseStack poseStack) {
-			RealmsSelectFileToUploadScreen.this.renderBackground(poseStack);
+		public void renderBackground(GuiGraphics guiGraphics) {
+			RealmsSelectFileToUploadScreen.this.renderBackground(guiGraphics);
 		}
 
 		public void setSelected(@Nullable RealmsSelectFileToUploadScreen.Entry entry) {

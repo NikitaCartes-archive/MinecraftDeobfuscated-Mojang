@@ -1,5 +1,6 @@
 package net.minecraft.world.inventory;
 
+import java.util.List;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -82,6 +83,10 @@ public class CraftingContainer implements Container, StackedContentsCompatible {
 
 	public int getWidth() {
 		return this.width;
+	}
+
+	public List<ItemStack> getItems() {
+		return List.copyOf(this.items);
 	}
 
 	@Override

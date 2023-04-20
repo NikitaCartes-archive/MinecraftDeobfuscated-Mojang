@@ -20,6 +20,10 @@ public record RemoteChatSession(UUID sessionId, ProfilePublicKey profilePublicKe
 		return new RemoteChatSession.Data(this.sessionId, this.profilePublicKey.data());
 	}
 
+	public boolean hasExpired() {
+		return this.profilePublicKey.data().hasExpired();
+	}
+
 	public static record Data(UUID sessionId, ProfilePublicKey.Data profilePublicKey) {
 		public static RemoteChatSession.Data read(FriendlyByteBuf friendlyByteBuf) {
 			return new RemoteChatSession.Data(friendlyByteBuf.readUUID(), new ProfilePublicKey.Data(friendlyByteBuf));

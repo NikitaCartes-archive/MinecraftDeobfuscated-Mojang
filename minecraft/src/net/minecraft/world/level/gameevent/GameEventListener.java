@@ -18,4 +18,8 @@ public interface GameEventListener {
 		UNSPECIFIED,
 		BY_DISTANCE;
 	}
+
+	public interface Holder<T extends GameEventListener> {
+		T getListener();
+	}
 }

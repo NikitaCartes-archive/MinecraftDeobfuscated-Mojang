@@ -1,6 +1,5 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -8,6 +7,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -93,14 +93,14 @@ public class RealmsInviteScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.font.draw(poseStack, NAME_LABEL, (float)(this.width / 2 - 100), (float)row(1), 10526880);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 100, row(1), 10526880, false);
 		if (this.errorMsg != null) {
-			drawCenteredString(poseStack, this.font, this.errorMsg, this.width / 2, row(5), 16711680);
+			guiGraphics.drawCenteredString(this.font, this.errorMsg, this.width / 2, row(5), 16711680);
 		}
 
-		this.profileName.render(poseStack, i, j, f);
-		super.render(poseStack, i, j, f);
+		this.profileName.render(guiGraphics, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 }

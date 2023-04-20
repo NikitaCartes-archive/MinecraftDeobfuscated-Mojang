@@ -2,7 +2,6 @@ package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -15,7 +14,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
@@ -361,12 +360,12 @@ public class EditBox extends AbstractWidget implements Renderable {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.isVisible()) {
 			if (this.isBordered()) {
 				int k = this.isFocused() ? -1 : -6250336;
-				fill(poseStack, this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, k);
-				fill(poseStack, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
+				guiGraphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, k);
+				guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
 			}
 
 			int k = this.isEditable ? this.textColor : this.textColorUneditable;
@@ -384,7 +383,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 
 			if (!string.isEmpty()) {
 				String string2 = bl ? string.substring(0, l) : string;
-				p = this.font.drawShadow(poseStack, (FormattedCharSequence)this.formatter.apply(string2, this.displayPos), (float)n, (float)o, k);
+				p = guiGraphics.drawString(this.font, (FormattedCharSequence)this.formatter.apply(string2, this.displayPos), n, o, k);
 			}
 
 			boolean bl3 = this.cursorPos < this.value.length() || this.value.length() >= this.getMaxLength();
@@ -397,33 +396,33 @@ public class EditBox extends AbstractWidget implements Renderable {
 			}
 
 			if (!string.isEmpty() && bl && l < string.length()) {
-				this.font.drawShadow(poseStack, (FormattedCharSequence)this.formatter.apply(string.substring(l), this.cursorPos), (float)p, (float)o, k);
+				guiGraphics.drawString(this.font, (FormattedCharSequence)this.formatter.apply(string.substring(l), this.cursorPos), p, o, k);
 			}
 
 			if (this.hint != null && string.isEmpty() && !this.isFocused()) {
-				this.font.drawShadow(poseStack, this.hint, (float)p, (float)o, k);
+				guiGraphics.drawString(this.font, this.hint, p, o, k);
 			}
 
 			if (!bl3 && this.suggestion != null) {
-				this.font.drawShadow(poseStack, this.suggestion, (float)(q - 1), (float)o, -8355712);
+				guiGraphics.drawString(this.font, this.suggestion, q - 1, o, -8355712);
 			}
 
 			if (bl2) {
 				if (bl3) {
-					GuiComponent.fill(poseStack, q, o - 1, q + 1, o + 1 + 9, -3092272);
+					guiGraphics.fill(q, o - 1, q + 1, o + 1 + 9, -3092272);
 				} else {
-					this.font.drawShadow(poseStack, "_", (float)q, (float)o, k);
+					guiGraphics.drawString(this.font, "_", q, o, k);
 				}
 			}
 
 			if (m != l) {
 				int r = n + this.font.width(string.substring(0, m));
-				this.renderHighlight(poseStack, q, o - 1, r - 1, o + 1 + 9);
+				this.renderHighlight(guiGraphics, q, o - 1, r - 1, o + 1 + 9);
 			}
 		}
 	}
 
-	private void renderHighlight(PoseStack poseStack, int i, int j, int k, int l) {
+	private void renderHighlight(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		if (i < k) {
 			int m = i;
 			i = k;
@@ -446,7 +445,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 
 		RenderSystem.enableColorLogicOp();
 		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-		fill(poseStack, i, j, k, l, -16776961);
+		guiGraphics.fill(i, j, k, l, -16776961);
 		RenderSystem.disableColorLogicOp();
 	}
 

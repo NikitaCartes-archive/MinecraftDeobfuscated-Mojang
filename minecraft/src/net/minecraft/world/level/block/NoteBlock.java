@@ -44,12 +44,14 @@ public class NoteBlock extends Block {
 	}
 
 	private BlockState setInstrument(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
-		BlockState blockState2 = levelAccessor.getBlockState(blockPos.above());
-		return blockState.setValue(
-			INSTRUMENT,
-			(NoteBlockInstrument)NoteBlockInstrument.byStateAbove(blockState2)
-				.orElseGet(() -> NoteBlockInstrument.byStateBelow(levelAccessor.getBlockState(blockPos.below())))
-		);
+		NoteBlockInstrument noteBlockInstrument = levelAccessor.getBlockState(blockPos.above()).instrument();
+		if (noteBlockInstrument.worksAboveNoteBlock()) {
+			return blockState.setValue(INSTRUMENT, noteBlockInstrument);
+		} else {
+			NoteBlockInstrument noteBlockInstrument2 = levelAccessor.getBlockState(blockPos.below()).instrument();
+			NoteBlockInstrument noteBlockInstrument3 = noteBlockInstrument2.worksAboveNoteBlock() ? NoteBlockInstrument.HARP : noteBlockInstrument2;
+			return blockState.setValue(INSTRUMENT, noteBlockInstrument3);
+		}
 	}
 
 	@Override
@@ -80,7 +82,7 @@ public class NoteBlock extends Block {
 	}
 
 	private void playNote(@Nullable Entity entity, BlockState blockState, Level level, BlockPos blockPos) {
-		if (!((NoteBlockInstrument)blockState.getValue(INSTRUMENT)).requiresAirAbove() || level.getBlockState(blockPos.above()).isAir()) {
+		if (((NoteBlockInstrument)blockState.getValue(INSTRUMENT)).worksAboveNoteBlock() || level.getBlockState(blockPos.above()).isAir()) {
 			level.blockEvent(blockPos, this, 0, 0);
 			level.gameEvent(entity, GameEvent.NOTE_BLOCK_PLAY, blockPos);
 		}

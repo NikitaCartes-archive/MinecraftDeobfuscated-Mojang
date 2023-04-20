@@ -1,7 +1,5 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.RealmsMainScreen;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -9,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
@@ -119,15 +118,16 @@ public class PauseScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.showPauseMenu) {
-			this.renderBackground(poseStack);
+			this.renderBackground(guiGraphics);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 		if (this.showPauseMenu && this.minecraft != null && this.minecraft.getReportingContext().hasDraftReport() && this.disconnectButton != null) {
-			RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-			blit(poseStack, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 182, 24, 15, 15);
+			guiGraphics.blit(
+				AbstractWidget.WIDGETS_LOCATION, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 182, 24, 15, 15
+			);
 		}
 	}
 

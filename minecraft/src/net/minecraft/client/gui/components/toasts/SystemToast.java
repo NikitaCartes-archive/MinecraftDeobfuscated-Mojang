@@ -1,15 +1,13 @@
 package net.minecraft.client.gui.components.toasts;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -63,36 +61,35 @@ public class SystemToast implements Toast {
 	}
 
 	@Override
-	public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
+	public Toast.Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long l) {
 		if (this.changed) {
 			this.lastChanged = l;
 			this.changed = false;
 		}
 
-		RenderSystem.setShaderTexture(0, TEXTURE);
 		int i = this.width();
 		if (i == 160 && this.messageLines.size() <= 1) {
-			GuiComponent.blit(poseStack, 0, 0, 0, 64, i, this.height());
+			guiGraphics.blit(TEXTURE, 0, 0, 0, 64, i, this.height());
 		} else {
 			int j = this.height();
 			int k = 28;
 			int m = Math.min(4, j - 28);
-			this.renderBackgroundRow(poseStack, toastComponent, i, 0, 0, 28);
+			this.renderBackgroundRow(guiGraphics, toastComponent, i, 0, 0, 28);
 
 			for (int n = 28; n < j - m; n += 10) {
-				this.renderBackgroundRow(poseStack, toastComponent, i, 16, n, Math.min(16, j - n - m));
+				this.renderBackgroundRow(guiGraphics, toastComponent, i, 16, n, Math.min(16, j - n - m));
 			}
 
-			this.renderBackgroundRow(poseStack, toastComponent, i, 32 - m, j - m, m);
+			this.renderBackgroundRow(guiGraphics, toastComponent, i, 32 - m, j - m, m);
 		}
 
 		if (this.messageLines == null) {
-			toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0F, 12.0F, -256);
+			guiGraphics.drawString(toastComponent.getMinecraft().font, this.title, 18, 12, -256, false);
 		} else {
-			toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0F, 7.0F, -256);
+			guiGraphics.drawString(toastComponent.getMinecraft().font, this.title, 18, 7, -256, false);
 
 			for (int j = 0; j < this.messageLines.size(); j++) {
-				toastComponent.getMinecraft().font.draw(poseStack, (FormattedCharSequence)this.messageLines.get(j), 18.0F, (float)(18 + j * 12), -1);
+				guiGraphics.drawString(toastComponent.getMinecraft().font, (FormattedCharSequence)this.messageLines.get(j), 18, 18 + j * 12, -1, false);
 			}
 		}
 
@@ -101,16 +98,16 @@ public class SystemToast implements Toast {
 			: Toast.Visibility.HIDE;
 	}
 
-	private void renderBackgroundRow(PoseStack poseStack, ToastComponent toastComponent, int i, int j, int k, int l) {
+	private void renderBackgroundRow(GuiGraphics guiGraphics, ToastComponent toastComponent, int i, int j, int k, int l) {
 		int m = j == 0 ? 20 : 5;
 		int n = Math.min(60, i - m);
-		GuiComponent.blit(poseStack, 0, k, 0, 64 + j, m, l);
+		guiGraphics.blit(TEXTURE, 0, k, 0, 64 + j, m, l);
 
 		for (int o = m; o < i - n; o += 64) {
-			GuiComponent.blit(poseStack, o, k, 32, 64 + j, Math.min(64, i - o - n), l);
+			guiGraphics.blit(TEXTURE, o, k, 32, 64 + j, Math.min(64, i - o - n), l);
 		}
 
-		GuiComponent.blit(poseStack, i - n, k, 160 - n, 64 + j, n, l);
+		guiGraphics.blit(TEXTURE, i - n, k, 160 - n, 64 + j, n, l);
 	}
 
 	public void reset(Component component, @Nullable Component component2) {

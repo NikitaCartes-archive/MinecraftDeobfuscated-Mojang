@@ -14,6 +14,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
+import net.minecraft.client.gui.components.SplashRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -66,21 +67,21 @@ public class SplashManager extends SimplePreparableReloadListener<List<String>> 
 	}
 
 	@Nullable
-	public String getSplash() {
+	public SplashRenderer getSplash() {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(new Date());
 		if (calendar.get(2) + 1 == 12 && calendar.get(5) == 24) {
-			return "Merry X-mas!";
+			return SplashRenderer.CHRISTMAS;
 		} else if (calendar.get(2) + 1 == 1 && calendar.get(5) == 1) {
-			return "Happy new year!";
+			return SplashRenderer.NEW_YEAR;
 		} else if (calendar.get(2) + 1 == 10 && calendar.get(5) == 31) {
-			return "OOoooOOOoooo! Spooky!";
+			return SplashRenderer.HALLOWEEN;
 		} else if (this.splashes.isEmpty()) {
 			return null;
 		} else {
 			return this.user != null && RANDOM.nextInt(this.splashes.size()) == 42
-				? this.user.getName().toUpperCase(Locale.ROOT) + " IS YOU"
-				: (String)this.splashes.get(RANDOM.nextInt(this.splashes.size()));
+				? new SplashRenderer(this.user.getName().toUpperCase(Locale.ROOT) + " IS YOU")
+				: new SplashRenderer((String)this.splashes.get(RANDOM.nextInt(this.splashes.size())));
 		}
 	}
 }

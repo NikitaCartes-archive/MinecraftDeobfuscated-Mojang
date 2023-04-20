@@ -1,9 +1,9 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -44,8 +44,7 @@ public class StateSwitchingButton extends AbstractWidget {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-		RenderSystem.setShaderTexture(0, this.resourceLocation);
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		RenderSystem.disableDepthTest();
 		int k = this.xTexStart;
 		int l = this.yTexStart;
@@ -57,7 +56,7 @@ public class StateSwitchingButton extends AbstractWidget {
 			l += this.yDiffTex;
 		}
 
-		blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
+		guiGraphics.blit(this.resourceLocation, this.getX(), this.getY(), k, l, this.width, this.height);
 		RenderSystem.enableDepthTest();
 	}
 }

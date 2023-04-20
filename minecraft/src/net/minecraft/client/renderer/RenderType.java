@@ -673,6 +673,8 @@ public abstract class RenderType extends RenderStateShard {
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.TRIANGLE_STRIP,
 		131072,
+		false,
+		true,
 		RenderType.CompositeState.builder()
 			.setShaderState(POSITION_COLOR_SHADER)
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
@@ -684,10 +686,26 @@ public abstract class RenderType extends RenderStateShard {
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.QUADS,
 		131072,
+		false,
+		true,
 		RenderType.CompositeState.builder()
 			.setShaderState(POSITION_COLOR_SHADER)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 			.setCullState(NO_CULL)
+			.createCompositeState(false)
+	);
+	private static final RenderType.CompositeRenderType DEBUG_SECTION_QUADS = create(
+		"debug_section_quads",
+		DefaultVertexFormat.POSITION_COLOR,
+		VertexFormat.Mode.QUADS,
+		131072,
+		false,
+		true,
+		RenderType.CompositeState.builder()
+			.setShaderState(POSITION_COLOR_SHADER)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setCullState(CULL)
 			.createCompositeState(false)
 	);
 	private static final ImmutableList<RenderType> CHUNK_BUFFER_LAYERS = ImmutableList.of(solid(), cutoutMipped(), cutout(), translucent(), tripwire());
@@ -962,6 +980,10 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType debugQuads() {
 		return DEBUG_QUADS;
+	}
+
+	public static RenderType debugSectionQuads() {
+		return DEBUG_SECTION_QUADS;
 	}
 
 	public RenderType(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, boolean bl, boolean bl2, Runnable runnable, Runnable runnable2) {

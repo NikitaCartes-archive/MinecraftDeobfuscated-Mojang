@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -18,7 +17,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.LogoRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -221,8 +220,7 @@ public class WinScreen extends Screen {
 		this.lines.add(component.getVisualOrderText());
 	}
 
-	private void renderBg(PoseStack poseStack) {
-		RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
+	private void renderBg(GuiGraphics guiGraphics) {
 		int i = this.width;
 		float f = this.scroll * 0.5F;
 		int j = 64;
@@ -240,51 +238,50 @@ public class WinScreen extends Screen {
 
 		h *= h;
 		h = h * 96.0F / 255.0F;
-		RenderSystem.setShaderColor(h, h, h, 1.0F);
-		blit(poseStack, 0, 0, 0, 0.0F, f, i, this.height, 64, 64);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.setColor(h, h, h, 1.0F);
+		guiGraphics.blit(BACKGROUND_LOCATION, 0, 0, 0, 0.0F, f, i, this.height, 64, 64);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.scroll = this.scroll + f * this.scrollSpeed;
-		this.renderBg(poseStack);
+		this.renderBg(guiGraphics);
 		int k = this.width / 2 - 128;
 		int l = this.height + 50;
 		float g = -this.scroll;
-		poseStack.pushPose();
-		poseStack.translate(0.0F, g, 0.0F);
-		this.logoRenderer.renderLogo(poseStack, this.width, 1.0F, l);
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate(0.0F, g, 0.0F);
+		this.logoRenderer.renderLogo(guiGraphics, this.width, 1.0F, l);
 		int m = l + 100;
 
 		for (int n = 0; n < this.lines.size(); n++) {
 			if (n == this.lines.size() - 1) {
 				float h = (float)m + g - (float)(this.height / 2 - 6);
 				if (h < 0.0F) {
-					poseStack.translate(0.0F, -h, 0.0F);
+					guiGraphics.pose().translate(0.0F, -h, 0.0F);
 				}
 			}
 
 			if ((float)m + g + 12.0F + 8.0F > 0.0F && (float)m + g < (float)this.height) {
 				FormattedCharSequence formattedCharSequence = (FormattedCharSequence)this.lines.get(n);
 				if (this.centeredLines.contains(n)) {
-					this.font.drawShadow(poseStack, formattedCharSequence, (float)(k + (256 - this.font.width(formattedCharSequence)) / 2), (float)m, 16777215);
+					guiGraphics.drawCenteredString(this.font, formattedCharSequence, k + 128, m, 16777215);
 				} else {
-					this.font.drawShadow(poseStack, formattedCharSequence, (float)k, (float)m, 16777215);
+					guiGraphics.drawString(this.font, formattedCharSequence, k, m, 16777215);
 				}
 			}
 
 			m += 12;
 		}
 
-		poseStack.popPose();
-		RenderSystem.setShaderTexture(0, VIGNETTE_LOCATION);
+		guiGraphics.pose().popPose();
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
-		blit(poseStack, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, this.width, this.height);
+		guiGraphics.blit(VIGNETTE_LOCATION, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, this.width, this.height);
 		RenderSystem.disableBlend();
 		RenderSystem.defaultBlendFunc();
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

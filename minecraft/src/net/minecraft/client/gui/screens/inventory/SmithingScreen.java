@@ -1,11 +1,11 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -84,18 +84,18 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		super.render(poseStack, i, j, f);
-		this.renderOnboardingTooltips(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
+		this.renderOnboardingTooltips(guiGraphics, i, j);
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		super.renderBg(poseStack, f, i, j);
-		this.templateIcon.render(this.menu, poseStack, f, this.leftPos, this.topPos);
-		this.baseIcon.render(this.menu, poseStack, f, this.leftPos, this.topPos);
-		this.additionalIcon.render(this.menu, poseStack, f, this.leftPos, this.topPos);
-		InventoryScreen.renderEntityInInventory(poseStack, this.leftPos + 141, this.topPos + 75, 25, ARMOR_STAND_ANGLE, null, this.armorStandPreview);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
+		super.renderBg(guiGraphics, f, i, j);
+		this.templateIcon.render(this.menu, guiGraphics, f, this.leftPos, this.topPos);
+		this.baseIcon.render(this.menu, guiGraphics, f, this.leftPos, this.topPos);
+		this.additionalIcon.render(this.menu, guiGraphics, f, this.leftPos, this.topPos);
+		InventoryScreen.renderEntityInInventory(guiGraphics, this.leftPos + 141, this.topPos + 75, 25, ARMOR_STAND_ANGLE, null, this.armorStandPreview);
 	}
 
 	@Override
@@ -123,13 +123,13 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
 	}
 
 	@Override
-	protected void renderErrorIcon(PoseStack poseStack, int i, int j) {
+	protected void renderErrorIcon(GuiGraphics guiGraphics, int i, int j) {
 		if (this.hasRecipeError()) {
-			blit(poseStack, i + 65, j + 46, this.imageWidth, 0, 28, 21);
+			guiGraphics.blit(SMITHING_LOCATION, i + 65, j + 46, this.imageWidth, 0, 28, 21);
 		}
 	}
 
-	private void renderOnboardingTooltips(PoseStack poseStack, int i, int j) {
+	private void renderOnboardingTooltips(GuiGraphics guiGraphics, int i, int j) {
 		Optional<Component> optional = Optional.empty();
 		if (this.hasRecipeError() && this.isHovering(65, 46, 28, 21, (double)i, (double)j)) {
 			optional = Optional.of(ERROR_TOOLTIP);
@@ -151,7 +151,7 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
 			}
 		}
 
-		optional.ifPresent(component -> this.renderTooltip(poseStack, this.font.split(component, 115), i, j));
+		optional.ifPresent(component -> guiGraphics.renderTooltip(this.font, this.font.split(component, 115), i, j));
 	}
 
 	private boolean hasRecipeError() {

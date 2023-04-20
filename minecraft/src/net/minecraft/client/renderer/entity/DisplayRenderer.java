@@ -124,6 +124,8 @@ public abstract class DisplayRenderer<T extends Display, S> extends EntityRender
 			int i,
 			float f
 		) {
+			Matrix4f matrix4f = poseStack.last().pose();
+			matrix4f.rotate((float) Math.PI, 0.0F, 1.0F, 0.0F);
 			this.itemRenderer
 				.renderStatic(
 					itemRenderState.itemStack(),

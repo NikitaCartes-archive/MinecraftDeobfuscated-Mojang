@@ -1,11 +1,10 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -34,24 +33,24 @@ public class SignEditScreen extends AbstractSignEditScreen {
 	}
 
 	@Override
-	protected void offsetSign(PoseStack poseStack, BlockState blockState) {
-		super.offsetSign(poseStack, blockState);
+	protected void offsetSign(GuiGraphics guiGraphics, BlockState blockState) {
+		super.offsetSign(guiGraphics, blockState);
 		boolean bl = blockState.getBlock() instanceof StandingSignBlock;
 		if (!bl) {
-			poseStack.translate(0.0F, 35.0F, 0.0F);
+			guiGraphics.pose().translate(0.0F, 35.0F, 0.0F);
 		}
 	}
 
 	@Override
-	protected void renderSignBackground(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, BlockState blockState) {
+	protected void renderSignBackground(GuiGraphics guiGraphics, BlockState blockState) {
 		if (this.signModel != null) {
 			boolean bl = blockState.getBlock() instanceof StandingSignBlock;
-			poseStack.translate(0.0F, 31.0F, 0.0F);
-			poseStack.scale(62.500004F, 62.500004F, -62.500004F);
+			guiGraphics.pose().translate(0.0F, 31.0F, 0.0F);
+			guiGraphics.pose().scale(62.500004F, 62.500004F, -62.500004F);
 			Material material = Sheets.getSignMaterial(this.woodType);
-			VertexConsumer vertexConsumer = material.buffer(bufferSource, this.signModel::renderType);
+			VertexConsumer vertexConsumer = material.buffer(guiGraphics.bufferSource(), this.signModel::renderType);
 			this.signModel.stick.visible = bl;
-			this.signModel.root.render(poseStack, vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY);
+			this.signModel.root.render(guiGraphics.pose(), vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY);
 		}
 	}
 

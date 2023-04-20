@@ -3,7 +3,6 @@ package net.minecraft.client.gui.components;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.ParseResults;
@@ -32,7 +31,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.commands.Commands;
@@ -56,7 +55,7 @@ public class CommandSuggestions {
 		.map(Style.EMPTY::withColor)
 		.collect(ImmutableList.toImmutableList());
 	final Minecraft minecraft;
-	final Screen screen;
+	private final Screen screen;
 	final EditBox input;
 	final Font font;
 	private final boolean commandsOnly;
@@ -330,28 +329,28 @@ public class CommandSuggestions {
 		return FormattedCharSequence.composite(list);
 	}
 
-	public void render(PoseStack poseStack, int i, int j) {
-		if (!this.renderSuggestions(poseStack, i, j)) {
-			this.renderUsage(poseStack);
+	public void render(GuiGraphics guiGraphics, int i, int j) {
+		if (!this.renderSuggestions(guiGraphics, i, j)) {
+			this.renderUsage(guiGraphics);
 		}
 	}
 
-	public boolean renderSuggestions(PoseStack poseStack, int i, int j) {
+	public boolean renderSuggestions(GuiGraphics guiGraphics, int i, int j) {
 		if (this.suggestions != null) {
-			this.suggestions.render(poseStack, i, j);
+			this.suggestions.render(guiGraphics, i, j);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public void renderUsage(PoseStack poseStack) {
+	public void renderUsage(GuiGraphics guiGraphics) {
 		int i = 0;
 
 		for (FormattedCharSequence formattedCharSequence : this.commandUsage) {
 			int j = this.anchorToBottom ? this.screen.height - 14 - 13 - 12 * i : 72 + 12 * i;
-			GuiComponent.fill(poseStack, this.commandUsagePosition - 1, j, this.commandUsagePosition + this.commandUsageWidth + 1, j + 12, this.fillColor);
-			this.font.drawShadow(poseStack, formattedCharSequence, (float)this.commandUsagePosition, (float)(j + 2), -1);
+			guiGraphics.fill(this.commandUsagePosition - 1, j, this.commandUsagePosition + this.commandUsageWidth + 1, j + 12, this.fillColor);
+			guiGraphics.drawString(this.font, formattedCharSequence, this.commandUsagePosition, j + 2, -1);
 			i++;
 		}
 	}
@@ -381,7 +380,7 @@ public class CommandSuggestions {
 			this.select(0);
 		}
 
-		public void render(PoseStack poseStack, int i, int j) {
+		public void render(GuiGraphics guiGraphics, int i, int j) {
 			int k = Math.min(this.suggestionList.size(), CommandSuggestions.this.suggestionLineLimit);
 			int l = -5592406;
 			boolean bl = this.offset > 0;
@@ -393,11 +392,8 @@ public class CommandSuggestions {
 			}
 
 			if (bl3) {
-				GuiComponent.fill(
-					poseStack, this.rect.getX(), this.rect.getY() - 1, this.rect.getX() + this.rect.getWidth(), this.rect.getY(), CommandSuggestions.this.fillColor
-				);
-				GuiComponent.fill(
-					poseStack,
+				guiGraphics.fill(this.rect.getX(), this.rect.getY() - 1, this.rect.getX() + this.rect.getWidth(), this.rect.getY(), CommandSuggestions.this.fillColor);
+				guiGraphics.fill(
 					this.rect.getX(),
 					this.rect.getY() + this.rect.getHeight(),
 					this.rect.getX() + this.rect.getWidth(),
@@ -407,7 +403,7 @@ public class CommandSuggestions {
 				if (bl) {
 					for (int m = 0; m < this.rect.getWidth(); m++) {
 						if (m % 2 == 0) {
-							GuiComponent.fill(poseStack, this.rect.getX() + m, this.rect.getY() - 1, this.rect.getX() + m + 1, this.rect.getY(), -1);
+							guiGraphics.fill(this.rect.getX() + m, this.rect.getY() - 1, this.rect.getX() + m + 1, this.rect.getY(), -1);
 						}
 					}
 				}
@@ -415,8 +411,8 @@ public class CommandSuggestions {
 				if (bl2) {
 					for (int mx = 0; mx < this.rect.getWidth(); mx++) {
 						if (mx % 2 == 0) {
-							GuiComponent.fill(
-								poseStack, this.rect.getX() + mx, this.rect.getY() + this.rect.getHeight(), this.rect.getX() + mx + 1, this.rect.getY() + this.rect.getHeight() + 1, -1
+							guiGraphics.fill(
+								this.rect.getX() + mx, this.rect.getY() + this.rect.getHeight(), this.rect.getX() + mx + 1, this.rect.getY() + this.rect.getHeight() + 1, -1
 							);
 						}
 					}
@@ -427,13 +423,8 @@ public class CommandSuggestions {
 
 			for (int n = 0; n < k; n++) {
 				Suggestion suggestion = (Suggestion)this.suggestionList.get(n + this.offset);
-				GuiComponent.fill(
-					poseStack,
-					this.rect.getX(),
-					this.rect.getY() + 12 * n,
-					this.rect.getX() + this.rect.getWidth(),
-					this.rect.getY() + 12 * n + 12,
-					CommandSuggestions.this.fillColor
+				guiGraphics.fill(
+					this.rect.getX(), this.rect.getY() + 12 * n, this.rect.getX() + this.rect.getWidth(), this.rect.getY() + 12 * n + 12, CommandSuggestions.this.fillColor
 				);
 				if (i > this.rect.getX() && i < this.rect.getX() + this.rect.getWidth() && j > this.rect.getY() + 12 * n && j < this.rect.getY() + 12 * n + 12) {
 					if (bl4) {
@@ -443,16 +434,15 @@ public class CommandSuggestions {
 					bl5 = true;
 				}
 
-				CommandSuggestions.this.font
-					.drawShadow(
-						poseStack, suggestion.getText(), (float)(this.rect.getX() + 1), (float)(this.rect.getY() + 2 + 12 * n), n + this.offset == this.current ? -256 : -5592406
-					);
+				guiGraphics.drawString(
+					CommandSuggestions.this.font, suggestion.getText(), this.rect.getX() + 1, this.rect.getY() + 2 + 12 * n, n + this.offset == this.current ? -256 : -5592406
+				);
 			}
 
 			if (bl5) {
 				Message message = ((Suggestion)this.suggestionList.get(this.current)).getTooltip();
 				if (message != null) {
-					CommandSuggestions.this.screen.renderTooltip(poseStack, ComponentUtils.fromMessage(message), i, j);
+					guiGraphics.renderTooltip(CommandSuggestions.this.font, ComponentUtils.fromMessage(message), i, j);
 				}
 			}
 		}

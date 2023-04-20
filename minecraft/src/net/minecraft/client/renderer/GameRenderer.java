@@ -9,10 +9,8 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.datafixers.util.Pair;
@@ -41,6 +39,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -1097,20 +1096,20 @@ public class GameRenderer implements AutoCloseable {
 			poseStack.translate(0.0F, 0.0F, -2000.0F);
 			RenderSystem.applyModelViewMatrix();
 			Lighting.setupFor3DItems();
-			PoseStack poseStack2 = new PoseStack();
+			GuiGraphics guiGraphics = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
 				if (this.minecraft.player != null) {
 					float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
 					float h = this.minecraft.options.screenEffectScale().get().floatValue();
 					if (g > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && h < 1.0F) {
-						this.renderConfusionOverlay(g * (1.0F - h));
+						this.renderConfusionOverlay(guiGraphics, g * (1.0F - h));
 					}
 				}
 
 				if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
 					this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), f);
-					this.minecraft.gui.render(poseStack2, f);
+					this.minecraft.gui.render(guiGraphics, f);
 					RenderSystem.clear(256, Minecraft.ON_OSX);
 				}
 
@@ -1119,7 +1118,7 @@ public class GameRenderer implements AutoCloseable {
 
 			if (this.minecraft.getOverlay() != null) {
 				try {
-					this.minecraft.getOverlay().render(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
+					this.minecraft.getOverlay().render(guiGraphics, i, j, this.minecraft.getDeltaFrameTime());
 				} catch (Throwable var16) {
 					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
@@ -1128,7 +1127,7 @@ public class GameRenderer implements AutoCloseable {
 				}
 			} else if (this.minecraft.screen != null) {
 				try {
-					this.minecraft.screen.renderWithTooltip(poseStack2, i, j, this.minecraft.getDeltaFrameTime());
+					this.minecraft.screen.renderWithTooltip(guiGraphics, i, j, this.minecraft.getDeltaFrameTime());
 				} catch (Throwable var15) {
 					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
@@ -1167,8 +1166,9 @@ public class GameRenderer implements AutoCloseable {
 			}
 
 			this.minecraft.getProfiler().push("toasts");
-			this.minecraft.getToasts().render(poseStack2);
+			this.minecraft.getToasts().render(guiGraphics);
 			this.minecraft.getProfiler().pop();
+			guiGraphics.flush();
 			poseStack.popPose();
 			RenderSystem.applyModelViewMatrix();
 		}
@@ -1356,37 +1356,29 @@ public class GameRenderer implements AutoCloseable {
 		}
 	}
 
-	private void renderConfusionOverlay(float f) {
+	private void renderConfusionOverlay(GuiGraphics guiGraphics, float f) {
 		int i = this.minecraft.getWindow().getGuiScaledWidth();
 		int j = this.minecraft.getWindow().getGuiScaledHeight();
-		double d = Mth.lerp((double)f, 2.0, 1.0);
-		float g = 0.2F * f;
-		float h = 0.4F * f;
-		float k = 0.2F * f;
-		double e = (double)i * d;
-		double l = (double)j * d;
-		double m = ((double)i - e) / 2.0;
-		double n = ((double)j - l) / 2.0;
+		guiGraphics.pose().pushPose();
+		float g = Mth.lerp(f, 2.0F, 1.0F);
+		guiGraphics.pose().translate((float)i / 2.0F, (float)j / 2.0F, 0.0F);
+		guiGraphics.pose().scale(g, g, g);
+		guiGraphics.pose().translate((float)(-i) / 2.0F, (float)(-j) / 2.0F, 0.0F);
+		float h = 0.2F * f;
+		float k = 0.4F * f;
+		float l = 0.2F * f;
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-		RenderSystem.setShaderColor(g, h, k, 1.0F);
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderTexture(0, NAUSEA_LOCATION);
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.vertex(m, n + l, -90.0).uv(0.0F, 1.0F).endVertex();
-		bufferBuilder.vertex(m + e, n + l, -90.0).uv(1.0F, 1.0F).endVertex();
-		bufferBuilder.vertex(m + e, n, -90.0).uv(1.0F, 0.0F).endVertex();
-		bufferBuilder.vertex(m, n, -90.0).uv(0.0F, 0.0F).endVertex();
-		tesselator.end();
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.setColor(h, k, l, 1.0F);
+		guiGraphics.blit(NAUSEA_LOCATION, 0, 0, -90, 0.0F, 0.0F, i, j, i, j);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableBlend();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();
+		guiGraphics.pose().popPose();
 	}
 
 	public Minecraft getMinecraft() {

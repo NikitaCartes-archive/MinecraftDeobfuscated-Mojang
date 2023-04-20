@@ -1,13 +1,13 @@
 package net.minecraft.client.gui.screens.controls;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -75,10 +75,10 @@ public class KeyBindsScreen extends OptionsSubScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.keyBindsList.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.keyBindsList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		boolean bl = false;
 
 		for (KeyMapping keyMapping : this.options.keyMappings) {
@@ -89,6 +89,6 @@ public class KeyBindsScreen extends OptionsSubScreen {
 		}
 
 		this.resetButton.active = bl;
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 }

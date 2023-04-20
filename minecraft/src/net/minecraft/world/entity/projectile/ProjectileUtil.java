@@ -40,9 +40,7 @@ public final class ProjectileUtil {
 			vec33 = hitResult.getLocation();
 		}
 
-		HitResult hitResult2 = getEntityHitResult(
-			level, entity, vec3, vec33, entity.getBoundingBox().expandTowards(entity.getDeltaMovement()).inflate(1.0), predicate
-		);
+		HitResult hitResult2 = getEntityHitResult(level, entity, vec3, vec33, entity.getBoundingBox().expandTowards(vec32).inflate(1.0), predicate);
 		if (hitResult2 != null) {
 			hitResult = hitResult2;
 		}

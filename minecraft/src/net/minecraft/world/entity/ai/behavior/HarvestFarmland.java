@@ -8,17 +8,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -115,28 +115,11 @@ public class HarvestFarmland extends Behavior<Villager> {
 					for (int i = 0; i < simpleContainer.getContainerSize(); i++) {
 						ItemStack itemStack = simpleContainer.getItem(i);
 						boolean bl = false;
-						if (!itemStack.isEmpty()) {
-							if (itemStack.is(Items.WHEAT_SEEDS)) {
-								BlockState blockState2 = Blocks.WHEAT.defaultBlockState();
-								serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
-								serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
-								bl = true;
-							} else if (itemStack.is(Items.POTATO)) {
-								BlockState blockState2 = Blocks.POTATOES.defaultBlockState();
-								serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
-								serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
-								bl = true;
-							} else if (itemStack.is(Items.CARROT)) {
-								BlockState blockState2 = Blocks.CARROTS.defaultBlockState();
-								serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
-								serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
-								bl = true;
-							} else if (itemStack.is(Items.BEETROOT_SEEDS)) {
-								BlockState blockState2 = Blocks.BEETROOTS.defaultBlockState();
-								serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
-								serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
-								bl = true;
-							}
+						if (!itemStack.isEmpty() && itemStack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS) && itemStack.getItem() instanceof BlockItem blockItem) {
+							BlockState blockState2 = blockItem.getBlock().defaultBlockState();
+							serverLevel.setBlockAndUpdate(this.aboveFarmlandPos, blockState2);
+							serverLevel.gameEvent(GameEvent.BLOCK_PLACE, this.aboveFarmlandPos, GameEvent.Context.of(villager, blockState2));
+							bl = true;
 						}
 
 						if (bl) {

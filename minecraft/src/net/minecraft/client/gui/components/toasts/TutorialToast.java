@@ -1,11 +1,10 @@
 package net.minecraft.client.gui.components.toasts;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -33,19 +32,18 @@ public class TutorialToast implements Toast {
 	}
 
 	@Override
-	public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
-		RenderSystem.setShaderTexture(0, TEXTURE);
-		GuiComponent.blit(poseStack, 0, 0, 0, 96, this.width(), this.height());
-		this.icon.render(poseStack, 6, 6);
+	public Toast.Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long l) {
+		guiGraphics.blit(TEXTURE, 0, 0, 0, 96, this.width(), this.height());
+		this.icon.render(guiGraphics, 6, 6);
 		if (this.message == null) {
-			toastComponent.getMinecraft().font.draw(poseStack, this.title, 30.0F, 12.0F, -11534256);
+			guiGraphics.drawString(toastComponent.getMinecraft().font, this.title, 30, 12, -11534256, false);
 		} else {
-			toastComponent.getMinecraft().font.draw(poseStack, this.title, 30.0F, 7.0F, -11534256);
-			toastComponent.getMinecraft().font.draw(poseStack, this.message, 30.0F, 18.0F, -16777216);
+			guiGraphics.drawString(toastComponent.getMinecraft().font, this.title, 30, 7, -11534256, false);
+			guiGraphics.drawString(toastComponent.getMinecraft().font, this.message, 30, 18, -16777216, false);
 		}
 
 		if (this.progressable) {
-			GuiComponent.fill(poseStack, 3, 28, 157, 29, -1);
+			guiGraphics.fill(3, 28, 157, 29, -1);
 			float f = Mth.clampedLerp(this.lastProgress, this.progress, (float)(l - this.lastProgressTime) / 100.0F);
 			int i;
 			if (this.progress >= this.lastProgress) {
@@ -54,7 +52,7 @@ public class TutorialToast implements Toast {
 				i = -11206656;
 			}
 
-			GuiComponent.fill(poseStack, 3, 28, (int)(3.0F + 154.0F * f), 29, i);
+			guiGraphics.fill(3, 28, (int)(3.0F + 154.0F * f), 29, i);
 			this.lastProgress = f;
 			this.lastProgressTime = l;
 		}
@@ -88,9 +86,9 @@ public class TutorialToast implements Toast {
 			this.y = k;
 		}
 
-		public void render(PoseStack poseStack, int i, int j) {
+		public void render(GuiGraphics guiGraphics, int i, int j) {
 			RenderSystem.enableBlend();
-			GuiComponent.blit(poseStack, i, j, 176 + this.x * 20, this.y * 20, 20, 20);
+			guiGraphics.blit(Toast.TEXTURE, i, j, 176 + this.x * 20, this.y * 20, 20, 20);
 		}
 	}
 }

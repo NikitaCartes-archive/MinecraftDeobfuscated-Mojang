@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.IOException;
@@ -12,6 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -165,11 +165,11 @@ public class EditWorldScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
-		drawString(poseStack, this.font, NAME_LABEL, this.width / 2 - 100, 24, 10526880);
-		this.nameEdit.render(poseStack, i, j, f);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
+		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 100, 24, 10526880);
+		this.nameEdit.render(guiGraphics, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 }

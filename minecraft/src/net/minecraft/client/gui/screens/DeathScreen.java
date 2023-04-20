@@ -1,14 +1,13 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.ClickEvent;
@@ -94,26 +93,27 @@ public class DeathScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		fillGradient(poseStack, 0, 0, this.width, this.height, 1615855616, -1602211792);
-		poseStack.pushPose();
-		poseStack.scale(2.0F, 2.0F, 2.0F);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2 / 2, 30, 16777215);
-		poseStack.popPose();
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		guiGraphics.fillGradient(0, 0, this.width, this.height, 1615855616, -1602211792);
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().scale(2.0F, 2.0F, 2.0F);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2 / 2, 30, 16777215);
+		guiGraphics.pose().popPose();
 		if (this.causeOfDeath != null) {
-			drawCenteredString(poseStack, this.font, this.causeOfDeath, this.width / 2, 85, 16777215);
+			guiGraphics.drawCenteredString(this.font, this.causeOfDeath, this.width / 2, 85, 16777215);
 		}
 
-		drawCenteredString(poseStack, this.font, this.deathScore, this.width / 2, 100, 16777215);
+		guiGraphics.drawCenteredString(this.font, this.deathScore, this.width / 2, 100, 16777215);
 		if (this.causeOfDeath != null && j > 85 && j < 85 + 9) {
 			Style style = this.getClickedComponentStyleAt(i);
-			this.renderComponentHoverEffect(poseStack, style, i, j);
+			guiGraphics.renderComponentHoverEffect(this.font, style, i, j);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 		if (this.exitToTitleButton != null && this.minecraft.getReportingContext().hasDraftReport()) {
-			RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-			blit(poseStack, this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17, this.exitToTitleButton.getY() + 3, 182, 24, 15, 15);
+			guiGraphics.blit(
+				AbstractWidget.WIDGETS_LOCATION, this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17, this.exitToTitleButton.getY() + 3, 182, 24, 15, 15
+			);
 		}
 	}
 

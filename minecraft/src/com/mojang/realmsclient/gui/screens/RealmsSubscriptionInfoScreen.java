@@ -1,6 +1,5 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -15,6 +14,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -134,20 +134,20 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
 		int k = this.width / 2 - 100;
-		drawCenteredString(poseStack, this.font, SUBSCRIPTION_TITLE, this.width / 2, 17, 16777215);
-		this.font.draw(poseStack, SUBSCRIPTION_START_LABEL, (float)k, (float)row(0), 10526880);
-		this.font.draw(poseStack, this.startDate, (float)k, (float)row(1), 16777215);
+		guiGraphics.drawCenteredString(this.font, SUBSCRIPTION_TITLE, this.width / 2, 17, 16777215);
+		guiGraphics.drawString(this.font, SUBSCRIPTION_START_LABEL, k, row(0), 10526880, false);
+		guiGraphics.drawString(this.font, this.startDate, k, row(1), 16777215, false);
 		if (this.type == Subscription.SubscriptionType.NORMAL) {
-			this.font.draw(poseStack, TIME_LEFT_LABEL, (float)k, (float)row(3), 10526880);
+			guiGraphics.drawString(this.font, TIME_LEFT_LABEL, k, row(3), 10526880, false);
 		} else if (this.type == Subscription.SubscriptionType.RECURRING) {
-			this.font.draw(poseStack, DAYS_LEFT_LABEL, (float)k, (float)row(3), 10526880);
+			guiGraphics.drawString(this.font, DAYS_LEFT_LABEL, k, row(3), 10526880, false);
 		}
 
-		this.font.draw(poseStack, this.daysLeft, (float)k, (float)row(4), 16777215);
-		super.render(poseStack, i, j, f);
+		guiGraphics.drawString(this.font, this.daysLeft, k, row(4), 16777215, false);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	private Component daysLeftPresentation(int i) {

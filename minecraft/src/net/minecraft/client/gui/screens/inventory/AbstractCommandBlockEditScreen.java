@@ -1,10 +1,10 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.CycleButton;
@@ -133,19 +133,19 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, SET_COMMAND_LABEL, this.width / 2, 20, 16777215);
-		drawString(poseStack, this.font, COMMAND_LABEL, this.width / 2 - 150, 40, 10526880);
-		this.commandEdit.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, SET_COMMAND_LABEL, this.width / 2, 20, 16777215);
+		guiGraphics.drawString(this.font, COMMAND_LABEL, this.width / 2 - 150, 40, 10526880);
+		this.commandEdit.render(guiGraphics, i, j, f);
 		int k = 75;
 		if (!this.previousEdit.getValue().isEmpty()) {
 			k += 5 * 9 + 1 + this.getPreviousY() - 135;
-			drawString(poseStack, this.font, PREVIOUS_OUTPUT_LABEL, this.width / 2 - 150, k + 4, 10526880);
-			this.previousEdit.render(poseStack, i, j, f);
+			guiGraphics.drawString(this.font, PREVIOUS_OUTPUT_LABEL, this.width / 2 - 150, k + 4, 10526880);
+			this.previousEdit.render(guiGraphics, i, j, f);
 		}
 
-		super.render(poseStack, i, j, f);
-		this.commandSuggestions.render(poseStack, i, j);
+		super.render(guiGraphics, i, j, f);
+		this.commandSuggestions.render(guiGraphics, i, j);
 	}
 }

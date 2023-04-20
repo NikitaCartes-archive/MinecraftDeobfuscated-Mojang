@@ -176,7 +176,7 @@ public class PortalForcer {
 		for (int j = -1; j < 3; j++) {
 			for (int k = -1; k < 4; k++) {
 				mutableBlockPos.setWithOffset(blockPos, direction.getStepX() * j + direction2.getStepX() * i, k, direction.getStepZ() * j + direction2.getStepZ() * i);
-				if (k < 0 && !this.level.getBlockState(mutableBlockPos).getMaterial().isSolid()) {
+				if (k < 0 && !this.level.getBlockState(mutableBlockPos).isSolid()) {
 					return false;
 				}
 

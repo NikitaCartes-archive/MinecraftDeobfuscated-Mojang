@@ -1,9 +1,9 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
@@ -46,11 +46,11 @@ public class StringWidget extends AbstractStringWidget {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		Component component = this.getMessage();
 		Font font = this.getFont();
 		int k = this.getX() + Math.round(this.alignX * (float)(this.getWidth() - font.width(component)));
 		int l = this.getY() + (this.getHeight() - 9) / 2;
-		drawString(poseStack, font, component, k, l, this.getColor());
+		guiGraphics.drawString(font, component, k, l, this.getColor());
 	}
 }

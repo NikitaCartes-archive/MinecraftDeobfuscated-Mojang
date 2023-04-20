@@ -1,8 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
@@ -19,7 +17,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -230,28 +228,28 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.toolTip = null;
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, WORLD_LIST_TITLE, this.width / 2, row(4), 16777215);
-		super.render(poseStack, i, j, f);
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, WORLD_LIST_TITLE, this.width / 2, row(4), 16777215);
+		super.render(guiGraphics, i, j, f);
 		if (this.serverData == null) {
-			drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
+			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, 16777215);
 		} else {
 			String string = this.serverData.getName();
 			int k = this.font.width(string);
 			int l = this.serverData.state == RealmsServer.State.CLOSED ? 10526880 : 8388479;
 			int m = this.font.width(this.title);
-			drawCenteredString(poseStack, this.font, this.title, this.width / 2, 12, 16777215);
-			drawCenteredString(poseStack, this.font, string, this.width / 2, 24, l);
+			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 16777215);
+			guiGraphics.drawCenteredString(this.font, string, this.width / 2, 24, l);
 			int n = Math.min(this.centerButton(2, 3) + 80 - 11, this.width / 2 + k / 2 + m / 2 + 10);
-			this.drawServerStatus(poseStack, n, 7, i, j);
+			this.drawServerStatus(guiGraphics, n, 7, i, j);
 			if (this.isMinigame()) {
-				this.font.draw(poseStack, MINIGAME_PREFIX.copy().append(this.serverData.getMinigameName()), (float)(this.leftX + 80 + 20 + 10), (float)row(13), 16777215);
+				guiGraphics.drawString(this.font, MINIGAME_PREFIX.copy().append(this.serverData.getMinigameName()), this.leftX + 80 + 20 + 10, row(13), 16777215, false);
 			}
 
 			if (this.toolTip != null) {
-				this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
+				this.renderMousehoverTooltip(guiGraphics, this.toolTip, i, j);
 			}
 		}
 	}
@@ -386,7 +384,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			);
 	}
 
-	protected void renderMousehoverTooltip(PoseStack poseStack, @Nullable Component component, int i, int j) {
+	protected void renderMousehoverTooltip(GuiGraphics guiGraphics, @Nullable Component component, int i, int j) {
 		int k = i + 12;
 		int l = j - 12;
 		int m = this.font.width(component);
@@ -394,38 +392,36 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			k = k - m - 20;
 		}
 
-		fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-		this.font.drawShadow(poseStack, component, (float)k, (float)l, 16777215);
+		guiGraphics.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+		guiGraphics.drawString(this.font, component, k, l, 16777215);
 	}
 
-	private void drawServerStatus(PoseStack poseStack, int i, int j, int k, int l) {
+	private void drawServerStatus(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		if (this.serverData.expired) {
-			this.drawExpired(poseStack, i, j, k, l);
+			this.drawExpired(guiGraphics, i, j, k, l);
 		} else if (this.serverData.state == RealmsServer.State.CLOSED) {
-			this.drawClose(poseStack, i, j, k, l);
+			this.drawClose(guiGraphics, i, j, k, l);
 		} else if (this.serverData.state == RealmsServer.State.OPEN) {
 			if (this.serverData.daysLeft < 7) {
-				this.drawExpiring(poseStack, i, j, k, l, this.serverData.daysLeft);
+				this.drawExpiring(guiGraphics, i, j, k, l, this.serverData.daysLeft);
 			} else {
-				this.drawOpen(poseStack, i, j, k, l);
+				this.drawOpen(guiGraphics, i, j, k, l);
 			}
 		}
 	}
 
-	private void drawExpired(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.setShaderTexture(0, EXPIRED_ICON_LOCATION);
-		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+	private void drawExpired(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		guiGraphics.blit(EXPIRED_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
 			this.toolTip = SERVER_EXPIRED_TOOLTIP;
 		}
 	}
 
-	private void drawExpiring(PoseStack poseStack, int i, int j, int k, int l, int m) {
-		RenderSystem.setShaderTexture(0, EXPIRES_SOON_ICON_LOCATION);
+	private void drawExpiring(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 		if (this.animTick % 20 < 10) {
-			GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 20, 28);
+			guiGraphics.blit(EXPIRES_SOON_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 20, 28);
 		} else {
-			GuiComponent.blit(poseStack, i, j, 10.0F, 0.0F, 10, 28, 20, 28);
+			guiGraphics.blit(EXPIRES_SOON_ICON_LOCATION, i, j, 10.0F, 0.0F, 10, 28, 20, 28);
 		}
 
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
@@ -439,17 +435,15 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 		}
 	}
 
-	private void drawOpen(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.setShaderTexture(0, ON_ICON_LOCATION);
-		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+	private void drawOpen(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		guiGraphics.blit(ON_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
 			this.toolTip = SERVER_OPEN_TOOLTIP;
 		}
 	}
 
-	private void drawClose(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.setShaderTexture(0, OFF_ICON_LOCATION);
-		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+	private void drawClose(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		guiGraphics.blit(OFF_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
 			this.toolTip = SERVER_CLOSED_TOOLTIP;
 		}

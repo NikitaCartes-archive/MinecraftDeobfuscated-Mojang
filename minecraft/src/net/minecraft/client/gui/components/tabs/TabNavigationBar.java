@@ -1,8 +1,6 @@
 package net.minecraft.client.gui.components.tabs;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +9,7 @@ import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.TabButton;
@@ -130,13 +129,12 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		fill(poseStack, 0, 0, this.width, 24, -16777216);
-		RenderSystem.setShaderTexture(0, CreateWorldScreen.HEADER_SEPERATOR);
-		blit(poseStack, 0, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		guiGraphics.fill(0, 0, this.width, 24, -16777216);
+		guiGraphics.blit(CreateWorldScreen.HEADER_SEPERATOR, 0, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
 
 		for (TabButton tabButton : this.tabButtons) {
-			tabButton.render(poseStack, i, j, f);
+			tabButton.render(guiGraphics, i, j, f);
 		}
 	}
 

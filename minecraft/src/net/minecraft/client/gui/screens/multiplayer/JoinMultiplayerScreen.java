@@ -1,11 +1,11 @@
 package net.minecraft.client.gui.screens.multiplayer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -235,14 +235,14 @@ public class JoinMultiplayerScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.toolTip = null;
-		this.renderBackground(poseStack);
-		this.serverSelectionList.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
-		super.render(poseStack, i, j, f);
+		this.renderBackground(guiGraphics);
+		this.serverSelectionList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
+		super.render(guiGraphics, i, j, f);
 		if (this.toolTip != null) {
-			this.renderComponentTooltip(poseStack, this.toolTip, i, j);
+			guiGraphics.renderComponentTooltip(this.font, this.toolTip, i, j);
 		}
 	}
 

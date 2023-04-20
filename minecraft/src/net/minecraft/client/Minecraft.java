@@ -17,7 +17,7 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.GlUtil;
-import com.mojang.blaze3d.platform.MacosUtil;
+import com.mojang.blaze3d.platform.IconSet;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -34,9 +34,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.Proxy;
 import java.net.SocketAddress;
@@ -77,6 +75,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
@@ -188,7 +187,6 @@ import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
-import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -446,11 +444,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.setWindowActive(true);
 
 		try {
-			if (ON_OSX) {
-				MacosUtil.loadIcon(this.getIconFile("icons", "minecraft.icns"));
-			} else {
-				this.window.setIcon(this.getIconFile("icons", "icon_16x16.png"), this.getIconFile("icons", "icon_32x32.png"));
-			}
+			this.window.setIcon(this.vanillaPackResources, SharedConstants.getCurrentVersion().isStable() ? IconSet.RELEASE : IconSet.SNAPSHOT);
 		} catch (IOException var10) {
 			LOGGER.error("Couldn't set icon", (Throwable)var10);
 		}
@@ -593,15 +587,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.setScreen(new AccessibilityOnboardingScreen(this.options));
 		} else {
 			this.setScreen(new TitleScreen(true));
-		}
-	}
-
-	private IoSupplier<InputStream> getIconFile(String... strings) throws IOException {
-		IoSupplier<InputStream> ioSupplier = this.vanillaPackResources.getRootResource(strings);
-		if (ioSupplier == null) {
-			throw new FileNotFoundException(String.join("/", strings));
-		} else {
-			return ioSupplier;
 		}
 	}
 
@@ -902,7 +887,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				TextureAtlasSprite textureAtlasSprite2 = blockModelShaper.getParticleIcon(blockState2);
 				if (!blockState2.isAir() && textureAtlasSprite2 == textureAtlasSprite) {
 					LOGGER.debug("Missing particle icon for: {}", blockState2);
-					bl = true;
 				}
 			}
 		}
@@ -1117,7 +1101,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		if (this.fpsPieResults != null) {
 			this.profiler.push("fpsPie");
-			this.renderFpsMeter(new PoseStack(), this.fpsPieResults);
+			GuiGraphics guiGraphics = new GuiGraphics(this, this.renderBuffers.bufferSource());
+			this.renderFpsMeter(guiGraphics, this.fpsPieResults);
+			guiGraphics.flush();
 			this.profiler.pop();
 		}
 
@@ -1431,17 +1417,17 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 	}
 
-	private void renderFpsMeter(PoseStack poseStack, ProfileResults profileResults) {
+	private void renderFpsMeter(GuiGraphics guiGraphics, ProfileResults profileResults) {
 		List<ResultField> list = profileResults.getTimes(this.debugPath);
 		ResultField resultField = (ResultField)list.remove(0);
 		RenderSystem.clear(256, ON_OSX);
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)this.window.getWidth(), (float)this.window.getHeight(), 0.0F, 1000.0F, 3000.0F);
 		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-		PoseStack poseStack2 = RenderSystem.getModelViewStack();
-		poseStack2.pushPose();
-		poseStack2.setIdentity();
-		poseStack2.translate(0.0F, 0.0F, -2000.0F);
+		PoseStack poseStack = RenderSystem.getModelViewStack();
+		poseStack.pushPose();
+		poseStack.setIdentity();
+		poseStack.translate(0.0F, 0.0F, -2000.0F);
 		RenderSystem.applyModelViewMatrix();
 		RenderSystem.lineWidth(1.0F);
 		Tesselator tesselator = Tesselator.getInstance();
@@ -1507,9 +1493,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		int m = 16777215;
-		this.font.drawShadow(poseStack, string2, (float)(j - 160), (float)(k - 80 - 16), 16777215);
+		guiGraphics.drawString(this.font, string2, j - 160, k - 80 - 16, 16777215);
 		string2 = decimalFormat.format(resultField.globalPercentage) + "%";
-		this.font.drawShadow(poseStack, string2, (float)(j + 160 - this.font.width(string2)), (float)(k - 80 - 16), 16777215);
+		guiGraphics.drawString(this.font, string2, j + 160 - this.font.width(string2), k - 80 - 16, 16777215);
 
 		for (int r = 0; r < list.size(); r++) {
 			ResultField resultField3 = (ResultField)list.get(r);
@@ -1521,14 +1507,14 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 
 			String string3 = stringBuilder.append(resultField3.name).toString();
-			this.font.drawShadow(poseStack, string3, (float)(j - 160), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+			guiGraphics.drawString(this.font, string3, j - 160, k + 80 + r * 8 + 20, resultField3.getColor());
 			string3 = decimalFormat.format(resultField3.percentage) + "%";
-			this.font.drawShadow(poseStack, string3, (float)(j + 160 - 50 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+			guiGraphics.drawString(this.font, string3, j + 160 - 50 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
 			string3 = decimalFormat.format(resultField3.globalPercentage) + "%";
-			this.font.drawShadow(poseStack, string3, (float)(j + 160 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+			guiGraphics.drawString(this.font, string3, j + 160 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
 		}
 
-		poseStack2.popPose();
+		poseStack.popPose();
 		RenderSystem.applyModelViewMatrix();
 	}
 
@@ -1740,7 +1726,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.gui.clearCache();
 		}
 
-		if (this.overlay == null && (this.screen == null || this.screen.passEvents)) {
+		if (this.overlay == null && this.screen == null) {
 			this.profiler.popPush("Keybindings");
 			this.handleKeybinds();
 			if (this.missTime > 0) {

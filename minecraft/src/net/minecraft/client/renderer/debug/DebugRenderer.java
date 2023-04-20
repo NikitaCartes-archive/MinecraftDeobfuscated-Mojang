@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -41,6 +42,7 @@ public class DebugRenderer {
 	public final GoalSelectorDebugRenderer goalSelectorRenderer;
 	public final GameTestDebugRenderer gameTestDebugRenderer;
 	public final GameEventListenerRenderer gameEventListenerRenderer;
+	public final LightSectionDebugRenderer skyLightSectionDebugRenderer;
 	private boolean renderChunkborder;
 
 	public DebugRenderer(Minecraft minecraft) {
@@ -61,6 +63,7 @@ public class DebugRenderer {
 		this.goalSelectorRenderer = new GoalSelectorDebugRenderer(minecraft);
 		this.gameTestDebugRenderer = new GameTestDebugRenderer();
 		this.gameEventListenerRenderer = new GameEventListenerRenderer(minecraft);
+		this.skyLightSectionDebugRenderer = new LightSectionDebugRenderer(minecraft, LightLayer.SKY);
 	}
 
 	public void clear() {
@@ -82,6 +85,7 @@ public class DebugRenderer {
 		this.goalSelectorRenderer.clear();
 		this.gameTestDebugRenderer.clear();
 		this.gameEventListenerRenderer.clear();
+		this.skyLightSectionDebugRenderer.clear();
 	}
 
 	public boolean switchRenderChunkborder() {

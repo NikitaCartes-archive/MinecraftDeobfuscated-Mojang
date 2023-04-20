@@ -81,15 +81,20 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	protected static final LootItemCondition.Builder HAS_SHEARS = MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.SHEARS));
 	private static final LootItemCondition.Builder HAS_SHEARS_OR_SILK_TOUCH = HAS_SHEARS.or(HAS_SILK_TOUCH);
 	private static final LootItemCondition.Builder HAS_NO_SHEARS_OR_SILK_TOUCH = HAS_SHEARS_OR_SILK_TOUCH.invert();
-	private final Set<Item> explosionResistant;
-	private final FeatureFlagSet enabledFeatures;
-	private final Map<ResourceLocation, LootTable.Builder> map = new HashMap();
+	protected final Set<Item> explosionResistant;
+	protected final FeatureFlagSet enabledFeatures;
+	protected final Map<ResourceLocation, LootTable.Builder> map;
 	protected static final float[] NORMAL_LEAVES_SAPLING_CHANCES = new float[]{0.05F, 0.0625F, 0.083333336F, 0.1F};
 	private static final float[] NORMAL_LEAVES_STICK_CHANCES = new float[]{0.02F, 0.022222223F, 0.025F, 0.033333335F, 0.1F};
 
 	protected BlockLootSubProvider(Set<Item> set, FeatureFlagSet featureFlagSet) {
+		this(set, featureFlagSet, new HashMap());
+	}
+
+	protected BlockLootSubProvider(Set<Item> set, FeatureFlagSet featureFlagSet, Map<ResourceLocation, LootTable.Builder> map) {
 		this.explosionResistant = set;
 		this.enabledFeatures = featureFlagSet;
+		this.map = map;
 	}
 
 	protected <T extends FunctionUserBuilder<T>> T applyExplosionDecay(ItemLike itemLike, FunctionUserBuilder<T> functionUserBuilder) {

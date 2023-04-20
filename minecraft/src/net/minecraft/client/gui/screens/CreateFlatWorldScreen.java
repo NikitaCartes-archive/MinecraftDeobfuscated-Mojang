@@ -1,18 +1,17 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -105,18 +104,20 @@ public class CreateFlatWorldScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.list.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.list.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		int k = this.width / 2 - 92 - 16;
-		drawString(poseStack, this.font, this.columnType, k, 32, 16777215);
-		drawString(poseStack, this.font, this.columnHeight, k + 2 + 213 - this.font.width(this.columnHeight), 32, 16777215);
-		super.render(poseStack, i, j, f);
+		guiGraphics.drawString(this.font, this.columnType, k, 32, 16777215);
+		guiGraphics.drawString(this.font, this.columnHeight, k + 2 + 213 - this.font.width(this.columnHeight), 32, 16777215);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Environment(EnvType.CLIENT)
 	class DetailsList extends ObjectSelectionList<CreateFlatWorldScreen.DetailsList.Entry> {
+		static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
+
 		public DetailsList() {
 			super(
 				CreateFlatWorldScreen.this.minecraft, CreateFlatWorldScreen.this.width, CreateFlatWorldScreen.this.height, 43, CreateFlatWorldScreen.this.height - 60, 24
@@ -154,14 +155,14 @@ public class CreateFlatWorldScreen extends Screen {
 		@Environment(EnvType.CLIENT)
 		class Entry extends ObjectSelectionList.Entry<CreateFlatWorldScreen.DetailsList.Entry> {
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				FlatLayerInfo flatLayerInfo = (FlatLayerInfo)CreateFlatWorldScreen.this.generator
 					.getLayersInfo()
 					.get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - i - 1);
 				BlockState blockState = flatLayerInfo.getBlockState();
 				ItemStack itemStack = this.getDisplayItem(blockState);
-				this.blitSlot(poseStack, k, j, itemStack);
-				CreateFlatWorldScreen.this.font.draw(poseStack, itemStack.getHoverName(), (float)(k + 18 + 5), (float)(j + 3), 16777215);
+				this.blitSlot(guiGraphics, k, j, itemStack);
+				guiGraphics.drawString(CreateFlatWorldScreen.this.font, itemStack.getHoverName(), k + 18 + 5, j + 3, 16777215, false);
 				Component component;
 				if (i == 0) {
 					component = Component.translatable("createWorld.customize.flat.layer.top", flatLayerInfo.getHeight());
@@ -171,8 +172,7 @@ public class CreateFlatWorldScreen extends Screen {
 					component = Component.translatable("createWorld.customize.flat.layer", flatLayerInfo.getHeight());
 				}
 
-				CreateFlatWorldScreen.this.font
-					.draw(poseStack, component, (float)(k + 2 + 213 - CreateFlatWorldScreen.this.font.width(component)), (float)(j + 3), 16777215);
+				guiGraphics.drawString(CreateFlatWorldScreen.this.font, component, k + 2 + 213 - CreateFlatWorldScreen.this.font.width(component), j + 3, 16777215, false);
 			}
 
 			private ItemStack getDisplayItem(BlockState blockState) {
@@ -207,16 +207,15 @@ public class CreateFlatWorldScreen extends Screen {
 				}
 			}
 
-			private void blitSlot(PoseStack poseStack, int i, int j, ItemStack itemStack) {
-				this.blitSlotBg(poseStack, i + 1, j + 1);
+			private void blitSlot(GuiGraphics guiGraphics, int i, int j, ItemStack itemStack) {
+				this.blitSlotBg(guiGraphics, i + 1, j + 1);
 				if (!itemStack.isEmpty()) {
-					CreateFlatWorldScreen.this.itemRenderer.renderGuiItem(poseStack, itemStack, i + 2, j + 2);
+					guiGraphics.renderFakeItem(itemStack, i + 2, j + 2);
 				}
 			}
 
-			private void blitSlotBg(PoseStack poseStack, int i, int j) {
-				RenderSystem.setShaderTexture(0, GuiComponent.STATS_ICON_LOCATION);
-				GuiComponent.blit(poseStack, i, j, 0, 0.0F, 0.0F, 18, 18, 128, 128);
+			private void blitSlotBg(GuiGraphics guiGraphics, int i, int j) {
+				guiGraphics.blit(CreateFlatWorldScreen.DetailsList.STATS_ICON_LOCATION, i, j, 0, 0.0F, 0.0F, 18, 18, 128, 128);
 			}
 		}
 	}

@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	private static final VoxelShape BOUNDING_BOX = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
-	public static final ResourceLocation SHARDS = new ResourceLocation("shards");
+	public static final ResourceLocation SHERDS = new ResourceLocation("sherds");
 	private static final DirectionProperty HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final BooleanProperty CRACKED = BlockStateProperties.CRACKED;
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -93,8 +93,8 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	public List<ItemStack> getDrops(BlockState blockState, LootContext.Builder builder) {
 		BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
 		if (blockEntity instanceof DecoratedPotBlockEntity decoratedPotBlockEntity) {
-			builder.withDynamicDrop(SHARDS, (lootContext, consumer) -> {
-				for (Item item : decoratedPotBlockEntity.getShards()) {
+			builder.withDynamicDrop(SHERDS, (lootContext, consumer) -> {
+				for (Item item : decoratedPotBlockEntity.getSherds()) {
 					consumer.accept(item.getDefaultInstance());
 				}
 			});

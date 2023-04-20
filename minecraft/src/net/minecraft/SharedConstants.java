@@ -15,22 +15,22 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3445;
+	public static final int WORLD_VERSION = 3449;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "23w14a";
+	public static final String VERSION_STRING = "23w16a";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 763;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 130;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 131;
 	public static final int SNBT_NAG_VERSION = 3437;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
 	public static final int RESOURCE_PACK_FORMAT = 14;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 13;
+	public static final int DATA_PACK_FORMAT = 14;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -53,6 +53,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_NEIGHBORSUPDATE = false;
 	public static final boolean DEBUG_STRUCTURES = false;
 	public static final boolean DEBUG_LIGHT = false;
+	public static final boolean DEBUG_SKY_LIGHT_SECTIONS = false;
 	public static final boolean DEBUG_WORLDGENATTEMPT = false;
 	public static final boolean DEBUG_SOLID_FACE = false;
 	public static final boolean DEBUG_CHUNKS = false;
@@ -113,6 +114,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_RESOURCE_GENERATION_OVERRIDE = false;
 	public static final boolean DEBUG_FORCE_TELEMETRY = false;
 	public static final long MAXIMUM_TICK_TIME_NANOS = Duration.ofMillis(300L).toNanos();
+	public static final boolean USE_WORKFLOWS_HOOKS = false;
 	public static boolean CHECK_DATA_FIXER_SCHEMA = true;
 	public static boolean IS_RUNNING_IN_IDE;
 	public static Set<TypeReference> DATA_FIX_TYPES_TO_OPTIMIZE = Set.of();
@@ -176,7 +178,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741954;
+		return 1073741955;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

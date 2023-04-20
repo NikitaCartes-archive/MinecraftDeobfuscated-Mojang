@@ -32,8 +32,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.gameevent.GameEventListener;
-import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
+import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -42,6 +41,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	public static final int ACTIVE_TICKS = 40;
+	public static final int COOLDOWN_TICKS = 1;
 	public static final EnumProperty<SculkSensorPhase> PHASE = BlockStateProperties.SCULK_SENSOR_PHASE;
 	public static final IntegerProperty POWER = BlockStateProperties.POWER;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -76,7 +76,11 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
-		if (getPhase(blockState) == SculkSensorPhase.ACTIVE) {
+		if (getPhase(blockState) != SculkSensorPhase.ACTIVE) {
+			if (getPhase(blockState) == SculkSensorPhase.COOLDOWN) {
+				serverLevel.setBlock(blockPos, blockState.setValue(PHASE, SculkSensorPhase.INACTIVE), 3);
+			}
+		} else {
 			deactivate(serverLevel, blockPos, blockState);
 		}
 	}
@@ -87,11 +91,9 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 			&& canActivate(blockState)
 			&& entity.getType() != EntityType.WARDEN
 			&& level.getBlockEntity(blockPos) instanceof SculkSensorBlockEntity sculkSensorBlockEntity
-			&& level instanceof ServerLevel serverLevel) {
-			VibrationListener vibrationListener = sculkSensorBlockEntity.getListener();
-			if (vibrationListener.getConfig().shouldListen(serverLevel, vibrationListener, blockPos, GameEvent.STEP, GameEvent.Context.of(blockState))) {
-				vibrationListener.forceGameEvent(serverLevel, GameEvent.STEP, GameEvent.Context.of(entity), entity.position());
-			}
+			&& level instanceof ServerLevel serverLevel
+			&& sculkSensorBlockEntity.getVibrationUser().canReceiveVibration(serverLevel, blockPos, GameEvent.STEP, GameEvent.Context.of(blockState))) {
+			sculkSensorBlockEntity.getListener().forceScheduleVibration(serverLevel, GameEvent.STEP, GameEvent.Context.of(entity), entity.position());
 		}
 
 		super.stepOn(level, blockPos, blockState, entity);
@@ -103,6 +105,8 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 			if ((Integer)blockState.getValue(POWER) > 0 && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
 				level.setBlock(blockPos, blockState.setValue(POWER, Integer.valueOf(0)), 18);
 			}
+
+			level.scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 1);
 		}
 	}
 
@@ -142,16 +146,14 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 
 	@Nullable
 	@Override
-	public <T extends BlockEntity> GameEventListener getListener(ServerLevel serverLevel, T blockEntity) {
-		return blockEntity instanceof SculkSensorBlockEntity sculkSensorBlockEntity ? sculkSensorBlockEntity.getListener() : null;
-	}
-
-	@Nullable
-	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
 		return !level.isClientSide
 			? createTickerHelper(
-				blockEntityType, BlockEntityType.SCULK_SENSOR, (levelx, blockPos, blockStatex, sculkSensorBlockEntity) -> sculkSensorBlockEntity.getListener().tick(levelx)
+				blockEntityType,
+				BlockEntityType.SCULK_SENSOR,
+				(levelx, blockPos, blockStatex, sculkSensorBlockEntity) -> VibrationSystem.Ticker.tick(
+						levelx, sculkSensorBlockEntity.getVibrationData(), sculkSensorBlockEntity.getVibrationUser()
+					)
 			)
 			: null;
 	}
@@ -190,7 +192,8 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 	}
 
 	public static void deactivate(Level level, BlockPos blockPos, BlockState blockState) {
-		level.setBlock(blockPos, blockState.setValue(PHASE, SculkSensorPhase.INACTIVE).setValue(POWER, Integer.valueOf(0)), 3);
+		level.setBlock(blockPos, blockState.setValue(PHASE, SculkSensorPhase.COOLDOWN).setValue(POWER, Integer.valueOf(0)), 3);
+		level.scheduleTick(blockPos, blockState.getBlock(), 1);
 		if (!(Boolean)blockState.getValue(WATERLOGGED)) {
 			level.playSound(null, blockPos, SoundEvents.SCULK_CLICKING_STOP, SoundSource.BLOCKS, 1.0F, level.random.nextFloat() * 0.2F + 0.8F);
 		}
@@ -228,7 +231,7 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 			BlockPos blockPos2 = blockPos.relative(direction);
 			BlockState blockState = level.getBlockState(blockPos2);
 			if (blockState.is(BlockTags.VIBRATION_RESONATORS)) {
-				level.gameEvent(VibrationListener.getResonanceEventByFrequency(i), blockPos2, GameEvent.Context.of(entity, blockState));
+				level.gameEvent(VibrationSystem.getResonanceEventByFrequency(i), blockPos2, GameEvent.Context.of(entity, blockState));
 				float f = RESONANCE_PITCH_BEND[i];
 				level.playSound(null, blockPos2, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.0F, f);
 			}

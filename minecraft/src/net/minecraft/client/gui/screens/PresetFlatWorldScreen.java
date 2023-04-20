@@ -2,8 +2,6 @@ package net.minecraft.client.gui.screens;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.util.Collections;
 import java.util.Iterator;
@@ -15,7 +13,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -233,17 +231,17 @@ public class PresetFlatWorldScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.list.render(poseStack, i, j, f);
-		poseStack.pushPose();
-		poseStack.translate(0.0F, 0.0F, 400.0F);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
-		drawString(poseStack, this.font, this.shareText, 50, 30, 10526880);
-		drawString(poseStack, this.font, this.listText, 50, 70, 10526880);
-		poseStack.popPose();
-		this.export.render(poseStack, i, j, f);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.list.render(guiGraphics, i, j, f);
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate(0.0F, 0.0F, 400.0F);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
+		guiGraphics.drawString(this.font, this.shareText, 50, 30, 10526880);
+		guiGraphics.drawString(this.font, this.listText, 50, 70, 10526880);
+		guiGraphics.pose().popPose();
+		this.export.render(guiGraphics, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override
@@ -305,6 +303,7 @@ public class PresetFlatWorldScreen extends Screen {
 
 		@Environment(EnvType.CLIENT)
 		public class Entry extends ObjectSelectionList.Entry<PresetFlatWorldScreen.PresetsList.Entry> {
+			private static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
 			private final FlatLevelGeneratorPreset preset;
 			private final Component name;
 
@@ -316,9 +315,9 @@ public class PresetFlatWorldScreen extends Screen {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				this.blitSlot(poseStack, k, j, this.preset.displayItem().value());
-				PresetFlatWorldScreen.this.font.draw(poseStack, this.name, (float)(k + 18 + 5), (float)(j + 6), 16777215);
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+				this.blitSlot(guiGraphics, k, j, this.preset.displayItem().value());
+				guiGraphics.drawString(PresetFlatWorldScreen.this.font, this.name, k + 18 + 5, j + 6, 16777215, false);
 			}
 
 			@Override
@@ -337,14 +336,13 @@ public class PresetFlatWorldScreen extends Screen {
 				PresetFlatWorldScreen.this.export.moveCursorToStart();
 			}
 
-			private void blitSlot(PoseStack poseStack, int i, int j, Item item) {
-				this.blitSlotBg(poseStack, i + 1, j + 1);
-				PresetFlatWorldScreen.this.itemRenderer.renderGuiItem(poseStack, new ItemStack(item), i + 2, j + 2);
+			private void blitSlot(GuiGraphics guiGraphics, int i, int j, Item item) {
+				this.blitSlotBg(guiGraphics, i + 1, j + 1);
+				guiGraphics.renderFakeItem(new ItemStack(item), i + 2, j + 2);
 			}
 
-			private void blitSlotBg(PoseStack poseStack, int i, int j) {
-				RenderSystem.setShaderTexture(0, GuiComponent.STATS_ICON_LOCATION);
-				GuiComponent.blit(poseStack, i, j, 0, 0.0F, 0.0F, 18, 18, 128, 128);
+			private void blitSlotBg(GuiGraphics guiGraphics, int i, int j) {
+				guiGraphics.blit(STATS_ICON_LOCATION, i, j, 0, 0.0F, 0.0F, 18, 18, 128, 128);
 			}
 
 			@Override

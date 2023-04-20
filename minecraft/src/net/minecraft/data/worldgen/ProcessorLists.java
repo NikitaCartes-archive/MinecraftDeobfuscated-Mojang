@@ -67,7 +67,9 @@ public class ProcessorLists {
 	public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_START_DEGRADATION = createKey("ancient_city_start_degradation");
 	public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_GENERIC_DEGRADATION = createKey("ancient_city_generic_degradation");
 	public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_WALLS_DEGRADATION = createKey("ancient_city_walls_degradation");
-	public static final ResourceKey<StructureProcessorList> TRAIL_RUINS_SUSPICIOUS_SAND = createKey("trail_ruins_suspicious_sand");
+	public static final ResourceKey<StructureProcessorList> TRAIL_RUINS_HOUSES_ARCHAEOLOGY = createKey("trail_ruins_houses_archaeology");
+	public static final ResourceKey<StructureProcessorList> TRAIL_RUINS_ROADS_ARCHAEOLOGY = createKey("trail_ruins_roads_archaeology");
+	public static final ResourceKey<StructureProcessorList> TRAIL_RUINS_TOWER_TOP_ARCHAEOLOGY = createKey("trail_ruins_tower_top_archaeology");
 
 	private static ResourceKey<StructureProcessorList> createKey(String string) {
 		return ResourceKey.create(Registries.PROCESSOR_LIST, new ResourceLocation(string));
@@ -697,44 +699,50 @@ public class ProcessorLists {
 		);
 		register(
 			bootstapContext,
-			TRAIL_RUINS_SUSPICIOUS_SAND,
+			TRAIL_RUINS_HOUSES_ARCHAEOLOGY,
 			List.of(
 				new RuleProcessor(
 					List.of(
-						new ProcessorRule(new RandomBlockMatchTest(Blocks.SAND, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.GRAVEL.defaultBlockState()),
-						new ProcessorRule(new RandomBlockMatchTest(Blocks.SAND, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.DIRT.defaultBlockState()),
-						new ProcessorRule(new RandomBlockMatchTest(Blocks.SAND, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.COARSE_DIRT.defaultBlockState())
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.GRAVEL, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.DIRT.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.GRAVEL, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.COARSE_DIRT.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.MUD_BRICKS, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.PACKED_MUD.defaultBlockState())
 					)
 				),
-				new CappedProcessor(
-					new RuleProcessor(
-						List.of(
-							new ProcessorRule(
-								new TagMatchTest(BlockTags.TRAIL_RUINS_REPLACEABLE),
-								AlwaysTrueTest.INSTANCE,
-								PosAlwaysTrueTest.INSTANCE,
-								Blocks.SUSPICIOUS_SAND.defaultBlockState(),
-								new AppendLoot(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY)
-							)
-						)
-					),
-					ConstantInt.of(6)
-				),
-				new CappedProcessor(
-					new RuleProcessor(
-						List.of(
-							new ProcessorRule(
-								new TagMatchTest(BlockTags.TRAIL_RUINS_REPLACEABLE),
-								AlwaysTrueTest.INSTANCE,
-								PosAlwaysTrueTest.INSTANCE,
-								Blocks.SUSPICIOUS_GRAVEL.defaultBlockState(),
-								new AppendLoot(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY)
-							)
-						)
-					),
-					ConstantInt.of(2)
-				)
+				trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 6),
+				trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_RARE, 3)
 			)
+		);
+		register(
+			bootstapContext,
+			TRAIL_RUINS_ROADS_ARCHAEOLOGY,
+			List.of(
+				new RuleProcessor(
+					List.of(
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.GRAVEL, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.DIRT.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.GRAVEL, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.COARSE_DIRT.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.MUD_BRICKS, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.PACKED_MUD.defaultBlockState())
+					)
+				),
+				trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 2)
+			)
+		);
+		register(bootstapContext, TRAIL_RUINS_TOWER_TOP_ARCHAEOLOGY, List.of(trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 2)));
+	}
+
+	private static CappedProcessor trailsArchyLootProcessor(ResourceLocation resourceLocation, int i) {
+		return new CappedProcessor(
+			new RuleProcessor(
+				List.of(
+					new ProcessorRule(
+						new TagMatchTest(BlockTags.TRAIL_RUINS_REPLACEABLE),
+						AlwaysTrueTest.INSTANCE,
+						PosAlwaysTrueTest.INSTANCE,
+						Blocks.SUSPICIOUS_GRAVEL.defaultBlockState(),
+						new AppendLoot(resourceLocation)
+					)
+				)
+			),
+			ConstantInt.of(i)
 		);
 	}
 }

@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
@@ -9,9 +8,9 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -72,9 +71,9 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		super.render(poseStack, i, j, f);
-		this.renderTooltip(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
+		this.renderTooltip(guiGraphics, i, j);
 	}
 
 	private int totalRowCount() {
@@ -82,48 +81,46 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		this.renderBackground(poseStack);
-		RenderSystem.setShaderTexture(0, BG_LOCATION);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
+		this.renderBackground(guiGraphics);
 		int k = this.leftPos;
 		int l = this.topPos;
-		blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(BG_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		Slot slot = this.menu.getBannerSlot();
 		Slot slot2 = this.menu.getDyeSlot();
 		Slot slot3 = this.menu.getPatternSlot();
 		Slot slot4 = this.menu.getResultSlot();
 		if (!slot.hasItem()) {
-			blit(poseStack, k + slot.x, l + slot.y, this.imageWidth, 0, 16, 16);
+			guiGraphics.blit(BG_LOCATION, k + slot.x, l + slot.y, this.imageWidth, 0, 16, 16);
 		}
 
 		if (!slot2.hasItem()) {
-			blit(poseStack, k + slot2.x, l + slot2.y, this.imageWidth + 16, 0, 16, 16);
+			guiGraphics.blit(BG_LOCATION, k + slot2.x, l + slot2.y, this.imageWidth + 16, 0, 16, 16);
 		}
 
 		if (!slot3.hasItem()) {
-			blit(poseStack, k + slot3.x, l + slot3.y, this.imageWidth + 32, 0, 16, 16);
+			guiGraphics.blit(BG_LOCATION, k + slot3.x, l + slot3.y, this.imageWidth + 32, 0, 16, 16);
 		}
 
 		int m = (int)(41.0F * this.scrollOffs);
-		blit(poseStack, k + 119, l + 13 + m, 232 + (this.displayPatterns ? 0 : 12), 0, 12, 15);
+		guiGraphics.blit(BG_LOCATION, k + 119, l + 13 + m, 232 + (this.displayPatterns ? 0 : 12), 0, 12, 15);
 		Lighting.setupForFlatItems();
 		if (this.resultBannerPatterns != null && !this.hasMaxPatterns) {
-			MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
-			poseStack.pushPose();
-			poseStack.translate((float)(k + 139), (float)(l + 52), 0.0F);
-			poseStack.scale(24.0F, -24.0F, 1.0F);
-			poseStack.translate(0.5F, 0.5F, 0.5F);
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate((float)(k + 139), (float)(l + 52), 0.0F);
+			guiGraphics.pose().scale(24.0F, -24.0F, 1.0F);
+			guiGraphics.pose().translate(0.5F, 0.5F, 0.5F);
 			float g = 0.6666667F;
-			poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
+			guiGraphics.pose().scale(0.6666667F, -0.6666667F, -0.6666667F);
 			this.flag.xRot = 0.0F;
 			this.flag.y = -32.0F;
 			BannerRenderer.renderPatterns(
-				poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, this.resultBannerPatterns
+				guiGraphics.pose(), guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, this.resultBannerPatterns
 			);
-			poseStack.popPose();
-			bufferSource.endBatch();
+			guiGraphics.pose().popPose();
+			guiGraphics.flush();
 		} else if (this.hasMaxPatterns) {
-			blit(poseStack, k + slot4.x - 2, l + slot4.y - 2, this.imageWidth, 17, 17, 16);
+			guiGraphics.blit(BG_LOCATION, k + slot4.x - 2, l + slot4.y - 2, this.imageWidth, 17, 17, 16);
 		}
 
 		if (this.displayPatterns) {
@@ -140,7 +137,6 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 						break label64;
 					}
 
-					RenderSystem.setShaderTexture(0, BG_LOCATION);
 					int t = n + q * 14;
 					int u = o + p * 14;
 					boolean bl = i >= t && j >= u && i < t + 14 && j < u + 14;
@@ -153,8 +149,8 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 						v = this.imageHeight;
 					}
 
-					blit(poseStack, t, u, 0, v, 14, 14);
-					this.renderPattern((Holder<BannerPattern>)list.get(s), t, u);
+					guiGraphics.blit(BG_LOCATION, t, u, 0, v, 14, 14);
+					this.renderPattern(guiGraphics, (Holder<BannerPattern>)list.get(s), t, u);
 				}
 			}
 		}
@@ -162,7 +158,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		Lighting.setupFor3DItems();
 	}
 
-	private void renderPattern(Holder<BannerPattern> holder, int i, int j) {
+	private void renderPattern(GuiGraphics guiGraphics, Holder<BannerPattern> holder, int i, int j) {
 		CompoundTag compoundTag = new CompoundTag();
 		ListTag listTag = new BannerPattern.Builder().addPattern(BannerPatterns.BASE, DyeColor.GRAY).addPattern(holder, DyeColor.WHITE).toListTag();
 		compoundTag.put("Patterns", listTag);
@@ -176,13 +172,12 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		poseStack.translate(0.5F, 0.5F, 0.5F);
 		float f = 0.6666667F;
 		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-		MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
 		this.flag.xRot = 0.0F;
 		this.flag.y = -32.0F;
 		List<Pair<Holder<BannerPattern>, DyeColor>> list = BannerBlockEntity.createPatterns(DyeColor.GRAY, BannerBlockEntity.getItemPatterns(itemStack));
-		BannerRenderer.renderPatterns(poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, list);
+		BannerRenderer.renderPatterns(poseStack, guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, list);
 		poseStack.popPose();
-		bufferSource.endBatch();
+		guiGraphics.flush();
 	}
 
 	@Override

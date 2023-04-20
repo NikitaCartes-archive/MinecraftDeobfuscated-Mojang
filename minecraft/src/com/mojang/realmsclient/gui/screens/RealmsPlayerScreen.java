@@ -1,7 +1,5 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Ops;
@@ -14,6 +12,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
@@ -183,29 +182,28 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.invitedObjectSelectionList.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.invitedObjectSelectionList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, 16777215);
 		int k = row(12) + 20;
-		RenderSystem.setShaderTexture(0, OPTIONS_BACKGROUND);
-		RenderSystem.setShaderColor(0.25F, 0.25F, 0.25F, 1.0F);
-		blit(poseStack, 0, k, 0.0F, 0.0F, this.width, this.height - k, 32, 32);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
+		guiGraphics.blit(OPTIONS_BACKGROUND, 0, k, 0.0F, 0.0F, this.width, this.height - k, 32, 32);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (this.serverData.players != null) {
-			this.font
-				.draw(
-					poseStack,
-					Component.empty().append(INVITED_LABEL).append(" (").append(Integer.toString(this.serverData.players.size())).append(")"),
-					(float)this.column1X,
-					(float)row(0),
-					10526880
-				);
+			guiGraphics.drawString(
+				this.font,
+				Component.empty().append(INVITED_LABEL).append(" (").append(Integer.toString(this.serverData.players.size())).append(")"),
+				this.column1X,
+				row(0),
+				10526880,
+				false
+			);
 		} else {
-			this.font.draw(poseStack, INVITED_LABEL, (float)this.column1X, (float)row(0), 10526880);
+			guiGraphics.drawString(this.font, INVITED_LABEL, this.column1X, row(0), 10526880, false);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -254,7 +252,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			int p;
 			if (!this.playerInfo.getAccepted()) {
 				p = 10526880;
@@ -264,11 +262,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
 				p = 16777215;
 			}
 
-			RealmsUtil.renderPlayerFace(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, this.playerInfo.getUuid());
-			RealmsPlayerScreen.this.font.draw(poseStack, this.playerInfo.getName(), (float)(RealmsPlayerScreen.this.column1X + 3 + 12), (float)(j + 1), p);
+			RealmsUtil.renderPlayerFace(guiGraphics, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, this.playerInfo.getUuid());
+			guiGraphics.drawString(RealmsPlayerScreen.this.font, this.playerInfo.getName(), RealmsPlayerScreen.this.column1X + 3 + 12, j + 1, p, false);
 			this.children.forEach(abstractWidget -> {
 				abstractWidget.setY(j + 1);
-				abstractWidget.render(poseStack, n, o, f);
+				abstractWidget.render(guiGraphics, n, o, f);
 			});
 		}
 
@@ -317,8 +315,8 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderBackground(PoseStack poseStack) {
-			RealmsPlayerScreen.this.renderBackground(poseStack);
+		public void renderBackground(GuiGraphics guiGraphics) {
+			RealmsPlayerScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Override

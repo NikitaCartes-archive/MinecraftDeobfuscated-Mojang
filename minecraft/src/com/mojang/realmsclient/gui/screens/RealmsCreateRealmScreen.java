@@ -1,11 +1,11 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.util.task.WorldCreationTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
@@ -105,19 +105,19 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 11, 16777215);
-		this.font.draw(poseStack, NAME_LABEL, (float)(this.width / 2 - 100), 52.0F, 10526880);
-		this.font.draw(poseStack, DESCRIPTION_LABEL, (float)(this.width / 2 - 100), 102.0F, 10526880);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 11, 16777215);
+		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 100, 52, 10526880, false);
+		guiGraphics.drawString(this.font, DESCRIPTION_LABEL, this.width / 2 - 100, 102, 10526880, false);
 		if (this.nameBox != null) {
-			this.nameBox.render(poseStack, i, j, f);
+			this.nameBox.render(guiGraphics, i, j, f);
 		}
 
 		if (this.descriptionBox != null) {
-			this.descriptionBox.render(poseStack, i, j, f);
+			this.descriptionBox.render(guiGraphics, i, j, f);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 }

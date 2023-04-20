@@ -1,9 +1,9 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -37,10 +37,10 @@ public class TextAndImageButton extends Button {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-		super.renderWidget(poseStack, i, j, f);
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.renderWidget(guiGraphics, i, j, f);
 		this.renderTexture(
-			poseStack,
+			guiGraphics,
 			this.resourceLocation,
 			this.getXOffset(),
 			this.getYOffset(),
@@ -55,10 +55,10 @@ public class TextAndImageButton extends Button {
 	}
 
 	@Override
-	public void renderString(PoseStack poseStack, Font font, int i) {
+	public void renderString(GuiGraphics guiGraphics, Font font, int i) {
 		int j = this.getX() + 2;
 		int k = this.getX() + this.getWidth() - this.usedTextureWidth - 6;
-		renderScrollingString(poseStack, font, this.getMessage(), j, this.getY(), k, this.getY() + this.getHeight(), i);
+		renderScrollingString(guiGraphics, font, this.getMessage(), j, this.getY(), k, this.getY() + this.getHeight(), i);
 	}
 
 	private int getXOffset() {

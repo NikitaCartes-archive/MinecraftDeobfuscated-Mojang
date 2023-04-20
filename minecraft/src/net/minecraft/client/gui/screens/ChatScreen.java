@@ -1,11 +1,11 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
@@ -177,18 +177,18 @@ public class ChatScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		fill(poseStack, 2, this.height - 14, this.width - 2, this.height - 2, this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
-		this.input.render(poseStack, i, j, f);
-		super.render(poseStack, i, j, f);
-		this.commandSuggestions.render(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		guiGraphics.fill(2, this.height - 14, this.width - 2, this.height - 2, this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
+		this.input.render(guiGraphics, i, j, f);
+		super.render(guiGraphics, i, j, f);
+		this.commandSuggestions.render(guiGraphics, i, j);
 		GuiMessageTag guiMessageTag = this.minecraft.gui.getChat().getMessageTagAt((double)i, (double)j);
 		if (guiMessageTag != null && guiMessageTag.text() != null) {
-			this.renderTooltip(poseStack, this.font.split(guiMessageTag.text(), 210), i, j);
+			guiGraphics.renderTooltip(this.font, this.font.split(guiMessageTag.text(), 210), i, j);
 		} else {
 			Style style = this.getComponentStyleAt((double)i, (double)j);
 			if (style != null && style.getHoverEvent() != null) {
-				this.renderComponentHoverEffect(poseStack, style, i, j);
+				guiGraphics.renderComponentHoverEffect(this.font, style, i, j);
 			}
 		}
 	}

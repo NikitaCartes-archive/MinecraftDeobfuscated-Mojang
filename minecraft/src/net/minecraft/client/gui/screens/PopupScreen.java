@@ -1,10 +1,10 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.CommonComponents;
@@ -57,11 +57,11 @@ public class PopupScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderDirtBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.contentTop - 9 * 2, -1);
-		this.messageLines.renderCentered(poseStack, this.width / 2, this.contentTop);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, this.contentTop - 9 * 2, -1);
+		this.messageLines.renderCentered(guiGraphics, this.width / 2, this.contentTop);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

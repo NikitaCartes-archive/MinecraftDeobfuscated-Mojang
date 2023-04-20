@@ -90,7 +90,7 @@ public abstract class LavaFluid extends FlowingFluid {
 							level.setBlockAndUpdate(blockPos2, BaseFireBlock.getState(level, blockPos2));
 							return;
 						}
-					} else if (blockState.getMaterial().blocksMotion()) {
+					} else if (blockState.blocksMotion()) {
 						return;
 					}
 				}

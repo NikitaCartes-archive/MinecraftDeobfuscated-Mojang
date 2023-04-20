@@ -1,7 +1,6 @@
 package com.mojang.realmsclient.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
@@ -12,6 +11,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -125,10 +125,10 @@ public class RealmsWorldSlotButton extends Button {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.state != null) {
 			this.drawSlotFrame(
-				poseStack,
+				guiGraphics,
 				this.getX(),
 				this.getY(),
 				i,
@@ -147,7 +147,7 @@ public class RealmsWorldSlotButton extends Button {
 	}
 
 	private void drawSlotFrame(
-		PoseStack poseStack,
+		GuiGraphics guiGraphics,
 		int i,
 		int j,
 		int k,
@@ -168,48 +168,49 @@ public class RealmsWorldSlotButton extends Button {
 		}
 
 		Minecraft minecraft = Minecraft.getInstance();
+		ResourceLocation resourceLocation;
 		if (bl3) {
-			RenderSystem.setShaderTexture(0, RealmsTextureManager.worldTemplate(String.valueOf(n), string2));
+			resourceLocation = RealmsTextureManager.worldTemplate(String.valueOf(n), string2);
 		} else if (bl2) {
-			RenderSystem.setShaderTexture(0, EMPTY_SLOT_LOCATION);
+			resourceLocation = EMPTY_SLOT_LOCATION;
 		} else if (string2 != null && n != -1L) {
-			RenderSystem.setShaderTexture(0, RealmsTextureManager.worldTemplate(String.valueOf(n), string2));
+			resourceLocation = RealmsTextureManager.worldTemplate(String.valueOf(n), string2);
 		} else if (m == 1) {
-			RenderSystem.setShaderTexture(0, DEFAULT_WORLD_SLOT_1);
+			resourceLocation = DEFAULT_WORLD_SLOT_1;
 		} else if (m == 2) {
-			RenderSystem.setShaderTexture(0, DEFAULT_WORLD_SLOT_2);
+			resourceLocation = DEFAULT_WORLD_SLOT_2;
 		} else if (m == 3) {
-			RenderSystem.setShaderTexture(0, DEFAULT_WORLD_SLOT_3);
+			resourceLocation = DEFAULT_WORLD_SLOT_3;
+		} else {
+			resourceLocation = EMPTY_SLOT_LOCATION;
 		}
 
 		if (bl) {
-			RenderSystem.setShaderColor(0.56F, 0.56F, 0.56F, 1.0F);
+			guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
 		}
 
-		blit(poseStack, i + 3, j + 3, 0.0F, 0.0F, 74, 74, 74, 74);
-		RenderSystem.setShaderTexture(0, SLOT_FRAME_LOCATION);
+		guiGraphics.blit(resourceLocation, i + 3, j + 3, 0.0F, 0.0F, 74, 74, 74, 74);
 		boolean bl5 = bl4 && action != RealmsWorldSlotButton.Action.NOTHING;
 		if (bl5) {
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		} else if (bl) {
-			RenderSystem.setShaderColor(0.8F, 0.8F, 0.8F, 1.0F);
+			guiGraphics.setColor(0.8F, 0.8F, 0.8F, 1.0F);
 		} else {
-			RenderSystem.setShaderColor(0.56F, 0.56F, 0.56F, 1.0F);
+			guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
 		}
 
-		blit(poseStack, i, j, 0.0F, 0.0F, 80, 80, 80, 80);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.blit(SLOT_FRAME_LOCATION, i, j, 0.0F, 0.0F, 80, 80, 80, 80);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (bl) {
-			this.renderCheckMark(poseStack, i, j);
+			this.renderCheckMark(guiGraphics, i, j);
 		}
 
-		drawCenteredString(poseStack, minecraft.font, string, i + 40, j + 66, 16777215);
+		guiGraphics.drawCenteredString(minecraft.font, string, i + 40, j + 66, 16777215);
 	}
 
-	private void renderCheckMark(PoseStack poseStack, int i, int j) {
-		RenderSystem.setShaderTexture(0, CHECK_MARK_LOCATION);
+	private void renderCheckMark(GuiGraphics guiGraphics, int i, int j) {
 		RenderSystem.enableBlend();
-		blit(poseStack, i + 67, j + 4, 0.0F, 0.0F, 9, 8, 9, 8);
+		guiGraphics.blit(CHECK_MARK_LOCATION, i + 67, j + 4, 0.0F, 0.0F, 9, 8, 9, 8);
 		RenderSystem.disableBlend();
 	}
 

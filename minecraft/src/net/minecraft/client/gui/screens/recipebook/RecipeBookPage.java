@@ -2,13 +2,13 @@ package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.stats.RecipeBook;
@@ -91,30 +91,30 @@ public class RecipeBookPage {
 		this.backButton.visible = this.totalPages > 1 && this.currentPage > 0;
 	}
 
-	public void render(PoseStack poseStack, int i, int j, int k, int l, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, float f) {
 		if (this.totalPages > 1) {
 			String string = this.currentPage + 1 + "/" + this.totalPages;
 			int m = this.minecraft.font.width(string);
-			this.minecraft.font.draw(poseStack, string, (float)(i - m / 2 + 73), (float)(j + 141), -1);
+			guiGraphics.drawString(this.minecraft.font, string, i - m / 2 + 73, j + 141, -1, false);
 		}
 
 		this.hoveredButton = null;
 
 		for (RecipeButton recipeButton : this.buttons) {
-			recipeButton.render(poseStack, k, l, f);
+			recipeButton.render(guiGraphics, k, l, f);
 			if (recipeButton.visible && recipeButton.isHoveredOrFocused()) {
 				this.hoveredButton = recipeButton;
 			}
 		}
 
-		this.backButton.render(poseStack, k, l, f);
-		this.forwardButton.render(poseStack, k, l, f);
-		this.overlay.render(poseStack, k, l, f);
+		this.backButton.render(guiGraphics, k, l, f);
+		this.forwardButton.render(guiGraphics, k, l, f);
+		this.overlay.render(guiGraphics, k, l, f);
 	}
 
-	public void renderTooltip(PoseStack poseStack, int i, int j) {
+	public void renderTooltip(GuiGraphics guiGraphics, int i, int j) {
 		if (this.minecraft.screen != null && this.hoveredButton != null && !this.overlay.isVisible()) {
-			this.minecraft.screen.renderComponentTooltip(poseStack, this.hoveredButton.getTooltipText(this.minecraft.screen), i, j);
+			guiGraphics.renderComponentTooltip(this.minecraft.font, this.hoveredButton.getTooltipText(), i, j);
 		}
 	}
 

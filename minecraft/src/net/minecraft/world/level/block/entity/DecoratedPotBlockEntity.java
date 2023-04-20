@@ -15,14 +15,13 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class DecoratedPotBlockEntity extends BlockEntity {
-	public static final String TAG_SHARDS = "shards";
-	private static final int SHARDS_IN_POT = 4;
-	private final List<Item> shards = Util.make(new ArrayList(4), arrayList -> {
+	public static final String TAG_SHERDS = "sherds";
+	private static final int SHERDS_IN_POT = 4;
+	private final List<Item> sherds = Util.make(new ArrayList(4), arrayList -> {
 		arrayList.add(Items.BRICK);
 		arrayList.add(Items.BRICK);
 		arrayList.add(Items.BRICK);
@@ -36,29 +35,29 @@ public class DecoratedPotBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag) {
 		super.saveAdditional(compoundTag);
-		saveShards(this.shards, compoundTag);
+		saveSherds(this.sherds, compoundTag);
 	}
 
 	@Override
 	public void load(CompoundTag compoundTag) {
 		super.load(compoundTag);
-		if (compoundTag.contains("shards", 9)) {
-			ListTag listTag = compoundTag.getList("shards", 8);
-			this.shards.clear();
+		if (compoundTag.contains("sherds", 9)) {
+			ListTag listTag = compoundTag.getList("sherds", 8);
+			this.sherds.clear();
 			int i = Math.min(4, listTag.size());
 
 			for (int j = 0; j < i; j++) {
 				if (listTag.get(j) instanceof StringTag stringTag) {
-					this.shards.add(BuiltInRegistries.ITEM.get(new ResourceLocation(stringTag.getAsString())));
+					this.sherds.add(BuiltInRegistries.ITEM.get(new ResourceLocation(stringTag.getAsString())));
 				} else {
-					this.shards.add(Items.BRICK);
+					this.sherds.add(Items.BRICK);
 				}
 			}
 
 			int jx = 4 - i;
 
 			for (int k = 0; k < jx; k++) {
-				this.shards.add(Items.BRICK);
+				this.sherds.add(Items.BRICK);
 			}
 		}
 	}
@@ -72,26 +71,18 @@ public class DecoratedPotBlockEntity extends BlockEntity {
 		return this.saveWithoutMetadata();
 	}
 
-	public static void saveShards(List<Item> list, CompoundTag compoundTag) {
+	public static void saveSherds(List<Item> list, CompoundTag compoundTag) {
 		ListTag listTag = new ListTag();
 
 		for (Item item : list) {
 			listTag.add(StringTag.valueOf(BuiltInRegistries.ITEM.getKey(item).toString()));
 		}
 
-		compoundTag.put("shards", listTag);
+		compoundTag.put("sherds", listTag);
 	}
 
-	public ItemStack getItem() {
-		ItemStack itemStack = new ItemStack(Blocks.DECORATED_POT);
-		CompoundTag compoundTag = new CompoundTag();
-		saveShards(this.shards, compoundTag);
-		BlockItem.setBlockEntityData(itemStack, BlockEntityType.DECORATED_POT, compoundTag);
-		return itemStack;
-	}
-
-	public List<Item> getShards() {
-		return this.shards;
+	public List<Item> getSherds() {
+		return this.sherds;
 	}
 
 	public Direction getDirection() {
@@ -103,10 +94,10 @@ public class DecoratedPotBlockEntity extends BlockEntity {
 		if (compoundTag != null) {
 			this.load(compoundTag);
 		} else {
-			this.shards.clear();
+			this.sherds.clear();
 
 			for (int i = 0; i < 4; i++) {
-				this.shards.add(Items.BRICK);
+				this.sherds.add(Items.BRICK);
 			}
 		}
 	}

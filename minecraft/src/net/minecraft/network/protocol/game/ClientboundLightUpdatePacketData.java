@@ -69,7 +69,7 @@ public class ClientboundLightUpdatePacketData {
 				bitSet2.set(i);
 			} else {
 				bitSet.set(i);
-				list.add((byte[])dataLayer.getData().clone());
+				list.add(dataLayer.copy().getData());
 			}
 		}
 	}

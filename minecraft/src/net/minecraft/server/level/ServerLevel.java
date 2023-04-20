@@ -485,14 +485,18 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		profilerFiller.popPush("tickBlocks");
 		if (i > 0) {
-			for (LevelChunkSection levelChunkSection : levelChunk.getSections()) {
+			LevelChunkSection[] levelChunkSections = levelChunk.getSections();
+
+			for (int n = 0; n < levelChunkSections.length; n++) {
+				LevelChunkSection levelChunkSection = levelChunkSections[n];
 				if (levelChunkSection.isRandomlyTicking()) {
-					int n = levelChunkSection.bottomBlockY();
+					int lx = levelChunk.getSectionYFromSectionIndex(n);
+					int o = SectionPos.sectionToBlockCoord(lx);
 
 					for (int m = 0; m < i; m++) {
-						BlockPos blockPos3 = this.getBlockRandomPos(j, n, k, 15);
+						BlockPos blockPos3 = this.getBlockRandomPos(j, o, k, 15);
 						profilerFiller.push("randomTick");
-						BlockState blockState4 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - n, blockPos3.getZ() - k);
+						BlockState blockState4 = levelChunkSection.getBlockState(blockPos3.getX() - j, blockPos3.getY() - o, blockPos3.getZ() - k);
 						if (blockState4.isRandomlyTicking()) {
 							blockState4.randomTick(this, blockPos3, this.random);
 						}

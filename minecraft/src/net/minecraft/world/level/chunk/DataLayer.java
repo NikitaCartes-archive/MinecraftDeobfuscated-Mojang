@@ -1,5 +1,6 @@
 package net.minecraft.world.level.chunk;
 
+import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.util.VisibleForDebug;
@@ -11,19 +12,22 @@ public class DataLayer {
 	private static final int NIBBLE_SIZE = 4;
 	@Nullable
 	protected byte[] data;
+	private final int defaultValue;
 
 	public DataLayer() {
+		this(0);
+	}
+
+	public DataLayer(int i) {
+		this.defaultValue = i;
 	}
 
 	public DataLayer(byte[] bs) {
 		this.data = bs;
+		this.defaultValue = 0;
 		if (bs.length != 2048) {
 			throw (IllegalArgumentException)Util.pauseInIde(new IllegalArgumentException("DataLayer should be 2048 bytes not: " + bs.length));
 		}
-	}
-
-	protected DataLayer(int i) {
-		this.data = new byte[i];
 	}
 
 	public int get(int i, int j, int k) {
@@ -40,7 +44,7 @@ public class DataLayer {
 
 	private int get(int i) {
 		if (this.data == null) {
-			return 0;
+			return this.defaultValue;
 		} else {
 			int j = getByteIndex(i);
 			int k = getNibbleIndex(i);
@@ -49,15 +53,12 @@ public class DataLayer {
 	}
 
 	private void set(int i, int j) {
-		if (this.data == null) {
-			this.data = new byte[2048];
-		}
-
+		byte[] bs = this.getData();
 		int k = getByteIndex(i);
 		int l = getNibbleIndex(i);
 		int m = ~(15 << 4 * l);
 		int n = (j & 15) << 4 * l;
-		this.data[k] = (byte)(this.data[k] & m | n);
+		bs[k] = (byte)(bs[k] & m | n);
 	}
 
 	private static int getNibbleIndex(int i) {
@@ -68,16 +69,29 @@ public class DataLayer {
 		return i >> 1;
 	}
 
+	private static byte packFilled(int i) {
+		byte b = (byte)i;
+
+		for (int j = 4; j < 8; j += 4) {
+			b = (byte)(b | i << j);
+		}
+
+		return b;
+	}
+
 	public byte[] getData() {
 		if (this.data == null) {
 			this.data = new byte[2048];
+			if (this.defaultValue != 0) {
+				Arrays.fill(this.data, packFilled(this.defaultValue));
+			}
 		}
 
 		return this.data;
 	}
 
 	public DataLayer copy() {
-		return this.data == null ? new DataLayer() : new DataLayer((byte[])this.data.clone());
+		return this.data == null ? new DataLayer(this.defaultValue) : new DataLayer((byte[])this.data.clone());
 	}
 
 	public String toString() {
@@ -111,7 +125,15 @@ public class DataLayer {
 		return stringBuilder.toString();
 	}
 
-	public boolean isEmpty() {
+	public boolean isDefinitelyHomogenous() {
 		return this.data == null;
+	}
+
+	public boolean isDefinitelyFilledWith(int i) {
+		return this.data == null && this.defaultValue == i;
+	}
+
+	public boolean isEmpty() {
+		return this.data == null && this.defaultValue == 0;
 	}
 }

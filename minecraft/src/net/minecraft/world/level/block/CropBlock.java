@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class CropBlock extends BushBlock implements BonemealableBlock, FarmableBlock {
+public class CropBlock extends BushBlock implements BonemealableBlock {
 	public static final int MAX_AGE = 7;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
 	private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{

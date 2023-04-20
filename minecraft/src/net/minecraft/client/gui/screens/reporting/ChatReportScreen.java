@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.reporting;
 
 import com.mojang.authlib.minecraft.report.AbuseReportLimits;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.UUID;
@@ -12,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineEditBox;
 import net.minecraft.client.gui.components.MultiLineLabel;
@@ -194,17 +194,17 @@ public class ChatReportScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		int k = this.width / 2;
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, k, 10, 16777215);
-		drawCenteredString(poseStack, this.font, OBSERVED_WHAT_LABEL, k, this.selectChatTop() - 9 - 6, 16777215);
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, k, 10, 16777215);
+		guiGraphics.drawCenteredString(this.font, OBSERVED_WHAT_LABEL, k, this.selectChatTop() - 9 - 6, 16777215);
 		if (this.reasonDescriptionLabel != null) {
-			this.reasonDescriptionLabel.renderLeftAligned(poseStack, this.contentLeft(), this.selectInfoTop() + 20 + 5, 9, 16777215);
+			this.reasonDescriptionLabel.renderLeftAligned(guiGraphics, this.contentLeft(), this.selectInfoTop() + 20 + 5, 9, 16777215);
 		}
 
-		drawString(poseStack, this.font, MORE_COMMENTS_LABEL, this.contentLeft(), this.commentBoxTop() - 9 - 6, 16777215);
-		super.render(poseStack, i, j, f);
+		guiGraphics.drawString(this.font, MORE_COMMENTS_LABEL, this.contentLeft(), this.commentBoxTop() - 9 - 6, 16777215);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override
@@ -311,8 +311,8 @@ public class ChatReportScreen extends Screen {
 		}
 
 		@Override
-		protected void renderTitle(PoseStack poseStack) {
-			drawString(poseStack, this.font, this.title, this.width / 2 - 155, 30, 16777215);
+		protected void renderTitle(GuiGraphics guiGraphics) {
+			guiGraphics.drawString(this.font, this.title, this.width / 2 - 155, 30, 16777215);
 		}
 	}
 }

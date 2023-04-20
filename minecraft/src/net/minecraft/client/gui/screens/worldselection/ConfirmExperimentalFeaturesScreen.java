@@ -1,12 +1,11 @@
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.util.Collection;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
@@ -74,9 +73,9 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override
@@ -108,11 +107,11 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, float f) {
-			this.renderBackground(poseStack);
-			this.packList.render(poseStack, i, j, f);
-			drawCenteredString(poseStack, this.font, this.title, this.width / 2, 10, 16777215);
-			super.render(poseStack, i, j, f);
+		public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+			this.renderBackground(guiGraphics);
+			this.packList.render(guiGraphics, i, j, f);
+			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
+			super.render(guiGraphics, i, j, f);
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -149,9 +148,9 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				GuiComponent.drawString(poseStack, DetailsScreen.this.minecraft.font, this.packId, k, j, 16777215);
-				this.splitMessage.renderLeftAligned(poseStack, k, j + 12, 9, 16777215);
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+				guiGraphics.drawString(DetailsScreen.this.minecraft.font, this.packId, k, j, 16777215);
+				this.splitMessage.renderLeftAligned(guiGraphics, k, j + 12, 9, 16777215);
 			}
 
 			@Override

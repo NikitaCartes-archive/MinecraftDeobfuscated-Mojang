@@ -1,8 +1,8 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -94,16 +94,16 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.visible) {
-			this.renderBackground(poseStack);
-			enableScissor(this.getX() + 1, this.getY() + 1, this.getX() + this.width - 1, this.getY() + this.height - 1);
-			poseStack.pushPose();
-			poseStack.translate(0.0, -this.scrollAmount, 0.0);
-			this.renderContents(poseStack, i, j, f);
-			poseStack.popPose();
-			disableScissor();
-			this.renderDecorations(poseStack);
+			this.renderBackground(guiGraphics);
+			guiGraphics.enableScissor(this.getX() + 1, this.getY() + 1, this.getX() + this.width - 1, this.getY() + this.height - 1);
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate(0.0, -this.scrollAmount, 0.0);
+			this.renderContents(guiGraphics, i, j, f);
+			guiGraphics.pose().popPose();
+			guiGraphics.disableScissor();
+			this.renderDecorations(guiGraphics);
 		}
 	}
 
@@ -111,9 +111,9 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 		return Mth.clamp((int)((float)(this.height * this.height) / (float)this.getContentHeight()), 32, this.height);
 	}
 
-	protected void renderDecorations(PoseStack poseStack) {
+	protected void renderDecorations(GuiGraphics guiGraphics) {
 		if (this.scrollbarVisible()) {
-			this.renderScrollBar(poseStack);
+			this.renderScrollBar(guiGraphics);
 		}
 	}
 
@@ -141,20 +141,20 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 		return this.getInnerHeight() + 4;
 	}
 
-	private void renderBackground(PoseStack poseStack) {
+	private void renderBackground(GuiGraphics guiGraphics) {
 		int i = this.isFocused() ? -1 : -6250336;
-		fill(poseStack, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, i);
-		fill(poseStack, this.getX() + 1, this.getY() + 1, this.getX() + this.width - 1, this.getY() + this.height - 1, -16777216);
+		guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, i);
+		guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.width - 1, this.getY() + this.height - 1, -16777216);
 	}
 
-	private void renderScrollBar(PoseStack poseStack) {
+	private void renderScrollBar(GuiGraphics guiGraphics) {
 		int i = this.getScrollBarHeight();
 		int j = this.getX() + this.width;
 		int k = this.getX() + this.width + 8;
 		int l = Math.max(this.getY(), (int)this.scrollAmount * (this.height - i) / this.getMaxScrollAmount() + this.getY());
 		int m = l + i;
-		fill(poseStack, j, l, k, m, -8355712);
-		fill(poseStack, j, l, k - 1, m - 1, -4144960);
+		guiGraphics.fill(j, l, k, m, -8355712);
+		guiGraphics.fill(j, l, k - 1, m - 1, -4144960);
 	}
 
 	protected boolean withinContentAreaTopBottom(int i, int j) {
@@ -171,5 +171,5 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 
 	protected abstract double scrollRate();
 
-	protected abstract void renderContents(PoseStack poseStack, int i, int j, float f);
+	protected abstract void renderContents(GuiGraphics guiGraphics, int i, int j, float f);
 }

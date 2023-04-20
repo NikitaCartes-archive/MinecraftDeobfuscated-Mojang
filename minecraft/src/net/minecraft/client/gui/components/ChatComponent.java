@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,7 @@ import net.minecraft.Optionull;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
@@ -26,7 +25,7 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class ChatComponent extends GuiComponent {
+public class ChatComponent {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int MAX_CHAT_HISTORY = 100;
 	private static final int MESSAGE_NOT_FOUND = -1;
@@ -53,7 +52,7 @@ public class ChatComponent extends GuiComponent {
 		}
 	}
 
-	public void render(PoseStack poseStack, int i, int j, int k) {
+	public void render(GuiGraphics guiGraphics, int i, int j, int k) {
 		if (!this.isChatHidden()) {
 			int l = this.getLinesPerPage();
 			int m = this.trimmedMessages.size();
@@ -62,9 +61,9 @@ public class ChatComponent extends GuiComponent {
 				float f = (float)this.getScale();
 				int n = Mth.ceil((float)this.getWidth() / f);
 				int o = this.minecraft.getWindow().getGuiScaledHeight();
-				poseStack.pushPose();
-				poseStack.scale(f, f, 1.0F);
-				poseStack.translate(4.0F, 0.0F, 0.0F);
+				guiGraphics.pose().pushPose();
+				guiGraphics.pose().scale(f, f, 1.0F);
+				guiGraphics.pose().translate(4.0F, 0.0F, 0.0F);
 				int p = Mth.floor((float)(o - 40) / f);
 				int q = this.getMessageEndIndexAt(this.screenToChatX((double)j), this.screenToChatY((double)k));
 				double d = this.minecraft.options.chatOpacity().get() * 0.9F + 0.1F;
@@ -88,23 +87,23 @@ public class ChatComponent extends GuiComponent {
 								int z = 0;
 								int aa = p - u * r;
 								int ab = aa + s;
-								poseStack.pushPose();
-								poseStack.translate(0.0F, 0.0F, 50.0F);
-								fill(poseStack, -4, aa - r, 0 + n + 4 + 4, aa, y << 24);
+								guiGraphics.pose().pushPose();
+								guiGraphics.pose().translate(0.0F, 0.0F, 50.0F);
+								guiGraphics.fill(-4, aa - r, 0 + n + 4 + 4, aa, y << 24);
 								GuiMessageTag guiMessageTag = line.tag();
 								if (guiMessageTag != null) {
 									int ac = guiMessageTag.indicatorColor() | x << 24;
-									fill(poseStack, -4, aa - r, -2, aa, ac);
+									guiGraphics.fill(-4, aa - r, -2, aa, ac);
 									if (v == q && guiMessageTag.icon() != null) {
 										int ad = this.getTagIconLeft(line);
 										int ae = ab + 9;
-										this.drawTagIcon(poseStack, ad, ae, guiMessageTag.icon());
+										this.drawTagIcon(guiGraphics, ad, ae, guiMessageTag.icon());
 									}
 								}
 
-								poseStack.translate(0.0F, 0.0F, 50.0F);
-								this.minecraft.font.drawShadow(poseStack, line.content(), 0.0F, (float)ab, 16777215 + (x << 24));
-								poseStack.popPose();
+								guiGraphics.pose().translate(0.0F, 0.0F, 50.0F);
+								guiGraphics.drawString(this.minecraft.font, line.content(), 0, ab, 16777215 + (x << 24));
+								guiGraphics.pose().popPose();
 							}
 						}
 					}
@@ -114,12 +113,12 @@ public class ChatComponent extends GuiComponent {
 				if (af > 0L) {
 					int ag = (int)(128.0 * d);
 					int w = (int)(255.0 * e);
-					poseStack.pushPose();
-					poseStack.translate(0.0F, (float)p, 50.0F);
-					fill(poseStack, -2, 0, n + 4, 9, w << 24);
-					poseStack.translate(0.0F, 0.0F, 50.0F);
-					this.minecraft.font.drawShadow(poseStack, Component.translatable("chat.queue", af), 0.0F, 1.0F, 16777215 + (ag << 24));
-					poseStack.popPose();
+					guiGraphics.pose().pushPose();
+					guiGraphics.pose().translate(0.0F, (float)p, 50.0F);
+					guiGraphics.fill(-2, 0, n + 4, 9, w << 24);
+					guiGraphics.pose().translate(0.0F, 0.0F, 50.0F);
+					guiGraphics.drawString(this.minecraft.font, Component.translatable("chat.queue", af), 0, 1, 16777215 + (ag << 24));
+					guiGraphics.pose().popPose();
 				}
 
 				if (bl) {
@@ -132,19 +131,19 @@ public class ChatComponent extends GuiComponent {
 						int y = ai > 0 ? 170 : 96;
 						int z = this.newMessageSinceScroll ? 13382451 : 3355562;
 						int aa = n + 4;
-						fill(poseStack, aa, -ai, aa + 2, -ai - x, z + (y << 24));
-						fill(poseStack, aa + 2, -ai, aa + 1, -ai - x, 13421772 + (y << 24));
+						guiGraphics.fill(aa, -ai, aa + 2, -ai - x, z + (y << 24));
+						guiGraphics.fill(aa + 2, -ai, aa + 1, -ai - x, 13421772 + (y << 24));
 					}
 				}
 
-				poseStack.popPose();
+				guiGraphics.pose().popPose();
 			}
 		}
 	}
 
-	private void drawTagIcon(PoseStack poseStack, int i, int j, GuiMessageTag.Icon icon) {
+	private void drawTagIcon(GuiGraphics guiGraphics, int i, int j, GuiMessageTag.Icon icon) {
 		int k = j - icon.height - 1;
-		icon.draw(poseStack, i, k);
+		icon.draw(guiGraphics, i, k);
 	}
 
 	private int getTagIconLeft(GuiMessage.Line line) {

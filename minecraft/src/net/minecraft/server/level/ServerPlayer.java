@@ -1077,6 +1077,11 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
+	public void triggerRecipeCrafted(Recipe<?> recipe, List<ItemStack> list) {
+		CriteriaTriggers.RECIPE_CRAFTED.trigger(this, recipe.getId(), list);
+	}
+
+	@Override
 	public void awardRecipesByKey(ResourceLocation[] resourceLocations) {
 		List<Recipe<?>> list = Lists.<Recipe<?>>newArrayList();
 
@@ -1664,7 +1669,7 @@ public class ServerPlayer extends Player {
 
 	@Nullable
 	public RemoteChatSession getChatSession() {
-		return this.chatSession;
+		return this.chatSession != null && this.chatSession.hasExpired() ? null : this.chatSession;
 	}
 
 	@Override

@@ -3,7 +3,6 @@ package net.minecraft.client.gui.screens.packs;
 import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +26,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -161,13 +161,13 @@ public class PackSelectionScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderDirtBackground(poseStack);
-		this.availablePackList.render(poseStack, i, j, f);
-		this.selectedPackList.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
-		drawCenteredString(poseStack, this.font, DRAG_AND_DROP, this.width / 2, 20, 16777215);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
+		this.availablePackList.render(guiGraphics, i, j, f);
+		this.selectedPackList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
+		guiGraphics.drawCenteredString(this.font, DRAG_AND_DROP, this.width / 2, 20, 16777215);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	protected static void copyPacks(Minecraft minecraft, List<Path> list, Path path) {

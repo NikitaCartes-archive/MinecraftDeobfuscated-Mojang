@@ -1,12 +1,9 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -26,18 +23,17 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		super.render(poseStack, i, j, f);
-		this.renderTooltip(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
+		this.renderTooltip(guiGraphics, i, j);
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		this.renderBackground(poseStack);
-		RenderSystem.setShaderTexture(0, BG_LOCATION);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
+		this.renderBackground(guiGraphics);
 		int k = this.leftPos;
 		int l = this.topPos;
-		blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(BG_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		ItemStack itemStack = this.menu.getSlot(1).getItem();
 		boolean bl = itemStack.is(Items.MAP);
 		boolean bl2 = itemStack.is(Items.PAPER);
@@ -53,13 +49,13 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 				if (mapItemSavedData.locked) {
 					bl4 = true;
 					if (bl2 || bl3) {
-						blit(poseStack, k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
+						guiGraphics.blit(BG_LOCATION, k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
 					}
 				}
 
 				if (bl2 && mapItemSavedData.scale >= 4) {
 					bl4 = true;
-					blit(poseStack, k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
+					guiGraphics.blit(BG_LOCATION, k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
 				}
 			}
 		} else {
@@ -67,49 +63,46 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 			mapItemSavedData = null;
 		}
 
-		this.renderResultingMap(poseStack, integer, mapItemSavedData, bl, bl2, bl3, bl4);
+		this.renderResultingMap(guiGraphics, integer, mapItemSavedData, bl, bl2, bl3, bl4);
 	}
 
 	private void renderResultingMap(
-		PoseStack poseStack, @Nullable Integer integer, @Nullable MapItemSavedData mapItemSavedData, boolean bl, boolean bl2, boolean bl3, boolean bl4
+		GuiGraphics guiGraphics, @Nullable Integer integer, @Nullable MapItemSavedData mapItemSavedData, boolean bl, boolean bl2, boolean bl3, boolean bl4
 	) {
 		int i = this.leftPos;
 		int j = this.topPos;
 		if (bl2 && !bl4) {
-			blit(poseStack, i + 67, j + 13, this.imageWidth, 66, 66, 66);
-			this.renderMap(poseStack, integer, mapItemSavedData, i + 85, j + 31, 0.226F);
+			guiGraphics.blit(BG_LOCATION, i + 67, j + 13, this.imageWidth, 66, 66, 66);
+			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 85, j + 31, 0.226F);
 		} else if (bl) {
-			blit(poseStack, i + 67 + 16, j + 13, this.imageWidth, 132, 50, 66);
-			this.renderMap(poseStack, integer, mapItemSavedData, i + 86, j + 16, 0.34F);
-			RenderSystem.setShaderTexture(0, BG_LOCATION);
-			poseStack.pushPose();
-			poseStack.translate(0.0F, 0.0F, 1.0F);
-			blit(poseStack, i + 67, j + 13 + 16, this.imageWidth, 132, 50, 66);
-			this.renderMap(poseStack, integer, mapItemSavedData, i + 70, j + 32, 0.34F);
-			poseStack.popPose();
+			guiGraphics.blit(BG_LOCATION, i + 67 + 16, j + 13, this.imageWidth, 132, 50, 66);
+			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 86, j + 16, 0.34F);
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate(0.0F, 0.0F, 1.0F);
+			guiGraphics.blit(BG_LOCATION, i + 67, j + 13 + 16, this.imageWidth, 132, 50, 66);
+			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 70, j + 32, 0.34F);
+			guiGraphics.pose().popPose();
 		} else if (bl3) {
-			blit(poseStack, i + 67, j + 13, this.imageWidth, 0, 66, 66);
-			this.renderMap(poseStack, integer, mapItemSavedData, i + 71, j + 17, 0.45F);
-			RenderSystem.setShaderTexture(0, BG_LOCATION);
-			poseStack.pushPose();
-			poseStack.translate(0.0F, 0.0F, 1.0F);
-			blit(poseStack, i + 66, j + 12, 0, this.imageHeight, 66, 66);
-			poseStack.popPose();
+			guiGraphics.blit(BG_LOCATION, i + 67, j + 13, this.imageWidth, 0, 66, 66);
+			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 71, j + 17, 0.45F);
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate(0.0F, 0.0F, 1.0F);
+			guiGraphics.blit(BG_LOCATION, i + 66, j + 12, 0, this.imageHeight, 66, 66);
+			guiGraphics.pose().popPose();
 		} else {
-			blit(poseStack, i + 67, j + 13, this.imageWidth, 0, 66, 66);
-			this.renderMap(poseStack, integer, mapItemSavedData, i + 71, j + 17, 0.45F);
+			guiGraphics.blit(BG_LOCATION, i + 67, j + 13, this.imageWidth, 0, 66, 66);
+			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 71, j + 17, 0.45F);
 		}
 	}
 
-	private void renderMap(PoseStack poseStack, @Nullable Integer integer, @Nullable MapItemSavedData mapItemSavedData, int i, int j, float f) {
+	private void renderMap(GuiGraphics guiGraphics, @Nullable Integer integer, @Nullable MapItemSavedData mapItemSavedData, int i, int j, float f) {
 		if (integer != null && mapItemSavedData != null) {
-			poseStack.pushPose();
-			poseStack.translate((float)i, (float)j, 1.0F);
-			poseStack.scale(f, f, 1.0F);
-			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-			this.minecraft.gameRenderer.getMapRenderer().render(poseStack, bufferSource, integer, mapItemSavedData, true, 15728880);
-			bufferSource.endBatch();
-			poseStack.popPose();
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate((float)i, (float)j, 1.0F);
+			guiGraphics.pose().scale(f, f, 1.0F);
+			this.minecraft.gameRenderer.getMapRenderer().render(guiGraphics.pose(), guiGraphics.bufferSource(), integer, mapItemSavedData, true, 15728880);
+			guiGraphics.flush();
+			guiGraphics.pose().popPose();
 		}
 	}
 }

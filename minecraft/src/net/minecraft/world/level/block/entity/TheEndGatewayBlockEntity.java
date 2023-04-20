@@ -239,7 +239,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 	}
 
 	private static boolean isChunkEmpty(ServerLevel serverLevel, Vec3 vec3) {
-		return getChunk(serverLevel, vec3).getHighestSectionPosition() <= serverLevel.getMinBuildHeight();
+		return getChunk(serverLevel, vec3).getHighestFilledSectionIndex() == -1;
 	}
 
 	private static BlockPos findTallestBlock(BlockGetter blockGetter, BlockPos blockPos, int i, boolean bl) {

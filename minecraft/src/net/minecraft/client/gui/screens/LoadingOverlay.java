@@ -3,7 +3,6 @@ package net.minecraft.client.gui.screens;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +13,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
@@ -65,7 +65,7 @@ public class LoadingOverlay extends Overlay {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		int k = this.minecraft.getWindow().getGuiScaledWidth();
 		int l = this.minecraft.getWindow().getGuiScaledHeight();
 		long m = Util.getMillis();
@@ -78,19 +78,19 @@ public class LoadingOverlay extends Overlay {
 		float o;
 		if (g >= 1.0F) {
 			if (this.minecraft.screen != null) {
-				this.minecraft.screen.render(poseStack, 0, 0, f);
+				this.minecraft.screen.render(guiGraphics, 0, 0, f);
 			}
 
 			int n = Mth.ceil((1.0F - Mth.clamp(g - 1.0F, 0.0F, 1.0F)) * 255.0F);
-			fill(poseStack, 0, 0, k, l, replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
+			guiGraphics.fill(0, 0, k, l, replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
 			o = 1.0F - Mth.clamp(g - 1.0F, 0.0F, 1.0F);
 		} else if (this.fadeIn) {
 			if (this.minecraft.screen != null && h < 1.0F) {
-				this.minecraft.screen.render(poseStack, i, j, f);
+				this.minecraft.screen.render(guiGraphics, i, j, f);
 			}
 
 			int n = Mth.ceil(Mth.clamp((double)h, 0.15, 1.0) * 255.0);
-			fill(poseStack, 0, 0, k, l, replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
+			guiGraphics.fill(0, 0, k, l, replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
 			o = Mth.clamp(h, 0.0F, 1.0F);
 		} else {
 			int n = BRAND_BACKGROUND.getAsInt();
@@ -108,20 +108,19 @@ public class LoadingOverlay extends Overlay {
 		int t = (int)(d * 0.5);
 		double e = d * 4.0;
 		int u = (int)(e * 0.5);
-		RenderSystem.setShaderTexture(0, MOJANG_STUDIOS_LOGO_LOCATION);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(770, 1);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
-		blit(poseStack, n - u, s - t, u, (int)d, -0.0625F, 0.0F, 120, 60, 120, 120);
-		blit(poseStack, n, s - t, u, (int)d, 0.0625F, 60.0F, 120, 60, 120, 120);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, o);
+		guiGraphics.blit(MOJANG_STUDIOS_LOGO_LOCATION, n - u, s - t, u, (int)d, -0.0625F, 0.0F, 120, 60, 120, 120);
+		guiGraphics.blit(MOJANG_STUDIOS_LOGO_LOCATION, n, s - t, u, (int)d, 0.0625F, 60.0F, 120, 60, 120, 120);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableBlend();
 		int v = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.8325);
 		float w = this.reload.getActualProgress();
 		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + w * 0.050000012F, 0.0F, 1.0F);
 		if (g < 1.0F) {
-			this.drawProgressBar(poseStack, k / 2 - u, v - 5, k / 2 + u, v + 5, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
+			this.drawProgressBar(guiGraphics, k / 2 - u, v - 5, k / 2 + u, v + 5, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
 		}
 
 		if (g >= 2.0F) {
@@ -143,15 +142,15 @@ public class LoadingOverlay extends Overlay {
 		}
 	}
 
-	private void drawProgressBar(PoseStack poseStack, int i, int j, int k, int l, float f) {
+	private void drawProgressBar(GuiGraphics guiGraphics, int i, int j, int k, int l, float f) {
 		int m = Mth.ceil((float)(k - i - 2) * this.currentProgress);
 		int n = Math.round(f * 255.0F);
 		int o = FastColor.ARGB32.color(n, 255, 255, 255);
-		fill(poseStack, i + 2, j + 2, i + m, l - 2, o);
-		fill(poseStack, i + 1, j, k - 1, j + 1, o);
-		fill(poseStack, i + 1, l, k - 1, l - 1, o);
-		fill(poseStack, i, j, i + 1, l, o);
-		fill(poseStack, k, j, k - 1, l, o);
+		guiGraphics.fill(i + 2, j + 2, i + m, l - 2, o);
+		guiGraphics.fill(i + 1, j, k - 1, j + 1, o);
+		guiGraphics.fill(i + 1, l, k - 1, l - 1, o);
+		guiGraphics.fill(i, j, i + 1, l, o);
+		guiGraphics.fill(k, j, k - 1, l, o);
 	}
 
 	@Override

@@ -60,7 +60,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 			@Override
 			public void onTake(Player player, ItemStack itemStack) {
 				itemStack.onCraftedBy(player.level, player, itemStack.getCount());
-				StonecutterMenu.this.resultContainer.awardUsedRecipes(player);
+				StonecutterMenu.this.resultContainer.awardUsedRecipes(player, this.getRelevantItems());
 				ItemStack itemStack2 = StonecutterMenu.this.inputSlot.remove(1);
 				if (!itemStack2.isEmpty()) {
 					StonecutterMenu.this.setupResultSlot();
@@ -74,6 +74,10 @@ public class StonecutterMenu extends AbstractContainerMenu {
 					}
 				});
 				super.onTake(player, itemStack);
+			}
+
+			private List<ItemStack> getRelevantItems() {
+				return List.of(StonecutterMenu.this.inputSlot.getItem());
 			}
 		});
 

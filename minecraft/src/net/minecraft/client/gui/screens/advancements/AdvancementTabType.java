@@ -1,10 +1,8 @@
 package net.minecraft.client.gui.screens.advancements;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
@@ -32,7 +30,7 @@ enum AdvancementTabType {
 		return this.max;
 	}
 
-	public void draw(PoseStack poseStack, int i, int j, boolean bl, int k) {
+	public void draw(GuiGraphics guiGraphics, int i, int j, boolean bl, int k) {
 		int l = this.textureX;
 		if (k > 0) {
 			l += this.width;
@@ -43,10 +41,10 @@ enum AdvancementTabType {
 		}
 
 		int m = bl ? this.textureY + this.height : this.textureY;
-		GuiComponent.blit(poseStack, i + this.getX(k), j + this.getY(k), l, m, this.width, this.height);
+		guiGraphics.blit(AdvancementsScreen.TABS_LOCATION, i + this.getX(k), j + this.getY(k), l, m, this.width, this.height);
 	}
 
-	public void drawIcon(PoseStack poseStack, int i, int j, int k, ItemRenderer itemRenderer, ItemStack itemStack) {
+	public void drawIcon(GuiGraphics guiGraphics, int i, int j, int k, ItemStack itemStack) {
 		int l = i + this.getX(k);
 		int m = j + this.getY(k);
 		switch (this) {
@@ -67,7 +65,7 @@ enum AdvancementTabType {
 				m += 5;
 		}
 
-		itemRenderer.renderAndDecorateFakeItem(poseStack, itemStack, l, m);
+		guiGraphics.renderFakeItem(itemStack, l, m);
 	}
 
 	public int getX(int i) {

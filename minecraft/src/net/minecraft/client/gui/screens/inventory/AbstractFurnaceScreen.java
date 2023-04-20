@@ -1,9 +1,8 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.recipebook.AbstractFurnaceRecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
@@ -55,34 +54,33 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
 		if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-			this.renderBg(poseStack, f, i, j);
-			this.recipeBookComponent.render(poseStack, i, j, f);
+			this.renderBg(guiGraphics, f, i, j);
+			this.recipeBookComponent.render(guiGraphics, i, j, f);
 		} else {
-			this.recipeBookComponent.render(poseStack, i, j, f);
-			super.render(poseStack, i, j, f);
-			this.recipeBookComponent.renderGhostRecipe(poseStack, this.leftPos, this.topPos, true, f);
+			this.recipeBookComponent.render(guiGraphics, i, j, f);
+			super.render(guiGraphics, i, j, f);
+			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, true, f);
 		}
 
-		this.renderTooltip(poseStack, i, j);
-		this.recipeBookComponent.renderTooltip(poseStack, this.leftPos, this.topPos, i, j);
+		this.renderTooltip(guiGraphics, i, j);
+		this.recipeBookComponent.renderTooltip(guiGraphics, this.leftPos, this.topPos, i, j);
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.setShaderTexture(0, this.texture);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = this.leftPos;
 		int l = this.topPos;
-		blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(this.texture, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		if (this.menu.isLit()) {
 			int m = this.menu.getLitProgress();
-			blit(poseStack, k + 56, l + 36 + 12 - m, 176, 12 - m, 14, m + 1);
+			guiGraphics.blit(this.texture, k + 56, l + 36 + 12 - m, 176, 12 - m, 14, m + 1);
 		}
 
 		int m = this.menu.getBurnProgress();
-		blit(poseStack, k + 79, l + 34, 176, 14, m + 1, 16);
+		guiGraphics.blit(this.texture, k + 79, l + 34, 176, 14, m + 1, 16);
 	}
 
 	@Override

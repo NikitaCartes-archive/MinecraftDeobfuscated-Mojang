@@ -48,8 +48,8 @@ public class ResultSlot extends Slot {
 			itemStack.onCraftedBy(this.player.level, this.player, this.removeCount);
 		}
 
-		if (this.container instanceof RecipeHolder) {
-			((RecipeHolder)this.container).awardUsedRecipes(this.player);
+		if (this.container instanceof RecipeHolder recipeHolder) {
+			recipeHolder.awardUsedRecipes(this.player, this.craftSlots.getItems());
 		}
 
 		this.removeCount = 0;

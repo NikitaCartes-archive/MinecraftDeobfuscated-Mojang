@@ -1,11 +1,10 @@
 package net.minecraft.client.gui.screens.inventory.tooltip;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.BundleTooltip;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -32,6 +31,6 @@ public interface ClientTooltipComponent {
 	default void renderText(Font font, int i, int j, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
 	}
 
-	default void renderImage(Font font, int i, int j, PoseStack poseStack, ItemRenderer itemRenderer) {
+	default void renderImage(Font font, int i, int j, GuiGraphics guiGraphics) {
 	}
 }

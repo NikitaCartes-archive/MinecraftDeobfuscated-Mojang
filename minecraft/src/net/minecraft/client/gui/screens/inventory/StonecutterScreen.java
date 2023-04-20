@@ -1,11 +1,10 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -39,30 +38,29 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		super.render(poseStack, i, j, f);
-		this.renderTooltip(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
+		this.renderTooltip(guiGraphics, i, j);
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		this.renderBackground(poseStack);
-		RenderSystem.setShaderTexture(0, BG_LOCATION);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
+		this.renderBackground(guiGraphics);
 		int k = this.leftPos;
 		int l = this.topPos;
-		blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(BG_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		int m = (int)(41.0F * this.scrollOffs);
-		blit(poseStack, k + 119, l + 15 + m, 176 + (this.isScrollBarActive() ? 0 : 12), 0, 12, 15);
+		guiGraphics.blit(BG_LOCATION, k + 119, l + 15 + m, 176 + (this.isScrollBarActive() ? 0 : 12), 0, 12, 15);
 		int n = this.leftPos + 52;
 		int o = this.topPos + 14;
 		int p = this.startIndex + 12;
-		this.renderButtons(poseStack, i, j, n, o, p);
-		this.renderRecipes(poseStack, n, o, p);
+		this.renderButtons(guiGraphics, i, j, n, o, p);
+		this.renderRecipes(guiGraphics, n, o, p);
 	}
 
 	@Override
-	protected void renderTooltip(PoseStack poseStack, int i, int j) {
-		super.renderTooltip(poseStack, i, j);
+	protected void renderTooltip(GuiGraphics guiGraphics, int i, int j) {
+		super.renderTooltip(guiGraphics, i, j);
 		if (this.displayRecipes) {
 			int k = this.leftPos + 52;
 			int l = this.topPos + 14;
@@ -74,13 +72,13 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 				int p = k + o % 4 * 16;
 				int q = l + o / 4 * 18 + 2;
 				if (i >= p && i < p + 16 && j >= q && j < q + 18) {
-					this.renderTooltip(poseStack, ((StonecutterRecipe)list.get(n)).getResultItem(this.minecraft.level.registryAccess()), i, j);
+					guiGraphics.renderTooltip(this.font, ((StonecutterRecipe)list.get(n)).getResultItem(this.minecraft.level.registryAccess()), i, j);
 				}
 			}
 		}
 	}
 
-	private void renderButtons(PoseStack poseStack, int i, int j, int k, int l, int m) {
+	private void renderButtons(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 		for (int n = this.startIndex; n < m && n < this.menu.getNumRecipes(); n++) {
 			int o = n - this.startIndex;
 			int p = k + o % 4 * 16;
@@ -93,11 +91,11 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 				s += 36;
 			}
 
-			blit(poseStack, p, r - 1, 0, s, 16, 18);
+			guiGraphics.blit(BG_LOCATION, p, r - 1, 0, s, 16, 18);
 		}
 	}
 
-	private void renderRecipes(PoseStack poseStack, int i, int j, int k) {
+	private void renderRecipes(GuiGraphics guiGraphics, int i, int j, int k) {
 		List<StonecutterRecipe> list = this.menu.getRecipes();
 
 		for (int l = this.startIndex; l < k && l < this.menu.getNumRecipes(); l++) {
@@ -105,9 +103,7 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 			int n = i + m % 4 * 16;
 			int o = m / 4;
 			int p = j + o * 18 + 2;
-			this.minecraft
-				.getItemRenderer()
-				.renderAndDecorateItem(poseStack, ((StonecutterRecipe)list.get(l)).getResultItem(this.minecraft.level.registryAccess()), n, p);
+			guiGraphics.renderItem(((StonecutterRecipe)list.get(l)).getResultItem(this.minecraft.level.registryAccess()), n, p);
 		}
 	}
 

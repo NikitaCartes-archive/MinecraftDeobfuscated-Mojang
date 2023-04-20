@@ -1,9 +1,8 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
@@ -22,8 +21,7 @@ public class PageButton extends Button {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-		RenderSystem.setShaderTexture(0, BookViewScreen.BOOK_LOCATION);
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		int k = 0;
 		int l = 192;
 		if (this.isHoveredOrFocused()) {
@@ -34,7 +32,7 @@ public class PageButton extends Button {
 			l += 13;
 		}
 
-		blit(poseStack, this.getX(), this.getY(), k, l, 23, 13);
+		guiGraphics.blit(BookViewScreen.BOOK_LOCATION, this.getX(), this.getY(), k, l, 23, 13);
 	}
 
 	@Override

@@ -629,29 +629,23 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 					this.walkDist = this.walkDist + (float)vec32.horizontalDistance() * 0.6F;
 					this.moveDist = this.moveDist + (float)Math.sqrt(e * e + f * f + g * g) * 0.6F;
 					if (this.moveDist > this.nextStep && !blockState.isAir()) {
-						if (!this.onGround && !bl3 && (!this.isCrouching() || vec3.y != 0.0)) {
-							if (this.isInWater()) {
-								this.nextStep = this.nextStep();
-								if (movementEmission.emitsSounds()) {
-									Entity entity = (Entity)(this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this);
-									float h = entity == this ? 0.35F : 0.4F;
-									Vec3 vec34 = entity.getDeltaMovement();
-									float i = Math.min(1.0F, (float)Math.sqrt(vec34.x * vec34.x * 0.2F + vec34.y * vec34.y + vec34.z * vec34.z * 0.2F) * h);
-									this.playSwimSound(i);
-								}
-
-								if (movementEmission.emitsEvents()) {
-									this.gameEvent(GameEvent.SWIM);
-								}
-							}
-						} else {
+						if (this.walkingOnBlock(bl3, vec3)) {
 							this.nextStep = this.nextStep();
 							if (movementEmission.emitsSounds()) {
-								this.handleStepSounds(blockPos, blockState);
+								this.walkingStepSound(blockPos, blockState);
 							}
 
 							if (movementEmission.emitsEvents()) {
 								this.level.gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
+							}
+						} else if (this.isInWater()) {
+							this.nextStep = this.nextStep();
+							if (movementEmission.emitsSounds()) {
+								this.waterSwimSound();
+							}
+
+							if (movementEmission.emitsEvents()) {
+								this.gameEvent(GameEvent.SWIM);
 							}
 						}
 					} else if (blockState.isAir()) {
@@ -660,8 +654,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				}
 
 				this.tryCheckInsideBlocks();
-				float j = this.getBlockSpeedFactor();
-				this.setDeltaMovement(this.getDeltaMovement().multiply((double)j, 1.0, (double)j));
+				float h = this.getBlockSpeedFactor();
+				this.setDeltaMovement(this.getDeltaMovement().multiply((double)h, 1.0, (double)h));
 				if (this.level
 					.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6))
 					.noneMatch(blockStatex -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA))) {
@@ -935,35 +929,36 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.gameEvent(gameEvent, this);
 	}
 
-	private void handleStepSounds(BlockPos blockPos, BlockState blockState) {
-		BlockPos blockPos2 = this.getPrimaryStepSoundBlockPos(blockPos);
-		if (this instanceof Player && !blockPos.equals(blockPos2)) {
-			BlockState blockState2 = this.level.getBlockState(blockPos2);
-			if (blockState2.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS)) {
-				this.playCombinationStepSounds(blockState2, blockState);
-			} else {
-				this.playStepSound(blockPos2, blockState2);
-			}
-		} else {
-			this.playStepSound(blockPos, blockState);
-		}
-
+	private void walkingStepSound(BlockPos blockPos, BlockState blockState) {
+		this.playStepSound(blockPos, blockState);
 		if (this.shouldPlayAmethystStepSound(blockState)) {
 			this.playAmethystStepSound();
 		}
 	}
 
-	private BlockPos getPrimaryStepSoundBlockPos(BlockPos blockPos) {
+	protected void waterSwimSound() {
+		Entity entity = (Entity)(this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this);
+		float f = entity == this ? 0.35F : 0.4F;
+		Vec3 vec3 = entity.getDeltaMovement();
+		float g = Math.min(1.0F, (float)Math.sqrt(vec3.x * vec3.x * 0.2F + vec3.y * vec3.y + vec3.z * vec3.z * 0.2F) * f);
+		this.playSwimSound(g);
+	}
+
+	protected BlockPos getPrimaryStepSoundBlockPos(BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.above();
 		BlockState blockState = this.level.getBlockState(blockPos2);
 		return !blockState.is(BlockTags.INSIDE_STEP_SOUND_BLOCKS) && !blockState.is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS) ? blockPos : blockPos2;
 	}
 
-	private void playCombinationStepSounds(BlockState blockState, BlockState blockState2) {
+	protected void playCombinationStepSounds(BlockState blockState, BlockState blockState2) {
 		SoundType soundType = blockState.getSoundType();
-		SoundType soundType2 = blockState2.getSoundType();
 		this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
-		this.playSound(soundType2.getStepSound(), soundType2.getVolume() * 0.05F, soundType2.getPitch() * 0.8F);
+		this.playMuffledStepSound(blockState2);
+	}
+
+	protected void playMuffledStepSound(BlockState blockState) {
+		SoundType soundType = blockState.getSoundType();
+		this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.05F, soundType.getPitch() * 0.8F);
 	}
 
 	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
@@ -1060,6 +1055,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 			return false;
 		}
+	}
+
+	public boolean walkingOnBlock(boolean bl, Vec3 vec3) {
+		return (this.onGround || bl || this.isCrouching() && vec3.y == 0.0) && !this.isSwimming();
 	}
 
 	public boolean isInWater() {

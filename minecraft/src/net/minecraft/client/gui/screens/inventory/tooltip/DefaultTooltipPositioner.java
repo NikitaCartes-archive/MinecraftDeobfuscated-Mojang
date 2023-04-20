@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.inventory.tooltip;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.Screen;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
@@ -14,20 +13,20 @@ public class DefaultTooltipPositioner implements ClientTooltipPositioner {
 	}
 
 	@Override
-	public Vector2ic positionTooltip(Screen screen, int i, int j, int k, int l) {
-		Vector2i vector2i = new Vector2i(i, j).add(12, -12);
-		this.positionTooltip(screen, vector2i, k, l);
+	public Vector2ic positionTooltip(int i, int j, int k, int l, int m, int n) {
+		Vector2i vector2i = new Vector2i(k, l).add(12, -12);
+		this.positionTooltip(i, j, vector2i, m, n);
 		return vector2i;
 	}
 
-	private void positionTooltip(Screen screen, Vector2i vector2i, int i, int j) {
-		if (vector2i.x + i > screen.width) {
-			vector2i.x = Math.max(vector2i.x - 24 - i, 4);
+	private void positionTooltip(int i, int j, Vector2i vector2i, int k, int l) {
+		if (vector2i.x + k > i) {
+			vector2i.x = Math.max(vector2i.x - 24 - k, 4);
 		}
 
-		int k = j + 3;
-		if (vector2i.y + k > screen.height) {
-			vector2i.y = screen.height - k;
+		int m = l + 3;
+		if (vector2i.y + m > j) {
+			vector2i.y = j - m;
 		}
 	}
 }

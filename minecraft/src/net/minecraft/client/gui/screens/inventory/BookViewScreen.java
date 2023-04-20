@@ -2,8 +2,6 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
@@ -159,12 +158,11 @@ public class BookViewScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		RenderSystem.setShaderTexture(0, BOOK_LOCATION);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
 		int k = (this.width - 192) / 2;
 		int l = 2;
-		blit(poseStack, k, 2, 0, 0, 192, 192);
+		guiGraphics.blit(BOOK_LOCATION, k, 2, 0, 0, 192, 192);
 		if (this.cachedPage != this.currentPage) {
 			FormattedText formattedText = this.bookAccess.getPage(this.currentPage);
 			this.cachedPageComponents = this.font.split(formattedText, 114);
@@ -173,20 +171,20 @@ public class BookViewScreen extends Screen {
 
 		this.cachedPage = this.currentPage;
 		int m = this.font.width(this.pageMsg);
-		this.font.draw(poseStack, this.pageMsg, (float)(k - m + 192 - 44), 18.0F, 0);
+		guiGraphics.drawString(this.font, this.pageMsg, k - m + 192 - 44, 18, 0, false);
 		int n = Math.min(128 / 9, this.cachedPageComponents.size());
 
 		for (int o = 0; o < n; o++) {
 			FormattedCharSequence formattedCharSequence = (FormattedCharSequence)this.cachedPageComponents.get(o);
-			this.font.draw(poseStack, formattedCharSequence, (float)(k + 36), (float)(32 + o * 9), 0);
+			guiGraphics.drawString(this.font, formattedCharSequence, k + 36, 32 + o * 9, 0, false);
 		}
 
 		Style style = this.getClickedComponentStyleAt((double)i, (double)j);
 		if (style != null) {
-			this.renderComponentHoverEffect(poseStack, style, i, j);
+			guiGraphics.renderComponentHoverEffect(this.font, style, i, j);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

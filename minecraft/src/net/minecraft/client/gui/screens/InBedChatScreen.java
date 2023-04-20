@@ -1,8 +1,8 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
@@ -26,11 +26,11 @@ public class InBedChatScreen extends ChatScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (!this.minecraft.getChatStatus().isChatAllowed(this.minecraft.isLocalServer())) {
-			this.leaveBedButton.render(poseStack, i, j, f);
+			this.leaveBedButton.render(guiGraphics, i, j, f);
 		} else {
-			super.render(poseStack, i, j, f);
+			super.render(guiGraphics, i, j, f);
 		}
 	}
 

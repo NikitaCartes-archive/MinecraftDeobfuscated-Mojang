@@ -4,14 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -37,8 +30,7 @@ import net.minecraft.Util;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
@@ -71,10 +63,9 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
-public class DebugScreenOverlay extends GuiComponent {
+public class DebugScreenOverlay {
 	private static final int COLOR_GREY = 14737632;
 	private static final int MARGIN_RIGHT = 2;
 	private static final int MARGIN_LEFT = 2;
@@ -113,26 +104,26 @@ public class DebugScreenOverlay extends GuiComponent {
 		this.clientChunk = null;
 	}
 
-	public void render(PoseStack poseStack) {
+	public void render(GuiGraphics guiGraphics) {
 		this.minecraft.getProfiler().push("debug");
 		Entity entity = this.minecraft.getCameraEntity();
 		this.block = entity.pick(20.0, 0.0F, false);
 		this.liquid = entity.pick(20.0, 0.0F, true);
-		this.drawGameInformation(poseStack);
-		this.drawSystemInformation(poseStack);
+		this.drawGameInformation(guiGraphics);
+		this.drawSystemInformation(guiGraphics);
 		if (this.minecraft.options.renderFpsChart) {
 			int i = this.minecraft.getWindow().getGuiScaledWidth();
-			this.drawChart(poseStack, this.minecraft.getFrameTimer(), 0, i / 2, true);
+			this.drawChart(guiGraphics, this.minecraft.getFrameTimer(), 0, i / 2, true);
 			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
 			if (integratedServer != null) {
-				this.drawChart(poseStack, integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
+				this.drawChart(guiGraphics, integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
 			}
 		}
 
 		this.minecraft.getProfiler().pop();
 	}
 
-	protected void drawGameInformation(PoseStack poseStack) {
+	protected void drawGameInformation(GuiGraphics guiGraphics) {
 		List<String> list = this.getGameInformation();
 		list.add("");
 		boolean bl = this.minecraft.getSingleplayerServer() != null;
@@ -152,13 +143,13 @@ public class DebugScreenOverlay extends GuiComponent {
 				int k = this.font.width(string);
 				int l = 2;
 				int m = 2 + j * i;
-				fill(poseStack, 1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
-				this.font.draw(poseStack, string, 2.0F, (float)m, 14737632);
+				guiGraphics.fill(1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
+				guiGraphics.drawString(this.font, string, 2, m, 14737632, false);
 			}
 		}
 	}
 
-	protected void drawSystemInformation(PoseStack poseStack) {
+	protected void drawSystemInformation(GuiGraphics guiGraphics) {
 		List<String> list = this.getSystemInformation();
 
 		for (int i = 0; i < list.size(); i++) {
@@ -168,8 +159,8 @@ public class DebugScreenOverlay extends GuiComponent {
 				int k = this.font.width(string);
 				int l = this.minecraft.getWindow().getGuiScaledWidth() - 2 - k;
 				int m = 2 + j * i;
-				fill(poseStack, l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
-				this.font.draw(poseStack, string, (float)l, (float)m, 14737632);
+				guiGraphics.fill(l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
+				guiGraphics.drawString(this.font, string, l, m, 14737632, false);
 			}
 		}
 	}
@@ -505,7 +496,7 @@ public class DebugScreenOverlay extends GuiComponent {
 		return property.getName() + ": " + string;
 	}
 
-	private void drawChart(PoseStack poseStack, FrameTimer frameTimer, int i, int j, boolean bl) {
+	private void drawChart(GuiGraphics guiGraphics, FrameTimer frameTimer, int i, int j, boolean bl) {
 		RenderSystem.disableDepthTest();
 		int k = frameTimer.getLogStart();
 		int l = frameTimer.getLogEnd();
@@ -526,58 +517,44 @@ public class DebugScreenOverlay extends GuiComponent {
 		}
 
 		int t = this.minecraft.getWindow().getGuiScaledHeight();
-		fill(poseStack, i, t - 60, i + p, t, -1873784752);
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		guiGraphics.fill(i, t - 60, i + p, t, -1873784752);
 
-		for (Matrix4f matrix4f = Transformation.identity().getMatrix(); m != l; m = frameTimer.wrapIndex(m + 1)) {
-			int v = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);
-			int w = bl ? 100 : 60;
-			int x = this.getSampleColor(Mth.clamp(v, 0, w), 0, w / 2, w);
-			int y = x >> 24 & 0xFF;
-			int z = x >> 16 & 0xFF;
-			int aa = x >> 8 & 0xFF;
-			int ab = x & 0xFF;
-			bufferBuilder.vertex(matrix4f, (float)(n + 1), (float)t, 0.0F).color(z, aa, ab, y).endVertex();
-			bufferBuilder.vertex(matrix4f, (float)(n + 1), (float)(t - v + 1), 0.0F).color(z, aa, ab, y).endVertex();
-			bufferBuilder.vertex(matrix4f, (float)n, (float)(t - v + 1), 0.0F).color(z, aa, ab, y).endVertex();
-			bufferBuilder.vertex(matrix4f, (float)n, (float)t, 0.0F).color(z, aa, ab, y).endVertex();
+		while (m != l) {
+			int u = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);
+			int v = bl ? 100 : 60;
+			int w = this.getSampleColor(Mth.clamp(u, 0, v), 0, v / 2, v);
+			guiGraphics.fill(n, t - u, n + 1, t, w);
 			n++;
+			m = frameTimer.wrapIndex(m + 1);
 		}
 
-		BufferUploader.drawWithShader(bufferBuilder.end());
-		RenderSystem.disableBlend();
 		if (bl) {
-			fill(poseStack, i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
-			this.font.draw(poseStack, "60 FPS", (float)(i + 2), (float)(t - 30 + 2), 14737632);
-			hLine(poseStack, i, i + p - 1, t - 30, -1);
-			fill(poseStack, i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-			this.font.draw(poseStack, "30 FPS", (float)(i + 2), (float)(t - 60 + 2), 14737632);
-			hLine(poseStack, i, i + p - 1, t - 60, -1);
+			guiGraphics.fill(i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
+			guiGraphics.drawString(this.font, "60 FPS", i + 2, t - 30 + 2, 14737632, false);
+			guiGraphics.hLine(i, i + p - 1, t - 30, -1);
+			guiGraphics.fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+			guiGraphics.drawString(this.font, "30 FPS", i + 2, t - 60 + 2, 14737632, false);
+			guiGraphics.hLine(i, i + p - 1, t - 60, -1);
 		} else {
-			fill(poseStack, i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-			this.font.draw(poseStack, "20 TPS", (float)(i + 2), (float)(t - 60 + 2), 14737632);
-			hLine(poseStack, i, i + p - 1, t - 60, -1);
+			guiGraphics.fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+			guiGraphics.drawString(this.font, "20 TPS", i + 2, t - 60 + 2, 14737632, false);
+			guiGraphics.hLine(i, i + p - 1, t - 60, -1);
 		}
 
-		hLine(poseStack, i, i + p - 1, t - 1, -1);
-		vLine(poseStack, i, t - 60, t, -1);
-		vLine(poseStack, i + p - 1, t - 60, t, -1);
-		int v = this.minecraft.options.framerateLimit().get();
-		if (bl && v > 0 && v <= 250) {
-			hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)v), -16711681);
+		guiGraphics.hLine(i, i + p - 1, t - 1, -1);
+		guiGraphics.vLine(i, t - 60, t, -1);
+		guiGraphics.vLine(i + p - 1, t - 60, t, -1);
+		int u = this.minecraft.options.framerateLimit().get();
+		if (bl && u > 0 && u <= 250) {
+			guiGraphics.hLine(i, i + p - 1, t - 1 - (int)(1800.0 / (double)u), -16711681);
 		}
 
 		String string = r + " ms min";
 		String string2 = q / (long)p + " ms avg";
 		String string3 = s + " ms max";
-		this.font.drawShadow(poseStack, string, (float)(i + 2), (float)(t - 60 - 9), 14737632);
-		this.font.drawShadow(poseStack, string2, (float)(i + p / 2 - this.font.width(string2) / 2), (float)(t - 60 - 9), 14737632);
-		this.font.drawShadow(poseStack, string3, (float)(i + p - this.font.width(string3)), (float)(t - 60 - 9), 14737632);
-		RenderSystem.enableDepthTest();
+		guiGraphics.drawString(this.font, string, i + 2, t - 60 - 9, 14737632);
+		guiGraphics.drawCenteredString(this.font, string2, i + p / 2, t - 60 - 9, 14737632);
+		guiGraphics.drawString(this.font, string3, i + p - this.font.width(string3), t - 60 - 9, 14737632);
 	}
 
 	private int getSampleColor(int i, int j, int k, int l) {

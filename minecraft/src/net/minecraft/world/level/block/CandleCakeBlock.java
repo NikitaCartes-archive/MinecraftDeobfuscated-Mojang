@@ -96,7 +96,7 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return levelReader.getBlockState(blockPos.below()).getMaterial().isSolid();
+		return levelReader.getBlockState(blockPos.below()).isSolid();
 	}
 
 	@Override

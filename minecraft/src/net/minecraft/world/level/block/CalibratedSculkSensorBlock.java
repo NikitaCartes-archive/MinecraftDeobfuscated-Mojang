@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 
 public class CalibratedSculkSensorBlock extends SculkSensorBlock {
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -37,7 +38,9 @@ public class CalibratedSculkSensorBlock extends SculkSensorBlock {
 			? createTickerHelper(
 				blockEntityType,
 				BlockEntityType.CALIBRATED_SCULK_SENSOR,
-				(levelx, blockPos, blockStatex, calibratedSculkSensorBlockEntity) -> calibratedSculkSensorBlockEntity.getListener().tick(levelx)
+				(levelx, blockPos, blockStatex, calibratedSculkSensorBlockEntity) -> VibrationSystem.Ticker.tick(
+						levelx, calibratedSculkSensorBlockEntity.getVibrationData(), calibratedSculkSensorBlockEntity.getVibrationUser()
+					)
 			)
 			: null;
 	}

@@ -277,7 +277,7 @@ public class ServerChunkCache extends ChunkSource {
 					return (BlockGetter)optional.get();
 				}
 
-				if (chunkStatus == ChunkStatus.LIGHT.getParent()) {
+				if (chunkStatus == ChunkStatus.INITIALIZE_LIGHT.getParent()) {
 					return null;
 				}
 

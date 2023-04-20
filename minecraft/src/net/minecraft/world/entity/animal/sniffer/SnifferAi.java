@@ -200,6 +200,8 @@ public class SnifferAi {
 			boolean bl = this.timedOut(l);
 			if (bl) {
 				sniffer.getBrain().setMemoryWithExpiry(MemoryModuleType.SNIFF_COOLDOWN, Unit.INSTANCE, 9600L);
+			} else {
+				SnifferAi.resetSniffing(sniffer);
 			}
 		}
 	}
@@ -265,6 +267,8 @@ public class SnifferAi {
 		Scenting(int i, int j) {
 			super(
 				Map.of(
+					MemoryModuleType.IS_PANICKING,
+					MemoryStatus.VALUE_ABSENT,
 					MemoryModuleType.SNIFFER_DIGGING,
 					MemoryStatus.VALUE_ABSENT,
 					MemoryModuleType.SNIFFER_SNIFFING_TARGET,

@@ -2,7 +2,6 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.Unit;
 import com.mojang.realmsclient.client.FileUpload;
@@ -28,6 +27,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -132,48 +132,48 @@ public class RealmsUploadScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
 		if (!this.uploadFinished && this.uploadStatus.bytesWritten != 0L && this.uploadStatus.bytesWritten == this.uploadStatus.totalBytes) {
 			this.status = VERIFYING_TEXT;
 			this.cancelButton.active = false;
 		}
 
-		drawCenteredString(poseStack, this.font, this.status, this.width / 2, 50, 16777215);
+		guiGraphics.drawCenteredString(this.font, this.status, this.width / 2, 50, 16777215);
 		if (this.showDots) {
-			this.drawDots(poseStack);
+			this.drawDots(guiGraphics);
 		}
 
 		if (this.uploadStatus.bytesWritten != 0L && !this.cancelled) {
-			this.drawProgressBar(poseStack);
-			this.drawUploadSpeed(poseStack);
+			this.drawProgressBar(guiGraphics);
+			this.drawUploadSpeed(guiGraphics);
 		}
 
 		if (this.errorMessage != null) {
 			for (int k = 0; k < this.errorMessage.length; k++) {
-				drawCenteredString(poseStack, this.font, this.errorMessage[k], this.width / 2, 110 + 12 * k, 16711680);
+				guiGraphics.drawCenteredString(this.font, this.errorMessage[k], this.width / 2, 110 + 12 * k, 16711680);
 			}
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
-	private void drawDots(PoseStack poseStack) {
+	private void drawDots(GuiGraphics guiGraphics) {
 		int i = this.font.width(this.status);
-		this.font.draw(poseStack, DOTS[this.tickCount / 10 % DOTS.length], (float)(this.width / 2 + i / 2 + 5), 50.0F, 16777215);
+		guiGraphics.drawString(this.font, DOTS[this.tickCount / 10 % DOTS.length], this.width / 2 + i / 2 + 5, 50, 16777215, false);
 	}
 
-	private void drawProgressBar(PoseStack poseStack) {
+	private void drawProgressBar(GuiGraphics guiGraphics) {
 		double d = Math.min((double)this.uploadStatus.bytesWritten / (double)this.uploadStatus.totalBytes, 1.0);
 		this.progress = String.format(Locale.ROOT, "%.1f", d * 100.0);
 		int i = (this.width - 200) / 2;
 		int j = i + (int)Math.round(200.0 * d);
-		fill(poseStack, i - 1, 79, j + 1, 96, -2501934);
-		fill(poseStack, i, 80, j, 95, -8355712);
-		drawCenteredString(poseStack, this.font, this.progress + " %", this.width / 2, 84, 16777215);
+		guiGraphics.fill(i - 1, 79, j + 1, 96, -2501934);
+		guiGraphics.fill(i, 80, j, 95, -8355712);
+		guiGraphics.drawCenteredString(this.font, this.progress + " %", this.width / 2, 84, 16777215);
 	}
 
-	private void drawUploadSpeed(PoseStack poseStack) {
+	private void drawUploadSpeed(GuiGraphics guiGraphics) {
 		if (this.tickCount % 20 == 0) {
 			if (this.previousWrittenBytes != null) {
 				long l = Util.getMillis() - this.previousTimeSnapshot;
@@ -182,21 +182,21 @@ public class RealmsUploadScreen extends RealmsScreen {
 				}
 
 				this.bytesPersSecond = 1000L * (this.uploadStatus.bytesWritten - this.previousWrittenBytes) / l;
-				this.drawUploadSpeed0(poseStack, this.bytesPersSecond);
+				this.drawUploadSpeed0(guiGraphics, this.bytesPersSecond);
 			}
 
 			this.previousWrittenBytes = this.uploadStatus.bytesWritten;
 			this.previousTimeSnapshot = Util.getMillis();
 		} else {
-			this.drawUploadSpeed0(poseStack, this.bytesPersSecond);
+			this.drawUploadSpeed0(guiGraphics, this.bytesPersSecond);
 		}
 	}
 
-	private void drawUploadSpeed0(PoseStack poseStack, long l) {
+	private void drawUploadSpeed0(GuiGraphics guiGraphics, long l) {
 		if (l > 0L) {
 			int i = this.font.width(this.progress);
 			String string = "(" + Unit.humanReadable(l) + "/s)";
-			this.font.draw(poseStack, string, (float)(this.width / 2 + i / 2 + 15), 84.0F, 16777215);
+			guiGraphics.drawString(this.font, string, this.width / 2 + i / 2 + 15, 84, 16777215, false);
 		}
 	}
 

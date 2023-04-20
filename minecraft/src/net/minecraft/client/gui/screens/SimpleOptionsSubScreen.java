@@ -1,11 +1,11 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -46,8 +46,8 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.basicListRender(poseStack, this.list, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.basicListRender(guiGraphics, this.list, i, j, f);
 	}
 
 	public void updateNarratorButton() {

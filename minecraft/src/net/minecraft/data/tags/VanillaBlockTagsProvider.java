@@ -63,7 +63,8 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.BAMBOO_BUTTON,
 				Blocks.CHERRY_BUTTON
 			);
-		this.tag(BlockTags.BUTTONS).addTag(BlockTags.WOODEN_BUTTONS).add(Blocks.STONE_BUTTON).add(Blocks.POLISHED_BLACKSTONE_BUTTON);
+		this.tag(BlockTags.STONE_BUTTONS).add(Blocks.STONE_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON);
+		this.tag(BlockTags.BUTTONS).addTag(BlockTags.WOODEN_BUTTONS).addTag(BlockTags.STONE_BUTTONS);
 		this.tag(BlockTags.WOOL_CARPETS)
 			.add(
 				Blocks.WHITE_CARPET,
@@ -1248,7 +1249,6 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.ICE,
 				Blocks.PACKED_ICE,
 				Blocks.BLUE_ICE,
-				Blocks.STONE_BUTTON,
 				Blocks.PISTON,
 				Blocks.STICKY_PISTON,
 				Blocks.PISTON_HEAD,
@@ -1266,6 +1266,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.INFESTED_MOSSY_STONE_BRICKS,
 				Blocks.INFESTED_STONE_BRICKS
 			)
+			.addTag(BlockTags.STONE_BUTTONS)
 			.addTag(BlockTags.WALLS)
 			.addTag(BlockTags.SHULKER_BOXES)
 			.addTag(BlockTags.ANVIL)
@@ -1556,7 +1557,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			.add(Blocks.EMERALD_ORE);
 		this.tag(BlockTags.INVALID_SPAWN_INSIDE).add(Blocks.END_PORTAL, Blocks.END_GATEWAY);
 		this.tag(BlockTags.SAND).add(Blocks.SUSPICIOUS_SAND);
-		this.tag(BlockTags.TRAIL_RUINS_REPLACEABLE).add(Blocks.SAND, Blocks.GRAVEL, Blocks.DIRT, Blocks.COARSE_DIRT);
+		this.tag(BlockTags.TRAIL_RUINS_REPLACEABLE).add(Blocks.GRAVEL);
 		this.tag(BlockTags.SNIFFER_DIGGABLE_BLOCK)
 			.add(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.ROOTED_DIRT, Blocks.MOSS_BLOCK, Blocks.MUD, Blocks.MUDDY_MANGROVE_ROOTS);
 		this.tag(BlockTags.SNIFFER_EGG_HATCH_BOOST).add(Blocks.MOSS_BLOCK);
@@ -1567,5 +1568,21 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			.forEach(intrinsicTagAppender::add);
 		this.tag(BlockTags.ENCHANTMENT_POWER_PROVIDER).add(Blocks.BOOKSHELF);
 		this.tag(BlockTags.ENCHANTMENT_POWER_TRANSMITTER).addTag(BlockTags.REPLACEABLE);
+		this.tag(BlockTags.MAINTAINS_FARMLAND)
+			.add(
+				Blocks.PUMPKIN_STEM,
+				Blocks.PUMPKIN,
+				Blocks.ATTACHED_PUMPKIN_STEM,
+				Blocks.MELON_STEM,
+				Blocks.MELON,
+				Blocks.ATTACHED_MELON_STEM,
+				Blocks.BEETROOTS,
+				Blocks.CARROTS,
+				Blocks.POTATOES,
+				Blocks.TORCHFLOWER_CROP,
+				Blocks.TORCHFLOWER,
+				Blocks.PITCHER_CROP,
+				Blocks.WHEAT
+			);
 	}
 }

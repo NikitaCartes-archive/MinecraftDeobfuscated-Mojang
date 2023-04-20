@@ -1,14 +1,13 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
@@ -114,32 +113,31 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	}
 
 	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		drawCenteredString(poseStack, this.font, PRIMARY_EFFECT_LABEL, 62, 10, 14737632);
-		drawCenteredString(poseStack, this.font, SECONDARY_EFFECT_LABEL, 169, 10, 14737632);
+	protected void renderLabels(GuiGraphics guiGraphics, int i, int j) {
+		guiGraphics.drawCenteredString(this.font, PRIMARY_EFFECT_LABEL, 62, 10, 14737632);
+		guiGraphics.drawCenteredString(this.font, SECONDARY_EFFECT_LABEL, 169, 10, 14737632);
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.setShaderTexture(0, BEACON_LOCATION);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
-		poseStack.pushPose();
-		poseStack.translate(0.0F, 0.0F, 100.0F);
-		this.itemRenderer.renderAndDecorateItem(poseStack, new ItemStack(Items.NETHERITE_INGOT), k + 20, l + 109);
-		this.itemRenderer.renderAndDecorateItem(poseStack, new ItemStack(Items.EMERALD), k + 41, l + 109);
-		this.itemRenderer.renderAndDecorateItem(poseStack, new ItemStack(Items.DIAMOND), k + 41 + 22, l + 109);
-		this.itemRenderer.renderAndDecorateItem(poseStack, new ItemStack(Items.GOLD_INGOT), k + 42 + 44, l + 109);
-		this.itemRenderer.renderAndDecorateItem(poseStack, new ItemStack(Items.IRON_INGOT), k + 42 + 66, l + 109);
-		poseStack.popPose();
+		guiGraphics.blit(BEACON_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
+		guiGraphics.renderItem(new ItemStack(Items.NETHERITE_INGOT), k + 20, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.EMERALD), k + 41, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.DIAMOND), k + 41 + 22, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.GOLD_INGOT), k + 42 + 44, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.IRON_INGOT), k + 42 + 66, l + 109);
+		guiGraphics.pose().popPose();
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		super.render(poseStack, i, j, f);
-		this.renderTooltip(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
+		this.renderTooltip(guiGraphics, i, j);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -221,9 +219,8 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		@Override
-		protected void renderIcon(PoseStack poseStack) {
-			RenderSystem.setShaderTexture(0, this.sprite.atlasLocation());
-			blit(poseStack, this.getX() + 2, this.getY() + 2, 0, 18, 18, this.sprite);
+		protected void renderIcon(GuiGraphics guiGraphics) {
+			guiGraphics.blit(this.getX() + 2, this.getY() + 2, 0, 18, 18, this.sprite);
 		}
 
 		@Override
@@ -251,8 +248,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		@Override
-		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-			RenderSystem.setShaderTexture(0, BeaconScreen.BEACON_LOCATION);
+		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 			int k = 219;
 			int l = 0;
 			if (!this.active) {
@@ -263,11 +259,11 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 				l += this.width * 3;
 			}
 
-			blit(poseStack, this.getX(), this.getY(), l, 219, this.width, this.height);
-			this.renderIcon(poseStack);
+			guiGraphics.blit(BeaconScreen.BEACON_LOCATION, this.getX(), this.getY(), l, 219, this.width, this.height);
+			this.renderIcon(guiGraphics);
 		}
 
-		protected abstract void renderIcon(PoseStack poseStack);
+		protected abstract void renderIcon(GuiGraphics guiGraphics);
 
 		public boolean isSelected() {
 			return this.selected;
@@ -295,8 +291,8 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		@Override
-		protected void renderIcon(PoseStack poseStack) {
-			blit(poseStack, this.getX() + 2, this.getY() + 2, this.iconX, this.iconY, 18, 18);
+		protected void renderIcon(GuiGraphics guiGraphics) {
+			guiGraphics.blit(BeaconScreen.BEACON_LOCATION, this.getX() + 2, this.getY() + 2, this.iconX, this.iconY, 18, 18);
 		}
 	}
 

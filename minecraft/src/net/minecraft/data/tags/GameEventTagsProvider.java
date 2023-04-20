@@ -7,7 +7,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.GameEventTags;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
+import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
 
 public class GameEventTagsProvider extends IntrinsicHolderTagsProvider<GameEvent> {
 	@VisibleForTesting
@@ -59,11 +59,11 @@ public class GameEventTagsProvider extends IntrinsicHolderTagsProvider<GameEvent
 
 	@Override
 	protected void addTags(HolderLookup.Provider provider) {
-		this.tag(GameEventTags.VIBRATIONS).add(VIBRATIONS_EXCEPT_FLAP).add(VibrationListener.RESONANCE_EVENTS).add(GameEvent.FLAP);
+		this.tag(GameEventTags.VIBRATIONS).add(VIBRATIONS_EXCEPT_FLAP).add(VibrationSystem.RESONANCE_EVENTS).add(GameEvent.FLAP);
 		this.tag(GameEventTags.SHRIEKER_CAN_LISTEN).add(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING);
 		this.tag(GameEventTags.WARDEN_CAN_LISTEN)
 			.add(VIBRATIONS_EXCEPT_FLAP)
-			.add(VibrationListener.RESONANCE_EVENTS)
+			.add(VibrationSystem.RESONANCE_EVENTS)
 			.add(GameEvent.SHRIEK)
 			.addTag(GameEventTags.SHRIEKER_CAN_LISTEN);
 		this.tag(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)

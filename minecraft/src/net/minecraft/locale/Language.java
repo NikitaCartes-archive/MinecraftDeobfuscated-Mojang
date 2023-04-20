@@ -35,32 +35,7 @@ public abstract class Language {
 	private static Language loadDefault() {
 		Builder<String, String> builder = ImmutableMap.builder();
 		BiConsumer<String, String> biConsumer = builder::put;
-		String string = "/assets/minecraft/lang/en_us.json";
-
-		try {
-			InputStream inputStream = Language.class.getResourceAsStream("/assets/minecraft/lang/en_us.json");
-
-			try {
-				loadFromJson(inputStream, biConsumer);
-			} catch (Throwable var7) {
-				if (inputStream != null) {
-					try {
-						inputStream.close();
-					} catch (Throwable var6) {
-						var7.addSuppressed(var6);
-					}
-				}
-
-				throw var7;
-			}
-
-			if (inputStream != null) {
-				inputStream.close();
-			}
-		} catch (JsonParseException | IOException var8) {
-			LOGGER.error("Couldn't read strings from {}", "/assets/minecraft/lang/en_us.json", var8);
-		}
-
+		parseTranslations(biConsumer, "/assets/minecraft/lang/en_us.json");
 		final Map<String, String> map = builder.build();
 		return new Language() {
 			@Override
@@ -86,6 +61,32 @@ public abstract class Language {
 						.isPresent();
 			}
 		};
+	}
+
+	private static void parseTranslations(BiConsumer<String, String> biConsumer, String string) {
+		try {
+			InputStream inputStream = Language.class.getResourceAsStream(string);
+
+			try {
+				loadFromJson(inputStream, biConsumer);
+			} catch (Throwable var6) {
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (Throwable var5) {
+						var6.addSuppressed(var5);
+					}
+				}
+
+				throw var6;
+			}
+
+			if (inputStream != null) {
+				inputStream.close();
+			}
+		} catch (JsonParseException | IOException var7) {
+			LOGGER.error("Couldn't read strings from {}", string, var7);
+		}
 	}
 
 	public static void loadFromJson(InputStream inputStream, BiConsumer<String, String> biConsumer) {

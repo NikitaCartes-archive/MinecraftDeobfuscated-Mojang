@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.slf4j.Logger;
 
@@ -50,8 +49,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 			for (int t = -1; t <= 4; t++) {
 				for (int u = p; u <= q; u++) {
 					BlockPos blockPos2 = blockPos.offset(s, t, u);
-					Material material = worldGenLevel.getBlockState(blockPos2).getMaterial();
-					boolean bl = material.isSolid();
+					boolean bl = worldGenLevel.getBlockState(blockPos2).isSolid();
 					if (t == -1 && !bl) {
 						return false;
 					}
@@ -74,9 +72,9 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 						BlockPos blockPos2x = blockPos.offset(s, t, u);
 						BlockState blockState = worldGenLevel.getBlockState(blockPos2x);
 						if (s == k || t == -1 || u == p || s == l || t == 4 || u == q) {
-							if (blockPos2x.getY() >= worldGenLevel.getMinBuildHeight() && !worldGenLevel.getBlockState(blockPos2x.below()).getMaterial().isSolid()) {
+							if (blockPos2x.getY() >= worldGenLevel.getMinBuildHeight() && !worldGenLevel.getBlockState(blockPos2x.below()).isSolid()) {
 								worldGenLevel.setBlock(blockPos2x, AIR, 2);
-							} else if (blockState.getMaterial().isSolid() && !blockState.is(Blocks.CHEST)) {
+							} else if (blockState.isSolid() && !blockState.is(Blocks.CHEST)) {
 								if (t == -1 && randomSource.nextInt(4) != 0) {
 									this.safeSetBlock(worldGenLevel, blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), predicate);
 								} else {
@@ -100,7 +98,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 						int x = 0;
 
 						for (Direction direction : Direction.Plane.HORIZONTAL) {
-							if (worldGenLevel.getBlockState(blockPos3.relative(direction)).getMaterial().isSolid()) {
+							if (worldGenLevel.getBlockState(blockPos3.relative(direction)).isSolid()) {
 								x++;
 							}
 						}

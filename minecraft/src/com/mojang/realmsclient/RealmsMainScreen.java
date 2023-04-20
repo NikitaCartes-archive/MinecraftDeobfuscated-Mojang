@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
 import com.mojang.realmsclient.client.Ping;
@@ -47,7 +46,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
@@ -793,24 +792,23 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.realmSelectionList.render(poseStack, i, j, f);
-		RenderSystem.setShaderTexture(0, LOGO_LOCATION);
-		blit(poseStack, this.width / 2 - 64, 5, 0.0F, 0.0F, 128, 34, 128, 64);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.realmSelectionList.render(guiGraphics, i, j, f);
+		guiGraphics.blit(LOGO_LOCATION, this.width / 2 - 64, 5, 0.0F, 0.0F, 128, 34, 128, 64);
 		if (RealmsClient.currentEnvironment == RealmsClient.Environment.STAGE) {
-			this.renderStage(poseStack);
+			this.renderStage(guiGraphics);
 		}
 
 		if (RealmsClient.currentEnvironment == RealmsClient.Environment.LOCAL) {
-			this.renderLocal(poseStack);
+			this.renderLocal(guiGraphics);
 		}
 
 		if (this.shouldShowPopup()) {
-			poseStack.pushPose();
-			poseStack.translate(0.0F, 0.0F, 100.0F);
-			this.drawPopup(poseStack);
-			poseStack.popPose();
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
+			this.drawPopup(guiGraphics);
+			guiGraphics.pose().popPose();
 		} else {
 			if (this.showingPopup) {
 				this.updateButtonStates(null);
@@ -825,9 +823,8 @@ public class RealmsMainScreen extends RealmsScreen {
 			this.showingPopup = false;
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 		if (this.trialsAvailable && !this.createdTrial && this.shouldShowPopup()) {
-			RenderSystem.setShaderTexture(0, TRIAL_ICON_LOCATION);
 			int k = 8;
 			int l = 8;
 			int m = 0;
@@ -835,8 +832,8 @@ public class RealmsMainScreen extends RealmsScreen {
 				m = 8;
 			}
 
-			GuiComponent.blit(
-				poseStack,
+			guiGraphics.blit(
+				TRIAL_ICON_LOCATION,
 				this.createTrialButton.getX() + this.createTrialButton.getWidth() - 8 - 4,
 				this.createTrialButton.getY() + this.createTrialButton.getHeight() / 2 - 4,
 				0.0F,
@@ -866,7 +863,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		return d < (double)(i - 5) || d > (double)(i + 315) || e < (double)(j - 5) || e > (double)(j + 171);
 	}
 
-	private void drawPopup(PoseStack poseStack) {
+	private void drawPopup(GuiGraphics guiGraphics) {
 		int i = this.popupX0();
 		int j = this.popupY0();
 		if (!this.showingPopup) {
@@ -886,19 +883,16 @@ public class RealmsMainScreen extends RealmsScreen {
 			this.showingPopup = true;
 		}
 
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.7F);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 0.7F);
 		RenderSystem.enableBlend();
-		RenderSystem.setShaderTexture(0, DARKEN_LOCATION);
 		int k = 0;
 		int l = 32;
-		GuiComponent.blit(poseStack, 0, 32, 0.0F, 0.0F, this.width, this.height - 40 - 32, 310, 166);
+		guiGraphics.blit(DARKEN_LOCATION, 0, 32, 0.0F, 0.0F, this.width, this.height - 40 - 32, 310, 166);
 		RenderSystem.disableBlend();
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.setShaderTexture(0, POPUP_LOCATION);
-		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 310, 166, 310, 166);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.blit(POPUP_LOCATION, i, j, 0.0F, 0.0F, 310, 166, 310, 166);
 		if (!teaserImages.isEmpty()) {
-			RenderSystem.setShaderTexture(0, (ResourceLocation)teaserImages.get(this.carouselIndex));
-			GuiComponent.blit(poseStack, i + 7, j + 7, 0.0F, 0.0F, 195, 152, 195, 152);
+			guiGraphics.blit((ResourceLocation)teaserImages.get(this.carouselIndex), i + 7, j + 7, 0.0F, 0.0F, 195, 152, 195, 152);
 			if (this.carouselTick % 95 < 5) {
 				if (!this.hasSwitchedCarouselImage) {
 					this.carouselIndex = (this.carouselIndex + 1) % teaserImages.size();
@@ -909,7 +903,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			}
 		}
 
-		this.formattedPopup.renderLeftAlignedNoShadow(poseStack, this.width / 2 + 52, j + 7, 10, 16777215);
+		this.formattedPopup.renderLeftAlignedNoShadow(guiGraphics, this.width / 2 + 52, j + 7, 10, 16777215);
 	}
 
 	int popupX0() {
@@ -947,20 +941,18 @@ public class RealmsMainScreen extends RealmsScreen {
 		return this.isSelfOwnedServer(realmsServer) && !realmsServer.expired;
 	}
 
-	void drawExpired(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.setShaderTexture(0, EXPIRED_ICON_LOCATION);
-		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+	void drawExpired(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		guiGraphics.blit(EXPIRED_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
 			this.setTooltipForNextRenderPass(SERVER_EXPIRED_TOOLTIP);
 		}
 	}
 
-	void drawExpiring(PoseStack poseStack, int i, int j, int k, int l, int m) {
-		RenderSystem.setShaderTexture(0, EXPIRES_SOON_ICON_LOCATION);
+	void drawExpiring(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 		if (this.animTick % 20 < 10) {
-			GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 20, 28);
+			guiGraphics.blit(EXPIRES_SOON_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 20, 28);
 		} else {
-			GuiComponent.blit(poseStack, i, j, 10.0F, 0.0F, 10, 28, 20, 28);
+			guiGraphics.blit(EXPIRES_SOON_ICON_LOCATION, i, j, 10.0F, 0.0F, 10, 28, 20, 28);
 		}
 
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
@@ -974,66 +966,62 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 	}
 
-	void drawOpen(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.setShaderTexture(0, ON_ICON_LOCATION);
-		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+	void drawOpen(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		guiGraphics.blit(ON_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
 			this.setTooltipForNextRenderPass(SERVER_OPEN_TOOLTIP);
 		}
 	}
 
-	void drawClose(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.setShaderTexture(0, OFF_ICON_LOCATION);
-		GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+	void drawClose(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		guiGraphics.blit(OFF_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32 && !this.shouldShowPopup()) {
 			this.setTooltipForNextRenderPass(SERVER_CLOSED_TOOLTIP);
 		}
 	}
 
-	void renderNews(PoseStack poseStack, int i, int j, boolean bl, int k, int l, boolean bl2, boolean bl3) {
+	void renderNews(GuiGraphics guiGraphics, int i, int j, boolean bl, int k, int l, boolean bl2, boolean bl3) {
 		boolean bl4 = false;
 		if (i >= k && i <= k + 20 && j >= l && j <= l + 20) {
 			bl4 = true;
 		}
 
-		RenderSystem.setShaderTexture(0, NEWS_LOCATION);
 		if (!bl3) {
-			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 1.0F);
+			guiGraphics.setColor(0.5F, 0.5F, 0.5F, 1.0F);
 		}
 
 		boolean bl5 = bl3 && bl2;
 		float f = bl5 ? 20.0F : 0.0F;
-		GuiComponent.blit(poseStack, k, l, f, 0.0F, 20, 20, 40, 20);
+		guiGraphics.blit(NEWS_LOCATION, k, l, f, 0.0F, 20, 20, 40, 20);
 		if (bl4 && bl3) {
 			this.setTooltipForNextRenderPass(NEWS_TOOLTIP);
 		}
 
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (bl && bl3) {
 			int m = bl4 ? 0 : (int)(Math.max(0.0F, Math.max(Mth.sin((float)(10 + this.animTick) * 0.57F), Mth.cos((float)this.animTick * 0.35F))) * -6.0F);
-			RenderSystem.setShaderTexture(0, INVITATION_ICONS_LOCATION);
-			GuiComponent.blit(poseStack, k + 10, l + 2 + m, 40.0F, 0.0F, 8, 8, 48, 16);
+			guiGraphics.blit(INVITATION_ICONS_LOCATION, k + 10, l + 2 + m, 40.0F, 0.0F, 8, 8, 48, 16);
 		}
 	}
 
-	private void renderLocal(PoseStack poseStack) {
+	private void renderLocal(GuiGraphics guiGraphics) {
 		String string = "LOCAL!";
-		poseStack.pushPose();
-		poseStack.translate((float)(this.width / 2 - 25), 20.0F, 0.0F);
-		poseStack.mulPose(Axis.ZP.rotationDegrees(-20.0F));
-		poseStack.scale(1.5F, 1.5F, 1.5F);
-		this.font.draw(poseStack, "LOCAL!", 0.0F, 0.0F, 8388479);
-		poseStack.popPose();
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate((float)(this.width / 2 - 25), 20.0F, 0.0F);
+		guiGraphics.pose().mulPose(Axis.ZP.rotationDegrees(-20.0F));
+		guiGraphics.pose().scale(1.5F, 1.5F, 1.5F);
+		guiGraphics.drawString(this.font, "LOCAL!", 0, 0, 8388479, false);
+		guiGraphics.pose().popPose();
 	}
 
-	private void renderStage(PoseStack poseStack) {
+	private void renderStage(GuiGraphics guiGraphics) {
 		String string = "STAGE!";
-		poseStack.pushPose();
-		poseStack.translate((float)(this.width / 2 - 25), 20.0F, 0.0F);
-		poseStack.mulPose(Axis.ZP.rotationDegrees(-20.0F));
-		poseStack.scale(1.5F, 1.5F, 1.5F);
-		this.font.draw(poseStack, "STAGE!", 0.0F, 0.0F, -256);
-		poseStack.popPose();
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate((float)(this.width / 2 - 25), 20.0F, 0.0F);
+		guiGraphics.pose().mulPose(Axis.ZP.rotationDegrees(-20.0F));
+		guiGraphics.pose().scale(1.5F, 1.5F, 1.5F);
+		guiGraphics.drawString(this.font, "STAGE!", 0, 0, -256, false);
+		guiGraphics.pose().popPose();
 	}
 
 	public RealmsMainScreen newScreen() {
@@ -1071,9 +1059,9 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			this.button.setPosition(this.xPos, j + 4);
-			this.button.render(poseStack, n, o, f);
+			this.button.render(guiGraphics, n, o, f);
 		}
 
 		@Override
@@ -1106,10 +1094,9 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-			RenderSystem.setShaderTexture(0, RealmsMainScreen.CROSS_ICON_LOCATION);
+		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 			float g = this.isHoveredOrFocused() ? 14.0F : 0.0F;
-			blit(poseStack, this.getX(), this.getY(), 0.0F, g, 14, 14, 14, 28);
+			guiGraphics.blit(RealmsMainScreen.CROSS_ICON_LOCATION, this.getX(), this.getY(), 0.0F, g, 14, 14, 14, 28);
 		}
 	}
 
@@ -1140,8 +1127,8 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-			RealmsMainScreen.this.renderNews(poseStack, i, j, RealmsMainScreen.this.hasUnreadNews, this.getX(), this.getY(), this.isHoveredOrFocused(), this.active);
+		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+			RealmsMainScreen.this.renderNews(guiGraphics, i, j, RealmsMainScreen.this.hasUnreadNews, this.getX(), this.getY(), this.isHoveredOrFocused(), this.active);
 		}
 	}
 
@@ -1209,16 +1196,16 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderBack(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			super.renderBack(poseStack, i, j, k, l, m, n, o, bl, f);
-			GuiComponent.renderOutline(poseStack, k - 2, j - 2, l, 70, -12303292);
+		public void renderBack(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			super.renderBack(guiGraphics, i, j, k, l, m, n, o, bl, f);
+			guiGraphics.renderOutline(k - 2, j - 2, l, 70, -12303292);
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			this.gridLayout.setPosition(k, j);
 			this.updateEntryWidth(l - 4);
-			this.children.forEach(abstractWidget -> abstractWidget.render(poseStack, n, o, f));
+			this.children.forEach(abstractWidget -> abstractWidget.render(guiGraphics, n, o, f));
 		}
 
 		@Override
@@ -1271,21 +1258,20 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-			super.renderWidget(poseStack, i, j, f);
-			this.drawInvitations(poseStack);
+		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+			super.renderWidget(guiGraphics, i, j, f);
+			this.drawInvitations(guiGraphics);
 		}
 
-		private void drawInvitations(PoseStack poseStack) {
+		private void drawInvitations(GuiGraphics guiGraphics) {
 			boolean bl = this.active && RealmsMainScreen.this.numberOfPendingInvites != 0;
 			if (bl) {
-				RenderSystem.setShaderTexture(0, RealmsMainScreen.INVITATION_ICONS_LOCATION);
 				int i = (Math.min(RealmsMainScreen.this.numberOfPendingInvites, 6) - 1) * 8;
 				int j = (int)(
 					Math.max(0.0F, Math.max(Mth.sin((float)(10 + RealmsMainScreen.this.animTick) * 0.57F), Mth.cos((float)RealmsMainScreen.this.animTick * 0.35F))) * -6.0F
 				);
 				float f = this.isHoveredOrFocused() ? 8.0F : 0.0F;
-				GuiComponent.blit(poseStack, this.getX() + 11, this.getY() + j, (float)i, f, 8, 8, 48, 16);
+				guiGraphics.blit(RealmsMainScreen.INVITATION_ICONS_LOCATION, this.getX() + 11, this.getY() + j, (float)i, f, 8, 8, 48, 16);
 			}
 		}
 	}
@@ -1331,8 +1317,8 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			this.renderMcoServerItem(this.serverData, poseStack, k, j, n, o);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			this.renderMcoServerItem(this.serverData, guiGraphics, k, j, n, o);
 		}
 
 		@Override
@@ -1362,24 +1348,23 @@ public class RealmsMainScreen extends RealmsScreen {
 			}
 		}
 
-		private void renderMcoServerItem(RealmsServer realmsServer, PoseStack poseStack, int i, int j, int k, int l) {
-			this.renderLegacy(realmsServer, poseStack, i + 36, j, k, l);
+		private void renderMcoServerItem(RealmsServer realmsServer, GuiGraphics guiGraphics, int i, int j, int k, int l) {
+			this.renderLegacy(realmsServer, guiGraphics, i + 36, j, k, l);
 		}
 
-		private void renderLegacy(RealmsServer realmsServer, PoseStack poseStack, int i, int j, int k, int l) {
+		private void renderLegacy(RealmsServer realmsServer, GuiGraphics guiGraphics, int i, int j, int k, int l) {
 			if (realmsServer.state == RealmsServer.State.UNINITIALIZED) {
-				RenderSystem.setShaderTexture(0, RealmsMainScreen.WORLDICON_LOCATION);
-				GuiComponent.blit(poseStack, i + 10, j + 6, 0.0F, 0.0F, 40, 20, 40, 20);
+				guiGraphics.blit(RealmsMainScreen.WORLDICON_LOCATION, i + 10, j + 6, 0.0F, 0.0F, 40, 20, 40, 20);
 				float f = 0.5F + (1.0F + Mth.sin((float)RealmsMainScreen.this.animTick * 0.25F)) * 0.25F;
 				int m = 0xFF000000 | (int)(127.0F * f) << 16 | (int)(255.0F * f) << 8 | (int)(127.0F * f);
-				GuiComponent.drawCenteredString(poseStack, RealmsMainScreen.this.font, RealmsMainScreen.SERVER_UNITIALIZED_TEXT, i + 10 + 40 + 75, j + 12, m);
+				guiGraphics.drawCenteredString(RealmsMainScreen.this.font, RealmsMainScreen.SERVER_UNITIALIZED_TEXT, i + 10 + 40 + 75, j + 12, m);
 			} else {
 				int n = 225;
 				int m = 2;
-				this.renderStatusLights(realmsServer, poseStack, i, j, k, l, 225, 2);
+				this.renderStatusLights(realmsServer, guiGraphics, i, j, k, l, 225, 2);
 				if (!"0".equals(realmsServer.serverPing.nrOfPlayers)) {
 					String string = ChatFormatting.GRAY + realmsServer.serverPing.nrOfPlayers;
-					RealmsMainScreen.this.font.draw(poseStack, string, (float)(i + 207 - RealmsMainScreen.this.font.width(string)), (float)(j + 3), 8421504);
+					guiGraphics.drawString(RealmsMainScreen.this.font, string, i + 207 - RealmsMainScreen.this.font.width(string), j + 3, 8421504, false);
 					if (k >= i + 207 - RealmsMainScreen.this.font.width(string)
 						&& k <= i + 207
 						&& l >= j + 1
@@ -1394,37 +1379,37 @@ public class RealmsMainScreen extends RealmsScreen {
 				if (RealmsMainScreen.this.isSelfOwnedServer(realmsServer) && realmsServer.expired) {
 					Component component = realmsServer.expiredTrial ? RealmsMainScreen.TRIAL_EXPIRED_TEXT : RealmsMainScreen.SUBSCRIPTION_EXPIRED_TEXT;
 					int o = j + 11 + 5;
-					RealmsMainScreen.this.font.draw(poseStack, component, (float)(i + 2), (float)(o + 1), 15553363);
+					guiGraphics.drawString(RealmsMainScreen.this.font, component, i + 2, o + 1, 15553363, false);
 				} else {
 					if (realmsServer.worldType == RealmsServer.WorldType.MINIGAME) {
 						int p = 13413468;
 						int o = RealmsMainScreen.this.font.width(RealmsMainScreen.SELECT_MINIGAME_PREFIX);
-						RealmsMainScreen.this.font.draw(poseStack, RealmsMainScreen.SELECT_MINIGAME_PREFIX, (float)(i + 2), (float)(j + 12), 13413468);
-						RealmsMainScreen.this.font.draw(poseStack, realmsServer.getMinigameName(), (float)(i + 2 + o), (float)(j + 12), 7105644);
+						guiGraphics.drawString(RealmsMainScreen.this.font, RealmsMainScreen.SELECT_MINIGAME_PREFIX, i + 2, j + 12, 13413468, false);
+						guiGraphics.drawString(RealmsMainScreen.this.font, realmsServer.getMinigameName(), i + 2 + o, j + 12, 7105644, false);
 					} else {
-						RealmsMainScreen.this.font.draw(poseStack, realmsServer.getDescription(), (float)(i + 2), (float)(j + 12), 7105644);
+						guiGraphics.drawString(RealmsMainScreen.this.font, realmsServer.getDescription(), i + 2, j + 12, 7105644, false);
 					}
 
 					if (!RealmsMainScreen.this.isSelfOwnedServer(realmsServer)) {
-						RealmsMainScreen.this.font.draw(poseStack, realmsServer.owner, (float)(i + 2), (float)(j + 12 + 11), 5000268);
+						guiGraphics.drawString(RealmsMainScreen.this.font, realmsServer.owner, i + 2, j + 12 + 11, 5000268, false);
 					}
 				}
 
-				RealmsMainScreen.this.font.draw(poseStack, realmsServer.getName(), (float)(i + 2), (float)(j + 1), 16777215);
-				RealmsUtil.renderPlayerFace(poseStack, i - 36, j, 32, realmsServer.ownerUUID);
+				guiGraphics.drawString(RealmsMainScreen.this.font, realmsServer.getName(), i + 2, j + 1, 16777215, false);
+				RealmsUtil.renderPlayerFace(guiGraphics, i - 36, j, 32, realmsServer.ownerUUID);
 			}
 		}
 
-		private void renderStatusLights(RealmsServer realmsServer, PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+		private void renderStatusLights(RealmsServer realmsServer, GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n) {
 			int o = i + m + 22;
 			if (realmsServer.expired) {
-				RealmsMainScreen.this.drawExpired(poseStack, o, j + n, k, l);
+				RealmsMainScreen.this.drawExpired(guiGraphics, o, j + n, k, l);
 			} else if (realmsServer.state == RealmsServer.State.CLOSED) {
-				RealmsMainScreen.this.drawClose(poseStack, o, j + n, k, l);
+				RealmsMainScreen.this.drawClose(guiGraphics, o, j + n, k, l);
 			} else if (RealmsMainScreen.this.isSelfOwnedServer(realmsServer) && realmsServer.daysLeft < 7) {
-				RealmsMainScreen.this.drawExpiring(poseStack, o, j + n, k, l, realmsServer.daysLeft);
+				RealmsMainScreen.this.drawExpiring(guiGraphics, o, j + n, k, l, realmsServer.daysLeft);
 			} else if (realmsServer.state == RealmsServer.State.OPEN) {
-				RealmsMainScreen.this.drawOpen(poseStack, o, j + n, k, l);
+				RealmsMainScreen.this.drawOpen(guiGraphics, o, j + n, k, l);
 			}
 		}
 
@@ -1445,8 +1430,8 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class TrialEntry extends RealmsMainScreen.Entry {
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			this.renderTrialItem(poseStack, i, k, j, n, o);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			this.renderTrialItem(guiGraphics, i, k, j, n, o);
 		}
 
 		@Override
@@ -1455,7 +1440,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			return true;
 		}
 
-		private void renderTrialItem(PoseStack poseStack, int i, int j, int k, int l, int m) {
+		private void renderTrialItem(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 			int n = k + 8;
 			int o = 0;
 			boolean bl = false;
@@ -1469,7 +1454,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			}
 
 			for (Component component : RealmsMainScreen.TRIAL_MESSAGE_LINES) {
-				GuiComponent.drawCenteredString(poseStack, RealmsMainScreen.this.font, component, RealmsMainScreen.this.width / 2, n + o, p);
+				guiGraphics.drawCenteredString(RealmsMainScreen.this.font, component, RealmsMainScreen.this.width / 2, n + o, p);
 				o += 10;
 			}
 		}

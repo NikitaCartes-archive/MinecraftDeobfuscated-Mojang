@@ -85,6 +85,7 @@ import net.minecraft.server.commands.PlaySoundCommand;
 import net.minecraft.server.commands.PublishCommand;
 import net.minecraft.server.commands.RecipeCommand;
 import net.minecraft.server.commands.ReloadCommand;
+import net.minecraft.server.commands.ReturnCommand;
 import net.minecraft.server.commands.RideCommand;
 import net.minecraft.server.commands.SaveAllCommand;
 import net.minecraft.server.commands.SaveOffCommand;
@@ -166,6 +167,7 @@ public class Commands {
 		PlaySoundCommand.register(this.dispatcher);
 		ReloadCommand.register(this.dispatcher);
 		RecipeCommand.register(this.dispatcher);
+		ReturnCommand.register(this.dispatcher);
 		RideCommand.register(this.dispatcher);
 		SayCommand.register(this.dispatcher);
 		ScheduleCommand.register(this.dispatcher);

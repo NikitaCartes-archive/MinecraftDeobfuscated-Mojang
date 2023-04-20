@@ -2,8 +2,6 @@ package net.minecraft.client.gui.screens.achievement;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -13,7 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -38,6 +36,7 @@ import net.minecraft.world.level.block.Block;
 @Environment(EnvType.CLIENT)
 public class StatsScreen extends Screen implements StatsUpdateListener {
 	private static final Component PENDING_TEXT = Component.translatable("multiplayer.downloadingStats");
+	private static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
 	protected final Screen lastScreen;
 	private StatsScreen.GeneralStatisticsList statsList;
 	StatsScreen.ItemStatisticsList itemStatsList;
@@ -108,17 +107,17 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.isLoading) {
-			this.renderBackground(poseStack);
-			drawCenteredString(poseStack, this.font, PENDING_TEXT, this.width / 2, this.height / 2, 16777215);
-			drawCenteredString(
-				poseStack, this.font, LOADING_SYMBOLS[(int)(Util.getMillis() / 150L % (long)LOADING_SYMBOLS.length)], this.width / 2, this.height / 2 + 9 * 2, 16777215
+			this.renderBackground(guiGraphics);
+			guiGraphics.drawCenteredString(this.font, PENDING_TEXT, this.width / 2, this.height / 2, 16777215);
+			guiGraphics.drawCenteredString(
+				this.font, LOADING_SYMBOLS[(int)(Util.getMillis() / 150L % (long)LOADING_SYMBOLS.length)], this.width / 2, this.height / 2 + 9 * 2, 16777215
 			);
 		} else {
-			this.getActiveList().render(poseStack, i, j, f);
-			drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
-			super.render(poseStack, i, j, f);
+			this.getActiveList().render(guiGraphics, i, j, f);
+			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
+			super.render(guiGraphics, i, j, f);
 		}
 	}
 
@@ -161,14 +160,13 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		return 115 + 40 * i;
 	}
 
-	void blitSlot(PoseStack poseStack, int i, int j, Item item) {
-		this.blitSlotIcon(poseStack, i + 1, j + 1, 0, 0);
-		this.itemRenderer.renderGuiItem(poseStack, item.getDefaultInstance(), i + 2, j + 2);
+	void blitSlot(GuiGraphics guiGraphics, int i, int j, Item item) {
+		this.blitSlotIcon(guiGraphics, i + 1, j + 1, 0, 0);
+		guiGraphics.renderFakeItem(item.getDefaultInstance(), i + 2, j + 2);
 	}
 
-	void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
-		RenderSystem.setShaderTexture(0, STATS_ICON_LOCATION);
-		blit(poseStack, i, j, 0, (float)k, (float)l, 18, 18, 128, 128);
+	void blitSlotIcon(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		guiGraphics.blit(STATS_ICON_LOCATION, i, j, 0, (float)k, (float)l, 18, 18, 128, 128);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -184,8 +182,8 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderBackground(PoseStack poseStack) {
-			StatsScreen.this.renderBackground(poseStack);
+		protected void renderBackground(GuiGraphics guiGraphics) {
+			StatsScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -203,10 +201,10 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.statDisplay, k + 2, j + 1, i % 2 == 0 ? 16777215 : 9474192);
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+				guiGraphics.drawString(StatsScreen.this.font, this.statDisplay, k + 2, j + 1, i % 2 == 0 ? 16777215 : 9474192);
 				String string = this.getValueText();
-				GuiComponent.drawString(poseStack, StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 16777215 : 9474192);
+				guiGraphics.drawString(StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 16777215 : 9474192);
 			}
 
 			@Override
@@ -271,24 +269,24 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderHeader(PoseStack poseStack, int i, int j) {
+		protected void renderHeader(GuiGraphics guiGraphics, int i, int j) {
 			if (!this.minecraft.mouseHandler.isLeftPressed()) {
 				this.headerPressed = -1;
 			}
 
 			for (int k = 0; k < this.iconOffsets.length; k++) {
-				StatsScreen.this.blitSlotIcon(poseStack, i + StatsScreen.this.getColumnX(k) - 18, j + 1, 0, this.headerPressed == k ? 0 : 18);
+				StatsScreen.this.blitSlotIcon(guiGraphics, i + StatsScreen.this.getColumnX(k) - 18, j + 1, 0, this.headerPressed == k ? 0 : 18);
 			}
 
 			if (this.sortColumn != null) {
 				int k = StatsScreen.this.getColumnX(this.getColumnIndex(this.sortColumn)) - 36;
 				int l = this.sortOrder == 1 ? 2 : 1;
-				StatsScreen.this.blitSlotIcon(poseStack, i + k, j + 1, 18 * l, 0);
+				StatsScreen.this.blitSlotIcon(guiGraphics, i + k, j + 1, 18 * l, 0);
 			}
 
 			for (int k = 0; k < this.iconOffsets.length; k++) {
 				int l = this.headerPressed == k ? 1 : 0;
-				StatsScreen.this.blitSlotIcon(poseStack, i + StatsScreen.this.getColumnX(k) - 18 + l, j + 1 + l, 18 * this.iconOffsets[k], 18);
+				StatsScreen.this.blitSlotIcon(guiGraphics, i + StatsScreen.this.getColumnX(k) - 18 + l, j + 1 + l, 18 * this.iconOffsets[k], 18);
 			}
 		}
 
@@ -303,8 +301,8 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderBackground(PoseStack poseStack) {
-			StatsScreen.this.renderBackground(poseStack);
+		protected void renderBackground(GuiGraphics guiGraphics) {
+			StatsScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Override
@@ -340,7 +338,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderDecorations(PoseStack poseStack, int i, int j) {
+		protected void renderDecorations(GuiGraphics guiGraphics, int i, int j) {
 			if (j >= this.y0 && j <= this.y1) {
 				StatsScreen.ItemStatisticsList.ItemRow itemRow = this.getHovered();
 				int k = (this.width - this.getRowWidth()) / 2;
@@ -350,7 +348,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 					}
 
 					Item item = itemRow.getItem();
-					this.renderMousehoverTooltip(poseStack, this.getString(item), i, j);
+					this.renderMousehoverTooltip(guiGraphics, this.getString(item), i, j);
 				} else {
 					Component component = null;
 					int l = i - k;
@@ -363,21 +361,21 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 						}
 					}
 
-					this.renderMousehoverTooltip(poseStack, component, i, j);
+					this.renderMousehoverTooltip(guiGraphics, component, i, j);
 				}
 			}
 		}
 
-		protected void renderMousehoverTooltip(PoseStack poseStack, @Nullable Component component, int i, int j) {
+		protected void renderMousehoverTooltip(GuiGraphics guiGraphics, @Nullable Component component, int i, int j) {
 			if (component != null) {
 				int k = i + 12;
 				int l = j - 12;
 				int m = StatsScreen.this.font.width(component);
-				fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-				poseStack.pushPose();
-				poseStack.translate(0.0F, 0.0F, 400.0F);
-				StatsScreen.this.font.drawShadow(poseStack, component, (float)k, (float)l, -1);
-				poseStack.popPose();
+				guiGraphics.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+				guiGraphics.pose().pushPose();
+				guiGraphics.pose().translate(0.0F, 0.0F, 400.0F);
+				guiGraphics.drawString(StatsScreen.this.font, component, k, l, -1);
+				guiGraphics.pose().popPose();
 			}
 		}
 
@@ -412,8 +410,8 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				StatsScreen.this.blitSlot(poseStack, k + 40, j, this.item);
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+				StatsScreen.this.blitSlot(guiGraphics, k + 40, j, this.item);
 
 				for (int p = 0; p < StatsScreen.this.itemStatsList.blockColumns.size(); p++) {
 					Stat<Block> stat;
@@ -423,12 +421,12 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 						stat = null;
 					}
 
-					this.renderStat(poseStack, stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
+					this.renderStat(guiGraphics, stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
 				}
 
 				for (int p = 0; p < StatsScreen.this.itemStatsList.itemColumns.size(); p++) {
 					this.renderStat(
-						poseStack,
+						guiGraphics,
 						((StatType)StatsScreen.this.itemStatsList.itemColumns.get(p)).get(this.item),
 						k + StatsScreen.this.getColumnX(p + StatsScreen.this.itemStatsList.blockColumns.size()),
 						j,
@@ -437,9 +435,9 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 				}
 			}
 
-			protected void renderStat(PoseStack poseStack, @Nullable Stat<?> stat, int i, int j, boolean bl) {
+			protected void renderStat(GuiGraphics guiGraphics, @Nullable Stat<?> stat, int i, int j, boolean bl) {
 				String string = stat == null ? "-" : stat.format(StatsScreen.this.stats.getValue(stat));
-				GuiComponent.drawString(poseStack, StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 16777215 : 9474192);
+				guiGraphics.drawString(StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 16777215 : 9474192);
 			}
 
 			@Override
@@ -490,8 +488,8 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderBackground(PoseStack poseStack) {
-			StatsScreen.this.renderBackground(poseStack);
+		protected void renderBackground(GuiGraphics guiGraphics) {
+			StatsScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -524,10 +522,10 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.mobName, k + 2, j + 1, 16777215);
-				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + 9, this.hasKills ? 9474192 : 6316128);
-				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + 9 * 2, this.wasKilledBy ? 9474192 : 6316128);
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+				guiGraphics.drawString(StatsScreen.this.font, this.mobName, k + 2, j + 1, 16777215);
+				guiGraphics.drawString(StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + 9, this.hasKills ? 9474192 : 6316128);
+				guiGraphics.drawString(StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + 9 * 2, this.wasKilledBy ? 9474192 : 6316128);
 			}
 
 			@Override

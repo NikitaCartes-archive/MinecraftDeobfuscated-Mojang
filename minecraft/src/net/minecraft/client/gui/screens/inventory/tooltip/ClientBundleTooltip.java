@@ -1,13 +1,10 @@
 package net.minecraft.client.gui.screens.inventory.tooltip;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.tooltip.BundleTooltip;
@@ -40,7 +37,7 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 	}
 
 	@Override
-	public void renderImage(Font font, int i, int j, PoseStack poseStack, ItemRenderer itemRenderer) {
+	public void renderImage(Font font, int i, int j, GuiGraphics guiGraphics) {
 		int k = this.gridSizeX();
 		int l = this.gridSizeY();
 		boolean bl = this.weight >= 64;
@@ -50,48 +47,47 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 			for (int o = 0; o < k; o++) {
 				int p = i + o * 18 + 1;
 				int q = j + n * 20 + 1;
-				this.renderSlot(p, q, m++, bl, font, poseStack, itemRenderer);
+				this.renderSlot(p, q, m++, bl, guiGraphics, font);
 			}
 		}
 
-		this.drawBorder(i, j, k, l, poseStack);
+		this.drawBorder(i, j, k, l, guiGraphics);
 	}
 
-	private void renderSlot(int i, int j, int k, boolean bl, Font font, PoseStack poseStack, ItemRenderer itemRenderer) {
+	private void renderSlot(int i, int j, int k, boolean bl, GuiGraphics guiGraphics, Font font) {
 		if (k >= this.items.size()) {
-			this.blit(poseStack, i, j, bl ? ClientBundleTooltip.Texture.BLOCKED_SLOT : ClientBundleTooltip.Texture.SLOT);
+			this.blit(guiGraphics, i, j, bl ? ClientBundleTooltip.Texture.BLOCKED_SLOT : ClientBundleTooltip.Texture.SLOT);
 		} else {
 			ItemStack itemStack = this.items.get(k);
-			this.blit(poseStack, i, j, ClientBundleTooltip.Texture.SLOT);
-			itemRenderer.renderAndDecorateItem(poseStack, itemStack, i + 1, j + 1, k);
-			itemRenderer.renderGuiItemDecorations(poseStack, font, itemStack, i + 1, j + 1);
+			this.blit(guiGraphics, i, j, ClientBundleTooltip.Texture.SLOT);
+			guiGraphics.renderItem(itemStack, i + 1, j + 1, k);
+			guiGraphics.renderItemDecorations(font, itemStack, i + 1, j + 1);
 			if (k == 0) {
-				AbstractContainerScreen.renderSlotHighlight(poseStack, i + 1, j + 1, 0);
+				AbstractContainerScreen.renderSlotHighlight(guiGraphics, i + 1, j + 1, 0);
 			}
 		}
 	}
 
-	private void drawBorder(int i, int j, int k, int l, PoseStack poseStack) {
-		this.blit(poseStack, i, j, ClientBundleTooltip.Texture.BORDER_CORNER_TOP);
-		this.blit(poseStack, i + k * 18 + 1, j, ClientBundleTooltip.Texture.BORDER_CORNER_TOP);
+	private void drawBorder(int i, int j, int k, int l, GuiGraphics guiGraphics) {
+		this.blit(guiGraphics, i, j, ClientBundleTooltip.Texture.BORDER_CORNER_TOP);
+		this.blit(guiGraphics, i + k * 18 + 1, j, ClientBundleTooltip.Texture.BORDER_CORNER_TOP);
 
 		for (int m = 0; m < k; m++) {
-			this.blit(poseStack, i + 1 + m * 18, j, ClientBundleTooltip.Texture.BORDER_HORIZONTAL_TOP);
-			this.blit(poseStack, i + 1 + m * 18, j + l * 20, ClientBundleTooltip.Texture.BORDER_HORIZONTAL_BOTTOM);
+			this.blit(guiGraphics, i + 1 + m * 18, j, ClientBundleTooltip.Texture.BORDER_HORIZONTAL_TOP);
+			this.blit(guiGraphics, i + 1 + m * 18, j + l * 20, ClientBundleTooltip.Texture.BORDER_HORIZONTAL_BOTTOM);
 		}
 
 		for (int m = 0; m < l; m++) {
-			this.blit(poseStack, i, j + m * 20 + 1, ClientBundleTooltip.Texture.BORDER_VERTICAL);
-			this.blit(poseStack, i + k * 18 + 1, j + m * 20 + 1, ClientBundleTooltip.Texture.BORDER_VERTICAL);
+			this.blit(guiGraphics, i, j + m * 20 + 1, ClientBundleTooltip.Texture.BORDER_VERTICAL);
+			this.blit(guiGraphics, i + k * 18 + 1, j + m * 20 + 1, ClientBundleTooltip.Texture.BORDER_VERTICAL);
 		}
 
-		this.blit(poseStack, i, j + l * 20, ClientBundleTooltip.Texture.BORDER_CORNER_BOTTOM);
-		this.blit(poseStack, i + k * 18 + 1, j + l * 20, ClientBundleTooltip.Texture.BORDER_CORNER_BOTTOM);
+		this.blit(guiGraphics, i, j + l * 20, ClientBundleTooltip.Texture.BORDER_CORNER_BOTTOM);
+		this.blit(guiGraphics, i + k * 18 + 1, j + l * 20, ClientBundleTooltip.Texture.BORDER_CORNER_BOTTOM);
 	}
 
-	private void blit(PoseStack poseStack, int i, int j, ClientBundleTooltip.Texture texture) {
-		RenderSystem.setShaderTexture(0, TEXTURE_LOCATION);
-		GuiComponent.blit(poseStack, i, j, 0, (float)texture.x, (float)texture.y, texture.w, texture.h, 128, 128);
+	private void blit(GuiGraphics guiGraphics, int i, int j, ClientBundleTooltip.Texture texture) {
+		guiGraphics.blit(TEXTURE_LOCATION, i, j, 0, (float)texture.x, (float)texture.y, texture.w, texture.h, 128, 128);
 	}
 
 	private int gridSizeX() {

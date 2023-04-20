@@ -318,7 +318,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 
 		if (this.player.getLastActionTime() > 0L
 			&& this.server.getPlayerIdleTimeout() > 0
-			&& Util.getMillis() - this.player.getLastActionTime() > (long)(this.server.getPlayerIdleTimeout() * 1000 * 60)) {
+			&& Util.getMillis() - this.player.getLastActionTime() > (long)this.server.getPlayerIdleTimeout() * 1000L * 60L) {
 			this.disconnect(Component.translatable("multiplayer.disconnect.idling"));
 		}
 	}

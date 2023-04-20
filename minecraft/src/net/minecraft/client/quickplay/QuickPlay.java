@@ -44,13 +44,9 @@ public class QuickPlay {
 		reloadInstance.done().thenRunAsync(() -> {
 			if (!StringUtils.isBlank(string)) {
 				joinSingleplayerWorld(minecraft, string);
-			}
-
-			if (!StringUtils.isBlank(string2)) {
+			} else if (!StringUtils.isBlank(string2)) {
 				joinMultiplayerWorld(minecraft, string2);
-			}
-
-			if (!StringUtils.isBlank(string3)) {
+			} else if (!StringUtils.isBlank(string3)) {
 				joinRealmsWorld(minecraft, realmsClient, string3);
 			}
 		}, minecraft);

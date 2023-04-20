@@ -1,6 +1,5 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Backup;
@@ -18,6 +17,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
@@ -177,17 +177,17 @@ public class RealmsBackupScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.backupObjectSelectionList.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 12, 16777215);
-		this.font.draw(poseStack, TITLE, (float)((this.width - 150) / 2 - 90), 20.0F, 10526880);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.backupObjectSelectionList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 16777215);
+		guiGraphics.drawString(this.font, TITLE, (this.width - 150) / 2 - 90, 20, 10526880, false);
 		if (this.noBackups) {
-			this.font.draw(poseStack, NO_BACKUPS_LABEL, 20.0F, (float)(this.height / 2 - 10), 16777215);
+			guiGraphics.drawString(this.font, NO_BACKUPS_LABEL, 20, this.height / 2 - 10, 16777215, false);
 		}
 
 		this.downloadButton.active = !this.noBackups;
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -211,8 +211,8 @@ public class RealmsBackupScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderBackground(PoseStack poseStack) {
-			RealmsBackupScreen.this.renderBackground(poseStack);
+		public void renderBackground(GuiGraphics guiGraphics) {
+			RealmsBackupScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Override
@@ -346,14 +346,15 @@ public class RealmsBackupScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			int p = this.backup.isUploadedVersion() ? -8388737 : 16777215;
-			RealmsBackupScreen.this.font
-				.draw(poseStack, "Backup (" + RealmsUtil.convertToAgePresentationFromInstant(this.backup.lastModifiedDate) + ")", (float)k, (float)(j + 1), p);
-			RealmsBackupScreen.this.font.draw(poseStack, this.getMediumDatePresentation(this.backup.lastModifiedDate), (float)k, (float)(j + 12), 5000268);
+			guiGraphics.drawString(
+				RealmsBackupScreen.this.font, "Backup (" + RealmsUtil.convertToAgePresentationFromInstant(this.backup.lastModifiedDate) + ")", k, j + 1, p, false
+			);
+			guiGraphics.drawString(RealmsBackupScreen.this.font, this.getMediumDatePresentation(this.backup.lastModifiedDate), k, j + 12, 5000268, false);
 			this.children.forEach(abstractWidget -> {
 				abstractWidget.setY(j + 2);
-				abstractWidget.render(poseStack, n, o, f);
+				abstractWidget.render(guiGraphics, n, o, f);
 			});
 		}
 

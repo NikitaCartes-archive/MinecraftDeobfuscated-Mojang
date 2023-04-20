@@ -1,7 +1,5 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -16,7 +14,7 @@ import com.mojang.realmsclient.util.task.SwitchSlotTask;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -202,24 +200,22 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 7, 16777215);
-		super.render(poseStack, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 7, 16777215);
+		super.render(guiGraphics, i, j, f);
 	}
 
-	void drawFrame(PoseStack poseStack, int i, int j, Component component, ResourceLocation resourceLocation, boolean bl, boolean bl2) {
-		RenderSystem.setShaderTexture(0, resourceLocation);
+	void drawFrame(GuiGraphics guiGraphics, int i, int j, Component component, ResourceLocation resourceLocation, boolean bl, boolean bl2) {
 		if (bl) {
-			RenderSystem.setShaderColor(0.56F, 0.56F, 0.56F, 1.0F);
+			guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
 		}
 
-		GuiComponent.blit(poseStack, i + 2, j + 14, 0.0F, 0.0F, 56, 56, 56, 56);
-		RenderSystem.setShaderTexture(0, SLOT_FRAME_LOCATION);
-		GuiComponent.blit(poseStack, i, j + 12, 0.0F, 0.0F, 60, 60, 60, 60);
+		guiGraphics.blit(resourceLocation, i + 2, j + 14, 0.0F, 0.0F, 56, 56, 56, 56);
+		guiGraphics.blit(SLOT_FRAME_LOCATION, i, j + 12, 0.0F, 0.0F, 60, 60, 60, 60);
 		int k = bl ? 10526880 : 16777215;
-		drawCenteredString(poseStack, this.font, component, i + 30, j, k);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.drawCenteredString(this.font, component, i + 30, j, k);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
 	private void startTask(LongRunningTask longRunningTask) {
@@ -262,9 +258,9 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 			RealmsResetWorldScreen.this.drawFrame(
-				poseStack, this.getX(), this.getY(), this.getMessage(), this.image, this.isHoveredOrFocused(), this.isMouseOver((double)i, (double)j)
+				guiGraphics, this.getX(), this.getY(), this.getMessage(), this.image, this.isHoveredOrFocused(), this.isMouseOver((double)i, (double)j)
 			);
 		}
 	}

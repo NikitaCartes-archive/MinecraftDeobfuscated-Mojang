@@ -1,9 +1,8 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,7 +15,6 @@ public class ContainerScreen extends AbstractContainerScreen<ChestMenu> implemen
 
 	public ContainerScreen(ChestMenu chestMenu, Inventory inventory, Component component) {
 		super(chestMenu, inventory, component);
-		this.passEvents = false;
 		int i = 222;
 		int j = 114;
 		this.containerRows = chestMenu.getRowCount();
@@ -25,18 +23,17 @@ public class ContainerScreen extends AbstractContainerScreen<ChestMenu> implemen
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		super.render(poseStack, i, j, f);
-		this.renderTooltip(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
+		this.renderTooltip(guiGraphics, i, j);
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.setShaderTexture(0, CONTAINER_BACKGROUND);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		blit(poseStack, k, l, 0, 0, this.imageWidth, this.containerRows * 18 + 17);
-		blit(poseStack, k, l + this.containerRows * 18 + 17, 0, 126, this.imageWidth, 96);
+		guiGraphics.blit(CONTAINER_BACKGROUND, k, l, 0, 0, this.imageWidth, this.containerRows * 18 + 17);
+		guiGraphics.blit(CONTAINER_BACKGROUND, k, l + this.containerRows * 18 + 17, 0, 126, this.imageWidth, 96);
 	}
 }

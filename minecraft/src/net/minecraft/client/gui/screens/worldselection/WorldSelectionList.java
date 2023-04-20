@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
@@ -30,7 +29,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -107,13 +106,13 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		List<LevelSummary> list = this.pollLevelsIgnoreErrors();
 		if (list != this.currentlyDisplayedLevels) {
 			this.handleNewLevels(list);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	private void handleNewLevels(@Nullable List<LevelSummary> list) {
@@ -237,14 +236,14 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			int p = (this.minecraft.screen.width - this.minecraft.font.width(LOADING_LABEL)) / 2;
 			int q = j + (m - 9) / 2;
-			this.minecraft.font.draw(poseStack, LOADING_LABEL, (float)p, (float)q, 16777215);
+			guiGraphics.drawString(this.minecraft.font, LOADING_LABEL, p, q, 16777215, false);
 			String string = LoadingDotsText.get(Util.getMillis());
 			int r = (this.minecraft.screen.width - this.minecraft.font.width(string)) / 2;
 			int s = q + 9;
-			this.minecraft.font.draw(poseStack, string, (float)r, (float)s, 8421504);
+			guiGraphics.drawString(this.minecraft.font, string, r, s, 8421504, false);
 		}
 
 		@Override
@@ -315,7 +314,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			String string = this.summary.getLevelName();
 			String string2 = this.summary.getLevelId() + " (" + WorldSelectionList.DATE_FORMAT.format(new Date(this.summary.getLastPlayed())) + ")";
 			if (StringUtils.isEmpty(string)) {
@@ -323,33 +322,32 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 			}
 
 			Component component = this.summary.getInfo();
-			this.minecraft.font.draw(poseStack, string, (float)(k + 32 + 3), (float)(j + 1), 16777215);
-			this.minecraft.font.draw(poseStack, string2, (float)(k + 32 + 3), (float)(j + 9 + 3), 8421504);
-			this.minecraft.font.draw(poseStack, component, (float)(k + 32 + 3), (float)(j + 9 + 9 + 3), 8421504);
-			RenderSystem.setShaderTexture(0, this.icon != null ? this.iconLocation : WorldSelectionList.ICON_MISSING);
+			guiGraphics.drawString(this.minecraft.font, string, k + 32 + 3, j + 1, 16777215, false);
+			guiGraphics.drawString(this.minecraft.font, string2, k + 32 + 3, j + 9 + 3, 8421504, false);
+			guiGraphics.drawString(this.minecraft.font, component, k + 32 + 3, j + 9 + 9 + 3, 8421504, false);
+			ResourceLocation resourceLocation = this.icon != null ? this.iconLocation : WorldSelectionList.ICON_MISSING;
 			RenderSystem.enableBlend();
-			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
+			guiGraphics.blit(resourceLocation, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			RenderSystem.disableBlend();
 			if (this.minecraft.options.touchscreen().get() || bl) {
-				RenderSystem.setShaderTexture(0, WorldSelectionList.ICON_OVERLAY_LOCATION);
-				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
+				guiGraphics.fill(k, j, k + 32, j + 32, -1601138544);
 				int p = n - k;
 				boolean bl2 = p < 32;
 				int q = bl2 ? 32 : 0;
 				if (this.summary.isLocked()) {
-					GuiComponent.blit(poseStack, k, j, 96.0F, (float)q, 32, 32, 256, 256);
+					guiGraphics.blit(WorldSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, (float)q, 32, 32, 256, 256);
 					if (bl2) {
 						this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WorldSelectionList.WORLD_LOCKED_TOOLTIP, 175));
 					}
 				} else if (this.summary.requiresManualConversion()) {
-					GuiComponent.blit(poseStack, k, j, 96.0F, (float)q, 32, 32, 256, 256);
+					guiGraphics.blit(WorldSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, (float)q, 32, 32, 256, 256);
 					if (bl2) {
 						this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WorldSelectionList.WORLD_REQUIRES_CONVERSION, 175));
 					}
 				} else if (this.summary.markVersionInList()) {
-					GuiComponent.blit(poseStack, k, j, 32.0F, (float)q, 32, 32, 256, 256);
+					guiGraphics.blit(WorldSelectionList.ICON_OVERLAY_LOCATION, k, j, 32.0F, (float)q, 32, 32, 256, 256);
 					if (this.summary.askToOpenWorld()) {
-						GuiComponent.blit(poseStack, k, j, 96.0F, (float)q, 32, 32, 256, 256);
+						guiGraphics.blit(WorldSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, (float)q, 32, 32, 256, 256);
 						if (bl2) {
 							this.screen
 								.setTooltipForNextRenderPass(
@@ -357,7 +355,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 								);
 						}
 					} else if (!SharedConstants.getCurrentVersion().isStable()) {
-						GuiComponent.blit(poseStack, k, j, 64.0F, (float)q, 32, 32, 256, 256);
+						guiGraphics.blit(WorldSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, (float)q, 32, 32, 256, 256);
 						if (bl2) {
 							this.screen
 								.setTooltipForNextRenderPass(
@@ -366,7 +364,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 						}
 					}
 				} else {
-					GuiComponent.blit(poseStack, k, j, 0.0F, (float)q, 32, 32, 256, 256);
+					guiGraphics.blit(WorldSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, (float)q, 32, 32, 256, 256);
 				}
 			}
 		}

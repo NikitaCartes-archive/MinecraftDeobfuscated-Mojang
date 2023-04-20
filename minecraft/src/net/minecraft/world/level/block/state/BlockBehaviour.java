@@ -45,6 +45,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
@@ -54,6 +55,7 @@ import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -67,6 +69,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -214,12 +217,12 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 	@Deprecated
 	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
-		return this.material.isReplaceable() && (blockPlaceContext.getItemInHand().isEmpty() || !blockPlaceContext.getItemInHand().is(this.asItem()));
+		return blockState.canBeReplaced() && (blockPlaceContext.getItemInHand().isEmpty() || !blockPlaceContext.getItemInHand().is(this.asItem()));
 	}
 
 	@Deprecated
 	public boolean canBeReplaced(BlockState blockState, Fluid fluid) {
-		return this.material.isReplaceable() || !this.material.isSolid();
+		return blockState.canBeReplaced() || !blockState.isSolid();
 	}
 
 	@Deprecated
@@ -384,6 +387,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		private final boolean ignitedByLava;
 		@Deprecated
 		private final boolean liquid;
+		@Deprecated
+		private boolean legacySolid;
 		private final PushReaction pushReaction;
 		private final Material material;
 		private final MaterialColor materialColor;
@@ -397,6 +402,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		private final BlockBehaviour.StatePredicate emissiveRendering;
 		private final Optional<BlockBehaviour.OffsetFunction> offsetFunction;
 		private final boolean spawnParticlesOnBreak;
+		private final NoteBlockInstrument instrument;
+		private final boolean replaceable;
 		@Nullable
 		protected BlockBehaviour.BlockStateBase.Cache cache;
 		private FluidState fluidState = Fluids.EMPTY.defaultFluidState();
@@ -423,6 +430,26 @@ public abstract class BlockBehaviour implements FeatureElement {
 			this.emissiveRendering = properties.emissiveRendering;
 			this.offsetFunction = properties.offsetFunction;
 			this.spawnParticlesOnBreak = properties.spawnParticlesOnBreak;
+			this.instrument = properties.instrument;
+			this.replaceable = properties.replaceable;
+		}
+
+		private boolean calculateSolid() {
+			if (this.owner.properties.forceSolidOn) {
+				return true;
+			} else if (this.owner.properties.forceSolidOff) {
+				return false;
+			} else if (this.cache == null) {
+				return false;
+			} else {
+				VoxelShape voxelShape = this.cache.collisionShape;
+				if (voxelShape.isEmpty()) {
+					return false;
+				} else {
+					AABB aABB = voxelShape.bounds();
+					return aABB.getSize() >= 0.7291666666666666 ? true : aABB.getYsize() >= 1.0;
+				}
+			}
 		}
 
 		public void initCache() {
@@ -431,6 +458,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 			if (!this.getBlock().hasDynamicShape()) {
 				this.cache = new BlockBehaviour.BlockStateBase.Cache(this.asState());
 			}
+
+			this.legacySolid = this.calculateSolid();
 		}
 
 		public Block getBlock() {
@@ -441,8 +470,20 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.owner.builtInRegistryHolder();
 		}
 
+		@Deprecated
 		public Material getMaterial() {
 			return this.material;
+		}
+
+		@Deprecated
+		public boolean blocksMotion() {
+			Block block = this.getBlock();
+			return block != Blocks.COBWEB && block != Blocks.BAMBOO_SAPLING && this.isSolid();
+		}
+
+		@Deprecated
+		public boolean isSolid() {
+			return this.legacySolid;
 		}
 
 		public boolean isValidSpawn(BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
@@ -704,7 +745,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 		}
 
 		public boolean canBeReplaced() {
-			return this.getMaterial().isReplaceable();
+			return this.replaceable;
 		}
 
 		public boolean canSurvive(LevelReader levelReader, BlockPos blockPos) {
@@ -789,6 +830,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public boolean shouldSpawnParticlesOnBreak() {
 			return this.spawnParticlesOnBreak;
+		}
+
+		public NoteBlockInstrument instrument() {
+			return this.instrument;
 		}
 
 		static final class Cache {
@@ -883,15 +928,20 @@ public abstract class BlockBehaviour implements FeatureElement {
 		boolean ignitedByLava;
 		@Deprecated
 		boolean liquid;
+		@Deprecated
+		boolean forceSolidOff;
+		boolean forceSolidOn;
 		PushReaction pushReaction = PushReaction.NORMAL;
 		boolean spawnParticlesOnBreak = true;
+		NoteBlockInstrument instrument = NoteBlockInstrument.HARP;
+		boolean replaceable;
 		BlockBehaviour.StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(
 					blockGetter, blockPos, Direction.UP
 				)
 				&& blockState.getLightEmission() < 14;
 		BlockBehaviour.StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking()
 				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
-		BlockBehaviour.StatePredicate isSuffocating = (blockState, blockGetter, blockPos) -> this.material.blocksMotion()
+		BlockBehaviour.StatePredicate isSuffocating = (blockState, blockGetter, blockPos) -> blockState.blocksMotion()
 				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
 		BlockBehaviour.StatePredicate isViewBlocking = this.isSuffocating;
 		BlockBehaviour.StatePredicate hasPostProcess = (blockState, blockGetter, blockPos) -> false;
@@ -942,12 +992,16 @@ public abstract class BlockBehaviour implements FeatureElement {
 			properties.isAir = blockBehaviour.properties.isAir;
 			properties.ignitedByLava = blockBehaviour.properties.ignitedByLava;
 			properties.liquid = blockBehaviour.properties.liquid;
+			properties.forceSolidOff = blockBehaviour.properties.forceSolidOff;
+			properties.forceSolidOn = blockBehaviour.properties.forceSolidOn;
 			properties.pushReaction = blockBehaviour.properties.pushReaction;
 			properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
 			properties.offsetFunction = blockBehaviour.properties.offsetFunction;
 			properties.spawnParticlesOnBreak = blockBehaviour.properties.spawnParticlesOnBreak;
 			properties.requiredFeatures = blockBehaviour.properties.requiredFeatures;
 			properties.emissiveRendering = blockBehaviour.properties.emissiveRendering;
+			properties.instrument = blockBehaviour.properties.instrument;
+			properties.replaceable = blockBehaviour.properties.replaceable;
 			return properties;
 		}
 
@@ -1027,6 +1081,17 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public BlockBehaviour.Properties liquid() {
 			this.liquid = true;
+			return this;
+		}
+
+		public BlockBehaviour.Properties forceSolidOn() {
+			this.forceSolidOn = true;
+			return this;
+		}
+
+		@Deprecated
+		public BlockBehaviour.Properties forceSolidOff() {
+			this.forceSolidOff = true;
 			return this;
 		}
 
@@ -1127,6 +1192,16 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public BlockBehaviour.Properties requiredFeatures(FeatureFlag... featureFlags) {
 			this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
+			return this;
+		}
+
+		public BlockBehaviour.Properties instrument(NoteBlockInstrument noteBlockInstrument) {
+			this.instrument = noteBlockInstrument;
+			return this;
+		}
+
+		public BlockBehaviour.Properties replaceable() {
+			this.replaceable = true;
 			return this;
 		}
 	}

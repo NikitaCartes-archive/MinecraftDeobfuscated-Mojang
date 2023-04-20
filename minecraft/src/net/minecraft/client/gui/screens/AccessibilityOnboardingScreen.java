@@ -1,12 +1,12 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.text2speech.Narrator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.AccessibilityOnboardingTextWidget;
 import net.minecraft.client.gui.components.Button;
@@ -88,16 +88,16 @@ public class AccessibilityOnboardingScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.handleInitialNarrationDelay();
 		this.panorama.render(0.0F, 1.0F);
-		fill(poseStack, 0, 0, this.width, this.height, -1877995504);
-		this.logoRenderer.renderLogo(poseStack, this.width, 1.0F);
+		guiGraphics.fill(0, 0, this.width, this.height, -1877995504);
+		this.logoRenderer.renderLogo(guiGraphics, this.width, 1.0F);
 		if (this.textWidget != null) {
-			this.textWidget.render(poseStack, i, j, f);
+			this.textWidget.render(guiGraphics, i, j, f);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	private void handleInitialNarrationDelay() {

@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.controls;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
@@ -84,10 +83,10 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			KeyBindsList.this.minecraft
-				.font
-				.draw(poseStack, this.name, (float)(KeyBindsList.this.minecraft.screen.width / 2 - this.width / 2), (float)(j + m - 9 - 1), 16777215);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			guiGraphics.drawString(
+				KeyBindsList.this.minecraft.font, this.name, KeyBindsList.this.minecraft.screen.width / 2 - this.width / 2, j + m - 9 - 1, 16777215, false
+			);
 		}
 
 		@Nullable
@@ -156,21 +155,21 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			float var10003 = (float)(k + 90 - KeyBindsList.this.maxNameWidth);
-			KeyBindsList.this.minecraft.font.draw(poseStack, this.name, var10003, (float)(j + m / 2 - 9 / 2), 16777215);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			int var10003 = k + 90 - KeyBindsList.this.maxNameWidth;
+			guiGraphics.drawString(KeyBindsList.this.minecraft.font, this.name, var10003, j + m / 2 - 9 / 2, 16777215, false);
 			this.resetButton.setX(k + 190);
 			this.resetButton.setY(j);
-			this.resetButton.render(poseStack, n, o, f);
+			this.resetButton.render(guiGraphics, n, o, f);
 			this.changeButton.setX(k + 105);
 			this.changeButton.setY(j);
 			if (this.hasCollision) {
 				int p = 3;
 				int q = this.changeButton.getX() - 6;
-				GuiComponent.fill(poseStack, q, j + 2, q + 3, j + m + 2, ChatFormatting.RED.getColor() | 0xFF000000);
+				guiGraphics.fill(q, j + 2, q + 3, j + m + 2, ChatFormatting.RED.getColor() | 0xFF000000);
 			}
 
-			this.changeButton.render(poseStack, n, o, f);
+			this.changeButton.render(guiGraphics, n, o, f);
 		}
 
 		@Override

@@ -1,9 +1,8 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -26,34 +25,33 @@ public class BrewingStandScreen extends AbstractContainerScreen<BrewingStandMenu
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		super.render(poseStack, i, j, f);
-		this.renderTooltip(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
+		this.renderTooltip(guiGraphics, i, j);
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.setShaderTexture(0, BREWING_STAND_LOCATION);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(BREWING_STAND_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		int m = this.menu.getFuel();
 		int n = Mth.clamp((18 * m + 20 - 1) / 20, 0, 18);
 		if (n > 0) {
-			blit(poseStack, k + 60, l + 44, 176, 29, n, 4);
+			guiGraphics.blit(BREWING_STAND_LOCATION, k + 60, l + 44, 176, 29, n, 4);
 		}
 
 		int o = this.menu.getBrewingTicks();
 		if (o > 0) {
 			int p = (int)(28.0F * (1.0F - (float)o / 400.0F));
 			if (p > 0) {
-				blit(poseStack, k + 97, l + 16, 176, 0, 9, p);
+				guiGraphics.blit(BREWING_STAND_LOCATION, k + 97, l + 16, 176, 0, 9, p);
 			}
 
 			p = BUBBLELENGTHS[o / 2 % 7];
 			if (p > 0) {
-				blit(poseStack, k + 63, l + 14 + 29 - p, 185, 29 - p, 12, p);
+				guiGraphics.blit(BREWING_STAND_LOCATION, k + 63, l + 14 + 29 - p, 185, 29 - p, 12, p);
 			}
 		}
 	}

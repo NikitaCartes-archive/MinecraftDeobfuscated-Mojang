@@ -3,6 +3,7 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.Collection;
+import java.util.OptionalInt;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -10,6 +11,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.item.FunctionArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.ServerFunctionManager;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 public class FunctionCommand {
 	public static final SuggestionProvider<CommandSourceStack> SUGGEST_FUNCTION = (commandContext, suggestionsBuilder) -> {
@@ -32,13 +34,31 @@ public class FunctionCommand {
 
 	private static int runFunction(CommandSourceStack commandSourceStack, Collection<CommandFunction> collection) {
 		int i = 0;
+		boolean bl = false;
 
 		for (CommandFunction commandFunction : collection) {
-			i += commandSourceStack.getServer().getFunctions().execute(commandFunction, commandSourceStack.withSuppressedOutput().withMaximumPermission(2));
+			MutableObject<OptionalInt> mutableObject = new MutableObject<>(OptionalInt.empty());
+			int j = commandSourceStack.getServer()
+				.getFunctions()
+				.execute(
+					commandFunction,
+					commandSourceStack.withSuppressedOutput().withMaximumPermission(2).withReturnValueConsumer(ix -> mutableObject.setValue(OptionalInt.of(ix)))
+				);
+			OptionalInt optionalInt = mutableObject.getValue();
+			i += optionalInt.orElse(j);
+			bl |= optionalInt.isPresent();
 		}
 
 		if (collection.size() == 1) {
-			commandSourceStack.sendSuccess(Component.translatable("commands.function.success.single", i, ((CommandFunction)collection.iterator().next()).getId()), true);
+			if (bl) {
+				commandSourceStack.sendSuccess(
+					Component.translatable("commands.function.success.single.result", i, ((CommandFunction)collection.iterator().next()).getId()), true
+				);
+			} else {
+				commandSourceStack.sendSuccess(Component.translatable("commands.function.success.single", i, ((CommandFunction)collection.iterator().next()).getId()), true);
+			}
+		} else if (bl) {
+			commandSourceStack.sendSuccess(Component.translatable("commands.function.success.multiple.result", collection.size()), true);
 		} else {
 			commandSourceStack.sendSuccess(Component.translatable("commands.function.success.multiple", i, collection.size()), true);
 		}

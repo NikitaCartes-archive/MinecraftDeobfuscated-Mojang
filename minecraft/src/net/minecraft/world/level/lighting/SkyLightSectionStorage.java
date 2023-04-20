@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import java.util.Arrays;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -153,9 +152,10 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 		if (dataLayer != null) {
 			return dataLayer;
 		} else {
-			long m = SectionPos.offset(l, Direction.UP);
 			int i = this.updatingSectionData.topSections.get(SectionPos.getZeroNode(l));
-			if (i != this.updatingSectionData.currentLowestY && SectionPos.y(m) < i) {
+			if (i != this.updatingSectionData.currentLowestY && SectionPos.y(l) < i) {
+				long m = SectionPos.offset(l, Direction.UP);
+
 				DataLayer dataLayer2;
 				while ((dataLayer2 = this.getDataLayer(m, true)) == null) {
 					m = SectionPos.offset(m, Direction.UP);
@@ -163,14 +163,14 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 
 				return repeatFirstLayer(dataLayer2);
 			} else {
-				return new DataLayer();
+				return this.lightOnInSection(l) ? new DataLayer(15) : new DataLayer();
 			}
 		}
 	}
 
 	private static DataLayer repeatFirstLayer(DataLayer dataLayer) {
-		if (dataLayer.isEmpty()) {
-			return new DataLayer();
+		if (dataLayer.isDefinitelyHomogenous()) {
+			return dataLayer.copy();
 		} else {
 			byte[] bs = dataLayer.getData();
 			byte[] cs = new byte[2048];
@@ -196,11 +196,13 @@ public class SkyLightSectionStorage extends LayerLightSectionStorage<SkyLightSec
 					if (i != 2 && !this.sectionsToRemoveSourcesFrom.contains(l) && this.sectionsWithSources.add(l)) {
 						if (i == 1) {
 							this.clearQueuedSectionBlocks(layerLightEngine, l);
-							if (this.changedSections.add(l)) {
-								this.updatingSectionData.copyDataLayer(l);
+							if (!this.getDataLayer(l, true).isDefinitelyFilledWith(15)) {
+								this.updatingSectionData.setLayer(l, new DataLayer(15));
+								this.updatingSectionData.clearCache();
+								this.changedSections.add(l);
+								this.markSectionAndNeighborsAsAffected(l);
 							}
 
-							Arrays.fill(this.getDataLayer(l, true).getData(), (byte)-1);
 							int j = SectionPos.sectionToBlockCoord(SectionPos.x(l));
 							int k = SectionPos.sectionToBlockCoord(SectionPos.y(l));
 							int m = SectionPos.sectionToBlockCoord(SectionPos.z(l));

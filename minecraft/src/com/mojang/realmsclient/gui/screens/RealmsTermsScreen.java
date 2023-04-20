@@ -1,6 +1,5 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
@@ -11,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -92,17 +92,17 @@ public class RealmsTermsScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 16777215);
-		this.font.draw(poseStack, TERMS_STATIC_TEXT, (float)(this.width / 2 - 120), (float)row(5), 16777215);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, 16777215);
+		guiGraphics.drawString(this.font, TERMS_STATIC_TEXT, this.width / 2 - 120, row(5), 16777215, false);
 		int k = this.font.width(TERMS_STATIC_TEXT);
 		int l = this.width / 2 - 121 + k;
 		int m = row(5);
 		int n = l + this.font.width(TERMS_LINK_TEXT) + 1;
 		int o = m + 1 + 9;
 		this.onLink = l <= i && i <= n && m <= j && j <= o;
-		this.font.draw(poseStack, TERMS_LINK_TEXT, (float)(this.width / 2 - 120 + k), (float)row(5), this.onLink ? 7107012 : 3368635);
-		super.render(poseStack, i, j, f);
+		guiGraphics.drawString(this.font, TERMS_LINK_TEXT, this.width / 2 - 120 + k, row(5), this.onLink ? 7107012 : 3368635, false);
+		super.render(guiGraphics, i, j, f);
 	}
 }

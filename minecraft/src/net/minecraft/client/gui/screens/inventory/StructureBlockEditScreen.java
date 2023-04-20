@@ -1,13 +1,13 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -412,46 +412,46 @@ public class StructureBlockEditScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
 		StructureMode structureMode = this.structure.getMode();
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 10, 16777215);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
 		if (structureMode != StructureMode.DATA) {
-			drawString(poseStack, this.font, NAME_LABEL, this.width / 2 - 153, 30, 10526880);
-			this.nameEdit.render(poseStack, i, j, f);
+			guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 153, 30, 10526880);
+			this.nameEdit.render(guiGraphics, i, j, f);
 		}
 
 		if (structureMode == StructureMode.LOAD || structureMode == StructureMode.SAVE) {
-			drawString(poseStack, this.font, POSITION_LABEL, this.width / 2 - 153, 70, 10526880);
-			this.posXEdit.render(poseStack, i, j, f);
-			this.posYEdit.render(poseStack, i, j, f);
-			this.posZEdit.render(poseStack, i, j, f);
-			drawString(poseStack, this.font, INCLUDE_ENTITIES_LABEL, this.width / 2 + 154 - this.font.width(INCLUDE_ENTITIES_LABEL), 150, 10526880);
+			guiGraphics.drawString(this.font, POSITION_LABEL, this.width / 2 - 153, 70, 10526880);
+			this.posXEdit.render(guiGraphics, i, j, f);
+			this.posYEdit.render(guiGraphics, i, j, f);
+			this.posZEdit.render(guiGraphics, i, j, f);
+			guiGraphics.drawString(this.font, INCLUDE_ENTITIES_LABEL, this.width / 2 + 154 - this.font.width(INCLUDE_ENTITIES_LABEL), 150, 10526880);
 		}
 
 		if (structureMode == StructureMode.SAVE) {
-			drawString(poseStack, this.font, SIZE_LABEL, this.width / 2 - 153, 110, 10526880);
-			this.sizeXEdit.render(poseStack, i, j, f);
-			this.sizeYEdit.render(poseStack, i, j, f);
-			this.sizeZEdit.render(poseStack, i, j, f);
-			drawString(poseStack, this.font, DETECT_SIZE_LABEL, this.width / 2 + 154 - this.font.width(DETECT_SIZE_LABEL), 110, 10526880);
-			drawString(poseStack, this.font, SHOW_AIR_LABEL, this.width / 2 + 154 - this.font.width(SHOW_AIR_LABEL), 70, 10526880);
+			guiGraphics.drawString(this.font, SIZE_LABEL, this.width / 2 - 153, 110, 10526880);
+			this.sizeXEdit.render(guiGraphics, i, j, f);
+			this.sizeYEdit.render(guiGraphics, i, j, f);
+			this.sizeZEdit.render(guiGraphics, i, j, f);
+			guiGraphics.drawString(this.font, DETECT_SIZE_LABEL, this.width / 2 + 154 - this.font.width(DETECT_SIZE_LABEL), 110, 10526880);
+			guiGraphics.drawString(this.font, SHOW_AIR_LABEL, this.width / 2 + 154 - this.font.width(SHOW_AIR_LABEL), 70, 10526880);
 		}
 
 		if (structureMode == StructureMode.LOAD) {
-			drawString(poseStack, this.font, INTEGRITY_LABEL, this.width / 2 - 153, 110, 10526880);
-			this.integrityEdit.render(poseStack, i, j, f);
-			this.seedEdit.render(poseStack, i, j, f);
-			drawString(poseStack, this.font, SHOW_BOUNDING_BOX_LABEL, this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 10526880);
+			guiGraphics.drawString(this.font, INTEGRITY_LABEL, this.width / 2 - 153, 110, 10526880);
+			this.integrityEdit.render(guiGraphics, i, j, f);
+			this.seedEdit.render(guiGraphics, i, j, f);
+			guiGraphics.drawString(this.font, SHOW_BOUNDING_BOX_LABEL, this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 10526880);
 		}
 
 		if (structureMode == StructureMode.DATA) {
-			drawString(poseStack, this.font, CUSTOM_DATA_LABEL, this.width / 2 - 153, 110, 10526880);
-			this.dataEdit.render(poseStack, i, j, f);
+			guiGraphics.drawString(this.font, CUSTOM_DATA_LABEL, this.width / 2 - 153, 110, 10526880);
+			this.dataEdit.render(guiGraphics, i, j, f);
 		}
 
-		drawString(poseStack, this.font, structureMode.getDisplayName(), this.width / 2 - 153, 174, 10526880);
-		super.render(poseStack, i, j, f);
+		guiGraphics.drawString(this.font, structureMode.getDisplayName(), this.width / 2 - 153, 174, 10526880);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

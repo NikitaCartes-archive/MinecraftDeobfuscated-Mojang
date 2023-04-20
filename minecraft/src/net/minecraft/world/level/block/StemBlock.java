@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class StemBlock extends BushBlock implements BonemealableBlock, FarmableBlock {
+public class StemBlock extends BushBlock implements BonemealableBlock {
 	public static final int MAX_AGE = 7;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
 	protected static final float AABB_OFFSET = 1.0F;

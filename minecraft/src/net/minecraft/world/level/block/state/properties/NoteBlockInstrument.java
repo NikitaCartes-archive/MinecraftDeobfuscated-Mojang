@@ -1,14 +1,9 @@
 package net.minecraft.world.level.block.state.properties;
 
-import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 
 public enum NoteBlockInstrument implements StringRepresentable {
 	HARP("harp", SoundEvents.NOTE_BLOCK_HARP, NoteBlockInstrument.Type.BASE_BLOCK),
@@ -62,63 +57,8 @@ public enum NoteBlockInstrument implements StringRepresentable {
 		return this.type == NoteBlockInstrument.Type.CUSTOM;
 	}
 
-	public boolean requiresAirAbove() {
-		return this.type == NoteBlockInstrument.Type.BASE_BLOCK;
-	}
-
-	public static Optional<NoteBlockInstrument> byStateAbove(BlockState blockState) {
-		if (blockState.is(Blocks.ZOMBIE_HEAD)) {
-			return Optional.of(ZOMBIE);
-		} else if (blockState.is(Blocks.SKELETON_SKULL)) {
-			return Optional.of(SKELETON);
-		} else if (blockState.is(Blocks.CREEPER_HEAD)) {
-			return Optional.of(CREEPER);
-		} else if (blockState.is(Blocks.DRAGON_HEAD)) {
-			return Optional.of(DRAGON);
-		} else if (blockState.is(Blocks.WITHER_SKELETON_SKULL)) {
-			return Optional.of(WITHER_SKELETON);
-		} else if (blockState.is(Blocks.PIGLIN_HEAD)) {
-			return Optional.of(PIGLIN);
-		} else {
-			return blockState.is(Blocks.PLAYER_HEAD) ? Optional.of(CUSTOM_HEAD) : Optional.empty();
-		}
-	}
-
-	public static NoteBlockInstrument byStateBelow(BlockState blockState) {
-		if (blockState.is(Blocks.CLAY)) {
-			return FLUTE;
-		} else if (blockState.is(Blocks.GOLD_BLOCK)) {
-			return BELL;
-		} else if (blockState.is(BlockTags.WOOL)) {
-			return GUITAR;
-		} else if (blockState.is(Blocks.PACKED_ICE)) {
-			return CHIME;
-		} else if (blockState.is(Blocks.BONE_BLOCK)) {
-			return XYLOPHONE;
-		} else if (blockState.is(Blocks.IRON_BLOCK)) {
-			return IRON_XYLOPHONE;
-		} else if (blockState.is(Blocks.SOUL_SAND)) {
-			return COW_BELL;
-		} else if (blockState.is(Blocks.PUMPKIN)) {
-			return DIDGERIDOO;
-		} else if (blockState.is(Blocks.EMERALD_BLOCK)) {
-			return BIT;
-		} else if (blockState.is(Blocks.HAY_BLOCK)) {
-			return BANJO;
-		} else if (blockState.is(Blocks.GLOWSTONE)) {
-			return PLING;
-		} else {
-			Material material = blockState.getMaterial();
-			if (material == Material.STONE) {
-				return BASEDRUM;
-			} else if (material == Material.SAND) {
-				return SNARE;
-			} else if (material == Material.GLASS) {
-				return HAT;
-			} else {
-				return material == Material.WOOD ? BASS : HARP;
-			}
-		}
+	public boolean worksAboveNoteBlock() {
+		return this.type != NoteBlockInstrument.Type.BASE_BLOCK;
 	}
 
 	static enum Type {

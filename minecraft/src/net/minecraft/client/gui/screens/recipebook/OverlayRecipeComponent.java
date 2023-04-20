@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +9,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -26,7 +25,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
-public class OverlayRecipeComponent extends GuiComponent implements Renderable, GuiEventListener {
+public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 	static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
 	private static final int MAX_ROW = 4;
 	private static final int MAX_ROW_LARGE = 5;
@@ -36,7 +35,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Renderable, 
 	private boolean isVisible;
 	private int x;
 	private int y;
-	Minecraft minecraft;
+	private Minecraft minecraft;
 	private RecipeCollection collection;
 	@Nullable
 	private Recipe<?> lastRecipeClicked;
@@ -126,25 +125,24 @@ public class OverlayRecipeComponent extends GuiComponent implements Renderable, 
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.isVisible) {
 			this.time += f;
 			RenderSystem.enableBlend();
-			RenderSystem.setShaderTexture(0, RECIPE_BOOK_LOCATION);
-			poseStack.pushPose();
-			poseStack.translate(0.0F, 0.0F, 170.0F);
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate(0.0F, 0.0F, 170.0F);
 			int k = this.recipeButtons.size() <= 16 ? 4 : 5;
 			int l = Math.min(this.recipeButtons.size(), k);
 			int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
 			int n = 4;
-			blitNineSliced(poseStack, this.x, this.y, l * 25 + 8, m * 25 + 8, 4, 32, 32, 82, 208);
+			guiGraphics.blitNineSliced(RECIPE_BOOK_LOCATION, this.x, this.y, l * 25 + 8, m * 25 + 8, 4, 32, 32, 82, 208);
 			RenderSystem.disableBlend();
 
 			for (OverlayRecipeComponent.OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
-				overlayRecipeButton.render(poseStack, i, j, f);
+				overlayRecipeButton.render(guiGraphics, i, j, f);
 			}
 
-			poseStack.popPose();
+			guiGraphics.pose().popPose();
 		}
 	}
 
@@ -198,8 +196,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Renderable, 
 		}
 
 		@Override
-		public void renderWidget(PoseStack poseStack, int i, int j, float f) {
-			RenderSystem.setShaderTexture(0, OverlayRecipeComponent.RECIPE_BOOK_LOCATION);
+		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 			int k = 152;
 			if (!this.isCraftable) {
 				k += 26;
@@ -210,22 +207,20 @@ public class OverlayRecipeComponent extends GuiComponent implements Renderable, 
 				l += 26;
 			}
 
-			blit(poseStack, this.getX(), this.getY(), k, l, this.width, this.height);
-			poseStack.pushPose();
-			poseStack.translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
+			guiGraphics.blit(OverlayRecipeComponent.RECIPE_BOOK_LOCATION, this.getX(), this.getY(), k, l, this.width, this.height);
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
 
 			for (OverlayRecipeComponent.OverlayRecipeButton.Pos pos : this.ingredientPos) {
-				poseStack.pushPose();
-				poseStack.translate((double)pos.x, (double)pos.y, 0.0);
-				poseStack.scale(0.375F, 0.375F, 1.0F);
-				poseStack.translate(-8.0, -8.0, 0.0);
-				OverlayRecipeComponent.this.minecraft
-					.getItemRenderer()
-					.renderAndDecorateItem(poseStack, pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], 0, 0);
-				poseStack.popPose();
+				guiGraphics.pose().pushPose();
+				guiGraphics.pose().translate((double)pos.x, (double)pos.y, 0.0);
+				guiGraphics.pose().scale(0.375F, 0.375F, 1.0F);
+				guiGraphics.pose().translate(-8.0, -8.0, 0.0);
+				guiGraphics.renderItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], 0, 0);
+				guiGraphics.pose().popPose();
 			}
 
-			poseStack.popPose();
+			guiGraphics.pose().popPose();
 		}
 
 		@Environment(EnvType.CLIENT)

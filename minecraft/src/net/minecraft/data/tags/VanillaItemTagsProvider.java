@@ -21,6 +21,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.copy(BlockTags.PLANKS, ItemTags.PLANKS);
 		this.copy(BlockTags.STONE_BRICKS, ItemTags.STONE_BRICKS);
 		this.copy(BlockTags.WOODEN_BUTTONS, ItemTags.WOODEN_BUTTONS);
+		this.copy(BlockTags.STONE_BUTTONS, ItemTags.STONE_BUTTONS);
 		this.copy(BlockTags.BUTTONS, ItemTags.BUTTONS);
 		this.copy(BlockTags.WOOL_CARPETS, ItemTags.WOOL_CARPETS);
 		this.copy(BlockTags.WOODEN_DOORS, ItemTags.WOODEN_DOORS);
@@ -248,29 +249,29 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.addTag(ItemTags.HOES)
 			.add(Items.TRIDENT);
 		this.tag(ItemTags.BREAKS_DECORATED_POTS).addTag(ItemTags.TOOLS);
-		this.tag(ItemTags.DECORATED_POT_SHARDS)
+		this.tag(ItemTags.DECORATED_POT_SHERDS)
 			.add(
 				Items.BRICK,
-				Items.ANGLER_POTTERY_SHARD,
-				Items.ARCHER_POTTERY_SHARD,
-				Items.ARMS_UP_POTTERY_SHARD,
-				Items.BLADE_POTTERY_SHARD,
-				Items.BREWER_POTTERY_SHARD,
-				Items.BURN_POTTERY_SHARD,
-				Items.DANGER_POTTERY_SHARD,
-				Items.EXPLORER_POTTERY_SHARD,
-				Items.FRIEND_POTTERY_SHARD,
-				Items.HEART_POTTERY_SHARD,
-				Items.HEARTBREAK_POTTERY_SHARD,
-				Items.HOWL_POTTERY_SHARD,
-				Items.MINER_POTTERY_SHARD,
-				Items.MOURNER_POTTERY_SHARD,
-				Items.PLENTY_POTTERY_SHARD,
-				Items.PRIZE_POTTERY_SHARD,
-				Items.SHEAF_POTTERY_SHARD,
-				Items.SHELTER_POTTERY_SHARD,
-				Items.SKULL_POTTERY_SHARD,
-				Items.SNORT_POTTERY_SHARD
+				Items.ANGLER_POTTERY_SHERD,
+				Items.ARCHER_POTTERY_SHERD,
+				Items.ARMS_UP_POTTERY_SHERD,
+				Items.BLADE_POTTERY_SHERD,
+				Items.BREWER_POTTERY_SHERD,
+				Items.BURN_POTTERY_SHERD,
+				Items.DANGER_POTTERY_SHERD,
+				Items.EXPLORER_POTTERY_SHERD,
+				Items.FRIEND_POTTERY_SHERD,
+				Items.HEART_POTTERY_SHERD,
+				Items.HEARTBREAK_POTTERY_SHERD,
+				Items.HOWL_POTTERY_SHERD,
+				Items.MINER_POTTERY_SHERD,
+				Items.MOURNER_POTTERY_SHERD,
+				Items.PLENTY_POTTERY_SHERD,
+				Items.PRIZE_POTTERY_SHERD,
+				Items.SHEAF_POTTERY_SHERD,
+				Items.SHELTER_POTTERY_SHERD,
+				Items.SKULL_POTTERY_SHERD,
+				Items.SNORT_POTTERY_SHERD
 			);
 		this.tag(ItemTags.TRIMMABLE_ARMOR)
 			.add(Items.NETHERITE_HELMET)
@@ -330,5 +331,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS)
 			.add(Items.ZOMBIE_HEAD, Items.SKELETON_SKULL, Items.CREEPER_HEAD, Items.DRAGON_HEAD, Items.WITHER_SKELETON_SKULL, Items.PIGLIN_HEAD, Items.PLAYER_HEAD);
 		this.tag(ItemTags.SNIFFER_FOOD).add(Items.TORCHFLOWER_SEEDS);
+		this.tag(ItemTags.VILLAGER_PLANTABLE_SEEDS)
+			.add(Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
 	}
 }

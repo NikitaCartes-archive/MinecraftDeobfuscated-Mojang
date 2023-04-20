@@ -7,13 +7,19 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
+import org.jetbrains.annotations.VisibleForTesting;
 
-public final class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLightSectionStorage> {
+public class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLightSectionStorage> {
 	private static final Direction[] DIRECTIONS = Direction.values();
 	private static final Direction[] HORIZONTALS = new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
 
 	public SkyLightEngine(LightChunkGetter lightChunkGetter) {
 		super(lightChunkGetter, new SkyLightSectionStorage(lightChunkGetter));
+	}
+
+	@VisibleForTesting
+	protected SkyLightEngine(LightChunkGetter lightChunkGetter, SkyLightSectionStorage skyLightSectionStorage) {
+		super(lightChunkGetter, skyLightSectionStorage);
 	}
 
 	@Override

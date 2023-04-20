@@ -22,8 +22,8 @@ public class VanillaArchaeologyLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Items.ARMS_UP_POTTERY_SHARD).setWeight(2))
-						.add(LootItem.lootTableItem(Items.BREWER_POTTERY_SHARD).setWeight(2))
+						.add(LootItem.lootTableItem(Items.ARMS_UP_POTTERY_SHERD).setWeight(2))
+						.add(LootItem.lootTableItem(Items.BREWER_POTTERY_SHERD).setWeight(2))
 						.add(LootItem.lootTableItem(Items.BRICK))
 						.add(LootItem.lootTableItem(Items.EMERALD))
 						.add(LootItem.lootTableItem(Items.STICK))
@@ -47,10 +47,10 @@ public class VanillaArchaeologyLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Items.ARCHER_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.MINER_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.PRIZE_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.SKULL_POTTERY_SHARD))
+						.add(LootItem.lootTableItem(Items.ARCHER_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.MINER_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.PRIZE_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.SKULL_POTTERY_SHERD))
 						.add(LootItem.lootTableItem(Items.DIAMOND))
 						.add(LootItem.lootTableItem(Items.TNT))
 						.add(LootItem.lootTableItem(Items.GUNPOWDER))
@@ -58,18 +58,11 @@ public class VanillaArchaeologyLoot implements LootTableSubProvider {
 				)
 		);
 		biConsumer.accept(
-			BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY,
+			BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON,
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Items.BURN_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.DANGER_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.FRIEND_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.HEART_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.HEARTBREAK_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.HOWL_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.SHEAF_POTTERY_SHARD))
 						.add(LootItem.lootTableItem(Items.EMERALD).setWeight(2))
 						.add(LootItem.lootTableItem(Items.WHEAT).setWeight(2))
 						.add(LootItem.lootTableItem(Items.WOODEN_HOE).setWeight(2))
@@ -101,6 +94,21 @@ public class VanillaArchaeologyLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.FLOWER_POT))
 						.add(LootItem.lootTableItem(Items.STRING))
 						.add(LootItem.lootTableItem(Items.LEAD))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_RARE,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.BURN_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.DANGER_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.FRIEND_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.HEART_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.HEARTBREAK_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.HOWL_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.SHEAF_POTTERY_SHERD))
 						.add(LootItem.lootTableItem(Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE))
 						.add(LootItem.lootTableItem(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE))
 						.add(LootItem.lootTableItem(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE))
@@ -113,9 +121,9 @@ public class VanillaArchaeologyLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Items.ANGLER_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.SHELTER_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.SNORT_POTTERY_SHARD))
+						.add(LootItem.lootTableItem(Items.ANGLER_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.SHELTER_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.SNORT_POTTERY_SHERD))
 						.add(LootItem.lootTableItem(Items.SNIFFER_EGG))
 						.add(LootItem.lootTableItem(Items.IRON_AXE))
 						.add(LootItem.lootTableItem(Items.EMERALD).setWeight(2))
@@ -131,10 +139,10 @@ public class VanillaArchaeologyLoot implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Items.BLADE_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.EXPLORER_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.MOURNER_POTTERY_SHARD))
-						.add(LootItem.lootTableItem(Items.PLENTY_POTTERY_SHARD))
+						.add(LootItem.lootTableItem(Items.BLADE_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.EXPLORER_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.MOURNER_POTTERY_SHERD))
+						.add(LootItem.lootTableItem(Items.PLENTY_POTTERY_SHERD))
 						.add(LootItem.lootTableItem(Items.IRON_AXE))
 						.add(LootItem.lootTableItem(Items.EMERALD).setWeight(2))
 						.add(LootItem.lootTableItem(Items.WHEAT).setWeight(2))

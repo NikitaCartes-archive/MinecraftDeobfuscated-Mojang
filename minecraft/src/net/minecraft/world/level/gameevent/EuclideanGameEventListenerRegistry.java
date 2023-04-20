@@ -16,9 +16,13 @@ public class EuclideanGameEventListenerRegistry implements GameEventListenerRegi
 	private final List<GameEventListener> listenersToAdd = Lists.<GameEventListener>newArrayList();
 	private boolean processing;
 	private final ServerLevel level;
+	private final int sectionY;
+	private final EuclideanGameEventListenerRegistry.OnEmptyAction onEmptyAction;
 
-	public EuclideanGameEventListenerRegistry(ServerLevel serverLevel) {
+	public EuclideanGameEventListenerRegistry(ServerLevel serverLevel, int i, EuclideanGameEventListenerRegistry.OnEmptyAction onEmptyAction) {
 		this.level = serverLevel;
+		this.sectionY = i;
+		this.onEmptyAction = onEmptyAction;
 	}
 
 	@Override
@@ -43,6 +47,10 @@ public class EuclideanGameEventListenerRegistry implements GameEventListenerRegi
 			this.listenersToRemove.add(gameEventListener);
 		} else {
 			this.listeners.remove(gameEventListener);
+		}
+
+		if (this.listeners.isEmpty()) {
+			this.onEmptyAction.apply(this.sectionY);
 		}
 	}
 
@@ -92,5 +100,10 @@ public class EuclideanGameEventListenerRegistry implements GameEventListenerRegi
 			int i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius();
 			return d > (double)i ? Optional.empty() : optional;
 		}
+	}
+
+	@FunctionalInterface
+	public interface OnEmptyAction {
+		void apply(int i);
 	}
 }

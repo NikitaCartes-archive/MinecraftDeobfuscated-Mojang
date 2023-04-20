@@ -1,12 +1,10 @@
 package net.minecraft.client.gui.screens.packs;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -35,11 +33,11 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 	}
 
 	@Override
-	protected void renderHeader(PoseStack poseStack, int i, int j) {
+	protected void renderHeader(GuiGraphics guiGraphics, int i, int j) {
 		Component component = Component.empty().append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
-		this.minecraft
-			.font
-			.draw(poseStack, component, (float)(i + this.width / 2 - this.minecraft.font.width(component) / 2), (float)Math.min(this.y0 + 3, j), 16777215);
+		guiGraphics.drawString(
+			this.minecraft.font, component, i + this.width / 2 - this.minecraft.font.width(component) / 2, Math.min(this.y0 + 3, j), 16777215, false
+		);
 	}
 
 	@Override
@@ -126,19 +124,17 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			PackCompatibility packCompatibility = this.pack.getCompatibility();
 			if (!packCompatibility.isCompatible()) {
-				GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
+				guiGraphics.fill(k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
 			}
 
-			RenderSystem.setShaderTexture(0, this.pack.getIconTexture());
-			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
+			guiGraphics.blit(this.pack.getIconTexture(), k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
 			MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
 			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get() || bl || this.parent.getSelected() == this && this.parent.isFocused())) {
-				RenderSystem.setShaderTexture(0, TransferableSelectionList.ICON_OVERLAY_LOCATION);
-				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
+				guiGraphics.fill(k, j, k + 32, j + 32, -1601138544);
 				int p = n - k;
 				int q = o - j;
 				if (!this.pack.getCompatibility().isCompatible()) {
@@ -148,39 +144,39 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 
 				if (this.pack.canSelect()) {
 					if (p < 32) {
-						GuiComponent.blit(poseStack, k, j, 0.0F, 32.0F, 32, 32, 256, 256);
+						guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, 32.0F, 32, 32, 256, 256);
 					} else {
-						GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 256, 256);
+						guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, 0.0F, 32, 32, 256, 256);
 					}
 				} else {
 					if (this.pack.canUnselect()) {
 						if (p < 16) {
-							GuiComponent.blit(poseStack, k, j, 32.0F, 32.0F, 32, 32, 256, 256);
+							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 32.0F, 32.0F, 32, 32, 256, 256);
 						} else {
-							GuiComponent.blit(poseStack, k, j, 32.0F, 0.0F, 32, 32, 256, 256);
+							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 32.0F, 0.0F, 32, 32, 256, 256);
 						}
 					}
 
 					if (this.pack.canMoveUp()) {
 						if (p < 32 && p > 16 && q < 16) {
-							GuiComponent.blit(poseStack, k, j, 96.0F, 32.0F, 32, 32, 256, 256);
+							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, 32.0F, 32, 32, 256, 256);
 						} else {
-							GuiComponent.blit(poseStack, k, j, 96.0F, 0.0F, 32, 32, 256, 256);
+							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, 0.0F, 32, 32, 256, 256);
 						}
 					}
 
 					if (this.pack.canMoveDown()) {
 						if (p < 32 && p > 16 && q > 16) {
-							GuiComponent.blit(poseStack, k, j, 64.0F, 32.0F, 32, 32, 256, 256);
+							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, 32.0F, 32, 32, 256, 256);
 						} else {
-							GuiComponent.blit(poseStack, k, j, 64.0F, 0.0F, 32, 32, 256, 256);
+							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, 0.0F, 32, 32, 256, 256);
 						}
 					}
 				}
 			}
 
-			this.minecraft.font.drawShadow(poseStack, formattedCharSequence, (float)(k + 32 + 2), (float)(j + 1), 16777215);
-			multiLineLabel.renderLeftAligned(poseStack, k + 32 + 2, j + 12, 10, 8421504);
+			guiGraphics.drawString(this.minecraft.font, formattedCharSequence, k + 32 + 2, j + 1, 16777215);
+			multiLineLabel.renderLeftAligned(guiGraphics, k + 32 + 2, j + 12, 10, 8421504);
 		}
 
 		public String getPackId() {

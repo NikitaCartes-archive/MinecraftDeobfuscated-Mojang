@@ -1,13 +1,13 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.inventory.RecipeBookMenu;
@@ -42,17 +42,16 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 	}
 
 	@Override
-	public void renderWidget(PoseStack poseStack, int i, int j, float f) {
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.animationTime > 0.0F) {
 			float g = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float) Math.PI));
-			poseStack.pushPose();
-			poseStack.translate((float)(this.getX() + 8), (float)(this.getY() + 12), 0.0F);
-			poseStack.scale(1.0F, g, 1.0F);
-			poseStack.translate((float)(-(this.getX() + 8)), (float)(-(this.getY() + 12)), 0.0F);
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate((float)(this.getX() + 8), (float)(this.getY() + 12), 0.0F);
+			guiGraphics.pose().scale(1.0F, g, 1.0F);
+			guiGraphics.pose().translate((float)(-(this.getX() + 8)), (float)(-(this.getY() + 12)), 0.0F);
 		}
 
 		Minecraft minecraft = Minecraft.getInstance();
-		RenderSystem.setShaderTexture(0, this.resourceLocation);
 		RenderSystem.disableDepthTest();
 		int k = this.xTexStart;
 		int l = this.yTexStart;
@@ -69,23 +68,23 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 			m -= 2;
 		}
 
-		blit(poseStack, m, this.getY(), k, l, this.width, this.height);
+		guiGraphics.blit(this.resourceLocation, m, this.getY(), k, l, this.width, this.height);
 		RenderSystem.enableDepthTest();
-		this.renderIcon(poseStack, minecraft.getItemRenderer());
+		this.renderIcon(guiGraphics, minecraft.getItemRenderer());
 		if (this.animationTime > 0.0F) {
-			poseStack.popPose();
+			guiGraphics.pose().popPose();
 			this.animationTime -= f;
 		}
 	}
 
-	private void renderIcon(PoseStack poseStack, ItemRenderer itemRenderer) {
+	private void renderIcon(GuiGraphics guiGraphics, ItemRenderer itemRenderer) {
 		List<ItemStack> list = this.category.getIconItems();
 		int i = this.isStateTriggered ? -2 : 0;
 		if (list.size() == 1) {
-			itemRenderer.renderAndDecorateFakeItem(poseStack, (ItemStack)list.get(0), this.getX() + 9 + i, this.getY() + 5);
+			guiGraphics.renderFakeItem((ItemStack)list.get(0), this.getX() + 9 + i, this.getY() + 5);
 		} else if (list.size() == 2) {
-			itemRenderer.renderAndDecorateFakeItem(poseStack, (ItemStack)list.get(0), this.getX() + 3 + i, this.getY() + 5);
-			itemRenderer.renderAndDecorateFakeItem(poseStack, (ItemStack)list.get(1), this.getX() + 14 + i, this.getY() + 5);
+			guiGraphics.renderFakeItem((ItemStack)list.get(0), this.getX() + 3 + i, this.getY() + 5);
+			guiGraphics.renderFakeItem((ItemStack)list.get(1), this.getX() + 14 + i, this.getY() + 5);
 		}
 	}
 

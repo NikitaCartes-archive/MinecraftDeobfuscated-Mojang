@@ -9,6 +9,7 @@ public final class BlockTags {
 	public static final TagKey<Block> PLANKS = create("planks");
 	public static final TagKey<Block> STONE_BRICKS = create("stone_bricks");
 	public static final TagKey<Block> WOODEN_BUTTONS = create("wooden_buttons");
+	public static final TagKey<Block> STONE_BUTTONS = create("stone_buttons");
 	public static final TagKey<Block> BUTTONS = create("buttons");
 	public static final TagKey<Block> WOOL_CARPETS = create("wool_carpets");
 	public static final TagKey<Block> WOODEN_DOORS = create("wooden_doors");
@@ -173,6 +174,7 @@ public final class BlockTags {
 	public static final TagKey<Block> REPLACEABLE = create("replaceable");
 	public static final TagKey<Block> ENCHANTMENT_POWER_PROVIDER = create("enchantment_power_provider");
 	public static final TagKey<Block> ENCHANTMENT_POWER_TRANSMITTER = create("enchantment_power_transmitter");
+	public static final TagKey<Block> MAINTAINS_FARMLAND = create("maintains_farmland");
 
 	private BlockTags() {
 	}

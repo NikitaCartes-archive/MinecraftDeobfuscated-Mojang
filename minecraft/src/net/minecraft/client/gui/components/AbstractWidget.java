@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -10,7 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -31,7 +30,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractWidget extends GuiComponent implements Renderable, GuiEventListener, LayoutElement, NarratableEntry {
+public abstract class AbstractWidget implements Renderable, GuiEventListener, LayoutElement, NarratableEntry {
 	public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
 	public static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");
 	private static final double PERIOD_PER_SCROLLED_PIXEL = 0.5;
@@ -67,10 +66,10 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.visible) {
 			this.isHovered = i >= this.getX() && j >= this.getY() && i < this.getX() + this.width && j < this.getY() + this.height;
-			this.renderWidget(poseStack, i, j, f);
+			this.renderWidget(guiGraphics, i, j, f);
 			this.updateTooltip();
 		}
 	}
@@ -122,9 +121,9 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 		return Component.translatable("gui.narrate.button", component);
 	}
 
-	public abstract void renderWidget(PoseStack poseStack, int i, int j, float f);
+	public abstract void renderWidget(GuiGraphics guiGraphics, int i, int j, float f);
 
-	protected static void renderScrollingString(PoseStack poseStack, Font font, Component component, int i, int j, int k, int l, int m) {
+	protected static void renderScrollingString(GuiGraphics guiGraphics, Font font, Component component, int i, int j, int k, int l, int m) {
 		int n = font.width(component);
 		int o = (j + l - 9) / 2 + 1;
 		int p = k - i;
@@ -134,22 +133,21 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 			double e = Math.max((double)q * 0.5, 3.0);
 			double f = Math.sin((Math.PI / 2) * Math.cos((Math.PI * 2) * d / e)) / 2.0 + 0.5;
 			double g = Mth.lerp(f, 0.0, (double)q);
-			enableScissor(i, j, k, l);
-			drawString(poseStack, font, component, i - (int)g, o, m);
-			disableScissor();
+			guiGraphics.enableScissor(i, j, k, l);
+			guiGraphics.drawString(font, component, i - (int)g, o, m);
+			guiGraphics.disableScissor();
 		} else {
-			drawCenteredString(poseStack, font, component, (i + k) / 2, o, m);
+			guiGraphics.drawCenteredString(font, component, (i + k) / 2, o, m);
 		}
 	}
 
-	protected void renderScrollingString(PoseStack poseStack, Font font, int i, int j) {
+	protected void renderScrollingString(GuiGraphics guiGraphics, Font font, int i, int j) {
 		int k = this.getX() + i;
 		int l = this.getX() + this.getWidth() - i;
-		renderScrollingString(poseStack, font, this.getMessage(), k, this.getY(), l, this.getY() + this.getHeight(), j);
+		renderScrollingString(guiGraphics, font, this.getMessage(), k, this.getY(), l, this.getY() + this.getHeight(), j);
 	}
 
-	public void renderTexture(PoseStack poseStack, ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
-		RenderSystem.setShaderTexture(0, resourceLocation);
+	public void renderTexture(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
 		int r = l;
 		if (!this.isActive()) {
 			r = l + m * 2;
@@ -158,7 +156,7 @@ public abstract class AbstractWidget extends GuiComponent implements Renderable,
 		}
 
 		RenderSystem.enableDepthTest();
-		blit(poseStack, i, j, (float)k, (float)r, n, o, p, q);
+		guiGraphics.blit(resourceLocation, i, j, (float)k, (float)r, n, o, p, q);
 	}
 
 	public void onClick(double d, double e) {

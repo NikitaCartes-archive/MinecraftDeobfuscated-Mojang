@@ -1,9 +1,8 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -38,24 +37,23 @@ public abstract class ItemCombinerScreen<T extends ItemCombinerMenu> extends Abs
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		super.render(poseStack, i, j, f);
-		this.renderFg(poseStack, i, j, f);
-		this.renderTooltip(poseStack, i, j);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
+		this.renderFg(guiGraphics, i, j, f);
+		this.renderTooltip(guiGraphics, i, j);
 	}
 
-	protected void renderFg(PoseStack poseStack, int i, int j, float f) {
+	protected void renderFg(GuiGraphics guiGraphics, int i, int j, float f) {
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		RenderSystem.setShaderTexture(0, this.menuResource);
-		blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
-		this.renderErrorIcon(poseStack, this.leftPos, this.topPos);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
+		guiGraphics.blit(this.menuResource, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+		this.renderErrorIcon(guiGraphics, this.leftPos, this.topPos);
 	}
 
-	protected abstract void renderErrorIcon(PoseStack poseStack, int i, int j);
+	protected abstract void renderErrorIcon(GuiGraphics guiGraphics, int i, int j);
 
 	@Override
 	public void dataChanged(AbstractContainerMenu abstractContainerMenu, int i, int j) {

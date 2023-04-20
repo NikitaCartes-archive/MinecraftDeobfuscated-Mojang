@@ -1,8 +1,8 @@
 package net.minecraft.client.gui.components.toasts;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +16,7 @@ public interface Toast {
 	Object NO_TOKEN = new Object();
 	int SLOT_HEIGHT = 32;
 
-	Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l);
+	Toast.Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long l);
 
 	default Object getToken() {
 		return NO_TOKEN;

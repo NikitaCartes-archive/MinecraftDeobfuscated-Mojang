@@ -1,8 +1,6 @@
 package net.minecraft.client.gui.screens.worldselection;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import java.util.ArrayList;
@@ -11,7 +9,7 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
@@ -104,13 +102,22 @@ public class ExperimentsScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
-		RenderSystem.setShaderColor(0.125F, 0.125F, 0.125F, 1.0F);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.setColor(0.125F, 0.125F, 0.125F, 1.0F);
 		int k = 32;
-		blit(poseStack, 0, this.layout.getHeaderHeight(), 0.0F, 0.0F, this.width, this.height - this.layout.getHeaderHeight() - this.layout.getFooterHeight(), 32, 32);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		super.render(poseStack, i, j, f);
+		guiGraphics.blit(
+			BACKGROUND_LOCATION,
+			0,
+			this.layout.getHeaderHeight(),
+			0.0F,
+			0.0F,
+			this.width,
+			this.height - this.layout.getHeaderHeight() - this.layout.getFooterHeight(),
+			32,
+			32
+		);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+		super.render(guiGraphics, i, j, f);
 	}
 }

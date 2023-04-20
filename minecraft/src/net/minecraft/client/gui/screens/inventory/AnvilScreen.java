@@ -1,9 +1,9 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
@@ -81,8 +81,8 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	}
 
 	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		super.renderLabels(poseStack, i, j);
+	protected void renderLabels(GuiGraphics guiGraphics, int i, int j) {
+		super.renderLabels(guiGraphics, i, j);
 		int k = this.menu.getCost();
 		if (k > 0) {
 			int l = 8453920;
@@ -102,27 +102,27 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 			if (component != null) {
 				int m = this.imageWidth - 8 - this.font.width(component) - 2;
 				int n = 69;
-				fill(poseStack, m - 2, 67, this.imageWidth - 8, 79, 1325400064);
-				this.font.drawShadow(poseStack, component, (float)m, 69.0F, l);
+				guiGraphics.fill(m - 2, 67, this.imageWidth - 8, 79, 1325400064);
+				guiGraphics.drawString(this.font, component, m, 69, l);
 			}
 		}
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
-		super.renderBg(poseStack, f, i, j);
-		blit(poseStack, this.leftPos + 59, this.topPos + 20, 0, this.imageHeight + (this.menu.getSlot(0).hasItem() ? 0 : 16), 110, 16);
+	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
+		super.renderBg(guiGraphics, f, i, j);
+		guiGraphics.blit(ANVIL_LOCATION, this.leftPos + 59, this.topPos + 20, 0, this.imageHeight + (this.menu.getSlot(0).hasItem() ? 0 : 16), 110, 16);
 	}
 
 	@Override
-	public void renderFg(PoseStack poseStack, int i, int j, float f) {
-		this.name.render(poseStack, i, j, f);
+	public void renderFg(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.name.render(guiGraphics, i, j, f);
 	}
 
 	@Override
-	protected void renderErrorIcon(PoseStack poseStack, int i, int j) {
+	protected void renderErrorIcon(GuiGraphics guiGraphics, int i, int j) {
 		if ((this.menu.getSlot(0).hasItem() || this.menu.getSlot(1).hasItem()) && !this.menu.getSlot(this.menu.getResultSlot()).hasItem()) {
-			blit(poseStack, i + 99, j + 45, this.imageWidth, 0, 28, 21);
+			guiGraphics.blit(ANVIL_LOCATION, i + 99, j + 45, this.imageWidth, 0, 28, 21);
 		}
 	}
 

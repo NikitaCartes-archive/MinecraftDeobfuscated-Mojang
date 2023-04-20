@@ -1186,7 +1186,7 @@ public class BlockModelGenerators {
 		this.blockStateOutput.accept(createAxisAlignedPillarBlock(block, resourceLocation));
 	}
 
-	private void createAxisAlignedPillarBlock(Block block, TexturedModel.Provider provider) {
+	public void createAxisAlignedPillarBlock(Block block, TexturedModel.Provider provider) {
 		ResourceLocation resourceLocation = provider.create(block, this.modelOutput);
 		this.blockStateOutput.accept(createAxisAlignedPillarBlock(block, resourceLocation));
 	}
@@ -1237,11 +1237,11 @@ public class BlockModelGenerators {
 			);
 	}
 
-	private void createTrivialCube(Block block) {
+	public void createTrivialCube(Block block) {
 		this.createTrivialBlock(block, TexturedModel.CUBE);
 	}
 
-	private void createTrivialBlock(Block block, TexturedModel.Provider provider) {
+	public void createTrivialBlock(Block block, TexturedModel.Provider provider) {
 		this.blockStateOutput.accept(createSimpleBlock(block, provider.create(block, this.modelOutput)));
 	}
 
@@ -2304,6 +2304,18 @@ public class BlockModelGenerators {
 
 	private void createCraftingTableLike(Block block, Block block2, BiFunction<Block, Block, TextureMapping> biFunction) {
 		TextureMapping textureMapping = (TextureMapping)biFunction.apply(block, block2);
+		this.blockStateOutput.accept(createSimpleBlock(block, ModelTemplates.CUBE.create(block, textureMapping, this.modelOutput)));
+	}
+
+	public void createGenericCube(Block block) {
+		TextureMapping textureMapping = new TextureMapping()
+			.put(TextureSlot.PARTICLE, TextureMapping.getBlockTexture(block, "_particle"))
+			.put(TextureSlot.DOWN, TextureMapping.getBlockTexture(block, "_down"))
+			.put(TextureSlot.UP, TextureMapping.getBlockTexture(block, "_up"))
+			.put(TextureSlot.NORTH, TextureMapping.getBlockTexture(block, "_north"))
+			.put(TextureSlot.SOUTH, TextureMapping.getBlockTexture(block, "_south"))
+			.put(TextureSlot.EAST, TextureMapping.getBlockTexture(block, "_east"))
+			.put(TextureSlot.WEST, TextureMapping.getBlockTexture(block, "_west"));
 		this.blockStateOutput.accept(createSimpleBlock(block, ModelTemplates.CUBE.create(block, textureMapping, this.modelOutput)));
 	}
 

@@ -1,7 +1,5 @@
 package net.minecraft.client.gui.screens.social;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
@@ -14,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -185,35 +184,34 @@ public class SocialInteractionsScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(PoseStack poseStack) {
+	public void renderBackground(GuiGraphics guiGraphics) {
 		int i = this.marginX() + 3;
-		super.renderBackground(poseStack);
-		RenderSystem.setShaderTexture(0, SOCIAL_INTERACTIONS_LOCATION);
-		blitNineSliced(poseStack, i, 64, 236, this.windowHeight() + 16, 8, 236, 34, 1, 1);
-		blit(poseStack, i + 10, 76, 243, 1, 12, 12);
+		super.renderBackground(guiGraphics);
+		guiGraphics.blitNineSliced(SOCIAL_INTERACTIONS_LOCATION, i, 64, 236, this.windowHeight() + 16, 8, 236, 34, 1, 1);
+		guiGraphics.blit(SOCIAL_INTERACTIONS_LOCATION, i + 10, 76, 243, 1, 12, 12);
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.updateServerLabel(this.minecraft);
-		this.renderBackground(poseStack);
+		this.renderBackground(guiGraphics);
 		if (this.serverLabel != null) {
-			drawString(poseStack, this.minecraft.font, this.serverLabel, this.marginX() + 8, 35, -1);
+			guiGraphics.drawString(this.minecraft.font, this.serverLabel, this.marginX() + 8, 35, -1);
 		}
 
 		if (!this.socialInteractionsPlayerList.isEmpty()) {
-			this.socialInteractionsPlayerList.render(poseStack, i, j, f);
+			this.socialInteractionsPlayerList.render(guiGraphics, i, j, f);
 		} else if (!this.searchBox.getValue().isEmpty()) {
-			drawCenteredString(poseStack, this.minecraft.font, EMPTY_SEARCH, this.width / 2, (72 + this.listEnd()) / 2, -1);
+			guiGraphics.drawCenteredString(this.minecraft.font, EMPTY_SEARCH, this.width / 2, (72 + this.listEnd()) / 2, -1);
 		} else if (this.page == SocialInteractionsScreen.Page.HIDDEN) {
-			drawCenteredString(poseStack, this.minecraft.font, EMPTY_HIDDEN, this.width / 2, (72 + this.listEnd()) / 2, -1);
+			guiGraphics.drawCenteredString(this.minecraft.font, EMPTY_HIDDEN, this.width / 2, (72 + this.listEnd()) / 2, -1);
 		} else if (this.page == SocialInteractionsScreen.Page.BLOCKED) {
-			drawCenteredString(poseStack, this.minecraft.font, EMPTY_BLOCKED, this.width / 2, (72 + this.listEnd()) / 2, -1);
+			guiGraphics.drawCenteredString(this.minecraft.font, EMPTY_BLOCKED, this.width / 2, (72 + this.listEnd()) / 2, -1);
 		}
 
-		this.searchBox.render(poseStack, i, j, f);
+		this.searchBox.render(guiGraphics, i, j, f);
 		this.blockingHintButton.visible = this.page == SocialInteractionsScreen.Page.BLOCKED;
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

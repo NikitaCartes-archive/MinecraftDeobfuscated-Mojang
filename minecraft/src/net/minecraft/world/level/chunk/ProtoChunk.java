@@ -149,7 +149,7 @@ public class ProtoChunk extends ChunkAccess {
 
 				LevelChunkSection levelChunkSection = this.getSection(l);
 				BlockState blockState2 = levelChunkSection.setBlockState(i & 15, j & 15, k & 15, blockState);
-				if (this.status.isOrAfter(ChunkStatus.FEATURES)
+				if (this.status.isOrAfter(ChunkStatus.INITIALIZE_LIGHT)
 					&& blockState != blockState2
 					&& (
 						blockState.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos)

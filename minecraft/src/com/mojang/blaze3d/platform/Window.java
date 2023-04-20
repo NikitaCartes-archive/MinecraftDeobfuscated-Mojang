@@ -5,7 +5,8 @@ import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Locale.Category;
@@ -15,6 +16,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.SilentInitException;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.Callbacks;
@@ -23,7 +25,6 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWImage.Buffer;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -133,77 +134,34 @@ public final class Window implements AutoCloseable {
 		}
 	}
 
-	public void setIcon(IoSupplier<InputStream> ioSupplier, IoSupplier<InputStream> ioSupplier2) {
+	public void setIcon(PackResources packResources, IconSet iconSet) throws IOException {
 		RenderSystem.assertInInitPhase();
+		if (Minecraft.ON_OSX) {
+			MacosUtil.loadIcon(iconSet.getMacIcon(packResources));
+		} else {
+			List<IoSupplier<InputStream>> list = iconSet.getStandardIcons(packResources);
+			List<ByteBuffer> list2 = new ArrayList(list.size());
 
-		try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-			IntBuffer intBuffer = memoryStack.mallocInt(1);
-			IntBuffer intBuffer2 = memoryStack.mallocInt(1);
-			IntBuffer intBuffer3 = memoryStack.mallocInt(1);
-			Buffer buffer = GLFWImage.malloc(2, memoryStack);
-			ByteBuffer byteBuffer = this.readIconPixels(ioSupplier, intBuffer, intBuffer2, intBuffer3);
-			if (byteBuffer == null) {
-				throw new IllegalStateException("Could not load icon: " + STBImage.stbi_failure_reason());
-			}
+			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
+				Buffer buffer = GLFWImage.malloc(list.size(), memoryStack);
 
-			buffer.position(0);
-			buffer.width(intBuffer.get(0));
-			buffer.height(intBuffer2.get(0));
-			buffer.pixels(byteBuffer);
-			ByteBuffer byteBuffer2 = this.readIconPixels(ioSupplier2, intBuffer, intBuffer2, intBuffer3);
-			if (byteBuffer2 == null) {
-				STBImage.stbi_image_free(byteBuffer);
-				throw new IllegalStateException("Could not load icon: " + STBImage.stbi_failure_reason());
-			}
-
-			buffer.position(1);
-			buffer.width(intBuffer.get(0));
-			buffer.height(intBuffer2.get(0));
-			buffer.pixels(byteBuffer2);
-			buffer.position(0);
-			GLFW.glfwSetWindowIcon(this.window, buffer);
-			STBImage.stbi_image_free(byteBuffer);
-			STBImage.stbi_image_free(byteBuffer2);
-		} catch (IOException var12) {
-			LOGGER.error("Couldn't set icon", (Throwable)var12);
-		}
-	}
-
-	@Nullable
-	private ByteBuffer readIconPixels(IoSupplier<InputStream> ioSupplier, IntBuffer intBuffer, IntBuffer intBuffer2, IntBuffer intBuffer3) throws IOException {
-		RenderSystem.assertInInitPhase();
-		ByteBuffer byteBuffer = null;
-
-		ByteBuffer var7;
-		try {
-			InputStream inputStream = ioSupplier.get();
-
-			try {
-				byteBuffer = TextureUtil.readResource(inputStream);
-				byteBuffer.rewind();
-				var7 = STBImage.stbi_load_from_memory(byteBuffer, intBuffer, intBuffer2, intBuffer3, 0);
-			} catch (Throwable var14) {
-				if (inputStream != null) {
-					try {
-						inputStream.close();
-					} catch (Throwable var13) {
-						var14.addSuppressed(var13);
+				for (int i = 0; i < list.size(); i++) {
+					try (NativeImage nativeImage = NativeImage.read((InputStream)((IoSupplier)list.get(i)).get())) {
+						ByteBuffer byteBuffer = MemoryUtil.memAlloc(nativeImage.getWidth() * nativeImage.getHeight() * 4);
+						list2.add(byteBuffer);
+						byteBuffer.asIntBuffer().put(nativeImage.getPixelsRGBA());
+						buffer.position(i);
+						buffer.width(nativeImage.getWidth());
+						buffer.height(nativeImage.getHeight());
+						buffer.pixels(byteBuffer);
 					}
 				}
 
-				throw var14;
-			}
-
-			if (inputStream != null) {
-				inputStream.close();
-			}
-		} finally {
-			if (byteBuffer != null) {
-				MemoryUtil.memFree(byteBuffer);
+				GLFW.glfwSetWindowIcon(this.window, buffer.position(0));
+			} finally {
+				list2.forEach(MemoryUtil::memFree);
 			}
 		}
-
-		return var7;
 	}
 
 	public void setErrorSection(String string) {

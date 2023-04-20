@@ -81,8 +81,8 @@ public class SnifferEggBlock extends Block {
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		boolean bl2 = hatchBoost(level, blockPos);
-		if (!level.isClientSide()) {
-			level.levelEvent(3009, blockPos, bl2 ? 1 : 0);
+		if (!level.isClientSide() && bl2) {
+			level.levelEvent(3009, blockPos, 0);
 		}
 
 		int i = bl2 ? 12000 : 24000;

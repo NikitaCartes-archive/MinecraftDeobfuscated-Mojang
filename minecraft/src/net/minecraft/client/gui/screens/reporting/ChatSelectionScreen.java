@@ -3,7 +3,6 @@ package net.minecraft.client.gui.screens.reporting;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.report.AbuseReportLimits;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -14,7 +13,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -94,17 +93,17 @@ public class ChatSelectionScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.chatSelectionList.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 16, 16777215);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.chatSelectionList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 16777215);
 		AbuseReportLimits abuseReportLimits = this.reportingContext.sender().reportLimits();
 		int k = this.report.reportedMessages().size();
 		int l = abuseReportLimits.maxReportedMessageCount();
 		Component component = Component.translatable("gui.chatSelection.selected", k, l);
-		drawCenteredString(poseStack, this.font, component, this.width / 2, 16 + 9 * 3 / 2, 10526880);
-		this.contextInfoLabel.renderCentered(poseStack, this.width / 2, this.chatSelectionList.getFooterTop());
-		super.render(poseStack, i, j, f);
+		guiGraphics.drawCenteredString(this.font, component, this.width / 2, 16 + 9 * 3 / 2, 10526880);
+		this.contextInfoLabel.renderCentered(guiGraphics, this.width / 2, this.chatSelectionList.getFooterTop());
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override
@@ -183,15 +182,15 @@ public class ChatSelectionScreen extends Screen {
 		}
 
 		@Override
-		protected void renderItem(PoseStack poseStack, int i, int j, float f, int k, int l, int m, int n, int o) {
+		protected void renderItem(GuiGraphics guiGraphics, int i, int j, float f, int k, int l, int m, int n, int o) {
 			ChatSelectionScreen.ChatSelectionList.Entry entry = this.getEntry(k);
 			if (this.shouldHighlightEntry(entry)) {
 				boolean bl = this.getSelected() == entry;
 				int p = this.isFocused() && bl ? -1 : -8355712;
-				this.renderSelection(poseStack, m, n, o, p, -16777216);
+				this.renderSelection(guiGraphics, m, n, o, p, -16777216);
 			}
 
-			entry.render(poseStack, k, m, l, n, o, i, j, this.getHovered() == entry, f);
+			entry.render(guiGraphics, k, m, l, n, o, i, j, this.getHovered() == entry, f);
 		}
 
 		private boolean shouldHighlightEntry(ChatSelectionScreen.ChatSelectionList.Entry entry) {
@@ -238,13 +237,13 @@ public class ChatSelectionScreen extends Screen {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				int p = j + m / 2;
 				int q = k + l - 8;
 				int r = ChatSelectionScreen.this.font.width(this.text);
 				int s = (k + q - r) / 2;
 				int t = p - 9 / 2;
-				GuiComponent.drawString(poseStack, ChatSelectionScreen.this.font, this.text, s, t, -6250336);
+				guiGraphics.drawString(ChatSelectionScreen.this.font, this.text, s, t, -6250336);
 			}
 
 			@Override
@@ -321,37 +320,36 @@ public class ChatSelectionScreen extends Screen {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				if (this.isSelected() && this.canReport) {
-					this.renderSelectedCheckmark(poseStack, j, k, m);
+					this.renderSelectedCheckmark(guiGraphics, j, k, m);
 				}
 
 				int p = k + this.getTextIndent();
 				int q = j + 1 + (m - 9) / 2;
-				GuiComponent.drawString(poseStack, ChatSelectionScreen.this.font, Language.getInstance().getVisualOrder(this.text), p, q, this.canReport ? -1 : -1593835521);
+				guiGraphics.drawString(ChatSelectionScreen.this.font, Language.getInstance().getVisualOrder(this.text), p, q, this.canReport ? -1 : -1593835521);
 				if (this.hoverText != null && bl) {
 					ChatSelectionScreen.this.setTooltipForNextRenderPass(this.hoverText);
 				}
 
 				int r = ChatSelectionScreen.this.font.width(this.text);
-				this.renderTag(poseStack, p + r + 4, j, m, n, o);
+				this.renderTag(guiGraphics, p + r + 4, j, m, n, o);
 			}
 
-			private void renderTag(PoseStack poseStack, int i, int j, int k, int l, int m) {
+			private void renderTag(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 				if (this.tagIcon != null) {
 					int n = j + (k - this.tagIcon.height) / 2;
-					this.tagIcon.draw(poseStack, i, n);
+					this.tagIcon.draw(guiGraphics, i, n);
 					if (this.tagHoverText != null && l >= i && l <= i + this.tagIcon.width && m >= n && m <= n + this.tagIcon.height) {
 						ChatSelectionScreen.this.setTooltipForNextRenderPass(this.tagHoverText);
 					}
 				}
 			}
 
-			private void renderSelectedCheckmark(PoseStack poseStack, int i, int j, int k) {
+			private void renderSelectedCheckmark(GuiGraphics guiGraphics, int i, int j, int k) {
 				int m = i + (k - 8) / 2;
-				RenderSystem.setShaderTexture(0, CHECKMARK_TEXTURE);
 				RenderSystem.enableBlend();
-				GuiComponent.blit(poseStack, j, m, 0.0F, 0.0F, 9, 8, 9, 8);
+				guiGraphics.blit(CHECKMARK_TEXTURE, j, m, 0.0F, 0.0F, 9, 8, 9, 8);
 				RenderSystem.disableBlend();
 			}
 
@@ -424,24 +422,19 @@ public class ChatSelectionScreen extends Screen {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				int p = k - 12 - 4;
 				int q = j + (m - 12) / 2;
-				this.renderFace(poseStack, p, q, this.skin);
+				PlayerFaceRenderer.draw(guiGraphics, this.skin, p, q, 12);
 				int r = j + 1 + (m - 9) / 2;
-				GuiComponent.drawString(poseStack, ChatSelectionScreen.this.font, this.heading, k, r, this.canReport ? -1 : -1593835521);
-			}
-
-			private void renderFace(PoseStack poseStack, int i, int j, ResourceLocation resourceLocation) {
-				RenderSystem.setShaderTexture(0, resourceLocation);
-				PlayerFaceRenderer.draw(poseStack, i, j, 12);
+				guiGraphics.drawString(ChatSelectionScreen.this.font, this.heading, k, r, this.canReport ? -1 : -1593835521);
 			}
 		}
 
 		@Environment(EnvType.CLIENT)
 		public class PaddingEntry extends ChatSelectionScreen.ChatSelectionList.Entry {
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			}
 		}
 	}

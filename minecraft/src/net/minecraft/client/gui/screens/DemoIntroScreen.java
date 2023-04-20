@@ -1,11 +1,10 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
@@ -50,22 +49,21 @@ public class DemoIntroScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(PoseStack poseStack) {
-		super.renderBackground(poseStack);
-		RenderSystem.setShaderTexture(0, DEMO_BACKGROUND_LOCATION);
+	public void renderBackground(GuiGraphics guiGraphics) {
+		super.renderBackground(guiGraphics);
 		int i = (this.width - 248) / 2;
 		int j = (this.height - 166) / 2;
-		blit(poseStack, i, j, 0, 0, 248, 166);
+		guiGraphics.blit(DEMO_BACKGROUND_LOCATION, i, j, 0, 0, 248, 166);
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
 		int k = (this.width - 248) / 2 + 10;
 		int l = (this.height - 166) / 2 + 8;
-		this.font.draw(poseStack, this.title, (float)k, (float)l, 2039583);
-		l = this.movementMessage.renderLeftAlignedNoShadow(poseStack, k, l + 12, 12, 5197647);
-		this.durationMessage.renderLeftAlignedNoShadow(poseStack, k, l + 20, 9, 2039583);
-		super.render(poseStack, i, j, f);
+		guiGraphics.drawString(this.font, this.title, k, l, 2039583, false);
+		l = this.movementMessage.renderLeftAlignedNoShadow(guiGraphics, k, l + 12, 12, 5197647);
+		this.durationMessage.renderLeftAlignedNoShadow(guiGraphics, k, l + 20, 9, 2039583);
+		super.render(guiGraphics, i, j, f);
 	}
 }

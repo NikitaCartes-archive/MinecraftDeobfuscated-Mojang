@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Monitor;
 import com.mojang.blaze3d.platform.VideoMode;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
@@ -15,6 +14,7 @@ import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.renderer.GpuWarnlistManager;
@@ -190,7 +190,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.basicListRender(poseStack, this.list, i, j, f);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.basicListRender(guiGraphics, this.list, i, j, f);
 	}
 }

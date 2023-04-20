@@ -2,7 +2,6 @@ package net.minecraft.world.level.chunk;
 
 import java.util.function.Predicate;
 import net.minecraft.core.Holder;
-import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.biome.Biome;
@@ -19,28 +18,21 @@ public class LevelChunkSection {
 	public static final int SECTION_HEIGHT = 16;
 	public static final int SECTION_SIZE = 4096;
 	public static final int BIOME_CONTAINER_BITS = 2;
-	private final int bottomBlockY;
 	private short nonEmptyBlockCount;
 	private short tickingBlockCount;
 	private short tickingFluidCount;
 	private final PalettedContainer<BlockState> states;
 	private PalettedContainerRO<Holder<Biome>> biomes;
 
-	public LevelChunkSection(int i, PalettedContainer<BlockState> palettedContainer, PalettedContainerRO<Holder<Biome>> palettedContainerRO) {
-		this.bottomBlockY = getBottomBlockY(i);
+	public LevelChunkSection(PalettedContainer<BlockState> palettedContainer, PalettedContainerRO<Holder<Biome>> palettedContainerRO) {
 		this.states = palettedContainer;
 		this.biomes = palettedContainerRO;
 		this.recalcBlockCounts();
 	}
 
-	public LevelChunkSection(int i, Registry<Biome> registry) {
-		this.bottomBlockY = getBottomBlockY(i);
+	public LevelChunkSection(Registry<Biome> registry) {
 		this.states = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
 		this.biomes = new PalettedContainer<>(registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
-	}
-
-	public static int getBottomBlockY(int i) {
-		return i << 4;
 	}
 
 	public BlockState getBlockState(int i, int j, int k) {
@@ -114,10 +106,6 @@ public class LevelChunkSection {
 		return this.tickingFluidCount > 0;
 	}
 
-	public int bottomBlockY() {
-		return this.bottomBlockY;
-	}
-
 	public void recalcBlockCounts() {
 		class BlockCounter implements PalettedContainer.CountConsumer<BlockState> {
 			public int nonEmptyBlockCount;
@@ -189,15 +177,14 @@ public class LevelChunkSection {
 		return this.biomes.get(i, j, k);
 	}
 
-	public void fillBiomesFromNoise(BiomeResolver biomeResolver, Climate.Sampler sampler, int i, int j) {
+	public void fillBiomesFromNoise(BiomeResolver biomeResolver, Climate.Sampler sampler, int i, int j, int k) {
 		PalettedContainer<Holder<Biome>> palettedContainer = this.biomes.recreate();
-		int k = QuartPos.fromBlock(this.bottomBlockY());
 		int l = 4;
 
 		for (int m = 0; m < 4; m++) {
 			for (int n = 0; n < 4; n++) {
 				for (int o = 0; o < 4; o++) {
-					palettedContainer.getAndSetUnchecked(m, n, o, biomeResolver.getNoiseBiome(i + m, k + n, j + o, sampler));
+					palettedContainer.getAndSetUnchecked(m, n, o, biomeResolver.getNoiseBiome(i + m, j + n, k + o, sampler));
 				}
 			}
 		}

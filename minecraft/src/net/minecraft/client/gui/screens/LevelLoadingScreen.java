@@ -1,12 +1,12 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -28,12 +28,11 @@ public class LevelLoadingScreen extends Screen {
 		object2IntOpenHashMap.put(ChunkStatus.BIOMES, 8434258);
 		object2IntOpenHashMap.put(ChunkStatus.NOISE, 13750737);
 		object2IntOpenHashMap.put(ChunkStatus.SURFACE, 7497737);
-		object2IntOpenHashMap.put(ChunkStatus.CARVERS, 7169628);
-		object2IntOpenHashMap.put(ChunkStatus.LIQUID_CARVERS, 3159410);
+		object2IntOpenHashMap.put(ChunkStatus.CARVERS, 3159410);
 		object2IntOpenHashMap.put(ChunkStatus.FEATURES, 2213376);
-		object2IntOpenHashMap.put(ChunkStatus.LIGHT, 13421772);
+		object2IntOpenHashMap.put(ChunkStatus.INITIALIZE_LIGHT, 13421772);
+		object2IntOpenHashMap.put(ChunkStatus.LIGHT, 16769184);
 		object2IntOpenHashMap.put(ChunkStatus.SPAWN, 15884384);
-		object2IntOpenHashMap.put(ChunkStatus.HEIGHTMAPS, 15658734);
 		object2IntOpenHashMap.put(ChunkStatus.FULL, 16777215);
 	});
 
@@ -73,8 +72,8 @@ public class LevelLoadingScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
 		long l = Util.getMillis();
 		if (l - this.lastNarration > 2000L) {
 			this.lastNarration = l;
@@ -84,11 +83,11 @@ public class LevelLoadingScreen extends Screen {
 		int k = this.width / 2;
 		int m = this.height / 2;
 		int n = 30;
-		renderChunks(poseStack, this.progressListener, k, m + 30, 2, 0);
-		drawCenteredString(poseStack, this.font, this.getFormattedProgress(), k, m - 9 / 2 - 30, 16777215);
+		renderChunks(guiGraphics, this.progressListener, k, m + 30, 2, 0);
+		guiGraphics.drawCenteredString(this.font, this.getFormattedProgress(), k, m - 9 / 2 - 30, 16777215);
 	}
 
-	public static void renderChunks(PoseStack poseStack, StoringChunkProgressListener storingChunkProgressListener, int i, int j, int k, int l) {
+	public static void renderChunks(GuiGraphics guiGraphics, StoringChunkProgressListener storingChunkProgressListener, int i, int j, int k, int l) {
 		int m = k + l;
 		int n = storingChunkProgressListener.getFullDiameter();
 		int o = n * m - l;
@@ -99,10 +98,10 @@ public class LevelLoadingScreen extends Screen {
 		int t = o / 2 + 1;
 		int u = -16772609;
 		if (l != 0) {
-			fill(poseStack, i - t, j - t, i - t + 1, j + t, -16772609);
-			fill(poseStack, i + t - 1, j - t, i + t, j + t, -16772609);
-			fill(poseStack, i - t, j - t, i + t, j - t + 1, -16772609);
-			fill(poseStack, i - t, j + t - 1, i + t, j + t, -16772609);
+			guiGraphics.fill(i - t, j - t, i - t + 1, j + t, -16772609);
+			guiGraphics.fill(i + t - 1, j - t, i + t, j + t, -16772609);
+			guiGraphics.fill(i - t, j - t, i + t, j - t + 1, -16772609);
+			guiGraphics.fill(i - t, j + t - 1, i + t, j + t, -16772609);
 		}
 
 		for (int v = 0; v < p; v++) {
@@ -110,7 +109,7 @@ public class LevelLoadingScreen extends Screen {
 				ChunkStatus chunkStatus = storingChunkProgressListener.getStatus(v, w);
 				int x = r + v * m;
 				int y = s + w * m;
-				fill(poseStack, x, y, x + k, y + k, COLORS.getInt(chunkStatus) | 0xFF000000);
+				guiGraphics.fill(x, y, x + k, y + k, COLORS.getInt(chunkStatus) | 0xFF000000);
 			}
 		}
 	}

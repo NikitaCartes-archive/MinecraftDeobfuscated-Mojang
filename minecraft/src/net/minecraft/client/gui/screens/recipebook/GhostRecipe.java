@@ -2,15 +2,13 @@ package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -50,7 +48,7 @@ public class GhostRecipe {
 		this.recipe = recipe;
 	}
 
-	public void render(PoseStack poseStack, Minecraft minecraft, int i, int j, boolean bl, float f) {
+	public void render(GuiGraphics guiGraphics, Minecraft minecraft, int i, int j, boolean bl, float f) {
 		if (!Screen.hasControlDown()) {
 			this.time += f;
 		}
@@ -60,19 +58,18 @@ public class GhostRecipe {
 			int l = ghostIngredient.getX() + i;
 			int m = ghostIngredient.getY() + j;
 			if (k == 0 && bl) {
-				GuiComponent.fill(poseStack, l - 4, m - 4, l + 20, m + 20, 822018048);
+				guiGraphics.fill(l - 4, m - 4, l + 20, m + 20, 822018048);
 			} else {
-				GuiComponent.fill(poseStack, l, m, l + 16, m + 16, 822018048);
+				guiGraphics.fill(l, m, l + 16, m + 16, 822018048);
 			}
 
 			ItemStack itemStack = ghostIngredient.getItem();
-			ItemRenderer itemRenderer = minecraft.getItemRenderer();
-			itemRenderer.renderAndDecorateFakeItem(poseStack, itemStack, l, m);
+			guiGraphics.renderFakeItem(itemStack, l, m);
 			RenderSystem.depthFunc(516);
-			GuiComponent.fill(poseStack, l, m, l + 16, m + 16, 822083583);
+			guiGraphics.fill(l, m, l + 16, m + 16, 822083583);
 			RenderSystem.depthFunc(515);
 			if (k == 0) {
-				itemRenderer.renderGuiItemDecorations(poseStack, minecraft.font, itemStack, l, m);
+				guiGraphics.renderItemDecorations(minecraft.font, itemStack, l, m);
 			}
 		}
 	}

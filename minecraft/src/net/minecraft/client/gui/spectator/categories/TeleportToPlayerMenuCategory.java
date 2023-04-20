@@ -1,14 +1,12 @@
 package net.minecraft.client.gui.spectator.categories;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.spectator.PlayerMenuItem;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
@@ -58,9 +56,8 @@ public class TeleportToPlayerMenuCategory implements SpectatorMenuCategory, Spec
 	}
 
 	@Override
-	public void renderIcon(PoseStack poseStack, float f, int i) {
-		RenderSystem.setShaderTexture(0, SpectatorGui.SPECTATOR_LOCATION);
-		GuiComponent.blit(poseStack, 0, 0, 0.0F, 0.0F, 16, 16, 256, 256);
+	public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
+		guiGraphics.blit(SpectatorGui.SPECTATOR_LOCATION, 0, 0, 0.0F, 0.0F, 16, 16, 256, 256);
 	}
 
 	@Override

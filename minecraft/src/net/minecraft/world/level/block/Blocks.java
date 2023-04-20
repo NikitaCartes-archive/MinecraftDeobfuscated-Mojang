@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.Fluids;
@@ -41,27 +42,71 @@ import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.material.PushReaction;
 
 public class Blocks {
-	public static final Block AIR = register("air", new AirBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE).noCollission().noLootTable().air()));
+	public static final Block AIR = register(
+		"air", new AirBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).replaceable().noCollission().noLootTable().air())
+	);
 	public static final Block STONE = register(
-		"stone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"stone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block GRANITE = register(
-		"granite", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DIRT).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"granite",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block POLISHED_GRANITE = register(
-		"polished_granite", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DIRT).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"polished_granite",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block DIORITE = register(
-		"diorite", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.QUARTZ).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"diorite",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.QUARTZ)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block POLISHED_DIORITE = register(
-		"polished_diorite", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.QUARTZ).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"polished_diorite",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.QUARTZ)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block ANDESITE = register(
-		"andesite", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"andesite",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block POLISHED_ANDESITE = register(
-		"polished_andesite", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"polished_andesite",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block GRASS_BLOCK = register(
 		"grass_block", new GrassBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.GRASS).randomTicks().strength(0.6F).sound(SoundType.GRASS))
@@ -76,42 +121,113 @@ public class Blocks {
 		"podzol", new SnowyDirtBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL).strength(0.5F).sound(SoundType.GRAVEL))
 	);
 	public static final Block COBBLESTONE = register(
-		"cobblestone", new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"cobblestone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block OAK_PLANKS = register(
-		"oak_planks", new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WOOD).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"oak_planks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block SPRUCE_PLANKS = register(
-		"spruce_planks", new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"spruce_planks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BIRCH_PLANKS = register(
-		"birch_planks", new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"birch_planks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block JUNGLE_PLANKS = register(
-		"jungle_planks", new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.DIRT).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"jungle_planks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block ACACIA_PLANKS = register(
 		"acacia_planks",
-		new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block CHERRY_PLANKS = register(
 		"cherry_planks",
-		new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_WHITE).strength(2.0F, 3.0F).sound(SoundType.CHERRY_WOOD).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_WHITE)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.CHERRY_WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block DARK_OAK_PLANKS = register(
 		"dark_oak_planks",
-		new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_BROWN).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BROWN)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block MANGROVE_PLANKS = register(
-		"mangrove_planks", new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"mangrove_planks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BAMBOO_PLANKS = register(
 		"bamboo_planks",
-		new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_YELLOW).strength(2.0F, 3.0F).sound(SoundType.BAMBOO_WOOD).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.BAMBOO_WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BAMBOO_MOSAIC = register(
 		"bamboo_mosaic",
-		new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_YELLOW).strength(2.0F, 3.0F).sound(SoundType.BAMBOO_WOOD).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.BAMBOO_WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block OAK_SAPLING = register(
 		"oak_sapling",
@@ -180,25 +296,35 @@ public class Blocks {
 		)
 	);
 	public static final Block BEDROCK = register(
-		"bedrock", new Block(BlockBehaviour.Properties.of(Material.STONE).strength(-1.0F, 3600000.0F).noLootTable().isValidSpawn(Blocks::never))
+		"bedrock",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(-1.0F, 3600000.0F)
+				.noLootTable()
+				.isValidSpawn(Blocks::never)
+		)
 	);
 	public static final Block WATER = register(
 		"water",
 		new LiquidBlock(
 			Fluids.WATER,
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.WATER)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.WATER)
+				.replaceable()
 				.noCollission()
 				.strength(100.0F)
 				.pushReaction(PushReaction.DESTROY)
 				.noLootTable()
 				.liquid()
+				.sound(SoundType.EMPTY)
 		)
 	);
 	public static final Block LAVA = register(
 		"lava",
 		new LiquidBlock(
 			Fluids.LAVA,
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.FIRE)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.FIRE)
+				.replaceable()
 				.noCollission()
 				.randomTicks()
 				.strength(100.0F)
@@ -206,51 +332,89 @@ public class Blocks {
 				.pushReaction(PushReaction.DESTROY)
 				.noLootTable()
 				.liquid()
+				.sound(SoundType.EMPTY)
 		)
 	);
 	public static final Block SAND = register(
-		"sand", new SandBlock(14406560, BlockBehaviour.Properties.of(Material.SAND, MaterialColor.SAND).strength(0.5F).sound(SoundType.SAND))
+		"sand",
+		new SandBlock(
+			14406560, BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block SUSPICIOUS_SAND = register(
 		"suspicious_sand",
 		new BrushableBlock(
 			SAND,
-			BlockBehaviour.Properties.of(Material.SAND, MaterialColor.SAND).strength(0.25F).sound(SoundType.SUSPICIOUS_SAND).pushReaction(PushReaction.DESTROY),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.SNARE)
+				.strength(0.25F)
+				.sound(SoundType.SUSPICIOUS_SAND)
+				.pushReaction(PushReaction.DESTROY),
 			SoundEvents.BRUSH_SAND,
 			SoundEvents.BRUSH_SAND_COMPLETED
 		)
 	);
 	public static final Block RED_SAND = register(
-		"red_sand", new SandBlock(11098145, BlockBehaviour.Properties.of(Material.SAND, MaterialColor.COLOR_ORANGE).strength(0.5F).sound(SoundType.SAND))
+		"red_sand",
+		new SandBlock(
+			11098145,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block GRAVEL = register(
-		"gravel", new GravelBlock(BlockBehaviour.Properties.of(Material.SAND, MaterialColor.STONE).strength(0.6F).sound(SoundType.GRAVEL))
+		"gravel",
+		new GravelBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE).instrument(NoteBlockInstrument.SNARE).strength(0.6F).sound(SoundType.GRAVEL)
+		)
 	);
 	public static final Block SUSPICIOUS_GRAVEL = register(
 		"suspicious_gravel",
 		new BrushableBlock(
 			GRAVEL,
-			BlockBehaviour.Properties.of(Material.SAND, MaterialColor.STONE).strength(0.25F).sound(SoundType.SUSPICIOUS_GRAVEL).pushReaction(PushReaction.DESTROY),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.SNARE)
+				.strength(0.25F)
+				.sound(SoundType.SUSPICIOUS_GRAVEL)
+				.pushReaction(PushReaction.DESTROY),
 			SoundEvents.BRUSH_GRAVEL,
 			SoundEvents.BRUSH_GRAVEL_COMPLETED
 		)
 	);
 	public static final Block GOLD_ORE = register(
-		"gold_ore", new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
+		"gold_ore",
+		new DropExperienceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 3.0F)
+		)
 	);
 	public static final Block DEEPSLATE_GOLD_ORE = register(
 		"deepslate_gold_ore",
 		new DropExperienceBlock(BlockBehaviour.Properties.copy(GOLD_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block IRON_ORE = register(
-		"iron_ore", new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
+		"iron_ore",
+		new DropExperienceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 3.0F)
+		)
 	);
 	public static final Block DEEPSLATE_IRON_ORE = register(
 		"deepslate_iron_ore",
 		new DropExperienceBlock(BlockBehaviour.Properties.copy(IRON_ORE).color(MaterialColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block COAL_ORE = register(
-		"coal_ore", new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(0, 2))
+		"coal_ore",
+		new DropExperienceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 3.0F),
+			UniformInt.of(0, 2)
+		)
 	);
 	public static final Block DEEPSLATE_COAL_ORE = register(
 		"deepslate_coal_ore",
@@ -261,7 +425,11 @@ public class Blocks {
 	public static final Block NETHER_GOLD_ORE = register(
 		"nether_gold_ore",
 		new DropExperienceBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.NETHER_GOLD_ORE),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 3.0F)
+				.sound(SoundType.NETHER_GOLD_ORE),
 			UniformInt.of(0, 1)
 		)
 	);
@@ -276,7 +444,8 @@ public class Blocks {
 	public static final Block MANGROVE_ROOTS = register(
 		"mangrove_roots",
 		new MangroveRootsBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL)
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(0.7F)
 				.randomTicks()
 				.sound(SoundType.MANGROVE_ROOTS)
@@ -306,60 +475,154 @@ public class Blocks {
 		"stripped_bamboo_block", log(MaterialColor.COLOR_YELLOW, MaterialColor.COLOR_YELLOW, SoundType.BAMBOO_WOOD)
 	);
 	public static final Block OAK_WOOD = register(
-		"oak_wood", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WOOD).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		"oak_wood",
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block SPRUCE_WOOD = register(
-		"spruce_wood", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		"spruce_wood",
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BIRCH_WOOD = register(
-		"birch_wood", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		"birch_wood",
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block JUNGLE_WOOD = register(
-		"jungle_wood", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.DIRT).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		"jungle_wood",
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block ACACIA_WOOD = register(
 		"acacia_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_GRAY).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block CHERRY_WOOD = register(
 		"cherry_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_GRAY).strength(2.0F).sound(SoundType.CHERRY_WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_GRAY)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.CHERRY_WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block DARK_OAK_WOOD = register(
 		"dark_oak_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_BROWN).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BROWN)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block MANGROVE_WOOD = register(
 		"mangrove_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STRIPPED_OAK_WOOD = register(
 		"stripped_oak_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WOOD).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STRIPPED_SPRUCE_WOOD = register(
 		"stripped_spruce_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STRIPPED_BIRCH_WOOD = register(
 		"stripped_birch_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STRIPPED_JUNGLE_WOOD = register(
 		"stripped_jungle_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.DIRT).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STRIPPED_ACACIA_WOOD = register(
 		"stripped_acacia_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STRIPPED_CHERRY_WOOD = register(
 		"stripped_cherry_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_PINK).strength(2.0F).sound(SoundType.CHERRY_WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_PINK)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.CHERRY_WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STRIPPED_DARK_OAK_WOOD = register(
 		"stripped_dark_oak_wood",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_BROWN).strength(2.0F).sound(SoundType.WOOD).ignitedByLava())
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BROWN)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STRIPPED_MANGROVE_WOOD = register("stripped_mangrove_wood", log(MaterialColor.COLOR_RED, MaterialColor.COLOR_RED));
 	public static final Block OAK_LEAVES = register("oak_leaves", leaves(SoundType.GRASS));
@@ -370,7 +633,7 @@ public class Blocks {
 	public static final Block CHERRY_LEAVES = register(
 		"cherry_leaves",
 		new CherryLeavesBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOTSOLIDBLOCKING, MaterialColor.COLOR_PINK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.COLOR_PINK)
 				.strength(0.2F)
 				.randomTicks()
 				.sound(SoundType.CHERRY_LEAVES)
@@ -386,7 +649,7 @@ public class Blocks {
 	public static final Block MANGROVE_LEAVES = register(
 		"mangrove_leaves",
 		new MangroveLeavesBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOTSOLIDBLOCKING, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
 				.strength(0.2F)
 				.randomTicks()
 				.sound(SoundType.GRASS)
@@ -409,7 +672,8 @@ public class Blocks {
 	public static final Block GLASS = register(
 		"glass",
 		new GlassBlock(
-			BlockBehaviour.Properties.of(Material.GLASS)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID)
+				.instrument(NoteBlockInstrument.HAT)
 				.strength(0.3F)
 				.sound(SoundType.GLASS)
 				.noOcclusion()
@@ -420,7 +684,14 @@ public class Blocks {
 		)
 	);
 	public static final Block LAPIS_ORE = register(
-		"lapis_ore", new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(2, 5))
+		"lapis_ore",
+		new DropExperienceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 3.0F),
+			UniformInt.of(2, 5)
+		)
 	);
 	public static final Block DEEPSLATE_LAPIS_ORE = register(
 		"deepslate_lapis_ore",
@@ -432,19 +703,38 @@ public class Blocks {
 		"lapis_block", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.LAPIS).requiresCorrectToolForDrops().strength(3.0F, 3.0F))
 	);
 	public static final Block DISPENSER = register(
-		"dispenser", new DispenserBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.5F))
+		"dispenser",
+		new DispenserBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(3.5F)
+		)
 	);
 	public static final Block SANDSTONE = register(
-		"sandstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(0.8F))
+		"sandstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(0.8F)
+		)
 	);
 	public static final Block CHISELED_SANDSTONE = register(
-		"chiseled_sandstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(0.8F))
+		"chiseled_sandstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(0.8F)
+		)
 	);
 	public static final Block CUT_SANDSTONE = register(
-		"cut_sandstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(0.8F))
+		"cut_sandstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(0.8F)
+		)
 	);
 	public static final Block NOTE_BLOCK = register(
-		"note_block", new NoteBlock(BlockBehaviour.Properties.of(Material.WOOD).sound(SoundType.WOOD).strength(0.8F).ignitedByLava())
+		"note_block",
+		new NoteBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.sound(SoundType.WOOD)
+				.strength(0.8F)
+				.ignitedByLava()
+		)
 	);
 	public static final Block WHITE_BED = register("white_bed", bed(DyeColor.WHITE));
 	public static final Block ORANGE_BED = register("orange_bed", bed(DyeColor.ORANGE));
@@ -472,7 +762,8 @@ public class Blocks {
 	public static final Block COBWEB = register(
 		"cobweb",
 		new WebBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOCOLLIDER_NONSOLIDBLOCKING, MaterialColor.WOOL)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.WOOL)
+				.forceSolidOn()
 				.noCollission()
 				.requiresCorrectToolForDrops()
 				.strength(4.0F)
@@ -482,7 +773,8 @@ public class Blocks {
 	public static final Block GRASS = register(
 		"grass",
 		new TallGrassBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -494,7 +786,8 @@ public class Blocks {
 	public static final Block FERN = register(
 		"fern",
 		new TallGrassBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -506,7 +799,8 @@ public class Blocks {
 	public static final Block DEAD_BUSH = register(
 		"dead_bush",
 		new DeadBushBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.WOOD)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.WOOD)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -517,7 +811,8 @@ public class Blocks {
 	public static final Block SEAGRASS = register(
 		"seagrass",
 		new SeagrassBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.WATER)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.WATER)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.WET_GRASS)
@@ -527,7 +822,8 @@ public class Blocks {
 	public static final Block TALL_SEAGRASS = register(
 		"tall_seagrass",
 		new TallSeagrassBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.WATER)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.WATER)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.WET_GRASS)
@@ -541,61 +837,170 @@ public class Blocks {
 		new PistonHeadBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE).strength(1.5F).noLootTable().pushReaction(PushReaction.BLOCK))
 	);
 	public static final Block WHITE_WOOL = register(
-		"white_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SNOW).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"white_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SNOW)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block ORANGE_WOOL = register(
-		"orange_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"orange_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block MAGENTA_WOOL = register(
 		"magenta_wool",
-		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_MAGENTA).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_MAGENTA)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block LIGHT_BLUE_WOOL = register(
 		"light_blue_wool",
-		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_LIGHT_BLUE).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_LIGHT_BLUE)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block YELLOW_WOOL = register(
-		"yellow_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"yellow_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block LIME_WOOL = register(
 		"lime_wool",
-		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_LIGHT_GREEN).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_LIGHT_GREEN)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block PINK_WOOL = register(
-		"pink_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_PINK).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"pink_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_PINK)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block GRAY_WOOL = register(
-		"gray_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"gray_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block LIGHT_GRAY_WOOL = register(
 		"light_gray_wool",
-		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_LIGHT_GRAY).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_LIGHT_GRAY)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block CYAN_WOOL = register(
-		"cyan_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_CYAN).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"cyan_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_CYAN)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block PURPLE_WOOL = register(
-		"purple_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_PURPLE).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"purple_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_PURPLE)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BLUE_WOOL = register(
-		"blue_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLUE).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"blue_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLUE)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BROWN_WOOL = register(
-		"brown_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BROWN).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"brown_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BROWN)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block GREEN_WOOL = register(
-		"green_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GREEN).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"green_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GREEN)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block RED_WOOL = register(
-		"red_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"red_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BLACK_WOOL = register(
-		"black_wool", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK).strength(0.8F).sound(SoundType.WOOL).ignitedByLava())
+		"black_wool",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.GUITAR)
+				.strength(0.8F)
+				.sound(SoundType.WOOL)
+				.ignitedByLava()
+		)
 	);
 	public static final Block MOVING_PISTON = register(
 		"moving_piston",
 		new MovingPistonBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.forceSolidOn()
 				.strength(-1.0F)
 				.dynamicShape()
 				.noLootTable()
@@ -816,31 +1221,73 @@ public class Blocks {
 	);
 	public static final Block GOLD_BLOCK = register(
 		"gold_block",
-		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.GOLD).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.METAL))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.GOLD)
+				.instrument(NoteBlockInstrument.BELL)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 6.0F)
+				.sound(SoundType.METAL)
+		)
 	);
 	public static final Block IRON_BLOCK = register(
 		"iron_block",
-		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundType.METAL))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.METAL)
+				.instrument(NoteBlockInstrument.IRON_XYLOPHONE)
+				.requiresCorrectToolForDrops()
+				.strength(5.0F, 6.0F)
+				.sound(SoundType.METAL)
+		)
 	);
 	public static final Block BRICKS = register(
-		"bricks", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"bricks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block TNT = register(
-		"tnt",
-		new TntBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NOTSOLIDBLOCKING, MaterialColor.FIRE).instabreak().sound(SoundType.GRASS).ignitedByLava())
+		"tnt", new TntBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.FIRE).instabreak().sound(SoundType.GRASS).ignitedByLava())
 	);
 	public static final Block BOOKSHELF = register(
-		"bookshelf", new Block(BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F).sound(SoundType.WOOD).ignitedByLava())
+		"bookshelf",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(1.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block CHISELED_BOOKSHELF = register(
 		"chiseled_bookshelf",
-		new ChiseledBookShelfBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(1.5F).sound(SoundType.CHISELED_BOOKSHELF).ignitedByLava())
+		new ChiseledBookShelfBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(1.5F)
+				.sound(SoundType.CHISELED_BOOKSHELF)
+				.ignitedByLava()
+		)
 	);
 	public static final Block MOSSY_COBBLESTONE = register(
-		"mossy_cobblestone", new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"mossy_cobblestone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block OBSIDIAN = register(
-		"obsidian", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(50.0F, 1200.0F))
+		"obsidian",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(50.0F, 1200.0F)
+		)
 	);
 	public static final Block TORCH = register(
 		"torch",
@@ -870,7 +1317,8 @@ public class Blocks {
 	public static final Block FIRE = register(
 		"fire",
 		new FireBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.FIRE)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.FIRE)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.lightLevel(blockStatex -> 15)
@@ -881,7 +1329,8 @@ public class Blocks {
 	public static final Block SOUL_FIRE = register(
 		"soul_fire",
 		new SoulFireBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.COLOR_LIGHT_BLUE)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.COLOR_LIGHT_BLUE)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.lightLevel(blockStatex -> 10)
@@ -890,18 +1339,41 @@ public class Blocks {
 		)
 	);
 	public static final Block SPAWNER = register(
-		"spawner", new SpawnerBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(5.0F).sound(SoundType.METAL).noOcclusion())
+		"spawner",
+		new SpawnerBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(5.0F)
+				.sound(SoundType.METAL)
+				.noOcclusion()
+		)
 	);
 	public static final Block OAK_STAIRS = register("oak_stairs", new StairBlock(OAK_PLANKS.defaultBlockState(), BlockBehaviour.Properties.copy(OAK_PLANKS)));
 	public static final Block CHEST = register(
-		"chest", new ChestBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava(), () -> BlockEntityType.CHEST)
+		"chest",
+		new ChestBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava(),
+			() -> BlockEntityType.CHEST
+		)
 	);
 	public static final Block REDSTONE_WIRE = register(
 		"redstone_wire",
 		new RedStoneWireBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).noCollission().instabreak().pushReaction(PushReaction.DESTROY))
 	);
 	public static final Block DIAMOND_ORE = register(
-		"diamond_ore", new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(3, 7))
+		"diamond_ore",
+		new DropExperienceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 3.0F),
+			UniformInt.of(3, 7)
+		)
 	);
 	public static final Block DEEPSLATE_DIAMOND_ORE = register(
 		"deepslate_diamond_ore",
@@ -914,7 +1386,14 @@ public class Blocks {
 		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIAMOND).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundType.METAL))
 	);
 	public static final Block CRAFTING_TABLE = register(
-		"crafting_table", new CraftingTableBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava())
+		"crafting_table",
+		new CraftingTableBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block WHEAT = register(
 		"wheat",
@@ -932,59 +1411,128 @@ public class Blocks {
 		)
 	);
 	public static final Block FURNACE = register(
-		"furnace", new FurnaceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.5F).lightLevel(litBlockEmission(13)))
+		"furnace",
+		new FurnaceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.5F)
+				.lightLevel(litBlockEmission(13))
+		)
 	);
 	public static final Block OAK_SIGN = register(
-		"oak_sign", new StandingSignBlock(BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).ignitedByLava(), WoodType.OAK)
+		"oak_sign",
+		new StandingSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.OAK
+		)
 	);
 	public static final Block SPRUCE_SIGN = register(
 		"spruce_sign",
 		new StandingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, SPRUCE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.SPRUCE
+			BlockBehaviour.Properties.of(Material.DEPRECATED, SPRUCE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.SPRUCE
 		)
 	);
 	public static final Block BIRCH_SIGN = register(
 		"birch_sign",
-		new StandingSignBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).noCollission().strength(1.0F).ignitedByLava(), WoodType.BIRCH)
+		new StandingSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.BIRCH
+		)
 	);
 	public static final Block ACACIA_SIGN = register(
 		"acacia_sign",
-		new StandingSignBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).noCollission().strength(1.0F).ignitedByLava(), WoodType.ACACIA)
+		new StandingSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.ACACIA
+		)
 	);
 	public static final Block CHERRY_SIGN = register(
 		"cherry_sign",
 		new StandingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, CHERRY_PLANKS.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.CHERRY
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CHERRY_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.CHERRY
 		)
 	);
 	public static final Block JUNGLE_SIGN = register(
 		"jungle_sign",
 		new StandingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, JUNGLE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.JUNGLE
+			BlockBehaviour.Properties.of(Material.DEPRECATED, JUNGLE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.JUNGLE
 		)
 	);
 	public static final Block DARK_OAK_SIGN = register(
 		"dark_oak_sign",
 		new StandingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, DARK_OAK_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.DARK_OAK
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DARK_OAK_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.DARK_OAK
 		)
 	);
 	public static final Block MANGROVE_SIGN = register(
 		"mangrove_sign",
 		new StandingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MANGROVE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.MANGROVE
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MANGROVE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.MANGROVE
 		)
 	);
 	public static final Block BAMBOO_SIGN = register(
 		"bamboo_sign",
 		new StandingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, BAMBOO_PLANKS.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.BAMBOO
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BAMBOO_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.BAMBOO
 		)
 	);
 	public static final Block OAK_DOOR = register(
 		"oak_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, OAK_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, OAK_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -995,7 +1543,12 @@ public class Blocks {
 	public static final Block LADDER = register(
 		"ladder",
 		new LadderBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).strength(0.4F).sound(SoundType.LADDER).noOcclusion().pushReaction(PushReaction.DESTROY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID)
+				.forceSolidOff()
+				.strength(0.4F)
+				.sound(SoundType.LADDER)
+				.noOcclusion()
+				.pushReaction(PushReaction.DESTROY)
 		)
 	);
 	public static final Block RAIL = register(
@@ -1006,167 +1559,335 @@ public class Blocks {
 	);
 	public static final Block OAK_WALL_SIGN = register(
 		"oak_wall_sign",
-		new WallSignBlock(BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).dropsLike(OAK_SIGN).ignitedByLava(), WoodType.OAK)
+		new WallSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(OAK_SIGN)
+				.ignitedByLava(),
+			WoodType.OAK
+		)
 	);
 	public static final Block SPRUCE_WALL_SIGN = register(
 		"spruce_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, SPRUCE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).dropsLike(SPRUCE_SIGN).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, SPRUCE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(SPRUCE_SIGN)
+				.ignitedByLava(),
 			WoodType.SPRUCE
 		)
 	);
 	public static final Block BIRCH_WALL_SIGN = register(
 		"birch_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).noCollission().strength(1.0F).dropsLike(BIRCH_SIGN).ignitedByLava(), WoodType.BIRCH
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(BIRCH_SIGN)
+				.ignitedByLava(),
+			WoodType.BIRCH
 		)
 	);
 	public static final Block ACACIA_WALL_SIGN = register(
 		"acacia_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).noCollission().strength(1.0F).dropsLike(ACACIA_SIGN).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(ACACIA_SIGN)
+				.ignitedByLava(),
 			WoodType.ACACIA
 		)
 	);
 	public static final Block CHERRY_WALL_SIGN = register(
 		"cherry_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, CHERRY_LOG.defaultMaterialColor()).noCollission().strength(1.0F).dropsLike(CHERRY_SIGN).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CHERRY_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(CHERRY_SIGN)
+				.ignitedByLava(),
 			WoodType.CHERRY
 		)
 	);
 	public static final Block JUNGLE_WALL_SIGN = register(
 		"jungle_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, JUNGLE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).dropsLike(JUNGLE_SIGN).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, JUNGLE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(JUNGLE_SIGN)
+				.ignitedByLava(),
 			WoodType.JUNGLE
 		)
 	);
 	public static final Block DARK_OAK_WALL_SIGN = register(
 		"dark_oak_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, DARK_OAK_LOG.defaultMaterialColor()).noCollission().strength(1.0F).dropsLike(DARK_OAK_SIGN).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DARK_OAK_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(DARK_OAK_SIGN)
+				.ignitedByLava(),
 			WoodType.DARK_OAK
 		)
 	);
 	public static final Block MANGROVE_WALL_SIGN = register(
 		"mangrove_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MANGROVE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).dropsLike(MANGROVE_SIGN).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MANGROVE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(MANGROVE_SIGN)
+				.ignitedByLava(),
 			WoodType.MANGROVE
 		)
 	);
 	public static final Block BAMBOO_WALL_SIGN = register(
 		"bamboo_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, BAMBOO_PLANKS.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava().dropsLike(BAMBOO_SIGN),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BAMBOO_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava()
+				.dropsLike(BAMBOO_SIGN),
 			WoodType.BAMBOO
 		)
 	);
 	public static final Block OAK_HANGING_SIGN = register(
 		"oak_hanging_sign",
 		new CeilingHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, OAK_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.OAK
+			BlockBehaviour.Properties.of(Material.DEPRECATED, OAK_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.OAK
 		)
 	);
 	public static final Block SPRUCE_HANGING_SIGN = register(
 		"spruce_hanging_sign",
 		new CeilingHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, SPRUCE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.SPRUCE
+			BlockBehaviour.Properties.of(Material.DEPRECATED, SPRUCE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.SPRUCE
 		)
 	);
 	public static final Block BIRCH_HANGING_SIGN = register(
 		"birch_hanging_sign",
-		new CeilingHangingSignBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).noCollission().strength(1.0F).ignitedByLava(), WoodType.BIRCH)
+		new CeilingHangingSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.BIRCH
+		)
 	);
 	public static final Block ACACIA_HANGING_SIGN = register(
 		"acacia_hanging_sign",
 		new CeilingHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).noCollission().strength(1.0F).ignitedByLava(), WoodType.ACACIA
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.ACACIA
 		)
 	);
 	public static final Block CHERRY_HANGING_SIGN = register(
 		"cherry_hanging_sign",
 		new CeilingHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_PINK).noCollission().strength(1.0F).ignitedByLava(), WoodType.CHERRY
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_PINK)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.CHERRY
 		)
 	);
 	public static final Block JUNGLE_HANGING_SIGN = register(
 		"jungle_hanging_sign",
 		new CeilingHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, JUNGLE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.JUNGLE
+			BlockBehaviour.Properties.of(Material.DEPRECATED, JUNGLE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.JUNGLE
 		)
 	);
 	public static final Block DARK_OAK_HANGING_SIGN = register(
 		"dark_oak_hanging_sign",
 		new CeilingHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, DARK_OAK_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.DARK_OAK
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DARK_OAK_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.DARK_OAK
 		)
 	);
 	public static final Block CRIMSON_HANGING_SIGN = register(
 		"crimson_hanging_sign",
-		new CeilingHangingSignBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.CRIMSON_STEM).noCollission().strength(1.0F), WoodType.CRIMSON)
+		new CeilingHangingSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.CRIMSON_STEM)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F),
+			WoodType.CRIMSON
+		)
 	);
 	public static final Block WARPED_HANGING_SIGN = register(
 		"warped_hanging_sign",
-		new CeilingHangingSignBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WARPED_STEM).noCollission().strength(1.0F), WoodType.WARPED)
+		new CeilingHangingSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WARPED_STEM)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F),
+			WoodType.WARPED
+		)
 	);
 	public static final Block MANGROVE_HANGING_SIGN = register(
 		"mangrove_hanging_sign",
 		new CeilingHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MANGROVE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava(), WoodType.MANGROVE
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MANGROVE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.MANGROVE
 		)
 	);
 	public static final Block BAMBOO_HANGING_SIGN = register(
 		"bamboo_hanging_sign",
 		new CeilingHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_YELLOW).noCollission().strength(1.0F).ignitedByLava(), WoodType.BAMBOO
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava(),
+			WoodType.BAMBOO
 		)
 	);
 	public static final Block OAK_WALL_HANGING_SIGN = register(
 		"oak_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, OAK_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava().dropsLike(OAK_HANGING_SIGN),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, OAK_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava()
+				.dropsLike(OAK_HANGING_SIGN),
 			WoodType.OAK
 		)
 	);
 	public static final Block SPRUCE_WALL_HANGING_SIGN = register(
 		"spruce_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).dropsLike(SPRUCE_HANGING_SIGN).ignitedByLava(), WoodType.SPRUCE
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(SPRUCE_HANGING_SIGN)
+				.ignitedByLava(),
+			WoodType.SPRUCE
 		)
 	);
 	public static final Block BIRCH_WALL_HANGING_SIGN = register(
 		"birch_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).noCollission().strength(1.0F).dropsLike(BIRCH_HANGING_SIGN).ignitedByLava(), WoodType.BIRCH
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(BIRCH_HANGING_SIGN)
+				.ignitedByLava(),
+			WoodType.BIRCH
 		)
 	);
 	public static final Block ACACIA_WALL_HANGING_SIGN = register(
 		"acacia_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).noCollission().strength(1.0F).ignitedByLava().dropsLike(ACACIA_HANGING_SIGN),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava()
+				.dropsLike(ACACIA_HANGING_SIGN),
 			WoodType.ACACIA
 		)
 	);
 	public static final Block CHERRY_WALL_HANGING_SIGN = register(
 		"cherry_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_PINK).noCollission().strength(1.0F).ignitedByLava().dropsLike(CHERRY_HANGING_SIGN),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_PINK)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava()
+				.dropsLike(CHERRY_HANGING_SIGN),
 			WoodType.CHERRY
 		)
 	);
 	public static final Block JUNGLE_WALL_HANGING_SIGN = register(
 		"jungle_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, JUNGLE_LOG.defaultMaterialColor()).noCollission().strength(1.0F).ignitedByLava().dropsLike(JUNGLE_HANGING_SIGN),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, JUNGLE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava()
+				.dropsLike(JUNGLE_HANGING_SIGN),
 			WoodType.JUNGLE
 		)
 	);
 	public static final Block DARK_OAK_WALL_HANGING_SIGN = register(
 		"dark_oak_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, DARK_OAK_LOG.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DARK_OAK_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(1.0F)
 				.ignitedByLava()
@@ -1177,7 +1898,9 @@ public class Blocks {
 	public static final Block MANGROVE_WALL_HANGING_SIGN = register(
 		"mangrove_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MANGROVE_LOG.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MANGROVE_LOG.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(1.0F)
 				.ignitedByLava()
@@ -1188,19 +1911,37 @@ public class Blocks {
 	public static final Block CRIMSON_WALL_HANGING_SIGN = register(
 		"crimson_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.CRIMSON_STEM).noCollission().strength(1.0F).dropsLike(CRIMSON_HANGING_SIGN), WoodType.CRIMSON
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.CRIMSON_STEM)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(CRIMSON_HANGING_SIGN),
+			WoodType.CRIMSON
 		)
 	);
 	public static final Block WARPED_WALL_HANGING_SIGN = register(
 		"warped_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WARPED_STEM).noCollission().strength(1.0F).dropsLike(WARPED_HANGING_SIGN), WoodType.WARPED
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WARPED_STEM)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(WARPED_HANGING_SIGN),
+			WoodType.WARPED
 		)
 	);
 	public static final Block BAMBOO_WALL_HANGING_SIGN = register(
 		"bamboo_wall_hanging_sign",
 		new WallHangingSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_YELLOW).noCollission().strength(1.0F).ignitedByLava().dropsLike(BAMBOO_HANGING_SIGN),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.ignitedByLava()
+				.dropsLike(BAMBOO_HANGING_SIGN),
 			WoodType.BAMBOO
 		)
 	);
@@ -1214,7 +1955,13 @@ public class Blocks {
 		"stone_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.MOBS,
-			BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().noCollission().strength(0.5F).pushReaction(PushReaction.DESTROY),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.strength(0.5F)
+				.pushReaction(PushReaction.DESTROY),
 			BlockSetType.STONE
 		)
 	);
@@ -1233,7 +1980,9 @@ public class Blocks {
 		"oak_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, OAK_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, OAK_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1245,7 +1994,9 @@ public class Blocks {
 		"spruce_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, SPRUCE_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, SPRUCE_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1257,7 +2008,9 @@ public class Blocks {
 		"birch_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, BIRCH_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BIRCH_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1269,7 +2022,9 @@ public class Blocks {
 		"jungle_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, JUNGLE_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, JUNGLE_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1281,7 +2036,9 @@ public class Blocks {
 		"acacia_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, ACACIA_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, ACACIA_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1293,7 +2050,9 @@ public class Blocks {
 		"cherry_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, CHERRY_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CHERRY_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1305,7 +2064,9 @@ public class Blocks {
 		"dark_oak_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, DARK_OAK_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DARK_OAK_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1317,7 +2078,9 @@ public class Blocks {
 		"mangrove_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, MANGROVE_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MANGROVE_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1329,7 +2092,9 @@ public class Blocks {
 		"bamboo_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, BAMBOO_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BAMBOO_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
 				.noCollission()
 				.strength(0.5F)
 				.ignitedByLava()
@@ -1340,7 +2105,12 @@ public class Blocks {
 	public static final Block REDSTONE_ORE = register(
 		"redstone_ore",
 		new RedStoneOreBlock(
-			BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().randomTicks().lightLevel(litBlockEmission(9)).strength(3.0F, 3.0F)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.randomTicks()
+				.lightLevel(litBlockEmission(9))
+				.strength(3.0F, 3.0F)
 		)
 	);
 	public static final Block DEEPSLATE_REDSTONE_ORE = register(
@@ -1374,7 +2144,9 @@ public class Blocks {
 	public static final Block SNOW = register(
 		"snow",
 		new SnowLayerBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.SNOW)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.SNOW)
+				.replaceable()
+				.forceSolidOff()
 				.randomTicks()
 				.strength(0.1F)
 				.requiresCorrectToolForDrops()
@@ -1386,7 +2158,7 @@ public class Blocks {
 	public static final Block ICE = register(
 		"ice",
 		new IceBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOTSOLIDBLOCKING, MaterialColor.ICE)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.ICE)
 				.friction(0.98F)
 				.randomTicks()
 				.strength(0.5F)
@@ -1402,7 +2174,7 @@ public class Blocks {
 	public static final Block CACTUS = register(
 		"cactus",
 		new CactusBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOTSOLIDBLOCKING, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
 				.randomTicks()
 				.strength(0.4F)
 				.sound(SoundType.WOOL)
@@ -1410,7 +2182,8 @@ public class Blocks {
 		)
 	);
 	public static final Block CLAY = register(
-		"clay", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.CLAY).strength(0.6F).sound(SoundType.GRAVEL))
+		"clay",
+		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.CLAY).instrument(NoteBlockInstrument.FLUTE).strength(0.6F).sound(SoundType.GRAVEL))
 	);
 	public static final Block SUGAR_CANE = register(
 		"sugar_cane",
@@ -1419,28 +2192,47 @@ public class Blocks {
 		)
 	);
 	public static final Block JUKEBOX = register(
-		"jukebox", new JukeboxBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.DIRT).strength(2.0F, 6.0F).ignitedByLava())
+		"jukebox",
+		new JukeboxBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT).instrument(NoteBlockInstrument.BASS).strength(2.0F, 6.0F).ignitedByLava()
+		)
 	);
 	public static final Block OAK_FENCE = register(
 		"oak_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, OAK_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, OAK_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block PUMPKIN = register(
 		"pumpkin",
 		new PumpkinBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE).strength(1.0F).sound(SoundType.WOOD).pushReaction(PushReaction.DESTROY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.DIDGERIDOO)
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.pushReaction(PushReaction.DESTROY)
 		)
 	);
 	public static final Block NETHERRACK = register(
 		"netherrack",
 		new NetherrackBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(0.4F).sound(SoundType.NETHERRACK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(0.4F)
+				.sound(SoundType.NETHERRACK)
 		)
 	);
 	public static final Block SOUL_SAND = register(
 		"soul_sand",
 		new SoulSandBlock(
-			BlockBehaviour.Properties.of(Material.SAND, MaterialColor.COLOR_BROWN)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BROWN)
+				.instrument(NoteBlockInstrument.COW_BELL)
 				.strength(0.5F)
 				.speedFactor(0.4F)
 				.sound(SoundType.SOUL_SAND)
@@ -1456,13 +2248,21 @@ public class Blocks {
 	public static final Block BASALT = register(
 		"basalt",
 		new RotatedPillarBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(1.25F, 4.2F).sound(SoundType.BASALT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+				.sound(SoundType.BASALT)
 		)
 	);
 	public static final Block POLISHED_BASALT = register(
 		"polished_basalt",
 		new RotatedPillarBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(1.25F, 4.2F).sound(SoundType.BASALT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+				.sound(SoundType.BASALT)
 		)
 	);
 	public static final Block SOUL_TORCH = register(
@@ -1491,7 +2291,14 @@ public class Blocks {
 		)
 	);
 	public static final Block GLOWSTONE = register(
-		"glowstone", new Block(BlockBehaviour.Properties.of(Material.GLASS, MaterialColor.SAND).strength(0.3F).sound(SoundType.GLASS).lightLevel(blockStatex -> 15))
+		"glowstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.PLING)
+				.strength(0.3F)
+				.sound(SoundType.GLASS)
+				.lightLevel(blockStatex -> 15)
+		)
 	);
 	public static final Block NETHER_PORTAL = register(
 		"nether_portal",
@@ -1528,7 +2335,9 @@ public class Blocks {
 	);
 	public static final Block CAKE = register(
 		"cake",
-		new CakeBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NONE).strength(0.5F).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY))
+		new CakeBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NONE).forceSolidOn().strength(0.5F).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block REPEATER = register(
 		"repeater",
@@ -1553,81 +2362,153 @@ public class Blocks {
 	public static final Block OAK_TRAPDOOR = register(
 		"oak_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WOOD).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(), BlockSetType.OAK
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
+			BlockSetType.OAK
 		)
 	);
 	public static final Block SPRUCE_TRAPDOOR = register(
 		"spruce_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
 			BlockSetType.SPRUCE
 		)
 	);
 	public static final Block BIRCH_TRAPDOOR = register(
 		"birch_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(), BlockSetType.BIRCH
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
+			BlockSetType.BIRCH
 		)
 	);
 	public static final Block JUNGLE_TRAPDOOR = register(
 		"jungle_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.DIRT).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
 			BlockSetType.JUNGLE
 		)
 	);
 	public static final Block ACACIA_TRAPDOOR = register(
 		"acacia_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
 			BlockSetType.ACACIA
 		)
 	);
 	public static final Block CHERRY_TRAPDOOR = register(
 		"cherry_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_WHITE).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_WHITE)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
 			BlockSetType.CHERRY
 		)
 	);
 	public static final Block DARK_OAK_TRAPDOOR = register(
 		"dark_oak_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_BROWN).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BROWN)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
 			BlockSetType.DARK_OAK
 		)
 	);
 	public static final Block MANGROVE_TRAPDOOR = register(
 		"mangrove_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
 			BlockSetType.MANGROVE
 		)
 	);
 	public static final Block BAMBOO_TRAPDOOR = register(
 		"bamboo_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_YELLOW).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never).ignitedByLava(),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never)
+				.ignitedByLava(),
 			BlockSetType.BAMBOO
 		)
 	);
 	public static final Block STONE_BRICKS = register(
-		"stone_bricks", new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"stone_bricks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block MOSSY_STONE_BRICKS = register(
-		"mossy_stone_bricks", new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"mossy_stone_bricks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block CRACKED_STONE_BRICKS = register(
-		"cracked_stone_bricks", new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"cracked_stone_bricks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block CHISELED_STONE_BRICKS = register(
-		"chiseled_stone_bricks", new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"chiseled_stone_bricks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block PACKED_MUD = register("packed_mud", new Block(BlockBehaviour.Properties.copy(DIRT).strength(1.0F, 3.0F).sound(SoundType.PACKED_MUD)));
 	public static final Block MUD_BRICKS = register(
 		"mud_bricks",
 		new Block(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_LIGHT_GRAY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_LIGHT_GRAY)
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.strength(1.5F, 3.0F)
 				.sound(SoundType.MUD_BRICKS)
@@ -1653,14 +2534,33 @@ public class Blocks {
 	);
 	public static final Block BROWN_MUSHROOM_BLOCK = register(
 		"brown_mushroom_block",
-		new HugeMushroomBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.DIRT).strength(0.2F).sound(SoundType.WOOD).ignitedByLava())
+		new HugeMushroomBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(0.2F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block RED_MUSHROOM_BLOCK = register(
 		"red_mushroom_block",
-		new HugeMushroomBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(0.2F).sound(SoundType.WOOD).ignitedByLava())
+		new HugeMushroomBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(0.2F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block MUSHROOM_STEM = register(
-		"mushroom_stem", new HugeMushroomBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WOOL).strength(0.2F).sound(SoundType.WOOD).ignitedByLava())
+		"mushroom_stem",
+		new HugeMushroomBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOL)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(0.2F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block IRON_BARS = register(
 		"iron_bars",
@@ -1676,6 +2576,7 @@ public class Blocks {
 		"chain",
 		new ChainBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NONE)
+				.forceSolidOn()
 				.requiresCorrectToolForDrops()
 				.strength(5.0F, 6.0F)
 				.sound(SoundType.CHAIN)
@@ -1683,7 +2584,10 @@ public class Blocks {
 		)
 	);
 	public static final Block GLASS_PANE = register(
-		"glass_pane", new IronBarsBlock(BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		"glass_pane",
+		new IronBarsBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block MELON = register(
 		"melon",
@@ -1726,7 +2630,8 @@ public class Blocks {
 	public static final Block VINE = register(
 		"vine",
 		new VineBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.randomTicks()
 				.strength(0.2F)
@@ -1738,7 +2643,8 @@ public class Blocks {
 	public static final Block GLOW_LICHEN = register(
 		"glow_lichen",
 		new GlowLichenBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.GLOW_LICHEN)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.GLOW_LICHEN)
+				.replaceable()
 				.noCollission()
 				.strength(0.2F)
 				.sound(SoundType.GLOW_LICHEN)
@@ -1749,7 +2655,14 @@ public class Blocks {
 	);
 	public static final Block OAK_FENCE_GATE = register(
 		"oak_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, OAK_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.OAK)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, OAK_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.OAK
+		)
 	);
 	public static final Block BRICK_STAIRS = register("brick_stairs", new StairBlock(BRICKS.defaultBlockState(), BlockBehaviour.Properties.copy(BRICKS)));
 	public static final Block STONE_BRICK_STAIRS = register(
@@ -1769,13 +2682,21 @@ public class Blocks {
 	public static final Block NETHER_BRICKS = register(
 		"nether_bricks",
 		new Block(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+				.sound(SoundType.NETHER_BRICKS)
 		)
 	);
 	public static final Block NETHER_BRICK_FENCE = register(
 		"nether_brick_fence",
 		new FenceBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+				.sound(SoundType.NETHER_BRICKS)
 		)
 	);
 	public static final Block NETHER_BRICK_STAIRS = register(
@@ -1794,7 +2715,11 @@ public class Blocks {
 	public static final Block ENCHANTING_TABLE = register(
 		"enchanting_table",
 		new EnchantmentTableBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().lightLevel(blockStatex -> 7).strength(5.0F, 1200.0F)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.lightLevel(blockStatex -> 7)
+				.strength(5.0F, 1200.0F)
 		)
 	);
 	public static final Block BREWING_STAND = register(
@@ -1834,7 +2759,8 @@ public class Blocks {
 	public static final Block END_PORTAL_FRAME = register(
 		"end_portal_frame",
 		new EndPortalFrameBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GREEN)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GREEN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.sound(SoundType.GLASS)
 				.lightLevel(blockStatex -> 1)
 				.strength(-1.0F, 3600000.0F)
@@ -1842,7 +2768,13 @@ public class Blocks {
 		)
 	);
 	public static final Block END_STONE = register(
-		"end_stone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(3.0F, 9.0F))
+		"end_stone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 9.0F)
+		)
 	);
 	public static final Block DRAGON_EGG = register(
 		"dragon_egg",
@@ -1874,7 +2806,14 @@ public class Blocks {
 		"sandstone_stairs", new StairBlock(SANDSTONE.defaultBlockState(), BlockBehaviour.Properties.copy(SANDSTONE))
 	);
 	public static final Block EMERALD_ORE = register(
-		"emerald_ore", new DropExperienceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F), UniformInt.of(3, 7))
+		"emerald_ore",
+		new DropExperienceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 3.0F),
+			UniformInt.of(3, 7)
+		)
 	);
 	public static final Block DEEPSLATE_EMERALD_ORE = register(
 		"deepslate_emerald_ore",
@@ -1884,7 +2823,13 @@ public class Blocks {
 	);
 	public static final Block ENDER_CHEST = register(
 		"ender_chest",
-		new EnderChestBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(22.5F, 600.0F).lightLevel(blockStatex -> 7))
+		new EnderChestBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(22.5F, 600.0F)
+				.lightLevel(blockStatex -> 7)
+		)
 	);
 	public static final Block TRIPWIRE_HOOK = register(
 		"tripwire_hook", new TripWireHookBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).noCollission().pushReaction(PushReaction.DESTROY))
@@ -1897,7 +2842,13 @@ public class Blocks {
 	);
 	public static final Block EMERALD_BLOCK = register(
 		"emerald_block",
-		new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.EMERALD).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundType.METAL))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.EMERALD)
+				.instrument(NoteBlockInstrument.BIT)
+				.requiresCorrectToolForDrops()
+				.strength(5.0F, 6.0F)
+				.sound(SoundType.METAL)
+		)
 	);
 	public static final Block SPRUCE_STAIRS = register(
 		"spruce_stairs", new StairBlock(SPRUCE_PLANKS.defaultBlockState(), BlockBehaviour.Properties.copy(SPRUCE_PLANKS))
@@ -1917,7 +2868,8 @@ public class Blocks {
 	public static final Block BEACON = register(
 		"beacon",
 		new BeaconBlock(
-			BlockBehaviour.Properties.of(Material.GLASS, MaterialColor.DIAMOND)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.DIAMOND)
+				.instrument(NoteBlockInstrument.HAT)
 				.strength(3.0F)
 				.lightLevel(blockStatex -> 15)
 				.noOcclusion()
@@ -1977,7 +2929,10 @@ public class Blocks {
 	public static final Block BAMBOO_BUTTON = register("bamboo_button", woodenButton(BlockSetType.BAMBOO));
 	public static final Block SKELETON_SKULL = register(
 		"skeleton_skull",
-		new SkullBlock(SkullBlock.Types.SKELETON, BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).strength(1.0F).pushReaction(PushReaction.DESTROY))
+		new SkullBlock(
+			SkullBlock.Types.SKELETON,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block SKELETON_WALL_SKULL = register(
 		"skeleton_wall_skull",
@@ -1987,7 +2942,10 @@ public class Blocks {
 		)
 	);
 	public static final Block WITHER_SKELETON_SKULL = register(
-		"wither_skeleton_skull", new WitherSkullBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).strength(1.0F).pushReaction(PushReaction.DESTROY))
+		"wither_skeleton_skull",
+		new WitherSkullBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.WITHER_SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block WITHER_SKELETON_WALL_SKULL = register(
 		"wither_skeleton_wall_skull",
@@ -1997,7 +2955,10 @@ public class Blocks {
 	);
 	public static final Block ZOMBIE_HEAD = register(
 		"zombie_head",
-		new SkullBlock(SkullBlock.Types.ZOMBIE, BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).strength(1.0F).pushReaction(PushReaction.DESTROY))
+		new SkullBlock(
+			SkullBlock.Types.ZOMBIE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.ZOMBIE).strength(1.0F).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block ZOMBIE_WALL_HEAD = register(
 		"zombie_wall_head",
@@ -2006,7 +2967,10 @@ public class Blocks {
 		)
 	);
 	public static final Block PLAYER_HEAD = register(
-		"player_head", new PlayerHeadBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).strength(1.0F).pushReaction(PushReaction.DESTROY))
+		"player_head",
+		new PlayerHeadBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.CUSTOM_HEAD).strength(1.0F).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block PLAYER_WALL_HEAD = register(
 		"player_wall_head",
@@ -2014,7 +2978,10 @@ public class Blocks {
 	);
 	public static final Block CREEPER_HEAD = register(
 		"creeper_head",
-		new SkullBlock(SkullBlock.Types.CREEPER, BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).strength(1.0F).pushReaction(PushReaction.DESTROY))
+		new SkullBlock(
+			SkullBlock.Types.CREEPER,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.CREEPER).strength(1.0F).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block CREEPER_WALL_HEAD = register(
 		"creeper_wall_head",
@@ -2025,7 +2992,10 @@ public class Blocks {
 	);
 	public static final Block DRAGON_HEAD = register(
 		"dragon_head",
-		new SkullBlock(SkullBlock.Types.DRAGON, BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).strength(1.0F).pushReaction(PushReaction.DESTROY))
+		new SkullBlock(
+			SkullBlock.Types.DRAGON,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.DRAGON).strength(1.0F).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block DRAGON_WALL_HEAD = register(
 		"dragon_wall_head",
@@ -2035,7 +3005,10 @@ public class Blocks {
 	);
 	public static final Block PIGLIN_HEAD = register(
 		"piglin_head",
-		new SkullBlock(SkullBlock.Types.PIGLIN, BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).strength(1.0F).pushReaction(PushReaction.DESTROY))
+		new SkullBlock(
+			SkullBlock.Types.PIGLIN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.PIGLIN).strength(1.0F).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block PIGLIN_WALL_HEAD = register(
 		"piglin_wall_head",
@@ -2072,13 +3045,21 @@ public class Blocks {
 		)
 	);
 	public static final Block TRAPPED_CHEST = register(
-		"trapped_chest", new TrappedChestBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava())
+		"trapped_chest",
+		new TrappedChestBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block LIGHT_WEIGHTED_PRESSURE_PLATE = register(
 		"light_weighted_pressure_plate",
 		new WeightedPressurePlateBlock(
 			15,
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.GOLD)
+				.forceSolidOn()
 				.requiresCorrectToolForDrops()
 				.noCollission()
 				.strength(0.5F)
@@ -2091,6 +3072,7 @@ public class Blocks {
 		new WeightedPressurePlateBlock(
 			150,
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.METAL)
+				.forceSolidOn()
 				.requiresCorrectToolForDrops()
 				.noCollission()
 				.strength(0.5F)
@@ -2103,7 +3085,14 @@ public class Blocks {
 		new ComparatorBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instabreak().sound(SoundType.WOOD).pushReaction(PushReaction.DESTROY))
 	);
 	public static final Block DAYLIGHT_DETECTOR = register(
-		"daylight_detector", new DaylightDetectorBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(0.2F).sound(SoundType.WOOD).ignitedByLava())
+		"daylight_detector",
+		new DaylightDetectorBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(0.2F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block REDSTONE_BLOCK = register(
 		"redstone_block",
@@ -2118,7 +3107,11 @@ public class Blocks {
 	public static final Block NETHER_QUARTZ_ORE = register(
 		"nether_quartz_ore",
 		new DropExperienceBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.NETHER_ORE),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 3.0F)
+				.sound(SoundType.NETHER_ORE),
 			UniformInt.of(2, 5)
 		)
 	);
@@ -2133,13 +3126,31 @@ public class Blocks {
 		)
 	);
 	public static final Block QUARTZ_BLOCK = register(
-		"quartz_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.QUARTZ).requiresCorrectToolForDrops().strength(0.8F))
+		"quartz_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.QUARTZ)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(0.8F)
+		)
 	);
 	public static final Block CHISELED_QUARTZ_BLOCK = register(
-		"chiseled_quartz_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.QUARTZ).requiresCorrectToolForDrops().strength(0.8F))
+		"chiseled_quartz_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.QUARTZ)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(0.8F)
+		)
 	);
 	public static final Block QUARTZ_PILLAR = register(
-		"quartz_pillar", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.QUARTZ).requiresCorrectToolForDrops().strength(0.8F))
+		"quartz_pillar",
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.QUARTZ)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(0.8F)
+		)
 	);
 	public static final Block QUARTZ_STAIRS = register(
 		"quartz_stairs", new StairBlock(QUARTZ_BLOCK.defaultBlockState(), BlockBehaviour.Properties.copy(QUARTZ_BLOCK))
@@ -2148,130 +3159,266 @@ public class Blocks {
 		"activator_rail", new PoweredRailBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).noCollission().strength(0.7F).sound(SoundType.METAL))
 	);
 	public static final Block DROPPER = register(
-		"dropper", new DropperBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.5F))
+		"dropper",
+		new DropperBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(3.5F)
+		)
 	);
 	public static final Block WHITE_TERRACOTTA = register(
 		"white_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_WHITE).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_WHITE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block ORANGE_TERRACOTTA = register(
 		"orange_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_ORANGE).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block MAGENTA_TERRACOTTA = register(
 		"magenta_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_MAGENTA).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_MAGENTA)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block LIGHT_BLUE_TERRACOTTA = register(
 		"light_blue_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_LIGHT_BLUE).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_LIGHT_BLUE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block YELLOW_TERRACOTTA = register(
 		"yellow_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_YELLOW).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_YELLOW)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block LIME_TERRACOTTA = register(
 		"lime_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_LIGHT_GREEN).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_LIGHT_GREEN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block PINK_TERRACOTTA = register(
-		"pink_terracotta", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_PINK).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		"pink_terracotta",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_PINK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block GRAY_TERRACOTTA = register(
-		"gray_terracotta", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_GRAY).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		"gray_terracotta",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_GRAY)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block LIGHT_GRAY_TERRACOTTA = register(
 		"light_gray_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_LIGHT_GRAY)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block CYAN_TERRACOTTA = register(
-		"cyan_terracotta", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_CYAN).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		"cyan_terracotta",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_CYAN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block PURPLE_TERRACOTTA = register(
 		"purple_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_PURPLE).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_PURPLE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block BLUE_TERRACOTTA = register(
-		"blue_terracotta", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BLUE).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		"blue_terracotta",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_BLUE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block BROWN_TERRACOTTA = register(
 		"brown_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BROWN).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_BROWN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block GREEN_TERRACOTTA = register(
 		"green_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_GREEN).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_GREEN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block RED_TERRACOTTA = register(
-		"red_terracotta", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_RED).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		"red_terracotta",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block BLACK_TERRACOTTA = register(
 		"black_terracotta",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BLACK).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block WHITE_STAINED_GLASS_PANE = register(
 		"white_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.WHITE, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.WHITE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block ORANGE_STAINED_GLASS_PANE = register(
 		"orange_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.ORANGE, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.ORANGE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block MAGENTA_STAINED_GLASS_PANE = register(
 		"magenta_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.MAGENTA, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.MAGENTA,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block LIGHT_BLUE_STAINED_GLASS_PANE = register(
 		"light_blue_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.LIGHT_BLUE, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.LIGHT_BLUE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block YELLOW_STAINED_GLASS_PANE = register(
 		"yellow_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.YELLOW, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.YELLOW,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block LIME_STAINED_GLASS_PANE = register(
 		"lime_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.LIME, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.LIME,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block PINK_STAINED_GLASS_PANE = register(
 		"pink_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.PINK, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.PINK,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block GRAY_STAINED_GLASS_PANE = register(
 		"gray_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.GRAY, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.GRAY,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block LIGHT_GRAY_STAINED_GLASS_PANE = register(
 		"light_gray_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.LIGHT_GRAY, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.LIGHT_GRAY,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block CYAN_STAINED_GLASS_PANE = register(
 		"cyan_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.CYAN, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.CYAN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block PURPLE_STAINED_GLASS_PANE = register(
 		"purple_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.PURPLE, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.PURPLE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block BLUE_STAINED_GLASS_PANE = register(
 		"blue_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.BLUE, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.BLUE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block BROWN_STAINED_GLASS_PANE = register(
 		"brown_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.BROWN, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.BROWN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block GREEN_STAINED_GLASS_PANE = register(
 		"green_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.GREEN, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.GREEN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block RED_STAINED_GLASS_PANE = register(
 		"red_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.RED, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.RED,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block BLACK_STAINED_GLASS_PANE = register(
 		"black_stained_glass_pane",
-		new StainedGlassPaneBlock(DyeColor.BLACK, BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
+		new StainedGlassPaneBlock(
+			DyeColor.BLACK,
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
+		)
 	);
 	public static final Block ACACIA_STAIRS = register(
 		"acacia_stairs", new StairBlock(ACACIA_PLANKS.defaultBlockState(), BlockBehaviour.Properties.copy(ACACIA_PLANKS))
@@ -2310,7 +3457,12 @@ public class Blocks {
 	public static final Block LIGHT = register(
 		"light",
 		new LightBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE).strength(-1.0F, 3600000.8F).noLootTable().noOcclusion().lightLevel(LightBlock.LIGHT_EMISSION)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID)
+				.replaceable()
+				.strength(-1.0F, 3600000.8F)
+				.noLootTable()
+				.noOcclusion()
+				.lightLevel(LightBlock.LIGHT_EMISSION)
 		)
 	);
 	public static final Block IRON_TRAPDOOR = register(
@@ -2325,13 +3477,31 @@ public class Blocks {
 		)
 	);
 	public static final Block PRISMARINE = register(
-		"prismarine", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_CYAN).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"prismarine",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_CYAN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block PRISMARINE_BRICKS = register(
-		"prismarine_bricks", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DIAMOND).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"prismarine_bricks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIAMOND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block DARK_PRISMARINE = register(
-		"dark_prismarine", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DIAMOND).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"dark_prismarine",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIAMOND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block PRISMARINE_STAIRS = register(
 		"prismarine_stairs", new StairBlock(PRISMARINE.defaultBlockState(), BlockBehaviour.Properties.copy(PRISMARINE))
@@ -2343,21 +3513,47 @@ public class Blocks {
 		"dark_prismarine_stairs", new StairBlock(DARK_PRISMARINE.defaultBlockState(), BlockBehaviour.Properties.copy(DARK_PRISMARINE))
 	);
 	public static final Block PRISMARINE_SLAB = register(
-		"prismarine_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_CYAN).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"prismarine_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_CYAN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block PRISMARINE_BRICK_SLAB = register(
 		"prismarine_brick_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DIAMOND).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIAMOND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block DARK_PRISMARINE_SLAB = register(
-		"dark_prismarine_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DIAMOND).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"dark_prismarine_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIAMOND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block SEA_LANTERN = register(
 		"sea_lantern",
-		new Block(BlockBehaviour.Properties.of(Material.GLASS, MaterialColor.QUARTZ).strength(0.3F).sound(SoundType.GLASS).lightLevel(blockStatex -> 15))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.QUARTZ)
+				.instrument(NoteBlockInstrument.HAT)
+				.strength(0.3F)
+				.sound(SoundType.GLASS)
+				.lightLevel(blockStatex -> 15)
+		)
 	);
 	public static final Block HAY_BLOCK = register(
-		"hay_block", new HayBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW).strength(0.5F).sound(SoundType.GRASS))
+		"hay_block",
+		new HayBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW).instrument(NoteBlockInstrument.BANJO).strength(0.5F).sound(SoundType.GRASS)
+		)
 	);
 	public static final Block WHITE_CARPET = register(
 		"white_carpet",
@@ -2460,18 +3656,38 @@ public class Blocks {
 		)
 	);
 	public static final Block TERRACOTTA = register(
-		"terracotta", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(1.25F, 4.2F))
+		"terracotta",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.25F, 4.2F)
+		)
 	);
 	public static final Block COAL_BLOCK = register(
-		"coal_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(5.0F, 6.0F))
+		"coal_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(5.0F, 6.0F)
+		)
 	);
 	public static final Block PACKED_ICE = register(
-		"packed_ice", new Block(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.ICE).friction(0.98F).strength(0.5F).sound(SoundType.GLASS))
+		"packed_ice",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.ICE)
+				.instrument(NoteBlockInstrument.CHIME)
+				.friction(0.98F)
+				.strength(0.5F)
+				.sound(SoundType.GLASS)
+		)
 	);
 	public static final Block SUNFLOWER = register(
 		"sunflower",
 		new TallFlowerBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -2483,7 +3699,8 @@ public class Blocks {
 	public static final Block LILAC = register(
 		"lilac",
 		new TallFlowerBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -2495,7 +3712,8 @@ public class Blocks {
 	public static final Block ROSE_BUSH = register(
 		"rose_bush",
 		new TallFlowerBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -2507,7 +3725,8 @@ public class Blocks {
 	public static final Block PEONY = register(
 		"peony",
 		new TallFlowerBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -2519,7 +3738,8 @@ public class Blocks {
 	public static final Block TALL_GRASS = register(
 		"tall_grass",
 		new DoublePlantBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -2531,7 +3751,8 @@ public class Blocks {
 	public static final Block LARGE_FERN = register(
 		"large_fern",
 		new DoublePlantBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.GRASS)
@@ -2542,241 +3763,643 @@ public class Blocks {
 	);
 	public static final Block WHITE_BANNER = register(
 		"white_banner",
-		new BannerBlock(DyeColor.WHITE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.WHITE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block ORANGE_BANNER = register(
 		"orange_banner",
-		new BannerBlock(DyeColor.ORANGE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.ORANGE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block MAGENTA_BANNER = register(
 		"magenta_banner",
-		new BannerBlock(DyeColor.MAGENTA, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.MAGENTA,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block LIGHT_BLUE_BANNER = register(
 		"light_blue_banner",
-		new BannerBlock(DyeColor.LIGHT_BLUE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.LIGHT_BLUE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block YELLOW_BANNER = register(
 		"yellow_banner",
-		new BannerBlock(DyeColor.YELLOW, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.YELLOW,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block LIME_BANNER = register(
 		"lime_banner",
-		new BannerBlock(DyeColor.LIME, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.LIME,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block PINK_BANNER = register(
 		"pink_banner",
-		new BannerBlock(DyeColor.PINK, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.PINK,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block GRAY_BANNER = register(
 		"gray_banner",
-		new BannerBlock(DyeColor.GRAY, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.GRAY,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block LIGHT_GRAY_BANNER = register(
 		"light_gray_banner",
-		new BannerBlock(DyeColor.LIGHT_GRAY, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.LIGHT_GRAY,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block CYAN_BANNER = register(
 		"cyan_banner",
-		new BannerBlock(DyeColor.CYAN, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.CYAN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block PURPLE_BANNER = register(
 		"purple_banner",
-		new BannerBlock(DyeColor.PURPLE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.PURPLE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BLUE_BANNER = register(
 		"blue_banner",
-		new BannerBlock(DyeColor.BLUE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.BLUE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BROWN_BANNER = register(
 		"brown_banner",
-		new BannerBlock(DyeColor.BROWN, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.BROWN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block GREEN_BANNER = register(
 		"green_banner",
-		new BannerBlock(DyeColor.GREEN, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.GREEN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block RED_BANNER = register(
-		"red_banner", new BannerBlock(DyeColor.RED, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		"red_banner",
+		new BannerBlock(
+			DyeColor.RED,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BLACK_BANNER = register(
 		"black_banner",
-		new BannerBlock(DyeColor.BLACK, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).ignitedByLava())
+		new BannerBlock(
+			DyeColor.BLACK,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block WHITE_WALL_BANNER = register(
 		"white_wall_banner",
 		new WallBannerBlock(
-			DyeColor.WHITE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(WHITE_BANNER).ignitedByLava()
+			DyeColor.WHITE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(WHITE_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block ORANGE_WALL_BANNER = register(
 		"orange_wall_banner",
 		new WallBannerBlock(
-			DyeColor.ORANGE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(ORANGE_BANNER).ignitedByLava()
+			DyeColor.ORANGE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(ORANGE_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block MAGENTA_WALL_BANNER = register(
 		"magenta_wall_banner",
 		new WallBannerBlock(
-			DyeColor.MAGENTA, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(MAGENTA_BANNER).ignitedByLava()
+			DyeColor.MAGENTA,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(MAGENTA_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block LIGHT_BLUE_WALL_BANNER = register(
 		"light_blue_wall_banner",
 		new WallBannerBlock(
 			DyeColor.LIGHT_BLUE,
-			BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(LIGHT_BLUE_BANNER).ignitedByLava()
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(LIGHT_BLUE_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block YELLOW_WALL_BANNER = register(
 		"yellow_wall_banner",
 		new WallBannerBlock(
-			DyeColor.YELLOW, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(YELLOW_BANNER).ignitedByLava()
+			DyeColor.YELLOW,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(YELLOW_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block LIME_WALL_BANNER = register(
 		"lime_wall_banner",
 		new WallBannerBlock(
-			DyeColor.LIME, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(LIME_BANNER).ignitedByLava()
+			DyeColor.LIME,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(LIME_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block PINK_WALL_BANNER = register(
 		"pink_wall_banner",
 		new WallBannerBlock(
-			DyeColor.PINK, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(PINK_BANNER).ignitedByLava()
+			DyeColor.PINK,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(PINK_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block GRAY_WALL_BANNER = register(
 		"gray_wall_banner",
 		new WallBannerBlock(
-			DyeColor.GRAY, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(GRAY_BANNER).ignitedByLava()
+			DyeColor.GRAY,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(GRAY_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block LIGHT_GRAY_WALL_BANNER = register(
 		"light_gray_wall_banner",
 		new WallBannerBlock(
 			DyeColor.LIGHT_GRAY,
-			BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(LIGHT_GRAY_BANNER).ignitedByLava()
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(LIGHT_GRAY_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block CYAN_WALL_BANNER = register(
 		"cyan_wall_banner",
 		new WallBannerBlock(
-			DyeColor.CYAN, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(CYAN_BANNER).ignitedByLava()
+			DyeColor.CYAN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(CYAN_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block PURPLE_WALL_BANNER = register(
 		"purple_wall_banner",
 		new WallBannerBlock(
-			DyeColor.PURPLE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(PURPLE_BANNER).ignitedByLava()
+			DyeColor.PURPLE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(PURPLE_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block BLUE_WALL_BANNER = register(
 		"blue_wall_banner",
 		new WallBannerBlock(
-			DyeColor.BLUE, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(BLUE_BANNER).ignitedByLava()
+			DyeColor.BLUE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(BLUE_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block BROWN_WALL_BANNER = register(
 		"brown_wall_banner",
 		new WallBannerBlock(
-			DyeColor.BROWN, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(BROWN_BANNER).ignitedByLava()
+			DyeColor.BROWN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(BROWN_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block GREEN_WALL_BANNER = register(
 		"green_wall_banner",
 		new WallBannerBlock(
-			DyeColor.GREEN, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(GREEN_BANNER).ignitedByLava()
+			DyeColor.GREEN,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(GREEN_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block RED_WALL_BANNER = register(
 		"red_wall_banner",
 		new WallBannerBlock(
-			DyeColor.RED, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(RED_BANNER).ignitedByLava()
+			DyeColor.RED,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(RED_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block BLACK_WALL_BANNER = register(
 		"black_wall_banner",
 		new WallBannerBlock(
-			DyeColor.BLACK, BlockBehaviour.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(BLACK_BANNER).ignitedByLava()
+			DyeColor.BLACK,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(1.0F)
+				.sound(SoundType.WOOD)
+				.dropsLike(BLACK_BANNER)
+				.ignitedByLava()
 		)
 	);
 	public static final Block RED_SANDSTONE = register(
-		"red_sandstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(0.8F))
+		"red_sandstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(0.8F)
+		)
 	);
 	public static final Block CHISELED_RED_SANDSTONE = register(
-		"chiseled_red_sandstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(0.8F))
+		"chiseled_red_sandstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(0.8F)
+		)
 	);
 	public static final Block CUT_RED_SANDSTONE = register(
-		"cut_red_sandstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(0.8F))
+		"cut_red_sandstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(0.8F)
+		)
 	);
 	public static final Block RED_SANDSTONE_STAIRS = register(
 		"red_sandstone_stairs", new StairBlock(RED_SANDSTONE.defaultBlockState(), BlockBehaviour.Properties.copy(RED_SANDSTONE))
 	);
 	public static final Block OAK_SLAB = register(
-		"oak_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WOOD).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"oak_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block SPRUCE_SLAB = register(
-		"spruce_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"spruce_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BIRCH_SLAB = register(
-		"birch_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.SAND).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"birch_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block JUNGLE_SLAB = register(
-		"jungle_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.DIRT).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		"jungle_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DIRT)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block ACACIA_SLAB = register(
 		"acacia_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block CHERRY_SLAB = register(
 		"cherry_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_WHITE).strength(2.0F, 3.0F).sound(SoundType.CHERRY_WOOD).ignitedByLava())
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_WHITE)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.CHERRY_WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block DARK_OAK_SLAB = register(
 		"dark_oak_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_BROWN).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BROWN)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block MANGROVE_SLAB = register(
 		"mangrove_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava())
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BAMBOO_SLAB = register(
 		"bamboo_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_YELLOW).strength(2.0F, 3.0F).sound(SoundType.BAMBOO_WOOD).ignitedByLava())
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.BAMBOO_WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BAMBOO_MOSAIC_SLAB = register(
 		"bamboo_mosaic_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_YELLOW).strength(2.0F, 3.0F).sound(SoundType.BAMBOO_WOOD).ignitedByLava())
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.BAMBOO_WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STONE_SLAB = register(
-		"stone_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"stone_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block SMOOTH_STONE_SLAB = register(
-		"smooth_stone_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"smooth_stone_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block SANDSTONE_SLAB = register(
-		"sandstone_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"sandstone_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block CUT_SANDSTONE_SLAB = register(
-		"cut_sandstone_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"cut_sandstone_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block PETRIFIED_OAK_SLAB = register(
-		"petrified_oak_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.WOOD).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"petrified_oak_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block COBBLESTONE_SLAB = register(
-		"cobblestone_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"cobblestone_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block BRICK_SLAB = register(
-		"brick_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"brick_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block STONE_BRICK_SLAB = register(
-		"stone_brick_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"stone_brick_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block MUD_BRICK_SLAB = register(
 		"mud_brick_slab",
 		new SlabBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_LIGHT_GRAY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_LIGHT_GRAY)
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.strength(1.5F, 3.0F)
 				.sound(SoundType.MUD_BRICKS)
@@ -2785,112 +4408,258 @@ public class Blocks {
 	public static final Block NETHER_BRICK_SLAB = register(
 		"nether_brick_slab",
 		new SlabBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+				.sound(SoundType.NETHER_BRICKS)
 		)
 	);
 	public static final Block QUARTZ_SLAB = register(
-		"quartz_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.QUARTZ).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"quartz_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.QUARTZ)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block RED_SANDSTONE_SLAB = register(
 		"red_sandstone_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block CUT_RED_SANDSTONE_SLAB = register(
 		"cut_red_sandstone_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block PURPUR_SLAB = register(
-		"purpur_slab", new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_MAGENTA).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"purpur_slab",
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_MAGENTA)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block SMOOTH_STONE = register(
-		"smooth_stone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.STONE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"smooth_stone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block SMOOTH_SANDSTONE = register(
-		"smooth_sandstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"smooth_sandstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block SMOOTH_QUARTZ = register(
-		"smooth_quartz", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.QUARTZ).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		"smooth_quartz",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.QUARTZ)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block SMOOTH_RED_SANDSTONE = register(
 		"smooth_red_sandstone",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+		)
 	);
 	public static final Block SPRUCE_FENCE_GATE = register(
 		"spruce_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, SPRUCE_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.SPRUCE)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, SPRUCE_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.SPRUCE
+		)
 	);
 	public static final Block BIRCH_FENCE_GATE = register(
 		"birch_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, BIRCH_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.BIRCH)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BIRCH_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.BIRCH
+		)
 	);
 	public static final Block JUNGLE_FENCE_GATE = register(
 		"jungle_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, JUNGLE_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.JUNGLE)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, JUNGLE_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.JUNGLE
+		)
 	);
 	public static final Block ACACIA_FENCE_GATE = register(
 		"acacia_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, ACACIA_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.ACACIA)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, ACACIA_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.ACACIA
+		)
 	);
 	public static final Block CHERRY_FENCE_GATE = register(
 		"cherry_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, CHERRY_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.CHERRY)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CHERRY_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.CHERRY
+		)
 	);
 	public static final Block DARK_OAK_FENCE_GATE = register(
 		"dark_oak_fence_gate",
 		new FenceGateBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, DARK_OAK_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.DARK_OAK
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DARK_OAK_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.DARK_OAK
 		)
 	);
 	public static final Block MANGROVE_FENCE_GATE = register(
 		"mangrove_fence_gate",
 		new FenceGateBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MANGROVE_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.MANGROVE
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MANGROVE_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.MANGROVE
 		)
 	);
 	public static final Block BAMBOO_FENCE_GATE = register(
 		"bamboo_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, BAMBOO_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava(), WoodType.BAMBOO)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BAMBOO_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava(),
+			WoodType.BAMBOO
+		)
 	);
 	public static final Block SPRUCE_FENCE = register(
 		"spruce_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, SPRUCE_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava().sound(SoundType.WOOD))
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, SPRUCE_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava()
+				.sound(SoundType.WOOD)
+		)
 	);
 	public static final Block BIRCH_FENCE = register(
 		"birch_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, BIRCH_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava().sound(SoundType.WOOD))
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BIRCH_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava()
+				.sound(SoundType.WOOD)
+		)
 	);
 	public static final Block JUNGLE_FENCE = register(
 		"jungle_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, JUNGLE_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava().sound(SoundType.WOOD))
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, JUNGLE_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava()
+				.sound(SoundType.WOOD)
+		)
 	);
 	public static final Block ACACIA_FENCE = register(
 		"acacia_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, ACACIA_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava().sound(SoundType.WOOD))
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, ACACIA_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava()
+				.sound(SoundType.WOOD)
+		)
 	);
 	public static final Block CHERRY_FENCE = register(
 		"cherry_fence",
 		new FenceBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, CHERRY_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava().sound(SoundType.CHERRY_WOOD)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CHERRY_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava()
+				.sound(SoundType.CHERRY_WOOD)
 		)
 	);
 	public static final Block DARK_OAK_FENCE = register(
 		"dark_oak_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, DARK_OAK_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava().sound(SoundType.WOOD))
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DARK_OAK_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava()
+				.sound(SoundType.WOOD)
+		)
 	);
 	public static final Block MANGROVE_FENCE = register(
 		"mangrove_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, MANGROVE_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).ignitedByLava().sound(SoundType.WOOD))
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MANGROVE_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.ignitedByLava()
+				.sound(SoundType.WOOD)
+		)
 	);
 	public static final Block BAMBOO_FENCE = register(
 		"bamboo_fence",
 		new FenceBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, BAMBOO_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).sound(SoundType.BAMBOO_WOOD).ignitedByLava()
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BAMBOO_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.BAMBOO_WOOD)
+				.ignitedByLava()
 		)
 	);
 	public static final Block SPRUCE_DOOR = register(
 		"spruce_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, SPRUCE_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, SPRUCE_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -2901,7 +4670,8 @@ public class Blocks {
 	public static final Block BIRCH_DOOR = register(
 		"birch_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, BIRCH_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BIRCH_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -2912,7 +4682,8 @@ public class Blocks {
 	public static final Block JUNGLE_DOOR = register(
 		"jungle_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, JUNGLE_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, JUNGLE_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -2923,7 +4694,8 @@ public class Blocks {
 	public static final Block ACACIA_DOOR = register(
 		"acacia_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, ACACIA_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, ACACIA_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -2934,7 +4706,8 @@ public class Blocks {
 	public static final Block CHERRY_DOOR = register(
 		"cherry_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, CHERRY_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CHERRY_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -2945,7 +4718,8 @@ public class Blocks {
 	public static final Block DARK_OAK_DOOR = register(
 		"dark_oak_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, DARK_OAK_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DARK_OAK_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -2956,7 +4730,8 @@ public class Blocks {
 	public static final Block MANGROVE_DOOR = register(
 		"mangrove_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, MANGROVE_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MANGROVE_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -2967,7 +4742,8 @@ public class Blocks {
 	public static final Block BAMBOO_DOOR = register(
 		"bamboo_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, BAMBOO_PLANKS.defaultMaterialColor())
+			BlockBehaviour.Properties.of(Material.DEPRECATED, BAMBOO_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(3.0F)
 				.noOcclusion()
 				.ignitedByLava()
@@ -2977,12 +4753,15 @@ public class Blocks {
 	);
 	public static final Block END_ROD = register(
 		"end_rod",
-		new EndRodBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).instabreak().lightLevel(blockStatex -> 14).sound(SoundType.WOOD).noOcclusion())
+		new EndRodBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).forceSolidOff().instabreak().lightLevel(blockStatex -> 14).sound(SoundType.WOOD).noOcclusion()
+		)
 	);
 	public static final Block CHORUS_PLANT = register(
 		"chorus_plant",
 		new ChorusPlantBlock(
 			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_PURPLE)
+				.forceSolidOff()
 				.strength(0.4F)
 				.sound(SoundType.WOOD)
 				.noOcclusion()
@@ -2994,6 +4773,7 @@ public class Blocks {
 		new ChorusFlowerBlock(
 			(ChorusPlantBlock)CHORUS_PLANT,
 			BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_PURPLE)
+				.forceSolidOff()
 				.randomTicks()
 				.strength(0.4F)
 				.sound(SoundType.WOOD)
@@ -3003,17 +4783,34 @@ public class Blocks {
 		)
 	);
 	public static final Block PURPUR_BLOCK = register(
-		"purpur_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_MAGENTA).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"purpur_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_MAGENTA)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block PURPUR_PILLAR = register(
 		"purpur_pillar",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_MAGENTA).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_MAGENTA)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block PURPUR_STAIRS = register(
 		"purpur_stairs", new StairBlock(PURPUR_BLOCK.defaultBlockState(), BlockBehaviour.Properties.copy(PURPUR_BLOCK))
 	);
 	public static final Block END_STONE_BRICKS = register(
-		"end_stone_bricks", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(3.0F, 9.0F))
+		"end_stone_bricks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 9.0F)
+		)
 	);
 	public static final Block TORCHFLOWER_CROP = register(
 		"torchflower_crop",
@@ -3030,7 +4827,7 @@ public class Blocks {
 	public static final Block PITCHER_PLANT = register(
 		"pitcher_plant",
 		new DoublePlantBlock(
-			BlockBehaviour.Properties.of(Material.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.CROP)
@@ -3081,7 +4878,7 @@ public class Blocks {
 	public static final Block FROSTED_ICE = register(
 		"frosted_ice",
 		new FrostedIceBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOTSOLIDBLOCKING, MaterialColor.ICE)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.ICE)
 				.friction(0.98F)
 				.randomTicks()
 				.strength(0.5F)
@@ -3093,7 +4890,8 @@ public class Blocks {
 	public static final Block MAGMA_BLOCK = register(
 		"magma_block",
 		new MagmaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.lightLevel(blockStatex -> 3)
 				.strength(0.5F)
@@ -3108,23 +4906,43 @@ public class Blocks {
 	public static final Block RED_NETHER_BRICKS = register(
 		"red_nether_bricks",
 		new Block(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+				.sound(SoundType.NETHER_BRICKS)
 		)
 	);
 	public static final Block BONE_BLOCK = register(
 		"bone_block",
 		new RotatedPillarBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).requiresCorrectToolForDrops().strength(2.0F).sound(SoundType.BONE_BLOCK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.instrument(NoteBlockInstrument.XYLOPHONE)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F)
+				.sound(SoundType.BONE_BLOCK)
 		)
 	);
 	public static final Block STRUCTURE_VOID = register(
 		"structure_void",
 		new StructureVoidBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE).noCollission().noLootTable().noParticlesOnBreak().pushReaction(PushReaction.DESTROY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID)
+				.replaceable()
+				.noCollission()
+				.noLootTable()
+				.noParticlesOnBreak()
+				.pushReaction(PushReaction.DESTROY)
 		)
 	);
 	public static final Block OBSERVER = register(
-		"observer", new ObserverBlock(BlockBehaviour.Properties.of(Material.STONE).strength(3.0F).requiresCorrectToolForDrops().isRedstoneConductor(Blocks::never))
+		"observer",
+		new ObserverBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(3.0F)
+				.requiresCorrectToolForDrops()
+				.isRedstoneConductor(Blocks::never)
+		)
 	);
 	public static final Block SHULKER_BOX = register(
 		"shulker_box", shulkerBox(null, BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_PURPLE))
@@ -3180,209 +4998,360 @@ public class Blocks {
 	public static final Block WHITE_GLAZED_TERRACOTTA = register(
 		"white_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.WHITE).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.WHITE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block ORANGE_GLAZED_TERRACOTTA = register(
 		"orange_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.ORANGE).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block MAGENTA_GLAZED_TERRACOTTA = register(
 		"magenta_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.MAGENTA).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.MAGENTA)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block LIGHT_BLUE_GLAZED_TERRACOTTA = register(
 		"light_blue_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.LIGHT_BLUE).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIGHT_BLUE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block YELLOW_GLAZED_TERRACOTTA = register(
 		"yellow_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.YELLOW).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.YELLOW)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block LIME_GLAZED_TERRACOTTA = register(
 		"lime_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.LIME).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIME)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block PINK_GLAZED_TERRACOTTA = register(
 		"pink_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.PINK).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.PINK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block GRAY_GLAZED_TERRACOTTA = register(
 		"gray_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.GRAY).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.GRAY)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block LIGHT_GRAY_GLAZED_TERRACOTTA = register(
 		"light_gray_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIGHT_GRAY)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block CYAN_GLAZED_TERRACOTTA = register(
 		"cyan_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.CYAN).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.CYAN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block PURPLE_GLAZED_TERRACOTTA = register(
 		"purple_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.PURPLE).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.PURPLE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block BLUE_GLAZED_TERRACOTTA = register(
 		"blue_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.BLUE).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BLUE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block BROWN_GLAZED_TERRACOTTA = register(
 		"brown_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.BROWN).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BROWN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block GREEN_GLAZED_TERRACOTTA = register(
 		"green_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.GREEN).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.GREEN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block RED_GLAZED_TERRACOTTA = register(
 		"red_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.RED).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block BLACK_GLAZED_TERRACOTTA = register(
 		"black_glazed_terracotta",
 		new GlazedTerracottaBlock(
-			BlockBehaviour.Properties.of(Material.STONE, DyeColor.BLACK).requiresCorrectToolForDrops().strength(1.4F).pushReaction(PushReaction.PUSH_ONLY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.4F)
+				.pushReaction(PushReaction.PUSH_ONLY)
 		)
 	);
 	public static final Block WHITE_CONCRETE = register(
-		"white_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.WHITE).requiresCorrectToolForDrops().strength(1.8F))
+		"white_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.WHITE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block ORANGE_CONCRETE = register(
-		"orange_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.ORANGE).requiresCorrectToolForDrops().strength(1.8F))
+		"orange_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.ORANGE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block MAGENTA_CONCRETE = register(
-		"magenta_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.MAGENTA).requiresCorrectToolForDrops().strength(1.8F))
+		"magenta_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.MAGENTA).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block LIGHT_BLUE_CONCRETE = register(
-		"light_blue_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.LIGHT_BLUE).requiresCorrectToolForDrops().strength(1.8F))
+		"light_blue_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIGHT_BLUE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block YELLOW_CONCRETE = register(
-		"yellow_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.YELLOW).requiresCorrectToolForDrops().strength(1.8F))
+		"yellow_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.YELLOW).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block LIME_CONCRETE = register(
-		"lime_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.LIME).requiresCorrectToolForDrops().strength(1.8F))
+		"lime_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIME).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block PINK_CONCRETE = register(
-		"pink_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.PINK).requiresCorrectToolForDrops().strength(1.8F))
+		"pink_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.PINK).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block GRAY_CONCRETE = register(
-		"gray_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.GRAY).requiresCorrectToolForDrops().strength(1.8F))
+		"gray_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.GRAY).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block LIGHT_GRAY_CONCRETE = register(
-		"light_gray_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.LIGHT_GRAY).requiresCorrectToolForDrops().strength(1.8F))
+		"light_gray_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIGHT_GRAY).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block CYAN_CONCRETE = register(
-		"cyan_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.CYAN).requiresCorrectToolForDrops().strength(1.8F))
+		"cyan_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.CYAN).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block PURPLE_CONCRETE = register(
-		"purple_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.PURPLE).requiresCorrectToolForDrops().strength(1.8F))
+		"purple_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.PURPLE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block BLUE_CONCRETE = register(
-		"blue_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.BLUE).requiresCorrectToolForDrops().strength(1.8F))
+		"blue_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BLUE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block BROWN_CONCRETE = register(
-		"brown_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.BROWN).requiresCorrectToolForDrops().strength(1.8F))
+		"brown_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BROWN).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block GREEN_CONCRETE = register(
-		"green_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.GREEN).requiresCorrectToolForDrops().strength(1.8F))
+		"green_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.GREEN).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block RED_CONCRETE = register(
-		"red_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.RED).requiresCorrectToolForDrops().strength(1.8F))
+		"red_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.RED).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block BLACK_CONCRETE = register(
-		"black_concrete", new Block(BlockBehaviour.Properties.of(Material.STONE, DyeColor.BLACK).requiresCorrectToolForDrops().strength(1.8F))
+		"black_concrete",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BLACK).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.8F)
+		)
 	);
 	public static final Block WHITE_CONCRETE_POWDER = register(
 		"white_concrete_powder",
-		new ConcretePowderBlock(WHITE_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.WHITE).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			WHITE_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.WHITE).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block ORANGE_CONCRETE_POWDER = register(
 		"orange_concrete_powder",
-		new ConcretePowderBlock(ORANGE_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.ORANGE).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			ORANGE_CONCRETE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.ORANGE).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block MAGENTA_CONCRETE_POWDER = register(
 		"magenta_concrete_powder",
-		new ConcretePowderBlock(MAGENTA_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.MAGENTA).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			MAGENTA_CONCRETE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.MAGENTA).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block LIGHT_BLUE_CONCRETE_POWDER = register(
 		"light_blue_concrete_powder",
-		new ConcretePowderBlock(LIGHT_BLUE_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.LIGHT_BLUE).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			LIGHT_BLUE_CONCRETE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIGHT_BLUE).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block YELLOW_CONCRETE_POWDER = register(
 		"yellow_concrete_powder",
-		new ConcretePowderBlock(YELLOW_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.YELLOW).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			YELLOW_CONCRETE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.YELLOW).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block LIME_CONCRETE_POWDER = register(
 		"lime_concrete_powder",
-		new ConcretePowderBlock(LIME_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.LIME).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			LIME_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIME).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block PINK_CONCRETE_POWDER = register(
 		"pink_concrete_powder",
-		new ConcretePowderBlock(PINK_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.PINK).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			PINK_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.PINK).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block GRAY_CONCRETE_POWDER = register(
 		"gray_concrete_powder",
-		new ConcretePowderBlock(GRAY_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.GRAY).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			GRAY_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.GRAY).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block LIGHT_GRAY_CONCRETE_POWDER = register(
 		"light_gray_concrete_powder",
-		new ConcretePowderBlock(LIGHT_GRAY_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.LIGHT_GRAY).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			LIGHT_GRAY_CONCRETE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.LIGHT_GRAY).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block CYAN_CONCRETE_POWDER = register(
 		"cyan_concrete_powder",
-		new ConcretePowderBlock(CYAN_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.CYAN).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			CYAN_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.CYAN).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block PURPLE_CONCRETE_POWDER = register(
 		"purple_concrete_powder",
-		new ConcretePowderBlock(PURPLE_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.PURPLE).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			PURPLE_CONCRETE,
+			BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.PURPLE).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block BLUE_CONCRETE_POWDER = register(
 		"blue_concrete_powder",
-		new ConcretePowderBlock(BLUE_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.BLUE).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			BLUE_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BLUE).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block BROWN_CONCRETE_POWDER = register(
 		"brown_concrete_powder",
-		new ConcretePowderBlock(BROWN_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.BROWN).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			BROWN_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BROWN).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block GREEN_CONCRETE_POWDER = register(
 		"green_concrete_powder",
-		new ConcretePowderBlock(GREEN_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.GREEN).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			GREEN_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.GREEN).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block RED_CONCRETE_POWDER = register(
-		"red_concrete_powder", new ConcretePowderBlock(RED_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.RED).strength(0.5F).sound(SoundType.SAND))
+		"red_concrete_powder",
+		new ConcretePowderBlock(
+			RED_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.RED).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block BLACK_CONCRETE_POWDER = register(
 		"black_concrete_powder",
-		new ConcretePowderBlock(BLACK_CONCRETE, BlockBehaviour.Properties.of(Material.SAND, DyeColor.BLACK).strength(0.5F).sound(SoundType.SAND))
+		new ConcretePowderBlock(
+			BLACK_CONCRETE, BlockBehaviour.Properties.of(Material.DEPRECATED, DyeColor.BLACK).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+		)
 	);
 	public static final Block KELP = register(
 		"kelp",
@@ -3412,6 +5381,7 @@ public class Blocks {
 		"turtle_egg",
 		new TurtleEggBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SAND)
+				.forceSolidOn()
 				.strength(0.5F)
 				.sound(SoundType.METAL)
 				.randomTicks()
@@ -3424,76 +5394,164 @@ public class Blocks {
 		new SnifferEggBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED).strength(0.5F).sound(SoundType.METAL).noOcclusion())
 	);
 	public static final Block DEAD_TUBE_CORAL_BLOCK = register(
-		"dead_tube_coral_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"dead_tube_coral_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block DEAD_BRAIN_CORAL_BLOCK = register(
 		"dead_brain_coral_block",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block DEAD_BUBBLE_CORAL_BLOCK = register(
 		"dead_bubble_coral_block",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block DEAD_FIRE_CORAL_BLOCK = register(
-		"dead_fire_coral_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"dead_fire_coral_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block DEAD_HORN_CORAL_BLOCK = register(
-		"dead_horn_coral_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"dead_horn_coral_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block TUBE_CORAL_BLOCK = register(
 		"tube_coral_block",
 		new CoralBlock(
 			DEAD_TUBE_CORAL_BLOCK,
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLUE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.CORAL_BLOCK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLUE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+				.sound(SoundType.CORAL_BLOCK)
 		)
 	);
 	public static final Block BRAIN_CORAL_BLOCK = register(
 		"brain_coral_block",
 		new CoralBlock(
 			DEAD_BRAIN_CORAL_BLOCK,
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_PINK).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.CORAL_BLOCK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_PINK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+				.sound(SoundType.CORAL_BLOCK)
 		)
 	);
 	public static final Block BUBBLE_CORAL_BLOCK = register(
 		"bubble_coral_block",
 		new CoralBlock(
 			DEAD_BUBBLE_CORAL_BLOCK,
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_PURPLE).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.CORAL_BLOCK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_PURPLE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+				.sound(SoundType.CORAL_BLOCK)
 		)
 	);
 	public static final Block FIRE_CORAL_BLOCK = register(
 		"fire_coral_block",
 		new CoralBlock(
 			DEAD_FIRE_CORAL_BLOCK,
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.CORAL_BLOCK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+				.sound(SoundType.CORAL_BLOCK)
 		)
 	);
 	public static final Block HORN_CORAL_BLOCK = register(
 		"horn_coral_block",
 		new CoralBlock(
 			DEAD_HORN_CORAL_BLOCK,
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_YELLOW).requiresCorrectToolForDrops().strength(1.5F, 6.0F).sound(SoundType.CORAL_BLOCK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+				.sound(SoundType.CORAL_BLOCK)
 		)
 	);
 	public static final Block DEAD_TUBE_CORAL = register(
 		"dead_tube_coral",
-		new BaseCoralPlantBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralPlantBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block DEAD_BRAIN_CORAL = register(
 		"dead_brain_coral",
-		new BaseCoralPlantBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralPlantBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block DEAD_BUBBLE_CORAL = register(
 		"dead_bubble_coral",
-		new BaseCoralPlantBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralPlantBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block DEAD_FIRE_CORAL = register(
 		"dead_fire_coral",
-		new BaseCoralPlantBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralPlantBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block DEAD_HORN_CORAL = register(
 		"dead_horn_coral",
-		new BaseCoralPlantBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralPlantBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block TUBE_CORAL = register(
 		"tube_coral",
@@ -3552,23 +5610,58 @@ public class Blocks {
 	);
 	public static final Block DEAD_TUBE_CORAL_FAN = register(
 		"dead_tube_coral_fan",
-		new BaseCoralFanBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralFanBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block DEAD_BRAIN_CORAL_FAN = register(
 		"dead_brain_coral_fan",
-		new BaseCoralFanBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralFanBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block DEAD_BUBBLE_CORAL_FAN = register(
 		"dead_bubble_coral_fan",
-		new BaseCoralFanBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralFanBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block DEAD_FIRE_CORAL_FAN = register(
 		"dead_fire_coral_fan",
-		new BaseCoralFanBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralFanBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block DEAD_HORN_CORAL_FAN = register(
 		"dead_horn_coral_fan",
-		new BaseCoralFanBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).requiresCorrectToolForDrops().noCollission().instabreak())
+		new BaseCoralFanBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.noCollission()
+				.instabreak()
+		)
 	);
 	public static final Block TUBE_CORAL_FAN = register(
 		"tube_coral_fan",
@@ -3628,7 +5721,9 @@ public class Blocks {
 	public static final Block DEAD_TUBE_CORAL_WALL_FAN = register(
 		"dead_tube_coral_wall_fan",
 		new BaseCoralWallFanBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.noCollission()
 				.instabreak()
@@ -3638,7 +5733,9 @@ public class Blocks {
 	public static final Block DEAD_BRAIN_CORAL_WALL_FAN = register(
 		"dead_brain_coral_wall_fan",
 		new BaseCoralWallFanBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.noCollission()
 				.instabreak()
@@ -3648,7 +5745,9 @@ public class Blocks {
 	public static final Block DEAD_BUBBLE_CORAL_WALL_FAN = register(
 		"dead_bubble_coral_wall_fan",
 		new BaseCoralWallFanBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.noCollission()
 				.instabreak()
@@ -3658,7 +5757,9 @@ public class Blocks {
 	public static final Block DEAD_FIRE_CORAL_WALL_FAN = register(
 		"dead_fire_coral_wall_fan",
 		new BaseCoralWallFanBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.noCollission()
 				.instabreak()
@@ -3668,7 +5769,9 @@ public class Blocks {
 	public static final Block DEAD_HORN_CORAL_WALL_FAN = register(
 		"dead_horn_coral_wall_fan",
 		new BaseCoralWallFanBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_GRAY)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.noCollission()
 				.instabreak()
@@ -3750,12 +5853,21 @@ public class Blocks {
 		new HalfTransparentBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.ICE).strength(2.8F).friction(0.989F).sound(SoundType.GLASS))
 	);
 	public static final Block CONDUIT = register(
-		"conduit", new ConduitBlock(BlockBehaviour.Properties.of(Material.GLASS, MaterialColor.DIAMOND).strength(3.0F).lightLevel(blockStatex -> 15).noOcclusion())
+		"conduit",
+		new ConduitBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.DIAMOND)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.HAT)
+				.strength(3.0F)
+				.lightLevel(blockStatex -> 15)
+				.noOcclusion()
+		)
 	);
 	public static final Block BAMBOO_SAPLING = register(
 		"bamboo_sapling",
 		new BambooSaplingBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOCOLLIDER, MaterialColor.WOOD)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.forceSolidOn()
 				.randomTicks()
 				.instabreak()
 				.noCollission()
@@ -3770,6 +5882,7 @@ public class Blocks {
 		"bamboo",
 		new BambooStalkBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PLANT)
+				.forceSolidOn()
 				.randomTicks()
 				.instabreak()
 				.strength(1.0F)
@@ -3783,15 +5896,21 @@ public class Blocks {
 	);
 	public static final Block POTTED_BAMBOO = register("potted_bamboo", flowerPot(BAMBOO));
 	public static final Block VOID_AIR = register(
-		"void_air", new AirBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE).noCollission().noLootTable().air())
+		"void_air", new AirBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).replaceable().noCollission().noLootTable().air())
 	);
 	public static final Block CAVE_AIR = register(
-		"cave_air", new AirBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE).noCollission().noLootTable().air())
+		"cave_air", new AirBlock(BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID).replaceable().noCollission().noLootTable().air())
 	);
 	public static final Block BUBBLE_COLUMN = register(
 		"bubble_column",
 		new BubbleColumnBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.WATER).noCollission().noLootTable().pushReaction(PushReaction.DESTROY).liquid()
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.WATER)
+				.replaceable()
+				.noCollission()
+				.noLootTable()
+				.pushReaction(PushReaction.DESTROY)
+				.liquid()
+				.sound(SoundType.EMPTY)
 		)
 	);
 	public static final Block POLISHED_GRANITE_STAIRS = register(
@@ -3868,23 +5987,64 @@ public class Blocks {
 		)
 	);
 	public static final Block LOOM = register(
-		"loom", new LoomBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava())
+		"loom",
+		new LoomBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BARREL = register(
-		"barrel", new BarrelBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava())
+		"barrel",
+		new BarrelBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block SMOKER = register(
-		"smoker", new SmokerBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.5F).lightLevel(litBlockEmission(13)))
+		"smoker",
+		new SmokerBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.5F)
+				.lightLevel(litBlockEmission(13))
+		)
 	);
 	public static final Block BLAST_FURNACE = register(
 		"blast_furnace",
-		new BlastFurnaceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.5F).lightLevel(litBlockEmission(13)))
+		new BlastFurnaceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.5F)
+				.lightLevel(litBlockEmission(13))
+		)
 	);
 	public static final Block CARTOGRAPHY_TABLE = register(
-		"cartography_table", new CartographyTableBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava())
+		"cartography_table",
+		new CartographyTableBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block FLETCHING_TABLE = register(
-		"fletching_table", new FletchingTableBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava())
+		"fletching_table",
+		new FletchingTableBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block GRINDSTONE = register(
 		"grindstone",
@@ -3897,18 +6057,36 @@ public class Blocks {
 		)
 	);
 	public static final Block LECTERN = register(
-		"lectern", new LecternBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava())
+		"lectern",
+		new LecternBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block SMITHING_TABLE = register(
-		"smithing_table", new SmithingTableBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD).ignitedByLava())
+		"smithing_table",
+		new SmithingTableBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block STONECUTTER = register(
-		"stonecutter", new StonecutterBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.5F))
+		"stonecutter",
+		new StonecutterBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(3.5F)
+		)
 	);
 	public static final Block BELL = register(
 		"bell",
 		new BellBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.GOLD)
+				.forceSolidOn()
 				.requiresCorrectToolForDrops()
 				.strength(5.0F)
 				.sound(SoundType.ANVIL)
@@ -3919,6 +6097,7 @@ public class Blocks {
 		"lantern",
 		new LanternBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.METAL)
+				.forceSolidOn()
 				.requiresCorrectToolForDrops()
 				.strength(3.5F)
 				.sound(SoundType.LANTERN)
@@ -3931,6 +6110,7 @@ public class Blocks {
 		"soul_lantern",
 		new LanternBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.METAL)
+				.forceSolidOn()
 				.requiresCorrectToolForDrops()
 				.strength(3.5F)
 				.sound(SoundType.LANTERN)
@@ -3944,7 +6124,8 @@ public class Blocks {
 		new CampfireBlock(
 			true,
 			1,
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL)
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(2.0F)
 				.sound(SoundType.WOOD)
 				.lightLevel(litBlockEmission(15))
@@ -3957,7 +6138,8 @@ public class Blocks {
 		new CampfireBlock(
 			false,
 			2,
-			BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.PODZOL)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.PODZOL)
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(2.0F)
 				.sound(SoundType.WOOD)
 				.lightLevel(litBlockEmission(10))
@@ -3974,16 +6156,26 @@ public class Blocks {
 	public static final Block WARPED_STEM = register("warped_stem", netherStem(MaterialColor.WARPED_STEM));
 	public static final Block STRIPPED_WARPED_STEM = register("stripped_warped_stem", netherStem(MaterialColor.WARPED_STEM));
 	public static final Block WARPED_HYPHAE = register(
-		"warped_hyphae", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WARPED_HYPHAE).strength(2.0F).sound(SoundType.STEM))
+		"warped_hyphae",
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WARPED_HYPHAE).instrument(NoteBlockInstrument.BASS).strength(2.0F).sound(SoundType.STEM)
+		)
 	);
 	public static final Block STRIPPED_WARPED_HYPHAE = register(
 		"stripped_warped_hyphae",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WARPED_HYPHAE).strength(2.0F).sound(SoundType.STEM))
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WARPED_HYPHAE).instrument(NoteBlockInstrument.BASS).strength(2.0F).sound(SoundType.STEM)
+		)
 	);
 	public static final Block WARPED_NYLIUM = register(
 		"warped_nylium",
 		new NyliumBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(0.4F).sound(SoundType.NYLIUM).randomTicks()
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WARPED_NYLIUM)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(0.4F)
+				.sound(SoundType.NYLIUM)
+				.randomTicks()
 		)
 	);
 	public static final Block WARPED_FUNGUS = register(
@@ -4004,7 +6196,8 @@ public class Blocks {
 	public static final Block WARPED_ROOTS = register(
 		"warped_roots",
 		new RootsBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.COLOR_CYAN)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.COLOR_CYAN)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.ROOTS)
@@ -4015,7 +6208,8 @@ public class Blocks {
 	public static final Block NETHER_SPROUTS = register(
 		"nether_sprouts",
 		new NetherSproutsBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.COLOR_CYAN)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.COLOR_CYAN)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.NETHER_SPROUTS)
@@ -4026,16 +6220,22 @@ public class Blocks {
 	public static final Block CRIMSON_STEM = register("crimson_stem", netherStem(MaterialColor.CRIMSON_STEM));
 	public static final Block STRIPPED_CRIMSON_STEM = register("stripped_crimson_stem", netherStem(MaterialColor.CRIMSON_STEM));
 	public static final Block CRIMSON_HYPHAE = register(
-		"crimson_hyphae", new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.CRIMSON_HYPHAE).strength(2.0F).sound(SoundType.STEM))
+		"crimson_hyphae",
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.CRIMSON_HYPHAE).instrument(NoteBlockInstrument.BASS).strength(2.0F).sound(SoundType.STEM)
+		)
 	);
 	public static final Block STRIPPED_CRIMSON_HYPHAE = register(
 		"stripped_crimson_hyphae",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.CRIMSON_HYPHAE).strength(2.0F).sound(SoundType.STEM))
+		new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.CRIMSON_HYPHAE).instrument(NoteBlockInstrument.BASS).strength(2.0F).sound(SoundType.STEM)
+		)
 	);
 	public static final Block CRIMSON_NYLIUM = register(
 		"crimson_nylium",
 		new NyliumBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.CRIMSON_NYLIUM)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.CRIMSON_NYLIUM)
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.strength(0.4F)
 				.sound(SoundType.NYLIUM)
@@ -4101,7 +6301,8 @@ public class Blocks {
 	public static final Block CRIMSON_ROOTS = register(
 		"crimson_roots",
 		new RootsBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.NETHER)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.NETHER)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.ROOTS)
@@ -4110,24 +6311,51 @@ public class Blocks {
 		)
 	);
 	public static final Block CRIMSON_PLANKS = register(
-		"crimson_planks", new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.CRIMSON_STEM).strength(2.0F, 3.0F).sound(SoundType.NETHER_WOOD))
+		"crimson_planks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.CRIMSON_STEM)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.NETHER_WOOD)
+		)
 	);
 	public static final Block WARPED_PLANKS = register(
-		"warped_planks", new Block(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WARPED_STEM).strength(2.0F, 3.0F).sound(SoundType.NETHER_WOOD))
+		"warped_planks",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WARPED_STEM)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.NETHER_WOOD)
+		)
 	);
 	public static final Block CRIMSON_SLAB = register(
 		"crimson_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, CRIMSON_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).sound(SoundType.NETHER_WOOD))
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CRIMSON_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.NETHER_WOOD)
+		)
 	);
 	public static final Block WARPED_SLAB = register(
 		"warped_slab",
-		new SlabBlock(BlockBehaviour.Properties.of(Material.WOOD, WARPED_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).sound(SoundType.NETHER_WOOD))
+		new SlabBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, WARPED_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.NETHER_WOOD)
+		)
 	);
 	public static final Block CRIMSON_PRESSURE_PLATE = register(
 		"crimson_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, CRIMSON_PLANKS.defaultMaterialColor()).noCollission().strength(0.5F).pushReaction(PushReaction.DESTROY),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CRIMSON_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(0.5F)
+				.pushReaction(PushReaction.DESTROY),
 			BlockSetType.CRIMSON
 		)
 	);
@@ -4135,39 +6363,74 @@ public class Blocks {
 		"warped_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.EVERYTHING,
-			BlockBehaviour.Properties.of(Material.WOOD, WARPED_PLANKS.defaultMaterialColor()).noCollission().strength(0.5F).pushReaction(PushReaction.DESTROY),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, WARPED_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.noCollission()
+				.strength(0.5F)
+				.pushReaction(PushReaction.DESTROY),
 			BlockSetType.WARPED
 		)
 	);
 	public static final Block CRIMSON_FENCE = register(
 		"crimson_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, CRIMSON_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).sound(SoundType.NETHER_WOOD))
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CRIMSON_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.NETHER_WOOD)
+		)
 	);
 	public static final Block WARPED_FENCE = register(
 		"warped_fence",
-		new FenceBlock(BlockBehaviour.Properties.of(Material.WOOD, WARPED_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F).sound(SoundType.NETHER_WOOD))
+		new FenceBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, WARPED_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F)
+				.sound(SoundType.NETHER_WOOD)
+		)
 	);
 	public static final Block CRIMSON_TRAPDOOR = register(
 		"crimson_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, CRIMSON_PLANKS.defaultMaterialColor()).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CRIMSON_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never),
 			BlockSetType.CRIMSON
 		)
 	);
 	public static final Block WARPED_TRAPDOOR = register(
 		"warped_trapdoor",
 		new TrapDoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, WARPED_PLANKS.defaultMaterialColor()).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, WARPED_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.isValidSpawn(Blocks::never),
 			BlockSetType.WARPED
 		)
 	);
 	public static final Block CRIMSON_FENCE_GATE = register(
 		"crimson_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, CRIMSON_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F), WoodType.CRIMSON)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CRIMSON_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F),
+			WoodType.CRIMSON
+		)
 	);
 	public static final Block WARPED_FENCE_GATE = register(
 		"warped_fence_gate",
-		new FenceGateBlock(BlockBehaviour.Properties.of(Material.WOOD, WARPED_PLANKS.defaultMaterialColor()).strength(2.0F, 3.0F), WoodType.WARPED)
+		new FenceGateBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, WARPED_PLANKS.defaultMaterialColor())
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.0F, 3.0F),
+			WoodType.WARPED
+		)
 	);
 	public static final Block CRIMSON_STAIRS = register(
 		"crimson_stairs", new StairBlock(CRIMSON_PLANKS.defaultBlockState(), BlockBehaviour.Properties.copy(CRIMSON_PLANKS))
@@ -4180,35 +6443,69 @@ public class Blocks {
 	public static final Block CRIMSON_DOOR = register(
 		"crimson_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, CRIMSON_PLANKS.defaultMaterialColor()).strength(3.0F).noOcclusion().pushReaction(PushReaction.DESTROY),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CRIMSON_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.pushReaction(PushReaction.DESTROY),
 			BlockSetType.CRIMSON
 		)
 	);
 	public static final Block WARPED_DOOR = register(
 		"warped_door",
 		new DoorBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, WARPED_PLANKS.defaultMaterialColor()).strength(3.0F).noOcclusion().pushReaction(PushReaction.DESTROY),
+			BlockBehaviour.Properties.of(Material.DEPRECATED, WARPED_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(3.0F)
+				.noOcclusion()
+				.pushReaction(PushReaction.DESTROY),
 			BlockSetType.WARPED
 		)
 	);
 	public static final Block CRIMSON_SIGN = register(
 		"crimson_sign",
-		new StandingSignBlock(BlockBehaviour.Properties.of(Material.WOOD, CRIMSON_PLANKS.defaultMaterialColor()).noCollission().strength(1.0F), WoodType.CRIMSON)
+		new StandingSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CRIMSON_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.forceSolidOn()
+				.noCollission()
+				.strength(1.0F),
+			WoodType.CRIMSON
+		)
 	);
 	public static final Block WARPED_SIGN = register(
 		"warped_sign",
-		new StandingSignBlock(BlockBehaviour.Properties.of(Material.WOOD, WARPED_PLANKS.defaultMaterialColor()).noCollission().strength(1.0F), WoodType.WARPED)
+		new StandingSignBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, WARPED_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.forceSolidOn()
+				.noCollission()
+				.strength(1.0F),
+			WoodType.WARPED
+		)
 	);
 	public static final Block CRIMSON_WALL_SIGN = register(
 		"crimson_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, CRIMSON_PLANKS.defaultMaterialColor()).noCollission().strength(1.0F).dropsLike(CRIMSON_SIGN), WoodType.CRIMSON
+			BlockBehaviour.Properties.of(Material.DEPRECATED, CRIMSON_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.forceSolidOn()
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(CRIMSON_SIGN),
+			WoodType.CRIMSON
 		)
 	);
 	public static final Block WARPED_WALL_SIGN = register(
 		"warped_wall_sign",
 		new WallSignBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, WARPED_PLANKS.defaultMaterialColor()).noCollission().strength(1.0F).dropsLike(WARPED_SIGN), WoodType.WARPED
+			BlockBehaviour.Properties.of(Material.DEPRECATED, WARPED_PLANKS.defaultMaterialColor())
+				.instrument(NoteBlockInstrument.BASS)
+				.forceSolidOn()
+				.noCollission()
+				.strength(1.0F)
+				.dropsLike(WARPED_SIGN),
+			WoodType.WARPED
 		)
 	);
 	public static final Block STRUCTURE_BLOCK = register(
@@ -4224,16 +6521,37 @@ public class Blocks {
 		)
 	);
 	public static final Block COMPOSTER = register(
-		"composter", new ComposterBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(0.6F).sound(SoundType.WOOD).ignitedByLava())
+		"composter",
+		new ComposterBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(0.6F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block TARGET = register(
 		"target", new TargetBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.QUARTZ).strength(0.5F).sound(SoundType.GRASS))
 	);
 	public static final Block BEE_NEST = register(
-		"bee_nest", new BeehiveBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_YELLOW).strength(0.3F).sound(SoundType.WOOD).ignitedByLava())
+		"bee_nest",
+		new BeehiveBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_YELLOW)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(0.3F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block BEEHIVE = register(
-		"beehive", new BeehiveBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(0.6F).sound(SoundType.WOOD).ignitedByLava())
+		"beehive",
+		new BeehiveBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(0.6F)
+				.sound(SoundType.WOOD)
+				.ignitedByLava()
+		)
 	);
 	public static final Block HONEY_BLOCK = register(
 		"honey_block",
@@ -4265,13 +6583,18 @@ public class Blocks {
 	public static final Block CRYING_OBSIDIAN = register(
 		"crying_obsidian",
 		new CryingObsidianBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(50.0F, 1200.0F).lightLevel(blockStatex -> 10)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(50.0F, 1200.0F)
+				.lightLevel(blockStatex -> 10)
 		)
 	);
 	public static final Block RESPAWN_ANCHOR = register(
 		"respawn_anchor",
 		new RespawnAnchorBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.strength(50.0F, 1200.0F)
 				.lightLevel(blockStatex -> RespawnAnchorBlock.getScaledChargeLevel(blockStatex, 15))
@@ -4292,7 +6615,13 @@ public class Blocks {
 		)
 	);
 	public static final Block BLACKSTONE = register(
-		"blackstone", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
+		"blackstone",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
+		)
 	);
 	public static final Block BLACKSTONE_STAIRS = register(
 		"blackstone_stairs", new StairBlock(BLACKSTONE.defaultBlockState(), BlockBehaviour.Properties.copy(BLACKSTONE))
@@ -4330,7 +6659,9 @@ public class Blocks {
 		"polished_blackstone_pressure_plate",
 		new PressurePlateBlock(
 			PressurePlateBlock.Sensitivity.MOBS,
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.requiresCorrectToolForDrops()
 				.noCollission()
 				.strength(0.5F)
@@ -4343,13 +6674,21 @@ public class Blocks {
 	public static final Block CHISELED_NETHER_BRICKS = register(
 		"chiseled_nether_bricks",
 		new Block(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+				.sound(SoundType.NETHER_BRICKS)
 		)
 	);
 	public static final Block CRACKED_NETHER_BRICKS = register(
 		"cracked_nether_bricks",
 		new Block(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.NETHER)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(2.0F, 6.0F)
+				.sound(SoundType.NETHER_BRICKS)
 		)
 	);
 	public static final Block QUARTZ_BRICKS = register("quartz_bricks", new Block(BlockBehaviour.Properties.copy(QUARTZ_BLOCK)));
@@ -4418,6 +6757,7 @@ public class Blocks {
 			7,
 			3,
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_PURPLE)
+				.forceSolidOn()
 				.noOcclusion()
 				.randomTicks()
 				.sound(SoundType.AMETHYST_CLUSTER)
@@ -4429,30 +6769,58 @@ public class Blocks {
 	public static final Block LARGE_AMETHYST_BUD = register(
 		"large_amethyst_bud",
 		new AmethystClusterBlock(
-			5, 3, BlockBehaviour.Properties.copy(AMETHYST_CLUSTER).sound(SoundType.MEDIUM_AMETHYST_BUD).lightLevel(blockStatex -> 4).pushReaction(PushReaction.DESTROY)
+			5,
+			3,
+			BlockBehaviour.Properties.copy(AMETHYST_CLUSTER)
+				.sound(SoundType.MEDIUM_AMETHYST_BUD)
+				.forceSolidOn()
+				.lightLevel(blockStatex -> 4)
+				.pushReaction(PushReaction.DESTROY)
 		)
 	);
 	public static final Block MEDIUM_AMETHYST_BUD = register(
 		"medium_amethyst_bud",
 		new AmethystClusterBlock(
-			4, 3, BlockBehaviour.Properties.copy(AMETHYST_CLUSTER).sound(SoundType.LARGE_AMETHYST_BUD).lightLevel(blockStatex -> 2).pushReaction(PushReaction.DESTROY)
+			4,
+			3,
+			BlockBehaviour.Properties.copy(AMETHYST_CLUSTER)
+				.sound(SoundType.LARGE_AMETHYST_BUD)
+				.forceSolidOn()
+				.lightLevel(blockStatex -> 2)
+				.pushReaction(PushReaction.DESTROY)
 		)
 	);
 	public static final Block SMALL_AMETHYST_BUD = register(
 		"small_amethyst_bud",
 		new AmethystClusterBlock(
-			3, 4, BlockBehaviour.Properties.copy(AMETHYST_CLUSTER).sound(SoundType.SMALL_AMETHYST_BUD).lightLevel(blockStatex -> 1).pushReaction(PushReaction.DESTROY)
+			3,
+			4,
+			BlockBehaviour.Properties.copy(AMETHYST_CLUSTER)
+				.sound(SoundType.SMALL_AMETHYST_BUD)
+				.forceSolidOn()
+				.lightLevel(blockStatex -> 1)
+				.pushReaction(PushReaction.DESTROY)
 		)
 	);
 	public static final Block TUFF = register(
 		"tuff",
 		new Block(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_GRAY).sound(SoundType.TUFF).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_GRAY)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.sound(SoundType.TUFF)
+				.requiresCorrectToolForDrops()
+				.strength(1.5F, 6.0F)
 		)
 	);
 	public static final Block CALCITE = register(
 		"calcite",
-		new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_WHITE).sound(SoundType.CALCITE).requiresCorrectToolForDrops().strength(0.75F))
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_WHITE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.sound(SoundType.CALCITE)
+				.requiresCorrectToolForDrops()
+				.strength(0.75F)
+		)
 	);
 	public static final Block TINTED_GLASS = register(
 		"tinted_glass",
@@ -4468,9 +6836,7 @@ public class Blocks {
 	);
 	public static final Block POWDER_SNOW = register(
 		"powder_snow",
-		new PowderSnowBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOCOLLIDER_NONSOLID, MaterialColor.SNOW).strength(0.25F).sound(SoundType.POWDER_SNOW).dynamicShape()
-		)
+		new PowderSnowBlock(BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.SNOW).strength(0.25F).sound(SoundType.POWDER_SNOW).dynamicShape())
 	);
 	public static final Block SCULK_SENSOR = register(
 		"sculk_sensor",
@@ -4492,6 +6858,7 @@ public class Blocks {
 		"sculk_vein",
 		new SculkVeinBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_BLACK)
+				.forceSolidOn()
 				.noCollission()
 				.strength(0.2F)
 				.sound(SoundType.SCULK_VEIN)
@@ -4631,6 +6998,7 @@ public class Blocks {
 		"lightning_rod",
 		new LightningRodBlock(
 			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.forceSolidOn()
 				.requiresCorrectToolForDrops()
 				.strength(3.0F, 6.0F)
 				.sound(SoundType.COPPER)
@@ -4640,7 +7008,9 @@ public class Blocks {
 	public static final Block POINTED_DRIPSTONE = register(
 		"pointed_dripstone",
 		new PointedDripstoneBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BROWN)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_BROWN)
+				.forceSolidOn()
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.noOcclusion()
 				.sound(SoundType.POINTED_DRIPSTONE)
 				.randomTicks()
@@ -4653,7 +7023,8 @@ public class Blocks {
 	public static final Block DRIPSTONE_BLOCK = register(
 		"dripstone_block",
 		new Block(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.TERRACOTTA_BROWN)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.TERRACOTTA_BROWN)
+				.instrument(NoteBlockInstrument.BASEDRUM)
 				.sound(SoundType.DRIPSTONE_BLOCK)
 				.requiresCorrectToolForDrops()
 				.strength(1.5F, 1.0F)
@@ -4689,11 +7060,16 @@ public class Blocks {
 		)
 	);
 	public static final Block AZALEA = register(
-		"azalea", new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().sound(SoundType.AZALEA).noOcclusion().pushReaction(PushReaction.DESTROY))
+		"azalea",
+		new AzaleaBlock(
+			BlockBehaviour.Properties.of(Material.PLANT).forceSolidOff().instabreak().sound(SoundType.AZALEA).noOcclusion().pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block FLOWERING_AZALEA = register(
 		"flowering_azalea",
-		new AzaleaBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().sound(SoundType.FLOWERING_AZALEA).noOcclusion().pushReaction(PushReaction.DESTROY))
+		new AzaleaBlock(
+			BlockBehaviour.Properties.of(Material.PLANT).forceSolidOff().instabreak().sound(SoundType.FLOWERING_AZALEA).noOcclusion().pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block MOSS_CARPET = register(
 		"moss_carpet",
@@ -4713,7 +7089,9 @@ public class Blocks {
 	);
 	public static final Block BIG_DRIPLEAF = register(
 		"big_dripleaf",
-		new BigDripleafBlock(BlockBehaviour.Properties.of(Material.PLANT).strength(0.1F).sound(SoundType.BIG_DRIPLEAF).pushReaction(PushReaction.DESTROY))
+		new BigDripleafBlock(
+			BlockBehaviour.Properties.of(Material.PLANT).forceSolidOff().strength(0.1F).sound(SoundType.BIG_DRIPLEAF).pushReaction(PushReaction.DESTROY)
+		)
 	);
 	public static final Block BIG_DRIPLEAF_STEM = register(
 		"big_dripleaf_stem",
@@ -4735,7 +7113,8 @@ public class Blocks {
 	public static final Block HANGING_ROOTS = register(
 		"hanging_roots",
 		new HangingRootsBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_REPLACEABLE, MaterialColor.DIRT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.DIRT)
+				.replaceable()
 				.noCollission()
 				.instabreak()
 				.sound(SoundType.HANGING_ROOTS)
@@ -4762,7 +7141,11 @@ public class Blocks {
 	public static final Block DEEPSLATE = register(
 		"deepslate",
 		new RotatedPillarBlock(
-			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DEEPSLATE).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.DEEPSLATE)
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DEEPSLATE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(3.0F, 6.0F)
+				.sound(SoundType.DEEPSLATE)
 		)
 	);
 	public static final Block COBBLED_DEEPSLATE = register("cobbled_deepslate", new Block(BlockBehaviour.Properties.copy(DEEPSLATE).strength(3.5F, 6.0F)));
@@ -4806,13 +7189,31 @@ public class Blocks {
 	);
 	public static final Block SMOOTH_BASALT = register("smooth_basalt", new Block(BlockBehaviour.Properties.copy(BASALT)));
 	public static final Block RAW_IRON_BLOCK = register(
-		"raw_iron_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.RAW_IRON).requiresCorrectToolForDrops().strength(5.0F, 6.0F))
+		"raw_iron_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.RAW_IRON)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(5.0F, 6.0F)
+		)
 	);
 	public static final Block RAW_COPPER_BLOCK = register(
-		"raw_copper_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(5.0F, 6.0F))
+		"raw_copper_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.COLOR_ORANGE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(5.0F, 6.0F)
+		)
 	);
 	public static final Block RAW_GOLD_BLOCK = register(
-		"raw_gold_block", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.GOLD).requiresCorrectToolForDrops().strength(5.0F, 6.0F))
+		"raw_gold_block",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.GOLD)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.strength(5.0F, 6.0F)
+		)
 	);
 	public static final Block POTTED_AZALEA = register("potted_azalea_bush", flowerPot(AZALEA));
 	public static final Block POTTED_FLOWERING_AZALEA = register("potted_flowering_azalea_bush", flowerPot(FLOWERING_AZALEA));
@@ -4846,7 +7247,13 @@ public class Blocks {
 		)
 	);
 	public static final Block REINFORCED_DEEPSLATE = register(
-		"reinforced_deepslate", new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.DEEPSLATE).sound(SoundType.DEEPSLATE).strength(55.0F, 1200.0F))
+		"reinforced_deepslate",
+		new Block(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, MaterialColor.DEEPSLATE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.sound(SoundType.DEEPSLATE)
+				.strength(55.0F, 1200.0F)
+		)
 	);
 	public static final Block DECORATED_POT = register(
 		"decorated_pot",
@@ -4887,7 +7294,10 @@ public class Blocks {
 
 	private static RotatedPillarBlock log(MaterialColor materialColor, MaterialColor materialColor2) {
 		return new RotatedPillarBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, blockState -> blockState.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? materialColor : materialColor2)
+			BlockBehaviour.Properties.of(
+					Material.DEPRECATED, blockState -> blockState.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? materialColor : materialColor2
+				)
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(2.0F)
 				.sound(SoundType.WOOD)
 				.ignitedByLava()
@@ -4896,7 +7306,10 @@ public class Blocks {
 
 	private static RotatedPillarBlock log(MaterialColor materialColor, MaterialColor materialColor2, SoundType soundType) {
 		return new RotatedPillarBlock(
-			BlockBehaviour.Properties.of(Material.WOOD, blockState -> blockState.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? materialColor : materialColor2)
+			BlockBehaviour.Properties.of(
+					Material.DEPRECATED, blockState -> blockState.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? materialColor : materialColor2
+				)
+				.instrument(NoteBlockInstrument.BASS)
 				.strength(2.0F)
 				.sound(soundType)
 				.ignitedByLava()
@@ -4904,7 +7317,9 @@ public class Blocks {
 	}
 
 	private static Block netherStem(MaterialColor materialColor) {
-		return new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, blockState -> materialColor).strength(2.0F).sound(SoundType.STEM));
+		return new RotatedPillarBlock(
+			BlockBehaviour.Properties.of(Material.DEPRECATED, blockState -> materialColor).instrument(NoteBlockInstrument.BASS).strength(2.0F).sound(SoundType.STEM)
+		);
 	}
 
 	private static boolean always(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
@@ -4918,7 +7333,8 @@ public class Blocks {
 	private static StainedGlassBlock stainedGlass(DyeColor dyeColor) {
 		return new StainedGlassBlock(
 			dyeColor,
-			BlockBehaviour.Properties.of(Material.GLASS, dyeColor)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, dyeColor)
+				.instrument(NoteBlockInstrument.HAT)
 				.strength(0.3F)
 				.sound(SoundType.GLASS)
 				.noOcclusion()
@@ -4931,7 +7347,7 @@ public class Blocks {
 
 	private static LeavesBlock leaves(SoundType soundType) {
 		return new LeavesBlock(
-			BlockBehaviour.Properties.of(Material.DEPRECATED_NOTSOLIDBLOCKING, MaterialColor.PLANT)
+			BlockBehaviour.Properties.of(Material.DEPRECATED_NONSOLID, MaterialColor.PLANT)
 				.strength(0.2F)
 				.randomTicks()
 				.sound(soundType)
@@ -4950,7 +7366,13 @@ public class Blocks {
 				: true;
 		return new ShulkerBoxBlock(
 			dyeColor,
-			properties.strength(2.0F).dynamicShape().noOcclusion().isSuffocating(statePredicate).isViewBlocking(statePredicate).pushReaction(PushReaction.DESTROY)
+			properties.forceSolidOn()
+				.strength(2.0F)
+				.dynamicShape()
+				.noOcclusion()
+				.isSuffocating(statePredicate)
+				.isViewBlocking(statePredicate)
+				.pushReaction(PushReaction.DESTROY)
 		);
 	}
 
@@ -5008,7 +7430,7 @@ public class Blocks {
 		);
 	}
 
-	private static Block register(String string, Block block) {
+	public static Block register(String string, Block block) {
 		return Registry.register(BuiltInRegistries.BLOCK, string, block);
 	}
 

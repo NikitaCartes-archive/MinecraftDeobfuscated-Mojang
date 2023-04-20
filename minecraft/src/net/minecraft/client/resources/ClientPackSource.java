@@ -56,13 +56,10 @@ public class ClientPackSource extends BuiltInPackSource {
 	}
 
 	private static VanillaPackResources createVanillaPackSource(Path path) {
-		return new VanillaPackResourcesBuilder()
+		VanillaPackResourcesBuilder vanillaPackResourcesBuilder = new VanillaPackResourcesBuilder()
 			.setMetadata(BUILT_IN_METADATA)
-			.exposeNamespace("minecraft", "realms")
-			.applyDevelopmentConfig()
-			.pushJarResources()
-			.pushAssetPath(PackType.CLIENT_RESOURCES, path)
-			.build();
+			.exposeNamespace("minecraft", "realms");
+		return vanillaPackResourcesBuilder.applyDevelopmentConfig().pushJarResources().pushAssetPath(PackType.CLIENT_RESOURCES, path).build();
 	}
 
 	@Override

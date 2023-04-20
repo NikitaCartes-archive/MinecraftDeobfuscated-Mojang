@@ -1,12 +1,10 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
@@ -38,24 +36,23 @@ public class CyclingSlotBackground {
 		}
 	}
 
-	public void render(AbstractContainerMenu abstractContainerMenu, PoseStack poseStack, float f, int i, int j) {
+	public void render(AbstractContainerMenu abstractContainerMenu, GuiGraphics guiGraphics, float f, int i, int j) {
 		Slot slot = abstractContainerMenu.getSlot(this.slotIndex);
 		if (!this.icons.isEmpty() && !slot.hasItem()) {
 			boolean bl = this.icons.size() > 1 && this.tick >= 30;
 			float g = bl ? this.getIconTransitionTransparency(f) : 1.0F;
 			if (g < 1.0F) {
 				int k = Math.floorMod(this.iconIndex - 1, this.icons.size());
-				this.renderIcon(slot, (ResourceLocation)this.icons.get(k), 1.0F - g, poseStack, i, j);
+				this.renderIcon(slot, (ResourceLocation)this.icons.get(k), 1.0F - g, guiGraphics, i, j);
 			}
 
-			this.renderIcon(slot, (ResourceLocation)this.icons.get(this.iconIndex), g, poseStack, i, j);
+			this.renderIcon(slot, (ResourceLocation)this.icons.get(this.iconIndex), g, guiGraphics, i, j);
 		}
 	}
 
-	private void renderIcon(Slot slot, ResourceLocation resourceLocation, float f, PoseStack poseStack, int i, int j) {
+	private void renderIcon(Slot slot, ResourceLocation resourceLocation, float f, GuiGraphics guiGraphics, int i, int j) {
 		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(resourceLocation);
-		RenderSystem.setShaderTexture(0, textureAtlasSprite.atlasLocation());
-		GuiComponent.blit(poseStack, i + slot.x, j + slot.y, 0, 16, 16, textureAtlasSprite, 1.0F, 1.0F, 1.0F, f);
+		guiGraphics.blit(i + slot.x, j + slot.y, 0, 16, 16, textureAtlasSprite, 1.0F, 1.0F, 1.0F, f);
 	}
 
 	private float getIconTransitionTransparency(float f) {

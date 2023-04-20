@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -10,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.client.GameNarrator;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientAdvancements;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -20,7 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 @Environment(EnvType.CLIENT)
 public class AdvancementsScreen extends Screen implements ClientAdvancements.Listener {
 	private static final ResourceLocation WINDOW_LOCATION = new ResourceLocation("textures/gui/advancements/window.png");
-	private static final ResourceLocation TABS_LOCATION = new ResourceLocation("textures/gui/advancements/tabs.png");
+	public static final ResourceLocation TABS_LOCATION = new ResourceLocation("textures/gui/advancements/tabs.png");
 	public static final int WINDOW_WIDTH = 252;
 	public static final int WINDOW_HEIGHT = 140;
 	private static final int WINDOW_INSIDE_X = 9;
@@ -97,13 +97,13 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		int k = (this.width - 252) / 2;
 		int l = (this.height - 140) / 2;
-		this.renderBackground(poseStack);
-		this.renderInside(poseStack, i, j, k, l);
-		this.renderWindow(poseStack, k, l);
-		this.renderTooltips(poseStack, i, j, k, l);
+		this.renderBackground(guiGraphics);
+		this.renderInside(guiGraphics, i, j, k, l);
+		this.renderWindow(guiGraphics, k, l);
+		this.renderTooltips(guiGraphics, i, j, k, l);
 	}
 
 	@Override
@@ -122,51 +122,48 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 		}
 	}
 
-	private void renderInside(PoseStack poseStack, int i, int j, int k, int l) {
+	private void renderInside(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		AdvancementTab advancementTab = this.selectedTab;
 		if (advancementTab == null) {
-			fill(poseStack, k + 9, l + 18, k + 9 + 234, l + 18 + 113, -16777216);
+			guiGraphics.fill(k + 9, l + 18, k + 9 + 234, l + 18 + 113, -16777216);
 			int m = k + 9 + 117;
-			drawCenteredString(poseStack, this.font, NO_ADVANCEMENTS_LABEL, m, l + 18 + 56 - 9 / 2, -1);
-			drawCenteredString(poseStack, this.font, VERY_SAD_LABEL, m, l + 18 + 113 - 9, -1);
+			guiGraphics.drawCenteredString(this.font, NO_ADVANCEMENTS_LABEL, m, l + 18 + 56 - 9 / 2, -1);
+			guiGraphics.drawCenteredString(this.font, VERY_SAD_LABEL, m, l + 18 + 113 - 9, -1);
 		} else {
-			advancementTab.drawContents(poseStack, k + 9, l + 18);
+			advancementTab.drawContents(guiGraphics, k + 9, l + 18);
 		}
 	}
 
-	public void renderWindow(PoseStack poseStack, int i, int j) {
+	public void renderWindow(GuiGraphics guiGraphics, int i, int j) {
 		RenderSystem.enableBlend();
-		RenderSystem.setShaderTexture(0, WINDOW_LOCATION);
-		blit(poseStack, i, j, 0, 0, 252, 140);
+		guiGraphics.blit(WINDOW_LOCATION, i, j, 0, 0, 252, 140);
 		if (this.tabs.size() > 1) {
-			RenderSystem.setShaderTexture(0, TABS_LOCATION);
-
 			for (AdvancementTab advancementTab : this.tabs.values()) {
-				advancementTab.drawTab(poseStack, i, j, advancementTab == this.selectedTab);
+				advancementTab.drawTab(guiGraphics, i, j, advancementTab == this.selectedTab);
 			}
 
 			for (AdvancementTab advancementTab : this.tabs.values()) {
-				advancementTab.drawIcon(poseStack, i, j, this.itemRenderer);
+				advancementTab.drawIcon(guiGraphics, i, j);
 			}
 		}
 
-		this.font.draw(poseStack, TITLE, (float)(i + 8), (float)(j + 6), 4210752);
+		guiGraphics.drawString(this.font, TITLE, i + 8, j + 6, 4210752, false);
 	}
 
-	private void renderTooltips(PoseStack poseStack, int i, int j, int k, int l) {
+	private void renderTooltips(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		if (this.selectedTab != null) {
-			poseStack.pushPose();
-			poseStack.translate((float)(k + 9), (float)(l + 18), 400.0F);
+			guiGraphics.pose().pushPose();
+			guiGraphics.pose().translate((float)(k + 9), (float)(l + 18), 400.0F);
 			RenderSystem.enableDepthTest();
-			this.selectedTab.drawTooltips(poseStack, i - k - 9, j - l - 18, k, l);
+			this.selectedTab.drawTooltips(guiGraphics, i - k - 9, j - l - 18, k, l);
 			RenderSystem.disableDepthTest();
-			poseStack.popPose();
+			guiGraphics.pose().popPose();
 		}
 
 		if (this.tabs.size() > 1) {
 			for (AdvancementTab advancementTab : this.tabs.values()) {
 				if (advancementTab.isMouseOver(k, l, (double)i, (double)j)) {
-					this.renderTooltip(poseStack, advancementTab.getTitle(), i, j);
+					guiGraphics.renderTooltip(this.font, advancementTab.getTitle(), i, j);
 				}
 			}
 		}

@@ -6,7 +6,6 @@ import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -22,7 +21,7 @@ import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.client.gui.screens.Screen;
@@ -53,6 +52,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	);
 	static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
 	static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
+	static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
 	static final Component SCANNING_LABEL = Component.translatable("lanServer.scanning");
 	static final Component CANT_RESOLVE_TEXT = Component.translatable("multiplayer.status.cannot_resolve").withStyle(style -> style.withColor(-65536));
 	static final Component CANT_CONNECT_TEXT = Component.translatable("multiplayer.status.cannot_connect").withStyle(style -> style.withColor(-65536));
@@ -138,19 +138,18 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		private final Minecraft minecraft = Minecraft.getInstance();
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			int p = j + m / 2 - 9 / 2;
-			this.minecraft
-				.font
-				.draw(
-					poseStack,
-					ServerSelectionList.SCANNING_LABEL,
-					(float)(this.minecraft.screen.width / 2 - this.minecraft.font.width(ServerSelectionList.SCANNING_LABEL) / 2),
-					(float)p,
-					16777215
-				);
+			guiGraphics.drawString(
+				this.minecraft.font,
+				ServerSelectionList.SCANNING_LABEL,
+				this.minecraft.screen.width / 2 - this.minecraft.font.width(ServerSelectionList.SCANNING_LABEL) / 2,
+				p,
+				16777215,
+				false
+			);
 			String string = LoadingDotsText.get(Util.getMillis());
-			this.minecraft.font.draw(poseStack, string, (float)(this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2), (float)(p + 9), 8421504);
+			guiGraphics.drawString(this.minecraft.font, string, this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2, p + 9, 8421504, false);
 		}
 
 		@Override
@@ -176,13 +175,13 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			this.minecraft.font.draw(poseStack, LAN_SERVER_HEADER, (float)(k + 32 + 3), (float)(j + 1), 16777215);
-			this.minecraft.font.draw(poseStack, this.serverData.getMotd(), (float)(k + 32 + 3), (float)(j + 12), 8421504);
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			guiGraphics.drawString(this.minecraft.font, LAN_SERVER_HEADER, k + 32 + 3, j + 1, 16777215, false);
+			guiGraphics.drawString(this.minecraft.font, this.serverData.getMotd(), k + 32 + 3, j + 12, 8421504, false);
 			if (this.minecraft.options.hideServerAddress) {
-				this.minecraft.font.draw(poseStack, HIDDEN_ADDRESS_TEXT, (float)(k + 32 + 3), (float)(j + 12 + 11), 3158064);
+				guiGraphics.drawString(this.minecraft.font, HIDDEN_ADDRESS_TEXT, k + 32 + 3, j + 12 + 11, 3158064, false);
 			} else {
-				this.minecraft.font.draw(poseStack, this.serverData.getAddress(), (float)(k + 32 + 3), (float)(j + 12 + 11), 3158064);
+				guiGraphics.drawString(this.minecraft.font, this.serverData.getAddress(), k + 32 + 3, j + 12 + 11, 3158064, false);
 			}
 		}
 
@@ -243,7 +242,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			if (!this.serverData.pinged) {
 				this.serverData.pinged = true;
 				this.serverData.ping = -2L;
@@ -263,16 +262,16 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			boolean bl2 = !this.isCompatible();
-			this.minecraft.font.draw(poseStack, this.serverData.name, (float)(k + 32 + 3), (float)(j + 1), 16777215);
+			guiGraphics.drawString(this.minecraft.font, this.serverData.name, k + 32 + 3, j + 1, 16777215, false);
 			List<FormattedCharSequence> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
 
 			for (int p = 0; p < Math.min(list.size(), 2); p++) {
-				this.minecraft.font.draw(poseStack, (FormattedCharSequence)list.get(p), (float)(k + 32 + 3), (float)(j + 12 + 9 * p), 8421504);
+				guiGraphics.drawString(this.minecraft.font, (FormattedCharSequence)list.get(p), k + 32 + 3, j + 12 + 9 * p, 8421504, false);
 			}
 
 			Component component = (Component)(bl2 ? this.serverData.version.copy().withStyle(ChatFormatting.RED) : this.serverData.status);
 			int q = this.minecraft.font.width(component);
-			this.minecraft.font.draw(poseStack, component, (float)(k + l - q - 15 - 2), (float)(j + 1), 8421504);
+			guiGraphics.drawString(this.minecraft.font, component, k + l - q - 15 - 2, j + 1, 8421504, false);
 			int r = 0;
 			int s;
 			List<Component> list2;
@@ -314,8 +313,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				list2 = Collections.emptyList();
 			}
 
-			RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
-			GuiComponent.blit(poseStack, k + l - 15, j, (float)(r * 10), (float)(176 + s * 8), 10, 8, 256, 256);
+			guiGraphics.blit(ServerSelectionList.GUI_ICONS_LOCATION, k + l - 15, j, (float)(r * 10), (float)(176 + s * 8), 10, 8, 256, 256);
 			byte[] bs = this.serverData.getIconBytes();
 			if (!Arrays.equals(bs, this.lastIconBytes)) {
 				if (this.uploadServerIcon(bs)) {
@@ -327,9 +325,9 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			if (this.icon == null) {
-				this.drawIcon(poseStack, k, j, ServerSelectionList.ICON_MISSING);
+				this.drawIcon(guiGraphics, k, j, ServerSelectionList.ICON_MISSING);
 			} else {
-				this.drawIcon(poseStack, k, j, this.iconLocation);
+				this.drawIcon(guiGraphics, k, j, this.iconLocation);
 			}
 
 			int t = n - k;
@@ -341,31 +339,30 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			if (this.minecraft.options.touchscreen().get() || bl) {
-				RenderSystem.setShaderTexture(0, ServerSelectionList.ICON_OVERLAY_LOCATION);
-				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
+				guiGraphics.fill(k, j, k + 32, j + 32, -1601138544);
 				int v = n - k;
 				int w = o - j;
 				if (this.canJoin()) {
 					if (v < 32 && v > 16) {
-						GuiComponent.blit(poseStack, k, j, 0.0F, 32.0F, 32, 32, 256, 256);
+						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, 32.0F, 32, 32, 256, 256);
 					} else {
-						GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 256, 256);
+						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, 0.0F, 32, 32, 256, 256);
 					}
 				}
 
 				if (i > 0) {
 					if (v < 16 && w < 16) {
-						GuiComponent.blit(poseStack, k, j, 96.0F, 32.0F, 32, 32, 256, 256);
+						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, 32.0F, 32, 32, 256, 256);
 					} else {
-						GuiComponent.blit(poseStack, k, j, 96.0F, 0.0F, 32, 32, 256, 256);
+						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, 0.0F, 32, 32, 256, 256);
 					}
 				}
 
 				if (i < this.screen.getServers().size() - 1) {
 					if (v < 16 && w > 16) {
-						GuiComponent.blit(poseStack, k, j, 64.0F, 32.0F, 32, 32, 256, 256);
+						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, 32.0F, 32, 32, 256, 256);
 					} else {
-						GuiComponent.blit(poseStack, k, j, 64.0F, 0.0F, 32, 32, 256, 256);
+						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, 0.0F, 32, 32, 256, 256);
 					}
 				}
 			}
@@ -383,10 +380,9 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			this.screen.getServers().save();
 		}
 
-		protected void drawIcon(PoseStack poseStack, int i, int j, ResourceLocation resourceLocation) {
-			RenderSystem.setShaderTexture(0, resourceLocation);
+		protected void drawIcon(GuiGraphics guiGraphics, int i, int j, ResourceLocation resourceLocation) {
 			RenderSystem.enableBlend();
-			GuiComponent.blit(poseStack, i, j, 0.0F, 0.0F, 32, 32, 32, 32);
+			guiGraphics.blit(resourceLocation, i, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			RenderSystem.disableBlend();
 		}
 

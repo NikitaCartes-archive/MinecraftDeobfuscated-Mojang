@@ -2,7 +2,6 @@ package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +11,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -21,6 +20,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -183,48 +183,48 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	protected void clickedHeader(int i, int j) {
 	}
 
-	protected void renderHeader(PoseStack poseStack, int i, int j) {
+	protected void renderHeader(GuiGraphics guiGraphics, int i, int j) {
 	}
 
-	protected void renderBackground(PoseStack poseStack) {
+	protected void renderBackground(GuiGraphics guiGraphics) {
 	}
 
-	protected void renderDecorations(PoseStack poseStack, int i, int j) {
+	protected void renderDecorations(GuiGraphics guiGraphics, int i, int j) {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
 		int k = this.getScrollbarPosition();
 		int l = k + 6;
 		this.hovered = this.isMouseOver((double)i, (double)j) ? this.getEntryAtPosition((double)i, (double)j) : null;
 		if (this.renderBackground) {
-			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
-			RenderSystem.setShaderColor(0.125F, 0.125F, 0.125F, 1.0F);
+			guiGraphics.setColor(0.125F, 0.125F, 0.125F, 1.0F);
 			int m = 32;
-			blit(poseStack, this.x0, this.y0, (float)this.x1, (float)(this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			guiGraphics.blit(
+				Screen.BACKGROUND_LOCATION, this.x0, this.y0, (float)this.x1, (float)(this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32
+			);
+			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		}
 
 		int m = this.getRowLeft();
 		int n = this.y0 + 4 - (int)this.getScrollAmount();
-		this.enableScissor();
+		this.enableScissor(guiGraphics);
 		if (this.renderHeader) {
-			this.renderHeader(poseStack, m, n);
+			this.renderHeader(guiGraphics, m, n);
 		}
 
-		this.renderList(poseStack, i, j, f);
-		disableScissor();
+		this.renderList(guiGraphics, i, j, f);
+		guiGraphics.disableScissor();
 		if (this.renderTopAndBottom) {
-			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
 			int o = 32;
-			RenderSystem.setShaderColor(0.25F, 0.25F, 0.25F, 1.0F);
-			blit(poseStack, this.x0, 0, 0.0F, 0.0F, this.width, this.y0, 32, 32);
-			blit(poseStack, this.x0, this.y1, 0.0F, (float)this.y1, this.width, this.height - this.y1, 32, 32);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			guiGraphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
+			guiGraphics.blit(Screen.BACKGROUND_LOCATION, this.x0, 0, 0.0F, 0.0F, this.width, this.y0, 32, 32);
+			guiGraphics.blit(Screen.BACKGROUND_LOCATION, this.x0, this.y1, 0.0F, (float)this.y1, this.width, this.height - this.y1, 32, 32);
+			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 			int p = 4;
-			fillGradient(poseStack, this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
-			fillGradient(poseStack, this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
+			guiGraphics.fillGradient(this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0);
+			guiGraphics.fillGradient(this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216);
 		}
 
 		int o = this.getMaxScroll();
@@ -236,17 +236,17 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				q = this.y0;
 			}
 
-			fill(poseStack, k, this.y0, l, this.y1, -16777216);
-			fill(poseStack, k, q, l, q + p, -8355712);
-			fill(poseStack, k, q, l - 1, q + p - 1, -4144960);
+			guiGraphics.fill(k, this.y0, l, this.y1, -16777216);
+			guiGraphics.fill(k, q, l, q + p, -8355712);
+			guiGraphics.fill(k, q, l - 1, q + p - 1, -4144960);
 		}
 
-		this.renderDecorations(poseStack, i, j);
+		this.renderDecorations(guiGraphics, i, j);
 		RenderSystem.disableBlend();
 	}
 
-	protected void enableScissor() {
-		enableScissor(this.x0, this.y0, this.x1, this.y1);
+	protected void enableScissor(GuiGraphics guiGraphics) {
+		guiGraphics.enableScissor(this.x0, this.y0, this.x1, this.y1);
 	}
 
 	protected void centerScrollOn(E entry) {
@@ -413,7 +413,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return e >= (double)this.y0 && e <= (double)this.y1 && d >= (double)this.x0 && d <= (double)this.x1;
 	}
 
-	protected void renderList(PoseStack poseStack, int i, int j, float f) {
+	protected void renderList(GuiGraphics guiGraphics, int i, int j, float f) {
 		int k = this.getRowLeft();
 		int l = this.getRowWidth();
 		int m = this.itemHeight - 4;
@@ -423,27 +423,27 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			int p = this.getRowTop(o);
 			int q = this.getRowBottom(o);
 			if (q >= this.y0 && p <= this.y1) {
-				this.renderItem(poseStack, i, j, f, o, k, p, l, m);
+				this.renderItem(guiGraphics, i, j, f, o, k, p, l, m);
 			}
 		}
 	}
 
-	protected void renderItem(PoseStack poseStack, int i, int j, float f, int k, int l, int m, int n, int o) {
+	protected void renderItem(GuiGraphics guiGraphics, int i, int j, float f, int k, int l, int m, int n, int o) {
 		E entry = this.getEntry(k);
-		entry.renderBack(poseStack, k, m, l, n, o, i, j, Objects.equals(this.hovered, entry), f);
+		entry.renderBack(guiGraphics, k, m, l, n, o, i, j, Objects.equals(this.hovered, entry), f);
 		if (this.renderSelection && this.isSelectedItem(k)) {
 			int p = this.isFocused() ? -1 : -8355712;
-			this.renderSelection(poseStack, m, n, o, p, -16777216);
+			this.renderSelection(guiGraphics, m, n, o, p, -16777216);
 		}
 
-		entry.render(poseStack, k, m, l, n, o, i, j, Objects.equals(this.hovered, entry), f);
+		entry.render(guiGraphics, k, m, l, n, o, i, j, Objects.equals(this.hovered, entry), f);
 	}
 
-	protected void renderSelection(PoseStack poseStack, int i, int j, int k, int l, int m) {
+	protected void renderSelection(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 		int n = this.x0 + (this.width - j) / 2;
 		int o = this.x0 + (this.width + j) / 2;
-		fill(poseStack, n, i - 2, o, i + k + 2, l);
-		fill(poseStack, n + 1, i - 1, o - 1, i + k + 1, m);
+		guiGraphics.fill(n, i - 2, o, i + k + 2, l);
+		guiGraphics.fill(n + 1, i - 1, o - 1, i + k + 1, m);
 	}
 
 	public int getRowLeft() {
@@ -524,9 +524,9 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			return this.list.getFocused() == this;
 		}
 
-		public abstract void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f);
+		public abstract void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f);
 
-		public void renderBack(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void renderBack(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 		}
 
 		@Override

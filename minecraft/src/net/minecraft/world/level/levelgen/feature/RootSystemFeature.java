@@ -71,7 +71,7 @@ public class RootSystemFeature extends Feature<RootSystemConfiguration> {
 			if (rootSystemConfiguration.allowedTreePosition.test(worldGenLevel, mutableBlockPos)
 				&& spaceForTree(worldGenLevel, rootSystemConfiguration, mutableBlockPos)) {
 				BlockPos blockPos2 = mutableBlockPos.below();
-				if (worldGenLevel.getFluidState(blockPos2).is(FluidTags.LAVA) || !worldGenLevel.getBlockState(blockPos2).getMaterial().isSolid()) {
+				if (worldGenLevel.getFluidState(blockPos2).is(FluidTags.LAVA) || !worldGenLevel.getBlockState(blockPos2).isSolid()) {
 					return false;
 				}
 

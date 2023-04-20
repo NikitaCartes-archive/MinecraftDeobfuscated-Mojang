@@ -65,7 +65,7 @@ public abstract class FlowingFluid extends Fluid {
 				float f = fluidState2.getOwnHeight();
 				float g = 0.0F;
 				if (f == 0.0F) {
-					if (!blockGetter.getBlockState(mutableBlockPos).getMaterial().blocksMotion()) {
+					if (!blockGetter.getBlockState(mutableBlockPos).blocksMotion()) {
 						BlockPos blockPos2 = mutableBlockPos.below();
 						FluidState fluidState3 = blockGetter.getFluidState(blockPos2);
 						if (this.affectsFlow(fluidState3)) {
@@ -174,7 +174,7 @@ public abstract class FlowingFluid extends Fluid {
 		if (this.canConvertToSource(level) && j >= 2) {
 			BlockState blockState3 = level.getBlockState(blockPos.below());
 			FluidState fluidState2 = blockState3.getFluidState();
-			if (blockState3.getMaterial().isSolid() || this.isSourceBlockOfThisType(fluidState2)) {
+			if (blockState3.isSolid() || this.isSourceBlockOfThisType(fluidState2)) {
 				return this.getSource(false);
 			}
 		}
@@ -407,7 +407,7 @@ public abstract class FlowingFluid extends Fluid {
 					&& !blockState.is(Blocks.END_PORTAL)
 					&& !blockState.is(Blocks.END_GATEWAY)
 					&& !blockState.is(Blocks.STRUCTURE_VOID)
-				? !blockState.getMaterial().blocksMotion()
+				? !blockState.blocksMotion()
 				: false;
 		}
 	}

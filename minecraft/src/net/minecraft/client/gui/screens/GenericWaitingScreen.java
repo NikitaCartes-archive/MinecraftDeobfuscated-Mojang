@@ -1,10 +1,10 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.CommonComponents;
@@ -65,17 +65,17 @@ public class GenericWaitingScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 80, 16777215);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 80, 16777215);
 		if (this.message == null) {
 			String string = LoadingDotsText.get(Util.getMillis());
-			drawCenteredString(poseStack, this.font, string, this.width / 2, 120, 10526880);
+			guiGraphics.drawCenteredString(this.font, string, this.width / 2, 120, 10526880);
 		} else {
-			this.message.renderCentered(poseStack, this.width / 2, 120);
+			this.message.renderCentered(guiGraphics, this.width / 2, 120);
 		}
 
-		super.render(poseStack, i, j, f);
+		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

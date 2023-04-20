@@ -122,9 +122,10 @@ public class ChunkSerializer {
 					);
 				}
 
-				LevelChunkSection levelChunkSection = new LevelChunkSection(k, palettedContainer, palettedContainerRO);
+				LevelChunkSection levelChunkSection = new LevelChunkSection(palettedContainer, palettedContainerRO);
 				levelChunkSections[l] = levelChunkSection;
-				poiManager.checkConsistencyWithBlocks(chunkPos, levelChunkSection);
+				SectionPos sectionPos = SectionPos.of(chunkPos, k);
+				poiManager.checkConsistencyWithBlocks(sectionPos, levelChunkSection);
 			}
 
 			boolean bl4 = compoundTag2.contains("BlockLight", 7);
@@ -195,7 +196,7 @@ public class ChunkSerializer {
 
 			ChunkStatus chunkStatus = ChunkStatus.byName(compoundTag.getString("Status"));
 			protoChunk.setStatus(chunkStatus);
-			if (chunkStatus.isOrAfter(ChunkStatus.FEATURES)) {
+			if (chunkStatus.isOrAfter(ChunkStatus.INITIALIZE_LIGHT)) {
 				protoChunk.setLightEngine(levelLightEngine);
 			}
 

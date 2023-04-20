@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.reporting;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -8,7 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Optionull;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
@@ -70,13 +69,13 @@ public class ReportReasonSelectionScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.renderBackground(poseStack);
-		this.reasonSelectionList.render(poseStack, i, j, f);
-		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 16, 16777215);
-		super.render(poseStack, i, j, f);
-		fill(poseStack, this.contentLeft(), this.descriptionTop(), this.contentRight(), this.descriptionBottom(), 2130706432);
-		drawString(poseStack, this.font, REASON_DESCRIPTION, this.contentLeft() + 4, this.descriptionTop() + 4, -8421505);
+	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics);
+		this.reasonSelectionList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 16777215);
+		super.render(guiGraphics, i, j, f);
+		guiGraphics.fill(this.contentLeft(), this.descriptionTop(), this.contentRight(), this.descriptionBottom(), 2130706432);
+		guiGraphics.drawString(this.font, REASON_DESCRIPTION, this.contentLeft() + 4, this.descriptionTop() + 4, -8421505);
 		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = this.reasonSelectionList.getSelected();
 		if (entry != null) {
 			int k = this.contentLeft() + 4 + 16;
@@ -86,7 +85,7 @@ public class ReportReasonSelectionScreen extends Screen {
 			int o = l - k;
 			int p = n - m;
 			int q = this.font.wordWrapHeight(entry.reason.description(), o);
-			this.font.drawWordWrap(poseStack, entry.reason.description(), k, m + (p - q) / 2, o, -1);
+			guiGraphics.drawWordWrap(this.font, entry.reason.description(), k, m + (p - q) / 2, o, -1);
 		}
 	}
 
@@ -158,10 +157,10 @@ public class ReportReasonSelectionScreen extends Screen {
 			}
 
 			@Override
-			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				int p = k + 1;
 				int q = j + (m - 9) / 2 + 1;
-				GuiComponent.drawString(poseStack, ReportReasonSelectionScreen.this.font, this.reason.title(), p, q, -1);
+				guiGraphics.drawString(ReportReasonSelectionScreen.this.font, this.reason.title(), p, q, -1);
 			}
 
 			@Override

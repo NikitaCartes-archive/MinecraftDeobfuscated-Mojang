@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -50,7 +51,7 @@ public class FarmBlock extends Block {
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.above());
-		return !blockState2.getMaterial().isSolid() || blockState2.getBlock() instanceof FenceGateBlock || blockState2.getBlock() instanceof MovingPistonBlock;
+		return !blockState2.isSolid() || blockState2.getBlock() instanceof FenceGateBlock || blockState2.getBlock() instanceof MovingPistonBlock;
 	}
 
 	@Override
@@ -111,8 +112,7 @@ public class FarmBlock extends Block {
 	}
 
 	private static boolean shouldMaintainFarmland(BlockGetter blockGetter, BlockPos blockPos) {
-		Block block = blockGetter.getBlockState(blockPos.above()).getBlock();
-		return block instanceof FarmableBlock;
+		return blockGetter.getBlockState(blockPos.above()).is(BlockTags.MAINTAINS_FARMLAND);
 	}
 
 	private static boolean isNearWater(LevelReader levelReader, BlockPos blockPos) {

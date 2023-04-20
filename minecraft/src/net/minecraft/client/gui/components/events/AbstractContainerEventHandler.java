@@ -3,10 +3,9 @@ package net.minecraft.client.gui.components.events;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractContainerEventHandler extends GuiComponent implements ContainerEventHandler {
+public abstract class AbstractContainerEventHandler implements ContainerEventHandler {
 	@Nullable
 	private GuiEventListener focused;
 	private boolean isDragging;

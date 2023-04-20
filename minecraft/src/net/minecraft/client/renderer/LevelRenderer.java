@@ -2611,17 +2611,13 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	@Nullable
 	private Particle addParticleInternal(ParticleOptions particleOptions, boolean bl, boolean bl2, double d, double e, double f, double g, double h, double i) {
 		Camera camera = this.minecraft.gameRenderer.getMainCamera();
-		if (this.minecraft != null && camera.isInitialized() && this.minecraft.particleEngine != null) {
-			ParticleStatus particleStatus = this.calculateParticleLevel(bl2);
-			if (bl) {
-				return this.minecraft.particleEngine.createParticle(particleOptions, d, e, f, g, h, i);
-			} else if (camera.getPosition().distanceToSqr(d, e, f) > 1024.0) {
-				return null;
-			} else {
-				return particleStatus == ParticleStatus.MINIMAL ? null : this.minecraft.particleEngine.createParticle(particleOptions, d, e, f, g, h, i);
-			}
-		} else {
+		ParticleStatus particleStatus = this.calculateParticleLevel(bl2);
+		if (bl) {
+			return this.minecraft.particleEngine.createParticle(particleOptions, d, e, f, g, h, i);
+		} else if (camera.getPosition().distanceToSqr(d, e, f) > 1024.0) {
 			return null;
+		} else {
+			return particleStatus == ParticleStatus.MINIMAL ? null : this.minecraft.particleEngine.createParticle(particleOptions, d, e, f, g, h, i);
 		}
 	}
 
@@ -3155,7 +3151,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.level.addDestroyBlockEffect(blockPos, blockState2);
 				break;
 			case 3009:
-				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.EGG_CRACK, j == 1 ? UniformInt.of(3, 6) : UniformInt.of(1, 3));
+				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.EGG_CRACK, UniformInt.of(3, 6));
 		}
 	}
 
