@@ -1,10 +1,7 @@
 package net.minecraft.tags;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -19,9 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -29,6 +25,7 @@ import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.DependencySorter;
 import org.slf4j.Logger;
 
 public class TagLoader<T> {
@@ -87,37 +84,6 @@ public class TagLoader<T> {
 		return map;
 	}
 
-	private static void visitDependenciesAndElement(
-		Map<ResourceLocation, List<TagLoader.EntryWithSource>> map,
-		Multimap<ResourceLocation, ResourceLocation> multimap,
-		Set<ResourceLocation> set,
-		ResourceLocation resourceLocation,
-		BiConsumer<ResourceLocation, List<TagLoader.EntryWithSource>> biConsumer
-	) {
-		if (set.add(resourceLocation)) {
-			multimap.get(resourceLocation).forEach(resourceLocationx -> visitDependenciesAndElement(map, multimap, set, resourceLocationx, biConsumer));
-			List<TagLoader.EntryWithSource> list = (List<TagLoader.EntryWithSource>)map.get(resourceLocation);
-			if (list != null) {
-				biConsumer.accept(resourceLocation, list);
-			}
-		}
-	}
-
-	private static boolean isCyclic(Multimap<ResourceLocation, ResourceLocation> multimap, ResourceLocation resourceLocation, ResourceLocation resourceLocation2) {
-		Collection<ResourceLocation> collection = multimap.get(resourceLocation2);
-		return collection.contains(resourceLocation)
-			? true
-			: collection.stream().anyMatch(resourceLocation2x -> isCyclic(multimap, resourceLocation, resourceLocation2x));
-	}
-
-	private static void addDependencyIfNotCyclic(
-		Multimap<ResourceLocation, ResourceLocation> multimap, ResourceLocation resourceLocation, ResourceLocation resourceLocation2
-	) {
-		if (!isCyclic(multimap, resourceLocation, resourceLocation2)) {
-			multimap.put(resourceLocation, resourceLocation2);
-		}
-	}
-
 	private Either<Collection<TagLoader.EntryWithSource>, Collection<T>> build(TagEntry.Lookup<T> lookup, List<TagLoader.EntryWithSource> list) {
 		Builder<T> builder = ImmutableSet.builder();
 		List<TagLoader.EntryWithSource> list2 = new ArrayList();
@@ -146,38 +112,19 @@ public class TagLoader<T> {
 				return (Collection<T>)map2.get(resourceLocation);
 			}
 		};
-		Multimap<ResourceLocation, ResourceLocation> multimap = HashMultimap.create();
-		map.forEach(
-			(resourceLocation, list) -> list.forEach(
-					entryWithSource -> entryWithSource.entry
-							.visitRequiredDependencies(resourceLocation2 -> addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2))
-				)
-		);
-		map.forEach(
-			(resourceLocation, list) -> list.forEach(
-					entryWithSource -> entryWithSource.entry
-							.visitOptionalDependencies(resourceLocation2 -> addDependencyIfNotCyclic(multimap, resourceLocation, resourceLocation2))
-				)
-		);
-		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
-		map.keySet()
-			.forEach(
-				resourceLocation -> visitDependenciesAndElement(
-						map,
-						multimap,
-						set,
-						resourceLocation,
-						(resourceLocationx, list) -> this.build(lookup, list)
-								.ifLeft(
-									collection -> LOGGER.error(
-											"Couldn't load tag {} as it is missing following references: {}",
-											resourceLocationx,
-											collection.stream().map(Objects::toString).collect(Collectors.joining(", "))
-										)
-								)
-								.ifRight(collection -> map2.put(resourceLocationx, collection))
+		DependencySorter<ResourceLocation, TagLoader.SortingEntry> dependencySorter = new DependencySorter<>();
+		map.forEach((resourceLocation, list) -> dependencySorter.addEntry(resourceLocation, new TagLoader.SortingEntry(list)));
+		dependencySorter.orderByDependencies(
+			(resourceLocation, sortingEntry) -> this.build(lookup, sortingEntry.entries)
+					.ifLeft(
+						collection -> LOGGER.error(
+								"Couldn't load tag {} as it is missing following references: {}",
+								resourceLocation,
+								collection.stream().map(Objects::toString).collect(Collectors.joining(", "))
+							)
 					)
-			);
+					.ifRight(collection -> map2.put(resourceLocation, collection))
+		);
 		return map2;
 	}
 
@@ -189,6 +136,19 @@ public class TagLoader<T> {
 
 		public String toString() {
 			return this.entry + " (from " + this.source + ")";
+		}
+	}
+
+	static record SortingEntry(List<TagLoader.EntryWithSource> entries) implements DependencySorter.Entry<ResourceLocation> {
+
+		@Override
+		public void visitRequiredDependencies(Consumer<ResourceLocation> consumer) {
+			this.entries.forEach(entryWithSource -> entryWithSource.entry.visitRequiredDependencies(consumer));
+		}
+
+		@Override
+		public void visitOptionalDependencies(Consumer<ResourceLocation> consumer) {
+			this.entries.forEach(entryWithSource -> entryWithSource.entry.visitOptionalDependencies(consumer));
 		}
 	}
 }

@@ -168,6 +168,12 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		this.pathfindingMalus.put(blockPathTypes, f);
 	}
 
+	public void onPathfindingStart() {
+	}
+
+	public void onPathfindingDone() {
+	}
+
 	protected BodyRotationControl createBodyControl() {
 		return new BodyRotationControl(this);
 	}
@@ -241,13 +247,13 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	@Override
 	public void baseTick() {
 		super.baseTick();
-		this.level.getProfiler().push("mobBaseTick");
+		this.level().getProfiler().push("mobBaseTick");
 		if (this.isAlive() && this.random.nextInt(1000) < this.ambientSoundTime++) {
 			this.resetAmbientSoundTime();
 			this.playAmbientSound();
 		}
 
-		this.level.getProfiler().pop();
+		this.level().getProfiler().pop();
 	}
 
 	@Override
@@ -284,16 +290,16 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	public void spawnAnim() {
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			for (int i = 0; i < 20; i++) {
 				double d = this.random.nextGaussian() * 0.02;
 				double e = this.random.nextGaussian() * 0.02;
 				double f = this.random.nextGaussian() * 0.02;
 				double g = 10.0;
-				this.level.addParticle(ParticleTypes.POOF, this.getX(1.0) - d * 10.0, this.getRandomY() - e * 10.0, this.getRandomZ(1.0) - f * 10.0, d, e, f);
+				this.level().addParticle(ParticleTypes.POOF, this.getX(1.0) - d * 10.0, this.getRandomY() - e * 10.0, this.getRandomZ(1.0) - f * 10.0, d, e, f);
 			}
 		} else {
-			this.level.broadcastEntityEvent(this, (byte)20);
+			this.level().broadcastEntityEvent(this, (byte)20);
 		}
 	}
 
@@ -309,7 +315,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			this.tickLeash();
 			if (this.tickCount % 5 == 0) {
 				this.updateControlFlags();
@@ -503,11 +509,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		this.level.getProfiler().push("looting");
-		if (!this.level.isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+		this.level().getProfiler().push("looting");
+		if (!this.level().isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 			Vec3i vec3i = this.getPickupReach();
 
-			for (ItemEntity itemEntity : this.level
+			for (ItemEntity itemEntity : this.level()
 				.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ()))) {
 				if (!itemEntity.isRemoved() && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay() && this.wantsToPickUp(itemEntity.getItem())) {
 					this.pickUpItem(itemEntity);
@@ -515,7 +521,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			}
 		}
 
-		this.level.getProfiler().pop();
+		this.level().getProfiler().pop();
 	}
 
 	protected Vec3i getPickupReach() {
@@ -665,10 +671,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 	@Override
 	public void checkDespawn() {
-		if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
+		if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
 			this.discard();
 		} else if (!this.isPersistenceRequired() && !this.requiresCustomPersistence()) {
-			Entity entity = this.level.getNearestPlayer(this, -1.0);
+			Entity entity = this.level().getNearestPlayer(this, -1.0);
 			if (entity != null) {
 				double d = entity.distanceToSqr(this);
 				int i = this.getType().getCategory().getDespawnDistance();
@@ -693,46 +699,46 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	@Override
 	protected final void serverAiStep() {
 		this.noActionTime++;
-		this.level.getProfiler().push("sensing");
+		this.level().getProfiler().push("sensing");
 		this.sensing.tick();
-		this.level.getProfiler().pop();
-		int i = this.level.getServer().getTickCount() + this.getId();
+		this.level().getProfiler().pop();
+		int i = this.level().getServer().getTickCount() + this.getId();
 		if (i % 2 != 0 && this.tickCount > 1) {
-			this.level.getProfiler().push("targetSelector");
+			this.level().getProfiler().push("targetSelector");
 			this.targetSelector.tickRunningGoals(false);
-			this.level.getProfiler().pop();
-			this.level.getProfiler().push("goalSelector");
+			this.level().getProfiler().pop();
+			this.level().getProfiler().push("goalSelector");
 			this.goalSelector.tickRunningGoals(false);
-			this.level.getProfiler().pop();
+			this.level().getProfiler().pop();
 		} else {
-			this.level.getProfiler().push("targetSelector");
+			this.level().getProfiler().push("targetSelector");
 			this.targetSelector.tick();
-			this.level.getProfiler().pop();
-			this.level.getProfiler().push("goalSelector");
+			this.level().getProfiler().pop();
+			this.level().getProfiler().push("goalSelector");
 			this.goalSelector.tick();
-			this.level.getProfiler().pop();
+			this.level().getProfiler().pop();
 		}
 
-		this.level.getProfiler().push("navigation");
+		this.level().getProfiler().push("navigation");
 		this.navigation.tick();
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("mob tick");
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("mob tick");
 		this.customServerAiStep();
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("controls");
-		this.level.getProfiler().push("move");
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("controls");
+		this.level().getProfiler().push("move");
 		this.moveControl.tick();
-		this.level.getProfiler().popPush("look");
+		this.level().getProfiler().popPush("look");
 		this.lookControl.tick();
-		this.level.getProfiler().popPush("jump");
+		this.level().getProfiler().popPush("jump");
 		this.jumpControl.tick();
-		this.level.getProfiler().pop();
-		this.level.getProfiler().pop();
+		this.level().getProfiler().pop();
+		this.level().getProfiler().pop();
 		this.sendDebugPackets();
 	}
 
 	protected void sendDebugPackets() {
-		DebugPackets.sendGoalSelector(this.level, this, this.goalSelector);
+		DebugPackets.sendGoalSelector(this.level(), this, this.goalSelector);
 	}
 
 	protected void customServerAiStep() {
@@ -809,7 +815,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			return 3;
 		} else {
 			int i = (int)(this.getHealth() - this.getMaxHealth() * 0.33F);
-			i -= (3 - this.level.getDifficulty().getId()) * 4;
+			i -= (3 - this.level().getDifficulty().getId()) * 4;
 			if (i < 0) {
 				i = 0;
 			}
@@ -884,7 +890,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
 		if (randomSource.nextFloat() < 0.15F * difficultyInstance.getSpecialMultiplier()) {
 			int i = randomSource.nextInt(2);
-			float f = this.level.getDifficulty() == Difficulty.HARD ? 0.1F : 0.25F;
+			float f = this.level().getDifficulty() == Difficulty.HARD ? 0.1F : 0.25F;
 			if (randomSource.nextFloat() < 0.095F) {
 				i++;
 			}
@@ -1061,7 +1067,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		} else if (this.getLeashHolder() == player) {
 			this.dropLeash(true, !player.getAbilities().instabuild);
 			this.gameEvent(GameEvent.ENTITY_INTERACT, player);
-			return InteractionResult.sidedSuccess(this.level.isClientSide);
+			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
 			InteractionResult interactionResult = this.checkAndHandleImportantInteractions(player, interactionHand);
 			if (interactionResult.consumesAction()) {
@@ -1084,7 +1090,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		if (itemStack.is(Items.LEAD) && this.canBeLeashed(player)) {
 			this.setLeashedTo(player, true);
 			itemStack.shrink(1);
-			return InteractionResult.sidedSuccess(this.level.isClientSide);
+			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
 			if (itemStack.is(Items.NAME_TAG)) {
 				InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
@@ -1094,10 +1100,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			}
 
 			if (itemStack.getItem() instanceof SpawnEggItem) {
-				if (this.level instanceof ServerLevel) {
+				if (this.level() instanceof ServerLevel) {
 					SpawnEggItem spawnEggItem = (SpawnEggItem)itemStack.getItem();
 					Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(
-						player, this, (EntityType<? extends Mob>)this.getType(), (ServerLevel)this.level, this.position(), itemStack
+						player, this, (EntityType<? extends Mob>)this.getType(), (ServerLevel)this.level(), this.position(), itemStack
 					);
 					optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, mob));
 					return optional.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;
@@ -1151,7 +1157,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		if (this.isRemoved()) {
 			return null;
 		} else {
-			T mob = (T)entityType.create(this.level);
+			T mob = (T)entityType.create(this.level());
 			if (mob == null) {
 				return null;
 			} else {
@@ -1180,7 +1186,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 					}
 				}
 
-				this.level.addFreshEntity(mob);
+				this.level().addFreshEntity(mob);
 				if (this.isPassenger()) {
 					Entity entity = this.getVehicle();
 					this.stopRiding();
@@ -1209,12 +1215,12 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		if (this.leashHolder != null) {
 			this.leashHolder = null;
 			this.leashInfoTag = null;
-			if (!this.level.isClientSide && bl2) {
+			if (!this.level().isClientSide && bl2) {
 				this.spawnAtLocation(Items.LEAD);
 			}
 
-			if (!this.level.isClientSide && bl && this.level instanceof ServerLevel) {
-				((ServerLevel)this.level).getChunkSource().broadcast(this, new ClientboundSetEntityLinkPacket(this, null));
+			if (!this.level().isClientSide && bl && this.level() instanceof ServerLevel) {
+				((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEntityLinkPacket(this, null));
 			}
 		}
 	}
@@ -1229,8 +1235,8 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 	@Nullable
 	public Entity getLeashHolder() {
-		if (this.leashHolder == null && this.delayedLeashHolderId != 0 && this.level.isClientSide) {
-			this.leashHolder = this.level.getEntity(this.delayedLeashHolderId);
+		if (this.leashHolder == null && this.delayedLeashHolderId != 0 && this.level().isClientSide) {
+			this.leashHolder = this.level().getEntity(this.delayedLeashHolderId);
 		}
 
 		return this.leashHolder;
@@ -1239,8 +1245,8 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	public void setLeashedTo(Entity entity, boolean bl) {
 		this.leashHolder = entity;
 		this.leashInfoTag = null;
-		if (!this.level.isClientSide && bl && this.level instanceof ServerLevel) {
-			((ServerLevel)this.level).getChunkSource().broadcast(this, new ClientboundSetEntityLinkPacket(this, this.leashHolder));
+		if (!this.level().isClientSide && bl && this.level() instanceof ServerLevel) {
+			((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEntityLinkPacket(this, this.leashHolder));
 		}
 
 		if (this.isPassenger()) {
@@ -1264,17 +1270,17 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	private void restoreLeashFromSave() {
-		if (this.leashInfoTag != null && this.level instanceof ServerLevel) {
+		if (this.leashInfoTag != null && this.level() instanceof ServerLevel) {
 			if (this.leashInfoTag.hasUUID("UUID")) {
 				UUID uUID = this.leashInfoTag.getUUID("UUID");
-				Entity entity = ((ServerLevel)this.level).getEntity(uUID);
+				Entity entity = ((ServerLevel)this.level()).getEntity(uUID);
 				if (entity != null) {
 					this.setLeashedTo(entity, true);
 					return;
 				}
 			} else if (this.leashInfoTag.contains("X", 99) && this.leashInfoTag.contains("Y", 99) && this.leashInfoTag.contains("Z", 99)) {
 				BlockPos blockPos = NbtUtils.readBlockPos(this.leashInfoTag);
-				this.setLeashedTo(LeashFenceKnotEntity.getOrCreateKnot(this.level, blockPos), true);
+				this.setLeashedTo(LeashFenceKnotEntity.getOrCreateKnot(this.level(), blockPos), true);
 				return;
 			}
 
@@ -1376,17 +1382,17 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			float f = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
 			if (this.random.nextFloat() < f) {
 				player.getCooldowns().addCooldown(Items.SHIELD, 100);
-				this.level.broadcastEntityEvent(player, (byte)30);
+				this.level().broadcastEntityEvent(player, (byte)30);
 			}
 		}
 	}
 
 	protected boolean isSunBurnTick() {
-		if (this.level.isDay() && !this.level.isClientSide) {
+		if (this.level().isDay() && !this.level().isClientSide) {
 			float f = this.getLightLevelDependentMagicValue();
 			BlockPos blockPos = BlockPos.containing(this.getX(), this.getEyeY(), this.getZ());
 			boolean bl = this.isInWaterRainOrBubble() || this.isInPowderSnow || this.wasInPowderSnow;
-			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && !bl && this.level.canSeeSky(blockPos)) {
+			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && !bl && this.level().canSeeSky(blockPos)) {
 				return true;
 			}
 		}

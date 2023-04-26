@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.lighting.LayerLightSectionStorage;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
@@ -175,11 +176,11 @@ public class LightSectionDebugRenderer implements DebugRenderer.SimpleDebugRende
 				for (int l = 0; l < j; l++) {
 					for (int m = 0; m < j; m++) {
 						SectionPos sectionPos2 = SectionPos.of(sectionPos.x() + m - i, sectionPos.y() + l - i, sectionPos.z() + k - i);
-						int n = levelLightEngine.getDebugSectionLevel(lightLayer, sectionPos2);
-						if (n == 0) {
+						LayerLightSectionStorage.SectionType sectionType = levelLightEngine.getDebugSectionType(lightLayer, sectionPos2);
+						if (sectionType == LayerLightSectionStorage.SectionType.LIGHT_AND_DATA) {
 							this.lightAndBlocksShape.fill(m, l, k);
 							this.lightShape.fill(m, l, k);
-						} else if (n == 1) {
+						} else if (sectionType == LayerLightSectionStorage.SectionType.LIGHT_ONLY) {
 							this.lightShape.fill(m, l, k);
 						}
 					}

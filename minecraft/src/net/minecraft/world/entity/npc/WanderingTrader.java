@@ -64,14 +64,14 @@ public class WanderingTrader extends AbstractVillager {
 					this,
 					PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.INVISIBILITY),
 					SoundEvents.WANDERING_TRADER_DISAPPEARED,
-					wanderingTrader -> this.level.isNight() && !wanderingTrader.isInvisible()
+					wanderingTrader -> this.level().isNight() && !wanderingTrader.isInvisible()
 				)
 			);
 		this.goalSelector
 			.addGoal(
 				0,
 				new UseItemGoal<>(
-					this, new ItemStack(Items.MILK_BUCKET), SoundEvents.WANDERING_TRADER_REAPPEARED, wanderingTrader -> this.level.isDay() && wanderingTrader.isInvisible()
+					this, new ItemStack(Items.MILK_BUCKET), SoundEvents.WANDERING_TRADER_REAPPEARED, wanderingTrader -> this.level().isDay() && wanderingTrader.isInvisible()
 				)
 			);
 		this.goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
@@ -111,14 +111,14 @@ public class WanderingTrader extends AbstractVillager {
 			}
 
 			if (this.getOffers().isEmpty()) {
-				return InteractionResult.sidedSuccess(this.level.isClientSide);
+				return InteractionResult.sidedSuccess(this.level().isClientSide);
 			} else {
-				if (!this.level.isClientSide) {
+				if (!this.level().isClientSide) {
 					this.setTradingPlayer(player);
 					this.openTradingScreen(player, this.getDisplayName(), 1);
 				}
 
-				return InteractionResult.sidedSuccess(this.level.isClientSide);
+				return InteractionResult.sidedSuccess(this.level().isClientSide);
 			}
 		} else {
 			return super.mobInteract(player, interactionHand);
@@ -173,7 +173,7 @@ public class WanderingTrader extends AbstractVillager {
 	protected void rewardTradeXp(MerchantOffer merchantOffer) {
 		if (merchantOffer.shouldRewardExp()) {
 			int i = 3 + this.random.nextInt(4);
-			this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY() + 0.5, this.getZ(), i));
+			this.level().addFreshEntity(new ExperienceOrb(this.level(), this.getX(), this.getY() + 0.5, this.getZ(), i));
 		}
 	}
 
@@ -218,7 +218,7 @@ public class WanderingTrader extends AbstractVillager {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			this.maybeDespawn();
 		}
 	}

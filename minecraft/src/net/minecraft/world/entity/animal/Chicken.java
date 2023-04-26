@@ -79,20 +79,20 @@ public class Chicken extends Animal {
 		super.aiStep();
 		this.oFlap = this.flap;
 		this.oFlapSpeed = this.flapSpeed;
-		this.flapSpeed = this.flapSpeed + (this.onGround ? -1.0F : 4.0F) * 0.3F;
+		this.flapSpeed = this.flapSpeed + (this.onGround() ? -1.0F : 4.0F) * 0.3F;
 		this.flapSpeed = Mth.clamp(this.flapSpeed, 0.0F, 1.0F);
-		if (!this.onGround && this.flapping < 1.0F) {
+		if (!this.onGround() && this.flapping < 1.0F) {
 			this.flapping = 1.0F;
 		}
 
 		this.flapping *= 0.9F;
 		Vec3 vec3 = this.getDeltaMovement();
-		if (!this.onGround && vec3.y < 0.0) {
+		if (!this.onGround() && vec3.y < 0.0) {
 			this.setDeltaMovement(vec3.multiply(1.0, 0.6, 1.0));
 		}
 
 		this.flap = this.flap + this.flapping * 2.0F;
-		if (!this.level.isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
+		if (!this.level().isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
 			this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 			this.spawnAtLocation(Items.EGG);
 			this.gameEvent(GameEvent.ENTITY_PLACE);

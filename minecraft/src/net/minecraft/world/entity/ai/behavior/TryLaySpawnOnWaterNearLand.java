@@ -21,7 +21,7 @@ public class TryLaySpawnOnWaterNearLand {
 					.apply(
 						instance,
 						(memoryAccessor, memoryAccessor2, memoryAccessor3) -> (serverLevel, livingEntity, l) -> {
-								if (!livingEntity.isInWater() && livingEntity.isOnGround()) {
+								if (!livingEntity.isInWater() && livingEntity.onGround()) {
 									BlockPos blockPos = livingEntity.blockPosition().below();
 
 									for (Direction direction : Direction.Plane.HORIZONTAL) {

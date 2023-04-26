@@ -16,18 +16,16 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 	private final SectionPos sectionPos;
 	private final short[] positions;
 	private final BlockState[] states;
-	private final boolean suppressLightUpdates;
 
-	public ClientboundSectionBlocksUpdatePacket(SectionPos sectionPos, ShortSet shortSet, LevelChunkSection levelChunkSection, boolean bl) {
+	public ClientboundSectionBlocksUpdatePacket(SectionPos sectionPos, ShortSet shortSet, LevelChunkSection levelChunkSection) {
 		this.sectionPos = sectionPos;
-		this.suppressLightUpdates = bl;
 		int i = shortSet.size();
 		this.positions = new short[i];
 		this.states = new BlockState[i];
 		int j = 0;
 
-		for (ShortIterator var7 = shortSet.iterator(); var7.hasNext(); j++) {
-			short s = (Short)var7.next();
+		for (ShortIterator var6 = shortSet.iterator(); var6.hasNext(); j++) {
+			short s = (Short)var6.next();
 			this.positions[j] = s;
 			this.states[j] = levelChunkSection.getBlockState(SectionPos.sectionRelativeX(s), SectionPos.sectionRelativeY(s), SectionPos.sectionRelativeZ(s));
 		}
@@ -35,7 +33,6 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 
 	public ClientboundSectionBlocksUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.sectionPos = SectionPos.of(friendlyByteBuf.readLong());
-		this.suppressLightUpdates = friendlyByteBuf.readBoolean();
 		int i = friendlyByteBuf.readVarInt();
 		this.positions = new short[i];
 		this.states = new BlockState[i];
@@ -50,7 +47,6 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeLong(this.sectionPos.asLong());
-		friendlyByteBuf.writeBoolean(this.suppressLightUpdates);
 		friendlyByteBuf.writeVarInt(this.positions.length);
 
 		for (int i = 0; i < this.positions.length; i++) {
@@ -70,9 +66,5 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 			mutableBlockPos.set(this.sectionPos.relativeToBlockX(s), this.sectionPos.relativeToBlockY(s), this.sectionPos.relativeToBlockZ(s));
 			biConsumer.accept(mutableBlockPos, this.states[i]);
 		}
-	}
-
-	public boolean shouldSuppressLightUpdates() {
-		return this.suppressLightUpdates;
 	}
 }

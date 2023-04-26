@@ -126,7 +126,7 @@ public class Slime extends Mob implements Enemy {
 		this.squish = this.squish + (this.targetSquish - this.squish) * 0.5F;
 		this.oSquish = this.squish;
 		super.tick();
-		if (this.onGround && !this.wasOnGround) {
+		if (this.onGround() && !this.wasOnGround) {
 			int i = this.getSize();
 
 			for (int j = 0; j < i * 8; j++) {
@@ -134,16 +134,16 @@ public class Slime extends Mob implements Enemy {
 				float g = this.random.nextFloat() * 0.5F + 0.5F;
 				float h = Mth.sin(f) * (float)i * 0.5F * g;
 				float k = Mth.cos(f) * (float)i * 0.5F * g;
-				this.level.addParticle(this.getParticleType(), this.getX() + (double)h, this.getY(), this.getZ() + (double)k, 0.0, 0.0, 0.0);
+				this.level().addParticle(this.getParticleType(), this.getX() + (double)h, this.getY(), this.getZ() + (double)k, 0.0, 0.0, 0.0);
 			}
 
 			this.playSound(this.getSquishSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) / 0.8F);
 			this.targetSquish = -0.5F;
-		} else if (!this.onGround && this.wasOnGround) {
+		} else if (!this.onGround() && this.wasOnGround) {
 			this.targetSquish = 1.0F;
 		}
 
-		this.wasOnGround = this.onGround;
+		this.wasOnGround = this.onGround();
 		this.decreaseSquish();
 	}
 
@@ -186,7 +186,7 @@ public class Slime extends Mob implements Enemy {
 	@Override
 	public void remove(Entity.RemovalReason removalReason) {
 		int i = this.getSize();
-		if (!this.level.isClientSide && i > 1 && this.isDeadOrDying()) {
+		if (!this.level().isClientSide && i > 1 && this.isDeadOrDying()) {
 			Component component = this.getCustomName();
 			boolean bl = this.isNoAi();
 			float f = (float)i / 4.0F;
@@ -196,7 +196,7 @@ public class Slime extends Mob implements Enemy {
 			for (int l = 0; l < k; l++) {
 				float g = ((float)(l % 2) - 0.5F) * f;
 				float h = ((float)(l / 2) - 0.5F) * f;
-				Slime slime = this.getType().create(this.level);
+				Slime slime = this.getType().create(this.level());
 				if (slime != null) {
 					if (this.isPersistenceRequired()) {
 						slime.setPersistenceRequired();
@@ -207,7 +207,7 @@ public class Slime extends Mob implements Enemy {
 					slime.setInvulnerable(this.isInvulnerable());
 					slime.setSize(j, true);
 					slime.moveTo(this.getX() + (double)g, this.getY() + 0.5, this.getZ() + (double)h, this.random.nextFloat() * 360.0F, 0.0F);
-					this.level.addFreshEntity(slime);
+					this.level().addFreshEntity(slime);
 				}
 			}
 		}
@@ -487,7 +487,7 @@ public class Slime extends Mob implements Enemy {
 				this.mob.setZza(0.0F);
 			} else {
 				this.operation = MoveControl.Operation.WAIT;
-				if (this.mob.isOnGround()) {
+				if (this.mob.onGround()) {
 					this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
 					if (this.jumpDelay-- <= 0) {
 						this.jumpDelay = this.slime.getJumpDelay();
@@ -524,7 +524,7 @@ public class Slime extends Mob implements Enemy {
 		@Override
 		public boolean canUse() {
 			return this.slime.getTarget() == null
-				&& (this.slime.onGround || this.slime.isInWater() || this.slime.isInLava() || this.slime.hasEffect(MobEffects.LEVITATION))
+				&& (this.slime.onGround() || this.slime.isInWater() || this.slime.isInLava() || this.slime.hasEffect(MobEffects.LEVITATION))
 				&& this.slime.getMoveControl() instanceof Slime.SlimeMoveControl;
 		}
 

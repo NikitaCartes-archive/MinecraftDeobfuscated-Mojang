@@ -3,7 +3,7 @@ package net.minecraft.client.gui.font.glyphs;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.font.GlyphRenderTypes;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
@@ -12,19 +12,7 @@ public class EmptyGlyph extends BakedGlyph {
 	public static final EmptyGlyph INSTANCE = new EmptyGlyph();
 
 	public EmptyGlyph() {
-		super(
-			RenderType.text(new ResourceLocation("")),
-			RenderType.textSeeThrough(new ResourceLocation("")),
-			RenderType.textPolygonOffset(new ResourceLocation("")),
-			0.0F,
-			0.0F,
-			0.0F,
-			0.0F,
-			0.0F,
-			0.0F,
-			0.0F,
-			0.0F
-		);
+		super(GlyphRenderTypes.createForColorTexture(new ResourceLocation("")), 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 	}
 
 	@Override

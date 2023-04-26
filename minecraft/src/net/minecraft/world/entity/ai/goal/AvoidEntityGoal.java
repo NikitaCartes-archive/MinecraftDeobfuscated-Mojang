@@ -53,10 +53,10 @@ public class AvoidEntityGoal<T extends LivingEntity> extends Goal {
 	@Override
 	public boolean canUse() {
 		this.toAvoid = this.mob
-			.level
+			.level()
 			.getNearestEntity(
 				this.mob
-					.level
+					.level()
 					.getEntitiesOfClass(this.avoidClass, this.mob.getBoundingBox().inflate((double)this.maxDist, 3.0, (double)this.maxDist), livingEntity -> true),
 				this.avoidEntityTargeting,
 				this.mob,

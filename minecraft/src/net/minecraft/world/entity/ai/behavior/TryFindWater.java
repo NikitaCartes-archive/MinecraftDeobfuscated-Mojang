@@ -30,8 +30,8 @@ public class TryFindWater {
 
 								for (BlockPos blockPos4 : BlockPos.withinManhattan(blockPos3, i, i, i)) {
 									if (blockPos4.getX() != blockPos3.getX() || blockPos4.getZ() != blockPos3.getZ()) {
-										BlockState blockState = pathfinderMob.level.getBlockState(blockPos4.above());
-										BlockState blockState2 = pathfinderMob.level.getBlockState(blockPos4);
+										BlockState blockState = pathfinderMob.level().getBlockState(blockPos4.above());
+										BlockState blockState2 = pathfinderMob.level().getBlockState(blockPos4);
 										if (blockState2.is(Blocks.WATER)) {
 											if (blockState.isAir()) {
 												blockPos = blockPos4.immutable();

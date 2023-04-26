@@ -51,7 +51,7 @@ public class LandRandomPos {
 
 	@Nullable
 	public static BlockPos movePosUpOutOfSolid(PathfinderMob pathfinderMob, BlockPos blockPos) {
-		blockPos = RandomPos.moveUpOutOfSolid(blockPos, pathfinderMob.level.getMaxBuildHeight(), blockPosx -> GoalUtils.isSolid(pathfinderMob, blockPosx));
+		blockPos = RandomPos.moveUpOutOfSolid(blockPos, pathfinderMob.level().getMaxBuildHeight(), blockPosx -> GoalUtils.isSolid(pathfinderMob, blockPosx));
 		return !GoalUtils.isWater(pathfinderMob, blockPos) && !GoalUtils.hasMalus(pathfinderMob, blockPos) ? blockPos : null;
 	}
 

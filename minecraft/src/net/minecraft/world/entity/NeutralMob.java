@@ -77,7 +77,7 @@ public interface NeutralMob {
 		if (!this.canAttack(livingEntity)) {
 			return false;
 		} else {
-			return livingEntity.getType() == EntityType.PLAYER && this.isAngryAtAllPlayers(livingEntity.level)
+			return livingEntity.getType() == EntityType.PLAYER && this.isAngryAtAllPlayers(livingEntity.level())
 				? true
 				: livingEntity.getUUID().equals(this.getPersistentAngerTarget());
 		}
@@ -92,7 +92,7 @@ public interface NeutralMob {
 	}
 
 	default void playerDied(Player player) {
-		if (player.level.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
+		if (player.level().getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
 			if (player.getUUID().equals(this.getPersistentAngerTarget())) {
 				this.stopBeingAngry();
 			}

@@ -877,7 +877,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	protected void updateChunkTracking(
 		ServerPlayer serverPlayer, ChunkPos chunkPos, MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject, boolean bl, boolean bl2
 	) {
-		if (serverPlayer.level == this.level) {
+		if (serverPlayer.level() == this.level) {
 			if (bl2 && !bl) {
 				ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(chunkPos.toLong());
 				if (chunkHolder != null) {
@@ -1258,7 +1258,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 	private void playerLoadedChunk(ServerPlayer serverPlayer, MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject, LevelChunk levelChunk) {
 		if (mutableObject.getValue() == null) {
-			mutableObject.setValue(new ClientboundLevelChunkWithLightPacket(levelChunk, this.lightEngine, null, null, true));
+			mutableObject.setValue(new ClientboundLevelChunkWithLightPacket(levelChunk, this.lightEngine, null, null));
 		}
 
 		serverPlayer.trackChunk(levelChunk.getPos(), mutableObject.getValue());

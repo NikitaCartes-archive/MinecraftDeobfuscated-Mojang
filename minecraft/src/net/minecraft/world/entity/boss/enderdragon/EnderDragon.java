@@ -122,8 +122,8 @@ public class EnderDragon extends Mob implements Enemy {
 
 	@Override
 	public void onFlap() {
-		if (this.level.isClientSide && !this.isSilent()) {
-			this.level
+		if (this.level().isClientSide && !this.isSilent()) {
+			this.level()
 				.playLocalSound(
 					this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_FLAP, this.getSoundSource(), 5.0F, 0.8F + this.random.nextFloat() * 0.3F, false
 				);
@@ -158,10 +158,10 @@ public class EnderDragon extends Mob implements Enemy {
 	@Override
 	public void aiStep() {
 		this.processFlappingMovement();
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			this.setHealth(this.getHealth());
 			if (!this.isSilent() && !this.phaseManager.getCurrentPhase().isSitting() && --this.growlTime < 0) {
-				this.level
+				this.level()
 					.playLocalSound(
 						this.getX(), this.getY(), this.getZ(), SoundEvents.ENDER_DRAGON_GROWL, this.getSoundSource(), 2.5F, 0.8F + this.random.nextFloat() * 0.3F, false
 					);
@@ -174,7 +174,7 @@ public class EnderDragon extends Mob implements Enemy {
 			float f = (this.random.nextFloat() - 0.5F) * 8.0F;
 			float g = (this.random.nextFloat() - 0.5F) * 4.0F;
 			float h = (this.random.nextFloat() - 0.5F) * 8.0F;
-			this.level.addParticle(ParticleTypes.EXPLOSION, this.getX() + (double)f, this.getY() + 2.0 + (double)g, this.getZ() + (double)h, 0.0, 0.0, 0.0);
+			this.level().addParticle(ParticleTypes.EXPLOSION, this.getX() + (double)f, this.getY() + 2.0 + (double)g, this.getZ() + (double)h, 0.0, 0.0, 0.0);
 		} else {
 			this.checkCrystals();
 			Vec3 vec3 = this.getDeltaMovement();
@@ -205,7 +205,7 @@ public class EnderDragon extends Mob implements Enemy {
 
 				this.positions[this.posPointer][0] = (double)this.getYRot();
 				this.positions[this.posPointer][1] = this.getY();
-				if (this.level.isClientSide) {
+				if (this.level().isClientSide) {
 					if (this.lerpSteps > 0) {
 						double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
 						double e = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
@@ -285,15 +285,15 @@ public class EnderDragon extends Mob implements Enemy {
 				this.tickPart(this.body, (double)(x * 0.5F), 0.0, (double)(-y * 0.5F));
 				this.tickPart(this.wing1, (double)(y * 4.5F), 2.0, (double)(x * 4.5F));
 				this.tickPart(this.wing2, (double)(y * -4.5F), 2.0, (double)(x * -4.5F));
-				if (!this.level.isClientSide && this.hurtTime == 0) {
+				if (!this.level().isClientSide && this.hurtTime == 0) {
 					this.knockBack(
-						this.level.getEntities(this, this.wing1.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR)
+						this.level().getEntities(this, this.wing1.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR)
 					);
 					this.knockBack(
-						this.level.getEntities(this, this.wing2.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR)
+						this.level().getEntities(this, this.wing2.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR)
 					);
-					this.hurt(this.level.getEntities(this, this.head.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
-					this.hurt(this.level.getEntities(this, this.neck.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+					this.hurt(this.level().getEntities(this, this.head.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+					this.hurt(this.level().getEntities(this, this.neck.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
 				}
 
 				float z = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
@@ -326,7 +326,7 @@ public class EnderDragon extends Mob implements Enemy {
 					this.tickPart(enderDragonPart, (double)(-(x * 1.5F + ox * ae) * u), es[1] - ds[1] - (double)((ae + 1.5F) * v) + 1.5, (double)((y * 1.5F + p * ae) * u));
 				}
 
-				if (!this.level.isClientSide) {
+				if (!this.level().isClientSide) {
 					this.inWall = this.checkWalls(this.head.getBoundingBox()) | this.checkWalls(this.neck.getBoundingBox()) | this.checkWalls(this.body.getBoundingBox());
 					if (this.dragonFight != null) {
 						this.dragonFight.updateDragon(this);
@@ -369,7 +369,7 @@ public class EnderDragon extends Mob implements Enemy {
 		}
 
 		if (this.random.nextInt(10) == 0) {
-			List<EndCrystal> list = this.level.getEntitiesOfClass(EndCrystal.class, this.getBoundingBox().inflate(32.0));
+			List<EndCrystal> list = this.level().getEntitiesOfClass(EndCrystal.class, this.getBoundingBox().inflate(32.0));
 			EndCrystal endCrystal = null;
 			double d = Double.MAX_VALUE;
 
@@ -430,10 +430,10 @@ public class EnderDragon extends Mob implements Enemy {
 			for (int p = j; p <= m; p++) {
 				for (int q = k; q <= n; q++) {
 					BlockPos blockPos = new BlockPos(o, p, q);
-					BlockState blockState = this.level.getBlockState(blockPos);
+					BlockState blockState = this.level().getBlockState(blockPos);
 					if (!blockState.isAir() && !blockState.is(BlockTags.DRAGON_TRANSPARENT)) {
-						if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && !blockState.is(BlockTags.DRAGON_IMMUNE)) {
-							bl2 = this.level.removeBlock(blockPos, false) || bl2;
+						if (this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && !blockState.is(BlockTags.DRAGON_IMMUNE)) {
+							bl2 = this.level().removeBlock(blockPos, false) || bl2;
 						} else {
 							bl = true;
 						}
@@ -444,7 +444,7 @@ public class EnderDragon extends Mob implements Enemy {
 
 		if (bl2) {
 			BlockPos blockPos2 = new BlockPos(i + this.random.nextInt(l - i + 1), j + this.random.nextInt(m - j + 1), k + this.random.nextInt(n - k + 1));
-			this.level.levelEvent(2008, blockPos2, 0);
+			this.level().levelEvent(2008, blockPos2, 0);
 		}
 
 		return bl;
@@ -486,7 +486,7 @@ public class EnderDragon extends Mob implements Enemy {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		return !this.level.isClientSide ? this.hurt(this.body, damageSource, f) : false;
+		return !this.level().isClientSide ? this.hurt(this.body, damageSource, f) : false;
 	}
 
 	protected boolean reallyHurt(DamageSource damageSource, float f) {
@@ -514,29 +514,29 @@ public class EnderDragon extends Mob implements Enemy {
 			float f = (this.random.nextFloat() - 0.5F) * 8.0F;
 			float g = (this.random.nextFloat() - 0.5F) * 4.0F;
 			float h = (this.random.nextFloat() - 0.5F) * 8.0F;
-			this.level.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.getX() + (double)f, this.getY() + 2.0 + (double)g, this.getZ() + (double)h, 0.0, 0.0, 0.0);
+			this.level().addParticle(ParticleTypes.EXPLOSION_EMITTER, this.getX() + (double)f, this.getY() + 2.0 + (double)g, this.getZ() + (double)h, 0.0, 0.0, 0.0);
 		}
 
-		boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
+		boolean bl = this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
 		int i = 500;
 		if (this.dragonFight != null && !this.dragonFight.hasPreviouslyKilledDragon()) {
 			i = 12000;
 		}
 
-		if (this.level instanceof ServerLevel) {
+		if (this.level() instanceof ServerLevel) {
 			if (this.dragonDeathTime > 150 && this.dragonDeathTime % 5 == 0 && bl) {
-				ExperienceOrb.award((ServerLevel)this.level, this.position(), Mth.floor((float)i * 0.08F));
+				ExperienceOrb.award((ServerLevel)this.level(), this.position(), Mth.floor((float)i * 0.08F));
 			}
 
 			if (this.dragonDeathTime == 1 && !this.isSilent()) {
-				this.level.globalLevelEvent(1028, this.blockPosition(), 0);
+				this.level().globalLevelEvent(1028, this.blockPosition(), 0);
 			}
 		}
 
 		this.move(MoverType.SELF, new Vec3(0.0, 0.1F, 0.0));
-		if (this.dragonDeathTime == 200 && this.level instanceof ServerLevel) {
+		if (this.dragonDeathTime == 200 && this.level() instanceof ServerLevel) {
 			if (bl) {
-				ExperienceOrb.award((ServerLevel)this.level, this.position(), Mth.floor((float)i * 0.2F));
+				ExperienceOrb.award((ServerLevel)this.level(), this.position(), Mth.floor((float)i * 0.2F));
 			}
 
 			if (this.dragonFight != null) {
@@ -568,7 +568,7 @@ public class EnderDragon extends Mob implements Enemy {
 					m = Mth.floor(20.0F * Mth.sin(2.0F * ((float) -Math.PI + (float) (Math.PI / 4) * (float)var7)));
 				}
 
-				int n = Math.max(this.level.getSeaLevel() + 10, this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(l, 0, m)).getY() + j);
+				int n = Math.max(this.level().getSeaLevel() + 10, this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(l, 0, m)).getY() + j);
 				this.nodes[i] = new Node(l, n, m);
 			}
 
@@ -777,7 +777,7 @@ public class EnderDragon extends Mob implements Enemy {
 		EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
 		double e;
 		if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
-			BlockPos blockPos = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
+			BlockPos blockPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
 			double d = Math.max(Math.sqrt(blockPos.distToCenterSqr(this.position())) / 4.0, 1.0);
 			e = (double)i / d;
 		} else if (dragonPhaseInstance.isSitting()) {
@@ -796,7 +796,7 @@ public class EnderDragon extends Mob implements Enemy {
 		EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
 		Vec3 vec3;
 		if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
-			BlockPos blockPos = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
+			BlockPos blockPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
 			float g = Math.max((float)Math.sqrt(blockPos.distToCenterSqr(this.position())) / 4.0F, 1.0F);
 			float h = 6.0F / g;
 			float i = this.getXRot();
@@ -822,7 +822,7 @@ public class EnderDragon extends Mob implements Enemy {
 		if (damageSource.getEntity() instanceof Player) {
 			player = (Player)damageSource.getEntity();
 		} else {
-			player = this.level.getNearestPlayer(CRYSTAL_DESTROY_TARGETING, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+			player = this.level().getNearestPlayer(CRYSTAL_DESTROY_TARGETING, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
 		}
 
 		if (endCrystal == this.nearestCrystal) {
@@ -834,7 +834,7 @@ public class EnderDragon extends Mob implements Enemy {
 
 	@Override
 	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
-		if (DATA_PHASE.equals(entityDataAccessor) && this.level.isClientSide) {
+		if (DATA_PHASE.equals(entityDataAccessor) && this.level().isClientSide) {
 			this.phaseManager.setPhase(EnderDragonPhase.getById(this.getEntityData().get(DATA_PHASE)));
 		}
 

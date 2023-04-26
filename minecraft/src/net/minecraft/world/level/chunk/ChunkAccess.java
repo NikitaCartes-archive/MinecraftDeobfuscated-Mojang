@@ -13,9 +13,10 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -48,12 +49,13 @@ import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.lighting.ChunkSkyLightSources;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.ticks.SerializableTickContainer;
 import net.minecraft.world.ticks.TickContainerAccess;
 import org.slf4j.Logger;
 
-public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiomeSource, StructureAccess {
+public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiomeSource, LightChunk, StructureAccess {
 	public static final int NO_FILLED_SECTION = -1;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final LongSet EMPTY_REFERENCE_SET = new LongOpenHashSet();
@@ -71,6 +73,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	@Nullable
 	protected BlendingData blendingData;
 	protected final Map<Heightmap.Types, Heightmap> heightmaps = Maps.newEnumMap(Heightmap.Types.class);
+	protected ChunkSkyLightSources skyLightSources;
 	private final Map<Structure, StructureStart> structureStarts = Maps.<Structure, StructureStart>newHashMap();
 	private final Map<Structure, LongSet> structuresRefences = Maps.<Structure, LongSet>newHashMap();
 	protected final Map<BlockPos, CompoundTag> pendingBlockEntities = Maps.<BlockPos, CompoundTag>newHashMap();
@@ -94,6 +97,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		this.inhabitedTime = l;
 		this.postProcessing = new ShortList[levelHeightAccessor.getSectionsCount()];
 		this.blendingData = blendingData;
+		this.skyLightSources = new ChunkSkyLightSources(levelHeightAccessor);
 		if (levelChunkSections != null) {
 			if (this.sections.length == levelChunkSections.length) {
 				System.arraycopy(levelChunkSections, 0, this.sections, 0, this.sections.length);
@@ -137,6 +141,9 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		return -1;
 	}
 
+	@Deprecated(
+		forRemoval = true
+	)
 	public int getHighestSectionPosition() {
 		int i = this.getHighestFilledSectionIndex();
 		return i == -1 ? this.getMinBuildHeight() : SectionPos.sectionToBlockCoord(this.getSectionYFromSectionIndex(i));
@@ -263,6 +270,17 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 
 	public abstract ChunkStatus getStatus();
 
+	public ChunkStatus getHighestGeneratedStatus() {
+		ChunkStatus chunkStatus = this.getStatus();
+		BelowZeroRetrogen belowZeroRetrogen = this.getBelowZeroRetrogen();
+		if (belowZeroRetrogen != null) {
+			ChunkStatus chunkStatus2 = belowZeroRetrogen.targetStatus();
+			return chunkStatus2.isOrAfter(chunkStatus) ? chunkStatus2 : chunkStatus;
+		} else {
+			return chunkStatus;
+		}
+	}
+
 	public abstract void removeBlockEntity(BlockPos blockPos);
 
 	public void markPosForPostprocessing(BlockPos blockPos) {
@@ -289,7 +307,32 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	@Nullable
 	public abstract CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos);
 
-	public abstract Stream<BlockPos> getLights();
+	@Override
+	public final void findBlockLightSources(BiConsumer<BlockPos, BlockState> biConsumer) {
+		this.findBlocks(blockState -> blockState.getLightEmission() != 0, biConsumer);
+	}
+
+	public void findBlocks(Predicate<BlockState> predicate, BiConsumer<BlockPos, BlockState> biConsumer) {
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (int i = this.getMinSection(); i < this.getMaxSection(); i++) {
+			LevelChunkSection levelChunkSection = this.getSection(this.getSectionIndexFromSectionY(i));
+			if (levelChunkSection.maybeHas(predicate)) {
+				BlockPos blockPos = SectionPos.of(this.chunkPos, i).origin();
+
+				for (int j = 0; j < 16; j++) {
+					for (int k = 0; k < 16; k++) {
+						for (int l = 0; l < 16; l++) {
+							BlockState blockState = levelChunkSection.getBlockState(l, j, k);
+							if (predicate.test(blockState)) {
+								biConsumer.accept(mutableBlockPos.setWithOffset(blockPos, l, j, k), blockState);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	public abstract TickContainerAccess<Block> getBlockTicks();
 
@@ -414,6 +457,15 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 
 	public LevelHeightAccessor getHeightAccessorForGeneration() {
 		return this;
+	}
+
+	public void initializeLightSources() {
+		this.skyLightSources.fillFrom(this);
+	}
+
+	@Override
+	public ChunkSkyLightSources getSkyLightSources() {
+		return this.skyLightSources;
 	}
 
 	public static record TicksToSave(SerializableTickContainer<Block> blocks, SerializableTickContainer<Fluid> fluids) {

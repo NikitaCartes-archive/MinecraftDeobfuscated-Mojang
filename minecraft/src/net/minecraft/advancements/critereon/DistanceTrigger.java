@@ -29,7 +29,7 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 
 	public void trigger(ServerPlayer serverPlayer, Vec3 vec3) {
 		Vec3 vec32 = serverPlayer.position();
-		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer.getLevel(), vec3, vec32));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer.serverLevel(), vec3, vec32));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {

@@ -12,10 +12,10 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 	private final int z;
 	private final ClientboundLightUpdatePacketData lightData;
 
-	public ClientboundLightUpdatePacket(ChunkPos chunkPos, LevelLightEngine levelLightEngine, @Nullable BitSet bitSet, @Nullable BitSet bitSet2, boolean bl) {
+	public ClientboundLightUpdatePacket(ChunkPos chunkPos, LevelLightEngine levelLightEngine, @Nullable BitSet bitSet, @Nullable BitSet bitSet2) {
 		this.x = chunkPos.x;
 		this.z = chunkPos.z;
-		this.lightData = new ClientboundLightUpdatePacketData(chunkPos, levelLightEngine, bitSet, bitSet2, bl);
+		this.lightData = new ClientboundLightUpdatePacketData(chunkPos, levelLightEngine, bitSet, bitSet2);
 	}
 
 	public ClientboundLightUpdatePacket(FriendlyByteBuf friendlyByteBuf) {

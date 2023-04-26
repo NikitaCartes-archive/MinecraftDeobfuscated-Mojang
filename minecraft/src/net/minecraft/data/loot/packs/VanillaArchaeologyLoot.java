@@ -113,6 +113,7 @@ public class VanillaArchaeologyLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE))
 						.add(LootItem.lootTableItem(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE))
 						.add(LootItem.lootTableItem(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_RELIC))
 				)
 		);
 		biConsumer.accept(

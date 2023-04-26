@@ -196,11 +196,9 @@ public class ChunkStatus {
 		POST_FEATURES,
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(chunkStatus, executor, serverLevel, chunkGenerator, structureTemplateManager, threadedLevelLightEngine, function, list, chunkAccess) -> lightChunk(
-				chunkStatus, threadedLevelLightEngine, chunkAccess
+				threadedLevelLightEngine, chunkAccess
 			),
-		(chunkStatus, serverLevel, structureTemplateManager, threadedLevelLightEngine, function, chunkAccess) -> lightChunk(
-				chunkStatus, threadedLevelLightEngine, chunkAccess
-			)
+		(chunkStatus, serverLevel, structureTemplateManager, threadedLevelLightEngine, function, chunkAccess) -> lightChunk(threadedLevelLightEngine, chunkAccess)
 	);
 	public static final ChunkStatus SPAWN = registerSimple(
 		"spawn", LIGHT, 0, POST_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
@@ -261,14 +259,16 @@ public class ChunkStatus {
 	private static CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> initializeLight(
 		ThreadedLevelLightEngine threadedLevelLightEngine, ChunkAccess chunkAccess
 	) {
+		chunkAccess.initializeLightSources();
 		((ProtoChunk)chunkAccess).setLightEngine(threadedLevelLightEngine);
-		return threadedLevelLightEngine.initializeLight(chunkAccess).thenApply(Either::left);
+		boolean bl = isLighted(chunkAccess);
+		return threadedLevelLightEngine.initializeLight(chunkAccess, bl).thenApply(Either::left);
 	}
 
 	private static CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> lightChunk(
-		ChunkStatus chunkStatus, ThreadedLevelLightEngine threadedLevelLightEngine, ChunkAccess chunkAccess
+		ThreadedLevelLightEngine threadedLevelLightEngine, ChunkAccess chunkAccess
 	) {
-		boolean bl = isLighted(chunkStatus, chunkAccess);
+		boolean bl = isLighted(chunkAccess);
 		return threadedLevelLightEngine.lightChunk(chunkAccess, bl).thenApply(Either::left);
 	}
 
@@ -320,8 +320,8 @@ public class ChunkStatus {
 		return list;
 	}
 
-	private static boolean isLighted(ChunkStatus chunkStatus, ChunkAccess chunkAccess) {
-		return chunkAccess.getStatus().isOrAfter(chunkStatus) && chunkAccess.isLightCorrect();
+	private static boolean isLighted(ChunkAccess chunkAccess) {
+		return chunkAccess.getStatus().isOrAfter(LIGHT) && chunkAccess.isLightCorrect();
 	}
 
 	public static ChunkStatus getStatusAroundFullChunk(int i) {

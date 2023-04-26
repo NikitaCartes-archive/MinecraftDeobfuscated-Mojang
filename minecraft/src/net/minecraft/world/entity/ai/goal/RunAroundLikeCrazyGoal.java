@@ -68,7 +68,7 @@ public class RunAroundLikeCrazyGoal extends Goal {
 
 			this.horse.ejectPassengers();
 			this.horse.makeMad();
-			this.horse.level.broadcastEntityEvent(this.horse, (byte)6);
+			this.horse.level().broadcastEntityEvent(this.horse, (byte)6);
 		}
 	}
 }

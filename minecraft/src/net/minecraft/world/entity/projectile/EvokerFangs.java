@@ -48,8 +48,8 @@ public class EvokerFangs extends Entity implements TraceableEntity {
 
 	@Nullable
 	public LivingEntity getOwner() {
-		if (this.owner == null && this.ownerUUID != null && this.level instanceof ServerLevel) {
-			Entity entity = ((ServerLevel)this.level).getEntity(this.ownerUUID);
+		if (this.owner == null && this.ownerUUID != null && this.level() instanceof ServerLevel) {
+			Entity entity = ((ServerLevel)this.level()).getEntity(this.ownerUUID);
 			if (entity instanceof LivingEntity) {
 				this.owner = (LivingEntity)entity;
 			}
@@ -77,7 +77,7 @@ public class EvokerFangs extends Entity implements TraceableEntity {
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			if (this.clientSideAttackStarted) {
 				this.lifeTicks--;
 				if (this.lifeTicks == 14) {
@@ -88,19 +88,19 @@ public class EvokerFangs extends Entity implements TraceableEntity {
 						double g = (this.random.nextDouble() * 2.0 - 1.0) * 0.3;
 						double h = 0.3 + this.random.nextDouble() * 0.3;
 						double j = (this.random.nextDouble() * 2.0 - 1.0) * 0.3;
-						this.level.addParticle(ParticleTypes.CRIT, d, e + 1.0, f, g, h, j);
+						this.level().addParticle(ParticleTypes.CRIT, d, e + 1.0, f, g, h, j);
 					}
 				}
 			}
 		} else if (--this.warmupDelayTicks < 0) {
 			if (this.warmupDelayTicks == -8) {
-				for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(0.2, 0.0, 0.2))) {
+				for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(0.2, 0.0, 0.2))) {
 					this.dealDamageTo(livingEntity);
 				}
 			}
 
 			if (!this.sentSpikeEvent) {
-				this.level.broadcastEntityEvent(this, (byte)4);
+				this.level().broadcastEntityEvent(this, (byte)4);
 				this.sentSpikeEvent = true;
 			}
 
@@ -131,7 +131,7 @@ public class EvokerFangs extends Entity implements TraceableEntity {
 		if (b == 4) {
 			this.clientSideAttackStarted = true;
 			if (!this.isSilent()) {
-				this.level
+				this.level()
 					.playLocalSound(
 						this.getX(), this.getY(), this.getZ(), SoundEvents.EVOKER_FANGS_ATTACK, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.2F + 0.85F, false
 					);

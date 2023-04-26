@@ -80,16 +80,16 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.level.isClientSide && this.isAlive() && this.isEnabled() && this.suckInItems()) {
+		if (!this.level().isClientSide && this.isAlive() && this.isEnabled() && this.suckInItems()) {
 			this.setChanged();
 		}
 	}
 
 	public boolean suckInItems() {
-		if (HopperBlockEntity.suckInItems(this.level, this)) {
+		if (HopperBlockEntity.suckInItems(this.level(), this)) {
 			return true;
 		} else {
-			for (ItemEntity itemEntity : this.level
+			for (ItemEntity itemEntity : this.level()
 				.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(0.25, 0.0, 0.25), EntitySelector.ENTITY_STILL_ALIVE)) {
 				if (HopperBlockEntity.addItem(this, itemEntity)) {
 					return true;

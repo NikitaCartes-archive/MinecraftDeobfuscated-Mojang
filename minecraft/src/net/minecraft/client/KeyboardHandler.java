@@ -147,7 +147,7 @@ public class KeyboardHandler {
 							String.format(
 								Locale.ROOT,
 								"/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f",
-								this.minecraft.player.level.dimension().location(),
+								this.minecraft.player.level().dimension().location(),
 								this.minecraft.player.getX(),
 								this.minecraft.player.getY(),
 								this.minecraft.player.getZ(),
@@ -254,7 +254,7 @@ public class KeyboardHandler {
 			switch (hitResult.getType()) {
 				case BLOCK:
 					BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
-					BlockState blockState = this.minecraft.player.level.getBlockState(blockPos);
+					BlockState blockState = this.minecraft.player.level().getBlockState(blockPos);
 					if (bl) {
 						if (bl2) {
 							this.minecraft.player.connection.getDebugQueryHandler().queryBlockEntityTag(blockPos, compoundTagx -> {
@@ -262,7 +262,7 @@ public class KeyboardHandler {
 								this.debugFeedbackTranslated("debug.inspect.server.block");
 							});
 						} else {
-							BlockEntity blockEntity = this.minecraft.player.level.getBlockEntity(blockPos);
+							BlockEntity blockEntity = this.minecraft.player.level().getBlockEntity(blockPos);
 							CompoundTag compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata() : null;
 							this.copyCreateBlockCommand(blockState, blockPos, compoundTag);
 							this.debugFeedbackTranslated("debug.inspect.client.block");

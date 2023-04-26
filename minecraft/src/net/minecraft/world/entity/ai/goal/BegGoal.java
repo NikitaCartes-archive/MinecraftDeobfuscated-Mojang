@@ -21,7 +21,7 @@ public class BegGoal extends Goal {
 
 	public BegGoal(Wolf wolf, float f) {
 		this.wolf = wolf;
-		this.level = wolf.level;
+		this.level = wolf.level();
 		this.lookDistance = f;
 		this.begTargeting = TargetingConditions.forNonCombat().range((double)f);
 		this.setFlags(EnumSet.of(Goal.Flag.LOOK));

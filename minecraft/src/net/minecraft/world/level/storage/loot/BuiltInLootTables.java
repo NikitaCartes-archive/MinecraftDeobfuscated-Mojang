@@ -86,6 +86,7 @@ public class BuiltInLootTables {
 	public static final ResourceLocation SHEPHERD_GIFT = register("gameplay/hero_of_the_village/shepherd_gift");
 	public static final ResourceLocation TOOLSMITH_GIFT = register("gameplay/hero_of_the_village/toolsmith_gift");
 	public static final ResourceLocation WEAPONSMITH_GIFT = register("gameplay/hero_of_the_village/weaponsmith_gift");
+	public static final ResourceLocation SNIFFER_DIGGING = register("gameplay/sniffer_digging");
 	public static final ResourceLocation PIGLIN_BARTERING = register("gameplay/piglin_bartering");
 	public static final ResourceLocation DESERT_WELL_ARCHAEOLOGY = register("archaeology/desert_well");
 	public static final ResourceLocation DESERT_PYRAMID_ARCHAEOLOGY = register("archaeology/desert_pyramid");

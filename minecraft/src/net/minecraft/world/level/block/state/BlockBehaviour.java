@@ -60,8 +60,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -80,7 +79,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 	protected static final Direction[] UPDATE_SHAPE_ORDER = new Direction[]{
 		Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP
 	};
-	protected final Material material;
 	protected final boolean hasCollision;
 	protected final float explosionResistance;
 	protected final boolean isRandomlyTicking;
@@ -95,7 +93,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 	protected ResourceLocation drops;
 
 	public BlockBehaviour(BlockBehaviour.Properties properties) {
-		this.material = properties.material;
 		this.hasCollision = properties.hasCollision;
 		this.drops = properties.drops;
 		this.explosionResistance = properties.explosionResistance;
@@ -372,8 +369,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 	protected abstract Block asBlock();
 
-	public MaterialColor defaultMaterialColor() {
-		return (MaterialColor)this.properties.materialColor.apply(this.asBlock().defaultBlockState());
+	public MapColor defaultMapColor() {
+		return (MapColor)this.properties.mapColor.apply(this.asBlock().defaultBlockState());
 	}
 
 	public float defaultDestroyTime() {
@@ -390,8 +387,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 		@Deprecated
 		private boolean legacySolid;
 		private final PushReaction pushReaction;
-		private final Material material;
-		private final MaterialColor materialColor;
+		private final MapColor mapColor;
 		private final float destroySpeed;
 		private final boolean requiresCorrectToolForDrops;
 		private final boolean canOcclude;
@@ -418,8 +414,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 			this.ignitedByLava = properties.ignitedByLava;
 			this.liquid = properties.liquid;
 			this.pushReaction = properties.pushReaction;
-			this.material = properties.material;
-			this.materialColor = (MaterialColor)properties.materialColor.apply(this.asState());
+			this.mapColor = (MapColor)properties.mapColor.apply(this.asState());
 			this.destroySpeed = properties.destroyTime;
 			this.requiresCorrectToolForDrops = properties.requiresCorrectToolForDrops;
 			this.canOcclude = properties.canOcclude;
@@ -468,11 +463,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public Holder<Block> getBlockHolder() {
 			return this.owner.builtInRegistryHolder();
-		}
-
-		@Deprecated
-		public Material getMaterial() {
-			return this.material;
 		}
 
 		@Deprecated
@@ -533,8 +523,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.liquid;
 		}
 
-		public MaterialColor getMapColor(BlockGetter blockGetter, BlockPos blockPos) {
-			return this.materialColor;
+		public MapColor getMapColor(BlockGetter blockGetter, BlockPos blockPos) {
+			return this.mapColor;
 		}
 
 		public BlockState rotate(Rotation rotation) {
@@ -910,8 +900,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 	}
 
 	public static class Properties {
-		Material material;
-		Function<BlockState, MaterialColor> materialColor;
+		Function<BlockState, MapColor> mapColor = blockState -> MapColor.NONE;
 		boolean hasCollision = true;
 		SoundType soundType = SoundType.STONE;
 		ToIntFunction<BlockState> lightEmission = blockState -> 0;
@@ -939,8 +928,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 					blockGetter, blockPos, Direction.UP
 				)
 				&& blockState.getLightEmission() < 14;
-		BlockBehaviour.StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking()
-				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
+		BlockBehaviour.StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
 		BlockBehaviour.StatePredicate isSuffocating = (blockState, blockGetter, blockPos) -> blockState.blocksMotion()
 				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
 		BlockBehaviour.StatePredicate isViewBlocking = this.isSuffocating;
@@ -950,40 +938,21 @@ public abstract class BlockBehaviour implements FeatureElement {
 		FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 		Optional<BlockBehaviour.OffsetFunction> offsetFunction = Optional.empty();
 
-		private Properties(Material material, MaterialColor materialColor) {
-			this(material, blockState -> materialColor);
+		private Properties() {
 		}
 
-		private Properties(Material material, Function<BlockState, MaterialColor> function) {
-			this.material = material;
-			this.materialColor = function;
-		}
-
-		public static BlockBehaviour.Properties of(Material material) {
-			return of(material, material.getColor());
-		}
-
-		public static BlockBehaviour.Properties of(Material material, DyeColor dyeColor) {
-			return of(material, dyeColor.getMaterialColor());
-		}
-
-		public static BlockBehaviour.Properties of(Material material, MaterialColor materialColor) {
-			return new BlockBehaviour.Properties(material, materialColor);
-		}
-
-		public static BlockBehaviour.Properties of(Material material, Function<BlockState, MaterialColor> function) {
-			return new BlockBehaviour.Properties(material, function);
+		public static BlockBehaviour.Properties of() {
+			return new BlockBehaviour.Properties();
 		}
 
 		public static BlockBehaviour.Properties copy(BlockBehaviour blockBehaviour) {
-			BlockBehaviour.Properties properties = new BlockBehaviour.Properties(blockBehaviour.material, blockBehaviour.properties.materialColor);
-			properties.material = blockBehaviour.properties.material;
+			BlockBehaviour.Properties properties = new BlockBehaviour.Properties();
 			properties.destroyTime = blockBehaviour.properties.destroyTime;
 			properties.explosionResistance = blockBehaviour.properties.explosionResistance;
 			properties.hasCollision = blockBehaviour.properties.hasCollision;
 			properties.isRandomlyTicking = blockBehaviour.properties.isRandomlyTicking;
 			properties.lightEmission = blockBehaviour.properties.lightEmission;
-			properties.materialColor = blockBehaviour.properties.materialColor;
+			properties.mapColor = blockBehaviour.properties.mapColor;
 			properties.soundType = blockBehaviour.properties.soundType;
 			properties.friction = blockBehaviour.properties.friction;
 			properties.speedFactor = blockBehaviour.properties.speedFactor;
@@ -1003,6 +972,21 @@ public abstract class BlockBehaviour implements FeatureElement {
 			properties.instrument = blockBehaviour.properties.instrument;
 			properties.replaceable = blockBehaviour.properties.replaceable;
 			return properties;
+		}
+
+		public BlockBehaviour.Properties mapColor(DyeColor dyeColor) {
+			this.mapColor = blockState -> dyeColor.getMapColor();
+			return this;
+		}
+
+		public BlockBehaviour.Properties mapColor(MapColor mapColor) {
+			this.mapColor = blockState -> mapColor;
+			return this;
+		}
+
+		public BlockBehaviour.Properties mapColor(Function<BlockState, MapColor> function) {
+			this.mapColor = function;
+			return this;
 		}
 
 		public BlockBehaviour.Properties noCollission() {
@@ -1137,11 +1121,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public BlockBehaviour.Properties requiresCorrectToolForDrops() {
 			this.requiresCorrectToolForDrops = true;
-			return this;
-		}
-
-		public BlockBehaviour.Properties color(MaterialColor materialColor) {
-			this.materialColor = blockState -> materialColor;
 			return this;
 		}
 

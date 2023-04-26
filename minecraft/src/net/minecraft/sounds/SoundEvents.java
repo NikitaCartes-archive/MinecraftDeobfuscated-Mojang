@@ -803,6 +803,7 @@ public class SoundEvents {
 	public static final SoundEvent MUSIC_DISC_WAIT = register("music_disc.wait");
 	public static final SoundEvent MUSIC_DISC_WARD = register("music_disc.ward");
 	public static final SoundEvent MUSIC_DISC_OTHERSIDE = register("music_disc.otherside");
+	public static final SoundEvent MUSIC_DISC_RELIC = register("music_disc.relic");
 	public static final Holder.Reference<SoundEvent> MUSIC_DRAGON = registerForHolder("music.dragon");
 	public static final Holder.Reference<SoundEvent> MUSIC_END = registerForHolder("music.end");
 	public static final Holder.Reference<SoundEvent> MUSIC_GAME = registerForHolder("music.game");
@@ -815,7 +816,7 @@ public class SoundEvents {
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_JAGGED_PEAKS = registerForHolder("music.overworld.jagged_peaks");
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_LUSH_CAVES = registerForHolder("music.overworld.lush_caves");
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_SWAMP = registerForHolder("music.overworld.swamp");
-	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_JUNGLE_AND_FOREST = registerForHolder("music.overworld.jungle_and_forest");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_FOREST = registerForHolder("music.overworld.forest");
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_OLD_GROWTH_TAIGA = registerForHolder("music.overworld.old_growth_taiga");
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_MEADOW = registerForHolder("music.overworld.meadow");
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_CHERRY_GROVE = registerForHolder("music.overworld.cherry_grove");
@@ -825,6 +826,12 @@ public class SoundEvents {
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_SOUL_SAND_VALLEY = registerForHolder("music.nether.soul_sand_valley");
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_STONY_PEAKS = registerForHolder("music.overworld.stony_peaks");
 	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_WARPED_FOREST = registerForHolder("music.nether.warped_forest");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_FLOWER_FOREST = registerForHolder("music.overworld.flower_forest");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_DESERT = registerForHolder("music.overworld.desert");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_BADLANDS = registerForHolder("music.overworld.badlands");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_JUNGLE = registerForHolder("music.overworld.jungle");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_SPARSE_JUNGLE = registerForHolder("music.overworld.sparse_jungle");
+	public static final Holder.Reference<SoundEvent> MUSIC_BIOME_BAMBOO_JUNGLE = registerForHolder("music.overworld.bamboo_jungle");
 	public static final Holder.Reference<SoundEvent> MUSIC_UNDER_WATER = registerForHolder("music.under_water");
 	public static final SoundEvent NETHER_BRICKS_BREAK = register("block.nether_bricks.break");
 	public static final SoundEvent NETHER_BRICKS_STEP = register("block.nether_bricks.step");

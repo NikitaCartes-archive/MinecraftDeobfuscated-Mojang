@@ -100,7 +100,7 @@ public class SpawnArmorTrimsCommand {
 	}
 
 	private static int spawnArmorTrims(CommandSourceStack commandSourceStack, Player player) {
-		Level level = player.getLevel();
+		Level level = player.level();
 		NonNullList<ArmorTrim> nonNullList = NonNullList.create();
 		Registry<TrimPattern> registry = level.registryAccess().registryOrThrow(Registries.TRIM_PATTERN);
 		Registry<TrimMaterial> registry2 = level.registryAccess().registryOrThrow(Registries.TRIM_MATERIAL);

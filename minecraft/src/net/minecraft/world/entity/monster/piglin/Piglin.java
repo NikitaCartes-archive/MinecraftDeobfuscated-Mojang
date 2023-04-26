@@ -268,7 +268,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		InteractionResult interactionResult = super.mobInteract(player, interactionHand);
 		if (interactionResult.consumesAction()) {
 			return interactionResult;
-		} else if (!this.level.isClientSide) {
+		} else if (!this.level().isClientSide) {
 			return PiglinAi.mobInteract(this, player, interactionHand);
 		} else {
 			boolean bl = PiglinAi.canAdmire(this, player.getItemInHand(interactionHand)) && this.getArmPose() != PiglinArmPose.ADMIRING_ITEM;
@@ -290,7 +290,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	@Override
 	public void setBaby(boolean bl) {
 		this.getEntityData().set(DATA_BABY_ID, bl);
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
 			attributeInstance.removeModifier(SPEED_MODIFIER_BABY);
 			if (bl) {
@@ -315,9 +315,9 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("piglinBrain");
-		this.getBrain().tick((ServerLevel)this.level, this);
-		this.level.getProfiler().pop();
+		this.level().getProfiler().push("piglinBrain");
+		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.level().getProfiler().pop();
 		PiglinAi.updateActivity(this);
 		super.customServerAiStep();
 	}
@@ -378,7 +378,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		boolean bl = super.hurt(damageSource, f);
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			return false;
 		} else {
 			if (bl && damageSource.getEntity() instanceof LivingEntity) {
@@ -419,7 +419,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 
 	@Override
 	public boolean wantsToPickUp(ItemStack itemStack) {
-		return this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.canPickUpLoot() && PiglinAi.wantsToPickup(this, itemStack);
+		return this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.canPickUpLoot() && PiglinAi.wantsToPickup(this, itemStack);
 	}
 
 	protected boolean canReplaceCurrentItem(ItemStack itemStack) {
@@ -467,7 +467,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return this.level.isClientSide ? null : (SoundEvent)PiglinAi.getSoundForCurrentActivity(this).orElse(null);
+		return this.level().isClientSide ? null : (SoundEvent)PiglinAi.getSoundForCurrentActivity(this).orElse(null);
 	}
 
 	@Override

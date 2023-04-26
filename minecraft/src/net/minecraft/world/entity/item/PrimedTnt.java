@@ -61,7 +61,7 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
-		if (this.onGround) {
+		if (this.onGround()) {
 			this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));
 		}
 
@@ -69,20 +69,20 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 		this.setFuse(i);
 		if (i <= 0) {
 			this.discard();
-			if (!this.level.isClientSide) {
+			if (!this.level().isClientSide) {
 				this.explode();
 			}
 		} else {
 			this.updateInWaterStateAndDoFluidPushing();
-			if (this.level.isClientSide) {
-				this.level.addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 0.0, 0.0, 0.0);
+			if (this.level().isClientSide) {
+				this.level().addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 0.0, 0.0, 0.0);
 			}
 		}
 	}
 
 	private void explode() {
 		float f = 4.0F;
-		this.level.explode(this, this.getX(), this.getY(0.0625), this.getZ(), 4.0F, Level.ExplosionInteraction.TNT);
+		this.level().explode(this, this.getX(), this.getY(0.0625), this.getZ(), 4.0F, Level.ExplosionInteraction.TNT);
 	}
 
 	@Override

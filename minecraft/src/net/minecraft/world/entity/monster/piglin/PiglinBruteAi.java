@@ -54,7 +54,7 @@ public class PiglinBruteAi {
 	}
 
 	protected static void initMemories(PiglinBrute piglinBrute) {
-		GlobalPos globalPos = GlobalPos.of(piglinBrute.level.dimension(), piglinBrute.blockPosition());
+		GlobalPos globalPos = GlobalPos.of(piglinBrute.level().dimension(), piglinBrute.blockPosition());
 		piglinBrute.getBrain().setMemory(MemoryModuleType.HOME, globalPos);
 	}
 
@@ -159,7 +159,7 @@ public class PiglinBruteAi {
 	}
 
 	protected static void maybePlayActivitySound(PiglinBrute piglinBrute) {
-		if ((double)piglinBrute.level.random.nextFloat() < 0.0125) {
+		if ((double)piglinBrute.level().random.nextFloat() < 0.0125) {
 			playActivitySound(piglinBrute);
 		}
 	}

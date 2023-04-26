@@ -405,11 +405,6 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 								blockState = this.debugPreliminarySurfaceLevel(noiseChunk, z, v, ac, blockState);
 								if (blockState != AIR && !SharedConstants.debugVoidTerrain(chunkAccess.getPos())) {
-									if (blockState.getLightEmission() != 0 && chunkAccess instanceof ProtoChunk) {
-										mutableBlockPos.set(z, v, ac);
-										((ProtoChunk)chunkAccess).addLight(mutableBlockPos);
-									}
-
 									levelChunkSection.setBlockState(aa, w, ad, blockState, false);
 									heightmap.update(aa, v, ad, blockState);
 									heightmap2.update(aa, v, ad, blockState);

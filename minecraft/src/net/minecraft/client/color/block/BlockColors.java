@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 
 @Environment(EnvType.CLIENT)
 public class BlockColors {
@@ -107,8 +107,8 @@ public class BlockColors {
 		if (blockColor != null) {
 			return blockColor.getColor(blockState, null, null, 0);
 		} else {
-			MaterialColor materialColor = blockState.getMapColor(level, blockPos);
-			return materialColor != null ? materialColor.col : -1;
+			MapColor mapColor = blockState.getMapColor(level, blockPos);
+			return mapColor != null ? mapColor.col : -1;
 		}
 	}
 

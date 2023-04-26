@@ -7,11 +7,11 @@ import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.TrueTypeGlyphProvider;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -78,9 +78,12 @@ public class TrueTypeGlyphProviderBuilder implements GlyphProviderBuilder {
 		);
 	}
 
-	@Nullable
 	@Override
-	public GlyphProvider create(ResourceManager resourceManager) {
+	public Either<GlyphProviderBuilder.Loader, GlyphProviderBuilder.Reference> build() {
+		return Either.left(this::load);
+	}
+
+	private GlyphProvider load(ResourceManager resourceManager) throws IOException {
 		STBTTFontinfo sTBTTFontinfo = null;
 		ByteBuffer byteBuffer = null;
 
@@ -117,13 +120,12 @@ public class TrueTypeGlyphProviderBuilder implements GlyphProviderBuilder {
 
 			return var5;
 		} catch (Exception var9) {
-			LOGGER.error("Couldn't load truetype font {}", this.location, var9);
 			if (sTBTTFontinfo != null) {
 				sTBTTFontinfo.free();
 			}
 
 			MemoryUtil.memFree(byteBuffer);
-			return null;
+			throw var9;
 		}
 	}
 }

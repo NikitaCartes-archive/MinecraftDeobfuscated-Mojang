@@ -44,7 +44,7 @@ public class ServerPlayerGameMode {
 
 	public ServerPlayerGameMode(ServerPlayer serverPlayer) {
 		this.player = serverPlayer;
-		this.level = serverPlayer.getLevel();
+		this.level = serverPlayer.serverLevel();
 	}
 
 	public boolean changeGameModeForPlayer(GameType gameType) {
@@ -112,7 +112,7 @@ public class ServerPlayerGameMode {
 
 	private float incrementDestroyProgress(BlockState blockState, BlockPos blockPos, int i) {
 		int j = this.gameTicks - i;
-		float f = blockState.getDestroyProgress(this.player, this.player.level, blockPos) * (float)(j + 1);
+		float f = blockState.getDestroyProgress(this.player, this.player.level(), blockPos) * (float)(j + 1);
 		int k = (int)(f * 10.0F);
 		if (k != this.lastSentState) {
 			this.level.destroyBlockProgress(this.player.getId(), blockPos, k);
@@ -155,7 +155,7 @@ public class ServerPlayerGameMode {
 				BlockState blockState = this.level.getBlockState(blockPos);
 				if (!blockState.isAir()) {
 					blockState.attack(this.level, blockPos, this.player);
-					f = blockState.getDestroyProgress(this.player, this.player.level, blockPos);
+					f = blockState.getDestroyProgress(this.player, this.player.level(), blockPos);
 				}
 
 				if (!blockState.isAir() && f >= 1.0F) {
@@ -178,7 +178,7 @@ public class ServerPlayerGameMode {
 					int l = this.gameTicks - this.destroyProgressStart;
 					BlockState blockStatex = this.level.getBlockState(blockPos);
 					if (!blockStatex.isAir()) {
-						float g = blockStatex.getDestroyProgress(this.player, this.player.level, blockPos) * (float)(l + 1);
+						float g = blockStatex.getDestroyProgress(this.player, this.player.level(), blockPos) * (float)(l + 1);
 						if (g >= 0.7F) {
 							this.isDestroyingBlock = false;
 							this.level.destroyBlockProgress(this.player.getId(), blockPos, -1);

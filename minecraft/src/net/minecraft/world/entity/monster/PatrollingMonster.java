@@ -167,7 +167,7 @@ public abstract class PatrollingMonster extends Monster {
 
 		@Override
 		public boolean canUse() {
-			boolean bl = this.mob.level.getGameTime() < this.cooldownUntil;
+			boolean bl = this.mob.level().getGameTime() < this.cooldownUntil;
 			return this.mob.isPatrolling() && this.mob.getTarget() == null && !this.mob.isVehicle() && this.mob.hasPatrolTarget() && !bl;
 		}
 
@@ -196,10 +196,10 @@ public abstract class PatrollingMonster extends Monster {
 					vec3 = vec33.yRot(90.0F).scale(0.4).add(vec3);
 					Vec3 vec34 = vec3.subtract(vec32).normalize().scale(10.0).add(vec32);
 					BlockPos blockPos = BlockPos.containing(vec34);
-					blockPos = this.mob.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
+					blockPos = this.mob.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
 					if (!pathNavigation.moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), bl ? this.leaderSpeedModifier : this.speedModifier)) {
 						this.moveRandomly();
-						this.cooldownUntil = this.mob.level.getGameTime() + 200L;
+						this.cooldownUntil = this.mob.level().getGameTime() + 200L;
 					} else if (bl) {
 						for (PatrollingMonster patrollingMonster : list) {
 							patrollingMonster.setPatrolTarget(blockPos);
@@ -211,7 +211,7 @@ public abstract class PatrollingMonster extends Monster {
 
 		private List<PatrollingMonster> findPatrolCompanions() {
 			return this.mob
-				.level
+				.level()
 				.getEntitiesOfClass(
 					PatrollingMonster.class,
 					this.mob.getBoundingBox().inflate(16.0),
@@ -222,7 +222,7 @@ public abstract class PatrollingMonster extends Monster {
 		private boolean moveRandomly() {
 			RandomSource randomSource = this.mob.getRandom();
 			BlockPos blockPos = this.mob
-				.level
+				.level()
 				.getHeightmapPos(
 					Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.mob.blockPosition().offset(-8 + randomSource.nextInt(16), 0, -8 + randomSource.nextInt(16))
 				);

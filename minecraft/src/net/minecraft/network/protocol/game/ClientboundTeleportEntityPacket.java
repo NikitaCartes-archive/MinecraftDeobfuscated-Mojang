@@ -22,7 +22,7 @@ public class ClientboundTeleportEntityPacket implements Packet<ClientGamePacketL
 		this.z = vec3.z;
 		this.yRot = (byte)((int)(entity.getYRot() * 256.0F / 360.0F));
 		this.xRot = (byte)((int)(entity.getXRot() * 256.0F / 360.0F));
-		this.onGround = entity.isOnGround();
+		this.onGround = entity.onGround();
 	}
 
 	public ClientboundTeleportEntityPacket(FriendlyByteBuf friendlyByteBuf) {

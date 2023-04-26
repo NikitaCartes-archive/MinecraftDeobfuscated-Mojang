@@ -98,12 +98,12 @@ public abstract class AbstractPiglin extends Monster {
 
 		if (this.timeInOverworld > 300) {
 			this.playConvertedSound();
-			this.finishConversion((ServerLevel)this.level);
+			this.finishConversion((ServerLevel)this.level());
 		}
 	}
 
 	public boolean isConverting() {
-		return !this.level.dimensionType().piglinSafe() && !this.isImmuneToZombification() && !this.isNoAi();
+		return !this.level().dimensionType().piglinSafe() && !this.isImmuneToZombification() && !this.isNoAi();
 	}
 
 	protected void finishConversion(ServerLevel serverLevel) {

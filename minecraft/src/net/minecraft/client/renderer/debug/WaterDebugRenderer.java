@@ -22,7 +22,7 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		BlockPos blockPos = this.minecraft.player.blockPosition();
-		LevelReader levelReader = this.minecraft.player.level;
+		LevelReader levelReader = this.minecraft.player.level();
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-10, -10, -10), blockPos.offset(10, 10, 10))) {
 			FluidState fluidState = levelReader.getFluidState(blockPos2);

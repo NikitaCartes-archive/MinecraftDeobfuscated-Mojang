@@ -1395,6 +1395,9 @@ public class Items {
 	public static final Item MUSIC_DISC_OTHERSIDE = registerItem(
 		"music_disc_otherside", new RecordItem(14, SoundEvents.MUSIC_DISC_OTHERSIDE, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 195)
 	);
+	public static final Item MUSIC_DISC_RELIC = registerItem(
+		"music_disc_relic", new RecordItem(14, SoundEvents.MUSIC_DISC_RELIC, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 218)
+	);
 	public static final Item MUSIC_DISC_5 = registerItem(
 		"music_disc_5", new RecordItem(15, SoundEvents.MUSIC_DISC_5, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 178)
 	);

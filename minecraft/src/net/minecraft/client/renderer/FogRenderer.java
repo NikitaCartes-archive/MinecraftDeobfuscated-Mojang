@@ -242,7 +242,7 @@ public class FogRenderer {
 			fogData.end = 96.0F;
 			if (entity instanceof LocalPlayer localPlayer) {
 				fogData.end = fogData.end * Math.max(0.25F, localPlayer.getWaterVision());
-				Holder<Biome> holder = localPlayer.level.getBiome(localPlayer.blockPosition());
+				Holder<Biome> holder = localPlayer.level().getBiome(localPlayer.blockPosition());
 				if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
 					fogData.end *= 0.85F;
 				}

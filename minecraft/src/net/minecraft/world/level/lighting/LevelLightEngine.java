@@ -10,13 +10,12 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 
 public class LevelLightEngine implements LightEventListener {
-	public static final int MAX_SOURCE_LEVEL = 15;
 	public static final int LIGHT_SECTION_PADDING = 1;
 	protected final LevelHeightAccessor levelHeightAccessor;
 	@Nullable
-	private final LayerLightEngine<?, ?> blockEngine;
+	private final LightEngine<?, ?> blockEngine;
 	@Nullable
-	private final LayerLightEngine<?, ?> skyEngine;
+	private final LightEngine<?, ?> skyEngine;
 
 	public LevelLightEngine(LightChunkGetter lightChunkGetter, boolean bl, boolean bl2) {
 		this.levelHeightAccessor = lightChunkGetter.getLevel();
@@ -36,30 +35,22 @@ public class LevelLightEngine implements LightEventListener {
 	}
 
 	@Override
-	public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
-		if (this.blockEngine != null) {
-			this.blockEngine.onBlockEmissionIncrease(blockPos, i);
-		}
-	}
-
-	@Override
 	public boolean hasLightWork() {
 		return this.skyEngine != null && this.skyEngine.hasLightWork() ? true : this.blockEngine != null && this.blockEngine.hasLightWork();
 	}
 
 	@Override
-	public int runUpdates(int i, boolean bl, boolean bl2) {
-		if (this.blockEngine != null && this.skyEngine != null) {
-			int j = i / 2;
-			int k = this.blockEngine.runUpdates(j, bl, bl2);
-			int l = i - j + k;
-			int m = this.skyEngine.runUpdates(l, bl, bl2);
-			return k == 0 && m > 0 ? this.blockEngine.runUpdates(m, bl, bl2) : m;
-		} else if (this.blockEngine != null) {
-			return this.blockEngine.runUpdates(i, bl, bl2);
-		} else {
-			return this.skyEngine != null ? this.skyEngine.runUpdates(i, bl, bl2) : i;
+	public int runLightUpdates() {
+		int i = 0;
+		if (this.blockEngine != null) {
+			i += this.blockEngine.runLightUpdates();
 		}
+
+		if (this.skyEngine != null) {
+			i += this.skyEngine.runLightUpdates();
+		}
+
+		return i;
 	}
 
 	@Override
@@ -74,13 +65,24 @@ public class LevelLightEngine implements LightEventListener {
 	}
 
 	@Override
-	public void enableLightSources(ChunkPos chunkPos, boolean bl) {
+	public void setLightEnabled(ChunkPos chunkPos, boolean bl) {
 		if (this.blockEngine != null) {
-			this.blockEngine.enableLightSources(chunkPos, bl);
+			this.blockEngine.setLightEnabled(chunkPos, bl);
 		}
 
 		if (this.skyEngine != null) {
-			this.skyEngine.enableLightSources(chunkPos, bl);
+			this.skyEngine.setLightEnabled(chunkPos, bl);
+		}
+	}
+
+	@Override
+	public void propagateLightSources(ChunkPos chunkPos) {
+		if (this.blockEngine != null) {
+			this.blockEngine.propagateLightSources(chunkPos);
+		}
+
+		if (this.skyEngine != null) {
+			this.skyEngine.propagateLightSources(chunkPos);
 		}
 	}
 
@@ -104,25 +106,25 @@ public class LevelLightEngine implements LightEventListener {
 		return "n/a";
 	}
 
-	public int getDebugSectionLevel(LightLayer lightLayer, SectionPos sectionPos) {
+	public LayerLightSectionStorage.SectionType getDebugSectionType(LightLayer lightLayer, SectionPos sectionPos) {
 		if (lightLayer == LightLayer.BLOCK) {
 			if (this.blockEngine != null) {
-				return this.blockEngine.getDebugSectionLevel(sectionPos.asLong());
+				return this.blockEngine.getDebugSectionType(sectionPos.asLong());
 			}
 		} else if (this.skyEngine != null) {
-			return this.skyEngine.getDebugSectionLevel(sectionPos.asLong());
+			return this.skyEngine.getDebugSectionType(sectionPos.asLong());
 		}
 
-		return 2;
+		return LayerLightSectionStorage.SectionType.EMPTY;
 	}
 
-	public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer, boolean bl) {
+	public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer) {
 		if (lightLayer == LightLayer.BLOCK) {
 			if (this.blockEngine != null) {
-				this.blockEngine.queueSectionData(sectionPos.asLong(), dataLayer, bl);
+				this.blockEngine.queueSectionData(sectionPos.asLong(), dataLayer);
 			}
 		} else if (this.skyEngine != null) {
-			this.skyEngine.queueSectionData(sectionPos.asLong(), dataLayer, bl);
+			this.skyEngine.queueSectionData(sectionPos.asLong(), dataLayer);
 		}
 	}
 
@@ -140,6 +142,11 @@ public class LevelLightEngine implements LightEventListener {
 		int j = this.skyEngine == null ? 0 : this.skyEngine.getLightValue(blockPos) - i;
 		int k = this.blockEngine == null ? 0 : this.blockEngine.getLightValue(blockPos);
 		return Math.max(k, j);
+	}
+
+	public boolean lightOnInSection(SectionPos sectionPos) {
+		long l = sectionPos.asLong();
+		return this.blockEngine == null || this.blockEngine.storage.lightOnInSection(l) && (this.skyEngine == null || this.skyEngine.storage.lightOnInSection(l));
 	}
 
 	public int getLightSectionCount() {

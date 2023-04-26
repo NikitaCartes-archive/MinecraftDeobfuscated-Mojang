@@ -142,7 +142,7 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 
 	@Override
 	public void notifyTradeUpdated(ItemStack itemStack) {
-		if (!this.level.isClientSide && this.ambientSoundTime > -this.getAmbientSoundInterval() + 20) {
+		if (!this.level().isClientSide && this.ambientSoundTime > -this.getAmbientSoundInterval() + 20) {
 			this.ambientSoundTime = -this.getAmbientSoundInterval();
 			this.playSound(this.getTradeUpdatedSound(!itemStack.isEmpty()), this.getSoundVolume(), this.getVoicePitch());
 		}
@@ -204,7 +204,7 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 			double d = this.random.nextGaussian() * 0.02;
 			double e = this.random.nextGaussian() * 0.02;
 			double f = this.random.nextGaussian() * 0.02;
-			this.level.addParticle(particleOptions, this.getRandomX(1.0), this.getRandomY() + 1.0, this.getRandomZ(1.0), d, e, f);
+			this.level().addParticle(particleOptions, this.getRandomX(1.0), this.getRandomY() + 1.0, this.getRandomZ(1.0), d, e, f);
 		}
 	}
 
@@ -256,6 +256,6 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 
 	@Override
 	public boolean isClientSide() {
-		return this.level.isClientSide;
+		return this.level().isClientSide;
 	}
 }

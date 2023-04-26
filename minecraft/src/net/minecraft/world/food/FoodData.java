@@ -31,7 +31,7 @@ public class FoodData {
 	}
 
 	public void tick(Player player) {
-		Difficulty difficulty = player.level.getDifficulty();
+		Difficulty difficulty = player.level().getDifficulty();
 		this.lastFoodLevel = this.foodLevel;
 		if (this.exhaustionLevel > 4.0F) {
 			this.exhaustionLevel -= 4.0F;
@@ -42,7 +42,7 @@ public class FoodData {
 			}
 		}
 
-		boolean bl = player.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
+		boolean bl = player.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
 		if (bl && this.saturationLevel > 0.0F && player.isHurt() && this.foodLevel >= 20) {
 			this.tickTimer++;
 			if (this.tickTimer >= 10) {

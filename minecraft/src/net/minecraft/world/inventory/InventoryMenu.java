@@ -132,19 +132,19 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 
 	@Override
 	public boolean recipeMatches(Recipe<? super CraftingContainer> recipe) {
-		return recipe.matches(this.craftSlots, this.owner.level);
+		return recipe.matches(this.craftSlots, this.owner.level());
 	}
 
 	@Override
 	public void slotsChanged(Container container) {
-		CraftingMenu.slotChangedCraftingGrid(this, this.owner.level, this.owner, this.craftSlots, this.resultSlots);
+		CraftingMenu.slotChangedCraftingGrid(this, this.owner.level(), this.owner, this.craftSlots, this.resultSlots);
 	}
 
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
 		this.resultSlots.clearContent();
-		if (!player.level.isClientSide) {
+		if (!player.level().isClientSide) {
 			this.clearContainer(player, this.craftSlots);
 		}
 	}

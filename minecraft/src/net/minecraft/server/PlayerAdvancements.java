@@ -208,7 +208,7 @@ public class PlayerAdvancements {
 				advancement.getRewards().grant(this.player);
 				if (advancement.getDisplay() != null
 					&& advancement.getDisplay().shouldAnnounceChat()
-					&& this.player.level.getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
+					&& this.player.level().getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
 					this.playerList
 						.broadcastSystemMessage(
 							Component.translatable(

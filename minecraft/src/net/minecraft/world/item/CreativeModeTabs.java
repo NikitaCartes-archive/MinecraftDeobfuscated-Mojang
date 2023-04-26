@@ -1275,6 +1275,7 @@ public class CreativeModeTabs {
 						output.accept(Items.MUSIC_DISC_OTHERSIDE);
 						output.accept(Items.MUSIC_DISC_5);
 						output.accept(Items.MUSIC_DISC_PIGSTEP);
+						output.accept(Items.MUSIC_DISC_RELIC);
 					}
 				)
 				.build()

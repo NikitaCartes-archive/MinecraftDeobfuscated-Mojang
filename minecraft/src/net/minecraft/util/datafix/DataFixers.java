@@ -53,6 +53,7 @@ import net.minecraft.util.datafix.fixes.CavesAndCliffsRenames;
 import net.minecraft.util.datafix.fixes.ChunkBedBlockEntityInjecterFix;
 import net.minecraft.util.datafix.fixes.ChunkBiomeFix;
 import net.minecraft.util.datafix.fixes.ChunkDeleteIgnoredLightDataFix;
+import net.minecraft.util.datafix.fixes.ChunkDeleteLightFix;
 import net.minecraft.util.datafix.fixes.ChunkHeightAndBiomeFix;
 import net.minecraft.util.datafix.fixes.ChunkLightRemoveFix;
 import net.minecraft.util.datafix.fixes.ChunkPalettedStorageFix;
@@ -1105,16 +1106,10 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new FeatureFlagRemoveFix(schema182, "Remove 1.20 feature toggle", Set.of("minecraft:update_1_20")));
 		Schema schema183 = dataFixerBuilder.addSchema(3441, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new BlendingDataFix(schema183));
-		Schema schema184 = dataFixerBuilder.addSchema(3446, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(
-			new RemapChunkStatusFix(
-				schema184, "Remove liquid_carvers and heightmap chunk statuses", createRenamer(Map.of("liquid_carvers", "carvers", "heightmaps", "spawn"))
-			)
-		);
-		Schema schema185 = dataFixerBuilder.addSchema(3447, SAME_NAMESPACED);
+		Schema schema184 = dataFixerBuilder.addSchema(3447, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(
 			ItemRenameFix.create(
-				schema185,
+				schema184,
 				"Pottery shard item renaming to Pottery sherd",
 				createRenamer(
 					(Map<String, String>)Stream.of(
@@ -1143,8 +1138,16 @@ public class DataFixers {
 				)
 			)
 		);
-		Schema schema186 = dataFixerBuilder.addSchema(3448, V3448::new);
-		dataFixerBuilder.addFixer(new DecoratedPotFieldRenameFix(schema186));
+		Schema schema185 = dataFixerBuilder.addSchema(3448, V3448::new);
+		dataFixerBuilder.addFixer(new DecoratedPotFieldRenameFix(schema185));
+		Schema schema186 = dataFixerBuilder.addSchema(3450, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(
+			new RemapChunkStatusFix(
+				schema186, "Remove liquid_carvers and heightmap chunk statuses", createRenamer(Map.of("liquid_carvers", "carvers", "heightmaps", "spawn"))
+			)
+		);
+		Schema schema187 = dataFixerBuilder.addSchema(3451, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new ChunkDeleteLightFix(schema187));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

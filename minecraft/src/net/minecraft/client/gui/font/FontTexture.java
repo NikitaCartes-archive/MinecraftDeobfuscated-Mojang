@@ -3,33 +3,28 @@ package net.minecraft.client.gui.font;
 import com.mojang.blaze3d.font.SheetGlyphInfo;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
+import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(EnvType.CLIENT)
-public class FontTexture extends AbstractTexture {
+public class FontTexture extends AbstractTexture implements Dumpable {
 	private static final int SIZE = 256;
-	private final ResourceLocation name;
-	private final RenderType normalType;
-	private final RenderType seeThroughType;
-	private final RenderType polygonOffsetType;
+	private final GlyphRenderTypes renderTypes;
 	private final boolean colored;
 	private final FontTexture.Node root;
 
-	public FontTexture(ResourceLocation resourceLocation, boolean bl) {
-		this.name = resourceLocation;
+	public FontTexture(GlyphRenderTypes glyphRenderTypes, boolean bl) {
 		this.colored = bl;
 		this.root = new FontTexture.Node(0, 0, 256, 256);
 		TextureUtil.prepareImage(bl ? NativeImage.InternalGlFormat.RGBA : NativeImage.InternalGlFormat.RED, this.getId(), 256, 256);
-		this.normalType = bl ? RenderType.text(resourceLocation) : RenderType.textIntensity(resourceLocation);
-		this.seeThroughType = bl ? RenderType.textSeeThrough(resourceLocation) : RenderType.textIntensitySeeThrough(resourceLocation);
-		this.polygonOffsetType = bl ? RenderType.textPolygonOffset(resourceLocation) : RenderType.textIntensityPolygonOffset(resourceLocation);
+		this.renderTypes = glyphRenderTypes;
 	}
 
 	@Override
@@ -54,9 +49,7 @@ public class FontTexture extends AbstractTexture {
 				float g = 256.0F;
 				float h = 0.01F;
 				return new BakedGlyph(
-					this.normalType,
-					this.seeThroughType,
-					this.polygonOffsetType,
+					this.renderTypes,
 					((float)node.x + 0.01F) / 256.0F,
 					((float)node.x - 0.01F + (float)sheetGlyphInfo.getPixelWidth()) / 256.0F,
 					((float)node.y + 0.01F) / 256.0F,
@@ -72,8 +65,10 @@ public class FontTexture extends AbstractTexture {
 		}
 	}
 
-	public ResourceLocation getName() {
-		return this.name;
+	@Override
+	public void dumpContents(ResourceLocation resourceLocation, Path path) {
+		String string = resourceLocation.toDebugFileName();
+		TextureUtil.writeAsPNG(path, string, this.getId(), 0, 256, 256, i -> (i & 0xFF000000) == 0 ? -16777216 : i);
 	}
 
 	@Environment(EnvType.CLIENT)

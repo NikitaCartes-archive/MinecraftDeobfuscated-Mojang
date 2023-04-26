@@ -37,10 +37,10 @@ public class ThrownExperienceBottle extends ThrowableItemProjectile {
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (this.level instanceof ServerLevel) {
-			this.level.levelEvent(2002, this.blockPosition(), PotionUtils.getColor(Potions.WATER));
-			int i = 3 + this.level.random.nextInt(5) + this.level.random.nextInt(5);
-			ExperienceOrb.award((ServerLevel)this.level, this.position(), i);
+		if (this.level() instanceof ServerLevel) {
+			this.level().levelEvent(2002, this.blockPosition(), PotionUtils.getColor(Potions.WATER));
+			int i = 3 + this.level().random.nextInt(5) + this.level().random.nextInt(5);
+			ExperienceOrb.award((ServerLevel)this.level(), this.position(), i);
 			this.discard();
 		}
 	}

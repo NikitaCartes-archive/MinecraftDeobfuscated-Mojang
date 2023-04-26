@@ -120,7 +120,7 @@ public class AxolotlAi {
 							Pair.of(RandomStroll.stroll(0.15F, false), 2),
 							Pair.of(SetWalkTargetFromLookTarget.create(AxolotlAi::canSetWalkTargetFromLookTarget, AxolotlAi::getSpeedModifier, 3), 3),
 							Pair.of(BehaviorBuilder.triggerIf(Entity::isInWaterOrBubble), 5),
-							Pair.of(BehaviorBuilder.triggerIf(Entity::isOnGround), 5)
+							Pair.of(BehaviorBuilder.triggerIf(Entity::onGround), 5)
 						)
 					)
 				)
@@ -129,7 +129,7 @@ public class AxolotlAi {
 	}
 
 	private static boolean canSetWalkTargetFromLookTarget(LivingEntity livingEntity) {
-		Level level = livingEntity.level;
+		Level level = livingEntity.level();
 		Optional<PositionTracker> optional = livingEntity.getBrain().getMemory(MemoryModuleType.LOOK_TARGET);
 		if (optional.isPresent()) {
 			BlockPos blockPos = ((PositionTracker)optional.get()).currentBlockPosition();

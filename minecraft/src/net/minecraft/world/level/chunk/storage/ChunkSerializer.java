@@ -137,11 +137,11 @@ public class ChunkSerializer {
 				}
 
 				if (bl4) {
-					levelLightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, k), new DataLayer(compoundTag2.getByteArray("BlockLight")), true);
+					levelLightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, k), new DataLayer(compoundTag2.getByteArray("BlockLight")));
 				}
 
 				if (bl5) {
-					levelLightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, k), new DataLayer(compoundTag2.getByteArray("SkyLight")), true);
+					levelLightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, k), new DataLayer(compoundTag2.getByteArray("SkyLight")));
 				}
 			}
 		}
@@ -199,23 +199,6 @@ public class ChunkSerializer {
 			if (chunkStatus.isOrAfter(ChunkStatus.INITIALIZE_LIGHT)) {
 				protoChunk.setLightEngine(levelLightEngine);
 			}
-
-			BelowZeroRetrogen belowZeroRetrogen = protoChunk.getBelowZeroRetrogen();
-			boolean bl6 = chunkStatus.isOrAfter(ChunkStatus.LIGHT) || belowZeroRetrogen != null && belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.LIGHT);
-			if (!bl && bl6) {
-				for (BlockPos blockPos : BlockPos.betweenClosed(
-					chunkPos.getMinBlockX(),
-					serverLevel.getMinBuildHeight(),
-					chunkPos.getMinBlockZ(),
-					chunkPos.getMaxBlockX(),
-					serverLevel.getMaxBuildHeight() - 1,
-					chunkPos.getMaxBlockZ()
-				)) {
-					if (chunkAccess.getBlockState(blockPos).getLightEmission() != 0) {
-						protoChunk.addLight(blockPos);
-					}
-				}
-			}
 		}
 
 		chunkAccess.setLightCorrect(bl);
@@ -266,24 +249,11 @@ public class ChunkSerializer {
 				chunkAccess.setBlockEntityNbt(compoundTag5);
 			}
 
-			ListTag listTag5 = compoundTag.getList("Lights", 9);
+			CompoundTag compoundTag6 = compoundTag.getCompound("CarvingMasks");
 
-			for (int q = 0; q < listTag5.size(); q++) {
-				LevelChunkSection levelChunkSection2 = levelChunkSections[q];
-				if (levelChunkSection2 != null && !levelChunkSection2.hasOnlyAir()) {
-					ListTag listTag6 = listTag5.getList(q);
-
-					for (int r = 0; r < listTag6.size(); r++) {
-						protoChunk2.addLight(listTag6.getShort(r), q);
-					}
-				}
-			}
-
-			CompoundTag compoundTag5 = compoundTag.getCompound("CarvingMasks");
-
-			for (String string2 : compoundTag5.getAllKeys()) {
+			for (String string2 : compoundTag6.getAllKeys()) {
 				GenerationStep.Carving carving = GenerationStep.Carving.valueOf(string2);
-				protoChunk2.setCarvingMask(carving, new CarvingMask(compoundTag5.getLongArray(string2), chunkAccess.getMinBuildHeight()));
+				protoChunk2.setCarvingMask(carving, new CarvingMask(compoundTag6.getLongArray(string2), chunkAccess.getMinBuildHeight()));
 			}
 
 			return protoChunk2;
@@ -382,7 +352,6 @@ public class ChunkSerializer {
 			ListTag listTag3 = new ListTag();
 			listTag3.addAll(protoChunk.getEntities());
 			compoundTag.put("entities", listTag3);
-			compoundTag.put("Lights", packOffsets(protoChunk.getPackedLights()));
 			CompoundTag compoundTag3 = new CompoundTag();
 
 			for (GenerationStep.Carving carving : GenerationStep.Carving.values()) {

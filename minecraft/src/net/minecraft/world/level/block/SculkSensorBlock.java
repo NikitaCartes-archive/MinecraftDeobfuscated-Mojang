@@ -40,8 +40,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
-	public static final int ACTIVE_TICKS = 40;
-	public static final int COOLDOWN_TICKS = 1;
+	public static final int ACTIVE_TICKS = 30;
+	public static final int COOLDOWN_TICKS = 10;
 	public static final EnumProperty<SculkSensorPhase> PHASE = BlockStateProperties.SCULK_SENSOR_PHASE;
 	public static final IntegerProperty POWER = BlockStateProperties.POWER;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -105,8 +105,6 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 			if ((Integer)blockState.getValue(POWER) > 0 && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
 				level.setBlock(blockPos, blockState.setValue(POWER, Integer.valueOf(0)), 18);
 			}
-
-			level.scheduleTick(new BlockPos(blockPos), blockState.getBlock(), 1);
 		}
 	}
 
@@ -193,7 +191,7 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 
 	public static void deactivate(Level level, BlockPos blockPos, BlockState blockState) {
 		level.setBlock(blockPos, blockState.setValue(PHASE, SculkSensorPhase.COOLDOWN).setValue(POWER, Integer.valueOf(0)), 3);
-		level.scheduleTick(blockPos, blockState.getBlock(), 1);
+		level.scheduleTick(blockPos, blockState.getBlock(), 10);
 		if (!(Boolean)blockState.getValue(WATERLOGGED)) {
 			level.playSound(null, blockPos, SoundEvents.SCULK_CLICKING_STOP, SoundSource.BLOCKS, 1.0F, level.random.nextFloat() * 0.2F + 0.8F);
 		}
@@ -203,7 +201,7 @@ public class SculkSensorBlock extends BaseEntityBlock implements SimpleWaterlogg
 
 	@VisibleForTesting
 	public int getActiveTicks() {
-		return 40;
+		return 30;
 	}
 
 	public void activate(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, int i, int j) {

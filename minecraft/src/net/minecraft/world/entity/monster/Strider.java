@@ -111,7 +111,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
-		if (DATA_BOOST_TIME.equals(entityDataAccessor) && this.level.isClientSide) {
+		if (DATA_BOOST_TIME.equals(entityDataAccessor) && this.level().isClientSide) {
 			this.steering.onSynced();
 		}
 
@@ -152,7 +152,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	public void equipSaddle(@Nullable SoundSource soundSource) {
 		this.steering.setSaddle(true);
 		if (soundSource != null) {
-			this.level.playSound(null, this, SoundEvents.STRIDER_SADDLE, soundSource, 0.5F, 1.0F);
+			this.level().playSound(null, this, SoundEvents.STRIDER_SADDLE, soundSource, 0.5F, 1.0F);
 		}
 	}
 
@@ -238,14 +238,14 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		}
 
 		for (BlockPos blockPos : set) {
-			if (!this.level.getFluidState(blockPos).is(FluidTags.LAVA)) {
-				double g = this.level.getBlockFloorHeight(blockPos);
+			if (!this.level().getFluidState(blockPos).is(FluidTags.LAVA)) {
+				double g = this.level().getBlockFloorHeight(blockPos);
 				if (DismountHelper.isBlockFloorValid(g)) {
 					Vec3 vec32 = Vec3.upFromBottomCenterOf(blockPos, g);
 
 					for (Pose pose : livingEntity.getDismountPoses()) {
 						AABB aABB = livingEntity.getLocalBoundsForPose(pose);
-						if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec32))) {
+						if (DismountHelper.canDismountTo(this.level(), livingEntity, aABB.move(vec32))) {
 							livingEntity.setPose(pose);
 							return vec32;
 						}
@@ -312,7 +312,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 			boolean bl;
 			boolean var10000;
 			label36: {
-				BlockState blockState = this.level.getBlockState(this.blockPosition());
+				BlockState blockState = this.level().getBlockState(this.blockPosition());
 				BlockState blockState2 = this.getBlockStateOnLegacy();
 				bl = blockState.is(BlockTags.STRIDER_WARM_BLOCKS) || blockState2.is(BlockTags.STRIDER_WARM_BLOCKS) || this.getFluidHeight(FluidTags.LAVA) > 0.0;
 				if (this.getVehicle() instanceof Strider strider && strider.isSuffocating()) {
@@ -349,8 +349,8 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		if (this.isInLava()) {
 			CollisionContext collisionContext = CollisionContext.of(this);
 			if (collisionContext.isAbove(LiquidBlock.STABLE_SHAPE, this.blockPosition(), true)
-				&& !this.level.getFluidState(this.blockPosition().above()).is(FluidTags.LAVA)) {
-				this.onGround = true;
+				&& !this.level().getFluidState(this.blockPosition().above()).is(FluidTags.LAVA)) {
+				this.setOnGround(true);
 			} else {
 				this.setDeltaMovement(this.getDeltaMovement().scale(0.5).add(0.0, 0.05, 0.0));
 			}
@@ -427,11 +427,11 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		boolean bl = this.isFood(player.getItemInHand(interactionHand));
 		if (!bl && this.isSaddled() && !this.isVehicle() && !player.isSecondaryUseActive()) {
-			if (!this.level.isClientSide) {
+			if (!this.level().isClientSide) {
 				player.startRiding(this);
 			}
 
-			return InteractionResult.sidedSuccess(this.level.isClientSide);
+			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
 			InteractionResult interactionResult = super.mobInteract(player, interactionHand);
 			if (!interactionResult.consumesAction()) {
@@ -439,7 +439,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 				return itemStack.is(Items.SADDLE) ? itemStack.interactLivingEntity(player, this, interactionHand) : InteractionResult.PASS;
 			} else {
 				if (bl && !this.isSilent()) {
-					this.level
+					this.level()
 						.playSound(
 							null,
 							this.getX(),
@@ -520,7 +520,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 		@Override
 		public boolean canContinueToUse() {
-			return !this.strider.isInLava() && this.isValidTarget(this.strider.level, this.blockPos);
+			return !this.strider.isInLava() && this.isValidTarget(this.strider.level(), this.blockPos);
 		}
 
 		@Override

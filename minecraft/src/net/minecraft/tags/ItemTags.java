@@ -95,6 +95,7 @@ public final class ItemTags {
 	public static final TagKey<Item> TRIM_TEMPLATES = bind("trim_templates");
 	public static final TagKey<Item> SNIFFER_FOOD = bind("sniffer_food");
 	public static final TagKey<Item> DECORATED_POT_SHERDS = bind("decorated_pot_sherds");
+	public static final TagKey<Item> DECORATED_POT_INGREDIENTS = bind("decorated_pot_ingredients");
 	public static final TagKey<Item> SWORDS = bind("swords");
 	public static final TagKey<Item> AXES = bind("axes");
 	public static final TagKey<Item> HOES = bind("hoes");

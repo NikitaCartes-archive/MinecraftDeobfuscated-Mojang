@@ -18,7 +18,7 @@ import net.minecraft.util.SignatureValidator;
 
 public record ProfilePublicKey(ProfilePublicKey.Data data) {
 	public static final Component EXPIRED_PROFILE_PUBLIC_KEY = Component.translatable("multiplayer.disconnect.expired_public_key");
-	private static final Component INVALID_SIGNATURE = Component.translatable("multiplayer.disconnect.invalid_public_key_signature");
+	private static final Component INVALID_SIGNATURE = Component.translatable("multiplayer.disconnect.invalid_public_key_signature.new");
 	public static final Duration EXPIRY_GRACE_PERIOD = Duration.ofHours(8L);
 	public static final Codec<ProfilePublicKey> TRUSTED_CODEC = ProfilePublicKey.Data.CODEC.xmap(ProfilePublicKey::new, ProfilePublicKey::data);
 

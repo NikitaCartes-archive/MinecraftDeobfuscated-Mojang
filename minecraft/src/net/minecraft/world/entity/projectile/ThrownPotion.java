@@ -59,7 +59,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 	@Override
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		super.onHitBlock(blockHitResult);
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			ItemStack itemStack = this.getItem();
 			Potion potion = PotionUtils.getPotion(itemStack);
 			List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
@@ -81,7 +81,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			ItemStack itemStack = this.getItem();
 			Potion potion = PotionUtils.getPotion(itemStack);
 			List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
@@ -97,7 +97,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 			}
 
 			int i = potion.hasInstantEffects() ? 2007 : 2002;
-			this.level.levelEvent(i, this.blockPosition(), PotionUtils.getColor(itemStack));
+			this.level().levelEvent(i, this.blockPosition(), PotionUtils.getColor(itemStack));
 			this.discard();
 		}
 	}
@@ -105,7 +105,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 	private void applyWater() {
 		AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
 
-		for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, aABB, WATER_SENSITIVE_OR_ON_FIRE)) {
+		for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, aABB, WATER_SENSITIVE_OR_ON_FIRE)) {
 			double d = this.distanceToSqr(livingEntity);
 			if (d < 16.0) {
 				if (livingEntity.isSensitiveToWater()) {
@@ -118,14 +118,14 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 			}
 		}
 
-		for (Axolotl axolotl : this.level.getEntitiesOfClass(Axolotl.class, aABB)) {
+		for (Axolotl axolotl : this.level().getEntitiesOfClass(Axolotl.class, aABB)) {
 			axolotl.rehydrate();
 		}
 	}
 
 	private void applySplash(List<MobEffectInstance> list, @Nullable Entity entity) {
 		AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
-		List<LivingEntity> list2 = this.level.getEntitiesOfClass(LivingEntity.class, aABB);
+		List<LivingEntity> list2 = this.level().getEntitiesOfClass(LivingEntity.class, aABB);
 		if (!list2.isEmpty()) {
 			Entity entity2 = this.getEffectSource();
 
@@ -161,7 +161,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 	}
 
 	private void makeAreaOfEffectCloud(ItemStack itemStack, Potion potion) {
-		AreaEffectCloud areaEffectCloud = new AreaEffectCloud(this.level, this.getX(), this.getY(), this.getZ());
+		AreaEffectCloud areaEffectCloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
 		Entity entity = this.getOwner();
 		if (entity instanceof LivingEntity) {
 			areaEffectCloud.setOwner((LivingEntity)entity);
@@ -182,7 +182,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 			areaEffectCloud.setFixedColor(compoundTag.getInt("CustomPotionColor"));
 		}
 
-		this.level.addFreshEntity(areaEffectCloud);
+		this.level().addFreshEntity(areaEffectCloud);
 	}
 
 	private boolean isLingering() {
@@ -190,15 +190,15 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 	}
 
 	private void dowseFire(BlockPos blockPos) {
-		BlockState blockState = this.level.getBlockState(blockPos);
+		BlockState blockState = this.level().getBlockState(blockPos);
 		if (blockState.is(BlockTags.FIRE)) {
-			this.level.removeBlock(blockPos, false);
+			this.level().removeBlock(blockPos, false);
 		} else if (AbstractCandleBlock.isLit(blockState)) {
-			AbstractCandleBlock.extinguish(null, blockState, this.level, blockPos);
+			AbstractCandleBlock.extinguish(null, blockState, this.level(), blockPos);
 		} else if (CampfireBlock.isLitCampfire(blockState)) {
-			this.level.levelEvent(null, 1009, blockPos, 0);
-			CampfireBlock.dowse(this.getOwner(), this.level, blockPos, blockState);
-			this.level.setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(false)));
+			this.level().levelEvent(null, 1009, blockPos, 0);
+			CampfireBlock.dowse(this.getOwner(), this.level(), blockPos, blockState);
+			this.level().setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(false)));
 		}
 	}
 }

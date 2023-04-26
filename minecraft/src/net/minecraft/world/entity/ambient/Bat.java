@@ -128,25 +128,25 @@ public class Bat extends AmbientCreature {
 		BlockPos blockPos2 = blockPos.above();
 		if (this.isResting()) {
 			boolean bl = this.isSilent();
-			if (this.level.getBlockState(blockPos2).isRedstoneConductor(this.level, blockPos)) {
+			if (this.level().getBlockState(blockPos2).isRedstoneConductor(this.level(), blockPos)) {
 				if (this.random.nextInt(200) == 0) {
 					this.yHeadRot = (float)this.random.nextInt(360);
 				}
 
-				if (this.level.getNearestPlayer(BAT_RESTING_TARGETING, this) != null) {
+				if (this.level().getNearestPlayer(BAT_RESTING_TARGETING, this) != null) {
 					this.setResting(false);
 					if (!bl) {
-						this.level.levelEvent(null, 1025, blockPos, 0);
+						this.level().levelEvent(null, 1025, blockPos, 0);
 					}
 				}
 			} else {
 				this.setResting(false);
 				if (!bl) {
-					this.level.levelEvent(null, 1025, blockPos, 0);
+					this.level().levelEvent(null, 1025, blockPos, 0);
 				}
 			}
 		} else {
-			if (this.targetPosition != null && (!this.level.isEmptyBlock(this.targetPosition) || this.targetPosition.getY() <= this.level.getMinBuildHeight())) {
+			if (this.targetPosition != null && (!this.level().isEmptyBlock(this.targetPosition) || this.targetPosition.getY() <= this.level().getMinBuildHeight())) {
 				this.targetPosition = null;
 			}
 
@@ -168,7 +168,7 @@ public class Bat extends AmbientCreature {
 			float h = Mth.wrapDegrees(g - this.getYRot());
 			this.zza = 0.5F;
 			this.setYRot(this.getYRot() + h);
-			if (this.random.nextInt(100) == 0 && this.level.getBlockState(blockPos2).isRedstoneConductor(this.level, blockPos2)) {
+			if (this.random.nextInt(100) == 0 && this.level().getBlockState(blockPos2).isRedstoneConductor(this.level(), blockPos2)) {
 				this.setResting(true);
 			}
 		}
@@ -193,7 +193,7 @@ public class Bat extends AmbientCreature {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
-			if (!this.level.isClientSide && this.isResting()) {
+			if (!this.level().isClientSide && this.isResting()) {
 				this.setResting(false);
 			}
 

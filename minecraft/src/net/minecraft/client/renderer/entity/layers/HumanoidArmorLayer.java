@@ -66,7 +66,7 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 					this.renderModel(poseStack, multiBufferSource, i, armorItem, bl2, humanoidModel, bl, 1.0F, 1.0F, 1.0F, null);
 				}
 
-				ArmorTrim.getTrim(livingEntity.level.registryAccess(), itemStack)
+				ArmorTrim.getTrim(livingEntity.level().registryAccess(), itemStack)
 					.ifPresent(armorTrim -> this.renderTrim(armorItem.getMaterial(), poseStack, multiBufferSource, i, armorTrim, bl2, humanoidModel, bl, 1.0F, 1.0F, 1.0F));
 			}
 		}

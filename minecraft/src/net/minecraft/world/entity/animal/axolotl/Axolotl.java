@@ -299,12 +299,12 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("axolotlBrain");
-		this.getBrain().tick((ServerLevel)this.level, this);
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("axolotlActivityUpdate");
+		this.level().getProfiler().push("axolotlBrain");
+		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("axolotlActivityUpdate");
 		AxolotlAi.updateActivity(this);
-		this.level.getProfiler().pop();
+		this.level().getProfiler().pop();
 		if (!this.isNoAi()) {
 			Optional<Integer> optional = this.getBrain().getMemory(MemoryModuleType.PLAY_DEAD_TICKS);
 			this.setPlayingDead(optional.isPresent() && (Integer)optional.get() > 0);
@@ -334,10 +334,10 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		float g = this.getHealth();
-		if (!this.level.isClientSide
+		if (!this.level().isClientSide
 			&& !this.isNoAi()
-			&& this.level.random.nextInt(3) == 0
-			&& ((float)this.level.random.nextInt(3) < f || g / this.getMaxHealth() < 0.5F)
+			&& this.level().random.nextInt(3) == 0
+			&& ((float)this.level().random.nextInt(3) < f || g / this.getMaxHealth() < 0.5F)
 			&& f < g
 			&& this.isInWater()
 			&& (damageSource.getEntity() != null || damageSource.getDirectEntity() != null)
@@ -409,7 +409,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	}
 
 	public static void onStopAttacking(Axolotl axolotl, LivingEntity livingEntity) {
-		Level level = axolotl.level;
+		Level level = axolotl.level();
 		if (livingEntity.isDeadOrDying()) {
 			DamageSource damageSource = livingEntity.getLastDamageSource();
 			if (damageSource != null) {

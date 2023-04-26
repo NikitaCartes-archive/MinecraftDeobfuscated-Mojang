@@ -53,7 +53,7 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 	}
 
 	public static <E extends Mob> boolean defaultAcceptableLandingSpot(E mob, BlockPos blockPos) {
-		Level level = mob.level;
+		Level level = mob.level();
 		BlockPos blockPos2 = blockPos.below();
 		return level.getBlockState(blockPos2).isSolidRender(level, blockPos2)
 			&& mob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(level, blockPos.mutable())) == 0.0F;
@@ -80,7 +80,7 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-		boolean bl = mob.isOnGround() && !mob.isInWater() && !mob.isInLava() && !serverLevel.getBlockState(mob.blockPosition()).is(Blocks.HONEY_BLOCK);
+		boolean bl = mob.onGround() && !mob.isInWater() && !mob.isInLava() && !serverLevel.getBlockState(mob.blockPosition()).is(Blocks.HONEY_BLOCK);
 		if (!bl) {
 			mob.getBrain().setMemory(MemoryModuleType.LONG_JUMP_COOLDOWN_TICKS, this.timeBetweenLongJumps.sample(serverLevel.random) / 2);
 		}
@@ -252,7 +252,7 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 
 		for (int j = 0; j < i; j++) {
 			vec35 = j == i - 1 ? vec32 : vec35.add(vec34.scale(d * 0.9F));
-			if (!mob.level.noCollision(mob, entityDimensions.makeBoundingBox(vec35))) {
+			if (!mob.level().noCollision(mob, entityDimensions.makeBoundingBox(vec35))) {
 				return false;
 			}
 		}

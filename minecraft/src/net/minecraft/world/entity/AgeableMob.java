@@ -61,7 +61,7 @@ public abstract class AgeableMob extends PathfinderMob {
 	}
 
 	public int getAge() {
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			return this.entityData.get(DATA_BABY_ID) ? -1 : 1;
 		} else {
 			return this.age;
@@ -128,10 +128,10 @@ public abstract class AgeableMob extends PathfinderMob {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			if (this.forcedAgeTimer > 0) {
 				if (this.forcedAgeTimer % 4 == 0) {
-					this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
+					this.level().addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
 				}
 
 				this.forcedAgeTimer--;

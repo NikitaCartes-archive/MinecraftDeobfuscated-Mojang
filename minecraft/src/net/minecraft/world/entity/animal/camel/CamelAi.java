@@ -152,7 +152,7 @@ public class CamelAi {
 			return !camel.isInWater()
 				&& camel.getPoseTime() >= (long)this.minimalPoseTicks
 				&& !camel.isLeashed()
-				&& camel.isOnGround()
+				&& camel.onGround()
 				&& !camel.hasControllingPassenger();
 		}
 

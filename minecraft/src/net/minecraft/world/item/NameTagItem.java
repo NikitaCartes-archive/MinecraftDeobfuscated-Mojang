@@ -14,7 +14,7 @@ public class NameTagItem extends Item {
 	@Override
 	public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
 		if (itemStack.hasCustomHoverName() && !(livingEntity instanceof Player)) {
-			if (!player.level.isClientSide && livingEntity.isAlive()) {
+			if (!player.level().isClientSide && livingEntity.isAlive()) {
 				livingEntity.setCustomName(itemStack.getHoverName());
 				if (livingEntity instanceof Mob) {
 					((Mob)livingEntity).setPersistenceRequired();
@@ -23,7 +23,7 @@ public class NameTagItem extends Item {
 				itemStack.shrink(1);
 			}
 
-			return InteractionResult.sidedSuccess(player.level.isClientSide);
+			return InteractionResult.sidedSuccess(player.level().isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}

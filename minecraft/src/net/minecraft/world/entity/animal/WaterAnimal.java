@@ -42,7 +42,7 @@ public abstract class WaterAnimal extends PathfinderMob {
 
 	@Override
 	public int getExperienceReward() {
-		return 1 + this.level.random.nextInt(3);
+		return 1 + this.level().random.nextInt(3);
 	}
 
 	protected void handleAirSupply(int i) {

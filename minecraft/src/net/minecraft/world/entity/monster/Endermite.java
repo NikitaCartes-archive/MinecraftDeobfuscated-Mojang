@@ -40,7 +40,7 @@ public class Endermite extends Monster {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(1, new FloatGoal(this));
-		this.goalSelector.addGoal(1, new ClimbOnTopOfPowderSnowGoal(this, this.level));
+		this.goalSelector.addGoal(1, new ClimbOnTopOfPowderSnowGoal(this, this.level()));
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, false));
 		this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -115,9 +115,9 @@ public class Endermite extends Monster {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			for (int i = 0; i < 2; i++) {
-				this.level
+				this.level()
 					.addParticle(
 						ParticleTypes.PORTAL,
 						this.getRandomX(0.5),

@@ -234,7 +234,7 @@ public class Inventory implements Container, Nameable {
 		for (NonNullList<ItemStack> nonNullList : this.compartments) {
 			for (int i = 0; i < nonNullList.size(); i++) {
 				if (!nonNullList.get(i).isEmpty()) {
-					nonNullList.get(i).inventoryTick(this.player.level, this.player, i, this.selected == i);
+					nonNullList.get(i).inventoryTick(this.player.level(), this.player, i, this.selected == i);
 				}
 			}
 		}

@@ -100,7 +100,7 @@ public class AxolotlModel<T extends Axolotl & LerpingModel> extends AgeableListM
 
 				this.saveAnimationValues(axolotl);
 			} else {
-				if (axolotl.isOnGround()) {
+				if (axolotl.onGround()) {
 					if (bl) {
 						this.setupGroundCrawlingAnimation(h, i);
 					} else {

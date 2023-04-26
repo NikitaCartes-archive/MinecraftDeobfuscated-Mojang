@@ -182,10 +182,10 @@ public class MapItemSavedData extends SavedData {
 			MapItemSavedData.HoldingPlayer holdingPlayer2 = (MapItemSavedData.HoldingPlayer)this.carriedBy.get(i);
 			String string = holdingPlayer2.player.getName().getString();
 			if (!holdingPlayer2.player.isRemoved() && (holdingPlayer2.player.getInventory().contains(itemStack) || itemStack.isFramed())) {
-				if (!itemStack.isFramed() && holdingPlayer2.player.level.dimension() == this.dimension && this.trackingPosition) {
+				if (!itemStack.isFramed() && holdingPlayer2.player.level().dimension() == this.dimension && this.trackingPosition) {
 					this.addDecoration(
 						MapDecoration.Type.PLAYER,
-						holdingPlayer2.player.level,
+						holdingPlayer2.player.level(),
 						string,
 						holdingPlayer2.player.getX(),
 						holdingPlayer2.player.getZ(),
@@ -211,7 +211,7 @@ public class MapItemSavedData extends SavedData {
 			MapFrame mapFrame2 = new MapFrame(blockPos, itemFrame.getDirection().get2DDataValue() * 90, itemFrame.getId());
 			this.addDecoration(
 				MapDecoration.Type.FRAME,
-				player.level,
+				player.level(),
 				"frame-" + itemFrame.getId(),
 				(double)blockPos.getX(),
 				(double)blockPos.getZ(),
@@ -230,7 +230,7 @@ public class MapItemSavedData extends SavedData {
 				if (!this.decorations.containsKey(compoundTag2.getString("id"))) {
 					this.addDecoration(
 						MapDecoration.Type.byIcon(compoundTag2.getByte("type")),
-						player.level,
+						player.level(),
 						compoundTag2.getString("id"),
 						compoundTag2.getDouble("x"),
 						compoundTag2.getDouble("z"),

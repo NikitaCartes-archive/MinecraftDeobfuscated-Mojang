@@ -234,19 +234,19 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("allayBrain");
-		this.getBrain().tick((ServerLevel)this.level, this);
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("allayActivityUpdate");
+		this.level().getProfiler().push("allayBrain");
+		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("allayActivityUpdate");
 		AllayAi.updateActivity(this);
-		this.level.getProfiler().pop();
+		this.level().getProfiler().pop();
 		super.customServerAiStep();
 	}
 
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (!this.level.isClientSide && this.isAlive() && this.tickCount % 10 == 0) {
+		if (!this.level().isClientSide && this.isAlive() && this.tickCount % 10 == 0) {
 			this.heal(1.0F);
 		}
 
@@ -261,7 +261,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			this.holdingItemAnimationTicks0 = this.holdingItemAnimationTicks;
 			if (this.hasItemInHand()) {
 				this.holdingItemAnimationTicks = Mth.clamp(this.holdingItemAnimationTicks + 1.0F, 0.0F, 5.0F);
@@ -285,7 +285,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 				this.spinningAnimationTicks0 = 0.0F;
 			}
 		} else {
-			VibrationSystem.Ticker.tick(this.level, this.vibrationData, this.vibrationUser);
+			VibrationSystem.Ticker.tick(this.level(), this.vibrationData, this.vibrationUser);
 			if (this.isPanicking()) {
 				this.setDancing(false);
 			}
@@ -316,20 +316,20 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 		ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
 		if (this.isDancing() && this.isDuplicationItem(itemStack) && this.canDuplicate()) {
 			this.duplicateAllay();
-			this.level.broadcastEntityEvent(this, (byte)18);
-			this.level.playSound(player, this, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 2.0F, 1.0F);
+			this.level().broadcastEntityEvent(this, (byte)18);
+			this.level().playSound(player, this, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 2.0F, 1.0F);
 			this.removeInteractionItem(player, itemStack);
 			return InteractionResult.SUCCESS;
 		} else if (itemStack2.isEmpty() && !itemStack.isEmpty()) {
 			ItemStack itemStack3 = itemStack.copyWithCount(1);
 			this.setItemInHand(InteractionHand.MAIN_HAND, itemStack3);
 			this.removeInteractionItem(player, itemStack);
-			this.level.playSound(player, this, SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.NEUTRAL, 2.0F, 1.0F);
+			this.level().playSound(player, this, SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.NEUTRAL, 2.0F, 1.0F);
 			this.getBrain().setMemory(MemoryModuleType.LIKED_PLAYER, player.getUUID());
 			return InteractionResult.SUCCESS;
 		} else if (!itemStack2.isEmpty() && interactionHand == InteractionHand.MAIN_HAND && itemStack.isEmpty()) {
 			this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-			this.level.playSound(player, this, SoundEvents.ALLAY_ITEM_TAKEN, SoundSource.NEUTRAL, 2.0F, 1.0F);
+			this.level().playSound(player, this, SoundEvents.ALLAY_ITEM_TAKEN, SoundSource.NEUTRAL, 2.0F, 1.0F);
 			this.swing(InteractionHand.MAIN_HAND);
 
 			for (ItemStack itemStack4 : this.getInventory().removeAllItems()) {
@@ -370,7 +370,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	public boolean wantsToPickUp(ItemStack itemStack) {
 		ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
 		return !itemStack2.isEmpty()
-			&& this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
+			&& this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
 			&& this.inventory.canAddItem(itemStack)
 			&& this.allayConsidersItemEqual(itemStack2, itemStack);
 	}
@@ -410,12 +410,12 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 
 	@Override
 	public boolean isFlapping() {
-		return !this.isOnGround();
+		return !this.onGround();
 	}
 
 	@Override
 	public void updateDynamicGameEventListener(BiConsumer<DynamicGameEventListener<?>, ServerLevel> biConsumer) {
-		if (this.level instanceof ServerLevel serverLevel) {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			biConsumer.accept(this.dynamicVibrationListener, serverLevel);
 			biConsumer.accept(this.dynamicJukeboxListener, serverLevel);
 		}
@@ -430,7 +430,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	public void setDancing(boolean bl) {
-		if (!this.level.isClientSide && this.isEffectiveAi() && (!bl || !this.isPanicking())) {
+		if (!this.level().isClientSide && this.isEffectiveAi() && (!bl || !this.isPanicking())) {
 			this.entityData.set(DATA_DANCING, bl);
 		}
 	}
@@ -438,7 +438,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	private boolean shouldStopDancing() {
 		return this.jukeboxPos == null
 			|| !this.jukeboxPos.closerToCenterThan(this.position(), (double)GameEvent.JUKEBOX_PLAY.getNotificationRadius())
-			|| !this.level.getBlockState(this.jukeboxPos).is(Blocks.JUKEBOX);
+			|| !this.level().getBlockState(this.jukeboxPos).is(Blocks.JUKEBOX);
 	}
 
 	public float getHoldingItemAnimationProgress(float f) {
@@ -509,7 +509,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 			this.duplicationCooldown--;
 		}
 
-		if (!this.level.isClientSide() && this.duplicationCooldown == 0L && !this.canDuplicate()) {
+		if (!this.level().isClientSide() && this.duplicationCooldown == 0L && !this.canDuplicate()) {
 			this.entityData.set(DATA_CAN_DUPLICATE, true);
 		}
 	}
@@ -519,13 +519,13 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	private void duplicateAllay() {
-		Allay allay = EntityType.ALLAY.create(this.level);
+		Allay allay = EntityType.ALLAY.create(this.level());
 		if (allay != null) {
 			allay.moveTo(this.position());
 			allay.setPersistenceRequired();
 			allay.resetDuplicationCooldown();
 			this.resetDuplicationCooldown();
-			this.level.addFreshEntity(allay);
+			this.level().addFreshEntity(allay);
 		}
 	}
 
@@ -569,7 +569,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 		double d = this.random.nextGaussian() * 0.02;
 		double e = this.random.nextGaussian() * 0.02;
 		double f = this.random.nextGaussian() * 0.02;
-		this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d, e, f);
+		this.level().addParticle(ParticleTypes.HEART, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d, e, f);
 	}
 
 	@Override

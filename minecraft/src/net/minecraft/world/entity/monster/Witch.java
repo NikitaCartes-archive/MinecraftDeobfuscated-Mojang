@@ -107,7 +107,7 @@ public class Witch extends Raider implements RangedAttackMob {
 
 	@Override
 	public void aiStep() {
-		if (!this.level.isClientSide && this.isAlive()) {
+		if (!this.level().isClientSide && this.isAlive()) {
 			this.healRaidersGoal.decrementCooldown();
 			if (this.healRaidersGoal.getCooldown() <= 0) {
 				this.attackPlayersGoal.setCanAttack(true);
@@ -153,7 +153,7 @@ public class Witch extends Raider implements RangedAttackMob {
 					this.usingTime = this.getMainHandItem().getUseDuration();
 					this.setUsingItem(true);
 					if (!this.isSilent()) {
-						this.level
+						this.level()
 							.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_DRINK, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
 					}
 
@@ -164,7 +164,7 @@ public class Witch extends Raider implements RangedAttackMob {
 			}
 
 			if (this.random.nextFloat() < 7.5E-4F) {
-				this.level.broadcastEntityEvent(this, (byte)15);
+				this.level().broadcastEntityEvent(this, (byte)15);
 			}
 		}
 
@@ -180,7 +180,7 @@ public class Witch extends Raider implements RangedAttackMob {
 	public void handleEntityEvent(byte b) {
 		if (b == 15) {
 			for (int i = 0; i < this.random.nextInt(35) + 10; i++) {
-				this.level
+				this.level()
 					.addParticle(
 						ParticleTypes.WITCH,
 						this.getX() + this.random.nextGaussian() * 0.13F,
@@ -235,16 +235,16 @@ public class Witch extends Raider implements RangedAttackMob {
 				potion = Potions.WEAKNESS;
 			}
 
-			ThrownPotion thrownPotion = new ThrownPotion(this.level, this);
+			ThrownPotion thrownPotion = new ThrownPotion(this.level(), this);
 			thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
 			thrownPotion.setXRot(thrownPotion.getXRot() - -20.0F);
 			thrownPotion.shoot(d, e + h * 0.2, g, 0.75F, 8.0F);
 			if (!this.isSilent()) {
-				this.level
+				this.level()
 					.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
 			}
 
-			this.level.addFreshEntity(thrownPotion);
+			this.level().addFreshEntity(thrownPotion);
 		}
 	}
 

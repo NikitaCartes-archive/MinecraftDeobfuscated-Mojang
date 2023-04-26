@@ -139,7 +139,7 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 	}
 
 	public Optional<Entity> getTongueTarget() {
-		return this.entityData.get(DATA_TONGUE_TARGET_ID).stream().mapToObj(this.level::getEntity).filter(Objects::nonNull).findFirst();
+		return this.entityData.get(DATA_TONGUE_TARGET_ID).stream().mapToObj(this.level()::getEntity).filter(Objects::nonNull).findFirst();
 	}
 
 	public void setTongueTarget(Entity entity) {
@@ -186,18 +186,18 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("frogBrain");
-		this.getBrain().tick((ServerLevel)this.level, this);
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("frogActivityUpdate");
+		this.level().getProfiler().push("frogBrain");
+		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("frogActivityUpdate");
 		FrogAi.updateActivity(this);
-		this.level.getProfiler().pop();
+		this.level().getProfiler().pop();
 		super.customServerAiStep();
 	}
 
 	@Override
 	public void tick() {
-		if (this.level.isClientSide()) {
+		if (this.level().isClientSide()) {
 			this.swimIdleAnimationState.animateWhen(this.isInWaterOrBubble() && !this.walkAnimation.isMoving(), this.tickCount);
 		}
 

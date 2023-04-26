@@ -43,7 +43,7 @@ public class Snowball extends ThrowableItemProjectile {
 			ParticleOptions particleOptions = this.getParticle();
 
 			for (int i = 0; i < 8; i++) {
-				this.level.addParticle(particleOptions, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
+				this.level().addParticle(particleOptions, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
 			}
 		}
 	}
@@ -59,8 +59,8 @@ public class Snowball extends ThrowableItemProjectile {
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (!this.level.isClientSide) {
-			this.level.broadcastEntityEvent(this, (byte)3);
+		if (!this.level().isClientSide) {
+			this.level().broadcastEntityEvent(this, (byte)3);
 			this.discard();
 		}
 	}

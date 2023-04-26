@@ -84,12 +84,12 @@ public abstract class Raider extends PatrollingMonster {
 
 	@Override
 	public void aiStep() {
-		if (this.level instanceof ServerLevel && this.isAlive()) {
+		if (this.level() instanceof ServerLevel && this.isAlive()) {
 			Raid raid = this.getCurrentRaid();
 			if (this.canJoinRaid()) {
 				if (raid == null) {
-					if (this.level.getGameTime() % 20L == 0L) {
-						Raid raid2 = ((ServerLevel)this.level).getRaidAt(this.blockPosition());
+					if (this.level().getGameTime() % 20L == 0L) {
+						Raid raid2 = ((ServerLevel)this.level()).getRaidAt(this.blockPosition());
 						if (raid2 != null && Raids.canJoinRaid(this, raid2)) {
 							raid2.joinRaid(raid2.getGroupsSpawned(), this, null, true);
 						}
@@ -113,7 +113,7 @@ public abstract class Raider extends PatrollingMonster {
 
 	@Override
 	public void die(DamageSource damageSource) {
-		if (this.level instanceof ServerLevel) {
+		if (this.level() instanceof ServerLevel) {
 			Entity entity = damageSource.getEntity();
 			Raid raid = this.getCurrentRaid();
 			if (raid != null) {
@@ -128,7 +128,7 @@ public abstract class Raider extends PatrollingMonster {
 				raid.removeFromRaid(this, false);
 			}
 
-			if (this.isPatrolLeader() && raid == null && ((ServerLevel)this.level).getRaidAt(this.blockPosition()) == null) {
+			if (this.isPatrolLeader() && raid == null && ((ServerLevel)this.level()).getRaidAt(this.blockPosition()) == null) {
 				ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
 				Player player = null;
 				if (entity instanceof Player) {
@@ -152,7 +152,7 @@ public abstract class Raider extends PatrollingMonster {
 
 					i = Mth.clamp(i, 0, 4);
 					MobEffectInstance mobEffectInstance2 = new MobEffectInstance(MobEffects.BAD_OMEN, 120000, i, false, false, true);
-					if (!this.level.getGameRules().getBoolean(GameRules.RULE_DISABLE_RAIDS)) {
+					if (!this.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_RAIDS)) {
 						player.addEffect(mobEffectInstance2);
 					}
 				}
@@ -212,8 +212,8 @@ public abstract class Raider extends PatrollingMonster {
 		this.wave = compoundTag.getInt("Wave");
 		this.canJoinRaid = compoundTag.getBoolean("CanJoinRaid");
 		if (compoundTag.contains("RaidId", 3)) {
-			if (this.level instanceof ServerLevel) {
-				this.raid = ((ServerLevel)this.level).getRaids().get(compoundTag.getInt("RaidId"));
+			if (this.level() instanceof ServerLevel) {
+				this.raid = ((ServerLevel)this.level()).getRaids().get(compoundTag.getInt("RaidId"));
 			}
 
 			if (this.raid != null) {
@@ -316,7 +316,7 @@ public abstract class Raider extends PatrollingMonster {
 			super.start();
 			this.mob.getNavigation().stop();
 
-			for (Raider raider : this.mob.level.getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
+			for (Raider raider : this.mob.level().getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
 				raider.setTarget(this.mob.getTarget());
 			}
 		}
@@ -326,7 +326,7 @@ public abstract class Raider extends PatrollingMonster {
 			super.stop();
 			LivingEntity livingEntity = this.mob.getTarget();
 			if (livingEntity != null) {
-				for (Raider raider : this.mob.level.getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
+				for (Raider raider : this.mob.level().getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
 					raider.setTarget(livingEntity);
 					raider.setAggressive(true);
 				}
@@ -375,7 +375,7 @@ public abstract class Raider extends PatrollingMonster {
 				&& !ItemStack.matches(this.mob.getItemBySlot(EquipmentSlot.HEAD), Raid.getLeaderBannerInstance())) {
 				Raider raider = raid.getLeader(this.mob.getWave());
 				if (raider == null || !raider.isAlive()) {
-					List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(16.0, 8.0, 16.0), Raider.ALLOWED_ITEMS);
+					List<ItemEntity> list = this.mob.level().getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(16.0, 8.0, 16.0), Raider.ALLOWED_ITEMS);
 					if (!list.isEmpty()) {
 						return this.mob.getNavigation().moveTo((Entity)list.get(0), 1.15F);
 					}
@@ -390,7 +390,7 @@ public abstract class Raider extends PatrollingMonster {
 		@Override
 		public void tick() {
 			if (this.mob.getNavigation().getTargetPos().closerToCenterThan(this.mob.position(), 1.414)) {
-				List<ItemEntity> list = this.mob.level.getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(4.0, 4.0, 4.0), Raider.ALLOWED_ITEMS);
+				List<ItemEntity> list = this.mob.level().getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(4.0, 4.0, 4.0), Raider.ALLOWED_ITEMS);
 				if (!list.isEmpty()) {
 					this.mob.pickUpItem((ItemEntity)list.get(0));
 				}
@@ -464,7 +464,7 @@ public abstract class Raider extends PatrollingMonster {
 		}
 
 		private boolean hasSuitablePoi() {
-			ServerLevel serverLevel = (ServerLevel)this.raider.level;
+			ServerLevel serverLevel = (ServerLevel)this.raider.level();
 			BlockPos blockPos = this.raider.blockPosition();
 			Optional<BlockPos> optional = serverLevel.getPoiManager()
 				.getRandom(holder -> holder.is(PoiTypes.HOME), this::hasNotVisited, PoiManager.Occupancy.ANY, blockPos, 48, this.raider.random);

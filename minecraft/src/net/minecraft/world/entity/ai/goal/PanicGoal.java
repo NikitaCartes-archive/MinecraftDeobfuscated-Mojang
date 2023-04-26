@@ -31,7 +31,7 @@ public class PanicGoal extends Goal {
 			return false;
 		} else {
 			if (this.mob.isOnFire()) {
-				BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 5);
+				BlockPos blockPos = this.lookForWater(this.mob.level(), this.mob, 5);
 				if (blockPos != null) {
 					this.posX = (double)blockPos.getX();
 					this.posY = (double)blockPos.getY();

@@ -3,6 +3,7 @@ package com.mojang.blaze3d.font;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.ints.Int2FloatMap;
 import it.unimi.dsi.fastutil.ints.Int2FloatMaps;
 import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
@@ -55,6 +56,7 @@ public class SpaceProvider implements GlyphProvider {
 			int2FloatMap.put(is[0], f);
 		}
 
-		return resourceManager -> new SpaceProvider(int2FloatMap);
+		GlyphProviderBuilder.Loader loader = resourceManager -> new SpaceProvider(int2FloatMap);
+		return () -> Either.left(loader);
 	}
 }

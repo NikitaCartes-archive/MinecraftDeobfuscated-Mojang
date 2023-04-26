@@ -40,7 +40,7 @@ public class LlamaSpit extends Projectile {
 		this.updateRotation();
 		float g = 0.99F;
 		float h = 0.06F;
-		if (this.level.getBlockStates(this.getBoundingBox()).noneMatch(BlockBehaviour.BlockStateBase::isAir)) {
+		if (this.level().getBlockStates(this.getBoundingBox()).noneMatch(BlockBehaviour.BlockStateBase::isAir)) {
 			this.discard();
 		} else if (this.isInWaterOrBubble()) {
 			this.discard();
@@ -65,7 +65,7 @@ public class LlamaSpit extends Projectile {
 	@Override
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		super.onHitBlock(blockHitResult);
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			this.discard();
 		}
 	}
@@ -83,7 +83,7 @@ public class LlamaSpit extends Projectile {
 
 		for (int i = 0; i < 7; i++) {
 			double g = 0.4 + 0.1 * (double)i;
-			this.level.addParticle(ParticleTypes.SPIT, this.getX(), this.getY(), this.getZ(), d * g, e, f * g);
+			this.level().addParticle(ParticleTypes.SPIT, this.getX(), this.getY(), this.getZ(), d * g, e, f * g);
 		}
 
 		this.setDeltaMovement(d, e, f);

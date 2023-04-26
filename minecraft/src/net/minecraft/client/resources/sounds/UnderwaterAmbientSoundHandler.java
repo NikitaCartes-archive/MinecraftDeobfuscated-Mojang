@@ -25,7 +25,7 @@ public class UnderwaterAmbientSoundHandler implements AmbientSoundHandler {
 	public void tick() {
 		this.tickDelay--;
 		if (this.tickDelay <= 0 && this.player.isUnderWater()) {
-			float f = this.player.level.random.nextFloat();
+			float f = this.player.level().random.nextFloat();
 			if (f < 1.0E-4F) {
 				this.tickDelay = 0;
 				this.soundManager.play(new UnderwaterAmbientSoundInstances.SubSound(this.player, SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS_ULTRA_RARE));

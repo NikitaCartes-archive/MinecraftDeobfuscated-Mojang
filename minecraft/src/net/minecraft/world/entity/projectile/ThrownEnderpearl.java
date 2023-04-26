@@ -41,21 +41,21 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 		super.onHit(hitResult);
 
 		for (int i = 0; i < 32; i++) {
-			this.level
+			this.level()
 				.addParticle(
 					ParticleTypes.PORTAL, this.getX(), this.getY() + this.random.nextDouble() * 2.0, this.getZ(), this.random.nextGaussian(), 0.0, this.random.nextGaussian()
 				);
 		}
 
-		if (!this.level.isClientSide && !this.isRemoved()) {
+		if (!this.level().isClientSide && !this.isRemoved()) {
 			Entity entity = this.getOwner();
 			if (entity instanceof ServerPlayer serverPlayer) {
-				if (serverPlayer.connection.isAcceptingMessages() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {
-					if (this.random.nextFloat() < 0.05F && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
-						Endermite endermite = EntityType.ENDERMITE.create(this.level);
+				if (serverPlayer.connection.isAcceptingMessages() && serverPlayer.level() == this.level() && !serverPlayer.isSleeping()) {
+					if (this.random.nextFloat() < 0.05F && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
+						Endermite endermite = EntityType.ENDERMITE.create(this.level());
 						if (endermite != null) {
 							endermite.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
-							this.level.addFreshEntity(endermite);
+							this.level().addFreshEntity(endermite);
 						}
 					}
 
@@ -91,7 +91,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 	@Override
 	public Entity changeDimension(ServerLevel serverLevel) {
 		Entity entity = this.getOwner();
-		if (entity != null && entity.level.dimension() != serverLevel.dimension()) {
+		if (entity != null && entity.level().dimension() != serverLevel.dimension()) {
 			this.setOwner(null);
 		}
 

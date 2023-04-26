@@ -562,6 +562,23 @@ public class GlStateManager {
 		GL11.glTexSubImage2D(i, j, k, l, m, n, o, p, q);
 	}
 
+	public static void upload(int i, int j, int k, int l, int m, NativeImage.Format format, IntBuffer intBuffer) {
+		if (!RenderSystem.isOnRenderThreadOrInit()) {
+			RenderSystem.recordRenderCall(() -> _upload(i, j, k, l, m, format, intBuffer));
+		} else {
+			_upload(i, j, k, l, m, format, intBuffer);
+		}
+	}
+
+	private static void _upload(int i, int j, int k, int l, int m, NativeImage.Format format, IntBuffer intBuffer) {
+		RenderSystem.assertOnRenderThreadOrInit();
+		_pixelStore(3314, l);
+		_pixelStore(3316, 0);
+		_pixelStore(3315, 0);
+		format.setUnpackPixelStoreState();
+		GL11.glTexSubImage2D(3553, i, j, k, l, m, format.glFormat(), 5121, intBuffer);
+	}
+
 	public static void _getTexImage(int i, int j, int k, int l, long m) {
 		RenderSystem.assertOnRenderThread();
 		GL11.glGetTexImage(i, j, k, l, m);

@@ -20,7 +20,7 @@ public class FleeSunGoal extends Goal {
 	public FleeSunGoal(PathfinderMob pathfinderMob, double d) {
 		this.mob = pathfinderMob;
 		this.speedModifier = d;
-		this.level = pathfinderMob.level;
+		this.level = pathfinderMob.level();
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE));
 	}
 

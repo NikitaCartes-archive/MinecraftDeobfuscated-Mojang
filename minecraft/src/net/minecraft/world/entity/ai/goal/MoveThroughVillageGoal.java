@@ -50,10 +50,10 @@ public class MoveThroughVillageGoal extends Goal {
 			return false;
 		} else {
 			this.updateVisited();
-			if (this.onlyAtNight && this.mob.level.isDay()) {
+			if (this.onlyAtNight && this.mob.level().isDay()) {
 				return false;
 			} else {
-				ServerLevel serverLevel = (ServerLevel)this.mob.level;
+				ServerLevel serverLevel = (ServerLevel)this.mob.level();
 				BlockPos blockPos = this.mob.blockPosition();
 				if (!serverLevel.isCloseToVillage(blockPos, 6)) {
 					return false;
@@ -103,7 +103,7 @@ public class MoveThroughVillageGoal extends Goal {
 							for (int i = 0; i < this.path.getNodeCount(); i++) {
 								Node node = this.path.getNode(i);
 								BlockPos blockPos2 = new BlockPos(node.x, node.y + 1, node.z);
-								if (DoorBlock.isWoodenDoor(this.mob.level, blockPos2)) {
+								if (DoorBlock.isWoodenDoor(this.mob.level(), blockPos2)) {
 									this.path = this.mob.getNavigation().createPath((double)node.x, (double)node.y, (double)node.z, 0);
 									break;
 								}

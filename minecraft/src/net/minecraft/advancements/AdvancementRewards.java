@@ -46,7 +46,7 @@ public class AdvancementRewards {
 
 	public void grant(ServerPlayer serverPlayer) {
 		serverPlayer.giveExperiencePoints(this.experience);
-		LootContext lootContext = new LootContext.Builder(serverPlayer.getLevel())
+		LootContext lootContext = new LootContext.Builder(serverPlayer.serverLevel())
 			.withParameter(LootContextParams.THIS_ENTITY, serverPlayer)
 			.withParameter(LootContextParams.ORIGIN, serverPlayer.position())
 			.withRandom(serverPlayer.getRandom())
@@ -56,7 +56,7 @@ public class AdvancementRewards {
 		for (ResourceLocation resourceLocation : this.loot) {
 			for (ItemStack itemStack : serverPlayer.server.getLootData().getLootTable(resourceLocation).getRandomItems(lootContext)) {
 				if (serverPlayer.addItem(itemStack)) {
-					serverPlayer.level
+					serverPlayer.level()
 						.playSound(
 							null,
 							serverPlayer.getX(),

@@ -78,7 +78,7 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 		this.leftFrontLeg.yRot = 0.0F;
 		this.rightHindLeg.yRot = 0.0F;
 		this.leftHindLeg.yRot = 0.0F;
-		if (!turtle.isInWater() && turtle.isOnGround()) {
+		if (!turtle.isInWater() && turtle.onGround()) {
 			float k = turtle.isLayingEgg() ? 4.0F : 1.0F;
 			float l = turtle.isLayingEgg() ? 2.0F : 1.0F;
 			float m = 5.0F;

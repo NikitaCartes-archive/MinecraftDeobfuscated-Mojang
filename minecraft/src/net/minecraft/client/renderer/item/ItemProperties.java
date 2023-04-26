@@ -129,26 +129,26 @@ public class ItemProperties {
 			private long lastUpdateTick;
 
 			@Override
-			public float unclampedCall(ItemStack itemStack, @Nullable ClientLevel clientLevelx, @Nullable LivingEntity livingEntity, int i) {
+			public float unclampedCall(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
 				Entity entity = (Entity)(livingEntity != null ? livingEntity : itemStack.getEntityRepresentation());
 				if (entity == null) {
 					return 0.0F;
 				} else {
-					if (clientLevelx == null && entity.level instanceof ClientLevel clientLevelx) {
-						;
+					if (clientLevel == null && entity.level() instanceof ClientLevel) {
+						clientLevel = (ClientLevel)entity.level();
 					}
 
-					if (clientLevelx == null) {
+					if (clientLevel == null) {
 						return 0.0F;
 					} else {
 						double d;
-						if (clientLevelx.dimensionType().natural()) {
-							d = (double)clientLevelx.getTimeOfDay(1.0F);
+						if (clientLevel.dimensionType().natural()) {
+							d = (double)clientLevel.getTimeOfDay(1.0F);
 						} else {
 							d = Math.random();
 						}
 
-						d = this.wobble(clientLevelx, d);
+						d = this.wobble(clientLevel, d);
 						return (float)d;
 					}
 				}

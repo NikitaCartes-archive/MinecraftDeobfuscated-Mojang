@@ -110,7 +110,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
@@ -129,6 +128,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.AABB;
@@ -1136,17 +1136,16 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		profilerFiller.popPush("light_update_queue");
 		this.level.pollLightUpdates();
 		profilerFiller.popPush("light_updates");
-		boolean bl2 = this.level.isLightUpdateQueueEmpty();
-		this.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, bl2, true);
+		this.level.getChunkSource().getLightEngine().runLightUpdates();
 		Vec3 vec3 = camera.getPosition();
 		double d = vec3.x();
 		double e = vec3.y();
 		double g = vec3.z();
 		Matrix4f matrix4f2 = poseStack.last().pose();
 		profilerFiller.popPush("culling");
-		boolean bl3 = this.capturedFrustum != null;
+		boolean bl2 = this.capturedFrustum != null;
 		Frustum frustum;
-		if (bl3) {
+		if (bl2) {
 			frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
 		} else {
@@ -1155,7 +1154,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		this.minecraft.getProfiler().popPush("captureFrustum");
 		if (this.captureFrustum) {
-			this.captureFrustum(matrix4f2, matrix4f, vec3.x, vec3.y, vec3.z, bl3 ? new Frustum(matrix4f2, matrix4f) : frustum);
+			this.captureFrustum(matrix4f2, matrix4f, vec3.x, vec3.y, vec3.z, bl2 ? new Frustum(matrix4f2, matrix4f) : frustum);
 			this.captureFrustum = false;
 		}
 
@@ -1164,14 +1163,14 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		FogRenderer.levelFogColor();
 		RenderSystem.clear(16640, Minecraft.ON_OSX);
 		float h = gameRenderer.getRenderDistance();
-		boolean bl4 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
+		boolean bl3 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
 		profilerFiller.popPush("sky");
 		RenderSystem.setShader(GameRenderer::getPositionShader);
-		this.renderSky(poseStack, matrix4f, f, camera, bl4, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl4, f));
+		this.renderSky(poseStack, matrix4f, f, camera, bl3, () -> FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl3, f));
 		profilerFiller.popPush("fog");
-		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h, 32.0F), bl4, f);
+		FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h, 32.0F), bl3, f);
 		profilerFiller.popPush("terrain_setup");
-		this.setupRender(camera, frustum, bl3, this.minecraft.player.isSpectator());
+		this.setupRender(camera, frustum, bl2, this.minecraft.player.isSpectator());
 		profilerFiller.popPush("compilechunks");
 		this.compileChunks(camera);
 		profilerFiller.popPush("terrain");
@@ -1202,7 +1201,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.minecraft.getMainRenderTarget().bindWrite(false);
 		}
 
-		boolean bl5 = false;
+		boolean bl4 = false;
 		MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
 
 		for (Entity entity : this.level.entitiesForRendering()) {
@@ -1220,7 +1219,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 					MultiBufferSource multiBufferSource;
 					if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
-						bl5 = true;
+						bl4 = true;
 						OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
 						multiBufferSource = outlineBufferSource;
 						int i = entity.getTeamColor();
@@ -1293,7 +1292,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		bufferSource.endBatch(Sheets.hangingSignSheet());
 		bufferSource.endBatch(Sheets.chestSheet());
 		this.renderBuffers.outlineBufferSource().endOutlineBatch();
-		if (bl5) {
+		if (bl4) {
 			this.entityEffect.process(f);
 			this.minecraft.getMainRenderTarget().bindWrite(false);
 		}
@@ -2198,14 +2197,15 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 	private void compileChunks(Camera camera) {
 		this.minecraft.getProfiler().push("populate_chunks_to_compile");
+		LevelLightEngine levelLightEngine = this.level.getLightEngine();
 		RenderRegionCache renderRegionCache = new RenderRegionCache();
 		BlockPos blockPos = camera.getBlockPosition();
 		List<ChunkRenderDispatcher.RenderChunk> list = Lists.<ChunkRenderDispatcher.RenderChunk>newArrayList();
 
 		for (LevelRenderer.RenderChunkInfo renderChunkInfo : this.renderChunksInFrustum) {
 			ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo.chunk;
-			ChunkPos chunkPos = new ChunkPos(renderChunk.getOrigin());
-			if (renderChunk.isDirty() && this.level.getChunk(chunkPos.x, chunkPos.z).isClientLightReady()) {
+			SectionPos sectionPos = SectionPos.of(renderChunk.getOrigin());
+			if (renderChunk.isDirty() && levelLightEngine.lightOnInSection(sectionPos)) {
 				boolean bl = false;
 				if (this.minecraft.options.prioritizeChunkUpdates().get() == PrioritizeChunkUpdates.NEARBY) {
 					BlockPos blockPos2 = renderChunk.getOrigin().offset(8, 8, 8);

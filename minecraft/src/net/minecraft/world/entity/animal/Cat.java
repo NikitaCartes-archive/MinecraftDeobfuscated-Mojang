@@ -366,7 +366,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			if (this.isTame() && this.isOwnedBy(player)) {
 				return InteractionResult.SUCCESS;
 			} else {
@@ -406,9 +406,9 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 				if (this.random.nextInt(3) == 0) {
 					this.tame(player);
 					this.setOrderedToSit(true);
-					this.level.broadcastEntityEvent(this, (byte)7);
+					this.level().broadcastEntityEvent(this, (byte)7);
 				} else {
-					this.level.broadcastEntityEvent(this, (byte)6);
+					this.level().broadcastEntityEvent(this, (byte)6);
 				}
 
 				this.setPersistenceRequired();
@@ -506,7 +506,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 					}
 
 					BlockPos blockPos = this.ownerPlayer.blockPosition();
-					BlockState blockState = this.cat.level.getBlockState(blockPos);
+					BlockState blockState = this.cat.level().getBlockState(blockPos);
 					if (blockState.is(BlockTags.BEDS)) {
 						this.goalPos = (BlockPos)blockState.getOptionalValue(BedBlock.FACING)
 							.map(direction -> blockPos.relative(direction.getOpposite()))
@@ -520,7 +520,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 		}
 
 		private boolean spaceIsOccupied() {
-			for (Cat cat : this.cat.level.getEntitiesOfClass(Cat.class, new AABB(this.goalPos).inflate(2.0))) {
+			for (Cat cat : this.cat.level().getEntitiesOfClass(Cat.class, new AABB(this.goalPos).inflate(2.0))) {
 				if (cat != this.cat && (cat.isLying() || cat.isRelaxStateOne())) {
 					return true;
 				}
@@ -550,8 +550,8 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 		@Override
 		public void stop() {
 			this.cat.setLying(false);
-			float f = this.cat.level.getTimeOfDay(1.0F);
-			if (this.ownerPlayer.getSleepTimer() >= 100 && (double)f > 0.77 && (double)f < 0.8 && (double)this.cat.level.getRandom().nextFloat() < 0.7) {
+			float f = this.cat.level().getTimeOfDay(1.0F);
+			if (this.ownerPlayer.getSleepTimer() >= 100 && (double)f > 0.77 && (double)f < 0.8 && (double)this.cat.level().getRandom().nextFloat() < 0.7) {
 				this.giveMorningGift();
 			}
 
@@ -572,18 +572,18 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 					false
 				);
 			mutableBlockPos.set(this.cat.blockPosition());
-			LootTable lootTable = this.cat.level.getServer().getLootData().getLootTable(BuiltInLootTables.CAT_MORNING_GIFT);
-			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level)
+			LootTable lootTable = this.cat.level().getServer().getLootData().getLootTable(BuiltInLootTables.CAT_MORNING_GIFT);
+			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level())
 				.withParameter(LootContextParams.ORIGIN, this.cat.position())
 				.withParameter(LootContextParams.THIS_ENTITY, this.cat)
 				.withRandom(randomSource);
 
 			for (ItemStack itemStack : lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT))) {
 				this.cat
-					.level
+					.level()
 					.addFreshEntity(
 						new ItemEntity(
-							this.cat.level,
+							this.cat.level(),
 							(double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
 							(double)mutableBlockPos.getY(),
 							(double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * (float) (Math.PI / 180.0)),

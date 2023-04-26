@@ -42,19 +42,19 @@ public class DolphinJumpGoal extends JumpGoal {
 
 	private boolean waterIsClear(BlockPos blockPos, int i, int j, int k) {
 		BlockPos blockPos2 = blockPos.offset(i * k, 0, j * k);
-		return this.dolphin.level.getFluidState(blockPos2).is(FluidTags.WATER) && !this.dolphin.level.getBlockState(blockPos2).blocksMotion();
+		return this.dolphin.level().getFluidState(blockPos2).is(FluidTags.WATER) && !this.dolphin.level().getBlockState(blockPos2).blocksMotion();
 	}
 
 	private boolean surfaceIsClear(BlockPos blockPos, int i, int j, int k) {
-		return this.dolphin.level.getBlockState(blockPos.offset(i * k, 1, j * k)).isAir()
-			&& this.dolphin.level.getBlockState(blockPos.offset(i * k, 2, j * k)).isAir();
+		return this.dolphin.level().getBlockState(blockPos.offset(i * k, 1, j * k)).isAir()
+			&& this.dolphin.level().getBlockState(blockPos.offset(i * k, 2, j * k)).isAir();
 	}
 
 	@Override
 	public boolean canContinueToUse() {
 		double d = this.dolphin.getDeltaMovement().y;
 		return (!(d * d < 0.03F) || this.dolphin.getXRot() == 0.0F || !(Math.abs(this.dolphin.getXRot()) < 10.0F) || !this.dolphin.isInWater())
-			&& !this.dolphin.isOnGround();
+			&& !this.dolphin.onGround();
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class DolphinJumpGoal extends JumpGoal {
 	public void tick() {
 		boolean bl = this.breached;
 		if (!bl) {
-			FluidState fluidState = this.dolphin.level.getFluidState(this.dolphin.blockPosition());
+			FluidState fluidState = this.dolphin.level().getFluidState(this.dolphin.blockPosition());
 			this.breached = fluidState.is(FluidTags.WATER);
 		}
 

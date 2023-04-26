@@ -8,6 +8,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SpawnUtil {
@@ -56,8 +58,14 @@ public class SpawnUtil {
 	}
 
 	public interface Strategy {
-		SpawnUtil.Strategy LEGACY_IRON_GOLEM = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> (blockState2.isAir() || blockState2.liquid())
-				&& blockState.getMaterial().isSolidBlocking();
+		@Deprecated
+		SpawnUtil.Strategy LEGACY_IRON_GOLEM = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> !blockState.is(Blocks.COBWEB)
+					&& !blockState.is(Blocks.CACTUS)
+					&& !blockState.is(Blocks.GLASS_PANE)
+					&& !(blockState.getBlock() instanceof StainedGlassPaneBlock)
+					&& !blockState.is(Blocks.CONDUIT)
+				? (blockState2.isAir() || blockState2.liquid()) && blockState.isSolid()
+				: false;
 		SpawnUtil.Strategy ON_TOP_OF_COLLIDER = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> blockState2.getCollisionShape(serverLevel, blockPos2)
 					.isEmpty()
 				&& Block.isFaceFull(blockState.getCollisionShape(serverLevel, blockPos), Direction.UP);

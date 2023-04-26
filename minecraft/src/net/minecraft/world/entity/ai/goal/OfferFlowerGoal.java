@@ -19,13 +19,13 @@ public class OfferFlowerGoal extends Goal {
 
 	@Override
 	public boolean canUse() {
-		if (!this.golem.level.isDay()) {
+		if (!this.golem.level().isDay()) {
 			return false;
 		} else if (this.golem.getRandom().nextInt(8000) != 0) {
 			return false;
 		} else {
 			this.villager = this.golem
-				.level
+				.level()
 				.getNearestEntity(
 					Villager.class,
 					OFFER_TARGER_CONTEXT,

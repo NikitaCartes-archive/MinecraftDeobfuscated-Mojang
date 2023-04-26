@@ -35,7 +35,7 @@ public final class EntitySelector {
 				entity2 -> {
 					if (!entity2.isPushable()) {
 						return false;
-					} else if (!entity.level.isClientSide || entity2 instanceof Player && ((Player)entity2).isLocalPlayer()) {
+					} else if (!entity.level().isClientSide || entity2 instanceof Player && ((Player)entity2).isLocalPlayer()) {
 						Team team2 = entity2.getTeam();
 						Team.CollisionRule collisionRule2 = team2 == null ? Team.CollisionRule.ALWAYS : team2.getCollisionRule();
 						if (collisionRule2 == Team.CollisionRule.NEVER) {

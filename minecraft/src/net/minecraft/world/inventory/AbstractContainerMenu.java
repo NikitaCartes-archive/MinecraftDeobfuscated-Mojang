@@ -510,7 +510,7 @@ public abstract class AbstractContainerMenu {
 	}
 
 	private boolean tryItemClickBehaviourOverride(Player player, ClickAction clickAction, Slot slot, ItemStack itemStack, ItemStack itemStack2) {
-		FeatureFlagSet featureFlagSet = player.getLevel().enabledFeatures();
+		FeatureFlagSet featureFlagSet = player.level().enabledFeatures();
 		return itemStack2.isItemEnabled(featureFlagSet) && itemStack2.overrideStackedOnOther(slot, clickAction, player)
 			? true
 			: itemStack.isItemEnabled(featureFlagSet) && itemStack.overrideOtherStackedOnMe(itemStack2, slot, clickAction, player, this.createCarriedSlotAccess());

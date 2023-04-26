@@ -819,7 +819,7 @@ public class Gui {
 
 	private void renderHearts(GuiGraphics guiGraphics, Player player, int i, int j, int k, int l, float f, int m, int n, int o, boolean bl) {
 		Gui.HeartType heartType = Gui.HeartType.forPlayer(player);
-		int p = 9 * (player.level.getLevelData().isHardcore() ? 5 : 0);
+		int p = 9 * (player.level().getLevelData().isHardcore() ? 5 : 0);
 		int q = Mth.ceil((double)f / 2.0);
 		int r = Mth.ceil((double)o / 2.0);
 		int s = q * 2;
@@ -933,7 +933,7 @@ public class Gui {
 	private void updateVignetteBrightness(Entity entity) {
 		if (entity != null) {
 			BlockPos blockPos = BlockPos.containing(entity.getX(), entity.getEyeY(), entity.getZ());
-			float f = LightTexture.getBrightness(entity.level.dimensionType(), entity.level.getMaxLocalRawBrightness(blockPos));
+			float f = LightTexture.getBrightness(entity.level().dimensionType(), entity.level().getMaxLocalRawBrightness(blockPos));
 			float g = Mth.clamp(1.0F - f, 0.0F, 1.0F);
 			this.vignetteBrightness = this.vignetteBrightness + (g - this.vignetteBrightness) * 0.01F;
 		}

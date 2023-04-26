@@ -180,12 +180,12 @@ public class Goat extends Animal {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("goatBrain");
-		this.getBrain().tick((ServerLevel)this.level, this);
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("goatActivityUpdate");
+		this.level().getProfiler().push("goatBrain");
+		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("goatActivityUpdate");
 		GoatAi.updateActivity(this);
-		this.level.getProfiler().pop();
+		this.level().getProfiler().pop();
 		super.customServerAiStep();
 	}
 
@@ -214,11 +214,11 @@ public class Goat extends Animal {
 			player.playSound(this.getMilkingSound(), 1.0F, 1.0F);
 			ItemStack itemStack2 = ItemUtils.createFilledResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
 			player.setItemInHand(interactionHand, itemStack2);
-			return InteractionResult.sidedSuccess(this.level.isClientSide);
+			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
 			InteractionResult interactionResult = super.mobInteract(player, interactionHand);
 			if (interactionResult.consumesAction() && this.isFood(itemStack)) {
-				this.level.playSound(null, this, this.getEatingSound(itemStack), SoundSource.NEUTRAL, 1.0F, Mth.randomBetween(this.level.random, 0.8F, 1.2F));
+				this.level().playSound(null, this, this.getEatingSound(itemStack), SoundSource.NEUTRAL, 1.0F, Mth.randomBetween(this.level().random, 0.8F, 1.2F));
 			}
 
 			return interactionResult;
@@ -332,8 +332,8 @@ public class Goat extends Animal {
 			double d = (double)Mth.randomBetween(this.random, -0.2F, 0.2F);
 			double e = (double)Mth.randomBetween(this.random, 0.3F, 0.7F);
 			double f = (double)Mth.randomBetween(this.random, -0.2F, 0.2F);
-			ItemEntity itemEntity = new ItemEntity(this.level, vec3.x(), vec3.y(), vec3.z(), itemStack, d, e, f);
-			this.level.addFreshEntity(itemEntity);
+			ItemEntity itemEntity = new ItemEntity(this.level(), vec3.x(), vec3.y(), vec3.z(), itemStack, d, e, f);
+			this.level().addFreshEntity(itemEntity);
 			return true;
 		}
 	}

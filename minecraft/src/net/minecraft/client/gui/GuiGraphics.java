@@ -80,7 +80,7 @@ public class GuiGraphics {
 	}
 
 	public int guiHeight() {
-		return this.minecraft.getWindow().getGuiScaledWidth();
+		return this.minecraft.getWindow().getGuiScaledHeight();
 	}
 
 	public PoseStack pose() {
@@ -444,7 +444,7 @@ public class GuiGraphics {
 	}
 
 	public void renderItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {
-		this.renderItem(livingEntity, livingEntity.level, itemStack, i, j, k);
+		this.renderItem(livingEntity, livingEntity.level(), itemStack, i, j, k);
 	}
 
 	private void renderItem(@Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, int i, int j, int k) {

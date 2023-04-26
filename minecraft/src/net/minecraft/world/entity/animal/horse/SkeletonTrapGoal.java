@@ -22,12 +22,12 @@ public class SkeletonTrapGoal extends Goal {
 
 	@Override
 	public boolean canUse() {
-		return this.horse.level.hasNearbyAlivePlayer(this.horse.getX(), this.horse.getY(), this.horse.getZ(), 10.0);
+		return this.horse.level().hasNearbyAlivePlayer(this.horse.getX(), this.horse.getY(), this.horse.getZ(), 10.0);
 	}
 
 	@Override
 	public void tick() {
-		ServerLevel serverLevel = (ServerLevel)this.horse.level;
+		ServerLevel serverLevel = (ServerLevel)this.horse.level();
 		DifficultyInstance difficultyInstance = serverLevel.getCurrentDifficultyAt(this.horse.blockPosition());
 		this.horse.setTrap(false);
 		this.horse.setTamed(true);
@@ -59,9 +59,9 @@ public class SkeletonTrapGoal extends Goal {
 
 	@Nullable
 	private AbstractHorse createHorse(DifficultyInstance difficultyInstance) {
-		SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this.horse.level);
+		SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this.horse.level());
 		if (skeletonHorse != null) {
-			skeletonHorse.finalizeSpawn((ServerLevel)this.horse.level, difficultyInstance, MobSpawnType.TRIGGERED, null, null);
+			skeletonHorse.finalizeSpawn((ServerLevel)this.horse.level(), difficultyInstance, MobSpawnType.TRIGGERED, null, null);
 			skeletonHorse.setPos(this.horse.getX(), this.horse.getY(), this.horse.getZ());
 			skeletonHorse.invulnerableTime = 60;
 			skeletonHorse.setPersistenceRequired();
@@ -74,9 +74,9 @@ public class SkeletonTrapGoal extends Goal {
 
 	@Nullable
 	private Skeleton createSkeleton(DifficultyInstance difficultyInstance, AbstractHorse abstractHorse) {
-		Skeleton skeleton = EntityType.SKELETON.create(abstractHorse.level);
+		Skeleton skeleton = EntityType.SKELETON.create(abstractHorse.level());
 		if (skeleton != null) {
-			skeleton.finalizeSpawn((ServerLevel)abstractHorse.level, difficultyInstance, MobSpawnType.TRIGGERED, null, null);
+			skeleton.finalizeSpawn((ServerLevel)abstractHorse.level(), difficultyInstance, MobSpawnType.TRIGGERED, null, null);
 			skeleton.setPos(abstractHorse.getX(), abstractHorse.getY(), abstractHorse.getZ());
 			skeleton.invulnerableTime = 60;
 			skeleton.setPersistenceRequired();

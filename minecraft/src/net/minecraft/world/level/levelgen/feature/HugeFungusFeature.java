@@ -9,9 +9,9 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.material.Material;
 
 public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 	private static final float HUGE_PROBABILITY = 0.06F;
@@ -57,15 +57,16 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 		}
 	}
 
-	private static boolean isReplaceable(LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
-		return levelAccessor.isStateAtPosition(blockPos, blockState -> {
-			Material material = blockState.getMaterial();
-			return blockState.canBeReplaced() || bl && material == Material.PLANT;
-		});
+	private static boolean isReplaceable(WorldGenLevel worldGenLevel, BlockPos blockPos, HugeFungusConfiguration hugeFungusConfiguration, boolean bl) {
+		if (worldGenLevel.isStateAtPosition(blockPos, BlockBehaviour.BlockStateBase::canBeReplaced)) {
+			return true;
+		} else {
+			return bl ? hugeFungusConfiguration.replaceableBlocks.test(worldGenLevel, blockPos) : false;
+		}
 	}
 
 	private void placeStem(
-		LevelAccessor levelAccessor, RandomSource randomSource, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl
+		WorldGenLevel worldGenLevel, RandomSource randomSource, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl
 	) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		BlockState blockState = hugeFungusConfiguration.stemState;
@@ -77,19 +78,19 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 
 				for (int m = 0; m < i; m++) {
 					mutableBlockPos.setWithOffset(blockPos, k, m, l);
-					if (isReplaceable(levelAccessor, mutableBlockPos, true)) {
+					if (isReplaceable(worldGenLevel, mutableBlockPos, hugeFungusConfiguration, true)) {
 						if (hugeFungusConfiguration.planted) {
-							if (!levelAccessor.getBlockState(mutableBlockPos.below()).isAir()) {
-								levelAccessor.destroyBlock(mutableBlockPos, true);
+							if (!worldGenLevel.getBlockState(mutableBlockPos.below()).isAir()) {
+								worldGenLevel.destroyBlock(mutableBlockPos, true);
 							}
 
-							levelAccessor.setBlock(mutableBlockPos, blockState, 3);
+							worldGenLevel.setBlock(mutableBlockPos, blockState, 3);
 						} else if (bl2) {
 							if (randomSource.nextFloat() < 0.1F) {
-								this.setBlock(levelAccessor, mutableBlockPos, blockState);
+								this.setBlock(worldGenLevel, mutableBlockPos, blockState);
 							}
 						} else {
-							this.setBlock(levelAccessor, mutableBlockPos, blockState);
+							this.setBlock(worldGenLevel, mutableBlockPos, blockState);
 						}
 					}
 				}
@@ -98,7 +99,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 	}
 
 	private void placeHat(
-		LevelAccessor levelAccessor, RandomSource randomSource, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl
+		WorldGenLevel worldGenLevel, RandomSource randomSource, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl
 	) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		boolean bl2 = hugeFungusConfiguration.hatState.is(Blocks.NETHER_WART_BLOCK);
@@ -123,21 +124,21 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 					boolean bl6 = bl3 && bl4;
 					boolean bl7 = l < k + 3;
 					mutableBlockPos.setWithOffset(blockPos, n, l, o);
-					if (isReplaceable(levelAccessor, mutableBlockPos, false)) {
-						if (hugeFungusConfiguration.planted && !levelAccessor.getBlockState(mutableBlockPos.below()).isAir()) {
-							levelAccessor.destroyBlock(mutableBlockPos, true);
+					if (isReplaceable(worldGenLevel, mutableBlockPos, hugeFungusConfiguration, false)) {
+						if (hugeFungusConfiguration.planted && !worldGenLevel.getBlockState(mutableBlockPos.below()).isAir()) {
+							worldGenLevel.destroyBlock(mutableBlockPos, true);
 						}
 
 						if (bl7) {
 							if (!bl5) {
-								this.placeHatDropBlock(levelAccessor, randomSource, mutableBlockPos, hugeFungusConfiguration.hatState, bl2);
+								this.placeHatDropBlock(worldGenLevel, randomSource, mutableBlockPos, hugeFungusConfiguration.hatState, bl2);
 							}
 						} else if (bl5) {
-							this.placeHatBlock(levelAccessor, randomSource, hugeFungusConfiguration, mutableBlockPos, 0.1F, 0.2F, bl2 ? 0.1F : 0.0F);
+							this.placeHatBlock(worldGenLevel, randomSource, hugeFungusConfiguration, mutableBlockPos, 0.1F, 0.2F, bl2 ? 0.1F : 0.0F);
 						} else if (bl6) {
-							this.placeHatBlock(levelAccessor, randomSource, hugeFungusConfiguration, mutableBlockPos, 0.01F, 0.7F, bl2 ? 0.083F : 0.0F);
+							this.placeHatBlock(worldGenLevel, randomSource, hugeFungusConfiguration, mutableBlockPos, 0.01F, 0.7F, bl2 ? 0.083F : 0.0F);
 						} else {
-							this.placeHatBlock(levelAccessor, randomSource, hugeFungusConfiguration, mutableBlockPos, 5.0E-4F, 0.98F, bl2 ? 0.07F : 0.0F);
+							this.placeHatBlock(worldGenLevel, randomSource, hugeFungusConfiguration, mutableBlockPos, 5.0E-4F, 0.98F, bl2 ? 0.07F : 0.0F);
 						}
 					}
 				}

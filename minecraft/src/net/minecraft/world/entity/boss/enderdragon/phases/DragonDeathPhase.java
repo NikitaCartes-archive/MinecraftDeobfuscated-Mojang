@@ -24,7 +24,7 @@ public class DragonDeathPhase extends AbstractDragonPhaseInstance {
 			float g = (this.dragon.getRandom().nextFloat() - 0.5F) * 4.0F;
 			float h = (this.dragon.getRandom().nextFloat() - 0.5F) * 8.0F;
 			this.dragon
-				.level
+				.level()
 				.addParticle(
 					ParticleTypes.EXPLOSION_EMITTER, this.dragon.getX() + (double)f, this.dragon.getY() + 2.0 + (double)g, this.dragon.getZ() + (double)h, 0.0, 0.0, 0.0
 				);
@@ -35,7 +35,7 @@ public class DragonDeathPhase extends AbstractDragonPhaseInstance {
 	public void doServerTick() {
 		this.time++;
 		if (this.targetLocation == null) {
-			BlockPos blockPos = this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, EndPodiumFeature.END_PODIUM_LOCATION);
+			BlockPos blockPos = this.dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, EndPodiumFeature.END_PODIUM_LOCATION);
 			this.targetLocation = Vec3.atBottomCenterOf(blockPos);
 		}
 

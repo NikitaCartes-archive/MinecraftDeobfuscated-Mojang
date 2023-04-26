@@ -110,7 +110,7 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 					ag = Mth.floor(painting.getZ() + (double)((aa + ab) / 2.0F / 16.0F));
 				}
 
-				int ah = LevelRenderer.getLightColor(painting.level, new BlockPos(ae, af, ag));
+				int ah = LevelRenderer.getLightColor(painting.level(), new BlockPos(ae, af, ag));
 				float ai = textureAtlasSprite.getU(d * (double)(w - y));
 				float aj = textureAtlasSprite.getU(d * (double)(w - (y + 1)));
 				float ak = textureAtlasSprite.getV(e * (double)(x - z));

@@ -14,7 +14,7 @@ public class RestrictSunGoal extends Goal {
 
 	@Override
 	public boolean canUse() {
-		return this.mob.level.isDay() && this.mob.getItemBySlot(EquipmentSlot.HEAD).isEmpty() && GoalUtils.hasGroundPathNavigation(this.mob);
+		return this.mob.level().isDay() && this.mob.getItemBySlot(EquipmentSlot.HEAD).isEmpty() && GoalUtils.hasGroundPathNavigation(this.mob);
 	}
 
 	@Override

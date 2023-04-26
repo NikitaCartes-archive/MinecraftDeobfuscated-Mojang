@@ -30,7 +30,7 @@ public class HurtBySensor extends Sensor<LivingEntity> {
 		}
 
 		brain.getMemory(MemoryModuleType.HURT_BY_ENTITY).ifPresent(livingEntityx -> {
-			if (!livingEntityx.isAlive() || livingEntityx.level != serverLevel) {
+			if (!livingEntityx.isAlive() || livingEntityx.level() != serverLevel) {
 				brain.eraseMemory(MemoryModuleType.HURT_BY_ENTITY);
 			}
 		});

@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -44,6 +42,7 @@ import net.minecraft.world.level.gameevent.GameEventListenerRegistry;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
+import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -75,7 +74,6 @@ public class LevelChunk extends ChunkAccess {
 	};
 	private final Map<BlockPos, LevelChunk.RebindableTickingBlockEntityWrapper> tickersInLevel = Maps.<BlockPos, LevelChunk.RebindableTickingBlockEntityWrapper>newHashMap();
 	private boolean loaded;
-	private boolean clientLightReady = false;
 	final Level level;
 	@Nullable
 	private Supplier<ChunkHolder.FullChunkStatus> fullStatus;
@@ -147,6 +145,7 @@ public class LevelChunk extends ChunkAccess {
 			}
 		}
 
+		this.skyLightSources = protoChunk.skyLightSources;
 		this.setLightCorrect(protoChunk.isLightCorrect());
 		this.unsaved = true;
 	}
@@ -263,6 +262,15 @@ public class LevelChunk extends ChunkAccess {
 				boolean bl3 = levelChunkSection.hasOnlyAir();
 				if (bl2 != bl3) {
 					this.level.getChunkSource().getLightEngine().updateSectionStatus(blockPos, bl3);
+				}
+
+				if (LightEngine.hasDifferentLightProperties(this, blockPos, blockState2, blockState)) {
+					ProfilerFiller profilerFiller = this.level.getProfiler();
+					profilerFiller.push("updateSkyLightSources");
+					this.skyLightSources.update(this, j, i, l);
+					profilerFiller.popPush("queueCheckLight");
+					this.level.getChunkSource().getLightEngine().checkBlock(blockPos);
+					profilerFiller.pop();
 				}
 
 				boolean bl4 = blockState2.hasBlockEntity();
@@ -468,6 +476,7 @@ public class LevelChunk extends ChunkAccess {
 			}
 		}
 
+		this.initializeLightSources();
 		consumer.accept((ClientboundLevelChunkPacketData.BlockEntityTagOutput)(blockPos, blockEntityType, compoundTagx) -> {
 			BlockEntity blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.IMMEDIATE);
 			if (blockEntity != null && compoundTagx != null && blockEntity.getType() == blockEntityType) {
@@ -492,23 +501,6 @@ public class LevelChunk extends ChunkAccess {
 
 	public Map<BlockPos, BlockEntity> getBlockEntities() {
 		return this.blockEntities;
-	}
-
-	@Override
-	public Stream<BlockPos> getLights() {
-		return StreamSupport.stream(
-				BlockPos.betweenClosed(
-						this.chunkPos.getMinBlockX(),
-						this.getMinBuildHeight(),
-						this.chunkPos.getMinBlockZ(),
-						this.chunkPos.getMaxBlockX(),
-						this.getMaxBuildHeight() - 1,
-						this.chunkPos.getMaxBlockZ()
-					)
-					.spliterator(),
-				false
-			)
-			.filter(blockPos -> this.getBlockState(blockPos).getLightEmission() != 0);
 	}
 
 	public void postProcessGeneration() {
@@ -652,14 +644,6 @@ public class LevelChunk extends ChunkAccess {
 
 	private <T extends BlockEntity> TickingBlockEntity createTicker(T blockEntity, BlockEntityTicker<T> blockEntityTicker) {
 		return new LevelChunk.BoundTickingBlockEntity<>(blockEntity, blockEntityTicker);
-	}
-
-	public boolean isClientLightReady() {
-		return this.clientLightReady;
-	}
-
-	public void setClientLightReady(boolean bl) {
-		this.clientLightReady = bl;
 	}
 
 	class BoundTickingBlockEntity<T extends BlockEntity> implements TickingBlockEntity {

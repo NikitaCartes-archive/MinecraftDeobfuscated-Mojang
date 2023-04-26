@@ -34,7 +34,7 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 	@Override
 	public void destroy(DamageSource damageSource) {
 		super.destroy(damageSource);
-		this.chestVehicleDestroyed(damageSource, this.level, this);
+		this.chestVehicleDestroyed(damageSource, this.level(), this);
 	}
 
 	@Override
@@ -73,8 +73,8 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 
 	@Override
 	public void remove(Entity.RemovalReason removalReason) {
-		if (!this.level.isClientSide && removalReason.shouldDestroy()) {
-			Containers.dropContents(this.level, this, this);
+		if (!this.level().isClientSide && removalReason.shouldDestroy()) {
+			Containers.dropContents(this.level(), this, this);
 		}
 
 		super.remove(removalReason);

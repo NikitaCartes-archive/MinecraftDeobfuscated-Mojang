@@ -31,17 +31,13 @@ public interface LayerLightEventListener extends LightEventListener {
 		}
 
 		@Override
-		public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
-		}
-
-		@Override
 		public boolean hasLightWork() {
 			return false;
 		}
 
 		@Override
-		public int runUpdates(int i, boolean bl, boolean bl2) {
-			return i;
+		public int runLightUpdates() {
+			return 0;
 		}
 
 		@Override
@@ -49,7 +45,11 @@ public interface LayerLightEventListener extends LightEventListener {
 		}
 
 		@Override
-		public void enableLightSources(ChunkPos chunkPos, boolean bl) {
+		public void setLightEnabled(ChunkPos chunkPos, boolean bl) {
+		}
+
+		@Override
+		public void propagateLightSources(ChunkPos chunkPos) {
 		}
 	}
 }

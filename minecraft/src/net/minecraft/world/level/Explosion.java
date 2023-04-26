@@ -118,7 +118,7 @@ public class Explosion {
 						double o = Mth.lerp(l, aABB.minY, aABB.maxY);
 						double p = Mth.lerp(m, aABB.minZ, aABB.maxZ);
 						Vec3 vec32 = new Vec3(n + g, o, p + h);
-						if (entity.level.clip(new ClipContext(vec32, vec3, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS) {
+						if (entity.level().clip(new ClipContext(vec32, vec3, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity)).getType() == HitResult.Type.MISS) {
 							i++;
 						}
 

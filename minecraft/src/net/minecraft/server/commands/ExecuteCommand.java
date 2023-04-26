@@ -134,7 +134,7 @@ public class ExecuteCommand {
 					List<CommandSourceStack> list = Lists.<CommandSourceStack>newArrayList();
 
 					for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
-						list.add(commandContext.getSource().withLevel((ServerLevel)entity.level).withPosition(entity.position()).withRotation(entity.getRotationVector()));
+						list.add(commandContext.getSource().withLevel((ServerLevel)entity.level()).withPosition(entity.position()).withRotation(entity.getRotationVector()));
 					}
 
 					return list;

@@ -23,7 +23,7 @@ public class Minecart extends AbstractMinecart {
 			return InteractionResult.PASS;
 		} else if (this.isVehicle()) {
 			return InteractionResult.PASS;
-		} else if (!this.level.isClientSide) {
+		} else if (!this.level().isClientSide) {
 			return player.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
 		} else {
 			return InteractionResult.SUCCESS;

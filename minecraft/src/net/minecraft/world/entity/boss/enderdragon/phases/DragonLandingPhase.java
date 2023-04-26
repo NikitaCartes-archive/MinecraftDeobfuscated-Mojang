@@ -30,7 +30,7 @@ public class DragonLandingPhase extends AbstractDragonPhaseInstance {
 			double h = e + randomSource.nextGaussian() / 2.0;
 			double j = f + randomSource.nextGaussian() / 2.0;
 			Vec3 vec32 = this.dragon.getDeltaMovement();
-			this.dragon.level.addParticle(ParticleTypes.DRAGON_BREATH, g, h, j, -vec3.x * 0.08F + vec32.x, -vec3.y * 0.3F + vec32.y, -vec3.z * 0.08F + vec32.z);
+			this.dragon.level().addParticle(ParticleTypes.DRAGON_BREATH, g, h, j, -vec3.x * 0.08F + vec32.x, -vec3.y * 0.3F + vec32.y, -vec3.z * 0.08F + vec32.z);
 			vec3.yRot((float) (Math.PI / 16));
 		}
 	}
@@ -39,7 +39,7 @@ public class DragonLandingPhase extends AbstractDragonPhaseInstance {
 	public void doServerTick() {
 		if (this.targetLocation == null) {
 			this.targetLocation = Vec3.atBottomCenterOf(
-				this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION)
+				this.dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION)
 			);
 		}
 

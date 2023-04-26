@@ -33,7 +33,7 @@ public class SmithingMenu extends ItemCombinerMenu {
 
 	public SmithingMenu(int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
 		super(MenuType.SMITHING, i, inventory, containerLevelAccess);
-		this.level = inventory.player.level;
+		this.level = inventory.player.level();
 		this.recipes = this.level.getRecipeManager().getAllRecipesFor(RecipeType.SMITHING);
 	}
 
@@ -73,7 +73,7 @@ public class SmithingMenu extends ItemCombinerMenu {
 
 	@Override
 	protected void onTake(Player player, ItemStack itemStack) {
-		itemStack.onCraftedBy(player.level, player, itemStack.getCount());
+		itemStack.onCraftedBy(player.level(), player, itemStack.getCount());
 		this.resultSlots.awardUsedRecipes(player, this.getRelevantItems());
 		this.shrinkStackInSlot(0);
 		this.shrinkStackInSlot(1);

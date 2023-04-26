@@ -13,7 +13,7 @@ public class RememberIfHoglinWasKilled {
 					.apply(instance, (memoryAccessor, memoryAccessor2) -> (serverLevel, livingEntity, l) -> {
 							LivingEntity livingEntity2 = instance.get(memoryAccessor);
 							if (livingEntity2.getType() == EntityType.HOGLIN && livingEntity2.isDeadOrDying()) {
-								memoryAccessor2.setWithExpiry(true, (long)PiglinAi.TIME_BETWEEN_HUNTS.sample(livingEntity.level.random));
+								memoryAccessor2.setWithExpiry(true, (long)PiglinAi.TIME_BETWEEN_HUNTS.sample(livingEntity.level().random));
 							}
 
 							return true;

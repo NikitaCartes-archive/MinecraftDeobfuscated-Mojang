@@ -14,7 +14,6 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.UnaryOperator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
@@ -33,8 +32,8 @@ public class FontSet implements AutoCloseable {
 	private BakedGlyph missingGlyph;
 	private BakedGlyph whiteGlyph;
 	private final List<GlyphProvider> providers = Lists.<GlyphProvider>newArrayList();
-	private final Int2ObjectMap<BakedGlyph> glyphs = new Int2ObjectOpenHashMap<>();
-	private final Int2ObjectMap<FontSet.GlyphInfoFilter> glyphInfos = new Int2ObjectOpenHashMap<>();
+	private final CodepointMap<BakedGlyph> glyphs = new CodepointMap<>(BakedGlyph[]::new, BakedGlyph[][]::new);
+	private final CodepointMap<FontSet.GlyphInfoFilter> glyphInfos = new CodepointMap<>(FontSet.GlyphInfoFilter[]::new, FontSet.GlyphInfoFilter[][]::new);
 	private final Int2ObjectMap<IntList> glyphsByWidth = new Int2ObjectOpenHashMap<>();
 	private final List<FontTexture> textures = Lists.<FontTexture>newArrayList();
 
@@ -150,11 +149,14 @@ public class FontSet implements AutoCloseable {
 			}
 		}
 
-		FontTexture fontTexture2 = new FontTexture(
-			this.name.withPath((UnaryOperator<String>)(string -> string + "/" + this.textures.size())), sheetGlyphInfo.isColored()
-		);
+		ResourceLocation resourceLocation = this.name.withSuffix("/" + this.textures.size());
+		boolean bl = sheetGlyphInfo.isColored();
+		GlyphRenderTypes glyphRenderTypes = bl
+			? GlyphRenderTypes.createForColorTexture(resourceLocation)
+			: GlyphRenderTypes.createForIntensityTexture(resourceLocation);
+		FontTexture fontTexture2 = new FontTexture(glyphRenderTypes, bl);
 		this.textures.add(fontTexture2);
-		this.textureManager.register(fontTexture2.getName(), fontTexture2);
+		this.textureManager.register(resourceLocation, fontTexture2);
 		BakedGlyph bakedGlyph2 = fontTexture2.add(sheetGlyphInfo);
 		return bakedGlyph2 == null ? this.missingGlyph : bakedGlyph2;
 	}

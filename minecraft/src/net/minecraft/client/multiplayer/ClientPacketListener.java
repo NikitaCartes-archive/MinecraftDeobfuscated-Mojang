@@ -249,6 +249,7 @@ import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.SignatureValidator;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
@@ -697,8 +698,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 	@Override
 	public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSectionBlocksUpdatePacket, this, this.minecraft);
-		int i = 19 | (clientboundSectionBlocksUpdatePacket.shouldSuppressLightUpdates() ? 128 : 0);
-		clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.level.setServerVerifiedBlockState(blockPos, blockState, i));
+		clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.level.setServerVerifiedBlockState(blockPos, blockState, 19));
 	}
 
 	@Override
@@ -761,7 +761,6 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		LevelLightEngine levelLightEngine = this.level.getChunkSource().getLightEngine();
 		LevelChunkSection[] levelChunkSections = levelChunk.getSections();
 		ChunkPos chunkPos = levelChunk.getPos();
-		levelLightEngine.enableLightSources(chunkPos, true);
 
 		for (int k = 0; k < levelChunkSections.length; k++) {
 			LevelChunkSection levelChunkSection = levelChunkSections[k];
@@ -769,8 +768,6 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 			levelLightEngine.updateSectionStatus(SectionPos.of(chunkPos, l), levelChunkSection.hasOnlyAir());
 			this.level.setSectionDirtyWithNeighbors(i, l, j);
 		}
-
-		this.level.setLightReady(i, j);
 	}
 
 	@Override
@@ -780,19 +777,17 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		int j = clientboundForgetLevelChunkPacket.getZ();
 		ClientChunkCache clientChunkCache = this.level.getChunkSource();
 		clientChunkCache.drop(i, j);
-		this.queueLightUpdate(clientboundForgetLevelChunkPacket);
+		this.queueLightRemoval(clientboundForgetLevelChunkPacket);
 	}
 
-	private void queueLightUpdate(ClientboundForgetLevelChunkPacket clientboundForgetLevelChunkPacket) {
+	private void queueLightRemoval(ClientboundForgetLevelChunkPacket clientboundForgetLevelChunkPacket) {
 		this.level.queueLightUpdate(() -> {
 			LevelLightEngine levelLightEngine = this.level.getLightEngine();
+			levelLightEngine.setLightEnabled(new ChunkPos(clientboundForgetLevelChunkPacket.getX(), clientboundForgetLevelChunkPacket.getZ()), false);
 
 			for (int i = this.level.getMinSection(); i < this.level.getMaxSection(); i++) {
 				levelLightEngine.updateSectionStatus(SectionPos.of(clientboundForgetLevelChunkPacket.getX(), i, clientboundForgetLevelChunkPacket.getZ()), true);
 			}
-
-			levelLightEngine.enableLightSources(new ChunkPos(clientboundForgetLevelChunkPacket.getX(), clientboundForgetLevelChunkPacket.getZ()), false);
-			this.level.setLightReady(clientboundForgetLevelChunkPacket.getX(), clientboundForgetLevelChunkPacket.getZ());
 		});
 	}
 
@@ -1112,7 +1107,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 			.getHolderOrThrow(clientboundRespawnPacket.getDimensionType());
 		LocalPlayer localPlayer = this.minecraft.player;
 		int i = localPlayer.getId();
-		if (resourceKey != localPlayer.level.dimension()) {
+		if (resourceKey != localPlayer.level().dimension()) {
 			Scoreboard scoreboard = this.level.getScoreboard();
 			Map<String, MapItemSavedData> map = this.level.getAllMapData();
 			boolean bl = clientboundRespawnPacket.isDebug();
@@ -1148,7 +1143,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 			.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
 		localPlayer2.setId(i);
 		this.minecraft.player = localPlayer2;
-		if (resourceKey != localPlayer.level.dimension()) {
+		if (resourceKey != localPlayer.level().dimension()) {
 			this.minecraft.getMusicManager().stopPlaying();
 		}
 
@@ -1840,17 +1835,23 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 
 	private void initializeChatSession(ClientboundPlayerInfoUpdatePacket.Entry entry, PlayerInfo playerInfo) {
 		GameProfile gameProfile = playerInfo.getProfile();
-		RemoteChatSession.Data data = entry.chatSession();
-		if (data != null) {
-			try {
-				RemoteChatSession remoteChatSession = data.validate(gameProfile, this.minecraft.getServiceSignatureValidator(), ProfilePublicKey.EXPIRY_GRACE_PERIOD);
-				playerInfo.setChatSession(remoteChatSession);
-			} catch (ProfilePublicKey.ValidationException var6) {
-				LOGGER.error("Failed to validate profile key for player: '{}'", gameProfile.getName(), var6);
+		SignatureValidator signatureValidator = this.minecraft.getProfileKeySignatureValidator();
+		if (signatureValidator == null) {
+			LOGGER.warn("Ignoring chat session from {} due to missing Services public key", gameProfile.getName());
+			playerInfo.clearChatSession(this.enforcesSecureChat());
+		} else {
+			RemoteChatSession.Data data = entry.chatSession();
+			if (data != null) {
+				try {
+					RemoteChatSession remoteChatSession = data.validate(gameProfile, signatureValidator, ProfilePublicKey.EXPIRY_GRACE_PERIOD);
+					playerInfo.setChatSession(remoteChatSession);
+				} catch (ProfilePublicKey.ValidationException var7) {
+					LOGGER.error("Failed to validate profile key for player: '{}'", gameProfile.getName(), var7);
+					playerInfo.clearChatSession(this.enforcesSecureChat());
+				}
+			} else {
 				playerInfo.clearChatSession(this.enforcesSecureChat());
 			}
-		} else {
-			playerInfo.clearChatSession(this.enforcesSecureChat());
 		}
 	}
 
@@ -2507,12 +2508,12 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		BitSet bitSet = clientboundLightUpdatePacketData.getSkyYMask();
 		BitSet bitSet2 = clientboundLightUpdatePacketData.getEmptySkyYMask();
 		Iterator<byte[]> iterator = clientboundLightUpdatePacketData.getSkyUpdates().iterator();
-		this.readSectionList(i, j, levelLightEngine, LightLayer.SKY, bitSet, bitSet2, iterator, clientboundLightUpdatePacketData.getTrustEdges());
+		this.readSectionList(i, j, levelLightEngine, LightLayer.SKY, bitSet, bitSet2, iterator);
 		BitSet bitSet3 = clientboundLightUpdatePacketData.getBlockYMask();
 		BitSet bitSet4 = clientboundLightUpdatePacketData.getEmptyBlockYMask();
 		Iterator<byte[]> iterator2 = clientboundLightUpdatePacketData.getBlockUpdates().iterator();
-		this.readSectionList(i, j, levelLightEngine, LightLayer.BLOCK, bitSet3, bitSet4, iterator2, clientboundLightUpdatePacketData.getTrustEdges());
-		this.level.setLightReady(i, j);
+		this.readSectionList(i, j, levelLightEngine, LightLayer.BLOCK, bitSet3, bitSet4, iterator2);
+		levelLightEngine.setLightEnabled(new ChunkPos(i, j), true);
 	}
 
 	@Override
@@ -2564,15 +2565,13 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		}
 	}
 
-	private void readSectionList(
-		int i, int j, LevelLightEngine levelLightEngine, LightLayer lightLayer, BitSet bitSet, BitSet bitSet2, Iterator<byte[]> iterator, boolean bl
-	) {
+	private void readSectionList(int i, int j, LevelLightEngine levelLightEngine, LightLayer lightLayer, BitSet bitSet, BitSet bitSet2, Iterator<byte[]> iterator) {
 		for (int k = 0; k < levelLightEngine.getLightSectionCount(); k++) {
 			int l = levelLightEngine.getMinLightSection() + k;
-			boolean bl2 = bitSet.get(k);
-			boolean bl3 = bitSet2.get(k);
-			if (bl2 || bl3) {
-				levelLightEngine.queueSectionData(lightLayer, SectionPos.of(i, l, j), bl2 ? new DataLayer((byte[])((byte[])iterator.next()).clone()) : new DataLayer(), bl);
+			boolean bl = bitSet.get(k);
+			boolean bl2 = bitSet2.get(k);
+			if (bl || bl2) {
+				levelLightEngine.queueSectionData(lightLayer, SectionPos.of(i, l, j), bl ? new DataLayer((byte[])((byte[])iterator.next()).clone()) : new DataLayer());
 				this.level.setSectionDirtyWithNeighbors(i, l, j);
 			}
 		}

@@ -31,7 +31,7 @@ public class FollowOwnerGoal extends Goal {
 
 	public FollowOwnerGoal(TamableAnimal tamableAnimal, double d, float f, float g, boolean bl) {
 		this.tamable = tamableAnimal;
-		this.level = tamableAnimal.level;
+		this.level = tamableAnimal.level();
 		this.speedModifier = d;
 		this.navigation = tamableAnimal.getNavigation();
 		this.startDistance = f;

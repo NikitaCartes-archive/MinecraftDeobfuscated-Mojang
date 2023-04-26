@@ -18,13 +18,13 @@ public class SaddleItem extends Item {
 		if (livingEntity instanceof Saddleable && livingEntity.isAlive()) {
 			Saddleable saddleable = (Saddleable)livingEntity;
 			if (!saddleable.isSaddled() && saddleable.isSaddleable()) {
-				if (!player.level.isClientSide) {
+				if (!player.level().isClientSide) {
 					saddleable.equipSaddle(SoundSource.NEUTRAL);
-					livingEntity.level.gameEvent(livingEntity, GameEvent.EQUIP, livingEntity.position());
+					livingEntity.level().gameEvent(livingEntity, GameEvent.EQUIP, livingEntity.position());
 					itemStack.shrink(1);
 				}
 
-				return InteractionResult.sidedSuccess(player.level.isClientSide);
+				return InteractionResult.sidedSuccess(player.level().isClientSide);
 			}
 		}
 

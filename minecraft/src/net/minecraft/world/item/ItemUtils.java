@@ -43,7 +43,7 @@ public class ItemUtils {
 	}
 
 	public static void onContainerDestroyed(ItemEntity itemEntity, Stream<ItemStack> stream) {
-		Level level = itemEntity.level;
+		Level level = itemEntity.level();
 		if (!level.isClientSide) {
 			stream.forEach(itemStack -> level.addFreshEntity(new ItemEntity(level, itemEntity.getX(), itemEntity.getY(), itemEntity.getZ(), itemStack)));
 		}

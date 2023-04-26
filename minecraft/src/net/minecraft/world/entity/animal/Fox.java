@@ -146,7 +146,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 			this, AbstractFish.class, 20, false, false, livingEntity -> livingEntity instanceof AbstractSchoolingFish
 		);
 		this.goalSelector.addGoal(0, new Fox.FoxFloatGoal());
-		this.goalSelector.addGoal(0, new ClimbOnTopOfPowderSnowGoal(this, this.level));
+		this.goalSelector.addGoal(0, new ClimbOnTopOfPowderSnowGoal(this, this.level()));
 		this.goalSelector.addGoal(1, new Fox.FaceplantGoal());
 		this.goalSelector.addGoal(2, new Fox.FoxPanicGoal(2.2));
 		this.goalSelector.addGoal(3, new Fox.FoxBreedGoal(1.0));
@@ -188,12 +188,12 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 
 	@Override
 	public void aiStep() {
-		if (!this.level.isClientSide && this.isAlive() && this.isEffectiveAi()) {
+		if (!this.level().isClientSide && this.isAlive() && this.isEffectiveAi()) {
 			this.ticksSinceEaten++;
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
 			if (this.canEat(itemStack)) {
 				if (this.ticksSinceEaten > 600) {
-					ItemStack itemStack2 = itemStack.finishUsingItem(this.level, this);
+					ItemStack itemStack2 = itemStack.finishUsingItem(this.level(), this);
 					if (!itemStack2.isEmpty()) {
 						this.setItemSlot(EquipmentSlot.MAINHAND, itemStack2);
 					}
@@ -201,7 +201,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 					this.ticksSinceEaten = 0;
 				} else if (this.ticksSinceEaten > 560 && this.random.nextFloat() < 0.1F) {
 					this.playSound(this.getEatingSound(itemStack), 1.0F, 1.0F);
-					this.level.broadcastEntityEvent(this, (byte)45);
+					this.level().broadcastEntityEvent(this, (byte)45);
 				}
 			}
 
@@ -230,7 +230,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	private boolean canEat(ItemStack itemStack) {
-		return itemStack.getItem().isEdible() && this.getTarget() == null && this.onGround && !this.isSleeping();
+		return itemStack.getItem().isEdible() && this.getTarget() == null && this.onGround() && !this.isSleeping();
 	}
 
 	@Override
@@ -265,7 +265,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 					Vec3 vec3 = new Vec3(((double)this.random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0.0)
 						.xRot(-this.getXRot() * (float) (Math.PI / 180.0))
 						.yRot(-this.getYRot() * (float) (Math.PI / 180.0));
-					this.level
+					this.level()
 						.addParticle(
 							new ItemParticleOption(ParticleTypes.ITEM, itemStack),
 							this.getX() + this.getLookAngle().x / 2.0,
@@ -421,7 +421,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		this.setVariant(Fox.Type.byName(compoundTag.getString("Type")));
 		this.setSitting(compoundTag.getBoolean("Sitting"));
 		this.setIsCrouching(compoundTag.getBoolean("Crouching"));
-		if (this.level instanceof ServerLevel) {
+		if (this.level() instanceof ServerLevel) {
 			this.setTargetGoals();
 		}
 	}
@@ -485,18 +485,18 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	private void spitOutItem(ItemStack itemStack) {
-		if (!itemStack.isEmpty() && !this.level.isClientSide) {
-			ItemEntity itemEntity = new ItemEntity(this.level, this.getX() + this.getLookAngle().x, this.getY() + 1.0, this.getZ() + this.getLookAngle().z, itemStack);
+		if (!itemStack.isEmpty() && !this.level().isClientSide) {
+			ItemEntity itemEntity = new ItemEntity(this.level(), this.getX() + this.getLookAngle().x, this.getY() + 1.0, this.getZ() + this.getLookAngle().z, itemStack);
 			itemEntity.setPickUpDelay(40);
 			itemEntity.setThrower(this.getUUID());
 			this.playSound(SoundEvents.FOX_SPIT, 1.0F, 1.0F);
-			this.level.addFreshEntity(itemEntity);
+			this.level().addFreshEntity(itemEntity);
 		}
 	}
 
 	private void dropItemStack(ItemStack itemStack) {
-		ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), itemStack);
-		this.level.addFreshEntity(itemEntity);
+		ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), itemStack);
+		this.level().addFreshEntity(itemEntity);
 	}
 
 	@Override
@@ -523,7 +523,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		super.tick();
 		if (this.isEffectiveAi()) {
 			boolean bl = this.isInWater();
-			if (bl || this.getTarget() != null || this.level.isThundering()) {
+			if (bl || this.getTarget() != null || this.level().isThundering()) {
 				this.wakeUp();
 			}
 
@@ -531,10 +531,10 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 				this.setSitting(false);
 			}
 
-			if (this.isFaceplanted() && this.level.random.nextFloat() < 0.2F) {
+			if (this.isFaceplanted() && this.level().random.nextFloat() < 0.2F) {
 				BlockPos blockPos = this.blockPosition();
-				BlockState blockState = this.level.getBlockState(blockPos);
-				this.level.levelEvent(2001, blockPos, Block.getId(blockState));
+				BlockState blockState = this.level().getBlockState(blockPos);
+				this.level().levelEvent(2001, blockPos, Block.getId(blockState));
 			}
 		}
 
@@ -654,8 +654,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		if (this.isSleeping()) {
 			return SoundEvents.FOX_SLEEP;
 		} else {
-			if (!this.level.isDay() && this.random.nextFloat() < 0.1F) {
-				List<Player> list = this.level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(16.0, 16.0, 16.0), EntitySelector.NO_SPECTATORS);
+			if (!this.level().isDay() && this.random.nextFloat() < 0.1F) {
+				List<Player> list = this.level().getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(16.0, 16.0, 16.0), EntitySelector.NO_SPECTATORS);
 				if (list.isEmpty()) {
 					return SoundEvents.FOX_SCREECH;
 				}
@@ -703,7 +703,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 			double h = f == 0.0 ? e * (double)((float)j / 6.0F) : g / f;
 
 			for (int k = 1; k < 4; k++) {
-				if (!fox.level.getBlockState(BlockPos.containing(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).canBeReplaced()) {
+				if (!fox.level().getBlockState(BlockPos.containing(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).canBeReplaced()) {
 					return false;
 				}
 			}
@@ -734,7 +734,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 				return false;
 			} else {
 				for (UUID uUID : Fox.this.getTrustedUUIDs()) {
-					if (uUID != null && Fox.this.level instanceof ServerLevel && ((ServerLevel)Fox.this.level).getEntity(uUID) instanceof LivingEntity livingEntity) {
+					if (uUID != null && Fox.this.level() instanceof ServerLevel && ((ServerLevel)Fox.this.level()).getEntity(uUID) instanceof LivingEntity livingEntity) {
 						this.trustedLastHurt = livingEntity;
 						this.trustedLastHurtBy = livingEntity.getLastHurtByMob();
 						int i = livingEntity.getLastHurtByMobTimestamp();
@@ -818,11 +818,11 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 
 		protected boolean hasShelter() {
 			BlockPos blockPos = BlockPos.containing(Fox.this.getX(), Fox.this.getBoundingBox().maxY, Fox.this.getZ());
-			return !Fox.this.level.canSeeSky(blockPos) && Fox.this.getWalkTargetValue(blockPos) >= 0.0F;
+			return !Fox.this.level().canSeeSky(blockPos) && Fox.this.getWalkTargetValue(blockPos) >= 0.0F;
 		}
 
 		protected boolean alertable() {
-			return !Fox.this.level
+			return !Fox.this.level()
 				.getNearbyEntities(LivingEntity.class, this.alertableTargeting, Fox.this, Fox.this.getBoundingBox().inflate(12.0, 6.0, 12.0))
 				.isEmpty();
 		}
@@ -919,8 +919,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		}
 
 		protected void onReachedTarget() {
-			if (Fox.this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-				BlockState blockState = Fox.this.level.getBlockState(this.blockPos);
+			if (Fox.this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+				BlockState blockState = Fox.this.level().getBlockState(this.blockPos);
 				if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 					this.pickSweetBerries(blockState);
 				} else if (CaveVines.hasGlowBerries(blockState)) {
@@ -930,13 +930,13 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		}
 
 		private void pickGlowBerry(BlockState blockState) {
-			CaveVines.use(Fox.this, blockState, Fox.this.level, this.blockPos);
+			CaveVines.use(Fox.this, blockState, Fox.this.level(), this.blockPos);
 		}
 
 		private void pickSweetBerries(BlockState blockState) {
 			int i = (Integer)blockState.getValue(SweetBerryBushBlock.AGE);
 			blockState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1));
-			int j = 1 + Fox.this.level.random.nextInt(2) + (i == 3 ? 1 : 0);
+			int j = 1 + Fox.this.level().random.nextInt(2) + (i == 3 ? 1 : 0);
 			ItemStack itemStack = Fox.this.getItemBySlot(EquipmentSlot.MAINHAND);
 			if (itemStack.isEmpty()) {
 				Fox.this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.SWEET_BERRIES));
@@ -944,11 +944,11 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 			}
 
 			if (j > 0) {
-				Block.popResource(Fox.this.level, this.blockPos, new ItemStack(Items.SWEET_BERRIES, j));
+				Block.popResource(Fox.this.level(), this.blockPos, new ItemStack(Items.SWEET_BERRIES, j));
 			}
 
 			Fox.this.playSound(SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, 1.0F, 1.0F);
-			Fox.this.level.setBlock(this.blockPos, blockState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1)), 2);
+			Fox.this.level().setBlock(this.blockPos, blockState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1)), 2);
 		}
 
 		@Override
@@ -1131,7 +1131,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 			LivingEntity livingEntity = Fox.this.getTarget();
 			if (livingEntity != null && livingEntity.isAlive()) {
 				double d = Fox.this.getDeltaMovement().y;
-				return (!(d * d < 0.05F) || !(Math.abs(Fox.this.getXRot()) < 15.0F) || !Fox.this.onGround) && !Fox.this.isFaceplanted();
+				return (!(d * d < 0.05F) || !(Math.abs(Fox.this.getXRot()) < 15.0F) || !Fox.this.onGround()) && !Fox.this.isFaceplanted();
 			} else {
 				return false;
 			}
@@ -1187,9 +1187,9 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 			if (livingEntity != null && Fox.this.distanceTo(livingEntity) <= 2.0F) {
 				Fox.this.doHurtTarget(livingEntity);
 			} else if (Fox.this.getXRot() > 0.0F
-				&& Fox.this.onGround
+				&& Fox.this.onGround()
 				&& (float)Fox.this.getDeltaMovement().y != 0.0F
-				&& Fox.this.level.getBlockState(Fox.this.blockPosition()).is(Blocks.SNOW)) {
+				&& Fox.this.level().getBlockState(Fox.this.blockPosition()).is(Blocks.SNOW)) {
 				Fox.this.setXRot(60.0F);
 				Fox.this.setTarget(null);
 				Fox.this.setFaceplanted(true);
@@ -1213,14 +1213,14 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 			} else if (Fox.this.getRandom().nextInt(reducedTickDelay(10)) != 0) {
 				return false;
 			} else {
-				List<ItemEntity> list = Fox.this.level.getEntitiesOfClass(ItemEntity.class, Fox.this.getBoundingBox().inflate(8.0, 8.0, 8.0), Fox.ALLOWED_ITEMS);
+				List<ItemEntity> list = Fox.this.level().getEntitiesOfClass(ItemEntity.class, Fox.this.getBoundingBox().inflate(8.0, 8.0, 8.0), Fox.ALLOWED_ITEMS);
 				return !list.isEmpty() && Fox.this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty();
 			}
 		}
 
 		@Override
 		public void tick() {
-			List<ItemEntity> list = Fox.this.level.getEntitiesOfClass(ItemEntity.class, Fox.this.getBoundingBox().inflate(8.0, 8.0, 8.0), Fox.ALLOWED_ITEMS);
+			List<ItemEntity> list = Fox.this.level().getEntitiesOfClass(ItemEntity.class, Fox.this.getBoundingBox().inflate(8.0, 8.0, 8.0), Fox.ALLOWED_ITEMS);
 			ItemStack itemStack = Fox.this.getItemBySlot(EquipmentSlot.MAINHAND);
 			if (itemStack.isEmpty() && !list.isEmpty()) {
 				Fox.this.getNavigation().moveTo((Entity)list.get(0), 1.2F);
@@ -1229,7 +1229,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 
 		@Override
 		public void start() {
-			List<ItemEntity> list = Fox.this.level.getEntitiesOfClass(ItemEntity.class, Fox.this.getBoundingBox().inflate(8.0, 8.0, 8.0), Fox.ALLOWED_ITEMS);
+			List<ItemEntity> list = Fox.this.level().getEntitiesOfClass(ItemEntity.class, Fox.this.getBoundingBox().inflate(8.0, 8.0, 8.0), Fox.ALLOWED_ITEMS);
 			if (!list.isEmpty()) {
 				Fox.this.getNavigation().moveTo((Entity)list.get(0), 1.2F);
 			}
@@ -1332,7 +1332,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		@Override
 		public boolean canUse() {
 			if (!Fox.this.isSleeping() && this.mob.getTarget() == null) {
-				if (Fox.this.level.isThundering() && Fox.this.level.canSeeSky(this.mob.blockPosition())) {
+				if (Fox.this.level().isThundering() && Fox.this.level().canSeeSky(this.mob.blockPosition())) {
 					return this.setWantedPos();
 				} else if (this.interval > 0) {
 					this.interval--;
@@ -1340,7 +1340,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 				} else {
 					this.interval = 100;
 					BlockPos blockPos = this.mob.blockPosition();
-					return Fox.this.level.isDay() && Fox.this.level.canSeeSky(blockPos) && !((ServerLevel)Fox.this.level).isVillage(blockPos) && this.setWantedPos();
+					return Fox.this.level().isDay() && Fox.this.level().canSeeSky(blockPos) && !((ServerLevel)Fox.this.level()).isVillage(blockPos) && this.setWantedPos();
 				}
 			} else {
 				return false;
@@ -1377,7 +1377,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 				this.countdown--;
 				return false;
 			} else {
-				return Fox.this.level.isDay() && this.hasShelter() && !this.alertable() && !Fox.this.isInPowderSnow;
+				return Fox.this.level().isDay() && this.hasShelter() && !this.alertable() && !Fox.this.isInPowderSnow;
 			}
 		}
 

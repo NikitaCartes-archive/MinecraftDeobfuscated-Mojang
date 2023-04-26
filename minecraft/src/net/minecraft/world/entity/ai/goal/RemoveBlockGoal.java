@@ -35,7 +35,7 @@ public class RemoveBlockGoal extends MoveToBlockGoal {
 
 	@Override
 	public boolean canUse() {
-		if (!this.removerMob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+		if (!this.removerMob.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 			return false;
 		} else if (this.nextStartTick > 0) {
 			this.nextStartTick--;
@@ -70,7 +70,7 @@ public class RemoveBlockGoal extends MoveToBlockGoal {
 	@Override
 	public void tick() {
 		super.tick();
-		Level level = this.removerMob.level;
+		Level level = this.removerMob.level();
 		BlockPos blockPos = this.removerMob.blockPosition();
 		BlockPos blockPos2 = this.getPosWithBlock(blockPos, level);
 		RandomSource randomSource = this.removerMob.getRandom();

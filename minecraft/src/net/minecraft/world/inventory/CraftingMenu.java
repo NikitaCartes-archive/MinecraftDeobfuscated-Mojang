@@ -96,7 +96,7 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 
 	@Override
 	public boolean recipeMatches(Recipe<? super CraftingContainer> recipe) {
-		return recipe.matches(this.craftSlots, this.player.level);
+		return recipe.matches(this.craftSlots, this.player.level());
 	}
 
 	@Override

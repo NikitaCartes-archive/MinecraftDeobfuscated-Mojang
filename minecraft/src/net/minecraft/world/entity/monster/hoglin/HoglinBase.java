@@ -13,7 +13,7 @@ public interface HoglinBase {
 		float f = (float)livingEntity.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		float g;
 		if (!livingEntity.isBaby() && (int)f > 0) {
-			g = f / 2.0F + (float)livingEntity.level.random.nextInt((int)f);
+			g = f / 2.0F + (float)livingEntity.level().random.nextInt((int)f);
 		} else {
 			g = f;
 		}
@@ -36,10 +36,10 @@ public interface HoglinBase {
 		if (!(f <= 0.0)) {
 			double g = livingEntity2.getX() - livingEntity.getX();
 			double h = livingEntity2.getZ() - livingEntity.getZ();
-			float i = (float)(livingEntity.level.random.nextInt(21) - 10);
-			double j = f * (double)(livingEntity.level.random.nextFloat() * 0.5F + 0.2F);
+			float i = (float)(livingEntity.level().random.nextInt(21) - 10);
+			double j = f * (double)(livingEntity.level().random.nextFloat() * 0.5F + 0.2F);
 			Vec3 vec3 = new Vec3(g, 0.0, h).normalize().scale(j).yRot(i);
-			double k = f * (double)livingEntity.level.random.nextFloat() * 0.5;
+			double k = f * (double)livingEntity.level().random.nextFloat() * 0.5;
 			livingEntity2.push(vec3.x, k, vec3.z);
 			livingEntity2.hurtMarked = true;
 		}

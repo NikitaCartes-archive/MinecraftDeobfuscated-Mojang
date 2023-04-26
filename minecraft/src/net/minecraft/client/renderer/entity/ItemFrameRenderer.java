@@ -97,7 +97,7 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 				float h = 0.0078125F;
 				poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
 				poseStack.translate(-64.0F, -64.0F, 0.0F);
-				MapItemSavedData mapItemSavedData = MapItem.getSavedData(optionalInt.getAsInt(), itemFrame.level);
+				MapItemSavedData mapItemSavedData = MapItem.getSavedData(optionalInt.getAsInt(), itemFrame.level());
 				poseStack.translate(0.0F, 0.0F, -1.0F);
 				if (mapItemSavedData != null) {
 					int k = this.getLightVal(itemFrame, 15728850, i);
@@ -107,7 +107,7 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 				int l = this.getLightVal(itemFrame, 15728880, i);
 				poseStack.scale(0.5F, 0.5F, 0.5F);
 				this.itemRenderer
-					.renderStatic(itemStack, ItemDisplayContext.FIXED, l, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, itemFrame.level, itemFrame.getId());
+					.renderStatic(itemStack, ItemDisplayContext.FIXED, l, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, itemFrame.level(), itemFrame.getId());
 			}
 		}
 

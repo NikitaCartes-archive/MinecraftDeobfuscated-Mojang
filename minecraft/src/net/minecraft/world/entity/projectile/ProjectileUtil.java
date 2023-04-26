@@ -21,14 +21,14 @@ import net.minecraft.world.phys.Vec3;
 public final class ProjectileUtil {
 	public static HitResult getHitResultOnMoveVector(Entity entity, Predicate<Entity> predicate) {
 		Vec3 vec3 = entity.getDeltaMovement();
-		Level level = entity.level;
+		Level level = entity.level();
 		Vec3 vec32 = entity.position();
 		return getHitResult(vec32, entity, predicate, vec3, level);
 	}
 
 	public static HitResult getHitResultOnViewVector(Entity entity, Predicate<Entity> predicate, double d) {
 		Vec3 vec3 = entity.getViewVector(0.0F).scale(d);
-		Level level = entity.level;
+		Level level = entity.level();
 		Vec3 vec32 = entity.getEyePosition();
 		return getHitResult(vec32, entity, predicate, vec3, level);
 	}
@@ -50,7 +50,7 @@ public final class ProjectileUtil {
 
 	@Nullable
 	public static EntityHitResult getEntityHitResult(Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate, double d) {
-		Level level = entity.level;
+		Level level = entity.level();
 		double e = d;
 		Entity entity2 = null;
 		Vec3 vec33 = null;
@@ -144,7 +144,7 @@ public final class ProjectileUtil {
 
 	public static AbstractArrow getMobArrow(LivingEntity livingEntity, ItemStack itemStack, float f) {
 		ArrowItem arrowItem = (ArrowItem)(itemStack.getItem() instanceof ArrowItem ? itemStack.getItem() : Items.ARROW);
-		AbstractArrow abstractArrow = arrowItem.createArrow(livingEntity.level, itemStack, livingEntity);
+		AbstractArrow abstractArrow = arrowItem.createArrow(livingEntity.level(), itemStack, livingEntity);
 		abstractArrow.setEnchantmentEffectsFromEntity(livingEntity, f);
 		if (itemStack.is(Items.TIPPED_ARROW) && abstractArrow instanceof Arrow) {
 			((Arrow)abstractArrow).setEffectsFromItem(itemStack);

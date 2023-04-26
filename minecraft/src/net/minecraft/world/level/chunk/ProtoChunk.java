@@ -2,12 +2,10 @@ package net.minecraft.world.level.chunk;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -30,6 +28,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -42,7 +41,6 @@ public class ProtoChunk extends ChunkAccess {
 	private volatile LevelLightEngine lightEngine;
 	private volatile ChunkStatus status = ChunkStatus.EMPTY;
 	private final List<CompoundTag> entities = Lists.<CompoundTag>newArrayList();
-	private final List<BlockPos> lights = Lists.<BlockPos>newArrayList();
 	private final Map<GenerationStep.Carving, CarvingMask> carvingMasks = new Object2ObjectArrayMap<>();
 	@Nullable
 	private BelowZeroRetrogen belowZeroRetrogen;
@@ -109,29 +107,6 @@ public class ProtoChunk extends ChunkAccess {
 		}
 	}
 
-	@Override
-	public Stream<BlockPos> getLights() {
-		return this.lights.stream();
-	}
-
-	public ShortList[] getPackedLights() {
-		ShortList[] shortLists = new ShortList[this.getSectionsCount()];
-
-		for (BlockPos blockPos : this.lights) {
-			ChunkAccess.getOrCreateOffsetList(shortLists, this.getSectionIndex(blockPos.getY())).add(packOffsetCoordinates(blockPos));
-		}
-
-		return shortLists;
-	}
-
-	public void addLight(short s, int i) {
-		this.addLight(unpackOffsetCoordinates(s, this.getSectionYFromSectionIndex(i), this.chunkPos));
-	}
-
-	public void addLight(BlockPos blockPos) {
-		this.lights.add(blockPos.immutable());
-	}
-
 	@Nullable
 	@Override
 	public BlockState setBlockState(BlockPos blockPos, BlockState blockState, boolean bl) {
@@ -140,24 +115,25 @@ public class ProtoChunk extends ChunkAccess {
 		int k = blockPos.getZ();
 		if (j >= this.getMinBuildHeight() && j < this.getMaxBuildHeight()) {
 			int l = this.getSectionIndex(j);
-			if (this.sections[l].hasOnlyAir() && blockState.is(Blocks.AIR)) {
+			LevelChunkSection levelChunkSection = this.getSection(l);
+			boolean bl2 = levelChunkSection.hasOnlyAir();
+			if (bl2 && blockState.is(Blocks.AIR)) {
 				return blockState;
 			} else {
-				if (blockState.getLightEmission() > 0) {
-					this.lights.add(new BlockPos((i & 15) + this.getPos().getMinBlockX(), j, (k & 15) + this.getPos().getMinBlockZ()));
-				}
+				int m = SectionPos.sectionRelative(i);
+				int n = SectionPos.sectionRelative(j);
+				int o = SectionPos.sectionRelative(k);
+				BlockState blockState2 = levelChunkSection.setBlockState(m, n, o, blockState);
+				if (this.status.isOrAfter(ChunkStatus.INITIALIZE_LIGHT)) {
+					boolean bl3 = levelChunkSection.hasOnlyAir();
+					if (bl3 != bl2) {
+						this.lightEngine.updateSectionStatus(blockPos, bl3);
+					}
 
-				LevelChunkSection levelChunkSection = this.getSection(l);
-				BlockState blockState2 = levelChunkSection.setBlockState(i & 15, j & 15, k & 15, blockState);
-				if (this.status.isOrAfter(ChunkStatus.INITIALIZE_LIGHT)
-					&& blockState != blockState2
-					&& (
-						blockState.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos)
-							|| blockState.getLightEmission() != blockState2.getLightEmission()
-							|| blockState.useShapeForLightOcclusion()
-							|| blockState2.useShapeForLightOcclusion()
-					)) {
-					this.lightEngine.checkBlock(blockPos);
+					if (LightEngine.hasDifferentLightProperties(this, blockPos, blockState2, blockState)) {
+						this.skyLightSources.update(this, m, j, o);
+						this.lightEngine.checkBlock(blockPos);
+					}
 				}
 
 				EnumSet<Heightmap.Types> enumSet = this.getStatus().heightmapsAfter();
@@ -179,7 +155,7 @@ public class ProtoChunk extends ChunkAccess {
 				}
 
 				for (Heightmap.Types typesx : enumSet) {
-					((Heightmap)this.heightmaps.get(typesx)).update(i & 15, j, k & 15, blockState);
+					((Heightmap)this.heightmaps.get(typesx)).update(m, j, o, blockState);
 				}
 
 				return blockState2;
@@ -251,11 +227,10 @@ public class ProtoChunk extends ChunkAccess {
 
 	@Override
 	public Holder<Biome> getNoiseBiome(int i, int j, int k) {
-		if (!this.getStatus().isOrAfter(ChunkStatus.BIOMES)
-			&& (this.belowZeroRetrogen == null || !this.belowZeroRetrogen.targetStatus().isOrAfter(ChunkStatus.BIOMES))) {
-			throw new IllegalStateException("Asking for biomes before we have biomes");
-		} else {
+		if (this.getHighestGeneratedStatus().isOrAfter(ChunkStatus.BIOMES)) {
 			return super.getNoiseBiome(i, j, k);
+		} else {
+			throw new IllegalStateException("Asking for biomes before we have biomes");
 		}
 	}
 

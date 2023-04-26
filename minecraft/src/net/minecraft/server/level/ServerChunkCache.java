@@ -26,7 +26,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -39,6 +38,7 @@ import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
 import net.minecraft.world.level.levelgen.RandomState;
@@ -261,8 +261,9 @@ public class ServerChunkCache extends ChunkSource {
 		return !this.chunkAbsent(chunkHolder, k);
 	}
 
+	@Nullable
 	@Override
-	public BlockGetter getChunkForLighting(int i, int j) {
+	public LightChunk getChunkForLighting(int i, int j) {
 		long l = ChunkPos.asLong(i, j);
 		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
 		if (chunkHolder == null) {
@@ -274,7 +275,7 @@ public class ServerChunkCache extends ChunkSource {
 				ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(k);
 				Optional<ChunkAccess> optional = ((Either)chunkHolder.getFutureIfPresentUnchecked(chunkStatus).getNow(ChunkHolder.UNLOADED_CHUNK)).left();
 				if (optional.isPresent()) {
-					return (BlockGetter)optional.get();
+					return (LightChunk)optional.get();
 				}
 
 				if (chunkStatus == ChunkStatus.INITIALIZE_LIGHT.getParent()) {

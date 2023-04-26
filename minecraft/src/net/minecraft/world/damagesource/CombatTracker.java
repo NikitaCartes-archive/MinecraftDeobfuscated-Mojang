@@ -43,7 +43,7 @@ public class CombatTracker {
 		this.resetPreparedStatus();
 		Optional<BlockPos> optional = this.mob.getLastClimbablePos();
 		if (optional.isPresent()) {
-			BlockState blockState = this.mob.level.getBlockState((BlockPos)optional.get());
+			BlockState blockState = this.mob.level().getBlockState((BlockPos)optional.get());
 			if (blockState.is(Blocks.LADDER) || blockState.is(BlockTags.TRAPDOORS)) {
 				this.nextLocation = "ladder";
 			} else if (blockState.is(Blocks.VINE)) {

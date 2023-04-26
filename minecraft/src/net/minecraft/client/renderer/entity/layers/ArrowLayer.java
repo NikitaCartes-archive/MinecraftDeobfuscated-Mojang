@@ -30,7 +30,7 @@ public class ArrowLayer<T extends LivingEntity, M extends PlayerModel<T>> extend
 	@Override
 	protected void renderStuckItem(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Entity entity, float f, float g, float h, float j) {
 		float k = Mth.sqrt(f * f + h * h);
-		Arrow arrow = new Arrow(entity.level, entity.getX(), entity.getY(), entity.getZ());
+		Arrow arrow = new Arrow(entity.level(), entity.getX(), entity.getY(), entity.getZ());
 		arrow.setYRot((float)(Math.atan2((double)f, (double)h) * 180.0F / (float)Math.PI));
 		arrow.setXRot((float)(Math.atan2((double)g, (double)k) * 180.0F / (float)Math.PI));
 		arrow.yRotO = arrow.getYRot();

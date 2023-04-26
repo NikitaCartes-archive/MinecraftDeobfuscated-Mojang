@@ -103,7 +103,7 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (this.level.isClientSide && this.isInvisible()) {
+		if (this.level().isClientSide && this.isInvisible()) {
 			this.clientSideIllusionTicks--;
 			if (this.clientSideIllusionTicks < 0) {
 				this.clientSideIllusionTicks = 0;
@@ -124,10 +124,10 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 				}
 
 				for (int j = 0; j < 16; j++) {
-					this.level.addParticle(ParticleTypes.CLOUD, this.getRandomX(0.5), this.getRandomY(), this.getZ(0.5), 0.0, 0.0, 0.0);
+					this.level().addParticle(ParticleTypes.CLOUD, this.getRandomX(0.5), this.getRandomY(), this.getZ(0.5), 0.0, 0.0, 0.0);
 				}
 
-				this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, this.getSoundSource(), 1.0F, 1.0F, false);
+				this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, this.getSoundSource(), 1.0F, 1.0F, false);
 			} else if (this.hurtTime == this.hurtDuration - 1) {
 				this.clientSideIllusionTicks = 3;
 
@@ -201,9 +201,9 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 		double e = livingEntity.getY(0.3333333333333333) - abstractArrow.getY();
 		double g = livingEntity.getZ() - this.getZ();
 		double h = Math.sqrt(d * d + g * g);
-		abstractArrow.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
+		abstractArrow.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level().getDifficulty().getId() * 4));
 		this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-		this.level.addFreshEntity(abstractArrow);
+		this.level().addFreshEntity(abstractArrow);
 	}
 
 	@Override
@@ -227,7 +227,7 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 			} else {
 				return Illusioner.this.getTarget().getId() == this.lastTargetId
 					? false
-					: Illusioner.this.level.getCurrentDifficultyAt(Illusioner.this.blockPosition()).isHarderThan((float)Difficulty.NORMAL.ordinal());
+					: Illusioner.this.level().getCurrentDifficultyAt(Illusioner.this.blockPosition()).isHarderThan((float)Difficulty.NORMAL.ordinal());
 			}
 		}
 

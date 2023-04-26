@@ -34,7 +34,7 @@ public class TraderLlama extends Llama {
 	@Nullable
 	@Override
 	protected Llama makeNewLlama() {
-		return EntityType.TRADER_LLAMA.create(this.level);
+		return EntityType.TRADER_LLAMA.create(this.level());
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class TraderLlama extends Llama {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			this.maybeDespawn();
 		}
 	}

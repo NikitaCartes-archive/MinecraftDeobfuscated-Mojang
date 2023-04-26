@@ -49,7 +49,6 @@ public class ChunkHolder {
 	);
 	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
 	private static final ChunkHolder.FullChunkStatus[] FULL_CHUNK_STATUSES = ChunkHolder.FullChunkStatus.values();
-	private static final int BLOCKS_BEFORE_RESEND_FUDGE = 64;
 	private final AtomicReferenceArray<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> futures = new AtomicReferenceArray(
 		CHUNK_STATUSES.size()
 	);
@@ -72,7 +71,6 @@ public class ChunkHolder {
 	private final ChunkHolder.LevelChangeListener onLevelChange;
 	private final ChunkHolder.PlayerProvider playerProvider;
 	private boolean wasAccessibleSinceLastSave;
-	private boolean resendLight;
 	private CompletableFuture<Void> pendingFullStateConfirmation = CompletableFuture.completedFuture(null);
 
 	public ChunkHolder(
@@ -206,42 +204,34 @@ public class ChunkHolder {
 	public void broadcastChanges(LevelChunk levelChunk) {
 		if (this.hasChangedSections || !this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty()) {
 			Level level = levelChunk.getLevel();
-			int i = 0;
-
-			for (int j = 0; j < this.changedBlocksPerSection.length; j++) {
-				i += this.changedBlocksPerSection[j] != null ? this.changedBlocksPerSection[j].size() : 0;
-			}
-
-			this.resendLight |= i >= 64;
 			if (!this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty()) {
 				this.broadcast(
-					new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, true),
-					!this.resendLight
+					new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter), true
 				);
 				this.skyChangedLightSectionFilter.clear();
 				this.blockChangedLightSectionFilter.clear();
 			}
 
-			for (int j = 0; j < this.changedBlocksPerSection.length; j++) {
-				ShortSet shortSet = this.changedBlocksPerSection[j];
+			for (int i = 0; i < this.changedBlocksPerSection.length; i++) {
+				ShortSet shortSet = this.changedBlocksPerSection[i];
 				if (shortSet != null) {
-					int k = this.levelHeightAccessor.getSectionYFromSectionIndex(j);
-					SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), k);
+					int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
+					SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), j);
 					if (shortSet.size() == 1) {
 						BlockPos blockPos = sectionPos.relativeToBlockPos(shortSet.iterator().nextShort());
 						BlockState blockState = level.getBlockState(blockPos);
 						this.broadcast(new ClientboundBlockUpdatePacket(blockPos, blockState), false);
 						this.broadcastBlockEntityIfNeeded(level, blockPos, blockState);
 					} else {
-						LevelChunkSection levelChunkSection = levelChunk.getSection(j);
+						LevelChunkSection levelChunkSection = levelChunk.getSection(i);
 						ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket = new ClientboundSectionBlocksUpdatePacket(
-							sectionPos, shortSet, levelChunkSection, this.resendLight
+							sectionPos, shortSet, levelChunkSection
 						);
 						this.broadcast(clientboundSectionBlocksUpdatePacket, false);
 						clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.broadcastBlockEntityIfNeeded(level, blockPos, blockState));
 					}
 
-					this.changedBlocksPerSection[j] = null;
+					this.changedBlocksPerSection[i] = null;
 				}
 			}
 

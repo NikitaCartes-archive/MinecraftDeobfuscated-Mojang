@@ -62,7 +62,7 @@ public class RideCommand {
 			throw ERROR_MOUNTING_PLAYER.create();
 		} else if (entity.getSelfAndPassengers().anyMatch(entity2x -> entity2x == entity2)) {
 			throw ERROR_MOUNTING_LOOP.create();
-		} else if (entity.getLevel() != entity2.getLevel()) {
+		} else if (entity.level() != entity2.level()) {
 			throw ERROR_WRONG_DIMENSION.create();
 		} else if (!entity.startRiding(entity2, true)) {
 			throw ERROR_MOUNT_FAILED.create(entity.getDisplayName(), entity2.getDisplayName());

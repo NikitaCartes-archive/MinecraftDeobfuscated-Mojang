@@ -53,7 +53,7 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 	}
 
 	public boolean isCastingSpell() {
-		return this.level.isClientSide ? this.entityData.get(DATA_SPELL_CASTING_ID) > 0 : this.spellCastingTickCount > 0;
+		return this.level().isClientSide ? this.entityData.get(DATA_SPELL_CASTING_ID) > 0 : this.spellCastingTickCount > 0;
 	}
 
 	public void setIsCastingSpell(SpellcasterIllager.IllagerSpell illagerSpell) {
@@ -62,7 +62,7 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 	}
 
 	protected SpellcasterIllager.IllagerSpell getCurrentSpell() {
-		return !this.level.isClientSide ? this.currentSpell : SpellcasterIllager.IllagerSpell.byId(this.entityData.get(DATA_SPELL_CASTING_ID));
+		return !this.level().isClientSide ? this.currentSpell : SpellcasterIllager.IllagerSpell.byId(this.entityData.get(DATA_SPELL_CASTING_ID));
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.level.isClientSide && this.isCastingSpell()) {
+		if (this.level().isClientSide && this.isCastingSpell()) {
 			SpellcasterIllager.IllagerSpell illagerSpell = this.getCurrentSpell();
 			double d = illagerSpell.spellColor[0];
 			double e = illagerSpell.spellColor[1];
@@ -84,8 +84,8 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 			float g = this.yBodyRot * (float) (Math.PI / 180.0) + Mth.cos((float)this.tickCount * 0.6662F) * 0.25F;
 			float h = Mth.cos(g);
 			float i = Mth.sin(g);
-			this.level.addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() + (double)h * 0.6, this.getY() + 1.8, this.getZ() + (double)i * 0.6, d, e, f);
-			this.level.addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() - (double)h * 0.6, this.getY() + 1.8, this.getZ() - (double)i * 0.6, d, e, f);
+			this.level().addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() + (double)h * 0.6, this.getY() + 1.8, this.getZ() + (double)i * 0.6, d, e, f);
+			this.level().addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() - (double)h * 0.6, this.getY() + 1.8, this.getZ() - (double)i * 0.6, d, e, f);
 		}
 	}
 

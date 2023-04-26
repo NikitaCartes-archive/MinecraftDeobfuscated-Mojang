@@ -222,7 +222,7 @@ public class Ghast extends FlyingMob implements Enemy {
 
 			for (int j = 1; j < i; j++) {
 				aABB = aABB.move(vec3);
-				if (!this.ghast.level.noCollision(this.ghast, aABB)) {
+				if (!this.ghast.level().noCollision(this.ghast, aABB)) {
 					return false;
 				}
 			}
@@ -265,7 +265,7 @@ public class Ghast extends FlyingMob implements Enemy {
 			if (livingEntity != null) {
 				double d = 64.0;
 				if (livingEntity.distanceToSqr(this.ghast) < 4096.0 && this.ghast.hasLineOfSight(livingEntity)) {
-					Level level = this.ghast.level;
+					Level level = this.ghast.level();
 					this.chargeTime++;
 					if (this.chargeTime == 10 && !this.ghast.isSilent()) {
 						level.levelEvent(null, 1015, this.ghast.blockPosition(), 0);

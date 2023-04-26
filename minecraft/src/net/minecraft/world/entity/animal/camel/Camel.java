@@ -156,31 +156,31 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("camelBrain");
+		this.level().getProfiler().push("camelBrain");
 		Brain<?> brain = this.getBrain();
-		((Brain<Camel>)brain).tick((ServerLevel)this.level, this);
-		this.level.getProfiler().pop();
-		this.level.getProfiler().push("camelActivityUpdate");
+		((Brain<Camel>)brain).tick((ServerLevel)this.level(), this);
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("camelActivityUpdate");
 		CamelAi.updateActivity(this);
-		this.level.getProfiler().pop();
+		this.level().getProfiler().pop();
 		super.customServerAiStep();
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.isDashing() && this.dashCooldown < 50 && (this.onGround || this.isInWater() || this.isPassenger())) {
+		if (this.isDashing() && this.dashCooldown < 50 && (this.onGround() || this.isInWater() || this.isPassenger())) {
 			this.setDashing(false);
 		}
 
 		if (this.dashCooldown > 0) {
 			this.dashCooldown--;
 			if (this.dashCooldown == 0) {
-				this.level.playSound(null, this.blockPosition(), SoundEvents.CAMEL_DASH_READY, SoundSource.NEUTRAL, 1.0F, 1.0F);
+				this.level().playSound(null, this.blockPosition(), SoundEvents.CAMEL_DASH_READY, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			}
 		}
 
-		if (this.level.isClientSide()) {
+		if (this.level().isClientSide()) {
 			this.setupAnimationStates();
 		}
 
@@ -233,7 +233,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.refuseToMove() && this.isOnGround()) {
+		if (this.refuseToMove() && this.onGround()) {
 			this.setDeltaMovement(this.getDeltaMovement().multiply(0.0, 1.0, 0.0));
 			vec3 = vec3.multiply(0.0, 1.0, 0.0);
 		}
@@ -276,7 +276,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 
 	@Override
 	public void onPlayerJump(int i) {
-		if (this.isSaddled() && this.dashCooldown <= 0 && this.isOnGround()) {
+		if (this.isSaddled() && this.dashCooldown <= 0 && this.onGround()) {
 			super.onPlayerJump(i);
 		}
 	}
@@ -362,7 +362,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (player.isSecondaryUseActive() && !this.isBaby()) {
 			this.openCustomInventoryScreen(player);
-			return InteractionResult.sidedSuccess(this.level.isClientSide);
+			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
 			InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
 			if (interactionResult.consumesAction()) {
@@ -374,7 +374,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 					this.doPlayerRide(player);
 				}
 
-				return InteractionResult.sidedSuccess(this.level.isClientSide);
+				return InteractionResult.sidedSuccess(this.level().isClientSide);
 			}
 		}
 	}
@@ -403,8 +403,8 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 
 			boolean bl3 = this.isBaby();
 			if (bl3) {
-				this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
-				if (!this.level.isClientSide) {
+				this.level().addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
+				if (!this.level().isClientSide) {
 					this.ageUp(10);
 				}
 			}
@@ -415,7 +415,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 				if (!this.isSilent()) {
 					SoundEvent soundEvent = this.getEatingSound();
 					if (soundEvent != null) {
-						this.level
+						this.level()
 							.playSound(
 								null, this.getX(), this.getY(), this.getZ(), soundEvent, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
 							);
@@ -600,7 +600,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 		if (!this.isCamelSitting()) {
 			this.playSound(SoundEvents.CAMEL_SIT, 1.0F, 1.0F);
 			this.setPose(Pose.SITTING);
-			this.resetLastPoseChangeTick(-this.level.getGameTime());
+			this.resetLastPoseChangeTick(-this.level().getGameTime());
 		}
 	}
 
@@ -608,13 +608,13 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 		if (this.isCamelSitting()) {
 			this.playSound(SoundEvents.CAMEL_STAND, 1.0F, 1.0F);
 			this.setPose(Pose.STANDING);
-			this.resetLastPoseChangeTick(this.level.getGameTime());
+			this.resetLastPoseChangeTick(this.level().getGameTime());
 		}
 	}
 
 	public void standUpInstantly() {
 		this.setPose(Pose.STANDING);
-		this.resetLastPoseChangeTickToFullStand(this.level.getGameTime());
+		this.resetLastPoseChangeTickToFullStand(this.level().getGameTime());
 	}
 
 	@VisibleForTesting
@@ -627,7 +627,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 	}
 
 	public long getPoseTime() {
-		return this.level.getGameTime() - Math.abs(this.entityData.get(LAST_POSE_CHANGE_TICK));
+		return this.level().getGameTime() - Math.abs(this.entityData.get(LAST_POSE_CHANGE_TICK));
 	}
 
 	@Override
@@ -656,7 +656,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 
 	@Override
 	public void openCustomInventoryScreen(Player player) {
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			player.openHorseInventory(this, this.inventory);
 		}
 	}

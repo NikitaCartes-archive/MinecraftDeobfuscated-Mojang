@@ -226,7 +226,7 @@ public class Turtle extends Animal {
 	@Nullable
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return !this.isInWater() && this.onGround && !this.isBaby() ? SoundEvents.TURTLE_AMBIENT_LAND : super.getAmbientSound();
+		return !this.isInWater() && this.onGround() && !this.isBaby() ? SoundEvents.TURTLE_AMBIENT_LAND : super.getAmbientSound();
 	}
 
 	@Override
@@ -302,8 +302,8 @@ public class Turtle extends Animal {
 		super.aiStep();
 		if (this.isAlive() && this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0) {
 			BlockPos blockPos = this.blockPosition();
-			if (TurtleEggBlock.onSand(this.level, blockPos)) {
-				this.level.levelEvent(2001, blockPos, Block.getId(this.level.getBlockState(blockPos.below())));
+			if (TurtleEggBlock.onSand(this.level(), blockPos)) {
+				this.level().levelEvent(2001, blockPos, Block.getId(this.level().getBlockState(blockPos.below())));
 			}
 		}
 	}
@@ -311,7 +311,7 @@ public class Turtle extends Animal {
 	@Override
 	protected void ageBoundaryReached() {
 		super.ageBoundaryReached();
-		if (!this.isBaby() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+		if (!this.isBaby() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 			this.spawnAtLocation(Items.SCUTE, 1);
 		}
 	}
@@ -432,7 +432,7 @@ public class Turtle extends Animal {
 					vec32 = DefaultRandomPos.getPosTowards(this.turtle, 8, 7, vec3, (float) (Math.PI / 2));
 				}
 
-				if (vec32 != null && !bl && !this.turtle.level.getBlockState(BlockPos.containing(vec32)).is(Blocks.WATER)) {
+				if (vec32 != null && !bl && !this.turtle.level().getBlockState(BlockPos.containing(vec32)).is(Blocks.WATER)) {
 					vec32 = DefaultRandomPos.getPosTowards(this.turtle, 16, 5, vec3, (float) (Math.PI / 2));
 				}
 
@@ -458,7 +458,7 @@ public class Turtle extends Animal {
 
 		@Override
 		public boolean canContinueToUse() {
-			return !this.turtle.isInWater() && this.tryTicks <= 1200 && this.isValidTarget(this.turtle.level, this.blockPos);
+			return !this.turtle.isInWater() && this.tryTicks <= 1200 && this.isValidTarget(this.turtle.level(), this.blockPos);
 		}
 
 		@Override
@@ -507,7 +507,7 @@ public class Turtle extends Animal {
 				if (this.turtle.layEggCounter < 1) {
 					this.turtle.setLayingEgg(true);
 				} else if (this.turtle.layEggCounter > this.adjustedTickDelay(200)) {
-					Level level = this.turtle.level;
+					Level level = this.turtle.level();
 					level.playSound(null, blockPos, SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
 					BlockPos blockPos2 = this.blockPos.above();
 					BlockState blockState = Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, Integer.valueOf(this.turtle.random.nextInt(4) + 1));
@@ -548,7 +548,7 @@ public class Turtle extends Animal {
 				if (this.turtle.isBaby()) {
 					this.turtle.setSpeed(Math.max(this.turtle.getSpeed() / 3.0F, 0.06F));
 				}
-			} else if (this.turtle.onGround) {
+			} else if (this.turtle.onGround()) {
 				this.turtle.setSpeed(Math.max(this.turtle.getSpeed() / 2.0F, 0.06F));
 			}
 		}
@@ -588,7 +588,7 @@ public class Turtle extends Animal {
 			if (!this.shouldPanic()) {
 				return false;
 			} else {
-				BlockPos blockPos = this.lookForWater(this.mob.level, this.mob, 7);
+				BlockPos blockPos = this.lookForWater(this.mob.level(), this.mob, 7);
 				if (blockPos != null) {
 					this.posX = (double)blockPos.getX();
 					this.posY = (double)blockPos.getY();
@@ -653,7 +653,7 @@ public class Turtle extends Animal {
 			int k = randomSource.nextInt(1025) - 512;
 			int l = randomSource.nextInt(9) - 4;
 			int m = randomSource.nextInt(1025) - 512;
-			if ((double)l + this.turtle.getY() > (double)(this.turtle.level.getSeaLevel() - 1)) {
+			if ((double)l + this.turtle.getY() > (double)(this.turtle.level().getSeaLevel() - 1)) {
 				l = 0;
 			}
 
@@ -676,7 +676,7 @@ public class Turtle extends Animal {
 					int i = Mth.floor(vec32.x);
 					int j = Mth.floor(vec32.z);
 					int k = 34;
-					if (!this.turtle.level.hasChunksAt(i - 34, j - 34, i + 34, j + 34)) {
+					if (!this.turtle.level().hasChunksAt(i - 34, j - 34, i + 34, j + 34)) {
 						vec32 = null;
 					}
 				}

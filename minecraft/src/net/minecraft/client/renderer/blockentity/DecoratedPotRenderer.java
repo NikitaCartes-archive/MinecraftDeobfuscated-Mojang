@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -108,11 +107,11 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
 		this.neck.render(poseStack, vertexConsumer, i, j);
 		this.top.render(poseStack, vertexConsumer, i, j);
 		this.bottom.render(poseStack, vertexConsumer, i, j);
-		List<Item> list = decoratedPotBlockEntity.getSherds();
-		this.renderSide(this.frontSide, poseStack, multiBufferSource, i, j, getMaterial((Item)list.get(3)));
-		this.renderSide(this.backSide, poseStack, multiBufferSource, i, j, getMaterial((Item)list.get(0)));
-		this.renderSide(this.leftSide, poseStack, multiBufferSource, i, j, getMaterial((Item)list.get(1)));
-		this.renderSide(this.rightSide, poseStack, multiBufferSource, i, j, getMaterial((Item)list.get(2)));
+		DecoratedPotBlockEntity.Decorations decorations = decoratedPotBlockEntity.getDecorations();
+		this.renderSide(this.frontSide, poseStack, multiBufferSource, i, j, getMaterial(decorations.front()));
+		this.renderSide(this.backSide, poseStack, multiBufferSource, i, j, getMaterial(decorations.back()));
+		this.renderSide(this.leftSide, poseStack, multiBufferSource, i, j, getMaterial(decorations.left()));
+		this.renderSide(this.rightSide, poseStack, multiBufferSource, i, j, getMaterial(decorations.right()));
 		poseStack.popPose();
 	}
 

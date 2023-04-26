@@ -8,11 +8,11 @@ public interface OwnableEntity {
 	@Nullable
 	UUID getOwnerUUID();
 
-	EntityGetter getLevel();
+	EntityGetter level();
 
 	@Nullable
 	default LivingEntity getOwner() {
 		UUID uUID = this.getOwnerUUID();
-		return uUID == null ? null : this.getLevel().getPlayerByUUID(uUID);
+		return uUID == null ? null : this.level().getPlayerByUUID(uUID);
 	}
 }

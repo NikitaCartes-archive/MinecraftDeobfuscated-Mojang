@@ -26,6 +26,7 @@ import net.minecraft.sounds.Musics;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -47,6 +48,7 @@ public class WinScreen extends Screen {
 	private final IntSet speedupModifiers = new IntOpenHashSet();
 	private float scrollSpeed;
 	private final float unmodifiedScrollSpeed;
+	private int direction;
 	private final LogoRenderer logoRenderer = new LogoRenderer(false);
 
 	public WinScreen(boolean bl, Runnable runnable) {
@@ -59,11 +61,14 @@ public class WinScreen extends Screen {
 			this.unmodifiedScrollSpeed = 0.5F;
 		}
 
+		this.direction = 1;
 		this.scrollSpeed = this.unmodifiedScrollSpeed;
 	}
 
 	private float calculateScrollSpeed() {
-		return this.speedupActive ? this.unmodifiedScrollSpeed * (5.0F + (float)this.speedupModifiers.size() * 15.0F) : this.unmodifiedScrollSpeed;
+		return this.speedupActive
+			? this.unmodifiedScrollSpeed * (5.0F + (float)this.speedupModifiers.size() * 15.0F) * (float)this.direction
+			: this.unmodifiedScrollSpeed * (float)this.direction;
 	}
 
 	@Override
@@ -78,7 +83,9 @@ public class WinScreen extends Screen {
 
 	@Override
 	public boolean keyPressed(int i, int j, int k) {
-		if (i == 341 || i == 345) {
+		if (i == 265) {
+			this.direction = -1;
+		} else if (i == 341 || i == 345) {
 			this.speedupModifiers.add(i);
 		} else if (i == 32) {
 			this.speedupActive = true;
@@ -90,6 +97,10 @@ public class WinScreen extends Screen {
 
 	@Override
 	public boolean keyReleased(int i, int j, int k) {
+		if (i == 265) {
+			this.direction = 1;
+		}
+
 		if (i == 32) {
 			this.speedupActive = false;
 		} else if (i == 341 || i == 345) {
@@ -187,19 +198,29 @@ public class WinScreen extends Screen {
 			this.addEmptyLine();
 			this.addEmptyLine();
 
-			for (JsonElement jsonElement2 : jsonObject.getAsJsonArray("titles")) {
+			for (JsonElement jsonElement2 : jsonObject.getAsJsonArray("disciplines")) {
 				JsonObject jsonObject2 = jsonElement2.getAsJsonObject();
-				String string2 = jsonObject2.get("title").getAsString();
-				JsonArray jsonArray3 = jsonObject2.getAsJsonArray("names");
-				this.addCreditsLine(Component.literal(string2).withStyle(ChatFormatting.GRAY), false);
-
-				for (JsonElement jsonElement3 : jsonArray3) {
-					String string3 = jsonElement3.getAsString();
-					this.addCreditsLine(Component.literal("           ").append(string3).withStyle(ChatFormatting.WHITE), false);
+				String string2 = jsonObject2.get("discipline").getAsString();
+				if (StringUtils.isNotEmpty(string2)) {
+					this.addCreditsLine(Component.literal(string2).withStyle(ChatFormatting.YELLOW), true);
+					this.addEmptyLine();
+					this.addEmptyLine();
 				}
 
-				this.addEmptyLine();
-				this.addEmptyLine();
+				for (JsonElement jsonElement3 : jsonObject2.getAsJsonArray("titles")) {
+					JsonObject jsonObject3 = jsonElement3.getAsJsonObject();
+					String string3 = jsonObject3.get("title").getAsString();
+					JsonArray jsonArray4 = jsonObject3.getAsJsonArray("names");
+					this.addCreditsLine(Component.literal(string3).withStyle(ChatFormatting.GRAY), false);
+
+					for (JsonElement jsonElement4 : jsonArray4) {
+						String string4 = jsonElement4.getAsString();
+						this.addCreditsLine(Component.literal("           ").append(string4).withStyle(ChatFormatting.WHITE), false);
+					}
+
+					this.addEmptyLine();
+					this.addEmptyLine();
+				}
 			}
 		}
 	}
@@ -245,7 +266,7 @@ public class WinScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.scroll = this.scroll + f * this.scrollSpeed;
+		this.scroll = Math.max(0.0F, this.scroll + f * this.scrollSpeed);
 		this.renderBg(guiGraphics);
 		int k = this.width / 2 - 128;
 		int l = this.height + 50;

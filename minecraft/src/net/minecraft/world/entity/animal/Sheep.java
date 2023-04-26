@@ -127,7 +127,7 @@ public class Sheep extends Animal implements Shearable {
 
 	@Override
 	public void aiStep() {
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			this.eatAnimationTick = Math.max(0, this.eatAnimationTick - 1);
 		}
 
@@ -202,7 +202,7 @@ public class Sheep extends Animal implements Shearable {
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.is(Items.SHEARS)) {
-			if (!this.level.isClientSide && this.readyForShearing()) {
+			if (!this.level().isClientSide && this.readyForShearing()) {
 				this.shear(SoundSource.PLAYERS);
 				this.gameEvent(GameEvent.SHEAR, player);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
@@ -217,7 +217,7 @@ public class Sheep extends Animal implements Shearable {
 
 	@Override
 	public void shear(SoundSource soundSource) {
-		this.level.playSound(null, this, SoundEvents.SHEEP_SHEAR, soundSource, 1.0F, 1.0F);
+		this.level().playSound(null, this, SoundEvents.SHEEP_SHEAR, soundSource, 1.0F, 1.0F);
 		this.setSheared(true);
 		int i = 1 + this.random.nextInt(3);
 
@@ -348,15 +348,15 @@ public class Sheep extends Animal implements Shearable {
 		DyeColor dyeColor = ((Sheep)animal).getColor();
 		DyeColor dyeColor2 = ((Sheep)animal2).getColor();
 		CraftingContainer craftingContainer = makeContainer(dyeColor, dyeColor2);
-		return (DyeColor)this.level
+		return (DyeColor)this.level()
 			.getRecipeManager()
-			.getRecipeFor(RecipeType.CRAFTING, craftingContainer, this.level)
-			.map(craftingRecipe -> craftingRecipe.assemble(craftingContainer, this.level.registryAccess()))
+			.getRecipeFor(RecipeType.CRAFTING, craftingContainer, this.level())
+			.map(craftingRecipe -> craftingRecipe.assemble(craftingContainer, this.level().registryAccess()))
 			.map(ItemStack::getItem)
 			.filter(DyeItem.class::isInstance)
 			.map(DyeItem.class::cast)
 			.map(DyeItem::getDyeColor)
-			.orElseGet(() -> this.level.random.nextBoolean() ? dyeColor : dyeColor2);
+			.orElseGet(() -> this.level().random.nextBoolean() ? dyeColor : dyeColor2);
 	}
 
 	private static CraftingContainer makeContainer(DyeColor dyeColor, DyeColor dyeColor2) {

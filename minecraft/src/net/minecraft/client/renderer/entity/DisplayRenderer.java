@@ -134,7 +134,7 @@ public abstract class DisplayRenderer<T extends Display, S> extends EntityRender
 					OverlayTexture.NO_OVERLAY,
 					poseStack,
 					multiBufferSource,
-					itemDisplay.getLevel(),
+					itemDisplay.level(),
 					itemDisplay.getId()
 				);
 		}

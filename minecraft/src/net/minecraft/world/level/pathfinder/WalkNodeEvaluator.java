@@ -33,19 +33,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class WalkNodeEvaluator extends NodeEvaluator {
 	public static final double SPACE_BETWEEN_WALL_POSTS = 0.5;
 	private static final double DEFAULT_MOB_JUMP_HEIGHT = 1.125;
-	protected float oldWaterCost;
 	private final Long2ObjectMap<BlockPathTypes> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
 	private final Object2BooleanMap<AABB> collisionCache = new Object2BooleanOpenHashMap<>();
 
 	@Override
 	public void prepare(PathNavigationRegion pathNavigationRegion, Mob mob) {
 		super.prepare(pathNavigationRegion, mob);
-		this.oldWaterCost = mob.getPathfindingMalus(BlockPathTypes.WATER);
+		mob.onPathfindingStart();
 	}
 
 	@Override
 	public void done() {
-		this.mob.setPathfindingMalus(BlockPathTypes.WATER, this.oldWaterCost);
+		this.mob.onPathfindingDone();
 		this.pathTypesByPosCache.clear();
 		this.collisionCache.clear();
 		super.done();
@@ -66,14 +65,14 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 
 					blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
 				}
-			} else if (this.mob.isOnGround()) {
+			} else if (this.mob.onGround()) {
 				i = Mth.floor(this.mob.getY() + 0.5);
 			} else {
 				BlockPos blockPos = this.mob.blockPosition();
 
 				while (
 					(this.level.getBlockState(blockPos).isAir() || this.level.getBlockState(blockPos).isPathfindable(this.level, blockPos, PathComputationType.LAND))
-						&& blockPos.getY() > this.mob.level.getMinBuildHeight()
+						&& blockPos.getY() > this.mob.level().getMinBuildHeight()
 				) {
 					blockPos = blockPos.below();
 				}
@@ -281,7 +280,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 						return node;
 					}
 
-					while (j > this.mob.level.getMinBuildHeight()) {
+					while (j > this.mob.level().getMinBuildHeight()) {
 						blockPathTypes2 = this.getCachedBlockType(this.mob, i, --j, k);
 						if (blockPathTypes2 != BlockPathTypes.WATER) {
 							return node;
@@ -296,7 +295,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 					int o = j;
 
 					while (blockPathTypes2 == BlockPathTypes.OPEN) {
-						if (--j < this.mob.level.getMinBuildHeight()) {
+						if (--j < this.mob.level().getMinBuildHeight()) {
 							return this.getBlockedNode(i, o, k);
 						}
 

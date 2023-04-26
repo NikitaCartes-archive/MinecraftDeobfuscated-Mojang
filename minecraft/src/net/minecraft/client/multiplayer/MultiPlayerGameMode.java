@@ -158,7 +158,7 @@ public class MultiPlayerGameMode {
 						blockState.attack(this.minecraft.level, blockPos, this.minecraft.player);
 					}
 
-					if (bl && blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos) >= 1.0F) {
+					if (bl && blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), blockPos) >= 1.0F) {
 						this.destroyBlock(blockPos);
 					} else {
 						this.isDestroying = true;
@@ -209,7 +209,7 @@ public class MultiPlayerGameMode {
 				this.isDestroying = false;
 				return false;
 			} else {
-				this.destroyProgress = this.destroyProgress + blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos);
+				this.destroyProgress = this.destroyProgress + blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level(), blockPos);
 				if (this.destroyTicks % 4.0F == 0.0F) {
 					SoundType soundType = blockState.getSoundType();
 					this.minecraft
@@ -346,7 +346,7 @@ public class MultiPlayerGameMode {
 		} else {
 			this.ensureHasSentCarriedItem();
 			this.connection
-				.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), player.isOnGround()));
+				.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), player.onGround()));
 			MutableObject<InteractionResult> mutableObject = new MutableObject<>();
 			this.startPrediction(this.minecraft.level, i -> {
 				ServerboundUseItemPacket serverboundUseItemPacket = new ServerboundUseItemPacket(interactionHand, i);

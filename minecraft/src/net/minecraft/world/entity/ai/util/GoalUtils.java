@@ -19,7 +19,7 @@ public class GoalUtils {
 	}
 
 	public static boolean isOutsideLimits(BlockPos blockPos, PathfinderMob pathfinderMob) {
-		return blockPos.getY() < pathfinderMob.level.getMinBuildHeight() || blockPos.getY() > pathfinderMob.level.getMaxBuildHeight();
+		return blockPos.getY() < pathfinderMob.level().getMinBuildHeight() || blockPos.getY() > pathfinderMob.level().getMaxBuildHeight();
 	}
 
 	public static boolean isRestricted(boolean bl, PathfinderMob pathfinderMob, BlockPos blockPos) {
@@ -31,14 +31,14 @@ public class GoalUtils {
 	}
 
 	public static boolean isWater(PathfinderMob pathfinderMob, BlockPos blockPos) {
-		return pathfinderMob.level.getFluidState(blockPos).is(FluidTags.WATER);
+		return pathfinderMob.level().getFluidState(blockPos).is(FluidTags.WATER);
 	}
 
 	public static boolean hasMalus(PathfinderMob pathfinderMob, BlockPos blockPos) {
-		return pathfinderMob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level, blockPos.mutable())) != 0.0F;
+		return pathfinderMob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level(), blockPos.mutable())) != 0.0F;
 	}
 
 	public static boolean isSolid(PathfinderMob pathfinderMob, BlockPos blockPos) {
-		return pathfinderMob.level.getBlockState(blockPos).isSolid();
+		return pathfinderMob.level().getBlockState(blockPos).isSolid();
 	}
 }

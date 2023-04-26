@@ -21,7 +21,7 @@ public class BubbleColumnAmbientSoundHandler implements AmbientSoundHandler {
 
 	@Override
 	public void tick() {
-		Level level = this.player.level;
+		Level level = this.player.level();
 		BlockState blockState = (BlockState)level.getBlockStatesIfLoaded(this.player.getBoundingBox().inflate(0.0, -0.4F, 0.0).deflate(1.0E-6))
 			.filter(blockStatex -> blockStatex.is(Blocks.BUBBLE_COLUMN))
 			.findFirst()

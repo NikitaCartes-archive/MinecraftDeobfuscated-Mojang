@@ -23,7 +23,10 @@ public class RemapChunkStatusFix extends DataFix {
 		return this.fixTypeEverywhereTyped(
 			this.name,
 			this.getInputSchema().getType(References.CHUNK),
-			typed -> typed.update(DSL.remainderFinder(), dynamic -> dynamic.update("Status", this::fixStatus))
+			typed -> typed.update(
+					DSL.remainderFinder(),
+					dynamic -> dynamic.update("Status", this::fixStatus).update("below_zero_retrogen", dynamicx -> dynamicx.update("target_status", this::fixStatus))
+				)
 		);
 	}
 

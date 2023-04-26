@@ -27,8 +27,8 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 	@Nullable
 	@Override
 	protected Vec3 getPosition() {
-		float f = this.mob.level.random.nextFloat();
-		if (this.mob.level.random.nextFloat() < 0.3F) {
+		float f = this.mob.level().random.nextFloat();
+		if (this.mob.level().random.nextFloat() < 0.3F) {
 			return this.getPositionTowardsAnywhere();
 		} else {
 			Vec3 vec3;
@@ -55,12 +55,12 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 
 	@Nullable
 	private Vec3 getPositionTowardsVillagerWhoWantsGolem() {
-		ServerLevel serverLevel = (ServerLevel)this.mob.level;
+		ServerLevel serverLevel = (ServerLevel)this.mob.level();
 		List<Villager> list = serverLevel.getEntities(EntityType.VILLAGER, this.mob.getBoundingBox().inflate(32.0), this::doesVillagerWantGolem);
 		if (list.isEmpty()) {
 			return null;
 		} else {
-			Villager villager = (Villager)list.get(this.mob.level.random.nextInt(list.size()));
+			Villager villager = (Villager)list.get(this.mob.level().random.nextInt(list.size()));
 			Vec3 vec3 = villager.position();
 			return LandRandomPos.getPosTowards(this.mob, 10, 7, vec3);
 		}
@@ -79,7 +79,7 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 
 	@Nullable
 	private SectionPos getRandomVillageSection() {
-		ServerLevel serverLevel = (ServerLevel)this.mob.level;
+		ServerLevel serverLevel = (ServerLevel)this.mob.level();
 		List<SectionPos> list = (List<SectionPos>)SectionPos.cube(SectionPos.of(this.mob), 2)
 			.filter(sectionPos -> serverLevel.sectionsToVillage(sectionPos) == 0)
 			.collect(Collectors.toList());
@@ -88,7 +88,7 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 
 	@Nullable
 	private BlockPos getRandomPoiWithinSection(SectionPos sectionPos) {
-		ServerLevel serverLevel = (ServerLevel)this.mob.level;
+		ServerLevel serverLevel = (ServerLevel)this.mob.level();
 		PoiManager poiManager = serverLevel.getPoiManager();
 		List<BlockPos> list = (List<BlockPos>)poiManager.getInRange(holder -> true, sectionPos.center(), 8, PoiManager.Occupancy.IS_OCCUPIED)
 			.map(PoiRecord::getPos)
@@ -97,6 +97,6 @@ public class GolemRandomStrollInVillageGoal extends RandomStrollGoal {
 	}
 
 	private boolean doesVillagerWantGolem(Villager villager) {
-		return villager.wantsToSpawnGolem(this.mob.level.getGameTime());
+		return villager.wantsToSpawnGolem(this.mob.level().getGameTime());
 	}
 }

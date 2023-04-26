@@ -7,11 +7,9 @@ import net.minecraft.world.level.ChunkPos;
 public interface LightEventListener {
 	void checkBlock(BlockPos blockPos);
 
-	void onBlockEmissionIncrease(BlockPos blockPos, int i);
-
 	boolean hasLightWork();
 
-	int runUpdates(int i, boolean bl, boolean bl2);
+	int runLightUpdates();
 
 	default void updateSectionStatus(BlockPos blockPos, boolean bl) {
 		this.updateSectionStatus(SectionPos.of(blockPos), bl);
@@ -19,5 +17,7 @@ public interface LightEventListener {
 
 	void updateSectionStatus(SectionPos sectionPos, boolean bl);
 
-	void enableLightSources(ChunkPos chunkPos, boolean bl);
+	void setLightEnabled(ChunkPos chunkPos, boolean bl);
+
+	void propagateLightSources(ChunkPos chunkPos);
 }

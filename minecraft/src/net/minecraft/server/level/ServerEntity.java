@@ -73,7 +73,7 @@ public class ServerEntity {
 		this.yRotp = Mth.floor(entity.getYRot() * 256.0F / 360.0F);
 		this.xRotp = Mth.floor(entity.getXRot() * 256.0F / 360.0F);
 		this.yHeadRotp = Mth.floor(entity.getYHeadRot() * 256.0F / 360.0F);
-		this.wasOnGround = entity.isOnGround();
+		this.wasOnGround = entity.onGround();
 		this.trackedDataValues = entity.getEntityData().getNonDefaultValues();
 	}
 
@@ -114,7 +114,7 @@ public class ServerEntity {
 				int j = Mth.floor(this.entity.getXRot() * 256.0F / 360.0F);
 				boolean bl = Math.abs(i - this.yRotp) >= 1 || Math.abs(j - this.xRotp) >= 1;
 				if (bl) {
-					this.broadcast.accept(new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.isOnGround()));
+					this.broadcast.accept(new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.onGround()));
 					this.yRotp = i;
 					this.xRotp = j;
 				}
@@ -138,23 +138,23 @@ public class ServerEntity {
 					long m = this.positionCodec.encodeY(vec3);
 					long n = this.positionCodec.encodeZ(vec3);
 					boolean bl7 = l < -32768L || l > 32767L || m < -32768L || m > 32767L || n < -32768L || n > 32767L;
-					if (bl7 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.isOnGround()) {
-						this.wasOnGround = this.entity.isOnGround();
+					if (bl7 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.onGround()) {
+						this.wasOnGround = this.entity.onGround();
 						this.teleportDelay = 0;
 						packet2 = new ClientboundTeleportEntityPacket(this.entity);
 						bl5 = true;
 						bl6 = true;
 					} else if ((!bl3 || !bl4) && !(this.entity instanceof AbstractArrow)) {
 						if (bl3) {
-							packet2 = new ClientboundMoveEntityPacket.Pos(this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), this.entity.isOnGround());
+							packet2 = new ClientboundMoveEntityPacket.Pos(this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), this.entity.onGround());
 							bl5 = true;
 						} else if (bl4) {
-							packet2 = new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.isOnGround());
+							packet2 = new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.onGround());
 							bl6 = true;
 						}
 					} else {
 						packet2 = new ClientboundMoveEntityPacket.PosRot(
-							this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), (byte)i, (byte)j, this.entity.isOnGround()
+							this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), (byte)i, (byte)j, this.entity.onGround()
 						);
 						bl5 = true;
 						bl6 = true;

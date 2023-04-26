@@ -261,7 +261,6 @@ public class ChunkHeightAndBiomeFix extends DataFix {
 			return updateCarvingMasks(dynamic, 24, 0);
 		} else {
 			dynamic = updateHeightmaps(dynamic);
-			dynamic = addPaddingEntries(dynamic, "Lights");
 			dynamic = addPaddingEntries(dynamic, "LiquidsToBeTicked");
 			dynamic = addPaddingEntries(dynamic, "PostProcessing");
 			dynamic = addPaddingEntries(dynamic, "ToBeTicked");

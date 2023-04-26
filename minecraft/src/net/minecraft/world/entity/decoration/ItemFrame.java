@@ -124,12 +124,12 @@ public class ItemFrame extends HangingEntity {
 	public boolean survives() {
 		if (this.fixed) {
 			return true;
-		} else if (!this.level.noCollision(this)) {
+		} else if (!this.level().noCollision(this)) {
 			return false;
 		} else {
-			BlockState blockState = this.level.getBlockState(this.pos.relative(this.direction.getOpposite()));
+			BlockState blockState = this.level().getBlockState(this.pos.relative(this.direction.getOpposite()));
 			return blockState.isSolid() || this.direction.getAxis().isHorizontal() && DiodeBlock.isDiode(blockState)
-				? this.level.getEntities(this, this.getBoundingBox(), HANGING_ENTITY).isEmpty()
+				? this.level().getEntities(this, this.getBoundingBox(), HANGING_ENTITY).isEmpty()
 				: false;
 		}
 	}
@@ -166,7 +166,7 @@ public class ItemFrame extends HangingEntity {
 		} else if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!damageSource.is(DamageTypeTags.IS_EXPLOSION) && !this.getItem().isEmpty()) {
-			if (!this.level.isClientSide) {
+			if (!this.level().isClientSide) {
 				this.dropItem(damageSource.getEntity(), false);
 				this.gameEvent(GameEvent.BLOCK_CHANGE, damageSource.getEntity());
 				this.playSound(this.getRemoveItemSound(), 1.0F, 1.0F);
@@ -223,7 +223,7 @@ public class ItemFrame extends HangingEntity {
 		if (!this.fixed) {
 			ItemStack itemStack = this.getItem();
 			this.setItem(ItemStack.EMPTY);
-			if (!this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+			if (!this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 				if (entity == null) {
 					this.removeFramedMap(itemStack);
 				}
@@ -250,7 +250,7 @@ public class ItemFrame extends HangingEntity {
 
 	private void removeFramedMap(ItemStack itemStack) {
 		this.getFramedMapId().ifPresent(i -> {
-			MapItemSavedData mapItemSavedData = MapItem.getSavedData(i, this.level);
+			MapItemSavedData mapItemSavedData = MapItem.getSavedData(i, this.level());
 			if (mapItemSavedData != null) {
 				mapItemSavedData.removedFromFrame(this.pos, this.getId());
 				mapItemSavedData.setDirty(true);
@@ -295,7 +295,7 @@ public class ItemFrame extends HangingEntity {
 		}
 
 		if (bl && this.pos != null) {
-			this.level.updateNeighbourForOutputSignal(this.pos, Blocks.AIR);
+			this.level().updateNeighbourForOutputSignal(this.pos, Blocks.AIR);
 		}
 	}
 
@@ -345,7 +345,7 @@ public class ItemFrame extends HangingEntity {
 	private void setRotation(int i, boolean bl) {
 		this.getEntityData().set(DATA_ROTATION, i % 8);
 		if (bl && this.pos != null) {
-			this.level.updateNeighbourForOutputSignal(this.pos, Blocks.AIR);
+			this.level().updateNeighbourForOutputSignal(this.pos, Blocks.AIR);
 		}
 	}
 
@@ -397,11 +397,11 @@ public class ItemFrame extends HangingEntity {
 		boolean bl2 = !itemStack.isEmpty();
 		if (this.fixed) {
 			return InteractionResult.PASS;
-		} else if (!this.level.isClientSide) {
+		} else if (!this.level().isClientSide) {
 			if (!bl) {
 				if (bl2 && !this.isRemoved()) {
 					if (itemStack.is(Items.FILLED_MAP)) {
-						MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, this.level);
+						MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, this.level());
 						if (mapItemSavedData != null && mapItemSavedData.isTrackedCountOverLimit(256)) {
 							return InteractionResult.FAIL;
 						}

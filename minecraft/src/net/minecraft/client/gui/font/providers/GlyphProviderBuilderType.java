@@ -14,7 +14,8 @@ public enum GlyphProviderBuilderType {
 	BITMAP("bitmap", BitmapProvider.Builder::fromJson),
 	TTF("ttf", TrueTypeGlyphProviderBuilder::fromJson),
 	SPACE("space", SpaceProvider::builderFromJson),
-	LEGACY_UNICODE("legacy_unicode", LegacyUnicodeBitmapsProvider.Builder::fromJson);
+	UNIHEX("unihex", UnihexProvider.Builder::fromJson),
+	REFERENCE("reference", ProviderReferenceBuilder::fromJson);
 
 	private static final Map<String, GlyphProviderBuilderType> BY_NAME = Util.make(Maps.<String, GlyphProviderBuilderType>newHashMap(), hashMap -> {
 		for (GlyphProviderBuilderType glyphProviderBuilderType : values()) {

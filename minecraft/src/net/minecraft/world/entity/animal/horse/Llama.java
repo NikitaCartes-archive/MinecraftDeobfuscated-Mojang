@@ -211,8 +211,8 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		}
 
 		if (this.isBaby() && i > 0) {
-			this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
-			if (!this.level.isClientSide) {
+			this.level().addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
+			if (!this.level().isClientSide) {
 				this.ageUp(i);
 			}
 
@@ -221,7 +221,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 		if (j > 0 && (bl || !this.isTamed()) && this.getTemper() < this.getMaxTemper()) {
 			bl = true;
-			if (!this.level.isClientSide) {
+			if (!this.level().isClientSide) {
 				this.modifyTemper(j);
 			}
 		}
@@ -229,7 +229,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		if (bl && !this.isSilent()) {
 			SoundEvent soundEvent = this.getEatingSound();
 			if (soundEvent != null) {
-				this.level
+				this.level()
 					.playSound(
 						null,
 						this.getX(),
@@ -352,7 +352,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 	@Override
 	protected void updateContainerEquipment() {
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			super.updateContainerEquipment();
 			this.setSwag(getDyeColor(this.inventory.getItem(1)));
 		}
@@ -404,18 +404,18 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 	@Nullable
 	protected Llama makeNewLlama() {
-		return EntityType.LLAMA.create(this.level);
+		return EntityType.LLAMA.create(this.level());
 	}
 
 	private void spit(LivingEntity livingEntity) {
-		LlamaSpit llamaSpit = new LlamaSpit(this.level, this);
+		LlamaSpit llamaSpit = new LlamaSpit(this.level(), this);
 		double d = livingEntity.getX() - this.getX();
 		double e = livingEntity.getY(0.3333333333333333) - llamaSpit.getY();
 		double f = livingEntity.getZ() - this.getZ();
 		double g = Math.sqrt(d * d + f * f) * 0.2F;
 		llamaSpit.shoot(d, e + g, f, 1.5F, 10.0F);
 		if (!this.isSilent()) {
-			this.level
+			this.level()
 				.playSound(
 					null,
 					this.getX(),
@@ -428,7 +428,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 				);
 		}
 
-		this.level.addFreshEntity(llamaSpit);
+		this.level().addFreshEntity(llamaSpit);
 		this.didSpit = true;
 	}
 

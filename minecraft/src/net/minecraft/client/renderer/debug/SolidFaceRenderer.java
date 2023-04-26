@@ -27,7 +27,7 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Matrix4f matrix4f = poseStack.last().pose();
-		BlockGetter blockGetter = this.minecraft.player.level;
+		BlockGetter blockGetter = this.minecraft.player.level();
 		BlockPos blockPos = BlockPos.containing(d, e, f);
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-6, -6, -6), blockPos.offset(6, 6, 6))) {

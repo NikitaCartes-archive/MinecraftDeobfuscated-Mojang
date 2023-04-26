@@ -29,12 +29,12 @@ public class StrollThroughVillageGoal extends Goal {
 	public boolean canUse() {
 		if (this.mob.isVehicle()) {
 			return false;
-		} else if (this.mob.level.isDay()) {
+		} else if (this.mob.level().isDay()) {
 			return false;
 		} else if (this.mob.getRandom().nextInt(this.interval) != 0) {
 			return false;
 		} else {
-			ServerLevel serverLevel = (ServerLevel)this.mob.level;
+			ServerLevel serverLevel = (ServerLevel)this.mob.level();
 			BlockPos blockPos = this.mob.blockPosition();
 			if (!serverLevel.isCloseToVillage(blockPos, 6)) {
 				return false;
@@ -62,7 +62,7 @@ public class StrollThroughVillageGoal extends Goal {
 				vec3 = vec33.scale(0.4).add(vec3);
 				Vec3 vec34 = vec3.subtract(vec32).normalize().scale(10.0).add(vec32);
 				BlockPos blockPos = BlockPos.containing(vec34);
-				blockPos = this.mob.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
+				blockPos = this.mob.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
 				if (!pathNavigation.moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 1.0)) {
 					this.moveRandomly();
 				}
@@ -73,7 +73,7 @@ public class StrollThroughVillageGoal extends Goal {
 	private void moveRandomly() {
 		RandomSource randomSource = this.mob.getRandom();
 		BlockPos blockPos = this.mob
-			.level
+			.level()
 			.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.mob.blockPosition().offset(-8 + randomSource.nextInt(16), 0, -8 + randomSource.nextInt(16)));
 		this.mob.getNavigation().moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 1.0);
 	}

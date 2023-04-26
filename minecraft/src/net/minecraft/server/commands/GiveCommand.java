@@ -71,7 +71,7 @@ public class GiveCommand {
 							itemEntity.makeFakeItem();
 						}
 
-						serverPlayer.level
+						serverPlayer.level()
 							.playSound(
 								null,
 								serverPlayer.getX(),

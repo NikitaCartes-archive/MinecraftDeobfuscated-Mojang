@@ -14,7 +14,7 @@ public class DragonSittingAttackingPhase extends AbstractDragonSittingPhase {
 	@Override
 	public void doClientTick() {
 		this.dragon
-			.level
+			.level()
 			.playLocalSound(
 				this.dragon.getX(),
 				this.dragon.getY(),

@@ -43,7 +43,7 @@ public class Skeleton extends AbstractSkeleton {
 
 	@Override
 	public void tick() {
-		if (!this.level.isClientSide && this.isAlive() && !this.isNoAi()) {
+		if (!this.level().isClientSide && this.isAlive() && !this.isNoAi()) {
 			if (this.isInPowderSnow) {
 				if (this.isFreezeConverting()) {
 					this.conversionTime--;
@@ -87,7 +87,7 @@ public class Skeleton extends AbstractSkeleton {
 	protected void doFreezeConversion() {
 		this.convertTo(EntityType.STRAY, true);
 		if (!this.isSilent()) {
-			this.level.levelEvent(null, 1048, this.blockPosition(), 0);
+			this.level().levelEvent(null, 1048, this.blockPosition(), 0);
 		}
 	}
 

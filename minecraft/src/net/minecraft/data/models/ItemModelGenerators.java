@@ -284,6 +284,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.MUSIC_DISC_WAIT, ModelTemplates.MUSIC_DISC);
 		this.generateFlatItem(Items.MUSIC_DISC_WARD, ModelTemplates.MUSIC_DISC);
 		this.generateFlatItem(Items.MUSIC_DISC_OTHERSIDE, ModelTemplates.MUSIC_DISC);
+		this.generateFlatItem(Items.MUSIC_DISC_RELIC, ModelTemplates.MUSIC_DISC);
 		this.generateFlatItem(Items.MUSIC_DISC_5, ModelTemplates.MUSIC_DISC);
 		this.generateFlatItem(Items.MUTTON, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.NAME_TAG, ModelTemplates.FLAT_ITEM);

@@ -18,10 +18,8 @@ public class ClientboundLightUpdatePacketData {
 	private final BitSet emptyBlockYMask;
 	private final List<byte[]> skyUpdates;
 	private final List<byte[]> blockUpdates;
-	private final boolean trustEdges;
 
-	public ClientboundLightUpdatePacketData(ChunkPos chunkPos, LevelLightEngine levelLightEngine, @Nullable BitSet bitSet, @Nullable BitSet bitSet2, boolean bl) {
-		this.trustEdges = bl;
+	public ClientboundLightUpdatePacketData(ChunkPos chunkPos, LevelLightEngine levelLightEngine, @Nullable BitSet bitSet, @Nullable BitSet bitSet2) {
 		this.skyYMask = new BitSet();
 		this.blockYMask = new BitSet();
 		this.emptySkyYMask = new BitSet();
@@ -41,7 +39,6 @@ public class ClientboundLightUpdatePacketData {
 	}
 
 	public ClientboundLightUpdatePacketData(FriendlyByteBuf friendlyByteBuf, int i, int j) {
-		this.trustEdges = friendlyByteBuf.readBoolean();
 		this.skyYMask = friendlyByteBuf.readBitSet();
 		this.blockYMask = friendlyByteBuf.readBitSet();
 		this.emptySkyYMask = friendlyByteBuf.readBitSet();
@@ -51,7 +48,6 @@ public class ClientboundLightUpdatePacketData {
 	}
 
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeBoolean(this.trustEdges);
 		friendlyByteBuf.writeBitSet(this.skyYMask);
 		friendlyByteBuf.writeBitSet(this.blockYMask);
 		friendlyByteBuf.writeBitSet(this.emptySkyYMask);
@@ -96,9 +92,5 @@ public class ClientboundLightUpdatePacketData {
 
 	public List<byte[]> getBlockUpdates() {
 		return this.blockUpdates;
-	}
-
-	public boolean getTrustEdges() {
-		return this.trustEdges;
 	}
 }

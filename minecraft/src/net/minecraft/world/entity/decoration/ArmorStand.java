@@ -289,7 +289,7 @@ public class ArmorStand extends LivingEntity {
 
 	@Override
 	protected void pushEntities() {
-		List<Entity> list = this.level.getEntities(this, this.getBoundingBox(), RIDABLE_MINECARTS);
+		List<Entity> list = this.level().getEntities(this, this.getBoundingBox(), RIDABLE_MINECARTS);
 
 		for (int i = 0; i < list.size(); i++) {
 			Entity entity = (Entity)list.get(i);
@@ -306,7 +306,7 @@ public class ArmorStand extends LivingEntity {
 			return InteractionResult.PASS;
 		} else if (player.isSpectator()) {
 			return InteractionResult.SUCCESS;
-		} else if (player.level.isClientSide) {
+		} else if (player.level().isClientSide) {
 			return InteractionResult.CONSUME;
 		} else {
 			EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
@@ -381,7 +381,7 @@ public class ArmorStand extends LivingEntity {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.level.isClientSide || this.isRemoved()) {
+		if (this.level().isClientSide || this.isRemoved()) {
 			return false;
 		} else if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			this.kill();
@@ -420,9 +420,9 @@ public class ArmorStand extends LivingEntity {
 					this.kill();
 					return bl2;
 				} else {
-					long l = this.level.getGameTime();
+					long l = this.level().getGameTime();
 					if (l - this.lastHit > 5L && !bl) {
-						this.level.broadcastEntityEvent(this, (byte)32);
+						this.level().broadcastEntityEvent(this, (byte)32);
 						this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
 						this.lastHit = l;
 					} else {
@@ -440,9 +440,9 @@ public class ArmorStand extends LivingEntity {
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 32) {
-			if (this.level.isClientSide) {
-				this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ARMOR_STAND_HIT, this.getSoundSource(), 0.3F, 1.0F, false);
-				this.lastHit = this.level.getGameTime();
+			if (this.level().isClientSide) {
+				this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ARMOR_STAND_HIT, this.getSoundSource(), 0.3F, 1.0F, false);
+				this.lastHit = this.level().getGameTime();
 			}
 		} else {
 			super.handleEntityEvent(b);
@@ -461,8 +461,8 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	private void showBreakingParticles() {
-		if (this.level instanceof ServerLevel) {
-			((ServerLevel)this.level)
+		if (this.level() instanceof ServerLevel) {
+			((ServerLevel)this.level())
 				.sendParticles(
 					new BlockParticleOption(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.defaultBlockState()),
 					this.getX(),
@@ -495,7 +495,7 @@ public class ArmorStand extends LivingEntity {
 			itemStack.setHoverName(this.getCustomName());
 		}
 
-		Block.popResource(this.level, this.blockPosition(), itemStack);
+		Block.popResource(this.level(), this.blockPosition(), itemStack);
 		this.brokenByAnything(damageSource);
 	}
 
@@ -506,7 +506,7 @@ public class ArmorStand extends LivingEntity {
 		for (int i = 0; i < this.handItems.size(); i++) {
 			ItemStack itemStack = this.handItems.get(i);
 			if (!itemStack.isEmpty()) {
-				Block.popResource(this.level, this.blockPosition().above(), itemStack);
+				Block.popResource(this.level(), this.blockPosition().above(), itemStack);
 				this.handItems.set(i, ItemStack.EMPTY);
 			}
 		}
@@ -514,14 +514,14 @@ public class ArmorStand extends LivingEntity {
 		for (int ix = 0; ix < this.armorItems.size(); ix++) {
 			ItemStack itemStack = this.armorItems.get(ix);
 			if (!itemStack.isEmpty()) {
-				Block.popResource(this.level, this.blockPosition().above(), itemStack);
+				Block.popResource(this.level(), this.blockPosition().above(), itemStack);
 				this.armorItems.set(ix, ItemStack.EMPTY);
 			}
 		}
 	}
 
 	private void playBrokenSound() {
-		this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ARMOR_STAND_BREAK, this.getSoundSource(), 1.0F, 1.0F);
+		this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ARMOR_STAND_BREAK, this.getSoundSource(), 1.0F, 1.0F);
 	}
 
 	@Override
@@ -729,7 +729,7 @@ public class ArmorStand extends LivingEntity {
 
 	@Override
 	public boolean skipAttackInteraction(Entity entity) {
-		return entity instanceof Player && !this.level.mayInteract((Player)entity, this.blockPosition());
+		return entity instanceof Player && !this.level().mayInteract((Player)entity, this.blockPosition());
 	}
 
 	@Override
@@ -799,7 +799,7 @@ public class ArmorStand extends LivingEntity {
 			int i = Integer.MIN_VALUE;
 
 			for (BlockPos blockPos2 : BlockPos.betweenClosed(BlockPos.containing(aABB.minX, aABB.minY, aABB.minZ), BlockPos.containing(aABB.maxX, aABB.maxY, aABB.maxZ))) {
-				int j = Math.max(this.level.getBrightness(LightLayer.BLOCK, blockPos2), this.level.getBrightness(LightLayer.SKY, blockPos2));
+				int j = Math.max(this.level().getBrightness(LightLayer.BLOCK, blockPos2), this.level().getBrightness(LightLayer.SKY, blockPos2));
 				if (j == 15) {
 					return Vec3.atCenterOf(blockPos2);
 				}

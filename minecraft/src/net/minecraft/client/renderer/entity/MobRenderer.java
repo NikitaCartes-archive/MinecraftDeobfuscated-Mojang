@@ -70,8 +70,8 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		BlockPos blockPos2 = BlockPos.containing(entity.getEyePosition(f));
 		int r = this.getBlockLightLevel(mob, blockPos);
 		int s = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, blockPos2);
-		int t = mob.level.getBrightness(LightLayer.SKY, blockPos);
-		int u = mob.level.getBrightness(LightLayer.SKY, blockPos2);
+		int t = mob.level().getBrightness(LightLayer.SKY, blockPos);
+		int u = mob.level().getBrightness(LightLayer.SKY, blockPos2);
 
 		for (int v = 0; v <= 24; v++) {
 			addVertexPair(vertexConsumer, matrix4f, k, l, m, r, s, t, u, 0.025F, 0.025F, p, q, v, false);

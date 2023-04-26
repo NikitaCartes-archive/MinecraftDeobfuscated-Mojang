@@ -108,7 +108,7 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		double g = vec3.horizontalDistance();
 		this.setXRot(Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, g) * 180.0F / (float)Math.PI)));
 		this.setYRot(Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI)));
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			double h = this.tx - d;
 			double i = this.tz - f;
 			float j = (float)Math.sqrt(h * h + i * i);
@@ -128,10 +128,10 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		float o = 0.25F;
 		if (this.isInWater()) {
 			for (int p = 0; p < 4; p++) {
-				this.level.addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+				this.level().addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
 			}
 		} else {
-			this.level
+			this.level()
 				.addParticle(
 					ParticleTypes.PORTAL,
 					d - vec3.x * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
@@ -143,16 +143,16 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 				);
 		}
 
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			this.setPos(d, e, f);
 			this.life++;
-			if (this.life > 80 && !this.level.isClientSide) {
+			if (this.life > 80 && !this.level().isClientSide) {
 				this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
 				this.discard();
 				if (this.surviveAfterDeath) {
-					this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), this.getItem()));
+					this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), this.getItem()));
 				} else {
-					this.level.levelEvent(2003, this.blockPosition(), 0);
+					this.level().levelEvent(2003, this.blockPosition(), 0);
 				}
 			}
 		} else {

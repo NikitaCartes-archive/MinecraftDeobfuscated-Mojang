@@ -65,7 +65,7 @@ public class ElderGuardian extends Guardian {
 		super.customServerAiStep();
 		if ((this.tickCount + this.getId()) % 1200 == 0) {
 			MobEffectInstance mobEffectInstance = new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 6000, 2);
-			List<ServerPlayer> list = MobEffectUtil.addEffectToPlayersAround((ServerLevel)this.level, this, this.position(), 50.0, mobEffectInstance, 1200);
+			List<ServerPlayer> list = MobEffectUtil.addEffectToPlayersAround((ServerLevel)this.level(), this, this.position(), 50.0, mobEffectInstance, 1200);
 			list.forEach(
 				serverPlayer -> serverPlayer.connection
 						.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT, this.isSilent() ? 0.0F : 1.0F))

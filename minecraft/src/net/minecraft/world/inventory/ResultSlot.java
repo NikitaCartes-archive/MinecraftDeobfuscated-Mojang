@@ -45,7 +45,7 @@ public class ResultSlot extends Slot {
 	@Override
 	protected void checkTakeAchievements(ItemStack itemStack) {
 		if (this.removeCount > 0) {
-			itemStack.onCraftedBy(this.player.level, this.player, this.removeCount);
+			itemStack.onCraftedBy(this.player.level(), this.player, this.removeCount);
 		}
 
 		if (this.container instanceof RecipeHolder recipeHolder) {
@@ -58,7 +58,7 @@ public class ResultSlot extends Slot {
 	@Override
 	public void onTake(Player player, ItemStack itemStack) {
 		this.checkTakeAchievements(itemStack);
-		NonNullList<ItemStack> nonNullList = player.level.getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, this.craftSlots, player.level);
+		NonNullList<ItemStack> nonNullList = player.level().getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, this.craftSlots, player.level());
 
 		for (int i = 0; i < nonNullList.size(); i++) {
 			ItemStack itemStack2 = this.craftSlots.getItem(i);

@@ -151,7 +151,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
 		}
 
-		this.readPersistentAngerSaveData(this.level, compoundTag);
+		this.readPersistentAngerSaveData(this.level(), compoundTag);
 	}
 
 	@Override
@@ -183,15 +183,15 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (!this.level.isClientSide && this.isWet && !this.isShaking && !this.isPathFinding() && this.onGround) {
+		if (!this.level().isClientSide && this.isWet && !this.isShaking && !this.isPathFinding() && this.onGround()) {
 			this.isShaking = true;
 			this.shakeAnim = 0.0F;
 			this.shakeAnimO = 0.0F;
-			this.level.broadcastEntityEvent(this, (byte)8);
+			this.level().broadcastEntityEvent(this, (byte)8);
 		}
 
-		if (!this.level.isClientSide) {
-			this.updatePersistentAnger((ServerLevel)this.level, true);
+		if (!this.level().isClientSide) {
+			this.updatePersistentAnger((ServerLevel)this.level(), true);
 		}
 	}
 
@@ -208,8 +208,8 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 
 			if (this.isInWaterRainOrBubble()) {
 				this.isWet = true;
-				if (this.isShaking && !this.level.isClientSide) {
-					this.level.broadcastEntityEvent(this, (byte)56);
+				if (this.isShaking && !this.level().isClientSide) {
+					this.level().broadcastEntityEvent(this, (byte)56);
 					this.cancelShake();
 				}
 			} else if ((this.isWet || this.isShaking) && this.isShaking) {
@@ -235,7 +235,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 					for (int j = 0; j < i; j++) {
 						float g = (this.random.nextFloat() * 2.0F - 1.0F) * this.getBbWidth() * 0.5F;
 						float h = (this.random.nextFloat() * 2.0F - 1.0F) * this.getBbWidth() * 0.5F;
-						this.level.addParticle(ParticleTypes.SPLASH, this.getX() + (double)g, (double)(f + 0.8F), this.getZ() + (double)h, vec3.x, vec3.y, vec3.z);
+						this.level().addParticle(ParticleTypes.SPLASH, this.getX() + (double)g, (double)(f + 0.8F), this.getZ() + (double)h, vec3.x, vec3.y, vec3.z);
 					}
 				}
 			}
@@ -296,7 +296,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			return false;
 		} else {
 			Entity entity = damageSource.getEntity();
-			if (!this.level.isClientSide) {
+			if (!this.level().isClientSide) {
 				this.setOrderedToSit(false);
 			}
 
@@ -335,7 +335,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame() && !this.isAngry();
 			return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
 		} else if (this.isTame()) {
@@ -382,9 +382,9 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 				this.navigation.stop();
 				this.setTarget(null);
 				this.setOrderedToSit(true);
-				this.level.broadcastEntityEvent(this, (byte)7);
+				this.level().broadcastEntityEvent(this, (byte)7);
 			} else {
-				this.level.broadcastEntityEvent(this, (byte)6);
+				this.level().broadcastEntityEvent(this, (byte)6);
 			}
 
 			return InteractionResult.SUCCESS;

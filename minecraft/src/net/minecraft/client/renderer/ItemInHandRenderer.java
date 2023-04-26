@@ -136,7 +136,7 @@ public class ItemInHandRenderer {
 					bl,
 					poseStack,
 					multiBufferSource,
-					livingEntity.level,
+					livingEntity.level(),
 					i,
 					OverlayTexture.NO_OVERLAY,
 					livingEntity.getId() + itemDisplayContext.ordinal()

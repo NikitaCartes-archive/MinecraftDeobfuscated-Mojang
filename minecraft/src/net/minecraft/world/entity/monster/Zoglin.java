@@ -174,7 +174,7 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 			return false;
 		} else {
 			this.attackAnimationRemainingTicks = 10;
-			this.level.broadcastEntityEvent(this, (byte)4);
+			this.level().broadcastEntityEvent(this, (byte)4);
 			this.playSound(SoundEvents.ZOGLIN_ATTACK, 1.0F, this.getVoicePitch());
 			return HoglinBase.hurtAndThrowTarget(this, (LivingEntity)entity);
 		}
@@ -200,7 +200,7 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		boolean bl = super.hurt(damageSource, f);
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			return false;
 		} else if (bl && damageSource.getEntity() instanceof LivingEntity) {
 			LivingEntity livingEntity = (LivingEntity)damageSource.getEntity();
@@ -237,16 +237,16 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("zoglinBrain");
-		this.getBrain().tick((ServerLevel)this.level, this);
-		this.level.getProfiler().pop();
+		this.level().getProfiler().push("zoglinBrain");
+		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.level().getProfiler().pop();
 		this.updateActivity();
 	}
 
 	@Override
 	public void setBaby(boolean bl) {
 		this.getEntityData().set(DATA_BABY_ID, bl);
-		if (!this.level.isClientSide && bl) {
+		if (!this.level().isClientSide && bl) {
 			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.5);
 		}
 	}
@@ -282,7 +282,7 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		if (this.level.isClientSide) {
+		if (this.level().isClientSide) {
 			return null;
 		} else {
 			return this.brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET) ? SoundEvents.ZOGLIN_ANGRY : SoundEvents.ZOGLIN_AMBIENT;

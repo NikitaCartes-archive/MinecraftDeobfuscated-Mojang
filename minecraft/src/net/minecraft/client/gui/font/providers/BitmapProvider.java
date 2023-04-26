@@ -8,9 +8,8 @@ import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.SheetGlyphInfo;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
 import java.io.IOException;
@@ -20,6 +19,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.font.CodepointMap;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -30,11 +30,11 @@ import org.slf4j.Logger;
 public class BitmapProvider implements GlyphProvider {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private final NativeImage image;
-	private final Int2ObjectMap<BitmapProvider.Glyph> glyphs;
+	private final CodepointMap<BitmapProvider.Glyph> glyphs;
 
-	BitmapProvider(NativeImage nativeImage, Int2ObjectMap<BitmapProvider.Glyph> int2ObjectMap) {
+	BitmapProvider(NativeImage nativeImage, CodepointMap<BitmapProvider.Glyph> codepointMap) {
 		this.image = nativeImage;
-		this.glyphs = int2ObjectMap;
+		this.glyphs = codepointMap;
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class BitmapProvider implements GlyphProvider {
 					if (k > 0) {
 						int l = ((int[])list.get(0)).length;
 						if (is.length != l) {
-							throw new JsonParseException("Elements of chars have to be the same length (found: " + is.length + ", expected: " + l + "), pad with space or \\u0000");
+							throw new JsonParseException("Elements of chars have to be the same length (found: " + is.length + ", expected: " + l + "), pad with \\u0000");
 						}
 					}
 
@@ -97,60 +97,59 @@ public class BitmapProvider implements GlyphProvider {
 			}
 		}
 
-		@Nullable
 		@Override
-		public GlyphProvider create(ResourceManager resourceManager) {
+		public Either<GlyphProviderBuilder.Loader, GlyphProviderBuilder.Reference> build() {
+			return Either.left(this::load);
+		}
+
+		private GlyphProvider load(ResourceManager resourceManager) throws IOException {
+			InputStream inputStream = resourceManager.open(this.texture);
+
+			BitmapProvider var21;
 			try {
-				InputStream inputStream = resourceManager.open(this.texture);
+				NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);
+				int i = nativeImage.getWidth();
+				int j = nativeImage.getHeight();
+				int k = i / ((int[])this.chars.get(0)).length;
+				int l = j / this.chars.size();
+				float f = (float)this.height / (float)l;
+				CodepointMap<BitmapProvider.Glyph> codepointMap = new CodepointMap<>(BitmapProvider.Glyph[]::new, BitmapProvider.Glyph[][]::new);
 
-				BitmapProvider var22;
-				try {
-					NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);
-					int i = nativeImage.getWidth();
-					int j = nativeImage.getHeight();
-					int k = i / ((int[])this.chars.get(0)).length;
-					int l = j / this.chars.size();
-					float f = (float)this.height / (float)l;
-					Int2ObjectMap<BitmapProvider.Glyph> int2ObjectMap = new Int2ObjectOpenHashMap<>();
+				for (int m = 0; m < this.chars.size(); m++) {
+					int n = 0;
 
-					for (int m = 0; m < this.chars.size(); m++) {
-						int n = 0;
-
-						for (int o : (int[])this.chars.get(m)) {
-							int p = n++;
-							if (o != 0) {
-								int q = this.getActualGlyphWidth(nativeImage, k, l, p, m);
-								BitmapProvider.Glyph glyph = int2ObjectMap.put(
-									o, new BitmapProvider.Glyph(f, nativeImage, p * k, m * l, k, l, (int)(0.5 + (double)((float)q * f)) + 1, this.ascent)
-								);
-								if (glyph != null) {
-									BitmapProvider.LOGGER.warn("Codepoint '{}' declared multiple times in {}", Integer.toHexString(o), this.texture);
-								}
+					for (int o : (int[])this.chars.get(m)) {
+						int p = n++;
+						if (o != 0) {
+							int q = this.getActualGlyphWidth(nativeImage, k, l, p, m);
+							BitmapProvider.Glyph glyph = codepointMap.put(
+								o, new BitmapProvider.Glyph(f, nativeImage, p * k, m * l, k, l, (int)(0.5 + (double)((float)q * f)) + 1, this.ascent)
+							);
+							if (glyph != null) {
+								BitmapProvider.LOGGER.warn("Codepoint '{}' declared multiple times in {}", Integer.toHexString(o), this.texture);
 							}
 						}
 					}
-
-					var22 = new BitmapProvider(nativeImage, int2ObjectMap);
-				} catch (Throwable var20) {
-					if (inputStream != null) {
-						try {
-							inputStream.close();
-						} catch (Throwable var19) {
-							var20.addSuppressed(var19);
-						}
-					}
-
-					throw var20;
 				}
 
+				var21 = new BitmapProvider(nativeImage, codepointMap);
+			} catch (Throwable var20) {
 				if (inputStream != null) {
-					inputStream.close();
+					try {
+						inputStream.close();
+					} catch (Throwable var19) {
+						var20.addSuppressed(var19);
+					}
 				}
 
-				return var22;
-			} catch (IOException var21) {
-				throw new RuntimeException(var21.getMessage());
+				throw var20;
 			}
+
+			if (inputStream != null) {
+				inputStream.close();
+			}
+
+			return var21;
 		}
 
 		private int getActualGlyphWidth(NativeImage nativeImage, int i, int j, int k, int l) {

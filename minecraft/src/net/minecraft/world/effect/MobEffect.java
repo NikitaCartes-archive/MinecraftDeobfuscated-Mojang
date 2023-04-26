@@ -62,7 +62,7 @@ public class MobEffect {
 		} else if (this == MobEffects.HUNGER && livingEntity instanceof Player) {
 			((Player)livingEntity).causeFoodExhaustion(0.005F * (float)(i + 1));
 		} else if (this == MobEffects.SATURATION && livingEntity instanceof Player) {
-			if (!livingEntity.level.isClientSide) {
+			if (!livingEntity.level().isClientSide) {
 				((Player)livingEntity).getFoodData().eat(i + 1, 1.0F);
 			}
 		} else if ((this != MobEffects.HEAL || livingEntity.isInvertedHealAndHarm()) && (this != MobEffects.HARM || !livingEntity.isInvertedHealAndHarm())) {

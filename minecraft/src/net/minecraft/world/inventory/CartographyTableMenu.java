@@ -66,7 +66,7 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 			public void onTake(Player player, ItemStack itemStack) {
 				CartographyTableMenu.this.slots.get(0).remove(1);
 				CartographyTableMenu.this.slots.get(1).remove(1);
-				itemStack.getItem().onCraftedBy(itemStack, player.level, player);
+				itemStack.getItem().onCraftedBy(itemStack, player.level(), player);
 				containerLevelAccess.execute((level, blockPos) -> {
 					long l = level.getGameTime();
 					if (CartographyTableMenu.this.lastSoundTime != l) {
@@ -153,7 +153,7 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
 			if (i == 2) {
-				itemStack2.getItem().onCraftedBy(itemStack2, player.level, player);
+				itemStack2.getItem().onCraftedBy(itemStack2, player.level(), player);
 				if (!this.moveItemStackTo(itemStack2, 3, 39, true)) {
 					return ItemStack.EMPTY;
 				}

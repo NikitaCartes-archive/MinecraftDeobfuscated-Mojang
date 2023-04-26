@@ -96,8 +96,8 @@ public class MoveControl implements Control {
 			this.mob.setYRot(this.rotlerp(this.mob.getYRot(), n, 90.0F));
 			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
 			BlockPos blockPos = this.mob.blockPosition();
-			BlockState blockState = this.mob.level.getBlockState(blockPos);
-			VoxelShape voxelShape = blockState.getCollisionShape(this.mob.level, blockPos);
+			BlockState blockState = this.mob.level().getBlockState(blockPos);
+			VoxelShape voxelShape = blockState.getCollisionShape(this.mob.level(), blockPos);
 			if (o > (double)this.mob.maxUpStep() && d * d + e * e < (double)Math.max(1.0F, this.mob.getBbWidth())
 				|| !voxelShape.isEmpty()
 					&& this.mob.getY() < voxelShape.max(Direction.Axis.Y) + (double)blockPos.getY()
@@ -108,7 +108,7 @@ public class MoveControl implements Control {
 			}
 		} else if (this.operation == MoveControl.Operation.JUMPING) {
 			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
-			if (this.mob.isOnGround()) {
+			if (this.mob.onGround()) {
 				this.operation = MoveControl.Operation.WAIT;
 			}
 		} else {
@@ -121,7 +121,7 @@ public class MoveControl implements Control {
 		if (pathNavigation != null) {
 			NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
 			if (nodeEvaluator != null
-				&& nodeEvaluator.getBlockPathType(this.mob.level, Mth.floor(this.mob.getX() + (double)f), this.mob.getBlockY(), Mth.floor(this.mob.getZ() + (double)g))
+				&& nodeEvaluator.getBlockPathType(this.mob.level(), Mth.floor(this.mob.getX() + (double)f), this.mob.getBlockY(), Mth.floor(this.mob.getZ() + (double)g))
 					!= BlockPathTypes.WALKABLE) {
 				return false;
 			}

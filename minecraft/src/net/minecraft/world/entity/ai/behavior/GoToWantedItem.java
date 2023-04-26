@@ -33,7 +33,7 @@ public class GoToWantedItem {
 								if (instance.tryGet(memoryAccessor4).isEmpty()
 									&& predicate.test(livingEntity)
 									&& itemEntity.closerThan(livingEntity, (double)i)
-									&& livingEntity.level.getWorldBorder().isWithinBounds(itemEntity.blockPosition())) {
+									&& livingEntity.level().getWorldBorder().isWithinBounds(itemEntity.blockPosition())) {
 									WalkTarget walkTarget = new WalkTarget(new EntityTracker(itemEntity, false), f, 0);
 									memoryAccessor.set(new EntityTracker(itemEntity, true));
 									memoryAccessor2.set(walkTarget);

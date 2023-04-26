@@ -82,7 +82,7 @@ public class Spider extends Monster {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			this.setClimbing(this.horizontalCollision);
 		}
 	}
@@ -160,7 +160,7 @@ public class Spider extends Monster {
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		if (randomSource.nextInt(100) == 0) {
-			Skeleton skeleton = EntityType.SKELETON.create(this.level);
+			Skeleton skeleton = EntityType.SKELETON.create(this.level());
 			if (skeleton != null) {
 				skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
 				skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null, null);

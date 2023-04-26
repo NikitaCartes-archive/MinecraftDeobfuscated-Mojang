@@ -232,6 +232,11 @@ public class BlockPos extends Vec3i {
 		);
 	}
 
+	@Deprecated
+	public static Stream<BlockPos> squareOutSouthEast(BlockPos blockPos) {
+		return Stream.of(blockPos, blockPos.south(), blockPos.east(), blockPos.south().east());
+	}
+
 	public static Iterable<BlockPos> randomBetweenClosed(RandomSource randomSource, int i, int j, int k, int l, int m, int n, int o) {
 		int p = m - j + 1;
 		int q = n - k + 1;

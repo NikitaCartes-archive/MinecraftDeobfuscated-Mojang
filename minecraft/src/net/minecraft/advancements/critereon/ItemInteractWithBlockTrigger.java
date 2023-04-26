@@ -30,8 +30,8 @@ public class ItemInteractWithBlockTrigger extends SimpleCriterionTrigger<ItemInt
 	}
 
 	public void trigger(ServerPlayer serverPlayer, BlockPos blockPos, ItemStack itemStack) {
-		BlockState blockState = serverPlayer.getLevel().getBlockState(blockPos);
-		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(blockState, serverPlayer.getLevel(), blockPos, itemStack));
+		BlockState blockState = serverPlayer.level().getBlockState(blockPos);
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(blockState, serverPlayer.serverLevel(), blockPos, itemStack));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {

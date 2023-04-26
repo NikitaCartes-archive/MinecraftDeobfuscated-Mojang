@@ -100,7 +100,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		if (this.isAttachedToEntity()) {
 			if (this.attachedToEntity == null) {
 				this.entityData.get(DATA_ATTACHED_TO_TARGET).ifPresent(i -> {
-					Entity entity = this.level.getEntity(i);
+					Entity entity = this.level().getEntity(i);
 					if (entity instanceof LivingEntity) {
 						this.attachedToEntity = (LivingEntity)entity;
 					}
@@ -145,12 +145,12 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 		this.updateRotation();
 		if (this.life == 0 && !this.isSilent()) {
-			this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.AMBIENT, 3.0F, 1.0F);
+			this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.AMBIENT, 3.0F, 1.0F);
 		}
 
 		this.life++;
-		if (this.level.isClientSide && this.life % 2 < 2) {
-			this.level
+		if (this.level().isClientSide && this.life % 2 < 2) {
+			this.level()
 				.addParticle(
 					ParticleTypes.FIREWORK,
 					this.getX(),
@@ -162,13 +162,13 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 				);
 		}
 
-		if (!this.level.isClientSide && this.life > this.lifetime) {
+		if (!this.level().isClientSide && this.life > this.lifetime) {
 			this.explode();
 		}
 	}
 
 	private void explode() {
-		this.level.broadcastEntityEvent(this, (byte)17);
+		this.level().broadcastEntityEvent(this, (byte)17);
 		this.gameEvent(GameEvent.EXPLODE, this.getOwner());
 		this.dealExplosionDamage();
 		this.discard();
@@ -177,7 +177,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	@Override
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		super.onHitEntity(entityHitResult);
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			this.explode();
 		}
 	}
@@ -185,8 +185,8 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	@Override
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		BlockPos blockPos = new BlockPos(blockHitResult.getBlockPos());
-		this.level.getBlockState(blockPos).entityInside(this.level, blockPos, this);
-		if (!this.level.isClientSide() && this.hasExplosion()) {
+		this.level().getBlockState(blockPos).entityInside(this.level(), blockPos, this);
+		if (!this.level().isClientSide() && this.hasExplosion()) {
 			this.explode();
 		}
 
@@ -217,13 +217,13 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 			double d = 5.0;
 			Vec3 vec3 = this.position();
 
-			for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(5.0))) {
+			for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(5.0))) {
 				if (livingEntity != this.attachedToEntity && !(this.distanceToSqr(livingEntity) > 25.0)) {
 					boolean bl = false;
 
 					for (int i = 0; i < 2; i++) {
 						Vec3 vec32 = new Vec3(livingEntity.getX(), livingEntity.getY(0.5 * (double)i), livingEntity.getZ());
-						HitResult hitResult = this.level.clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+						HitResult hitResult = this.level().clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
 						if (hitResult.getType() == HitResult.Type.MISS) {
 							bl = true;
 							break;
@@ -249,17 +249,17 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 	@Override
 	public void handleEntityEvent(byte b) {
-		if (b == 17 && this.level.isClientSide) {
+		if (b == 17 && this.level().isClientSide) {
 			if (!this.hasExplosion()) {
 				for (int i = 0; i < this.random.nextInt(3) + 2; i++) {
-					this.level
+					this.level()
 						.addParticle(ParticleTypes.POOF, this.getX(), this.getY(), this.getZ(), this.random.nextGaussian() * 0.05, 0.005, this.random.nextGaussian() * 0.05);
 				}
 			} else {
 				ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
 				CompoundTag compoundTag = itemStack.isEmpty() ? null : itemStack.getTagElement("Fireworks");
 				Vec3 vec3 = this.getDeltaMovement();
-				this.level.createFireworks(this.getX(), this.getY(), this.getZ(), vec3.x, vec3.y, vec3.z, compoundTag);
+				this.level().createFireworks(this.getX(), this.getY(), this.getZ(), vec3.x, vec3.y, vec3.z, compoundTag);
 			}
 		}
 

@@ -3,6 +3,7 @@ package net.minecraft.gametest.framework;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.yggdrasil.ServicesKeySet;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
 import java.net.Proxy;
@@ -30,7 +31,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlags;
@@ -51,7 +51,7 @@ import org.slf4j.Logger;
 public class GameTestServer extends MinecraftServer {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int PROGRESS_REPORT_INTERVAL = 20;
-	private static final Services NO_SERVICES = new Services(null, SignatureValidator.NO_VALIDATION, null, null);
+	private static final Services NO_SERVICES = new Services(null, ServicesKeySet.EMPTY, null, null);
 	private final List<GameTestBatch> testBatches;
 	private final BlockPos spawnPos;
 	private static final GameRules TEST_GAME_RULES = Util.make(new GameRules(), gameRules -> {

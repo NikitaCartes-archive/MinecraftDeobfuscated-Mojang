@@ -20,7 +20,7 @@ public class AirAndWaterRandomPos {
 		} else {
 			BlockPos blockPos2 = RandomPos.generateRandomPosTowardDirection(pathfinderMob, i, pathfinderMob.getRandom(), blockPos);
 			if (!GoalUtils.isOutsideLimits(blockPos2, pathfinderMob) && !GoalUtils.isRestricted(bl, pathfinderMob, blockPos2)) {
-				blockPos2 = RandomPos.moveUpOutOfSolid(blockPos2, pathfinderMob.level.getMaxBuildHeight(), blockPosx -> GoalUtils.isSolid(pathfinderMob, blockPosx));
+				blockPos2 = RandomPos.moveUpOutOfSolid(blockPos2, pathfinderMob.level().getMaxBuildHeight(), blockPosx -> GoalUtils.isSolid(pathfinderMob, blockPosx));
 				return GoalUtils.hasMalus(pathfinderMob, blockPos2) ? null : blockPos2;
 			} else {
 				return null;

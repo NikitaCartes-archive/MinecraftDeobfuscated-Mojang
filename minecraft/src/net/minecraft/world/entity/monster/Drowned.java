@@ -73,7 +73,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 		this.goalSelector.addGoal(2, new Drowned.DrownedTridentAttackGoal(this, 1.0, 40, 10.0F));
 		this.goalSelector.addGoal(2, new Drowned.DrownedAttackGoal(this, 1.0, false));
 		this.goalSelector.addGoal(5, new Drowned.DrownedGoToBeachGoal(this, 1.0));
-		this.goalSelector.addGoal(6, new Drowned.DrownedSwimUpGoal(this, 1.0, this.level.getSeaLevel()));
+		this.goalSelector.addGoal(6, new Drowned.DrownedSwimUpGoal(this, 1.0, this.level().getSeaLevel()));
 		this.goalSelector.addGoal(7, new RandomStrollGoal(this, 1.0));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this, Drowned.class).setAlertOthers(ZombifiedPiglin.class));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::okTarget));
@@ -189,7 +189,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 	}
 
 	public boolean okTarget(@Nullable LivingEntity livingEntity) {
-		return livingEntity != null ? !this.level.isDay() || livingEntity.isInWater() : false;
+		return livingEntity != null ? !this.level().isDay() || livingEntity.isInWater() : false;
 	}
 
 	@Override
@@ -219,7 +219,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 	@Override
 	public void updateSwimming() {
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			if (this.isEffectiveAi() && this.isInWater() && this.wantsToSwim()) {
 				this.navigation = this.waterNavigation;
 				this.setSwimming(true);
@@ -252,14 +252,14 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
-		ThrownTrident thrownTrident = new ThrownTrident(this.level, this, new ItemStack(Items.TRIDENT));
+		ThrownTrident thrownTrident = new ThrownTrident(this.level(), this, new ItemStack(Items.TRIDENT));
 		double d = livingEntity.getX() - this.getX();
 		double e = livingEntity.getY(0.3333333333333333) - thrownTrident.getY();
 		double g = livingEntity.getZ() - this.getZ();
 		double h = Math.sqrt(d * d + g * g);
-		thrownTrident.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
+		thrownTrident.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level().getDifficulty().getId() * 4));
 		this.playSound(SoundEvents.DROWNED_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-		this.level.addFreshEntity(thrownTrident);
+		this.level().addFreshEntity(thrownTrident);
 	}
 
 	public void setSearchingForLand(boolean bl) {
@@ -295,7 +295,10 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 		@Override
 		public boolean canUse() {
-			return super.canUse() && !this.drowned.level.isDay() && this.drowned.isInWater() && this.drowned.getY() >= (double)(this.drowned.level.getSeaLevel() - 3);
+			return super.canUse()
+				&& !this.drowned.level().isDay()
+				&& this.drowned.isInWater()
+				&& this.drowned.getY() >= (double)(this.drowned.level().getSeaLevel() - 3);
 		}
 
 		@Override
@@ -335,7 +338,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 		public DrownedGoToWaterGoal(PathfinderMob pathfinderMob, double d) {
 			this.mob = pathfinderMob;
 			this.speedModifier = d;
-			this.level = pathfinderMob.level;
+			this.level = pathfinderMob.level();
 			this.setFlags(EnumSet.of(Goal.Flag.MOVE));
 		}
 
@@ -418,7 +421,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 				this.drowned.setSpeed(j);
 				this.drowned.setDeltaMovement(this.drowned.getDeltaMovement().add((double)j * d * 0.005, (double)j * e * 0.1, (double)j * f * 0.005));
 			} else {
-				if (!this.drowned.onGround) {
+				if (!this.drowned.onGround()) {
 					this.drowned.setDeltaMovement(this.drowned.getDeltaMovement().add(0.0, -0.008, 0.0));
 				}
 
@@ -441,7 +444,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 		@Override
 		public boolean canUse() {
-			return !this.drowned.level.isDay() && this.drowned.isInWater() && this.drowned.getY() < (double)(this.seaLevel - 2);
+			return !this.drowned.level().isDay() && this.drowned.isInWater() && this.drowned.getY() < (double)(this.seaLevel - 2);
 		}
 
 		@Override

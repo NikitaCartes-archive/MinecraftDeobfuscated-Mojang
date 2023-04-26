@@ -65,7 +65,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	protected void dropEquipment() {
 		super.dropEquipment();
 		if (this.hasChest()) {
-			if (!this.level.isClientSide) {
+			if (!this.level().isClientSide) {
 				this.spawnAtLocation(Blocks.CHEST);
 			}
 
@@ -157,12 +157,12 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 
 				if (!this.isTamed()) {
 					this.makeMad();
-					return InteractionResult.sidedSuccess(this.level.isClientSide);
+					return InteractionResult.sidedSuccess(this.level().isClientSide);
 				}
 
 				if (!this.hasChest() && itemStack.is(Items.CHEST)) {
 					this.equipChest(player, itemStack);
-					return InteractionResult.sidedSuccess(this.level.isClientSide);
+					return InteractionResult.sidedSuccess(this.level().isClientSide);
 				}
 			}
 

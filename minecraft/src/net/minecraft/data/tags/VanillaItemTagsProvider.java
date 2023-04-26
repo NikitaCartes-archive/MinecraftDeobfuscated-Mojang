@@ -141,7 +141,8 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.addTag(ItemTags.CREEPER_DROP_MUSIC_DISCS)
 			.add(Items.MUSIC_DISC_PIGSTEP)
 			.add(Items.MUSIC_DISC_OTHERSIDE)
-			.add(Items.MUSIC_DISC_5);
+			.add(Items.MUSIC_DISC_5)
+			.add(Items.MUSIC_DISC_RELIC);
 		this.tag(ItemTags.COALS).add(Items.COAL, Items.CHARCOAL);
 		this.tag(ItemTags.ARROWS).add(Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW);
 		this.tag(ItemTags.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);
@@ -251,7 +252,6 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.BREAKS_DECORATED_POTS).addTag(ItemTags.TOOLS);
 		this.tag(ItemTags.DECORATED_POT_SHERDS)
 			.add(
-				Items.BRICK,
 				Items.ANGLER_POTTERY_SHERD,
 				Items.ARCHER_POTTERY_SHERD,
 				Items.ARMS_UP_POTTERY_SHERD,
@@ -273,6 +273,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.SKULL_POTTERY_SHERD,
 				Items.SNORT_POTTERY_SHERD
 			);
+		this.tag(ItemTags.DECORATED_POT_INGREDIENTS).add(Items.BRICK).addTag(ItemTags.DECORATED_POT_SHERDS);
 		this.tag(ItemTags.TRIMMABLE_ARMOR)
 			.add(Items.NETHERITE_HELMET)
 			.add(Items.NETHERITE_CHESTPLATE)

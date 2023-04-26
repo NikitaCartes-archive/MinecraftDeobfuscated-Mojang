@@ -51,7 +51,7 @@ public class WitherSkull extends AbstractHurtingProjectile {
 	@Override
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		super.onHitEntity(entityHitResult);
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			Entity entity = entityHitResult.getEntity();
 			boolean bl;
 			if (this.getOwner() instanceof LivingEntity livingEntity) {
@@ -69,9 +69,9 @@ public class WitherSkull extends AbstractHurtingProjectile {
 
 			if (bl && entity instanceof LivingEntity livingEntityx) {
 				int i = 0;
-				if (this.level.getDifficulty() == Difficulty.NORMAL) {
+				if (this.level().getDifficulty() == Difficulty.NORMAL) {
 					i = 10;
-				} else if (this.level.getDifficulty() == Difficulty.HARD) {
+				} else if (this.level().getDifficulty() == Difficulty.HARD) {
 					i = 40;
 				}
 
@@ -85,8 +85,8 @@ public class WitherSkull extends AbstractHurtingProjectile {
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (!this.level.isClientSide) {
-			this.level.explode(this, this.getX(), this.getY(), this.getZ(), 1.0F, false, Level.ExplosionInteraction.MOB);
+		if (!this.level().isClientSide) {
+			this.level().explode(this, this.getX(), this.getY(), this.getZ(), 1.0F, false, Level.ExplosionInteraction.MOB);
 			this.discard();
 		}
 	}

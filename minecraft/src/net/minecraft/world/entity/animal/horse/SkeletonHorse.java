@@ -58,7 +58,7 @@ public class SkeletonHorse extends AbstractHorse {
 
 	@Override
 	protected SoundEvent getSwimSound() {
-		if (this.onGround) {
+		if (this.onGround()) {
 			if (!this.isVehicle()) {
 				return SoundEvents.SKELETON_HORSE_STEP_WATER;
 			}
@@ -78,7 +78,7 @@ public class SkeletonHorse extends AbstractHorse {
 
 	@Override
 	protected void playSwimSound(float f) {
-		if (this.onGround) {
+		if (this.onGround()) {
 			super.playSwimSound(0.3F);
 		} else {
 			super.playSwimSound(Math.min(0.1F, f * 25.0F));

@@ -143,21 +143,21 @@ public class Ravager extends Raider {
 				this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(Mth.lerp(0.1, e, d));
 			}
 
-			if (this.horizontalCollision && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+			if (this.horizontalCollision && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 				boolean bl = false;
 				AABB aABB = this.getBoundingBox().inflate(0.2);
 
 				for (BlockPos blockPos : BlockPos.betweenClosed(
 					Mth.floor(aABB.minX), Mth.floor(aABB.minY), Mth.floor(aABB.minZ), Mth.floor(aABB.maxX), Mth.floor(aABB.maxY), Mth.floor(aABB.maxZ)
 				)) {
-					BlockState blockState = this.level.getBlockState(blockPos);
+					BlockState blockState = this.level().getBlockState(blockPos);
 					Block block = blockState.getBlock();
 					if (block instanceof LeavesBlock) {
-						bl = this.level.destroyBlock(blockPos, true, this) || bl;
+						bl = this.level().destroyBlock(blockPos, true, this) || bl;
 					}
 				}
 
-				if (!bl && this.onGround) {
+				if (!bl && this.onGround()) {
 					this.jumpFromGround();
 				}
 			}
@@ -189,7 +189,7 @@ public class Ravager extends Raider {
 			double d = this.getX() - (double)this.getBbWidth() * Math.sin((double)(this.yBodyRot * (float) (Math.PI / 180.0))) + (this.random.nextDouble() * 0.6 - 0.3);
 			double e = this.getY() + (double)this.getBbHeight() - 0.3;
 			double f = this.getZ() + (double)this.getBbWidth() * Math.cos((double)(this.yBodyRot * (float) (Math.PI / 180.0))) + (this.random.nextDouble() * 0.6 - 0.3);
-			this.level.addParticle(ParticleTypes.ENTITY_EFFECT, d, e, f, 0.4980392156862745, 0.5137254901960784, 0.5725490196078431);
+			this.level().addParticle(ParticleTypes.ENTITY_EFFECT, d, e, f, 0.4980392156862745, 0.5137254901960784, 0.5725490196078431);
 		}
 	}
 
@@ -209,7 +209,7 @@ public class Ravager extends Raider {
 			if (this.random.nextDouble() < 0.5) {
 				this.stunnedTick = 40;
 				this.playSound(SoundEvents.RAVAGER_STUNNED, 1.0F, 1.0F);
-				this.level.broadcastEntityEvent(this, (byte)39);
+				this.level().broadcastEntityEvent(this, (byte)39);
 				livingEntity.push(this);
 			} else {
 				this.strongKnockback(livingEntity);
@@ -221,7 +221,7 @@ public class Ravager extends Raider {
 
 	private void roar() {
 		if (this.isAlive()) {
-			for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE)) {
+			for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE)) {
 				if (!(livingEntity instanceof AbstractIllager)) {
 					livingEntity.hurt(this.damageSources().mobAttack(this), 6.0F);
 				}
@@ -235,7 +235,7 @@ public class Ravager extends Raider {
 				double d = this.random.nextGaussian() * 0.2;
 				double e = this.random.nextGaussian() * 0.2;
 				double f = this.random.nextGaussian() * 0.2;
-				this.level.addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d, e, f);
+				this.level().addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d, e, f);
 			}
 
 			this.gameEvent(GameEvent.ENTITY_ROAR);
@@ -276,7 +276,7 @@ public class Ravager extends Raider {
 	@Override
 	public boolean doHurtTarget(Entity entity) {
 		this.attackTick = 10;
-		this.level.broadcastEntityEvent(this, (byte)4);
+		this.level().broadcastEntityEvent(this, (byte)4);
 		this.playSound(SoundEvents.RAVAGER_ATTACK, 1.0F, 1.0F);
 		return super.doHurtTarget(entity);
 	}

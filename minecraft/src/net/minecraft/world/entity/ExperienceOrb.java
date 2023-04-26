@@ -65,13 +65,13 @@ public class ExperienceOrb extends Entity {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.03, 0.0));
 		}
 
-		if (this.level.getFluidState(this.blockPosition()).is(FluidTags.LAVA)) {
+		if (this.level().getFluidState(this.blockPosition()).is(FluidTags.LAVA)) {
 			this.setDeltaMovement(
 				(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F), 0.2F, (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F)
 			);
 		}
 
-		if (!this.level.noCollision(this.getBoundingBox())) {
+		if (!this.level().noCollision(this.getBoundingBox())) {
 			this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
 		}
 
@@ -98,12 +98,12 @@ public class ExperienceOrb extends Entity {
 
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		float f = 0.98F;
-		if (this.onGround) {
-			f = this.level.getBlockState(BlockPos.containing(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98F;
+		if (this.onGround()) {
+			f = this.level().getBlockState(BlockPos.containing(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98F;
 		}
 
 		this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.98, (double)f));
-		if (this.onGround) {
+		if (this.onGround()) {
 			this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, -0.9, 1.0));
 		}
 
@@ -115,11 +115,12 @@ public class ExperienceOrb extends Entity {
 
 	private void scanForEntities() {
 		if (this.followingPlayer == null || this.followingPlayer.distanceToSqr(this) > 64.0) {
-			this.followingPlayer = this.level.getNearestPlayer(this, 8.0);
+			this.followingPlayer = this.level().getNearestPlayer(this, 8.0);
 		}
 
-		if (this.level instanceof ServerLevel) {
-			for (ExperienceOrb experienceOrb : this.level.getEntities(EntityTypeTest.forClass(ExperienceOrb.class), this.getBoundingBox().inflate(0.5), this::canMerge)) {
+		if (this.level() instanceof ServerLevel) {
+			for (ExperienceOrb experienceOrb : this.level()
+				.getEntities(EntityTypeTest.forClass(ExperienceOrb.class), this.getBoundingBox().inflate(0.5), this::canMerge)) {
 				this.merge(experienceOrb);
 			}
 		}
@@ -176,7 +177,7 @@ public class ExperienceOrb extends Entity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (this.level.isClientSide) {
+		} else if (this.level().isClientSide) {
 			return true;
 		} else {
 			this.markHurt();
@@ -207,7 +208,7 @@ public class ExperienceOrb extends Entity {
 
 	@Override
 	public void playerTouch(Player player) {
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			if (player.takeXpDelay == 0) {
 				player.takeXpDelay = 2;
 				player.take(this, 1);

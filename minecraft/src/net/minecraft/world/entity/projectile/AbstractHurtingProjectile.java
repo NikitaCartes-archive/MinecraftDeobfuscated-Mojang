@@ -64,7 +64,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	@Override
 	public void tick() {
 		Entity entity = this.getOwner();
-		if (this.level.isClientSide || (entity == null || !entity.isRemoved()) && this.level.hasChunkAt(this.blockPosition())) {
+		if (this.level().isClientSide || (entity == null || !entity.isRemoved()) && this.level().hasChunkAt(this.blockPosition())) {
 			super.tick();
 			if (this.shouldBurn()) {
 				this.setSecondsOnFire(1);
@@ -85,14 +85,14 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 			if (this.isInWater()) {
 				for (int i = 0; i < 4; i++) {
 					float h = 0.25F;
-					this.level.addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+					this.level().addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
 				}
 
 				g = 0.8F;
 			}
 
 			this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale((double)g));
-			this.level.addParticle(this.getTrailParticle(), d, e + 0.5, f, 0.0, 0.0, 0.0);
+			this.level().addParticle(this.getTrailParticle(), d, e + 0.5, f, 0.0, 0.0, 0.0);
 			this.setPos(d, e, f);
 		} else {
 			this.discard();
@@ -153,7 +153,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 			this.markHurt();
 			Entity entity = damageSource.getEntity();
 			if (entity != null) {
-				if (!this.level.isClientSide) {
+				if (!this.level().isClientSide) {
 					Vec3 vec3 = entity.getLookAngle();
 					this.setDeltaMovement(vec3);
 					this.xPower = vec3.x * 0.1;

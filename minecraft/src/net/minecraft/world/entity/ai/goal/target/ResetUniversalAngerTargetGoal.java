@@ -23,7 +23,7 @@ public class ResetUniversalAngerTargetGoal<T extends Mob & NeutralMob> extends G
 
 	@Override
 	public boolean canUse() {
-		return this.mob.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER) && this.wasHurtByPlayer();
+		return this.mob.level().getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER) && this.wasHurtByPlayer();
 	}
 
 	private boolean wasHurtByPlayer() {
@@ -50,6 +50,6 @@ public class ResetUniversalAngerTargetGoal<T extends Mob & NeutralMob> extends G
 	private List<? extends Mob> getNearbyMobsOfSameType() {
 		double d = this.mob.getAttributeValue(Attributes.FOLLOW_RANGE);
 		AABB aABB = AABB.unitCubeFromLowerCorner(this.mob.position()).inflate(d, 10.0, d);
-		return this.mob.level.getEntitiesOfClass(this.mob.getClass(), aABB, EntitySelector.NO_SPECTATORS);
+		return this.mob.level().getEntitiesOfClass(this.mob.getClass(), aABB, EntitySelector.NO_SPECTATORS);
 	}
 }

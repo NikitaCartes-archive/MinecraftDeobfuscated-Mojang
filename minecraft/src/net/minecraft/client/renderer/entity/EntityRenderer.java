@@ -36,11 +36,11 @@ public abstract class EntityRenderer<T extends Entity> {
 	}
 
 	protected int getSkyLightLevel(T entity, BlockPos blockPos) {
-		return entity.level.getBrightness(LightLayer.SKY, blockPos);
+		return entity.level().getBrightness(LightLayer.SKY, blockPos);
 	}
 
 	protected int getBlockLightLevel(T entity, BlockPos blockPos) {
-		return entity.isOnFire() ? 15 : entity.level.getBrightness(LightLayer.BLOCK, blockPos);
+		return entity.isOnFire() ? 15 : entity.level().getBrightness(LightLayer.BLOCK, blockPos);
 	}
 
 	public boolean shouldRender(T entity, Frustum frustum, double d, double e, double f) {

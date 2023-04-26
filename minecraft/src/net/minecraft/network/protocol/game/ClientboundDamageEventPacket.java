@@ -16,7 +16,7 @@ public record ClientboundDamageEventPacket(int entityId, int sourceTypeId, int s
 	public ClientboundDamageEventPacket(Entity entity, DamageSource damageSource) {
 		this(
 			entity.getId(),
-			entity.getLevel().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getId(damageSource.type()),
+			entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getId(damageSource.type()),
 			damageSource.getEntity() != null ? damageSource.getEntity().getId() : -1,
 			damageSource.getDirectEntity() != null ? damageSource.getDirectEntity().getId() : -1,
 			Optional.ofNullable(damageSource.sourcePositionRaw())

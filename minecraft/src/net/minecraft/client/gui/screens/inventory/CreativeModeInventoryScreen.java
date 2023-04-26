@@ -80,7 +80,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		this.imageHeight = 136;
 		this.imageWidth = 195;
 		this.displayOperatorCreativeTab = bl;
-		CreativeModeTabs.tryRebuildTabContents(featureFlagSet, this.hasPermissions(player), player.level.registryAccess());
+		CreativeModeTabs.tryRebuildTabContents(featureFlagSet, this.hasPermissions(player), player.level().registryAccess());
 	}
 
 	private boolean hasPermissions(Player player) {
@@ -121,7 +121,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		if (this.minecraft != null) {
 			if (this.minecraft.player != null) {
 				this.tryRefreshInvalidatedTabs(
-					this.minecraft.player.connection.enabledFeatures(), this.hasPermissions(this.minecraft.player), this.minecraft.player.level.registryAccess()
+					this.minecraft.player.connection.enabledFeatures(), this.hasPermissions(this.minecraft.player), this.minecraft.player.level().registryAccess()
 				);
 			}
 
@@ -761,7 +761,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		if (bl) {
 			for (int j = 0; j < Inventory.getSelectionSize(); j++) {
 				ItemStack itemStack = hotbar.get(j);
-				ItemStack itemStack2 = itemStack.isItemEnabled(localPlayer.level.enabledFeatures()) ? itemStack.copy() : ItemStack.EMPTY;
+				ItemStack itemStack2 = itemStack.isItemEnabled(localPlayer.level().enabledFeatures()) ? itemStack.copy() : ItemStack.EMPTY;
 				localPlayer.getInventory().setItem(j, itemStack2);
 				minecraft.gameMode.handleCreativeModeItemAdd(itemStack2, 36 + j);
 			}
@@ -791,7 +791,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		public boolean mayPickup(Player player) {
 			ItemStack itemStack = this.getItem();
 			return super.mayPickup(player) && !itemStack.isEmpty()
-				? itemStack.isItemEnabled(player.level.enabledFeatures()) && itemStack.getTagElement("CustomCreativeLock") == null
+				? itemStack.isItemEnabled(player.level().enabledFeatures()) && itemStack.getTagElement("CustomCreativeLock") == null
 				: itemStack.isEmpty();
 		}
 	}

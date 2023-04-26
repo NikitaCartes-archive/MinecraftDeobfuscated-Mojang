@@ -66,7 +66,7 @@ public class TargetingConditions {
 			return false;
 		} else {
 			if (livingEntity == null) {
-				if (this.isCombat && (!livingEntity2.canBeSeenAsEnemy() || livingEntity2.level.getDifficulty() == Difficulty.PEACEFUL)) {
+				if (this.isCombat && (!livingEntity2.canBeSeenAsEnemy() || livingEntity2.level().getDifficulty() == Difficulty.PEACEFUL)) {
 					return false;
 				}
 			} else {

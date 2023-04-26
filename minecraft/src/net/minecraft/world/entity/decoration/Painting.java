@@ -147,7 +147,7 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
 
 	@Override
 	public void dropItem(@Nullable Entity entity) {
-		if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+		if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 			this.playSound(SoundEvents.PAINTING_BREAK, 1.0F, 1.0F);
 			if (entity instanceof Player player && player.getAbilities().instabuild) {
 				return;

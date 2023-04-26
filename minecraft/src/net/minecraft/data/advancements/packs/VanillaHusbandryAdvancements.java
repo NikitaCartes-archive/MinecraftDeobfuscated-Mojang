@@ -16,6 +16,7 @@ import net.minecraft.advancements.critereon.BredAnimalsTrigger;
 import net.minecraft.advancements.critereon.ConsumeItemTrigger;
 import net.minecraft.advancements.critereon.EffectsChangedTrigger;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.EntitySubPredicate;
 import net.minecraft.advancements.critereon.FilledBucketTrigger;
@@ -37,6 +38,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
@@ -171,7 +173,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.addCriterion("bred", BredAnimalsTrigger.TriggerInstance.bredAnimals())
 			.save(consumer, "husbandry/breed_an_animal");
 		createBreedAllAnimalsAdvancement(advancement3, consumer, BREEDABLE_ANIMALS.stream(), INDIRECTLY_BREEDABLE_ANIMALS.stream());
-		this.addFood(Advancement.Builder.advancement())
+		addFood(Advancement.Builder.advancement())
 			.parent(advancement2)
 			.display(
 				Items.APPLE,
@@ -214,7 +216,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("tamed_animal", TameAnimalTrigger.TriggerInstance.tamedAnimal())
 			.save(consumer, "husbandry/tame_an_animal");
-		Advancement advancement5 = this.addFish(Advancement.Builder.advancement())
+		Advancement advancement5 = addFish(Advancement.Builder.advancement())
 			.parent(advancement)
 			.requirements(RequirementsStrategy.OR)
 			.display(
@@ -228,7 +230,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				false
 			)
 			.save(consumer, "husbandry/fishy_business");
-		Advancement advancement6 = this.addFishBuckets(Advancement.Builder.advancement())
+		Advancement advancement6 = addFishBuckets(Advancement.Builder.advancement())
 			.parent(advancement5)
 			.requirements(RequirementsStrategy.OR)
 			.display(
@@ -274,7 +276,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				false
 			)
 			.save(consumer, "husbandry/kill_axolotl_target");
-		this.addCatVariants(Advancement.Builder.advancement())
+		addCatVariants(Advancement.Builder.advancement())
 			.parent(advancement4)
 			.display(
 				Items.COD,
@@ -365,7 +367,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				false
 			)
 			.save(consumer, "husbandry/tadpole_in_a_bucket");
-		Advancement advancement11 = this.addLeashedFrogVariants(Advancement.Builder.advancement())
+		Advancement advancement11 = addLeashedFrogVariants(Advancement.Builder.advancement())
 			.parent(advancement10)
 			.display(
 				Items.LEAD,
@@ -491,6 +493,58 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "husbandry/allay_deliver_cake_to_note_block");
+		Advancement advancement13 = Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.SNIFFER_EGG,
+				Component.translatable("advancements.husbandry.obtain_sniffer_egg.title"),
+				Component.translatable("advancements.husbandry.obtain_sniffer_egg.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				true
+			)
+			.addCriterion("obtain_sniffer_egg", InventoryChangeTrigger.TriggerInstance.hasItems(Items.SNIFFER_EGG))
+			.save(consumer, "husbandry/obtain_sniffer_egg");
+		Advancement advancement14 = Advancement.Builder.advancement()
+			.parent(advancement13)
+			.display(
+				Items.TORCHFLOWER_SEEDS,
+				Component.translatable("advancements.husbandry.feed_snifflet.title"),
+				Component.translatable("advancements.husbandry.feed_snifflet.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				true
+			)
+			.addCriterion(
+				"feed_snifflet",
+				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
+					ItemPredicate.Builder.item().of(ItemTags.SNIFFER_FOOD),
+					EntityPredicate.Composite.wrap(
+						EntityPredicate.Builder.entity().of(EntityType.SNIFFER).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(true).build()).build()
+					)
+				)
+			)
+			.save(consumer, "husbandry/feed_snifflet");
+		Advancement.Builder.advancement()
+			.parent(advancement14)
+			.display(
+				Items.PITCHER_POD,
+				Component.translatable("advancements.husbandry.plant_any_sniffer_seed.title"),
+				Component.translatable("advancements.husbandry.plant_any_sniffer_seed.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				true
+			)
+			.requirements(RequirementsStrategy.OR)
+			.addCriterion("torchflower", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.TORCHFLOWER_CROP))
+			.addCriterion("pitcher_pod", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.PITCHER_CROP))
+			.save(consumer, "husbandry/plant_any_sniffer_seed");
 	}
 
 	public static Advancement createBreedAllAnimalsAdvancement(
@@ -512,7 +566,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.save(consumer, "husbandry/bred_all_animals");
 	}
 
-	private Advancement.Builder addLeashedFrogVariants(Advancement.Builder builder) {
+	private static Advancement.Builder addLeashedFrogVariants(Advancement.Builder builder) {
 		BuiltInRegistries.FROG_VARIANT
 			.holders()
 			.forEach(
@@ -529,7 +583,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		return builder;
 	}
 
-	private Advancement.Builder addFood(Advancement.Builder builder) {
+	private static Advancement.Builder addFood(Advancement.Builder builder) {
 		for (Item item : EDIBLE_ITEMS) {
 			builder.addCriterion(BuiltInRegistries.ITEM.getKey(item).getPath(), ConsumeItemTrigger.TriggerInstance.usedItem(item));
 		}
@@ -554,7 +608,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		return builder;
 	}
 
-	private Advancement.Builder addFishBuckets(Advancement.Builder builder) {
+	private static Advancement.Builder addFishBuckets(Advancement.Builder builder) {
 		for (Item item : FISH_BUCKETS) {
 			builder.addCriterion(
 				BuiltInRegistries.ITEM.getKey(item).getPath(), FilledBucketTrigger.TriggerInstance.filledBucket(ItemPredicate.Builder.item().of(item).build())
@@ -564,7 +618,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		return builder;
 	}
 
-	private Advancement.Builder addFish(Advancement.Builder builder) {
+	private static Advancement.Builder addFish(Advancement.Builder builder) {
 		for (Item item : FISH) {
 			builder.addCriterion(
 				BuiltInRegistries.ITEM.getKey(item).getPath(),
@@ -575,7 +629,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		return builder;
 	}
 
-	private Advancement.Builder addCatVariants(Advancement.Builder builder) {
+	private static Advancement.Builder addCatVariants(Advancement.Builder builder) {
 		BuiltInRegistries.CAT_VARIANT
 			.entrySet()
 			.stream()

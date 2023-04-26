@@ -23,7 +23,7 @@ public class DragonTakeoffPhase extends AbstractDragonPhaseInstance {
 	@Override
 	public void doServerTick() {
 		if (!this.firstTick && this.currentPath != null) {
-			BlockPos blockPos = this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
+			BlockPos blockPos = this.dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
 			if (!blockPos.closerToCenterThan(this.dragon.position(), 10.0)) {
 				this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
 			}
