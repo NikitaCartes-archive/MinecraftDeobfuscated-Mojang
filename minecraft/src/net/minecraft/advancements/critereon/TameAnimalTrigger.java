@@ -15,10 +15,10 @@ public class TameAnimalTrigger extends SimpleCriterionTrigger<TameAnimalTrigger.
 	}
 
 	public TameAnimalTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "entity", deserializationContext);
-		return new TameAnimalTrigger.TriggerInstance(composite, composite2);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
+		return new TameAnimalTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Animal animal) {
@@ -27,19 +27,19 @@ public class TameAnimalTrigger extends SimpleCriterionTrigger<TameAnimalTrigger.
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate.Composite entity;
+		private final ContextAwarePredicate entity;
 
-		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite composite2) {
-			super(TameAnimalTrigger.ID, composite);
-			this.entity = composite2;
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2) {
+			super(TameAnimalTrigger.ID, contextAwarePredicate);
+			this.entity = contextAwarePredicate2;
 		}
 
 		public static TameAnimalTrigger.TriggerInstance tamedAnimal() {
-			return new TameAnimalTrigger.TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY);
+			return new TameAnimalTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY);
 		}
 
 		public static TameAnimalTrigger.TriggerInstance tamedAnimal(EntityPredicate entityPredicate) {
-			return new TameAnimalTrigger.TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(entityPredicate));
+			return new TameAnimalTrigger.TriggerInstance(ContextAwarePredicate.ANY, EntityPredicate.wrap(entityPredicate));
 		}
 
 		public boolean matches(LootContext lootContext) {

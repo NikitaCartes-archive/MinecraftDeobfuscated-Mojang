@@ -1,5 +1,6 @@
 package net.minecraft.client.telemetry;
 
+import com.google.common.base.Suppliers;
 import com.mojang.authlib.minecraft.TelemetrySession;
 import com.mojang.authlib.minecraft.UserApiService;
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,6 +34,7 @@ public class ClientTelemetryManager implements AutoCloseable {
 	private final TelemetryPropertyMap deviceSessionProperties;
 	private final Path logDirectory;
 	private final CompletableFuture<Optional<TelemetryLogManager>> logManager;
+	private final Supplier<TelemetryEventSender> outsideSessionSender = Suppliers.memoize(this::createEventSender);
 
 	public ClientTelemetryManager(Minecraft minecraft, UserApiService userApiService, User user) {
 		this.userApiService = userApiService;
@@ -43,16 +46,21 @@ public class ClientTelemetryManager implements AutoCloseable {
 		builder.put(TelemetryProperty.OPERATING_SYSTEM, Util.getPlatform().telemetryName());
 		builder.put(TelemetryProperty.PLATFORM, System.getProperty("os.name"));
 		builder.put(TelemetryProperty.CLIENT_MODDED, Minecraft.checkModStatus().shouldReportAsModified());
+		builder.putIfNotNull(TelemetryProperty.LAUNCHER_NAME, System.getProperty("minecraft.launcher.brand"));
 		this.deviceSessionProperties = builder.build();
 		this.logDirectory = minecraft.gameDirectory.toPath().resolve("logs/telemetry");
 		this.logManager = TelemetryLogManager.open(this.logDirectory);
 	}
 
-	public WorldSessionTelemetryManager createWorldSessionManager(boolean bl, @Nullable Duration duration) {
-		return new WorldSessionTelemetryManager(this.createWorldSessionEventSender(), bl, duration);
+	public WorldSessionTelemetryManager createWorldSessionManager(boolean bl, @Nullable Duration duration, @Nullable String string) {
+		return new WorldSessionTelemetryManager(this.createEventSender(), bl, duration, string);
 	}
 
-	private TelemetryEventSender createWorldSessionEventSender() {
+	public TelemetryEventSender getOutsideSessionSender() {
+		return (TelemetryEventSender)this.outsideSessionSender.get();
+	}
+
+	private TelemetryEventSender createEventSender() {
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			return TelemetryEventSender.DISABLED;
 		} else {

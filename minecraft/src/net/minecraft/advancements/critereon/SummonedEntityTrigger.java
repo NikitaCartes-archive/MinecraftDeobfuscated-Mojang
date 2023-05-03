@@ -15,10 +15,10 @@ public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntity
 	}
 
 	public SummonedEntityTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "entity", deserializationContext);
-		return new SummonedEntityTrigger.TriggerInstance(composite, composite2);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
+		return new SummonedEntityTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Entity entity) {
@@ -27,15 +27,15 @@ public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntity
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate.Composite entity;
+		private final ContextAwarePredicate entity;
 
-		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite composite2) {
-			super(SummonedEntityTrigger.ID, composite);
-			this.entity = composite2;
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2) {
+			super(SummonedEntityTrigger.ID, contextAwarePredicate);
+			this.entity = contextAwarePredicate2;
 		}
 
 		public static SummonedEntityTrigger.TriggerInstance summonedEntity(EntityPredicate.Builder builder) {
-			return new SummonedEntityTrigger.TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build()));
+			return new SummonedEntityTrigger.TriggerInstance(ContextAwarePredicate.ANY, EntityPredicate.wrap(builder.build()));
 		}
 
 		public boolean matches(LootContext lootContext) {

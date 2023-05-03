@@ -133,7 +133,7 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
 		DecoratedPotBlockEntity.Decorations decorations = DecoratedPotBlockEntity.Decorations.load(BlockItem.getBlockEntityData(itemStack));
-		if (decorations != DecoratedPotBlockEntity.Decorations.EMPTY) {
+		if (!decorations.equals(DecoratedPotBlockEntity.Decorations.EMPTY)) {
 			list.add(CommonComponents.EMPTY);
 			Stream.of(decorations.front(), decorations.left(), decorations.right(), decorations.back())
 				.forEach(item -> list.add(new ItemStack(item, 1).getHoverName().plainCopy().withStyle(ChatFormatting.GRAY)));

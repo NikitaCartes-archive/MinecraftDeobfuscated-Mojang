@@ -108,7 +108,7 @@ public class VertexFormat {
 	public VertexBuffer getImmediateDrawVertexBuffer() {
 		VertexBuffer vertexBuffer = this.immediateDrawVertexBuffer;
 		if (vertexBuffer == null) {
-			this.immediateDrawVertexBuffer = vertexBuffer = new VertexBuffer();
+			this.immediateDrawVertexBuffer = vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
 		}
 
 		return vertexBuffer;

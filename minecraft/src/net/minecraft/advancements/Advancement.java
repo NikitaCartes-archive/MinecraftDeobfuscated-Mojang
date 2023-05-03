@@ -37,6 +37,7 @@ public class Advancement {
 	private final String[][] requirements;
 	private final Set<Advancement> children = Sets.<Advancement>newLinkedHashSet();
 	private final Component chatComponent;
+	private final boolean sendsTelemetryEvent;
 
 	public Advancement(
 		ResourceLocation resourceLocation,
@@ -44,7 +45,8 @@ public class Advancement {
 		@Nullable DisplayInfo displayInfo,
 		AdvancementRewards advancementRewards,
 		Map<String, Criterion> map,
-		String[][] strings
+		String[][] strings,
+		boolean bl
 	) {
 		this.id = resourceLocation;
 		this.display = displayInfo;
@@ -52,6 +54,7 @@ public class Advancement {
 		this.parent = advancement;
 		this.rewards = advancementRewards;
 		this.requirements = strings;
+		this.sendsTelemetryEvent = bl;
 		if (advancement != null) {
 			advancement.addChild(this);
 		}
@@ -68,7 +71,9 @@ public class Advancement {
 	}
 
 	public Advancement.Builder deconstruct() {
-		return new Advancement.Builder(this.parent == null ? null : this.parent.getId(), this.display, this.rewards, this.criteria, this.requirements);
+		return new Advancement.Builder(
+			this.parent == null ? null : this.parent.getId(), this.display, this.rewards, this.criteria, this.requirements, this.sendsTelemetryEvent
+		);
 	}
 
 	@Nullable
@@ -98,6 +103,10 @@ public class Advancement {
 		return this.display;
 	}
 
+	public boolean sendsTelemetryEvent() {
+		return this.sendsTelemetryEvent;
+	}
+
 	public AdvancementRewards getRewards() {
 		return this.rewards;
 	}
@@ -115,6 +124,8 @@ public class Advancement {
 			+ this.criteria
 			+ ", requirements="
 			+ Arrays.deepToString(this.requirements)
+			+ ", sendsTelemetryEvent="
+			+ this.sendsTelemetryEvent
 			+ "}";
 	}
 
@@ -170,26 +181,34 @@ public class Advancement {
 		@Nullable
 		private String[][] requirements;
 		private RequirementsStrategy requirementsStrategy = RequirementsStrategy.AND;
+		private final boolean sendsTelemetryEvent;
 
 		Builder(
 			@Nullable ResourceLocation resourceLocation,
 			@Nullable DisplayInfo displayInfo,
 			AdvancementRewards advancementRewards,
 			Map<String, Criterion> map,
-			String[][] strings
+			String[][] strings,
+			boolean bl
 		) {
 			this.parentId = resourceLocation;
 			this.display = displayInfo;
 			this.rewards = advancementRewards;
 			this.criteria = map;
 			this.requirements = strings;
+			this.sendsTelemetryEvent = bl;
 		}
 
-		private Builder() {
+		private Builder(boolean bl) {
+			this.sendsTelemetryEvent = bl;
 		}
 
 		public static Advancement.Builder advancement() {
-			return new Advancement.Builder();
+			return new Advancement.Builder(true);
+		}
+
+		public static Advancement.Builder recipeAdvancement() {
+			return new Advancement.Builder(false);
 		}
 
 		public Advancement.Builder parent(Advancement advancement) {
@@ -285,7 +304,7 @@ public class Advancement {
 					this.requirements = this.requirementsStrategy.createRequirements(this.criteria.keySet());
 				}
 
-				return new Advancement(resourceLocation, this.parent, this.display, this.rewards, this.criteria, this.requirements);
+				return new Advancement(resourceLocation, this.parent, this.display, this.rewards, this.criteria, this.requirements, this.sendsTelemetryEvent);
 			}
 		}
 
@@ -332,6 +351,7 @@ public class Advancement {
 			}
 
 			jsonObject.add("requirements", jsonArray);
+			jsonObject.addProperty("sends_telemetry_event", this.sendsTelemetryEvent);
 			return jsonObject;
 		}
 
@@ -352,6 +372,8 @@ public class Advancement {
 					friendlyByteBuf.writeUtf(string);
 				}
 			}
+
+			friendlyByteBuf.writeBoolean(this.sendsTelemetryEvent);
 		}
 
 		public String toString() {
@@ -365,6 +387,8 @@ public class Advancement {
 				+ this.criteria
 				+ ", requirements="
 				+ Arrays.deepToString(this.requirements)
+				+ ", sends_telemetry_event="
+				+ this.sendsTelemetryEvent
 				+ "}";
 		}
 
@@ -428,7 +452,8 @@ public class Advancement {
 					}
 				}
 
-				return new Advancement.Builder(resourceLocation, displayInfo, advancementRewards, map, strings);
+				boolean bl2 = GsonHelper.getAsBoolean(jsonObject, "sends_telemetry_event", false);
+				return new Advancement.Builder(resourceLocation, displayInfo, advancementRewards, map, strings, bl2);
 			}
 		}
 
@@ -446,7 +471,8 @@ public class Advancement {
 				}
 			}
 
-			return new Advancement.Builder(resourceLocation, displayInfo, AdvancementRewards.EMPTY, map, strings);
+			boolean bl = friendlyByteBuf.readBoolean();
+			return new Advancement.Builder(resourceLocation, displayInfo, AdvancementRewards.EMPTY, map, strings, bl);
 		}
 
 		public Map<String, Criterion> getCriteria() {

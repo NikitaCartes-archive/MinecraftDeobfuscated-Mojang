@@ -138,7 +138,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl3);
 				VertexConsumer vertexConsumer;
-				if (itemStack.is(ItemTags.COMPASSES) && itemStack.hasFoil()) {
+				if (hasAnimatedTexture(itemStack) && itemStack.hasFoil()) {
 					poseStack.pushPose();
 					PoseStack.Pose pose = poseStack.last();
 					if (itemDisplayContext == ItemDisplayContext.GUI) {
@@ -167,6 +167,10 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 			poseStack.popPose();
 		}
+	}
+
+	private static boolean hasAnimatedTexture(ItemStack itemStack) {
+		return itemStack.is(ItemTags.COMPASSES) || itemStack.is(Items.CLOCK);
 	}
 
 	public static VertexConsumer getArmorFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {

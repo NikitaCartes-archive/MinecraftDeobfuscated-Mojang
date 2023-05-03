@@ -22,11 +22,11 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 	}
 
 	public KilledByCrossbowTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
-		EntityPredicate.Composite[] composites = EntityPredicate.Composite.fromJsonArray(jsonObject, "victims", deserializationContext);
+		ContextAwarePredicate[] contextAwarePredicates = EntityPredicate.fromJsonArray(jsonObject, "victims", deserializationContext);
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("unique_entity_types"));
-		return new KilledByCrossbowTrigger.TriggerInstance(composite, composites, ints);
+		return new KilledByCrossbowTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicates, ints);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Collection<Entity> collection) {
@@ -42,42 +42,42 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate.Composite[] victims;
+		private final ContextAwarePredicate[] victims;
 		private final MinMaxBounds.Ints uniqueEntityTypes;
 
-		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite[] composites, MinMaxBounds.Ints ints) {
-			super(KilledByCrossbowTrigger.ID, composite);
-			this.victims = composites;
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate[] contextAwarePredicates, MinMaxBounds.Ints ints) {
+			super(KilledByCrossbowTrigger.ID, contextAwarePredicate);
+			this.victims = contextAwarePredicates;
 			this.uniqueEntityTypes = ints;
 		}
 
 		public static KilledByCrossbowTrigger.TriggerInstance crossbowKilled(EntityPredicate.Builder... builders) {
-			EntityPredicate.Composite[] composites = new EntityPredicate.Composite[builders.length];
+			ContextAwarePredicate[] contextAwarePredicates = new ContextAwarePredicate[builders.length];
 
 			for (int i = 0; i < builders.length; i++) {
 				EntityPredicate.Builder builder = builders[i];
-				composites[i] = EntityPredicate.Composite.wrap(builder.build());
+				contextAwarePredicates[i] = EntityPredicate.wrap(builder.build());
 			}
 
-			return new KilledByCrossbowTrigger.TriggerInstance(EntityPredicate.Composite.ANY, composites, MinMaxBounds.Ints.ANY);
+			return new KilledByCrossbowTrigger.TriggerInstance(ContextAwarePredicate.ANY, contextAwarePredicates, MinMaxBounds.Ints.ANY);
 		}
 
 		public static KilledByCrossbowTrigger.TriggerInstance crossbowKilled(MinMaxBounds.Ints ints) {
-			EntityPredicate.Composite[] composites = new EntityPredicate.Composite[0];
-			return new KilledByCrossbowTrigger.TriggerInstance(EntityPredicate.Composite.ANY, composites, ints);
+			ContextAwarePredicate[] contextAwarePredicates = new ContextAwarePredicate[0];
+			return new KilledByCrossbowTrigger.TriggerInstance(ContextAwarePredicate.ANY, contextAwarePredicates, ints);
 		}
 
 		public boolean matches(Collection<LootContext> collection, int i) {
 			if (this.victims.length > 0) {
 				List<LootContext> list = Lists.<LootContext>newArrayList(collection);
 
-				for (EntityPredicate.Composite composite : this.victims) {
+				for (ContextAwarePredicate contextAwarePredicate : this.victims) {
 					boolean bl = false;
 					Iterator<LootContext> iterator = list.iterator();
 
 					while (iterator.hasNext()) {
 						LootContext lootContext = (LootContext)iterator.next();
-						if (composite.matches(lootContext)) {
+						if (contextAwarePredicate.matches(lootContext)) {
 							iterator.remove();
 							bl = true;
 							break;
@@ -96,7 +96,7 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 		@Override
 		public JsonObject serializeToJson(SerializationContext serializationContext) {
 			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("victims", EntityPredicate.Composite.toJson(this.victims, serializationContext));
+			jsonObject.add("victims", ContextAwarePredicate.toJson(this.victims, serializationContext));
 			jsonObject.add("unique_entity_types", this.uniqueEntityTypes.serializeToJson());
 			return jsonObject;
 		}

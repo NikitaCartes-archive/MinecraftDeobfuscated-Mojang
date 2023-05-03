@@ -17,12 +17,12 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 	}
 
 	public BredAnimalsTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "parent", deserializationContext);
-		EntityPredicate.Composite composite3 = EntityPredicate.Composite.fromJson(jsonObject, "partner", deserializationContext);
-		EntityPredicate.Composite composite4 = EntityPredicate.Composite.fromJson(jsonObject, "child", deserializationContext);
-		return new BredAnimalsTrigger.TriggerInstance(composite, composite2, composite3, composite4);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "parent", deserializationContext);
+		ContextAwarePredicate contextAwarePredicate3 = EntityPredicate.fromJson(jsonObject, "partner", deserializationContext);
+		ContextAwarePredicate contextAwarePredicate4 = EntityPredicate.fromJson(jsonObject, "child", deserializationContext);
+		return new BredAnimalsTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2, contextAwarePredicate3, contextAwarePredicate4);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Animal animal, Animal animal2, @Nullable AgeableMob ageableMob) {
@@ -33,28 +33,29 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate.Composite parent;
-		private final EntityPredicate.Composite partner;
-		private final EntityPredicate.Composite child;
+		private final ContextAwarePredicate parent;
+		private final ContextAwarePredicate partner;
+		private final ContextAwarePredicate child;
 
 		public TriggerInstance(
-			EntityPredicate.Composite composite, EntityPredicate.Composite composite2, EntityPredicate.Composite composite3, EntityPredicate.Composite composite4
+			ContextAwarePredicate contextAwarePredicate,
+			ContextAwarePredicate contextAwarePredicate2,
+			ContextAwarePredicate contextAwarePredicate3,
+			ContextAwarePredicate contextAwarePredicate4
 		) {
-			super(BredAnimalsTrigger.ID, composite);
-			this.parent = composite2;
-			this.partner = composite3;
-			this.child = composite4;
+			super(BredAnimalsTrigger.ID, contextAwarePredicate);
+			this.parent = contextAwarePredicate2;
+			this.partner = contextAwarePredicate3;
+			this.child = contextAwarePredicate4;
 		}
 
 		public static BredAnimalsTrigger.TriggerInstance bredAnimals() {
-			return new BredAnimalsTrigger.TriggerInstance(
-				EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY
-			);
+			return new BredAnimalsTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ContextAwarePredicate.ANY);
 		}
 
 		public static BredAnimalsTrigger.TriggerInstance bredAnimals(EntityPredicate.Builder builder) {
 			return new BredAnimalsTrigger.TriggerInstance(
-				EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build())
+				ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, EntityPredicate.wrap(builder.build())
 			);
 		}
 
@@ -62,15 +63,12 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 			EntityPredicate entityPredicate, EntityPredicate entityPredicate2, EntityPredicate entityPredicate3
 		) {
 			return new BredAnimalsTrigger.TriggerInstance(
-				EntityPredicate.Composite.ANY,
-				EntityPredicate.Composite.wrap(entityPredicate),
-				EntityPredicate.Composite.wrap(entityPredicate2),
-				EntityPredicate.Composite.wrap(entityPredicate3)
+				ContextAwarePredicate.ANY, EntityPredicate.wrap(entityPredicate), EntityPredicate.wrap(entityPredicate2), EntityPredicate.wrap(entityPredicate3)
 			);
 		}
 
 		public boolean matches(LootContext lootContext, LootContext lootContext2, @Nullable LootContext lootContext3) {
-			return this.child == EntityPredicate.Composite.ANY || lootContext3 != null && this.child.matches(lootContext3)
+			return this.child == ContextAwarePredicate.ANY || lootContext3 != null && this.child.matches(lootContext3)
 				? this.parent.matches(lootContext) && this.partner.matches(lootContext2) || this.parent.matches(lootContext2) && this.partner.matches(lootContext)
 				: false;
 		}

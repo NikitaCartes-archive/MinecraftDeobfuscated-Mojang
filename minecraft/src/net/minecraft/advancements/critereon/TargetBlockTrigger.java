@@ -16,11 +16,11 @@ public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigge
 	}
 
 	public TargetBlockTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("signal_strength"));
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "projectile", deserializationContext);
-		return new TargetBlockTrigger.TriggerInstance(composite, ints, composite2);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "projectile", deserializationContext);
+		return new TargetBlockTrigger.TriggerInstance(contextAwarePredicate, ints, contextAwarePredicate2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Entity entity, Vec3 vec3, int i) {
@@ -30,16 +30,16 @@ public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigge
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final MinMaxBounds.Ints signalStrength;
-		private final EntityPredicate.Composite projectile;
+		private final ContextAwarePredicate projectile;
 
-		public TriggerInstance(EntityPredicate.Composite composite, MinMaxBounds.Ints ints, EntityPredicate.Composite composite2) {
-			super(TargetBlockTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, MinMaxBounds.Ints ints, ContextAwarePredicate contextAwarePredicate2) {
+			super(TargetBlockTrigger.ID, contextAwarePredicate);
 			this.signalStrength = ints;
-			this.projectile = composite2;
+			this.projectile = contextAwarePredicate2;
 		}
 
-		public static TargetBlockTrigger.TriggerInstance targetHit(MinMaxBounds.Ints ints, EntityPredicate.Composite composite) {
-			return new TargetBlockTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ints, composite);
+		public static TargetBlockTrigger.TriggerInstance targetHit(MinMaxBounds.Ints ints, ContextAwarePredicate contextAwarePredicate) {
+			return new TargetBlockTrigger.TriggerInstance(ContextAwarePredicate.ANY, ints, contextAwarePredicate);
 		}
 
 		@Override

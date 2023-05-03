@@ -598,7 +598,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.darkBuffer.close();
 		}
 
-		this.darkBuffer = new VertexBuffer();
+		this.darkBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 		BufferBuilder.RenderedBuffer renderedBuffer = buildSkyDisc(bufferBuilder, -16.0F);
 		this.darkBuffer.bind();
 		this.darkBuffer.upload(renderedBuffer);
@@ -612,7 +612,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.skyBuffer.close();
 		}
 
-		this.skyBuffer = new VertexBuffer();
+		this.skyBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 		BufferBuilder.RenderedBuffer renderedBuffer = buildSkyDisc(bufferBuilder, 16.0F);
 		this.skyBuffer.bind();
 		this.skyBuffer.upload(renderedBuffer);
@@ -644,7 +644,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.starBuffer.close();
 		}
 
-		this.starBuffer = new VertexBuffer();
+		this.starBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 		BufferBuilder.RenderedBuffer renderedBuffer = this.drawStars(bufferBuilder);
 		this.starBuffer.bind();
 		this.starBuffer.upload(renderedBuffer);
@@ -1091,7 +1091,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		BlockPos blockPos2 = renderChunk.getOrigin();
 		int k = SectionPos.blockToSectionCoord(blockPos2.getX());
 		int l = SectionPos.blockToSectionCoord(blockPos2.getZ());
-		return !ChunkMap.isChunkInRange(k, l, i, j, this.lastViewDistance - 2);
+		return !ChunkMap.isChunkInRange(k, l, i, j, this.lastViewDistance - 3);
 	}
 
 	private void captureFrustum(Matrix4f matrix4f, Matrix4f matrix4f2, double d, double e, double f, Frustum frustum) {
@@ -1949,7 +1949,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					this.cloudBuffer.close();
 				}
 
-				this.cloudBuffer = new VertexBuffer();
+				this.cloudBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 				BufferBuilder.RenderedBuffer renderedBuffer = this.buildClouds(bufferBuilder, m, n, o, vec3);
 				this.cloudBuffer.bind();
 				this.cloudBuffer.upload(renderedBuffer);
@@ -2366,20 +2366,45 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		);
 	}
 
+	private static Vec3 mixColor(float f) {
+		float g = 5.99999F;
+		int i = (int)(Mth.clamp(f, 0.0F, 1.0F) * 5.99999F);
+		float h = f * 5.99999F - (float)i;
+
+		return switch (i) {
+			case 0 -> new Vec3(1.0, (double)h, 0.0);
+			case 1 -> new Vec3((double)(1.0F - h), 1.0, 0.0);
+			case 2 -> new Vec3(0.0, 1.0, (double)h);
+			case 3 -> new Vec3(0.0, 1.0 - (double)h, 1.0);
+			case 4 -> new Vec3((double)h, 0.0, 1.0);
+			case 5 -> new Vec3(1.0, 0.0, 1.0 - (double)h);
+			default -> throw new IllegalStateException("Unexpected value: " + i);
+		};
+	}
+
+	private static Vec3 shiftHue(float f, float g, float h, float i) {
+		Vec3 vec3 = mixColor(i).scale((double)f);
+		Vec3 vec32 = mixColor((i + 0.33333334F) % 1.0F).scale((double)g);
+		Vec3 vec33 = mixColor((i + 0.6666667F) % 1.0F).scale((double)h);
+		Vec3 vec34 = vec3.add(vec32).add(vec33);
+		double d = Math.max(Math.max(1.0, vec34.x), Math.max(vec34.y, vec34.z));
+		return new Vec3(vec34.x / d, vec34.y / d, vec34.z / d);
+	}
+
 	public static void renderVoxelShape(
-		PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j
+		PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j, boolean bl
 	) {
 		List<AABB> list = voxelShape.toAabbs();
-		int k = Mth.ceil((double)list.size() / 3.0);
+		if (!list.isEmpty()) {
+			int k = bl ? list.size() : list.size() * 8;
+			renderShape(poseStack, vertexConsumer, Shapes.create((AABB)list.get(0)), d, e, f, g, h, i, j);
 
-		for (int l = 0; l < list.size(); l++) {
-			AABB aABB = (AABB)list.get(l);
-			float m = ((float)l % (float)k + 1.0F) / (float)k;
-			float n = (float)(l / k);
-			float o = m * (float)(n == 0.0F ? 1 : 0);
-			float p = m * (float)(n == 1.0F ? 1 : 0);
-			float q = m * (float)(n == 2.0F ? 1 : 0);
-			renderShape(poseStack, vertexConsumer, Shapes.create(aABB.move(0.0, 0.0, 0.0)), d, e, f, o, p, q, 1.0F);
+			for (int l = 1; l < list.size(); l++) {
+				AABB aABB = (AABB)list.get(l);
+				float m = (float)l / (float)k;
+				Vec3 vec3 = shiftHue(g, h, i, m);
+				renderShape(poseStack, vertexConsumer, Shapes.create(aABB), d, e, f, (float)vec3.x, (float)vec3.y, (float)vec3.z, j);
+			}
 		}
 	}
 

@@ -9,6 +9,7 @@ import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.BrewedPotionTrigger;
 import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
 import net.minecraft.advancements.critereon.ConstructBeaconTrigger;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.DistancePredicate;
 import net.minecraft.advancements.critereon.DistanceTrigger;
@@ -18,8 +19,8 @@ import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
-import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.LootTableTrigger;
@@ -50,7 +51,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
 public class VanillaNetherAdvancements implements AdvancementSubProvider {
-	private static final EntityPredicate.Composite DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE = EntityPredicate.Composite.create(
+	private static final ContextAwarePredicate DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE = ContextAwarePredicate.create(
 		LootItemEntityPropertyCondition.hasProperties(
 				LootContext.EntityTarget.THIS,
 				EntityPredicate.Builder.entity()
@@ -378,7 +379,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion(
 				"use_lodestone",
-				ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(
+				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
 					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.LODESTONE).build()), ItemPredicate.Builder.item().of(Items.COMPASS)
 				)
 			)
@@ -411,7 +412,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion(
 				"charge_respawn_anchor",
-				ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(
+				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
 					LocationPredicate.Builder.location()
 						.setBlock(
 							BlockPredicate.Builder.block()
@@ -438,7 +439,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"used_warped_fungus_on_a_stick",
 				ItemDurabilityTrigger.TriggerInstance.changedDurability(
-					EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER).build()).build()),
+					EntityPredicate.wrap(EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER).build()).build()),
 					ItemPredicate.Builder.item().of(Items.WARPED_FUNGUS_ON_A_STICK).build(),
 					MinMaxBounds.Ints.ANY
 				)
@@ -530,9 +531,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByEntity(
 					DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE,
 					ItemPredicate.Builder.item().of(ItemTags.PIGLIN_LOVED).build(),
-					EntityPredicate.Composite.wrap(
-						EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build()
-					)
+					EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build())
 				)
 			)
 			.addCriterion(
@@ -540,9 +539,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
 					DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE,
 					ItemPredicate.Builder.item().of(PiglinAi.BARTERING_ITEM),
-					EntityPredicate.Composite.wrap(
-						EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build()
-					)
+					EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build())
 				)
 			)
 			.save(consumer, "nether/distract_piglin");

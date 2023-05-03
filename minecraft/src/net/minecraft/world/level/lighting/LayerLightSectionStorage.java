@@ -156,7 +156,6 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 				if (this.storingLightForSection(m)) {
 					DataLayer dataLayer2 = (DataLayer)entry.getValue();
 					if (this.updatingSectionData.getLayer(m) != dataLayer2) {
-						lightEngine.clearQueuedSectionBlocks(m);
 						this.updatingSectionData.setLayer(m, dataLayer2);
 						this.changedSections.add(m);
 					}

@@ -229,6 +229,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public boolean isInPowderSnow;
 	public boolean wasInPowderSnow;
 	public boolean wasOnFire;
+	public Optional<BlockPos> mainSupportingBlockPos = Optional.empty();
 	private float crystalSoundIntensity;
 	private int lastCrystalSoundPlayTick;
 	private boolean hasVisualFire;
@@ -541,6 +542,17 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public void setOnGround(boolean bl) {
 		this.onGround = bl;
+		this.checkSupportingBlock(bl);
+	}
+
+	protected void checkSupportingBlock(boolean bl) {
+		if (bl) {
+			AABB aABB = this.getBoundingBox();
+			AABB aABB2 = new AABB(aABB.minX, aABB.minY - 1.0E-6, aABB.minZ, aABB.maxX, aABB.minY, aABB.maxZ);
+			this.mainSupportingBlockPos = this.level.findSupportingBlock(this, aABB2);
+		} else if (this.mainSupportingBlockPos.isPresent()) {
+			this.mainSupportingBlockPos = Optional.empty();
+		}
 	}
 
 	public boolean onGround() {
@@ -621,23 +633,24 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 					double f = vec32.y;
 					double g = vec32.z;
 					this.flyDist = this.flyDist + (float)(vec32.length() * 0.6);
-					boolean bl3 = blockState.is(BlockTags.CLIMBABLE) || blockState.is(Blocks.POWDER_SNOW);
+					BlockPos blockPos2 = this.getOnPos();
+					BlockState blockState2 = this.level().getBlockState(blockPos2);
+					boolean bl3 = this.isStateClimbable(blockState2);
 					if (!bl3) {
 						f = 0.0;
 					}
 
 					this.walkDist = this.walkDist + (float)vec32.horizontalDistance() * 0.6F;
 					this.moveDist = this.moveDist + (float)Math.sqrt(e * e + f * f + g * g) * 0.6F;
-					if (this.moveDist > this.nextStep && !blockState.isAir()) {
-						if (this.walkingOnBlock(bl3, vec3)) {
-							this.nextStep = this.nextStep();
-							if (movementEmission.emitsSounds()) {
-								this.walkingStepSound(blockPos, blockState);
-							}
+					if (this.moveDist > this.nextStep && !blockState2.isAir()) {
+						boolean bl4 = blockPos2.equals(blockPos);
+						boolean bl5 = this.vibrationAndSoundEffectsFromBlock(blockPos, blockState, movementEmission.emitsSounds(), bl4, vec3);
+						if (!bl4) {
+							bl5 |= this.vibrationAndSoundEffectsFromBlock(blockPos2, blockState2, false, movementEmission.emitsEvents(), vec3);
+						}
 
-							if (movementEmission.emitsEvents()) {
-								this.level().gameEvent(GameEvent.STEP, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
-							}
+						if (bl5) {
+							this.nextStep = this.nextStep();
 						} else if (this.isInWater()) {
 							this.nextStep = this.nextStep();
 							if (movementEmission.emitsSounds()) {
@@ -648,7 +661,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 								this.gameEvent(GameEvent.SWIM);
 							}
 						}
-					} else if (blockState.isAir()) {
+					} else if (blockState2.isAir()) {
 						this.processFlappingMovement();
 					}
 				}
@@ -673,6 +686,31 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				}
 
 				this.level().getProfiler().pop();
+			}
+		}
+	}
+
+	private boolean isStateClimbable(BlockState blockState) {
+		return blockState.is(BlockTags.CLIMBABLE) || blockState.is(Blocks.POWDER_SNOW);
+	}
+
+	private boolean vibrationAndSoundEffectsFromBlock(BlockPos blockPos, BlockState blockState, boolean bl, boolean bl2, Vec3 vec3) {
+		if (blockState.isAir()) {
+			return false;
+		} else {
+			boolean bl3 = this.isStateClimbable(blockState);
+			if ((this.onGround() || bl3 || this.isCrouching() && vec3.y == 0.0) && !this.isSwimming()) {
+				if (bl) {
+					this.walkingStepSound(blockPos, blockState);
+				}
+
+				if (bl2) {
+					this.level().gameEvent(GameEvent.STEP, this.position(), GameEvent.Context.of(this, blockState));
+				}
+
+				return true;
+			} else {
+				return false;
 			}
 		}
 	}
@@ -723,19 +761,22 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	private BlockPos getOnPos(float f) {
-		int i = Mth.floor(this.position.x);
-		int j = Mth.floor(this.position.y - (double)f);
-		int k = Mth.floor(this.position.z);
-		BlockPos blockPos = new BlockPos(i, j, k);
-		if (this.level().getBlockState(blockPos).isAir()) {
-			BlockPos blockPos2 = blockPos.below();
-			BlockState blockState = this.level().getBlockState(blockPos2);
-			if (blockState.is(BlockTags.FENCES) || blockState.is(BlockTags.WALLS) || blockState.getBlock() instanceof FenceGateBlock) {
-				return blockPos2;
+		if (this.mainSupportingBlockPos.isPresent()) {
+			BlockPos blockPos = (BlockPos)this.mainSupportingBlockPos.get();
+			if (!(f > 1.0E-5F)) {
+				return blockPos;
+			} else {
+				BlockState blockState = this.level().getBlockState(blockPos);
+				return (!((double)f <= 0.5) || !blockState.is(BlockTags.FENCES)) && !blockState.is(BlockTags.WALLS) && !(blockState.getBlock() instanceof FenceGateBlock)
+					? blockPos.atY(Mth.floor(this.position.y - (double)f))
+					: blockPos;
 			}
+		} else {
+			int i = Mth.floor(this.position.x);
+			int j = Mth.floor(this.position.y - (double)f);
+			int k = Mth.floor(this.position.z);
+			return new BlockPos(i, j, k);
 		}
-
-		return blockPos;
 	}
 
 	protected float getBlockJumpFactor() {
@@ -755,7 +796,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
-		return BlockPos.containing(this.position.x, this.getBoundingBox().minY - 0.5000001, this.position.z);
+		return this.getOnPos(0.5000001F);
 	}
 
 	protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
@@ -1030,7 +1071,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		if (bl) {
 			if (this.fallDistance > 0.0F) {
 				blockState.getBlock().fallOn(this.level(), blockState, blockPos, this, this.fallDistance);
-				this.level().gameEvent(GameEvent.HIT_GROUND, this.position, GameEvent.Context.of(this, this.getBlockStateOn()));
+				this.level()
+					.gameEvent(
+						GameEvent.HIT_GROUND,
+						this.position,
+						GameEvent.Context.of(this, (BlockState)this.mainSupportingBlockPos.map(blockPosx -> this.level().getBlockState(blockPosx)).orElse(blockState))
+					);
 			}
 
 			this.resetFallDistance();
@@ -1055,10 +1101,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 			return false;
 		}
-	}
-
-	public boolean walkingOnBlock(boolean bl, Vec3 vec3) {
-		return (this.onGround() || bl || this.isCrouching() && vec3.y == 0.0) && !this.isSwimming();
 	}
 
 	public boolean isInWater() {

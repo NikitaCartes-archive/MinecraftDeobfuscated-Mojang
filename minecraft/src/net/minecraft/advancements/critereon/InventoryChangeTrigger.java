@@ -21,14 +21,14 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 	}
 
 	public InventoryChangeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "slots", new JsonObject());
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject2.get("occupied"));
 		MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject2.get("full"));
 		MinMaxBounds.Ints ints3 = MinMaxBounds.Ints.fromJson(jsonObject2.get("empty"));
 		ItemPredicate[] itemPredicates = ItemPredicate.fromJsonArray(jsonObject.get("items"));
-		return new InventoryChangeTrigger.TriggerInstance(composite, ints, ints2, ints3, itemPredicates);
+		return new InventoryChangeTrigger.TriggerInstance(contextAwarePredicate, ints, ints2, ints3, itemPredicates);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack) {
@@ -62,9 +62,9 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 		private final ItemPredicate[] predicates;
 
 		public TriggerInstance(
-			EntityPredicate.Composite composite, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, MinMaxBounds.Ints ints3, ItemPredicate[] itemPredicates
+			ContextAwarePredicate contextAwarePredicate, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, MinMaxBounds.Ints ints3, ItemPredicate[] itemPredicates
 		) {
-			super(InventoryChangeTrigger.ID, composite);
+			super(InventoryChangeTrigger.ID, contextAwarePredicate);
 			this.slotsOccupied = ints;
 			this.slotsFull = ints2;
 			this.slotsEmpty = ints3;
@@ -73,7 +73,7 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 
 		public static InventoryChangeTrigger.TriggerInstance hasItems(ItemPredicate... itemPredicates) {
 			return new InventoryChangeTrigger.TriggerInstance(
-				EntityPredicate.Composite.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates
+				ContextAwarePredicate.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates
 			);
 		}
 

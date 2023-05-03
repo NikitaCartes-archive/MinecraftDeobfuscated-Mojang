@@ -189,7 +189,7 @@ public class SnifferAi {
 		}
 
 		protected boolean canStillUse(ServerLevel serverLevel, Sniffer sniffer, long l) {
-			return sniffer.getBrain().getMemory(MemoryModuleType.SNIFFER_DIGGING).isPresent() && sniffer.canSniff();
+			return sniffer.getBrain().getMemory(MemoryModuleType.SNIFFER_DIGGING).isPresent() && sniffer.canDig() && !sniffer.isInLove();
 		}
 
 		protected void start(ServerLevel serverLevel, Sniffer sniffer, long l) {

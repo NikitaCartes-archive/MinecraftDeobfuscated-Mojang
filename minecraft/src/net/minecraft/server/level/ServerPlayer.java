@@ -957,6 +957,7 @@ public class ServerPlayer extends Player {
 
 	public void doCheckFallDamage(double d, boolean bl) {
 		if (!this.touchingUnloadedChunk()) {
+			this.checkSupportingBlock(bl);
 			BlockPos blockPos = this.getOnPosLegacy();
 			super.checkFallDamage(d, bl, this.level().getBlockState(blockPos), blockPos);
 		}

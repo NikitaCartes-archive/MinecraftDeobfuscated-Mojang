@@ -15,10 +15,10 @@ public class RecipeUnlockedTrigger extends SimpleCriterionTrigger<RecipeUnlocked
 	}
 
 	public RecipeUnlockedTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "recipe"));
-		return new RecipeUnlockedTrigger.TriggerInstance(composite, resourceLocation);
+		return new RecipeUnlockedTrigger.TriggerInstance(contextAwarePredicate, resourceLocation);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Recipe<?> recipe) {
@@ -26,14 +26,14 @@ public class RecipeUnlockedTrigger extends SimpleCriterionTrigger<RecipeUnlocked
 	}
 
 	public static RecipeUnlockedTrigger.TriggerInstance unlocked(ResourceLocation resourceLocation) {
-		return new RecipeUnlockedTrigger.TriggerInstance(EntityPredicate.Composite.ANY, resourceLocation);
+		return new RecipeUnlockedTrigger.TriggerInstance(ContextAwarePredicate.ANY, resourceLocation);
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ResourceLocation recipe;
 
-		public TriggerInstance(EntityPredicate.Composite composite, ResourceLocation resourceLocation) {
-			super(RecipeUnlockedTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ResourceLocation resourceLocation) {
+			super(RecipeUnlockedTrigger.ID, contextAwarePredicate);
 			this.recipe = resourceLocation;
 		}
 

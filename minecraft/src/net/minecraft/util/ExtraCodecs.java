@@ -310,6 +310,10 @@ public class ExtraCodecs {
 		return codec.flatXmap(function, function);
 	}
 
+	public static <T> MapCodec<T> validate(MapCodec<T> mapCodec, Function<T, DataResult<T>> function) {
+		return mapCodec.flatXmap(function, function);
+	}
+
 	private static Codec<Integer> intRangeWithMessage(int i, int j, Function<Integer, String> function) {
 		return validate(
 			Codec.INT,

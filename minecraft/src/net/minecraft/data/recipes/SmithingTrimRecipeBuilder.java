@@ -17,7 +17,7 @@ public class SmithingTrimRecipeBuilder {
 	private final Ingredient template;
 	private final Ingredient base;
 	private final Ingredient addition;
-	private final Advancement.Builder advancement = Advancement.Builder.advancement();
+	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
 	private final RecipeSerializer<?> type;
 
 	public SmithingTrimRecipeBuilder(

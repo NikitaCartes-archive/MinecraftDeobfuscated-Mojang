@@ -20,12 +20,12 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 	}
 
 	public FishingRodHookedTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("rod"));
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "entity", deserializationContext);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
 		ItemPredicate itemPredicate2 = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new FishingRodHookedTrigger.TriggerInstance(composite, itemPredicate, composite2, itemPredicate2);
+		return new FishingRodHookedTrigger.TriggerInstance(contextAwarePredicate, itemPredicate, contextAwarePredicate2, itemPredicate2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, FishingHook fishingHook, Collection<ItemStack> collection) {
@@ -35,20 +35,20 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ItemPredicate rod;
-		private final EntityPredicate.Composite entity;
+		private final ContextAwarePredicate entity;
 		private final ItemPredicate item;
 
-		public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2, ItemPredicate itemPredicate2) {
-			super(FishingRodHookedTrigger.ID, composite);
+		public TriggerInstance(
+			ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, ContextAwarePredicate contextAwarePredicate2, ItemPredicate itemPredicate2
+		) {
+			super(FishingRodHookedTrigger.ID, contextAwarePredicate);
 			this.rod = itemPredicate;
-			this.entity = composite2;
+			this.entity = contextAwarePredicate2;
 			this.item = itemPredicate2;
 		}
 
 		public static FishingRodHookedTrigger.TriggerInstance fishedItem(ItemPredicate itemPredicate, EntityPredicate entityPredicate, ItemPredicate itemPredicate2) {
-			return new FishingRodHookedTrigger.TriggerInstance(
-				EntityPredicate.Composite.ANY, itemPredicate, EntityPredicate.Composite.wrap(entityPredicate), itemPredicate2
-			);
+			return new FishingRodHookedTrigger.TriggerInstance(ContextAwarePredicate.ANY, itemPredicate, EntityPredicate.wrap(entityPredicate), itemPredicate2);
 		}
 
 		public boolean matches(ItemStack itemStack, LootContext lootContext, Collection<ItemStack> collection) {

@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -9,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -65,9 +65,7 @@ public class GhostRecipe {
 
 			ItemStack itemStack = ghostIngredient.getItem();
 			guiGraphics.renderFakeItem(itemStack, l, m);
-			RenderSystem.depthFunc(516);
-			guiGraphics.fill(l, m, l + 16, m + 16, 822083583);
-			RenderSystem.depthFunc(515);
+			guiGraphics.fill(RenderType.guiGhostRecipeOverlay(), l, m, l + 16, m + 16, 822083583);
 			if (k == 0) {
 				guiGraphics.renderItemDecorations(minecraft.font, itemStack, l, m);
 			}

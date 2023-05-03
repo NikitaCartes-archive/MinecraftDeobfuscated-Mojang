@@ -192,6 +192,11 @@ public class GameTestHelper {
 		};
 	}
 
+	public LivingEntity withLowHealth(LivingEntity livingEntity) {
+		livingEntity.setHealth(0.25F);
+		return livingEntity;
+	}
+
 	public Player makeMockPlayer() {
 		return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
 			@Override

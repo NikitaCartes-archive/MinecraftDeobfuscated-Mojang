@@ -1,5 +1,7 @@
 package net.minecraft.client.main;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.base.Ticker;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.properties.PropertyMap;
@@ -32,6 +34,8 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.client.telemetry.TelemetryProperty;
+import net.minecraft.client.telemetry.events.GameLoadTimesEvent;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.server.Bootstrap;
@@ -46,6 +50,10 @@ public class Main {
 
 	@DontObfuscate
 	public static void main(String[] strings) {
+		Stopwatch stopwatch = Stopwatch.createStarted(Ticker.systemTicker());
+		Stopwatch stopwatch2 = Stopwatch.createStarted(Ticker.systemTicker());
+		GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_TOTAL_TIME_MS, stopwatch);
+		GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_PRE_WINDOW_MS, stopwatch2);
 		SharedConstants.tryDetectVersion();
 		SharedConstants.enableDataFixerOptimizations();
 		OptionParser optionParser = new OptionParser();
@@ -94,7 +102,7 @@ public class Main {
 		if (string != null) {
 			try {
 				proxy = new Proxy(Type.SOCKS, new InetSocketAddress(string, parseArgument(optionSet, optionSpec10)));
-			} catch (Exception var81) {
+			} catch (Exception var83) {
 			}
 		}
 
@@ -138,6 +146,7 @@ public class Main {
 
 		CrashReport.preload();
 		Bootstrap.bootStrap();
+		GameLoadTimesEvent.INSTANCE.setBootstrapTime(Bootstrap.bootstrapDuration.get());
 		Bootstrap.validate();
 		Util.startTimerHackThread();
 		String string14 = optionSpec26.value(optionSet);
@@ -177,11 +186,11 @@ public class Main {
 			RenderSystem.beginInitialization();
 			minecraft = new Minecraft(gameConfig);
 			RenderSystem.finishInitialization();
-		} catch (SilentInitException var79) {
-			LOGGER.warn("Failed to create window: ", (Throwable)var79);
+		} catch (SilentInitException var81) {
+			LOGGER.warn("Failed to create window: ", (Throwable)var81);
 			return;
-		} catch (Throwable var80) {
-			CrashReport crashReport = CrashReport.forThrowable(var80, "Initializing game");
+		} catch (Throwable var82) {
+			CrashReport crashReport = CrashReport.forThrowable(var82, "Initializing game");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Initialization");
 			NativeModuleLister.addCrashSection(crashReportCategory);
 			Minecraft.fillReport(null, null, gameConfig.game.launchVersion, null, crashReport);
@@ -211,8 +220,8 @@ public class Main {
 			try {
 				RenderSystem.initGameThread(false);
 				minecraft.run();
-			} catch (Throwable var78) {
-				LOGGER.error("Unhandled game exception", var78);
+			} catch (Throwable var80) {
+				LOGGER.error("Unhandled game exception", var80);
 			}
 		}
 
@@ -223,8 +232,8 @@ public class Main {
 			if (thread2 != null) {
 				thread2.join();
 			}
-		} catch (InterruptedException var76) {
-			LOGGER.error("Exception during client thread shutdown", (Throwable)var76);
+		} catch (InterruptedException var78) {
+			LOGGER.error("Exception during client thread shutdown", (Throwable)var78);
 		} finally {
 			minecraft.destroy();
 		}

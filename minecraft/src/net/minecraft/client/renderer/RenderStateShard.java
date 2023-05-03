@@ -90,8 +90,6 @@ public abstract class RenderStateShard {
 		}
 	);
 	protected static final RenderStateShard.ShaderStateShard NO_SHADER = new RenderStateShard.ShaderStateShard();
-	protected static final RenderStateShard.ShaderStateShard BLOCK_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getBlockShader);
-	protected static final RenderStateShard.ShaderStateShard NEW_ENTITY_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getNewEntityShader);
 	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_LIGHTMAP_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getPositionColorLightmapShader
 	);
@@ -235,6 +233,16 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LINES_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeLinesShader
 	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeGuiShader);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_OVERLAY_SHADER = new RenderStateShard.ShaderStateShard(
+		GameRenderer::getRendertypeGuiOverlayShader
+	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_TEXT_HIGHLIGHT_SHADER = new RenderStateShard.ShaderStateShard(
+		GameRenderer::getRendertypeGuiTextHighlightShader
+	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_GHOST_RECIPE_OVERLAY_SHADER = new RenderStateShard.ShaderStateShard(
+		GameRenderer::getRendertypeGuiGhostRecipeOverlayShader
+	);
 	protected static final RenderStateShard.TextureStateShard BLOCK_SHEET_MIPPED = new RenderStateShard.TextureStateShard(
 		TextureAtlas.LOCATION_BLOCKS, false, true
 	);
@@ -258,6 +266,7 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.DepthTestStateShard NO_DEPTH_TEST = new RenderStateShard.DepthTestStateShard("always", 519);
 	protected static final RenderStateShard.DepthTestStateShard EQUAL_DEPTH_TEST = new RenderStateShard.DepthTestStateShard("==", 514);
 	protected static final RenderStateShard.DepthTestStateShard LEQUAL_DEPTH_TEST = new RenderStateShard.DepthTestStateShard("<=", 515);
+	protected static final RenderStateShard.DepthTestStateShard GREATER_DEPTH_TEST = new RenderStateShard.DepthTestStateShard(">", 516);
 	protected static final RenderStateShard.WriteMaskStateShard COLOR_DEPTH_WRITE = new RenderStateShard.WriteMaskStateShard(true, true);
 	protected static final RenderStateShard.WriteMaskStateShard COLOR_WRITE = new RenderStateShard.WriteMaskStateShard(true, false);
 	protected static final RenderStateShard.WriteMaskStateShard DEPTH_WRITE = new RenderStateShard.WriteMaskStateShard(false, true);
@@ -337,6 +346,14 @@ public abstract class RenderStateShard {
 		}
 	});
 	protected static final RenderStateShard.LineStateShard DEFAULT_LINE = new RenderStateShard.LineStateShard(OptionalDouble.of(1.0));
+	protected static final RenderStateShard.ColorLogicStateShard NO_COLOR_LOGIC = new RenderStateShard.ColorLogicStateShard(
+		"no_color_logic", () -> RenderSystem.disableColorLogicOp(), () -> {
+		}
+	);
+	protected static final RenderStateShard.ColorLogicStateShard OR_REVERSE_COLOR_LOGIC = new RenderStateShard.ColorLogicStateShard("or_reverse", () -> {
+		RenderSystem.enableColorLogicOp();
+		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+	}, () -> RenderSystem.disableColorLogicOp());
 
 	public RenderStateShard(String string, Runnable runnable, Runnable runnable2) {
 		this.name = string;
@@ -377,6 +394,13 @@ public abstract class RenderStateShard {
 		@Override
 		public String toString() {
 			return this.name + "[" + this.enabled + "]";
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	protected static class ColorLogicStateShard extends RenderStateShard {
+		public ColorLogicStateShard(String string, Runnable runnable, Runnable runnable2) {
+			super(string, runnable, runnable2);
 		}
 	}
 

@@ -69,7 +69,7 @@ public interface CollisionGetter extends BlockGetter {
 	}
 
 	default Iterable<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB) {
-		return () -> new BlockCollisions(this, entity, aABB);
+		return () -> new BlockCollisions(this, entity, aABB, false, (mutableBlockPos, voxelShape) -> voxelShape);
 	}
 
 	@Nullable
@@ -79,7 +79,7 @@ public interface CollisionGetter extends BlockGetter {
 	}
 
 	default boolean collidesWithSuffocatingBlock(@Nullable Entity entity, AABB aABB) {
-		BlockCollisions blockCollisions = new BlockCollisions(this, entity, aABB, true);
+		BlockCollisions<VoxelShape> blockCollisions = new BlockCollisions<>(this, entity, aABB, true, (mutableBlockPos, voxelShape) -> voxelShape);
 
 		while (blockCollisions.hasNext()) {
 			if (!blockCollisions.next().isEmpty()) {
@@ -88,6 +88,23 @@ public interface CollisionGetter extends BlockGetter {
 		}
 
 		return false;
+	}
+
+	default Optional<BlockPos> findSupportingBlock(Entity entity, AABB aABB) {
+		BlockPos blockPos = null;
+		double d = Double.MAX_VALUE;
+		BlockCollisions<BlockPos> blockCollisions = new BlockCollisions<>(this, entity, aABB, false, (mutableBlockPos, voxelShape) -> mutableBlockPos);
+
+		while (blockCollisions.hasNext()) {
+			BlockPos blockPos2 = blockCollisions.next();
+			double e = blockPos2.distToCenterSqr(entity.position());
+			if (e < d || e == d && (blockPos == null || blockPos.compareTo(blockPos2) < 0)) {
+				blockPos = blockPos2.immutable();
+				d = e;
+			}
+		}
+
+		return Optional.ofNullable(blockPos);
 	}
 
 	default Optional<Vec3> findFreePosition(@Nullable Entity entity, VoxelShape voxelShape, Vec3 vec3, double d, double e, double f) {

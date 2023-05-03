@@ -2,8 +2,11 @@ package net.minecraft.server;
 
 import com.mojang.logging.LogUtils;
 import java.io.PrintStream;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
@@ -31,10 +34,12 @@ public class Bootstrap {
 	public static final PrintStream STDOUT = System.out;
 	private static volatile boolean isBootstrapped;
 	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final AtomicLong bootstrapDuration = new AtomicLong(-1L);
 
 	public static void bootStrap() {
 		if (!isBootstrapped) {
 			isBootstrapped = true;
+			Instant instant = Instant.now();
 			if (BuiltInRegistries.REGISTRY.keySet().isEmpty()) {
 				throw new IllegalStateException("Unable to load registries");
 			} else {
@@ -50,6 +55,7 @@ public class Bootstrap {
 					BuiltInRegistries.bootStrap();
 					CreativeModeTabs.validate();
 					wrapStreams();
+					bootstrapDuration.set(Duration.between(instant, Instant.now()).toMillis());
 				}
 			}
 		}

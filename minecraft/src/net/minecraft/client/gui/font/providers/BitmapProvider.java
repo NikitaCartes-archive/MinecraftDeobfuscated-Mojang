@@ -1,19 +1,20 @@
 package net.minecraft.client.gui.font.providers;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.SheetGlyphInfo;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -23,7 +24,7 @@ import net.minecraft.client.gui.font.CodepointMap;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -54,71 +55,96 @@ public class BitmapProvider implements GlyphProvider {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Builder implements GlyphProviderBuilder {
-		private final ResourceLocation texture;
-		private final List<int[]> chars;
-		private final int height;
-		private final int ascent;
+	public static record Definition(ResourceLocation file, int height, int ascent, int[][] codepointGrid) implements GlyphProviderDefinition {
+		private static final Codec<int[][]> CODEPOINT_GRID_CODEC = ExtraCodecs.validate(Codec.STRING.listOf().xmap(list -> {
+			int i = list.size();
+			int[][] is = new int[i][];
 
-		public Builder(ResourceLocation resourceLocation, int i, int j, List<int[]> list) {
-			this.texture = resourceLocation.withPrefix("textures/");
-			this.chars = list;
-			this.height = i;
-			this.ascent = j;
-		}
+			for (int j = 0; j < i; j++) {
+				is[j] = ((String)list.get(j)).codePoints().toArray();
+			}
 
-		public static BitmapProvider.Builder fromJson(JsonObject jsonObject) {
-			int i = GsonHelper.getAsInt(jsonObject, "height", 8);
-			int j = GsonHelper.getAsInt(jsonObject, "ascent");
-			if (j > i) {
-				throw new JsonParseException("Ascent " + j + " higher than height " + i);
+			return is;
+		}, is -> {
+			List<String> list = new ArrayList(is.length);
+
+			for (int[] js : is) {
+				list.add(new String(js, 0, js.length));
+			}
+
+			return list;
+		}), BitmapProvider.Definition::validateDimensions);
+		public static final MapCodec<BitmapProvider.Definition> CODEC = ExtraCodecs.validate(
+			RecordCodecBuilder.mapCodec(
+				instance -> instance.group(
+							ResourceLocation.CODEC.fieldOf("file").forGetter(BitmapProvider.Definition::file),
+							Codec.INT.optionalFieldOf("height", Integer.valueOf(8)).forGetter(BitmapProvider.Definition::height),
+							Codec.INT.fieldOf("ascent").forGetter(BitmapProvider.Definition::ascent),
+							CODEPOINT_GRID_CODEC.fieldOf("chars").forGetter(BitmapProvider.Definition::codepointGrid)
+						)
+						.apply(instance, BitmapProvider.Definition::new)
+			),
+			BitmapProvider.Definition::validate
+		);
+
+		private static DataResult<int[][]> validateDimensions(int[][] is) {
+			int i = is.length;
+			if (i == 0) {
+				return DataResult.error(() -> "Expected to find data in codepoint grid");
 			} else {
-				List<int[]> list = Lists.<int[]>newArrayList();
-				JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "chars");
-
-				for (int k = 0; k < jsonArray.size(); k++) {
-					String string = GsonHelper.convertToString(jsonArray.get(k), "chars[" + k + "]");
-					int[] is = string.codePoints().toArray();
-					if (k > 0) {
-						int l = ((int[])list.get(0)).length;
-						if (is.length != l) {
-							throw new JsonParseException("Elements of chars have to be the same length (found: " + is.length + ", expected: " + l + "), pad with \\u0000");
+				int[] js = is[0];
+				int j = js.length;
+				if (j == 0) {
+					return DataResult.error(() -> "Expected to find data in codepoint grid");
+				} else {
+					for (int k = 1; k < i; k++) {
+						int[] ks = is[k];
+						if (ks.length != j) {
+							return DataResult.error(
+								() -> "Lines in codepoint grid have to be the same length (found: " + ks.length + " codepoints, expected: " + j + "), pad with \\u0000"
+							);
 						}
 					}
 
-					list.add(is);
-				}
-
-				if (!list.isEmpty() && ((int[])list.get(0)).length != 0) {
-					return new BitmapProvider.Builder(new ResourceLocation(GsonHelper.getAsString(jsonObject, "file")), i, j, list);
-				} else {
-					throw new JsonParseException("Expected to find data in chars, found none.");
+					return DataResult.success(is);
 				}
 			}
 		}
 
+		private static DataResult<BitmapProvider.Definition> validate(BitmapProvider.Definition definition) {
+			return definition.ascent > definition.height
+				? DataResult.error(() -> "Ascent " + definition.ascent + " higher than height " + definition.height)
+				: DataResult.success(definition);
+		}
+
 		@Override
-		public Either<GlyphProviderBuilder.Loader, GlyphProviderBuilder.Reference> build() {
+		public GlyphProviderType type() {
+			return GlyphProviderType.BITMAP;
+		}
+
+		@Override
+		public Either<GlyphProviderDefinition.Loader, GlyphProviderDefinition.Reference> unpack() {
 			return Either.left(this::load);
 		}
 
 		private GlyphProvider load(ResourceManager resourceManager) throws IOException {
-			InputStream inputStream = resourceManager.open(this.texture);
+			ResourceLocation resourceLocation = this.file.withPrefix("textures/");
+			InputStream inputStream = resourceManager.open(resourceLocation);
 
-			BitmapProvider var21;
+			BitmapProvider var22;
 			try {
 				NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, inputStream);
 				int i = nativeImage.getWidth();
 				int j = nativeImage.getHeight();
-				int k = i / ((int[])this.chars.get(0)).length;
-				int l = j / this.chars.size();
+				int k = i / this.codepointGrid[0].length;
+				int l = j / this.codepointGrid.length;
 				float f = (float)this.height / (float)l;
 				CodepointMap<BitmapProvider.Glyph> codepointMap = new CodepointMap<>(BitmapProvider.Glyph[]::new, BitmapProvider.Glyph[][]::new);
 
-				for (int m = 0; m < this.chars.size(); m++) {
+				for (int m = 0; m < this.codepointGrid.length; m++) {
 					int n = 0;
 
-					for (int o : (int[])this.chars.get(m)) {
+					for (int o : this.codepointGrid[m]) {
 						int p = n++;
 						if (o != 0) {
 							int q = this.getActualGlyphWidth(nativeImage, k, l, p, m);
@@ -126,30 +152,30 @@ public class BitmapProvider implements GlyphProvider {
 								o, new BitmapProvider.Glyph(f, nativeImage, p * k, m * l, k, l, (int)(0.5 + (double)((float)q * f)) + 1, this.ascent)
 							);
 							if (glyph != null) {
-								BitmapProvider.LOGGER.warn("Codepoint '{}' declared multiple times in {}", Integer.toHexString(o), this.texture);
+								BitmapProvider.LOGGER.warn("Codepoint '{}' declared multiple times in {}", Integer.toHexString(o), resourceLocation);
 							}
 						}
 					}
 				}
 
-				var21 = new BitmapProvider(nativeImage, codepointMap);
-			} catch (Throwable var20) {
+				var22 = new BitmapProvider(nativeImage, codepointMap);
+			} catch (Throwable var21) {
 				if (inputStream != null) {
 					try {
 						inputStream.close();
-					} catch (Throwable var19) {
-						var20.addSuppressed(var19);
+					} catch (Throwable var20) {
+						var21.addSuppressed(var20);
 					}
 				}
 
-				throw var20;
+				throw var21;
 			}
 
 			if (inputStream != null) {
 				inputStream.close();
 			}
 
-			return var21;
+			return var22;
 		}
 
 		private int getActualGlyphWidth(NativeImage nativeImage, int i, int j, int k, int l) {

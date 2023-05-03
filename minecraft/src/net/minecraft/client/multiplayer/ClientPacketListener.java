@@ -370,7 +370,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		this.connection = connection;
 		this.serverData = serverData;
 		this.localGameProfile = gameProfile;
-		this.advancements = new ClientAdvancements(minecraft);
+		this.advancements = new ClientAdvancements(minecraft, worldSessionTelemetryManager);
 		this.suggestionsProvider = new ClientSuggestionProvider(this, minecraft);
 		this.telemetryManager = worldSessionTelemetryManager;
 	}
@@ -704,12 +704,17 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 	@Override
 	public void handleLevelChunkWithLight(ClientboundLevelChunkWithLightPacket clientboundLevelChunkWithLightPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundLevelChunkWithLightPacket, this, this.minecraft);
-		this.updateLevelChunk(
-			clientboundLevelChunkWithLightPacket.getX(), clientboundLevelChunkWithLightPacket.getZ(), clientboundLevelChunkWithLightPacket.getChunkData()
-		);
-		this.queueLightUpdate(
-			clientboundLevelChunkWithLightPacket.getX(), clientboundLevelChunkWithLightPacket.getZ(), clientboundLevelChunkWithLightPacket.getLightData()
-		);
+		int i = clientboundLevelChunkWithLightPacket.getX();
+		int j = clientboundLevelChunkWithLightPacket.getZ();
+		this.updateLevelChunk(i, j, clientboundLevelChunkWithLightPacket.getChunkData());
+		ClientboundLightUpdatePacketData clientboundLightUpdatePacketData = clientboundLevelChunkWithLightPacket.getLightData();
+		this.level.queueLightUpdate(() -> {
+			this.applyLightData(i, j, clientboundLightUpdatePacketData);
+			LevelChunk levelChunk = this.level.getChunkSource().getChunk(i, j, false);
+			if (levelChunk != null) {
+				this.enableChunkLight(levelChunk, i, j);
+			}
+		});
 	}
 
 	@Override
@@ -747,16 +752,6 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 			);
 	}
 
-	private void queueLightUpdate(int i, int j, ClientboundLightUpdatePacketData clientboundLightUpdatePacketData) {
-		this.level.queueLightUpdate(() -> {
-			this.applyLightData(i, j, clientboundLightUpdatePacketData);
-			LevelChunk levelChunk = this.level.getChunkSource().getChunk(i, j, false);
-			if (levelChunk != null) {
-				this.enableChunkLight(levelChunk, i, j);
-			}
-		});
-	}
-
 	private void enableChunkLight(LevelChunk levelChunk, int i, int j) {
 		LevelLightEngine levelLightEngine = this.level.getChunkSource().getLightEngine();
 		LevelChunkSection[] levelChunkSections = levelChunk.getSections();
@@ -781,12 +776,19 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 	}
 
 	private void queueLightRemoval(ClientboundForgetLevelChunkPacket clientboundForgetLevelChunkPacket) {
+		ChunkPos chunkPos = new ChunkPos(clientboundForgetLevelChunkPacket.getX(), clientboundForgetLevelChunkPacket.getZ());
 		this.level.queueLightUpdate(() -> {
 			LevelLightEngine levelLightEngine = this.level.getLightEngine();
-			levelLightEngine.setLightEnabled(new ChunkPos(clientboundForgetLevelChunkPacket.getX(), clientboundForgetLevelChunkPacket.getZ()), false);
+			levelLightEngine.setLightEnabled(chunkPos, false);
+
+			for (int i = levelLightEngine.getMinLightSection(); i < levelLightEngine.getMaxLightSection(); i++) {
+				SectionPos sectionPos = SectionPos.of(chunkPos, i);
+				levelLightEngine.queueSectionData(LightLayer.BLOCK, sectionPos, null);
+				levelLightEngine.queueSectionData(LightLayer.SKY, sectionPos, null);
+			}
 
 			for (int i = this.level.getMinSection(); i < this.level.getMaxSection(); i++) {
-				levelLightEngine.updateSectionStatus(SectionPos.of(clientboundForgetLevelChunkPacket.getX(), i, clientboundForgetLevelChunkPacket.getZ()), true);
+				levelLightEngine.updateSectionStatus(SectionPos.of(chunkPos, i), true);
 			}
 		});
 	}

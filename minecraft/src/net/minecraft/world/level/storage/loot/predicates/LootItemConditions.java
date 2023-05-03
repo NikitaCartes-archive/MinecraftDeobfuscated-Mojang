@@ -9,7 +9,8 @@ import net.minecraft.world.level.storage.loot.Serializer;
 
 public class LootItemConditions {
 	public static final LootItemConditionType INVERTED = register("inverted", new InvertedLootItemCondition.Serializer());
-	public static final LootItemConditionType ALTERNATIVE = register("alternative", new AlternativeLootItemCondition.Serializer());
+	public static final LootItemConditionType ANY_OF = register("any_of", new AnyOfCondition.Serializer());
+	public static final LootItemConditionType ALL_OF = register("all_of", new AllOfCondition.Serializer());
 	public static final LootItemConditionType RANDOM_CHANCE = register("random_chance", new LootItemRandomChanceCondition.Serializer());
 	public static final LootItemConditionType RANDOM_CHANCE_WITH_LOOTING = register(
 		"random_chance_with_looting", new LootItemRandomChanceWithLootingCondition.Serializer()
@@ -40,44 +41,36 @@ public class LootItemConditions {
 	}
 
 	public static <T> Predicate<T> andConditions(Predicate<T>[] predicates) {
-		switch (predicates.length) {
-			case 0:
-				return object -> true;
-			case 1:
-				return predicates[0];
-			case 2:
-				return predicates[0].and(predicates[1]);
-			default:
-				return object -> {
-					for (Predicate<T> predicate : predicates) {
-						if (!predicate.test(object)) {
-							return false;
-						}
-					}
+		return switch (predicates.length) {
+			case 0 -> object -> true;
+			case 1 -> predicates[0];
+			case 2 -> predicates[0].and(predicates[1]);
+			default -> object -> {
+			for (Predicate<T> predicate : predicates) {
+				if (!predicate.test(object)) {
+					return false;
+				}
+			}
 
-					return true;
-				};
-		}
+			return true;
+		};
+		};
 	}
 
 	public static <T> Predicate<T> orConditions(Predicate<T>[] predicates) {
-		switch (predicates.length) {
-			case 0:
-				return object -> false;
-			case 1:
-				return predicates[0];
-			case 2:
-				return predicates[0].or(predicates[1]);
-			default:
-				return object -> {
-					for (Predicate<T> predicate : predicates) {
-						if (predicate.test(object)) {
-							return true;
-						}
-					}
+		return switch (predicates.length) {
+			case 0 -> object -> false;
+			case 1 -> predicates[0];
+			case 2 -> predicates[0].or(predicates[1]);
+			default -> object -> {
+			for (Predicate<T> predicate : predicates) {
+				if (predicate.test(object)) {
+					return true;
+				}
+			}
 
-					return false;
-				};
-		}
+			return false;
+		};
+		};
 	}
 }

@@ -28,7 +28,7 @@ public class ToastComponent {
 
 	public void render(GuiGraphics guiGraphics) {
 		if (!this.minecraft.options.hideGui) {
-			int i = this.minecraft.getWindow().getGuiScaledWidth();
+			int i = guiGraphics.guiWidth();
 			this.visible.removeIf(toastInstance -> {
 				if (toastInstance != null && toastInstance.render(i, guiGraphics)) {
 					this.occupiedSlots.clear(toastInstance.index, toastInstance.index + toastInstance.slotCount);

@@ -311,7 +311,7 @@ public class ChunkRenderDispatcher {
 		private final Set<BlockEntity> globalBlockEntities = Sets.<BlockEntity>newHashSet();
 		private final Map<RenderType, VertexBuffer> buffers = (Map<RenderType, VertexBuffer>)RenderType.chunkBufferLayers()
 			.stream()
-			.collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer()));
+			.collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer(VertexBuffer.Usage.STATIC)));
 		private AABB bb;
 		private boolean dirty = true;
 		final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(-1, -1, -1);

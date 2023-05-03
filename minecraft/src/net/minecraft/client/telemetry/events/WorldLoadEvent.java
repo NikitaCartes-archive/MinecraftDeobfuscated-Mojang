@@ -14,9 +14,15 @@ import net.minecraft.world.level.GameType;
 public class WorldLoadEvent {
 	private boolean eventSent;
 	@Nullable
-	private TelemetryProperty.GameMode gameMode = null;
+	private TelemetryProperty.GameMode gameMode;
 	@Nullable
 	private String serverBrand;
+	@Nullable
+	private final String minigameName;
+
+	public WorldLoadEvent(@Nullable String string) {
+		this.minigameName = string;
+	}
 
 	public void addProperties(TelemetryPropertyMap.Builder builder) {
 		if (this.serverBrand != null) {
@@ -37,7 +43,12 @@ public class WorldLoadEvent {
 	public boolean send(TelemetryEventSender telemetryEventSender) {
 		if (!this.eventSent && this.gameMode != null && this.serverBrand != null) {
 			this.eventSent = true;
-			telemetryEventSender.send(TelemetryEventType.WORLD_LOADED, builder -> builder.put(TelemetryProperty.GAME_MODE, this.gameMode));
+			telemetryEventSender.send(TelemetryEventType.WORLD_LOADED, builder -> {
+				builder.put(TelemetryProperty.GAME_MODE, this.gameMode);
+				if (this.minigameName != null) {
+					builder.put(TelemetryProperty.REALMS_MAP_CONTENT, this.minigameName);
+				}
+			});
 			return true;
 		} else {
 			return false;

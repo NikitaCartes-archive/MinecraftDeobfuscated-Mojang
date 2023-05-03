@@ -25,7 +25,7 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 	private final Ingredient ingredient;
 	private final float experience;
 	private final int cookingTime;
-	private final Advancement.Builder advancement = Advancement.Builder.advancement();
+	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
 	@Nullable
 	private String group;
 	private final RecipeSerializer<? extends AbstractCookingRecipe> serializer;

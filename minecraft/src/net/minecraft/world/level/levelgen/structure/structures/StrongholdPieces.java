@@ -1193,7 +1193,7 @@ public class StrongholdPieces {
 						this.placeBlock(worldGenLevel, Blocks.COBBLESTONE.defaultBlockState(), 6, i, 6, boundingBox);
 					}
 
-					this.placeBlock(worldGenLevel, Blocks.TORCH.defaultBlockState(), 5, 3, 5, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.WALL_TORCH.defaultBlockState(), 5, 3, 5, boundingBox);
 
 					for (int i = 2; i <= 8; i++) {
 						this.placeBlock(worldGenLevel, Blocks.OAK_PLANKS.defaultBlockState(), 2, 3, i, boundingBox);

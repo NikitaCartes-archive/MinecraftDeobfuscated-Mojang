@@ -19,7 +19,7 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
 	}
 
 	public SlideDownBlockTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		Block block = deserializeBlock(jsonObject);
 		StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
@@ -29,7 +29,7 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
 			});
 		}
 
-		return new SlideDownBlockTrigger.TriggerInstance(composite, block, statePropertiesPredicate);
+		return new SlideDownBlockTrigger.TriggerInstance(contextAwarePredicate, block, statePropertiesPredicate);
 	}
 
 	@Nullable
@@ -53,14 +53,14 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
 		private final Block block;
 		private final StatePropertiesPredicate state;
 
-		public TriggerInstance(EntityPredicate.Composite composite, @Nullable Block block, StatePropertiesPredicate statePropertiesPredicate) {
-			super(SlideDownBlockTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, @Nullable Block block, StatePropertiesPredicate statePropertiesPredicate) {
+			super(SlideDownBlockTrigger.ID, contextAwarePredicate);
 			this.block = block;
 			this.state = statePropertiesPredicate;
 		}
 
 		public static SlideDownBlockTrigger.TriggerInstance slidesDownBlock(Block block) {
-			return new SlideDownBlockTrigger.TriggerInstance(EntityPredicate.Composite.ANY, block, StatePropertiesPredicate.ANY);
+			return new SlideDownBlockTrigger.TriggerInstance(ContextAwarePredicate.ANY, block, StatePropertiesPredicate.ANY);
 		}
 
 		@Override

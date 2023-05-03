@@ -14,6 +14,7 @@ import net.minecraft.advancements.critereon.BeeNestDestroyedTrigger;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.BredAnimalsTrigger;
 import net.minecraft.advancements.critereon.ConsumeItemTrigger;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.EffectsChangedTrigger;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
@@ -22,12 +23,11 @@ import net.minecraft.advancements.critereon.EntitySubPredicate;
 import net.minecraft.advancements.critereon.FilledBucketTrigger;
 import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PickedUpItemTrigger;
-import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.StartRidingTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
@@ -149,13 +149,13 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				false
 			)
 			.requirements(RequirementsStrategy.OR)
-			.addCriterion("wheat", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.WHEAT))
-			.addCriterion("pumpkin_stem", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.PUMPKIN_STEM))
-			.addCriterion("melon_stem", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.MELON_STEM))
-			.addCriterion("beetroots", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.BEETROOTS))
-			.addCriterion("nether_wart", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.NETHER_WART))
-			.addCriterion("torchflower", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.TORCHFLOWER_CROP))
-			.addCriterion("pitcher_pod", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.PITCHER_CROP))
+			.addCriterion("wheat", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.WHEAT))
+			.addCriterion("pumpkin_stem", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.PUMPKIN_STEM))
+			.addCriterion("melon_stem", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.MELON_STEM))
+			.addCriterion("beetroots", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.BEETROOTS))
+			.addCriterion("nether_wart", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.NETHER_WART))
+			.addCriterion("torchflower", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.TORCHFLOWER_CROP))
+			.addCriterion("pitcher_pod", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.PITCHER_CROP))
 			.save(consumer, "husbandry/plant_seed");
 		Advancement advancement3 = Advancement.Builder.advancement()
 			.parent(advancement)
@@ -294,7 +294,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.parent(advancement)
 			.addCriterion(
 				"safely_harvest_honey",
-				ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(
+				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
 					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(BlockTags.BEEHIVES).build()).setSmokey(true),
 					ItemPredicate.Builder.item().of(Items.GLASS_BOTTLE)
 				)
@@ -324,7 +324,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion(
 				"wax_on",
-				ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(
+				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
 					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(((BiMap)HoneycombItem.WAXABLES.get()).keySet()).build()),
 					ItemPredicate.Builder.item().of(Items.HONEYCOMB)
 				)
@@ -344,7 +344,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion(
 				"wax_off",
-				ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(
+				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
 					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(((BiMap)HoneycombItem.WAX_OFF_BY_BLOCK.get()).keySet()).build()),
 					ItemPredicate.Builder.item().of(WAX_SCRAPING_TOOLS)
 				)
@@ -449,7 +449,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion(
 				"make_a_sign_glow",
-				ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(
+				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
 					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(BlockTags.ALL_SIGNS).build()),
 					ItemPredicate.Builder.item().of(Items.GLOW_INK_SAC)
 				)
@@ -470,7 +470,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"allay_deliver_item_to_player",
 				PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByPlayer(
-					EntityPredicate.Composite.ANY, ItemPredicate.ANY, EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().of(EntityType.ALLAY).build())
+					ContextAwarePredicate.ANY, ItemPredicate.ANY, EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.ALLAY).build())
 				)
 			)
 			.save(consumer, "husbandry/allay_deliver_item_to_player");
@@ -488,7 +488,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion(
 				"allay_deliver_cake_to_note_block",
-				ItemInteractWithBlockTrigger.TriggerInstance.allayDropItemOnBlock(
+				ItemUsedOnLocationTrigger.TriggerInstance.allayDropItemOnBlock(
 					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.NOTE_BLOCK).build()), ItemPredicate.Builder.item().of(Items.CAKE)
 				)
 			)
@@ -523,9 +523,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				"feed_snifflet",
 				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
 					ItemPredicate.Builder.item().of(ItemTags.SNIFFER_FOOD),
-					EntityPredicate.Composite.wrap(
-						EntityPredicate.Builder.entity().of(EntityType.SNIFFER).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(true).build()).build()
-					)
+					EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.SNIFFER).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(true).build()).build())
 				)
 			)
 			.save(consumer, "husbandry/feed_snifflet");
@@ -542,8 +540,8 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				true
 			)
 			.requirements(RequirementsStrategy.OR)
-			.addCriterion("torchflower", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.TORCHFLOWER_CROP))
-			.addCriterion("pitcher_pod", PlacedBlockTrigger.TriggerInstance.placedBlock(Blocks.PITCHER_CROP))
+			.addCriterion("torchflower", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.TORCHFLOWER_CROP))
+			.addCriterion("pitcher_pod", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.PITCHER_CROP))
 			.save(consumer, "husbandry/plant_any_sniffer_seed");
 	}
 
@@ -574,7 +572,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 						reference.key().location().toString(),
 						PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
 							ItemPredicate.Builder.item().of(Items.LEAD),
-							EntityPredicate.Composite.wrap(
+							EntityPredicate.wrap(
 								EntityPredicate.Builder.entity().of(EntityType.FROG).subPredicate(EntitySubPredicate.variant((FrogVariant)reference.value())).build()
 							)
 						)

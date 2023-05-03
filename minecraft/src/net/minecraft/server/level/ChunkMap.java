@@ -224,21 +224,17 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		long p = (long)Math.max(0, Math.max(n, o) - 1);
 		long q = (long)Math.min(n, o);
 		long r = q * q + p * p;
-		int s = m - 1;
-		int t = s * s;
-		return r <= (long)t;
+		int s = m * m;
+		return r < (long)s;
 	}
 
 	private static boolean isChunkOnRangeBorder(int i, int j, int k, int l, int m) {
-		if (!isChunkInRange(i, j, k, l, m)) {
-			return false;
-		} else if (!isChunkInRange(i + 1, j, k, l, m)) {
-			return true;
-		} else if (!isChunkInRange(i, j + 1, k, l, m)) {
-			return true;
-		} else {
-			return !isChunkInRange(i - 1, j, k, l, m) ? true : !isChunkInRange(i, j - 1, k, l, m);
-		}
+		return !isChunkInRange(i, j, k, l, m)
+			? false
+			: !isChunkInRange(i + 1, j + 1, k, l, m)
+				|| !isChunkInRange(i - 1, j + 1, k, l, m)
+				|| !isChunkInRange(i + 1, j - 1, k, l, m)
+				|| !isChunkInRange(i - 1, j - 1, k, l, m);
 	}
 
 	protected ThreadedLevelLightEngine getLightEngine() {
@@ -855,11 +851,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	protected void setViewDistance(int i) {
-		int j = Mth.clamp(i + 1, 3, 33);
+		int j = Mth.clamp(i, 2, 32);
 		if (j != this.viewDistance) {
 			int k = this.viewDistance;
 			this.viewDistance = j;
-			this.distanceManager.updatePlayerTickets(this.viewDistance + 1);
+			this.distanceManager.updatePlayerTickets(this.viewDistance + 2);
 
 			for (ChunkHolder chunkHolder : this.updatingChunkMap.values()) {
 				ChunkPos chunkPos = chunkHolder.getPos();
@@ -1099,36 +1095,37 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 		int k = sectionPos.x();
 		int n = sectionPos.z();
-		if (Math.abs(k - i) <= this.viewDistance * 2 && Math.abs(n - j) <= this.viewDistance * 2) {
-			int o = Math.min(i, k) - this.viewDistance - 1;
-			int p = Math.min(j, n) - this.viewDistance - 1;
-			int q = Math.max(i, k) + this.viewDistance + 1;
-			int r = Math.max(j, n) + this.viewDistance + 1;
+		int o = this.viewDistance + 1;
+		if (Math.abs(k - i) <= o * 2 && Math.abs(n - j) <= o * 2) {
+			int p = Math.min(i, k) - o;
+			int q = Math.min(j, n) - o;
+			int r = Math.max(i, k) + o;
+			int s = Math.max(j, n) + o;
 
-			for (int s = o; s <= q; s++) {
-				for (int t = p; t <= r; t++) {
-					boolean bl4 = isChunkInRange(s, t, k, n, this.viewDistance);
-					boolean bl5 = isChunkInRange(s, t, i, j, this.viewDistance);
-					this.updateChunkTracking(serverPlayer, new ChunkPos(s, t), new MutableObject<>(), bl4, bl5);
+			for (int t = p; t <= r; t++) {
+				for (int u = q; u <= s; u++) {
+					boolean bl4 = isChunkInRange(t, u, k, n, this.viewDistance);
+					boolean bl5 = isChunkInRange(t, u, i, j, this.viewDistance);
+					this.updateChunkTracking(serverPlayer, new ChunkPos(t, u), new MutableObject<>(), bl4, bl5);
 				}
 			}
 		} else {
-			for (int o = k - this.viewDistance - 1; o <= k + this.viewDistance + 1; o++) {
-				for (int p = n - this.viewDistance - 1; p <= n + this.viewDistance + 1; p++) {
-					if (isChunkInRange(o, p, k, n, this.viewDistance)) {
+			for (int p = k - o; p <= k + o; p++) {
+				for (int q = n - o; q <= n + o; q++) {
+					if (isChunkInRange(p, q, k, n, this.viewDistance)) {
 						boolean bl6 = true;
 						boolean bl7 = false;
-						this.updateChunkTracking(serverPlayer, new ChunkPos(o, p), new MutableObject<>(), true, false);
+						this.updateChunkTracking(serverPlayer, new ChunkPos(p, q), new MutableObject<>(), true, false);
 					}
 				}
 			}
 
-			for (int o = i - this.viewDistance - 1; o <= i + this.viewDistance + 1; o++) {
-				for (int px = j - this.viewDistance - 1; px <= j + this.viewDistance + 1; px++) {
-					if (isChunkInRange(o, px, i, j, this.viewDistance)) {
+			for (int p = i - o; p <= i + o; p++) {
+				for (int qx = j - o; qx <= j + o; qx++) {
+					if (isChunkInRange(p, qx, i, j, this.viewDistance)) {
 						boolean bl6 = false;
 						boolean bl7 = true;
-						this.updateChunkTracking(serverPlayer, new ChunkPos(o, px), new MutableObject<>(), false, true);
+						this.updateChunkTracking(serverPlayer, new ChunkPos(p, qx), new MutableObject<>(), false, true);
 					}
 				}
 			}
@@ -1378,7 +1375,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		public void updatePlayer(ServerPlayer serverPlayer) {
 			if (serverPlayer != this.entity) {
 				Vec3 vec3 = serverPlayer.position().subtract(this.entity.position());
-				double d = (double)Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
+				double d = (double)Math.min(this.getEffectiveRange(), ChunkMap.this.viewDistance * 16);
 				double e = vec3.x * vec3.x + vec3.z * vec3.z;
 				double f = d * d;
 				boolean bl = e <= f && this.entity.broadcastToPlayer(serverPlayer);

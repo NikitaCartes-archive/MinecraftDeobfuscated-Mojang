@@ -31,7 +31,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 	private final int count;
 	private final List<String> rows = Lists.<String>newArrayList();
 	private final Map<Character, Ingredient> key = Maps.<Character, Ingredient>newLinkedHashMap();
-	private final Advancement.Builder advancement = Advancement.Builder.advancement();
+	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
 	@Nullable
 	private String group;
 	private boolean showNotification = true;

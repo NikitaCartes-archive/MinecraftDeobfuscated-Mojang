@@ -129,7 +129,7 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 				mob.setYRot(mob.yBodyRot);
 				mob.setDiscardFriction(true);
 				double d = this.chosenJump.length();
-				double e = d + mob.getJumpBoostPower();
+				double e = d + (double)mob.getJumpBoostPower();
 				mob.setDeltaMovement(this.chosenJump.scale(e / d));
 				mob.getBrain().setMemory(MemoryModuleType.LONG_JUMP_MID_JUMP, true);
 				serverLevel.playSound(null, mob, (SoundEvent)this.getJumpSound.apply(mob), SoundSource.NEUTRAL, 1.0F, 1.0F);

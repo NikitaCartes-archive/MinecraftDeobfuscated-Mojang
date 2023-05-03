@@ -3,7 +3,6 @@ package net.minecraft.world.level.lighting;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -27,14 +26,7 @@ public abstract class LightEngine<M extends DataLayerStorageMap<M>, S extends La
 	protected static final Direction[] PROPAGATION_DIRECTIONS = Direction.values();
 	protected final LightChunkGetter chunkSource;
 	protected final S storage;
-	private final LongSet blockNodesToCheck = new LongOpenHashSet(512, 0.5F) {
-		@Override
-		protected void rehash(int i) {
-			if (i > 512) {
-				super.rehash(i);
-			}
-		}
-	};
+	private final LongOpenHashSet blockNodesToCheck = new LongOpenHashSet(512, 0.5F);
 	private final LongArrayFIFOQueue decreaseQueue = new LongArrayFIFOQueue();
 	private final LongArrayFIFOQueue increaseQueue = new LongArrayFIFOQueue();
 	private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
@@ -150,30 +142,8 @@ public abstract class LightEngine<M extends DataLayerStorageMap<M>, S extends La
 		this.storage.setLightEnabled(SectionPos.getZeroNode(chunkPos.x, chunkPos.z), bl);
 	}
 
-	protected void clearQueuedSectionBlocks(long l) {
-		if (!this.blockNodesToCheck.isEmpty()) {
-			if (this.blockNodesToCheck.size() < 8192) {
-				this.blockNodesToCheck.removeIf(mx -> SectionPos.blockToSection(mx) == l);
-			} else {
-				int i = SectionPos.sectionToBlockCoord(SectionPos.x(l));
-				int j = SectionPos.sectionToBlockCoord(SectionPos.y(l));
-				int k = SectionPos.sectionToBlockCoord(SectionPos.z(l));
-
-				for (int m = 0; m < 16; m++) {
-					for (int n = 0; n < 16; n++) {
-						for (int o = 0; o < 16; o++) {
-							long p = BlockPos.asLong(i + m, j + n, k + o);
-							this.blockNodesToCheck.remove(p);
-						}
-					}
-				}
-			}
-		}
-	}
-
 	@Override
 	public int runLightUpdates() {
-		this.storage.markNewInconsistencies(this);
 		LongIterator longIterator = this.blockNodesToCheck.iterator();
 
 		while (longIterator.hasNext()) {
@@ -181,10 +151,12 @@ public abstract class LightEngine<M extends DataLayerStorageMap<M>, S extends La
 		}
 
 		this.blockNodesToCheck.clear();
+		this.blockNodesToCheck.trim(512);
 		int i = 0;
 		i += this.propagateDecreases();
 		i += this.propagateIncreases();
 		this.clearChunkCache();
+		this.storage.markNewInconsistencies(this);
 		this.storage.swapSectionMap();
 		return i;
 	}

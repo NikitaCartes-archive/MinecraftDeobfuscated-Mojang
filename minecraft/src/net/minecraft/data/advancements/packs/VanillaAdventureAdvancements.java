@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.BlockPredicate;
@@ -17,8 +18,8 @@ import net.minecraft.advancements.critereon.DistanceTrigger;
 import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LighthingBoltPredicate;
@@ -32,12 +33,14 @@ import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.RecipeCraftedTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.advancements.critereon.TargetBlockTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.advancements.critereon.UsingItemTrigger;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
@@ -57,9 +60,16 @@ import net.minecraft.world.item.crafting.DecoratedPotRecipe;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ComparatorBlock;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.predicates.AllOfCondition;
+import net.minecraft.world.level.storage.loot.predicates.AnyOfCondition;
+import net.minecraft.world.level.storage.loot.predicates.LocationCheck;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 	private static final int DISTANCE_FROM_BOTTOM_TO_TOP = 384;
@@ -453,7 +463,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				"bullseye",
 				TargetBlockTrigger.TriggerInstance.targetHit(
 					MinMaxBounds.Ints.exactly(15),
-					EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().distance(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(30.0))).build())
+					EntityPredicate.wrap(EntityPredicate.Builder.entity().distance(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(30.0))).build())
 				)
 			)
 			.save(consumer, "adventure/bullseye");
@@ -530,7 +540,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion(
 				"play_jukebox_in_meadows",
-				ItemInteractWithBlockTrigger.TriggerInstance.itemUsedOnBlock(
+				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
 					LocationPredicate.Builder.location().setBiome(Biomes.MEADOW).setBlock(BlockPredicate.Builder.block().of(Blocks.JUKEBOX).build()),
 					ItemPredicate.Builder.item().of(ItemTags.MUSIC_DISCS)
 				)
@@ -665,6 +675,51 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				false
 			)
 			.save(consumer, "adventure/trim_with_all_exclusive_armor_patterns");
+		Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.CHISELED_BOOKSHELF,
+				Component.translatable("advancements.adventure.read_power_from_chiseled_bookshelf.title"),
+				Component.translatable("advancements.adventure.read_power_from_chiseled_bookshelf.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.requirements(RequirementsStrategy.OR)
+			.addCriterion("chiseled_bookshelf", placedBlockReadByComparator(Blocks.CHISELED_BOOKSHELF))
+			.addCriterion("comparator", placedComparatorReadingBlock(Blocks.CHISELED_BOOKSHELF))
+			.save(consumer, "adventure/read_power_of_chiseled_bookshelf");
+	}
+
+	private static CriterionTriggerInstance placedBlockReadByComparator(Block block) {
+		LootItemCondition.Builder[] builders = (LootItemCondition.Builder[])ComparatorBlock.FACING.getPossibleValues().stream().map(direction -> {
+			StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.Builder.properties().hasProperty(ComparatorBlock.FACING, direction).build();
+			BlockPredicate blockPredicate = BlockPredicate.Builder.block().of(Blocks.COMPARATOR).setProperties(statePropertiesPredicate).build();
+			return LocationCheck.checkLocation(LocationPredicate.Builder.location().setBlock(blockPredicate), new BlockPos(direction.getOpposite().getNormal()));
+		}).toArray(LootItemCondition.Builder[]::new);
+		return ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(
+			LootItemBlockStatePropertyCondition.hasBlockStateProperties(block), AnyOfCondition.anyOf(builders)
+		);
+	}
+
+	private static CriterionTriggerInstance placedComparatorReadingBlock(Block block) {
+		LootItemCondition.Builder[] builders = (LootItemCondition.Builder[])ComparatorBlock.FACING
+			.getPossibleValues()
+			.stream()
+			.map(
+				direction -> {
+					StatePropertiesPredicate.Builder builder = StatePropertiesPredicate.Builder.properties().hasProperty(ComparatorBlock.FACING, direction);
+					LootItemBlockStatePropertyCondition.Builder builder2 = new LootItemBlockStatePropertyCondition.Builder(Blocks.COMPARATOR).setProperties(builder);
+					LootItemCondition.Builder builder3 = LocationCheck.checkLocation(
+						LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(block).build()), new BlockPos(direction.getNormal())
+					);
+					return AllOfCondition.allOf(builder2, builder3);
+				}
+			)
+			.toArray(LootItemCondition.Builder[]::new);
+		return ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(AnyOfCondition.anyOf(builders));
 	}
 
 	private static Advancement.Builder smithingWithStyle(Advancement.Builder builder) {

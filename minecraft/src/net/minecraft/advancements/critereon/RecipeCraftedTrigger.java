@@ -19,11 +19,11 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 	}
 
 	protected RecipeCraftedTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "recipe_id"));
 		ItemPredicate[] itemPredicates = ItemPredicate.fromJsonArray(jsonObject.get("ingredients"));
-		return new RecipeCraftedTrigger.TriggerInstance(composite, resourceLocation, List.of(itemPredicates));
+		return new RecipeCraftedTrigger.TriggerInstance(contextAwarePredicate, resourceLocation, List.of(itemPredicates));
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ResourceLocation resourceLocation, List<ItemStack> list) {
@@ -34,18 +34,18 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 		private final ResourceLocation recipeId;
 		private final List<ItemPredicate> predicates;
 
-		public TriggerInstance(EntityPredicate.Composite composite, ResourceLocation resourceLocation, List<ItemPredicate> list) {
-			super(RecipeCraftedTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ResourceLocation resourceLocation, List<ItemPredicate> list) {
+			super(RecipeCraftedTrigger.ID, contextAwarePredicate);
 			this.recipeId = resourceLocation;
 			this.predicates = list;
 		}
 
 		public static RecipeCraftedTrigger.TriggerInstance craftedItem(ResourceLocation resourceLocation, List<ItemPredicate> list) {
-			return new RecipeCraftedTrigger.TriggerInstance(EntityPredicate.Composite.ANY, resourceLocation, list);
+			return new RecipeCraftedTrigger.TriggerInstance(ContextAwarePredicate.ANY, resourceLocation, list);
 		}
 
 		public static RecipeCraftedTrigger.TriggerInstance craftedItem(ResourceLocation resourceLocation) {
-			return new RecipeCraftedTrigger.TriggerInstance(EntityPredicate.Composite.ANY, resourceLocation, List.of());
+			return new RecipeCraftedTrigger.TriggerInstance(ContextAwarePredicate.ANY, resourceLocation, List.of());
 		}
 
 		boolean matches(ResourceLocation resourceLocation, List<ItemStack> list) {

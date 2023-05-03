@@ -22,11 +22,11 @@ public class PickedUpItemTrigger extends SimpleCriterionTrigger<PickedUpItemTrig
 	}
 
 	protected PickedUpItemTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "entity", deserializationContext);
-		return new PickedUpItemTrigger.TriggerInstance(this.id, composite, itemPredicate, composite2);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
+		return new PickedUpItemTrigger.TriggerInstance(this.id, contextAwarePredicate, itemPredicate, contextAwarePredicate2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, @Nullable Entity entity) {
@@ -36,26 +36,30 @@ public class PickedUpItemTrigger extends SimpleCriterionTrigger<PickedUpItemTrig
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ItemPredicate item;
-		private final EntityPredicate.Composite entity;
+		private final ContextAwarePredicate entity;
 
 		public TriggerInstance(
-			ResourceLocation resourceLocation, EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2
+			ResourceLocation resourceLocation, ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, ContextAwarePredicate contextAwarePredicate2
 		) {
-			super(resourceLocation, composite);
+			super(resourceLocation, contextAwarePredicate);
 			this.item = itemPredicate;
-			this.entity = composite2;
+			this.entity = contextAwarePredicate2;
 		}
 
 		public static PickedUpItemTrigger.TriggerInstance thrownItemPickedUpByEntity(
-			EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2
+			ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, ContextAwarePredicate contextAwarePredicate2
 		) {
-			return new PickedUpItemTrigger.TriggerInstance(CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.getId(), composite, itemPredicate, composite2);
+			return new PickedUpItemTrigger.TriggerInstance(
+				CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY.getId(), contextAwarePredicate, itemPredicate, contextAwarePredicate2
+			);
 		}
 
 		public static PickedUpItemTrigger.TriggerInstance thrownItemPickedUpByPlayer(
-			EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2
+			ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, ContextAwarePredicate contextAwarePredicate2
 		) {
-			return new PickedUpItemTrigger.TriggerInstance(CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.getId(), composite, itemPredicate, composite2);
+			return new PickedUpItemTrigger.TriggerInstance(
+				CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER.getId(), contextAwarePredicate, itemPredicate, contextAwarePredicate2
+			);
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, ItemStack itemStack, LootContext lootContext) {

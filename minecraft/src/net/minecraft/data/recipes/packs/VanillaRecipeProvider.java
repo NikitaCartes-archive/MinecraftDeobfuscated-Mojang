@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -57,7 +57,9 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		return CompletableFuture.allOf(
 			super.run(cachedOutput),
 			this.buildAdvancement(
-				cachedOutput, RecipeBuilder.ROOT_RECIPE_ADVANCEMENT, Advancement.Builder.advancement().addCriterion("impossible", new ImpossibleTrigger.TriggerInstance())
+				cachedOutput,
+				RecipeBuilder.ROOT_RECIPE_ADVANCEMENT,
+				Advancement.Builder.recipeAdvancement().addCriterion("impossible", new ImpossibleTrigger.TriggerInstance())
 			)
 		);
 	}
@@ -519,7 +521,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy(
 				"has_lots_of_items",
 				new InventoryChangeTrigger.TriggerInstance(
-					EntityPredicate.Composite.ANY, MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new ItemPredicate[0]
+					ContextAwarePredicate.ANY, MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new ItemPredicate[0]
 				)
 			)
 			.save(consumer);

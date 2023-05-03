@@ -16,9 +16,9 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
 	}
 
 	public ConsumeItemTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
-		return new ConsumeItemTrigger.TriggerInstance(composite, ItemPredicate.fromJson(jsonObject.get("item")));
+		return new ConsumeItemTrigger.TriggerInstance(contextAwarePredicate, ItemPredicate.fromJson(jsonObject.get("item")));
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack) {
@@ -28,22 +28,22 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ItemPredicate item;
 
-		public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate) {
-			super(ConsumeItemTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate) {
+			super(ConsumeItemTrigger.ID, contextAwarePredicate);
 			this.item = itemPredicate;
 		}
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem() {
-			return new ConsumeItemTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ItemPredicate.ANY);
+			return new ConsumeItemTrigger.TriggerInstance(ContextAwarePredicate.ANY, ItemPredicate.ANY);
 		}
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem(ItemPredicate itemPredicate) {
-			return new ConsumeItemTrigger.TriggerInstance(EntityPredicate.Composite.ANY, itemPredicate);
+			return new ConsumeItemTrigger.TriggerInstance(ContextAwarePredicate.ANY, itemPredicate);
 		}
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem(ItemLike itemLike) {
 			return new ConsumeItemTrigger.TriggerInstance(
-				EntityPredicate.Composite.ANY,
+				ContextAwarePredicate.ANY,
 				new ItemPredicate(
 					null,
 					ImmutableSet.of(itemLike.asItem()),

@@ -14,10 +14,10 @@ public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPl
 	}
 
 	public EntityHurtPlayerTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		DamagePredicate damagePredicate = DamagePredicate.fromJson(jsonObject.get("damage"));
-		return new EntityHurtPlayerTrigger.TriggerInstance(composite, damagePredicate);
+		return new EntityHurtPlayerTrigger.TriggerInstance(contextAwarePredicate, damagePredicate);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, DamageSource damageSource, float f, float g, boolean bl) {
@@ -27,21 +27,21 @@ public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPl
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final DamagePredicate damage;
 
-		public TriggerInstance(EntityPredicate.Composite composite, DamagePredicate damagePredicate) {
-			super(EntityHurtPlayerTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, DamagePredicate damagePredicate) {
+			super(EntityHurtPlayerTrigger.ID, contextAwarePredicate);
 			this.damage = damagePredicate;
 		}
 
 		public static EntityHurtPlayerTrigger.TriggerInstance entityHurtPlayer() {
-			return new EntityHurtPlayerTrigger.TriggerInstance(EntityPredicate.Composite.ANY, DamagePredicate.ANY);
+			return new EntityHurtPlayerTrigger.TriggerInstance(ContextAwarePredicate.ANY, DamagePredicate.ANY);
 		}
 
 		public static EntityHurtPlayerTrigger.TriggerInstance entityHurtPlayer(DamagePredicate damagePredicate) {
-			return new EntityHurtPlayerTrigger.TriggerInstance(EntityPredicate.Composite.ANY, damagePredicate);
+			return new EntityHurtPlayerTrigger.TriggerInstance(ContextAwarePredicate.ANY, damagePredicate);
 		}
 
 		public static EntityHurtPlayerTrigger.TriggerInstance entityHurtPlayer(DamagePredicate.Builder builder) {
-			return new EntityHurtPlayerTrigger.TriggerInstance(EntityPredicate.Composite.ANY, builder.build());
+			return new EntityHurtPlayerTrigger.TriggerInstance(ContextAwarePredicate.ANY, builder.build());
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, DamageSource damageSource, float f, float g, boolean bl) {

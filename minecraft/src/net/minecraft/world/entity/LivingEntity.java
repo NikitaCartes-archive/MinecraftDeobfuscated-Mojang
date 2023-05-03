@@ -295,14 +295,23 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.tryAddSoulSpeed();
 		}
 
-		if (!this.level().isClientSide && this.fallDistance > 3.0F && bl) {
-			float f = (float)Mth.ceil(this.fallDistance - 3.0F);
-			if (!blockState.isAir()) {
-				double e = Math.min((double)(0.2F + f / 15.0F), 2.5);
-				int i = (int)(150.0 * e);
-				((ServerLevel)this.level())
-					.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.getX(), this.getY(), this.getZ(), i, 0.0, 0.0, 0.0, 0.15F);
+		if (!this.level().isClientSide && this.fallDistance > 3.0F && bl && !blockState.isAir()) {
+			double e = this.getX();
+			double f = this.getY();
+			double g = this.getZ();
+			BlockPos blockPos2 = this.blockPosition();
+			if (blockPos.getX() != blockPos2.getX() || blockPos.getZ() != blockPos2.getZ()) {
+				double h = e - (double)blockPos.getX() - 0.5;
+				double i = g - (double)blockPos.getZ() - 0.5;
+				double j = Math.max(Math.abs(h), Math.abs(i));
+				e = (double)blockPos.getX() + 0.5 + h / j * 0.5;
+				g = (double)blockPos.getZ() + 0.5 + i / j * 0.5;
 			}
+
+			float k = (float)Mth.ceil(this.fallDistance - 3.0F);
+			double l = Math.min((double)(0.2F + k / 15.0F), 2.5);
+			int m = (int)(150.0 * l);
+			((ServerLevel)this.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), e, f, g, m, 0.0, 0.0, 0.0, 0.15F);
 		}
 
 		super.checkFallDamage(d, bl, blockState, blockPos);
@@ -1925,17 +1934,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected float getJumpPower() {
-		return 0.42F * this.getBlockJumpFactor();
+		float f = 0.42F * this.getBlockJumpFactor();
+		return f + this.getJumpBoostPower();
 	}
 
-	public double getJumpBoostPower() {
-		return this.hasEffect(MobEffects.JUMP) ? (double)(0.1F * (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1)) : 0.0;
+	public float getJumpBoostPower() {
+		return this.hasEffect(MobEffects.JUMP) ? 0.1F * (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) : 0.0F;
 	}
 
 	protected void jumpFromGround() {
-		double d = (double)this.getJumpPower() + this.getJumpBoostPower();
 		Vec3 vec3 = this.getDeltaMovement();
-		this.setDeltaMovement(vec3.x, d, vec3.z);
+		this.setDeltaMovement(vec3.x, (double)this.getJumpPower(), vec3.z);
 		if (this.isSprinting()) {
 			float f = this.getYRot() * (float) (Math.PI / 180.0);
 			this.setDeltaMovement(this.getDeltaMovement().add((double)(-Mth.sin(f) * 0.2F), 0.0, (double)(Mth.cos(f) * 0.2F)));

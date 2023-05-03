@@ -14,10 +14,10 @@ public class UsedEnderEyeTrigger extends SimpleCriterionTrigger<UsedEnderEyeTrig
 	}
 
 	public UsedEnderEyeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromJson(jsonObject.get("distance"));
-		return new UsedEnderEyeTrigger.TriggerInstance(composite, doubles);
+		return new UsedEnderEyeTrigger.TriggerInstance(contextAwarePredicate, doubles);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, BlockPos blockPos) {
@@ -30,8 +30,8 @@ public class UsedEnderEyeTrigger extends SimpleCriterionTrigger<UsedEnderEyeTrig
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final MinMaxBounds.Doubles level;
 
-		public TriggerInstance(EntityPredicate.Composite composite, MinMaxBounds.Doubles doubles) {
-			super(UsedEnderEyeTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, MinMaxBounds.Doubles doubles) {
+			super(UsedEnderEyeTrigger.ID, contextAwarePredicate);
 			this.level = doubles;
 		}
 

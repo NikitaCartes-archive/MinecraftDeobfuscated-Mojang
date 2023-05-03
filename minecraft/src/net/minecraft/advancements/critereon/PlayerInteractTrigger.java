@@ -16,11 +16,11 @@ public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteract
 	}
 
 	protected PlayerInteractTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "entity", deserializationContext);
-		return new PlayerInteractTrigger.TriggerInstance(composite, itemPredicate, composite2);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
+		return new PlayerInteractTrigger.TriggerInstance(contextAwarePredicate, itemPredicate, contextAwarePredicate2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, Entity entity) {
@@ -30,22 +30,22 @@ public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteract
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ItemPredicate item;
-		private final EntityPredicate.Composite entity;
+		private final ContextAwarePredicate entity;
 
-		public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate, EntityPredicate.Composite composite2) {
-			super(PlayerInteractTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, ContextAwarePredicate contextAwarePredicate2) {
+			super(PlayerInteractTrigger.ID, contextAwarePredicate);
 			this.item = itemPredicate;
-			this.entity = composite2;
+			this.entity = contextAwarePredicate2;
 		}
 
 		public static PlayerInteractTrigger.TriggerInstance itemUsedOnEntity(
-			EntityPredicate.Composite composite, ItemPredicate.Builder builder, EntityPredicate.Composite composite2
+			ContextAwarePredicate contextAwarePredicate, ItemPredicate.Builder builder, ContextAwarePredicate contextAwarePredicate2
 		) {
-			return new PlayerInteractTrigger.TriggerInstance(composite, builder.build(), composite2);
+			return new PlayerInteractTrigger.TriggerInstance(contextAwarePredicate, builder.build(), contextAwarePredicate2);
 		}
 
-		public static PlayerInteractTrigger.TriggerInstance itemUsedOnEntity(ItemPredicate.Builder builder, EntityPredicate.Composite composite) {
-			return itemUsedOnEntity(EntityPredicate.Composite.ANY, builder, composite);
+		public static PlayerInteractTrigger.TriggerInstance itemUsedOnEntity(ItemPredicate.Builder builder, ContextAwarePredicate contextAwarePredicate) {
+			return itemUsedOnEntity(ContextAwarePredicate.ANY, builder, contextAwarePredicate);
 		}
 
 		public boolean matches(ItemStack itemStack, LootContext lootContext) {

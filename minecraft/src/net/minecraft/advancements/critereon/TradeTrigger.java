@@ -15,10 +15,12 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 		return ID;
 	}
 
-	public TradeTrigger.TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "villager", deserializationContext);
+	public TradeTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+	) {
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "villager", deserializationContext);
 		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new TradeTrigger.TriggerInstance(composite, composite2, itemPredicate);
+		return new TradeTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2, itemPredicate);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, AbstractVillager abstractVillager, ItemStack itemStack) {
@@ -27,21 +29,21 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate.Composite villager;
+		private final ContextAwarePredicate villager;
 		private final ItemPredicate item;
 
-		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite composite2, ItemPredicate itemPredicate) {
-			super(TradeTrigger.ID, composite);
-			this.villager = composite2;
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2, ItemPredicate itemPredicate) {
+			super(TradeTrigger.ID, contextAwarePredicate);
+			this.villager = contextAwarePredicate2;
 			this.item = itemPredicate;
 		}
 
 		public static TradeTrigger.TriggerInstance tradedWithVillager() {
-			return new TradeTrigger.TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, ItemPredicate.ANY);
+			return new TradeTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ItemPredicate.ANY);
 		}
 
 		public static TradeTrigger.TriggerInstance tradedWithVillager(EntityPredicate.Builder builder) {
-			return new TradeTrigger.TriggerInstance(EntityPredicate.Composite.wrap(builder.build()), EntityPredicate.Composite.ANY, ItemPredicate.ANY);
+			return new TradeTrigger.TriggerInstance(EntityPredicate.wrap(builder.build()), ContextAwarePredicate.ANY, ItemPredicate.ANY);
 		}
 
 		public boolean matches(LootContext lootContext, ItemStack itemStack) {

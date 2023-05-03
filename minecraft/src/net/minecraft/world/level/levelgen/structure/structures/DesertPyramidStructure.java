@@ -57,7 +57,7 @@ public class DesertPyramidStructure extends SinglePieceStructure {
 			if (i > 0) {
 				i--;
 				placeSuspiciousSand(boundingBox, worldGenLevel, blockPos);
-			} else {
+			} else if (boundingBox.isInside(blockPos)) {
 				worldGenLevel.setBlock(blockPos, Blocks.SAND.defaultBlockState(), 2);
 			}
 		}

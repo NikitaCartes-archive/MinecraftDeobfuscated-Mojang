@@ -50,10 +50,10 @@ public class SpectatorGui implements SpectatorMenuListener {
 			if (f <= 0.0F) {
 				this.menu.exit();
 			} else {
-				int i = this.minecraft.getWindow().getGuiScaledWidth() / 2;
+				int i = guiGraphics.guiWidth() / 2;
 				guiGraphics.pose().pushPose();
 				guiGraphics.pose().translate(0.0F, 0.0F, -90.0F);
-				int j = Mth.floor((float)this.minecraft.getWindow().getGuiScaledHeight() - 22.0F * f);
+				int j = Mth.floor((float)guiGraphics.guiHeight() - 22.0F * f);
 				SpectatorPage spectatorPage = this.menu.getCurrentPage();
 				this.renderPage(guiGraphics, f, i, j, spectatorPage);
 				guiGraphics.pose().popPose();
@@ -72,7 +72,7 @@ public class SpectatorGui implements SpectatorMenuListener {
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 
 		for (int k = 0; k < 9; k++) {
-			this.renderSlot(guiGraphics, k, this.minecraft.getWindow().getGuiScaledWidth() / 2 - 90 + k * 20 + 2, (float)(j + 3), f, spectatorPage.getItem(k));
+			this.renderSlot(guiGraphics, k, guiGraphics.guiWidth() / 2 - 90 + k * 20 + 2, (float)(j + 3), f, spectatorPage.getItem(k));
 		}
 
 		RenderSystem.disableBlend();
@@ -101,8 +101,8 @@ public class SpectatorGui implements SpectatorMenuListener {
 			SpectatorMenuItem spectatorMenuItem = this.menu.getSelectedItem();
 			Component component = spectatorMenuItem == SpectatorMenu.EMPTY_SLOT ? this.menu.getSelectedCategory().getPrompt() : spectatorMenuItem.getName();
 			if (component != null) {
-				int j = (this.minecraft.getWindow().getGuiScaledWidth() - this.minecraft.font.width(component)) / 2;
-				int k = this.minecraft.getWindow().getGuiScaledHeight() - 35;
+				int j = (guiGraphics.guiWidth() - this.minecraft.font.width(component)) / 2;
+				int k = guiGraphics.guiHeight() - 35;
 				guiGraphics.drawString(this.minecraft.font, component, j, k, 16777215 + (i << 24));
 			}
 		}

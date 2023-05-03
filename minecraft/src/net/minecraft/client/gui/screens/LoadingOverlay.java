@@ -66,8 +66,8 @@ public class LoadingOverlay extends Overlay {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		int k = this.minecraft.getWindow().getGuiScaledWidth();
-		int l = this.minecraft.getWindow().getGuiScaledHeight();
+		int k = guiGraphics.guiWidth();
+		int l = guiGraphics.guiHeight();
 		long m = Util.getMillis();
 		if (this.fadeIn && this.fadeInStart == -1L) {
 			this.fadeInStart = m;
@@ -102,9 +102,9 @@ public class LoadingOverlay extends Overlay {
 			o = 1.0F;
 		}
 
-		int n = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5);
-		int s = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.5);
-		double d = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75, (double)this.minecraft.getWindow().getGuiScaledHeight()) * 0.25;
+		int n = (int)((double)guiGraphics.guiWidth() * 0.5);
+		int s = (int)((double)guiGraphics.guiHeight() * 0.5);
+		double d = Math.min((double)guiGraphics.guiWidth() * 0.75, (double)guiGraphics.guiHeight()) * 0.25;
 		int t = (int)(d * 0.5);
 		double e = d * 4.0;
 		int u = (int)(e * 0.5);
@@ -116,7 +116,7 @@ public class LoadingOverlay extends Overlay {
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableBlend();
-		int v = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.8325);
+		int v = (int)((double)guiGraphics.guiHeight() * 0.8325);
 		float w = this.reload.getActualProgress();
 		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + w * 0.050000012F, 0.0F, 1.0F);
 		if (g < 1.0F) {
@@ -137,7 +137,7 @@ public class LoadingOverlay extends Overlay {
 
 			this.fadeOutStart = Util.getMillis();
 			if (this.minecraft.screen != null) {
-				this.minecraft.screen.init(this.minecraft, this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight());
+				this.minecraft.screen.init(this.minecraft, guiGraphics.guiWidth(), guiGraphics.guiHeight());
 			}
 		}
 	}

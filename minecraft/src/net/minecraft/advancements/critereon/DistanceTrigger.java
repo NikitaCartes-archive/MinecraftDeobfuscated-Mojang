@@ -20,11 +20,11 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 	}
 
 	public DistanceTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		LocationPredicate locationPredicate = LocationPredicate.fromJson(jsonObject.get("start_position"));
 		DistancePredicate distancePredicate = DistancePredicate.fromJson(jsonObject.get("distance"));
-		return new DistanceTrigger.TriggerInstance(this.id, composite, locationPredicate, distancePredicate);
+		return new DistanceTrigger.TriggerInstance(this.id, contextAwarePredicate, locationPredicate, distancePredicate);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Vec3 vec3) {
@@ -37,9 +37,9 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 		private final DistancePredicate distance;
 
 		public TriggerInstance(
-			ResourceLocation resourceLocation, EntityPredicate.Composite composite, LocationPredicate locationPredicate, DistancePredicate distancePredicate
+			ResourceLocation resourceLocation, ContextAwarePredicate contextAwarePredicate, LocationPredicate locationPredicate, DistancePredicate distancePredicate
 		) {
-			super(resourceLocation, composite);
+			super(resourceLocation, contextAwarePredicate);
 			this.startPosition = locationPredicate;
 			this.distance = distancePredicate;
 		}
@@ -47,19 +47,17 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 		public static DistanceTrigger.TriggerInstance fallFromHeight(
 			EntityPredicate.Builder builder, DistancePredicate distancePredicate, LocationPredicate locationPredicate
 		) {
-			return new DistanceTrigger.TriggerInstance(
-				CriteriaTriggers.FALL_FROM_HEIGHT.id, EntityPredicate.Composite.wrap(builder.build()), locationPredicate, distancePredicate
-			);
+			return new DistanceTrigger.TriggerInstance(CriteriaTriggers.FALL_FROM_HEIGHT.id, EntityPredicate.wrap(builder.build()), locationPredicate, distancePredicate);
 		}
 
 		public static DistanceTrigger.TriggerInstance rideEntityInLava(EntityPredicate.Builder builder, DistancePredicate distancePredicate) {
 			return new DistanceTrigger.TriggerInstance(
-				CriteriaTriggers.RIDE_ENTITY_IN_LAVA_TRIGGER.id, EntityPredicate.Composite.wrap(builder.build()), LocationPredicate.ANY, distancePredicate
+				CriteriaTriggers.RIDE_ENTITY_IN_LAVA_TRIGGER.id, EntityPredicate.wrap(builder.build()), LocationPredicate.ANY, distancePredicate
 			);
 		}
 
 		public static DistanceTrigger.TriggerInstance travelledThroughNether(DistancePredicate distancePredicate) {
-			return new DistanceTrigger.TriggerInstance(CriteriaTriggers.NETHER_TRAVEL.id, EntityPredicate.Composite.ANY, LocationPredicate.ANY, distancePredicate);
+			return new DistanceTrigger.TriggerInstance(CriteriaTriggers.NETHER_TRAVEL.id, ContextAwarePredicate.ANY, LocationPredicate.ANY, distancePredicate);
 		}
 
 		@Override

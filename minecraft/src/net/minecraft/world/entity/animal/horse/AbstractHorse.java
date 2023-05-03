@@ -790,7 +790,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	protected void executeRidersJump(float f, Vec3 vec3) {
 		double d = this.getCustomJump() * (double)f * (double)this.getBlockJumpFactor();
-		double e = d + this.getJumpBoostPower();
+		double e = d + (double)this.getJumpBoostPower();
 		Vec3 vec32 = this.getDeltaMovement();
 		this.setDeltaMovement(vec32.x, e, vec32.z);
 		this.setIsJumping(true);

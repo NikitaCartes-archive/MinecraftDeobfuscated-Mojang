@@ -5,11 +5,14 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.client.telemetry.events.PerformanceMetricsEvent;
 import net.minecraft.client.telemetry.events.WorldLoadEvent;
 import net.minecraft.client.telemetry.events.WorldLoadTimesEvent;
 import net.minecraft.client.telemetry.events.WorldUnloadEvent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class WorldSessionTelemetryManager {
@@ -20,8 +23,8 @@ public class WorldSessionTelemetryManager {
 	private final PerformanceMetricsEvent performanceMetricsEvent;
 	private final WorldLoadTimesEvent worldLoadTimesEvent;
 
-	public WorldSessionTelemetryManager(TelemetryEventSender telemetryEventSender, boolean bl, @Nullable Duration duration) {
-		this.worldLoadEvent = new WorldLoadEvent();
+	public WorldSessionTelemetryManager(TelemetryEventSender telemetryEventSender, boolean bl, @Nullable Duration duration, @Nullable String string) {
+		this.worldLoadEvent = new WorldLoadEvent(string);
 		this.performanceMetricsEvent = new PerformanceMetricsEvent();
 		this.worldLoadTimesEvent = new WorldLoadTimesEvent(bl, duration);
 		this.eventSender = telemetryEventSender.decorate(builder -> {
@@ -60,5 +63,16 @@ public class WorldSessionTelemetryManager {
 		this.worldLoadEvent.send(this.eventSender);
 		this.performanceMetricsEvent.stop();
 		this.worldUnloadEvent.send(this.eventSender);
+	}
+
+	public void onAdvancementDone(Level level, Advancement advancement) {
+		ResourceLocation resourceLocation = advancement.getId();
+		if (advancement.sendsTelemetryEvent() && "minecraft".equals(resourceLocation.getNamespace())) {
+			long l = level.getGameTime();
+			this.eventSender.send(TelemetryEventType.ADVANCEMENT_MADE, builder -> {
+				builder.put(TelemetryProperty.ADVANCEMENT_ID, resourceLocation.toString());
+				builder.put(TelemetryProperty.ADVANCEMENT_GAME_TIME, l);
+			});
+		}
 	}
 }

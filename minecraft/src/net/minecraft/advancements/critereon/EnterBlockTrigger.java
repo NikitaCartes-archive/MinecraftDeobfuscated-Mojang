@@ -19,7 +19,7 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
 	}
 
 	public EnterBlockTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		Block block = deserializeBlock(jsonObject);
 		StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
@@ -29,7 +29,7 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
 			});
 		}
 
-		return new EnterBlockTrigger.TriggerInstance(composite, block, statePropertiesPredicate);
+		return new EnterBlockTrigger.TriggerInstance(contextAwarePredicate, block, statePropertiesPredicate);
 	}
 
 	@Nullable
@@ -53,14 +53,14 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
 		private final Block block;
 		private final StatePropertiesPredicate state;
 
-		public TriggerInstance(EntityPredicate.Composite composite, @Nullable Block block, StatePropertiesPredicate statePropertiesPredicate) {
-			super(EnterBlockTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, @Nullable Block block, StatePropertiesPredicate statePropertiesPredicate) {
+			super(EnterBlockTrigger.ID, contextAwarePredicate);
 			this.block = block;
 			this.state = statePropertiesPredicate;
 		}
 
 		public static EnterBlockTrigger.TriggerInstance entersBlock(Block block) {
-			return new EnterBlockTrigger.TriggerInstance(EntityPredicate.Composite.ANY, block, StatePropertiesPredicate.ANY);
+			return new EnterBlockTrigger.TriggerInstance(ContextAwarePredicate.ANY, block, StatePropertiesPredicate.ANY);
 		}
 
 		@Override

@@ -16,11 +16,11 @@ public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZomb
 	}
 
 	public CuredZombieVillagerTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "zombie", deserializationContext);
-		EntityPredicate.Composite composite3 = EntityPredicate.Composite.fromJson(jsonObject, "villager", deserializationContext);
-		return new CuredZombieVillagerTrigger.TriggerInstance(composite, composite2, composite3);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "zombie", deserializationContext);
+		ContextAwarePredicate contextAwarePredicate3 = EntityPredicate.fromJson(jsonObject, "villager", deserializationContext);
+		return new CuredZombieVillagerTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2, contextAwarePredicate3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Zombie zombie, Villager villager) {
@@ -30,17 +30,19 @@ public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZomb
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate.Composite zombie;
-		private final EntityPredicate.Composite villager;
+		private final ContextAwarePredicate zombie;
+		private final ContextAwarePredicate villager;
 
-		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite composite2, EntityPredicate.Composite composite3) {
-			super(CuredZombieVillagerTrigger.ID, composite);
-			this.zombie = composite2;
-			this.villager = composite3;
+		public TriggerInstance(
+			ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2, ContextAwarePredicate contextAwarePredicate3
+		) {
+			super(CuredZombieVillagerTrigger.ID, contextAwarePredicate);
+			this.zombie = contextAwarePredicate2;
+			this.villager = contextAwarePredicate3;
 		}
 
 		public static CuredZombieVillagerTrigger.TriggerInstance curedZombieVillager() {
-			return new CuredZombieVillagerTrigger.TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY);
+			return new CuredZombieVillagerTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ContextAwarePredicate.ANY);
 		}
 
 		public boolean matches(LootContext lootContext, LootContext lootContext2) {

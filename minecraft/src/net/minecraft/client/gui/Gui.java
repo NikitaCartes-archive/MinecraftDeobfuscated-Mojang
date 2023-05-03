@@ -30,6 +30,7 @@ import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
@@ -142,8 +143,8 @@ public class Gui {
 
 	public void render(GuiGraphics guiGraphics, float f) {
 		Window window = this.minecraft.getWindow();
-		this.screenWidth = window.getGuiScaledWidth();
-		this.screenHeight = window.getGuiScaledHeight();
+		this.screenWidth = guiGraphics.guiWidth();
+		this.screenHeight = guiGraphics.guiHeight();
 		Font font = this.getFont();
 		RenderSystem.enableBlend();
 		if (Minecraft.useFancyGraphics()) {
@@ -210,7 +211,6 @@ public class Gui {
 
 		if (this.minecraft.player.getSleepTimer() > 0) {
 			this.minecraft.getProfiler().push("sleep");
-			RenderSystem.disableDepthTest();
 			float j = (float)this.minecraft.player.getSleepTimer();
 			float k = j / 100.0F;
 			if (k > 1.0F) {
@@ -218,8 +218,7 @@ public class Gui {
 			}
 
 			int l = (int)(220.0F * k) << 24 | 1052704;
-			guiGraphics.fill(0, 0, this.screenWidth, this.screenHeight, l);
-			RenderSystem.enableDepthTest();
+			guiGraphics.fill(RenderType.guiOverlay(), 0, 0, this.screenWidth, this.screenHeight, l);
 			this.minecraft.getProfiler().pop();
 		}
 
@@ -911,8 +910,6 @@ public class Gui {
 	}
 
 	private void renderSpyglassOverlay(GuiGraphics guiGraphics, float f) {
-		RenderSystem.disableDepthTest();
-		RenderSystem.depthMask(false);
 		float g = (float)Math.min(this.screenWidth, this.screenHeight);
 		float i = Math.min((float)this.screenWidth / g, (float)this.screenHeight / g) * f;
 		int j = Mth.floor(g * i);
@@ -922,12 +919,10 @@ public class Gui {
 		int n = l + j;
 		int o = m + k;
 		guiGraphics.blit(SPYGLASS_SCOPE_LOCATION, l, m, -90, 0.0F, 0.0F, j, k, j, k);
-		guiGraphics.fill(0, o, this.screenWidth, this.screenHeight, -90, -16777216);
-		guiGraphics.fill(0, 0, this.screenWidth, m, -90, -16777216);
-		guiGraphics.fill(0, m, l, o, -90, -16777216);
-		guiGraphics.fill(n, m, this.screenWidth, o, -90, -16777216);
-		RenderSystem.depthMask(true);
-		RenderSystem.enableDepthTest();
+		guiGraphics.fill(RenderType.guiOverlay(), 0, o, this.screenWidth, this.screenHeight, -90, -16777216);
+		guiGraphics.fill(RenderType.guiOverlay(), 0, 0, this.screenWidth, m, -90, -16777216);
+		guiGraphics.fill(RenderType.guiOverlay(), 0, m, l, o, -90, -16777216);
+		guiGraphics.fill(RenderType.guiOverlay(), n, m, this.screenWidth, o, -90, -16777216);
 	}
 
 	private void updateVignetteBrightness(Entity entity) {

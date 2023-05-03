@@ -18,7 +18,7 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 	}
 
 	public BrewedPotionTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		Potion potion = null;
 		if (jsonObject.has("potion")) {
@@ -28,7 +28,7 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 				.orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation + "'"));
 		}
 
-		return new BrewedPotionTrigger.TriggerInstance(composite, potion);
+		return new BrewedPotionTrigger.TriggerInstance(contextAwarePredicate, potion);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Potion potion) {
@@ -39,13 +39,13 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 		@Nullable
 		private final Potion potion;
 
-		public TriggerInstance(EntityPredicate.Composite composite, @Nullable Potion potion) {
-			super(BrewedPotionTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, @Nullable Potion potion) {
+			super(BrewedPotionTrigger.ID, contextAwarePredicate);
 			this.potion = potion;
 		}
 
 		public static BrewedPotionTrigger.TriggerInstance brewedPotion() {
-			return new BrewedPotionTrigger.TriggerInstance(EntityPredicate.Composite.ANY, null);
+			return new BrewedPotionTrigger.TriggerInstance(ContextAwarePredicate.ANY, null);
 		}
 
 		public boolean matches(Potion potion) {

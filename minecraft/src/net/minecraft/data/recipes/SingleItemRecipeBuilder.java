@@ -20,7 +20,7 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 	private final Item result;
 	private final Ingredient ingredient;
 	private final int count;
-	private final Advancement.Builder advancement = Advancement.Builder.advancement();
+	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
 	@Nullable
 	private String group;
 	private final RecipeSerializer<?> type;

@@ -55,7 +55,7 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 					double jx = vec3x.x() + (double)trackedListener.getListenerRadius();
 					double kx = vec3x.y() + (double)trackedListener.getListenerRadius();
 					double lx = vec3x.z() + (double)trackedListener.getListenerRadius();
-					LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, Shapes.create(new AABB(gx, hx, ix, jx, kx, lx)), -d, -e, -f, 1.0F, 1.0F, 0.0F, 0.35F);
+					LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, Shapes.create(new AABB(gx, hx, ix, jx, kx, lx)), -d, -e, -f, 1.0F, 1.0F, 0.0F, 0.35F, true);
 				});
 			}
 

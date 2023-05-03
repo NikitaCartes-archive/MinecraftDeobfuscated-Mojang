@@ -1,8 +1,6 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -12,6 +10,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
@@ -192,10 +191,7 @@ public abstract class AbstractSignEditScreen extends Screen {
 					int t = this.font.width(string.substring(0, r)) - this.font.width(string) / 2;
 					int u = Math.min(s, t);
 					int v = Math.max(s, t);
-					RenderSystem.enableColorLogicOp();
-					RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-					guiGraphics.fill(u, m, v, m + this.sign.getTextLineHeight(), -16776961);
-					RenderSystem.disableColorLogicOp();
+					guiGraphics.fill(RenderType.guiTextHighlight(), u, m, v, m + this.sign.getTextLineHeight(), -16776961);
 				}
 			}
 		}

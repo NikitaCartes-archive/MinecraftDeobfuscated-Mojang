@@ -1097,6 +1097,7 @@ public class CreativeModeTabs {
 					output.accept(Items.CHISELED_BOOKSHELF);
 					output.accept(Items.FURNACE);
 					output.accept(Items.TRAPPED_CHEST);
+					output.accept(Items.JUKEBOX);
 					output.accept(Items.OBSERVER);
 					output.accept(Items.NOTE_BLOCK);
 					output.accept(Items.COMPOSTER);

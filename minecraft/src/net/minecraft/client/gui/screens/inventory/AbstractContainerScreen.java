@@ -14,6 +14,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -150,11 +151,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	}
 
 	public static void renderSlotHighlight(GuiGraphics guiGraphics, int i, int j, int k) {
-		RenderSystem.disableDepthTest();
-		RenderSystem.colorMask(true, true, true, false);
-		guiGraphics.fillGradient(i, j, i + 16, j + 16, k, -2130706433, -2130706433);
-		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.enableDepthTest();
+		guiGraphics.fillGradient(RenderType.guiOverlay(), i, j, i + 16, j + 16, -2130706433, -2130706433, k);
 	}
 
 	protected void renderTooltip(GuiGraphics guiGraphics, int i, int j) {

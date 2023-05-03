@@ -18,7 +18,7 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
 	}
 
 	public ChangeDimensionTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		ResourceKey<Level> resourceKey = jsonObject.has("from")
 			? ResourceKey.create(Registries.DIMENSION, new ResourceLocation(GsonHelper.getAsString(jsonObject, "from")))
@@ -26,7 +26,7 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
 		ResourceKey<Level> resourceKey2 = jsonObject.has("to")
 			? ResourceKey.create(Registries.DIMENSION, new ResourceLocation(GsonHelper.getAsString(jsonObject, "to")))
 			: null;
-		return new ChangeDimensionTrigger.TriggerInstance(composite, resourceKey, resourceKey2);
+		return new ChangeDimensionTrigger.TriggerInstance(contextAwarePredicate, resourceKey, resourceKey2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {
@@ -39,26 +39,26 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
 		@Nullable
 		private final ResourceKey<Level> to;
 
-		public TriggerInstance(EntityPredicate.Composite composite, @Nullable ResourceKey<Level> resourceKey, @Nullable ResourceKey<Level> resourceKey2) {
-			super(ChangeDimensionTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, @Nullable ResourceKey<Level> resourceKey, @Nullable ResourceKey<Level> resourceKey2) {
+			super(ChangeDimensionTrigger.ID, contextAwarePredicate);
 			this.from = resourceKey;
 			this.to = resourceKey2;
 		}
 
 		public static ChangeDimensionTrigger.TriggerInstance changedDimension() {
-			return new ChangeDimensionTrigger.TriggerInstance(EntityPredicate.Composite.ANY, null, null);
+			return new ChangeDimensionTrigger.TriggerInstance(ContextAwarePredicate.ANY, null, null);
 		}
 
 		public static ChangeDimensionTrigger.TriggerInstance changedDimension(ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {
-			return new ChangeDimensionTrigger.TriggerInstance(EntityPredicate.Composite.ANY, resourceKey, resourceKey2);
+			return new ChangeDimensionTrigger.TriggerInstance(ContextAwarePredicate.ANY, resourceKey, resourceKey2);
 		}
 
 		public static ChangeDimensionTrigger.TriggerInstance changedDimensionTo(ResourceKey<Level> resourceKey) {
-			return new ChangeDimensionTrigger.TriggerInstance(EntityPredicate.Composite.ANY, null, resourceKey);
+			return new ChangeDimensionTrigger.TriggerInstance(ContextAwarePredicate.ANY, null, resourceKey);
 		}
 
 		public static ChangeDimensionTrigger.TriggerInstance changedDimensionFrom(ResourceKey<Level> resourceKey) {
-			return new ChangeDimensionTrigger.TriggerInstance(EntityPredicate.Composite.ANY, resourceKey, null);
+			return new ChangeDimensionTrigger.TriggerInstance(ContextAwarePredicate.ANY, resourceKey, null);
 		}
 
 		public boolean matches(ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {

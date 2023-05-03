@@ -21,14 +21,13 @@ import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
-import net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger;
+import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LevitationTrigger;
 import net.minecraft.advancements.critereon.LightningStrikeTrigger;
 import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.PickedUpItemTrigger;
-import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.PlayerTrigger;
@@ -72,7 +71,7 @@ public class CriteriaTriggers {
 	public static final ChangeDimensionTrigger CHANGED_DIMENSION = register(new ChangeDimensionTrigger());
 	public static final PlayerTrigger TICK = register(new PlayerTrigger(new ResourceLocation("tick")));
 	public static final TameAnimalTrigger TAME_ANIMAL = register(new TameAnimalTrigger());
-	public static final PlacedBlockTrigger PLACED_BLOCK = register(new PlacedBlockTrigger());
+	public static final ItemUsedOnLocationTrigger PLACED_BLOCK = register(new ItemUsedOnLocationTrigger(new ResourceLocation("placed_block")));
 	public static final ConsumeItemTrigger CONSUME_ITEM = register(new ConsumeItemTrigger());
 	public static final EffectsChangedTrigger EFFECTS_CHANGED = register(new EffectsChangedTrigger());
 	public static final UsedTotemTrigger USED_TOTEM = register(new UsedTotemTrigger());
@@ -86,7 +85,7 @@ public class CriteriaTriggers {
 	public static final SlideDownBlockTrigger HONEY_BLOCK_SLIDE = register(new SlideDownBlockTrigger());
 	public static final BeeNestDestroyedTrigger BEE_NEST_DESTROYED = register(new BeeNestDestroyedTrigger());
 	public static final TargetBlockTrigger TARGET_BLOCK_HIT = register(new TargetBlockTrigger());
-	public static final ItemInteractWithBlockTrigger ITEM_USED_ON_BLOCK = register(new ItemInteractWithBlockTrigger(new ResourceLocation("item_used_on_block")));
+	public static final ItemUsedOnLocationTrigger ITEM_USED_ON_BLOCK = register(new ItemUsedOnLocationTrigger(new ResourceLocation("item_used_on_block")));
 	public static final LootTableTrigger GENERATE_LOOT = register(new LootTableTrigger());
 	public static final PickedUpItemTrigger THROWN_ITEM_PICKED_UP_BY_ENTITY = register(
 		new PickedUpItemTrigger(new ResourceLocation("thrown_item_picked_up_by_entity"))
@@ -101,8 +100,8 @@ public class CriteriaTriggers {
 	public static final DistanceTrigger FALL_FROM_HEIGHT = register(new DistanceTrigger(new ResourceLocation("fall_from_height")));
 	public static final DistanceTrigger RIDE_ENTITY_IN_LAVA_TRIGGER = register(new DistanceTrigger(new ResourceLocation("ride_entity_in_lava")));
 	public static final KilledTrigger KILL_MOB_NEAR_SCULK_CATALYST = register(new KilledTrigger(new ResourceLocation("kill_mob_near_sculk_catalyst")));
-	public static final ItemInteractWithBlockTrigger ALLAY_DROP_ITEM_ON_BLOCK = register(
-		new ItemInteractWithBlockTrigger(new ResourceLocation("allay_drop_item_on_block"))
+	public static final ItemUsedOnLocationTrigger ALLAY_DROP_ITEM_ON_BLOCK = register(
+		new ItemUsedOnLocationTrigger(new ResourceLocation("allay_drop_item_on_block"))
 	);
 	public static final PlayerTrigger AVOID_VIBRATION = register(new PlayerTrigger(new ResourceLocation("avoid_vibration")));
 	public static final RecipeCraftedTrigger RECIPE_CRAFTED = register(new RecipeCraftedTrigger());

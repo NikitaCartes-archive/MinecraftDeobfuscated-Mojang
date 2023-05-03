@@ -3,7 +3,6 @@ package net.minecraft.client.gui.components;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.DataFixUtils;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
@@ -32,6 +31,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -109,17 +109,18 @@ public class DebugScreenOverlay {
 		Entity entity = this.minecraft.getCameraEntity();
 		this.block = entity.pick(20.0, 0.0F, false);
 		this.liquid = entity.pick(20.0, 0.0F, true);
-		this.drawGameInformation(guiGraphics);
-		this.drawSystemInformation(guiGraphics);
-		if (this.minecraft.options.renderFpsChart) {
-			int i = this.minecraft.getWindow().getGuiScaledWidth();
-			this.drawChart(guiGraphics, this.minecraft.getFrameTimer(), 0, i / 2, true);
-			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-			if (integratedServer != null) {
-				this.drawChart(guiGraphics, integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
+		guiGraphics.drawManaged(() -> {
+			this.drawGameInformation(guiGraphics);
+			this.drawSystemInformation(guiGraphics);
+			if (this.minecraft.options.renderFpsChart) {
+				int i = guiGraphics.guiWidth();
+				this.drawChart(guiGraphics, this.minecraft.getFrameTimer(), 0, i / 2, true);
+				IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
+				if (integratedServer != null) {
+					this.drawChart(guiGraphics, integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
+				}
 			}
-		}
-
+		});
 		this.minecraft.getProfiler().pop();
 	}
 
@@ -135,31 +136,33 @@ public class DebugScreenOverlay {
 				+ (this.minecraft.options.renderFpsChart ? "visible" : "hidden")
 		);
 		list.add("For help: press F3 + Q");
-
-		for (int i = 0; i < list.size(); i++) {
-			String string = (String)list.get(i);
-			if (!Strings.isNullOrEmpty(string)) {
-				int j = 9;
-				int k = this.font.width(string);
-				int l = 2;
-				int m = 2 + j * i;
-				guiGraphics.fill(1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
-				guiGraphics.drawString(this.font, string, 2, m, 14737632, false);
-			}
-		}
+		this.renderLines(guiGraphics, list, true);
 	}
 
 	protected void drawSystemInformation(GuiGraphics guiGraphics) {
 		List<String> list = this.getSystemInformation();
+		this.renderLines(guiGraphics, list, false);
+	}
 
-		for (int i = 0; i < list.size(); i++) {
-			String string = (String)list.get(i);
+	private void renderLines(GuiGraphics guiGraphics, List<String> list, boolean bl) {
+		int i = 9;
+
+		for (int j = 0; j < list.size(); j++) {
+			String string = (String)list.get(j);
 			if (!Strings.isNullOrEmpty(string)) {
-				int j = 9;
 				int k = this.font.width(string);
-				int l = this.minecraft.getWindow().getGuiScaledWidth() - 2 - k;
-				int m = 2 + j * i;
-				guiGraphics.fill(l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
+				int l = bl ? 2 : guiGraphics.guiWidth() - 2 - k;
+				int m = 2 + i * j;
+				guiGraphics.fill(l - 1, m - 1, l + k + 1, m + i - 1, -1873784752);
+			}
+		}
+
+		for (int jx = 0; jx < list.size(); jx++) {
+			String string = (String)list.get(jx);
+			if (!Strings.isNullOrEmpty(string)) {
+				int k = this.font.width(string);
+				int l = bl ? 2 : guiGraphics.guiWidth() - 2 - k;
+				int m = 2 + i * jx;
 				guiGraphics.drawString(this.font, string, l, m, 14737632, false);
 			}
 		}
@@ -497,7 +500,6 @@ public class DebugScreenOverlay {
 	}
 
 	private void drawChart(GuiGraphics guiGraphics, FrameTimer frameTimer, int i, int j, boolean bl) {
-		RenderSystem.disableDepthTest();
 		int k = frameTimer.getLogStart();
 		int l = frameTimer.getLogEnd();
 		long[] ls = frameTimer.getLog();
@@ -516,37 +518,37 @@ public class DebugScreenOverlay {
 			q += (long)u;
 		}
 
-		int t = this.minecraft.getWindow().getGuiScaledHeight();
-		guiGraphics.fill(i, t - 60, i + p, t, -1873784752);
+		int t = guiGraphics.guiHeight();
+		guiGraphics.fill(RenderType.guiOverlay(), i, t - 60, i + p, t, -1873784752);
 
 		while (m != l) {
 			int u = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);
 			int v = bl ? 100 : 60;
 			int w = this.getSampleColor(Mth.clamp(u, 0, v), 0, v / 2, v);
-			guiGraphics.fill(n, t - u, n + 1, t, w);
+			guiGraphics.fill(RenderType.guiOverlay(), n, t - u, n + 1, t, w);
 			n++;
 			m = frameTimer.wrapIndex(m + 1);
 		}
 
 		if (bl) {
-			guiGraphics.fill(i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
+			guiGraphics.fill(RenderType.guiOverlay(), i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
 			guiGraphics.drawString(this.font, "60 FPS", i + 2, t - 30 + 2, 14737632, false);
-			guiGraphics.hLine(i, i + p - 1, t - 30, -1);
-			guiGraphics.fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+			guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 30, -1);
+			guiGraphics.fill(RenderType.guiOverlay(), i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
 			guiGraphics.drawString(this.font, "30 FPS", i + 2, t - 60 + 2, 14737632, false);
-			guiGraphics.hLine(i, i + p - 1, t - 60, -1);
+			guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 60, -1);
 		} else {
-			guiGraphics.fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+			guiGraphics.fill(RenderType.guiOverlay(), i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
 			guiGraphics.drawString(this.font, "20 TPS", i + 2, t - 60 + 2, 14737632, false);
-			guiGraphics.hLine(i, i + p - 1, t - 60, -1);
+			guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 60, -1);
 		}
 
-		guiGraphics.hLine(i, i + p - 1, t - 1, -1);
-		guiGraphics.vLine(i, t - 60, t, -1);
-		guiGraphics.vLine(i + p - 1, t - 60, t, -1);
+		guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 1, -1);
+		guiGraphics.vLine(RenderType.guiOverlay(), i, t - 60, t, -1);
+		guiGraphics.vLine(RenderType.guiOverlay(), i + p - 1, t - 60, t, -1);
 		int u = this.minecraft.options.framerateLimit().get();
 		if (bl && u > 0 && u <= 250) {
-			guiGraphics.hLine(i, i + p - 1, t - 1 - (int)(1800.0 / (double)u), -16711681);
+			guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 1 - (int)(1800.0 / (double)u), -16711681);
 		}
 
 		String string = r + " ms min";

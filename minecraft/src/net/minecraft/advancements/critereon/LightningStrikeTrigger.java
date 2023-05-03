@@ -18,11 +18,11 @@ public class LightningStrikeTrigger extends SimpleCriterionTrigger<LightningStri
 	}
 
 	public LightningStrikeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
-		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "lightning", deserializationContext);
-		EntityPredicate.Composite composite3 = EntityPredicate.Composite.fromJson(jsonObject, "bystander", deserializationContext);
-		return new LightningStrikeTrigger.TriggerInstance(composite, composite2, composite3);
+		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "lightning", deserializationContext);
+		ContextAwarePredicate contextAwarePredicate3 = EntityPredicate.fromJson(jsonObject, "bystander", deserializationContext);
+		return new LightningStrikeTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2, contextAwarePredicate3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, LightningBolt lightningBolt, List<Entity> list) {
@@ -32,23 +32,23 @@ public class LightningStrikeTrigger extends SimpleCriterionTrigger<LightningStri
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate.Composite lightning;
-		private final EntityPredicate.Composite bystander;
+		private final ContextAwarePredicate lightning;
+		private final ContextAwarePredicate bystander;
 
-		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite composite2, EntityPredicate.Composite composite3) {
-			super(LightningStrikeTrigger.ID, composite);
-			this.lightning = composite2;
-			this.bystander = composite3;
+		public TriggerInstance(
+			ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2, ContextAwarePredicate contextAwarePredicate3
+		) {
+			super(LightningStrikeTrigger.ID, contextAwarePredicate);
+			this.lightning = contextAwarePredicate2;
+			this.bystander = contextAwarePredicate3;
 		}
 
 		public static LightningStrikeTrigger.TriggerInstance lighthingStrike(EntityPredicate entityPredicate, EntityPredicate entityPredicate2) {
-			return new LightningStrikeTrigger.TriggerInstance(
-				EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(entityPredicate), EntityPredicate.Composite.wrap(entityPredicate2)
-			);
+			return new LightningStrikeTrigger.TriggerInstance(ContextAwarePredicate.ANY, EntityPredicate.wrap(entityPredicate), EntityPredicate.wrap(entityPredicate2));
 		}
 
 		public boolean matches(LootContext lootContext, List<LootContext> list) {
-			return !this.lightning.matches(lootContext) ? false : this.bystander == EntityPredicate.Composite.ANY || !list.stream().noneMatch(this.bystander::matches);
+			return !this.lightning.matches(lootContext) ? false : this.bystander == ContextAwarePredicate.ANY || !list.stream().noneMatch(this.bystander::matches);
 		}
 
 		@Override

@@ -42,6 +42,13 @@ public class LootContextParamSets {
 	public static final LootContextParamSet ADVANCEMENT_ENTITY = register(
 		"advancement_entity", builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.ORIGIN)
 	);
+	public static final LootContextParamSet ADVANCEMENT_LOCATION = register(
+		"advancement_location",
+		builder -> builder.required(LootContextParams.THIS_ENTITY)
+				.required(LootContextParams.ORIGIN)
+				.required(LootContextParams.TOOL)
+				.required(LootContextParams.BLOCK_STATE)
+	);
 	public static final LootContextParamSet ALL_PARAMS = register(
 		"generic",
 		builder -> builder.required(LootContextParams.THIS_ENTITY)

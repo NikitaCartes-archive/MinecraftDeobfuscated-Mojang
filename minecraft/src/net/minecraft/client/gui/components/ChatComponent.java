@@ -60,7 +60,7 @@ public class ChatComponent {
 				boolean bl = this.isChatFocused();
 				float f = (float)this.getScale();
 				int n = Mth.ceil((float)this.getWidth() / f);
-				int o = this.minecraft.getWindow().getGuiScaledHeight();
+				int o = guiGraphics.guiHeight();
 				guiGraphics.pose().pushPose();
 				guiGraphics.pose().scale(f, f, 1.0F);
 				guiGraphics.pose().translate(4.0F, 0.0F, 0.0F);

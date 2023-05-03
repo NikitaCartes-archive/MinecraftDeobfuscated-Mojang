@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.font.providers;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.SheetGlyphInfo;
@@ -11,7 +10,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
@@ -167,24 +165,56 @@ public class UnihexProvider implements GlyphProvider {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Builder implements GlyphProviderBuilder {
-		public static final Codec<UnihexProvider.Builder> CODEC = RecordCodecBuilder.create(
+	static record ByteContents(byte[] contents) implements UnihexProvider.LineData {
+		@Override
+		public int line(int i) {
+			return this.contents[i] << 24;
+		}
+
+		static UnihexProvider.LineData read(int i, ByteList byteList) {
+			byte[] bs = new byte[16];
+			int j = 0;
+
+			for (int k = 0; k < 16; k++) {
+				int l = UnihexProvider.decodeHex(i, byteList, j++);
+				int m = UnihexProvider.decodeHex(i, byteList, j++);
+				byte b = (byte)(l << 4 | m);
+				bs[k] = b;
+			}
+
+			return new UnihexProvider.ByteContents(bs);
+		}
+
+		@Override
+		public int bitWidth() {
+			return 8;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class Definition implements GlyphProviderDefinition {
+		public static final MapCodec<UnihexProvider.Definition> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						ResourceLocation.CODEC.fieldOf("hex_file").forGetter(builder -> builder.hexFile),
-						UnihexProvider.OverrideRange.CODEC.listOf().fieldOf("size_overrides").forGetter(builder -> builder.sizeOverrides)
+						ResourceLocation.CODEC.fieldOf("hex_file").forGetter(definition -> definition.hexFile),
+						UnihexProvider.OverrideRange.CODEC.listOf().fieldOf("size_overrides").forGetter(definition -> definition.sizeOverrides)
 					)
-					.apply(instance, UnihexProvider.Builder::new)
+					.apply(instance, UnihexProvider.Definition::new)
 		);
 		private final ResourceLocation hexFile;
 		private final List<UnihexProvider.OverrideRange> sizeOverrides;
 
-		private Builder(ResourceLocation resourceLocation, List<UnihexProvider.OverrideRange> list) {
+		private Definition(ResourceLocation resourceLocation, List<UnihexProvider.OverrideRange> list) {
 			this.hexFile = resourceLocation;
 			this.sizeOverrides = list;
 		}
 
 		@Override
-		public Either<GlyphProviderBuilder.Loader, GlyphProviderBuilder.Reference> build() {
+		public GlyphProviderType type() {
+			return GlyphProviderType.UNIHEX;
+		}
+
+		@Override
+		public Either<GlyphProviderDefinition.Loader, GlyphProviderDefinition.Reference> unpack() {
 			return Either.left(this::load);
 		}
 
@@ -263,38 +293,6 @@ public class UnihexProvider implements GlyphProvider {
 
 			zipInputStream.close();
 			return var17;
-		}
-
-		public static GlyphProviderBuilder fromJson(JsonObject jsonObject) {
-			return CODEC.parse(JsonOps.INSTANCE, jsonObject).getOrThrow(false, string -> {
-			});
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static record ByteContents(byte[] contents) implements UnihexProvider.LineData {
-		@Override
-		public int line(int i) {
-			return this.contents[i] << 24;
-		}
-
-		static UnihexProvider.LineData read(int i, ByteList byteList) {
-			byte[] bs = new byte[16];
-			int j = 0;
-
-			for (int k = 0; k < 16; k++) {
-				int l = UnihexProvider.decodeHex(i, byteList, j++);
-				int m = UnihexProvider.decodeHex(i, byteList, j++);
-				byte b = (byte)(l << 4 | m);
-				bs[k] = b;
-			}
-
-			return new UnihexProvider.ByteContents(bs);
-		}
-
-		@Override
-		public int bitWidth() {
-			return 8;
 		}
 	}
 

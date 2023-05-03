@@ -29,6 +29,7 @@ public class DebugRenderer {
 	public final DebugRenderer.SimpleDebugRenderer chunkBorderRenderer;
 	public final DebugRenderer.SimpleDebugRenderer heightMapRenderer;
 	public final DebugRenderer.SimpleDebugRenderer collisionBoxRenderer;
+	public final DebugRenderer.SimpleDebugRenderer supportBlockRenderer;
 	public final DebugRenderer.SimpleDebugRenderer neighborsUpdateRenderer;
 	public final StructureRenderer structureRenderer;
 	public final DebugRenderer.SimpleDebugRenderer lightDebugRenderer;
@@ -50,6 +51,7 @@ public class DebugRenderer {
 		this.chunkBorderRenderer = new ChunkBorderRenderer(minecraft);
 		this.heightMapRenderer = new HeightMapRenderer(minecraft);
 		this.collisionBoxRenderer = new CollisionBoxRenderer(minecraft);
+		this.supportBlockRenderer = new SupportBlockRenderer(minecraft);
 		this.neighborsUpdateRenderer = new NeighborsUpdateRenderer(minecraft);
 		this.structureRenderer = new StructureRenderer(minecraft);
 		this.lightDebugRenderer = new LightDebugRenderer(minecraft);
@@ -72,6 +74,7 @@ public class DebugRenderer {
 		this.chunkBorderRenderer.clear();
 		this.heightMapRenderer.clear();
 		this.collisionBoxRenderer.clear();
+		this.supportBlockRenderer.clear();
 		this.neighborsUpdateRenderer.clear();
 		this.structureRenderer.clear();
 		this.lightDebugRenderer.clear();

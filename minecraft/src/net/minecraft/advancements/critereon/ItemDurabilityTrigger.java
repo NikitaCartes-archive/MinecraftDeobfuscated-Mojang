@@ -14,12 +14,12 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 	}
 
 	public ItemDurabilityTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
 	) {
 		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("durability"));
 		MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject.get("delta"));
-		return new ItemDurabilityTrigger.TriggerInstance(composite, itemPredicate, ints, ints2);
+		return new ItemDurabilityTrigger.TriggerInstance(contextAwarePredicate, itemPredicate, ints, ints2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, int i) {
@@ -31,21 +31,21 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 		private final MinMaxBounds.Ints durability;
 		private final MinMaxBounds.Ints delta;
 
-		public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2) {
-			super(ItemDurabilityTrigger.ID, composite);
+		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2) {
+			super(ItemDurabilityTrigger.ID, contextAwarePredicate);
 			this.item = itemPredicate;
 			this.durability = ints;
 			this.delta = ints2;
 		}
 
 		public static ItemDurabilityTrigger.TriggerInstance changedDurability(ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
-			return changedDurability(EntityPredicate.Composite.ANY, itemPredicate, ints);
+			return changedDurability(ContextAwarePredicate.ANY, itemPredicate, ints);
 		}
 
 		public static ItemDurabilityTrigger.TriggerInstance changedDurability(
-			EntityPredicate.Composite composite, ItemPredicate itemPredicate, MinMaxBounds.Ints ints
+			ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, MinMaxBounds.Ints ints
 		) {
-			return new ItemDurabilityTrigger.TriggerInstance(composite, itemPredicate, ints, MinMaxBounds.Ints.ANY);
+			return new ItemDurabilityTrigger.TriggerInstance(contextAwarePredicate, itemPredicate, ints, MinMaxBounds.Ints.ANY);
 		}
 
 		public boolean matches(ItemStack itemStack, int i) {

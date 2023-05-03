@@ -63,6 +63,8 @@ public class Sniffer extends Animal {
 	private static final int DIGGING_PARTICLES_AMOUNT = 30;
 	private static final int DIGGING_DROP_SEED_OFFSET_TICKS = 120;
 	private static final int SNIFFER_BABY_AGE_TICKS = 48000;
+	private static final float DIGGING_BB_HEIGHT_OFFSET = 0.4F;
+	private static final EntityDimensions DIGGING_DIMENSIONS = EntityDimensions.scalable(EntityType.SNIFFER.getWidth(), EntityType.SNIFFER.getHeight() - 0.4F);
 	private static final EntityDataAccessor<Sniffer.State> DATA_STATE = SynchedEntityData.defineId(Sniffer.class, EntityDataSerializers.SNIFFER_STATE);
 	private static final EntityDataAccessor<Integer> DATA_DROP_SEED_AT_TICK = SynchedEntityData.defineId(Sniffer.class, EntityDataSerializers.INT);
 	public final AnimationState feelingHappyAnimationState = new AnimationState();
@@ -102,6 +104,13 @@ public class Sniffer extends Animal {
 	@Override
 	public void onPathfindingDone() {
 		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
+	}
+
+	@Override
+	public EntityDimensions getDimensions(Pose pose) {
+		return this.entityData.hasItem(DATA_STATE) && this.getState() == Sniffer.State.DIGGING
+			? DIGGING_DIMENSIONS.scale(this.getScale())
+			: super.getDimensions(pose);
 	}
 
 	public boolean isPanicking() {
@@ -163,6 +172,8 @@ public class Sniffer extends Animal {
 				case FEELING_HAPPY:
 					this.feelingHappyAnimationState.startIfStopped(this.tickCount);
 			}
+
+			this.refreshDimensions();
 		}
 
 		super.onSyncedDataUpdated(entityDataAccessor);
@@ -276,8 +287,8 @@ public class Sniffer extends Animal {
 	private Sniffer emitDiggingParticles(AnimationState animationState) {
 		boolean bl = animationState.getAccumulatedTime() > 1700L && animationState.getAccumulatedTime() < 6000L;
 		if (bl) {
-			BlockState blockState = this.getBlockStateOn();
 			BlockPos blockPos = this.getHeadBlock();
+			BlockState blockState = this.level().getBlockState(blockPos.below());
 			if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
 				for (int i = 0; i < 30; i++) {
 					Vec3 vec3 = Vec3.atCenterOf(blockPos).add(0.0, -0.65F, 0.0);

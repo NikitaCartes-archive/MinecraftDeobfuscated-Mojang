@@ -25,7 +25,7 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 	private final Item result;
 	private final int count;
 	private final List<Ingredient> ingredients = Lists.<Ingredient>newArrayList();
-	private final Advancement.Builder advancement = Advancement.Builder.advancement();
+	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
 	@Nullable
 	private String group;
 

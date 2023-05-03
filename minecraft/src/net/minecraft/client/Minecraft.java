@@ -156,6 +156,8 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.client.telemetry.ClientTelemetryManager;
+import net.minecraft.client.telemetry.TelemetryProperty;
+import net.minecraft.client.telemetry.events.GameLoadTimesEvent;
 import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -441,6 +443,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.virtualScreen = new VirtualScreen(this);
 		this.window = this.virtualScreen.newWindow(displayData, this.options.fullscreenVideoModeString, this.createTitle());
 		this.setWindowActive(true);
+		GameLoadTimesEvent.INSTANCE.endStep(TelemetryProperty.LOAD_TIME_PRE_WINDOW_MS);
 
 		try {
 			this.window.setIcon(this.vanillaPackResources, SharedConstants.getCurrentVersion().isStable() ? IconSet.RELEASE : IconSet.SNAPSHOT);
@@ -558,12 +561,14 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
 		this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
 		ReloadInstance reloadInstance = this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list);
+		GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_LOADING_OVERLAY_MS);
 		this.setOverlay(new LoadingOverlay(this, reloadInstance, optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
 				if (SharedConstants.IS_RUNNING_IN_IDE) {
 					this.selfTest();
 				}
 
 				this.reloadStateTracker.finishReload();
+				this.onGameLoadFinished();
 			}), false));
 		this.quickPlayLog = QuickPlayLog.of(gameConfig.quickPlay.path());
 		if (this.shouldShowBanNotice()) {
@@ -577,6 +582,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		} else {
 			this.setInitialScreen(realmsClient, reloadInstance, gameConfig.quickPlay);
 		}
+	}
+
+	private void onGameLoadFinished() {
+		GameLoadTimesEvent.INSTANCE.endStep(TelemetryProperty.LOAD_TIME_LOADING_OVERLAY_MS);
+		GameLoadTimesEvent.INSTANCE.endStep(TelemetryProperty.LOAD_TIME_TOTAL_TIME_MS);
+		GameLoadTimesEvent.INSTANCE.send(this.telemetryManager.getOutsideSessionSender());
 	}
 
 	private void setInitialScreen(RealmsClient realmsClient, ReloadInstance reloadInstance, GameConfig.QuickPlayData quickPlayData) {

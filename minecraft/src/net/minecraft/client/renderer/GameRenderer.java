@@ -164,10 +164,6 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	private static ShaderInstance positionTexColorShader;
 	@Nullable
-	private static ShaderInstance blockShader;
-	@Nullable
-	private static ShaderInstance newEntityShader;
-	@Nullable
 	private static ShaderInstance particleShader;
 	@Nullable
 	private static ShaderInstance positionColorLightmapShader;
@@ -267,6 +263,14 @@ public class GameRenderer implements AutoCloseable {
 	private static ShaderInstance rendertypeLinesShader;
 	@Nullable
 	private static ShaderInstance rendertypeCrumblingShader;
+	@Nullable
+	private static ShaderInstance rendertypeGuiShader;
+	@Nullable
+	private static ShaderInstance rendertypeGuiOverlayShader;
+	@Nullable
+	private static ShaderInstance rendertypeGuiTextHighlightShader;
+	@Nullable
+	private static ShaderInstance rendertypeGuiGhostRecipeOverlayShader;
 
 	public GameRenderer(Minecraft minecraft, ItemInHandRenderer itemInHandRenderer, ResourceManager resourceManager, RenderBuffers renderBuffers) {
 		this.minecraft = minecraft;
@@ -442,6 +446,7 @@ public class GameRenderer implements AutoCloseable {
 				throw new RuntimeException("could not preload blit shader", var3);
 			}
 
+			rendertypeGuiShader = this.preloadShader(resourceProvider, "rendertype_gui", DefaultVertexFormat.POSITION_COLOR);
 			positionShader = this.preloadShader(resourceProvider, "position", DefaultVertexFormat.POSITION);
 			positionColorShader = this.preloadShader(resourceProvider, "position_color", DefaultVertexFormat.POSITION_COLOR);
 			positionColorTexShader = this.preloadShader(resourceProvider, "position_color_tex", DefaultVertexFormat.POSITION_COLOR_TEX);
@@ -472,8 +477,6 @@ public class GameRenderer implements AutoCloseable {
 		);
 
 		try {
-			list2.add(Pair.of(new ShaderInstance(resourceProvider, "block", DefaultVertexFormat.BLOCK), shaderInstance -> blockShader = shaderInstance));
-			list2.add(Pair.of(new ShaderInstance(resourceProvider, "new_entity", DefaultVertexFormat.NEW_ENTITY), shaderInstance -> newEntityShader = shaderInstance));
 			list2.add(Pair.of(new ShaderInstance(resourceProvider, "particle", DefaultVertexFormat.PARTICLE), shaderInstance -> particleShader = shaderInstance));
 			list2.add(Pair.of(new ShaderInstance(resourceProvider, "position", DefaultVertexFormat.POSITION), shaderInstance -> positionShader = shaderInstance));
 			list2.add(
@@ -768,6 +771,27 @@ public class GameRenderer implements AutoCloseable {
 			list2.add(
 				Pair.of(
 					new ShaderInstance(resourceProvider, "rendertype_crumbling", DefaultVertexFormat.BLOCK), shaderInstance -> rendertypeCrumblingShader = shaderInstance
+				)
+			);
+			list2.add(
+				Pair.of(new ShaderInstance(resourceProvider, "rendertype_gui", DefaultVertexFormat.POSITION_COLOR), shaderInstance -> rendertypeGuiShader = shaderInstance)
+			);
+			list2.add(
+				Pair.of(
+					new ShaderInstance(resourceProvider, "rendertype_gui_overlay", DefaultVertexFormat.POSITION_COLOR),
+					shaderInstance -> rendertypeGuiOverlayShader = shaderInstance
+				)
+			);
+			list2.add(
+				Pair.of(
+					new ShaderInstance(resourceProvider, "rendertype_gui_text_highlight", DefaultVertexFormat.POSITION_COLOR),
+					shaderInstance -> rendertypeGuiTextHighlightShader = shaderInstance
+				)
+			);
+			list2.add(
+				Pair.of(
+					new ShaderInstance(resourceProvider, "rendertype_gui_ghost_recipe_overlay", DefaultVertexFormat.POSITION_COLOR),
+					shaderInstance -> rendertypeGuiGhostRecipeOverlayShader = shaderInstance
 				)
 			);
 		} catch (IOException var5) {
@@ -1357,8 +1381,8 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	private void renderConfusionOverlay(GuiGraphics guiGraphics, float f) {
-		int i = this.minecraft.getWindow().getGuiScaledWidth();
-		int j = this.minecraft.getWindow().getGuiScaledHeight();
+		int i = guiGraphics.guiWidth();
+		int j = guiGraphics.guiHeight();
 		guiGraphics.pose().pushPose();
 		float g = Mth.lerp(f, 2.0F, 1.0F);
 		guiGraphics.pose().translate((float)i / 2.0F, (float)j / 2.0F, 0.0F);
@@ -1428,16 +1452,6 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	public static ShaderInstance getPositionTexColorShader() {
 		return positionTexColorShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getBlockShader() {
-		return blockShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getNewEntityShader() {
-		return newEntityShader;
 	}
 
 	@Nullable
@@ -1688,6 +1702,26 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	public static ShaderInstance getRendertypeCrumblingShader() {
 		return rendertypeCrumblingShader;
+	}
+
+	@Nullable
+	public static ShaderInstance getRendertypeGuiShader() {
+		return rendertypeGuiShader;
+	}
+
+	@Nullable
+	public static ShaderInstance getRendertypeGuiOverlayShader() {
+		return rendertypeGuiOverlayShader;
+	}
+
+	@Nullable
+	public static ShaderInstance getRendertypeGuiTextHighlightShader() {
+		return rendertypeGuiTextHighlightShader;
+	}
+
+	@Nullable
+	public static ShaderInstance getRendertypeGuiGhostRecipeOverlayShader() {
+		return rendertypeGuiGhostRecipeOverlayShader;
 	}
 
 	@Environment(EnvType.CLIENT)

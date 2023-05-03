@@ -1,7 +1,6 @@
 package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -10,16 +9,15 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Divisor;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,6 +35,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -64,6 +63,7 @@ public class GuiGraphics {
 	private final PoseStack pose;
 	private final MultiBufferSource.BufferSource bufferSource;
 	private final GuiGraphics.ScissorStack scissorStack = new GuiGraphics.ScissorStack();
+	private boolean managed;
 
 	private GuiGraphics(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
 		this.minecraft = minecraft;
@@ -73,6 +73,22 @@ public class GuiGraphics {
 
 	public GuiGraphics(Minecraft minecraft, MultiBufferSource.BufferSource bufferSource) {
 		this(minecraft, new PoseStack(), bufferSource);
+	}
+
+	@Deprecated
+	public void drawManaged(Runnable runnable) {
+		this.flush();
+		this.managed = true;
+		runnable.run();
+		this.managed = false;
+		this.flush();
+	}
+
+	@Deprecated
+	private void flushIfUnmanaged() {
+		if (!this.managed) {
+			this.flush();
+		}
 	}
 
 	public int guiWidth() {
@@ -92,38 +108,49 @@ public class GuiGraphics {
 	}
 
 	public void flush() {
+		RenderSystem.disableDepthTest();
 		this.bufferSource.endBatch();
+		RenderSystem.enableDepthTest();
 	}
 
 	public void hLine(int i, int j, int k, int l) {
+		this.hLine(RenderType.gui(), i, j, k, l);
+	}
+
+	public void hLine(RenderType renderType, int i, int j, int k, int l) {
 		if (j < i) {
 			int m = i;
 			i = j;
 			j = m;
 		}
 
-		this.fill(i, k, j + 1, k + 1, l);
+		this.fill(renderType, i, k, j + 1, k + 1, l);
 	}
 
 	public void vLine(int i, int j, int k, int l) {
+		this.vLine(RenderType.gui(), i, j, k, l);
+	}
+
+	public void vLine(RenderType renderType, int i, int j, int k, int l) {
 		if (k < j) {
 			int m = j;
 			j = k;
 			k = m;
 		}
 
-		this.fill(i, j + 1, i + 1, k, l);
+		this.fill(renderType, i, j + 1, i + 1, k, l);
 	}
 
 	public void enableScissor(int i, int j, int k, int l) {
-		applyScissor(this.scissorStack.push(new ScreenRectangle(i, j, k - i, l - j)));
+		this.applyScissor(this.scissorStack.push(new ScreenRectangle(i, j, k - i, l - j)));
 	}
 
 	public void disableScissor() {
-		applyScissor(this.scissorStack.pop());
+		this.applyScissor(this.scissorStack.pop());
 	}
 
-	private static void applyScissor(@Nullable ScreenRectangle screenRectangle) {
+	private void applyScissor(@Nullable ScreenRectangle screenRectangle) {
+		this.flush();
 		if (screenRectangle != null) {
 			Window window = Minecraft.getInstance().getWindow();
 			int i = window.getHeight();
@@ -139,6 +166,7 @@ public class GuiGraphics {
 	}
 
 	public void setColor(float f, float g, float h, float i) {
+		this.flush();
 		RenderSystem.setShaderColor(f, g, h, i);
 	}
 
@@ -147,6 +175,14 @@ public class GuiGraphics {
 	}
 
 	public void fill(int i, int j, int k, int l, int m, int n) {
+		this.fill(RenderType.gui(), i, j, k, l, m, n);
+	}
+
+	public void fill(RenderType renderType, int i, int j, int k, int l, int m) {
+		this.fill(renderType, i, j, k, l, 0, m);
+	}
+
+	public void fill(RenderType renderType, int i, int j, int k, int l, int m, int n) {
 		Matrix4f matrix4f = this.pose.last().pose();
 		if (i < k) {
 			int o = i;
@@ -164,16 +200,12 @@ public class GuiGraphics {
 		float g = (float)FastColor.ARGB32.red(n) / 255.0F;
 		float h = (float)FastColor.ARGB32.green(n) / 255.0F;
 		float p = (float)FastColor.ARGB32.blue(n) / 255.0F;
-		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-		RenderSystem.enableBlend();
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		bufferBuilder.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).color(g, h, p, f).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)k, (float)l, (float)m).color(g, h, p, f).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
-		BufferUploader.drawWithShader(bufferBuilder.end());
-		RenderSystem.disableBlend();
+		VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
+		vertexConsumer.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)i, (float)l, (float)m).color(g, h, p, f).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)k, (float)l, (float)m).color(g, h, p, f).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
+		this.flushIfUnmanaged();
 	}
 
 	public void fillGradient(int i, int j, int k, int l, int m, int n) {
@@ -181,17 +213,16 @@ public class GuiGraphics {
 	}
 
 	public void fillGradient(int i, int j, int k, int l, int m, int n, int o) {
-		RenderSystem.enableBlend();
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		this.fillGradient(bufferBuilder, i, j, k, l, m, n, o);
-		tesselator.end();
-		RenderSystem.disableBlend();
+		this.fillGradient(RenderType.gui(), i, j, k, l, n, o, m);
 	}
 
-	void fillGradient(BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o) {
+	public void fillGradient(RenderType renderType, int i, int j, int k, int l, int m, int n, int o) {
+		VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
+		this.fillGradient(vertexConsumer, i, j, k, l, o, m, n);
+		this.flushIfUnmanaged();
+	}
+
+	private void fillGradient(VertexConsumer vertexConsumer, int i, int j, int k, int l, int m, int n, int o) {
 		float f = (float)FastColor.ARGB32.alpha(n) / 255.0F;
 		float g = (float)FastColor.ARGB32.red(n) / 255.0F;
 		float h = (float)FastColor.ARGB32.green(n) / 255.0F;
@@ -201,10 +232,10 @@ public class GuiGraphics {
 		float s = (float)FastColor.ARGB32.green(o) / 255.0F;
 		float t = (float)FastColor.ARGB32.blue(o) / 255.0F;
 		Matrix4f matrix4f = this.pose.last().pose();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).color(r, s, t, q).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)k, (float)l, (float)m).color(r, s, t, q).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)i, (float)l, (float)m).color(r, s, t, q).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)k, (float)l, (float)m).color(r, s, t, q).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
 	}
 
 	public void drawCenteredString(Font font, String string, int i, int j, int k) {
@@ -231,7 +262,7 @@ public class GuiGraphics {
 			int l = font.drawInBatch(
 				string, (float)i, (float)j, k, bl, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional()
 			);
-			this.flush();
+			this.flushIfUnmanaged();
 			return l;
 		}
 	}
@@ -242,7 +273,7 @@ public class GuiGraphics {
 
 	public int drawString(Font font, FormattedCharSequence formattedCharSequence, int i, int j, int k, boolean bl) {
 		int l = font.drawInBatch(formattedCharSequence, (float)i, (float)j, k, bl, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
-		this.flush();
+		this.flushIfUnmanaged();
 		return l;
 	}
 
@@ -259,21 +290,6 @@ public class GuiGraphics {
 			this.drawString(font, formattedCharSequence, i, j, l, false);
 			j += 9;
 		}
-	}
-
-	public void blitOutlineBlack(int i, int j, BiConsumer<Integer, Integer> biConsumer) {
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.ZERO,
-			GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-			GlStateManager.SourceFactor.SRC_ALPHA,
-			GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
-		);
-		biConsumer.accept(i + 1, j);
-		biConsumer.accept(i - 1, j);
-		biConsumer.accept(i, j + 1);
-		biConsumer.accept(i, j - 1);
-		RenderSystem.defaultBlendFunc();
-		biConsumer.accept(i, j);
 	}
 
 	public void blit(int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite) {
@@ -469,7 +485,6 @@ public class GuiGraphics {
 					.getItemRenderer()
 					.render(itemStack, ItemDisplayContext.GUI, false, this.pose, this.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
 				this.flush();
-				RenderSystem.enableDepthTest();
 				if (bl) {
 					Lighting.setupFor3DItems();
 				}
@@ -501,24 +516,20 @@ public class GuiGraphics {
 			}
 
 			if (itemStack.isBarVisible()) {
-				RenderSystem.disableDepthTest();
 				int k = itemStack.getBarWidth();
 				int l = itemStack.getBarColor();
 				int m = i + 2;
 				int n = j + 13;
-				this.fill(m, n, m + 13, n + 2, -16777216);
-				this.fill(m, n, m + k, n + 1, l | 0xFF000000);
-				RenderSystem.enableDepthTest();
+				this.fill(RenderType.guiOverlay(), m, n, m + 13, n + 2, -16777216);
+				this.fill(RenderType.guiOverlay(), m, n, m + k, n + 1, l | 0xFF000000);
 			}
 
 			LocalPlayer localPlayer = this.minecraft.player;
 			float f = localPlayer == null ? 0.0F : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), this.minecraft.getFrameTime());
 			if (f > 0.0F) {
-				RenderSystem.disableDepthTest();
 				int m = j + Mth.floor(16.0F * (1.0F - f));
 				int n = m + Mth.ceil(16.0F * f);
-				this.fill(i, m, i + 16, n, Integer.MAX_VALUE);
-				RenderSystem.enableDepthTest();
+				this.fill(RenderType.guiOverlay(), i, m, i + 16, n, Integer.MAX_VALUE);
 			}
 
 			this.pose.popPose();
@@ -539,7 +550,7 @@ public class GuiGraphics {
 	}
 
 	public void renderTooltip(Font font, Component component, int i, int j) {
-		this.renderTooltip(font, Arrays.asList(component.getVisualOrderText()), i, j);
+		this.renderTooltip(font, List.of(component.getVisualOrderText()), i, j);
 	}
 
 	public void renderComponentTooltip(Font font, List<Component> list, int i, int j) {
@@ -572,12 +583,14 @@ public class GuiGraphics {
 				l += clientTooltipComponent.getHeight();
 			}
 
-			Vector2ic vector2ic = clientTooltipPositioner.positionTooltip(this.guiWidth(), this.guiHeight(), i, j, k, l);
+			int n = k;
+			int o = l;
+			Vector2ic vector2ic = clientTooltipPositioner.positionTooltip(this.guiWidth(), this.guiHeight(), i, j, n, o);
 			int p = vector2ic.x();
 			int q = vector2ic.y();
 			this.pose.pushPose();
 			int r = 400;
-			TooltipRenderUtil.renderTooltipBackground(this, p, q, k, l, 400);
+			this.drawManaged(() -> TooltipRenderUtil.renderTooltipBackground(this, p, q, n, o, 400));
 			this.pose.translate(0.0F, 0.0F, 400.0F);
 			int s = q;
 
@@ -591,7 +604,7 @@ public class GuiGraphics {
 
 			for (int t = 0; t < list.size(); t++) {
 				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(t);
-				clientTooltipComponent2.renderText(font, p, s, this.pose.last().pose(), this.bufferSource);
+				clientTooltipComponent2.renderImage(font, p, s, this);
 				s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
 			}
 
