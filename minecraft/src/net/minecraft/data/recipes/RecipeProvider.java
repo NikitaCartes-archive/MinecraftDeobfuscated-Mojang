@@ -282,13 +282,22 @@ public abstract class RecipeProvider implements DataProvider {
 			.save(consumer);
 	}
 
-	protected static void coloredWoolFromWhiteWoolAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike)
-			.requires(itemLike2)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
+	protected static void colorBlockWithDye(Consumer<FinishedRecipe> consumer, List<Item> list, List<Item> list2) {
+		for (int i = 0; i < list.size(); i++) {
+			for (int j = 0; j != list2.size(); j++) {
+				if (i != j) {
+					Item item = (Item)list.get(i);
+					Item item2 = (Item)list2.get(i);
+					Item item3 = (Item)list2.get(j);
+					ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, item2)
+						.requires(item)
+						.requires(item3)
+						.group(BuiltInRegistries.ITEM.getKey(item2).getPath())
+						.unlockedBy("has_needed_dye", has(item))
+						.save(consumer, getConversionRecipeName(item2, item3));
+				}
+			}
+		}
 	}
 
 	protected static void carpet(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
@@ -300,19 +309,6 @@ public abstract class RecipeProvider implements DataProvider {
 			.save(consumer);
 	}
 
-	protected static void coloredCarpetFromWhiteCarpetAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', itemLike2)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(consumer, getConversionRecipeName(itemLike, Blocks.WHITE_CARPET));
-	}
-
 	protected static void bedFromPlanksAndWool(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
 		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike)
 			.define('#', itemLike2)
@@ -322,15 +318,6 @@ public abstract class RecipeProvider implements DataProvider {
 			.group("bed")
 			.unlockedBy(getHasName(itemLike2), has(itemLike2))
 			.save(consumer);
-	}
-
-	protected static void bedFromWhiteBedAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.DECORATIONS, itemLike)
-			.requires(Items.WHITE_BED)
-			.requires(itemLike2)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, getConversionRecipeName(itemLike, Items.WHITE_BED));
 	}
 
 	protected static void banner(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {

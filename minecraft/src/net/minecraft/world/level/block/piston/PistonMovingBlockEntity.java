@@ -188,23 +188,20 @@ public class PistonMovingBlockEntity extends BlockEntity {
 			Direction direction = pistonMovingBlockEntity.getMovementDirection();
 			if (direction.getAxis().isHorizontal()) {
 				double d = pistonMovingBlockEntity.movedState.getCollisionShape(level, blockPos).max(Direction.Axis.Y);
-				AABB aABB = moveByPositionAndProgress(blockPos, new AABB(0.0, d, 0.0, 1.0, 1.5000000999999998, 1.0), pistonMovingBlockEntity);
+				AABB aABB = moveByPositionAndProgress(blockPos, new AABB(0.0, d, 0.0, 1.0, 1.5000010000000001, 1.0), pistonMovingBlockEntity);
 				double e = (double)(f - pistonMovingBlockEntity.progress);
 
-				for (Entity entity : level.getEntities((Entity)null, aABB, entityx -> matchesStickyCritera(aABB, entityx))) {
+				for (Entity entity : level.getEntities((Entity)null, aABB, entityx -> matchesStickyCritera(aABB, entityx, blockPos))) {
 					moveEntityByPiston(direction, entity, e, direction);
 				}
 			}
 		}
 	}
 
-	private static boolean matchesStickyCritera(AABB aABB, Entity entity) {
+	private static boolean matchesStickyCritera(AABB aABB, Entity entity, BlockPos blockPos) {
 		return entity.getPistonPushReaction() == PushReaction.NORMAL
 			&& entity.onGround()
-			&& entity.getX() >= aABB.minX
-			&& entity.getX() <= aABB.maxX
-			&& entity.getZ() >= aABB.minZ
-			&& entity.getZ() <= aABB.maxZ;
+			&& (entity.isSupportedBy(blockPos) || entity.getX() >= aABB.minX && entity.getX() <= aABB.maxX && entity.getZ() >= aABB.minZ && entity.getZ() <= aABB.maxZ);
 	}
 
 	private boolean isStickyForEntities() {

@@ -32,10 +32,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	static final ResourceLocation USER_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/user_icon.png");
 	static final ResourceLocation CROSS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/cross_player_icon.png");
 	private static final ResourceLocation OPTIONS_BACKGROUND = new ResourceLocation("minecraft", "textures/gui/options_background.png");
+	private static final Component QUESTION_TITLE = Component.translatable("mco.question");
 	static final Component NORMAL_USER_TOOLTIP = Component.translatable("mco.configure.world.invites.normal.tooltip");
 	static final Component OP_TOOLTIP = Component.translatable("mco.configure.world.invites.ops.tooltip");
 	static final Component REMOVE_ENTRY_TOOLTIP = Component.translatable("mco.configure.world.invites.remove.tooltip");
-	private static final Component INVITED_LABEL = Component.translatable("mco.configure.world.invited");
 	private static final int NO_ENTRY_SELECTED = -1;
 	private final RealmsConfigureWorldScreen lastScreen;
 	final RealmsServer serverData;
@@ -176,7 +176,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 				this.stateChanged = true;
 				this.minecraft.setScreen(this);
-			}, Component.literal("Question"), Component.translatable("mco.configure.world.uninvite.question").append(" '").append(playerInfo.getName()).append("' ?"));
+			}, QUESTION_TITLE, Component.translatable("mco.configure.world.uninvite.player", playerInfo.getName()));
 			this.minecraft.setScreen(realmsConfirmScreen);
 		}
 	}
@@ -190,19 +190,8 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		guiGraphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
 		guiGraphics.blit(OPTIONS_BACKGROUND, 0, k, 0.0F, 0.0F, this.width, this.height - k, 32, 32);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-		if (this.serverData.players != null) {
-			guiGraphics.drawString(
-				this.font,
-				Component.empty().append(INVITED_LABEL).append(" (").append(Integer.toString(this.serverData.players.size())).append(")"),
-				this.column1X,
-				row(0),
-				10526880,
-				false
-			);
-		} else {
-			guiGraphics.drawString(this.font, INVITED_LABEL, this.column1X, row(0), 10526880, false);
-		}
-
+		String string = this.serverData.players != null ? Integer.toString(this.serverData.players.size()) : "0";
+		guiGraphics.drawString(this.font, Component.translatable("mco.configure.world.invited.number", string), this.column1X, row(0), 10526880, false);
 		super.render(guiGraphics, i, j, f);
 	}
 

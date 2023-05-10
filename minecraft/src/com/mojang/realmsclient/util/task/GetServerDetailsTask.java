@@ -117,7 +117,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 					this.scheduleResourcePackDownload(realmsServerAddress).thenRun(() -> setScreen((Screen)function.apply(realmsServerAddress))).exceptionally(throwable -> {
 						Minecraft.getInstance().getDownloadedPackSource().clearServerPack();
 						LOGGER.error("Failed to download resource pack from {}", realmsServerAddress, throwable);
-						setScreen(new RealmsGenericErrorScreen(Component.literal("Failed to download resource pack!"), this.lastScreen));
+						setScreen(new RealmsGenericErrorScreen(Component.translatable("mco.download.resourcePack.fail"), this.lastScreen));
 						return null;
 					});
 					return;
@@ -132,7 +132,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 		};
 		return new RealmsLongConfirmationScreen(
 			booleanConsumer,
-			RealmsLongConfirmationScreen.Type.Info,
+			RealmsLongConfirmationScreen.Type.INFO,
 			Component.translatable("mco.configure.world.resourcepack.question.line1"),
 			Component.translatable("mco.configure.world.resourcepack.question.line2"),
 			true

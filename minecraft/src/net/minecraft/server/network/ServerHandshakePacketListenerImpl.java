@@ -11,7 +11,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.MinecraftServer;
 
 public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketListener {
-	private static final Component IGNORE_STATUS_REASON = Component.literal("Ignoring status request");
+	private static final Component IGNORE_STATUS_REASON = Component.translatable("disconnect.ignoring_status_request");
 	private final MinecraftServer server;
 	private final Connection connection;
 

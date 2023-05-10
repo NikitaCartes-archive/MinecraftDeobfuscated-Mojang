@@ -231,19 +231,19 @@ public class DataCommands {
 															)
 													)
 													.then(
-														Commands.argument("start", IntegerArgumentType.integer(0))
+														Commands.argument("start", IntegerArgumentType.integer())
 															.executes(
 																commandContext -> manipulateData(
 																		commandContext,
 																		dataProvider,
 																		dataManipulator,
 																		stringifyTagList(
-																			resolveSourcePath(commandContext, dataProvider2), string -> string.substring(IntegerArgumentType.getInteger(commandContext, "start"))
+																			resolveSourcePath(commandContext, dataProvider2), string -> substring(string, IntegerArgumentType.getInteger(commandContext, "start"))
 																		)
 																	)
 															)
 															.then(
-																Commands.argument("end", IntegerArgumentType.integer(0))
+																Commands.argument("end", IntegerArgumentType.integer())
 																	.executes(
 																		commandContext -> manipulateData(
 																				commandContext,
@@ -251,7 +251,7 @@ public class DataCommands {
 																				dataManipulator,
 																				stringifyTagList(
 																					resolveSourcePath(commandContext, dataProvider2),
-																					string -> string.substring(IntegerArgumentType.getInteger(commandContext, "start"), IntegerArgumentType.getInteger(commandContext, "end"))
+																					string -> substring(string, IntegerArgumentType.getInteger(commandContext, "start"), IntegerArgumentType.getInteger(commandContext, "end"))
 																				)
 																			)
 																	)
@@ -276,6 +276,19 @@ public class DataCommands {
 		}
 
 		return literalArgumentBuilder;
+	}
+
+	private static String substring(String string, int i, int j) {
+		int k = string.length();
+		return string.substring(getOffset(i, k), getOffset(j, k));
+	}
+
+	private static String substring(String string, int i) {
+		return string.substring(getOffset(i, string.length()));
+	}
+
+	private static int getOffset(int i, int j) {
+		return i >= 0 ? i : j + i;
 	}
 
 	private static List<Tag> getSingletonSource(CommandContext<CommandSourceStack> commandContext, DataCommands.DataProvider dataProvider) throws CommandSyntaxException {

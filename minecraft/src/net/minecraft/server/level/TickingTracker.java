@@ -12,6 +12,7 @@ import net.minecraft.util.SortedArraySet;
 import net.minecraft.world.level.ChunkPos;
 
 public class TickingTracker extends ChunkTracker {
+	public static final int MAX_LEVEL = 33;
 	private static final int INITIAL_TICKET_LIST_CAPACITY = 4;
 	protected final Long2ByteMap chunks = new Long2ByteOpenHashMap();
 	private final Long2ObjectOpenHashMap<SortedArraySet<Ticket<?>>> tickets = new Long2ObjectOpenHashMap<>();

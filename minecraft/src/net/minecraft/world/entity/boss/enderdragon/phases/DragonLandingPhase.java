@@ -39,7 +39,7 @@ public class DragonLandingPhase extends AbstractDragonPhaseInstance {
 	public void doServerTick() {
 		if (this.targetLocation == null) {
 			this.targetLocation = Vec3.atBottomCenterOf(
-				this.dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION)
+				this.dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()))
 			);
 		}
 

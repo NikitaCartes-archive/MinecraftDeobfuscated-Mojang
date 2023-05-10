@@ -50,7 +50,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -267,11 +267,11 @@ public class Sniffer extends Animal {
 		if (!this.level().isClientSide() && this.entityData.get(DATA_DROP_SEED_AT_TICK) == this.tickCount) {
 			ServerLevel serverLevel = (ServerLevel)this.level();
 			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(BuiltInLootTables.SNIFFER_DIGGING);
-			LootContext.Builder builder = new LootContext.Builder(serverLevel)
+			LootParams lootParams = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.ORIGIN, this.getHeadPosition())
 				.withParameter(LootContextParams.THIS_ENTITY, this)
-				.withRandom(this.random);
-			List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
+				.create(LootContextParamSets.GIFT);
+			List<ItemStack> list = lootTable.getRandomItems(lootParams);
 			BlockPos blockPos = this.getHeadBlock();
 
 			for (ItemStack itemStack : list) {

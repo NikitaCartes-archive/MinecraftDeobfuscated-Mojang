@@ -29,7 +29,7 @@ public class DamageSources {
 	private final DamageSource cactus;
 	private final DamageSource fall;
 	private final DamageSource flyIntoWall;
-	private final DamageSource outOfWorld;
+	private final DamageSource fellOutOfWorld;
 	private final DamageSource generic;
 	private final DamageSource magic;
 	private final DamageSource wither;
@@ -38,6 +38,8 @@ public class DamageSources {
 	private final DamageSource sweetBerryBush;
 	private final DamageSource freeze;
 	private final DamageSource stalagmite;
+	private final DamageSource outsideBorder;
+	private final DamageSource genericKill;
 
 	public DamageSources(RegistryAccess registryAccess) {
 		this.damageTypes = registryAccess.registryOrThrow(Registries.DAMAGE_TYPE);
@@ -53,7 +55,7 @@ public class DamageSources {
 		this.cactus = this.source(DamageTypes.CACTUS);
 		this.fall = this.source(DamageTypes.FALL);
 		this.flyIntoWall = this.source(DamageTypes.FLY_INTO_WALL);
-		this.outOfWorld = this.source(DamageTypes.OUT_OF_WORLD);
+		this.fellOutOfWorld = this.source(DamageTypes.FELL_OUT_OF_WORLD);
 		this.generic = this.source(DamageTypes.GENERIC);
 		this.magic = this.source(DamageTypes.MAGIC);
 		this.wither = this.source(DamageTypes.WITHER);
@@ -62,6 +64,8 @@ public class DamageSources {
 		this.sweetBerryBush = this.source(DamageTypes.SWEET_BERRY_BUSH);
 		this.freeze = this.source(DamageTypes.FREEZE);
 		this.stalagmite = this.source(DamageTypes.STALAGMITE);
+		this.outsideBorder = this.source(DamageTypes.OUTSIDE_BORDER);
+		this.genericKill = this.source(DamageTypes.GENERIC_KILL);
 	}
 
 	private DamageSource source(ResourceKey<DamageType> resourceKey) {
@@ -124,8 +128,8 @@ public class DamageSources {
 		return this.flyIntoWall;
 	}
 
-	public DamageSource outOfWorld() {
-		return this.outOfWorld;
+	public DamageSource fellOutOfWorld() {
+		return this.fellOutOfWorld;
 	}
 
 	public DamageSource generic() {
@@ -238,5 +242,13 @@ public class DamageSources {
 
 	public DamageSource badRespawnPointExplosion(Vec3 vec3) {
 		return new DamageSource(this.damageTypes.getHolderOrThrow(DamageTypes.BAD_RESPAWN_POINT), vec3);
+	}
+
+	public DamageSource outOfBorder() {
+		return this.outsideBorder;
+	}
+
+	public DamageSource genericKill() {
+		return this.genericKill;
 	}
 }

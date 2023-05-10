@@ -93,7 +93,7 @@ public abstract class HangingEntity extends Entity {
 	@Override
 	public void tick() {
 		if (!this.level().isClientSide) {
-			this.checkOutOfWorld();
+			this.checkBelowWorld();
 			if (this.checkInterval++ == 100) {
 				this.checkInterval = 0;
 				if (!this.isRemoved() && !this.survives()) {

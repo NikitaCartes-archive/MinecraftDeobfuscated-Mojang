@@ -32,13 +32,15 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.STALAGMITE,
 				DamageTypes.MAGIC,
 				DamageTypes.INDIRECT_MAGIC,
-				DamageTypes.OUT_OF_WORLD,
-				DamageTypes.SONIC_BOOM
+				DamageTypes.FELL_OUT_OF_WORLD,
+				DamageTypes.GENERIC_KILL,
+				DamageTypes.SONIC_BOOM,
+				DamageTypes.OUTSIDE_BORDER
 			);
 		this.tag(DamageTypeTags.BYPASSES_SHIELD).addTag(DamageTypeTags.BYPASSES_ARMOR).add(DamageTypes.FALLING_ANVIL, DamageTypes.FALLING_STALACTITE);
-		this.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).add(DamageTypes.OUT_OF_WORLD);
+		this.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).add(DamageTypes.FELL_OUT_OF_WORLD, DamageTypes.GENERIC_KILL);
 		this.tag(DamageTypeTags.BYPASSES_EFFECTS).add(DamageTypes.STARVE);
-		this.tag(DamageTypeTags.BYPASSES_RESISTANCE).add(DamageTypes.OUT_OF_WORLD);
+		this.tag(DamageTypeTags.BYPASSES_RESISTANCE).add(DamageTypes.FELL_OUT_OF_WORLD, DamageTypes.GENERIC_KILL);
 		this.tag(DamageTypeTags.BYPASSES_ENCHANTMENTS).add(DamageTypes.SONIC_BOOM);
 		this.tag(DamageTypeTags.IS_FIRE)
 			.add(DamageTypes.IN_FIRE, DamageTypes.ON_FIRE, DamageTypes.LAVA, DamageTypes.HOT_FLOOR, DamageTypes.UNATTRIBUTED_FIREBALL, DamageTypes.FIREBALL);
@@ -60,7 +62,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 		this.tag(DamageTypeTags.IS_LIGHTNING).add(DamageTypes.LIGHTNING_BOLT);
 		this.tag(DamageTypeTags.NO_ANGER).add(DamageTypes.MOB_ATTACK_NO_AGGRO);
 		this.tag(DamageTypeTags.NO_IMPACT).add(DamageTypes.DROWN);
-		this.tag(DamageTypeTags.ALWAYS_MOST_SIGNIFICANT_FALL).add(DamageTypes.OUT_OF_WORLD);
+		this.tag(DamageTypeTags.ALWAYS_MOST_SIGNIFICANT_FALL).add(DamageTypes.FELL_OUT_OF_WORLD);
 		this.tag(DamageTypeTags.WITHER_IMMUNE_TO).add(DamageTypes.DROWN);
 		this.tag(DamageTypeTags.IGNITES_ARMOR_STANDS).add(DamageTypes.IN_FIRE);
 		this.tag(DamageTypeTags.BURNS_ARMOR_STANDS).add(DamageTypes.ON_FIRE);

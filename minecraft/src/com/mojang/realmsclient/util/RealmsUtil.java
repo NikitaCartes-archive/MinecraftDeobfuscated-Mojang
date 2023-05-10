@@ -13,11 +13,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class RealmsUtil {
 	static final MinecraftSessionService SESSION_SERVICE = Minecraft.getInstance().getMinecraftSessionService();
+	private static final Component RIGHT_NOW = Component.translatable("mco.util.time.now");
 	private static final LoadingCache<String, GameProfile> GAME_PROFILE_CACHE = CacheBuilder.newBuilder()
 		.expireAfterWrite(60L, TimeUnit.MINUTES)
 		.build(new CacheLoader<String, GameProfile>() {
@@ -37,27 +39,27 @@ public class RealmsUtil {
 		return GAME_PROFILE_CACHE.getUnchecked(string);
 	}
 
-	public static String convertToAgePresentation(long l) {
+	public static Component convertToAgePresentation(long l) {
 		if (l < 0L) {
-			return "right now";
+			return RIGHT_NOW;
 		} else {
 			long m = l / 1000L;
 			if (m < 60L) {
-				return (m == 1L ? "1 second" : m + " seconds") + " ago";
+				return Component.translatable("mco.time.secondsAgo", m);
 			} else if (m < 3600L) {
 				long n = m / 60L;
-				return (n == 1L ? "1 minute" : n + " minutes") + " ago";
+				return Component.translatable("mco.time.minutesAgo", n);
 			} else if (m < 86400L) {
 				long n = m / 3600L;
-				return (n == 1L ? "1 hour" : n + " hours") + " ago";
+				return Component.translatable("mco.time.hoursAgo", n);
 			} else {
 				long n = m / 86400L;
-				return (n == 1L ? "1 day" : n + " days") + " ago";
+				return Component.translatable("mco.time.daysAgo", n);
 			}
 		}
 	}
 
-	public static String convertToAgePresentationFromInstant(Date date) {
+	public static Component convertToAgePresentationFromInstant(Date date) {
 		return convertToAgePresentation(System.currentTimeMillis() - date.getTime());
 	}
 

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
 
@@ -40,19 +41,19 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
 	private static Pair<Component, Component> errorMessage(RealmsServiceException realmsServiceException) {
 		if (realmsServiceException.realmsError == null) {
 			return Pair.of(
-				Component.literal("An error occurred (" + realmsServiceException.httpResultCode + "):"), Component.literal(realmsServiceException.rawResponse)
+				Component.translatable("mco.errorMessage.realmsService", realmsServiceException.httpResultCode), Component.literal(realmsServiceException.rawResponse)
 			);
 		} else {
 			String string = "mco.errorMessage." + realmsServiceException.realmsError.getErrorCode();
 			return Pair.of(
-				Component.literal("Realms (" + realmsServiceException.realmsError + "):"),
+				Component.translatable("mco.errorMessage.realmsService.realmsError", realmsServiceException.realmsError),
 				(Component)(I18n.exists(string) ? Component.translatable(string) : Component.nullToEmpty(realmsServiceException.realmsError.getErrorMessage()))
 			);
 		}
 	}
 
 	private static Pair<Component, Component> errorMessage(Component component) {
-		return Pair.of(Component.literal("An error occurred: "), component);
+		return Pair.of(Component.translatable("mco.errorMessage.generic"), component);
 	}
 
 	private static Pair<Component, Component> errorMessage(Component component, Component component2) {
@@ -62,7 +63,7 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.addRenderableWidget(
-			Button.builder(Component.literal("Ok"), button -> this.minecraft.setScreen(this.nextScreen)).bounds(this.width / 2 - 100, this.height - 52, 200, 20).build()
+			Button.builder(CommonComponents.GUI_OK, button -> this.minecraft.setScreen(this.nextScreen)).bounds(this.width / 2 - 100, this.height - 52, 200, 20).build()
 		);
 		this.line2Split = MultiLineLabel.create(this.font, this.lines.getSecond(), this.width * 3 / 4);
 	}

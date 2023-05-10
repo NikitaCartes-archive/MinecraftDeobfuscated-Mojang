@@ -22,7 +22,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.util.DebugBuffer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -48,7 +47,6 @@ public class ChunkHolder {
 		UNLOADED_LEVEL_CHUNK
 	);
 	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
-	private static final ChunkHolder.FullChunkStatus[] FULL_CHUNK_STATUSES = ChunkHolder.FullChunkStatus.values();
 	private final AtomicReferenceArray<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> futures = new AtomicReferenceArray(
 		CHUNK_STATUSES.size()
 	);
@@ -86,7 +84,7 @@ public class ChunkHolder {
 		this.lightEngine = levelLightEngine;
 		this.onLevelChange = levelChangeListener;
 		this.playerProvider = playerProvider;
-		this.oldTicketLevel = ChunkMap.MAX_CHUNK_DISTANCE + 1;
+		this.oldTicketLevel = ChunkLevel.MAX_LEVEL + 1;
 		this.ticketLevel = this.oldTicketLevel;
 		this.queueLevel = this.oldTicketLevel;
 		this.setTicketLevel(i);
@@ -100,7 +98,7 @@ public class ChunkHolder {
 	}
 
 	public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getFutureIfPresent(ChunkStatus chunkStatus) {
-		return getStatus(this.ticketLevel).isOrAfter(chunkStatus) ? this.getFutureIfPresentUnchecked(chunkStatus) : UNLOADED_CHUNK_FUTURE;
+		return ChunkLevel.generationStatus(this.ticketLevel).isOrAfter(chunkStatus) ? this.getFutureIfPresentUnchecked(chunkStatus) : UNLOADED_CHUNK_FUTURE;
 	}
 
 	public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> getTickingChunkFuture() {
@@ -275,7 +273,7 @@ public class ChunkHolder {
 			}
 		}
 
-		if (getStatus(this.ticketLevel).isOrAfter(chunkStatus)) {
+		if (ChunkLevel.generationStatus(this.ticketLevel).isOrAfter(chunkStatus)) {
 			CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture2 = chunkMap.schedule(this, chunkStatus);
 			this.updateChunkToSave(completableFuture2, "schedule " + chunkStatus);
 			this.futures.set(i, completableFuture2);
@@ -302,8 +300,8 @@ public class ChunkHolder {
 			.thenCombine(completableFuture, (chunkAccess, either) -> either.map(chunkAccessx -> chunkAccessx, chunkLoadingFailure -> chunkAccess));
 	}
 
-	public ChunkHolder.FullChunkStatus getFullStatus() {
-		return getFullChunkStatus(this.ticketLevel);
+	public FullChunkStatus getFullStatus() {
+		return ChunkLevel.fullStatus(this.ticketLevel);
 	}
 
 	public ChunkPos getPos() {
@@ -330,7 +328,7 @@ public class ChunkHolder {
 		ChunkMap chunkMap,
 		CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> completableFuture,
 		Executor executor,
-		ChunkHolder.FullChunkStatus fullChunkStatus
+		FullChunkStatus fullChunkStatus
 	) {
 		this.pendingFullStateConfirmation.cancel(false);
 		CompletableFuture<Void> completableFuture2 = new CompletableFuture();
@@ -339,18 +337,18 @@ public class ChunkHolder {
 		completableFuture.thenAccept(either -> either.ifLeft(levelChunk -> completableFuture2.complete(null)));
 	}
 
-	private void demoteFullChunk(ChunkMap chunkMap, ChunkHolder.FullChunkStatus fullChunkStatus) {
+	private void demoteFullChunk(ChunkMap chunkMap, FullChunkStatus fullChunkStatus) {
 		this.pendingFullStateConfirmation.cancel(false);
 		chunkMap.onFullChunkStatusChange(this.pos, fullChunkStatus);
 	}
 
 	protected void updateFutures(ChunkMap chunkMap, Executor executor) {
-		ChunkStatus chunkStatus = getStatus(this.oldTicketLevel);
-		ChunkStatus chunkStatus2 = getStatus(this.ticketLevel);
-		boolean bl = this.oldTicketLevel <= ChunkMap.MAX_CHUNK_DISTANCE;
-		boolean bl2 = this.ticketLevel <= ChunkMap.MAX_CHUNK_DISTANCE;
-		ChunkHolder.FullChunkStatus fullChunkStatus = getFullChunkStatus(this.oldTicketLevel);
-		ChunkHolder.FullChunkStatus fullChunkStatus2 = getFullChunkStatus(this.ticketLevel);
+		ChunkStatus chunkStatus = ChunkLevel.generationStatus(this.oldTicketLevel);
+		ChunkStatus chunkStatus2 = ChunkLevel.generationStatus(this.ticketLevel);
+		boolean bl = ChunkLevel.isLoaded(this.oldTicketLevel);
+		boolean bl2 = ChunkLevel.isLoaded(this.ticketLevel);
+		FullChunkStatus fullChunkStatus = ChunkLevel.fullStatus(this.oldTicketLevel);
+		FullChunkStatus fullChunkStatus2 = ChunkLevel.fullStatus(this.ticketLevel);
 		if (bl) {
 			Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either = Either.right(new ChunkHolder.ChunkLoadingFailure() {
 				public String toString() {
@@ -367,12 +365,12 @@ public class ChunkHolder {
 			}
 		}
 
-		boolean bl3 = fullChunkStatus.isOrAfter(ChunkHolder.FullChunkStatus.BORDER);
-		boolean bl4 = fullChunkStatus2.isOrAfter(ChunkHolder.FullChunkStatus.BORDER);
+		boolean bl3 = fullChunkStatus.isOrAfter(FullChunkStatus.FULL);
+		boolean bl4 = fullChunkStatus2.isOrAfter(FullChunkStatus.FULL);
 		this.wasAccessibleSinceLastSave |= bl4;
 		if (!bl3 && bl4) {
 			this.fullChunkFuture = chunkMap.prepareAccessibleChunk(this);
-			this.scheduleFullChunkPromotion(chunkMap, this.fullChunkFuture, executor, ChunkHolder.FullChunkStatus.BORDER);
+			this.scheduleFullChunkPromotion(chunkMap, this.fullChunkFuture, executor, FullChunkStatus.FULL);
 			this.updateChunkToSave(this.fullChunkFuture, "full");
 		}
 
@@ -381,11 +379,11 @@ public class ChunkHolder {
 			this.fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 		}
 
-		boolean bl5 = fullChunkStatus.isOrAfter(ChunkHolder.FullChunkStatus.TICKING);
-		boolean bl6 = fullChunkStatus2.isOrAfter(ChunkHolder.FullChunkStatus.TICKING);
+		boolean bl5 = fullChunkStatus.isOrAfter(FullChunkStatus.BLOCK_TICKING);
+		boolean bl6 = fullChunkStatus2.isOrAfter(FullChunkStatus.BLOCK_TICKING);
 		if (!bl5 && bl6) {
 			this.tickingChunkFuture = chunkMap.prepareTickingChunk(this);
-			this.scheduleFullChunkPromotion(chunkMap, this.tickingChunkFuture, executor, ChunkHolder.FullChunkStatus.TICKING);
+			this.scheduleFullChunkPromotion(chunkMap, this.tickingChunkFuture, executor, FullChunkStatus.BLOCK_TICKING);
 			this.updateChunkToSave(this.tickingChunkFuture, "ticking");
 		}
 
@@ -394,15 +392,15 @@ public class ChunkHolder {
 			this.tickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 		}
 
-		boolean bl7 = fullChunkStatus.isOrAfter(ChunkHolder.FullChunkStatus.ENTITY_TICKING);
-		boolean bl8 = fullChunkStatus2.isOrAfter(ChunkHolder.FullChunkStatus.ENTITY_TICKING);
+		boolean bl7 = fullChunkStatus.isOrAfter(FullChunkStatus.ENTITY_TICKING);
+		boolean bl8 = fullChunkStatus2.isOrAfter(FullChunkStatus.ENTITY_TICKING);
 		if (!bl7 && bl8) {
 			if (this.entityTickingChunkFuture != UNLOADED_LEVEL_CHUNK_FUTURE) {
 				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException());
 			}
 
 			this.entityTickingChunkFuture = chunkMap.prepareEntityTickingChunk(this);
-			this.scheduleFullChunkPromotion(chunkMap, this.entityTickingChunkFuture, executor, ChunkHolder.FullChunkStatus.ENTITY_TICKING);
+			this.scheduleFullChunkPromotion(chunkMap, this.entityTickingChunkFuture, executor, FullChunkStatus.ENTITY_TICKING);
 			this.updateChunkToSave(this.entityTickingChunkFuture, "entity ticking");
 		}
 
@@ -419,20 +417,12 @@ public class ChunkHolder {
 		this.oldTicketLevel = this.ticketLevel;
 	}
 
-	public static ChunkStatus getStatus(int i) {
-		return i < 33 ? ChunkStatus.FULL : ChunkStatus.getStatusAroundFullChunk(i - 33);
-	}
-
-	public static ChunkHolder.FullChunkStatus getFullChunkStatus(int i) {
-		return FULL_CHUNK_STATUSES[Mth.clamp(33 - i + 1, 0, FULL_CHUNK_STATUSES.length - 1)];
-	}
-
 	public boolean wasAccessibleSinceLastSave() {
 		return this.wasAccessibleSinceLastSave;
 	}
 
 	public void refreshAccessibility() {
-		this.wasAccessibleSinceLastSave = getFullChunkStatus(this.ticketLevel).isOrAfter(ChunkHolder.FullChunkStatus.BORDER);
+		this.wasAccessibleSinceLastSave = ChunkLevel.fullStatus(this.ticketLevel).isOrAfter(FullChunkStatus.FULL);
 	}
 
 	public void replaceProtoChunk(ImposterProtoChunk imposterProtoChunk) {
@@ -477,17 +467,6 @@ public class ChunkHolder {
 			this.thread = thread;
 			this.future = completableFuture;
 			this.source = string;
-		}
-	}
-
-	public static enum FullChunkStatus {
-		INACCESSIBLE,
-		BORDER,
-		TICKING,
-		ENTITY_TICKING;
-
-		public boolean isOrAfter(ChunkHolder.FullChunkStatus fullChunkStatus) {
-			return this.ordinal() >= fullChunkStatus.ordinal();
 		}
 	}
 

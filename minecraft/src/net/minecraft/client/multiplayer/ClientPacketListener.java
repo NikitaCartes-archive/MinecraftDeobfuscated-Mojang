@@ -444,6 +444,7 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		this.minecraft.player.setReducedDebugInfo(clientboundLoginPacket.reducedDebugInfo());
 		this.minecraft.player.setShowDeathScreen(clientboundLoginPacket.showDeathScreen());
 		this.minecraft.player.setLastDeathLocation(clientboundLoginPacket.lastDeathLocation());
+		this.minecraft.player.setPortalCooldown(clientboundLoginPacket.portalCooldown());
 		this.minecraft.gameMode.setLocalMode(clientboundLoginPacket.gameType(), clientboundLoginPacket.previousGameType());
 		this.minecraft.options.setServerRenderDistance(clientboundLoginPacket.chunkRadius());
 		this.minecraft.options.broadcastOptions();
@@ -1170,6 +1171,9 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 		localPlayer2.setReducedDebugInfo(localPlayer.isReducedDebugInfo());
 		localPlayer2.setShowDeathScreen(localPlayer.shouldShowDeathScreen());
 		localPlayer2.setLastDeathLocation(clientboundRespawnPacket.getLastDeathLocation());
+		localPlayer2.setPortalCooldown(clientboundRespawnPacket.getPortalCooldown());
+		localPlayer2.spinningEffectIntensity = localPlayer.spinningEffectIntensity;
+		localPlayer2.oSpinningEffectIntensity = localPlayer.oSpinningEffectIntensity;
 		if (this.minecraft.screen instanceof DeathScreen || this.minecraft.screen instanceof DeathScreen.TitleConfirmScreen) {
 			this.minecraft.setScreen(null);
 		}
@@ -1818,6 +1822,10 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 				this.initializeChatSession(entry, playerInfo);
 				break;
 			case UPDATE_GAME_MODE:
+				if (playerInfo.getGameMode() != entry.gameMode() && this.minecraft.player != null && this.minecraft.player.getUUID().equals(entry.profileId())) {
+					this.minecraft.player.onGameModeChanged(entry.gameMode());
+				}
+
 				playerInfo.setGameMode(entry.gameMode());
 				break;
 			case UPDATE_LISTED:

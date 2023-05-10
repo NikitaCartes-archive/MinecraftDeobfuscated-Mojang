@@ -100,13 +100,12 @@ public class SpawnEggItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
-		if (hitResult.getType() != HitResult.Type.BLOCK) {
+		BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+		if (blockHitResult.getType() != HitResult.Type.BLOCK) {
 			return InteractionResultHolder.pass(itemStack);
 		} else if (!(level instanceof ServerLevel)) {
 			return InteractionResultHolder.success(itemStack);
 		} else {
-			BlockHitResult blockHitResult = (BlockHitResult)hitResult;
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			if (!(level.getBlockState(blockPos).getBlock() instanceof LiquidBlock)) {
 				return InteractionResultHolder.pass(itemStack);

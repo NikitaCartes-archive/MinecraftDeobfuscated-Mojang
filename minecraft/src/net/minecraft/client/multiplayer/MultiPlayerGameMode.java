@@ -166,7 +166,7 @@ public class MultiPlayerGameMode {
 						this.destroyingItem = this.minecraft.player.getMainHandItem();
 						this.destroyProgress = 0.0F;
 						this.destroyTicks = 0.0F;
-						this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, (int)(this.destroyProgress * 10.0F) - 1);
+						this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, this.getDestroyStage());
 					}
 
 					return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction, i);
@@ -239,7 +239,7 @@ public class MultiPlayerGameMode {
 					this.destroyDelay = 5;
 				}
 
-				this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, (int)(this.destroyProgress * 10.0F) - 1);
+				this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, this.getDestroyStage());
 				return true;
 			}
 		} else {
@@ -270,14 +270,7 @@ public class MultiPlayerGameMode {
 
 	private boolean sameDestroyTarget(BlockPos blockPos) {
 		ItemStack itemStack = this.minecraft.player.getMainHandItem();
-		boolean bl = this.destroyingItem.isEmpty() && itemStack.isEmpty();
-		if (!this.destroyingItem.isEmpty() && !itemStack.isEmpty()) {
-			bl = itemStack.is(this.destroyingItem.getItem())
-				&& ItemStack.tagMatches(itemStack, this.destroyingItem)
-				&& (itemStack.isDamageableItem() || itemStack.getDamageValue() == this.destroyingItem.getDamageValue());
-		}
-
-		return blockPos.equals(this.destroyBlockPos) && bl;
+		return blockPos.equals(this.destroyBlockPos) && ItemStack.isSameItemSameTags(itemStack, this.destroyingItem);
 	}
 
 	private void ensureHasSentCarriedItem() {
@@ -489,6 +482,10 @@ public class MultiPlayerGameMode {
 
 	public boolean isDestroying() {
 		return this.isDestroying;
+	}
+
+	public int getDestroyStage() {
+		return (int)(this.destroyProgress * 10.0F);
 	}
 
 	public void handlePickItem(int i) {

@@ -110,10 +110,9 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	private static final int CHUNK_SAVED_PER_TICK = 200;
 	private static final int CHUNK_SAVED_EAGERLY_PER_TICK = 20;
 	private static final int EAGER_CHUNK_SAVE_COOLDOWN_IN_MILLIS = 10000;
-	private static final int MIN_VIEW_DISTANCE = 3;
-	public static final int MAX_VIEW_DISTANCE = 33;
-	public static final int MAX_CHUNK_DISTANCE = 33 + ChunkStatus.maxDistance();
-	public static final int FORCED_TICKET_LEVEL = 31;
+	private static final int MIN_VIEW_DISTANCE = 2;
+	public static final int MAX_VIEW_DISTANCE = 32;
+	public static final int FORCED_TICKET_LEVEL = ChunkLevel.byStatus(FullChunkStatus.ENTITY_TICKING);
 	private final Long2ObjectLinkedOpenHashMap<ChunkHolder> updatingChunkMap = new Long2ObjectLinkedOpenHashMap<>();
 	private volatile Long2ObjectLinkedOpenHashMap<ChunkHolder> visibleChunkMap = this.updatingChunkMap.clone();
 	private final Long2ObjectLinkedOpenHashMap<ChunkHolder> pendingUnloads = new Long2ObjectLinkedOpenHashMap<>();
@@ -276,7 +275,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				string = string + "Ch: §" + chunkAccess.getStatus().getIndex() + chunkAccess.getStatus() + "§r\n";
 			}
 
-			ChunkHolder.FullChunkStatus fullChunkStatus = chunkHolder.getFullStatus();
+			FullChunkStatus fullChunkStatus = chunkHolder.getFullStatus();
 			string = string + "§" + fullChunkStatus.ordinal() + fullChunkStatus;
 			return string + "§r";
 		}
@@ -386,7 +385,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 	@Nullable
 	ChunkHolder updateChunkScheduling(long l, int i, @Nullable ChunkHolder chunkHolder, int j) {
-		if (j > MAX_CHUNK_DISTANCE && i > MAX_CHUNK_DISTANCE) {
+		if (!ChunkLevel.isLoaded(j) && !ChunkLevel.isLoaded(i)) {
 			return chunkHolder;
 		} else {
 			if (chunkHolder != null) {
@@ -394,14 +393,14 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			}
 
 			if (chunkHolder != null) {
-				if (i > MAX_CHUNK_DISTANCE) {
+				if (!ChunkLevel.isLoaded(i)) {
 					this.toDrop.add(l);
 				} else {
 					this.toDrop.remove(l);
 				}
 			}
 
-			if (i <= MAX_CHUNK_DISTANCE && chunkHolder == null) {
+			if (ChunkLevel.isLoaded(i) && chunkHolder == null) {
 				chunkHolder = this.pendingUnloads.remove(l);
 				if (chunkHolder != null) {
 					chunkHolder.setTicketLevel(i);
@@ -562,7 +561,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			return this.scheduleChunkLoad(chunkPos);
 		} else {
 			if (chunkStatus == ChunkStatus.LIGHT) {
-				this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos);
+				this.distanceManager.addTicket(TicketType.LIGHT, chunkPos, ChunkLevel.byStatus(ChunkStatus.LIGHT), chunkPos);
 			}
 
 			if (!chunkStatus.hasLoadDependencies()) {
@@ -684,7 +683,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		this.mainThreadExecutor
 			.tell(
 				Util.name(
-					(Runnable)(() -> this.distanceManager.removeTicket(TicketType.LIGHT, chunkPos, 33 + ChunkStatus.getDistance(ChunkStatus.LIGHT), chunkPos)),
+					(Runnable)(() -> this.distanceManager.removeTicket(TicketType.LIGHT, chunkPos, ChunkLevel.byStatus(ChunkStatus.LIGHT), chunkPos)),
 					() -> "release light ticket " + chunkPos
 				)
 			);
@@ -712,7 +711,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			ChunkStatus.FULL.getParent()
 		);
 		return completableFuture.thenApplyAsync(either -> {
-			ChunkStatus chunkStatus = ChunkHolder.getStatus(chunkHolder.getTicketLevel());
+			ChunkStatus chunkStatus = ChunkLevel.generationStatus(chunkHolder.getTicketLevel());
 			return !chunkStatus.isOrAfter(ChunkStatus.FULL) ? ChunkHolder.UNLOADED_CHUNK : either.mapLeft(chunkAccess -> {
 				ChunkPos chunkPos = chunkHolder.getPos();
 				ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
@@ -724,7 +723,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 					chunkHolder.replaceProtoChunk(new ImposterProtoChunk(levelChunk, false));
 				}
 
-				levelChunk.setFullStatus(() -> ChunkHolder.getFullChunkStatus(chunkHolder.getTicketLevel()));
+				levelChunk.setFullStatus(() -> ChunkLevel.fullStatus(chunkHolder.getTicketLevel()));
 				levelChunk.runPostLoad();
 				if (this.entitiesInLevel.add(chunkPos.toLong())) {
 					levelChunk.setLoaded(true);
@@ -749,8 +748,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 					levelChunk.postProcessGeneration();
 					this.level.startTickingChunk(levelChunk);
 				}), this.mainThreadExecutor);
+		completableFuture2.handle((either, throwable) -> {
+			this.tickingGenerated.getAndIncrement();
+			return null;
+		});
 		completableFuture2.thenAcceptAsync(either -> either.ifLeft(levelChunk -> {
-				this.tickingGenerated.getAndIncrement();
 				MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject = new MutableObject<>();
 				this.getPlayers(chunkHolder.getPos(), false).forEach(serverPlayer -> this.playerLoadedChunk(serverPlayer, mutableObject, levelChunk));
 			}), runnable -> this.mainThreadMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable)));
@@ -855,7 +857,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		if (j != this.viewDistance) {
 			int k = this.viewDistance;
 			this.viewDistance = j;
-			this.distanceManager.updatePlayerTickets(this.viewDistance + 2);
+			this.distanceManager.updatePlayerTickets(this.viewDistance);
 
 			for (ChunkHolder chunkHolder : this.updatingChunkMap.values()) {
 				ChunkPos chunkPos = chunkHolder.getPos();
@@ -1298,7 +1300,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		return this.storageName;
 	}
 
-	void onFullChunkStatusChange(ChunkPos chunkPos, ChunkHolder.FullChunkStatus fullChunkStatus) {
+	void onFullChunkStatusChange(ChunkPos chunkPos, FullChunkStatus fullChunkStatus) {
 		this.chunkStatusListener.onChunkStatusChange(chunkPos, fullChunkStatus);
 	}
 

@@ -12,6 +12,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
@@ -412,48 +413,24 @@ public final class ItemStack {
 		}
 	}
 
-	public static boolean tagMatches(ItemStack itemStack, ItemStack itemStack2) {
-		if (itemStack.isEmpty() && itemStack2.isEmpty()) {
-			return true;
-		} else if (itemStack.isEmpty() || itemStack2.isEmpty()) {
-			return false;
-		} else {
-			return itemStack.tag == null && itemStack2.tag != null ? false : itemStack.tag == null || itemStack.tag.equals(itemStack2.tag);
-		}
-	}
-
 	public static boolean matches(ItemStack itemStack, ItemStack itemStack2) {
-		if (itemStack.isEmpty() && itemStack2.isEmpty()) {
-			return true;
-		} else {
-			return !itemStack.isEmpty() && !itemStack2.isEmpty() ? itemStack.matches(itemStack2) : false;
-		}
-	}
-
-	private boolean matches(ItemStack itemStack) {
-		if (this.getCount() != itemStack.getCount()) {
-			return false;
-		} else if (!this.is(itemStack.getItem())) {
-			return false;
-		} else {
-			return this.tag == null && itemStack.tag != null ? false : this.tag == null || this.tag.equals(itemStack.tag);
-		}
-	}
-
-	public static boolean isSame(ItemStack itemStack, ItemStack itemStack2) {
 		if (itemStack == itemStack2) {
 			return true;
 		} else {
-			return !itemStack.isEmpty() && !itemStack2.isEmpty() ? itemStack.sameItem(itemStack2) : false;
+			return itemStack.getCount() != itemStack2.getCount() ? false : isSameItemSameTags(itemStack, itemStack2);
 		}
 	}
 
-	public boolean sameItem(ItemStack itemStack) {
-		return !itemStack.isEmpty() && this.is(itemStack.getItem());
+	public static boolean isSameItem(ItemStack itemStack, ItemStack itemStack2) {
+		return itemStack.is(itemStack2.getItem());
 	}
 
 	public static boolean isSameItemSameTags(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack.is(itemStack2.getItem()) && tagMatches(itemStack, itemStack2);
+		if (!itemStack.is(itemStack2.getItem())) {
+			return false;
+		} else {
+			return itemStack.isEmpty() && itemStack2.isEmpty() ? true : Objects.equals(itemStack.tag, itemStack2.tag);
+		}
 	}
 
 	public String getDescriptionId() {

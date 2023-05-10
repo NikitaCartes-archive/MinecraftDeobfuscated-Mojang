@@ -3,7 +3,7 @@ package net.minecraft.world.level.chunk;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -71,8 +71,8 @@ public class EmptyLevelChunk extends LevelChunk {
 	}
 
 	@Override
-	public ChunkHolder.FullChunkStatus getFullStatus() {
-		return ChunkHolder.FullChunkStatus.BORDER;
+	public FullChunkStatus getFullStatus() {
+		return FullChunkStatus.FULL;
 	}
 
 	@Override

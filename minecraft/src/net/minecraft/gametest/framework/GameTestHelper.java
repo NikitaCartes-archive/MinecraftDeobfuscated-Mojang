@@ -13,7 +13,10 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -216,6 +219,22 @@ public class GameTestHelper {
 		};
 	}
 
+	public ServerPlayer makeMockServerPlayerInLevel() {
+		ServerPlayer serverPlayer = new ServerPlayer(this.getLevel().getServer(), this.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-player")) {
+			@Override
+			public boolean isSpectator() {
+				return false;
+			}
+
+			@Override
+			public boolean isCreative() {
+				return true;
+			}
+		};
+		this.getLevel().getServer().getPlayerList().placeNewPlayer(new Connection(PacketFlow.SERVERBOUND), serverPlayer);
+		return serverPlayer;
+	}
+
 	public void pullLever(int i, int j, int k) {
 		this.pullLever(new BlockPos(i, j, k));
 	}
@@ -394,10 +413,10 @@ public class GameTestHelper {
 		List<ItemEntity> list = this.getLevel().getEntities(EntityType.ITEM, new AABB(blockPos2).inflate(d), Entity::isAlive);
 		int j = 0;
 
-		for (Entity entity : list) {
-			ItemEntity itemEntity = (ItemEntity)entity;
-			if (itemEntity.getItem().getItem().equals(item)) {
-				j += itemEntity.getItem().getCount();
+		for (ItemEntity itemEntity : list) {
+			ItemStack itemStack = itemEntity.getItem();
+			if (itemStack.is(item)) {
+				j += itemStack.getCount();
 			}
 		}
 

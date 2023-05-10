@@ -36,7 +36,8 @@ public record ClientboundLoginPacket(
 	boolean showDeathScreen,
 	boolean isDebug,
 	boolean isFlat,
-	Optional<GlobalPos> lastDeathLocation
+	Optional<GlobalPos> lastDeathLocation,
+	int portalCooldown
 ) implements Packet<ClientGamePacketListener> {
 	private static final RegistryOps<Tag> BUILTIN_CONTEXT_OPS = RegistryOps.create(
 		NbtOps.INSTANCE, RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)
@@ -60,7 +61,8 @@ public record ClientboundLoginPacket(
 			friendlyByteBuf.readBoolean(),
 			friendlyByteBuf.readBoolean(),
 			friendlyByteBuf.readBoolean(),
-			friendlyByteBuf.readOptional(FriendlyByteBuf::readGlobalPos)
+			friendlyByteBuf.readOptional(FriendlyByteBuf::readGlobalPos),
+			friendlyByteBuf.readVarInt()
 		);
 	}
 
@@ -83,6 +85,7 @@ public record ClientboundLoginPacket(
 		friendlyByteBuf.writeBoolean(this.isDebug);
 		friendlyByteBuf.writeBoolean(this.isFlat);
 		friendlyByteBuf.writeOptional(this.lastDeathLocation, FriendlyByteBuf::writeGlobalPos);
+		friendlyByteBuf.writeVarInt(this.portalCooldown);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

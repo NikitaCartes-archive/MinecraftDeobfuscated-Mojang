@@ -38,7 +38,7 @@ public class RecipeCollection {
 
 		for (int j = 1; j < i; j++) {
 			ItemStack itemStack2 = ((Recipe)list.get(j)).getResultItem(registryAccess);
-			if (!ItemStack.isSame(itemStack, itemStack2) || !ItemStack.tagMatches(itemStack, itemStack2)) {
+			if (!ItemStack.isSameItemSameTags(itemStack, itemStack2)) {
 				return false;
 			}
 		}

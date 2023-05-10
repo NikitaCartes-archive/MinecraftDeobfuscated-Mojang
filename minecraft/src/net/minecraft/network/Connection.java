@@ -363,7 +363,9 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 	}
 
 	public void setReadOnly() {
-		this.channel.config().setAutoRead(false);
+		if (this.channel != null) {
+			this.channel.config().setAutoRead(false);
+		}
 	}
 
 	public void setupCompression(int i, boolean bl) {

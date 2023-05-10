@@ -392,7 +392,7 @@ public abstract class AbstractContainerMenu {
 
 				ItemStack itemStack = this.quickMoveStack(player, i);
 
-				while (!itemStack.isEmpty() && ItemStack.isSame(slot.getItem(), itemStack)) {
+				while (!itemStack.isEmpty() && ItemStack.isSameItem(slot.getItem(), itemStack)) {
 					itemStack = this.quickMoveStack(player, i);
 				}
 			} else {

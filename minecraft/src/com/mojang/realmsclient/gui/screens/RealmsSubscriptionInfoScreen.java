@@ -20,7 +20,6 @@ import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.CommonLinks;
 import org.slf4j.Logger;
@@ -34,10 +33,6 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 	private static final Component DAYS_LEFT_LABEL = Component.translatable("mco.configure.world.subscription.recurring.daysleft");
 	private static final Component SUBSCRIPTION_EXPIRED_TEXT = Component.translatable("mco.configure.world.subscription.expired");
 	private static final Component SUBSCRIPTION_LESS_THAN_A_DAY_TEXT = Component.translatable("mco.configure.world.subscription.less_than_a_day");
-	private static final Component MONTH_SUFFIX = Component.translatable("mco.configure.world.subscription.month");
-	private static final Component MONTHS_SUFFIX = Component.translatable("mco.configure.world.subscription.months");
-	private static final Component DAY_SUFFIX = Component.translatable("mco.configure.world.subscription.day");
-	private static final Component DAYS_SUFFIX = Component.translatable("mco.configure.world.subscription.days");
 	private static final Component UNKNOWN = Component.translatable("mco.configure.world.subscription.unknown");
 	private static final Component RECURRING_INFO = Component.translatable("mco.configure.world.subscription.recurring.info");
 	private final Screen lastScreen;
@@ -70,7 +65,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 			this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.delete.button"), button -> {
 				Component component = Component.translatable("mco.configure.world.delete.question.line1");
 				Component component2 = Component.translatable("mco.configure.world.delete.question.line2");
-				this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.Warning, component, component2, true));
+				this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.WARNING, component, component2, true));
 			}).bounds(this.width / 2 - 100, row(10), 200, 20).build());
 		} else {
 			this.addRenderableWidget(new MultiLineTextWidget(this.width / 2 - 100, row(8), RECURRING_INFO, this.font).setColor(10526880).setMaxWidth(200));
@@ -158,30 +153,15 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 		} else {
 			int j = i / 30;
 			int k = i % 30;
-			MutableComponent mutableComponent = Component.empty();
-			if (j > 0) {
-				mutableComponent.append(Integer.toString(j)).append(CommonComponents.SPACE);
-				if (j == 1) {
-					mutableComponent.append(MONTH_SUFFIX);
-				} else {
-					mutableComponent.append(MONTHS_SUFFIX);
-				}
+			boolean bl = j > 0;
+			boolean bl2 = k > 0;
+			if (bl && bl2) {
+				return Component.translatable("mco.configure.world.subscription.remaining.months.days", j, k);
+			} else if (bl) {
+				return Component.translatable("mco.configure.world.subscription.remaining.months", j);
+			} else {
+				return bl2 ? Component.translatable("mco.configure.world.subscription.remaining.days", k) : Component.empty();
 			}
-
-			if (k > 0) {
-				if (j > 0) {
-					mutableComponent.append(", ");
-				}
-
-				mutableComponent.append(Integer.toString(k)).append(CommonComponents.SPACE);
-				if (k == 1) {
-					mutableComponent.append(DAY_SUFFIX);
-				} else {
-					mutableComponent.append(DAYS_SUFFIX);
-				}
-			}
-
-			return mutableComponent;
 		}
 	}
 }

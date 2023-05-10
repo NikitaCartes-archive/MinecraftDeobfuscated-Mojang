@@ -13,6 +13,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -171,7 +173,7 @@ public class EntityPredicate {
 				return false;
 			} else {
 				if (this.steppingOnLocation != LocationPredicate.ANY) {
-					Vec3 vec32 = Vec3.atCenterOf(entity.getOnPosLegacy());
+					Vec3 vec32 = Vec3.atCenterOf(entity.getOnPos());
 					if (!this.steppingOnLocation.matches(serverLevel, vec32.x(), vec32.y(), vec32.z())) {
 						return false;
 					}
@@ -266,11 +268,11 @@ public class EntityPredicate {
 	}
 
 	public static LootContext createContext(ServerPlayer serverPlayer, Entity entity) {
-		return new LootContext.Builder(serverPlayer.serverLevel())
+		LootParams lootParams = new LootParams.Builder(serverPlayer.serverLevel())
 			.withParameter(LootContextParams.THIS_ENTITY, entity)
 			.withParameter(LootContextParams.ORIGIN, serverPlayer.position())
-			.withRandom(serverPlayer.getRandom())
 			.create(LootContextParamSets.ADVANCEMENT_ENTITY);
+		return new LootContext.Builder(lootParams).create(LootTable.DEFAULT_RANDOM_SEQUENCE);
 	}
 
 	public static class Builder {

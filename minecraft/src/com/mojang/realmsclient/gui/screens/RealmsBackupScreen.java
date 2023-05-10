@@ -49,7 +49,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 	private Button changesButton;
 	Boolean noBackups = false;
 	final RealmsServer serverData;
-	private static final String UPLOADED_KEY = "Uploaded";
+	private static final String UPLOADED_KEY = "uploaded";
 
 	public RealmsBackupScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer, int i) {
 		super(Component.translatable("mco.configure.world.backup"));
@@ -129,9 +129,9 @@ public class RealmsBackupScreen extends RealmsScreen {
 			this.selectedBackup = i;
 			Date date = ((Backup)this.backups.get(i)).lastModifiedDate;
 			String string = DateFormat.getDateTimeInstance(3, 3).format(date);
-			String string2 = RealmsUtil.convertToAgePresentationFromInstant(date);
-			Component component = Component.translatable("mco.configure.world.restore.question.line1", string, string2);
-			Component component2 = Component.translatable("mco.configure.world.restore.question.line2");
+			Component component = RealmsUtil.convertToAgePresentationFromInstant(date);
+			Component component2 = Component.translatable("mco.configure.world.restore.question.line1", string, component);
+			Component component3 = Component.translatable("mco.configure.world.restore.question.line2");
 			this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
 				if (bl) {
 					this.restore();
@@ -139,7 +139,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 					this.selectedBackup = -1;
 					this.minecraft.setScreen(this);
 				}
-			}, RealmsLongConfirmationScreen.Type.Warning, component, component2, true));
+			}, RealmsLongConfirmationScreen.Type.WARNING, component2, component3, true));
 		}
 	}
 
@@ -152,7 +152,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 			} else {
 				this.minecraft.setScreen(this);
 			}
-		}, RealmsLongConfirmationScreen.Type.Info, component, component2, true));
+		}, RealmsLongConfirmationScreen.Type.INFO, component, component2, true));
 	}
 
 	private void downloadWorldData() {
@@ -267,7 +267,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 				Backup backup2 = (Backup)RealmsBackupScreen.this.backups.get(i + 1);
 
 				for (String string : backup.metadata.keySet()) {
-					if (!string.contains("Uploaded") && backup2.metadata.containsKey(string)) {
+					if (!string.contains("uploaded") && backup2.metadata.containsKey(string)) {
 						if (!((String)backup.metadata.get(string)).equals(backup2.metadata.get(string))) {
 							this.addToChangeList(string);
 						}
@@ -279,7 +279,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 		}
 
 		private void addToChangeList(String string) {
-			if (string.contains("Uploaded")) {
+			if (string.contains("uploaded")) {
 				String string2 = DateFormat.getDateTimeInstance(3, 3).format(this.backup.lastModifiedDate);
 				this.backup.changeList.put(string, string2);
 				this.backup.setUploadedVersion(true);
@@ -349,7 +349,12 @@ public class RealmsBackupScreen extends RealmsScreen {
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			int p = this.backup.isUploadedVersion() ? -8388737 : 16777215;
 			guiGraphics.drawString(
-				RealmsBackupScreen.this.font, "Backup (" + RealmsUtil.convertToAgePresentationFromInstant(this.backup.lastModifiedDate) + ")", k, j + 1, p, false
+				RealmsBackupScreen.this.font,
+				Component.translatable("mco.backup.entry", RealmsUtil.convertToAgePresentationFromInstant(this.backup.lastModifiedDate)),
+				k,
+				j + 1,
+				p,
+				false
 			);
 			guiGraphics.drawString(RealmsBackupScreen.this.font, this.getMediumDatePresentation(this.backup.lastModifiedDate), k, j + 12, 5000268, false);
 			this.children.forEach(abstractWidget -> {

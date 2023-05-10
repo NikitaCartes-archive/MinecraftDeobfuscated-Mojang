@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Component UNABLE_TO_LOAD_WORLD = Component.translatable("selectWorld.unable_to_load");
 	static final Component WORLD_TEXT = Component.translatable("selectWorld.world");
 	static final Component HARDCORE_TEXT = Component.translatable("mco.upload.hardcore").withStyle(style -> style.withColor(-65536));
 	static final Component CHEATS_TEXT = Component.translatable("selectWorld.cheats");
@@ -66,8 +67,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 			this.loadLevelList();
 		} catch (Exception var2) {
 			LOGGER.error("Couldn't load level list", (Throwable)var2);
-			this.minecraft
-				.setScreen(new RealmsGenericErrorScreen(Component.literal("Unable to load worlds"), Component.nullToEmpty(var2.getMessage()), this.lastScreen));
+			this.minecraft.setScreen(new RealmsGenericErrorScreen(UNABLE_TO_LOAD_WORLD, Component.nullToEmpty(var2.getMessage()), this.lastScreen));
 			return;
 		}
 
@@ -127,13 +127,13 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 	class Entry extends ObjectSelectionList.Entry<RealmsSelectFileToUploadScreen.Entry> {
 		private final LevelSummary levelSummary;
 		private final String name;
-		private final String id;
+		private final Component id;
 		private final Component info;
 
 		public Entry(LevelSummary levelSummary) {
 			this.levelSummary = levelSummary;
 			this.name = levelSummary.getLevelName();
-			this.id = levelSummary.getLevelId() + " (" + RealmsSelectFileToUploadScreen.formatLastPlayed(levelSummary) + ")";
+			this.id = Component.translatable("mco.upload.entry.id", levelSummary.getLevelId(), RealmsSelectFileToUploadScreen.formatLastPlayed(levelSummary));
 			Component component;
 			if (levelSummary.isHardcore()) {
 				component = RealmsSelectFileToUploadScreen.HARDCORE_TEXT;
@@ -142,7 +142,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 			}
 
 			if (levelSummary.hasCheats()) {
-				component = component.copy().append(", ").append(RealmsSelectFileToUploadScreen.CHEATS_TEXT);
+				component = Component.translatable("mco.upload.entry.cheats", component.getString(), RealmsSelectFileToUploadScreen.CHEATS_TEXT);
 			}
 
 			this.info = component;

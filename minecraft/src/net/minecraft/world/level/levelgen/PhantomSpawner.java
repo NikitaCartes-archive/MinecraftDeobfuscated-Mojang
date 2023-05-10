@@ -12,7 +12,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.monster.Phantom;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.NaturalSpawner;
@@ -40,13 +39,13 @@ public class PhantomSpawner implements CustomSpawner {
 				} else {
 					int i = 0;
 
-					for (Player player : serverLevel.players()) {
-						if (!player.isSpectator()) {
-							BlockPos blockPos = player.blockPosition();
+					for (ServerPlayer serverPlayer : serverLevel.players()) {
+						if (!serverPlayer.isSpectator()) {
+							BlockPos blockPos = serverPlayer.blockPosition();
 							if (!serverLevel.dimensionType().hasSkyLight() || blockPos.getY() >= serverLevel.getSeaLevel() && serverLevel.canSeeSky(blockPos)) {
 								DifficultyInstance difficultyInstance = serverLevel.getCurrentDifficultyAt(blockPos);
 								if (difficultyInstance.isHarderThan(randomSource.nextFloat() * 3.0F)) {
-									ServerStatsCounter serverStatsCounter = ((ServerPlayer)player).getStats();
+									ServerStatsCounter serverStatsCounter = serverPlayer.getStats();
 									int j = Mth.clamp(serverStatsCounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
 									int k = 24000;
 									if (randomSource.nextInt(j) >= 72000) {

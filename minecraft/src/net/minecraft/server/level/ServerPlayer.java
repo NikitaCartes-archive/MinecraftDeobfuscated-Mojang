@@ -196,7 +196,7 @@ public class ServerPlayer extends Player {
 	private float respawnAngle;
 	private final TextFilter textFilter;
 	private boolean textFilteringEnabled;
-	private boolean allowsListing = true;
+	private boolean allowsListing;
 	private WardenSpawnTracker wardenSpawnTracker = new WardenSpawnTracker(0, 0, 0);
 	private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer() {
 		@Override
@@ -756,7 +756,8 @@ public class ServerPlayer extends Player {
 						serverLevel.isDebug(),
 						serverLevel.isFlat(),
 						(byte)3,
-						this.getLastDeathLocation()
+						this.getLastDeathLocation(),
+						this.getPortalCooldown()
 					)
 				);
 			this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
@@ -1475,7 +1476,8 @@ public class ServerPlayer extends Player {
 						serverLevel.isDebug(),
 						serverLevel.isFlat(),
 						(byte)3,
-						this.getLastDeathLocation()
+						this.getLastDeathLocation(),
+						this.getPortalCooldown()
 					)
 				);
 			this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));

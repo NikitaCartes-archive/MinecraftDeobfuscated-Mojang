@@ -28,6 +28,7 @@ public class RealmsWorldSlotButton extends Button {
 	private static final Component SLOT_ACTIVE_TOOLTIP = Component.translatable("mco.configure.world.slot.tooltip.active");
 	private static final Component SWITCH_TO_MINIGAME_SLOT_TOOLTIP = Component.translatable("mco.configure.world.slot.tooltip.minigame");
 	private static final Component SWITCH_TO_WORLD_SLOT_TOOLTIP = Component.translatable("mco.configure.world.slot.tooltip");
+	private static final Component MINIGAME = Component.translatable("mco.worldSlot.minigame");
 	private final Supplier<RealmsServer> serverDataProvider;
 	private final Consumer<Component> toolTipSetter;
 	private final int slotIndex;
@@ -58,7 +59,7 @@ public class RealmsWorldSlotButton extends Button {
 			boolean bl3;
 			if (bl) {
 				bl2 = realmsServer.worldType == RealmsServer.WorldType.MINIGAME;
-				string = "Minigame";
+				string = MINIGAME.getString();
 				l = (long)realmsServer.minigameId;
 				string2 = realmsServer.minigameImage;
 				bl3 = realmsServer.minigameId == -1;

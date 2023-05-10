@@ -14,6 +14,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
@@ -82,7 +83,7 @@ public class LoadingOverlay extends Overlay {
 			}
 
 			int n = Mth.ceil((1.0F - Mth.clamp(g - 1.0F, 0.0F, 1.0F)) * 255.0F);
-			guiGraphics.fill(0, 0, k, l, replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
+			guiGraphics.fill(RenderType.guiOverlay(), 0, 0, k, l, replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
 			o = 1.0F - Mth.clamp(g - 1.0F, 0.0F, 1.0F);
 		} else if (this.fadeIn) {
 			if (this.minecraft.screen != null && h < 1.0F) {
@@ -90,7 +91,7 @@ public class LoadingOverlay extends Overlay {
 			}
 
 			int n = Mth.ceil(Mth.clamp((double)h, 0.15, 1.0) * 255.0);
-			guiGraphics.fill(0, 0, k, l, replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
+			guiGraphics.fill(RenderType.guiOverlay(), 0, 0, k, l, replaceAlpha(BRAND_BACKGROUND.getAsInt(), n));
 			o = Mth.clamp(h, 0.0F, 1.0F);
 		} else {
 			int n = BRAND_BACKGROUND.getAsInt();
@@ -108,6 +109,8 @@ public class LoadingOverlay extends Overlay {
 		int t = (int)(d * 0.5);
 		double e = d * 4.0;
 		int u = (int)(e * 0.5);
+		RenderSystem.disableDepthTest();
+		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(770, 1);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, o);
@@ -116,6 +119,8 @@ public class LoadingOverlay extends Overlay {
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableBlend();
+		RenderSystem.depthMask(true);
+		RenderSystem.enableDepthTest();
 		int v = (int)((double)guiGraphics.guiHeight() * 0.8325);
 		float w = this.reload.getActualProgress();
 		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + w * 0.050000012F, 0.0F, 1.0F);

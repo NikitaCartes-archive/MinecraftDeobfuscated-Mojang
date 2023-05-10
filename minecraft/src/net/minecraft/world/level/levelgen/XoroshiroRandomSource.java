@@ -5,12 +5,15 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.primitives.Longs;
+import com.mojang.serialization.Codec;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 
 public class XoroshiroRandomSource implements RandomSource {
 	private static final float FLOAT_UNIT = 5.9604645E-8F;
 	private static final double DOUBLE_UNIT = 1.110223E-16F;
+	public static final Codec<XoroshiroRandomSource> CODEC = Xoroshiro128PlusPlus.CODEC
+		.xmap(xoroshiro128PlusPlus -> new XoroshiroRandomSource(xoroshiro128PlusPlus), xoroshiroRandomSource -> xoroshiroRandomSource.randomNumberGenerator);
 	private Xoroshiro128PlusPlus randomNumberGenerator;
 	private final MarsagliaPolarGaussian gaussianSource = new MarsagliaPolarGaussian(this);
 
@@ -20,6 +23,10 @@ public class XoroshiroRandomSource implements RandomSource {
 
 	public XoroshiroRandomSource(long l, long m) {
 		this.randomNumberGenerator = new Xoroshiro128PlusPlus(l, m);
+	}
+
+	private XoroshiroRandomSource(Xoroshiro128PlusPlus xoroshiro128PlusPlus) {
+		this.randomNumberGenerator = xoroshiro128PlusPlus;
 	}
 
 	@Override

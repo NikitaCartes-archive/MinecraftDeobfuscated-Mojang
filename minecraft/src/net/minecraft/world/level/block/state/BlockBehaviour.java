@@ -64,7 +64,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -223,15 +223,15 @@ public abstract class BlockBehaviour implements FeatureElement {
 	}
 
 	@Deprecated
-	public List<ItemStack> getDrops(BlockState blockState, LootContext.Builder builder) {
+	public List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
 		ResourceLocation resourceLocation = this.getLootTable();
 		if (resourceLocation == BuiltInLootTables.EMPTY) {
 			return Collections.emptyList();
 		} else {
-			LootContext lootContext = builder.withParameter(LootContextParams.BLOCK_STATE, blockState).create(LootContextParamSets.BLOCK);
-			ServerLevel serverLevel = lootContext.getLevel();
+			LootParams lootParams = builder.withParameter(LootContextParams.BLOCK_STATE, blockState).create(LootContextParamSets.BLOCK);
+			ServerLevel serverLevel = lootParams.getLevel();
 			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(resourceLocation);
-			return lootTable.getRandomItems(lootContext);
+			return lootTable.getRandomItems(lootParams);
 		}
 	}
 
@@ -698,7 +698,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 			this.getBlock().spawnAfterBreak(this.asState(), serverLevel, blockPos, itemStack, bl);
 		}
 
-		public List<ItemStack> getDrops(LootContext.Builder builder) {
+		public List<ItemStack> getDrops(LootParams.Builder builder) {
 			return this.getBlock().getDrops(this.asState(), builder);
 		}
 

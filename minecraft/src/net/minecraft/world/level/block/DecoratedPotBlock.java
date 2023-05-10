@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -96,11 +96,11 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
-	public List<ItemStack> getDrops(BlockState blockState, LootContext.Builder builder) {
+	public List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
 		BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
 		if (blockEntity instanceof DecoratedPotBlockEntity decoratedPotBlockEntity) {
 			builder.withDynamicDrop(
-				SHERDS_DYNAMIC_DROP_ID, (lootContext, consumer) -> decoratedPotBlockEntity.getDecorations().sorted().map(Item::getDefaultInstance).forEach(consumer)
+				SHERDS_DYNAMIC_DROP_ID, consumer -> decoratedPotBlockEntity.getDecorations().sorted().map(Item::getDefaultInstance).forEach(consumer)
 			);
 		}
 

@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import net.minecraft.world.level.ChunkPos;
 
 public class ChunkTaskPriorityQueue<T> {
-	public static final int PRIORITY_LEVEL_COUNT = ChunkMap.MAX_CHUNK_DISTANCE + 2;
+	public static final int PRIORITY_LEVEL_COUNT = ChunkLevel.MAX_LEVEL + 2;
 	private final List<Long2ObjectLinkedOpenHashMap<List<Optional<T>>>> taskQueue = (List<Long2ObjectLinkedOpenHashMap<List<Optional<T>>>>)IntStream.range(
 			0, PRIORITY_LEVEL_COUNT
 		)

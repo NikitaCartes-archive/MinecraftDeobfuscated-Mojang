@@ -702,7 +702,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			Component component = Component.translatable("mco.configure.world.leave.question.line1");
 			Component component2 = Component.translatable("mco.configure.world.leave.question.line2");
 			this.minecraft
-				.setScreen(new RealmsLongConfirmationScreen(bl -> this.leaveServer(bl, realmsServer), RealmsLongConfirmationScreen.Type.Info, component, component2, true));
+				.setScreen(new RealmsLongConfirmationScreen(bl -> this.leaveServer(bl, realmsServer), RealmsLongConfirmationScreen.Type.INFO, component, component2, true));
 		}
 	}
 

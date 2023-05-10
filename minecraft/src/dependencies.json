@@ -438,8 +438,8 @@
 		"url": "https://libraries.minecraft.net/org/slf4j/slf4j-api/2.0.1/slf4j-api-2.0.1.jar"
 	},
 	{
-		"sha1sum": "ee4095669061d1fe4bce5fea23d69d1520bc2d58",
-		"name": "text2speech-1.16.7.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.16.7/text2speech-1.16.7.jar"
+		"sha1sum": "01b3a7718bbdad624537597ff3ca38a0f232df87",
+		"name": "text2speech-1.16.8.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/text2speech/1.16.8/text2speech-1.16.8.jar"
 	}
 ]

@@ -12,6 +12,8 @@ import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsLongConfirmationScreen extends RealmsScreen {
+	static final Component WARNING = Component.translatable("mco.warning");
+	static final Component INFO = Component.translatable("mco.info");
 	private final RealmsLongConfirmationScreen.Type type;
 	private final Component line2;
 	private final Component line3;
@@ -37,9 +39,7 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 			);
 			this.addRenderableWidget(Button.builder(CommonComponents.GUI_NO, button -> this.callback.accept(false)).bounds(this.width / 2 + 5, row(8), 100, 20).build());
 		} else {
-			this.addRenderableWidget(
-				Button.builder(Component.translatable("mco.gui.ok"), button -> this.callback.accept(true)).bounds(this.width / 2 - 50, row(8), 100, 20).build()
-			);
+			this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, button -> this.callback.accept(true)).bounds(this.width / 2 - 50, row(8), 100, 20).build());
 		}
 	}
 
@@ -69,14 +69,14 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 
 	@Environment(EnvType.CLIENT)
 	public static enum Type {
-		Warning("Warning!", 16711680),
-		Info("Info!", 8226750);
+		WARNING(RealmsLongConfirmationScreen.WARNING, 16711680),
+		INFO(RealmsLongConfirmationScreen.INFO, 8226750);
 
 		public final int colorCode;
 		public final Component text;
 
-		private Type(String string2, int j) {
-			this.text = Component.literal(string2);
+		private Type(Component component, int j) {
+			this.text = component;
 			this.colorCode = j;
 		}
 	}

@@ -18,7 +18,7 @@ public interface DamageTypes {
 	ResourceKey<DamageType> CACTUS = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("cactus"));
 	ResourceKey<DamageType> FALL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("fall"));
 	ResourceKey<DamageType> FLY_INTO_WALL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("fly_into_wall"));
-	ResourceKey<DamageType> OUT_OF_WORLD = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("out_of_world"));
+	ResourceKey<DamageType> FELL_OUT_OF_WORLD = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("out_of_world"));
 	ResourceKey<DamageType> GENERIC = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("generic"));
 	ResourceKey<DamageType> MAGIC = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("magic"));
 	ResourceKey<DamageType> WITHER = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("wither"));
@@ -48,6 +48,8 @@ public interface DamageTypes {
 	ResourceKey<DamageType> PLAYER_EXPLOSION = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("player_explosion"));
 	ResourceKey<DamageType> SONIC_BOOM = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("sonic_boom"));
 	ResourceKey<DamageType> BAD_RESPAWN_POINT = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("bad_respawn_point"));
+	ResourceKey<DamageType> OUTSIDE_BORDER = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("outside_border"));
+	ResourceKey<DamageType> GENERIC_KILL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("generic_kill"));
 
 	static void bootstrap(BootstapContext<DamageType> bootstapContext) {
 		bootstapContext.register(IN_FIRE, new DamageType("inFire", 0.1F, DamageEffects.BURNING));
@@ -64,7 +66,7 @@ public interface DamageTypes {
 			FALL, new DamageType("fall", DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER, 0.0F, DamageEffects.HURT, DeathMessageType.FALL_VARIANTS)
 		);
 		bootstapContext.register(FLY_INTO_WALL, new DamageType("flyIntoWall", 0.0F));
-		bootstapContext.register(OUT_OF_WORLD, new DamageType("outOfWorld", 0.0F));
+		bootstapContext.register(FELL_OUT_OF_WORLD, new DamageType("outOfWorld", 0.0F));
 		bootstapContext.register(GENERIC, new DamageType("generic", 0.0F));
 		bootstapContext.register(MAGIC, new DamageType("magic", 0.0F));
 		bootstapContext.register(WITHER, new DamageType("wither", 0.0F));
@@ -96,5 +98,7 @@ public interface DamageTypes {
 		bootstapContext.register(
 			BAD_RESPAWN_POINT, new DamageType("badRespawnPoint", DamageScaling.ALWAYS, 0.1F, DamageEffects.HURT, DeathMessageType.INTENTIONAL_GAME_DESIGN)
 		);
+		bootstapContext.register(OUTSIDE_BORDER, new DamageType("outsideBorder", 0.0F));
+		bootstapContext.register(GENERIC_KILL, new DamageType("genericKill", 0.0F));
 	}
 }

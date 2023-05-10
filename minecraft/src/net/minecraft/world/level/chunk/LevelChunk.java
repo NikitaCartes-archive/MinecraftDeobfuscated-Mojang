@@ -21,7 +21,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
-import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
@@ -76,7 +76,7 @@ public class LevelChunk extends ChunkAccess {
 	private boolean loaded;
 	final Level level;
 	@Nullable
-	private Supplier<ChunkHolder.FullChunkStatus> fullStatus;
+	private Supplier<FullChunkStatus> fullStatus;
 	@Nullable
 	private LevelChunk.PostLoadProcessor postLoad;
 	private final Int2ObjectMap<GameEventListenerRegistry> gameEventListenerRegistrySections;
@@ -373,7 +373,7 @@ public class LevelChunk extends ChunkAccess {
 		} else {
 			return !(this.level instanceof ServerLevel serverLevel)
 				? true
-				: this.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING) && serverLevel.areEntitiesLoaded(ChunkPos.asLong(blockPos));
+				: this.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING) && serverLevel.areEntitiesLoaded(ChunkPos.asLong(blockPos));
 		}
 	}
 
@@ -579,11 +579,11 @@ public class LevelChunk extends ChunkAccess {
 		return ChunkStatus.FULL;
 	}
 
-	public ChunkHolder.FullChunkStatus getFullStatus() {
-		return this.fullStatus == null ? ChunkHolder.FullChunkStatus.BORDER : (ChunkHolder.FullChunkStatus)this.fullStatus.get();
+	public FullChunkStatus getFullStatus() {
+		return this.fullStatus == null ? FullChunkStatus.FULL : (FullChunkStatus)this.fullStatus.get();
 	}
 
-	public void setFullStatus(Supplier<ChunkHolder.FullChunkStatus> supplier) {
+	public void setFullStatus(Supplier<FullChunkStatus> supplier) {
 		this.fullStatus = supplier;
 	}
 

@@ -171,7 +171,7 @@ public class Gui {
 			this.renderTextureOverlay(guiGraphics, POWDER_SNOW_OUTLINE_LOCATION, this.minecraft.player.getPercentFrozen());
 		}
 
-		float h = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
+		float h = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity);
 		if (h > 0.0F && !this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
 			this.renderPortalOverlay(guiGraphics, h);
 		}

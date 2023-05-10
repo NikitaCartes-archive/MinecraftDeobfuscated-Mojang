@@ -17,6 +17,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -32,23 +33,26 @@ import org.slf4j.Logger;
 
 public class LootTable {
 	static final Logger LOGGER = LogUtils.getLogger();
-	public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, new LootPool[0], new LootItemFunction[0]);
+	public static final ResourceLocation DEFAULT_RANDOM_SEQUENCE = new ResourceLocation("default");
+	public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, DEFAULT_RANDOM_SEQUENCE, new LootPool[0], new LootItemFunction[0]);
 	public static final LootContextParamSet DEFAULT_PARAM_SET = LootContextParamSets.ALL_PARAMS;
 	final LootContextParamSet paramSet;
+	final ResourceLocation randomSequence;
 	final LootPool[] pools;
 	final LootItemFunction[] functions;
 	private final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
 
-	LootTable(LootContextParamSet lootContextParamSet, LootPool[] lootPools, LootItemFunction[] lootItemFunctions) {
+	LootTable(LootContextParamSet lootContextParamSet, ResourceLocation resourceLocation, LootPool[] lootPools, LootItemFunction[] lootItemFunctions) {
 		this.paramSet = lootContextParamSet;
+		this.randomSequence = resourceLocation;
 		this.pools = lootPools;
 		this.functions = lootItemFunctions;
 		this.compositeFunction = LootItemFunctions.compose(lootItemFunctions);
 	}
 
-	public static Consumer<ItemStack> createStackSplitter(LootContext lootContext, Consumer<ItemStack> consumer) {
+	public static Consumer<ItemStack> createStackSplitter(ServerLevel serverLevel, Consumer<ItemStack> consumer) {
 		return itemStack -> {
-			if (itemStack.isItemEnabled(lootContext.getLevel().enabledFeatures())) {
+			if (itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
 				if (itemStack.getCount() < itemStack.getMaxStackSize()) {
 					consumer.accept(itemStack);
 				} else {
@@ -62,6 +66,10 @@ public class LootTable {
 				}
 			}
 		};
+	}
+
+	public void getRandomItemsRaw(LootParams lootParams, Consumer<ItemStack> consumer) {
+		this.getRandomItemsRaw(new LootContext.Builder(lootParams).create(this.randomSequence), consumer);
 	}
 
 	public void getRandomItemsRaw(LootContext lootContext, Consumer<ItemStack> consumer) {
@@ -79,11 +87,29 @@ public class LootTable {
 		}
 	}
 
-	public void getRandomItems(LootContext lootContext, Consumer<ItemStack> consumer) {
-		this.getRandomItemsRaw(lootContext, createStackSplitter(lootContext, consumer));
+	public void getRandomItems(LootParams lootParams, long l, Consumer<ItemStack> consumer) {
+		this.getRandomItemsRaw(
+			new LootContext.Builder(lootParams).withOptionalRandomSeed(l).create(this.randomSequence), createStackSplitter(lootParams.getLevel(), consumer)
+		);
 	}
 
-	public ObjectArrayList<ItemStack> getRandomItems(LootContext lootContext) {
+	public void getRandomItems(LootParams lootParams, Consumer<ItemStack> consumer) {
+		this.getRandomItemsRaw(lootParams, createStackSplitter(lootParams.getLevel(), consumer));
+	}
+
+	public void getRandomItems(LootContext lootContext, Consumer<ItemStack> consumer) {
+		this.getRandomItemsRaw(lootContext, createStackSplitter(lootContext.getLevel(), consumer));
+	}
+
+	public ObjectArrayList<ItemStack> getRandomItems(LootParams lootParams, long l) {
+		return this.getRandomItems(new LootContext.Builder(lootParams).withOptionalRandomSeed(l).create(this.randomSequence));
+	}
+
+	public ObjectArrayList<ItemStack> getRandomItems(LootParams lootParams) {
+		return this.getRandomItems(new LootContext.Builder(lootParams).create(this.randomSequence));
+	}
+
+	private ObjectArrayList<ItemStack> getRandomItems(LootContext lootContext) {
 		ObjectArrayList<ItemStack> objectArrayList = new ObjectArrayList<>();
 		this.getRandomItems(lootContext, objectArrayList::add);
 		return objectArrayList;
@@ -103,7 +129,8 @@ public class LootTable {
 		}
 	}
 
-	public void fill(Container container, LootContext lootContext) {
+	public void fill(Container container, LootParams lootParams, long l) {
+		LootContext lootContext = new LootContext.Builder(lootParams).withOptionalRandomSeed(l).create(this.randomSequence);
 		ObjectArrayList<ItemStack> objectArrayList = this.getRandomItems(lootContext);
 		RandomSource randomSource = lootContext.getRandom();
 		List<Integer> list = this.getAvailableSlots(container, randomSource);
@@ -179,6 +206,7 @@ public class LootTable {
 		private final List<LootPool> pools = Lists.<LootPool>newArrayList();
 		private final List<LootItemFunction> functions = Lists.<LootItemFunction>newArrayList();
 		private LootContextParamSet paramSet = LootTable.DEFAULT_PARAM_SET;
+		private ResourceLocation randomSequence = LootTable.DEFAULT_RANDOM_SEQUENCE;
 
 		public LootTable.Builder withPool(LootPool.Builder builder) {
 			this.pools.add(builder.build());
@@ -187,6 +215,11 @@ public class LootTable {
 
 		public LootTable.Builder setParamSet(LootContextParamSet lootContextParamSet) {
 			this.paramSet = lootContextParamSet;
+			return this;
+		}
+
+		public LootTable.Builder setRandomSequence(ResourceLocation resourceLocation) {
+			this.randomSequence = resourceLocation;
 			return this;
 		}
 
@@ -200,7 +233,9 @@ public class LootTable {
 		}
 
 		public LootTable build() {
-			return new LootTable(this.paramSet, (LootPool[])this.pools.toArray(new LootPool[0]), (LootItemFunction[])this.functions.toArray(new LootItemFunction[0]));
+			return new LootTable(
+				this.paramSet, this.randomSequence, (LootPool[])this.pools.toArray(new LootPool[0]), (LootItemFunction[])this.functions.toArray(new LootItemFunction[0])
+			);
 		}
 	}
 
@@ -214,10 +249,18 @@ public class LootTable {
 				lootContextParamSet = LootContextParamSets.get(new ResourceLocation(string));
 			}
 
+			ResourceLocation resourceLocation;
+			if (jsonObject.has("random_sequence")) {
+				String string2 = GsonHelper.getAsString(jsonObject, "random_sequence");
+				resourceLocation = new ResourceLocation(string2);
+			} else {
+				resourceLocation = LootTable.DEFAULT_RANDOM_SEQUENCE;
+			}
+
 			LootItemFunction[] lootItemFunctions = GsonHelper.getAsObject(
 				jsonObject, "functions", new LootItemFunction[0], jsonDeserializationContext, LootItemFunction[].class
 			);
-			return new LootTable(lootContextParamSet != null ? lootContextParamSet : LootContextParamSets.ALL_PARAMS, lootPools, lootItemFunctions);
+			return new LootTable(lootContextParamSet != null ? lootContextParamSet : LootContextParamSets.ALL_PARAMS, resourceLocation, lootPools, lootItemFunctions);
 		}
 
 		public JsonElement serialize(LootTable lootTable, Type type, JsonSerializationContext jsonSerializationContext) {
@@ -231,6 +274,7 @@ public class LootTable {
 				}
 			}
 
+			jsonObject.addProperty("random_sequence", lootTable.randomSequence.toString());
 			if (lootTable.pools.length > 0) {
 				jsonObject.add("pools", jsonSerializationContext.serialize(lootTable.pools));
 			}

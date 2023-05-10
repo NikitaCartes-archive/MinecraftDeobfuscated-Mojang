@@ -80,7 +80,7 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 	private void findItemsToDisplay(LivingEntity livingEntity, Villager villager) {
 		boolean bl = false;
 		ItemStack itemStack = livingEntity.getMainHandItem();
-		if (this.playerItemStack == null || !ItemStack.isSame(this.playerItemStack, itemStack)) {
+		if (this.playerItemStack == null || !ItemStack.isSameItem(this.playerItemStack, itemStack)) {
 			this.playerItemStack = itemStack;
 			bl = true;
 			this.displayItems.clear();
@@ -108,7 +108,7 @@ public class ShowTradesToPlayer extends Behavior<Villager> {
 	}
 
 	private boolean playerItemStackMatchesCostOfOffer(MerchantOffer merchantOffer) {
-		return ItemStack.isSame(this.playerItemStack, merchantOffer.getCostA()) || ItemStack.isSame(this.playerItemStack, merchantOffer.getCostB());
+		return ItemStack.isSameItem(this.playerItemStack, merchantOffer.getCostA()) || ItemStack.isSameItem(this.playerItemStack, merchantOffer.getCostB());
 	}
 
 	private static void clearHeldItem(Villager villager) {

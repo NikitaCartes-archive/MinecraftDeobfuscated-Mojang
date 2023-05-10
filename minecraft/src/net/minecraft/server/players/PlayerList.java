@@ -144,9 +144,15 @@ public abstract class PlayerList {
 	public void placeNewPlayer(Connection connection, ServerPlayer serverPlayer) {
 		GameProfile gameProfile = serverPlayer.getGameProfile();
 		GameProfileCache gameProfileCache = this.server.getProfileCache();
-		Optional<GameProfile> optional = gameProfileCache.get(gameProfile.getId());
-		String string = (String)optional.map(GameProfile::getName).orElse(gameProfile.getName());
-		gameProfileCache.add(gameProfile);
+		String string;
+		if (gameProfileCache != null) {
+			Optional<GameProfile> optional = gameProfileCache.get(gameProfile.getId());
+			string = (String)optional.map(GameProfile::getName).orElse(gameProfile.getName());
+			gameProfileCache.add(gameProfile);
+		} else {
+			string = gameProfile.getName();
+		}
+
 		CompoundTag compoundTag = this.load(serverPlayer);
 		ResourceKey<Level> resourceKey = compoundTag != null
 			? (ResourceKey)DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Dimension")))
@@ -201,7 +207,8 @@ public abstract class PlayerList {
 				!bl,
 				serverLevel2.isDebug(),
 				serverLevel2.isFlat(),
-				serverPlayer.getLastDeathLocation()
+				serverPlayer.getLastDeathLocation(),
+				serverPlayer.getPortalCooldown()
 			)
 		);
 		serverGamePacketListenerImpl.send(new ClientboundUpdateEnabledFeaturesPacket(FeatureFlags.REGISTRY.toNames(serverLevel2.enabledFeatures())));
@@ -516,7 +523,8 @@ public abstract class PlayerList {
 					serverPlayer2.level().isDebug(),
 					serverPlayer2.serverLevel().isFlat(),
 					b,
-					serverPlayer2.getLastDeathLocation()
+					serverPlayer2.getLastDeathLocation(),
+					serverPlayer2.getPortalCooldown()
 				)
 			);
 		serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.getYRot(), serverPlayer2.getXRot());

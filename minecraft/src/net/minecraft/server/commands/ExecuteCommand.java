@@ -64,7 +64,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.server.commands.data.DataCommands;
-import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Attackable;
@@ -83,6 +83,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootDataManager;
 import net.minecraft.world.level.storage.loot.LootDataType;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -443,7 +445,7 @@ public class ExecuteCommand {
 		int i = SectionPos.blockToSectionCoord(blockPos.getX());
 		int j = SectionPos.blockToSectionCoord(blockPos.getZ());
 		LevelChunk levelChunk = serverLevel.getChunkSource().getChunkNow(i, j);
-		return levelChunk != null ? levelChunk.getFullStatus() == ChunkHolder.FullChunkStatus.ENTITY_TICKING : false;
+		return levelChunk != null ? levelChunk.getFullStatus() == FullChunkStatus.ENTITY_TICKING : false;
 	}
 
 	private static ArgumentBuilder<CommandSourceStack, ?> addConditionals(
@@ -707,10 +709,11 @@ public class ExecuteCommand {
 
 	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, LootItemCondition lootItemCondition) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		LootContext lootContext = new LootContext.Builder(serverLevel)
+		LootParams lootParams = new LootParams.Builder(serverLevel)
 			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition())
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
 			.create(LootContextParamSets.COMMAND);
+		LootContext lootContext = new LootContext.Builder(lootParams).create(LootTable.DEFAULT_RANDOM_SEQUENCE);
 		lootContext.pushVisitedElement(LootContext.createVisitedEntry(lootItemCondition));
 		return lootItemCondition.test(lootContext);
 	}

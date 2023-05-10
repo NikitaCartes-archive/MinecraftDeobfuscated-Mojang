@@ -91,6 +91,13 @@ public class GuiGraphics {
 		}
 	}
 
+	@Deprecated
+	private void flushIfManaged() {
+		if (this.managed) {
+			this.flush();
+		}
+	}
+
 	public int guiWidth() {
 		return this.minecraft.getWindow().getGuiScaledWidth();
 	}
@@ -150,7 +157,7 @@ public class GuiGraphics {
 	}
 
 	private void applyScissor(@Nullable ScreenRectangle screenRectangle) {
-		this.flush();
+		this.flushIfManaged();
 		if (screenRectangle != null) {
 			Window window = Minecraft.getInstance().getWindow();
 			int i = window.getHeight();
@@ -166,7 +173,7 @@ public class GuiGraphics {
 	}
 
 	public void setColor(float f, float g, float h, float i) {
-		this.flush();
+		this.flushIfManaged();
 		RenderSystem.setShaderColor(f, g, h, i);
 	}
 

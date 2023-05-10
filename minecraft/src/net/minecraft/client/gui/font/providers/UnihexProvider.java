@@ -31,7 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.FastBufferedInputStream;
-import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -365,12 +365,10 @@ public class UnihexProvider implements GlyphProvider {
 
 				@Override
 				public void upload(int i, int j) {
-					try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-						IntBuffer intBuffer = memoryStack.mallocInt(Glyph.this.width() * 16);
-						UnihexProvider.unpackBitsToBytes(intBuffer, Glyph.this.contents, Glyph.this.left, Glyph.this.right);
-						intBuffer.rewind();
-						GlStateManager.upload(0, i, j, Glyph.this.width(), 16, NativeImage.Format.RGBA, intBuffer);
-					}
+					IntBuffer intBuffer = MemoryUtil.memAllocInt(Glyph.this.width() * 16);
+					UnihexProvider.unpackBitsToBytes(intBuffer, Glyph.this.contents, Glyph.this.left, Glyph.this.right);
+					intBuffer.rewind();
+					GlStateManager.upload(0, i, j, Glyph.this.width(), 16, NativeImage.Format.RGBA, intBuffer, MemoryUtil::memFree);
 				}
 
 				@Override

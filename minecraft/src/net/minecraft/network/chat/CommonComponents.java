@@ -11,6 +11,7 @@ public class CommonComponents {
 	public static final Component GUI_CANCEL = Component.translatable("gui.cancel");
 	public static final Component GUI_YES = Component.translatable("gui.yes");
 	public static final Component GUI_NO = Component.translatable("gui.no");
+	public static final Component GUI_OK = Component.translatable("gui.ok");
 	public static final Component GUI_PROCEED = Component.translatable("gui.proceed");
 	public static final Component GUI_CONTINUE = Component.translatable("gui.continue");
 	public static final Component GUI_BACK = Component.translatable("gui.back");

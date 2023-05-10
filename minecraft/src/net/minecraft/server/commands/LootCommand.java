@@ -10,7 +10,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -36,9 +35,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootDataManager;
 import net.minecraft.world.level.storage.loot.LootDataType;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -339,10 +338,7 @@ public class LootCommand {
 	}
 
 	private static boolean canMergeItems(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack.is(itemStack2.getItem())
-			&& itemStack.getDamageValue() == itemStack2.getDamageValue()
-			&& itemStack.getCount() <= itemStack.getMaxStackSize()
-			&& Objects.equals(itemStack.getTag(), itemStack2.getTag());
+		return itemStack.getCount() <= itemStack.getMaxStackSize() && ItemStack.isSameItemSameTags(itemStack, itemStack2);
 	}
 
 	private static int playerGive(Collection<ServerPlayer> collection, List<ItemStack> list, LootCommand.Callback callback) throws CommandSyntaxException {
@@ -433,7 +429,7 @@ public class LootCommand {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		BlockState blockState = serverLevel.getBlockState(blockPos);
 		BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-		LootContext.Builder builder = new LootContext.Builder(serverLevel)
+		LootParams.Builder builder = new LootParams.Builder(serverLevel)
 			.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 			.withParameter(LootContextParams.BLOCK_STATE, blockState)
 			.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity)
@@ -449,10 +445,10 @@ public class LootCommand {
 		} else {
 			ResourceLocation resourceLocation = ((LivingEntity)entity).getLootTable();
 			CommandSourceStack commandSourceStack = commandContext.getSource();
-			LootContext.Builder builder = new LootContext.Builder(commandSourceStack.getLevel());
+			LootParams.Builder builder = new LootParams.Builder(commandSourceStack.getLevel());
 			Entity entity2 = commandSourceStack.getEntity();
-			if (entity2 instanceof Player) {
-				builder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, (Player)entity2);
+			if (entity2 instanceof Player player) {
+				builder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, player);
 			}
 
 			builder.withParameter(LootContextParams.DAMAGE_SOURCE, entity.damageSources().magic());
@@ -460,18 +456,20 @@ public class LootCommand {
 			builder.withOptionalParameter(LootContextParams.KILLER_ENTITY, entity2);
 			builder.withParameter(LootContextParams.THIS_ENTITY, entity);
 			builder.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition());
+			LootParams lootParams = builder.create(LootContextParamSets.ENTITY);
 			LootTable lootTable = commandSourceStack.getServer().getLootData().getLootTable(resourceLocation);
-			List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
+			List<ItemStack> list = lootTable.getRandomItems(lootParams);
 			return dropConsumer.accept(commandContext, list, listx -> callback(commandSourceStack, listx, resourceLocation));
 		}
 	}
 
 	private static int dropChestLoot(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation, LootCommand.DropConsumer dropConsumer) throws CommandSyntaxException {
 		CommandSourceStack commandSourceStack = commandContext.getSource();
-		LootContext.Builder builder = new LootContext.Builder(commandSourceStack.getLevel())
+		LootParams lootParams = new LootParams.Builder(commandSourceStack.getLevel())
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
-			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition());
-		return drop(commandContext, resourceLocation, builder.create(LootContextParamSets.CHEST), dropConsumer);
+			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition())
+			.create(LootContextParamSets.CHEST);
+		return drop(commandContext, resourceLocation, lootParams, dropConsumer);
 	}
 
 	private static int dropFishingLoot(
@@ -482,20 +480,20 @@ public class LootCommand {
 		LootCommand.DropConsumer dropConsumer
 	) throws CommandSyntaxException {
 		CommandSourceStack commandSourceStack = commandContext.getSource();
-		LootContext lootContext = new LootContext.Builder(commandSourceStack.getLevel())
+		LootParams lootParams = new LootParams.Builder(commandSourceStack.getLevel())
 			.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 			.withParameter(LootContextParams.TOOL, itemStack)
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
 			.create(LootContextParamSets.FISHING);
-		return drop(commandContext, resourceLocation, lootContext, dropConsumer);
+		return drop(commandContext, resourceLocation, lootParams, dropConsumer);
 	}
 
 	private static int drop(
-		CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation, LootContext lootContext, LootCommand.DropConsumer dropConsumer
+		CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation, LootParams lootParams, LootCommand.DropConsumer dropConsumer
 	) throws CommandSyntaxException {
 		CommandSourceStack commandSourceStack = commandContext.getSource();
 		LootTable lootTable = commandSourceStack.getServer().getLootData().getLootTable(resourceLocation);
-		List<ItemStack> list = lootTable.getRandomItems(lootContext);
+		List<ItemStack> list = lootTable.getRandomItems(lootParams);
 		return dropConsumer.accept(commandContext, list, listx -> callback(commandSourceStack, listx));
 	}
 

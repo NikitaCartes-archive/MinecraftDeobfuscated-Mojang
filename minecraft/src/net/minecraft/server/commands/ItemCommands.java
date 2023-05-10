@@ -34,6 +34,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootDataManager;
 import net.minecraft.world.level.storage.loot.LootDataType;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -456,10 +458,11 @@ public class ItemCommands {
 
 	private static ItemStack applyModifier(CommandSourceStack commandSourceStack, LootItemFunction lootItemFunction, ItemStack itemStack) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		LootContext lootContext = new LootContext.Builder(serverLevel)
+		LootParams lootParams = new LootParams.Builder(serverLevel)
 			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition())
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
 			.create(LootContextParamSets.COMMAND);
+		LootContext lootContext = new LootContext.Builder(lootParams).create(LootTable.DEFAULT_RANDOM_SEQUENCE);
 		lootContext.pushVisitedElement(LootContext.createVisitedEntry(lootItemFunction));
 		return (ItemStack)lootItemFunction.apply(itemStack, lootContext);
 	}

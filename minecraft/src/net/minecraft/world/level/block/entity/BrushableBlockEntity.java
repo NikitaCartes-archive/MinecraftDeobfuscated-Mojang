@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -87,12 +87,12 @@ public class BrushableBlockEntity extends BlockEntity {
 				CriteriaTriggers.GENERATE_LOOT.trigger(serverPlayer, this.lootTable);
 			}
 
-			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
+			LootParams lootParams = new LootParams.Builder((ServerLevel)this.level)
 				.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(this.worldPosition))
-				.withOptionalRandomSeed(this.lootTableSeed)
 				.withLuck(player.getLuck())
-				.withParameter(LootContextParams.THIS_ENTITY, player);
-			ObjectArrayList<ItemStack> objectArrayList = lootTable.getRandomItems(builder.create(LootContextParamSets.CHEST));
+				.withParameter(LootContextParams.THIS_ENTITY, player)
+				.create(LootContextParamSets.CHEST);
+			ObjectArrayList<ItemStack> objectArrayList = lootTable.getRandomItems(lootParams, this.lootTableSeed);
 
 			this.item = switch (objectArrayList.size()) {
 				case 0 -> ItemStack.EMPTY;

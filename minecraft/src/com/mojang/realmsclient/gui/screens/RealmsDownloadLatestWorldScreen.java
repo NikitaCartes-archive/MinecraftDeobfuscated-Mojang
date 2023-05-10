@@ -88,7 +88,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 					this.checked = true;
 					this.minecraft.setScreen(this);
 					this.downloadSave();
-				}, RealmsLongConfirmationScreen.Type.Warning, component, component2, false));
+				}, RealmsLongConfirmationScreen.Type.WARNING, component, component2, false));
 			} else {
 				this.downloadSave();
 			}
@@ -182,7 +182,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		int j = i + (int)Math.round(200.0 * d);
 		guiGraphics.fill(i - 1, 79, j + 1, 96, -2501934);
 		guiGraphics.fill(i, 80, j, 95, -8355712);
-		guiGraphics.drawCenteredString(this.font, this.progress + " %", this.width / 2, 84, 16777215);
+		guiGraphics.drawCenteredString(this.font, Component.translatable("mco.download.percent", this.progress), this.width / 2, 84, 16777215);
 	}
 
 	private void drawDownloadSpeed(GuiGraphics guiGraphics) {
@@ -207,8 +207,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private void drawDownloadSpeed0(GuiGraphics guiGraphics, long l) {
 		if (l > 0L) {
 			int i = this.font.width(this.progress);
-			String string = "(" + Unit.humanReadable(l) + "/s)";
-			guiGraphics.drawString(this.font, string, this.width / 2 + i / 2 + 15, 84, 16777215, false);
+			guiGraphics.drawString(this.font, Component.translatable("mco.download.speed", Unit.humanReadable(l)), this.width / 2 + i / 2 + 15, 84, 16777215, false);
 		}
 	}
 

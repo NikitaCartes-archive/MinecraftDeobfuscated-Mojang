@@ -78,7 +78,8 @@ public class EnderDragon extends Mob implements Enemy {
 	@Nullable
 	public EndCrystal nearestCrystal;
 	@Nullable
-	private final EndDragonFight dragonFight;
+	private EndDragonFight dragonFight;
+	private BlockPos fightOrigin = BlockPos.ZERO;
 	private final EnderDragonPhaseManager phaseManager;
 	private int growlTime = 100;
 	private float sittingDamageReceived;
@@ -100,13 +101,19 @@ public class EnderDragon extends Mob implements Enemy {
 		this.setHealth(this.getMaxHealth());
 		this.noPhysics = true;
 		this.noCulling = true;
-		if (level instanceof ServerLevel) {
-			this.dragonFight = ((ServerLevel)level).dragonFight();
-		} else {
-			this.dragonFight = null;
-		}
-
 		this.phaseManager = new EnderDragonPhaseManager(this);
+	}
+
+	public void setDragonFight(EndDragonFight endDragonFight) {
+		this.dragonFight = endDragonFight;
+	}
+
+	public void setFightOrigin(BlockPos blockPos) {
+		this.fightOrigin = blockPos;
+	}
+
+	public BlockPos getFightOrigin() {
+		return this.fightOrigin;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -777,7 +784,7 @@ public class EnderDragon extends Mob implements Enemy {
 		EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
 		double e;
 		if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
-			BlockPos blockPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
+			BlockPos blockPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.fightOrigin));
 			double d = Math.max(Math.sqrt(blockPos.distToCenterSqr(this.position())) / 4.0, 1.0);
 			e = (double)i / d;
 		} else if (dragonPhaseInstance.isSitting()) {
@@ -796,7 +803,7 @@ public class EnderDragon extends Mob implements Enemy {
 		EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
 		Vec3 vec3;
 		if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
-			BlockPos blockPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
+			BlockPos blockPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.fightOrigin));
 			float g = Math.max((float)Math.sqrt(blockPos.distToCenterSqr(this.position())) / 4.0F, 1.0F);
 			float h = 6.0F / g;
 			float i = this.getXRot();

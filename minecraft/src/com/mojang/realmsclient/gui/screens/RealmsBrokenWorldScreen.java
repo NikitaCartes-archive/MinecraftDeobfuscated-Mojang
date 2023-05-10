@@ -119,7 +119,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 						} else {
 							this.minecraft.setScreen(this);
 						}
-					}, RealmsLongConfirmationScreen.Type.Info, component, component2, true));
+					}, RealmsLongConfirmationScreen.Type.INFO, component, component2, true));
 				}).bounds(this.getFramePositionX(i), row(8), 80, 20).build();
 			}
 

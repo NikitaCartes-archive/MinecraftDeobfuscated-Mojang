@@ -65,6 +65,7 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
@@ -623,6 +624,16 @@ public class Util {
 			return is.length >= i ? DataResult.error(supplier, Arrays.copyOf(is, i)) : DataResult.error(supplier);
 		} else {
 			return DataResult.success(is);
+		}
+	}
+
+	public static DataResult<long[]> fixedSize(LongStream longStream, int i) {
+		long[] ls = longStream.limit((long)(i + 1)).toArray();
+		if (ls.length != i) {
+			Supplier<String> supplier = () -> "Input is not a list of " + i + " longs";
+			return ls.length >= i ? DataResult.error(supplier, Arrays.copyOf(ls, i)) : DataResult.error(supplier);
+		} else {
+			return DataResult.success(ls);
 		}
 	}
 

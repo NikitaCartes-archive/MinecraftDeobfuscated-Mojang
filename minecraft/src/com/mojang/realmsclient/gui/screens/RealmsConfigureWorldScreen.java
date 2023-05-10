@@ -35,7 +35,6 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	private static final ResourceLocation EXPIRES_SOON_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/expires_soon_icon.png");
 	private static final Component WORLD_LIST_TITLE = Component.translatable("mco.configure.worlds.title");
 	private static final Component TITLE = Component.translatable("mco.configure.world.title");
-	private static final Component MINIGAME_PREFIX = Component.translatable("mco.configure.current.minigame").append(": ");
 	private static final Component SERVER_EXPIRED_TOOLTIP = Component.translatable("mco.selectServer.expired");
 	private static final Component SERVER_EXPIRING_SOON_TOOLTIP = Component.translatable("mco.selectServer.expires.soon");
 	private static final Component SERVER_EXPIRING_IN_DAY_TOOLTIP = Component.translatable("mco.selectServer.expires.day");
@@ -245,7 +244,9 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			int n = Math.min(this.centerButton(2, 3) + 80 - 11, this.width / 2 + k / 2 + m / 2 + 10);
 			this.drawServerStatus(guiGraphics, n, 7, i, j);
 			if (this.isMinigame()) {
-				guiGraphics.drawString(this.font, MINIGAME_PREFIX.copy().append(this.serverData.getMinigameName()), this.leftX + 80 + 20 + 10, row(13), 16777215, false);
+				guiGraphics.drawString(
+					this.font, Component.translatable("mco.configure.world.minigame", this.serverData.getMinigameName()), this.leftX + 80 + 20 + 10, row(13), 16777215, false
+				);
 			}
 
 			if (this.toolTip != null) {
@@ -343,7 +344,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 							this.minecraft.setScreen(this);
 						}
 					},
-					RealmsLongConfirmationScreen.Type.Info,
+					RealmsLongConfirmationScreen.Type.INFO,
 					component,
 					component2,
 					true
@@ -376,7 +377,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 							this.minecraft.setScreen(this);
 						}
 					},
-					RealmsLongConfirmationScreen.Type.Info,
+					RealmsLongConfirmationScreen.Type.INFO,
 					component,
 					component2,
 					true

@@ -63,7 +63,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -346,8 +346,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		if (blockState != null) {
 			ItemStack itemStack = new ItemStack(Items.DIAMOND_AXE);
 			itemStack.enchant(Enchantments.SILK_TOUCH, 1);
-			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level())
-				.withRandom(this.level().getRandom())
+			LootParams.Builder builder = new LootParams.Builder((ServerLevel)this.level())
 				.withParameter(LootContextParams.ORIGIN, this.position())
 				.withParameter(LootContextParams.TOOL, itemStack)
 				.withOptionalParameter(LootContextParams.THIS_ENTITY, this);

@@ -400,26 +400,28 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	private void _upload(int i, int j, int k, int l, int m, int n, int o, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
-		RenderSystem.assertOnRenderThreadOrInit();
-		this.checkAllocated();
-		setFilter(bl, bl3);
-		if (n == this.getWidth()) {
-			GlStateManager._pixelStore(3314, 0);
-		} else {
-			GlStateManager._pixelStore(3314, this.getWidth());
-		}
+		try {
+			RenderSystem.assertOnRenderThreadOrInit();
+			this.checkAllocated();
+			setFilter(bl, bl3);
+			if (n == this.getWidth()) {
+				GlStateManager._pixelStore(3314, 0);
+			} else {
+				GlStateManager._pixelStore(3314, this.getWidth());
+			}
 
-		GlStateManager._pixelStore(3316, l);
-		GlStateManager._pixelStore(3315, m);
-		this.format.setUnpackPixelStoreState();
-		GlStateManager._texSubImage2D(3553, i, j, k, n, o, this.format.glFormat(), 5121, this.pixels);
-		if (bl2) {
-			GlStateManager._texParameter(3553, 10242, 33071);
-			GlStateManager._texParameter(3553, 10243, 33071);
-		}
-
-		if (bl4) {
-			this.close();
+			GlStateManager._pixelStore(3316, l);
+			GlStateManager._pixelStore(3315, m);
+			this.format.setUnpackPixelStoreState();
+			GlStateManager._texSubImage2D(3553, i, j, k, n, o, this.format.glFormat(), 5121, this.pixels);
+			if (bl2) {
+				GlStateManager._texParameter(3553, 10242, 33071);
+				GlStateManager._texParameter(3553, 10243, 33071);
+			}
+		} finally {
+			if (bl4) {
+				this.close();
+			}
 		}
 	}
 

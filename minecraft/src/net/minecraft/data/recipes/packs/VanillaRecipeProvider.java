@@ -1,6 +1,7 @@
 package net.minecraft.data.recipes.packs;
 
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -101,98 +102,128 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		woodenBoat(consumer, Items.OAK_BOAT, Blocks.OAK_PLANKS);
 		woodenBoat(consumer, Items.SPRUCE_BOAT, Blocks.SPRUCE_PLANKS);
 		woodenBoat(consumer, Items.MANGROVE_BOAT, Blocks.MANGROVE_PLANKS);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BLACK_WOOL, Items.BLACK_DYE);
+		List<Item> list = List.of(
+			Items.BLACK_DYE,
+			Items.BLUE_DYE,
+			Items.BROWN_DYE,
+			Items.CYAN_DYE,
+			Items.GRAY_DYE,
+			Items.GREEN_DYE,
+			Items.LIGHT_BLUE_DYE,
+			Items.LIGHT_GRAY_DYE,
+			Items.LIME_DYE,
+			Items.MAGENTA_DYE,
+			Items.ORANGE_DYE,
+			Items.PINK_DYE,
+			Items.PURPLE_DYE,
+			Items.RED_DYE,
+			Items.YELLOW_DYE,
+			Items.WHITE_DYE
+		);
+		List<Item> list2 = List.of(
+			Items.BLACK_WOOL,
+			Items.BLUE_WOOL,
+			Items.BROWN_WOOL,
+			Items.CYAN_WOOL,
+			Items.GRAY_WOOL,
+			Items.GREEN_WOOL,
+			Items.LIGHT_BLUE_WOOL,
+			Items.LIGHT_GRAY_WOOL,
+			Items.LIME_WOOL,
+			Items.MAGENTA_WOOL,
+			Items.ORANGE_WOOL,
+			Items.PINK_WOOL,
+			Items.PURPLE_WOOL,
+			Items.RED_WOOL,
+			Items.YELLOW_WOOL,
+			Items.WHITE_WOOL
+		);
+		List<Item> list3 = List.of(
+			Items.BLACK_BED,
+			Items.BLUE_BED,
+			Items.BROWN_BED,
+			Items.CYAN_BED,
+			Items.GRAY_BED,
+			Items.GREEN_BED,
+			Items.LIGHT_BLUE_BED,
+			Items.LIGHT_GRAY_BED,
+			Items.LIME_BED,
+			Items.MAGENTA_BED,
+			Items.ORANGE_BED,
+			Items.PINK_BED,
+			Items.PURPLE_BED,
+			Items.RED_BED,
+			Items.YELLOW_BED,
+			Items.WHITE_BED
+		);
+		List<Item> list4 = List.of(
+			Items.BLACK_CARPET,
+			Items.BLUE_CARPET,
+			Items.BROWN_CARPET,
+			Items.CYAN_CARPET,
+			Items.GRAY_CARPET,
+			Items.GREEN_CARPET,
+			Items.LIGHT_BLUE_CARPET,
+			Items.LIGHT_GRAY_CARPET,
+			Items.LIME_CARPET,
+			Items.MAGENTA_CARPET,
+			Items.ORANGE_CARPET,
+			Items.PINK_CARPET,
+			Items.PURPLE_CARPET,
+			Items.RED_CARPET,
+			Items.YELLOW_CARPET,
+			Items.WHITE_CARPET
+		);
+		colorBlockWithDye(consumer, list, list2);
+		colorBlockWithDye(consumer, list, list3);
+		colorBlockWithDye(consumer, list, list4);
 		carpet(consumer, Blocks.BLACK_CARPET, Blocks.BLACK_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BLACK_CARPET, Items.BLACK_DYE);
 		bedFromPlanksAndWool(consumer, Items.BLACK_BED, Blocks.BLACK_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.BLACK_BED, Items.BLACK_DYE);
 		banner(consumer, Items.BLACK_BANNER, Blocks.BLACK_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BLUE_WOOL, Items.BLUE_DYE);
 		carpet(consumer, Blocks.BLUE_CARPET, Blocks.BLUE_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BLUE_CARPET, Items.BLUE_DYE);
 		bedFromPlanksAndWool(consumer, Items.BLUE_BED, Blocks.BLUE_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.BLUE_BED, Items.BLUE_DYE);
 		banner(consumer, Items.BLUE_BANNER, Blocks.BLUE_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BROWN_WOOL, Items.BROWN_DYE);
 		carpet(consumer, Blocks.BROWN_CARPET, Blocks.BROWN_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BROWN_CARPET, Items.BROWN_DYE);
 		bedFromPlanksAndWool(consumer, Items.BROWN_BED, Blocks.BROWN_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.BROWN_BED, Items.BROWN_DYE);
 		banner(consumer, Items.BROWN_BANNER, Blocks.BROWN_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.CYAN_WOOL, Items.CYAN_DYE);
 		carpet(consumer, Blocks.CYAN_CARPET, Blocks.CYAN_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.CYAN_CARPET, Items.CYAN_DYE);
 		bedFromPlanksAndWool(consumer, Items.CYAN_BED, Blocks.CYAN_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.CYAN_BED, Items.CYAN_DYE);
 		banner(consumer, Items.CYAN_BANNER, Blocks.CYAN_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.GRAY_WOOL, Items.GRAY_DYE);
 		carpet(consumer, Blocks.GRAY_CARPET, Blocks.GRAY_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.GRAY_CARPET, Items.GRAY_DYE);
 		bedFromPlanksAndWool(consumer, Items.GRAY_BED, Blocks.GRAY_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.GRAY_BED, Items.GRAY_DYE);
 		banner(consumer, Items.GRAY_BANNER, Blocks.GRAY_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.GREEN_WOOL, Items.GREEN_DYE);
 		carpet(consumer, Blocks.GREEN_CARPET, Blocks.GREEN_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.GREEN_CARPET, Items.GREEN_DYE);
 		bedFromPlanksAndWool(consumer, Items.GREEN_BED, Blocks.GREEN_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.GREEN_BED, Items.GREEN_DYE);
 		banner(consumer, Items.GREEN_BANNER, Blocks.GREEN_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIGHT_BLUE_WOOL, Items.LIGHT_BLUE_DYE);
 		carpet(consumer, Blocks.LIGHT_BLUE_CARPET, Blocks.LIGHT_BLUE_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIGHT_BLUE_CARPET, Items.LIGHT_BLUE_DYE);
 		bedFromPlanksAndWool(consumer, Items.LIGHT_BLUE_BED, Blocks.LIGHT_BLUE_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.LIGHT_BLUE_BED, Items.LIGHT_BLUE_DYE);
 		banner(consumer, Items.LIGHT_BLUE_BANNER, Blocks.LIGHT_BLUE_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIGHT_GRAY_WOOL, Items.LIGHT_GRAY_DYE);
 		carpet(consumer, Blocks.LIGHT_GRAY_CARPET, Blocks.LIGHT_GRAY_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIGHT_GRAY_CARPET, Items.LIGHT_GRAY_DYE);
 		bedFromPlanksAndWool(consumer, Items.LIGHT_GRAY_BED, Blocks.LIGHT_GRAY_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.LIGHT_GRAY_BED, Items.LIGHT_GRAY_DYE);
 		banner(consumer, Items.LIGHT_GRAY_BANNER, Blocks.LIGHT_GRAY_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIME_WOOL, Items.LIME_DYE);
 		carpet(consumer, Blocks.LIME_CARPET, Blocks.LIME_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIME_CARPET, Items.LIME_DYE);
 		bedFromPlanksAndWool(consumer, Items.LIME_BED, Blocks.LIME_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.LIME_BED, Items.LIME_DYE);
 		banner(consumer, Items.LIME_BANNER, Blocks.LIME_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.MAGENTA_WOOL, Items.MAGENTA_DYE);
 		carpet(consumer, Blocks.MAGENTA_CARPET, Blocks.MAGENTA_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.MAGENTA_CARPET, Items.MAGENTA_DYE);
 		bedFromPlanksAndWool(consumer, Items.MAGENTA_BED, Blocks.MAGENTA_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.MAGENTA_BED, Items.MAGENTA_DYE);
 		banner(consumer, Items.MAGENTA_BANNER, Blocks.MAGENTA_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.ORANGE_WOOL, Items.ORANGE_DYE);
 		carpet(consumer, Blocks.ORANGE_CARPET, Blocks.ORANGE_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.ORANGE_CARPET, Items.ORANGE_DYE);
 		bedFromPlanksAndWool(consumer, Items.ORANGE_BED, Blocks.ORANGE_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.ORANGE_BED, Items.ORANGE_DYE);
 		banner(consumer, Items.ORANGE_BANNER, Blocks.ORANGE_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.PINK_WOOL, Items.PINK_DYE);
 		carpet(consumer, Blocks.PINK_CARPET, Blocks.PINK_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.PINK_CARPET, Items.PINK_DYE);
 		bedFromPlanksAndWool(consumer, Items.PINK_BED, Blocks.PINK_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.PINK_BED, Items.PINK_DYE);
 		banner(consumer, Items.PINK_BANNER, Blocks.PINK_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.PURPLE_WOOL, Items.PURPLE_DYE);
 		carpet(consumer, Blocks.PURPLE_CARPET, Blocks.PURPLE_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.PURPLE_CARPET, Items.PURPLE_DYE);
 		bedFromPlanksAndWool(consumer, Items.PURPLE_BED, Blocks.PURPLE_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.PURPLE_BED, Items.PURPLE_DYE);
 		banner(consumer, Items.PURPLE_BANNER, Blocks.PURPLE_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.RED_WOOL, Items.RED_DYE);
 		carpet(consumer, Blocks.RED_CARPET, Blocks.RED_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.RED_CARPET, Items.RED_DYE);
 		bedFromPlanksAndWool(consumer, Items.RED_BED, Blocks.RED_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.RED_BED, Items.RED_DYE);
 		banner(consumer, Items.RED_BANNER, Blocks.RED_WOOL);
 		carpet(consumer, Blocks.WHITE_CARPET, Blocks.WHITE_WOOL);
 		bedFromPlanksAndWool(consumer, Items.WHITE_BED, Blocks.WHITE_WOOL);
 		banner(consumer, Items.WHITE_BANNER, Blocks.WHITE_WOOL);
-		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.YELLOW_WOOL, Items.YELLOW_DYE);
 		carpet(consumer, Blocks.YELLOW_CARPET, Blocks.YELLOW_WOOL);
-		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.YELLOW_CARPET, Items.YELLOW_DYE);
 		bedFromPlanksAndWool(consumer, Items.YELLOW_BED, Blocks.YELLOW_WOOL);
-		bedFromWhiteBedAndDye(consumer, Items.YELLOW_BED, Items.YELLOW_DYE);
 		banner(consumer, Items.YELLOW_BANNER, Blocks.YELLOW_WOOL);
 		carpet(consumer, Blocks.MOSS_CARPET, Blocks.MOSS_BLOCK);
 		stainedGlassFromGlassAndDye(consumer, Blocks.BLACK_STAINED_GLASS, Items.BLACK_DYE);

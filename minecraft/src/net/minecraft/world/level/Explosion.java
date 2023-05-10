@@ -33,7 +33,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -271,8 +271,7 @@ public class Explosion {
 						if (blockEntity instanceof ServerLevel) {
 							ServerLevel serverLevel = (ServerLevel)blockEntity;
 							BlockEntity blockEntityx = blockState.hasBlockEntity() ? this.level.getBlockEntity(blockPos) : null;
-							LootContext.Builder builder = new LootContext.Builder(serverLevel)
-								.withRandom(this.level.random)
+							LootParams.Builder builder = new LootParams.Builder(serverLevel)
 								.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 								.withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
 								.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntityx)

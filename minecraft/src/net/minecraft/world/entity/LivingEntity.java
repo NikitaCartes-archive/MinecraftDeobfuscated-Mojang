@@ -107,7 +107,7 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -139,6 +139,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private static final int TICKS_PER_ELYTRA_FREE_FALL_EVENT = 10;
 	private static final int FREE_FALL_EVENTS_PER_ELYTRA_BREAK = 2;
 	public static final int USE_ITEM_INTERVAL = 4;
+	private static final float BASE_JUMP_POWER = 0.42F;
 	private static final double MAX_LINE_OF_SIGHT_TEST_RANGE = 128.0;
 	protected static final int LIVING_ENTITY_FLAG_IS_USING = 1;
 	protected static final int LIVING_ENTITY_FLAG_OFF_HAND = 2;
@@ -257,7 +258,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public void kill() {
-		this.hurt(this.damageSources().outOfWorld(), Float.MAX_VALUE);
+		this.hurt(this.damageSources().genericKill(), Float.MAX_VALUE);
 	}
 
 	public boolean canAttackType(EntityType<?> entityType) {
@@ -352,7 +353,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					if (d < 0.0) {
 						double e = this.level().getWorldBorder().getDamagePerBlock();
 						if (e > 0.0) {
-							this.hurt(this.damageSources().inWall(), (float)Math.max(1, Mth.floor(-d * e)));
+							this.hurt(this.damageSources().outOfBorder(), (float)Math.max(1, Mth.floor(-d * e)));
 						}
 					}
 				}
@@ -1353,16 +1354,14 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.getType().getDefaultLootTable();
 	}
 
+	public long getLootTableSeed() {
+		return 0L;
+	}
+
 	protected void dropFromLootTable(DamageSource damageSource, boolean bl) {
 		ResourceLocation resourceLocation = this.getLootTable();
 		LootTable lootTable = this.level().getServer().getLootData().getLootTable(resourceLocation);
-		LootContext.Builder builder = this.createLootContext(bl, damageSource);
-		lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY), this::spawnAtLocation);
-	}
-
-	protected LootContext.Builder createLootContext(boolean bl, DamageSource damageSource) {
-		LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level())
-			.withRandom(this.random)
+		LootParams.Builder builder = new LootParams.Builder((ServerLevel)this.level())
 			.withParameter(LootContextParams.THIS_ENTITY, this)
 			.withParameter(LootContextParams.ORIGIN, this.position())
 			.withParameter(LootContextParams.DAMAGE_SOURCE, damageSource)
@@ -1372,7 +1371,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			builder = builder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, this.lastHurtByPlayer).withLuck(this.lastHurtByPlayer.getLuck());
 		}
 
-		return builder;
+		LootParams lootParams = builder.create(LootContextParamSets.ENTITY);
+		lootTable.getRandomItems(lootParams, this.getLootTableSeed(), this::spawnAtLocation);
 	}
 
 	public void knockback(double d, double e, double f) {
@@ -1761,8 +1761,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
-	protected void outOfWorld() {
-		this.hurt(this.damageSources().outOfWorld(), 4.0F);
+	protected void onBelowWorld() {
+		this.hurt(this.damageSources().fellOutOfWorld(), 4.0F);
 	}
 
 	protected void updateSwingTime() {
@@ -1934,12 +1934,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected float getJumpPower() {
-		float f = 0.42F * this.getBlockJumpFactor();
-		return f + this.getJumpBoostPower();
+		return 0.42F * this.getBlockJumpFactor() + this.getJumpBoostPower();
 	}
 
 	public float getJumpBoostPower() {
-		return this.hasEffect(MobEffects.JUMP) ? 0.1F * (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) : 0.0F;
+		return this.hasEffect(MobEffects.JUMP) ? 0.1F * ((float)this.getEffect(MobEffects.JUMP).getAmplifier() + 1.0F) : 0.0F;
 	}
 
 	protected void jumpFromGround() {
@@ -2815,7 +2814,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	private void updatingUsingItem() {
 		if (this.isUsingItem()) {
-			if (ItemStack.isSame(this.getItemInHand(this.getUsedItemHand()), this.useItem)) {
+			if (ItemStack.isSameItem(this.getItemInHand(this.getUsedItemHand()), this.useItem)) {
 				this.useItem = this.getItemInHand(this.getUsedItemHand());
 				this.updateUsingItem(this.useItem);
 			} else {

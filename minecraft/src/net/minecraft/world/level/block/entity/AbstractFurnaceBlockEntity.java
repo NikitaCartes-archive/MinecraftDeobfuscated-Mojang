@@ -309,7 +309,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 				ItemStack itemStack2 = nonNullList.get(2);
 				if (itemStack2.isEmpty()) {
 					return true;
-				} else if (!itemStack2.sameItem(itemStack)) {
+				} else if (!ItemStack.isSameItem(itemStack2, itemStack)) {
 					return false;
 				} else {
 					return itemStack2.getCount() < i && itemStack2.getCount() < itemStack2.getMaxStackSize() ? true : itemStack2.getCount() < itemStack.getMaxStackSize();
@@ -412,7 +412,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	@Override
 	public void setItem(int i, ItemStack itemStack) {
 		ItemStack itemStack2 = this.items.get(i);
-		boolean bl = !itemStack.isEmpty() && itemStack.sameItem(itemStack2) && ItemStack.tagMatches(itemStack, itemStack2);
+		boolean bl = !itemStack.isEmpty() && ItemStack.isSameItemSameTags(itemStack2, itemStack);
 		this.items.set(i, itemStack);
 		if (itemStack.getCount() > this.getMaxStackSize()) {
 			itemStack.setCount(this.getMaxStackSize());

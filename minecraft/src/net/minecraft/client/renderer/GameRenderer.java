@@ -447,6 +447,7 @@ public class GameRenderer implements AutoCloseable {
 			}
 
 			rendertypeGuiShader = this.preloadShader(resourceProvider, "rendertype_gui", DefaultVertexFormat.POSITION_COLOR);
+			rendertypeGuiOverlayShader = this.preloadShader(resourceProvider, "rendertype_gui_overlay", DefaultVertexFormat.POSITION_COLOR);
 			positionShader = this.preloadShader(resourceProvider, "position", DefaultVertexFormat.POSITION);
 			positionColorShader = this.preloadShader(resourceProvider, "position_color", DefaultVertexFormat.POSITION_COLOR);
 			positionColorTexShader = this.preloadShader(resourceProvider, "position_color_tex", DefaultVertexFormat.POSITION_COLOR_TEX);
@@ -1124,7 +1125,7 @@ public class GameRenderer implements AutoCloseable {
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
 				if (this.minecraft.player != null) {
-					float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
+					float g = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity);
 					float h = this.minecraft.options.screenEffectScale().get().floatValue();
 					if (g > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && h < 1.0F) {
 						this.renderConfusionOverlay(guiGraphics, g * (1.0F - h));
@@ -1293,7 +1294,7 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		float g = this.minecraft.options.screenEffectScale().get().floatValue();
-		float h = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime) * g * g;
+		float h = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity) * g * g;
 		if (h > 0.0F) {
 			int i = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
 			float j = 5.0F / (h * h + 5.0F) - h * 0.04F;

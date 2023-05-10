@@ -46,6 +46,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
@@ -360,7 +361,7 @@ public class Sheep extends Animal implements Shearable {
 	}
 
 	private static CraftingContainer makeContainer(DyeColor dyeColor, DyeColor dyeColor2) {
-		CraftingContainer craftingContainer = new CraftingContainer(new AbstractContainerMenu(null, -1) {
+		CraftingContainer craftingContainer = new TransientCraftingContainer(new AbstractContainerMenu(null, -1) {
 			@Override
 			public ItemStack quickMoveStack(Player player, int i) {
 				return ItemStack.EMPTY;

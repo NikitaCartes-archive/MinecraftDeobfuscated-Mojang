@@ -1,8 +1,17 @@
 package net.minecraft.world.level.levelgen;
 
+import com.mojang.serialization.Codec;
+import java.util.stream.LongStream;
+import net.minecraft.Util;
+
 public class Xoroshiro128PlusPlus {
 	private long seedLo;
 	private long seedHi;
+	public static final Codec<Xoroshiro128PlusPlus> CODEC = Codec.LONG_STREAM
+		.comapFlatMap(
+			longStream -> Util.fixedSize(longStream, 2).map(ls -> new Xoroshiro128PlusPlus(ls[0], ls[1])),
+			xoroshiro128PlusPlus -> LongStream.of(new long[]{xoroshiro128PlusPlus.seedLo, xoroshiro128PlusPlus.seedHi})
+		);
 
 	public Xoroshiro128PlusPlus(RandomSupport.Seed128bit seed128bit) {
 		this(seed128bit.seedLo(), seed128bit.seedHi());

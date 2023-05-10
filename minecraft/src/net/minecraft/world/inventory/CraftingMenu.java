@@ -22,7 +22,7 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 	private static final int INV_SLOT_END = 37;
 	private static final int USE_ROW_SLOT_START = 37;
 	private static final int USE_ROW_SLOT_END = 46;
-	private final CraftingContainer craftSlots = new CraftingContainer(this, 3, 3);
+	private final CraftingContainer craftSlots = new TransientCraftingContainer(this, 3, 3);
 	private final ResultContainer resultSlots = new ResultContainer();
 	private final ContainerLevelAccess access;
 	private final Player player;

@@ -130,7 +130,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public static final int BOARDING_COOLDOWN = 60;
 	public static final int TOTAL_AIR_SUPPLY = 300;
 	public static final int MAX_ENTITY_TAG_COUNT = 1024;
-	public static final double DELTA_AFFECTED_BY_BLOCKS_BELOW = 0.5000001;
+	public static final float DELTA_AFFECTED_BY_BLOCKS_BELOW_0_2 = 0.2F;
+	public static final double DELTA_AFFECTED_BY_BLOCKS_BELOW_0_5 = 0.500001;
+	public static final double DELTA_AFFECTED_BY_BLOCKS_BELOW_1_0 = 0.999999;
 	public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
 	public static final int BASE_TICKS_REQUIRED_TO_FREEZE = 140;
 	public static final int FREEZE_HURT_FREQUENCY = 40;
@@ -230,6 +232,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	public boolean wasInPowderSnow;
 	public boolean wasOnFire;
 	public Optional<BlockPos> mainSupportingBlockPos = Optional.empty();
+	private boolean onGroundNoBlocks = false;
 	private float crystalSoundIntensity;
 	private int lastCrystalSoundPlayTick;
 	private boolean hasVisualFire;
@@ -459,7 +462,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			this.fallDistance *= 0.5F;
 		}
 
-		this.checkOutOfWorld();
+		this.checkBelowWorld();
 		if (!this.level().isClientSide) {
 			this.setSharedFlagOnFire(this.remainingFireTicks > 0);
 		}
@@ -472,14 +475,22 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.setSharedFlag(0, bl || this.hasVisualFire);
 	}
 
-	public void checkOutOfWorld() {
+	public void checkBelowWorld() {
 		if (this.getY() < (double)(this.level().getMinBuildHeight() - 64)) {
-			this.outOfWorld();
+			this.onBelowWorld();
 		}
 	}
 
 	public void setPortalCooldown() {
 		this.portalCooldown = this.getDimensionChangingDelay();
+	}
+
+	public void setPortalCooldown(int i) {
+		this.portalCooldown = i;
+	}
+
+	public int getPortalCooldown() {
+		return this.portalCooldown;
 	}
 
 	public boolean isOnPortalCooldown() {
@@ -528,7 +539,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.setRemainingFireTicks(0);
 	}
 
-	protected void outOfWorld() {
+	protected void onBelowWorld() {
 		this.discard();
 	}
 
@@ -545,13 +556,25 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		this.checkSupportingBlock(bl);
 	}
 
+	public boolean isSupportedBy(BlockPos blockPos) {
+		return this.mainSupportingBlockPos.isPresent() && ((BlockPos)this.mainSupportingBlockPos.get()).equals(blockPos);
+	}
+
 	protected void checkSupportingBlock(boolean bl) {
 		if (bl) {
 			AABB aABB = this.getBoundingBox();
 			AABB aABB2 = new AABB(aABB.minX, aABB.minY - 1.0E-6, aABB.minZ, aABB.maxX, aABB.minY, aABB.maxZ);
-			this.mainSupportingBlockPos = this.level.findSupportingBlock(this, aABB2);
-		} else if (this.mainSupportingBlockPos.isPresent()) {
-			this.mainSupportingBlockPos = Optional.empty();
+			Optional<BlockPos> optional = this.level.findSupportingBlock(this, aABB2);
+			if (optional.isPresent() || this.onGroundNoBlocks) {
+				this.mainSupportingBlockPos = optional;
+			}
+
+			this.onGroundNoBlocks = optional.isEmpty();
+		} else {
+			this.onGroundNoBlocks = false;
+			if (this.mainSupportingBlockPos.isPresent()) {
+				this.mainSupportingBlockPos = Optional.empty();
+			}
 		}
 	}
 
@@ -756,11 +779,15 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.getOnPos(0.2F);
 	}
 
+	protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
+		return this.getOnPos(0.500001F);
+	}
+
 	public BlockPos getOnPos() {
 		return this.getOnPos(1.0E-5F);
 	}
 
-	private BlockPos getOnPos(float f) {
+	protected BlockPos getOnPos(float f) {
 		if (this.mainSupportingBlockPos.isPresent()) {
 			BlockPos blockPos = (BlockPos)this.mainSupportingBlockPos.get();
 			if (!(f > 1.0E-5F)) {
@@ -793,10 +820,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		} else {
 			return f;
 		}
-	}
-
-	protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
-		return this.getOnPos(0.5000001F);
 	}
 
 	protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
@@ -1227,23 +1250,22 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	protected void spawnSprintParticle() {
-		int i = Mth.floor(this.getX());
-		int j = Mth.floor(this.getY() - 0.2F);
-		int k = Mth.floor(this.getZ());
-		BlockPos blockPos = new BlockPos(i, j, k);
+		BlockPos blockPos = this.getOnPosLegacy();
 		BlockState blockState = this.level().getBlockState(blockPos);
 		if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
 			Vec3 vec3 = this.getDeltaMovement();
-			this.level()
-				.addParticle(
-					new BlockParticleOption(ParticleTypes.BLOCK, blockState),
-					this.getX() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width,
-					this.getY() + 0.1,
-					this.getZ() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width,
-					vec3.x * -4.0,
-					1.5,
-					vec3.z * -4.0
-				);
+			BlockPos blockPos2 = this.blockPosition();
+			double d = this.getX() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width;
+			double e = this.getZ() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width;
+			if (blockPos2.getX() != blockPos.getX()) {
+				d = Mth.clamp(d, (double)blockPos.getX(), (double)blockPos.getX() + 1.0);
+			}
+
+			if (blockPos2.getZ() != blockPos.getZ()) {
+				e = Mth.clamp(e, (double)blockPos.getZ(), (double)blockPos.getZ() + 1.0);
+			}
+
+			this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), d, this.getY() + 0.1, e, vec3.x * -4.0, 1.5, vec3.z * -4.0);
 		}
 	}
 
@@ -1630,7 +1652,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 				this.setAirSupply(compoundTag.getShort("Air"));
 			}
 
-			this.setOnGround(compoundTag.getBoolean("OnGround"));
+			this.onGround = compoundTag.getBoolean("OnGround");
 			this.invulnerable = compoundTag.getBoolean("Invulnerable");
 			this.portalCooldown = compoundTag.getInt("PortalCooldown");
 			if (compoundTag.hasUUID("UUID")) {

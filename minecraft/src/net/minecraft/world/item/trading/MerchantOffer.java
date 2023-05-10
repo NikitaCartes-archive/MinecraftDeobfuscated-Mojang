@@ -188,7 +188,7 @@ public class MerchantOffer {
 				itemStack3.setDamageValue(itemStack3.getDamageValue());
 			}
 
-			return ItemStack.isSame(itemStack3, itemStack2)
+			return ItemStack.isSameItem(itemStack3, itemStack2)
 				&& (!itemStack2.hasTag() || itemStack3.hasTag() && NbtUtils.compareNbt(itemStack2.getTag(), itemStack3.getTag(), false));
 		}
 	}

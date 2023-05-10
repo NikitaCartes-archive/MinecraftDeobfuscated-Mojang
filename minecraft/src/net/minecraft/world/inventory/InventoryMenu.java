@@ -35,7 +35,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 		EMPTY_ARMOR_SLOT_BOOTS, EMPTY_ARMOR_SLOT_LEGGINGS, EMPTY_ARMOR_SLOT_CHESTPLATE, EMPTY_ARMOR_SLOT_HELMET
 	};
 	private static final EquipmentSlot[] SLOT_IDS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-	private final CraftingContainer craftSlots = new CraftingContainer(this, 2, 2);
+	private final CraftingContainer craftSlots = new TransientCraftingContainer(this, 2, 2);
 	private final ResultContainer resultSlots = new ResultContainer();
 	public final boolean active;
 	private final Player owner;

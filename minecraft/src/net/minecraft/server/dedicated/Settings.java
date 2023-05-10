@@ -4,7 +4,13 @@ import com.google.common.base.MoreObjects;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -26,45 +32,79 @@ public abstract class Settings<T extends Settings<T>> {
 	}
 
 	public static Properties loadFromFile(Path path) {
-		Properties properties = new Properties();
-
 		try {
-			InputStream inputStream = Files.newInputStream(path);
-
 			try {
-				properties.load(inputStream);
-			} catch (Throwable var6) {
-				if (inputStream != null) {
-					try {
-						inputStream.close();
-					} catch (Throwable var5) {
-						var6.addSuppressed(var5);
+				InputStream inputStream = Files.newInputStream(path);
+
+				Properties var13;
+				try {
+					CharsetDecoder charsetDecoder = StandardCharsets.UTF_8
+						.newDecoder()
+						.onMalformedInput(CodingErrorAction.REPORT)
+						.onUnmappableCharacter(CodingErrorAction.REPORT);
+					Properties properties = new Properties();
+					properties.load(new InputStreamReader(inputStream, charsetDecoder));
+					var13 = properties;
+				} catch (Throwable var8) {
+					if (inputStream != null) {
+						try {
+							inputStream.close();
+						} catch (Throwable var6) {
+							var8.addSuppressed(var6);
+						}
 					}
+
+					throw var8;
 				}
 
-				throw var6;
-			}
+				if (inputStream != null) {
+					inputStream.close();
+				}
 
-			if (inputStream != null) {
-				inputStream.close();
+				return var13;
+			} catch (CharacterCodingException var9) {
+				LOGGER.info("Failed to load properties as UTF-8 from file {}, trying ISO_8859_1", path);
+				Reader reader = Files.newBufferedReader(path, StandardCharsets.ISO_8859_1);
+
+				Properties var4;
+				try {
+					Properties properties = new Properties();
+					properties.load(reader);
+					var4 = properties;
+				} catch (Throwable var7) {
+					if (reader != null) {
+						try {
+							reader.close();
+						} catch (Throwable var5) {
+							var7.addSuppressed(var5);
+						}
+					}
+
+					throw var7;
+				}
+
+				if (reader != null) {
+					reader.close();
+				}
+
+				return var4;
 			}
-		} catch (IOException var7) {
-			LOGGER.error("Failed to load properties from file: {}", path);
+		} catch (IOException var10) {
+			LOGGER.error("Failed to load properties from file: {}", path, var10);
+			return new Properties();
 		}
-
-		return properties;
 	}
 
 	public void store(Path path) {
 		try {
-			OutputStream outputStream = Files.newOutputStream(path);
+			Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
 
 			try {
-				this.properties.store(outputStream, "Minecraft server properties");
+				this.properties.store(writer, "Minecraft server properties");
 			} catch (Throwable var6) {
-				if (outputStream != null) {
+				if (writer != null) {
 					try {
-						outputStream.close();
+						writer.close();
 					} catch (Throwable var5) {
 						var6.addSuppressed(var5);
 					}
@@ -73,8 +113,8 @@ public abstract class Settings<T extends Settings<T>> {
 				throw var6;
 			}
 
-			if (outputStream != null) {
-				outputStream.close();
+			if (writer != null) {
+				writer.close();
 			}
 		} catch (IOException var7) {
 			LOGGER.error("Failed to store properties to file: {}", path);

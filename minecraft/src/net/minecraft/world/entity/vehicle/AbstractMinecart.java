@@ -279,7 +279,7 @@ public abstract class AbstractMinecart extends Entity {
 			this.setDamage(this.getDamage() - 1.0F);
 		}
 
-		this.checkOutOfWorld();
+		this.checkBelowWorld();
 		this.handleNetherPortal();
 		if (this.level().isClientSide) {
 			if (this.lSteps > 0) {
