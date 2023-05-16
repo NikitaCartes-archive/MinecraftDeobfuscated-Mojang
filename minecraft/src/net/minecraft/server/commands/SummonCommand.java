@@ -109,7 +109,7 @@ public class SummonCommand {
 		CommandSourceStack commandSourceStack, Holder.Reference<EntityType<?>> reference, Vec3 vec3, CompoundTag compoundTag, boolean bl
 	) throws CommandSyntaxException {
 		Entity entity = createEntity(commandSourceStack, reference, vec3, compoundTag, bl);
-		commandSourceStack.sendSuccess(Component.translatable("commands.summon.success", entity.getDisplayName()), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.summon.success", entity.getDisplayName()), true);
 		return 1;
 	}
 }

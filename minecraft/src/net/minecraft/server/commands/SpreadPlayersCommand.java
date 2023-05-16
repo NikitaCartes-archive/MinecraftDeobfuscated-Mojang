@@ -116,9 +116,9 @@ public class SpreadPlayersCommand {
 			spreadPositions(vec2, (double)f, serverLevel, randomSource, d, e, h, k, i, positions, bl);
 			double l = setPlayerPositions(collection, serverLevel, positions, i, bl);
 			commandSourceStack.sendSuccess(
-				Component.translatable(
-					"commands.spreadplayers.success." + (bl ? "teams" : "entities"), positions.length, vec2.x, vec2.y, String.format(Locale.ROOT, "%.2f", l)
-				),
+				() -> Component.translatable(
+						"commands.spreadplayers.success." + (bl ? "teams" : "entities"), positions.length, vec2.x, vec2.y, String.format(Locale.ROOT, "%.2f", l)
+					),
 				true
 			);
 			return positions.length;

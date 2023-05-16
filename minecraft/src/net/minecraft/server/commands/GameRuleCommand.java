@@ -31,13 +31,13 @@ public class GameRuleCommand {
 		CommandSourceStack commandSourceStack = commandContext.getSource();
 		T value = commandSourceStack.getServer().getGameRules().getRule(key);
 		value.setFromArgument(commandContext, "value");
-		commandSourceStack.sendSuccess(Component.translatable("commands.gamerule.set", key.getId(), value.toString()), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.gamerule.set", key.getId(), value.toString()), true);
 		return value.getCommandResult();
 	}
 
 	static <T extends GameRules.Value<T>> int queryRule(CommandSourceStack commandSourceStack, GameRules.Key<T> key) {
 		T value = commandSourceStack.getServer().getGameRules().getRule(key);
-		commandSourceStack.sendSuccess(Component.translatable("commands.gamerule.query", key.getId(), value.toString()), false);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.gamerule.query", key.getId(), value.toString()), false);
 		return value.getCommandResult();
 	}
 }

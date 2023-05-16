@@ -248,7 +248,7 @@ public class RedStoneWireBlock extends Block {
 		BlockPos blockPos2 = blockPos.relative(direction);
 		BlockState blockState = blockGetter.getBlockState(blockPos2);
 		if (bl) {
-			boolean bl2 = this.canSurviveOn(blockGetter, blockPos2, blockState);
+			boolean bl2 = blockState.getBlock() instanceof TrapDoorBlock || this.canSurviveOn(blockGetter, blockPos2, blockState);
 			if (bl2 && shouldConnectTo(blockGetter.getBlockState(blockPos2.above()))) {
 				if (blockState.isFaceSturdy(blockGetter, blockPos2, direction.getOpposite())) {
 					return RedstoneSide.UP;

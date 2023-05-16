@@ -7,8 +7,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.main.SilentInitException;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -96,5 +98,26 @@ public class GameNarrator {
 
 	public void destroy() {
 		this.narrator.destroy();
+	}
+
+	public void checkStatus(boolean bl) {
+		if (bl
+			&& !this.isActive()
+			&& !TinyFileDialogs.tinyfd_messageBox(
+				"Minecraft",
+				"Failed to initialize text-to-speech library. Do you want to continue?\nIf this problem persists, please report it at bugs.mojang.com",
+				"yesno",
+				"error",
+				true
+			)) {
+			throw new GameNarrator.NarratorInitException("Narrator library is not active");
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class NarratorInitException extends SilentInitException {
+		public NarratorInitException(String string) {
+			super(string);
+		}
 	}
 }

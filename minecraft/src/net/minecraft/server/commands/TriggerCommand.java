@@ -90,19 +90,19 @@ public class TriggerCommand {
 
 	private static int addValue(CommandSourceStack commandSourceStack, Score score, int i) {
 		score.add(i);
-		commandSourceStack.sendSuccess(Component.translatable("commands.trigger.add.success", score.getObjective().getFormattedDisplayName(), i), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.add.success", score.getObjective().getFormattedDisplayName(), i), true);
 		return score.getScore();
 	}
 
 	private static int setValue(CommandSourceStack commandSourceStack, Score score, int i) {
 		score.setScore(i);
-		commandSourceStack.sendSuccess(Component.translatable("commands.trigger.set.success", score.getObjective().getFormattedDisplayName(), i), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.set.success", score.getObjective().getFormattedDisplayName(), i), true);
 		return i;
 	}
 
 	private static int simpleTrigger(CommandSourceStack commandSourceStack, Score score) {
 		score.add(1);
-		commandSourceStack.sendSuccess(Component.translatable("commands.trigger.simple.success", score.getObjective().getFormattedDisplayName()), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.simple.success", score.getObjective().getFormattedDisplayName()), true);
 		return score.getScore();
 	}
 

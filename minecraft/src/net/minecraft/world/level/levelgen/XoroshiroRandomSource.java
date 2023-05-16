@@ -1,10 +1,6 @@
 package net.minecraft.world.level.levelgen;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-import com.google.common.primitives.Longs;
 import com.mojang.serialization.Codec;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -19,6 +15,10 @@ public class XoroshiroRandomSource implements RandomSource {
 
 	public XoroshiroRandomSource(long l) {
 		this.randomNumberGenerator = new Xoroshiro128PlusPlus(RandomSupport.upgradeSeedTo128bit(l));
+	}
+
+	public XoroshiroRandomSource(RandomSupport.Seed128bit seed128bit) {
+		this.randomNumberGenerator = new Xoroshiro128PlusPlus(seed128bit);
 	}
 
 	public XoroshiroRandomSource(long l, long m) {
@@ -107,7 +107,6 @@ public class XoroshiroRandomSource implements RandomSource {
 	}
 
 	public static class XoroshiroPositionalRandomFactory implements PositionalRandomFactory {
-		private static final HashFunction MD5_128 = Hashing.md5();
 		private final long seedLo;
 		private final long seedHi;
 
@@ -125,10 +124,8 @@ public class XoroshiroRandomSource implements RandomSource {
 
 		@Override
 		public RandomSource fromHashOf(String string) {
-			byte[] bs = MD5_128.hashString(string, Charsets.UTF_8).asBytes();
-			long l = Longs.fromBytes(bs[0], bs[1], bs[2], bs[3], bs[4], bs[5], bs[6], bs[7]);
-			long m = Longs.fromBytes(bs[8], bs[9], bs[10], bs[11], bs[12], bs[13], bs[14], bs[15]);
-			return new XoroshiroRandomSource(l ^ this.seedLo, m ^ this.seedHi);
+			RandomSupport.Seed128bit seed128bit = RandomSupport.seedFromHashOf(string);
+			return new XoroshiroRandomSource(seed128bit.xor(this.seedLo, this.seedHi));
 		}
 
 		@VisibleForTesting

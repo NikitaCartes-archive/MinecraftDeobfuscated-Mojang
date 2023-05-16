@@ -91,10 +91,11 @@ public class RecipeCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.recipe.give.success.single", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					() -> Component.translatable("commands.recipe.give.success.single", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()),
+					true
 				);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.recipe.give.success.multiple", collection2.size(), collection.size()), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.recipe.give.success.multiple", collection2.size(), collection.size()), true);
 			}
 
 			return i;
@@ -113,10 +114,11 @@ public class RecipeCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.recipe.take.success.single", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					() -> Component.translatable("commands.recipe.take.success.single", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()),
+					true
 				);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.recipe.take.success.multiple", collection2.size(), collection.size()), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.recipe.take.success.multiple", collection2.size(), collection.size()), true);
 			}
 
 			return i;

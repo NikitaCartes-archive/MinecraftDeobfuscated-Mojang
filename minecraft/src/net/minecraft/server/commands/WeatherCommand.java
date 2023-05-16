@@ -49,19 +49,19 @@ public class WeatherCommand {
 
 	private static int setClear(CommandSourceStack commandSourceStack, int i) {
 		commandSourceStack.getLevel().setWeatherParameters(getDuration(commandSourceStack, i, ServerLevel.RAIN_DELAY), 0, false, false);
-		commandSourceStack.sendSuccess(Component.translatable("commands.weather.set.clear"), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.weather.set.clear"), true);
 		return i;
 	}
 
 	private static int setRain(CommandSourceStack commandSourceStack, int i) {
 		commandSourceStack.getLevel().setWeatherParameters(0, getDuration(commandSourceStack, i, ServerLevel.RAIN_DURATION), true, false);
-		commandSourceStack.sendSuccess(Component.translatable("commands.weather.set.rain"), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.weather.set.rain"), true);
 		return i;
 	}
 
 	private static int setThunder(CommandSourceStack commandSourceStack, int i) {
 		commandSourceStack.getLevel().setWeatherParameters(0, getDuration(commandSourceStack, i, ServerLevel.THUNDER_DURATION), true, true);
-		commandSourceStack.sendSuccess(Component.translatable("commands.weather.set.thunder"), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.weather.set.thunder"), true);
 		return i;
 	}
 }

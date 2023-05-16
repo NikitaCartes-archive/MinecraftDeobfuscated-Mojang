@@ -107,7 +107,7 @@ public class DamageSource {
 		if (this.damageSourcePosition != null) {
 			return this.damageSourcePosition;
 		} else {
-			return this.causingEntity != null ? this.causingEntity.position() : null;
+			return this.directEntity != null ? this.directEntity.position() : null;
 		}
 	}
 

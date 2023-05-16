@@ -562,4 +562,9 @@ public class EndDragonFight {
 			}
 		}
 	}
+
+	@Nullable
+	public UUID getDragonUUID() {
+		return this.dragonUUID;
+	}
 }

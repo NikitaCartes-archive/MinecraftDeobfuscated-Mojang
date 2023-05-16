@@ -47,7 +47,7 @@ public class PerfCommand {
 			Consumer<ProfileResults> consumer = profileResults -> whenStopped(commandSourceStack, profileResults);
 			Consumer<Path> consumer2 = path -> saveResults(commandSourceStack, path, minecraftServer);
 			minecraftServer.startRecordingMetrics(consumer, consumer2);
-			commandSourceStack.sendSuccess(Component.translatable("commands.perf.started"), false);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.perf.started"), false);
 			return 0;
 		}
 	}
@@ -99,7 +99,7 @@ public class PerfCommand {
 			LOGGER.warn("Failed to delete temporary profiling file {}", path, var9);
 		}
 
-		commandSourceStack.sendSuccess(Component.translatable("commands.perf.reportSaved", string2), false);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.perf.reportSaved", string2), false);
 	}
 
 	private static void whenStopped(CommandSourceStack commandSourceStack, ProfileResults profileResults) {
@@ -107,7 +107,7 @@ public class PerfCommand {
 			int i = profileResults.getTickDuration();
 			double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.perf.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d)), false
+				() -> Component.translatable("commands.perf.stopped", String.format(Locale.ROOT, "%.2f", d), i, String.format(Locale.ROOT, "%.2f", (double)i / d)), false
 			);
 		}
 	}

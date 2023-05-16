@@ -219,6 +219,10 @@ public class ClientLevel extends Level {
 	public void tick(BooleanSupplier booleanSupplier) {
 		this.getWorldBorder().tick();
 		this.tickTime();
+		if (this.skyFlashTime > 0) {
+			this.setSkyFlashTime(this.skyFlashTime - 1);
+		}
+
 		this.getProfiler().push("blocks");
 		this.chunkSource.tick(booleanSupplier, true);
 		this.getProfiler().pop();
@@ -672,16 +676,17 @@ public class ClientLevel extends Level {
 			k = k * o + n * (1.0F - o);
 		}
 
-		if (!this.minecraft.options.hideLightningFlash().get() && this.skyFlashTime > 0) {
-			float n = (float)this.skyFlashTime - f;
-			if (n > 1.0F) {
-				n = 1.0F;
+		int p = this.getSkyFlashTime();
+		if (p > 0) {
+			float o = (float)p - f;
+			if (o > 1.0F) {
+				o = 1.0F;
 			}
 
-			n *= 0.45F;
-			i = i * (1.0F - n) + 0.8F * n;
-			j = j * (1.0F - n) + 0.8F * n;
-			k = k * (1.0F - n) + 1.0F * n;
+			o *= 0.45F;
+			i = i * (1.0F - o) + 0.8F * o;
+			j = j * (1.0F - o) + 0.8F * o;
+			k = k * (1.0F - o) + 1.0F * o;
 		}
 
 		return new Vec3((double)i, (double)j, (double)k);
@@ -726,7 +731,7 @@ public class ClientLevel extends Level {
 	}
 
 	public int getSkyFlashTime() {
-		return this.skyFlashTime;
+		return this.minecraft.options.hideLightningFlash().get() ? 0 : this.skyFlashTime;
 	}
 
 	@Override

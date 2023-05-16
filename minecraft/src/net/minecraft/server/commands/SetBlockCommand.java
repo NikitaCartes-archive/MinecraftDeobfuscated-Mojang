@@ -101,7 +101,7 @@ public class SetBlockCommand {
 				throw ERROR_FAILED.create();
 			} else {
 				serverLevel.blockUpdated(blockPos, blockInput.getState().getBlock());
-				commandSourceStack.sendSuccess(Component.translatable("commands.setblock.success", blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.setblock.success", blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
 				return 1;
 			}
 		}

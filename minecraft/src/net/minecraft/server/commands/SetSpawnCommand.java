@@ -67,20 +67,20 @@ public class SetSpawnCommand {
 		String string = resourceKey.location().toString();
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				Component.translatable(
-					"commands.spawnpoint.success.single",
-					blockPos.getX(),
-					blockPos.getY(),
-					blockPos.getZ(),
-					f,
-					string,
-					((ServerPlayer)collection.iterator().next()).getDisplayName()
-				),
+				() -> Component.translatable(
+						"commands.spawnpoint.success.single",
+						blockPos.getX(),
+						blockPos.getY(),
+						blockPos.getZ(),
+						f,
+						string,
+						((ServerPlayer)collection.iterator().next()).getDisplayName()
+					),
 				true
 			);
 		} else {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.spawnpoint.success.multiple", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f, string, collection.size()), true
+				() -> Component.translatable("commands.spawnpoint.success.multiple", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f, string, collection.size()), true
 			);
 		}
 

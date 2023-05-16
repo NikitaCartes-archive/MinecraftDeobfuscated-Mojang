@@ -51,9 +51,9 @@ public class SpectateCommand {
 		} else {
 			serverPlayer.setCamera(entity);
 			if (entity != null) {
-				commandSourceStack.sendSuccess(Component.translatable("commands.spectate.success.started", entity.getDisplayName()), false);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.spectate.success.started", entity.getDisplayName()), false);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.spectate.success.stopped"), false);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.spectate.success.stopped"), false);
 			}
 
 			return 1;

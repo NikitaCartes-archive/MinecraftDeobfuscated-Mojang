@@ -31,6 +31,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -284,19 +285,14 @@ public abstract class RecipeProvider implements DataProvider {
 
 	protected static void colorBlockWithDye(Consumer<FinishedRecipe> consumer, List<Item> list, List<Item> list2) {
 		for (int i = 0; i < list.size(); i++) {
-			for (int j = 0; j != list2.size(); j++) {
-				if (i != j) {
-					Item item = (Item)list.get(i);
-					Item item2 = (Item)list2.get(i);
-					Item item3 = (Item)list2.get(j);
-					ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, item2)
-						.requires(item)
-						.requires(item3)
-						.group(BuiltInRegistries.ITEM.getKey(item2).getPath())
-						.unlockedBy("has_needed_dye", has(item))
-						.save(consumer, getConversionRecipeName(item2, item3));
-				}
-			}
+			Item item = (Item)list.get(i);
+			Item item2 = (Item)list2.get(i);
+			ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, item2)
+				.requires(item)
+				.requires(Ingredient.of(list2.stream().filter(item2x -> !item2x.equals(item2)).map(ItemStack::new)))
+				.group(BuiltInRegistries.ITEM.getKey(item2).getPath())
+				.unlockedBy("has_needed_dye", has(item))
+				.save(consumer, "dye_" + getItemName(item2));
 		}
 	}
 

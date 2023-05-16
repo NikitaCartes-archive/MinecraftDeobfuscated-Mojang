@@ -34,7 +34,7 @@ public class ListPlayersCommand {
 		PlayerList playerList = commandSourceStack.getServer().getPlayerList();
 		List<ServerPlayer> list = playerList.getPlayers();
 		Component component = ComponentUtils.formatList(list, function);
-		commandSourceStack.sendSuccess(Component.translatable("commands.list.players", list.size(), playerList.getMaxPlayers(), component), false);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.list.players", list.size(), playerList.getMaxPlayers(), component), false);
 		return list.size();
 	}
 }

@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -523,13 +524,18 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		}
 	}
 
-	public void sendSuccess(Component component, boolean bl) {
-		if (this.source.acceptsSuccess() && !this.silent) {
-			this.source.sendSystemMessage(component);
-		}
+	public void sendSuccess(Supplier<Component> supplier, boolean bl) {
+		boolean bl2 = this.source.acceptsSuccess() && !this.silent;
+		boolean bl3 = bl && this.source.shouldInformAdmins() && !this.silent;
+		if (bl2 || bl3) {
+			Component component = (Component)supplier.get();
+			if (bl2) {
+				this.source.sendSystemMessage(component);
+			}
 
-		if (bl && this.source.shouldInformAdmins() && !this.silent) {
-			this.broadcastToAdmins(component);
+			if (bl3) {
+				this.broadcastToAdmins(component);
+			}
 		}
 	}
 

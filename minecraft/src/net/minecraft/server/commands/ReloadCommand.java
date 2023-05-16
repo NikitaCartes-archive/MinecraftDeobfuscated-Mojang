@@ -45,7 +45,7 @@ public class ReloadCommand {
 			WorldData worldData = minecraftServer.getWorldData();
 			Collection<String> collection = packRepository.getSelectedIds();
 			Collection<String> collection2 = discoverNewPacks(packRepository, worldData, collection);
-			commandSourceStack.sendSuccess(Component.translatable("commands.reload.success"), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.reload.success"), true);
 			reloadPacks(collection2, commandSourceStack);
 			return 0;
 		}));

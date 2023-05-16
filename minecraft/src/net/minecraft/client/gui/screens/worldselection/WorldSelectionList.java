@@ -33,6 +33,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -103,6 +104,19 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 
 	void reloadWorldList() {
 		this.pendingLevels = this.loadLevels();
+	}
+
+	@Override
+	public boolean keyPressed(int i, int j, int k) {
+		if (CommonInputs.selected(i)) {
+			Optional<WorldSelectionList.WorldListEntry> optional = this.getSelectedOpt();
+			if (optional.isPresent()) {
+				((WorldSelectionList.WorldListEntry)optional.get()).joinWorld();
+				return true;
+			}
+		}
+
+		return super.keyPressed(i, j, k);
 	}
 
 	@Override

@@ -161,7 +161,7 @@ public class ParticleCommand {
 			throw ERROR_FAILED.create();
 		} else {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.particle.success", BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType()).toString()), true
+				() -> Component.translatable("commands.particle.success", BuiltInRegistries.PARTICLE_TYPE.getKey(particleOptions.getType()).toString()), true
 			);
 			return j;
 		}

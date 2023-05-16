@@ -25,7 +25,13 @@ public class KeyframeAnimations {
 					Keyframe keyframe = keyframes[i];
 					Keyframe keyframe2 = keyframes[j];
 					float h = g - keyframe.timestamp();
-					float k = Mth.clamp(h / (keyframe2.timestamp() - keyframe.timestamp()), 0.0F, 1.0F);
+					float k;
+					if (j != i) {
+						k = Mth.clamp(h / (keyframe2.timestamp() - keyframe.timestamp()), 0.0F, 1.0F);
+					} else {
+						k = 0.0F;
+					}
+
 					keyframe2.interpolation().apply(vector3f, k, keyframes, i, j, f);
 					animationChannel.target().apply(modelPart, vector3f);
 				}));

@@ -130,7 +130,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 			this.time += f;
 			RenderSystem.enableBlend();
 			guiGraphics.pose().pushPose();
-			guiGraphics.pose().translate(0.0F, 0.0F, 170.0F);
+			guiGraphics.pose().translate(0.0F, 0.0F, 1000.0F);
 			int k = this.recipeButtons.size() <= 16 ? 4 : 5;
 			int l = Math.min(this.recipeButtons.size(), k);
 			int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
@@ -216,7 +216,10 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 				guiGraphics.pose().translate((double)pos.x, (double)pos.y, 0.0);
 				guiGraphics.pose().scale(0.375F, 0.375F, 1.0F);
 				guiGraphics.pose().translate(-8.0, -8.0, 0.0);
-				guiGraphics.renderItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], 0, 0);
+				if (pos.ingredients.length > 0) {
+					guiGraphics.renderItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0F) % pos.ingredients.length], 0, 0);
+				}
+
 				guiGraphics.pose().popPose();
 			}
 

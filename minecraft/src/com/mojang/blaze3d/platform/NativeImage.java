@@ -207,7 +207,7 @@ public final class NativeImage implements AutoCloseable {
 
 	public void setPixelRGBA(int i, int j, int k) {
 		if (this.format != NativeImage.Format.RGBA) {
-			throw new IllegalArgumentException(String.format(Locale.ROOT, "getPixelRGBA only works on RGBA images; have %s", this.format));
+			throw new IllegalArgumentException(String.format(Locale.ROOT, "setPixelRGBA only works on RGBA images; have %s", this.format));
 		} else if (this.isOutsideBounds(i, j)) {
 			throw new IllegalArgumentException(String.format(Locale.ROOT, "(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
 		} else {

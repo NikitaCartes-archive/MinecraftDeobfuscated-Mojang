@@ -240,7 +240,9 @@ public class PlaceCommand {
 			throw ERROR_FEATURE_FAILED.create();
 		} else {
 			String string = reference.key().location().toString();
-			commandSourceStack.sendSuccess(Component.translatable("commands.place.feature.success", string, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
+			commandSourceStack.sendSuccess(
+				() -> Component.translatable("commands.place.feature.success", string, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true
+			);
 			return 1;
 		}
 	}
@@ -252,7 +254,7 @@ public class PlaceCommand {
 		if (!JigsawPlacement.generateJigsaw(serverLevel, holder, resourceLocation, i, blockPos, false)) {
 			throw ERROR_JIGSAW_FAILED.create();
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.place.jigsaw.success", blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.place.jigsaw.success", blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
 			return 1;
 		}
 	}
@@ -299,7 +301,9 @@ public class PlaceCommand {
 						)
 				);
 			String string = reference.key().location().toString();
-			commandSourceStack.sendSuccess(Component.translatable("commands.place.structure.success", string, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true);
+			commandSourceStack.sendSuccess(
+				() -> Component.translatable("commands.place.structure.success", string, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true
+			);
 			return 1;
 		}
 	}
@@ -332,7 +336,7 @@ public class PlaceCommand {
 				throw ERROR_TEMPLATE_FAILED.create();
 			} else {
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.place.template.success", resourceLocation, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true
+					() -> Component.translatable("commands.place.template.success", resourceLocation, blockPos.getX(), blockPos.getY(), blockPos.getZ()), true
 				);
 				return 1;
 			}

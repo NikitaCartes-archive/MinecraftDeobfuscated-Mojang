@@ -39,7 +39,7 @@ public class DeOpCommands {
 			if (playerList.isOp(gameProfile)) {
 				playerList.deop(gameProfile);
 				i++;
-				commandSourceStack.sendSuccess(Component.translatable("commands.deop.success", ((GameProfile)collection.iterator().next()).getName()), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.deop.success", ((GameProfile)collection.iterator().next()).getName()), true);
 			}
 		}
 

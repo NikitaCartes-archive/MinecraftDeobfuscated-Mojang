@@ -49,18 +49,21 @@ public class FunctionCommand {
 			bl |= optionalInt.isPresent();
 		}
 
+		int k = i;
 		if (collection.size() == 1) {
 			if (bl) {
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.function.success.single.result", i, ((CommandFunction)collection.iterator().next()).getId()), true
+					() -> Component.translatable("commands.function.success.single.result", k, ((CommandFunction)collection.iterator().next()).getId()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.function.success.single", i, ((CommandFunction)collection.iterator().next()).getId()), true);
+				commandSourceStack.sendSuccess(
+					() -> Component.translatable("commands.function.success.single", k, ((CommandFunction)collection.iterator().next()).getId()), true
+				);
 			}
 		} else if (bl) {
-			commandSourceStack.sendSuccess(Component.translatable("commands.function.success.multiple.result", collection.size()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.function.success.multiple.result", collection.size()), true);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.function.success.multiple", i, collection.size()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.function.success.multiple", k, collection.size()), true);
 		}
 
 		return i;

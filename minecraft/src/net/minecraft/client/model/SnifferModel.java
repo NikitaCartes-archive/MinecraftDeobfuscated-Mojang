@@ -117,7 +117,9 @@ public class SnifferModel<T extends Sniffer> extends AgeableHierarchicalModel<T>
 		this.animate(sniffer.risingAnimationState, SnifferAnimation.SNIFFER_STAND_UP, h);
 		this.animate(sniffer.feelingHappyAnimationState, SnifferAnimation.SNIFFER_HAPPY, h);
 		this.animate(sniffer.scentingAnimationState, SnifferAnimation.SNIFFER_SNIFFSNIFF, h);
-		this.animate(sniffer.babyTransformationState, SnifferAnimation.BABY_TRANSFORM, h);
+		if (this.young) {
+			this.applyStatic(SnifferAnimation.BABY_TRANSFORM);
+		}
 	}
 
 	@Override

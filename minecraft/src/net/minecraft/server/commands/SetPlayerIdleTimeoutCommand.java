@@ -20,7 +20,7 @@ public class SetPlayerIdleTimeoutCommand {
 
 	private static int setIdleTimeout(CommandSourceStack commandSourceStack, int i) {
 		commandSourceStack.getServer().setPlayerIdleTimeout(i);
-		commandSourceStack.sendSuccess(Component.translatable("commands.setidletimeout.success", i), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.setidletimeout.success", i), true);
 		return i;
 	}
 }

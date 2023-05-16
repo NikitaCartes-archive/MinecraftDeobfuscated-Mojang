@@ -56,7 +56,7 @@ public class DebugCommand {
 			throw ERROR_ALREADY_RUNNING.create();
 		} else {
 			minecraftServer.startTimeProfiler();
-			commandSourceStack.sendSuccess(Component.translatable("commands.debug.started"), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.debug.started"), true);
 			return 0;
 		}
 	}
@@ -70,9 +70,9 @@ public class DebugCommand {
 			double d = (double)profileResults.getNanoDuration() / (double)TimeUtil.NANOSECONDS_PER_SECOND;
 			double e = (double)profileResults.getTickDuration() / d;
 			commandSourceStack.sendSuccess(
-				Component.translatable(
-					"commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), profileResults.getTickDuration(), String.format(Locale.ROOT, "%.2f", e)
-				),
+				() -> Component.translatable(
+						"commands.debug.stopped", String.format(Locale.ROOT, "%.2f", d), profileResults.getTickDuration(), String.format(Locale.ROOT, "%.2f", e)
+					),
 				true
 			);
 			return (int)e;
@@ -117,12 +117,13 @@ public class DebugCommand {
 			commandSourceStack.sendFailure(Component.translatable("commands.debug.function.traceFailed"));
 		}
 
+		int j = i;
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.debug.function.success.single", i, ((CommandFunction)collection.iterator().next()).getId(), string), true
+				() -> Component.translatable("commands.debug.function.success.single", j, ((CommandFunction)collection.iterator().next()).getId(), string), true
 			);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.debug.function.success.multiple", i, collection.size(), string), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.debug.function.success.multiple", j, collection.size(), string), true);
 		}
 
 		return i;

@@ -10,8 +10,8 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
+import net.minecraft.Util;
 import net.minecraft.util.StringUtil;
-import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public abstract class GlslPreprocessor {
@@ -58,7 +58,7 @@ public abstract class GlslPreprocessor {
 						int k = context.sourceId;
 						List<String> list2 = this.processImports(string7, context, bl ? FileUtil.getFullResourcePath(string6) : "");
 						list2.set(0, String.format(Locale.ROOT, "#line %d %d\n%s", 0, k, this.processVersions((String)list2.get(0), context)));
-						if (!StringUtils.isBlank(string5)) {
+						if (!Util.isBlank(string5)) {
 							list.add(string5);
 						}
 
@@ -76,7 +76,7 @@ public abstract class GlslPreprocessor {
 		}
 
 		String string4x = string.substring(j);
-		if (!StringUtils.isBlank(string4x)) {
+		if (!Util.isBlank(string4x)) {
 			list.add(string3 + string4x);
 		}
 

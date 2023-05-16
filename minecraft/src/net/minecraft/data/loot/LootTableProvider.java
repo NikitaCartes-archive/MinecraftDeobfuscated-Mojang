@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +12,13 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.RandomSequence;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.storage.loot.LootDataId;
 import net.minecraft.world.level.storage.loot.LootDataResolver;
 import net.minecraft.world.level.storage.loot.LootDataType;
@@ -39,7 +43,13 @@ public class LootTableProvider implements DataProvider {
 	@Override
 	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		final Map<ResourceLocation, LootTable> map = Maps.<ResourceLocation, LootTable>newHashMap();
+		Map<RandomSupport.Seed128bit, ResourceLocation> map2 = new Object2ObjectOpenHashMap<>();
 		this.subProviders.forEach(subProviderEntry -> ((LootTableSubProvider)subProviderEntry.provider().get()).generate((resourceLocationx, builder) -> {
+				ResourceLocation resourceLocation2 = (ResourceLocation)map2.put(RandomSequence.seedForKey(resourceLocationx), resourceLocationx);
+				if (resourceLocation2 != null) {
+					Util.logAndPauseIfInIde("Loot table random sequence seed collision on " + resourceLocation2 + " and " + resourceLocationx);
+				}
+
 				builder.setRandomSequence(resourceLocationx);
 				if (map.put(resourceLocationx, builder.setParamSet(subProviderEntry.paramSet).build()) != null) {
 					throw new IllegalStateException("Duplicate loot table " + resourceLocationx);

@@ -31,7 +31,7 @@ public class SetWorldSpawnCommand {
 
 	private static int setSpawn(CommandSourceStack commandSourceStack, BlockPos blockPos, float f) {
 		commandSourceStack.getLevel().setDefaultSpawnPos(blockPos, f);
-		commandSourceStack.sendSuccess(Component.translatable("commands.setworldspawn.success", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.setworldspawn.success", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f), true);
 		return 1;
 	}
 }

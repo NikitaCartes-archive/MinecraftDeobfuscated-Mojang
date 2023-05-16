@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 
 public class RandomSequence {
@@ -18,7 +19,11 @@ public class RandomSequence {
 	}
 
 	public RandomSequence(long l, ResourceLocation resourceLocation) {
-		this(new XoroshiroRandomSource(l, (long)resourceLocation.hashCode()));
+		this(new XoroshiroRandomSource(RandomSupport.upgradeSeedTo128bit(l).xor(seedForKey(resourceLocation))));
+	}
+
+	public static RandomSupport.Seed128bit seedForKey(ResourceLocation resourceLocation) {
+		return RandomSupport.seedFromHashOf(resourceLocation.toString());
 	}
 
 	public RandomSource random() {

@@ -67,7 +67,7 @@ public class RideCommand {
 		} else if (!entity.startRiding(entity2, true)) {
 			throw ERROR_MOUNT_FAILED.create(entity.getDisplayName(), entity2.getDisplayName());
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.ride.mount.success", entity.getDisplayName(), entity2.getDisplayName()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.ride.mount.success", entity.getDisplayName(), entity2.getDisplayName()), true);
 			return 1;
 		}
 	}
@@ -78,7 +78,7 @@ public class RideCommand {
 			throw ERROR_NOT_RIDING.create(entity.getDisplayName());
 		} else {
 			entity.stopRiding();
-			commandSourceStack.sendSuccess(Component.translatable("commands.ride.dismount.success", entity.getDisplayName(), entity2.getDisplayName()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.ride.dismount.success", entity.getDisplayName(), entity2.getDisplayName()), true);
 			return 1;
 		}
 	}

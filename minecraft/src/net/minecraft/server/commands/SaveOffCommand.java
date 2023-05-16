@@ -25,7 +25,7 @@ public class SaveOffCommand {
 			if (!bl) {
 				throw ERROR_ALREADY_OFF.create();
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.save.disabled"), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.save.disabled"), true);
 				return 1;
 			}
 		}));

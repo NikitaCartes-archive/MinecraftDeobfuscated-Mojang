@@ -4,11 +4,11 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.world.flag.FeatureFlag;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
-import org.apache.commons.lang3.StringUtils;
 
 public class BlockFamily {
 	private final Block baseBlock;
@@ -46,11 +46,11 @@ public class BlockFamily {
 	}
 
 	public Optional<String> getRecipeGroupPrefix() {
-		return StringUtils.isBlank(this.recipeGroupPrefix) ? Optional.empty() : Optional.of(this.recipeGroupPrefix);
+		return Util.isBlank(this.recipeGroupPrefix) ? Optional.empty() : Optional.of(this.recipeGroupPrefix);
 	}
 
 	public Optional<String> getRecipeUnlockedBy() {
-		return StringUtils.isBlank(this.recipeUnlockedBy) ? Optional.empty() : Optional.of(this.recipeUnlockedBy);
+		return Util.isBlank(this.recipeUnlockedBy) ? Optional.empty() : Optional.of(this.recipeUnlockedBy);
 	}
 
 	public static class Builder {

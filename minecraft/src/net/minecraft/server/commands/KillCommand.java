@@ -28,9 +28,9 @@ public class KillCommand {
 		}
 
 		if (collection.size() == 1) {
-			commandSourceStack.sendSuccess(Component.translatable("commands.kill.success.single", ((Entity)collection.iterator().next()).getDisplayName()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.kill.success.single", ((Entity)collection.iterator().next()).getDisplayName()), true);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.kill.success.multiple", collection.size()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.kill.success.multiple", collection.size()), true);
 		}
 
 		return collection.size();

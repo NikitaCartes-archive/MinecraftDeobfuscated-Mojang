@@ -32,13 +32,13 @@ public class BanListCommands {
 
 	private static int showList(CommandSourceStack commandSourceStack, Collection<? extends BanListEntry<?>> collection) {
 		if (collection.isEmpty()) {
-			commandSourceStack.sendSuccess(Component.translatable("commands.banlist.none"), false);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.banlist.none"), false);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.banlist.list", collection.size()), false);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.banlist.list", collection.size()), false);
 
 			for (BanListEntry<?> banListEntry : collection) {
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.banlist.entry", banListEntry.getDisplayName(), banListEntry.getSource(), banListEntry.getReason()), false
+					() -> Component.translatable("commands.banlist.entry", banListEntry.getDisplayName(), banListEntry.getSource(), banListEntry.getReason()), false
 				);
 			}
 		}

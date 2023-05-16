@@ -68,15 +68,16 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	}
 
 	private void onNameChanged(String string) {
-		if (!string.isEmpty()) {
+		Slot slot = this.menu.getSlot(0);
+		if (slot.hasItem()) {
 			String string2 = string;
-			Slot slot = this.menu.getSlot(0);
-			if (slot != null && slot.hasItem() && !slot.getItem().hasCustomHoverName() && string.equals(slot.getItem().getHoverName().getString())) {
+			if (!slot.getItem().hasCustomHoverName() && string.equals(slot.getItem().getHoverName().getString())) {
 				string2 = "";
 			}
 
-			this.menu.setItemName(string2);
-			this.minecraft.player.connection.send(new ServerboundRenameItemPacket(string2));
+			if (this.menu.setItemName(string2)) {
+				this.minecraft.player.connection.send(new ServerboundRenameItemPacket(string2));
+			}
 		}
 	}
 

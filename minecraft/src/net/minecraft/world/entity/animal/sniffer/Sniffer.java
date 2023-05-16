@@ -72,7 +72,6 @@ public class Sniffer extends Animal {
 	public final AnimationState sniffingAnimationState = new AnimationState();
 	public final AnimationState diggingAnimationState = new AnimationState();
 	public final AnimationState risingAnimationState = new AnimationState();
-	public final AnimationState babyTransformationState = new AnimationState();
 
 	public static AttributeSupplier.Builder createAttributes() {
 		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.1F).add(Attributes.MAX_HEALTH, 14.0);
@@ -357,7 +356,6 @@ public class Sniffer extends Animal {
 				this.playSearchingSound();
 		}
 
-		this.babyTransformationState.animateWhen(this.isBaby(), this.tickCount);
 		super.tick();
 	}
 

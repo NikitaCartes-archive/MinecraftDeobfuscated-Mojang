@@ -128,7 +128,7 @@ public class ExperienceCommand {
 
 	private static int queryExperience(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer, ExperienceCommand.Type type) {
 		int i = type.query.applyAsInt(serverPlayer);
-		commandSourceStack.sendSuccess(Component.translatable("commands.experience.query." + type.name, serverPlayer.getDisplayName(), i), false);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.experience.query." + type.name, serverPlayer.getDisplayName(), i), false);
 		return i;
 	}
 
@@ -139,10 +139,11 @@ public class ExperienceCommand {
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.experience.add." + type.name + ".success.single", i, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+				() -> Component.translatable("commands.experience.add." + type.name + ".success.single", i, ((ServerPlayer)collection.iterator().next()).getDisplayName()),
+				true
 			);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.experience.add." + type.name + ".success.multiple", i, collection.size()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.experience.add." + type.name + ".success.multiple", i, collection.size()), true);
 		}
 
 		return collection.size();
@@ -162,10 +163,11 @@ public class ExperienceCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.experience.set." + type.name + ".success.single", i, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					() -> Component.translatable("commands.experience.set." + type.name + ".success.single", i, ((ServerPlayer)collection.iterator().next()).getDisplayName()),
+					true
 				);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.experience.set." + type.name + ".success.multiple", i, collection.size()), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.experience.set." + type.name + ".success.multiple", i, collection.size()), true);
 			}
 
 			return collection.size();

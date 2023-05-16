@@ -50,7 +50,7 @@ public class BanPlayerCommands {
 				userBanList.add(userBanListEntry);
 				i++;
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.ban.success", ComponentUtils.getDisplayName(gameProfile), userBanListEntry.getReason()), true
+					() -> Component.translatable("commands.ban.success", ComponentUtils.getDisplayName(gameProfile), userBanListEntry.getReason()), true
 				);
 				ServerPlayer serverPlayer = commandSourceStack.getServer().getPlayerList().getPlayer(gameProfile.getId());
 				if (serverPlayer != null) {

@@ -203,58 +203,68 @@ public class ChunkHolder {
 		if (this.hasChangedSections || !this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty()) {
 			Level level = levelChunk.getLevel();
 			if (!this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty()) {
-				this.broadcast(
-					new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter), true
-				);
+				List<ServerPlayer> list = this.playerProvider.getPlayers(this.pos, true);
+				if (!list.isEmpty()) {
+					ClientboundLightUpdatePacket clientboundLightUpdatePacket = new ClientboundLightUpdatePacket(
+						levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter
+					);
+					this.broadcast(list, clientboundLightUpdatePacket);
+				}
+
 				this.skyChangedLightSectionFilter.clear();
 				this.blockChangedLightSectionFilter.clear();
 			}
 
-			for (int i = 0; i < this.changedBlocksPerSection.length; i++) {
-				ShortSet shortSet = this.changedBlocksPerSection[i];
-				if (shortSet != null) {
-					int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
-					SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), j);
-					if (shortSet.size() == 1) {
-						BlockPos blockPos = sectionPos.relativeToBlockPos(shortSet.iterator().nextShort());
-						BlockState blockState = level.getBlockState(blockPos);
-						this.broadcast(new ClientboundBlockUpdatePacket(blockPos, blockState), false);
-						this.broadcastBlockEntityIfNeeded(level, blockPos, blockState);
-					} else {
-						LevelChunkSection levelChunkSection = levelChunk.getSection(i);
-						ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket = new ClientboundSectionBlocksUpdatePacket(
-							sectionPos, shortSet, levelChunkSection
-						);
-						this.broadcast(clientboundSectionBlocksUpdatePacket, false);
-						clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.broadcastBlockEntityIfNeeded(level, blockPos, blockState));
+			if (this.hasChangedSections) {
+				List<ServerPlayer> list = this.playerProvider.getPlayers(this.pos, false);
+
+				for (int i = 0; i < this.changedBlocksPerSection.length; i++) {
+					ShortSet shortSet = this.changedBlocksPerSection[i];
+					if (shortSet != null) {
+						this.changedBlocksPerSection[i] = null;
+						if (!list.isEmpty()) {
+							int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
+							SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), j);
+							if (shortSet.size() == 1) {
+								BlockPos blockPos = sectionPos.relativeToBlockPos(shortSet.iterator().nextShort());
+								BlockState blockState = level.getBlockState(blockPos);
+								this.broadcast(list, new ClientboundBlockUpdatePacket(blockPos, blockState));
+								this.broadcastBlockEntityIfNeeded(list, level, blockPos, blockState);
+							} else {
+								LevelChunkSection levelChunkSection = levelChunk.getSection(i);
+								ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket = new ClientboundSectionBlocksUpdatePacket(
+									sectionPos, shortSet, levelChunkSection
+								);
+								this.broadcast(list, clientboundSectionBlocksUpdatePacket);
+								clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.broadcastBlockEntityIfNeeded(list, level, blockPos, blockState));
+							}
+						}
 					}
-
-					this.changedBlocksPerSection[i] = null;
 				}
+
+				this.hasChangedSections = false;
 			}
-
-			this.hasChangedSections = false;
 		}
 	}
 
-	private void broadcastBlockEntityIfNeeded(Level level, BlockPos blockPos, BlockState blockState) {
+	private void broadcastBlockEntityIfNeeded(List<ServerPlayer> list, Level level, BlockPos blockPos, BlockState blockState) {
 		if (blockState.hasBlockEntity()) {
-			this.broadcastBlockEntity(level, blockPos);
+			this.broadcastBlockEntity(list, level, blockPos);
 		}
 	}
 
-	private void broadcastBlockEntity(Level level, BlockPos blockPos) {
+	private void broadcastBlockEntity(List<ServerPlayer> list, Level level, BlockPos blockPos) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity != null) {
 			Packet<?> packet = blockEntity.getUpdatePacket();
 			if (packet != null) {
-				this.broadcast(packet, false);
+				this.broadcast(list, packet);
 			}
 		}
 	}
 
-	private void broadcast(Packet<?> packet, boolean bl) {
-		this.playerProvider.getPlayers(this.pos, bl).forEach(serverPlayer -> serverPlayer.connection.send(packet));
+	private void broadcast(List<ServerPlayer> list, Packet<?> packet) {
+		list.forEach(serverPlayer -> serverPlayer.connection.send(packet));
 	}
 
 	public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getOrScheduleFuture(ChunkStatus chunkStatus, ChunkMap chunkMap) {

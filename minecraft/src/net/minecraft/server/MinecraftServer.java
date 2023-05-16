@@ -119,6 +119,7 @@ import net.minecraft.util.profiling.metrics.profiling.ServerMetricsSamplersProvi
 import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
 import net.minecraft.world.entity.npc.WanderingTraderSpawner;
@@ -347,7 +348,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		);
 		LevelStem levelStem = registry.get(LevelStem.OVERWORLD);
 		ServerLevel serverLevel = new ServerLevel(
-			this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, levelStem, chunkProgressListener, bl, m, list, true
+			this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, levelStem, chunkProgressListener, bl, m, list, true, null
 		);
 		this.levels.put(Level.OVERWORLD, serverLevel);
 		DimensionDataStorage dimensionDataStorage = serverLevel.getDataStorage();
@@ -361,12 +362,12 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				if (bl) {
 					this.setupDebugLevel(this.worldData);
 				}
-			} catch (Throwable var22) {
-				CrashReport crashReport = CrashReport.forThrowable(var22, "Exception initializing level");
+			} catch (Throwable var23) {
+				CrashReport crashReport = CrashReport.forThrowable(var23, "Exception initializing level");
 
 				try {
 					serverLevel.fillReportDetails(crashReport);
-				} catch (Throwable var21) {
+				} catch (Throwable var22) {
 				}
 
 				throw new ReportedException(crashReport);
@@ -379,6 +380,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		if (this.worldData.getCustomBossEvents() != null) {
 			this.getCustomBossEvents().load(this.worldData.getCustomBossEvents());
 		}
+
+		RandomSequences randomSequences = serverLevel.getRandomSequences();
 
 		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : registry.entrySet()) {
 			ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
@@ -396,7 +399,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					bl,
 					m,
 					ImmutableList.of(),
-					false
+					false,
+					randomSequences
 				);
 				worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
 				this.levels.put(resourceKey2, serverLevel2);

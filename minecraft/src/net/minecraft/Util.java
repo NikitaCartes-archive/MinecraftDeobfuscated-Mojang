@@ -799,6 +799,14 @@ public class Util {
 		}
 	}
 
+	public static boolean isWhitespace(int i) {
+		return Character.isWhitespace(i) || Character.isSpaceChar(i);
+	}
+
+	public static boolean isBlank(@Nullable String string) {
+		return string != null && string.length() != 0 ? string.chars().allMatch(Util::isWhitespace) : true;
+	}
+
 	static enum IdentityStrategy implements Strategy<Object> {
 		INSTANCE;
 

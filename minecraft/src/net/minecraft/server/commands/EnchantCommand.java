@@ -96,10 +96,11 @@ public class EnchantCommand {
 			} else {
 				if (collection.size() == 1) {
 					commandSourceStack.sendSuccess(
-						Component.translatable("commands.enchant.success.single", enchantment.getFullname(i), ((Entity)collection.iterator().next()).getDisplayName()), true
+						() -> Component.translatable("commands.enchant.success.single", enchantment.getFullname(i), ((Entity)collection.iterator().next()).getDisplayName()),
+						true
 					);
 				} else {
-					commandSourceStack.sendSuccess(Component.translatable("commands.enchant.success.multiple", enchantment.getFullname(i), collection.size()), true);
+					commandSourceStack.sendSuccess(() -> Component.translatable("commands.enchant.success.multiple", enchantment.getFullname(i), collection.size()), true);
 				}
 
 				return j;

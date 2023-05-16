@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
@@ -18,13 +19,13 @@ public class FollowTemptation extends Behavior<PathfinderMob> {
 	public static final int TEMPTATION_COOLDOWN = 100;
 	public static final double CLOSE_ENOUGH_DIST = 2.5;
 	private final Function<LivingEntity, Float> speedModifier;
-	private final double closeEnoughDistance;
+	private final Function<LivingEntity, Double> closeEnoughDistance;
 
 	public FollowTemptation(Function<LivingEntity, Float> function) {
-		this(function, 2.5);
+		this(function, livingEntity -> 2.5);
 	}
 
-	public FollowTemptation(Function<LivingEntity, Float> function, double d) {
+	public FollowTemptation(Function<LivingEntity, Float> function, Function<LivingEntity, Double> function2) {
 		super(Util.make(() -> {
 			Builder<MemoryModuleType<?>, MemoryStatus> builder = ImmutableMap.builder();
 			builder.put(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED);
@@ -37,7 +38,7 @@ public class FollowTemptation extends Behavior<PathfinderMob> {
 			return builder.build();
 		}));
 		this.speedModifier = function;
-		this.closeEnoughDistance = d;
+		this.closeEnoughDistance = function2;
 	}
 
 	protected float getSpeedModifier(PathfinderMob pathfinderMob) {
@@ -75,7 +76,8 @@ public class FollowTemptation extends Behavior<PathfinderMob> {
 		Player player = (Player)this.getTemptingPlayer(pathfinderMob).get();
 		Brain<?> brain = pathfinderMob.getBrain();
 		brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(player, true));
-		if (pathfinderMob.distanceToSqr(player) < this.closeEnoughDistance * this.closeEnoughDistance) {
+		double d = (Double)this.closeEnoughDistance.apply(pathfinderMob);
+		if (pathfinderMob.distanceToSqr(player) < Mth.square(d)) {
 			brain.eraseMemory(MemoryModuleType.WALK_TARGET);
 		} else {
 			brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(player, false), this.getSpeedModifier(pathfinderMob), 2));

@@ -135,16 +135,16 @@ public class FillBiomeCommand {
 
 			serverLevel.getChunkSource().chunkMap.resendBiomesForChunks(list);
 			commandSourceStack.sendSuccess(
-				Component.translatable(
-					"commands.fillbiome.success.count",
-					mutableInt.getValue(),
-					boundingBox.minX(),
-					boundingBox.minY(),
-					boundingBox.minZ(),
-					boundingBox.maxX(),
-					boundingBox.maxY(),
-					boundingBox.maxZ()
-				),
+				() -> Component.translatable(
+						"commands.fillbiome.success.count",
+						mutableInt.getValue(),
+						boundingBox.minX(),
+						boundingBox.minY(),
+						boundingBox.minZ(),
+						boundingBox.maxX(),
+						boundingBox.maxY(),
+						boundingBox.maxZ()
+					),
 				true
 			);
 			return mutableInt.getValue();

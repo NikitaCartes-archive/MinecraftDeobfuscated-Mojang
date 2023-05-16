@@ -156,7 +156,7 @@ public class SpawnArmorTrimsCommand {
 			j++;
 		}
 
-		commandSourceStack.sendSuccess(Component.literal("Armorstands with trimmed armor spawned around you"), true);
+		commandSourceStack.sendSuccess(() -> Component.literal("Armorstands with trimmed armor spawned around you"), true);
 		return 1;
 	}
 }

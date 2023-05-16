@@ -69,10 +69,10 @@ public abstract class AbstractSignEditScreen extends Screen {
 	}
 
 	private boolean isValid() {
-		return this.minecraft == null
-			|| this.minecraft.player == null
-			|| !this.sign.getType().isValid(this.sign.getBlockState())
-			|| !this.sign.playerIsTooFarAwayToEdit(this.minecraft.player.getUUID());
+		return this.minecraft != null
+			&& this.minecraft.player != null
+			&& !this.sign.isRemoved()
+			&& !this.sign.playerIsTooFarAwayToEdit(this.minecraft.player.getUUID());
 	}
 
 	@Override

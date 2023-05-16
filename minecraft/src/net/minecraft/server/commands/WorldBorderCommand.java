@@ -140,7 +140,7 @@ public class WorldBorderCommand {
 			throw ERROR_SAME_DAMAGE_BUFFER.create();
 		} else {
 			worldBorder.setDamageSafeZone((double)f);
-			commandSourceStack.sendSuccess(Component.translatable("commands.worldborder.damage.buffer.success", String.format(Locale.ROOT, "%.2f", f)), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.worldborder.damage.buffer.success", String.format(Locale.ROOT, "%.2f", f)), true);
 			return (int)f;
 		}
 	}
@@ -151,7 +151,7 @@ public class WorldBorderCommand {
 			throw ERROR_SAME_DAMAGE_AMOUNT.create();
 		} else {
 			worldBorder.setDamagePerBlock((double)f);
-			commandSourceStack.sendSuccess(Component.translatable("commands.worldborder.damage.amount.success", String.format(Locale.ROOT, "%.2f", f)), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.worldborder.damage.amount.success", String.format(Locale.ROOT, "%.2f", f)), true);
 			return (int)f;
 		}
 	}
@@ -162,7 +162,7 @@ public class WorldBorderCommand {
 			throw ERROR_SAME_WARNING_TIME.create();
 		} else {
 			worldBorder.setWarningTime(i);
-			commandSourceStack.sendSuccess(Component.translatable("commands.worldborder.warning.time.success", i), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.worldborder.warning.time.success", i), true);
 			return i;
 		}
 	}
@@ -173,14 +173,14 @@ public class WorldBorderCommand {
 			throw ERROR_SAME_WARNING_DISTANCE.create();
 		} else {
 			worldBorder.setWarningBlocks(i);
-			commandSourceStack.sendSuccess(Component.translatable("commands.worldborder.warning.distance.success", i), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.worldborder.warning.distance.success", i), true);
 			return i;
 		}
 	}
 
 	private static int getSize(CommandSourceStack commandSourceStack) {
 		double d = commandSourceStack.getServer().overworld().getWorldBorder().getSize();
-		commandSourceStack.sendSuccess(Component.translatable("commands.worldborder.get", String.format(Locale.ROOT, "%.0f", d)), false);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.worldborder.get", String.format(Locale.ROOT, "%.0f", d)), false);
 		return Mth.floor(d + 0.5);
 	}
 
@@ -191,7 +191,8 @@ public class WorldBorderCommand {
 		} else if (!((double)Math.abs(vec2.x) > 2.9999984E7) && !((double)Math.abs(vec2.y) > 2.9999984E7)) {
 			worldBorder.setCenter((double)vec2.x, (double)vec2.y);
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.worldborder.center.success", String.format(Locale.ROOT, "%.2f", vec2.x), String.format(Locale.ROOT, "%.2f", vec2.y)), true
+				() -> Component.translatable("commands.worldborder.center.success", String.format(Locale.ROOT, "%.2f", vec2.x), String.format(Locale.ROOT, "%.2f", vec2.y)),
+				true
 			);
 			return 0;
 		} else {
@@ -213,16 +214,16 @@ public class WorldBorderCommand {
 				worldBorder.lerpSizeBetween(e, d, l);
 				if (d > e) {
 					commandSourceStack.sendSuccess(
-						Component.translatable("commands.worldborder.set.grow", String.format(Locale.ROOT, "%.1f", d), Long.toString(l / 1000L)), true
+						() -> Component.translatable("commands.worldborder.set.grow", String.format(Locale.ROOT, "%.1f", d), Long.toString(l / 1000L)), true
 					);
 				} else {
 					commandSourceStack.sendSuccess(
-						Component.translatable("commands.worldborder.set.shrink", String.format(Locale.ROOT, "%.1f", d), Long.toString(l / 1000L)), true
+						() -> Component.translatable("commands.worldborder.set.shrink", String.format(Locale.ROOT, "%.1f", d), Long.toString(l / 1000L)), true
 					);
 				}
 			} else {
 				worldBorder.setSize(d);
-				commandSourceStack.sendSuccess(Component.translatable("commands.worldborder.set.immediate", String.format(Locale.ROOT, "%.1f", d)), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.worldborder.set.immediate", String.format(Locale.ROOT, "%.1f", d)), true);
 			}
 
 			return (int)(d - e);

@@ -80,6 +80,7 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
 		if (compoundTag.hasUUID("Owner")) {
 			this.ownerUUID = compoundTag.getUUID("Owner");
+			this.cachedOwner = null;
 		}
 
 		this.leftOwner = compoundTag.getBoolean("LeftOwner");

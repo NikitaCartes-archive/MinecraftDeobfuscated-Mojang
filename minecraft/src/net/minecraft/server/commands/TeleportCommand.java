@@ -167,10 +167,11 @@ public class TeleportCommand {
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.teleport.success.entity.single", ((Entity)collection.iterator().next()).getDisplayName(), entity.getDisplayName()), true
+				() -> Component.translatable("commands.teleport.success.entity.single", ((Entity)collection.iterator().next()).getDisplayName(), entity.getDisplayName()),
+				true
 			);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.teleport.success.entity.multiple", collection.size(), entity.getDisplayName()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.teleport.success.entity.multiple", collection.size(), entity.getDisplayName()), true);
 		}
 
 		return collection.size();
@@ -222,18 +223,20 @@ public class TeleportCommand {
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				Component.translatable(
-					"commands.teleport.success.location.single",
-					((Entity)collection.iterator().next()).getDisplayName(),
-					formatDouble(vec3.x),
-					formatDouble(vec3.y),
-					formatDouble(vec3.z)
-				),
+				() -> Component.translatable(
+						"commands.teleport.success.location.single",
+						((Entity)collection.iterator().next()).getDisplayName(),
+						formatDouble(vec3.x),
+						formatDouble(vec3.y),
+						formatDouble(vec3.z)
+					),
 				true
 			);
 		} else {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.teleport.success.location.multiple", collection.size(), formatDouble(vec3.x), formatDouble(vec3.y), formatDouble(vec3.z)),
+				() -> Component.translatable(
+						"commands.teleport.success.location.multiple", collection.size(), formatDouble(vec3.x), formatDouble(vec3.y), formatDouble(vec3.z)
+					),
 				true
 			);
 		}

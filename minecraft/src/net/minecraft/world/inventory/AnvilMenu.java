@@ -2,6 +2,9 @@ package net.minecraft.world.inventory;
 
 import com.mojang.logging.LogUtils;
 import java.util.Map;
+import javax.annotation.Nullable;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,7 +16,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 public class AnvilMenu extends ItemCombinerMenu {
@@ -24,6 +26,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 	private static final boolean DEBUG_COST = false;
 	public static final int MAX_NAME_LENGTH = 50;
 	private int repairItemCountCost;
+	@Nullable
 	private String itemName;
 	private final DataSlot cost = DataSlot.standalone();
 	private static final int COST_FAIL = 0;
@@ -226,16 +229,16 @@ public class AnvilMenu extends ItemCombinerMenu {
 				}
 			}
 
-			if (StringUtils.isBlank(this.itemName)) {
-				if (itemStack.hasCustomHoverName()) {
+			if (this.itemName != null && !Util.isBlank(this.itemName)) {
+				if (!this.itemName.equals(itemStack.getHoverName().getString())) {
 					k = 1;
 					i += k;
-					itemStack2.resetHoverName();
+					itemStack2.setHoverName(Component.literal(this.itemName));
 				}
-			} else if (!this.itemName.equals(itemStack.getHoverName().getString())) {
+			} else if (itemStack.hasCustomHoverName()) {
 				k = 1;
 				i += k;
-				itemStack2.setHoverName(Component.literal(this.itemName));
+				itemStack2.resetHoverName();
 			}
 
 			this.cost.set(j + i);
@@ -274,18 +277,30 @@ public class AnvilMenu extends ItemCombinerMenu {
 		return i * 2 + 1;
 	}
 
-	public void setItemName(String string) {
-		this.itemName = string;
-		if (this.getSlot(2).hasItem()) {
-			ItemStack itemStack = this.getSlot(2).getItem();
-			if (StringUtils.isBlank(string)) {
-				itemStack.resetHoverName();
-			} else {
-				itemStack.setHoverName(Component.literal(this.itemName));
+	public boolean setItemName(String string) {
+		String string2 = validateName(string);
+		if (string2 != null && !string2.equals(this.itemName)) {
+			this.itemName = string2;
+			if (this.getSlot(2).hasItem()) {
+				ItemStack itemStack = this.getSlot(2).getItem();
+				if (Util.isBlank(string2)) {
+					itemStack.resetHoverName();
+				} else {
+					itemStack.setHoverName(Component.literal(string2));
+				}
 			}
-		}
 
-		this.createResult();
+			this.createResult();
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Nullable
+	private static String validateName(String string) {
+		String string2 = SharedConstants.filterText(string);
+		return string2.length() <= 50 ? string2 : null;
 	}
 
 	public int getCost() {

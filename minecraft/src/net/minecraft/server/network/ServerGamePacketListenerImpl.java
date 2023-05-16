@@ -140,6 +140,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.RelativeMovement;
@@ -429,6 +430,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				m = h - this.vehicleLastGoodY - 1.0E-6;
 				n = i - this.vehicleLastGoodZ;
 				boolean bl2 = entity.verticalCollisionBelow;
+				if (entity instanceof LivingEntity livingEntity && livingEntity.onClimbable()) {
+					livingEntity.resetFallDistance();
+				}
+
 				entity.move(MoverType.PLAYER, new Vec3(l, m, n));
 				l = g - entity.getX();
 				m = h - entity.getY();
@@ -638,10 +643,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				return;
 			}
 
-			String string = SharedConstants.filterText(serverboundRenameItemPacket.getName());
-			if (string.length() <= 50) {
-				anvilMenu.setItemName(string);
-			}
+			anvilMenu.setItemName(serverboundRenameItemPacket.getName());
 		}
 	}
 
@@ -941,10 +943,10 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 								LOGGER.warn("{} moved wrongly!", this.player.getName().getString());
 							}
 
-							this.player.absMoveTo(d, e, f, g, h);
 							if (this.player.noPhysics
 								|| this.player.isSleeping()
-								|| (!bl3 || !serverLevel.noCollision(this.player, aABB)) && !this.isPlayerCollidingWithAnythingNew(serverLevel, aABB)) {
+								|| (!bl3 || !serverLevel.noCollision(this.player, aABB)) && !this.isPlayerCollidingWithAnythingNew(serverLevel, aABB, d, e, f)) {
+								this.player.absMoveTo(d, e, f, g, h);
 								this.clientIsFloating = n >= -0.03125
 									&& !bl2
 									&& this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR
@@ -976,8 +978,9 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 		}
 	}
 
-	private boolean isPlayerCollidingWithAnythingNew(LevelReader levelReader, AABB aABB) {
-		Iterable<VoxelShape> iterable = levelReader.getCollisions(this.player, this.player.getBoundingBox().deflate(1.0E-5F));
+	private boolean isPlayerCollidingWithAnythingNew(LevelReader levelReader, AABB aABB, double d, double e, double f) {
+		AABB aABB2 = this.player.getBoundingBox().move(d - this.player.getX(), e - this.player.getY(), f - this.player.getZ());
+		Iterable<VoxelShape> iterable = levelReader.getCollisions(this.player, aABB2.deflate(1.0E-5F));
 		VoxelShape voxelShape = Shapes.create(aABB.deflate(1.0E-5F));
 
 		for (VoxelShape voxelShape2 : iterable) {

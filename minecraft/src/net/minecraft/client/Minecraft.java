@@ -554,6 +554,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, this.gameDirectory.toPath());
 		this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
 		this.narrator = new GameNarrator(this);
+		this.narrator.checkStatus(this.options.narrator().get() != NarratorStatus.OFF);
 		this.chatListener = new ChatListener(this);
 		this.chatListener.setMessageDelay(this.options.chatDelay().get());
 		this.reportingContext = ReportingContext.create(ReportEnvironment.local(), this.userApiService);
@@ -1757,10 +1758,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			this.profiler.popPush("level");
 			if (!this.pause) {
-				if (this.level.getSkyFlashTime() > 0) {
-					this.level.setSkyFlashTime(this.level.getSkyFlashTime() - 1);
-				}
-
 				this.level.tickEntities();
 			}
 		} else if (this.gameRenderer.currentEffect() != null) {

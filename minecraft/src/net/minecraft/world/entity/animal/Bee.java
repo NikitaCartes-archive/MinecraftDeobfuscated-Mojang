@@ -83,7 +83,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
@@ -945,34 +944,30 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 					BlockPos blockPos = Bee.this.blockPosition().below(i);
 					BlockState blockState = Bee.this.level().getBlockState(blockPos);
 					Block block = blockState.getBlock();
-					boolean bl = false;
-					IntegerProperty integerProperty = null;
+					BlockState blockState2 = null;
 					if (blockState.is(BlockTags.BEE_GROWABLES)) {
 						if (block instanceof CropBlock) {
 							CropBlock cropBlock = (CropBlock)block;
 							if (!cropBlock.isMaxAge(blockState)) {
-								bl = true;
-								integerProperty = cropBlock.getAgeProperty();
+								blockState2 = cropBlock.getStateForAge(cropBlock.getAge(blockState) + 1);
 							}
 						} else if (block instanceof StemBlock) {
 							int j = (Integer)blockState.getValue(StemBlock.AGE);
 							if (j < 7) {
-								bl = true;
-								integerProperty = StemBlock.AGE;
+								blockState2 = blockState.setValue(StemBlock.AGE, Integer.valueOf(j + 1));
 							}
 						} else if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 							int j = (Integer)blockState.getValue(SweetBerryBushBlock.AGE);
 							if (j < 3) {
-								bl = true;
-								integerProperty = SweetBerryBushBlock.AGE;
+								blockState2 = blockState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(j + 1));
 							}
 						} else if (blockState.is(Blocks.CAVE_VINES) || blockState.is(Blocks.CAVE_VINES_PLANT)) {
 							((BonemealableBlock)blockState.getBlock()).performBonemeal((ServerLevel)Bee.this.level(), Bee.this.random, blockPos, blockState);
 						}
 
-						if (bl) {
+						if (blockState2 != null) {
 							Bee.this.level().levelEvent(2005, blockPos, 0);
-							Bee.this.level().setBlockAndUpdate(blockPos, blockState.setValue(integerProperty, Integer.valueOf((Integer)blockState.getValue(integerProperty) + 1)));
+							Bee.this.level().setBlockAndUpdate(blockPos, blockState2);
 							Bee.this.incrementNumCropsGrownSincePollination();
 						}
 					}

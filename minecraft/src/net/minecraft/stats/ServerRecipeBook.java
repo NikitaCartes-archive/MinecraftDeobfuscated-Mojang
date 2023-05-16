@@ -38,7 +38,10 @@ public class ServerRecipeBook extends RecipeBook {
 			}
 		}
 
-		this.sendRecipes(ClientboundRecipePacket.State.ADD, serverPlayer, list);
+		if (list.size() > 0) {
+			this.sendRecipes(ClientboundRecipePacket.State.ADD, serverPlayer, list);
+		}
+
 		return i;
 	}
 

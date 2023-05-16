@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.TridentModel;
@@ -53,7 +54,6 @@ import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadListener {
@@ -97,7 +97,7 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 					CompoundTag compoundTag = itemStack.getTag();
 					if (compoundTag.contains("SkullOwner", 10)) {
 						gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
-					} else if (compoundTag.contains("SkullOwner", 8) && !StringUtils.isBlank(compoundTag.getString("SkullOwner"))) {
+					} else if (compoundTag.contains("SkullOwner", 8) && !Util.isBlank(compoundTag.getString("SkullOwner"))) {
 						gameProfile = new GameProfile(null, compoundTag.getString("SkullOwner"));
 						compoundTag.remove("SkullOwner");
 						SkullBlockEntity.updateGameprofile(gameProfile, gameProfilex -> compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfilex)));

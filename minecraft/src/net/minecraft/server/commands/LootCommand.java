@@ -396,9 +396,9 @@ public class LootCommand {
 	private static void callback(CommandSourceStack commandSourceStack, List<ItemStack> list) {
 		if (list.size() == 1) {
 			ItemStack itemStack = (ItemStack)list.get(0);
-			commandSourceStack.sendSuccess(Component.translatable("commands.drop.success.single", itemStack.getCount(), itemStack.getDisplayName()), false);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.drop.success.single", itemStack.getCount(), itemStack.getDisplayName()), false);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.drop.success.multiple", list.size()), false);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.drop.success.multiple", list.size()), false);
 		}
 	}
 
@@ -406,10 +406,10 @@ public class LootCommand {
 		if (list.size() == 1) {
 			ItemStack itemStack = (ItemStack)list.get(0);
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.drop.success.single_with_table", itemStack.getCount(), itemStack.getDisplayName(), resourceLocation), false
+				() -> Component.translatable("commands.drop.success.single_with_table", itemStack.getCount(), itemStack.getDisplayName(), resourceLocation), false
 			);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.drop.success.multiple_with_table", list.size(), resourceLocation), false);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.drop.success.multiple_with_table", list.size(), resourceLocation), false);
 		}
 	}
 

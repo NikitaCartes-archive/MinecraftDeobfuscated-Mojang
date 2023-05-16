@@ -42,10 +42,10 @@ public class WardenSpawnTrackerCommand {
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.warden_spawn_tracker.set.success.single", ((Player)collection.iterator().next()).getDisplayName()), true
+				() -> Component.translatable("commands.warden_spawn_tracker.set.success.single", ((Player)collection.iterator().next()).getDisplayName()), true
 			);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.warden_spawn_tracker.set.success.multiple", collection.size()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.warden_spawn_tracker.set.success.multiple", collection.size()), true);
 		}
 
 		return collection.size();
@@ -58,10 +58,10 @@ public class WardenSpawnTrackerCommand {
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				Component.translatable("commands.warden_spawn_tracker.clear.success.single", ((Player)collection.iterator().next()).getDisplayName()), true
+				() -> Component.translatable("commands.warden_spawn_tracker.clear.success.single", ((Player)collection.iterator().next()).getDisplayName()), true
 			);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.warden_spawn_tracker.clear.success.multiple", collection.size()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.warden_spawn_tracker.clear.success.multiple", collection.size()), true);
 		}
 
 		return collection.size();

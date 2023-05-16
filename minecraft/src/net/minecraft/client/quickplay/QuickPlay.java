@@ -10,6 +10,7 @@ import com.mojang.realmsclient.util.task.GetServerDetailsTask;
 import java.util.concurrent.locks.ReentrantLock;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
@@ -25,7 +26,6 @@ import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.resources.ReloadInstance;
-import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class QuickPlay {
@@ -42,11 +42,11 @@ public class QuickPlay {
 		String string2 = quickPlayData.multiplayer();
 		String string3 = quickPlayData.realms();
 		reloadInstance.done().thenRunAsync(() -> {
-			if (!StringUtils.isBlank(string)) {
+			if (!Util.isBlank(string)) {
 				joinSingleplayerWorld(minecraft, string);
-			} else if (!StringUtils.isBlank(string2)) {
+			} else if (!Util.isBlank(string2)) {
 				joinMultiplayerWorld(minecraft, string2);
-			} else if (!StringUtils.isBlank(string3)) {
+			} else if (!Util.isBlank(string3)) {
 				joinRealmsWorld(minecraft, realmsClient, string3);
 			}
 		}, minecraft);

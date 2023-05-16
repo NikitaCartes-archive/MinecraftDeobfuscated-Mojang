@@ -75,20 +75,21 @@ public class ClearInventoryCommands {
 				throw ERROR_MULTIPLE.create(collection.size());
 			}
 		} else {
+			int k = j;
 			if (i == 0) {
 				if (collection.size() == 1) {
 					commandSourceStack.sendSuccess(
-						Component.translatable("commands.clear.test.single", j, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+						() -> Component.translatable("commands.clear.test.single", k, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 					);
 				} else {
-					commandSourceStack.sendSuccess(Component.translatable("commands.clear.test.multiple", j, collection.size()), true);
+					commandSourceStack.sendSuccess(() -> Component.translatable("commands.clear.test.multiple", k, collection.size()), true);
 				}
 			} else if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.clear.success.single", j, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					() -> Component.translatable("commands.clear.success.single", k, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.clear.success.multiple", j, collection.size()), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.clear.success.multiple", k, collection.size()), true);
 			}
 
 			return j;

@@ -408,7 +408,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 
 			if (bl2) {
 				if (bl3) {
-					guiGraphics.fill(q, o - 1, q + 1, o + 1 + 9, -3092272);
+					guiGraphics.fill(RenderType.guiOverlay(), q, o - 1, q + 1, o + 1 + 9, -3092272);
 				} else {
 					guiGraphics.drawString(this.font, "_", q, o, k);
 				}

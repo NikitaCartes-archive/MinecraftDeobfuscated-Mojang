@@ -253,25 +253,26 @@ public class AdvancementCommands {
 			if (collection2.size() == 1) {
 				if (collection.size() == 1) {
 					commandSourceStack.sendSuccess(
-						Component.translatable(
-							action.getKey() + ".one.to.one.success",
-							((Advancement)collection2.iterator().next()).getChatComponent(),
-							((ServerPlayer)collection.iterator().next()).getDisplayName()
-						),
+						() -> Component.translatable(
+								action.getKey() + ".one.to.one.success",
+								((Advancement)collection2.iterator().next()).getChatComponent(),
+								((ServerPlayer)collection.iterator().next()).getDisplayName()
+							),
 						true
 					);
 				} else {
 					commandSourceStack.sendSuccess(
-						Component.translatable(action.getKey() + ".one.to.many.success", ((Advancement)collection2.iterator().next()).getChatComponent(), collection.size()),
+						() -> Component.translatable(action.getKey() + ".one.to.many.success", ((Advancement)collection2.iterator().next()).getChatComponent(), collection.size()),
 						true
 					);
 				}
 			} else if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					Component.translatable(action.getKey() + ".many.to.one.success", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					() -> Component.translatable(action.getKey() + ".many.to.one.success", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName()),
+					true
 				);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable(action.getKey() + ".many.to.many.success", collection2.size(), collection.size()), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable(action.getKey() + ".many.to.many.success", collection2.size(), collection.size()), true);
 			}
 
 			return i;
@@ -306,14 +307,14 @@ public class AdvancementCommands {
 			} else {
 				if (collection.size() == 1) {
 					commandSourceStack.sendSuccess(
-						Component.translatable(
-							action.getKey() + ".criterion.to.one.success", string, advancement.getChatComponent(), ((ServerPlayer)collection.iterator().next()).getDisplayName()
-						),
+						() -> Component.translatable(
+								action.getKey() + ".criterion.to.one.success", string, advancement.getChatComponent(), ((ServerPlayer)collection.iterator().next()).getDisplayName()
+							),
 						true
 					);
 				} else {
 					commandSourceStack.sendSuccess(
-						Component.translatable(action.getKey() + ".criterion.to.many.success", string, advancement.getChatComponent(), collection.size()), true
+						() -> Component.translatable(action.getKey() + ".criterion.to.many.success", string, advancement.getChatComponent(), collection.size()), true
 					);
 				}
 

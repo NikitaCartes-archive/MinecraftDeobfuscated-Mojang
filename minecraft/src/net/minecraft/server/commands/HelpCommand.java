@@ -22,7 +22,7 @@ public class HelpCommand {
 					Map<CommandNode<CommandSourceStack>, String> map = commandDispatcher.getSmartUsage(commandDispatcher.getRoot(), commandContext.getSource());
 
 					for (String string : map.values()) {
-						commandContext.getSource().sendSuccess(Component.literal("/" + string), false);
+						commandContext.getSource().sendSuccess(() -> Component.literal("/" + string), false);
 					}
 
 					return map.size();
@@ -42,7 +42,7 @@ public class HelpCommand {
 									);
 
 									for (String string : map.values()) {
-										commandContext.getSource().sendSuccess(Component.literal("/" + parseResults.getReader().getString() + " " + string), false);
+										commandContext.getSource().sendSuccess(() -> Component.literal("/" + parseResults.getReader().getString() + " " + string), false);
 									}
 
 									return map.size();

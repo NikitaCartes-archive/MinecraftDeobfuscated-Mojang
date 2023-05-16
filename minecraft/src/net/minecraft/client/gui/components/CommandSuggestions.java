@@ -223,6 +223,7 @@ public class CommandSuggestions {
 	}
 
 	private void updateUsageInfo() {
+		boolean bl = false;
 		if (this.input.getCursorPosition() == this.input.getValue().length()) {
 			if (((Suggestions)this.pendingSuggestions.join()).isEmpty() && !this.currentParse.getExceptions().isEmpty()) {
 				int i = 0;
@@ -240,14 +241,14 @@ public class CommandSuggestions {
 					this.commandUsage.add(getExceptionMessage(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().create()));
 				}
 			} else if (this.currentParse.getReader().canRead()) {
-				this.commandUsage.add(getExceptionMessage(Commands.getParseException(this.currentParse)));
+				bl = true;
 			}
 		}
 
 		this.commandUsagePosition = 0;
 		this.commandUsageWidth = this.screen.width;
-		if (this.commandUsage.isEmpty()) {
-			this.fillNodeUsage(ChatFormatting.GRAY);
+		if (this.commandUsage.isEmpty() && !this.fillNodeUsage(ChatFormatting.GRAY) && bl) {
+			this.commandUsage.add(getExceptionMessage(Commands.getParseException(this.currentParse)));
 		}
 
 		this.suggestions = null;
@@ -256,7 +257,7 @@ public class CommandSuggestions {
 		}
 	}
 
-	private void fillNodeUsage(ChatFormatting chatFormatting) {
+	private boolean fillNodeUsage(ChatFormatting chatFormatting) {
 		CommandContextBuilder<SharedSuggestionProvider> commandContextBuilder = this.currentParse.getContext();
 		SuggestionContext<SharedSuggestionProvider> suggestionContext = commandContextBuilder.findSuggestionContext(this.input.getCursorPosition());
 		Map<CommandNode<SharedSuggestionProvider>, String> map = this.minecraft
@@ -279,6 +280,9 @@ public class CommandSuggestions {
 			this.commandUsage.addAll(list);
 			this.commandUsagePosition = Mth.clamp(this.input.getScreenX(suggestionContext.startPos), 0, this.input.getScreenX(0) + this.input.getInnerWidth() - i);
 			this.commandUsageWidth = i;
+			return true;
+		} else {
+			return false;
 		}
 	}
 

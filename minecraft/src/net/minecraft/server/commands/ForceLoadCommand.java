@@ -91,7 +91,7 @@ public class ForceLoadCommand {
 		ResourceKey<Level> resourceKey = serverLevel.dimension();
 		boolean bl = serverLevel.getForcedChunks().contains(chunkPos.toLong());
 		if (bl) {
-			commandSourceStack.sendSuccess(Component.translatable("commands.forceload.query.success", chunkPos, resourceKey.location()), false);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.query.success", chunkPos, resourceKey.location()), false);
 			return 1;
 		} else {
 			throw ERROR_NOT_TICKING.create(chunkPos, resourceKey.location());
@@ -106,9 +106,9 @@ public class ForceLoadCommand {
 		if (i > 0) {
 			String string = Joiner.on(", ").join(longSet.stream().sorted().map(ChunkPos::new).map(ChunkPos::toString).iterator());
 			if (i == 1) {
-				commandSourceStack.sendSuccess(Component.translatable("commands.forceload.list.single", resourceKey.location(), string), false);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.list.single", resourceKey.location(), string), false);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.forceload.list.multiple", i, resourceKey.location(), string), false);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.list.multiple", i, resourceKey.location(), string), false);
 			}
 		} else {
 			commandSourceStack.sendFailure(Component.translatable("commands.forceload.added.none", resourceKey.location()));
@@ -122,7 +122,7 @@ public class ForceLoadCommand {
 		ResourceKey<Level> resourceKey = serverLevel.dimension();
 		LongSet longSet = serverLevel.getForcedChunks();
 		longSet.forEach(l -> serverLevel.setChunkForced(ChunkPos.getX(l), ChunkPos.getZ(l), false));
-		commandSourceStack.sendSuccess(Component.translatable("commands.forceload.removed.all", resourceKey.location()), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.removed.all", resourceKey.location()), true);
 		return 0;
 	}
 
@@ -157,18 +157,20 @@ public class ForceLoadCommand {
 					}
 				}
 
+				ChunkPos chunkPos2 = chunkPos;
 				if (r == 0) {
 					throw (bl ? ERROR_ALL_ADDED : ERROR_NONE_REMOVED).create();
 				} else {
 					if (r == 1) {
 						commandSourceStack.sendSuccess(
-							Component.translatable("commands.forceload." + (bl ? "added" : "removed") + ".single", chunkPos, resourceKey.location()), true
+							() -> Component.translatable("commands.forceload." + (bl ? "added" : "removed") + ".single", chunkPos2, resourceKey.location()), true
 						);
 					} else {
-						ChunkPos chunkPos2 = new ChunkPos(m, n);
-						ChunkPos chunkPos3 = new ChunkPos(o, p);
+						ChunkPos chunkPos3 = new ChunkPos(m, n);
+						ChunkPos chunkPos4 = new ChunkPos(o, p);
 						commandSourceStack.sendSuccess(
-							Component.translatable("commands.forceload." + (bl ? "added" : "removed") + ".multiple", r, resourceKey.location(), chunkPos2, chunkPos3), true
+							() -> Component.translatable("commands.forceload." + (bl ? "added" : "removed") + ".multiple", chunkPos2, resourceKey.location(), chunkPos3, chunkPos4),
+							true
 						);
 					}
 

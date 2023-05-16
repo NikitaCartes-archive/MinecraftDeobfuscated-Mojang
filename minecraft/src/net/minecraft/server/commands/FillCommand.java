@@ -167,7 +167,8 @@ public class FillCommand {
 			if (k == 0) {
 				throw ERROR_FAILED.create();
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.fill.success", k), true);
+				int l = k;
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.fill.success", l), true);
 				return k;
 			}
 		}

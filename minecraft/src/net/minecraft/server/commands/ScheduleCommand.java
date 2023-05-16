@@ -103,7 +103,7 @@ public class ScheduleCommand {
 				}
 
 				timerQueue.schedule(string, l, new FunctionCallback(resourceLocation));
-				commandSourceStack.sendSuccess(Component.translatable("commands.schedule.created.function", resourceLocation, i, l), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.schedule.created.function", resourceLocation, i, l), true);
 			}).ifRight(collection -> {
 				String string = "#" + resourceLocation;
 				if (bl) {
@@ -111,7 +111,7 @@ public class ScheduleCommand {
 				}
 
 				timerQueue.schedule(string, l, new FunctionTagCallback(resourceLocation));
-				commandSourceStack.sendSuccess(Component.translatable("commands.schedule.created.tag", resourceLocation, i, l), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.schedule.created.tag", resourceLocation, i, l), true);
 			});
 			return Math.floorMod(l, Integer.MAX_VALUE);
 		}
@@ -122,7 +122,7 @@ public class ScheduleCommand {
 		if (i == 0) {
 			throw ERROR_CANT_REMOVE.create(string);
 		} else {
-			commandSourceStack.sendSuccess(Component.translatable("commands.schedule.cleared.success", i, string), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.schedule.cleared.success", i, string), true);
 			return i;
 		}
 	}

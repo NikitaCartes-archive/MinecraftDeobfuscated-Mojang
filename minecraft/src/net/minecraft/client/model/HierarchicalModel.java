@@ -56,4 +56,8 @@ public abstract class HierarchicalModel<E extends Entity> extends EntityModel<E>
 			animationStatex -> KeyframeAnimations.animate(this, animationDefinition, animationStatex.getAccumulatedTime(), 1.0F, ANIMATION_VECTOR_CACHE)
 		);
 	}
+
+	protected void applyStatic(AnimationDefinition animationDefinition) {
+		KeyframeAnimations.animate(this, animationDefinition, 0L, 1.0F, ANIMATION_VECTOR_CACHE);
+	}
 }

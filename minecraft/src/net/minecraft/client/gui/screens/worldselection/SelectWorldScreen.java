@@ -30,11 +30,6 @@ public class SelectWorldScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
-		return super.mouseScrolled(d, e, f);
-	}
-
-	@Override
 	public void tick() {
 		this.searchBox.tick();
 	}

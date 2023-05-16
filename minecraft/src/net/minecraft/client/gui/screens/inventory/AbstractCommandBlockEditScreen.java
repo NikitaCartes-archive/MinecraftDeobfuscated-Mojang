@@ -34,6 +34,9 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 	@Override
 	public void tick() {
 		this.commandEdit.tick();
+		if (!this.getCommandBlock().isValid()) {
+			this.onClose();
+		}
 	}
 
 	abstract BaseCommandBlock getCommandBlock();

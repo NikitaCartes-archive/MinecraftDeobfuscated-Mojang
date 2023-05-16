@@ -9,6 +9,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.ArrayList;
@@ -45,6 +46,9 @@ public class DataCommands {
 	);
 	private static final DynamicCommandExceptionType ERROR_EXPECTED_VALUE = new DynamicCommandExceptionType(
 		object -> Component.translatable("commands.data.modify.expected_value", object)
+	);
+	private static final Dynamic2CommandExceptionType ERROR_INVALID_SUBSTRING = new Dynamic2CommandExceptionType(
+		(object, object2) -> Component.translatable("commands.data.modify.invalid_substring", object, object2)
 	);
 	public static final List<Function<String, DataCommands.DataProvider>> ALL_PROVIDERS = ImmutableList.of(
 		EntityDataAccessor.PROVIDER, BlockDataAccessor.PROVIDER, StorageDataAccessor.PROVIDER
@@ -178,12 +182,12 @@ public class DataCommands {
 		}
 	}
 
-	private static List<Tag> stringifyTagList(List<Tag> list, Function<String, String> function) throws CommandSyntaxException {
+	private static List<Tag> stringifyTagList(List<Tag> list, DataCommands.StringProcessor stringProcessor) throws CommandSyntaxException {
 		List<Tag> list2 = new ArrayList(list.size());
 
 		for (Tag tag : list) {
 			String string = getAsText(tag);
-			list2.add(StringTag.valueOf((String)function.apply(string)));
+			list2.add(StringTag.valueOf(stringProcessor.process(string)));
 		}
 
 		return list2;
@@ -278,13 +282,24 @@ public class DataCommands {
 		return literalArgumentBuilder;
 	}
 
-	private static String substring(String string, int i, int j) {
-		int k = string.length();
-		return string.substring(getOffset(i, k), getOffset(j, k));
+	private static String validatedSubstring(String string, int i, int j) throws CommandSyntaxException {
+		if (i >= 0 && j <= string.length() && i <= j) {
+			return string.substring(i, j);
+		} else {
+			throw ERROR_INVALID_SUBSTRING.create(i, j);
+		}
 	}
 
-	private static String substring(String string, int i) {
-		return string.substring(getOffset(i, string.length()));
+	private static String substring(String string, int i, int j) throws CommandSyntaxException {
+		int k = string.length();
+		int l = getOffset(i, k);
+		int m = getOffset(j, k);
+		return validatedSubstring(string, l, m);
+	}
+
+	private static String substring(String string, int i) throws CommandSyntaxException {
+		int j = string.length();
+		return validatedSubstring(string, getOffset(i, j), j);
 	}
 
 	private static int getOffset(int i, int j) {
@@ -313,7 +328,7 @@ public class DataCommands {
 			throw ERROR_MERGE_UNCHANGED.create();
 		} else {
 			dataAccessor.setData(compoundTag);
-			commandContext.getSource().sendSuccess(dataAccessor.getModifiedSuccess(), true);
+			commandContext.getSource().sendSuccess(() -> dataAccessor.getModifiedSuccess(), true);
 			return i;
 		}
 	}
@@ -325,7 +340,7 @@ public class DataCommands {
 			throw ERROR_MERGE_UNCHANGED.create();
 		} else {
 			dataAccessor.setData(compoundTag);
-			commandSourceStack.sendSuccess(dataAccessor.getModifiedSuccess(), true);
+			commandSourceStack.sendSuccess(() -> dataAccessor.getModifiedSuccess(), true);
 			return i;
 		}
 	}
@@ -358,7 +373,7 @@ public class DataCommands {
 			i = tag.getAsString().length();
 		}
 
-		commandSourceStack.sendSuccess(dataAccessor.getPrintSuccess(tag), false);
+		commandSourceStack.sendSuccess(() -> dataAccessor.getPrintSuccess(tag), false);
 		return i;
 	}
 
@@ -368,13 +383,14 @@ public class DataCommands {
 			throw ERROR_GET_NOT_NUMBER.create(nbtPath.toString());
 		} else {
 			int i = Mth.floor(((NumericTag)tag).getAsDouble() * d);
-			commandSourceStack.sendSuccess(dataAccessor.getPrintSuccess(nbtPath, d, i), false);
+			commandSourceStack.sendSuccess(() -> dataAccessor.getPrintSuccess(nbtPath, d, i), false);
 			return i;
 		}
 	}
 
 	private static int getData(CommandSourceStack commandSourceStack, DataAccessor dataAccessor) throws CommandSyntaxException {
-		commandSourceStack.sendSuccess(dataAccessor.getPrintSuccess(dataAccessor.getData()), false);
+		CompoundTag compoundTag = dataAccessor.getData();
+		commandSourceStack.sendSuccess(() -> dataAccessor.getPrintSuccess(compoundTag), false);
 		return 1;
 	}
 
@@ -388,16 +404,18 @@ public class DataCommands {
 				throw ERROR_MERGE_UNCHANGED.create();
 			} else {
 				dataAccessor.setData(compoundTag3);
-				commandSourceStack.sendSuccess(dataAccessor.getModifiedSuccess(), true);
+				commandSourceStack.sendSuccess(() -> dataAccessor.getModifiedSuccess(), true);
 				return 1;
 			}
 		}
 	}
 
+	@FunctionalInterface
 	interface DataManipulator {
 		int modify(CommandContext<CommandSourceStack> commandContext, CompoundTag compoundTag, NbtPathArgument.NbtPath nbtPath, List<Tag> list) throws CommandSyntaxException;
 	}
 
+	@FunctionalInterface
 	interface DataManipulatorDecorator {
 		ArgumentBuilder<CommandSourceStack, ?> create(DataCommands.DataManipulator dataManipulator);
 	}
@@ -408,5 +426,10 @@ public class DataCommands {
 		ArgumentBuilder<CommandSourceStack, ?> wrap(
 			ArgumentBuilder<CommandSourceStack, ?> argumentBuilder, Function<ArgumentBuilder<CommandSourceStack, ?>, ArgumentBuilder<CommandSourceStack, ?>> function
 		);
+	}
+
+	@FunctionalInterface
+	interface StringProcessor {
+		String process(String string) throws CommandSyntaxException;
 	}
 }

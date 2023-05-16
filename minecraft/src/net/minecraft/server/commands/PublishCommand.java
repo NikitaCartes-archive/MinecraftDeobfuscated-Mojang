@@ -64,7 +64,7 @@ public class PublishCommand {
 		} else if (!commandSourceStack.getServer().publishServer(gameType, bl, i)) {
 			throw ERROR_FAILED.create();
 		} else {
-			commandSourceStack.sendSuccess(getSuccessMessage(i), true);
+			commandSourceStack.sendSuccess(() -> getSuccessMessage(i), true);
 			return i;
 		}
 	}

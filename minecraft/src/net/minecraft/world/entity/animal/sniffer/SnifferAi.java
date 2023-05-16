@@ -135,7 +135,7 @@ public class SnifferAi {
 						super.start(serverLevel, animal, l);
 					}
 				}),
-				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F, 3.5) {
+				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F, livingEntity -> livingEntity.isBaby() ? 2.5 : 3.5) {
 					@Override
 					protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
 						SnifferAi.resetSniffing((Sniffer)pathfinderMob);
@@ -274,6 +274,8 @@ public class SnifferAi {
 					MemoryModuleType.SNIFFER_SNIFFING_TARGET,
 					MemoryStatus.VALUE_ABSENT,
 					MemoryModuleType.SNIFFER_HAPPY,
+					MemoryStatus.VALUE_ABSENT,
+					MemoryModuleType.BREED_TARGET,
 					MemoryStatus.VALUE_ABSENT
 				),
 				i,

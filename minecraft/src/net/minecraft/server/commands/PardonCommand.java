@@ -40,7 +40,7 @@ public class PardonCommand {
 			if (userBanList.isBanned(gameProfile)) {
 				userBanList.remove(gameProfile);
 				i++;
-				commandSourceStack.sendSuccess(Component.translatable("commands.pardon.success", ComponentUtils.getDisplayName(gameProfile)), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.pardon.success", ComponentUtils.getDisplayName(gameProfile)), true);
 			}
 		}
 

@@ -718,6 +718,8 @@ public class CreativeModeTabs {
 					output.accept(Items.ACACIA_LOG);
 					output.accept(Items.DARK_OAK_LOG);
 					output.accept(Items.MANGROVE_LOG);
+					output.accept(Items.MANGROVE_ROOTS);
+					output.accept(Items.MUDDY_MANGROVE_ROOTS);
 					output.accept(Items.CHERRY_LOG);
 					output.accept(Items.MUSHROOM_STEM);
 					output.accept(Items.CRIMSON_STEM);
@@ -729,8 +731,6 @@ public class CreativeModeTabs {
 					output.accept(Items.ACACIA_LEAVES);
 					output.accept(Items.DARK_OAK_LEAVES);
 					output.accept(Items.MANGROVE_LEAVES);
-					output.accept(Items.MANGROVE_ROOTS);
-					output.accept(Items.MUDDY_MANGROVE_ROOTS);
 					output.accept(Items.CHERRY_LEAVES);
 					output.accept(Items.AZALEA_LEAVES);
 					output.accept(Items.FLOWERING_AZALEA_LEAVES);
@@ -769,12 +769,12 @@ public class CreativeModeTabs {
 					output.accept(Items.CORNFLOWER);
 					output.accept(Items.LILY_OF_THE_VALLEY);
 					output.accept(Items.TORCHFLOWER);
+					output.accept(Items.WITHER_ROSE);
 					output.accept(Items.PINK_PETALS);
 					output.accept(Items.SPORE_BLOSSOM);
 					output.accept(Items.BAMBOO);
 					output.accept(Items.SUGAR_CANE);
 					output.accept(Items.CACTUS);
-					output.accept(Items.WITHER_ROSE);
 					output.accept(Items.CRIMSON_ROOTS);
 					output.accept(Items.WARPED_ROOTS);
 					output.accept(Items.NETHER_SPROUTS);
@@ -827,11 +827,11 @@ public class CreativeModeTabs {
 					output.accept(Items.BUBBLE_CORAL);
 					output.accept(Items.FIRE_CORAL);
 					output.accept(Items.HORN_CORAL);
+					output.accept(Items.DEAD_TUBE_CORAL);
 					output.accept(Items.DEAD_BRAIN_CORAL);
 					output.accept(Items.DEAD_BUBBLE_CORAL);
 					output.accept(Items.DEAD_FIRE_CORAL);
 					output.accept(Items.DEAD_HORN_CORAL);
-					output.accept(Items.DEAD_TUBE_CORAL);
 					output.accept(Items.TUBE_CORAL_FAN);
 					output.accept(Items.BRAIN_CORAL_FAN);
 					output.accept(Items.BUBBLE_CORAL_FAN);
@@ -1193,10 +1193,10 @@ public class CreativeModeTabs {
 						output.accept(Items.NETHERITE_HOE);
 						output.accept(Items.BUCKET);
 						output.accept(Items.WATER_BUCKET);
-						output.accept(Items.PUFFERFISH_BUCKET);
-						output.accept(Items.SALMON_BUCKET);
 						output.accept(Items.COD_BUCKET);
+						output.accept(Items.SALMON_BUCKET);
 						output.accept(Items.TROPICAL_FISH_BUCKET);
+						output.accept(Items.PUFFERFISH_BUCKET);
 						output.accept(Items.AXOLOTL_BUCKET);
 						output.accept(Items.TADPOLE_BUCKET);
 						output.accept(Items.LAVA_BUCKET);

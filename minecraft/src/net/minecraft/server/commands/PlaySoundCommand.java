@@ -157,10 +157,10 @@ public class PlaySoundCommand {
 		} else {
 			if (collection.size() == 1) {
 				commandSourceStack.sendSuccess(
-					Component.translatable("commands.playsound.success.single", resourceLocation, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
+					() -> Component.translatable("commands.playsound.success.single", resourceLocation, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.playsound.success.multiple", resourceLocation, collection.size()), true);
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.playsound.success.multiple", resourceLocation, collection.size()), true);
 			}
 
 			return i;
