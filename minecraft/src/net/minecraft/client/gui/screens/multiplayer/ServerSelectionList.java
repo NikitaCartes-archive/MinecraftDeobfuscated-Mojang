@@ -66,12 +66,6 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		this.screen = joinMultiplayerScreen;
 	}
 
-	@Override
-	protected void clearEntries() {
-		this.children().forEach(ServerSelectionList.Entry::close);
-		super.clearEntries();
-	}
-
 	private void refreshEntries() {
 		this.clearEntries();
 		this.onlineServers.forEach(entry -> this.addEntry(entry));
@@ -132,7 +126,6 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	}
 
 	public void removed() {
-		this.clearEntries();
 	}
 
 	@Environment(EnvType.CLIENT)
