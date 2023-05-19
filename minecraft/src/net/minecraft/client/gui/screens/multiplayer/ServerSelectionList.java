@@ -1,8 +1,6 @@
 package net.minecraft.client.gui.screens.multiplayer;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -23,13 +21,11 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.FaviconTexture;
 import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.server.LanServer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -50,7 +46,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER))
 			.build()
 	);
-	static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
+	private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
 	static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
 	static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
 	static final Component SCANNING_LABEL = Component.translatable("lanServer.scanning");
@@ -68,6 +64,12 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	public ServerSelectionList(JoinMultiplayerScreen joinMultiplayerScreen, Minecraft minecraft, int i, int j, int k, int l, int m) {
 		super(minecraft, i, j, k, l, m);
 		this.screen = joinMultiplayerScreen;
+	}
+
+	@Override
+	protected void clearEntries() {
+		this.children().forEach(ServerSelectionList.Entry::close);
+		super.clearEntries();
 	}
 
 	private void refreshEntries() {
@@ -129,8 +131,14 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		return super.getRowWidth() + 85;
 	}
 
+	public void removed() {
+		this.clearEntries();
+	}
+
 	@Environment(EnvType.CLIENT)
-	public abstract static class Entry extends ObjectSelectionList.Entry<ServerSelectionList.Entry> {
+	public abstract static class Entry extends ObjectSelectionList.Entry<ServerSelectionList.Entry> implements AutoCloseable {
+		public void close() {
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -223,22 +231,16 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		private final JoinMultiplayerScreen screen;
 		private final Minecraft minecraft;
 		private final ServerData serverData;
-		private final ResourceLocation iconLocation;
+		private final FaviconTexture icon;
 		@Nullable
 		private byte[] lastIconBytes;
-		@Nullable
-		private DynamicTexture icon;
 		private long lastClickTime;
 
 		protected OnlineServerEntry(JoinMultiplayerScreen joinMultiplayerScreen, ServerData serverData) {
 			this.screen = joinMultiplayerScreen;
 			this.serverData = serverData;
 			this.minecraft = Minecraft.getInstance();
-			this.iconLocation = new ResourceLocation("servers/" + Hashing.sha1().hashUnencodedChars(serverData.ip) + "/icon");
-			AbstractTexture abstractTexture = this.minecraft.getTextureManager().getTexture(this.iconLocation, MissingTextureAtlasSprite.getTexture());
-			if (abstractTexture != MissingTextureAtlasSprite.getTexture() && abstractTexture instanceof DynamicTexture) {
-				this.icon = (DynamicTexture)abstractTexture;
-			}
+			this.icon = FaviconTexture.forServer(this.minecraft.getTextureManager(), serverData.ip);
 		}
 
 		@Override
@@ -324,12 +326,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				}
 			}
 
-			if (this.icon == null) {
-				this.drawIcon(guiGraphics, k, j, ServerSelectionList.ICON_MISSING);
-			} else {
-				this.drawIcon(guiGraphics, k, j, this.iconLocation);
-			}
-
+			this.drawIcon(guiGraphics, k, j, this.icon.textureLocation());
 			int t = n - k;
 			int u = o - j;
 			if (t >= l - 15 && t <= l - 5 && u >= 0 && u <= 8) {
@@ -392,25 +389,10 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 
 		private boolean uploadServerIcon(@Nullable byte[] bs) {
 			if (bs == null) {
-				this.minecraft.getTextureManager().release(this.iconLocation);
-				if (this.icon != null && this.icon.getPixels() != null) {
-					this.icon.getPixels().close();
-				}
-
-				this.icon = null;
+				this.icon.clear();
 			} else {
 				try {
-					NativeImage nativeImage = NativeImage.read(bs);
-					Preconditions.checkState(nativeImage.getWidth() == 64, "Must be 64 pixels wide");
-					Preconditions.checkState(nativeImage.getHeight() == 64, "Must be 64 pixels high");
-					if (this.icon == null) {
-						this.icon = new DynamicTexture(nativeImage);
-					} else {
-						this.icon.setPixels(nativeImage);
-						this.icon.upload();
-					}
-
-					this.minecraft.getTextureManager().register(this.iconLocation, this.icon);
+					this.icon.upload(NativeImage.read(bs));
 				} catch (Throwable var3) {
 					ServerSelectionList.LOGGER.error("Invalid icon for server {} ({})", this.serverData.name, this.serverData.ip, var3);
 					return false;
@@ -514,6 +496,11 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			return mutableComponent;
+		}
+
+		@Override
+		public void close() {
+			this.icon.close();
 		}
 	}
 }

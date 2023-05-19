@@ -58,6 +58,8 @@ import org.joml.Vector2ic;
 
 @Environment(EnvType.CLIENT)
 public class GuiGraphics {
+	public static final float MAX_GUI_Z = 10000.0F;
+	public static final float MIN_GUI_Z = -10000.0F;
 	private static final int EXTRA_SPACE_AFTER_FIRST_TOOLTIP_LINE = 2;
 	private final Minecraft minecraft;
 	private final PoseStack pose;

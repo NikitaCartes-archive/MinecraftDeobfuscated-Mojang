@@ -90,6 +90,7 @@ public class GameRenderer implements AutoCloseable {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
 	public static final float PROJECTION_Z_NEAR = 0.05F;
+	private static final float GUI_Z_NEAR = 1000.0F;
 	final Minecraft minecraft;
 	private final ResourceManager resourceManager;
 	private final RandomSource random = RandomSource.create();
@@ -1112,13 +1113,13 @@ public class GameRenderer implements AutoCloseable {
 			RenderSystem.clear(256, Minecraft.ON_OSX);
 			Matrix4f matrix4f = new Matrix4f()
 				.setOrtho(
-					0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, 3000.0F
+					0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F
 				);
 			RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 			PoseStack poseStack = RenderSystem.getModelViewStack();
 			poseStack.pushPose();
 			poseStack.setIdentity();
-			poseStack.translate(0.0F, 0.0F, -2000.0F);
+			poseStack.translate(0.0F, 0.0F, -11000.0F);
 			RenderSystem.applyModelViewMatrix();
 			Lighting.setupFor3DItems();
 			GuiGraphics guiGraphics = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());

@@ -291,7 +291,9 @@ public class Block extends BlockBehaviour implements ItemLike {
 		}
 	}
 
-	public static void dropResources(BlockState blockState, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity, Entity entity, ItemStack itemStack) {
+	public static void dropResources(
+		BlockState blockState, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity, @Nullable Entity entity, ItemStack itemStack
+	) {
 		if (level instanceof ServerLevel) {
 			getDrops(blockState, (ServerLevel)level, blockPos, blockEntity, entity, itemStack).forEach(itemStackx -> popResource(level, blockPos, itemStackx));
 			blockState.spawnAfterBreak((ServerLevel)level, blockPos, itemStack, true);

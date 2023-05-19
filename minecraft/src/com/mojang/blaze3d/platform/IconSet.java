@@ -22,7 +22,13 @@ public enum IconSet {
 	}
 
 	public List<IoSupplier<InputStream>> getStandardIcons(PackResources packResources) throws IOException {
-		return List.of(this.getFile(packResources, "icon_16x16.png"), this.getFile(packResources, "icon_32x32.png"), this.getFile(packResources, "icon_48x48.png"));
+		return List.of(
+			this.getFile(packResources, "icon_16x16.png"),
+			this.getFile(packResources, "icon_32x32.png"),
+			this.getFile(packResources, "icon_48x48.png"),
+			this.getFile(packResources, "icon_128x128.png"),
+			this.getFile(packResources, "icon_256x256.png")
+		);
 	}
 
 	public IoSupplier<InputStream> getMacIcon(PackResources packResources) throws IOException {

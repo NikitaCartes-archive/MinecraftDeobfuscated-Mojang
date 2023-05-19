@@ -34,8 +34,6 @@ public record ServerStatus(
 	);
 
 	public static record Favicon(byte[] iconBytes) {
-		public static final int WIDTH = 64;
-		public static final int HEIGHT = 64;
 		private static final String PREFIX = "data:image/png;base64,";
 		public static final Codec<ServerStatus.Favicon> CODEC = Codec.STRING.comapFlatMap(string -> {
 			if (!string.startsWith("data:image/png;base64,")) {

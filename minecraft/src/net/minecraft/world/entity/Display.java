@@ -282,6 +282,11 @@ public abstract class Display extends Entity {
 		return PushReaction.IGNORE;
 	}
 
+	@Override
+	public boolean isIgnoringBlockTriggers() {
+		return true;
+	}
+
 	public Quaternionf orientation() {
 		return this.orientation;
 	}

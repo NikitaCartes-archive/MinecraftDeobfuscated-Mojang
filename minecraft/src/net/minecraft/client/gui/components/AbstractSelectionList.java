@@ -110,7 +110,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return this.children;
 	}
 
-	protected final void clearEntries() {
+	protected void clearEntries() {
 		this.children.clear();
 		this.selected = null;
 	}

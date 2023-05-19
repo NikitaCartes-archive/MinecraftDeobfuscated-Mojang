@@ -120,6 +120,11 @@ public class Interaction extends Entity implements Attackable, Targeting {
 	}
 
 	@Override
+	public boolean isIgnoringBlockTriggers() {
+		return true;
+	}
+
+	@Override
 	public boolean skipAttackInteraction(Entity entity) {
 		if (entity instanceof Player player) {
 			this.attack = new Interaction.PlayerAction(player.getUUID(), this.level().getGameTime());

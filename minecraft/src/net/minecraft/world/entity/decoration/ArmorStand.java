@@ -626,6 +626,11 @@ public class ArmorStand extends LivingEntity {
 		return this.isMarker() ? PushReaction.IGNORE : super.getPistonPushReaction();
 	}
 
+	@Override
+	public boolean isIgnoringBlockTriggers() {
+		return this.isMarker();
+	}
+
 	private void setSmall(boolean bl) {
 		this.entityData.set(DATA_CLIENT_FLAGS, this.setBit(this.entityData.get(DATA_CLIENT_FLAGS), 1, bl));
 	}

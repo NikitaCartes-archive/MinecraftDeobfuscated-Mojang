@@ -19,7 +19,13 @@ public class RandomSequence {
 	}
 
 	public RandomSequence(long l, ResourceLocation resourceLocation) {
-		this(new XoroshiroRandomSource(RandomSupport.upgradeSeedTo128bit(l).xor(seedForKey(resourceLocation))));
+		this(createSequence(l, resourceLocation));
+	}
+
+	private static XoroshiroRandomSource createSequence(long l, ResourceLocation resourceLocation) {
+		XoroshiroRandomSource xoroshiroRandomSource = new XoroshiroRandomSource(RandomSupport.upgradeSeedTo128bit(l).xor(seedForKey(resourceLocation)));
+		xoroshiroRandomSource.nextLong();
+		return xoroshiroRandomSource;
 	}
 
 	public static RandomSupport.Seed128bit seedForKey(ResourceLocation resourceLocation) {

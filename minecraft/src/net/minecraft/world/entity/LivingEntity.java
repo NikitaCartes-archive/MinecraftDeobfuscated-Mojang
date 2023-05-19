@@ -35,8 +35,10 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -998,6 +1000,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.effectsDirty = true;
 		if (!this.level().isClientSide) {
 			mobEffectInstance.getEffect().addAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
+			this.sendEffectToRider(mobEffectInstance);
+		}
+	}
+
+	public void sendEffectToRider(MobEffectInstance mobEffectInstance) {
+		if (this.getControllingPassenger() instanceof ServerPlayer serverPlayer) {
+			serverPlayer.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance));
 		}
 	}
 
@@ -1008,12 +1017,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			mobEffect.removeAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
 			mobEffect.addAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
 		}
+
+		if (!this.level().isClientSide) {
+			this.sendEffectToRider(mobEffectInstance);
+		}
 	}
 
 	protected void onEffectRemoved(MobEffectInstance mobEffectInstance) {
 		this.effectsDirty = true;
 		if (!this.level().isClientSide) {
 			mobEffectInstance.getEffect().removeAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
+			if (this.getControllingPassenger() instanceof ServerPlayer serverPlayer) {
+				serverPlayer.connection.send(new ClientboundRemoveMobEffectPacket(this.getId(), mobEffectInstance.getEffect()));
+			}
 		}
 	}
 
@@ -1585,9 +1601,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			}
 
 			if (var9 != 0.0F) {
-				float i = this.getHealth();
-				this.getCombatTracker().recordDamage(damageSource, i, var9);
-				this.setHealth(i - var9);
+				this.getCombatTracker().recordDamage(damageSource, var9);
+				this.setHealth(this.getHealth() - var9);
 				this.setAbsorptionAmount(this.getAbsorptionAmount() - var9);
 				this.gameEvent(GameEvent.ENTITY_DAMAGE);
 			}
@@ -1600,9 +1615,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Nullable
 	public LivingEntity getKillCredit() {
-		if (this.combatTracker.getKiller() != null) {
-			return this.combatTracker.getKiller();
-		} else if (this.lastHurtByPlayer != null) {
+		if (this.lastHurtByPlayer != null) {
 			return this.lastHurtByPlayer;
 		} else {
 			return this.lastHurtByMob != null ? this.lastHurtByMob : null;
@@ -1969,7 +1982,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			boolean bl = this.getDeltaMovement().y <= 0.0;
 			if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
 				d = 0.01;
-				this.resetFallDistance();
 			}
 
 			FluidState fluidState = this.level().getFluidState(this.blockPosition());
@@ -2076,7 +2088,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				double q = vec37.y;
 				if (this.hasEffect(MobEffects.LEVITATION)) {
 					q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
-					this.resetFallDistance();
 				} else if (this.level().isClientSide && !this.level().hasChunkAt(blockPos)) {
 					if (this.getY() > (double)this.level().getMinBuildHeight()) {
 						q = -0.1;
@@ -2519,18 +2530,21 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.noJumpDelay = 0;
 		}
 
-		AABB aABB;
-		label101: {
-			this.level().getProfiler().pop();
-			this.level().getProfiler().push("travel");
-			this.xxa *= 0.98F;
-			this.zza *= 0.98F;
-			this.updateFallFlying();
-			aABB = this.getBoundingBox();
-			Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("travel");
+		this.xxa *= 0.98F;
+		this.zza *= 0.98F;
+		this.updateFallFlying();
+		AABB aABB = this.getBoundingBox();
+		Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
+		if (this.hasEffect(MobEffects.SLOW_FALLING) || this.hasEffect(MobEffects.LEVITATION)) {
+			this.resetFallDistance();
+		}
+
+		label104: {
 			if (this.getControllingPassenger() instanceof Player player && this.isAlive()) {
 				this.travelRidden(player, vec32);
-				break label101;
+				break label104;
 			}
 
 			this.travel(vec32);

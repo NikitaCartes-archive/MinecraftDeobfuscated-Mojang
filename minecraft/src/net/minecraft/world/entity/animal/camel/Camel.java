@@ -459,7 +459,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 	}
 
 	@Override
-	public void positionRider(Entity entity) {
+	protected void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
 		int i = this.getPassengers().indexOf(entity);
 		if (i >= 0) {
 			boolean bl = i == 0;
@@ -476,7 +476,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Rider
 			}
 
 			Vec3 vec3 = new Vec3(0.0, 0.0, (double)f).yRot(-this.yBodyRot * (float) (Math.PI / 180.0));
-			entity.setPos(this.getX() + vec3.x, this.getY() + (double)g, this.getZ() + vec3.z);
+			moveFunction.accept(entity, this.getX() + vec3.x, this.getY() + (double)g, this.getZ() + vec3.z);
 			this.clampRotation(entity);
 		}
 	}

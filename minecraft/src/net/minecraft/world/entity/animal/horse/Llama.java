@@ -158,13 +158,13 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	}
 
 	@Override
-	public void positionRider(Entity entity) {
+	protected void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
 		if (this.hasPassenger(entity)) {
 			float f = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
 			float g = Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0));
 			float h = 0.3F;
-			entity.setPos(
-				this.getX() + (double)(0.3F * g), this.getY() + this.getPassengersRidingOffset() + entity.getMyRidingOffset(), this.getZ() - (double)(0.3F * f)
+			moveFunction.accept(
+				entity, this.getX() + (double)(0.3F * g), this.getY() + this.getPassengersRidingOffset() + entity.getMyRidingOffset(), this.getZ() - (double)(0.3F * f)
 			);
 		}
 	}

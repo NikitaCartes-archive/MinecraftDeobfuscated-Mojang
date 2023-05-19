@@ -57,4 +57,9 @@ public class Marker extends Entity {
 	public PushReaction getPistonPushReaction() {
 		return PushReaction.IGNORE;
 	}
+
+	@Override
+	public boolean isIgnoringBlockTriggers() {
+		return true;
+	}
 }

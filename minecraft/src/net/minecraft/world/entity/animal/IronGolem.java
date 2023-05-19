@@ -7,8 +7,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -16,7 +14,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
@@ -125,28 +122,14 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 			this.offerFlowerTick--;
 		}
 
-		if (this.getDeltaMovement().horizontalDistanceSqr() > 2.5000003E-7F && this.random.nextInt(5) == 0) {
-			int i = Mth.floor(this.getX());
-			int j = Mth.floor(this.getY() - 0.2F);
-			int k = Mth.floor(this.getZ());
-			BlockState blockState = this.level().getBlockState(new BlockPos(i, j, k));
-			if (!blockState.isAir()) {
-				this.level()
-					.addParticle(
-						new BlockParticleOption(ParticleTypes.BLOCK, blockState),
-						this.getX() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(),
-						this.getY() + 0.1,
-						this.getZ() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(),
-						4.0 * ((double)this.random.nextFloat() - 0.5),
-						0.5,
-						((double)this.random.nextFloat() - 0.5) * 4.0
-					);
-			}
-		}
-
 		if (!this.level().isClientSide) {
 			this.updatePersistentAnger((ServerLevel)this.level(), true);
 		}
+	}
+
+	@Override
+	public boolean canSpawnSprintParticle() {
+		return this.getDeltaMovement().horizontalDistanceSqr() > 2.5000003E-7F && this.random.nextInt(5) == 0;
 	}
 
 	@Override

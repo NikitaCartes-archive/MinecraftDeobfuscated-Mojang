@@ -591,7 +591,7 @@ public class ServerPlayer extends Player {
 			Component component = this.getCombatTracker().getDeathMessage();
 			this.connection
 				.send(
-					new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component),
+					new ClientboundPlayerCombatKillPacket(this.getId(), component),
 					PacketSendListener.exceptionallySend(
 						() -> {
 							int i = 256;
@@ -599,7 +599,7 @@ public class ServerPlayer extends Player {
 							Component component2 = Component.translatable("death.attack.message_too_long", Component.literal(string).withStyle(ChatFormatting.YELLOW));
 							Component component3 = Component.translatable("death.attack.even_more_magic", this.getDisplayName())
 								.withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
-							return new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), component3);
+							return new ClientboundPlayerCombatKillPacket(this.getId(), component3);
 						}
 					)
 				);
@@ -612,7 +612,7 @@ public class ServerPlayer extends Player {
 				this.server.getPlayerList().broadcastSystemToAllExceptTeam(this, component);
 			}
 		} else {
-			this.connection.send(new ClientboundPlayerCombatKillPacket(this.getCombatTracker(), CommonComponents.EMPTY));
+			this.connection.send(new ClientboundPlayerCombatKillPacket(this.getId(), CommonComponents.EMPTY));
 		}
 
 		this.removeEntitiesOnShoulder();
@@ -1244,7 +1244,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void moveTo(double d, double e, double f) {
-		this.teleportTo(d, e, f);
+		super.moveTo(d, e, f);
 		this.connection.resetPosition();
 	}
 
@@ -1683,12 +1683,29 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public boolean startRiding(Entity entity, boolean bl) {
-		if (super.startRiding(entity, bl)) {
+		if (!super.startRiding(entity, bl)) {
+			return false;
+		} else {
 			entity.positionRider(this);
 			this.connection.teleport(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+			if (entity instanceof LivingEntity livingEntity) {
+				for (MobEffectInstance mobEffectInstance : livingEntity.getActiveEffects()) {
+					this.connection.send(new ClientboundUpdateMobEffectPacket(entity.getId(), mobEffectInstance));
+				}
+			}
+
 			return true;
-		} else {
-			return false;
+		}
+	}
+
+	@Override
+	public void stopRiding() {
+		Entity entity = this.getVehicle();
+		super.stopRiding();
+		if (entity instanceof LivingEntity livingEntity) {
+			for (MobEffectInstance mobEffectInstance : livingEntity.getActiveEffects()) {
+				this.connection.send(new ClientboundRemoveMobEffectPacket(entity.getId(), mobEffectInstance.getEffect()));
+			}
 		}
 	}
 }

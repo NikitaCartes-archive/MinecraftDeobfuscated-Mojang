@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.RealmsMainScreen;
@@ -67,7 +66,6 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 		AbstractTexture abstractTexture2 = (AbstractTexture)this.byPath.put(resourceLocation, abstractTexture);
 		if (abstractTexture2 != abstractTexture) {
 			if (abstractTexture2 != null && abstractTexture2 != MissingTextureAtlasSprite.getTexture()) {
-				this.tickableTextures.remove(abstractTexture2);
 				this.safeClose(resourceLocation, abstractTexture2);
 			}
 
@@ -79,6 +77,8 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 
 	private void safeClose(ResourceLocation resourceLocation, AbstractTexture abstractTexture) {
 		if (abstractTexture != MissingTextureAtlasSprite.getTexture()) {
+			this.tickableTextures.remove(abstractTexture);
+
 			try {
 				abstractTexture.close();
 			} catch (Exception var4) {
@@ -158,9 +158,9 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 	}
 
 	public void release(ResourceLocation resourceLocation) {
-		AbstractTexture abstractTexture = this.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
-		if (abstractTexture != MissingTextureAtlasSprite.getTexture()) {
-			TextureUtil.releaseTextureId(abstractTexture.getId());
+		AbstractTexture abstractTexture = (AbstractTexture)this.byPath.remove(resourceLocation);
+		if (abstractTexture != null) {
+			this.safeClose(resourceLocation, abstractTexture);
 		}
 	}
 

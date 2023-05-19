@@ -1,8 +1,6 @@
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
@@ -38,11 +36,11 @@ import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ErrorScreen;
+import net.minecraft.client.gui.screens.FaviconTexture;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.CommonComponents;
@@ -62,7 +60,7 @@ import org.slf4j.Logger;
 public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.Entry> {
 	static final Logger LOGGER = LogUtils.getLogger();
 	static final DateFormat DATE_FORMAT = new SimpleDateFormat();
-	static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
+	private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
 	static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/world_selection.png");
 	static final Component FROM_NEWER_TOOLTIP_1 = Component.translatable("selectWorld.tooltip.fromNewerVersion1").withStyle(ChatFormatting.RED);
 	static final Component FROM_NEWER_TOOLTIP_2 = Component.translatable("selectWorld.tooltip.fromNewerVersion2").withStyle(ChatFormatting.RED);
@@ -91,6 +89,12 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 		}
 
 		this.handleNewLevels(this.pollLevelsIgnoreErrors());
+	}
+
+	@Override
+	protected void clearEntries() {
+		this.children().forEach(WorldSelectionList.Entry::close);
+		super.clearEntries();
 	}
 
 	@Nullable
@@ -284,27 +288,22 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 		private final Minecraft minecraft;
 		private final SelectWorldScreen screen;
 		private final LevelSummary summary;
-		private final ResourceLocation iconLocation;
+		private final FaviconTexture icon;
 		@Nullable
 		private Path iconFile;
-		@Nullable
-		private final DynamicTexture icon;
 		private long lastClickTime;
 
 		public WorldListEntry(WorldSelectionList worldSelectionList2, LevelSummary levelSummary) {
 			this.minecraft = worldSelectionList2.minecraft;
 			this.screen = worldSelectionList2.getScreen();
 			this.summary = levelSummary;
-			String string = levelSummary.getLevelId();
-			this.iconLocation = new ResourceLocation(
-				"minecraft", "worlds/" + Util.sanitizeName(string, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(string) + "/icon"
-			);
+			this.icon = FaviconTexture.forWorld(this.minecraft.getTextureManager(), levelSummary.getLevelId());
 			this.iconFile = levelSummary.getIcon();
 			if (!Files.isRegularFile(this.iconFile, new LinkOption[0])) {
 				this.iconFile = null;
 			}
 
-			this.icon = this.loadServerIcon();
+			this.loadIcon();
 		}
 
 		@Override
@@ -339,9 +338,8 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 			guiGraphics.drawString(this.minecraft.font, string, k + 32 + 3, j + 1, 16777215, false);
 			guiGraphics.drawString(this.minecraft.font, string2, k + 32 + 3, j + 9 + 3, 8421504, false);
 			guiGraphics.drawString(this.minecraft.font, component, k + 32 + 3, j + 9 + 9 + 3, 8421504, false);
-			ResourceLocation resourceLocation = this.icon != null ? this.iconLocation : WorldSelectionList.ICON_MISSING;
 			RenderSystem.enableBlend();
-			guiGraphics.blit(resourceLocation, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
+			guiGraphics.blit(this.icon.textureLocation(), k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			RenderSystem.disableBlend();
 			if (this.minecraft.options.touchscreen().get() || bl) {
 				guiGraphics.fill(k, j, k + 32, j + 32, -1601138544);
@@ -571,54 +569,41 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 			this.minecraft.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("selectWorld.data_read")));
 		}
 
-		@Nullable
-		private DynamicTexture loadServerIcon() {
+		private void loadIcon() {
 			boolean bl = this.iconFile != null && Files.isRegularFile(this.iconFile, new LinkOption[0]);
 			if (bl) {
 				try {
 					InputStream inputStream = Files.newInputStream(this.iconFile);
 
-					DynamicTexture var5;
 					try {
-						NativeImage nativeImage = NativeImage.read(inputStream);
-						Preconditions.checkState(nativeImage.getWidth() == 64, "Must be 64 pixels wide");
-						Preconditions.checkState(nativeImage.getHeight() == 64, "Must be 64 pixels high");
-						DynamicTexture dynamicTexture = new DynamicTexture(nativeImage);
-						this.minecraft.getTextureManager().register(this.iconLocation, dynamicTexture);
-						var5 = dynamicTexture;
-					} catch (Throwable var7) {
+						this.icon.upload(NativeImage.read(inputStream));
+					} catch (Throwable var6) {
 						if (inputStream != null) {
 							try {
 								inputStream.close();
-							} catch (Throwable var6) {
-								var7.addSuppressed(var6);
+							} catch (Throwable var5) {
+								var6.addSuppressed(var5);
 							}
 						}
 
-						throw var7;
+						throw var6;
 					}
 
 					if (inputStream != null) {
 						inputStream.close();
 					}
-
-					return var5;
-				} catch (Throwable var8) {
-					WorldSelectionList.LOGGER.error("Invalid icon for world {}", this.summary.getLevelId(), var8);
+				} catch (Throwable var7) {
+					WorldSelectionList.LOGGER.error("Invalid icon for world {}", this.summary.getLevelId(), var7);
 					this.iconFile = null;
-					return null;
 				}
 			} else {
-				this.minecraft.getTextureManager().release(this.iconLocation);
-				return null;
+				this.icon.clear();
 			}
 		}
 
 		@Override
 		public void close() {
-			if (this.icon != null) {
-				this.icon.close();
-			}
+			this.icon.close();
 		}
 
 		public String getLevelName() {

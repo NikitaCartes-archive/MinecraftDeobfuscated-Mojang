@@ -167,13 +167,13 @@ public class Chicken extends Animal {
 	}
 
 	@Override
-	public void positionRider(Entity entity) {
-		super.positionRider(entity);
+	protected void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
+		super.positionRider(entity, moveFunction);
 		float f = Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0));
 		float g = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
 		float h = 0.1F;
 		float i = 0.0F;
-		entity.setPos(this.getX() + (double)(0.1F * f), this.getY(0.5) + entity.getMyRidingOffset() + 0.0, this.getZ() - (double)(0.1F * g));
+		moveFunction.accept(entity, this.getX() + (double)(0.1F * f), this.getY(0.5) + entity.getMyRidingOffset() + 0.0, this.getZ() - (double)(0.1F * g));
 		if (entity instanceof LivingEntity) {
 			((LivingEntity)entity).yBodyRot = this.yBodyRot;
 		}
