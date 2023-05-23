@@ -20,10 +20,14 @@ public final class RandomSupport {
 		return l ^ l >>> 31;
 	}
 
-	public static RandomSupport.Seed128bit upgradeSeedTo128bit(long l) {
+	public static RandomSupport.Seed128bit upgradeSeedTo128bitUnmixed(long l) {
 		long m = l ^ 7640891576956012809L;
 		long n = m + -7046029254386353131L;
-		return new RandomSupport.Seed128bit(mixStafford13(m), mixStafford13(n));
+		return new RandomSupport.Seed128bit(m, n);
+	}
+
+	public static RandomSupport.Seed128bit upgradeSeedTo128bit(long l) {
+		return upgradeSeedTo128bitUnmixed(l).mixed();
 	}
 
 	public static RandomSupport.Seed128bit seedFromHashOf(String string) {
@@ -44,6 +48,10 @@ public final class RandomSupport {
 
 		public RandomSupport.Seed128bit xor(RandomSupport.Seed128bit seed128bit) {
 			return this.xor(seed128bit.seedLo, seed128bit.seedHi);
+		}
+
+		public RandomSupport.Seed128bit mixed() {
+			return new RandomSupport.Seed128bit(RandomSupport.mixStafford13(this.seedLo), RandomSupport.mixStafford13(this.seedHi));
 		}
 	}
 }

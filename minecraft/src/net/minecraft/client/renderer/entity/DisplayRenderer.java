@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,8 +125,7 @@ public abstract class DisplayRenderer<T extends Display, S> extends EntityRender
 			int i,
 			float f
 		) {
-			Matrix4f matrix4f = poseStack.last().pose();
-			matrix4f.rotate((float) Math.PI, 0.0F, 1.0F, 0.0F);
+			poseStack.mulPose(Axis.YP.rotation((float) Math.PI));
 			this.itemRenderer
 				.renderStatic(
 					itemRenderState.itemStack(),

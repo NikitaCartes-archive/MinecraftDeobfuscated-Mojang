@@ -24,11 +24,9 @@ import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -260,12 +258,6 @@ public class ServerEntity {
 
 			if (!list.isEmpty()) {
 				consumer.accept(new ClientboundSetEquipmentPacket(this.entity.getId(), list));
-			}
-		}
-
-		if (this.entity instanceof LivingEntity livingEntity && livingEntity.getControllingPassenger() == serverPlayer) {
-			for (MobEffectInstance mobEffectInstance : livingEntity.getActiveEffects()) {
-				consumer.accept(new ClientboundUpdateMobEffectPacket(this.entity.getId(), mobEffectInstance));
 			}
 		}
 

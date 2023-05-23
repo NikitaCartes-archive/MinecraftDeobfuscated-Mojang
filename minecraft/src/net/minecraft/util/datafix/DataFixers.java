@@ -1143,7 +1143,9 @@ public class DataFixers {
 		Schema schema186 = dataFixerBuilder.addSchema(3450, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(
 			new RemapChunkStatusFix(
-				schema186, "Remove liquid_carvers and heightmap chunk statuses", createRenamer(Map.of("liquid_carvers", "carvers", "heightmaps", "spawn"))
+				schema186,
+				"Remove liquid_carvers and heightmap chunk statuses",
+				createRenamer(Map.of("minecraft:liquid_carvers", "minecraft:carvers", "minecraft:heightmaps", "minecraft:spawn"))
 			)
 		);
 		Schema schema187 = dataFixerBuilder.addSchema(3451, SAME_NAMESPACED);

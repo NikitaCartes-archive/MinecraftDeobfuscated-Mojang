@@ -6,7 +6,9 @@ import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.serialization.Dynamic;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class RemapChunkStatusFix extends DataFix {
 	private final String name;
@@ -31,6 +33,7 @@ public class RemapChunkStatusFix extends DataFix {
 	}
 
 	private <T> Dynamic<T> fixStatus(Dynamic<T> dynamic) {
-		return DataFixUtils.orElse(dynamic.asString().result().map(this.mapper).map(dynamic::createString), dynamic);
+		Optional<Dynamic<T>> optional = dynamic.asString().result().map(NamespacedSchema::ensureNamespaced).map(this.mapper).map(dynamic::createString);
+		return DataFixUtils.orElse(optional, dynamic);
 	}
 }

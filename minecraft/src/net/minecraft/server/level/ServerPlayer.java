@@ -956,11 +956,11 @@ public class ServerPlayer extends Player {
 		}
 	}
 
-	public void doCheckFallDamage(double d, boolean bl) {
+	public void doCheckFallDamage(double d, double e, double f, boolean bl) {
 		if (!this.touchingUnloadedChunk()) {
-			this.checkSupportingBlock(bl);
+			this.checkSupportingBlock(bl, new Vec3(d, e, f));
 			BlockPos blockPos = this.getOnPosLegacy();
-			super.checkFallDamage(d, bl, this.level().getBlockState(blockPos), blockPos);
+			super.checkFallDamage(e, bl, this.level().getBlockState(blockPos), blockPos);
 		}
 	}
 

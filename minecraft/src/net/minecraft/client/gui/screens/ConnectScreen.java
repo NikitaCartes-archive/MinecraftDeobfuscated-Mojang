@@ -50,13 +50,17 @@ public class ConnectScreen extends Screen {
 	}
 
 	public static void startConnecting(Screen screen, Minecraft minecraft, ServerAddress serverAddress, ServerData serverData, boolean bl) {
-		ConnectScreen connectScreen = new ConnectScreen(screen, bl ? QuickPlay.ERROR_TITLE : CommonComponents.CONNECT_FAILED);
-		minecraft.clearLevel();
-		minecraft.prepareForMultiplayer();
-		minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(serverData != null ? serverData.ip : serverAddress.getHost()));
-		minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.MULTIPLAYER, serverData.ip, serverData.name);
-		minecraft.setScreen(connectScreen);
-		connectScreen.connect(minecraft, serverAddress, serverData);
+		if (minecraft.screen instanceof ConnectScreen) {
+			LOGGER.error("Attempt to connect while already connecting");
+		} else {
+			ConnectScreen connectScreen = new ConnectScreen(screen, bl ? QuickPlay.ERROR_TITLE : CommonComponents.CONNECT_FAILED);
+			minecraft.clearLevel();
+			minecraft.prepareForMultiplayer();
+			minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(serverData != null ? serverData.ip : serverAddress.getHost()));
+			minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.MULTIPLAYER, serverData.ip, serverData.name);
+			minecraft.setScreen(connectScreen);
+			connectScreen.connect(minecraft, serverAddress, serverData);
+		}
 	}
 
 	private void connect(Minecraft minecraft, ServerAddress serverAddress, @Nullable ServerData serverData) {
@@ -83,28 +87,34 @@ public class ConnectScreen extends Screen {
 					}
 
 					inetSocketAddress = (InetSocketAddress)optional.get();
-					ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
-					ConnectScreen.this.connection
-						.setListener(
-							new ClientHandshakePacketListenerImpl(
-								ConnectScreen.this.connection, minecraft, serverData, ConnectScreen.this.parent, false, null, ConnectScreen.this::updateStatus
-							)
-						);
-					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
-					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), Optional.ofNullable(minecraft.getUser().getProfileId())));
-				} catch (Exception var6) {
+					synchronized (ConnectScreen.this) {
+						if (ConnectScreen.this.aborted) {
+							return;
+						}
+
+						ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
+						ConnectScreen.this.connection
+							.setListener(
+								new ClientHandshakePacketListenerImpl(
+									ConnectScreen.this.connection, minecraft, serverData, ConnectScreen.this.parent, false, null, ConnectScreen.this::updateStatus
+								)
+							);
+						ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
+						ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), Optional.ofNullable(minecraft.getUser().getProfileId())));
+					}
+				} catch (Exception var7) {
 					if (ConnectScreen.this.aborted) {
 						return;
 					}
 
 					Exception exception3;
-					if (var6.getCause() instanceof Exception exception2) {
+					if (var7.getCause() instanceof Exception exception2) {
 						exception3 = exception2;
 					} else {
-						exception3 = var6;
+						exception3 = var7;
 					}
 
-					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var6);
+					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var7);
 					String string = inetSocketAddress == null
 						? exception3.getMessage()
 						: exception3.getMessage()
@@ -145,9 +155,11 @@ public class ConnectScreen extends Screen {
 	@Override
 	protected void init() {
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
-			this.aborted = true;
-			if (this.connection != null) {
-				this.connection.disconnect(Component.translatable("connect.aborted"));
+			synchronized (this) {
+				this.aborted = true;
+				if (this.connection != null) {
+					this.connection.disconnect(Component.translatable("connect.aborted"));
+				}
 			}
 
 			this.minecraft.setScreen(this.parent);

@@ -14,7 +14,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownTrident;
@@ -288,11 +287,6 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	@Override
 	public DamageSource getFallDamageSource(Entity entity) {
 		return entity.damageSources().fallingStalactite(entity);
-	}
-
-	@Override
-	public Predicate<Entity> getHurtsEntitySelector() {
-		return EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(EntitySelector.LIVING_ENTITY_STILL_ALIVE);
 	}
 
 	private static void spawnFallingStalactite(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos) {

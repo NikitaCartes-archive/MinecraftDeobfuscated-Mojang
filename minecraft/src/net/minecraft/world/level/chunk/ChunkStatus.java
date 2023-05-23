@@ -246,7 +246,6 @@ public class ChunkStatus {
 			intArrayList.add(0, i);
 		}
 	});
-	private final String name;
 	private final int index;
 	private final ChunkStatus parent;
 	private final ChunkStatus.GenerationTask generationTask;
@@ -304,7 +303,7 @@ public class ChunkStatus {
 		ChunkStatus.GenerationTask generationTask,
 		ChunkStatus.LoadingTask loadingTask
 	) {
-		return Registry.register(BuiltInRegistries.CHUNK_STATUS, string, new ChunkStatus(string, chunkStatus, i, bl, enumSet, chunkType, generationTask, loadingTask));
+		return Registry.register(BuiltInRegistries.CHUNK_STATUS, string, new ChunkStatus(chunkStatus, i, bl, enumSet, chunkType, generationTask, loadingTask));
 	}
 
 	public static List<ChunkStatus> getStatusList() {
@@ -341,7 +340,6 @@ public class ChunkStatus {
 	}
 
 	ChunkStatus(
-		String string,
 		@Nullable ChunkStatus chunkStatus,
 		int i,
 		boolean bl,
@@ -350,7 +348,6 @@ public class ChunkStatus {
 		ChunkStatus.GenerationTask generationTask,
 		ChunkStatus.LoadingTask loadingTask
 	) {
-		this.name = string;
 		this.parent = chunkStatus == null ? this : chunkStatus;
 		this.generationTask = generationTask;
 		this.loadingTask = loadingTask;
@@ -363,10 +360,6 @@ public class ChunkStatus {
 
 	public int getIndex() {
 		return this.index;
-	}
-
-	public String getName() {
-		return this.name;
 	}
 
 	public ChunkStatus getParent() {
@@ -383,7 +376,7 @@ public class ChunkStatus {
 		List<ChunkAccess> list
 	) {
 		ChunkAccess chunkAccess = (ChunkAccess)list.get(list.size() / 2);
-		ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onChunkGenerate(chunkAccess.getPos(), serverLevel.dimension(), this.name);
+		ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onChunkGenerate(chunkAccess.getPos(), serverLevel.dimension(), this.toString());
 		return this.generationTask
 			.doWork(this, executor, serverLevel, chunkGenerator, structureTemplateManager, threadedLevelLightEngine, function, list, chunkAccess)
 			.thenApply(either -> {

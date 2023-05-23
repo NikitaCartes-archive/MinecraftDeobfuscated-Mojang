@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.LongStream;
@@ -342,6 +343,16 @@ public class GameTestHelper {
 		BlockState blockState = this.getBlockState(blockPos);
 		if (!predicate.test(blockState)) {
 			throw new GameTestAssertPosException((String)supplier.get(), this.absolutePos(blockPos), blockPos, this.testInfo.getTick());
+		}
+	}
+
+	public void assertRedstoneSignal(BlockPos blockPos, Direction direction, IntPredicate intPredicate, Supplier<String> supplier) {
+		BlockPos blockPos2 = this.absolutePos(blockPos);
+		ServerLevel serverLevel = this.getLevel();
+		BlockState blockState = serverLevel.getBlockState(blockPos2);
+		int i = blockState.getSignal(serverLevel, blockPos2, direction);
+		if (!intPredicate.test(i)) {
+			throw new GameTestAssertPosException((String)supplier.get(), blockPos2, blockPos, this.testInfo.getTick());
 		}
 	}
 

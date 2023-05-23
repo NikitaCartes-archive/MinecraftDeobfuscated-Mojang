@@ -2141,7 +2141,7 @@ public class Blocks {
 	);
 	public static final Block CARVED_PUMPKIN = register(
 		"carved_pumpkin",
-		new CarvedPumpkinBlock(
+		new EquipableCarvedPumpkinBlock(
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.COLOR_ORANGE)
 				.strength(1.0F)

@@ -637,7 +637,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getChunkRangeFuture(
 			chunkHolder, chunkStatus.getRange(), i -> this.getDependencyStatus(chunkStatus, i)
 		);
-		this.level.getProfiler().incrementCounter((Supplier<String>)(() -> "chunkGenerate " + chunkStatus.getName()));
+		this.level.getProfiler().incrementCounter((Supplier<String>)(() -> "chunkGenerate " + chunkStatus));
 		Executor executor = runnable -> this.worldgenMailbox.tell(ChunkTaskPriorityQueueSorter.message(chunkHolder, runnable));
 		return completableFuture.thenComposeAsync(
 			either -> either.map(

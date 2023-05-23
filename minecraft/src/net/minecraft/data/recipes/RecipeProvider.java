@@ -283,14 +283,14 @@ public abstract class RecipeProvider implements DataProvider {
 			.save(consumer);
 	}
 
-	protected static void colorBlockWithDye(Consumer<FinishedRecipe> consumer, List<Item> list, List<Item> list2) {
+	protected static void colorBlockWithDye(Consumer<FinishedRecipe> consumer, List<Item> list, List<Item> list2, String string) {
 		for (int i = 0; i < list.size(); i++) {
 			Item item = (Item)list.get(i);
 			Item item2 = (Item)list2.get(i);
 			ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, item2)
 				.requires(item)
 				.requires(Ingredient.of(list2.stream().filter(item2x -> !item2x.equals(item2)).map(ItemStack::new)))
-				.group(BuiltInRegistries.ITEM.getKey(item2).getPath())
+				.group(string)
 				.unlockedBy("has_needed_dye", has(item))
 				.save(consumer, "dye_" + getItemName(item2));
 		}

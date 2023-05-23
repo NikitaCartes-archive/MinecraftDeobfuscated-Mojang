@@ -886,56 +886,55 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 						double i = this.player.getX();
 						double j = this.player.getY();
 						double k = this.player.getZ();
-						double l = this.player.getY();
-						double m = d - this.firstGoodX;
-						double n = e - this.firstGoodY;
-						double o = f - this.firstGoodZ;
-						double p = this.player.getDeltaMovement().lengthSqr();
-						double q = m * m + n * n + o * o;
+						double l = d - this.firstGoodX;
+						double m = e - this.firstGoodY;
+						double n = f - this.firstGoodZ;
+						double o = this.player.getDeltaMovement().lengthSqr();
+						double p = l * l + m * m + n * n;
 						if (this.player.isSleeping()) {
-							if (q > 1.0) {
+							if (p > 1.0) {
 								this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), g, h);
 							}
 						} else {
 							this.receivedMovePacketCount++;
-							int r = this.receivedMovePacketCount - this.knownMovePacketCount;
-							if (r > 5) {
-								LOGGER.debug("{} is sending move packets too frequently ({} packets since last tick)", this.player.getName().getString(), r);
-								r = 1;
+							int q = this.receivedMovePacketCount - this.knownMovePacketCount;
+							if (q > 5) {
+								LOGGER.debug("{} is sending move packets too frequently ({} packets since last tick)", this.player.getName().getString(), q);
+								q = 1;
 							}
 
 							if (!this.player.isChangingDimension()
 								&& (!this.player.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !this.player.isFallFlying())) {
-								float s = this.player.isFallFlying() ? 300.0F : 100.0F;
-								if (q - p > (double)(s * (float)r) && !this.isSingleplayerOwner()) {
-									LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName().getString(), m, n, o);
+								float r = this.player.isFallFlying() ? 300.0F : 100.0F;
+								if (p - o > (double)(r * (float)q) && !this.isSingleplayerOwner()) {
+									LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName().getString(), l, m, n);
 									this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), this.player.getYRot(), this.player.getXRot());
 									return;
 								}
 							}
 
 							AABB aABB = this.player.getBoundingBox();
-							m = d - this.lastGoodX;
-							n = e - this.lastGoodY;
-							o = f - this.lastGoodZ;
-							boolean bl = n > 0.0;
+							l = d - this.lastGoodX;
+							m = e - this.lastGoodY;
+							n = f - this.lastGoodZ;
+							boolean bl = m > 0.0;
 							if (this.player.onGround() && !serverboundMovePlayerPacket.isOnGround() && bl) {
 								this.player.jumpFromGround();
 							}
 
 							boolean bl2 = this.player.verticalCollisionBelow;
-							this.player.move(MoverType.PLAYER, new Vec3(m, n, o));
-							m = d - this.player.getX();
-							n = e - this.player.getY();
-							if (n > -0.5 || n < 0.5) {
-								n = 0.0;
+							this.player.move(MoverType.PLAYER, new Vec3(l, m, n));
+							l = d - this.player.getX();
+							m = e - this.player.getY();
+							if (m > -0.5 || m < 0.5) {
+								m = 0.0;
 							}
 
-							o = f - this.player.getZ();
-							q = m * m + n * n + o * o;
+							n = f - this.player.getZ();
+							p = l * l + m * m + n * n;
 							boolean bl3 = false;
 							if (!this.player.isChangingDimension()
-								&& q > 0.0625
+								&& p > 0.0625
 								&& !this.player.isSleeping()
 								&& !this.player.gameMode.isCreative()
 								&& this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR) {
@@ -947,7 +946,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 								|| this.player.isSleeping()
 								|| (!bl3 || !serverLevel.noCollision(this.player, aABB)) && !this.isPlayerCollidingWithAnythingNew(serverLevel, aABB, d, e, f)) {
 								this.player.absMoveTo(d, e, f, g, h);
-								this.clientIsFloating = n >= -0.03125
+								this.clientIsFloating = m >= -0.03125
 									&& !bl2
 									&& this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR
 									&& !this.server.isFlightAllowed()
@@ -957,8 +956,11 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 									&& !this.player.isAutoSpinAttack()
 									&& this.noBlocksAround(this.player);
 								this.player.serverLevel().getChunkSource().move(this.player);
-								this.player.doCheckFallDamage(this.player.getY() - l, serverboundMovePlayerPacket.isOnGround());
-								this.player.setOnGround(serverboundMovePlayerPacket.isOnGround());
+								this.player.doCheckFallDamage(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k, serverboundMovePlayerPacket.isOnGround());
+								this.player
+									.setOnGroundWithKnownMovement(
+										serverboundMovePlayerPacket.isOnGround(), new Vec3(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k)
+									);
 								if (bl) {
 									this.player.resetFallDistance();
 								}
@@ -969,7 +971,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 								this.lastGoodZ = this.player.getZ();
 							} else {
 								this.teleport(i, j, k, g, h);
-								this.player.doCheckFallDamage(this.player.getY() - l, serverboundMovePlayerPacket.isOnGround());
+								this.player.doCheckFallDamage(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k, serverboundMovePlayerPacket.isOnGround());
 							}
 						}
 					}

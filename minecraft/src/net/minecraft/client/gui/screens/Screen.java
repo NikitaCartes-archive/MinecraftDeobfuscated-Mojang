@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -84,6 +85,11 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	private NarratableEntry lastNarratable;
 	@Nullable
 	private Screen.DeferredTooltipRendering deferredTooltipRendering;
+	protected final Executor screenExecutor = runnable -> this.minecraft.execute(() -> {
+			if (this.minecraft.screen == this) {
+				runnable.run();
+			}
+		});
 
 	protected Screen(Component component) {
 		this.title = component;

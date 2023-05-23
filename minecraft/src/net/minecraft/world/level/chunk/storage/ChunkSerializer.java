@@ -278,7 +278,7 @@ public class ChunkSerializer {
 		compoundTag.putInt("zPos", chunkPos.z);
 		compoundTag.putLong("LastUpdate", serverLevel.getGameTime());
 		compoundTag.putLong("InhabitedTime", chunkAccess.getInhabitedTime());
-		compoundTag.putString("Status", chunkAccess.getStatus().getName());
+		compoundTag.putString("Status", BuiltInRegistries.CHUNK_STATUS.getKey(chunkAccess.getStatus()).toString());
 		BlendingData blendingData = chunkAccess.getBlendingData();
 		if (blendingData != null) {
 			BlendingData.CODEC.encodeStart(NbtOps.INSTANCE, blendingData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("blending_data", tag));

@@ -2,9 +2,7 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -25,7 +23,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> {
@@ -77,92 +74,70 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
-		Lighting.setupForFlatItems();
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
 		guiGraphics.blit(ENCHANTING_TABLE_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
-		int m = (int)this.minecraft.getWindow().getGuiScale();
-		RenderSystem.viewport((this.width - 320) / 2 * m, (this.height - 240) / 2 * m, 320 * m, 240 * m);
-		Matrix4f matrix4f = new Matrix4f().translation(-0.34F, 0.23F, 0.0F).perspective((float) (Math.PI / 2), 1.3333334F, 9.0F, 80.0F);
-		RenderSystem.backupProjectionMatrix();
-		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.DISTANCE_TO_ORIGIN);
+		this.renderBook(guiGraphics, k, l, f);
+		EnchantmentNames.getInstance().initSeed((long)this.menu.getEnchantmentSeed());
+		int m = this.menu.getGoldCount();
+
+		for (int n = 0; n < 3; n++) {
+			int o = k + 60;
+			int p = o + 20;
+			int q = this.menu.costs[n];
+			if (q == 0) {
+				guiGraphics.blit(ENCHANTING_TABLE_LOCATION, o, l + 14 + 19 * n, 0, 185, 108, 19);
+			} else {
+				String string = q + "";
+				int r = 86 - this.font.width(string);
+				FormattedText formattedText = EnchantmentNames.getInstance().getRandomName(this.font, r);
+				int s = 6839882;
+				if ((m < n + 1 || this.minecraft.player.experienceLevel < q) && !this.minecraft.player.getAbilities().instabuild) {
+					guiGraphics.blit(ENCHANTING_TABLE_LOCATION, o, l + 14 + 19 * n, 0, 185, 108, 19);
+					guiGraphics.blit(ENCHANTING_TABLE_LOCATION, o + 1, l + 15 + 19 * n, 16 * n, 239, 16, 16);
+					guiGraphics.drawWordWrap(this.font, formattedText, p, l + 16 + 19 * n, r, (s & 16711422) >> 1);
+					s = 4226832;
+				} else {
+					int t = i - (k + 60);
+					int u = j - (l + 14 + 19 * n);
+					if (t >= 0 && u >= 0 && t < 108 && u < 19) {
+						guiGraphics.blit(ENCHANTING_TABLE_LOCATION, o, l + 14 + 19 * n, 0, 204, 108, 19);
+						s = 16777088;
+					} else {
+						guiGraphics.blit(ENCHANTING_TABLE_LOCATION, o, l + 14 + 19 * n, 0, 166, 108, 19);
+					}
+
+					guiGraphics.blit(ENCHANTING_TABLE_LOCATION, o + 1, l + 15 + 19 * n, 16 * n, 223, 16, 16);
+					guiGraphics.drawWordWrap(this.font, formattedText, p, l + 16 + 19 * n, r, s);
+					s = 8453920;
+				}
+
+				guiGraphics.drawString(this.font, string, p + 86 - this.font.width(string), l + 16 + 19 * n + 7, s);
+			}
+		}
+	}
+
+	private void renderBook(GuiGraphics guiGraphics, int i, int j, float f) {
+		float g = Mth.lerp(f, this.oOpen, this.open);
+		float h = Mth.lerp(f, this.oFlip, this.flip);
+		Lighting.setupForEntityInInventory();
 		guiGraphics.pose().pushPose();
-		guiGraphics.pose().setIdentity();
-		guiGraphics.pose().translate(0.0F, 3.3F, 1984.0F);
-		float g = 5.0F;
-		guiGraphics.pose().scale(5.0F, 5.0F, 5.0F);
-		guiGraphics.pose().mulPose(Axis.ZP.rotationDegrees(180.0F));
-		guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(20.0F));
-		float h = Mth.lerp(f, this.oOpen, this.open);
-		guiGraphics.pose().translate((1.0F - h) * 0.2F, (1.0F - h) * 0.1F, (1.0F - h) * 0.25F);
-		float n = -(1.0F - h) * 90.0F - 90.0F;
-		guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(n));
+		guiGraphics.pose().translate((float)i + 33.0F, (float)j + 31.0F, 100.0F);
+		float k = 40.0F;
+		guiGraphics.pose().scale(-40.0F, 40.0F, 40.0F);
+		guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(25.0F));
+		guiGraphics.pose().translate((1.0F - g) * 0.2F, (1.0F - g) * 0.1F, (1.0F - g) * 0.25F);
+		float l = -(1.0F - g) * 90.0F - 90.0F;
+		guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(l));
 		guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(180.0F));
-		float o = Mth.lerp(f, this.oFlip, this.flip) + 0.25F;
-		float p = Mth.lerp(f, this.oFlip, this.flip) + 0.75F;
-		o = (o - (float)Mth.floor(o)) * 1.6F - 0.3F;
-		p = (p - (float)Mth.floor(p)) * 1.6F - 0.3F;
-		if (o < 0.0F) {
-			o = 0.0F;
-		}
-
-		if (p < 0.0F) {
-			p = 0.0F;
-		}
-
-		if (o > 1.0F) {
-			o = 1.0F;
-		}
-
-		if (p > 1.0F) {
-			p = 1.0F;
-		}
-
-		this.bookModel.setupAnim(0.0F, o, p, h);
+		float m = Mth.clamp(Mth.frac(h + 0.25F) * 1.6F - 0.3F, 0.0F, 1.0F);
+		float n = Mth.clamp(Mth.frac(h + 0.75F) * 1.6F - 0.3F, 0.0F, 1.0F);
+		this.bookModel.setupAnim(0.0F, m, n, g);
 		VertexConsumer vertexConsumer = guiGraphics.bufferSource().getBuffer(this.bookModel.renderType(ENCHANTING_BOOK_LOCATION));
 		this.bookModel.renderToBuffer(guiGraphics.pose(), vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		guiGraphics.flush();
 		guiGraphics.pose().popPose();
-		RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
-		RenderSystem.restoreProjectionMatrix();
 		Lighting.setupFor3DItems();
-		EnchantmentNames.getInstance().initSeed((long)this.menu.getEnchantmentSeed());
-		int q = this.menu.getGoldCount();
-
-		for (int r = 0; r < 3; r++) {
-			int s = k + 60;
-			int t = s + 20;
-			int u = this.menu.costs[r];
-			if (u == 0) {
-				guiGraphics.blit(ENCHANTING_TABLE_LOCATION, s, l + 14 + 19 * r, 0, 185, 108, 19);
-			} else {
-				String string = u + "";
-				int v = 86 - this.font.width(string);
-				FormattedText formattedText = EnchantmentNames.getInstance().getRandomName(this.font, v);
-				int w = 6839882;
-				if ((q < r + 1 || this.minecraft.player.experienceLevel < u) && !this.minecraft.player.getAbilities().instabuild) {
-					guiGraphics.blit(ENCHANTING_TABLE_LOCATION, s, l + 14 + 19 * r, 0, 185, 108, 19);
-					guiGraphics.blit(ENCHANTING_TABLE_LOCATION, s + 1, l + 15 + 19 * r, 16 * r, 239, 16, 16);
-					guiGraphics.drawWordWrap(this.font, formattedText, t, l + 16 + 19 * r, v, (w & 16711422) >> 1);
-					w = 4226832;
-				} else {
-					int x = i - (k + 60);
-					int y = j - (l + 14 + 19 * r);
-					if (x >= 0 && y >= 0 && x < 108 && y < 19) {
-						guiGraphics.blit(ENCHANTING_TABLE_LOCATION, s, l + 14 + 19 * r, 0, 204, 108, 19);
-						w = 16777088;
-					} else {
-						guiGraphics.blit(ENCHANTING_TABLE_LOCATION, s, l + 14 + 19 * r, 0, 166, 108, 19);
-					}
-
-					guiGraphics.blit(ENCHANTING_TABLE_LOCATION, s + 1, l + 15 + 19 * r, 16 * r, 223, 16, 16);
-					guiGraphics.drawWordWrap(this.font, formattedText, t, l + 16 + 19 * r, v, w);
-					w = 8453920;
-				}
-
-				guiGraphics.drawString(this.font, string, t + 86 - this.font.width(string), l + 16 + 19 * r + 7, w);
-			}
-		}
 	}
 
 	@Override

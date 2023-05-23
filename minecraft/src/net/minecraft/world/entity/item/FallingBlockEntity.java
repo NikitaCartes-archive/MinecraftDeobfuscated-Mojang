@@ -229,16 +229,10 @@ public class FallingBlockEntity extends Entity {
 			if (i < 0) {
 				return false;
 			} else {
-				Predicate<Entity> predicate;
-				DamageSource damageSource2;
-				if (this.blockState.getBlock() instanceof Fallable fallable) {
-					predicate = fallable.getHurtsEntitySelector();
-					damageSource2 = fallable.getFallDamageSource(this);
-				} else {
-					predicate = EntitySelector.NO_SPECTATORS;
-					damageSource2 = this.damageSources().fallingBlock(this);
-				}
-
+				Predicate<Entity> predicate = EntitySelector.NO_CREATIVE_OR_SPECTATOR.and(EntitySelector.LIVING_ENTITY_STILL_ALIVE);
+				DamageSource damageSource2 = this.blockState.getBlock() instanceof Fallable fallable
+					? fallable.getFallDamageSource(this)
+					: this.damageSources().fallingBlock(this);
 				float h = (float)Math.min(Mth.floor((float)i * this.fallDamagePerDistance), this.fallDamageMax);
 				this.level().getEntities(this, this.getBoundingBox(), predicate).forEach(entity -> entity.hurt(damageSource2, h));
 				boolean bl = this.blockState.is(BlockTags.ANVIL);
