@@ -68,6 +68,14 @@ public class KeyMapping implements Comparable<KeyMapping> {
 		}
 	}
 
+	public static void resetToggleKeys() {
+		for (KeyMapping keyMapping : ALL.values()) {
+			if (keyMapping instanceof ToggleKeyMapping toggleKeyMapping) {
+				toggleKeyMapping.reset();
+			}
+		}
+	}
+
 	public static void resetMapping() {
 		MAP.clear();
 

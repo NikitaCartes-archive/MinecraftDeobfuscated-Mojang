@@ -669,7 +669,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.adventure.trim_with_all_exclusive_armor_patterns.title"),
 				Component.translatable("advancements.adventure.trim_with_all_exclusive_armor_patterns.description"),
 				null,
-				FrameType.TASK,
+				FrameType.CHALLENGE,
 				true,
 				true,
 				false

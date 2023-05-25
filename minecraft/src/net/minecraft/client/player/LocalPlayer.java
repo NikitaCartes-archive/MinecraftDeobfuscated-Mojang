@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
@@ -305,6 +306,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	@Override
 	public void respawn() {
 		this.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
+		KeyMapping.resetToggleKeys();
 	}
 
 	@Override

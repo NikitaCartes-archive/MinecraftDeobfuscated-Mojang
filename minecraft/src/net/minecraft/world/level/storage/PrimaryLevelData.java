@@ -35,6 +35,7 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.timers.TimerCallbacks;
@@ -70,7 +71,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private boolean initialized;
 	private boolean difficultyLocked;
 	private WorldBorder.Settings worldBorder;
-	private CompoundTag endDragonFightData;
+	private EndDragonFight.Data endDragonFightData;
 	@Nullable
 	private CompoundTag customBossEvents;
 	private int wanderingTraderSpawnDelay;
@@ -109,7 +110,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		Set<String> set2,
 		TimerQueue<MinecraftServer> timerQueue,
 		@Nullable CompoundTag compoundTag2,
-		CompoundTag compoundTag3,
+		EndDragonFight.Data data,
 		LevelSettings levelSettings,
 		WorldOptions worldOptions,
 		PrimaryLevelData.SpecialWorldProperty specialWorldProperty,
@@ -141,7 +142,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		this.playerDataVersion = i;
 		this.scheduledEvents = timerQueue;
 		this.customBossEvents = compoundTag2;
-		this.endDragonFightData = compoundTag3;
+		this.endDragonFightData = data;
 		this.settings = levelSettings;
 		this.worldOptions = worldOptions;
 		this.specialWorldProperty = specialWorldProperty;
@@ -178,7 +179,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			new HashSet(),
 			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS),
 			null,
-			new CompoundTag(),
+			EndDragonFight.Data.DEFAULT,
 			levelSettings.copy(),
 			worldOptions,
 			specialWorldProperty,
@@ -198,11 +199,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		Lifecycle lifecycle
 	) {
 		long l = dynamic.get("Time").asLong(0L);
-		CompoundTag compoundTag2 = (CompoundTag)((Dynamic)dynamic.get("DragonFight")
-				.result()
-				.orElseGet(() -> dynamic.get("DimensionData").get("1").get("DragonFight").orElseEmptyMap()))
-			.convert(NbtOps.INSTANCE)
-			.getValue();
 		return new PrimaryLevelData(
 			dataFixer,
 			i,
@@ -233,7 +229,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			(Set<String>)dynamic.get("removed_features").asStream().flatMap(dynamicx -> dynamicx.asString().result().stream()).collect(Collectors.toSet()),
 			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS, dynamic.get("ScheduledEvents").asStream()),
 			(CompoundTag)dynamic.get("CustomBossEvents").orElseEmptyMap().getValue(),
-			compoundTag2,
+			(EndDragonFight.Data)dynamic.get("DragonFight").read(EndDragonFight.Data.CODEC).resultOrPartial(LOGGER::error).orElse(EndDragonFight.Data.DEFAULT),
 			levelSettings,
 			worldOptions,
 			specialWorldProperty,
@@ -293,7 +289,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag.putByte("Difficulty", (byte)this.settings.difficulty().getId());
 		compoundTag.putBoolean("DifficultyLocked", this.difficultyLocked);
 		compoundTag.put("GameRules", this.settings.gameRules().createTag());
-		compoundTag.put("DragonFight", this.endDragonFightData);
+		compoundTag.put("DragonFight", Util.getOrThrow(EndDragonFight.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.endDragonFightData), IllegalStateException::new));
 		if (compoundTag2 != null) {
 			compoundTag.put("Player", compoundTag2);
 		}
@@ -565,13 +561,13 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public CompoundTag endDragonFightData() {
+	public EndDragonFight.Data endDragonFightData() {
 		return this.endDragonFightData;
 	}
 
 	@Override
-	public void setEndDragonFightData(CompoundTag compoundTag) {
-		this.endDragonFightData = compoundTag;
+	public void setEndDragonFightData(EndDragonFight.Data data) {
+		this.endDragonFightData = data;
 	}
 
 	@Override

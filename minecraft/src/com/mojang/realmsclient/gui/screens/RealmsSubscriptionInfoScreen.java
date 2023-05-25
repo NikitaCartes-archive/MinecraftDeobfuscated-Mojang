@@ -16,7 +16,7 @@ import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.components.FittingMultiLineTextWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -58,9 +58,6 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 			this.minecraft.keyboardHandler.setClipboard(string);
 			Util.getPlatform().openUri(string);
 		}).bounds(this.width / 2 - 100, row(6), 200, 20).build());
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, row(12), 200, 20).build()
-		);
 		if (this.serverData.expired) {
 			this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.delete.button"), button -> {
 				Component component = Component.translatable("mco.configure.world.delete.question.line1");
@@ -68,8 +65,12 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 				this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.WARNING, component, component2, true));
 			}).bounds(this.width / 2 - 100, row(10), 200, 20).build());
 		} else {
-			this.addRenderableWidget(new MultiLineTextWidget(this.width / 2 - 100, row(8), RECURRING_INFO, this.font).setColor(10526880).setMaxWidth(200));
+			this.addRenderableWidget(new FittingMultiLineTextWidget(this.width / 2 - 100, row(8), 200, 46, RECURRING_INFO, this.font).setColor(10526880));
 		}
+
+		this.addRenderableWidget(
+			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, row(12), 200, 20).build()
+		);
 	}
 
 	@Override

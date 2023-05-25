@@ -2661,8 +2661,10 @@ public class Blocks {
 				.isRedstoneConductor(Blocks::never)
 		)
 	);
-	public static final Block COBBLESTONE_WALL = register("cobblestone_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLESTONE)));
-	public static final Block MOSSY_COBBLESTONE_WALL = register("mossy_cobblestone_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLESTONE)));
+	public static final Block COBBLESTONE_WALL = register("cobblestone_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLESTONE).forceSolidOn()));
+	public static final Block MOSSY_COBBLESTONE_WALL = register(
+		"mossy_cobblestone_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLESTONE).forceSolidOn())
+	);
 	public static final Block FLOWER_POT = register("flower_pot", flowerPot(AIR));
 	public static final Block POTTED_TORCHFLOWER = register("potted_torchflower", flowerPot(TORCHFLOWER));
 	public static final Block POTTED_OAK_SAPLING = register("potted_oak_sapling", flowerPot(OAK_SAPLING));
@@ -5559,19 +5561,25 @@ public class Blocks {
 	public static final Block RED_NETHER_BRICK_SLAB = register("red_nether_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(RED_NETHER_BRICKS)));
 	public static final Block POLISHED_ANDESITE_SLAB = register("polished_andesite_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_ANDESITE)));
 	public static final Block DIORITE_SLAB = register("diorite_slab", new SlabBlock(BlockBehaviour.Properties.copy(DIORITE)));
-	public static final Block BRICK_WALL = register("brick_wall", new WallBlock(BlockBehaviour.Properties.copy(BRICKS)));
-	public static final Block PRISMARINE_WALL = register("prismarine_wall", new WallBlock(BlockBehaviour.Properties.copy(PRISMARINE)));
-	public static final Block RED_SANDSTONE_WALL = register("red_sandstone_wall", new WallBlock(BlockBehaviour.Properties.copy(RED_SANDSTONE)));
-	public static final Block MOSSY_STONE_BRICK_WALL = register("mossy_stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(MOSSY_STONE_BRICKS)));
-	public static final Block GRANITE_WALL = register("granite_wall", new WallBlock(BlockBehaviour.Properties.copy(GRANITE)));
-	public static final Block STONE_BRICK_WALL = register("stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(STONE_BRICKS)));
-	public static final Block MUD_BRICK_WALL = register("mud_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(MUD_BRICKS)));
-	public static final Block NETHER_BRICK_WALL = register("nether_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(NETHER_BRICKS)));
-	public static final Block ANDESITE_WALL = register("andesite_wall", new WallBlock(BlockBehaviour.Properties.copy(ANDESITE)));
-	public static final Block RED_NETHER_BRICK_WALL = register("red_nether_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(RED_NETHER_BRICKS)));
-	public static final Block SANDSTONE_WALL = register("sandstone_wall", new WallBlock(BlockBehaviour.Properties.copy(SANDSTONE)));
-	public static final Block END_STONE_BRICK_WALL = register("end_stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(END_STONE_BRICKS)));
-	public static final Block DIORITE_WALL = register("diorite_wall", new WallBlock(BlockBehaviour.Properties.copy(DIORITE)));
+	public static final Block BRICK_WALL = register("brick_wall", new WallBlock(BlockBehaviour.Properties.copy(BRICKS).forceSolidOn()));
+	public static final Block PRISMARINE_WALL = register("prismarine_wall", new WallBlock(BlockBehaviour.Properties.copy(PRISMARINE).forceSolidOn()));
+	public static final Block RED_SANDSTONE_WALL = register("red_sandstone_wall", new WallBlock(BlockBehaviour.Properties.copy(RED_SANDSTONE).forceSolidOn()));
+	public static final Block MOSSY_STONE_BRICK_WALL = register(
+		"mossy_stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(MOSSY_STONE_BRICKS).forceSolidOn())
+	);
+	public static final Block GRANITE_WALL = register("granite_wall", new WallBlock(BlockBehaviour.Properties.copy(GRANITE).forceSolidOn()));
+	public static final Block STONE_BRICK_WALL = register("stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(STONE_BRICKS).forceSolidOn()));
+	public static final Block MUD_BRICK_WALL = register("mud_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(MUD_BRICKS).forceSolidOn()));
+	public static final Block NETHER_BRICK_WALL = register("nether_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(NETHER_BRICKS).forceSolidOn()));
+	public static final Block ANDESITE_WALL = register("andesite_wall", new WallBlock(BlockBehaviour.Properties.copy(ANDESITE).forceSolidOn()));
+	public static final Block RED_NETHER_BRICK_WALL = register(
+		"red_nether_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(RED_NETHER_BRICKS).forceSolidOn())
+	);
+	public static final Block SANDSTONE_WALL = register("sandstone_wall", new WallBlock(BlockBehaviour.Properties.copy(SANDSTONE).forceSolidOn()));
+	public static final Block END_STONE_BRICK_WALL = register(
+		"end_stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(END_STONE_BRICKS).forceSolidOn())
+	);
+	public static final Block DIORITE_WALL = register("diorite_wall", new WallBlock(BlockBehaviour.Properties.copy(DIORITE).forceSolidOn()));
 	public static final Block SCAFFOLDING = register(
 		"scaffolding",
 		new ScaffoldingBlock(
@@ -6170,7 +6178,7 @@ public class Blocks {
 	public static final Block BLACKSTONE_STAIRS = register(
 		"blackstone_stairs", new StairBlock(BLACKSTONE.defaultBlockState(), BlockBehaviour.Properties.copy(BLACKSTONE))
 	);
-	public static final Block BLACKSTONE_WALL = register("blackstone_wall", new WallBlock(BlockBehaviour.Properties.copy(BLACKSTONE)));
+	public static final Block BLACKSTONE_WALL = register("blackstone_wall", new WallBlock(BlockBehaviour.Properties.copy(BLACKSTONE).forceSolidOn()));
 	public static final Block BLACKSTONE_SLAB = register("blackstone_slab", new SlabBlock(BlockBehaviour.Properties.copy(BLACKSTONE).strength(2.0F, 6.0F)));
 	public static final Block POLISHED_BLACKSTONE = register("polished_blackstone", new Block(BlockBehaviour.Properties.copy(BLACKSTONE).strength(2.0F, 6.0F)));
 	public static final Block POLISHED_BLACKSTONE_BRICKS = register(
@@ -6190,7 +6198,7 @@ public class Blocks {
 		new StairBlock(POLISHED_BLACKSTONE_BRICKS.defaultBlockState(), BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE_BRICKS))
 	);
 	public static final Block POLISHED_BLACKSTONE_BRICK_WALL = register(
-		"polished_blackstone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE_BRICKS))
+		"polished_blackstone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE_BRICKS).forceSolidOn())
 	);
 	public static final Block GILDED_BLACKSTONE = register(
 		"gilded_blackstone", new Block(BlockBehaviour.Properties.copy(BLACKSTONE).sound(SoundType.GILDED_BLACKSTONE))
@@ -6215,7 +6223,9 @@ public class Blocks {
 		)
 	);
 	public static final Block POLISHED_BLACKSTONE_BUTTON = register("polished_blackstone_button", stoneButton());
-	public static final Block POLISHED_BLACKSTONE_WALL = register("polished_blackstone_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE)));
+	public static final Block POLISHED_BLACKSTONE_WALL = register(
+		"polished_blackstone_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE).forceSolidOn())
+	);
 	public static final Block CHISELED_NETHER_BRICKS = register(
 		"chiseled_nether_bricks",
 		new Block(
@@ -6716,7 +6726,9 @@ public class Blocks {
 		"cobbled_deepslate_stairs", new StairBlock(COBBLED_DEEPSLATE.defaultBlockState(), BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE))
 	);
 	public static final Block COBBLED_DEEPSLATE_SLAB = register("cobbled_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE)));
-	public static final Block COBBLED_DEEPSLATE_WALL = register("cobbled_deepslate_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE)));
+	public static final Block COBBLED_DEEPSLATE_WALL = register(
+		"cobbled_deepslate_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).forceSolidOn())
+	);
 	public static final Block POLISHED_DEEPSLATE = register(
 		"polished_deepslate", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).sound(SoundType.POLISHED_DEEPSLATE))
 	);
@@ -6724,7 +6736,9 @@ public class Blocks {
 		"polished_deepslate_stairs", new StairBlock(POLISHED_DEEPSLATE.defaultBlockState(), BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE))
 	);
 	public static final Block POLISHED_DEEPSLATE_SLAB = register("polished_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE)));
-	public static final Block POLISHED_DEEPSLATE_WALL = register("polished_deepslate_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE)));
+	public static final Block POLISHED_DEEPSLATE_WALL = register(
+		"polished_deepslate_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE).forceSolidOn())
+	);
 	public static final Block DEEPSLATE_TILES = register(
 		"deepslate_tiles", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_TILES))
 	);
@@ -6732,7 +6746,7 @@ public class Blocks {
 		"deepslate_tile_stairs", new StairBlock(DEEPSLATE_TILES.defaultBlockState(), BlockBehaviour.Properties.copy(DEEPSLATE_TILES))
 	);
 	public static final Block DEEPSLATE_TILE_SLAB = register("deepslate_tile_slab", new SlabBlock(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
-	public static final Block DEEPSLATE_TILE_WALL = register("deepslate_tile_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
+	public static final Block DEEPSLATE_TILE_WALL = register("deepslate_tile_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_TILES).forceSolidOn()));
 	public static final Block DEEPSLATE_BRICKS = register(
 		"deepslate_bricks", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_BRICKS))
 	);
@@ -6740,7 +6754,9 @@ public class Blocks {
 		"deepslate_brick_stairs", new StairBlock(DEEPSLATE_BRICKS.defaultBlockState(), BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS))
 	);
 	public static final Block DEEPSLATE_BRICK_SLAB = register("deepslate_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS)));
-	public static final Block DEEPSLATE_BRICK_WALL = register("deepslate_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS)));
+	public static final Block DEEPSLATE_BRICK_WALL = register(
+		"deepslate_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS).forceSolidOn())
+	);
 	public static final Block CHISELED_DEEPSLATE = register(
 		"chiseled_deepslate", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_BRICKS))
 	);

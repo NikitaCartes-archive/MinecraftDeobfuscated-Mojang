@@ -300,10 +300,10 @@ public class ShapedRecipe implements CraftingRecipe {
 		}
 	}
 
-	private static Item itemFromJson(JsonObject jsonObject) {
+	public static Item itemFromJson(JsonObject jsonObject) {
 		String string = GsonHelper.getAsString(jsonObject, "item");
 		Item item = (Item)BuiltInRegistries.ITEM
-			.getOptional(new ResourceLocation(string))
+			.getOptional(ResourceLocation.tryParse(string))
 			.orElseThrow(() -> new JsonSyntaxException("Unknown item '" + string + "'"));
 		if (item == Items.AIR) {
 			throw new JsonSyntaxException("Empty ingredient not allowed here");

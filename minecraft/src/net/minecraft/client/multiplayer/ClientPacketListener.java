@@ -1141,9 +1141,15 @@ public class ClientPacketListener implements TickablePacketListener, ClientGameP
 			localPlayer.closeContainer();
 		}
 
-		LocalPlayer localPlayer2 = this.minecraft
-			.gameMode
-			.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
+		LocalPlayer localPlayer2;
+		if (clientboundRespawnPacket.shouldKeep((byte)2)) {
+			localPlayer2 = this.minecraft
+				.gameMode
+				.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
+		} else {
+			localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook());
+		}
+
 		localPlayer2.setId(i);
 		this.minecraft.player = localPlayer2;
 		if (resourceKey != localPlayer.level().dimension()) {

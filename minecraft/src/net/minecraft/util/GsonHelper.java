@@ -69,8 +69,17 @@ public class GsonHelper {
 		return !isValidNode(jsonObject, string) ? false : jsonObject.get(string).isJsonPrimitive();
 	}
 
-	public static boolean isValidNode(JsonObject jsonObject, String string) {
+	public static boolean isValidNode(@Nullable JsonObject jsonObject, String string) {
 		return jsonObject == null ? false : jsonObject.get(string) != null;
+	}
+
+	public static JsonElement getNonNull(JsonObject jsonObject, String string) {
+		JsonElement jsonElement = jsonObject.get(string);
+		if (jsonElement != null && !jsonElement.isJsonNull()) {
+			return jsonElement;
+		} else {
+			throw new JsonSyntaxException("Missing field " + string);
+		}
 	}
 
 	public static String convertToString(JsonElement jsonElement, String string) {

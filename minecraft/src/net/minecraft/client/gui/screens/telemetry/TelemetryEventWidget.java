@@ -82,11 +82,6 @@ public class TelemetryEventWidget extends AbstractScrollWidget {
 	}
 
 	@Override
-	protected boolean scrollbarVisible() {
-		return this.getInnerHeight() > this.height;
-	}
-
-	@Override
 	protected double scrollRate() {
 		return 9.0;
 	}

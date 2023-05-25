@@ -9,6 +9,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -63,8 +65,18 @@ public class SpawnUtil {
 					&& !blockState.is(Blocks.CACTUS)
 					&& !blockState.is(Blocks.GLASS_PANE)
 					&& !(blockState.getBlock() instanceof StainedGlassPaneBlock)
+					&& !(blockState.getBlock() instanceof StainedGlassBlock)
+					&& !(blockState.getBlock() instanceof LeavesBlock)
 					&& !blockState.is(Blocks.CONDUIT)
-				? (blockState2.isAir() || blockState2.liquid()) && blockState.isSolid()
+					&& !blockState.is(Blocks.ICE)
+					&& !blockState.is(Blocks.TNT)
+					&& !blockState.is(Blocks.GLOWSTONE)
+					&& !blockState.is(Blocks.BEACON)
+					&& !blockState.is(Blocks.SEA_LANTERN)
+					&& !blockState.is(Blocks.FROSTED_ICE)
+					&& !blockState.is(Blocks.TINTED_GLASS)
+					&& !blockState.is(Blocks.GLASS)
+				? (blockState2.isAir() || blockState2.liquid()) && (blockState.isSolid() || blockState.is(Blocks.POWDER_SNOW))
 				: false;
 		SpawnUtil.Strategy ON_TOP_OF_COLLIDER = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> blockState2.getCollisionShape(serverLevel, blockPos2)
 					.isEmpty()
