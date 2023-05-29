@@ -20,6 +20,7 @@ import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DatapackLoadFailureScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.SymlinkWarningScreen;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.MappedRegistry;
@@ -46,6 +47,7 @@ import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.level.validation.ContentValidationException;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -93,11 +95,15 @@ public class WorldOpenFlows {
 	@Nullable
 	private LevelStorageSource.LevelStorageAccess createWorldAccess(String string) {
 		try {
-			return this.levelSource.createAccess(string);
+			return this.levelSource.validateAndCreateAccess(string);
 		} catch (IOException var3) {
 			LOGGER.warn("Failed to read level {} data", string, var3);
 			SystemToast.onWorldAccessFailure(this.minecraft, string);
 			this.minecraft.setScreen(null);
+			return null;
+		} catch (ContentValidationException var4) {
+			LOGGER.warn("{}", var4.getMessage());
+			this.minecraft.setScreen(new SymlinkWarningScreen(null));
 			return null;
 		}
 	}

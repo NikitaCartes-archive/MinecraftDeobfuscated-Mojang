@@ -123,7 +123,7 @@ public class Main {
 			Services services = Services.create(new YggdrasilAuthenticationService(Proxy.NO_PROXY), file);
 			String string = (String)Optional.ofNullable(optionSet.valueOf(optionSpec11)).orElse(dedicatedServerSettings.getProperties().levelName);
 			LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
-			LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
+			LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.validateAndCreateAccess(string);
 			LevelSummary levelSummary = levelStorageAccess.getSummary();
 			if (levelSummary != null) {
 				if (levelSummary.requiresManualConversion()) {

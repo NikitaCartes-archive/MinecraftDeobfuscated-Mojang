@@ -14,6 +14,7 @@ public class CommonLinks {
 	public static final String REPORTING_HELP = "https://aka.ms/aboutjavareporting";
 	public static final String SUSPENSION_HELP = "https://aka.ms/mcjavamoderation";
 	public static final String BLOCKING_HELP = "https://aka.ms/javablocking";
+	public static final String SYMLINK_HELP = "https://aka.ms/MinecraftSymLinks";
 	public static final String START_REALMS_TRIAL = "https://aka.ms/startjavarealmstrial";
 	public static final String BUY_REALMS = "https://aka.ms/BuyJavaRealms";
 	public static final String REALMS_TERMS = "https://aka.ms/MinecraftRealmsTerms";

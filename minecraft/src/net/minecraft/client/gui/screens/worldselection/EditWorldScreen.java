@@ -23,6 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
+import net.minecraft.world.level.validation.ContentValidationException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
@@ -129,7 +130,7 @@ public class EditWorldScreen extends Screen {
 	public static void makeBackupAndShowToast(LevelStorageSource levelStorageSource, String string) {
 		boolean bl = false;
 
-		try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string)) {
+		try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.validateAndCreateAccess(string)) {
 			bl = true;
 			makeBackupAndShowToast(levelStorageAccess);
 		} catch (IOException var8) {
@@ -138,6 +139,9 @@ public class EditWorldScreen extends Screen {
 			}
 
 			LOGGER.warn("Failed to create backup of level {}", string, var8);
+		} catch (ContentValidationException var9) {
+			LOGGER.warn("{}", var9.getMessage());
+			SystemToast.onWorldAccessFailure(Minecraft.getInstance(), string);
 		}
 	}
 

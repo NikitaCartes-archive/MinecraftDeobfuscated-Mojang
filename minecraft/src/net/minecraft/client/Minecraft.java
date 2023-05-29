@@ -239,6 +239,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.validation.DirectoryValidator;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -447,8 +448,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		try {
 			this.window.setIcon(this.vanillaPackResources, SharedConstants.getCurrentVersion().isStable() ? IconSet.RELEASE : IconSet.SNAPSHOT);
-		} catch (IOException var10) {
-			LOGGER.error("Couldn't set icon", (Throwable)var10);
+		} catch (IOException var12) {
+			LOGGER.error("Couldn't set icon", (Throwable)var12);
 		}
 
 		this.window.setFramerateLimit(this.options.framerateLimit().get());
@@ -468,7 +469,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.textureManager = new TextureManager(this.resourceManager);
 		this.resourceManager.registerReloadListener(this.textureManager);
 		this.skinManager = new SkinManager(this.textureManager, new File(file, "skins"), this.minecraftSessionService);
-		this.levelSource = new LevelStorageSource(this.gameDirectory.toPath().resolve("saves"), this.gameDirectory.toPath().resolve("backups"), this.fixerUpper);
+		Path path = this.gameDirectory.toPath();
+		DirectoryValidator directoryValidator = LevelStorageSource.parseValidator(path.resolve("allowed_symlinks.txt"));
+		this.levelSource = new LevelStorageSource(path.resolve("saves"), path.resolve("backups"), directoryValidator, this.fixerUpper);
 		this.soundManager = new SoundManager(this.options);
 		this.resourceManager.registerReloadListener(this.soundManager);
 		this.splashManager = new SplashManager(this.user);
@@ -551,7 +554,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resizeDisplay();
 		this.gameRenderer.preloadUiShader(this.vanillaPackResources.asProvider());
 		this.telemetryManager = new ClientTelemetryManager(this, this.userApiService, this.user);
-		this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, this.gameDirectory.toPath());
+		this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, path);
 		this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
 		this.narrator = new GameNarrator(this);
 		this.narrator.checkStatus(this.options.narrator().get() != NarratorStatus.OFF);

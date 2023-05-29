@@ -330,6 +330,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			.addTag(BlockTags.STONE_PRESSURE_PLATES);
 		this.tag(BlockTags.STAIRS)
 			.addTag(BlockTags.WOODEN_STAIRS)
+			.add(Blocks.BAMBOO_MOSAIC_STAIRS)
 			.add(
 				Blocks.COBBLESTONE_STAIRS,
 				Blocks.SANDSTONE_STAIRS,
@@ -375,6 +376,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			);
 		this.tag(BlockTags.SLABS)
 			.addTag(BlockTags.WOODEN_SLABS)
+			.add(Blocks.BAMBOO_MOSAIC_SLAB)
 			.add(
 				Blocks.STONE_SLAB,
 				Blocks.SMOOTH_STONE_SLAB,
