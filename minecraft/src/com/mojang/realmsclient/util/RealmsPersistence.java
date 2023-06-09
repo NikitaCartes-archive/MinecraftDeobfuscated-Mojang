@@ -4,14 +4,13 @@ import com.google.gson.annotations.SerializedName;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.GuardedSerializer;
 import com.mojang.realmsclient.dto.ReflectionBasedSerialization;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -29,33 +28,33 @@ public class RealmsPersistence {
 	}
 
 	public static RealmsPersistence.RealmsPersistenceData readFile() {
-		File file = getPathToData();
+		Path path = getPathToData();
 
 		try {
-			String string = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+			String string = Files.readString(path, StandardCharsets.UTF_8);
 			RealmsPersistence.RealmsPersistenceData realmsPersistenceData = GSON.fromJson(string, RealmsPersistence.RealmsPersistenceData.class);
 			if (realmsPersistenceData != null) {
 				return realmsPersistenceData;
 			}
-		} catch (FileNotFoundException var3) {
+		} catch (NoSuchFileException var3) {
 		} catch (Exception var4) {
-			LOGGER.warn("Failed to read Realms storage {}", file, var4);
+			LOGGER.warn("Failed to read Realms storage {}", path, var4);
 		}
 
 		return new RealmsPersistence.RealmsPersistenceData();
 	}
 
 	public static void writeFile(RealmsPersistence.RealmsPersistenceData realmsPersistenceData) {
-		File file = getPathToData();
+		Path path = getPathToData();
 
 		try {
-			FileUtils.writeStringToFile(file, GSON.toJson(realmsPersistenceData), StandardCharsets.UTF_8);
-		} catch (IOException var3) {
+			Files.writeString(path, GSON.toJson(realmsPersistenceData), StandardCharsets.UTF_8);
+		} catch (Exception var3) {
 		}
 	}
 
-	private static File getPathToData() {
-		return new File(Minecraft.getInstance().gameDirectory, "realms_persistence.json");
+	private static Path getPathToData() {
+		return Minecraft.getInstance().gameDirectory.toPath().resolve("realms_persistence.json");
 	}
 
 	@Environment(EnvType.CLIENT)

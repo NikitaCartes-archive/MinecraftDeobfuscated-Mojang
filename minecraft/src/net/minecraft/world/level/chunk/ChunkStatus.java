@@ -380,10 +380,11 @@ public class ChunkStatus {
 		return this.generationTask
 			.doWork(this, executor, serverLevel, chunkGenerator, structureTemplateManager, threadedLevelLightEngine, function, list, chunkAccess)
 			.thenApply(either -> {
-				if (chunkAccess instanceof ProtoChunk protoChunk && !protoChunk.getStatus().isOrAfter(this)) {
-					protoChunk.setStatus(this);
-				}
-
+				either.ifLeft(chunkAccessx -> {
+					if (chunkAccessx instanceof ProtoChunk protoChunk && !protoChunk.getStatus().isOrAfter(this)) {
+						protoChunk.setStatus(this);
+					}
+				});
 				if (profiledDuration != null) {
 					profiledDuration.finish();
 				}

@@ -78,6 +78,8 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 	private float averageSentPackets;
 	private int tickCount;
 	private boolean handlingFault;
+	@Nullable
+	private volatile Component delayedDisconnect;
 
 	public Connection(PacketFlow packetFlow) {
 		this.receiving = packetFlow;
@@ -93,6 +95,10 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 			this.setProtocol(ConnectionProtocol.HANDSHAKING);
 		} catch (Throwable var3) {
 			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to change protocol to handshake", var3);
+		}
+
+		if (this.delayedDisconnect != null) {
+			this.disconnect(this.delayedDisconnect);
 		}
 	}
 
@@ -267,7 +273,11 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 	}
 
 	public void disconnect(Component component) {
-		if (this.channel.isOpen()) {
+		if (this.channel == null) {
+			this.delayedDisconnect = component;
+		}
+
+		if (this.isConnected()) {
 			this.channel.close().awaitUninterruptibly();
 			this.disconnectedReason = component;
 		}
@@ -286,7 +296,13 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 	}
 
 	public static Connection connectToServer(InetSocketAddress inetSocketAddress, boolean bl) {
-		final Connection connection = new Connection(PacketFlow.CLIENTBOUND);
+		Connection connection = new Connection(PacketFlow.CLIENTBOUND);
+		ChannelFuture channelFuture = connect(inetSocketAddress, bl, connection);
+		channelFuture.syncUninterruptibly();
+		return connection;
+	}
+
+	public static ChannelFuture connect(InetSocketAddress inetSocketAddress, boolean bl, Connection connection) {
 		Class<? extends SocketChannel> class_;
 		LazyLoadedValue<? extends EventLoopGroup> lazyLoadedValue;
 		if (Epoll.isAvailable() && bl) {
@@ -297,7 +313,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 			lazyLoadedValue = NETWORK_WORKER_GROUP;
 		}
 
-		new Bootstrap().group(lazyLoadedValue.get()).handler(new ChannelInitializer<Channel>() {
+		return new Bootstrap().group(lazyLoadedValue.get()).handler(new ChannelInitializer<Channel>() {
 			@Override
 			protected void initChannel(Channel channel) {
 				try {
@@ -309,8 +325,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 				Connection.configureSerialization(channelPipeline, PacketFlow.CLIENTBOUND);
 				channelPipeline.addLast("packet_handler", connection);
 			}
-		}).channel(class_).connect(inetSocketAddress.getAddress(), inetSocketAddress.getPort()).syncUninterruptibly();
-		return connection;
+		}).channel(class_).connect(inetSocketAddress.getAddress(), inetSocketAddress.getPort());
 	}
 
 	public static void configureSerialization(ChannelPipeline channelPipeline, PacketFlow packetFlow) {

@@ -142,45 +142,45 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (validClient) {
-			this.drawIcons(guiGraphics, i, j);
+			this.drawIcons(guiGraphics);
 		}
 
 		super.render(guiGraphics, i, j, f);
 	}
 
-	private void drawIcons(GuiGraphics guiGraphics, int i, int j) {
-		int k = this.numberOfPendingInvites;
-		int l = 24;
-		int m = this.height / 4 + 48;
-		int n = this.width / 2 + 80;
-		int o = m + 48 + 2;
-		int p = 0;
+	private void drawIcons(GuiGraphics guiGraphics) {
+		int i = this.numberOfPendingInvites;
+		int j = 24;
+		int k = this.height / 4 + 48;
+		int l = this.width / 2 + 80;
+		int m = k + 48 + 2;
+		int n = 0;
 		if (hasUnseenNotifications) {
-			guiGraphics.blit(UNSEEN_NOTIFICATION_ICON_LOCATION, n - p + 5, o + 3, 0.0F, 0.0F, 10, 10, 10, 10);
-			p += 14;
+			guiGraphics.blit(UNSEEN_NOTIFICATION_ICON_LOCATION, l - n + 5, m + 3, 0.0F, 0.0F, 10, 10, 10, 10);
+			n += 14;
 		}
 
 		if (this.currentConfiguration != null && this.currentConfiguration.showOldNotifications()) {
 			if (hasUnreadNews) {
 				guiGraphics.pose().pushPose();
 				guiGraphics.pose().scale(0.4F, 0.4F, 0.4F);
-				guiGraphics.blit(NEWS_ICON_LOCATION, (int)((double)(n + 2 - p) * 2.5), (int)((double)o * 2.5), 0.0F, 0.0F, 40, 40, 40, 40);
+				guiGraphics.blit(NEWS_ICON_LOCATION, (int)((double)(l + 2 - n) * 2.5), (int)((double)m * 2.5), 0.0F, 0.0F, 40, 40, 40, 40);
 				guiGraphics.pose().popPose();
-				p += 14;
+				n += 14;
 			}
 
-			if (k != 0) {
-				guiGraphics.blit(INVITE_ICON_LOCATION, n - p, o - 6, 0.0F, 0.0F, 15, 25, 31, 25);
-				p += 16;
+			if (i != 0) {
+				guiGraphics.blit(INVITE_ICON_LOCATION, l - n, m, 0.0F, 0.0F, 18, 15, 18, 30);
+				n += 16;
 			}
 
 			if (trialAvailable) {
-				int q = 0;
+				int o = 0;
 				if ((Util.getMillis() / 800L & 1L) == 1L) {
-					q = 8;
+					o = 8;
 				}
 
-				guiGraphics.blit(TRIAL_ICON_LOCATION, n + 4 - p, o + 4, 0.0F, (float)q, 8, 8, 8, 16);
+				guiGraphics.blit(TRIAL_ICON_LOCATION, l + 4 - n, m + 4, 0.0F, (float)o, 8, 8, 8, 16);
 			}
 		}
 	}

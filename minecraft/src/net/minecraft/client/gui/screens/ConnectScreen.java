@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.logging.LogUtils;
+import io.netty.channel.ChannelFuture;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,6 +26,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import org.slf4j.Logger;
@@ -34,9 +36,12 @@ public class ConnectScreen extends Screen {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final long NARRATION_DELAY_MS = 2000L;
+	static final Component ABORT_CONNECTION = Component.translatable("connect.aborted");
 	public static final Component UNKNOWN_HOST_MESSAGE = Component.translatable("disconnect.genericReason", Component.translatable("disconnect.unknownHost"));
 	@Nullable
 	volatile Connection connection;
+	@Nullable
+	ChannelFuture channelFuture;
 	volatile boolean aborted;
 	final Screen parent;
 	private Component status = Component.translatable("connect.connecting");
@@ -87,34 +92,47 @@ public class ConnectScreen extends Screen {
 					}
 
 					inetSocketAddress = (InetSocketAddress)optional.get();
+					Connection connection;
 					synchronized (ConnectScreen.this) {
 						if (ConnectScreen.this.aborted) {
 							return;
 						}
 
-						ConnectScreen.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport());
-						ConnectScreen.this.connection
-							.setListener(
-								new ClientHandshakePacketListenerImpl(
-									ConnectScreen.this.connection, minecraft, serverData, ConnectScreen.this.parent, false, null, ConnectScreen.this::updateStatus
-								)
-							);
-						ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
-						ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), Optional.ofNullable(minecraft.getUser().getProfileId())));
+						connection = new Connection(PacketFlow.CLIENTBOUND);
+						ConnectScreen.this.channelFuture = Connection.connect(inetSocketAddress, minecraft.options.useNativeTransport(), connection);
 					}
-				} catch (Exception var7) {
+
+					ConnectScreen.this.channelFuture.syncUninterruptibly();
+					synchronized (ConnectScreen.this) {
+						if (ConnectScreen.this.aborted) {
+							connection.disconnect(ConnectScreen.ABORT_CONNECTION);
+							return;
+						}
+
+						ConnectScreen.this.connection = connection;
+					}
+
+					ConnectScreen.this.connection
+						.setListener(
+							new ClientHandshakePacketListenerImpl(
+								ConnectScreen.this.connection, minecraft, serverData, ConnectScreen.this.parent, false, null, ConnectScreen.this::updateStatus
+							)
+						);
+					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
+					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), Optional.ofNullable(minecraft.getUser().getProfileId())));
+				} catch (Exception var9) {
 					if (ConnectScreen.this.aborted) {
 						return;
 					}
 
 					Exception exception3;
-					if (var7.getCause() instanceof Exception exception2) {
+					if (var9.getCause() instanceof Exception exception2) {
 						exception3 = exception2;
 					} else {
-						exception3 = var7;
+						exception3 = var9;
 					}
 
-					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var7);
+					ConnectScreen.LOGGER.error("Couldn't connect to server", (Throwable)var9);
 					String string = inetSocketAddress == null
 						? exception3.getMessage()
 						: exception3.getMessage()
@@ -157,8 +175,13 @@ public class ConnectScreen extends Screen {
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
 			synchronized (this) {
 				this.aborted = true;
+				if (this.channelFuture != null) {
+					this.channelFuture.cancel(true);
+					this.channelFuture = null;
+				}
+
 				if (this.connection != null) {
-					this.connection.disconnect(Component.translatable("connect.aborted"));
+					this.connection.disconnect(ABORT_CONNECTION);
 				}
 			}
 
