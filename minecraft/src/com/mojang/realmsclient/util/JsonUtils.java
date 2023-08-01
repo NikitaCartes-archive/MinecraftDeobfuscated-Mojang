@@ -2,6 +2,7 @@ package com.mojang.realmsclient.util;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.util.UndashedUuid;
 import java.util.Date;
 import java.util.UUID;
 import java.util.function.Function;
@@ -44,7 +45,7 @@ public class JsonUtils {
 	@Nullable
 	public static UUID getUuidOr(String string, JsonObject jsonObject, @Nullable UUID uUID) {
 		String string2 = getStringOr(string, jsonObject, null);
-		return string2 == null ? uUID : UUID.fromString(string2);
+		return string2 == null ? uUID : UndashedUuid.fromStringLenient(string2);
 	}
 
 	public static int getIntOr(String string, JsonObject jsonObject, int i) {

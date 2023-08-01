@@ -10,7 +10,7 @@ import net.minecraft.client.resources.model.ModelBakery;
 
 @Environment(EnvType.CLIENT)
 public class RenderBuffers {
-	private final ChunkBufferBuilderPack fixedBufferPack = new ChunkBufferBuilderPack();
+	private final SectionBufferBuilderPack fixedBufferPack = new SectionBufferBuilderPack();
 	private final SortedMap<RenderType, BufferBuilder> fixedBuffers = Util.make(new Object2ObjectLinkedOpenHashMap<>(), object2ObjectLinkedOpenHashMap -> {
 		object2ObjectLinkedOpenHashMap.put(Sheets.solidBlockSheet(), this.fixedBufferPack.builder(RenderType.solid()));
 		object2ObjectLinkedOpenHashMap.put(Sheets.cutoutBlockSheet(), this.fixedBufferPack.builder(RenderType.cutout()));
@@ -41,7 +41,7 @@ public class RenderBuffers {
 		object2ObjectLinkedOpenHashMap.put(renderType, new BufferBuilder(renderType.bufferSize()));
 	}
 
-	public ChunkBufferBuilderPack fixedBufferPack() {
+	public SectionBufferBuilderPack fixedBufferPack() {
 		return this.fixedBufferPack;
 	}
 

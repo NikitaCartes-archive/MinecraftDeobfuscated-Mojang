@@ -153,6 +153,20 @@ public class ChunkPos {
 		return Math.max(Math.abs(this.x - chunkPos.x), Math.abs(this.z - chunkPos.z));
 	}
 
+	public int distanceSquared(ChunkPos chunkPos) {
+		return this.distanceSquared(chunkPos.x, chunkPos.z);
+	}
+
+	public int distanceSquared(long l) {
+		return this.distanceSquared(getX(l), getZ(l));
+	}
+
+	private int distanceSquared(int i, int j) {
+		int k = i - this.x;
+		int l = j - this.z;
+		return k * k + l * l;
+	}
+
 	public static Stream<ChunkPos> rangeClosed(ChunkPos chunkPos, int i) {
 		return rangeClosed(new ChunkPos(chunkPos.x - i, chunkPos.z - i), new ChunkPos(chunkPos.x + i, chunkPos.z + i));
 	}

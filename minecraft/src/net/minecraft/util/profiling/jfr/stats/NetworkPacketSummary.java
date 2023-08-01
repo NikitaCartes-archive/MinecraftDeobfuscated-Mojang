@@ -60,7 +60,7 @@ public final class NetworkPacketSummary {
 		}
 	}
 
-	public static record PacketIdentification(PacketFlow direction, int protocolId, int packetId) {
+	public static record PacketIdentification(PacketFlow direction, String protocolId, int packetId) {
 		private static final Map<NetworkPacketSummary.PacketIdentification, String> PACKET_NAME_BY_ID;
 
 		public String packetName() {
@@ -70,7 +70,7 @@ public final class NetworkPacketSummary {
 		public static NetworkPacketSummary.PacketIdentification from(RecordedEvent recordedEvent) {
 			return new NetworkPacketSummary.PacketIdentification(
 				recordedEvent.getEventType().getName().equals("minecraft.PacketSent") ? PacketFlow.CLIENTBOUND : PacketFlow.SERVERBOUND,
-				recordedEvent.getInt("protocolId"),
+				recordedEvent.getString("protocolId"),
 				recordedEvent.getInt("packetId")
 			);
 		}
@@ -82,7 +82,7 @@ public final class NetworkPacketSummary {
 				for (PacketFlow packetFlow : PacketFlow.values()) {
 					Int2ObjectMap<Class<? extends Packet<?>>> int2ObjectMap = connectionProtocol.getPacketsByIds(packetFlow);
 					int2ObjectMap.forEach(
-						(integer, class_) -> builder.put(new NetworkPacketSummary.PacketIdentification(packetFlow, connectionProtocol.getId(), integer), class_.getSimpleName())
+						(integer, class_) -> builder.put(new NetworkPacketSummary.PacketIdentification(packetFlow, connectionProtocol.id(), integer), class_.getSimpleName())
 					);
 				}
 			}

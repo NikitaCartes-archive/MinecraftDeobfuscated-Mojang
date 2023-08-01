@@ -136,31 +136,40 @@ public final class Window implements AutoCloseable {
 
 	public void setIcon(PackResources packResources, IconSet iconSet) throws IOException {
 		RenderSystem.assertInInitPhase();
-		if (Minecraft.ON_OSX) {
-			MacosUtil.loadIcon(iconSet.getMacIcon(packResources));
-		} else {
-			List<IoSupplier<InputStream>> list = iconSet.getStandardIcons(packResources);
-			List<ByteBuffer> list2 = new ArrayList(list.size());
+		int i = GLFW.glfwGetPlatform();
+		switch (i) {
+			case 393217:
+			case 393220:
+				List<IoSupplier<InputStream>> list = iconSet.getStandardIcons(packResources);
+				List<ByteBuffer> list2 = new ArrayList(list.size());
 
-			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-				Buffer buffer = GLFWImage.malloc(list.size(), memoryStack);
+				try (MemoryStack memoryStack = MemoryStack.stackPush()) {
+					Buffer buffer = GLFWImage.malloc(list.size(), memoryStack);
 
-				for (int i = 0; i < list.size(); i++) {
-					try (NativeImage nativeImage = NativeImage.read((InputStream)((IoSupplier)list.get(i)).get())) {
-						ByteBuffer byteBuffer = MemoryUtil.memAlloc(nativeImage.getWidth() * nativeImage.getHeight() * 4);
-						list2.add(byteBuffer);
-						byteBuffer.asIntBuffer().put(nativeImage.getPixelsRGBA());
-						buffer.position(i);
-						buffer.width(nativeImage.getWidth());
-						buffer.height(nativeImage.getHeight());
-						buffer.pixels(byteBuffer);
+					for (int j = 0; j < list.size(); j++) {
+						try (NativeImage nativeImage = NativeImage.read((InputStream)((IoSupplier)list.get(j)).get())) {
+							ByteBuffer byteBuffer = MemoryUtil.memAlloc(nativeImage.getWidth() * nativeImage.getHeight() * 4);
+							list2.add(byteBuffer);
+							byteBuffer.asIntBuffer().put(nativeImage.getPixelsRGBA());
+							buffer.position(j);
+							buffer.width(nativeImage.getWidth());
+							buffer.height(nativeImage.getHeight());
+							buffer.pixels(byteBuffer);
+						}
 					}
-				}
 
-				GLFW.glfwSetWindowIcon(this.window, buffer.position(0));
-			} finally {
-				list2.forEach(MemoryUtil::memFree);
-			}
+					GLFW.glfwSetWindowIcon(this.window, buffer.position(0));
+					break;
+				} finally {
+					list2.forEach(MemoryUtil::memFree);
+				}
+			case 393218:
+				MacosUtil.loadIcon(iconSet.getMacIcon(packResources));
+			case 393219:
+			case 393221:
+				break;
+			default:
+				LOGGER.warn("Not setting icon for unrecognized platform: {}", i);
 		}
 	}
 

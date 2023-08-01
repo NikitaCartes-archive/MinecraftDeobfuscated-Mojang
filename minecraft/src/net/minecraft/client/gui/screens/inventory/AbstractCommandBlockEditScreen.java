@@ -33,7 +33,6 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 
 	@Override
 	public void tick() {
-		this.commandEdit.tick();
 		if (!this.getCommandBlock().isValid()) {
 			this.onClose();
 		}
@@ -126,8 +125,8 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
-		return this.commandSuggestions.mouseScrolled(f) ? true : super.mouseScrolled(d, e, f);
+	public boolean mouseScrolled(double d, double e, double f, double g) {
+		return this.commandSuggestions.mouseScrolled(g) ? true : super.mouseScrolled(d, e, f, g);
 	}
 
 	@Override
@@ -137,7 +136,7 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, SET_COMMAND_LABEL, this.width / 2, 20, 16777215);
 		guiGraphics.drawString(this.font, COMMAND_LABEL, this.width / 2 - 150, 40, 10526880);
 		this.commandEdit.render(guiGraphics, i, j, f);
@@ -148,7 +147,6 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 			this.previousEdit.render(guiGraphics, i, j, f);
 		}
 
-		super.render(guiGraphics, i, j, f);
 		this.commandSuggestions.render(guiGraphics, i, j);
 	}
 }

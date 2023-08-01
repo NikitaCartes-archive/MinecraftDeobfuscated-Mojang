@@ -23,6 +23,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -33,8 +34,6 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RealmsBackupScreen extends RealmsScreen {
 	static final Logger LOGGER = LogUtils.getLogger();
-	static final ResourceLocation PLUS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/plus_icon.png");
-	static final ResourceLocation RESTORE_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/restore_icon.png");
 	static final Component RESTORE_TOOLTIP = Component.translatable("mco.backup.button.restore");
 	static final Component HAS_CHANGES_TOOLTIP = Component.translatable("mco.backup.changes.tooltip");
 	private static final Component TITLE = Component.translatable("mco.configure.world.backup");
@@ -52,7 +51,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 	private static final String UPLOADED_KEY = "uploaded";
 
 	public RealmsBackupScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer, int i) {
-		super(Component.translatable("mco.configure.world.backup"));
+		super(TITLE);
 		this.lastScreen = realmsConfigureWorldScreen;
 		this.serverData = realmsServer;
 		this.slotId = i;
@@ -178,16 +177,14 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		this.backupObjectSelectionList.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 16777215);
-		guiGraphics.drawString(this.font, TITLE, (this.width - 150) / 2 - 90, 20, 10526880, false);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, -1);
 		if (this.noBackups) {
-			guiGraphics.drawString(this.font, NO_BACKUPS_LABEL, 20, this.height / 2 - 10, 16777215, false);
+			guiGraphics.drawString(this.font, NO_BACKUPS_LABEL, 20, this.height / 2 - 10, -1, false);
 		}
 
 		this.downloadButton.active = !this.noBackups;
-		super.render(guiGraphics, i, j, f);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -208,11 +205,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 		@Override
 		public int getMaxPosition() {
 			return this.getItemCount() * 36;
-		}
-
-		@Override
-		public void renderBackground(GuiGraphics guiGraphics) {
-			RealmsBackupScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Override
@@ -242,6 +234,12 @@ public class RealmsBackupScreen extends RealmsScreen {
 	class Entry extends ObjectSelectionList.Entry<RealmsBackupScreen.Entry> {
 		private static final int Y_PADDING = 2;
 		private static final int X_PADDING = 7;
+		private static final WidgetSprites CHANGES_BUTTON_SPRITES = new WidgetSprites(
+			new ResourceLocation("backup/changes"), new ResourceLocation("backup/changes_highlighted")
+		);
+		private static final WidgetSprites RESTORE_BUTTON_SPRITES = new WidgetSprites(
+			new ResourceLocation("backup/restore"), new ResourceLocation("backup/restore_highlighted")
+		);
 		private final Backup backup;
 		private final List<AbstractWidget> children = new ArrayList();
 		@Nullable
@@ -298,13 +296,9 @@ public class RealmsBackupScreen extends RealmsScreen {
 				l,
 				9,
 				9,
-				0,
-				0,
-				9,
-				RealmsBackupScreen.PLUS_ICON_LOCATION,
-				9,
-				18,
-				button -> RealmsBackupScreen.this.minecraft.setScreen(new RealmsBackupInfoScreen(RealmsBackupScreen.this, this.backup))
+				CHANGES_BUTTON_SPRITES,
+				button -> RealmsBackupScreen.this.minecraft.setScreen(new RealmsBackupInfoScreen(RealmsBackupScreen.this, this.backup)),
+				CommonComponents.EMPTY
 			);
 			this.changesButton.setTooltip(Tooltip.create(RealmsBackupScreen.HAS_CHANGES_TOOLTIP));
 			this.children.add(this.changesButton);
@@ -320,13 +314,9 @@ public class RealmsBackupScreen extends RealmsScreen {
 				l,
 				17,
 				10,
-				0,
-				0,
-				10,
-				RealmsBackupScreen.RESTORE_ICON_LOCATION,
-				17,
-				20,
-				button -> RealmsBackupScreen.this.restoreClicked(RealmsBackupScreen.this.backups.indexOf(this.backup))
+				RESTORE_BUTTON_SPRITES,
+				button -> RealmsBackupScreen.this.restoreClicked(RealmsBackupScreen.this.backups.indexOf(this.backup)),
+				CommonComponents.EMPTY
 			);
 			this.restoreButton.setTooltip(Tooltip.create(RealmsBackupScreen.RESTORE_TOOLTIP));
 			this.children.add(this.restoreButton);

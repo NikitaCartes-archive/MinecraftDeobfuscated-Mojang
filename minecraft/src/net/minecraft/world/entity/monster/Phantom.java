@@ -39,6 +39,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Phantom extends FlyingMob implements Enemy {
 	public static final float FLAP_DEGREES_PER_TICK = 7.448451F;
@@ -234,13 +235,17 @@ public class Phantom extends FlyingMob implements Enemy {
 	public EntityDimensions getDimensions(Pose pose) {
 		int i = this.getPhantomSize();
 		EntityDimensions entityDimensions = super.getDimensions(pose);
-		float f = (entityDimensions.width + 0.2F * (float)i) / entityDimensions.width;
-		return entityDimensions.scale(f);
+		return entityDimensions.scale(1.0F + 0.15F * (float)i);
 	}
 
 	@Override
-	public double getPassengersRidingOffset() {
-		return (double)this.getEyeHeight();
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height * 0.675F, 0.0F);
+	}
+
+	@Override
+	protected float ridingOffset(Entity entity) {
+		return -0.125F;
 	}
 
 	static enum AttackPhase {

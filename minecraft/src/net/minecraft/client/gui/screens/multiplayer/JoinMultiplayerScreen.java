@@ -7,8 +7,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.layouts.EqualSpacingLayout;
 import net.minecraft.client.gui.layouts.FrameLayout;
-import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.navigation.CommonInputs;
@@ -68,8 +68,8 @@ public class JoinMultiplayerScreen extends Screen {
 			try {
 				this.lanServerDetector = new LanServerDetection.LanServerDetector(this.lanServerList);
 				this.lanServerDetector.start();
-			} catch (Exception var9) {
-				LOGGER.warn("Unable to start LAN server detection: {}", var9.getMessage());
+			} catch (Exception var8) {
+				LOGGER.warn("Unable to start LAN server detection: {}", var8.getMessage());
 			}
 
 			this.serverSelectionList = new ServerSelectionList(this, this.minecraft, this.width, this.height, 32, this.height - 64, 36);
@@ -81,18 +81,18 @@ public class JoinMultiplayerScreen extends Screen {
 			Button.builder(Component.translatable("selectServer.select"), buttonx -> this.joinSelectedServer()).width(100).build()
 		);
 		Button button = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.direct"), buttonx -> {
-			this.editingServer = new ServerData(I18n.get("selectServer.defaultName"), "", false);
+			this.editingServer = new ServerData(I18n.get("selectServer.defaultName"), "", ServerData.Type.OTHER);
 			this.minecraft.setScreen(new DirectJoinServerScreen(this, this::directJoinCallback, this.editingServer));
 		}).width(100).build());
 		Button button2 = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.add"), buttonx -> {
-			this.editingServer = new ServerData(I18n.get("selectServer.defaultName"), "", false);
+			this.editingServer = new ServerData(I18n.get("selectServer.defaultName"), "", ServerData.Type.OTHER);
 			this.minecraft.setScreen(new EditServerScreen(this, this::addServerCallback, this.editingServer));
 		}).width(100).build());
 		this.editButton = this.addRenderableWidget(Button.builder(Component.translatable("selectServer.edit"), buttonx -> {
 			ServerSelectionList.Entry entry = this.serverSelectionList.getSelected();
 			if (entry instanceof ServerSelectionList.OnlineServerEntry) {
 				ServerData serverData = ((ServerSelectionList.OnlineServerEntry)entry).getServerData();
-				this.editingServer = new ServerData(serverData.name, serverData.ip, false);
+				this.editingServer = new ServerData(serverData.name, serverData.ip, ServerData.Type.OTHER);
 				this.editingServer.copyFrom(serverData);
 				this.minecraft.setScreen(new EditServerScreen(this, this::editServerCallback, this.editingServer));
 			}
@@ -113,21 +113,20 @@ public class JoinMultiplayerScreen extends Screen {
 		Button button3 = this.addRenderableWidget(
 			Button.builder(Component.translatable("selectServer.refresh"), buttonx -> this.refreshServerList()).width(74).build()
 		);
-		Button button4 = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.minecraft.setScreen(this.lastScreen)).width(74).build());
-		GridLayout gridLayout = new GridLayout();
-		GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(1);
-		LinearLayout linearLayout = rowHelper.addChild(new LinearLayout(308, 20, LinearLayout.Orientation.HORIZONTAL));
-		linearLayout.addChild(this.selectButton);
-		linearLayout.addChild(button);
-		linearLayout.addChild(button2);
-		rowHelper.addChild(SpacerElement.height(4));
-		LinearLayout linearLayout2 = rowHelper.addChild(new LinearLayout(308, 20, LinearLayout.Orientation.HORIZONTAL));
-		linearLayout2.addChild(this.editButton);
-		linearLayout2.addChild(this.deleteButton);
-		linearLayout2.addChild(button3);
-		linearLayout2.addChild(button4);
-		gridLayout.arrangeElements();
-		FrameLayout.centerInRectangle(gridLayout, 0, this.height - 64, this.width, 64);
+		Button button4 = this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, buttonx -> this.minecraft.setScreen(this.lastScreen)).width(74).build());
+		LinearLayout linearLayout = LinearLayout.vertical();
+		EqualSpacingLayout equalSpacingLayout = linearLayout.addChild(new EqualSpacingLayout(308, 20, EqualSpacingLayout.Orientation.HORIZONTAL));
+		equalSpacingLayout.addChild(this.selectButton);
+		equalSpacingLayout.addChild(button);
+		equalSpacingLayout.addChild(button2);
+		linearLayout.addChild(SpacerElement.height(4));
+		EqualSpacingLayout equalSpacingLayout2 = linearLayout.addChild(new EqualSpacingLayout(308, 20, EqualSpacingLayout.Orientation.HORIZONTAL));
+		equalSpacingLayout2.addChild(this.editButton);
+		equalSpacingLayout2.addChild(this.deleteButton);
+		equalSpacingLayout2.addChild(button3);
+		equalSpacingLayout2.addChild(button4);
+		linearLayout.arrangeElements();
+		FrameLayout.centerInRectangle(linearLayout, 0, this.height - 64, this.width, 64);
 		this.onSelectedChange();
 	}
 
@@ -237,11 +236,10 @@ public class JoinMultiplayerScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
 		this.toolTip = null;
-		this.renderBackground(guiGraphics);
 		this.serverSelectionList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
-		super.render(guiGraphics, i, j, f);
 		if (this.toolTip != null) {
 			guiGraphics.renderComponentTooltip(this.font, this.toolTip, i, j);
 		}
@@ -253,7 +251,7 @@ public class JoinMultiplayerScreen extends Screen {
 			this.join(((ServerSelectionList.OnlineServerEntry)entry).getServerData());
 		} else if (entry instanceof ServerSelectionList.NetworkServerEntry) {
 			LanServer lanServer = ((ServerSelectionList.NetworkServerEntry)entry).getServerData();
-			this.join(new ServerData(lanServer.getMotd(), lanServer.getAddress(), true));
+			this.join(new ServerData(lanServer.getMotd(), lanServer.getAddress(), ServerData.Type.LAN));
 		}
 	}
 

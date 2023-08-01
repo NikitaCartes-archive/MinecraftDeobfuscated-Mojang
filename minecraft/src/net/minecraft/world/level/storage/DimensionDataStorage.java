@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
@@ -35,22 +34,22 @@ public class DimensionDataStorage {
 		return new File(this.dataFolder, string + ".dat");
 	}
 
-	public <T extends SavedData> T computeIfAbsent(Function<CompoundTag, T> function, Supplier<T> supplier, String string) {
-		T savedData = this.get(function, string);
+	public <T extends SavedData> T computeIfAbsent(SavedData.Factory<T> factory, String string) {
+		T savedData = this.get(factory, string);
 		if (savedData != null) {
 			return savedData;
 		} else {
-			T savedData2 = (T)supplier.get();
+			T savedData2 = (T)factory.constructor().get();
 			this.set(string, savedData2);
 			return savedData2;
 		}
 	}
 
 	@Nullable
-	public <T extends SavedData> T get(Function<CompoundTag, T> function, String string) {
+	public <T extends SavedData> T get(SavedData.Factory factory, String string) {
 		SavedData savedData = (SavedData)this.cache.get(string);
 		if (savedData == null && !this.cache.containsKey(string)) {
-			savedData = this.readSavedData(function, string);
+			savedData = this.readSavedData(factory.deserializer(), factory.type(), string);
 			this.cache.put(string, savedData);
 		}
 
@@ -58,15 +57,15 @@ public class DimensionDataStorage {
 	}
 
 	@Nullable
-	private <T extends SavedData> T readSavedData(Function<CompoundTag, T> function, String string) {
+	private <T extends SavedData> T readSavedData(Function<CompoundTag, T> function, DataFixTypes dataFixTypes, String string) {
 		try {
 			File file = this.getDataFile(string);
 			if (file.exists()) {
-				CompoundTag compoundTag = this.readTagFromDisk(string, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+				CompoundTag compoundTag = this.readTagFromDisk(string, dataFixTypes, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
 				return (T)function.apply(compoundTag.getCompound("data"));
 			}
-		} catch (Exception var5) {
-			LOGGER.error("Error loading saved data: {}", string, var5);
+		} catch (Exception var6) {
+			LOGGER.error("Error loading saved data: {}", string, var6);
 		}
 
 		return null;
@@ -76,11 +75,11 @@ public class DimensionDataStorage {
 		this.cache.put(string, savedData);
 	}
 
-	public CompoundTag readTagFromDisk(String string, int i) throws IOException {
+	public CompoundTag readTagFromDisk(String string, DataFixTypes dataFixTypes, int i) throws IOException {
 		File file = this.getDataFile(string);
 		FileInputStream fileInputStream = new FileInputStream(file);
 
-		CompoundTag var8;
+		CompoundTag var9;
 		try {
 			PushbackInputStream pushbackInputStream = new PushbackInputStream(fileInputStream, 2);
 
@@ -93,44 +92,44 @@ public class DimensionDataStorage {
 
 					try {
 						compoundTag = NbtIo.read(dataInputStream);
-					} catch (Throwable var13) {
+					} catch (Throwable var14) {
 						try {
 							dataInputStream.close();
-						} catch (Throwable var12) {
-							var13.addSuppressed(var12);
+						} catch (Throwable var13) {
+							var14.addSuppressed(var13);
 						}
 
-						throw var13;
+						throw var14;
 					}
 
 					dataInputStream.close();
 				}
 
 				int j = NbtUtils.getDataVersion(compoundTag, 1343);
-				var8 = DataFixTypes.SAVED_DATA.update(this.fixerUpper, compoundTag, j, i);
-			} catch (Throwable var14) {
+				var9 = dataFixTypes.update(this.fixerUpper, compoundTag, j, i);
+			} catch (Throwable var15) {
 				try {
 					pushbackInputStream.close();
-				} catch (Throwable var11) {
-					var14.addSuppressed(var11);
+				} catch (Throwable var12) {
+					var15.addSuppressed(var12);
 				}
 
-				throw var14;
+				throw var15;
 			}
 
 			pushbackInputStream.close();
-		} catch (Throwable var15) {
+		} catch (Throwable var16) {
 			try {
 				fileInputStream.close();
-			} catch (Throwable var10) {
-				var15.addSuppressed(var10);
+			} catch (Throwable var11) {
+				var16.addSuppressed(var11);
 			}
 
-			throw var15;
+			throw var16;
 		}
 
 		fileInputStream.close();
-		return var8;
+		return var9;
 	}
 
 	private boolean isGzip(PushbackInputStream pushbackInputStream) throws IOException {

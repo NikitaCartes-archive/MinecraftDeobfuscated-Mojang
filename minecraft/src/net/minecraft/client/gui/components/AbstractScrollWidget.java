@@ -69,11 +69,11 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
+	public boolean mouseScrolled(double d, double e, double f, double g) {
 		if (!this.visible) {
 			return false;
 		} else {
-			this.setScrollAmount(this.scrollAmount - f * this.scrollRate());
+			this.setScrollAmount(this.scrollAmount - g * this.scrollRate());
 			return true;
 		}
 	}

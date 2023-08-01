@@ -13,7 +13,7 @@ public class PacketSentEvent extends PacketEvent {
 	public static final String NAME = "minecraft.PacketSent";
 	public static final EventType TYPE = EventType.getEventType(PacketSentEvent.class);
 
-	public PacketSentEvent(int i, int j, SocketAddress socketAddress, int k) {
-		super(i, j, socketAddress, k);
+	public PacketSentEvent(String string, int i, SocketAddress socketAddress, int j) {
+		super(string, i, socketAddress, j);
 	}
 }

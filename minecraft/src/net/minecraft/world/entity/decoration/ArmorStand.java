@@ -537,11 +537,6 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	public double getMyRidingOffset() {
-		return this.isMarker() ? 0.0 : 0.1F;
-	}
-
-	@Override
 	public void travel(Vec3 vec3) {
 		if (this.hasPhysics()) {
 			super.travel(vec3);

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.util.Mth;
 
@@ -77,6 +78,10 @@ public class FrameLayout extends AbstractLayout {
 	public <T extends LayoutElement> T addChild(T layoutElement, LayoutSettings layoutSettings) {
 		this.children.add(new FrameLayout.ChildContainer(layoutElement, layoutSettings));
 		return layoutElement;
+	}
+
+	public <T extends LayoutElement> T addChild(T layoutElement, Consumer<LayoutSettings> consumer) {
+		return this.addChild(layoutElement, Util.make(this.newChildLayoutSettings(), consumer));
 	}
 
 	@Override

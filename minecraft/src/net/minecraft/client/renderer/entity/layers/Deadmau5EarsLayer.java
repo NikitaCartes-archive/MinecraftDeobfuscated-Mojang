@@ -31,8 +31,8 @@ public class Deadmau5EarsLayer extends RenderLayer<AbstractClientPlayer, PlayerM
 		float k,
 		float l
 	) {
-		if ("deadmau5".equals(abstractClientPlayer.getName().getString()) && abstractClientPlayer.isSkinLoaded() && !abstractClientPlayer.isInvisible()) {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation()));
+		if ("deadmau5".equals(abstractClientPlayer.getName().getString()) && !abstractClientPlayer.isInvisible()) {
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkin().texture()));
 			int m = LivingEntityRenderer.getOverlayCoords(abstractClientPlayer, 0.0F);
 
 			for (int n = 0; n < 2; n++) {

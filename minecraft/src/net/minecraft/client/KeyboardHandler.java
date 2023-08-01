@@ -61,8 +61,8 @@ public class KeyboardHandler {
 	private boolean handleChunkDebugKeys(int i) {
 		switch (i) {
 			case 69:
-				this.minecraft.chunkPath = !this.minecraft.chunkPath;
-				this.debugFeedback("ChunkPath: {0}", this.minecraft.chunkPath ? "shown" : "hidden");
+				this.minecraft.sectionPath = !this.minecraft.sectionPath;
+				this.debugFeedback("SectionPath: {0}", this.minecraft.sectionPath ? "shown" : "hidden");
 				return true;
 			case 76:
 				this.minecraft.smartCull = !this.minecraft.smartCull;
@@ -79,8 +79,8 @@ public class KeyboardHandler {
 
 				return true;
 			case 86:
-				this.minecraft.chunkVisibility = !this.minecraft.chunkVisibility;
-				this.debugFeedback("ChunkVisibility: {0}", this.minecraft.chunkVisibility ? "enabled" : "disabled");
+				this.minecraft.sectionVisibility = !this.minecraft.sectionVisibility;
+				this.debugFeedback("SectionVisibility: {0}", this.minecraft.sectionVisibility ? "enabled" : "disabled");
 				return true;
 			case 87:
 				this.minecraft.wireframe = !this.minecraft.wireframe;

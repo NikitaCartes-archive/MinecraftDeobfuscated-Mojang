@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.dto;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -9,7 +10,7 @@ public class PlayerInfo extends ValueObject implements ReflectionBasedSerializat
 	@SerializedName("name")
 	private String name;
 	@SerializedName("uuid")
-	private String uuid;
+	private UUID uuid;
 	@SerializedName("operator")
 	private boolean operator;
 	@SerializedName("accepted")
@@ -25,12 +26,12 @@ public class PlayerInfo extends ValueObject implements ReflectionBasedSerializat
 		this.name = string;
 	}
 
-	public String getUuid() {
+	public UUID getUuid() {
 		return this.uuid;
 	}
 
-	public void setUuid(String string) {
-		this.uuid = string;
+	public void setUuid(UUID uUID) {
+		this.uuid = uUID;
 	}
 
 	public boolean isOperator() {

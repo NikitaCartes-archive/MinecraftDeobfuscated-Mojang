@@ -27,7 +27,7 @@ public class StrollThroughVillageGoal extends Goal {
 
 	@Override
 	public boolean canUse() {
-		if (this.mob.isVehicle()) {
+		if (this.mob.hasControllingPassenger()) {
 			return false;
 		} else if (this.mob.level().isDay()) {
 			return false;

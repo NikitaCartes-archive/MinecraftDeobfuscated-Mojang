@@ -18,7 +18,14 @@ import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class TransferableSelectionList extends ObjectSelectionList<TransferableSelectionList.PackEntry> {
-	static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/resource_packs.png");
+	static final ResourceLocation SELECT_HIGHLIGHTED_SPRITE = new ResourceLocation("transferable_list/select_highlighted");
+	static final ResourceLocation SELECT_SPRITE = new ResourceLocation("transferable_list/select");
+	static final ResourceLocation UNSELECT_HIGHLIGHTED_SPRITE = new ResourceLocation("transferable_list/unselect_highlighted");
+	static final ResourceLocation UNSELECT_SPRITE = new ResourceLocation("transferable_list/unselect");
+	static final ResourceLocation MOVE_UP_HIGHLIGHTED_SPRITE = new ResourceLocation("transferable_list/move_up_highlighted");
+	static final ResourceLocation MOVE_UP_SPRITE = new ResourceLocation("transferable_list/move_up");
+	static final ResourceLocation MOVE_DOWN_HIGHLIGHTED_SPRITE = new ResourceLocation("transferable_list/move_down_highlighted");
+	static final ResourceLocation MOVE_DOWN_SPRITE = new ResourceLocation("transferable_list/move_down");
 	static final Component INCOMPATIBLE_TITLE = Component.translatable("pack.incompatible");
 	static final Component INCOMPATIBLE_CONFIRM_TITLE = Component.translatable("pack.incompatible.confirm.title");
 	private final Component title;
@@ -77,12 +84,6 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 
 	@Environment(EnvType.CLIENT)
 	public static class PackEntry extends ObjectSelectionList.Entry<TransferableSelectionList.PackEntry> {
-		private static final int ICON_OVERLAY_X_MOVE_RIGHT = 0;
-		private static final int ICON_OVERLAY_X_MOVE_LEFT = 32;
-		private static final int ICON_OVERLAY_X_MOVE_DOWN = 64;
-		private static final int ICON_OVERLAY_X_MOVE_UP = 96;
-		private static final int ICON_OVERLAY_Y_UNSELECTED = 0;
-		private static final int ICON_OVERLAY_Y_SELECTED = 32;
 		private static final int MAX_DESCRIPTION_WIDTH_PIXELS = 157;
 		private static final int MAX_NAME_WIDTH_PIXELS = 157;
 		private static final String TOO_LONG_NAME_SUFFIX = "...";
@@ -144,39 +145,39 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 
 				if (this.pack.canSelect()) {
 					if (p < 32) {
-						guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, 32.0F, 32, 32, 256, 256);
+						guiGraphics.blitSprite(TransferableSelectionList.SELECT_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
-						guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, 0.0F, 32, 32, 256, 256);
+						guiGraphics.blitSprite(TransferableSelectionList.SELECT_SPRITE, k, j, 32, 32);
 					}
 				} else {
 					if (this.pack.canUnselect()) {
 						if (p < 16) {
-							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 32.0F, 32.0F, 32, 32, 256, 256);
+							guiGraphics.blitSprite(TransferableSelectionList.UNSELECT_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
-							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 32.0F, 0.0F, 32, 32, 256, 256);
+							guiGraphics.blitSprite(TransferableSelectionList.UNSELECT_SPRITE, k, j, 32, 32);
 						}
 					}
 
 					if (this.pack.canMoveUp()) {
 						if (p < 32 && p > 16 && q < 16) {
-							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, 32.0F, 32, 32, 256, 256);
+							guiGraphics.blitSprite(TransferableSelectionList.MOVE_UP_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
-							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, 0.0F, 32, 32, 256, 256);
+							guiGraphics.blitSprite(TransferableSelectionList.MOVE_UP_SPRITE, k, j, 32, 32);
 						}
 					}
 
 					if (this.pack.canMoveDown()) {
 						if (p < 32 && p > 16 && q > 16) {
-							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, 32.0F, 32, 32, 256, 256);
+							guiGraphics.blitSprite(TransferableSelectionList.MOVE_DOWN_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
-							guiGraphics.blit(TransferableSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, 0.0F, 32, 32, 256, 256);
+							guiGraphics.blitSprite(TransferableSelectionList.MOVE_DOWN_SPRITE, k, j, 32, 32);
 						}
 					}
 				}
 			}
 
 			guiGraphics.drawString(this.minecraft.font, formattedCharSequence, k + 32 + 2, j + 1, 16777215);
-			multiLineLabel.renderLeftAligned(guiGraphics, k + 32 + 2, j + 12, 10, 8421504);
+			multiLineLabel.renderLeftAligned(guiGraphics, k + 32 + 2, j + 12, 10, -8355712);
 		}
 
 		public String getPackId() {

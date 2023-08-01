@@ -2,6 +2,7 @@ package net.minecraft.client.resources;
 
 import com.google.common.hash.Hashing;
 import com.mojang.logging.LogUtils;
+import com.mojang.util.UndashedUuid;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -74,7 +75,7 @@ public class DownloadedPackSource implements RepositorySource {
 			"X-Minecraft-Username",
 			Minecraft.getInstance().getUser().getName(),
 			"X-Minecraft-UUID",
-			Minecraft.getInstance().getUser().getUuid(),
+			UndashedUuid.toString(Minecraft.getInstance().getUser().getProfileId()),
 			"X-Minecraft-Version",
 			SharedConstants.getCurrentVersion().getName(),
 			"X-Minecraft-Version-ID",
@@ -223,13 +224,14 @@ public class DownloadedPackSource implements RepositorySource {
 	}
 
 	public CompletableFuture<Void> setServerPack(File file, PackSource packSource) {
-		Pack.ResourcesSupplier resourcesSupplier = string -> new FilePackResources(string, file, false);
-		Pack.Info info = Pack.readPackInfo("server", resourcesSupplier);
+		Pack.ResourcesSupplier resourcesSupplier = new FilePackResources.FileResourcesSupplier(file, false);
+		int i = SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES);
+		Pack.Info info = Pack.readPackInfo("server", resourcesSupplier, i);
 		if (info == null) {
 			return CompletableFuture.failedFuture(new IllegalArgumentException("Invalid pack metadata at " + file));
 		} else {
 			LOGGER.info("Applying server pack {}", file);
-			this.serverPack = Pack.create("server", SERVER_NAME, true, resourcesSupplier, info, PackType.CLIENT_RESOURCES, Pack.Position.TOP, true, packSource);
+			this.serverPack = Pack.create("server", SERVER_NAME, true, resourcesSupplier, info, Pack.Position.TOP, true, packSource);
 			return Minecraft.getInstance().delayTextureReload();
 		}
 	}

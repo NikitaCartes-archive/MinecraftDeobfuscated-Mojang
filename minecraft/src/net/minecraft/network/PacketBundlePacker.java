@@ -3,29 +3,29 @@ package net.minecraft.network;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.util.AttributeKey;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.network.protocol.BundlerInfo;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketFlow;
 
 public class PacketBundlePacker extends MessageToMessageDecoder<Packet<?>> {
 	@Nullable
 	private BundlerInfo.Bundler currentBundler;
 	@Nullable
 	private BundlerInfo infoForCurrentBundler;
-	private final PacketFlow flow;
+	private final AttributeKey<? extends BundlerInfo.Provider> bundlerAttributeKey;
 
-	public PacketBundlePacker(PacketFlow packetFlow) {
-		this.flow = packetFlow;
+	public PacketBundlePacker(AttributeKey<? extends BundlerInfo.Provider> attributeKey) {
+		this.bundlerAttributeKey = attributeKey;
 	}
 
 	protected void decode(ChannelHandlerContext channelHandlerContext, Packet<?> packet, List<Object> list) throws Exception {
-		BundlerInfo.Provider provider = channelHandlerContext.channel().attr(BundlerInfo.BUNDLER_PROVIDER).get();
+		BundlerInfo.Provider provider = channelHandlerContext.channel().attr(this.bundlerAttributeKey).get();
 		if (provider == null) {
 			throw new DecoderException("Bundler not configured: " + packet);
 		} else {
-			BundlerInfo bundlerInfo = provider.getBundlerInfo(this.flow);
+			BundlerInfo bundlerInfo = provider.bundlerInfo();
 			if (this.currentBundler != null) {
 				if (this.infoForCurrentBundler != bundlerInfo) {
 					throw new DecoderException("Bundler handler changed during bundling");

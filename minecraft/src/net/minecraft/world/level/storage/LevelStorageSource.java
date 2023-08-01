@@ -18,6 +18,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -92,7 +93,7 @@ public class LevelStorageSource {
 		"RandomSeed", "generatorName", "generatorOptions", "generatorVersion", "legacy_custom_options", "MapFeatures", "BonusChest"
 	);
 	private static final String TAG_DATA = "Data";
-	private static final PathAllowList NO_SYMLINKS_ALLOWED = new PathAllowList(List.of());
+	private static final PathMatcher NO_SYMLINKS_ALLOWED = path -> false;
 	public static final String ALLOWED_SYMLINKS_CONFIG_NAME = "allowed_symlinks.txt";
 	private final Path baseDir;
 	private final Path backupDir;
@@ -324,10 +325,9 @@ public class LevelStorageSource {
 		return (path, dataFixer) -> {
 			try {
 				if (Files.isSymbolicLink(path)) {
-					List<ForbiddenSymlinkInfo> list = new ArrayList();
-					this.worldDirValidator.validateSymlink(path, list);
+					List<ForbiddenSymlinkInfo> list = this.worldDirValidator.validateSymlink(path);
 					if (!list.isEmpty()) {
-						LOGGER.warn(ContentValidationException.getMessage(path, list));
+						LOGGER.warn("{}", ContentValidationException.getMessage(path, list));
 						return new LevelSummary.SymlinkLevelSummary(levelDirectory.directoryName(), levelDirectory.iconFile());
 					}
 				}
@@ -404,7 +404,7 @@ public class LevelStorageSource {
 
 	public LevelStorageSource.LevelStorageAccess validateAndCreateAccess(String string) throws IOException, ContentValidationException {
 		Path path = this.getLevelPath(string);
-		List<ForbiddenSymlinkInfo> list = this.worldDirValidator.validateSave(path, true);
+		List<ForbiddenSymlinkInfo> list = this.worldDirValidator.validateDirectory(path, true);
 		if (!list.isEmpty()) {
 			throw new ContentValidationException(path, list);
 		} else {
@@ -472,6 +472,10 @@ public class LevelStorageSource {
 			this.levelId = string;
 			this.levelDirectory = new LevelStorageSource.LevelDirectory(path);
 			this.lock = DirectoryLock.create(path);
+		}
+
+		public LevelStorageSource parent() {
+			return LevelStorageSource.this;
 		}
 
 		public String getLevelId() {

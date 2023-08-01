@@ -72,7 +72,7 @@ public class ScoreContents implements ComponentContents {
 		if (minecraftServer != null) {
 			Scoreboard scoreboard = minecraftServer.getScoreboard();
 			Objective objective = scoreboard.getObjective(this.objective);
-			if (scoreboard.hasPlayerScore(string, objective)) {
+			if (objective != null && scoreboard.hasPlayerScore(string, objective)) {
 				Score score = scoreboard.getOrCreatePlayerScore(string, objective);
 				return Integer.toString(score.getScore());
 			}

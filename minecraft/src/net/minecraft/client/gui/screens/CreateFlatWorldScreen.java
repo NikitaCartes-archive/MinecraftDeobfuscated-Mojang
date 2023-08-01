@@ -22,7 +22,7 @@ import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 @Environment(EnvType.CLIENT)
 public class CreateFlatWorldScreen extends Screen {
-	private static final int SLOT_TEX_SIZE = 128;
+	static final ResourceLocation SLOT_SPRITE = new ResourceLocation("container/slot");
 	private static final int SLOT_BG_SIZE = 18;
 	private static final int SLOT_STAT_HEIGHT = 20;
 	private static final int SLOT_BG_X = 1;
@@ -105,18 +105,17 @@ public class CreateFlatWorldScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		this.list.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		int k = this.width / 2 - 92 - 16;
 		guiGraphics.drawString(this.font, this.columnType, k, 32, 16777215);
 		guiGraphics.drawString(this.font, this.columnHeight, k + 2 + 213 - this.font.width(this.columnHeight), 32, 16777215);
-		super.render(guiGraphics, i, j, f);
 	}
 
 	@Environment(EnvType.CLIENT)
 	class DetailsList extends ObjectSelectionList<CreateFlatWorldScreen.DetailsList.Entry> {
-		static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
+		private static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
 
 		public DetailsList() {
 			super(
@@ -215,7 +214,7 @@ public class CreateFlatWorldScreen extends Screen {
 			}
 
 			private void blitSlotBg(GuiGraphics guiGraphics, int i, int j) {
-				guiGraphics.blit(CreateFlatWorldScreen.DetailsList.STATS_ICON_LOCATION, i, j, 0, 0.0F, 0.0F, 18, 18, 128, 128);
+				guiGraphics.blitSprite(CreateFlatWorldScreen.SLOT_SPRITE, i, j, 0, 18, 18);
 			}
 		}
 	}

@@ -56,10 +56,9 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		this.backupInfoList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
-		super.render(guiGraphics, i, j, f);
 	}
 
 	Component checkForSpecificMetadata(String string, String string2) {
@@ -123,8 +122,8 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			guiGraphics.drawString(RealmsBackupInfoScreen.this.font, this.translateKey(this.key), k, j, 10526880);
-			guiGraphics.drawString(RealmsBackupInfoScreen.this.font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(this.key, this.value), k, j + 12, 16777215);
+			guiGraphics.drawString(RealmsBackupInfoScreen.this.font, this.translateKey(this.key), k, j, -6250336);
+			guiGraphics.drawString(RealmsBackupInfoScreen.this.font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(this.key, this.value), k, j + 12, -1);
 		}
 
 		private Component translateKey(String string) {

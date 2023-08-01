@@ -58,12 +58,12 @@ public class ClientChunkCache extends ChunkSource {
 		}
 	}
 
-	public void drop(int i, int j) {
-		if (this.storage.inRange(i, j)) {
-			int k = this.storage.getIndex(i, j);
-			LevelChunk levelChunk = this.storage.getChunk(k);
-			if (isValidChunk(levelChunk, i, j)) {
-				this.storage.replace(k, levelChunk, null);
+	public void drop(ChunkPos chunkPos) {
+		if (this.storage.inRange(chunkPos.x, chunkPos.z)) {
+			int i = this.storage.getIndex(chunkPos.x, chunkPos.z);
+			LevelChunk levelChunk = this.storage.getChunk(i);
+			if (isValidChunk(levelChunk, chunkPos.x, chunkPos.z)) {
+				this.storage.replace(i, levelChunk, null);
 			}
 		}
 	}

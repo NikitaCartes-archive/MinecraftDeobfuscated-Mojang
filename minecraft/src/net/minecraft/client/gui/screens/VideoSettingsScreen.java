@@ -171,10 +171,10 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
+	public boolean mouseScrolled(double d, double e, double f, double g) {
 		if (Screen.hasControlDown()) {
 			OptionInstance<Integer> optionInstance = this.options.guiScale();
-			int i = optionInstance.get() + (int)Math.signum(f);
+			int i = optionInstance.get() + (int)Math.signum(g);
 			if (i != 0) {
 				optionInstance.set(i);
 				if (optionInstance.get() == i) {
@@ -185,12 +185,17 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 
 			return false;
 		} else {
-			return super.mouseScrolled(d, e, f);
+			return super.mouseScrolled(d, e, f, g);
 		}
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.basicListRender(guiGraphics, this.list, i, j, f);
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
 	}
 }

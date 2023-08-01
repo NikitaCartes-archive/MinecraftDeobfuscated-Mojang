@@ -94,7 +94,7 @@ public class ItemProperties {
 			} else {
 				return clientLevel == null
 					? 0.0F
-					: (Float)ArmorTrim.getTrim(clientLevel.registryAccess(), itemStack)
+					: (Float)ArmorTrim.getTrim(clientLevel.registryAccess(), itemStack, true)
 						.map(ArmorTrim::material)
 						.map(Holder::value)
 						.map(TrimMaterial::itemModelIndex)

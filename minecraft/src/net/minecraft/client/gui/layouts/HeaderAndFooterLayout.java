@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screens.Screen;
 @Environment(EnvType.CLIENT)
 public class HeaderAndFooterLayout implements Layout {
 	private static final int DEFAULT_HEADER_AND_FOOTER_HEIGHT = 36;
-	private static final int DEFAULT_CONTENT_MARGIN_TOP = 30;
+	private static final int CONTENT_MARGIN_TOP = 30;
 	private final FrameLayout headerFrame = new FrameLayout();
 	private final FrameLayout footerFrame = new FrameLayout();
 	private final FrameLayout contentsFrame = new FrameLayout();
@@ -30,7 +30,6 @@ public class HeaderAndFooterLayout implements Layout {
 		this.footerHeight = j;
 		this.headerFrame.defaultChildLayoutSetting().align(0.5F, 0.5F);
 		this.footerFrame.defaultChildLayoutSetting().align(0.5F, 0.5F);
-		this.contentsFrame.defaultChildLayoutSetting().align(0.5F, 0.0F).paddingTop(30);
 	}
 
 	@Override
@@ -97,44 +96,33 @@ public class HeaderAndFooterLayout implements Layout {
 		this.footerFrame.arrangeElements();
 		this.footerFrame.setY(this.screen.height - j);
 		this.contentsFrame.setMinWidth(this.screen.width);
-		this.contentsFrame.setMinHeight(this.screen.height - i - j);
-		this.contentsFrame.setPosition(0, i);
 		this.contentsFrame.arrangeElements();
+		int k = i + 30;
+		int l = this.screen.height - j - this.contentsFrame.getHeight();
+		this.contentsFrame.setPosition(0, Math.min(k, l));
 	}
 
 	public <T extends LayoutElement> T addToHeader(T layoutElement) {
 		return this.headerFrame.addChild(layoutElement);
 	}
 
-	public <T extends LayoutElement> T addToHeader(T layoutElement, LayoutSettings layoutSettings) {
-		return this.headerFrame.addChild(layoutElement, layoutSettings);
+	public <T extends LayoutElement> T addToHeader(T layoutElement, Consumer<LayoutSettings> consumer) {
+		return this.headerFrame.addChild(layoutElement, consumer);
 	}
 
 	public <T extends LayoutElement> T addToFooter(T layoutElement) {
 		return this.footerFrame.addChild(layoutElement);
 	}
 
-	public <T extends LayoutElement> T addToFooter(T layoutElement, LayoutSettings layoutSettings) {
-		return this.footerFrame.addChild(layoutElement, layoutSettings);
+	public <T extends LayoutElement> T addToFooter(T layoutElement, Consumer<LayoutSettings> consumer) {
+		return this.footerFrame.addChild(layoutElement, consumer);
 	}
 
 	public <T extends LayoutElement> T addToContents(T layoutElement) {
 		return this.contentsFrame.addChild(layoutElement);
 	}
 
-	public <T extends LayoutElement> T addToContents(T layoutElement, LayoutSettings layoutSettings) {
-		return this.contentsFrame.addChild(layoutElement, layoutSettings);
-	}
-
-	public LayoutSettings newHeaderLayoutSettings() {
-		return this.headerFrame.newChildLayoutSettings();
-	}
-
-	public LayoutSettings newContentLayoutSettings() {
-		return this.contentsFrame.newChildLayoutSettings();
-	}
-
-	public LayoutSettings newFooterLayoutSettings() {
-		return this.footerFrame.newChildLayoutSettings();
+	public <T extends LayoutElement> T addToContents(T layoutElement, Consumer<LayoutSettings> consumer) {
+		return this.contentsFrame.addChild(layoutElement, consumer);
 	}
 }

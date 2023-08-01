@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
@@ -29,7 +30,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class ChiseledBookShelfBlock extends BaseEntityBlock {
 	private static final int MAX_BOOKS_IN_STORAGE = 6;

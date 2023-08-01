@@ -29,7 +29,13 @@ import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
-	static final ResourceLocation BEACON_LOCATION = new ResourceLocation("textures/gui/container/beacon.png");
+	private static final ResourceLocation BEACON_LOCATION = new ResourceLocation("textures/gui/container/beacon.png");
+	static final ResourceLocation BUTTON_DISABLED_SPRITE = new ResourceLocation("container/beacon/button_disabled");
+	static final ResourceLocation BUTTON_SELECTED_SPRITE = new ResourceLocation("container/beacon/button_selected");
+	static final ResourceLocation BUTTON_HIGHLIGHTED_SPRITE = new ResourceLocation("container/beacon/button_highlighted");
+	static final ResourceLocation BUTTON_SPRITE = new ResourceLocation("container/beacon/button");
+	static final ResourceLocation CONFIRM_SPRITE = new ResourceLocation("container/beacon/confirm");
+	static final ResourceLocation CANCEL_SPRITE = new ResourceLocation("container/beacon/cancel");
 	private static final Component PRIMARY_EFFECT_LABEL = Component.translatable("block.minecraft.beacon.primary");
 	private static final Component SECONDARY_EFFECT_LABEL = Component.translatable("block.minecraft.beacon.secondary");
 	private final List<BeaconScreen.BeaconButton> beaconButtons = Lists.<BeaconScreen.BeaconButton>newArrayList();
@@ -135,7 +141,6 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		super.render(guiGraphics, i, j, f);
 		this.renderTooltip(guiGraphics, i, j);
 	}
@@ -148,7 +153,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	@Environment(EnvType.CLIENT)
 	class BeaconCancelButton extends BeaconScreen.BeaconSpriteScreenButton {
 		public BeaconCancelButton(int i, int j) {
-			super(i, j, 112, 220, CommonComponents.GUI_CANCEL);
+			super(i, j, BeaconScreen.CANCEL_SPRITE, CommonComponents.GUI_CANCEL);
 		}
 
 		@Override
@@ -164,7 +169,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	@Environment(EnvType.CLIENT)
 	class BeaconConfirmButton extends BeaconScreen.BeaconSpriteScreenButton {
 		public BeaconConfirmButton(int i, int j) {
-			super(i, j, 90, 220, CommonComponents.GUI_DONE);
+			super(i, j, BeaconScreen.CONFIRM_SPRITE, CommonComponents.GUI_DONE);
 		}
 
 		@Override
@@ -249,17 +254,18 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 		@Override
 		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-			int k = 219;
-			int l = 0;
+			ResourceLocation resourceLocation;
 			if (!this.active) {
-				l += this.width * 2;
+				resourceLocation = BeaconScreen.BUTTON_DISABLED_SPRITE;
 			} else if (this.selected) {
-				l += this.width * 1;
+				resourceLocation = BeaconScreen.BUTTON_SELECTED_SPRITE;
 			} else if (this.isHoveredOrFocused()) {
-				l += this.width * 3;
+				resourceLocation = BeaconScreen.BUTTON_HIGHLIGHTED_SPRITE;
+			} else {
+				resourceLocation = BeaconScreen.BUTTON_SPRITE;
 			}
 
-			guiGraphics.blit(BeaconScreen.BEACON_LOCATION, this.getX(), this.getY(), l, 219, this.width, this.height);
+			guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
 			this.renderIcon(guiGraphics);
 		}
 
@@ -281,18 +287,16 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 	@Environment(EnvType.CLIENT)
 	abstract static class BeaconSpriteScreenButton extends BeaconScreen.BeaconScreenButton {
-		private final int iconX;
-		private final int iconY;
+		private final ResourceLocation sprite;
 
-		protected BeaconSpriteScreenButton(int i, int j, int k, int l, Component component) {
+		protected BeaconSpriteScreenButton(int i, int j, ResourceLocation resourceLocation, Component component) {
 			super(i, j, component);
-			this.iconX = k;
-			this.iconY = l;
+			this.sprite = resourceLocation;
 		}
 
 		@Override
 		protected void renderIcon(GuiGraphics guiGraphics) {
-			guiGraphics.blit(BeaconScreen.BEACON_LOCATION, this.getX() + 2, this.getY() + 2, this.iconX, this.iconY, 18, 18);
+			guiGraphics.blitSprite(this.sprite, this.getX() + 2, this.getY() + 2, 18, 18);
 		}
 	}
 

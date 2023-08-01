@@ -30,11 +30,6 @@ public class SelectWorldScreen extends Screen {
 	}
 
 	@Override
-	public void tick() {
-		this.searchBox.tick();
-	}
-
-	@Override
 	protected void init() {
 		this.searchBox = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, this.searchBox, Component.translatable("selectWorld.search"));
 		this.searchBox.setResponder(string -> this.list.updateFilter(string));
@@ -69,9 +64,7 @@ public class SelectWorldScreen extends Screen {
 				.build()
 		);
 		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen))
-				.bounds(this.width / 2 + 82, this.height - 28, 72, 20)
-				.build()
+			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 82, this.height - 28, 72, 20).build()
 		);
 		this.updateButtonStatus(false, false);
 		this.setInitialFocus(this.searchBox);
@@ -94,10 +87,10 @@ public class SelectWorldScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
 		this.list.render(guiGraphics, i, j, f);
 		this.searchBox.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
-		super.render(guiGraphics, i, j, f);
 	}
 
 	public void updateButtonStatus(boolean bl, boolean bl2) {

@@ -44,7 +44,6 @@ public class ReportReasonSelectionScreen extends Screen {
 	@Override
 	protected void init() {
 		this.reasonSelectionList = new ReportReasonSelectionScreen.ReasonSelectionList(this.minecraft);
-		this.reasonSelectionList.setRenderBackground(false);
 		this.addWidget(this.reasonSelectionList);
 		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Optionull.map(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
 		this.reasonSelectionList.setSelected(entry);
@@ -70,10 +69,9 @@ public class ReportReasonSelectionScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		this.reasonSelectionList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 16777215);
-		super.render(guiGraphics, i, j, f);
 		guiGraphics.fill(this.contentLeft(), this.descriptionTop(), this.contentRight(), this.descriptionBottom(), 2130706432);
 		guiGraphics.drawString(this.font, REASON_DESCRIPTION, this.contentLeft() + 4, this.descriptionTop() + 4, -8421505);
 		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = this.reasonSelectionList.getSelected();
@@ -87,6 +85,11 @@ public class ReportReasonSelectionScreen extends Screen {
 			int q = this.font.wordWrapHeight(entry.reason.description(), o);
 			guiGraphics.drawWordWrap(this.font, entry.reason.description(), k, m + (p - q) / 2, o, -1);
 		}
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
 	}
 
 	private int buttonTop() {

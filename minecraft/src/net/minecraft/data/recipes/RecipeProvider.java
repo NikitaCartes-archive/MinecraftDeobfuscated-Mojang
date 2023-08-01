@@ -573,20 +573,24 @@ public abstract class RecipeProvider implements DataProvider {
 	}
 
 	protected static void generateRecipes(Consumer<FinishedRecipe> consumer, BlockFamily blockFamily) {
-		blockFamily.getVariants().forEach((variant, block) -> {
-			BiFunction<ItemLike, ItemLike, RecipeBuilder> biFunction = (BiFunction<ItemLike, ItemLike, RecipeBuilder>)SHAPE_BUILDERS.get(variant);
-			ItemLike itemLike = getBaseBlock(blockFamily, variant);
-			if (biFunction != null) {
-				RecipeBuilder recipeBuilder = (RecipeBuilder)biFunction.apply(block, itemLike);
-				blockFamily.getRecipeGroupPrefix().ifPresent(string -> recipeBuilder.group(string + (variant == BlockFamily.Variant.CUT ? "" : "_" + variant.getName())));
-				recipeBuilder.unlockedBy((String)blockFamily.getRecipeUnlockedBy().orElseGet(() -> getHasName(itemLike)), has(itemLike));
-				recipeBuilder.save(consumer);
-			}
+		blockFamily.getVariants()
+			.forEach(
+				(variant, block) -> {
+					BiFunction<ItemLike, ItemLike, RecipeBuilder> biFunction = (BiFunction<ItemLike, ItemLike, RecipeBuilder>)SHAPE_BUILDERS.get(variant);
+					ItemLike itemLike = getBaseBlock(blockFamily, variant);
+					if (biFunction != null) {
+						RecipeBuilder recipeBuilder = (RecipeBuilder)biFunction.apply(block, itemLike);
+						blockFamily.getRecipeGroupPrefix()
+							.ifPresent(string -> recipeBuilder.group(string + (variant == BlockFamily.Variant.CUT ? "" : "_" + variant.getRecipeGroup())));
+						recipeBuilder.unlockedBy((String)blockFamily.getRecipeUnlockedBy().orElseGet(() -> getHasName(itemLike)), has(itemLike));
+						recipeBuilder.save(consumer);
+					}
 
-			if (variant == BlockFamily.Variant.CRACKED) {
-				smeltingResultFromBase(consumer, block, itemLike);
-			}
-		});
+					if (variant == BlockFamily.Variant.CRACKED) {
+						smeltingResultFromBase(consumer, block, itemLike);
+					}
+				}
+			);
 	}
 
 	private static Block getBaseBlock(BlockFamily blockFamily, BlockFamily.Variant variant) {

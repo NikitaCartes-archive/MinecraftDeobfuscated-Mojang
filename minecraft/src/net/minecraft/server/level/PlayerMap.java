@@ -7,15 +7,15 @@ import java.util.Set;
 public final class PlayerMap {
 	private final Object2BooleanMap<ServerPlayer> players = new Object2BooleanOpenHashMap<>();
 
-	public Set<ServerPlayer> getPlayers(long l) {
+	public Set<ServerPlayer> getAllPlayers() {
 		return this.players.keySet();
 	}
 
-	public void addPlayer(long l, ServerPlayer serverPlayer, boolean bl) {
+	public void addPlayer(ServerPlayer serverPlayer, boolean bl) {
 		this.players.put(serverPlayer, bl);
 	}
 
-	public void removePlayer(long l, ServerPlayer serverPlayer) {
+	public void removePlayer(ServerPlayer serverPlayer) {
 		this.players.removeBoolean(serverPlayer);
 	}
 
@@ -33,8 +33,5 @@ public final class PlayerMap {
 
 	public boolean ignored(ServerPlayer serverPlayer) {
 		return this.players.getBoolean(serverPlayer);
-	}
-
-	public void updatePlayer(long l, long m, ServerPlayer serverPlayer) {
 	}
 }

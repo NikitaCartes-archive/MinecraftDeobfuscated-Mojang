@@ -9,10 +9,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class SystemToast implements Toast {
+	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("toast/system");
 	private static final int MAX_LINE_SIZE = 200;
 	private static final int LINE_SPACING = 12;
 	private static final int MARGIN = 10;
@@ -69,18 +71,18 @@ public class SystemToast implements Toast {
 
 		int i = this.width();
 		if (i == 160 && this.messageLines.size() <= 1) {
-			guiGraphics.blit(TEXTURE, 0, 0, 0, 64, i, this.height());
+			guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, i, this.height());
 		} else {
 			int j = this.height();
 			int k = 28;
 			int m = Math.min(4, j - 28);
-			this.renderBackgroundRow(guiGraphics, toastComponent, i, 0, 0, 28);
+			this.renderBackgroundRow(guiGraphics, i, 0, 0, 28);
 
 			for (int n = 28; n < j - m; n += 10) {
-				this.renderBackgroundRow(guiGraphics, toastComponent, i, 16, n, Math.min(16, j - n - m));
+				this.renderBackgroundRow(guiGraphics, i, 16, n, Math.min(16, j - n - m));
 			}
 
-			this.renderBackgroundRow(guiGraphics, toastComponent, i, 32 - m, j - m, m);
+			this.renderBackgroundRow(guiGraphics, i, 32 - m, j - m, m);
 		}
 
 		if (this.messageLines == null) {
@@ -98,16 +100,17 @@ public class SystemToast implements Toast {
 			: Toast.Visibility.HIDE;
 	}
 
-	private void renderBackgroundRow(GuiGraphics guiGraphics, ToastComponent toastComponent, int i, int j, int k, int l) {
+	private void renderBackgroundRow(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		int m = j == 0 ? 20 : 5;
 		int n = Math.min(60, i - m);
-		guiGraphics.blit(TEXTURE, 0, k, 0, 64 + j, m, l);
+		ResourceLocation resourceLocation = BACKGROUND_SPRITE;
+		guiGraphics.blitSprite(resourceLocation, 160, 32, 0, j, 0, k, m, l);
 
 		for (int o = m; o < i - n; o += 64) {
-			guiGraphics.blit(TEXTURE, o, k, 32, 64 + j, Math.min(64, i - o - n), l);
+			guiGraphics.blitSprite(resourceLocation, 160, 32, 32, j, o, k, Math.min(64, i - o - n), l);
 		}
 
-		guiGraphics.blit(TEXTURE, i - n, k, 160 - n, 64 + j, n, l);
+		guiGraphics.blitSprite(resourceLocation, 160, 32, 160 - n, j, i - n, k, n, l);
 	}
 
 	public void reset(Component component, @Nullable Component component2) {

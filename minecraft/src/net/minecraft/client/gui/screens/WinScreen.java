@@ -241,33 +241,10 @@ public class WinScreen extends Screen {
 		this.lines.add(component.getVisualOrderText());
 	}
 
-	private void renderBg(GuiGraphics guiGraphics) {
-		int i = this.width;
-		float f = this.scroll * 0.5F;
-		int j = 64;
-		float g = this.scroll / this.unmodifiedScrollSpeed;
-		float h = g * 0.02F;
-		float k = (float)(this.totalScrollLength + this.height + this.height + 24) / this.unmodifiedScrollSpeed;
-		float l = (k - 20.0F - g) * 0.005F;
-		if (l < h) {
-			h = l;
-		}
-
-		if (h > 1.0F) {
-			h = 1.0F;
-		}
-
-		h *= h;
-		h = h * 96.0F / 255.0F;
-		guiGraphics.setColor(h, h, h, 1.0F);
-		guiGraphics.blit(BACKGROUND_LOCATION, 0, 0, 0, 0.0F, f, i, this.height, 64, 64);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-	}
-
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.scroll = Math.max(0.0F, this.scroll + f * this.scrollSpeed);
-		this.renderBg(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		int k = this.width / 2 - 128;
 		int l = this.height + 50;
 		float g = -this.scroll;
@@ -302,7 +279,30 @@ public class WinScreen extends Screen {
 		guiGraphics.blit(VIGNETTE_LOCATION, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, this.width, this.height);
 		RenderSystem.disableBlend();
 		RenderSystem.defaultBlendFunc();
-		super.render(guiGraphics, i, j, f);
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		int k = this.width;
+		float g = this.scroll * 0.5F;
+		int l = 64;
+		float h = this.scroll / this.unmodifiedScrollSpeed;
+		float m = h * 0.02F;
+		float n = (float)(this.totalScrollLength + this.height + this.height + 24) / this.unmodifiedScrollSpeed;
+		float o = (n - 20.0F - h) * 0.005F;
+		if (o < m) {
+			m = o;
+		}
+
+		if (m > 1.0F) {
+			m = 1.0F;
+		}
+
+		m *= m;
+		m = m * 96.0F / 255.0F;
+		guiGraphics.setColor(m, m, m, 1.0F);
+		guiGraphics.blit(BACKGROUND_LOCATION, 0, 0, 0, 0.0F, g, k, this.height, 64, 64);
+		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
 	@Override

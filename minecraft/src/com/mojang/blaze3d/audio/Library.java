@@ -80,7 +80,12 @@ public class Library {
 			throw new IllegalStateException("OpenAL 1.1 not supported");
 		} else {
 			this.setHrtf(aLCCapabilities.ALC_SOFT_HRTF && bl);
-			this.context = ALC10.alcCreateContext(this.currentDevice, (IntBuffer)null);
+
+			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
+				IntBuffer intBuffer = memoryStack.callocInt(3).put(6554).put(1).put(0).flip();
+				this.context = ALC10.alcCreateContext(this.currentDevice, intBuffer);
+			}
+
 			ALC10.alcMakeContextCurrent(this.context);
 			int i = this.getChannelCount();
 			int j = Mth.clamp((int)Mth.sqrt((float)i), 2, 8);

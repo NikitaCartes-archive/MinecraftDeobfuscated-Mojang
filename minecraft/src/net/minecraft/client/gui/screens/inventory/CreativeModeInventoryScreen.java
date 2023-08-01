@@ -48,7 +48,44 @@ import net.minecraft.world.item.TooltipFlag;
 
 @Environment(EnvType.CLIENT)
 public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
-	private static final ResourceLocation CREATIVE_TABS_LOCATION = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
+	private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("container/creative_inventory/scroller");
+	private static final ResourceLocation SCROLLER_DISABLED_SPRITE = new ResourceLocation("container/creative_inventory/scroller_disabled");
+	private static final ResourceLocation[] UNSELECTED_TOP_TABS = new ResourceLocation[]{
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_1"),
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_2"),
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_3"),
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_4"),
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_5"),
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_6"),
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_7")
+	};
+	private static final ResourceLocation[] SELECTED_TOP_TABS = new ResourceLocation[]{
+		new ResourceLocation("container/creative_inventory/tab_top_selected_1"),
+		new ResourceLocation("container/creative_inventory/tab_top_selected_2"),
+		new ResourceLocation("container/creative_inventory/tab_top_selected_3"),
+		new ResourceLocation("container/creative_inventory/tab_top_selected_4"),
+		new ResourceLocation("container/creative_inventory/tab_top_selected_5"),
+		new ResourceLocation("container/creative_inventory/tab_top_selected_6"),
+		new ResourceLocation("container/creative_inventory/tab_top_selected_7")
+	};
+	private static final ResourceLocation[] UNSELECTED_BOTTOM_TABS = new ResourceLocation[]{
+		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_1"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_2"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_3"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_4"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_5"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_6"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_7")
+	};
+	private static final ResourceLocation[] SELECTED_BOTTOM_TABS = new ResourceLocation[]{
+		new ResourceLocation("container/creative_inventory/tab_bottom_selected_1"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_selected_2"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_selected_3"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_selected_4"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_selected_5"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_selected_6"),
+		new ResourceLocation("container/creative_inventory/tab_bottom_selected_7")
+	};
 	private static final String GUI_CREATIVE_TAB_PREFIX = "textures/gui/container/creative_inventory/tab_";
 	private static final String CUSTOM_SLOT_LOCK = "CustomCreativeLock";
 	private static final int NUM_ROWS = 5;
@@ -127,8 +164,6 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 			if (!this.minecraft.gameMode.hasInfiniteItems()) {
 				this.minecraft.setScreen(new InventoryScreen(this.minecraft.player));
-			} else {
-				this.searchBox.tick();
 			}
 		}
 	}
@@ -136,7 +171,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	@Override
 	protected void slotClicked(@Nullable Slot slot, int i, int j, ClickType clickType) {
 		if (this.isCreativeSlot(slot)) {
-			this.searchBox.moveCursorToEnd();
+			this.searchBox.moveCursorToEnd(false);
 			this.searchBox.setHighlightPos(0);
 		}
 
@@ -554,11 +589,11 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
+	public boolean mouseScrolled(double d, double e, double f, double g) {
 		if (!this.canScroll()) {
 			return false;
 		} else {
-			this.scrollOffs = this.menu.subtractInputFromScroll(this.scrollOffs, f);
+			this.scrollOffs = this.menu.subtractInputFromScroll(this.scrollOffs, g);
 			this.menu.scrollTo(this.scrollOffs);
 			return true;
 		}
@@ -597,7 +632,6 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		super.render(guiGraphics, i, j, f);
 
 		for (CreativeModeTab creativeModeTab : CreativeModeTabs.tabs()) {
@@ -669,13 +703,14 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		int l = this.topPos + 18;
 		int m = l + 112;
 		if (selectedTab.canScroll()) {
-			guiGraphics.blit(CREATIVE_TABS_LOCATION, k, l + (int)((float)(m - l - 17) * this.scrollOffs), 232 + (this.canScroll() ? 0 : 12), 0, 12, 15);
+			ResourceLocation resourceLocation = this.canScroll() ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
+			guiGraphics.blitSprite(resourceLocation, k, l + (int)((float)(m - l - 17) * this.scrollOffs), 12, 15);
 		}
 
 		this.renderTabButton(guiGraphics, selectedTab);
 		if (selectedTab.getType() == CreativeModeTab.Type.INVENTORY) {
 			InventoryScreen.renderEntityInInventoryFollowsMouse(
-				guiGraphics, this.leftPos + 88, this.topPos + 45, 20, (float)(this.leftPos + 88 - i), (float)(this.topPos + 45 - 30 - j), this.minecraft.player
+				guiGraphics, this.leftPos + 73, this.topPos + 6, this.leftPos + 105, this.topPos + 49, 20, 0.0625F, (float)i, (float)j, this.minecraft.player
 			);
 		}
 	}
@@ -723,30 +758,23 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		boolean bl = creativeModeTab == selectedTab;
 		boolean bl2 = creativeModeTab.row() == CreativeModeTab.Row.TOP;
 		int i = creativeModeTab.column();
-		int j = i * 26;
-		int k = 0;
-		int l = this.leftPos + this.getTabX(creativeModeTab);
-		int m = this.topPos;
-		int n = 32;
-		if (bl) {
-			k += 32;
-		}
-
+		int j = this.leftPos + this.getTabX(creativeModeTab);
+		int k = this.topPos - (bl2 ? 28 : -(this.imageHeight - 4));
+		ResourceLocation[] resourceLocations;
 		if (bl2) {
-			m -= 28;
+			resourceLocations = bl ? SELECTED_TOP_TABS : UNSELECTED_TOP_TABS;
 		} else {
-			k += 64;
-			m += this.imageHeight - 4;
+			resourceLocations = bl ? SELECTED_BOTTOM_TABS : UNSELECTED_BOTTOM_TABS;
 		}
 
-		guiGraphics.blit(CREATIVE_TABS_LOCATION, l, m, j, k, 26, 32);
+		guiGraphics.blitSprite(resourceLocations[Mth.clamp(i, 0, resourceLocations.length)], j, k, 26, 32);
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
-		l += 5;
-		m += 8 + (bl2 ? 1 : -1);
+		j += 5;
+		k += 8 + (bl2 ? 1 : -1);
 		ItemStack itemStack = creativeModeTab.getIconItem();
-		guiGraphics.renderItem(itemStack, l, m);
-		guiGraphics.renderItemDecorations(this.font, itemStack, l, m);
+		guiGraphics.renderItem(itemStack, j, k);
+		guiGraphics.renderItemDecorations(this.font, itemStack, j, k);
 		guiGraphics.pose().popPose();
 	}
 

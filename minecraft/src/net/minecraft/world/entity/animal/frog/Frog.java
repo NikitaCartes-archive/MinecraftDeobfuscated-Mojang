@@ -29,6 +29,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -64,6 +65,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Frog extends Animal implements VariantHolder<FrogVariant> {
 	public static final Ingredient TEMPTATION_ITEM = Ingredient.of(Items.SLIME_BALL);
@@ -354,6 +356,11 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 	@Override
 	protected PathNavigation createNavigation(Level level) {
 		return new Frog.FrogPathNavigation(this, level);
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height - 0.125F * f, -0.25F * f);
 	}
 
 	@Override

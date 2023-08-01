@@ -182,9 +182,9 @@ public class BlockFamily {
 		CRACKED("cracked"),
 		CUT("cut"),
 		DOOR("door"),
-		CUSTOM_FENCE("custom_fence"),
+		CUSTOM_FENCE("fence"),
 		FENCE("fence"),
-		CUSTOM_FENCE_GATE("custom_fence_gate"),
+		CUSTOM_FENCE_GATE("fence_gate"),
 		FENCE_GATE("fence_gate"),
 		MOSAIC("mosaic"),
 		SIGN("sign"),
@@ -196,14 +196,14 @@ public class BlockFamily {
 		WALL("wall"),
 		WALL_SIGN("wall_sign");
 
-		private final String name;
+		private final String recipeGroup;
 
 		private Variant(String string2) {
-			this.name = string2;
+			this.recipeGroup = string2;
 		}
 
-		public String getName() {
-			return this.name;
+		public String getRecipeGroup() {
+			return this.recipeGroup;
 		}
 	}
 }

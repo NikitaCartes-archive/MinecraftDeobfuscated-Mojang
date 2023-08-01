@@ -131,7 +131,7 @@ public class FishingHook extends Projectile {
 	}
 
 	@Override
-	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
+	public void lerpTo(double d, double e, double f, float g, float h, int i) {
 	}
 
 	@Override

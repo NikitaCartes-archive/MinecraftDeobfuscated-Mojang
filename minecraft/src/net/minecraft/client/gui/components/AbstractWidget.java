@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -25,14 +24,11 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractWidget implements Renderable, GuiEventListener, LayoutElement, NarratableEntry {
-	public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
-	public static final ResourceLocation ACCESSIBILITY_TEXTURE = new ResourceLocation("textures/gui/accessibility.png");
 	private static final double PERIOD_PER_SCROLLED_PIXEL = 0.5;
 	private static final double MIN_SCROLL_PERIOD = 3.0;
 	protected int width;
@@ -124,20 +120,25 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 	protected abstract void renderWidget(GuiGraphics guiGraphics, int i, int j, float f);
 
 	protected static void renderScrollingString(GuiGraphics guiGraphics, Font font, Component component, int i, int j, int k, int l, int m) {
-		int n = font.width(component);
-		int o = (j + l - 9) / 2 + 1;
-		int p = k - i;
-		if (n > p) {
-			int q = n - p;
+		renderScrollingString(guiGraphics, font, component, (i + k) / 2, i, j, k, l, m);
+	}
+
+	protected static void renderScrollingString(GuiGraphics guiGraphics, Font font, Component component, int i, int j, int k, int l, int m, int n) {
+		int o = font.width(component);
+		int p = (k + m - 9) / 2 + 1;
+		int q = l - j;
+		if (o > q) {
+			int r = o - q;
 			double d = (double)Util.getMillis() / 1000.0;
-			double e = Math.max((double)q * 0.5, 3.0);
+			double e = Math.max((double)r * 0.5, 3.0);
 			double f = Math.sin((Math.PI / 2) * Math.cos((Math.PI * 2) * d / e)) / 2.0 + 0.5;
-			double g = Mth.lerp(f, 0.0, (double)q);
-			guiGraphics.enableScissor(i, j, k, l);
-			guiGraphics.drawString(font, component, i - (int)g, o, m);
+			double g = Mth.lerp(f, 0.0, (double)r);
+			guiGraphics.enableScissor(j, k, l, m);
+			guiGraphics.drawString(font, component, j - (int)g, p, n);
 			guiGraphics.disableScissor();
 		} else {
-			guiGraphics.drawCenteredString(font, component, (i + k) / 2, o, m);
+			int r = Mth.clamp(i, j + o / 2, l - o / 2);
+			guiGraphics.drawCenteredString(font, component, r, p, n);
 		}
 	}
 
@@ -145,18 +146,6 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 		int k = this.getX() + i;
 		int l = this.getX() + this.getWidth() - i;
 		renderScrollingString(guiGraphics, font, this.getMessage(), k, this.getY(), l, this.getY() + this.getHeight(), j);
-	}
-
-	public void renderTexture(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
-		int r = l;
-		if (!this.isActive()) {
-			r = l + m * 2;
-		} else if (this.isHoveredOrFocused()) {
-			r = l + m;
-		}
-
-		RenderSystem.enableDepthTest();
-		guiGraphics.blit(resourceLocation, i, j, (float)k, (float)r, n, o, p, q);
 	}
 
 	public void onClick(double d, double e) {

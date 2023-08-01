@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -119,6 +120,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Team;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 public abstract class Entity implements Nameable, EntityAccess, CommandSource {
@@ -1010,7 +1012,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	protected void waterSwimSound() {
-		Entity entity = (Entity)(this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this);
+		Entity entity = (Entity)Objects.requireNonNullElse(this.getControllingPassenger(), this);
 		float f = entity == this ? 0.35F : 0.4F;
 		Vec3 vec3 = entity.getDeltaMovement();
 		float g = Math.min(1.0F, (float)Math.sqrt(vec3.x * vec3.x * 0.2F + vec3.y * vec3.y + vec3.z * vec3.z * 0.2F) * f);
@@ -1161,6 +1163,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.isInWater() || this.isInBubbleColumn();
 	}
 
+	public boolean isInLiquid() {
+		return this.isInWaterOrBubble() || this.isInLava();
+	}
+
 	public boolean isUnderWater() {
 		return this.wasEyeInWater && this.isInWater();
 	}
@@ -1217,7 +1223,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	protected void doWaterSplashEffect() {
-		Entity entity = (Entity)(this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this);
+		Entity entity = (Entity)Objects.requireNonNullElse(this.getControllingPassenger(), this);
 		float f = entity == this ? 0.2F : 0.9F;
 		Vec3 vec3 = entity.getDeltaMovement();
 		float g = Math.min(1.0F, (float)Math.sqrt(vec3.x * vec3.x * 0.2F + vec3.y * vec3.y + vec3.z * vec3.z * 0.2F) * f);
@@ -1826,25 +1832,33 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 	}
 
 	public final void positionRider(Entity entity) {
-		this.positionRider(entity, Entity::setPos);
+		if (this.hasPassenger(entity)) {
+			this.positionRider(entity, Entity::setPos);
+		}
 	}
 
 	protected void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
-		if (this.hasPassenger(entity)) {
-			double d = this.getY() + this.getPassengersRidingOffset() + entity.getMyRidingOffset();
-			moveFunction.accept(entity, this.getX(), d, this.getZ());
-		}
+		Vec3 vec3 = this.getPassengerRidingPosition(entity);
+		moveFunction.accept(entity, vec3.x, vec3.y + (double)entity.getMyRidingOffset(this), vec3.z);
 	}
 
 	public void onPassengerTurned(Entity entity) {
 	}
 
-	public double getMyRidingOffset() {
-		return 0.0;
+	public float getMyRidingOffset(Entity entity) {
+		return this.ridingOffset(entity);
 	}
 
-	public double getPassengersRidingOffset() {
-		return (double)this.dimensions.height * 0.75;
+	protected float ridingOffset(Entity entity) {
+		return 0.0F;
+	}
+
+	public Vec3 getPassengerRidingPosition(Entity entity) {
+		return new Vec3(this.getPassengerAttachmentPoint(entity, this.dimensions, 1.0F).rotateY(-this.yRot * (float) (Math.PI / 180.0))).add(this.position());
+	}
+
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height, 0.0F);
 	}
 
 	public boolean startRiding(Entity entity) {
@@ -1887,10 +1901,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	protected boolean canRide(Entity entity) {
 		return !this.isShiftKeyDown() && this.boardingCooldown <= 0;
-	}
-
-	protected boolean canEnterPose(Pose pose) {
-		return this.level().noCollision(this, this.getBoundingBoxForPose(pose).deflate(1.0E-7));
 	}
 
 	public void ejectPassengers() {
@@ -1955,7 +1965,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return true;
 	}
 
-	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
+	public void lerpTo(double d, double e, double f, float g, float h, int i) {
 		this.setPos(d, e, f);
 		this.setRot(g, h);
 	}
@@ -2084,6 +2094,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public boolean dismountsUnderwater() {
 		return this.getType().is(EntityTypeTags.DISMOUNTS_UNDERWATER);
+	}
+
+	public boolean canControlVehicle() {
+		return !this.getType().is(EntityTypeTags.NON_CONTROLLING_RIDER);
 	}
 
 	public void setShiftKeyDown(boolean bl) {
@@ -2735,14 +2749,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.getBoundingBox();
 	}
 
-	protected AABB getBoundingBoxForPose(Pose pose) {
-		EntityDimensions entityDimensions = this.getDimensions(pose);
-		float f = entityDimensions.width / 2.0F;
-		Vec3 vec3 = new Vec3(this.getX() - (double)f, this.getY(), this.getZ() - (double)f);
-		Vec3 vec32 = new Vec3(this.getX() + (double)f, this.getY() + (double)entityDimensions.height, this.getZ() + (double)f);
-		return new AABB(vec3, vec32);
-	}
-
 	public final void setBoundingBox(AABB aABB) {
 		this.bb = aABB;
 	}
@@ -3357,6 +3363,17 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 
 	public DamageSources damageSources() {
 		return this.level().damageSources();
+	}
+
+	protected void lerpPositionAndRotationStep(int i, double d, double e, double f, double g, double h) {
+		double j = 1.0 / (double)i;
+		double k = Mth.lerp(j, this.getX(), d);
+		double l = Mth.lerp(j, this.getY(), e);
+		double m = Mth.lerp(j, this.getZ(), f);
+		float n = (float)Mth.rotLerp(j, (double)this.getYRot(), g);
+		float o = (float)Mth.lerp(j, (double)this.getXRot(), h);
+		this.setPos(k, l, m);
+		this.setRot(n, o);
 	}
 
 	@FunctionalInterface

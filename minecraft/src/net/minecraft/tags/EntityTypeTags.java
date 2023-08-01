@@ -18,6 +18,7 @@ public final class EntityTypeTags {
 	public static final TagKey<EntityType<?>> FROG_FOOD = create("frog_food");
 	public static final TagKey<EntityType<?>> FALL_DAMAGE_IMMUNE = create("fall_damage_immune");
 	public static final TagKey<EntityType<?>> DISMOUNTS_UNDERWATER = create("dismounts_underwater");
+	public static final TagKey<EntityType<?>> NON_CONTROLLING_RIDER = create("non_controlling_rider");
 
 	private EntityTypeTags() {
 	}

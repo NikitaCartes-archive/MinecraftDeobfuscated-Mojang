@@ -304,20 +304,21 @@ public class V99 extends Schema {
 		schema.registerType(false, References.BLOCK_NAME, () -> DSL.or(DSL.constType(DSL.intType()), DSL.constType(NamespacedSchema.namespacedString())));
 		schema.registerType(false, References.ITEM_NAME, () -> DSL.constType(NamespacedSchema.namespacedString()));
 		schema.registerType(false, References.STATS, DSL::remainder);
+		schema.registerType(false, References.SAVED_DATA_COMMAND_STORAGE, DSL::remainder);
+		schema.registerType(false, References.SAVED_DATA_FORCED_CHUNKS, DSL::remainder);
+		schema.registerType(false, References.SAVED_DATA_MAP_DATA, DSL::remainder);
+		schema.registerType(false, References.SAVED_DATA_MAP_INDEX, DSL::remainder);
+		schema.registerType(false, References.SAVED_DATA_RAIDS, DSL::remainder);
+		schema.registerType(false, References.SAVED_DATA_RANDOM_SEQUENCES, DSL::remainder);
 		schema.registerType(
 			false,
-			References.SAVED_DATA,
-			() -> DSL.optionalFields(
-					"data",
-					DSL.optionalFields(
-						"Features",
-						DSL.compoundList(References.STRUCTURE_FEATURE.in(schema)),
-						"Objectives",
-						DSL.list(References.OBJECTIVE.in(schema)),
-						"Teams",
-						DSL.list(References.TEAM.in(schema))
-					)
-				)
+			References.SAVED_DATA_SCOREBOARD,
+			() -> DSL.optionalFields("data", DSL.optionalFields("Objectives", DSL.list(References.OBJECTIVE.in(schema)), "Teams", DSL.list(References.TEAM.in(schema))))
+		);
+		schema.registerType(
+			false,
+			References.SAVED_DATA_STRUCTURE_FEATURE_INDICES,
+			() -> DSL.optionalFields("data", DSL.optionalFields("Features", DSL.compoundList(References.STRUCTURE_FEATURE.in(schema))))
 		);
 		schema.registerType(false, References.STRUCTURE_FEATURE, DSL::remainder);
 		schema.registerType(false, References.OBJECTIVE, DSL::remainder);

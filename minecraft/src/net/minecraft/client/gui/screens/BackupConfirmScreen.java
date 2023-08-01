@@ -53,10 +53,9 @@ public class BackupConfirmScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 50, 16777215);
 		this.message.renderCentered(guiGraphics, this.width / 2, 70);
-		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

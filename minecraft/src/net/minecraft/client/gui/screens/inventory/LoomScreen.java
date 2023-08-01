@@ -37,6 +37,14 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 
 @Environment(EnvType.CLIENT)
 public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
+	private static final ResourceLocation BANNER_SLOT_SPRITE = new ResourceLocation("container/loom/banner_slot");
+	private static final ResourceLocation DYE_SLOT_SPRITE = new ResourceLocation("container/loom/dye_slot");
+	private static final ResourceLocation PATTERN_SLOT_SPRITE = new ResourceLocation("container/loom/pattern_slot");
+	private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("container/loom/scroller");
+	private static final ResourceLocation SCROLLER_DISABLED_SPRITE = new ResourceLocation("container/loom/scroller_disabled");
+	private static final ResourceLocation PATTERN_SELECTED_SPRITE = new ResourceLocation("container/loom/pattern_selected");
+	private static final ResourceLocation PATTERN_HIGHLIGHTED_SPRITE = new ResourceLocation("container/loom/pattern_highlighted");
+	private static final ResourceLocation PATTERN_SPRITE = new ResourceLocation("container/loom/pattern");
 	private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/loom.png");
 	private static final int PATTERN_COLUMNS = 4;
 	private static final int PATTERN_ROWS = 4;
@@ -82,28 +90,27 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
-		this.renderBackground(guiGraphics);
 		int k = this.leftPos;
 		int l = this.topPos;
 		guiGraphics.blit(BG_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		Slot slot = this.menu.getBannerSlot();
 		Slot slot2 = this.menu.getDyeSlot();
 		Slot slot3 = this.menu.getPatternSlot();
-		Slot slot4 = this.menu.getResultSlot();
 		if (!slot.hasItem()) {
-			guiGraphics.blit(BG_LOCATION, k + slot.x, l + slot.y, this.imageWidth, 0, 16, 16);
+			guiGraphics.blitSprite(BANNER_SLOT_SPRITE, k + slot.x, l + slot.y, 16, 16);
 		}
 
 		if (!slot2.hasItem()) {
-			guiGraphics.blit(BG_LOCATION, k + slot2.x, l + slot2.y, this.imageWidth + 16, 0, 16, 16);
+			guiGraphics.blitSprite(DYE_SLOT_SPRITE, k + slot2.x, l + slot2.y, 16, 16);
 		}
 
 		if (!slot3.hasItem()) {
-			guiGraphics.blit(BG_LOCATION, k + slot3.x, l + slot3.y, this.imageWidth + 32, 0, 16, 16);
+			guiGraphics.blitSprite(PATTERN_SLOT_SPRITE, k + slot3.x, l + slot3.y, 16, 16);
 		}
 
 		int m = (int)(41.0F * this.scrollOffs);
-		guiGraphics.blit(BG_LOCATION, k + 119, l + 13 + m, 232 + (this.displayPatterns ? 0 : 12), 0, 12, 15);
+		ResourceLocation resourceLocation = this.displayPatterns ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
+		guiGraphics.blitSprite(resourceLocation, k + 119, l + 13 + m, 12, 15);
 		Lighting.setupForFlatItems();
 		if (this.resultBannerPatterns != null && !this.hasMaxPatterns) {
 			guiGraphics.pose().pushPose();
@@ -119,8 +126,6 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 			);
 			guiGraphics.pose().popPose();
 			guiGraphics.flush();
-		} else if (this.hasMaxPatterns) {
-			guiGraphics.blit(BG_LOCATION, k + slot4.x - 2, l + slot4.y - 2, this.imageWidth, 17, 17, 16);
 		}
 
 		if (this.displayPatterns) {
@@ -140,16 +145,16 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 					int t = n + q * 14;
 					int u = o + p * 14;
 					boolean bl = i >= t && j >= u && i < t + 14 && j < u + 14;
-					int v;
+					ResourceLocation resourceLocation2;
 					if (s == this.menu.getSelectedBannerPatternIndex()) {
-						v = this.imageHeight + 14;
+						resourceLocation2 = PATTERN_SELECTED_SPRITE;
 					} else if (bl) {
-						v = this.imageHeight + 28;
+						resourceLocation2 = PATTERN_HIGHLIGHTED_SPRITE;
 					} else {
-						v = this.imageHeight;
+						resourceLocation2 = PATTERN_SPRITE;
 					}
 
-					guiGraphics.blit(BG_LOCATION, t, u, 0, v, 14, 14);
+					guiGraphics.blitSprite(resourceLocation2, t, u, 14, 14);
 					this.renderPattern(guiGraphics, (Holder<BannerPattern>)list.get(s), t, u);
 				}
 			}
@@ -227,11 +232,11 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
+	public boolean mouseScrolled(double d, double e, double f, double g) {
 		int i = this.totalRowCount() - 4;
 		if (this.displayPatterns && i > 0) {
-			float g = (float)f / (float)i;
-			this.scrollOffs = Mth.clamp(this.scrollOffs - g, 0.0F, 1.0F);
+			float h = (float)g / (float)i;
+			this.scrollOffs = Mth.clamp(this.scrollOffs - h, 0.0F, 1.0F);
 			this.startRow = Math.max((int)(this.scrollOffs * (float)i + 0.5F), 0);
 		}
 

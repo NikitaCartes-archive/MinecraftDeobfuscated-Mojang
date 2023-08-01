@@ -55,11 +55,4 @@ public class TabManager {
 	public Tab getCurrentTab() {
 		return this.currentTab;
 	}
-
-	public void tickCurrent() {
-		Tab tab = this.getCurrentTab();
-		if (tab != null) {
-			tab.tick();
-		}
-	}
 }

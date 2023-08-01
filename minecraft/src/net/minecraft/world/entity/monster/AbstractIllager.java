@@ -1,5 +1,7 @@
 package net.minecraft.world.entity.monster;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
@@ -7,6 +9,7 @@ import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.Level;
+import org.joml.Vector3f;
 
 public abstract class AbstractIllager extends Raider {
 	protected AbstractIllager(EntityType<? extends AbstractIllager> entityType, Level level) {
@@ -30,6 +33,16 @@ public abstract class AbstractIllager extends Raider {
 	@Override
 	public boolean canAttack(LivingEntity livingEntity) {
 		return livingEntity instanceof AbstractVillager && livingEntity.isBaby() ? false : super.canAttack(livingEntity);
+	}
+
+	@Override
+	protected float ridingOffset(Entity entity) {
+		return -0.6F;
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height + 0.05F * f, 0.0F);
 	}
 
 	public static enum IllagerArmPose {

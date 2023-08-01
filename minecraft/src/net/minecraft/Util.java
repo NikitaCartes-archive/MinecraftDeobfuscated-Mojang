@@ -354,7 +354,7 @@ public class Util {
 		return (T)supplier.get();
 	}
 
-	public static <T> T make(T object, Consumer<T> consumer) {
+	public static <T> T make(T object, Consumer<? super T> consumer) {
 		consumer.accept(object);
 		return object;
 	}

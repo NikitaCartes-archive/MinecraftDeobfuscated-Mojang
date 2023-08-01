@@ -1,19 +1,18 @@
 package net.minecraft.network.protocol.login;
 
-import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
-public record ServerboundHelloPacket(String name, Optional<UUID> profileId) implements Packet<ServerLoginPacketListener> {
+public record ServerboundHelloPacket(String name, UUID profileId) implements Packet<ServerLoginPacketListener> {
 	public ServerboundHelloPacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readUtf(16), friendlyByteBuf.readOptional(FriendlyByteBuf::readUUID));
+		this(friendlyByteBuf.readUtf(16), friendlyByteBuf.readUUID());
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(this.name, 16);
-		friendlyByteBuf.writeOptional(this.profileId, FriendlyByteBuf::writeUUID);
+		friendlyByteBuf.writeUUID(this.profileId);
 	}
 
 	public void handle(ServerLoginPacketListener serverLoginPacketListener) {

@@ -13,6 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -41,13 +42,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Vex extends Monster implements TraceableEntity {
 	public static final float FLAP_DEGREES_PER_TICK = 45.836624F;
 	public static final int TICKS_PER_FLAP = Mth.ceil((float) (Math.PI * 5.0 / 4.0));
 	protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Vex.class, EntityDataSerializers.BYTE);
 	private static final int FLAG_IS_CHARGING = 1;
-	private static final double RIDING_OFFSET = 0.4;
 	@Nullable
 	Mob owner;
 	@Nullable
@@ -227,8 +228,13 @@ public class Vex extends Monster implements TraceableEntity {
 	}
 
 	@Override
-	public double getMyRidingOffset() {
-		return 0.4;
+	protected float ridingOffset(Entity entity) {
+		return 0.04F;
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height - 0.0625F * f, 0.0F);
 	}
 
 	class VexChargeAttackGoal extends Goal {

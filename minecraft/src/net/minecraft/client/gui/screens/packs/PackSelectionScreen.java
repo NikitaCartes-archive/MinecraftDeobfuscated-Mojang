@@ -14,8 +14,12 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,7 +34,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.NoticeWithLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -39,8 +45,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackDetector;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.IoSupplier;
+import net.minecraft.world.level.validation.ForbiddenSymlinkInfo;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 
@@ -162,12 +170,16 @@ public class PackSelectionScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderDirtBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		this.availablePackList.render(guiGraphics, i, j, f);
 		this.selectedPackList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		guiGraphics.drawCenteredString(this.font, DRAG_AND_DROP, this.width / 2, 20, 16777215);
-		super.render(guiGraphics, i, j, f);
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
 	}
 
 	protected static void copyPacks(Minecraft minecraft, List<Path> list, Path path) {
@@ -212,15 +224,73 @@ public class PackSelectionScreen extends Screen {
 
 	@Override
 	public void onFilesDrop(List<Path> list) {
-		String string = (String)list.stream().map(Path::getFileName).map(Path::toString).collect(Collectors.joining(", "));
-		this.minecraft.setScreen(new ConfirmScreen(bl -> {
-			if (bl) {
-				copyPacks(this.minecraft, list, this.packDir);
-				this.reload();
-			}
+		String string = (String)extractPackNames(list).collect(Collectors.joining(", "));
+		this.minecraft
+			.setScreen(
+				new ConfirmScreen(
+					bl -> {
+						if (bl) {
+							List<Path> list2 = new ArrayList(list.size());
+							Set<Path> set = new HashSet(list);
+							PackDetector<Path> packDetector = new PackDetector<Path>(this.minecraft.directoryValidator()) {
+								protected Path createZipPack(Path path) {
+									return path;
+								}
 
-			this.minecraft.setScreen(this);
-		}, Component.translatable("pack.dropConfirm"), Component.literal(string)));
+								protected Path createDirectoryPack(Path path) {
+									return path;
+								}
+							};
+							List<ForbiddenSymlinkInfo> list3 = new ArrayList();
+
+							for (Path path : list) {
+								try {
+									Path path2 = packDetector.detectPackResources(path, list3);
+									if (path2 == null) {
+										LOGGER.warn("Path {} does not seem like pack", path);
+									} else {
+										list2.add(path2);
+										set.remove(path2);
+									}
+								} catch (IOException var10) {
+									LOGGER.warn("Failed to check {} for packs", path, var10);
+								}
+							}
+
+							if (!list3.isEmpty()) {
+								this.minecraft.setScreen(NoticeWithLinkScreen.createPackSymlinkWarningScreen(this));
+								return;
+							}
+
+							if (!list2.isEmpty()) {
+								copyPacks(this.minecraft, list2, this.packDir);
+								this.reload();
+							}
+
+							if (!set.isEmpty()) {
+								String stringx = (String)extractPackNames(set).collect(Collectors.joining(", "));
+								this.minecraft
+									.setScreen(
+										new AlertScreen(
+											() -> this.minecraft.setScreen(this),
+											Component.translatable("pack.dropRejected.title"),
+											Component.translatable("pack.dropRejected.message", stringx)
+										)
+									);
+								return;
+							}
+						}
+
+						this.minecraft.setScreen(this);
+					},
+					Component.translatable("pack.dropConfirm"),
+					Component.literal(string)
+				)
+			);
+	}
+
+	private static Stream<String> extractPackNames(Collection<Path> collection) {
+		return collection.stream().map(Path::getFileName).map(Path::toString);
 	}
 
 	private ResourceLocation loadPackIcon(TextureManager textureManager, Pack pack) {

@@ -8,6 +8,7 @@ import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.worldgen.features.TreeFeatures;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.effect.MobEffects;
@@ -3194,7 +3195,7 @@ public class Blocks {
 				.noLootTable()
 				.noOcclusion()
 				.isValidSpawn(Blocks::never)
-				.noParticlesOnBreak()
+				.noTerrainParticles()
 				.pushReaction(PushReaction.BLOCK)
 		)
 	);
@@ -4570,7 +4571,7 @@ public class Blocks {
 	);
 	public static final Block STRUCTURE_VOID = register(
 		"structure_void",
-		new StructureVoidBlock(BlockBehaviour.Properties.of().replaceable().noCollission().noLootTable().noParticlesOnBreak().pushReaction(PushReaction.DESTROY))
+		new StructureVoidBlock(BlockBehaviour.Properties.of().replaceable().noCollission().noLootTable().noTerrainParticles().pushReaction(PushReaction.DESTROY))
 	);
 	public static final Block OBSERVER = register(
 		"observer",
@@ -6930,7 +6931,6 @@ public class Blocks {
 				.isSuffocating(statePredicate)
 				.isViewBlocking(statePredicate)
 				.pushReaction(PushReaction.DESTROY)
-				.isRedstoneConductor(Blocks::always)
 		);
 	}
 
@@ -6984,6 +6984,10 @@ public class Blocks {
 
 	public static Block register(String string, Block block) {
 		return Registry.register(BuiltInRegistries.BLOCK, string, block);
+	}
+
+	public static Block register(ResourceLocation resourceLocation, Block block) {
+		return Registry.register(BuiltInRegistries.BLOCK, resourceLocation, block);
 	}
 
 	public static void rebuildCache() {

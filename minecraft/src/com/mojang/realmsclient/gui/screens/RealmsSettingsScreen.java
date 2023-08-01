@@ -3,6 +3,7 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.realmsclient.dto.RealmsServer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -29,9 +30,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
 
 	@Override
 	public void tick() {
-		this.nameEdit.tick();
-		this.descEdit.tick();
-		this.doneButton.active = !this.nameEdit.getValue().trim().isEmpty();
+		this.doneButton.active = !Util.isBlank(this.nameEdit.getValue());
 	}
 
 	@Override
@@ -85,13 +84,12 @@ public class RealmsSettingsScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, 16777215);
-		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 106, row(3), 10526880, false);
-		guiGraphics.drawString(this.font, DESCRIPTION_LABEL, this.width / 2 - 106, row(7), 10526880, false);
+		super.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, -1);
+		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 106, row(3), -6250336, false);
+		guiGraphics.drawString(this.font, DESCRIPTION_LABEL, this.width / 2 - 106, row(7), -6250336, false);
 		this.nameEdit.render(guiGraphics, i, j, f);
 		this.descEdit.render(guiGraphics, i, j, f);
-		super.render(guiGraphics, i, j, f);
 	}
 
 	public void save() {

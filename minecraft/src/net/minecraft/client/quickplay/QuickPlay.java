@@ -67,7 +67,7 @@ public class QuickPlay {
 		serverList.load();
 		ServerData serverData = serverList.get(string);
 		if (serverData == null) {
-			serverData = new ServerData(I18n.get("selectServer.defaultName"), string, false);
+			serverData = new ServerData(I18n.get("selectServer.defaultName"), string, ServerData.Type.OTHER);
 			serverList.add(serverData, true);
 			serverList.save();
 		}

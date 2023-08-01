@@ -79,6 +79,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.level.validation.DirectoryValidator;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.slf4j.Logger;
 
@@ -103,6 +104,7 @@ public class CreateWorldScreen extends Screen {
 	final WorldCreationUiState uiState;
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, guiEventListener -> this.removeWidget(guiEventListener));
 	private boolean recreated;
+	private final DirectoryValidator packValidator;
 	@Nullable
 	private final Screen lastScreen;
 	@Nullable
@@ -116,7 +118,7 @@ public class CreateWorldScreen extends Screen {
 
 	public static void openFresh(Minecraft minecraft, @Nullable Screen screen) {
 		queueLoadScreen(minecraft, PREPARING_WORLD_DATA);
-		PackRepository packRepository = new PackRepository(new ServerPacksSource());
+		PackRepository packRepository = new PackRepository(new ServerPacksSource(minecraft.directoryValidator()));
 		WorldLoader.InitConfig initConfig = createDefaultLoadConfig(packRepository, WorldDataConfiguration.DEFAULT);
 		CompletableFuture<WorldCreationContext> completableFuture = WorldLoader.load(
 			initConfig,
@@ -178,16 +180,12 @@ public class CreateWorldScreen extends Screen {
 	) {
 		super(Component.translatable("selectWorld.create"));
 		this.lastScreen = screen;
+		this.packValidator = minecraft.directoryValidator();
 		this.uiState = new WorldCreationUiState(minecraft.getLevelSource().getBaseDir(), worldCreationContext, optional, optionalLong);
 	}
 
 	public WorldCreationUiState getUiState() {
 		return this.uiState;
-	}
-
-	@Override
-	public void tick() {
-		this.tabManager.tickCurrent();
 	}
 
 	@Override
@@ -304,9 +302,8 @@ public class CreateWorldScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		guiGraphics.blit(FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
 		super.render(guiGraphics, i, j, f);
+		guiGraphics.blit(FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
 	}
 
 	@Override
@@ -602,7 +599,7 @@ public class CreateWorldScreen extends Screen {
 		Path path = this.getTempDataPackDir();
 		if (path != null) {
 			if (this.tempDataPackRepository == null) {
-				this.tempDataPackRepository = ServerPacksSource.createPackRepository(path);
+				this.tempDataPackRepository = ServerPacksSource.createPackRepository(path, this.packValidator);
 				this.tempDataPackRepository.reload();
 			}
 
@@ -630,7 +627,7 @@ public class CreateWorldScreen extends Screen {
 			GridLayout.RowHelper rowHelper2 = new GridLayout().rowSpacing(4).createRowHelper(1);
 			rowHelper2.addChild(new StringWidget(CreateWorldScreen.NAME_LABEL, CreateWorldScreen.this.minecraft.font), rowHelper2.newCellSettings().paddingLeft(1));
 			this.nameEdit = rowHelper2.addChild(
-				new EditBox(CreateWorldScreen.this.font, 0, 0, 208, 20, Component.translatable("selectWorld.enterName")), rowHelper2.newCellSettings().padding(1)
+				new EditBox(CreateWorldScreen.this.font, 208, 20, Component.translatable("selectWorld.enterName")), rowHelper2.newCellSettings().padding(1)
 			);
 			this.nameEdit.setValue(CreateWorldScreen.this.uiState.getName());
 			this.nameEdit.setResponder(CreateWorldScreen.this.uiState::setName);
@@ -690,11 +687,6 @@ public class CreateWorldScreen extends Screen {
 						.build()
 				);
 			}
-		}
-
-		@Override
-		public void tick() {
-			this.nameEdit.tick();
 		}
 	}
 
@@ -779,7 +771,7 @@ public class CreateWorldScreen extends Screen {
 				.addListener(worldCreationUiState -> this.customizeTypeButton.active = !worldCreationUiState.isDebug() && worldCreationUiState.getPresetEditor() != null);
 			GridLayout.RowHelper rowHelper2 = new GridLayout().rowSpacing(4).createRowHelper(1);
 			rowHelper2.addChild(new StringWidget(SEED_LABEL, CreateWorldScreen.this.font).alignLeft());
-			this.seedEdit = rowHelper2.addChild(new EditBox(CreateWorldScreen.this.font, 0, 0, 308, 20, Component.translatable("selectWorld.enterSeed")) {
+			this.seedEdit = rowHelper2.addChild(new EditBox(CreateWorldScreen.this.font, 308, 20, Component.translatable("selectWorld.enterSeed")) {
 				@Override
 				protected MutableComponent createNarrationMessage() {
 					return super.createNarrationMessage().append(CommonComponents.NARRATION_SEPARATOR).append(CreateWorldScreen.WorldTab.SEED_EMPTY_HINT);
@@ -826,11 +818,6 @@ public class CreateWorldScreen extends Screen {
 			return cycleButton.getValue().isAmplified()
 				? CommonComponents.joinForNarration(cycleButton.createDefaultNarrationMessage(), AMPLIFIED_HELP_TEXT)
 				: cycleButton.createDefaultNarrationMessage();
-		}
-
-		@Override
-		public void tick() {
-			this.seedEdit.tick();
 		}
 	}
 }

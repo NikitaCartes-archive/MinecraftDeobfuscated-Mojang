@@ -106,8 +106,9 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}
 		}
 
-		if (bl) {
-			for (Node node2 : path.getClosedSet()) {
+		Path.DebugData debugData = path.debugData();
+		if (bl && debugData != null) {
+			for (Node node2 : debugData.closedSet()) {
 				if (distanceToCamera(node2.asBlockPos(), d, e, g) <= 80.0F) {
 					DebugRenderer.renderFilledBox(
 						poseStack,
@@ -129,7 +130,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 				}
 			}
 
-			for (Node node2x : path.getOpenSet()) {
+			for (Node node2x : debugData.openSet()) {
 				if (distanceToCamera(node2x.asBlockPos(), d, e, g) <= 80.0F) {
 					DebugRenderer.renderFilledBox(
 						poseStack,
@@ -153,19 +154,29 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		if (bl2) {
-			for (int ix = 0; ix < path.getNodeCount(); ix++) {
-				Node node = path.getNode(ix);
-				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0F) {
+			for (int k = 0; k < path.getNodeCount(); k++) {
+				Node node3 = path.getNode(k);
+				if (distanceToCamera(node3.asBlockPos(), d, e, g) <= 80.0F) {
 					DebugRenderer.renderFloatingText(
-						poseStack, multiBufferSource, String.valueOf(node.type), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1, 0.02F, true, 0.0F, true
+						poseStack,
+						multiBufferSource,
+						String.valueOf(node3.type),
+						(double)node3.x + 0.5,
+						(double)node3.y + 0.75,
+						(double)node3.z + 0.5,
+						-1,
+						0.02F,
+						true,
+						0.0F,
+						true
 					);
 					DebugRenderer.renderFloatingText(
 						poseStack,
 						multiBufferSource,
-						String.format(Locale.ROOT, "%.2f", node.costMalus),
-						(double)node.x + 0.5,
-						(double)node.y + 0.25,
-						(double)node.z + 0.5,
+						String.format(Locale.ROOT, "%.2f", node3.costMalus),
+						(double)node3.x + 0.5,
+						(double)node3.y + 0.25,
+						(double)node3.z + 0.5,
 						-1,
 						0.02F,
 						true,

@@ -2,12 +2,11 @@ package net.minecraft.client.gui.screens;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.FrameLayout;
-import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
@@ -18,7 +17,7 @@ public class DisconnectedScreen extends Screen {
 	private final Screen parent;
 	private final Component reason;
 	private final Component buttonText;
-	private final GridLayout layout = new GridLayout();
+	private final LinearLayout layout = LinearLayout.vertical();
 
 	public DisconnectedScreen(Screen screen, Component component, Component component2) {
 		this(screen, component, component2, TO_SERVER_LIST);
@@ -34,9 +33,8 @@ public class DisconnectedScreen extends Screen {
 	@Override
 	protected void init() {
 		this.layout.defaultCellSetting().alignHorizontallyCenter().padding(10);
-		GridLayout.RowHelper rowHelper = this.layout.createRowHelper(1);
-		rowHelper.addChild(new StringWidget(this.title, this.font));
-		rowHelper.addChild(new MultiLineTextWidget(this.reason, this.font).setMaxWidth(this.width - 50).setCentered(true));
+		this.layout.addChild(new StringWidget(this.title, this.font));
+		this.layout.addChild(new MultiLineTextWidget(this.reason, this.font).setMaxWidth(this.width - 50).setCentered(true));
 		Button button;
 		if (this.minecraft.allowsMultiplayer()) {
 			button = Button.builder(this.buttonText, buttonx -> this.minecraft.setScreen(this.parent)).build();
@@ -44,7 +42,7 @@ public class DisconnectedScreen extends Screen {
 			button = Button.builder(TO_TITLE, buttonx -> this.minecraft.setScreen(new TitleScreen())).build();
 		}
 
-		rowHelper.addChild(button);
+		this.layout.addChild(button);
 		this.layout.arrangeElements();
 		this.layout.visitWidgets(this::addRenderableWidget);
 		this.repositionElements();
@@ -63,11 +61,5 @@ public class DisconnectedScreen extends Screen {
 	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
-	}
-
-	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		super.render(guiGraphics, i, j, f);
 	}
 }

@@ -24,7 +24,6 @@ public class ContainerScreen extends AbstractContainerScreen<ChestMenu> implemen
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		super.render(guiGraphics, i, j, f);
 		this.renderTooltip(guiGraphics, i, j);
 	}

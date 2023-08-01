@@ -32,7 +32,7 @@ public class ServerOpListEntry extends StoredUserEntry<GameProfile> {
 	@Override
 	protected void serialize(JsonObject jsonObject) {
 		if (this.getUser() != null) {
-			jsonObject.addProperty("uuid", this.getUser().getId() == null ? "" : this.getUser().getId().toString());
+			jsonObject.addProperty("uuid", this.getUser().getId().toString());
 			jsonObject.addProperty("name", this.getUser().getName());
 			jsonObject.addProperty("level", this.level);
 			jsonObject.addProperty("bypassesPlayerLimit", this.bypassesPlayerLimit);

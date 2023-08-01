@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -57,8 +58,8 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	}
 
 	@Override
-	public double getPassengersRidingOffset() {
-		return super.getPassengersRidingOffset() - 0.25;
+	protected float getPassengersRidingOffsetY(EntityDimensions entityDimensions, float f) {
+		return entityDimensions.height - (this.isBaby() ? 0.15625F : 0.3875F) * f;
 	}
 
 	@Override

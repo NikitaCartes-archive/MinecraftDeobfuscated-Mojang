@@ -1220,7 +1220,7 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	private void takeAutoScreenshot(Path path) {
-		if (this.minecraft.levelRenderer.countRenderedChunks() > 10 && this.minecraft.levelRenderer.hasRenderedAllChunks()) {
+		if (this.minecraft.levelRenderer.countRenderedSections() > 10 && this.minecraft.levelRenderer.hasRenderedAllSections()) {
 			NativeImage nativeImage = Screenshot.takeScreenshot(this.minecraft.getMainRenderTarget());
 			Util.ioPool().execute(() -> {
 				int i = nativeImage.getWidth();

@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class AdvancementWidget {
-	private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/advancements/widgets.png");
+	private static final ResourceLocation TITLE_BOX_SPRITE = new ResourceLocation("advancements/title_box");
 	private static final int HEIGHT = 26;
 	private static final int BOX_X = 0;
 	private static final int BOX_WIDTH = 200;
@@ -149,7 +149,7 @@ public class AdvancementWidget {
 				advancementWidgetType = AdvancementWidgetType.UNOBTAINED;
 			}
 
-			guiGraphics.blit(WIDGETS_LOCATION, i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
+			guiGraphics.blitSprite(advancementWidgetType.frameSprite(this.display.getFrame()), i + this.x + 3, j + this.y, 26, 26);
 			guiGraphics.renderFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
 		}
 
@@ -214,15 +214,15 @@ public class AdvancementWidget {
 		int r = 32 + this.description.size() * 9;
 		if (!this.description.isEmpty()) {
 			if (bl2) {
-				guiGraphics.blitNineSliced(WIDGETS_LOCATION, q, p + 26 - r, this.width, r, 10, 200, 26, 0, 52);
+				guiGraphics.blitSprite(TITLE_BOX_SPRITE, q, p + 26 - r, this.width, r);
 			} else {
-				guiGraphics.blitNineSliced(WIDGETS_LOCATION, q, p, this.width, r, 10, 200, 26, 0, 52);
+				guiGraphics.blitSprite(TITLE_BOX_SPRITE, q, p, this.width, r);
 			}
 		}
 
-		guiGraphics.blit(WIDGETS_LOCATION, q, p, 0, advancementWidgetType.getIndex() * 26, n, 26);
-		guiGraphics.blit(WIDGETS_LOCATION, q + n, p, 200 - o, advancementWidgetType2.getIndex() * 26, o, 26);
-		guiGraphics.blit(WIDGETS_LOCATION, i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType3.getIndex() * 26, 26, 26);
+		guiGraphics.blitSprite(advancementWidgetType.boxSprite(), 200, 26, 0, 0, q, p, n, 26);
+		guiGraphics.blitSprite(advancementWidgetType2.boxSprite(), 200, 26, 200 - o, 0, q + n, p, o, 26);
+		guiGraphics.blitSprite(advancementWidgetType3.frameSprite(this.display.getFrame()), i + this.x + 3, j + this.y, 26, 26);
 		if (bl) {
 			guiGraphics.drawString(this.minecraft.font, this.title, q + 5, j + this.y + 9, -1);
 			if (string != null) {

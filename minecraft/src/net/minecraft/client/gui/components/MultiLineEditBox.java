@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -19,10 +20,11 @@ public class MultiLineEditBox extends AbstractScrollWidget {
 	private static final String CURSOR_APPEND_CHARACTER = "_";
 	private static final int TEXT_COLOR = -2039584;
 	private static final int PLACEHOLDER_TEXT_COLOR = -857677600;
+	private static final int CURSOR_BLINK_INTERVAL_MS = 300;
 	private final Font font;
 	private final Component placeholder;
 	private final MultilineTextField textField;
-	private int frame;
+	private long focusedTime = Util.getMillis();
 
 	public MultiLineEditBox(Font font, int i, int j, int k, int l, Component component, Component component2) {
 		super(i, j, k, l, component2);
@@ -46,10 +48,6 @@ public class MultiLineEditBox extends AbstractScrollWidget {
 
 	public String getValue() {
 		return this.textField.value();
-	}
-
-	public void tick() {
-		this.frame++;
 	}
 
 	@Override
@@ -108,7 +106,7 @@ public class MultiLineEditBox extends AbstractScrollWidget {
 			);
 		} else {
 			int k = this.textField.cursor();
-			boolean bl = this.isFocused() && this.frame / 6 % 2 == 0;
+			boolean bl = this.isFocused() && (Util.getMillis() - this.focusedTime) / 300L % 2L == 0L;
 			boolean bl2 = k < string.length();
 			int l = 0;
 			int m = 0;
@@ -222,5 +220,13 @@ public class MultiLineEditBox extends AbstractScrollWidget {
 		double f = d - (double)this.getX() - (double)this.innerPadding();
 		double g = e - (double)this.getY() - (double)this.innerPadding() + this.scrollAmount();
 		this.textField.seekCursorToPoint(f, g);
+	}
+
+	@Override
+	public void setFocused(boolean bl) {
+		super.setFocused(bl);
+		if (bl) {
+			this.focusedTime = Util.getMillis();
+		}
 	}
 }

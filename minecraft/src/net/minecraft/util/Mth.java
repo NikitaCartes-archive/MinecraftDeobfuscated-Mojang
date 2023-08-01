@@ -525,6 +525,10 @@ public class Mth {
 		return g + f * wrapDegrees(h - g);
 	}
 
+	public static double rotLerp(double d, double e, double f) {
+		return e + d * wrapDegrees(f - e);
+	}
+
 	public static float triangleWave(float f, float g) {
 		return (Math.abs(f % g - g * 0.5F) - g * 0.25F) / (g * 0.25F);
 	}

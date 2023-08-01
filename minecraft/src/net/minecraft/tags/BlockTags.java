@@ -64,6 +64,7 @@ public final class BlockTags {
 	public static final TagKey<Block> CANDLES = create("candles");
 	public static final TagKey<Block> DIRT = create("dirt");
 	public static final TagKey<Block> TERRACOTTA = create("terracotta");
+	public static final TagKey<Block> CONCRETE_POWDER = create("concrete_powder");
 	public static final TagKey<Block> COMPLETES_FIND_TREE_TUTORIAL = create("completes_find_tree_tutorial");
 	public static final TagKey<Block> FLOWER_POTS = create("flower_pots");
 	public static final TagKey<Block> ENDERMAN_HOLDABLE = create("enderman_holdable");
@@ -122,6 +123,7 @@ public final class BlockTags {
 	public static final TagKey<Block> CRYSTAL_SOUND_BLOCKS = create("crystal_sound_blocks");
 	public static final TagKey<Block> INSIDE_STEP_SOUND_BLOCKS = create("inside_step_sound_blocks");
 	public static final TagKey<Block> COMBINATION_STEP_SOUND_BLOCKS = create("combination_step_sound_blocks");
+	public static final TagKey<Block> CAMEL_SAND_STEP_SOUND_BLOCKS = create("camel_sand_step_sound_blocks");
 	public static final TagKey<Block> OCCLUDES_VIBRATION_SIGNALS = create("occludes_vibration_signals");
 	public static final TagKey<Block> DAMPENS_VIBRATIONS = create("dampens_vibrations");
 	public static final TagKey<Block> DRIPSTONE_REPLACEABLE = create("dripstone_replaceable_blocks");

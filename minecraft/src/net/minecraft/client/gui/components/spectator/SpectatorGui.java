@@ -17,8 +17,8 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class SpectatorGui implements SpectatorMenuListener {
-	private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
-	public static final ResourceLocation SPECTATOR_LOCATION = new ResourceLocation("textures/gui/spectator_widgets.png");
+	private static final ResourceLocation HOTBAR_SPRITE = new ResourceLocation("hud/hotbar");
+	private static final ResourceLocation HOTBAR_SELECTION_SPRITE = new ResourceLocation("hud/hotbar_selection");
 	private static final long FADE_OUT_DELAY = 5000L;
 	private static final long FADE_OUT_TIME = 2000L;
 	private final Minecraft minecraft;
@@ -64,9 +64,9 @@ public class SpectatorGui implements SpectatorMenuListener {
 	protected void renderPage(GuiGraphics guiGraphics, float f, int i, int j, SpectatorPage spectatorPage) {
 		RenderSystem.enableBlend();
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, f);
-		guiGraphics.blit(WIDGETS_LOCATION, i - 91, j, 0, 0, 182, 22);
+		guiGraphics.blitSprite(HOTBAR_SPRITE, i - 91, j, 182, 22);
 		if (spectatorPage.getSelectedSlot() >= 0) {
-			guiGraphics.blit(WIDGETS_LOCATION, i - 91 - 1 + spectatorPage.getSelectedSlot() * 20, j - 1, 0, 22, 24, 22);
+			guiGraphics.blitSprite(HOTBAR_SELECTION_SPRITE, i - 91 - 1 + spectatorPage.getSelectedSlot() * 20, j - 1, 24, 23);
 		}
 
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);

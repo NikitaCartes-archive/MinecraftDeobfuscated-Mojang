@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Position;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
@@ -96,7 +98,7 @@ public class EuclideanGameEventListenerRegistry implements GameEventListenerRegi
 		if (optional.isEmpty()) {
 			return Optional.empty();
 		} else {
-			double d = ((Vec3)optional.get()).distanceToSqr(vec3);
+			double d = BlockPos.containing((Position)optional.get()).distSqr(BlockPos.containing(vec3));
 			int i = gameEventListener.getListenerRadius() * gameEventListener.getListenerRadius();
 			return d > (double)i ? Optional.empty() : optional;
 		}

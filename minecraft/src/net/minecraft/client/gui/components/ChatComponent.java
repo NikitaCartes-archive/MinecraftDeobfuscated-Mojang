@@ -19,6 +19,7 @@ import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.ArrayListDeque;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.ChatVisiblity;
@@ -35,7 +36,7 @@ public class ChatComponent {
 	private static final int TIME_BEFORE_MESSAGE_DELETION = 60;
 	private static final Component DELETED_CHAT_MESSAGE = Component.translatable("chat.deleted_marker").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 	private final Minecraft minecraft;
-	private final List<String> recentChat = Lists.<String>newArrayList();
+	private final ArrayListDeque<String> recentChat = new ArrayListDeque<>(100);
 	private final List<GuiMessage> allMessages = Lists.<GuiMessage>newArrayList();
 	private final List<GuiMessage.Line> trimmedMessages = Lists.<GuiMessage.Line>newArrayList();
 	private int chatScrollbarPos;
@@ -44,6 +45,7 @@ public class ChatComponent {
 
 	public ChatComponent(Minecraft minecraft) {
 		this.minecraft = minecraft;
+		this.recentChat.addAll(minecraft.commandHistory().history());
 	}
 
 	public void tick() {
@@ -131,8 +133,8 @@ public class ChatComponent {
 						int y = ai > 0 ? 170 : 96;
 						int z = this.newMessageSinceScroll ? 13382451 : 3355562;
 						int aa = n + 4;
-						guiGraphics.fill(aa, -ai, aa + 2, -ai - x, z + (y << 24));
-						guiGraphics.fill(aa + 2, -ai, aa + 1, -ai - x, 13421772 + (y << 24));
+						guiGraphics.fill(aa, -ai, aa + 2, -ai - x, 100, z + (y << 24));
+						guiGraphics.fill(aa + 2, -ai, aa + 1, -ai - x, 100, 13421772 + (y << 24));
 					}
 				}
 
@@ -169,6 +171,7 @@ public class ChatComponent {
 		this.allMessages.clear();
 		if (bl) {
 			this.recentChat.clear();
+			this.recentChat.addAll(this.minecraft.commandHistory().history());
 		}
 	}
 
@@ -279,13 +282,21 @@ public class ChatComponent {
 		}
 	}
 
-	public List<String> getRecentChat() {
+	public ArrayListDeque<String> getRecentChat() {
 		return this.recentChat;
 	}
 
 	public void addRecentChat(String string) {
-		if (this.recentChat.isEmpty() || !((String)this.recentChat.get(this.recentChat.size() - 1)).equals(string)) {
-			this.recentChat.add(string);
+		if (!string.equals(this.recentChat.peekLast())) {
+			if (this.recentChat.size() >= 100) {
+				this.recentChat.removeFirst();
+			}
+
+			this.recentChat.addLast(string);
+		}
+
+		if (string.startsWith("/")) {
+			this.minecraft.commandHistory().addCommand(string);
 		}
 	}
 

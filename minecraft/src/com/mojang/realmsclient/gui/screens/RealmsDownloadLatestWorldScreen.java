@@ -147,7 +147,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.downloadTitle, this.width / 2, 20, 16777215);
 		guiGraphics.drawCenteredString(this.font, this.status, this.width / 2, 50, 16777215);
 		if (this.showDots) {
@@ -162,8 +162,6 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		if (this.errorMessage != null) {
 			guiGraphics.drawCenteredString(this.font, this.errorMessage, this.width / 2, 110, 16711680);
 		}
-
-		super.render(guiGraphics, i, j, f);
 	}
 
 	private void drawDots(GuiGraphics guiGraphics) {
@@ -267,7 +265,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 					LOGGER.error("Could not acquire upload lock");
 				} catch (Exception var10) {
 					this.errorMessage = Component.translatable("mco.download.failed");
-					var10.printStackTrace();
+					LOGGER.info("Exception while downloading world", (Throwable)var10);
 				}
 			} finally {
 				if (!DOWNLOAD_LOCK.isHeldByCurrentThread()) {

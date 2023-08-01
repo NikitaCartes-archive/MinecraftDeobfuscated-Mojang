@@ -10,7 +10,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
@@ -36,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -67,15 +65,8 @@ public class GameProfileCache {
 	private void safeAdd(GameProfileCache.GameProfileInfo gameProfileInfo) {
 		GameProfile gameProfile = gameProfileInfo.getProfile();
 		gameProfileInfo.setLastAccess(this.getNextOperation());
-		String string = gameProfile.getName();
-		if (string != null) {
-			this.profilesByName.put(string.toLowerCase(Locale.ROOT), gameProfileInfo);
-		}
-
-		UUID uUID = gameProfile.getId();
-		if (uUID != null) {
-			this.profilesByUUID.put(uUID, gameProfileInfo);
-		}
+		this.profilesByName.put(gameProfile.getName().toLowerCase(Locale.ROOT), gameProfileInfo);
+		this.profilesByUUID.put(gameProfile.getId(), gameProfileInfo);
 	}
 
 	private static Optional<GameProfile> lookupGameProfile(GameProfileRepository gameProfileRepository, String string) {
@@ -87,14 +78,14 @@ public class GameProfileCache {
 			}
 
 			@Override
-			public void onProfileLookupFailed(GameProfile gameProfile, Exception exception) {
+			public void onProfileLookupFailed(String string, Exception exception) {
 				atomicReference.set(null);
 			}
 		};
-		gameProfileRepository.findProfilesByNames(new String[]{string}, Agent.MINECRAFT, profileLookupCallback);
+		gameProfileRepository.findProfilesByNames(new String[]{string}, profileLookupCallback);
 		GameProfile gameProfile = (GameProfile)atomicReference.get();
 		if (!usesAuthentication() && gameProfile == null) {
-			UUID uUID = UUIDUtil.getOrCreatePlayerUUID(new GameProfile(null, string));
+			UUID uUID = UUIDUtil.createOfflinePlayerUUID(string);
 			return Optional.of(new GameProfile(uUID, string));
 		} else {
 			return Optional.ofNullable(gameProfile);
@@ -153,21 +144,18 @@ public class GameProfileCache {
 		return optional;
 	}
 
-	public void getAsync(String string, Consumer<Optional<GameProfile>> consumer) {
+	public CompletableFuture<Optional<GameProfile>> getAsync(String string) {
 		if (this.executor == null) {
 			throw new IllegalStateException("No executor");
 		} else {
 			CompletableFuture<Optional<GameProfile>> completableFuture = (CompletableFuture<Optional<GameProfile>>)this.requests.get(string);
 			if (completableFuture != null) {
-				this.requests.put(string, completableFuture.whenCompleteAsync((optional, throwable) -> consumer.accept(optional), this.executor));
+				return completableFuture;
 			} else {
-				this.requests
-					.put(
-						string,
-						CompletableFuture.supplyAsync(() -> this.get(string), Util.backgroundExecutor())
-							.whenCompleteAsync((optional, throwable) -> this.requests.remove(string), this.executor)
-							.whenCompleteAsync((optional, throwable) -> consumer.accept(optional), this.executor)
-					);
+				CompletableFuture<Optional<GameProfile>> completableFuture2 = CompletableFuture.supplyAsync(() -> this.get(string), Util.backgroundExecutor())
+					.whenCompleteAsync((optional, throwable) -> this.requests.remove(string), this.executor);
+				this.requests.put(string, completableFuture2);
+				return completableFuture2;
 			}
 		}
 	}
@@ -283,8 +271,7 @@ public class GameProfileCache {
 	private static JsonElement writeGameProfile(GameProfileCache.GameProfileInfo gameProfileInfo, DateFormat dateFormat) {
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.addProperty("name", gameProfileInfo.getProfile().getName());
-		UUID uUID = gameProfileInfo.getProfile().getId();
-		jsonObject.addProperty("uuid", uUID == null ? "" : uUID.toString());
+		jsonObject.addProperty("uuid", gameProfileInfo.getProfile().getId().toString());
 		jsonObject.addProperty("expiresOn", dateFormat.format(gameProfileInfo.getExpirationDate()));
 		return jsonObject;
 	}

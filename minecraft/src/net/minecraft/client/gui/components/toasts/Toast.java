@@ -5,14 +5,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public interface Toast {
-	ResourceLocation TEXTURE = new ResourceLocation("textures/gui/toasts.png");
 	Object NO_TOKEN = new Object();
 	int SLOT_HEIGHT = 32;
 

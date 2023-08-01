@@ -1,8 +1,10 @@
 package net.minecraft.world.level.block;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -15,7 +17,7 @@ import net.minecraft.world.level.material.Fluids;
 
 public interface SimpleWaterloggedBlock extends BucketPickup, LiquidBlockContainer {
 	@Override
-	default boolean canPlaceLiquid(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Fluid fluid) {
+	default boolean canPlaceLiquid(@Nullable Player player, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Fluid fluid) {
 		return fluid == Fluids.WATER;
 	}
 
@@ -34,7 +36,7 @@ public interface SimpleWaterloggedBlock extends BucketPickup, LiquidBlockContain
 	}
 
 	@Override
-	default ItemStack pickupBlock(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
+	default ItemStack pickupBlock(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
 		if ((Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
 			levelAccessor.setBlock(blockPos, blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(false)), 3);
 			if (!blockState.canSurvive(levelAccessor, blockPos)) {

@@ -113,6 +113,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderBackground(guiGraphics, i, j, f);
+
 		for (Renderable renderable : this.renderables) {
 			renderable.render(guiGraphics, i, j, f);
 		}
@@ -329,12 +331,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	public void added() {
 	}
 
-	public void renderBackground(GuiGraphics guiGraphics) {
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.minecraft.level != null) {
-			guiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+			this.renderTransparentBackground(guiGraphics);
 		} else {
 			this.renderDirtBackground(guiGraphics);
 		}
+	}
+
+	public void renderTransparentBackground(GuiGraphics guiGraphics) {
+		guiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
 	}
 
 	public void renderDirtBackground(GuiGraphics guiGraphics) {

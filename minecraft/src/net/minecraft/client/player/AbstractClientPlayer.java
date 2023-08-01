@@ -1,23 +1,15 @@
 package net.minecraft.client.player;
 
-import com.google.common.hash.Hashing;
 import com.mojang.authlib.GameProfile;
-import java.util.Locale;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.HttpTexture;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.util.Mth;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +19,6 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractClientPlayer extends Player {
-	private static final String SKIN_URL_TEMPLATE = "http://skins.minecraft.net/MinecraftSkins/%s.png";
 	@Nullable
 	private PlayerInfo playerInfo;
 	protected Vec3 deltaMovementOnPreviousTick = Vec3.ZERO;
@@ -53,10 +44,6 @@ public abstract class AbstractClientPlayer extends Player {
 		return playerInfo != null && playerInfo.getGameMode() == GameType.CREATIVE;
 	}
 
-	public boolean isCapeLoaded() {
-		return this.getPlayerInfo() != null;
-	}
-
 	@Nullable
 	protected PlayerInfo getPlayerInfo() {
 		if (this.playerInfo == null) {
@@ -76,54 +63,9 @@ public abstract class AbstractClientPlayer extends Player {
 		return this.deltaMovementOnPreviousTick.lerp(this.getDeltaMovement(), (double)f);
 	}
 
-	public boolean isSkinLoaded() {
+	public PlayerSkin getSkin() {
 		PlayerInfo playerInfo = this.getPlayerInfo();
-		return playerInfo != null && playerInfo.isSkinLoaded();
-	}
-
-	public ResourceLocation getSkinTextureLocation() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
-		return playerInfo == null ? DefaultPlayerSkin.getDefaultSkin(this.getUUID()) : playerInfo.getSkinLocation();
-	}
-
-	@Nullable
-	public ResourceLocation getCloakTextureLocation() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
-		return playerInfo == null ? null : playerInfo.getCapeLocation();
-	}
-
-	public boolean isElytraLoaded() {
-		return this.getPlayerInfo() != null;
-	}
-
-	@Nullable
-	public ResourceLocation getElytraTextureLocation() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
-		return playerInfo == null ? null : playerInfo.getElytraLocation();
-	}
-
-	public static void registerSkinTexture(ResourceLocation resourceLocation, String string) {
-		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-		AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation, MissingTextureAtlasSprite.getTexture());
-		if (abstractTexture == MissingTextureAtlasSprite.getTexture()) {
-			AbstractTexture var4 = new HttpTexture(
-				null,
-				String.format(Locale.ROOT, "http://skins.minecraft.net/MinecraftSkins/%s.png", StringUtil.stripColor(string)),
-				DefaultPlayerSkin.getDefaultSkin(UUIDUtil.createOfflinePlayerUUID(string)),
-				true,
-				null
-			);
-			textureManager.register(resourceLocation, var4);
-		}
-	}
-
-	public static ResourceLocation getSkinLocation(String string) {
-		return new ResourceLocation("skins/" + Hashing.sha1().hashUnencodedChars(StringUtil.stripColor(string)));
-	}
-
-	public String getModelName() {
-		PlayerInfo playerInfo = this.getPlayerInfo();
-		return playerInfo == null ? DefaultPlayerSkin.getSkinModelName(this.getUUID()) : playerInfo.getModelName();
+		return playerInfo == null ? DefaultPlayerSkin.get(this.getUUID()) : playerInfo.getSkin();
 	}
 
 	public float getFieldOfViewModifier() {

@@ -14,7 +14,10 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class Checkbox extends AbstractButton {
-	private static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/checkbox.png");
+	private static final ResourceLocation CHECKBOX_SELECTED_HIGHLIGHTED_SPRITE = new ResourceLocation("widget/checkbox_selected_highlighted");
+	private static final ResourceLocation CHECKBOX_SELECTED_SPRITE = new ResourceLocation("widget/checkbox_selected");
+	private static final ResourceLocation CHECKBOX_HIGHLIGHTED_SPRITE = new ResourceLocation("widget/checkbox_highlighted");
+	private static final ResourceLocation CHECKBOX_SPRITE = new ResourceLocation("widget/checkbox");
 	private static final int TEXT_COLOR = 14737632;
 	private boolean selected;
 	private final boolean showLabel;
@@ -57,7 +60,14 @@ public class Checkbox extends AbstractButton {
 		Font font = minecraft.font;
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
 		RenderSystem.enableBlend();
-		guiGraphics.blit(TEXTURE, this.getX(), this.getY(), this.isFocused() ? 20.0F : 0.0F, this.selected ? 20.0F : 0.0F, 20, this.height, 64, 64);
+		ResourceLocation resourceLocation;
+		if (this.selected) {
+			resourceLocation = this.isFocused() ? CHECKBOX_SELECTED_HIGHLIGHTED_SPRITE : CHECKBOX_SELECTED_SPRITE;
+		} else {
+			resourceLocation = this.isFocused() ? CHECKBOX_HIGHLIGHTED_SPRITE : CHECKBOX_SPRITE;
+		}
+
+		guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), 20, this.height);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (this.showLabel) {
 			guiGraphics.drawString(font, this.getMessage(), this.getX() + 24, this.getY() + (this.height - 8) / 2, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);

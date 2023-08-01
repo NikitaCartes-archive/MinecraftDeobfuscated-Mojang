@@ -99,7 +99,7 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		Optional<BlockPos> optional = BlockUtil.getTopConnectedBlock(levelReader, blockPos, blockState.getBlock(), Direction.UP, Blocks.BIG_DRIPLEAF);
 		if (!optional.isPresent()) {
 			return false;

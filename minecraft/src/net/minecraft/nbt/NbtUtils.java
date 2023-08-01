@@ -22,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
@@ -31,7 +32,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -64,15 +64,8 @@ public final class NbtUtils {
 
 	@Nullable
 	public static GameProfile readGameProfile(CompoundTag compoundTag) {
-		String string = null;
-		UUID uUID = null;
-		if (compoundTag.contains("Name", 8)) {
-			string = compoundTag.getString("Name");
-		}
-
-		if (compoundTag.hasUUID("Id")) {
-			uUID = compoundTag.getUUID("Id");
-		}
+		UUID uUID = compoundTag.hasUUID("Id") ? compoundTag.getUUID("Id") : Util.NIL_UUID;
+		String string = compoundTag.getString("Name");
 
 		try {
 			GameProfile gameProfile = new GameProfile(uUID, string);
@@ -101,11 +94,11 @@ public final class NbtUtils {
 	}
 
 	public static CompoundTag writeGameProfile(CompoundTag compoundTag, GameProfile gameProfile) {
-		if (!StringUtil.isNullOrEmpty(gameProfile.getName())) {
+		if (!gameProfile.getName().isEmpty()) {
 			compoundTag.putString("Name", gameProfile.getName());
 		}
 
-		if (gameProfile.getId() != null) {
+		if (!gameProfile.getId().equals(Util.NIL_UUID)) {
 			compoundTag.putUUID("Id", gameProfile.getId());
 		}
 
@@ -117,9 +110,10 @@ public final class NbtUtils {
 
 				for (com.mojang.authlib.properties.Property property : gameProfile.getProperties().get(string)) {
 					CompoundTag compoundTag3 = new CompoundTag();
-					compoundTag3.putString("Value", property.getValue());
-					if (property.hasSignature()) {
-						compoundTag3.putString("Signature", property.getSignature());
+					compoundTag3.putString("Value", property.value());
+					String string2 = property.signature();
+					if (string2 != null) {
+						compoundTag3.putString("Signature", string2);
 					}
 
 					listTag.add(compoundTag3);

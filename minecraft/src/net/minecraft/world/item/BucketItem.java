@@ -52,9 +52,8 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 				return InteractionResultHolder.fail(itemStack);
 			} else if (this.content == Fluids.EMPTY) {
 				BlockState blockState = level.getBlockState(blockPos);
-				if (blockState.getBlock() instanceof BucketPickup) {
-					BucketPickup bucketPickup = (BucketPickup)blockState.getBlock();
-					ItemStack itemStack2 = bucketPickup.pickupBlock(level, blockPos, blockState);
+				if (blockState.getBlock() instanceof BucketPickup bucketPickup) {
+					ItemStack itemStack2 = bucketPickup.pickupBlock(player, level, blockPos, blockState);
 					if (!itemStack2.isEmpty()) {
 						player.awardStat(Stats.ITEM_USED.get(this));
 						bucketPickup.getPickupSound().ifPresent(soundEvent -> player.playSound(soundEvent, 1.0F, 1.0F));
@@ -97,15 +96,31 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 
 	@Override
 	public boolean emptyContents(@Nullable Player player, Level level, BlockPos blockPos, @Nullable BlockHitResult blockHitResult) {
-		if (!(this.content instanceof FlowingFluid)) {
+		if (!(this.content instanceof FlowingFluid flowingFluid)) {
 			return false;
 		} else {
-			BlockState blockState = level.getBlockState(blockPos);
-			Block block = blockState.getBlock();
-			boolean bl = blockState.canBeReplaced(this.content);
-			boolean bl2 = blockState.isAir()
-				|| bl
-				|| block instanceof LiquidBlockContainer && ((LiquidBlockContainer)block).canPlaceLiquid(level, blockPos, blockState, this.content);
+			Block block;
+			boolean bl;
+			BlockState blockState;
+			boolean var10000;
+			label82: {
+				blockState = level.getBlockState(blockPos);
+				block = blockState.getBlock();
+				bl = blockState.canBeReplaced(this.content);
+				label70:
+				if (!blockState.isAir() && !bl) {
+					if (block instanceof LiquidBlockContainer liquidBlockContainer && liquidBlockContainer.canPlaceLiquid(player, level, blockPos, blockState, this.content)) {
+						break label70;
+					}
+
+					var10000 = false;
+					break label82;
+				}
+
+				var10000 = true;
+			}
+
+			boolean bl2 = var10000;
 			if (!bl2) {
 				return blockHitResult != null && this.emptyContents(player, level, blockHitResult.getBlockPos().relative(blockHitResult.getDirection()), null);
 			} else if (level.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
@@ -121,11 +136,13 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 				}
 
 				return true;
-			} else if (block instanceof LiquidBlockContainer && this.content == Fluids.WATER) {
-				((LiquidBlockContainer)block).placeLiquid(level, blockPos, blockState, ((FlowingFluid)this.content).getSource(false));
-				this.playEmptySound(player, level, blockPos);
-				return true;
 			} else {
+				if (block instanceof LiquidBlockContainer liquidBlockContainer && this.content == Fluids.WATER) {
+					liquidBlockContainer.placeLiquid(level, blockPos, blockState, flowingFluid.getSource(false));
+					this.playEmptySound(player, level, blockPos);
+					return true;
+				}
+
 				if (!level.isClientSide && bl && !blockState.liquid()) {
 					level.destroyBlock(blockPos, true);
 				}

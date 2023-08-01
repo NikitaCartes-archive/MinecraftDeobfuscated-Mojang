@@ -79,6 +79,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -849,10 +850,17 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	protected void updateTrades() {
 		VillagerData villagerData = this.getVillagerData();
-		Int2ObjectMap<VillagerTrades.ItemListing[]> int2ObjectMap = (Int2ObjectMap<VillagerTrades.ItemListing[]>)VillagerTrades.TRADES
-			.get(villagerData.getProfession());
-		if (int2ObjectMap != null && !int2ObjectMap.isEmpty()) {
-			VillagerTrades.ItemListing[] itemListings = int2ObjectMap.get(villagerData.getLevel());
+		Int2ObjectMap<VillagerTrades.ItemListing[]> int2ObjectMap2;
+		if (this.level().enabledFeatures().contains(FeatureFlags.TRADE_REBALANCE)) {
+			Int2ObjectMap<VillagerTrades.ItemListing[]> int2ObjectMap = (Int2ObjectMap<VillagerTrades.ItemListing[]>)VillagerTrades.EXPERIMENTAL_TRADES
+				.get(villagerData.getProfession());
+			int2ObjectMap2 = int2ObjectMap != null ? int2ObjectMap : (Int2ObjectMap)VillagerTrades.TRADES.get(villagerData.getProfession());
+		} else {
+			int2ObjectMap2 = (Int2ObjectMap<VillagerTrades.ItemListing[]>)VillagerTrades.TRADES.get(villagerData.getProfession());
+		}
+
+		if (int2ObjectMap2 != null && !int2ObjectMap2.isEmpty()) {
+			VillagerTrades.ItemListing[] itemListings = int2ObjectMap2.get(villagerData.getLevel());
 			if (itemListings != null) {
 				MerchantOffers merchantOffers = this.getOffers();
 				this.addOffersFromItemListings(merchantOffers, itemListings, 2);

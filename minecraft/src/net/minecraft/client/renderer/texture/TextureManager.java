@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import com.mojang.realmsclient.RealmsMainScreen;
+import com.mojang.realmsclient.gui.screens.RealmsPopupScreen;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +22,6 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -181,26 +180,24 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 		Executor executor2
 	) {
 		CompletableFuture<Void> completableFuture = new CompletableFuture();
-		CompletableFuture.allOf(TitleScreen.preloadResources(this, executor), this.preload(AbstractWidget.WIDGETS_LOCATION, executor))
-			.thenCompose(preparationBarrier::wait)
-			.thenAcceptAsync(void_ -> {
-				MissingTextureAtlasSprite.getTexture();
-				RealmsMainScreen.updateTeaserImages(this.resourceManager);
-				Iterator<Entry<ResourceLocation, AbstractTexture>> iterator = this.byPath.entrySet().iterator();
+		TitleScreen.preloadResources(this, executor).thenCompose(preparationBarrier::wait).thenAcceptAsync(void_ -> {
+			MissingTextureAtlasSprite.getTexture();
+			RealmsPopupScreen.updateCarouselImages(this.resourceManager);
+			Iterator<Entry<ResourceLocation, AbstractTexture>> iterator = this.byPath.entrySet().iterator();
 
-				while (iterator.hasNext()) {
-					Entry<ResourceLocation, AbstractTexture> entry = (Entry<ResourceLocation, AbstractTexture>)iterator.next();
-					ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
-					AbstractTexture abstractTexture = (AbstractTexture)entry.getValue();
-					if (abstractTexture == MissingTextureAtlasSprite.getTexture() && !resourceLocation.equals(MissingTextureAtlasSprite.getLocation())) {
-						iterator.remove();
-					} else {
-						abstractTexture.reset(this, resourceManager, resourceLocation, executor2);
-					}
+			while (iterator.hasNext()) {
+				Entry<ResourceLocation, AbstractTexture> entry = (Entry<ResourceLocation, AbstractTexture>)iterator.next();
+				ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
+				AbstractTexture abstractTexture = (AbstractTexture)entry.getValue();
+				if (abstractTexture == MissingTextureAtlasSprite.getTexture() && !resourceLocation.equals(MissingTextureAtlasSprite.getLocation())) {
+					iterator.remove();
+				} else {
+					abstractTexture.reset(this, resourceManager, resourceLocation, executor2);
 				}
+			}
 
-				Minecraft.getInstance().tell(() -> completableFuture.complete(null));
-			}, runnable -> RenderSystem.recordRenderCall(runnable::run));
+			Minecraft.getInstance().tell(() -> completableFuture.complete(null));
+		}, runnable -> RenderSystem.recordRenderCall(runnable::run));
 		return completableFuture;
 	}
 

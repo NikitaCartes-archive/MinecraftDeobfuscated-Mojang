@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.telemetry.TelemetryEventSender;
 import net.minecraft.client.telemetry.TelemetryEventType;
 import net.minecraft.client.telemetry.TelemetryProperty;
@@ -33,7 +34,8 @@ public class WorldLoadEvent {
 	}
 
 	private TelemetryProperty.ServerType getServerType() {
-		if (Minecraft.getInstance().isConnectedToRealms()) {
+		ServerData serverData = Minecraft.getInstance().getCurrentServer();
+		if (serverData != null && serverData.isRealm()) {
 			return TelemetryProperty.ServerType.REALM;
 		} else {
 			return Minecraft.getInstance().hasSingleplayerServer() ? TelemetryProperty.ServerType.LOCAL : TelemetryProperty.ServerType.OTHER;

@@ -17,7 +17,8 @@ import net.minecraft.world.entity.player.Player;
 
 public class FollowTemptation extends Behavior<PathfinderMob> {
 	public static final int TEMPTATION_COOLDOWN = 100;
-	public static final double CLOSE_ENOUGH_DIST = 2.5;
+	public static final double DEFAULT_CLOSE_ENOUGH_DIST = 2.5;
+	public static final double BACKED_UP_CLOSE_ENOUGH_DIST = 3.5;
 	private final Function<LivingEntity, Float> speedModifier;
 	private final Function<LivingEntity, Double> closeEnoughDistance;
 

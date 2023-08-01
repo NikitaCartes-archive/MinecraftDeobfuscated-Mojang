@@ -106,7 +106,7 @@ public class OptimizeWorldScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
 		int k = this.width / 2 - 150;
 		int l = this.width / 2 + 150;
@@ -130,7 +130,5 @@ public class OptimizeWorldScreen extends Screen {
 			guiGraphics.drawCenteredString(this.font, q + " / " + this.upgrader.getTotalChunks(), this.width / 2, m + 2 * 9 + 2, 10526880);
 			guiGraphics.drawCenteredString(this.font, Mth.floor(this.upgrader.getProgress() * 100.0F) + "%", this.width / 2, m + (n - m) / 2 - 9 / 2, 10526880);
 		}
-
-		super.render(guiGraphics, i, j, f);
 	}
 }

@@ -44,8 +44,8 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class PresetFlatWorldScreen extends Screen {
+	static final ResourceLocation SLOT_SPRITE = new ResourceLocation("container/slot");
 	static final Logger LOGGER = LogUtils.getLogger();
-	private static final int SLOT_TEX_SIZE = 128;
 	private static final int SLOT_BG_SIZE = 18;
 	private static final int SLOT_STAT_HEIGHT = 20;
 	private static final int SLOT_BG_X = 1;
@@ -214,8 +214,8 @@ public class PresetFlatWorldScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
-		return this.list.mouseScrolled(d, e, f);
+	public boolean mouseScrolled(double d, double e, double f, double g) {
+		return this.list.mouseScrolled(d, e, f, g);
 	}
 
 	@Override
@@ -232,7 +232,7 @@ public class PresetFlatWorldScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		this.list.render(guiGraphics, i, j, f);
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 400.0F);
@@ -241,13 +241,6 @@ public class PresetFlatWorldScreen extends Screen {
 		guiGraphics.drawString(this.font, this.listText, 50, 70, 10526880);
 		guiGraphics.pose().popPose();
 		this.export.render(guiGraphics, i, j, f);
-		super.render(guiGraphics, i, j, f);
-	}
-
-	@Override
-	public void tick() {
-		this.export.tick();
-		super.tick();
 	}
 
 	public void updateButtonValidity(boolean bl) {
@@ -333,7 +326,7 @@ public class PresetFlatWorldScreen extends Screen {
 				PresetsList.this.setSelected(this);
 				PresetFlatWorldScreen.this.settings = this.preset.settings();
 				PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(PresetFlatWorldScreen.this.settings));
-				PresetFlatWorldScreen.this.export.moveCursorToStart();
+				PresetFlatWorldScreen.this.export.moveCursorToStart(false);
 			}
 
 			private void blitSlot(GuiGraphics guiGraphics, int i, int j, Item item) {
@@ -342,7 +335,7 @@ public class PresetFlatWorldScreen extends Screen {
 			}
 
 			private void blitSlotBg(GuiGraphics guiGraphics, int i, int j) {
-				guiGraphics.blit(STATS_ICON_LOCATION, i, j, 0, 0.0F, 0.0F, 18, 18, 128, 128);
+				guiGraphics.blitSprite(PresetFlatWorldScreen.SLOT_SPRITE, i, j, 0, 18, 18);
 			}
 
 			@Override

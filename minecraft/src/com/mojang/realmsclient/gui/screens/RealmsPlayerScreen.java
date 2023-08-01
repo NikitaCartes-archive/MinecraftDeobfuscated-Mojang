@@ -9,6 +9,7 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -28,9 +30,6 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RealmsPlayerScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	static final ResourceLocation OP_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/op_icon.png");
-	static final ResourceLocation USER_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/user_icon.png");
-	static final ResourceLocation CROSS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/cross_player_icon.png");
 	private static final ResourceLocation OPTIONS_BACKGROUND = new ResourceLocation("minecraft", "textures/gui/options_background.png");
 	private static final Component QUESTION_TITLE = Component.translatable("mco.question");
 	static final Component NORMAL_USER_TOOLTIP = Component.translatable("mco.configure.world.invites.normal.tooltip");
@@ -125,12 +124,12 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 	void op(int i) {
 		RealmsClient realmsClient = RealmsClient.create();
-		String string = ((PlayerInfo)this.serverData.players.get(i)).getUuid();
+		UUID uUID = ((PlayerInfo)this.serverData.players.get(i)).getUuid();
 
 		try {
-			this.updateOps(realmsClient.op(this.serverData.id, string));
+			this.updateOps(realmsClient.op(this.serverData.id, uUID));
 		} catch (RealmsServiceException var5) {
-			LOGGER.error("Couldn't op the user");
+			LOGGER.error("Couldn't op the user", (Throwable)var5);
 		}
 
 		this.updateButtonStates();
@@ -138,12 +137,12 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 	void deop(int i) {
 		RealmsClient realmsClient = RealmsClient.create();
-		String string = ((PlayerInfo)this.serverData.players.get(i)).getUuid();
+		UUID uUID = ((PlayerInfo)this.serverData.players.get(i)).getUuid();
 
 		try {
-			this.updateOps(realmsClient.deop(this.serverData.id, string));
+			this.updateOps(realmsClient.deop(this.serverData.id, uUID));
 		} catch (RealmsServiceException var5) {
-			LOGGER.error("Couldn't deop the user");
+			LOGGER.error("Couldn't deop the user", (Throwable)var5);
 		}
 
 		this.updateButtonStates();
@@ -166,7 +165,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 					try {
 						realmsClient.uninvite(this.serverData.id, playerInfo.getUuid());
 					} catch (RealmsServiceException var5) {
-						LOGGER.error("Couldn't uninvite user");
+						LOGGER.error("Couldn't uninvite user", (Throwable)var5);
 					}
 
 					this.serverData.players.remove(this.playerIndex);
@@ -183,16 +182,15 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		this.invitedObjectSelectionList.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, 16777215);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, -1);
 		int k = row(12) + 20;
 		guiGraphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
 		guiGraphics.blit(OPTIONS_BACKGROUND, 0, k, 0.0F, 0.0F, this.width, this.height - k, 32, 32);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		String string = this.serverData.players != null ? Integer.toString(this.serverData.players.size()) : "0";
-		guiGraphics.drawString(this.font, Component.translatable("mco.configure.world.invited.number", string), this.column1X, row(0), 10526880, false);
-		super.render(guiGraphics, i, j, f);
+		guiGraphics.drawString(this.font, Component.translatable("mco.configure.world.invited.number", string), this.column1X, row(0), -6250336, false);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -201,6 +199,15 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		private static final int Y_PADDING = 1;
 		private static final int BUTTON_WIDTH = 8;
 		private static final int BUTTON_HEIGHT = 7;
+		private static final WidgetSprites REMOVE_BUTTON_SPRITES = new WidgetSprites(
+			new ResourceLocation("player_list/remove_player"), new ResourceLocation("player_list/remove_player_highlighted")
+		);
+		private static final WidgetSprites MAKE_OP_BUTTON_SPRITES = new WidgetSprites(
+			new ResourceLocation("player_list/make_operator"), new ResourceLocation("player_list/make_operator_highlighted")
+		);
+		private static final WidgetSprites REMOVE_OP_BUTTON_SPRITES = new WidgetSprites(
+			new ResourceLocation("player_list/remove_operator"), new ResourceLocation("player_list/remove_operator_highlighted")
+		);
 		private final PlayerInfo playerInfo;
 		private final List<AbstractWidget> children = new ArrayList();
 		private final ImageButton removeButton;
@@ -212,14 +219,14 @@ public class RealmsPlayerScreen extends RealmsScreen {
 			int i = RealmsPlayerScreen.this.serverData.players.indexOf(this.playerInfo);
 			int j = RealmsPlayerScreen.this.invitedObjectSelectionList.getRowRight() - 16 - 9;
 			int k = RealmsPlayerScreen.this.invitedObjectSelectionList.getRowTop(i) + 1;
-			this.removeButton = new ImageButton(j, k, 8, 7, 0, 0, 7, RealmsPlayerScreen.CROSS_ICON_LOCATION, 8, 14, button -> RealmsPlayerScreen.this.uninvite(i));
+			this.removeButton = new ImageButton(j, k, 8, 7, REMOVE_BUTTON_SPRITES, button -> RealmsPlayerScreen.this.uninvite(i), CommonComponents.EMPTY);
 			this.removeButton.setTooltip(Tooltip.create(RealmsPlayerScreen.REMOVE_ENTRY_TOOLTIP));
 			this.children.add(this.removeButton);
 			j += 11;
-			this.makeOpButton = new ImageButton(j, k, 8, 7, 0, 0, 7, RealmsPlayerScreen.USER_ICON_LOCATION, 8, 14, button -> RealmsPlayerScreen.this.op(i));
+			this.makeOpButton = new ImageButton(j, k, 8, 7, MAKE_OP_BUTTON_SPRITES, button -> RealmsPlayerScreen.this.op(i), CommonComponents.EMPTY);
 			this.makeOpButton.setTooltip(Tooltip.create(RealmsPlayerScreen.NORMAL_USER_TOOLTIP));
 			this.children.add(this.makeOpButton);
-			this.removeOpButton = new ImageButton(j, k, 8, 7, 0, 0, 7, RealmsPlayerScreen.OP_ICON_LOCATION, 8, 14, button -> RealmsPlayerScreen.this.deop(i));
+			this.removeOpButton = new ImageButton(j, k, 8, 7, REMOVE_OP_BUTTON_SPRITES, button -> RealmsPlayerScreen.this.deop(i), CommonComponents.EMPTY);
 			this.removeOpButton.setTooltip(Tooltip.create(RealmsPlayerScreen.OP_TOOLTIP));
 			this.children.add(this.removeOpButton);
 			this.updateButtons();
@@ -244,11 +251,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			int p;
 			if (!this.playerInfo.getAccepted()) {
-				p = 10526880;
+				p = -6250336;
 			} else if (this.playerInfo.getOnline()) {
 				p = 8388479;
 			} else {
-				p = 16777215;
+				p = -1;
 			}
 
 			RealmsUtil.renderPlayerFace(guiGraphics, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, this.playerInfo.getUuid());
@@ -301,11 +308,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 			super.setSelected(entry);
 			RealmsPlayerScreen.this.playerIndex = this.children().indexOf(entry);
 			RealmsPlayerScreen.this.updateButtonStates();
-		}
-
-		@Override
-		public void renderBackground(GuiGraphics guiGraphics) {
-			RealmsPlayerScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Override

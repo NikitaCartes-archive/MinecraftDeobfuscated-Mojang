@@ -5,6 +5,7 @@ import com.mojang.authlib.GameProfile;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.Optionull;
@@ -92,8 +93,9 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 			gameProfile.getProperties().putAll(friendlyByteBuf.readGameProfileProperties());
 			entryBuilder.profile = gameProfile;
 		}, (friendlyByteBuf, entry) -> {
-			friendlyByteBuf.writeUtf(entry.profile().getName(), 16);
-			friendlyByteBuf.writeGameProfileProperties(entry.profile().getProperties());
+			GameProfile gameProfile = (GameProfile)Objects.requireNonNull(entry.profile());
+			friendlyByteBuf.writeUtf(gameProfile.getName(), 16);
+			friendlyByteBuf.writeGameProfileProperties(gameProfile.getProperties());
 		}),
 		INITIALIZE_CHAT(
 			(entryBuilder, friendlyByteBuf) -> entryBuilder.chatSession = friendlyByteBuf.readNullable(RemoteChatSession.Data::read),
@@ -135,7 +137,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 
 	public static record Entry(
 		UUID profileId,
-		GameProfile profile,
+		@Nullable GameProfile profile,
 		boolean listed,
 		int latency,
 		GameType gameMode,
@@ -148,7 +150,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 				serverPlayer.getUUID(),
 				serverPlayer.getGameProfile(),
 				true,
-				serverPlayer.latency,
+				serverPlayer.connection.latency(),
 				serverPlayer.gameMode.getGameModeForPlayer(),
 				serverPlayer.getTabListDisplayName(),
 				Optionull.map(serverPlayer.getChatSession(), RemoteChatSession::asData)
@@ -158,6 +160,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 
 	static class EntryBuilder {
 		final UUID profileId;
+		@Nullable
 		GameProfile profile;
 		boolean listed;
 		int latency;
@@ -169,7 +172,6 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 
 		EntryBuilder(UUID uUID) {
 			this.profileId = uUID;
-			this.profile = new GameProfile(uUID, null);
 		}
 
 		ClientboundPlayerInfoUpdatePacket.Entry build() {

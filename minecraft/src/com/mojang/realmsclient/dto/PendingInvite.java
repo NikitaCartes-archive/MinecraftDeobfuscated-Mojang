@@ -4,8 +4,10 @@ import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.util.JsonUtils;
 import java.util.Date;
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -14,7 +16,7 @@ public class PendingInvite extends ValueObject {
 	public String invitationId;
 	public String worldName;
 	public String worldOwnerName;
-	public String worldOwnerUuid;
+	public UUID worldOwnerUuid;
 	public Date date;
 
 	public static PendingInvite parse(JsonObject jsonObject) {
@@ -24,7 +26,7 @@ public class PendingInvite extends ValueObject {
 			pendingInvite.invitationId = JsonUtils.getStringOr("invitationId", jsonObject, "");
 			pendingInvite.worldName = JsonUtils.getStringOr("worldName", jsonObject, "");
 			pendingInvite.worldOwnerName = JsonUtils.getStringOr("worldOwnerName", jsonObject, "");
-			pendingInvite.worldOwnerUuid = JsonUtils.getStringOr("worldOwnerUuid", jsonObject, "");
+			pendingInvite.worldOwnerUuid = JsonUtils.getUuidOr("worldOwnerUuid", jsonObject, Util.NIL_UUID);
 			pendingInvite.date = JsonUtils.getDateOr("date", jsonObject);
 		} catch (Exception var3) {
 			LOGGER.error("Could not parse PendingInvite: {}", var3.getMessage());

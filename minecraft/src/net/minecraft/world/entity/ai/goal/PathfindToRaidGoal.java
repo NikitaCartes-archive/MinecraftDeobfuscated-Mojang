@@ -25,7 +25,7 @@ public class PathfindToRaidGoal<T extends Raider> extends Goal {
 	@Override
 	public boolean canUse() {
 		return this.mob.getTarget() == null
-			&& !this.mob.isVehicle()
+			&& !this.mob.hasControllingPassenger()
 			&& this.mob.hasActiveRaid()
 			&& !this.mob.getCurrentRaid().isOver()
 			&& !((ServerLevel)this.mob.level()).isVillage(this.mob.blockPosition());

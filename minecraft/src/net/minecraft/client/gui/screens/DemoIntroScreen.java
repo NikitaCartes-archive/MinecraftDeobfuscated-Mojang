@@ -49,21 +49,20 @@ public class DemoIntroScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics guiGraphics) {
-		super.renderBackground(guiGraphics);
-		int i = (this.width - 248) / 2;
-		int j = (this.height - 166) / 2;
-		guiGraphics.blit(DEMO_BACKGROUND_LOCATION, i, j, 0, 0, 248, 166);
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.renderBackground(guiGraphics, i, j, f);
+		int k = (this.width - 248) / 2;
+		int l = (this.height - 166) / 2;
+		guiGraphics.blit(DEMO_BACKGROUND_LOCATION, k, l, 0, 0, 248, 166);
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		int k = (this.width - 248) / 2 + 10;
 		int l = (this.height - 166) / 2 + 8;
 		guiGraphics.drawString(this.font, this.title, k, l, 2039583, false);
 		l = this.movementMessage.renderLeftAlignedNoShadow(guiGraphics, k, l + 12, 12, 5197647);
 		this.durationMessage.renderLeftAlignedNoShadow(guiGraphics, k, l + 20, 9, 2039583);
-		super.render(guiGraphics, i, j, f);
 	}
 }

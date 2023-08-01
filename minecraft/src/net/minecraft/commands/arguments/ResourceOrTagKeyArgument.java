@@ -80,12 +80,11 @@ public class ResourceOrTagKeyArgument<T> implements ArgumentType<ResourceOrTagKe
 
 	public static class Info<T> implements ArgumentTypeInfo<ResourceOrTagKeyArgument<T>, ResourceOrTagKeyArgument.Info<T>.Template> {
 		public void serializeToNetwork(ResourceOrTagKeyArgument.Info<T>.Template template, FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeResourceLocation(template.registryKey.location());
+			friendlyByteBuf.writeResourceKey(template.registryKey);
 		}
 
 		public ResourceOrTagKeyArgument.Info<T>.Template deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-			return new ResourceOrTagKeyArgument.Info.Template(ResourceKey.createRegistryKey(resourceLocation));
+			return new ResourceOrTagKeyArgument.Info.Template(friendlyByteBuf.readRegistryKey());
 		}
 
 		public void serializeToJson(ResourceOrTagKeyArgument.Info<T>.Template template, JsonObject jsonObject) {

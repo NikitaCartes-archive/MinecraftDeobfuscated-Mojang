@@ -8,15 +8,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class DeathScreen extends Screen {
+	private static final ResourceLocation DRAFT_REPORT_SPRITE = new ResourceLocation("icon/draft_report");
 	private int delayTicker;
 	private final Component causeOfDeath;
 	private final boolean hardcore;
@@ -88,13 +89,13 @@ public class DeathScreen extends Screen {
 			this.minecraft.level.disconnect();
 		}
 
-		this.minecraft.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
+		this.minecraft.disconnect(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
 		this.minecraft.setScreen(new TitleScreen());
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		guiGraphics.fillGradient(0, 0, this.width, this.height, 1615855616, -1602211792);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().scale(2.0F, 2.0F, 2.0F);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2 / 2, 30, 16777215);
@@ -109,12 +110,16 @@ public class DeathScreen extends Screen {
 			guiGraphics.renderComponentHoverEffect(this.font, style, i, j);
 		}
 
-		super.render(guiGraphics, i, j, f);
 		if (this.exitToTitleButton != null && this.minecraft.getReportingContext().hasDraftReport()) {
-			guiGraphics.blit(
-				AbstractWidget.WIDGETS_LOCATION, this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17, this.exitToTitleButton.getY() + 3, 182, 24, 15, 15
+			guiGraphics.blitSprite(
+				DRAFT_REPORT_SPRITE, this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17, this.exitToTitleButton.getY() + 3, 15, 15
 			);
 		}
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		guiGraphics.fillGradient(0, 0, this.width, this.height, 1615855616, -1602211792);
 	}
 
 	@Nullable

@@ -38,7 +38,7 @@ public class RaftModel extends ListModel<Boat> {
 		partDefinition.addOrReplaceChild(
 			"bottom",
 			CubeListBuilder.create().texOffs(0, 0).addBox(-14.0F, -11.0F, -4.0F, 28.0F, 20.0F, 4.0F).texOffs(0, 0).addBox(-14.0F, -9.0F, -8.0F, 28.0F, 16.0F, 4.0F),
-			PartPose.offsetAndRotation(0.0F, -2.0F, 1.0F, 1.5708F, 0.0F, 0.0F)
+			PartPose.offsetAndRotation(0.0F, -2.1F, 1.0F, 1.5708F, 0.0F, 0.0F)
 		);
 		int i = 20;
 		int j = 7;

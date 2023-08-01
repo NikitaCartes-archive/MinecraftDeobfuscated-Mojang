@@ -121,11 +121,10 @@ import org.slf4j.Logger;
 
 public abstract class LivingEntity extends Entity implements Attackable {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final UUID SPEED_MODIFIER_SPRINTING_UUID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
 	private static final UUID SPEED_MODIFIER_SOUL_SPEED_UUID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
 	private static final UUID SPEED_MODIFIER_POWDER_SNOW_UUID = UUID.fromString("1eaf83ff-7207-4596-b37a-d7a07b3ec4ce");
 	private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
-		SPEED_MODIFIER_SPRINTING_UUID, "Sprinting speed boost", 0.3F, AttributeModifier.Operation.MULTIPLY_TOTAL
+		UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D"), "Sprinting speed boost", 0.3F, AttributeModifier.Operation.MULTIPLY_TOTAL
 	);
 	public static final int HAND_SLOTS = 2;
 	public static final int ARMOR_SLOTS = 4;
@@ -206,7 +205,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected double lerpZ;
 	protected double lerpYRot;
 	protected double lerpXRot;
-	protected double lyHeadRot;
+	protected double lerpYHeadRot;
 	protected int lerpHeadSteps;
 	private boolean effectsDirty = true;
 	@Nullable
@@ -284,7 +283,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			.add(Attributes.KNOCKBACK_RESISTANCE)
 			.add(Attributes.MOVEMENT_SPEED)
 			.add(Attributes.ARMOR)
-			.add(Attributes.ARMOR_TOUGHNESS);
+			.add(Attributes.ARMOR_TOUGHNESS)
+			.add(Attributes.MAX_ABSORPTION);
 	}
 
 	@Override
@@ -945,9 +945,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			if (mobEffectInstance2 == null) {
 				this.activeEffects.put(mobEffectInstance.getEffect(), mobEffectInstance);
 				this.onEffectAdded(mobEffectInstance, entity);
+				mobEffectInstance.onEffectStarted(this);
 				return true;
 			} else if (mobEffectInstance2.update(mobEffectInstance)) {
 				this.onEffectUpdated(mobEffectInstance2, true, entity);
+				mobEffectInstance.onEffectStarted(this);
 				return true;
 			} else {
 				return false;
@@ -999,7 +1001,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void onEffectAdded(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
 		this.effectsDirty = true;
 		if (!this.level().isClientSide) {
-			mobEffectInstance.getEffect().addAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
+			mobEffectInstance.getEffect().addAttributeModifiers(this.getAttributes(), mobEffectInstance.getAmplifier());
 			this.sendEffectToPassengers(mobEffectInstance);
 		}
 	}
@@ -1016,8 +1018,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.effectsDirty = true;
 		if (bl && !this.level().isClientSide) {
 			MobEffect mobEffect = mobEffectInstance.getEffect();
-			mobEffect.removeAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
-			mobEffect.addAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
+			mobEffect.removeAttributeModifiers(this.getAttributes());
+			mobEffect.addAttributeModifiers(this.getAttributes(), mobEffectInstance.getAmplifier());
+			this.refreshDirtyAttributes();
 		}
 
 		if (!this.level().isClientSide) {
@@ -1028,12 +1031,33 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void onEffectRemoved(MobEffectInstance mobEffectInstance) {
 		this.effectsDirty = true;
 		if (!this.level().isClientSide) {
-			mobEffectInstance.getEffect().removeAttributeModifiers(this, this.getAttributes(), mobEffectInstance.getAmplifier());
+			mobEffectInstance.getEffect().removeAttributeModifiers(this.getAttributes());
+			this.refreshDirtyAttributes();
 
 			for (Entity entity : this.getPassengers()) {
 				if (entity instanceof ServerPlayer serverPlayer) {
 					serverPlayer.connection.send(new ClientboundRemoveMobEffectPacket(this.getId(), mobEffectInstance.getEffect()));
 				}
+			}
+		}
+	}
+
+	private void refreshDirtyAttributes() {
+		for (AttributeInstance attributeInstance : this.getAttributes().getDirtyAttributes()) {
+			this.onAttributeUpdated(attributeInstance.getAttribute());
+		}
+	}
+
+	private void onAttributeUpdated(Attribute attribute) {
+		if (attribute == Attributes.MAX_HEALTH) {
+			float f = this.getMaxHealth();
+			if (this.getHealth() > f) {
+				this.setHealth(f);
+			}
+		} else if (attribute == Attributes.MAX_ABSORPTION) {
+			float f = this.getMaxAbsorption();
+			if (this.getAbsorptionAmount() > f) {
+				this.setAbsorptionAmount(f);
 			}
 		}
 	}
@@ -1144,7 +1168,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					this.markHurt();
 				}
 
-				if (entity2 != null && !damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
+				if (entity2 != null && !damageSource.is(DamageTypeTags.NO_KNOCKBACK)) {
 					double d = entity2.getX() - this.getX();
 
 					double e;
@@ -1220,6 +1244,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				if (this instanceof ServerPlayer serverPlayer) {
 					serverPlayer.awardStat(Stats.ITEM_USED.get(Items.TOTEM_OF_UNDYING));
 					CriteriaTriggers.USED_TOTEM.trigger(serverPlayer, itemStack);
+					this.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
 				}
 
 				this.setHealth(1.0F);
@@ -1631,6 +1656,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return (float)this.getAttributeValue(Attributes.MAX_HEALTH);
 	}
 
+	public final float getMaxAbsorption() {
+		return (float)this.getAttributeValue(Attributes.MAX_ABSORPTION);
+	}
+
 	public final int getArrowCount() {
 		return this.entityData.get(DATA_ARROW_COUNT_ID);
 	}
@@ -1899,10 +1928,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public void setSprinting(boolean bl) {
 		super.setSprinting(bl);
 		AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-		if (attributeInstance.getModifier(SPEED_MODIFIER_SPRINTING_UUID) != null) {
-			attributeInstance.removeModifier(SPEED_MODIFIER_SPRINTING);
-		}
-
+		attributeInstance.removeModifier(SPEED_MODIFIER_SPRINTING.getId());
 		if (bl) {
 			attributeInstance.addTransientModifier(SPEED_MODIFIER_SPRINTING);
 		}
@@ -2334,6 +2360,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		if (this.isSleeping()) {
 			this.setXRot(0.0F);
 		}
+
+		this.refreshDirtyAttributes();
 	}
 
 	private void detectEquipmentUpdates() {
@@ -2461,41 +2489,34 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		if (this.lerpSteps > 0) {
-			double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
-			double e = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
-			double f = this.getZ() + (this.lerpZ - this.getZ()) / (double)this.lerpSteps;
-			double g = Mth.wrapDegrees(this.lerpYRot - (double)this.getYRot());
-			this.setYRot(this.getYRot() + (float)g / (float)this.lerpSteps);
-			this.setXRot(this.getXRot() + (float)(this.lerpXRot - (double)this.getXRot()) / (float)this.lerpSteps);
+			this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
 			this.lerpSteps--;
-			this.setPos(d, e, f);
-			this.setRot(this.getYRot(), this.getXRot());
 		} else if (!this.isEffectiveAi()) {
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
 		}
 
 		if (this.lerpHeadSteps > 0) {
-			this.yHeadRot = this.yHeadRot + (float)Mth.wrapDegrees(this.lyHeadRot - (double)this.yHeadRot) / (float)this.lerpHeadSteps;
+			this.lerpHeadRotationStep(this.lerpHeadSteps, this.lerpYHeadRot);
 			this.lerpHeadSteps--;
 		}
 
 		Vec3 vec3 = this.getDeltaMovement();
-		double h = vec3.x;
-		double i = vec3.y;
-		double j = vec3.z;
+		double d = vec3.x;
+		double e = vec3.y;
+		double f = vec3.z;
 		if (Math.abs(vec3.x) < 0.003) {
-			h = 0.0;
+			d = 0.0;
 		}
 
 		if (Math.abs(vec3.y) < 0.003) {
-			i = 0.0;
+			e = 0.0;
 		}
 
 		if (Math.abs(vec3.z) < 0.003) {
-			j = 0.0;
+			f = 0.0;
 		}
 
-		this.setDeltaMovement(h, i, j);
+		this.setDeltaMovement(d, e, f);
 		this.level().getProfiler().push("ai");
 		if (this.isImmobile()) {
 			this.jumping = false;
@@ -2510,18 +2531,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.level().getProfiler().pop();
 		this.level().getProfiler().push("jump");
 		if (this.jumping && this.isAffectedByFluids()) {
-			double k;
+			double g;
 			if (this.isInLava()) {
-				k = this.getFluidHeight(FluidTags.LAVA);
+				g = this.getFluidHeight(FluidTags.LAVA);
 			} else {
-				k = this.getFluidHeight(FluidTags.WATER);
+				g = this.getFluidHeight(FluidTags.WATER);
 			}
 
-			boolean bl = this.isInWater() && k > 0.0;
-			double l = this.getFluidJumpThreshold();
-			if (!bl || this.onGround() && !(k > l)) {
-				if (!this.isInLava() || this.onGround() && !(k > l)) {
-					if ((this.onGround() || bl && k <= l) && this.noJumpDelay == 0) {
+			boolean bl = this.isInWater() && g > 0.0;
+			double h = this.getFluidJumpThreshold();
+			if (!bl || this.onGround() && !(g > h)) {
+				if (!this.isInLava() || this.onGround() && !(g > h)) {
+					if ((this.onGround() || bl && g <= h) && this.noJumpDelay == 0) {
 						this.jumpFromGround();
 						this.noJumpDelay = 10;
 					}
@@ -2558,11 +2579,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.level().getProfiler().pop();
 		this.level().getProfiler().push("freezing");
 		if (!this.level().isClientSide && !this.isDeadOrDying()) {
-			int m = this.getTicksFrozen();
+			int i = this.getTicksFrozen();
 			if (this.isInPowderSnow && this.canFreeze()) {
-				this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), m + 1));
+				this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), i + 1));
 			} else {
-				this.setTicksFrozen(Math.max(0, m - 2));
+				this.setTicksFrozen(Math.max(0, i - 2));
 			}
 		}
 
@@ -2700,7 +2721,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
-	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
+	public void lerpTo(double d, double e, double f, float g, float h, int i) {
 		this.lerpX = d;
 		this.lerpY = e;
 		this.lerpZ = f;
@@ -2711,7 +2732,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public void lerpHeadTo(float f, int i) {
-		this.lyHeadRot = (double)f;
+		this.lerpYHeadRot = (double)f;
 		this.lerpHeadSteps = i;
 	}
 
@@ -2798,11 +2819,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.absorptionAmount;
 	}
 
-	public void setAbsorptionAmount(float f) {
-		if (f < 0.0F) {
-			f = 0.0F;
-		}
+	public final void setAbsorptionAmount(float f) {
+		this.internalSetAbsorptionAmount(Mth.clamp(f, 0.0F, this.getMaxAbsorption()));
+	}
 
+	protected void internalSetAbsorptionAmount(float f) {
 		this.absorptionAmount = f;
 	}
 
@@ -3109,6 +3130,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		);
 	}
 
+	protected boolean wouldNotSuffocateAtTargetPose(Pose pose) {
+		AABB aABB = this.getDimensions(pose).makeBoundingBox(this.position());
+		return this.level().noBlockCollision(this, aABB);
+	}
+
 	@Override
 	public boolean canChangeDimensions() {
 		return super.canChangeDimensions() && !this.isSleeping();
@@ -3356,6 +3382,23 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public float maxUpStep() {
 		float f = super.maxUpStep();
 		return this.getControllingPassenger() instanceof Player ? Math.max(f, 1.0F) : f;
+	}
+
+	@Override
+	public Vec3 getPassengerRidingPosition(Entity entity) {
+		return new Vec3(
+				this.getPassengerAttachmentPoint(entity, this.getDimensions(this.getPose()), this.getScale()).rotateY(-this.yBodyRot * (float) (Math.PI / 180.0))
+			)
+			.add(this.position());
+	}
+
+	@Override
+	public float getMyRidingOffset(Entity entity) {
+		return this.ridingOffset(entity) * this.getScale();
+	}
+
+	protected void lerpHeadRotationStep(int i, double d) {
+		this.yHeadRot = (float)Mth.rotLerp(1.0 / (double)i, (double)this.yHeadRot, d);
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {

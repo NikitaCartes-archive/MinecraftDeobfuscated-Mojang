@@ -26,7 +26,8 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class SocialInteractionsScreen extends Screen {
-	protected static final ResourceLocation SOCIAL_INTERACTIONS_LOCATION = new ResourceLocation("textures/gui/social_interactions.png");
+	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("social_interactions/background");
+	private static final ResourceLocation SEARCH_SPRITE = new ResourceLocation("icon/search");
 	private static final Component TAB_ALL = Component.translatable("gui.socialInteractions.tab_all");
 	private static final Component TAB_HIDDEN = Component.translatable("gui.socialInteractions.tab_hidden");
 	private static final Component TAB_BLOCKED = Component.translatable("gui.socialInteractions.tab_blocked");
@@ -82,12 +83,6 @@ public class SocialInteractionsScreen extends Screen {
 	@Override
 	public Component getNarrationMessage() {
 		return (Component)(this.serverLabel != null ? CommonComponents.joinForNarration(super.getNarrationMessage(), this.serverLabel) : super.getNarrationMessage());
-	}
-
-	@Override
-	public void tick() {
-		super.tick();
-		this.searchBox.tick();
 	}
 
 	@Override
@@ -184,17 +179,17 @@ public class SocialInteractionsScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics guiGraphics) {
-		int i = this.marginX() + 3;
-		super.renderBackground(guiGraphics);
-		guiGraphics.blitNineSliced(SOCIAL_INTERACTIONS_LOCATION, i, 64, 236, this.windowHeight() + 16, 8, 236, 34, 1, 1);
-		guiGraphics.blit(SOCIAL_INTERACTIONS_LOCATION, i + 10, 76, 243, 1, 12, 12);
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		int k = this.marginX() + 3;
+		super.renderBackground(guiGraphics, i, j, f);
+		guiGraphics.blitSprite(BACKGROUND_SPRITE, k, 64, 236, this.windowHeight() + 16);
+		guiGraphics.blitSprite(SEARCH_SPRITE, k + 10, 76, 12, 12);
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
 		this.updateServerLabel(this.minecraft);
-		this.renderBackground(guiGraphics);
 		if (this.serverLabel != null) {
 			guiGraphics.drawString(this.minecraft.font, this.serverLabel, this.marginX() + 8, 35, -1);
 		}
@@ -211,7 +206,6 @@ public class SocialInteractionsScreen extends Screen {
 
 		this.searchBox.render(guiGraphics, i, j, f);
 		this.blockingHintButton.visible = this.page == SocialInteractionsScreen.Page.BLOCKED;
-		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

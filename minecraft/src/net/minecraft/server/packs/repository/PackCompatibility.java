@@ -1,9 +1,8 @@
 package net.minecraft.server.packs.repository;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.util.InclusiveRange;
 
 public enum PackCompatibility {
 	TOO_OLD("old"),
@@ -22,12 +21,11 @@ public enum PackCompatibility {
 		return this == COMPATIBLE;
 	}
 
-	public static PackCompatibility forFormat(int i, PackType packType) {
-		int j = SharedConstants.getCurrentVersion().getPackVersion(packType);
-		if (i < j) {
+	public static PackCompatibility forVersion(InclusiveRange<Integer> inclusiveRange, int i) {
+		if ((Integer)inclusiveRange.maxInclusive() < i) {
 			return TOO_OLD;
 		} else {
-			return i > j ? TOO_NEW : COMPATIBLE;
+			return i < inclusiveRange.minInclusive() ? TOO_NEW : COMPATIBLE;
 		}
 	}
 

@@ -3,22 +3,22 @@ package net.minecraft.network;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 @Sharable
 public class Varint21LengthFieldPrepender extends MessageToByteEncoder<ByteBuf> {
-	private static final int MAX_BYTES = 3;
+	public static final int MAX_VARINT21_BYTES = 3;
 
 	protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) {
 		int i = byteBuf.readableBytes();
-		int j = FriendlyByteBuf.getVarIntSize(i);
+		int j = VarInt.getByteSize(i);
 		if (j > 3) {
-			throw new IllegalArgumentException("unable to fit " + i + " into 3");
+			throw new EncoderException("unable to fit " + i + " into 3");
 		} else {
-			FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(byteBuf2);
-			friendlyByteBuf.ensureWritable(j + i);
-			friendlyByteBuf.writeVarInt(i);
-			friendlyByteBuf.writeBytes(byteBuf, byteBuf.readerIndex(), i);
+			byteBuf2.ensureWritable(j + i);
+			VarInt.write(byteBuf2, i);
+			byteBuf2.writeBytes(byteBuf, byteBuf.readerIndex(), i);
 		}
 	}
 }

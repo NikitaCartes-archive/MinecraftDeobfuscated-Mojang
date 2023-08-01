@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.VarInt;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 
 public class HashMapPalette<T> implements Palette<T> {
@@ -89,10 +90,10 @@ public class HashMapPalette<T> implements Palette<T> {
 
 	@Override
 	public int getSerializedSize() {
-		int i = FriendlyByteBuf.getVarIntSize(this.getSize());
+		int i = VarInt.getByteSize(this.getSize());
 
 		for (int j = 0; j < this.getSize(); j++) {
-			i += FriendlyByteBuf.getVarIntSize(this.registry.getId(this.values.byId(j)));
+			i += VarInt.getByteSize(this.registry.getId(this.values.byId(j)));
 		}
 
 		return i;

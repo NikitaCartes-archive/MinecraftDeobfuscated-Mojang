@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
@@ -18,6 +19,10 @@ public class PlayerFaceRenderer {
 	public static final int SKIN_HAT_HEIGHT = 8;
 	public static final int SKIN_TEX_WIDTH = 64;
 	public static final int SKIN_TEX_HEIGHT = 64;
+
+	public static void draw(GuiGraphics guiGraphics, PlayerSkin playerSkin, int i, int j, int k) {
+		draw(guiGraphics, playerSkin.texture(), i, j, k);
+	}
 
 	public static void draw(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int i, int j, int k) {
 		draw(guiGraphics, resourceLocation, i, j, k, true, false);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -99,6 +100,10 @@ public class GridLayout extends AbstractLayout {
 		return this.addChild(layoutElement, i, j, 1, 1, layoutSettings);
 	}
 
+	public <T extends LayoutElement> T addChild(T layoutElement, int i, int j, Consumer<LayoutSettings> consumer) {
+		return this.addChild(layoutElement, i, j, 1, 1, Util.make(this.newCellSettings(), consumer));
+	}
+
 	public <T extends LayoutElement> T addChild(T layoutElement, int i, int j, int k, int l) {
 		return this.addChild(layoutElement, i, j, k, l, this.newCellSettings());
 	}
@@ -113,6 +118,10 @@ public class GridLayout extends AbstractLayout {
 			this.children.add(layoutElement);
 			return layoutElement;
 		}
+	}
+
+	public <T extends LayoutElement> T addChild(T layoutElement, int i, int j, int k, int l, Consumer<LayoutSettings> consumer) {
+		return this.addChild(layoutElement, i, j, k, l, Util.make(this.newCellSettings(), consumer));
 	}
 
 	public GridLayout columnSpacing(int i) {

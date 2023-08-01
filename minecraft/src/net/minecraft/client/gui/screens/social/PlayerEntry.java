@@ -17,10 +17,12 @@ import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.reporting.ChatReportScreen;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -29,13 +31,24 @@ import net.minecraft.util.FastColor;
 
 @Environment(EnvType.CLIENT)
 public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry> {
-	private static final ResourceLocation REPORT_BUTTON_LOCATION = new ResourceLocation("textures/gui/report_button.png");
+	private static final ResourceLocation DRAFT_REPORT_SPRITE = new ResourceLocation("icon/draft_report");
 	private static final int TOOLTIP_DELAY = 10;
+	private static final WidgetSprites REPORT_BUTTON_SPRITES = new WidgetSprites(
+		new ResourceLocation("social_interactions/report_button"),
+		new ResourceLocation("social_interactions/report_button_disabled"),
+		new ResourceLocation("social_interactions/report_button_highlighted")
+	);
+	private static final WidgetSprites MUTE_BUTTON_SPRITES = new WidgetSprites(
+		new ResourceLocation("social_interactions/mute_button"), new ResourceLocation("social_interactions/mute_button_highlighted")
+	);
+	private static final WidgetSprites UNMUTE_BUTTON_SPRITES = new WidgetSprites(
+		new ResourceLocation("social_interactions/unmute_button"), new ResourceLocation("social_interactions/unmute_button_highlighted")
+	);
 	private final Minecraft minecraft;
 	private final List<AbstractWidget> children;
 	private final UUID id;
 	private final String playerName;
-	private final Supplier<ResourceLocation> skinGetter;
+	private final Supplier<PlayerSkin> skinGetter;
 	private boolean isRemoved;
 	private boolean hasRecentMessages;
 	private final boolean reportingEnabled;
@@ -60,18 +73,14 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	private static final Component REPORT_PLAYER_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.report");
 	private static final int SKIN_SIZE = 24;
 	private static final int PADDING = 4;
-	private static final int CHAT_TOGGLE_ICON_SIZE = 20;
-	private static final int CHAT_TOGGLE_ICON_X = 0;
-	private static final int CHAT_TOGGLE_ICON_Y = 38;
 	public static final int SKIN_SHADE = FastColor.ARGB32.color(190, 0, 0, 0);
+	private static final int CHAT_TOGGLE_ICON_SIZE = 20;
 	public static final int BG_FILL = FastColor.ARGB32.color(255, 74, 74, 74);
 	public static final int BG_FILL_REMOVED = FastColor.ARGB32.color(255, 48, 48, 48);
 	public static final int PLAYERNAME_COLOR = FastColor.ARGB32.color(255, 255, 255, 255);
 	public static final int PLAYER_STATUS_COLOR = FastColor.ARGB32.color(140, 255, 255, 255);
 
-	public PlayerEntry(
-		Minecraft minecraft, SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<ResourceLocation> supplier, boolean bl
-	) {
+	public PlayerEntry(Minecraft minecraft, SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<PlayerSkin> supplier, boolean bl) {
 		this.minecraft = minecraft;
 		this.id = uUID;
 		this.playerName = string;
@@ -91,12 +100,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 				0,
 				20,
 				20,
-				0,
-				0,
-				20,
-				REPORT_BUTTON_LOCATION,
-				64,
-				64,
+				REPORT_BUTTON_SPRITES,
 				button -> reportingContext.draftReportHandled(
 						minecraft, socialInteractionsScreen, () -> minecraft.setScreen(new ChatReportScreen(socialInteractionsScreen, reportingContext, uUID)), false
 					),
@@ -109,7 +113,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 			};
 			this.reportButton.setTooltip(this.createReportButtonTooltip());
 			this.reportButton.setTooltipDelay(10);
-			this.hideButton = new ImageButton(0, 0, 20, 20, 0, 38, 20, SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION, 256, 256, button -> {
+			this.hideButton = new ImageButton(0, 0, 20, 20, MUTE_BUTTON_SPRITES, button -> {
 				playerSocialManager.hidePlayer(uUID);
 				this.onHiddenOrShown(true, Component.translatable("gui.socialInteractions.hidden_in_chat", string));
 			}, Component.translatable("gui.socialInteractions.hide")) {
@@ -120,7 +124,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 			};
 			this.hideButton.setTooltip(Tooltip.create(HIDE_TEXT_TOOLTIP, component));
 			this.hideButton.setTooltipDelay(10);
-			this.showButton = new ImageButton(0, 0, 20, 20, 20, 38, 20, SocialInteractionsScreen.SOCIAL_INTERACTIONS_LOCATION, 256, 256, button -> {
+			this.showButton = new ImageButton(0, 0, 20, 20, UNMUTE_BUTTON_SPRITES, button -> {
 				playerSocialManager.showPlayer(uUID);
 				this.onHiddenOrShown(false, Component.translatable("gui.socialInteractions.shown_in_chat", string));
 			}, Component.translatable("gui.socialInteractions.show")) {
@@ -169,7 +173,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 			guiGraphics.drawString(this.minecraft.font, component, r, s + 12, PLAYER_STATUS_COLOR, false);
 		}
 
-		PlayerFaceRenderer.draw(guiGraphics, (ResourceLocation)this.skinGetter.get(), p, q, 24);
+		PlayerFaceRenderer.draw(guiGraphics, (PlayerSkin)this.skinGetter.get(), p, q, 24);
 		guiGraphics.drawString(this.minecraft.font, this.playerName, r, s, PLAYERNAME_COLOR, false);
 		if (this.isRemoved) {
 			guiGraphics.fill(p, q, p + 24, q + 24, SKIN_SHADE);
@@ -192,7 +196,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		}
 
 		if (this.hasDraftReport && this.reportButton != null) {
-			guiGraphics.blit(AbstractWidget.WIDGETS_LOCATION, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 182.0F, 24.0F, 15, 15, 256, 256);
+			guiGraphics.blitSprite(DRAFT_REPORT_SPRITE, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 15, 15);
 		}
 	}
 

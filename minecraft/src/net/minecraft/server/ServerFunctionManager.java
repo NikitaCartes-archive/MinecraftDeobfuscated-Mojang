@@ -13,6 +13,8 @@ import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.FunctionInstantiationException;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.GameRules;
@@ -63,28 +65,38 @@ public class ServerFunctionManager {
 	}
 
 	public int execute(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
-		return this.execute(commandFunction, commandSourceStack, null);
+		try {
+			return this.execute(commandFunction, commandSourceStack, null, null);
+		} catch (FunctionInstantiationException var4) {
+			return 0;
+		}
 	}
 
-	public int execute(CommandFunction commandFunction, CommandSourceStack commandSourceStack, @Nullable ServerFunctionManager.TraceCallbacks traceCallbacks) {
+	public int execute(
+		CommandFunction commandFunction,
+		CommandSourceStack commandSourceStack,
+		@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks,
+		@Nullable CompoundTag compoundTag
+	) throws FunctionInstantiationException {
+		CommandFunction commandFunction2 = commandFunction.instantiate(compoundTag, this.getDispatcher(), commandSourceStack);
 		if (this.context != null) {
 			if (traceCallbacks != null) {
 				this.context.reportError(NO_RECURSIVE_TRACES.getString());
 				return 0;
 			} else {
-				this.context.delayFunctionCall(commandFunction, commandSourceStack);
+				this.context.delayFunctionCall(commandFunction2, commandSourceStack);
 				return 0;
 			}
 		} else {
-			int var4;
+			int var6;
 			try {
 				this.context = new ServerFunctionManager.ExecutionContext(traceCallbacks);
-				var4 = this.context.runTopCommand(commandFunction, commandSourceStack);
+				var6 = this.context.runTopCommand(commandFunction2, commandSourceStack);
 			} finally {
 				this.context = null;
 			}
 
-			return var4;
+			return var6;
 		}
 	}
 

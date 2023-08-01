@@ -255,6 +255,18 @@ public class NbtIo {
 		}
 	}
 
+	public static Tag readAnyTag(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+		byte b = dataInput.readByte();
+		return (Tag)(b == 0 ? EndTag.INSTANCE : readTagSafe(dataInput, 0, nbtAccounter, b));
+	}
+
+	public static void writeAnyTag(Tag tag, DataOutput dataOutput) throws IOException {
+		dataOutput.writeByte(tag.getId());
+		if (tag.getId() != 0) {
+			tag.write(dataOutput);
+		}
+	}
+
 	public static void writeUnnamedTag(Tag tag, DataOutput dataOutput) throws IOException {
 		dataOutput.writeByte(tag.getId());
 		if (tag.getId() != 0) {
@@ -269,15 +281,18 @@ public class NbtIo {
 			return EndTag.INSTANCE;
 		} else {
 			StringTag.skipString(dataInput);
+			return readTagSafe(dataInput, i, nbtAccounter, b);
+		}
+	}
 
-			try {
-				return TagTypes.getType(b).load(dataInput, i, nbtAccounter);
-			} catch (IOException var7) {
-				CrashReport crashReport = CrashReport.forThrowable(var7, "Loading NBT data");
-				CrashReportCategory crashReportCategory = crashReport.addCategory("NBT Tag");
-				crashReportCategory.setDetail("Tag type", b);
-				throw new ReportedException(crashReport);
-			}
+	private static Tag readTagSafe(DataInput dataInput, int i, NbtAccounter nbtAccounter, byte b) {
+		try {
+			return TagTypes.getType(b).load(dataInput, i, nbtAccounter);
+		} catch (IOException var7) {
+			CrashReport crashReport = CrashReport.forThrowable(var7, "Loading NBT data");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("NBT Tag");
+			crashReportCategory.setDetail("Tag type", b);
+			throw new ReportedException(crashReport);
 		}
 	}
 }

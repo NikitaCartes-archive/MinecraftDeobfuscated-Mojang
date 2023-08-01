@@ -24,6 +24,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
@@ -44,6 +46,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 public class ZombieVillager extends Zombie implements VillagerDataHolder {
@@ -343,5 +346,10 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 
 	public void setVillagerXp(int i) {
 		this.villagerXp = i;
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height + 0.175F * f, 0.0F);
 	}
 }

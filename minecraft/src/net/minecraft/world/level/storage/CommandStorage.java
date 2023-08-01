@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class CommandStorage {
@@ -22,17 +23,21 @@ public class CommandStorage {
 		return container;
 	}
 
+	private SavedData.Factory<CommandStorage.Container> factory(String string) {
+		return new SavedData.Factory<>(
+			() -> this.newStorage(string), compoundTag -> this.newStorage(string).load(compoundTag), DataFixTypes.SAVED_DATA_COMMAND_STORAGE
+		);
+	}
+
 	public CompoundTag get(ResourceLocation resourceLocation) {
 		String string = resourceLocation.getNamespace();
-		CommandStorage.Container container = this.storage.get(compoundTag -> this.newStorage(string).load(compoundTag), createId(string));
+		CommandStorage.Container container = this.storage.get(this.factory(string), createId(string));
 		return container != null ? container.get(resourceLocation.getPath()) : new CompoundTag();
 	}
 
 	public void set(ResourceLocation resourceLocation, CompoundTag compoundTag) {
 		String string = resourceLocation.getNamespace();
-		this.storage
-			.<CommandStorage.Container>computeIfAbsent(compoundTagx -> this.newStorage(string).load(compoundTagx), () -> this.newStorage(string), createId(string))
-			.put(resourceLocation.getPath(), compoundTag);
+		this.storage.computeIfAbsent(this.factory(string), createId(string)).put(resourceLocation.getPath(), compoundTag);
 	}
 
 	public Stream<ResourceLocation> keys() {

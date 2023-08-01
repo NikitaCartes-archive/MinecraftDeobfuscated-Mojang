@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -103,7 +104,9 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 				double l = vec32.y + 0.2F + 0.5;
 				double m = vec32.z + 0.2F;
 				renderFilledBox(poseStack, multiBufferSource, new AABB(h, i, j, k, l, m), 1.0F, 1.0F, 1.0F, 0.2F);
-				DebugRenderer.renderFloatingText(poseStack, multiBufferSource, trackedGameEvent.gameEvent.getName(), vec32.x, vec32.y + 0.85F, vec32.z, -7564911, 0.0075F);
+				DebugRenderer.renderFloatingText(
+					poseStack, multiBufferSource, trackedGameEvent.gameEvent.location().toString(), vec32.x, vec32.y + 0.85F, vec32.z, -7564911, 0.0075F
+				);
 			}
 		}
 	}
@@ -116,8 +119,8 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 		}
 	}
 
-	public void trackGameEvent(GameEvent gameEvent, Vec3 vec3) {
-		this.trackedGameEvents.add(new GameEventListenerRenderer.TrackedGameEvent(Util.getMillis(), gameEvent, vec3));
+	public void trackGameEvent(ResourceKey<GameEvent> resourceKey, Vec3 vec3) {
+		this.trackedGameEvents.add(new GameEventListenerRenderer.TrackedGameEvent(Util.getMillis(), resourceKey, vec3));
 	}
 
 	public void trackListener(PositionSource positionSource, int i) {
@@ -125,7 +128,7 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 	}
 
 	@Environment(EnvType.CLIENT)
-	static record TrackedGameEvent(long timeStamp, GameEvent gameEvent, Vec3 position) {
+	static record TrackedGameEvent(long timeStamp, ResourceKey<GameEvent> gameEvent, Vec3 position) {
 
 		public boolean isExpired() {
 			return Util.getMillis() - this.timeStamp > 3000L;

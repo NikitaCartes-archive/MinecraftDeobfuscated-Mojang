@@ -355,7 +355,7 @@ public class FileDownload {
 				compoundTag2.remove("Player");
 				NbtIo.writeCompressed(compoundTag, file);
 			} catch (Exception var3) {
-				var3.printStackTrace();
+				LOGGER.info("Exception while removing player tag", (Throwable)var3);
 			}
 		}
 	}

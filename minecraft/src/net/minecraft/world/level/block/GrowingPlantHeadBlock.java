@@ -87,7 +87,7 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return this.canGrowInto(levelReader.getBlockState(blockPos.relative(this.growthDirection)));
 	}
 

@@ -20,14 +20,15 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.atlas.SpriteResourceLoader;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
 import net.minecraft.client.renderer.texture.atlas.SpriteSources;
-import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 import net.minecraft.util.FastColor;
 import org.slf4j.Logger;
 
@@ -154,21 +155,19 @@ public class PalettedPermutations implements SpriteSource {
 	static record PalettedSpriteSupplier(LazyLoadedImage baseImage, Supplier<IntUnaryOperator> palette, ResourceLocation permutationLocation)
 		implements SpriteSource.SpriteSupplier {
 		@Nullable
-		public SpriteContents get() {
-			Object var2;
+		public SpriteContents apply(SpriteResourceLoader spriteResourceLoader) {
+			Object var3;
 			try {
 				NativeImage nativeImage = this.baseImage.get().mappedCopy((IntUnaryOperator)this.palette.get());
-				return new SpriteContents(
-					this.permutationLocation, new FrameSize(nativeImage.getWidth(), nativeImage.getHeight()), nativeImage, AnimationMetadataSection.EMPTY
-				);
-			} catch (IllegalArgumentException | IOException var6) {
-				PalettedPermutations.LOGGER.error("unable to apply palette to {}", this.permutationLocation, var6);
-				var2 = null;
+				return new SpriteContents(this.permutationLocation, new FrameSize(nativeImage.getWidth(), nativeImage.getHeight()), nativeImage, ResourceMetadata.EMPTY);
+			} catch (IllegalArgumentException | IOException var7) {
+				PalettedPermutations.LOGGER.error("unable to apply palette to {}", this.permutationLocation, var7);
+				var3 = null;
 			} finally {
 				this.baseImage.release();
 			}
 
-			return (SpriteContents)var2;
+			return (SpriteContents)var3;
 		}
 
 		@Override

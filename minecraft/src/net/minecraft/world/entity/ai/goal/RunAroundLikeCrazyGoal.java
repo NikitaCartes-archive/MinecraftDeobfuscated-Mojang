@@ -50,16 +50,16 @@ public class RunAroundLikeCrazyGoal extends Goal {
 	@Override
 	public void tick() {
 		if (!this.horse.isTamed() && this.horse.getRandom().nextInt(this.adjustedTickDelay(50)) == 0) {
-			Entity entity = (Entity)this.horse.getPassengers().get(0);
+			Entity entity = this.horse.getFirstPassenger();
 			if (entity == null) {
 				return;
 			}
 
-			if (entity instanceof Player) {
+			if (entity instanceof Player player) {
 				int i = this.horse.getTemper();
 				int j = this.horse.getMaxTemper();
 				if (j > 0 && this.horse.getRandom().nextInt(j) < i) {
-					this.horse.tameWithName((Player)entity);
+					this.horse.tameWithName(player);
 					return;
 				}
 

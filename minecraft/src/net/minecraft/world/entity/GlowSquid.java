@@ -95,7 +95,7 @@ public class GlowSquid extends Squid {
 		return this.entityData.get(DATA_DARK_TICKS_REMAINING);
 	}
 
-	public static boolean checkGlowSquideSpawnRules(
+	public static boolean checkGlowSquidSpawnRules(
 		EntityType<? extends LivingEntity> entityType,
 		ServerLevelAccessor serverLevelAccessor,
 		MobSpawnType mobSpawnType,

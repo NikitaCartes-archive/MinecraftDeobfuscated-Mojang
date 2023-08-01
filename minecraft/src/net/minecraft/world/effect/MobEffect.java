@@ -16,10 +16,9 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.player.Player;
 
 public class MobEffect {
-	private final Map<Attribute, AttributeModifier> attributeModifiers = Maps.<Attribute, AttributeModifier>newHashMap();
+	private final Map<Attribute, AttributeModifierTemplate> attributeModifiers = Maps.<Attribute, AttributeModifierTemplate>newHashMap();
 	private final MobEffectCategory category;
 	private final int color;
 	@Nullable
@@ -49,62 +48,17 @@ public class MobEffect {
 	}
 
 	public void applyEffectTick(LivingEntity livingEntity, int i) {
-		if (this == MobEffects.REGENERATION) {
-			if (livingEntity.getHealth() < livingEntity.getMaxHealth()) {
-				livingEntity.heal(1.0F);
-			}
-		} else if (this == MobEffects.POISON) {
-			if (livingEntity.getHealth() > 1.0F) {
-				livingEntity.hurt(livingEntity.damageSources().magic(), 1.0F);
-			}
-		} else if (this == MobEffects.WITHER) {
-			livingEntity.hurt(livingEntity.damageSources().wither(), 1.0F);
-		} else if (this == MobEffects.HUNGER && livingEntity instanceof Player) {
-			((Player)livingEntity).causeFoodExhaustion(0.005F * (float)(i + 1));
-		} else if (this == MobEffects.SATURATION && livingEntity instanceof Player) {
-			if (!livingEntity.level().isClientSide) {
-				((Player)livingEntity).getFoodData().eat(i + 1, 1.0F);
-			}
-		} else if ((this != MobEffects.HEAL || livingEntity.isInvertedHealAndHarm()) && (this != MobEffects.HARM || !livingEntity.isInvertedHealAndHarm())) {
-			if (this == MobEffects.HARM && !livingEntity.isInvertedHealAndHarm() || this == MobEffects.HEAL && livingEntity.isInvertedHealAndHarm()) {
-				livingEntity.hurt(livingEntity.damageSources().magic(), (float)(6 << i));
-			}
-		} else {
-			livingEntity.heal((float)Math.max(4 << i, 0));
-		}
 	}
 
 	public void applyInstantenousEffect(@Nullable Entity entity, @Nullable Entity entity2, LivingEntity livingEntity, int i, double d) {
-		if ((this != MobEffects.HEAL || livingEntity.isInvertedHealAndHarm()) && (this != MobEffects.HARM || !livingEntity.isInvertedHealAndHarm())) {
-			if (this == MobEffects.HARM && !livingEntity.isInvertedHealAndHarm() || this == MobEffects.HEAL && livingEntity.isInvertedHealAndHarm()) {
-				int j = (int)(d * (double)(6 << i) + 0.5);
-				if (entity == null) {
-					livingEntity.hurt(livingEntity.damageSources().magic(), (float)j);
-				} else {
-					livingEntity.hurt(livingEntity.damageSources().indirectMagic(entity, entity2), (float)j);
-				}
-			} else {
-				this.applyEffectTick(livingEntity, i);
-			}
-		} else {
-			int j = (int)(d * (double)(4 << i) + 0.5);
-			livingEntity.heal((float)j);
-		}
+		this.applyEffectTick(livingEntity, i);
 	}
 
-	public boolean isDurationEffectTick(int i, int j) {
-		if (this == MobEffects.REGENERATION) {
-			int k = 50 >> j;
-			return k > 0 ? i % k == 0 : true;
-		} else if (this == MobEffects.POISON) {
-			int k = 25 >> j;
-			return k > 0 ? i % k == 0 : true;
-		} else if (this == MobEffects.WITHER) {
-			int k = 40 >> j;
-			return k > 0 ? i % k == 0 : true;
-		} else {
-			return this == MobEffects.HUNGER;
-		}
+	public boolean shouldApplyEffectTickThisTick(int i, int j) {
+		return false;
+	}
+
+	public void onEffectStarted(LivingEntity livingEntity, int i) {
 	}
 
 	public boolean isInstantenous() {
@@ -136,8 +90,7 @@ public class MobEffect {
 	}
 
 	public MobEffect addAttributeModifier(Attribute attribute, String string, double d, AttributeModifier.Operation operation) {
-		AttributeModifier attributeModifier = new AttributeModifier(UUID.fromString(string), this::getDescriptionId, d, operation);
-		this.attributeModifiers.put(attribute, attributeModifier);
+		this.attributeModifiers.put(attribute, new MobEffect.MobEffectAttributeModifierTemplate(UUID.fromString(string), d, operation));
 		return this;
 	}
 
@@ -146,39 +99,52 @@ public class MobEffect {
 		return this;
 	}
 
-	public Map<Attribute, AttributeModifier> getAttributeModifiers() {
+	public Map<Attribute, AttributeModifierTemplate> getAttributeModifiers() {
 		return this.attributeModifiers;
 	}
 
-	public void removeAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int i) {
-		for (Entry<Attribute, AttributeModifier> entry : this.attributeModifiers.entrySet()) {
+	public void removeAttributeModifiers(AttributeMap attributeMap) {
+		for (Entry<Attribute, AttributeModifierTemplate> entry : this.attributeModifiers.entrySet()) {
 			AttributeInstance attributeInstance = attributeMap.getInstance((Attribute)entry.getKey());
 			if (attributeInstance != null) {
-				attributeInstance.removeModifier((AttributeModifier)entry.getValue());
+				attributeInstance.removeModifier(((AttributeModifierTemplate)entry.getValue()).getAttributeModifierId());
 			}
 		}
 	}
 
-	public void addAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int i) {
-		for (Entry<Attribute, AttributeModifier> entry : this.attributeModifiers.entrySet()) {
+	public void addAttributeModifiers(AttributeMap attributeMap, int i) {
+		for (Entry<Attribute, AttributeModifierTemplate> entry : this.attributeModifiers.entrySet()) {
 			AttributeInstance attributeInstance = attributeMap.getInstance((Attribute)entry.getKey());
 			if (attributeInstance != null) {
-				AttributeModifier attributeModifier = (AttributeModifier)entry.getValue();
-				attributeInstance.removeModifier(attributeModifier);
-				attributeInstance.addPermanentModifier(
-					new AttributeModifier(
-						attributeModifier.getId(), this.getDescriptionId() + " " + i, this.getAttributeModifierValue(i, attributeModifier), attributeModifier.getOperation()
-					)
-				);
+				attributeInstance.removeModifier(((AttributeModifierTemplate)entry.getValue()).getAttributeModifierId());
+				attributeInstance.addPermanentModifier(((AttributeModifierTemplate)entry.getValue()).create(i));
 			}
 		}
-	}
-
-	public double getAttributeModifierValue(int i, AttributeModifier attributeModifier) {
-		return attributeModifier.getAmount() * (double)(i + 1);
 	}
 
 	public boolean isBeneficial() {
 		return this.category == MobEffectCategory.BENEFICIAL;
+	}
+
+	class MobEffectAttributeModifierTemplate implements AttributeModifierTemplate {
+		private final UUID id;
+		private final double amount;
+		private final AttributeModifier.Operation operation;
+
+		public MobEffectAttributeModifierTemplate(UUID uUID, double d, AttributeModifier.Operation operation) {
+			this.id = uUID;
+			this.amount = d;
+			this.operation = operation;
+		}
+
+		@Override
+		public UUID getAttributeModifierId() {
+			return this.id;
+		}
+
+		@Override
+		public AttributeModifier create(int i) {
+			return new AttributeModifier(this.id, MobEffect.this.getDescriptionId() + " " + i, this.amount * (double)(i + 1), this.operation);
+		}
 	}
 }

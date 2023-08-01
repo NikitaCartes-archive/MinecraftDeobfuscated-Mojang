@@ -96,7 +96,7 @@ public class AttributeMap {
 		multimap.asMap().forEach((attribute, collection) -> {
 			AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(attribute);
 			if (attributeInstance != null) {
-				collection.forEach(attributeInstance::removeModifier);
+				collection.forEach(attributeModifier -> attributeInstance.removeModifier(attributeModifier.getId()));
 			}
 		});
 	}
@@ -105,7 +105,7 @@ public class AttributeMap {
 		multimap.forEach((attribute, attributeModifier) -> {
 			AttributeInstance attributeInstance = this.getInstance(attribute);
 			if (attributeInstance != null) {
-				attributeInstance.removeModifier(attributeModifier);
+				attributeInstance.removeModifier(attributeModifier.getId());
 				attributeInstance.addTransientModifier(attributeModifier);
 			}
 		});

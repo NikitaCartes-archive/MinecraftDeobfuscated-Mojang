@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public abstract class AbstractMinecart extends Entity {
 	private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
@@ -58,6 +59,13 @@ public abstract class AbstractMinecart extends Entity {
 	protected static final float WATER_SLOWDOWN_FACTOR = 0.95F;
 	private boolean flipped;
 	private boolean onRails;
+	private int lerpSteps;
+	private double lerpX;
+	private double lerpY;
+	private double lerpZ;
+	private double lerpYRot;
+	private double lerpXRot;
+	private Vec3 targetDeltaMovement = Vec3.ZERO;
 	private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), enumMap -> {
 		Vec3i vec3i = Direction.WEST.getNormal();
 		Vec3i vec3i2 = Direction.EAST.getNormal();
@@ -78,15 +86,6 @@ public abstract class AbstractMinecart extends Entity {
 		enumMap.put(RailShape.NORTH_WEST, Pair.of(vec3i3, vec3i));
 		enumMap.put(RailShape.NORTH_EAST, Pair.of(vec3i3, vec3i2));
 	});
-	private int lSteps;
-	private double lx;
-	private double ly;
-	private double lz;
-	private double lyr;
-	private double lxr;
-	private double lxd;
-	private double lyd;
-	private double lzd;
 
 	protected AbstractMinecart(EntityType<?> entityType, Level level) {
 		super(entityType, level);
@@ -148,8 +147,8 @@ public abstract class AbstractMinecart extends Entity {
 	}
 
 	@Override
-	public double getPassengersRidingOffset() {
-		return 0.0;
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, 0.0F, 0.0F);
 	}
 
 	@Override
@@ -283,16 +282,9 @@ public abstract class AbstractMinecart extends Entity {
 		this.checkBelowWorld();
 		this.handleNetherPortal();
 		if (this.level().isClientSide) {
-			if (this.lSteps > 0) {
-				double d = this.getX() + (this.lx - this.getX()) / (double)this.lSteps;
-				double e = this.getY() + (this.ly - this.getY()) / (double)this.lSteps;
-				double f = this.getZ() + (this.lz - this.getZ()) / (double)this.lSteps;
-				double g = Mth.wrapDegrees(this.lyr - (double)this.getYRot());
-				this.setYRot(this.getYRot() + (float)g / (float)this.lSteps);
-				this.setXRot(this.getXRot() + (float)(this.lxr - (double)this.getXRot()) / (float)this.lSteps);
-				this.lSteps--;
-				this.setPos(d, e, f);
-				this.setRot(this.getYRot(), this.getXRot());
+			if (this.lerpSteps > 0) {
+				this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
+				this.lerpSteps--;
 			} else {
 				this.reapplyPosition();
 				this.setRot(this.getYRot(), this.getXRot());
@@ -324,17 +316,17 @@ public abstract class AbstractMinecart extends Entity {
 
 			this.checkInsideBlocks();
 			this.setXRot(0.0F);
-			double h = this.xo - this.getX();
-			double l = this.zo - this.getZ();
-			if (h * h + l * l > 0.001) {
-				this.setYRot((float)(Mth.atan2(l, h) * 180.0 / Math.PI));
+			double e = this.xo - this.getX();
+			double f = this.zo - this.getZ();
+			if (e * e + f * f > 0.001) {
+				this.setYRot((float)(Mth.atan2(f, e) * 180.0 / Math.PI));
 				if (this.flipped) {
 					this.setYRot(this.getYRot() + 180.0F);
 				}
 			}
 
-			double m = (double)Mth.wrapDegrees(this.getYRot() - this.yRotO);
-			if (m < -170.0 || m >= 170.0) {
+			double g = (double)Mth.wrapDegrees(this.getYRot() - this.yRotO);
+			if (g < -170.0 || g >= 170.0) {
 				this.setYRot(this.getYRot() + 180.0F);
 				this.flipped = !this.flipped;
 			}
@@ -343,8 +335,8 @@ public abstract class AbstractMinecart extends Entity {
 			if (this.getMinecartType() == AbstractMinecart.Type.RIDEABLE && this.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
 				List<Entity> list = this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, 0.0, 0.2F), EntitySelector.pushableBy(this));
 				if (!list.isEmpty()) {
-					for (int n = 0; n < list.size(); n++) {
-						Entity entity = (Entity)list.get(n);
+					for (int l = 0; l < list.size(); l++) {
+						Entity entity = (Entity)list.get(l);
 						if (!(entity instanceof Player) && !(entity instanceof IronGolem) && !(entity instanceof AbstractMinecart) && !this.isVehicle() && !entity.isPassenger()) {
 							entity.startRiding(this);
 						} else {
@@ -745,22 +737,20 @@ public abstract class AbstractMinecart extends Entity {
 	}
 
 	@Override
-	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
-		this.lx = d;
-		this.ly = e;
-		this.lz = f;
-		this.lyr = (double)g;
-		this.lxr = (double)h;
-		this.lSteps = i + 2;
-		this.setDeltaMovement(this.lxd, this.lyd, this.lzd);
+	public void lerpTo(double d, double e, double f, float g, float h, int i) {
+		this.lerpX = d;
+		this.lerpY = e;
+		this.lerpZ = f;
+		this.lerpYRot = (double)g;
+		this.lerpXRot = (double)h;
+		this.lerpSteps = i + 2;
+		this.setDeltaMovement(this.targetDeltaMovement);
 	}
 
 	@Override
 	public void lerpMotion(double d, double e, double f) {
-		this.lxd = d;
-		this.lyd = e;
-		this.lzd = f;
-		this.setDeltaMovement(this.lxd, this.lyd, this.lzd);
+		this.targetDeltaMovement = new Vec3(d, e, f);
+		this.setDeltaMovement(this.targetDeltaMovement);
 	}
 
 	public void setDamage(float f) {

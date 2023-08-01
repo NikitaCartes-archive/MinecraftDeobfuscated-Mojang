@@ -177,7 +177,7 @@ public class CrashReport {
 			StackTraceElement stackTraceElement2 = null;
 			int k = stackTraceElements.length - j;
 			if (k < 0) {
-				System.out.println("Negative index in crash report handler (" + stackTraceElements.length + "/" + j + ")");
+				LOGGER.error("Negative index in crash report handler ({}/{})", stackTraceElements.length, j, ")");
 			}
 
 			if (stackTraceElements != null && 0 <= k && k < stackTraceElements.length) {

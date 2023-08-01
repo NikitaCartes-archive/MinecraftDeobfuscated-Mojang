@@ -8,37 +8,43 @@ import io.netty.handler.codec.CorruptedFrameException;
 import java.util.List;
 
 public class Varint21FrameDecoder extends ByteToMessageDecoder {
-	@Override
-	protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
-		byteBuf.markReaderIndex();
-		byte[] bs = new byte[3];
+	private static final int MAX_VARINT21_BYTES = 3;
+	private final ByteBuf helperBuf = Unpooled.directBuffer(3);
 
-		for (int i = 0; i < bs.length; i++) {
+	@Override
+	protected void handlerRemoved0(ChannelHandlerContext channelHandlerContext) {
+		this.helperBuf.release();
+	}
+
+	private static boolean copyVarint(ByteBuf byteBuf, ByteBuf byteBuf2) {
+		for (int i = 0; i < 3; i++) {
 			if (!byteBuf.isReadable()) {
-				byteBuf.resetReaderIndex();
-				return;
+				return false;
 			}
 
-			bs[i] = byteBuf.readByte();
-			if (bs[i] >= 0) {
-				FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(bs));
-
-				try {
-					int j = friendlyByteBuf.readVarInt();
-					if (byteBuf.readableBytes() >= j) {
-						list.add(byteBuf.readBytes(j));
-						return;
-					}
-
-					byteBuf.resetReaderIndex();
-				} finally {
-					friendlyByteBuf.release();
-				}
-
-				return;
+			byte b = byteBuf.readByte();
+			byteBuf2.writeByte(b);
+			if (!VarInt.hasContinuationBit(b)) {
+				return true;
 			}
 		}
 
 		throw new CorruptedFrameException("length wider than 21-bit");
+	}
+
+	@Override
+	protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
+		byteBuf.markReaderIndex();
+		this.helperBuf.clear();
+		if (!copyVarint(byteBuf, this.helperBuf)) {
+			byteBuf.resetReaderIndex();
+		} else {
+			int i = VarInt.read(this.helperBuf);
+			if (byteBuf.readableBytes() < i) {
+				byteBuf.resetReaderIndex();
+			} else {
+				list.add(byteBuf.readBytes(i));
+			}
+		}
 	}
 }

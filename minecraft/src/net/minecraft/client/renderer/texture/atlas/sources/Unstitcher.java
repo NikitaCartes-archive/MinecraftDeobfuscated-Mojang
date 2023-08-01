@@ -10,14 +10,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.atlas.SpriteResourceLoader;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
 import net.minecraft.client.renderer.texture.atlas.SpriteSources;
-import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import org.slf4j.Logger;
@@ -94,7 +95,7 @@ public class Unstitcher implements SpriteSource {
 			this.yDivisor = e;
 		}
 
-		public SpriteContents get() {
+		public SpriteContents apply(SpriteResourceLoader spriteResourceLoader) {
 			try {
 				NativeImage nativeImage = this.image.get();
 				double d = (double)nativeImage.getWidth() / this.xDivisor;
@@ -105,9 +106,9 @@ public class Unstitcher implements SpriteSource {
 				int l = Mth.floor(this.region.height * e);
 				NativeImage nativeImage2 = new NativeImage(NativeImage.Format.RGBA, k, l, false);
 				nativeImage.copyRect(nativeImage2, i, j, 0, 0, k, l, false, false);
-				return new SpriteContents(this.region.sprite, new FrameSize(k, l), nativeImage2, AnimationMetadataSection.EMPTY);
-			} catch (Exception var15) {
-				Unstitcher.LOGGER.error("Failed to unstitch region {}", this.region.sprite, var15);
+				return new SpriteContents(this.region.sprite, new FrameSize(k, l), nativeImage2, ResourceMetadata.EMPTY);
+			} catch (Exception var16) {
+				Unstitcher.LOGGER.error("Failed to unstitch region {}", this.region.sprite, var16);
 			} finally {
 				this.image.release();
 			}

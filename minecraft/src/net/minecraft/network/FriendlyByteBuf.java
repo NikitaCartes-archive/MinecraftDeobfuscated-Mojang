@@ -1,6 +1,5 @@
 package net.minecraft.network;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -31,7 +30,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.time.Instant;
 import java.util.Arrays;
@@ -47,6 +45,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -59,6 +58,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.EndTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
@@ -79,8 +79,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class FriendlyByteBuf extends ByteBuf {
-	private static final int MAX_VARINT_SIZE = 5;
-	private static final int MAX_VARLONG_SIZE = 10;
 	public static final int DEFAULT_NBT_QUOTA = 2097152;
 	private final ByteBuf source;
 	public static final short MAX_STRING_LENGTH = 32767;
@@ -94,36 +92,22 @@ public class FriendlyByteBuf extends ByteBuf {
 		this.source = byteBuf;
 	}
 
-	public static int getVarIntSize(int i) {
-		for (int j = 1; j < 5; j++) {
-			if ((i & -1 << j * 7) == 0) {
-				return j;
-			}
-		}
-
-		return 5;
-	}
-
-	public static int getVarLongSize(long l) {
-		for (int i = 1; i < 10; i++) {
-			if ((l & -1L << i * 7) == 0L) {
-				return i;
-			}
-		}
-
-		return 10;
+	@Deprecated
+	public <T> T readWithCodecTrusted(DynamicOps<Tag> dynamicOps, Codec<T> codec) {
+		return this.readWithCodec(dynamicOps, codec, NbtAccounter.UNLIMITED);
 	}
 
 	@Deprecated
-	public <T> T readWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec) {
-		CompoundTag compoundTag = this.readAnySizeNbt();
-		return Util.getOrThrow(codec.parse(dynamicOps, compoundTag), string -> new DecoderException("Failed to decode: " + string + " " + compoundTag));
+	public <T> T readWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec, NbtAccounter nbtAccounter) {
+		Tag tag = this.readNbt(nbtAccounter);
+		return Util.getOrThrow(codec.parse(dynamicOps, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag));
 	}
 
 	@Deprecated
-	public <T> void writeWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec, T object) {
+	public <T> FriendlyByteBuf writeWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec, T object) {
 		Tag tag = Util.getOrThrow(codec.encodeStart(dynamicOps, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
-		this.writeNbt((CompoundTag)tag);
+		this.writeNbt(tag);
+		return this;
 	}
 
 	public <T> T readJsonWithCodec(Codec<T> codec) {
@@ -415,14 +399,6 @@ public class FriendlyByteBuf extends ByteBuf {
 		return ls;
 	}
 
-	@VisibleForTesting
-	public byte[] accessByteBufWithCorrectSize() {
-		int i = this.writerIndex();
-		byte[] bs = new byte[i];
-		this.getBytes(0, bs);
-		return bs;
-	}
-
 	public BlockPos readBlockPos() {
 		return BlockPos.of(this.readLong());
 	}
@@ -482,6 +458,16 @@ public class FriendlyByteBuf extends ByteBuf {
 		this.writeFloat(quaternionf.w);
 	}
 
+	public Vec3 readVec3() {
+		return new Vec3(this.readDouble(), this.readDouble(), this.readDouble());
+	}
+
+	public void writeVec3(Vec3 vec3) {
+		this.writeDouble(vec3.x());
+		this.writeDouble(vec3.y());
+		this.writeDouble(vec3.z());
+	}
+
 	public Component readComponent() {
 		Component component = Component.Serializer.fromJson(this.readUtf(262144));
 		if (component == null) {
@@ -503,36 +489,22 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.writeVarInt(enum_.ordinal());
 	}
 
+	public <T> T readById(IntFunction<T> intFunction) {
+		int i = this.readVarInt();
+		return (T)intFunction.apply(i);
+	}
+
+	public <T> FriendlyByteBuf writeById(ToIntFunction<T> toIntFunction, T object) {
+		int i = toIntFunction.applyAsInt(object);
+		return this.writeVarInt(i);
+	}
+
 	public int readVarInt() {
-		int i = 0;
-		int j = 0;
-
-		byte b;
-		do {
-			b = this.readByte();
-			i |= (b & 127) << j++ * 7;
-			if (j > 5) {
-				throw new RuntimeException("VarInt too big");
-			}
-		} while ((b & 128) == 128);
-
-		return i;
+		return VarInt.read(this.source);
 	}
 
 	public long readVarLong() {
-		long l = 0L;
-		int i = 0;
-
-		byte b;
-		do {
-			b = this.readByte();
-			l |= (long)(b & 127) << i++ * 7;
-			if (i > 10) {
-				throw new RuntimeException("VarLong too big");
-			}
-		} while ((b & 128) == 128);
-
-		return l;
+		return VarLong.read(this.source);
 	}
 
 	public FriendlyByteBuf writeUUID(UUID uUID) {
@@ -546,63 +518,45 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public FriendlyByteBuf writeVarInt(int i) {
-		while ((i & -128) != 0) {
-			this.writeByte(i & 127 | 128);
-			i >>>= 7;
-		}
-
-		this.writeByte(i);
+		VarInt.write(this.source, i);
 		return this;
 	}
 
 	public FriendlyByteBuf writeVarLong(long l) {
-		while ((l & -128L) != 0L) {
-			this.writeByte((int)(l & 127L) | 128);
-			l >>>= 7;
-		}
-
-		this.writeByte((int)l);
+		VarLong.write(this.source, l);
 		return this;
 	}
 
-	public FriendlyByteBuf writeNbt(@Nullable CompoundTag compoundTag) {
-		if (compoundTag == null) {
-			this.writeByte(0);
-		} else {
-			try {
-				NbtIo.write(compoundTag, new ByteBufOutputStream(this));
-			} catch (IOException var3) {
-				throw new EncoderException(var3);
-			}
+	public FriendlyByteBuf writeNbt(@Nullable Tag tag) {
+		if (tag == null) {
+			tag = EndTag.INSTANCE;
 		}
 
-		return this;
+		try {
+			NbtIo.writeAnyTag(tag, new ByteBufOutputStream(this));
+			return this;
+		} catch (IOException var3) {
+			throw new EncoderException(var3);
+		}
 	}
 
 	@Nullable
 	public CompoundTag readNbt() {
-		return this.readNbt(new NbtAccounter(2097152L));
-	}
-
-	@Nullable
-	public CompoundTag readAnySizeNbt() {
-		return this.readNbt(NbtAccounter.UNLIMITED);
-	}
-
-	@Nullable
-	public CompoundTag readNbt(NbtAccounter nbtAccounter) {
-		int i = this.readerIndex();
-		byte b = this.readByte();
-		if (b == 0) {
-			return null;
+		Tag tag = this.readNbt(new NbtAccounter(2097152L));
+		if (tag != null && !(tag instanceof CompoundTag)) {
+			throw new DecoderException("Not a compound tag: " + tag);
 		} else {
-			this.readerIndex(i);
+			return (CompoundTag)tag;
+		}
+	}
 
-			try {
-				return NbtIo.read(new ByteBufInputStream(this), nbtAccounter);
-			} catch (IOException var5) {
-				throw new EncoderException(var5);
-			}
+	@Nullable
+	public Tag readNbt(NbtAccounter nbtAccounter) {
+		try {
+			Tag tag = NbtIo.readAnyTag(new ByteBufInputStream(this), nbtAccounter);
+			return tag.getId() == 0 ? null : tag;
+		} catch (IOException var3) {
+			throw new EncoderException(var3);
 		}
 	}
 
@@ -642,21 +596,7 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public String readUtf(int i) {
-		int j = getMaxEncodedUtfLength(i);
-		int k = this.readVarInt();
-		if (k > j) {
-			throw new DecoderException("The received encoded string buffer length is longer than maximum allowed (" + k + " > " + j + ")");
-		} else if (k < 0) {
-			throw new DecoderException("The received encoded string buffer length is less than zero! Weird string!");
-		} else {
-			String string = this.toString(this.readerIndex(), k, StandardCharsets.UTF_8);
-			this.readerIndex(this.readerIndex() + k);
-			if (string.length() > i) {
-				throw new DecoderException("The received string length is longer than maximum allowed (" + string.length() + " > " + i + ")");
-			} else {
-				return string;
-			}
-		}
+		return Utf8String.read(this.source, i);
 	}
 
 	public FriendlyByteBuf writeUtf(String string) {
@@ -664,23 +604,8 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public FriendlyByteBuf writeUtf(String string, int i) {
-		if (string.length() > i) {
-			throw new EncoderException("String too big (was " + string.length() + " characters, max " + i + ")");
-		} else {
-			byte[] bs = string.getBytes(StandardCharsets.UTF_8);
-			int j = getMaxEncodedUtfLength(i);
-			if (bs.length > j) {
-				throw new EncoderException("String too big (was " + bs.length + " bytes encoded, max " + j + ")");
-			} else {
-				this.writeVarInt(bs.length);
-				this.writeBytes(bs);
-				return this;
-			}
-		}
-	}
-
-	private static int getMaxEncodedUtfLength(int i) {
-		return i * 3;
+		Utf8String.write(this.source, string, i);
+		return this;
 	}
 
 	public ResourceLocation readResourceLocation() {
@@ -699,6 +624,11 @@ public class FriendlyByteBuf extends ByteBuf {
 
 	public void writeResourceKey(ResourceKey<?> resourceKey) {
 		this.writeResourceLocation(resourceKey.location());
+	}
+
+	public <T> ResourceKey<? extends Registry<T>> readRegistryKey() {
+		ResourceLocation resourceLocation = this.readResourceLocation();
+		return ResourceKey.createRegistryKey(resourceLocation);
 	}
 
 	public Date readDate() {
@@ -795,7 +725,7 @@ public class FriendlyByteBuf extends ByteBuf {
 		PropertyMap propertyMap = new PropertyMap();
 		this.readWithCount(friendlyByteBuf -> {
 			Property property = this.readProperty();
-			propertyMap.put(property.getName(), property);
+			propertyMap.put(property.name(), property);
 		});
 		return propertyMap;
 	}
@@ -807,23 +737,24 @@ public class FriendlyByteBuf extends ByteBuf {
 	public Property readProperty() {
 		String string = this.readUtf();
 		String string2 = this.readUtf();
-		if (this.readBoolean()) {
-			String string3 = this.readUtf();
-			return new Property(string, string2, string3);
-		} else {
-			return new Property(string, string2);
-		}
+		String string3 = this.readNullable(FriendlyByteBuf::readUtf);
+		return new Property(string, string2, string3);
 	}
 
 	public void writeProperty(Property property) {
-		this.writeUtf(property.getName());
-		this.writeUtf(property.getValue());
-		if (property.hasSignature()) {
-			this.writeBoolean(true);
-			this.writeUtf(property.getSignature());
-		} else {
-			this.writeBoolean(false);
-		}
+		this.writeUtf(property.name());
+		this.writeUtf(property.value());
+		this.writeNullable(property.signature(), FriendlyByteBuf::writeUtf);
+	}
+
+	@Override
+	public boolean isContiguous() {
+		return this.source.isContiguous();
+	}
+
+	@Override
+	public int maxFastWritableBytes() {
+		return this.source.maxFastWritableBytes();
 	}
 
 	@Override
@@ -831,9 +762,9 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.capacity();
 	}
 
-	@Override
-	public ByteBuf capacity(int i) {
-		return this.source.capacity(i);
+	public FriendlyByteBuf capacity(int i) {
+		this.source.capacity(i);
+		return this;
 	}
 
 	@Override
@@ -858,7 +789,7 @@ public class FriendlyByteBuf extends ByteBuf {
 
 	@Override
 	public ByteBuf unwrap() {
-		return this.source.unwrap();
+		return this.source;
 	}
 
 	@Override
@@ -881,9 +812,9 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.readerIndex();
 	}
 
-	@Override
-	public ByteBuf readerIndex(int i) {
-		return this.source.readerIndex(i);
+	public FriendlyByteBuf readerIndex(int i) {
+		this.source.readerIndex(i);
+		return this;
 	}
 
 	@Override
@@ -891,14 +822,14 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.writerIndex();
 	}
 
-	@Override
-	public ByteBuf writerIndex(int i) {
-		return this.source.writerIndex(i);
+	public FriendlyByteBuf writerIndex(int i) {
+		this.source.writerIndex(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setIndex(int i, int j) {
-		return this.source.setIndex(i, j);
+	public FriendlyByteBuf setIndex(int i, int j) {
+		this.source.setIndex(i, j);
+		return this;
 	}
 
 	@Override
@@ -936,44 +867,44 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.isWritable(i);
 	}
 
-	@Override
-	public ByteBuf clear() {
-		return this.source.clear();
+	public FriendlyByteBuf clear() {
+		this.source.clear();
+		return this;
 	}
 
-	@Override
-	public ByteBuf markReaderIndex() {
-		return this.source.markReaderIndex();
+	public FriendlyByteBuf markReaderIndex() {
+		this.source.markReaderIndex();
+		return this;
 	}
 
-	@Override
-	public ByteBuf resetReaderIndex() {
-		return this.source.resetReaderIndex();
+	public FriendlyByteBuf resetReaderIndex() {
+		this.source.resetReaderIndex();
+		return this;
 	}
 
-	@Override
-	public ByteBuf markWriterIndex() {
-		return this.source.markWriterIndex();
+	public FriendlyByteBuf markWriterIndex() {
+		this.source.markWriterIndex();
+		return this;
 	}
 
-	@Override
-	public ByteBuf resetWriterIndex() {
-		return this.source.resetWriterIndex();
+	public FriendlyByteBuf resetWriterIndex() {
+		this.source.resetWriterIndex();
+		return this;
 	}
 
-	@Override
-	public ByteBuf discardReadBytes() {
-		return this.source.discardReadBytes();
+	public FriendlyByteBuf discardReadBytes() {
+		this.source.discardReadBytes();
+		return this;
 	}
 
-	@Override
-	public ByteBuf discardSomeReadBytes() {
-		return this.source.discardSomeReadBytes();
+	public FriendlyByteBuf discardSomeReadBytes() {
+		this.source.discardSomeReadBytes();
+		return this;
 	}
 
-	@Override
-	public ByteBuf ensureWritable(int i) {
-		return this.source.ensureWritable(i);
+	public FriendlyByteBuf ensureWritable(int i) {
+		this.source.ensureWritable(i);
+		return this;
 	}
 
 	@Override
@@ -1081,39 +1012,39 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.getDouble(i);
 	}
 
-	@Override
-	public ByteBuf getBytes(int i, ByteBuf byteBuf) {
-		return this.source.getBytes(i, byteBuf);
+	public FriendlyByteBuf getBytes(int i, ByteBuf byteBuf) {
+		this.source.getBytes(i, byteBuf);
+		return this;
 	}
 
-	@Override
-	public ByteBuf getBytes(int i, ByteBuf byteBuf, int j) {
-		return this.source.getBytes(i, byteBuf, j);
+	public FriendlyByteBuf getBytes(int i, ByteBuf byteBuf, int j) {
+		this.source.getBytes(i, byteBuf, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf getBytes(int i, ByteBuf byteBuf, int j, int k) {
-		return this.source.getBytes(i, byteBuf, j, k);
+	public FriendlyByteBuf getBytes(int i, ByteBuf byteBuf, int j, int k) {
+		this.source.getBytes(i, byteBuf, j, k);
+		return this;
 	}
 
-	@Override
-	public ByteBuf getBytes(int i, byte[] bs) {
-		return this.source.getBytes(i, bs);
+	public FriendlyByteBuf getBytes(int i, byte[] bs) {
+		this.source.getBytes(i, bs);
+		return this;
 	}
 
-	@Override
-	public ByteBuf getBytes(int i, byte[] bs, int j, int k) {
-		return this.source.getBytes(i, bs, j, k);
+	public FriendlyByteBuf getBytes(int i, byte[] bs, int j, int k) {
+		this.source.getBytes(i, bs, j, k);
+		return this;
 	}
 
-	@Override
-	public ByteBuf getBytes(int i, ByteBuffer byteBuffer) {
-		return this.source.getBytes(i, byteBuffer);
+	public FriendlyByteBuf getBytes(int i, ByteBuffer byteBuffer) {
+		this.source.getBytes(i, byteBuffer);
+		return this;
 	}
 
-	@Override
-	public ByteBuf getBytes(int i, OutputStream outputStream, int j) throws IOException {
-		return this.source.getBytes(i, outputStream, j);
+	public FriendlyByteBuf getBytes(int i, OutputStream outputStream, int j) throws IOException {
+		this.source.getBytes(i, outputStream, j);
+		return this;
 	}
 
 	@Override
@@ -1131,99 +1062,99 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.getCharSequence(i, j, charset);
 	}
 
-	@Override
-	public ByteBuf setBoolean(int i, boolean bl) {
-		return this.source.setBoolean(i, bl);
+	public FriendlyByteBuf setBoolean(int i, boolean bl) {
+		this.source.setBoolean(i, bl);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setByte(int i, int j) {
-		return this.source.setByte(i, j);
+	public FriendlyByteBuf setByte(int i, int j) {
+		this.source.setByte(i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setShort(int i, int j) {
-		return this.source.setShort(i, j);
+	public FriendlyByteBuf setShort(int i, int j) {
+		this.source.setShort(i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setShortLE(int i, int j) {
-		return this.source.setShortLE(i, j);
+	public FriendlyByteBuf setShortLE(int i, int j) {
+		this.source.setShortLE(i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setMedium(int i, int j) {
-		return this.source.setMedium(i, j);
+	public FriendlyByteBuf setMedium(int i, int j) {
+		this.source.setMedium(i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setMediumLE(int i, int j) {
-		return this.source.setMediumLE(i, j);
+	public FriendlyByteBuf setMediumLE(int i, int j) {
+		this.source.setMediumLE(i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setInt(int i, int j) {
-		return this.source.setInt(i, j);
+	public FriendlyByteBuf setInt(int i, int j) {
+		this.source.setInt(i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setIntLE(int i, int j) {
-		return this.source.setIntLE(i, j);
+	public FriendlyByteBuf setIntLE(int i, int j) {
+		this.source.setIntLE(i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setLong(int i, long l) {
-		return this.source.setLong(i, l);
+	public FriendlyByteBuf setLong(int i, long l) {
+		this.source.setLong(i, l);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setLongLE(int i, long l) {
-		return this.source.setLongLE(i, l);
+	public FriendlyByteBuf setLongLE(int i, long l) {
+		this.source.setLongLE(i, l);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setChar(int i, int j) {
-		return this.source.setChar(i, j);
+	public FriendlyByteBuf setChar(int i, int j) {
+		this.source.setChar(i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setFloat(int i, float f) {
-		return this.source.setFloat(i, f);
+	public FriendlyByteBuf setFloat(int i, float f) {
+		this.source.setFloat(i, f);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setDouble(int i, double d) {
-		return this.source.setDouble(i, d);
+	public FriendlyByteBuf setDouble(int i, double d) {
+		this.source.setDouble(i, d);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setBytes(int i, ByteBuf byteBuf) {
-		return this.source.setBytes(i, byteBuf);
+	public FriendlyByteBuf setBytes(int i, ByteBuf byteBuf) {
+		this.source.setBytes(i, byteBuf);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setBytes(int i, ByteBuf byteBuf, int j) {
-		return this.source.setBytes(i, byteBuf, j);
+	public FriendlyByteBuf setBytes(int i, ByteBuf byteBuf, int j) {
+		this.source.setBytes(i, byteBuf, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setBytes(int i, ByteBuf byteBuf, int j, int k) {
-		return this.source.setBytes(i, byteBuf, j, k);
+	public FriendlyByteBuf setBytes(int i, ByteBuf byteBuf, int j, int k) {
+		this.source.setBytes(i, byteBuf, j, k);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setBytes(int i, byte[] bs) {
-		return this.source.setBytes(i, bs);
+	public FriendlyByteBuf setBytes(int i, byte[] bs) {
+		this.source.setBytes(i, bs);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setBytes(int i, byte[] bs, int j, int k) {
-		return this.source.setBytes(i, bs, j, k);
+	public FriendlyByteBuf setBytes(int i, byte[] bs, int j, int k) {
+		this.source.setBytes(i, bs, j, k);
+		return this;
 	}
 
-	@Override
-	public ByteBuf setBytes(int i, ByteBuffer byteBuffer) {
-		return this.source.setBytes(i, byteBuffer);
+	public FriendlyByteBuf setBytes(int i, ByteBuffer byteBuffer) {
+		this.source.setBytes(i, byteBuffer);
+		return this;
 	}
 
 	@Override
@@ -1241,9 +1172,9 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.setBytes(i, fileChannel, l, j);
 	}
 
-	@Override
-	public ByteBuf setZero(int i, int j) {
-		return this.source.setZero(i, j);
+	public FriendlyByteBuf setZero(int i, int j) {
+		this.source.setZero(i, j);
+		return this;
 	}
 
 	@Override
@@ -1366,39 +1297,39 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.readRetainedSlice(i);
 	}
 
-	@Override
-	public ByteBuf readBytes(ByteBuf byteBuf) {
-		return this.source.readBytes(byteBuf);
+	public FriendlyByteBuf readBytes(ByteBuf byteBuf) {
+		this.source.readBytes(byteBuf);
+		return this;
 	}
 
-	@Override
-	public ByteBuf readBytes(ByteBuf byteBuf, int i) {
-		return this.source.readBytes(byteBuf, i);
+	public FriendlyByteBuf readBytes(ByteBuf byteBuf, int i) {
+		this.source.readBytes(byteBuf, i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf readBytes(ByteBuf byteBuf, int i, int j) {
-		return this.source.readBytes(byteBuf, i, j);
+	public FriendlyByteBuf readBytes(ByteBuf byteBuf, int i, int j) {
+		this.source.readBytes(byteBuf, i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf readBytes(byte[] bs) {
-		return this.source.readBytes(bs);
+	public FriendlyByteBuf readBytes(byte[] bs) {
+		this.source.readBytes(bs);
+		return this;
 	}
 
-	@Override
-	public ByteBuf readBytes(byte[] bs, int i, int j) {
-		return this.source.readBytes(bs, i, j);
+	public FriendlyByteBuf readBytes(byte[] bs, int i, int j) {
+		this.source.readBytes(bs, i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf readBytes(ByteBuffer byteBuffer) {
-		return this.source.readBytes(byteBuffer);
+	public FriendlyByteBuf readBytes(ByteBuffer byteBuffer) {
+		this.source.readBytes(byteBuffer);
+		return this;
 	}
 
-	@Override
-	public ByteBuf readBytes(OutputStream outputStream, int i) throws IOException {
-		return this.source.readBytes(outputStream, i);
+	public FriendlyByteBuf readBytes(OutputStream outputStream, int i) throws IOException {
+		this.source.readBytes(outputStream, i);
+		return this;
 	}
 
 	@Override
@@ -1416,104 +1347,104 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.readBytes(fileChannel, l, i);
 	}
 
-	@Override
-	public ByteBuf skipBytes(int i) {
-		return this.source.skipBytes(i);
+	public FriendlyByteBuf skipBytes(int i) {
+		this.source.skipBytes(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeBoolean(boolean bl) {
-		return this.source.writeBoolean(bl);
+	public FriendlyByteBuf writeBoolean(boolean bl) {
+		this.source.writeBoolean(bl);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeByte(int i) {
-		return this.source.writeByte(i);
+	public FriendlyByteBuf writeByte(int i) {
+		this.source.writeByte(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeShort(int i) {
-		return this.source.writeShort(i);
+	public FriendlyByteBuf writeShort(int i) {
+		this.source.writeShort(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeShortLE(int i) {
-		return this.source.writeShortLE(i);
+	public FriendlyByteBuf writeShortLE(int i) {
+		this.source.writeShortLE(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeMedium(int i) {
-		return this.source.writeMedium(i);
+	public FriendlyByteBuf writeMedium(int i) {
+		this.source.writeMedium(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeMediumLE(int i) {
-		return this.source.writeMediumLE(i);
+	public FriendlyByteBuf writeMediumLE(int i) {
+		this.source.writeMediumLE(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeInt(int i) {
-		return this.source.writeInt(i);
+	public FriendlyByteBuf writeInt(int i) {
+		this.source.writeInt(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeIntLE(int i) {
-		return this.source.writeIntLE(i);
+	public FriendlyByteBuf writeIntLE(int i) {
+		this.source.writeIntLE(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeLong(long l) {
-		return this.source.writeLong(l);
+	public FriendlyByteBuf writeLong(long l) {
+		this.source.writeLong(l);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeLongLE(long l) {
-		return this.source.writeLongLE(l);
+	public FriendlyByteBuf writeLongLE(long l) {
+		this.source.writeLongLE(l);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeChar(int i) {
-		return this.source.writeChar(i);
+	public FriendlyByteBuf writeChar(int i) {
+		this.source.writeChar(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeFloat(float f) {
-		return this.source.writeFloat(f);
+	public FriendlyByteBuf writeFloat(float f) {
+		this.source.writeFloat(f);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeDouble(double d) {
-		return this.source.writeDouble(d);
+	public FriendlyByteBuf writeDouble(double d) {
+		this.source.writeDouble(d);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeBytes(ByteBuf byteBuf) {
-		return this.source.writeBytes(byteBuf);
+	public FriendlyByteBuf writeBytes(ByteBuf byteBuf) {
+		this.source.writeBytes(byteBuf);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeBytes(ByteBuf byteBuf, int i) {
-		return this.source.writeBytes(byteBuf, i);
+	public FriendlyByteBuf writeBytes(ByteBuf byteBuf, int i) {
+		this.source.writeBytes(byteBuf, i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeBytes(ByteBuf byteBuf, int i, int j) {
-		return this.source.writeBytes(byteBuf, i, j);
+	public FriendlyByteBuf writeBytes(ByteBuf byteBuf, int i, int j) {
+		this.source.writeBytes(byteBuf, i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeBytes(byte[] bs) {
-		return this.source.writeBytes(bs);
+	public FriendlyByteBuf writeBytes(byte[] bs) {
+		this.source.writeBytes(bs);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeBytes(byte[] bs, int i, int j) {
-		return this.source.writeBytes(bs, i, j);
+	public FriendlyByteBuf writeBytes(byte[] bs, int i, int j) {
+		this.source.writeBytes(bs, i, j);
+		return this;
 	}
 
-	@Override
-	public ByteBuf writeBytes(ByteBuffer byteBuffer) {
-		return this.source.writeBytes(byteBuffer);
+	public FriendlyByteBuf writeBytes(ByteBuffer byteBuffer) {
+		this.source.writeBytes(byteBuffer);
+		return this;
 	}
 
 	@Override
@@ -1531,9 +1462,9 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.writeBytes(fileChannel, l, i);
 	}
 
-	@Override
-	public ByteBuf writeZero(int i) {
-		return this.source.writeZero(i);
+	public FriendlyByteBuf writeZero(int i) {
+		this.source.writeZero(i);
+		return this;
 	}
 
 	@Override
@@ -1706,24 +1637,24 @@ public class FriendlyByteBuf extends ByteBuf {
 		return this.source.toString();
 	}
 
-	@Override
-	public ByteBuf retain(int i) {
-		return this.source.retain(i);
+	public FriendlyByteBuf retain(int i) {
+		this.source.retain(i);
+		return this;
 	}
 
-	@Override
-	public ByteBuf retain() {
-		return this.source.retain();
+	public FriendlyByteBuf retain() {
+		this.source.retain();
+		return this;
 	}
 
-	@Override
-	public ByteBuf touch() {
-		return this.source.touch();
+	public FriendlyByteBuf touch() {
+		this.source.touch();
+		return this;
 	}
 
-	@Override
-	public ByteBuf touch(Object object) {
-		return this.source.touch(object);
+	public FriendlyByteBuf touch(Object object) {
+		this.source.touch(object);
+		return this;
 	}
 
 	@Override

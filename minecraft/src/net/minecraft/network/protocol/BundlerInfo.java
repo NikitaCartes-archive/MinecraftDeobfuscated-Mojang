@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol;
 
-import io.netty.util.AttributeKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -9,7 +8,6 @@ import javax.annotation.Nullable;
 import net.minecraft.network.PacketListener;
 
 public interface BundlerInfo {
-	AttributeKey<BundlerInfo.Provider> BUNDLER_PROVIDER = AttributeKey.valueOf("bundler");
 	int BUNDLE_SIZE_LIMIT = 4096;
 	BundlerInfo EMPTY = new BundlerInfo() {
 		@Override
@@ -74,6 +72,6 @@ public interface BundlerInfo {
 	}
 
 	public interface Provider {
-		BundlerInfo getBundlerInfo(PacketFlow packetFlow);
+		BundlerInfo bundlerInfo();
 	}
 }

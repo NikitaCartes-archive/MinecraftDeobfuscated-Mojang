@@ -116,7 +116,7 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return (Integer)blockState.getValue(AGE) < 2;
 	}
 

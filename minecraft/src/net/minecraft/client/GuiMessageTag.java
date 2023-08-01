@@ -20,7 +20,6 @@ public record GuiMessageTag(int indicatorColor, @Nullable GuiMessageTag.Icon ico
 	private static final GuiMessageTag SYSTEM = new GuiMessageTag(13684944, null, SYSTEM_TEXT, "System");
 	private static final GuiMessageTag SYSTEM_SINGLE_PLAYER = new GuiMessageTag(13684944, null, SYSTEM_TEXT_SINGLE_PLAYER, "System");
 	private static final GuiMessageTag CHAT_NOT_SECURE = new GuiMessageTag(13684944, null, CHAT_NOT_SECURE_TEXT, "Not Secure");
-	static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/gui/chat_tags.png");
 
 	public static GuiMessageTag system() {
 		return SYSTEM;
@@ -42,22 +41,20 @@ public record GuiMessageTag(int indicatorColor, @Nullable GuiMessageTag.Icon ico
 
 	@Environment(EnvType.CLIENT)
 	public static enum Icon {
-		CHAT_MODIFIED(0, 0, 9, 9);
+		CHAT_MODIFIED(new ResourceLocation("icon/chat_modified"), 9, 9);
 
-		public final int u;
-		public final int v;
+		public final ResourceLocation sprite;
 		public final int width;
 		public final int height;
 
-		private Icon(int j, int k, int l, int m) {
-			this.u = j;
-			this.v = k;
-			this.width = l;
-			this.height = m;
+		private Icon(ResourceLocation resourceLocation, int j, int k) {
+			this.sprite = resourceLocation;
+			this.width = j;
+			this.height = k;
 		}
 
 		public void draw(GuiGraphics guiGraphics, int i, int j) {
-			guiGraphics.blit(GuiMessageTag.TEXTURE_LOCATION, i, j, (float)this.u, (float)this.v, this.width, this.height, 32, 32);
+			guiGraphics.blitSprite(this.sprite, i, j, this.width, this.height);
 		}
 	}
 }

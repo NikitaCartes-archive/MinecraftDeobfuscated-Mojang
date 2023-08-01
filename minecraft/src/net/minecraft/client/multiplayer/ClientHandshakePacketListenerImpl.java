@@ -17,26 +17,29 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.BrandPayload;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundHelloPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.ServerboundKeyPacket;
+import net.minecraft.network.protocol.login.ServerboundLoginAcknowledgedPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
-import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.HttpUtil;
+import net.minecraft.world.flag.FeatureFlags;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -49,7 +52,6 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	private final Screen parent;
 	private final Consumer<Component> updateStatus;
 	private final Connection connection;
-	private GameProfile localGameProfile;
 	private final boolean newWorld;
 	@Nullable
 	private final Duration worldLoadDuration;
@@ -112,7 +114,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	@Nullable
 	private Component authenticateServer(String string) {
 		try {
-			this.getMinecraftSessionService().joinServer(this.minecraft.getUser().getGameProfile(), this.minecraft.getUser().getAccessToken(), string);
+			this.getMinecraftSessionService().joinServer(this.minecraft.getUser().getProfileId(), this.minecraft.getUser().getAccessToken(), string);
 			return null;
 		} catch (AuthenticationUnavailableException var3) {
 			return Component.translatable("disconnect.loginFailedInfo", Component.translatable("disconnect.loginFailedInfo.serversUnavailable"));
@@ -134,24 +136,30 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	@Override
 	public void handleGameProfile(ClientboundGameProfilePacket clientboundGameProfilePacket) {
 		this.updateStatus.accept(Component.translatable("connect.joining"));
-		this.localGameProfile = clientboundGameProfilePacket.getGameProfile();
-		this.connection.setProtocol(ConnectionProtocol.PLAY);
+		GameProfile gameProfile = clientboundGameProfilePacket.getGameProfile();
+		this.connection.send(new ServerboundLoginAcknowledgedPacket());
 		this.connection
 			.setListener(
-				new ClientPacketListener(
+				new ClientConfigurationPacketListenerImpl(
 					this.minecraft,
-					this.parent,
 					this.connection,
-					this.serverData,
-					this.localGameProfile,
-					this.minecraft.getTelemetryManager().createWorldSessionManager(this.newWorld, this.worldLoadDuration, this.minigameName)
+					new CommonListenerCookie(
+						gameProfile,
+						this.minecraft.getTelemetryManager().createWorldSessionManager(this.newWorld, this.worldLoadDuration, this.minigameName),
+						ClientRegistryLayer.createRegistryAccess().compositeAccess(),
+						FeatureFlags.DEFAULT_FLAGS,
+						null,
+						this.serverData,
+						this.parent
+					)
 				)
 			);
+		this.connection.send(new ServerboundCustomPayloadPacket(new BrandPayload(ClientBrandRetriever.getClientModName())));
 	}
 
 	@Override
 	public void onDisconnect(Component component) {
-		if (this.parent != null && this.parent instanceof RealmsScreen) {
+		if (this.serverData != null && this.serverData.isRealm()) {
 			this.minecraft.setScreen(new DisconnectedRealmsScreen(this.parent, CommonComponents.CONNECT_FAILED, component));
 		} else {
 			this.minecraft.setScreen(new DisconnectedScreen(this.parent, CommonComponents.CONNECT_FAILED, component));
@@ -178,7 +186,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	@Override
 	public void handleCustomQuery(ClientboundCustomQueryPacket clientboundCustomQueryPacket) {
 		this.updateStatus.accept(Component.translatable("connect.negotiating"));
-		this.connection.send(new ServerboundCustomQueryPacket(clientboundCustomQueryPacket.getTransactionId(), null));
+		this.connection.send(new ServerboundCustomQueryAnswerPacket(clientboundCustomQueryPacket.transactionId(), null));
 	}
 
 	public void setMinigameName(String string) {

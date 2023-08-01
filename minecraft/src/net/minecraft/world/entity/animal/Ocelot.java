@@ -19,6 +19,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -48,6 +49,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Ocelot extends Animal {
 	public static final double CROUCH_SPEED_MOD = 0.6;
@@ -280,6 +282,11 @@ public class Ocelot extends Animal {
 	@Override
 	public boolean isSteppingCarefully() {
 		return this.isCrouching() || super.isSteppingCarefully();
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height - 0.0625F * f, 0.0F);
 	}
 
 	static class OcelotAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {

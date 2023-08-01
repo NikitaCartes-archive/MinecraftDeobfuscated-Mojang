@@ -1,5 +1,6 @@
 package net.minecraft.world.scores;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -7,8 +8,10 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.slf4j.Logger;
 
 public class ScoreboardSaveData extends SavedData {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String FILE_ID = "scoreboard";
 	private final Scoreboard scoreboard;
 
@@ -98,11 +101,12 @@ public class ScoreboardSaveData extends SavedData {
 	}
 
 	private void loadDisplaySlots(CompoundTag compoundTag) {
-		for (int i = 0; i < 19; i++) {
-			if (compoundTag.contains("slot_" + i, 8)) {
-				String string = compoundTag.getString("slot_" + i);
-				Objective objective = this.scoreboard.getObjective(string);
-				this.scoreboard.setDisplayObjective(i, objective);
+		for (String string : compoundTag.getAllKeys()) {
+			DisplaySlot displaySlot = (DisplaySlot)DisplaySlot.CODEC.byName(string);
+			if (displaySlot != null) {
+				String string2 = compoundTag.getString(string);
+				Objective objective = this.scoreboard.getObjective(string2);
+				this.scoreboard.setDisplayObjective(displaySlot, objective);
 			}
 		}
 	}
@@ -110,12 +114,15 @@ public class ScoreboardSaveData extends SavedData {
 	private void loadObjectives(ListTag listTag) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
-			ObjectiveCriteria.byName(compoundTag.getString("CriteriaName")).ifPresent(objectiveCriteria -> {
-				String string = compoundTag.getString("Name");
-				Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
-				ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.byId(compoundTag.getString("RenderType"));
-				this.scoreboard.addObjective(string, objectiveCriteria, component, renderType);
+			String string = compoundTag.getString("CriteriaName");
+			ObjectiveCriteria objectiveCriteria = (ObjectiveCriteria)ObjectiveCriteria.byName(string).orElseGet(() -> {
+				LOGGER.warn("Unknown scoreboard criteria {}, replacing with {}", string, ObjectiveCriteria.DUMMY.getName());
+				return ObjectiveCriteria.DUMMY;
 			});
+			String string2 = compoundTag.getString("Name");
+			Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
+			ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.byId(compoundTag.getString("RenderType"));
+			this.scoreboard.addObjective(string2, objectiveCriteria, component, renderType);
 		}
 	}
 
@@ -161,17 +168,15 @@ public class ScoreboardSaveData extends SavedData {
 
 	private void saveDisplaySlots(CompoundTag compoundTag) {
 		CompoundTag compoundTag2 = new CompoundTag();
-		boolean bl = false;
 
-		for (int i = 0; i < 19; i++) {
-			Objective objective = this.scoreboard.getDisplayObjective(i);
+		for (DisplaySlot displaySlot : DisplaySlot.values()) {
+			Objective objective = this.scoreboard.getDisplayObjective(displaySlot);
 			if (objective != null) {
-				compoundTag2.putString("slot_" + i, objective.getName());
-				bl = true;
+				compoundTag2.putString(displaySlot.getSerializedName(), objective.getName());
 			}
 		}
 
-		if (bl) {
+		if (!compoundTag2.isEmpty()) {
 			compoundTag.put("DisplaySlots", compoundTag2);
 		}
 	}
@@ -180,14 +185,12 @@ public class ScoreboardSaveData extends SavedData {
 		ListTag listTag = new ListTag();
 
 		for (Objective objective : this.scoreboard.getObjectives()) {
-			if (objective.getCriteria() != null) {
-				CompoundTag compoundTag = new CompoundTag();
-				compoundTag.putString("Name", objective.getName());
-				compoundTag.putString("CriteriaName", objective.getCriteria().getName());
-				compoundTag.putString("DisplayName", Component.Serializer.toJson(objective.getDisplayName()));
-				compoundTag.putString("RenderType", objective.getRenderType().getId());
-				listTag.add(compoundTag);
-			}
+			CompoundTag compoundTag = new CompoundTag();
+			compoundTag.putString("Name", objective.getName());
+			compoundTag.putString("CriteriaName", objective.getCriteria().getName());
+			compoundTag.putString("DisplayName", Component.Serializer.toJson(objective.getDisplayName()));
+			compoundTag.putString("RenderType", objective.getRenderType().getId());
+			listTag.add(compoundTag);
 		}
 
 		return listTag;

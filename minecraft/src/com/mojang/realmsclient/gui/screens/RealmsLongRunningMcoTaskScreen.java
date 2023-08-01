@@ -98,16 +98,14 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, row(3), 16777215);
 		Component component = this.errorMessage;
 		if (component == null) {
-			guiGraphics.drawCenteredString(this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, row(8), 8421504);
+			guiGraphics.drawCenteredString(this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, row(8), -8355712);
 		} else {
 			guiGraphics.drawCenteredString(this.font, component, this.width / 2, row(8), 16711680);
 		}
-
-		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

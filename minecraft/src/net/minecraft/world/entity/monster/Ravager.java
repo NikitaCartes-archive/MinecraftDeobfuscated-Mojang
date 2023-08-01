@@ -11,6 +11,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -38,6 +39,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Ravager extends Raider {
 	private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = entity -> entity.isAlive() && !(entity instanceof Ravager);
@@ -121,14 +123,8 @@ public class Ravager extends Raider {
 	}
 
 	@Override
-	public double getPassengersRidingOffset() {
-		return 2.1;
-	}
-
-	@Nullable
-	@Override
-	public LivingEntity getControllingPassenger() {
-		return !this.isNoAi() && this.getFirstPassenger() instanceof LivingEntity livingEntity ? livingEntity : null;
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height + 0.0625F * f, -0.0625F * f);
 	}
 
 	@Override
@@ -238,7 +234,7 @@ public class Ravager extends Raider {
 				this.level().addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d, e, f);
 			}
 
-			this.gameEvent(GameEvent.ENTITY_ROAR);
+			this.gameEvent(GameEvent.ENTITY_ACTION);
 		}
 	}
 

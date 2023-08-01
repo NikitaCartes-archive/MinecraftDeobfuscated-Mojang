@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.IdMap;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.VarInt;
 import org.apache.commons.lang3.Validate;
 
 public class SingleValuePalette<T> implements Palette<T> {
@@ -73,7 +74,7 @@ public class SingleValuePalette<T> implements Palette<T> {
 		if (this.value == null) {
 			throw new IllegalStateException("Use of an uninitialized palette");
 		} else {
-			return FriendlyByteBuf.getVarIntSize(this.registry.getId(this.value));
+			return VarInt.getByteSize(this.registry.getId(this.value));
 		}
 	}
 

@@ -35,8 +35,11 @@ import net.minecraft.world.level.block.Block;
 
 @Environment(EnvType.CLIENT)
 public class StatsScreen extends Screen implements StatsUpdateListener {
+	static final ResourceLocation SLOT_SPRITE = new ResourceLocation("container/slot");
+	static final ResourceLocation HEADER_SPRITE = new ResourceLocation("statistics/header");
+	static final ResourceLocation SORT_UP_SPRITE = new ResourceLocation("statistics/sort_up");
+	static final ResourceLocation SORT_DOWN_SPRITE = new ResourceLocation("statistics/sort_down");
 	private static final Component PENDING_TEXT = Component.translatable("multiplayer.downloadingStats");
-	private static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
 	protected final Screen lastScreen;
 	private StatsScreen.GeneralStatisticsList statsList;
 	StatsScreen.ItemStatisticsList itemStatsList;
@@ -45,7 +48,6 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	@Nullable
 	private ObjectSelectionList<?> activeList;
 	private boolean isLoading = true;
-	private static final int SLOT_TEX_SIZE = 128;
 	private static final int SLOT_BG_SIZE = 18;
 	private static final int SLOT_STAT_HEIGHT = 20;
 	private static final int SLOT_BG_X = 1;
@@ -109,16 +111,21 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.isLoading) {
-			this.renderBackground(guiGraphics);
+			this.renderBackground(guiGraphics, i, j, f);
 			guiGraphics.drawCenteredString(this.font, PENDING_TEXT, this.width / 2, this.height / 2, 16777215);
 			guiGraphics.drawCenteredString(
 				this.font, LOADING_SYMBOLS[(int)(Util.getMillis() / 150L % (long)LOADING_SYMBOLS.length)], this.width / 2, this.height / 2 + 9 * 2, 16777215
 			);
 		} else {
+			super.render(guiGraphics, i, j, f);
 			this.getActiveList().render(guiGraphics, i, j, f);
 			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
-			super.render(guiGraphics, i, j, f);
 		}
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
 	}
 
 	@Override
@@ -161,12 +168,12 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	}
 
 	void blitSlot(GuiGraphics guiGraphics, int i, int j, Item item) {
-		this.blitSlotIcon(guiGraphics, i + 1, j + 1, 0, 0);
+		this.blitSlotIcon(guiGraphics, i + 1, j + 1, SLOT_SPRITE);
 		guiGraphics.renderFakeItem(item.getDefaultInstance(), i + 2, j + 2);
 	}
 
-	void blitSlotIcon(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blit(STATS_ICON_LOCATION, i, j, 0, (float)k, (float)l, 18, 18, 128, 128);
+	void blitSlotIcon(GuiGraphics guiGraphics, int i, int j, ResourceLocation resourceLocation) {
+		guiGraphics.blitSprite(resourceLocation, i, j, 0, 18, 18);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -179,11 +186,6 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			for (Stat<ResourceLocation> stat : objectArrayList) {
 				this.addEntry(new StatsScreen.GeneralStatisticsList.Entry(stat));
 			}
-		}
-
-		@Override
-		protected void renderBackground(GuiGraphics guiGraphics) {
-			StatsScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -218,7 +220,14 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	class ItemStatisticsList extends ObjectSelectionList<StatsScreen.ItemStatisticsList.ItemRow> {
 		protected final List<StatType<Block>> blockColumns;
 		protected final List<StatType<Item>> itemColumns;
-		private final int[] iconOffsets = new int[]{3, 4, 1, 2, 5, 6};
+		private final ResourceLocation[] iconSprites = new ResourceLocation[]{
+			new ResourceLocation("statistics/block_mined"),
+			new ResourceLocation("statistics/item_broken"),
+			new ResourceLocation("statistics/item_crafted"),
+			new ResourceLocation("statistics/item_used"),
+			new ResourceLocation("statistics/item_picked_up"),
+			new ResourceLocation("statistics/item_dropped")
+		};
 		protected int headerPressed = -1;
 		protected final Comparator<StatsScreen.ItemStatisticsList.ItemRow> itemStatSorter = new StatsScreen.ItemStatisticsList.ItemRowComparator();
 		@Nullable
@@ -274,19 +283,20 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 				this.headerPressed = -1;
 			}
 
-			for (int k = 0; k < this.iconOffsets.length; k++) {
-				StatsScreen.this.blitSlotIcon(guiGraphics, i + StatsScreen.this.getColumnX(k) - 18, j + 1, 0, this.headerPressed == k ? 0 : 18);
+			for (int k = 0; k < this.iconSprites.length; k++) {
+				ResourceLocation resourceLocation = this.headerPressed == k ? StatsScreen.SLOT_SPRITE : StatsScreen.HEADER_SPRITE;
+				StatsScreen.this.blitSlotIcon(guiGraphics, i + StatsScreen.this.getColumnX(k) - 18, j + 1, resourceLocation);
 			}
 
 			if (this.sortColumn != null) {
 				int k = StatsScreen.this.getColumnX(this.getColumnIndex(this.sortColumn)) - 36;
-				int l = this.sortOrder == 1 ? 2 : 1;
-				StatsScreen.this.blitSlotIcon(guiGraphics, i + k, j + 1, 18 * l, 0);
+				ResourceLocation resourceLocation = this.sortOrder == 1 ? StatsScreen.SORT_UP_SPRITE : StatsScreen.SORT_DOWN_SPRITE;
+				StatsScreen.this.blitSlotIcon(guiGraphics, i + k, j + 1, resourceLocation);
 			}
 
-			for (int k = 0; k < this.iconOffsets.length; k++) {
+			for (int k = 0; k < this.iconSprites.length; k++) {
 				int l = this.headerPressed == k ? 1 : 0;
-				StatsScreen.this.blitSlotIcon(guiGraphics, i + StatsScreen.this.getColumnX(k) - 18 + l, j + 1 + l, 18 * this.iconOffsets[k], 18);
+				StatsScreen.this.blitSlotIcon(guiGraphics, i + StatsScreen.this.getColumnX(k) - 18 + l, j + 1 + l, this.iconSprites[k]);
 			}
 		}
 
@@ -301,15 +311,10 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderBackground(GuiGraphics guiGraphics) {
-			StatsScreen.this.renderBackground(guiGraphics);
-		}
-
-		@Override
 		protected void clickedHeader(int i, int j) {
 			this.headerPressed = -1;
 
-			for (int k = 0; k < this.iconOffsets.length; k++) {
+			for (int k = 0; k < this.iconSprites.length; k++) {
 				int l = i - StatsScreen.this.getColumnX(k);
 				if (l >= -36 && l <= 0) {
 					this.headerPressed = k;
@@ -348,12 +353,12 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 					}
 
 					Item item = itemRow.getItem();
-					this.renderMousehoverTooltip(guiGraphics, this.getString(item), i, j);
+					guiGraphics.renderTooltip(StatsScreen.this.font, this.getString(item), i, j);
 				} else {
 					Component component = null;
 					int l = i - k;
 
-					for (int m = 0; m < this.iconOffsets.length; m++) {
+					for (int m = 0; m < this.iconSprites.length; m++) {
 						int n = StatsScreen.this.getColumnX(m);
 						if (l >= n - 18 && l <= n) {
 							component = this.getColumn(m).getDisplayName();
@@ -361,21 +366,10 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 						}
 					}
 
-					this.renderMousehoverTooltip(guiGraphics, component, i, j);
+					if (component != null) {
+						guiGraphics.renderTooltip(StatsScreen.this.font, component, i, j);
+					}
 				}
-			}
-		}
-
-		protected void renderMousehoverTooltip(GuiGraphics guiGraphics, @Nullable Component component, int i, int j) {
-			if (component != null) {
-				int k = i + 12;
-				int l = j - 12;
-				int m = StatsScreen.this.font.width(component);
-				guiGraphics.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-				guiGraphics.pose().pushPose();
-				guiGraphics.pose().translate(0.0F, 0.0F, 400.0F);
-				guiGraphics.drawString(StatsScreen.this.font, component, k, l, -1);
-				guiGraphics.pose().popPose();
 			}
 		}
 
@@ -485,11 +479,6 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 					this.addEntry(new StatsScreen.MobsStatisticsList.MobRow(entityType));
 				}
 			}
-		}
-
-		@Override
-		protected void renderBackground(GuiGraphics guiGraphics) {
-			StatsScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Environment(EnvType.CLIENT)

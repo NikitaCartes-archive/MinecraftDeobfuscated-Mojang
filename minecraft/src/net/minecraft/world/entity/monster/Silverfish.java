@@ -32,6 +32,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.InfestedBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3f;
 
 public class Silverfish extends Monster {
 	@Nullable
@@ -51,11 +52,6 @@ public class Silverfish extends Monster {
 		this.goalSelector.addGoal(5, new Silverfish.SilverfishMergeWithStoneGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
-	}
-
-	@Override
-	public double getMyRidingOffset() {
-		return 0.1;
 	}
 
 	@Override
@@ -136,6 +132,11 @@ public class Silverfish extends Monster {
 	@Override
 	public MobType getMobType() {
 		return MobType.ARTHROPOD;
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height - 0.0625F * f, 0.0F);
 	}
 
 	static class SilverfishMergeWithStoneGoal extends RandomStrollGoal {

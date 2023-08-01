@@ -17,6 +17,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import org.joml.Vector3f;
 
 public class CaveSpider extends Spider {
 	public CaveSpider(EntityType<? extends CaveSpider> entityType, Level level) {
@@ -64,5 +65,15 @@ public class CaveSpider extends Spider {
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
 		return 0.45F;
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height, 0.0F);
+	}
+
+	@Override
+	protected float ridingOffset(Entity entity) {
+		return entity.getBbWidth() <= this.getBbWidth() ? -0.21875F : 0.0F;
 	}
 }

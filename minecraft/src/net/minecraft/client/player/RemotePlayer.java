@@ -6,7 +6,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.phys.Vec3;
 
@@ -46,18 +45,12 @@ public class RemotePlayer extends AbstractClientPlayer {
 	@Override
 	public void aiStep() {
 		if (this.lerpSteps > 0) {
-			double d = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
-			double e = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
-			double f = this.getZ() + (this.lerpZ - this.getZ()) / (double)this.lerpSteps;
-			this.setYRot(this.getYRot() + (float)Mth.wrapDegrees(this.lerpYRot - (double)this.getYRot()) / (float)this.lerpSteps);
-			this.setXRot(this.getXRot() + (float)(this.lerpXRot - (double)this.getXRot()) / (float)this.lerpSteps);
+			this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
 			this.lerpSteps--;
-			this.setPos(d, e, f);
-			this.setRot(this.getYRot(), this.getXRot());
 		}
 
 		if (this.lerpHeadSteps > 0) {
-			this.yHeadRot = this.yHeadRot + (float)(Mth.wrapDegrees(this.lyHeadRot - (double)this.yHeadRot) / (double)this.lerpHeadSteps);
+			this.lerpHeadRotationStep(this.lerpHeadSteps, this.lerpYHeadRot);
 			this.lerpHeadSteps--;
 		}
 
@@ -74,14 +67,14 @@ public class RemotePlayer extends AbstractClientPlayer {
 
 		this.oBob = this.bob;
 		this.updateSwingTime();
-		float g;
+		float f;
 		if (this.onGround() && !this.isDeadOrDying()) {
-			g = (float)Math.min(0.1, this.getDeltaMovement().horizontalDistance());
+			f = (float)Math.min(0.1, this.getDeltaMovement().horizontalDistance());
 		} else {
-			g = 0.0F;
+			f = 0.0F;
 		}
 
-		this.bob = this.bob + (g - this.bob) * 0.4F;
+		this.bob = this.bob + (f - this.bob) * 0.4F;
 		this.level().getProfiler().push("push");
 		this.pushEntities();
 		this.level().getProfiler().pop();

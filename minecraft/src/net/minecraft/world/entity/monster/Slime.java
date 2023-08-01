@@ -41,6 +41,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Slime extends Mob implements Enemy {
 	private static final EntityDataAccessor<Integer> ID_SIZE = SynchedEntityData.defineId(Slime.class, EntityDataSerializers.INT);
@@ -245,6 +246,11 @@ public class Slime extends Mob implements Enemy {
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
 		return 0.625F * entityDimensions.height;
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height - 0.015625F * (float)this.getSize() * f, 0.0F);
 	}
 
 	protected boolean isDealsDamage() {

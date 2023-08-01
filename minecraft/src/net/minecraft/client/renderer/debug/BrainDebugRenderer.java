@@ -3,7 +3,6 @@ package net.minecraft.client.renderer.debug;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import java.util.Collection;
@@ -21,10 +20,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Position;
+import net.minecraft.network.protocol.common.custom.BrainDebugPayload;
 import net.minecraft.network.protocol.game.DebugEntityNameGenerator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.pathfinder.Path;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -66,7 +65,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private static final int ORANGE = -23296;
 	private final Minecraft minecraft;
 	private final Map<BlockPos, BrainDebugRenderer.PoiInfo> pois = Maps.<BlockPos, BrainDebugRenderer.PoiInfo>newHashMap();
-	private final Map<UUID, BrainDebugRenderer.BrainDump> brainDumpsPerEntity = Maps.<UUID, BrainDebugRenderer.BrainDump>newHashMap();
+	private final Map<UUID, BrainDebugPayload.BrainDump> brainDumpsPerEntity = Maps.<UUID, BrainDebugPayload.BrainDump>newHashMap();
 	@Nullable
 	private UUID lastLookedAtUuid;
 
@@ -98,12 +97,12 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 	}
 
-	public void addOrUpdateBrainDump(BrainDebugRenderer.BrainDump brainDump) {
-		this.brainDumpsPerEntity.put(brainDump.uuid, brainDump);
+	public void addOrUpdateBrainDump(BrainDebugPayload.BrainDump brainDump) {
+		this.brainDumpsPerEntity.put(brainDump.uuid(), brainDump);
 	}
 
 	public void removeBrainDump(int i) {
-		this.brainDumpsPerEntity.values().removeIf(brainDump -> brainDump.id == i);
+		this.brainDumpsPerEntity.values().removeIf(brainDump -> brainDump.id() == i);
 	}
 
 	@Override
@@ -117,7 +116,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	private void clearRemovedEntities() {
 		this.brainDumpsPerEntity.entrySet().removeIf(entry -> {
-			Entity entity = this.minecraft.level.getEntity(((BrainDebugRenderer.BrainDump)entry.getValue()).id);
+			Entity entity = this.minecraft.level.getEntity(((BrainDebugPayload.BrainDump)entry.getValue()).id());
 			return entity == null || entity.isRemoved();
 		});
 	}
@@ -181,71 +180,71 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		renderTextOverPoi(poseStack, multiBufferSource, poiInfo.type, poiInfo, ++i, -1);
 	}
 
-	private void renderPath(PoseStack poseStack, MultiBufferSource multiBufferSource, BrainDebugRenderer.BrainDump brainDump, double d, double e, double f) {
-		if (brainDump.path != null) {
-			PathfindingRenderer.renderPath(poseStack, multiBufferSource, brainDump.path, 0.5F, false, false, d, e, f);
+	private void renderPath(PoseStack poseStack, MultiBufferSource multiBufferSource, BrainDebugPayload.BrainDump brainDump, double d, double e, double f) {
+		if (brainDump.path() != null) {
+			PathfindingRenderer.renderPath(poseStack, multiBufferSource, brainDump.path(), 0.5F, false, false, d, e, f);
 		}
 	}
 
-	private void renderBrainInfo(PoseStack poseStack, MultiBufferSource multiBufferSource, BrainDebugRenderer.BrainDump brainDump, double d, double e, double f) {
+	private void renderBrainInfo(PoseStack poseStack, MultiBufferSource multiBufferSource, BrainDebugPayload.BrainDump brainDump, double d, double e, double f) {
 		boolean bl = this.isMobSelected(brainDump);
 		int i = 0;
-		renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, brainDump.name, -1, 0.03F);
+		renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, brainDump.name(), -1, 0.03F);
 		i++;
 		if (bl) {
-			renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, brainDump.profession + " " + brainDump.xp + " xp", -1, 0.02F);
+			renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, brainDump.profession() + " " + brainDump.xp() + " xp", -1, 0.02F);
 			i++;
 		}
 
 		if (bl) {
-			int j = brainDump.health < brainDump.maxHealth ? -23296 : -1;
+			int j = brainDump.health() < brainDump.maxHealth() ? -23296 : -1;
 			renderTextOverMob(
 				poseStack,
 				multiBufferSource,
-				brainDump.pos,
+				brainDump.pos(),
 				i,
-				"health: " + String.format(Locale.ROOT, "%.1f", brainDump.health) + " / " + String.format(Locale.ROOT, "%.1f", brainDump.maxHealth),
+				"health: " + String.format(Locale.ROOT, "%.1f", brainDump.health()) + " / " + String.format(Locale.ROOT, "%.1f", brainDump.maxHealth()),
 				j,
 				0.02F
 			);
 			i++;
 		}
 
-		if (bl && !brainDump.inventory.equals("")) {
-			renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, brainDump.inventory, -98404, 0.02F);
+		if (bl && !brainDump.inventory().equals("")) {
+			renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, brainDump.inventory(), -98404, 0.02F);
 			i++;
 		}
 
 		if (bl) {
-			for (String string : brainDump.behaviors) {
-				renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -16711681, 0.02F);
+			for (String string : brainDump.behaviors()) {
+				renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, string, -16711681, 0.02F);
 				i++;
 			}
 		}
 
 		if (bl) {
-			for (String string : brainDump.activities) {
-				renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -16711936, 0.02F);
+			for (String string : brainDump.activities()) {
+				renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, string, -16711936, 0.02F);
 				i++;
 			}
 		}
 
-		if (brainDump.wantsGolem) {
-			renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, "Wants Golem", -23296, 0.02F);
+		if (brainDump.wantsGolem()) {
+			renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, "Wants Golem", -23296, 0.02F);
 			i++;
 		}
 
-		if (bl && brainDump.angerLevel != -1) {
-			renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, "Anger Level: " + brainDump.angerLevel, -98404, 0.02F);
+		if (bl && brainDump.angerLevel() != -1) {
+			renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, "Anger Level: " + brainDump.angerLevel(), -98404, 0.02F);
 			i++;
 		}
 
 		if (bl) {
-			for (String string : brainDump.gossips) {
-				if (string.startsWith(brainDump.name)) {
-					renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -1, 0.02F);
+			for (String string : brainDump.gossips()) {
+				if (string.startsWith(brainDump.name())) {
+					renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, string, -1, 0.02F);
 				} else {
-					renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -23296, 0.02F);
+					renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, string, -23296, 0.02F);
 				}
 
 				i++;
@@ -253,8 +252,8 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		if (bl) {
-			for (String string : Lists.reverse(brainDump.memories)) {
-				renderTextOverMob(poseStack, multiBufferSource, brainDump.pos, i, string, -3355444, 0.02F);
+			for (String string : Lists.reverse(brainDump.memories())) {
+				renderTextOverMob(poseStack, multiBufferSource, brainDump.pos(), i, string, -3355444, 0.02F);
 				i++;
 			}
 		}
@@ -298,14 +297,14 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		return (Set<String>)this.getPotentialTicketHolders(poiInfo.pos).stream().map(DebugEntityNameGenerator::getEntityName).collect(Collectors.toSet());
 	}
 
-	private boolean isMobSelected(BrainDebugRenderer.BrainDump brainDump) {
-		return Objects.equals(this.lastLookedAtUuid, brainDump.uuid);
+	private boolean isMobSelected(BrainDebugPayload.BrainDump brainDump) {
+		return Objects.equals(this.lastLookedAtUuid, brainDump.uuid());
 	}
 
-	private boolean isPlayerCloseEnoughToMob(BrainDebugRenderer.BrainDump brainDump) {
+	private boolean isPlayerCloseEnoughToMob(BrainDebugPayload.BrainDump brainDump) {
 		Player player = this.minecraft.player;
-		BlockPos blockPos = BlockPos.containing(player.getX(), brainDump.pos.y(), player.getZ());
-		BlockPos blockPos2 = BlockPos.containing(brainDump.pos);
+		BlockPos blockPos = BlockPos.containing(player.getX(), brainDump.pos().y(), player.getZ());
+		BlockPos blockPos2 = BlockPos.containing(brainDump.pos());
 		return blockPos.closerThan(blockPos2, 30.0);
 	}
 
@@ -314,7 +313,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			.values()
 			.stream()
 			.filter(brainDump -> brainDump.hasPoi(blockPos))
-			.map(BrainDebugRenderer.BrainDump::getUuid)
+			.map(BrainDebugPayload.BrainDump::uuid)
 			.collect(Collectors.toSet());
 	}
 
@@ -323,17 +322,17 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			.values()
 			.stream()
 			.filter(brainDump -> brainDump.hasPotentialPoi(blockPos))
-			.map(BrainDebugRenderer.BrainDump::getUuid)
+			.map(BrainDebugPayload.BrainDump::uuid)
 			.collect(Collectors.toSet());
 	}
 
 	private Map<BlockPos, List<String>> getGhostPois() {
 		Map<BlockPos, List<String>> map = Maps.<BlockPos, List<String>>newHashMap();
 
-		for (BrainDebugRenderer.BrainDump brainDump : this.brainDumpsPerEntity.values()) {
-			for (BlockPos blockPos : Iterables.concat(brainDump.pois, brainDump.potentialPois)) {
+		for (BrainDebugPayload.BrainDump brainDump : this.brainDumpsPerEntity.values()) {
+			for (BlockPos blockPos : Iterables.concat(brainDump.pois(), brainDump.potentialPois())) {
 				if (!this.pois.containsKey(blockPos)) {
-					((List)map.computeIfAbsent(blockPos, blockPosx -> Lists.newArrayList())).add(brainDump.name);
+					((List)map.computeIfAbsent(blockPos, blockPosx -> Lists.newArrayList())).add(brainDump.name());
 				}
 			}
 		}
@@ -346,60 +345,9 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class BrainDump {
-		public final UUID uuid;
-		public final int id;
-		public final String name;
-		public final String profession;
-		public final int xp;
-		public final float health;
-		public final float maxHealth;
-		public final Position pos;
-		public final String inventory;
-		public final Path path;
-		public final boolean wantsGolem;
-		public final int angerLevel;
-		public final List<String> activities = Lists.<String>newArrayList();
-		public final List<String> behaviors = Lists.<String>newArrayList();
-		public final List<String> memories = Lists.<String>newArrayList();
-		public final List<String> gossips = Lists.<String>newArrayList();
-		public final Set<BlockPos> pois = Sets.<BlockPos>newHashSet();
-		public final Set<BlockPos> potentialPois = Sets.<BlockPos>newHashSet();
-
-		public BrainDump(
-			UUID uUID, int i, String string, String string2, int j, float f, float g, Position position, String string3, @Nullable Path path, boolean bl, int k
-		) {
-			this.uuid = uUID;
-			this.id = i;
-			this.name = string;
-			this.profession = string2;
-			this.xp = j;
-			this.health = f;
-			this.maxHealth = g;
-			this.pos = position;
-			this.inventory = string3;
-			this.path = path;
-			this.wantsGolem = bl;
-			this.angerLevel = k;
-		}
-
-		boolean hasPoi(BlockPos blockPos) {
-			return this.pois.stream().anyMatch(blockPos::equals);
-		}
-
-		boolean hasPotentialPoi(BlockPos blockPos) {
-			return this.potentialPois.contains(blockPos);
-		}
-
-		public UUID getUuid() {
-			return this.uuid;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
 	public static class PoiInfo {
 		public final BlockPos pos;
-		public String type;
+		public final String type;
 		public int freeTicketCount;
 
 		public PoiInfo(BlockPos blockPos, String string, int i) {

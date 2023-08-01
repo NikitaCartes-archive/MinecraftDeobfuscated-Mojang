@@ -1,8 +1,14 @@
 package net.minecraft.network.protocol.login;
 
-import net.minecraft.network.PacketListener;
+import net.minecraft.network.ClientboundPacketListener;
+import net.minecraft.network.ConnectionProtocol;
 
-public interface ClientLoginPacketListener extends PacketListener {
+public interface ClientLoginPacketListener extends ClientboundPacketListener {
+	@Override
+	default ConnectionProtocol protocol() {
+		return ConnectionProtocol.LOGIN;
+	}
+
 	void handleHello(ClientboundHelloPacket clientboundHelloPacket);
 
 	void handleGameProfile(ClientboundGameProfilePacket clientboundGameProfilePacket);

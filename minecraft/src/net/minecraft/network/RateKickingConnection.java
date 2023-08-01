@@ -3,7 +3,7 @@ package net.minecraft.network;
 import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import org.slf4j.Logger;
 
 public class RateKickingConnection extends Connection {

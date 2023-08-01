@@ -21,7 +21,10 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class RecipeButton extends AbstractWidget {
-	private static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+	private static final ResourceLocation SLOT_MANY_CRAFTABLE_SPRITE = new ResourceLocation("recipe_book/slot_many_craftable");
+	private static final ResourceLocation SLOT_CRAFTABLE_SPRITE = new ResourceLocation("recipe_book/slot_craftable");
+	private static final ResourceLocation SLOT_MANY_UNCRAFTABLE_SPRITE = new ResourceLocation("recipe_book/slot_many_uncraftable");
+	private static final ResourceLocation SLOT_UNCRAFTABLE_SPRITE = new ResourceLocation("recipe_book/slot_uncraftable");
 	private static final float ANIMATION_TIME = 15.0F;
 	private static final int BACKGROUND_SIZE = 25;
 	public static final int TICKS_TO_SWAP = 30;
@@ -62,15 +65,17 @@ public class RecipeButton extends AbstractWidget {
 			this.time += f;
 		}
 
-		Minecraft minecraft = Minecraft.getInstance();
-		int k = 29;
-		if (!this.collection.hasCraftable()) {
-			k += 25;
-		}
-
-		int l = 206;
-		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
-			l += 25;
+		ResourceLocation resourceLocation;
+		if (this.collection.hasCraftable()) {
+			if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
+				resourceLocation = SLOT_MANY_CRAFTABLE_SPRITE;
+			} else {
+				resourceLocation = SLOT_CRAFTABLE_SPRITE;
+			}
+		} else if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
+			resourceLocation = SLOT_MANY_UNCRAFTABLE_SPRITE;
+		} else {
+			resourceLocation = SLOT_UNCRAFTABLE_SPRITE;
 		}
 
 		boolean bl = this.animationTime > 0.0F;
@@ -83,17 +88,17 @@ public class RecipeButton extends AbstractWidget {
 			this.animationTime -= f;
 		}
 
-		guiGraphics.blit(RECIPE_BOOK_LOCATION, this.getX(), this.getY(), k, l, this.width, this.height);
+		guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
 		List<Recipe<?>> list = this.getOrderedRecipes();
 		this.currentIndex = Mth.floor(this.time / 30.0F) % list.size();
 		ItemStack itemStack = ((Recipe)list.get(this.currentIndex)).getResultItem(this.collection.registryAccess());
-		int m = 4;
+		int k = 4;
 		if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
-			guiGraphics.renderItem(itemStack, this.getX() + m + 1, this.getY() + m + 1, 0, 10);
-			m--;
+			guiGraphics.renderItem(itemStack, this.getX() + k + 1, this.getY() + k + 1, 0, 10);
+			k--;
 		}
 
-		guiGraphics.renderFakeItem(itemStack, this.getX() + m, this.getY() + m);
+		guiGraphics.renderFakeItem(itemStack, this.getX() + k, this.getY() + k);
 		if (bl) {
 			guiGraphics.pose().popPose();
 		}

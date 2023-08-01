@@ -12,6 +12,9 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
@@ -57,12 +60,12 @@ public class ServerScoreboard extends Scoreboard {
 	}
 
 	@Override
-	public void setDisplayObjective(int i, @Nullable Objective objective) {
-		Objective objective2 = this.getDisplayObjective(i);
-		super.setDisplayObjective(i, objective);
+	public void setDisplayObjective(DisplaySlot displaySlot, @Nullable Objective objective) {
+		Objective objective2 = this.getDisplayObjective(displaySlot);
+		super.setDisplayObjective(displaySlot, objective);
 		if (objective2 != objective && objective2 != null) {
 			if (this.getObjectiveDisplaySlotCount(objective2) > 0) {
-				this.server.getPlayerList().broadcastAll(new ClientboundSetDisplayObjectivePacket(i, objective));
+				this.server.getPlayerList().broadcastAll(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
 			} else {
 				this.stopTrackingObjective(objective2);
 			}
@@ -70,7 +73,7 @@ public class ServerScoreboard extends Scoreboard {
 
 		if (objective != null) {
 			if (this.trackedObjectives.contains(objective)) {
-				this.server.getPlayerList().broadcastAll(new ClientboundSetDisplayObjectivePacket(i, objective));
+				this.server.getPlayerList().broadcastAll(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
 			} else {
 				this.startTrackingObjective(objective);
 			}
@@ -158,9 +161,9 @@ public class ServerScoreboard extends Scoreboard {
 		List<Packet<?>> list = Lists.<Packet<?>>newArrayList();
 		list.add(new ClientboundSetObjectivePacket(objective, 0));
 
-		for (int i = 0; i < 19; i++) {
-			if (this.getDisplayObjective(i) == objective) {
-				list.add(new ClientboundSetDisplayObjectivePacket(i, objective));
+		for (DisplaySlot displaySlot : DisplaySlot.values()) {
+			if (this.getDisplayObjective(displaySlot) == objective) {
+				list.add(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
 			}
 		}
 
@@ -187,9 +190,9 @@ public class ServerScoreboard extends Scoreboard {
 		List<Packet<?>> list = Lists.<Packet<?>>newArrayList();
 		list.add(new ClientboundSetObjectivePacket(objective, 1));
 
-		for (int i = 0; i < 19; i++) {
-			if (this.getDisplayObjective(i) == objective) {
-				list.add(new ClientboundSetDisplayObjectivePacket(i, objective));
+		for (DisplaySlot displaySlot : DisplaySlot.values()) {
+			if (this.getDisplayObjective(displaySlot) == objective) {
+				list.add(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
 			}
 		}
 
@@ -211,8 +214,8 @@ public class ServerScoreboard extends Scoreboard {
 	public int getObjectiveDisplaySlotCount(Objective objective) {
 		int i = 0;
 
-		for (int j = 0; j < 19; j++) {
-			if (this.getDisplayObjective(j) == objective) {
+		for (DisplaySlot displaySlot : DisplaySlot.values()) {
+			if (this.getDisplayObjective(displaySlot) == objective) {
 				i++;
 			}
 		}
@@ -220,13 +223,17 @@ public class ServerScoreboard extends Scoreboard {
 		return i;
 	}
 
-	public ScoreboardSaveData createData() {
+	public SavedData.Factory<ScoreboardSaveData> dataFactory() {
+		return new SavedData.Factory<>(this::createData, this::createData, DataFixTypes.SAVED_DATA_SCOREBOARD);
+	}
+
+	private ScoreboardSaveData createData() {
 		ScoreboardSaveData scoreboardSaveData = new ScoreboardSaveData(this);
 		this.addDirtyListener(scoreboardSaveData::setDirty);
 		return scoreboardSaveData;
 	}
 
-	public ScoreboardSaveData createData(CompoundTag compoundTag) {
+	private ScoreboardSaveData createData(CompoundTag compoundTag) {
 		return this.createData().load(compoundTag);
 	}
 

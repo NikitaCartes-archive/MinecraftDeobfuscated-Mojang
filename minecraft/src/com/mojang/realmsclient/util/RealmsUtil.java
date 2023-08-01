@@ -1,43 +1,23 @@
 package com.mojang.realmsclient.util;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.util.UUIDTypeAdapter;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
+import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class RealmsUtil {
-	static final MinecraftSessionService SESSION_SERVICE = Minecraft.getInstance().getMinecraftSessionService();
 	private static final Component RIGHT_NOW = Component.translatable("mco.util.time.now");
-	private static final LoadingCache<String, GameProfile> GAME_PROFILE_CACHE = CacheBuilder.newBuilder()
-		.expireAfterWrite(60L, TimeUnit.MINUTES)
-		.build(new CacheLoader<String, GameProfile>() {
-			public GameProfile load(String string) {
-				return RealmsUtil.SESSION_SERVICE.fillProfileProperties(new GameProfile(UUIDTypeAdapter.fromString(string), null), false);
-			}
-		});
 	private static final int MINUTES = 60;
 	private static final int HOURS = 3600;
 	private static final int DAYS = 86400;
-
-	public static String uuidToName(String string) {
-		return GAME_PROFILE_CACHE.getUnchecked(string).getName();
-	}
-
-	public static GameProfile getGameProfile(String string) {
-		return GAME_PROFILE_CACHE.getUnchecked(string);
-	}
 
 	public static Component convertToAgePresentation(long l) {
 		if (l < 0L) {
@@ -63,9 +43,10 @@ public class RealmsUtil {
 		return convertToAgePresentation(System.currentTimeMillis() - date.getTime());
 	}
 
-	public static void renderPlayerFace(GuiGraphics guiGraphics, int i, int j, int k, String string) {
-		GameProfile gameProfile = getGameProfile(string);
-		ResourceLocation resourceLocation = Minecraft.getInstance().getSkinManager().getInsecureSkinLocation(gameProfile);
-		PlayerFaceRenderer.draw(guiGraphics, resourceLocation, i, j, k);
+	public static void renderPlayerFace(GuiGraphics guiGraphics, int i, int j, int k, UUID uUID) {
+		Minecraft minecraft = Minecraft.getInstance();
+		GameProfile gameProfile = minecraft.getMinecraftSessionService().fetchProfile(uUID, false);
+		PlayerSkin playerSkin = gameProfile != null ? minecraft.getSkinManager().getInsecureSkin(gameProfile) : DefaultPlayerSkin.get(uUID);
+		PlayerFaceRenderer.draw(guiGraphics, playerSkin.texture(), i, j, k);
 	}
 }

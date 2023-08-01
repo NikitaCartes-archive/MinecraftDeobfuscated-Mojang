@@ -17,6 +17,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -28,11 +29,11 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsConfigureWorldScreen extends RealmsScreen {
+	private static final ResourceLocation EXPIRED_SPRITE = new ResourceLocation("realm_status/expired");
+	private static final ResourceLocation EXPIRES_SOON_SPRITE = new ResourceLocation("realm_status/expires_soon");
+	private static final ResourceLocation OPEN_SPRITE = new ResourceLocation("realm_status/open");
+	private static final ResourceLocation CLOSED_SPRITE = new ResourceLocation("realm_status/closed");
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final ResourceLocation ON_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/on_icon.png");
-	private static final ResourceLocation OFF_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/off_icon.png");
-	private static final ResourceLocation EXPIRED_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/expired_icon.png");
-	private static final ResourceLocation EXPIRES_SOON_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/expires_soon_icon.png");
 	private static final Component WORLD_LIST_TITLE = Component.translatable("mco.configure.worlds.title");
 	private static final Component TITLE = Component.translatable("mco.configure.world.title");
 	private static final Component SERVER_EXPIRED_TOOLTIP = Component.translatable("mco.selectServer.expired");
@@ -58,7 +59,6 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	private Button resetWorldButton;
 	private Button switchMinigameButton;
 	private boolean stateChanged;
-	private int animTick;
 	private int clicks;
 	private final List<RealmsWorldSlotButton> slotButtonList = Lists.<RealmsWorldSlotButton>newArrayList();
 
@@ -217,7 +217,6 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	@Override
 	public void tick() {
 		super.tick();
-		this.animTick++;
 		this.clicks--;
 		if (this.clicks < 0) {
 			this.clicks = 0;
@@ -228,29 +227,28 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.toolTip = null;
-		this.renderBackground(guiGraphics);
-		guiGraphics.drawCenteredString(this.font, WORLD_LIST_TITLE, this.width / 2, row(4), 16777215);
 		super.render(guiGraphics, i, j, f);
+		this.toolTip = null;
+		guiGraphics.drawCenteredString(this.font, WORLD_LIST_TITLE, this.width / 2, row(4), -1);
 		if (this.serverData == null) {
-			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, 16777215);
+			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, -1);
 		} else {
 			String string = this.serverData.getName();
 			int k = this.font.width(string);
-			int l = this.serverData.state == RealmsServer.State.CLOSED ? 10526880 : 8388479;
+			int l = this.serverData.state == RealmsServer.State.CLOSED ? -6250336 : 8388479;
 			int m = this.font.width(this.title);
-			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 16777215);
+			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, -1);
 			guiGraphics.drawCenteredString(this.font, string, this.width / 2, 24, l);
 			int n = Math.min(this.centerButton(2, 3) + 80 - 11, this.width / 2 + k / 2 + m / 2 + 10);
 			this.drawServerStatus(guiGraphics, n, 7, i, j);
 			if (this.isMinigame()) {
 				guiGraphics.drawString(
-					this.font, Component.translatable("mco.configure.world.minigame", this.serverData.getMinigameName()), this.leftX + 80 + 20 + 10, row(13), 16777215, false
+					this.font, Component.translatable("mco.configure.world.minigame", this.serverData.getMinigameName()), this.leftX + 80 + 20 + 10, row(13), -1, false
 				);
 			}
 
 			if (this.toolTip != null) {
-				this.renderMousehoverTooltip(guiGraphics, this.toolTip, i, j);
+				guiGraphics.renderTooltip(this.font, this.toolTip, i, j);
 			}
 		}
 	}
@@ -295,8 +293,8 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 					}
 				});
 			} catch (RealmsServiceException var5) {
-				LOGGER.error("Couldn't get own world");
-				this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsGenericErrorScreen(Component.nullToEmpty(var5.getMessage()), this.lastScreen)));
+				LOGGER.error("Couldn't get own world", (Throwable)var5);
+				this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsGenericErrorScreen(var5, this.lastScreen)));
 			}
 		}).start();
 	}
@@ -365,7 +363,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 								realmsServer,
 								Component.translatable("mco.configure.world.switch.slot"),
 								Component.translatable("mco.configure.world.switch.slot.subtitle"),
-								10526880,
+								-6250336,
 								CommonComponents.GUI_CANCEL,
 								() -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())),
 								() -> this.minecraft.setScreen(this.getNewScreen())
@@ -385,18 +383,6 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			);
 	}
 
-	protected void renderMousehoverTooltip(GuiGraphics guiGraphics, @Nullable Component component, int i, int j) {
-		int k = i + 12;
-		int l = j - 12;
-		int m = this.font.width(component);
-		if (k + m + 3 > this.rightX) {
-			k = k - m - 20;
-		}
-
-		guiGraphics.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-		guiGraphics.drawString(this.font, component, k, l, 16777215);
-	}
-
 	private void drawServerStatus(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		if (this.serverData.expired) {
 			this.drawExpired(guiGraphics, i, j, k, l);
@@ -412,19 +398,14 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	}
 
 	private void drawExpired(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blit(EXPIRED_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+		guiGraphics.blitSprite(EXPIRED_SPRITE, i, j, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
 			this.toolTip = SERVER_EXPIRED_TOOLTIP;
 		}
 	}
 
 	private void drawExpiring(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
-		if (this.animTick % 20 < 10) {
-			guiGraphics.blit(EXPIRES_SOON_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 20, 28);
-		} else {
-			guiGraphics.blit(EXPIRES_SOON_ICON_LOCATION, i, j, 10.0F, 0.0F, 10, 28, 20, 28);
-		}
-
+		guiGraphics.blitSprite(EXPIRES_SOON_SPRITE, i, j, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
 			if (m <= 0) {
 				this.toolTip = SERVER_EXPIRING_SOON_TOOLTIP;
@@ -437,14 +418,14 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	}
 
 	private void drawOpen(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blit(ON_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+		guiGraphics.blitSprite(OPEN_SPRITE, i, j, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
 			this.toolTip = SERVER_OPEN_TOOLTIP;
 		}
 	}
 
 	private void drawClose(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blit(OFF_ICON_LOCATION, i, j, 0.0F, 0.0F, 10, 28, 10, 28);
+		guiGraphics.blitSprite(CLOSED_SPRITE, i, j, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
 			this.toolTip = SERVER_CLOSED_TOOLTIP;
 		}
@@ -462,12 +443,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 
 	private void hide(Button button) {
 		button.visible = false;
-		this.removeWidget(button);
 	}
 
 	private void show(Button button) {
 		button.visible = true;
-		this.addRenderableWidget(button);
 	}
 
 	private void hideMinigameButtons() {
@@ -484,7 +463,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			realmsClient.updateSlot(this.serverData.id, this.serverData.activeSlot, realmsWorldOptions);
 			this.serverData.slots.put(this.serverData.activeSlot, realmsWorldOptions);
 		} catch (RealmsServiceException var5) {
-			LOGGER.error("Couldn't save slot settings");
+			LOGGER.error("Couldn't save slot settings", (Throwable)var5);
 			this.minecraft.setScreen(new RealmsGenericErrorScreen(var5, this));
 			return;
 		}
@@ -493,7 +472,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	}
 
 	public void saveSettings(String string, String string2) {
-		String string3 = string2.trim().isEmpty() ? null : string2;
+		String string3 = Util.isBlank(string2) ? null : string2;
 		RealmsClient realmsClient = RealmsClient.create();
 
 		try {
@@ -501,7 +480,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			this.serverData.setName(string);
 			this.serverData.setDescription(string3);
 		} catch (RealmsServiceException var6) {
-			LOGGER.error("Couldn't save settings");
+			LOGGER.error("Couldn't save settings", (Throwable)var6);
 			this.minecraft.setScreen(new RealmsGenericErrorScreen(var6, this));
 			return;
 		}

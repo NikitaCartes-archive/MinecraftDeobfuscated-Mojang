@@ -11,14 +11,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Divisor;
-import it.unimi.dsi.fastutil.ints.IntIterator;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -38,6 +37,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -52,7 +52,6 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector2ic;
 
@@ -65,12 +64,14 @@ public class GuiGraphics {
 	private final PoseStack pose;
 	private final MultiBufferSource.BufferSource bufferSource;
 	private final GuiGraphics.ScissorStack scissorStack = new GuiGraphics.ScissorStack();
+	private final GuiSpriteManager sprites;
 	private boolean managed;
 
 	private GuiGraphics(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
 		this.minecraft = minecraft;
 		this.pose = poseStack;
 		this.bufferSource = bufferSource;
+		this.sprites = minecraft.getGuiSprites();
 	}
 
 	public GuiGraphics(Minecraft minecraft, MultiBufferSource.BufferSource bufferSource) {
@@ -302,18 +303,7 @@ public class GuiGraphics {
 	}
 
 	public void blit(int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite) {
-		this.innerBlit(
-			textureAtlasSprite.atlasLocation(),
-			i,
-			i + l,
-			j,
-			j + m,
-			k,
-			textureAtlasSprite.getU0(),
-			textureAtlasSprite.getU1(),
-			textureAtlasSprite.getV0(),
-			textureAtlasSprite.getV1()
-		);
+		this.blitSprite(textureAtlasSprite, i, j, k, l, m);
 	}
 
 	public void blit(int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite, float f, float g, float h, float n) {
@@ -340,6 +330,66 @@ public class GuiGraphics {
 		this.fill(i, j + l - 1, i + k, j + l, m);
 		this.fill(i, j + 1, i + 1, j + l - 1, m);
 		this.fill(i + k - 1, j + 1, i + k, j + l - 1, m);
+	}
+
+	public void blitSprite(ResourceLocation resourceLocation, int i, int j, int k, int l) {
+		this.blitSprite(resourceLocation, i, j, 0, k, l);
+	}
+
+	public void blitSprite(ResourceLocation resourceLocation, int i, int j, int k, int l, int m) {
+		TextureAtlasSprite textureAtlasSprite = this.sprites.getSprite(resourceLocation);
+		GuiSpriteScaling guiSpriteScaling = this.sprites.getSpriteScaling(textureAtlasSprite);
+		if (guiSpriteScaling instanceof GuiSpriteScaling.Stretch) {
+			this.blitSprite(textureAtlasSprite, i, j, k, l, m);
+		} else if (guiSpriteScaling instanceof GuiSpriteScaling.Tile tile) {
+			this.blitTiledSprite(textureAtlasSprite, i, j, k, l, m, 0, 0, tile.width(), tile.height(), tile.width(), tile.height());
+		} else if (guiSpriteScaling instanceof GuiSpriteScaling.NineSlice nineSlice) {
+			this.blitNineSlicedSprite(textureAtlasSprite, nineSlice, i, j, k, l, m);
+		}
+	}
+
+	public void blitSprite(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p) {
+		this.blitSprite(resourceLocation, i, j, k, l, m, n, 0, o, p);
+	}
+
+	public void blitSprite(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
+		TextureAtlasSprite textureAtlasSprite = this.sprites.getSprite(resourceLocation);
+		GuiSpriteScaling guiSpriteScaling = this.sprites.getSpriteScaling(textureAtlasSprite);
+		if (guiSpriteScaling instanceof GuiSpriteScaling.Stretch) {
+			this.blitSprite(textureAtlasSprite, i, j, k, l, m, n, o, p, q);
+		} else {
+			this.blitSprite(resourceLocation, m, n, o, p, q);
+		}
+	}
+
+	private void blitSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
+		this.innerBlit(
+			textureAtlasSprite.atlasLocation(),
+			m,
+			m + p,
+			n,
+			n + q,
+			o,
+			textureAtlasSprite.getU((float)k / (float)i),
+			textureAtlasSprite.getU((float)(k + p) / (float)i),
+			textureAtlasSprite.getV((float)l / (float)j),
+			textureAtlasSprite.getV((float)(l + q) / (float)j)
+		);
+	}
+
+	private void blitSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m) {
+		this.innerBlit(
+			textureAtlasSprite.atlasLocation(),
+			i,
+			i + l,
+			j,
+			j + m,
+			k,
+			textureAtlasSprite.getU0(),
+			textureAtlasSprite.getU1(),
+			textureAtlasSprite.getV0(),
+			textureAtlasSprite.getV1()
+		);
 	}
 
 	public void blit(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n) {
@@ -390,66 +440,71 @@ public class GuiGraphics {
 		RenderSystem.disableBlend();
 	}
 
-	public void blitNineSliced(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
-		this.blitNineSliced(resourceLocation, i, j, k, l, m, m, m, m, n, o, p, q);
-	}
-
-	public void blitNineSliced(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r) {
-		this.blitNineSliced(resourceLocation, i, j, k, l, m, n, m, n, o, p, q, r);
-	}
-
-	public void blitNineSliced(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r, int s, int t) {
-		m = Math.min(m, k / 2);
-		o = Math.min(o, k / 2);
-		n = Math.min(n, l / 2);
-		p = Math.min(p, l / 2);
-		if (k == q && l == r) {
-			this.blit(resourceLocation, i, j, s, t, k, l);
-		} else if (l == r) {
-			this.blit(resourceLocation, i, j, s, t, m, l);
-			this.blitRepeating(resourceLocation, i + m, j, k - o - m, l, s + m, t, q - o - m, r);
-			this.blit(resourceLocation, i + k - o, j, s + q - o, t, o, l);
-		} else if (k == q) {
-			this.blit(resourceLocation, i, j, s, t, k, n);
-			this.blitRepeating(resourceLocation, i, j + n, k, l - p - n, s, t + n, q, r - p - n);
-			this.blit(resourceLocation, i, j + l - p, s, t + r - p, k, p);
+	private void blitNineSlicedSprite(TextureAtlasSprite textureAtlasSprite, GuiSpriteScaling.NineSlice nineSlice, int i, int j, int k, int l, int m) {
+		GuiSpriteScaling.NineSlice.Border border = nineSlice.border();
+		int n = Math.min(border.left(), l / 2);
+		int o = Math.min(border.right(), l / 2);
+		int p = Math.min(border.top(), m / 2);
+		int q = Math.min(border.bottom(), m / 2);
+		if (l == nineSlice.width() && m == nineSlice.height()) {
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, l, m);
+		} else if (m == nineSlice.height()) {
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, n, m);
+			this.blitTiledSprite(
+				textureAtlasSprite, i + n, j, k, l - o - n, m, n, 0, nineSlice.width() - o - n, nineSlice.height(), nineSlice.width(), nineSlice.height()
+			);
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, 0, i + l - o, j, k, o, m);
+		} else if (l == nineSlice.width()) {
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, l, p);
+			this.blitTiledSprite(
+				textureAtlasSprite, i, j + p, k, l, m - q - p, 0, p, nineSlice.width(), nineSlice.height() - q - p, nineSlice.width(), nineSlice.height()
+			);
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, nineSlice.height() - q, i, j + m - q, k, l, q);
 		} else {
-			this.blit(resourceLocation, i, j, s, t, m, n);
-			this.blitRepeating(resourceLocation, i + m, j, k - o - m, n, s + m, t, q - o - m, n);
-			this.blit(resourceLocation, i + k - o, j, s + q - o, t, o, n);
-			this.blit(resourceLocation, i, j + l - p, s, t + r - p, m, p);
-			this.blitRepeating(resourceLocation, i + m, j + l - p, k - o - m, p, s + m, t + r - p, q - o - m, p);
-			this.blit(resourceLocation, i + k - o, j + l - p, s + q - o, t + r - p, o, p);
-			this.blitRepeating(resourceLocation, i, j + n, m, l - p - n, s, t + n, m, r - p - n);
-			this.blitRepeating(resourceLocation, i + m, j + n, k - o - m, l - p - n, s + m, t + n, q - o - m, r - p - n);
-			this.blitRepeating(resourceLocation, i + k - o, j + n, m, l - p - n, s + q - o, t + n, o, r - p - n);
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, n, p);
+			this.blitTiledSprite(textureAtlasSprite, i + n, j, k, l - o - n, p, n, 0, nineSlice.width() - o - n, p, nineSlice.width(), nineSlice.height());
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, 0, i + l - o, j, k, o, p);
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, nineSlice.height() - q, i, j + m - q, k, n, q);
+			this.blitTiledSprite(
+				textureAtlasSprite, i + n, j + m - q, k, l - o - n, q, n, nineSlice.height() - q, nineSlice.width() - o - n, q, nineSlice.width(), nineSlice.height()
+			);
+			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, nineSlice.height() - q, i + l - o, j + m - q, k, o, q);
+			this.blitTiledSprite(textureAtlasSprite, i, j + p, k, n, m - q - p, 0, p, n, nineSlice.height() - q - p, nineSlice.width(), nineSlice.height());
+			this.blitTiledSprite(
+				textureAtlasSprite,
+				i + n,
+				j + p,
+				k,
+				l - o - n,
+				m - q - p,
+				n,
+				p,
+				nineSlice.width() - o - n,
+				nineSlice.height() - q - p,
+				nineSlice.width(),
+				nineSlice.height()
+			);
+			this.blitTiledSprite(
+				textureAtlasSprite, i + l - o, j + p, k, n, m - q - p, nineSlice.width() - o, p, o, nineSlice.height() - q - p, nineSlice.width(), nineSlice.height()
+			);
 		}
 	}
 
-	public void blitRepeating(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p) {
-		int q = i;
-		IntIterator intIterator = slices(k, o);
+	private void blitTiledSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r, int s) {
+		int t = 0;
 
-		while (intIterator.hasNext()) {
-			int r = intIterator.nextInt();
-			int s = (o - r) / 2;
-			int t = j;
-			IntIterator intIterator2 = slices(l, p);
+		while (t < l) {
+			int u = Math.min(p, l - t);
+			int v = 0;
 
-			while (intIterator2.hasNext()) {
-				int u = intIterator2.nextInt();
-				int v = (p - u) / 2;
-				this.blit(resourceLocation, q, t, m + s, n + v, r, u);
-				t += u;
+			while (v < m) {
+				int w = Math.min(q, m - v);
+				this.blitSprite(textureAtlasSprite, r, s, n, o, i + t, j + v, k, u, w);
+				v += q;
 			}
 
-			q += r;
+			t += p;
 		}
-	}
-
-	private static IntIterator slices(int i, int j) {
-		int k = Mth.positiveCeilDiv(i, j);
-		return new Divisor(i, k);
 	}
 
 	public void renderItem(ItemStack itemStack, int i, int j) {

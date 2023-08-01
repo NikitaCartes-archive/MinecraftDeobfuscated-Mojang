@@ -1,5 +1,6 @@
 package net.minecraft.server.network;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.logging.LogUtils;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
@@ -40,17 +42,16 @@ import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.RateKickingConnection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.LazyLoadedValue;
 import org.slf4j.Logger;
 
 public class ServerConnectionListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final LazyLoadedValue<NioEventLoopGroup> SERVER_EVENT_GROUP = new LazyLoadedValue<>(
+	public static final Supplier<NioEventLoopGroup> SERVER_EVENT_GROUP = Suppliers.memoize(
 		() -> new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Server IO #%d").setDaemon(true).build())
 	);
-	public static final LazyLoadedValue<EpollEventLoopGroup> SERVER_EPOLL_EVENT_GROUP = new LazyLoadedValue<>(
+	public static final Supplier<EpollEventLoopGroup> SERVER_EPOLL_EVENT_GROUP = Suppliers.memoize(
 		() -> new EpollEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat("Netty Epoll Server IO #%d").setDaemon(true).build())
 	);
 	final MinecraftServer server;
@@ -66,14 +67,14 @@ public class ServerConnectionListener {
 	public void startTcpServerListener(@Nullable InetAddress inetAddress, int i) throws IOException {
 		synchronized (this.channels) {
 			Class<? extends ServerSocketChannel> class_;
-			LazyLoadedValue<? extends EventLoopGroup> lazyLoadedValue;
+			EventLoopGroup eventLoopGroup;
 			if (Epoll.isAvailable() && this.server.isEpollEnabled()) {
 				class_ = EpollServerSocketChannel.class;
-				lazyLoadedValue = SERVER_EPOLL_EVENT_GROUP;
+				eventLoopGroup = (EventLoopGroup)SERVER_EPOLL_EVENT_GROUP.get();
 				LOGGER.info("Using epoll channel type");
 			} else {
 				class_ = NioServerSocketChannel.class;
-				lazyLoadedValue = SERVER_EVENT_GROUP;
+				eventLoopGroup = (EventLoopGroup)SERVER_EVENT_GROUP.get();
 				LOGGER.info("Using default channel type");
 			}
 
@@ -85,6 +86,8 @@ public class ServerConnectionListener {
 							new ChannelInitializer<Channel>() {
 								@Override
 								protected void initChannel(Channel channel) {
+									Connection.setInitialProtocolAttributes(channel);
+
 									try {
 										channel.config().setOption(ChannelOption.TCP_NODELAY, true);
 									} catch (ChannelException var5) {
@@ -92,17 +95,17 @@ public class ServerConnectionListener {
 
 									ChannelPipeline channelPipeline = channel.pipeline()
 										.addLast("timeout", new ReadTimeoutHandler(30))
-										.addLast("legacy_query", new LegacyQueryHandler(ServerConnectionListener.this));
+										.addLast("legacy_query", new LegacyQueryHandler(ServerConnectionListener.this.getServer()));
 									Connection.configureSerialization(channelPipeline, PacketFlow.SERVERBOUND);
 									int i = ServerConnectionListener.this.server.getRateLimitPacketsPerSecond();
 									Connection connection = (Connection)(i > 0 ? new RateKickingConnection(i) : new Connection(PacketFlow.SERVERBOUND));
 									ServerConnectionListener.this.connections.add(connection);
 									channelPipeline.addLast("packet_handler", connection);
-									connection.setListener(new ServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
+									connection.setListenerForServerboundHandshake(new ServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
 								}
 							}
 						)
-						.group(lazyLoadedValue.get())
+						.group(eventLoopGroup)
 						.localAddress(inetAddress, i)
 						.bind()
 						.syncUninterruptibly()
@@ -116,13 +119,15 @@ public class ServerConnectionListener {
 			channelFuture = new ServerBootstrap().channel(LocalServerChannel.class).childHandler(new ChannelInitializer<Channel>() {
 				@Override
 				protected void initChannel(Channel channel) {
+					Connection.setInitialProtocolAttributes(channel);
 					Connection connection = new Connection(PacketFlow.SERVERBOUND);
-					connection.setListener(new MemoryServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
+					connection.setListenerForServerboundHandshake(new MemoryServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
 					ServerConnectionListener.this.connections.add(connection);
 					ChannelPipeline channelPipeline = channel.pipeline();
+					Connection.configureInMemoryPipeline(channelPipeline, PacketFlow.SERVERBOUND);
 					channelPipeline.addLast("packet_handler", connection);
 				}
-			}).group(SERVER_EVENT_GROUP.get()).localAddress(LocalAddress.ANY).bind().syncUninterruptibly();
+			}).group((EventLoopGroup)SERVER_EVENT_GROUP.get()).localAddress(LocalAddress.ANY).bind().syncUninterruptibly();
 			this.channels.add(channelFuture);
 		}
 
@@ -156,7 +161,7 @@ public class ServerConnectionListener {
 								throw new ReportedException(CrashReport.forThrowable(var7, "Ticking memory connection"));
 							}
 
-							LOGGER.warn("Failed to handle packet for {}", connection.getRemoteAddress(), var7);
+							LOGGER.warn("Failed to handle packet for {}", connection.getLoggableAddress(this.server.logIPs()), var7);
 							Component component = Component.literal("Internal server error");
 							connection.send(new ClientboundDisconnectPacket(component), PacketSendListener.thenRun(() -> connection.disconnect(component)));
 							connection.setReadOnly();

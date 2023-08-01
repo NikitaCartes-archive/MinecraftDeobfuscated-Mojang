@@ -17,9 +17,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -43,8 +40,13 @@ import org.slf4j.Logger;
 public abstract class Display extends Entity {
 	static final Logger LOGGER = LogUtils.getLogger();
 	public static final int NO_BRIGHTNESS_OVERRIDE = -1;
-	private static final EntityDataAccessor<Integer> DATA_INTERPOLATION_START_DELTA_TICKS_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
-	private static final EntityDataAccessor<Integer> DATA_INTERPOLATION_DURATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID = SynchedEntityData.defineId(
+		Display.class, EntityDataSerializers.INT
+	);
+	private static final EntityDataAccessor<Integer> DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID = SynchedEntityData.defineId(
+		Display.class, EntityDataSerializers.INT
+	);
+	private static final EntityDataAccessor<Integer> DATA_POS_ROT_INTERPOLATION_DURATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Vector3f> DATA_TRANSLATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.VECTOR3);
 	private static final EntityDataAccessor<Vector3f> DATA_SCALE_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.VECTOR3);
 	private static final EntityDataAccessor<Quaternionf> DATA_LEFT_ROTATION_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.QUATERNION);
@@ -70,8 +72,9 @@ public abstract class Display extends Entity {
 	private static final float INITIAL_SHADOW_RADIUS = 0.0F;
 	private static final float INITIAL_SHADOW_STRENGTH = 1.0F;
 	private static final int NO_GLOW_COLOR_OVERRIDE = -1;
-	public static final String TAG_INTERPOLATION_DURATION = "interpolation_duration";
-	public static final String TAG_START_INTERPOLATION = "start_interpolation";
+	public static final String TAG_POS_ROT_INTERPOLATION_DURATION = "teleport_duration";
+	public static final String TAG_TRANSFORMATION_INTERPOLATION_DURATION = "interpolation_duration";
+	public static final String TAG_TRANSFORMATION_START_INTERPOLATION = "start_interpolation";
 	public static final String TAG_TRANSFORMATION = "transformation";
 	public static final String TAG_BILLBOARD = "billboard";
 	public static final String TAG_BRIGHTNESS = "brightness";
@@ -81,7 +84,6 @@ public abstract class Display extends Entity {
 	public static final String TAG_WIDTH = "width";
 	public static final String TAG_HEIGHT = "height";
 	public static final String TAG_GLOW_COLOR_OVERRIDE = "glow_color_override";
-	private final Quaternionf orientation = new Quaternionf();
 	private long interpolationStartClientTick = -2147483648L;
 	private int interpolationDuration;
 	private float lastProgress;
@@ -91,6 +93,8 @@ public abstract class Display extends Entity {
 	private boolean updateInterpolationDuration;
 	@Nullable
 	private Display.RenderState renderState;
+	@Nullable
+	private Display.PosRotInterpolationTarget posRotInterpolationTarget;
 
 	public Display(EntityType<?> entityType, Level level) {
 		super(entityType, level);
@@ -106,11 +110,11 @@ public abstract class Display extends Entity {
 			this.updateCulling();
 		}
 
-		if (DATA_INTERPOLATION_START_DELTA_TICKS_ID.equals(entityDataAccessor)) {
+		if (DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID.equals(entityDataAccessor)) {
 			this.updateStartTick = true;
 		}
 
-		if (DATA_INTERPOLATION_DURATION_ID.equals(entityDataAccessor)) {
+		if (DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID.equals(entityDataAccessor)) {
 			this.updateInterpolationDuration = true;
 		}
 
@@ -137,13 +141,13 @@ public abstract class Display extends Entity {
 		if (this.level().isClientSide) {
 			if (this.updateStartTick) {
 				this.updateStartTick = false;
-				int i = this.getInterpolationDelay();
+				int i = this.getTransformationInterpolationDelay();
 				this.interpolationStartClientTick = (long)(this.tickCount + i);
 			}
 
 			if (this.updateInterpolationDuration) {
 				this.updateInterpolationDuration = false;
-				this.interpolationDuration = this.getInterpolationDuration();
+				this.interpolationDuration = this.getTransformationInterpolationDuration();
 			}
 
 			if (this.updateRenderState) {
@@ -157,6 +161,20 @@ public abstract class Display extends Entity {
 
 				this.updateRenderSubState(bl, this.lastProgress);
 			}
+
+			if (this.posRotInterpolationTarget != null) {
+				if (this.posRotInterpolationTarget.steps == 0) {
+					this.posRotInterpolationTarget.applyTargetPosAndRot(this);
+					this.setOldPosAndRot();
+					this.posRotInterpolationTarget = null;
+				} else {
+					this.posRotInterpolationTarget.applyLerpStep(this);
+					this.posRotInterpolationTarget.steps--;
+					if (this.posRotInterpolationTarget.steps == 0) {
+						this.posRotInterpolationTarget = null;
+					}
+				}
+			}
 		}
 	}
 
@@ -164,8 +182,9 @@ public abstract class Display extends Entity {
 
 	@Override
 	protected void defineSynchedData() {
-		this.entityData.define(DATA_INTERPOLATION_START_DELTA_TICKS_ID, 0);
-		this.entityData.define(DATA_INTERPOLATION_DURATION_ID, 0);
+		this.entityData.define(DATA_POS_ROT_INTERPOLATION_DURATION_ID, 0);
+		this.entityData.define(DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID, 0);
+		this.entityData.define(DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID, 0);
 		this.entityData.define(DATA_TRANSLATION_ID, new Vector3f());
 		this.entityData.define(DATA_SCALE_ID, new Vector3f(1.0F, 1.0F, 1.0F));
 		this.entityData.define(DATA_RIGHT_ROTATION_ID, new Quaternionf());
@@ -191,12 +210,17 @@ public abstract class Display extends Entity {
 
 		if (compoundTag.contains("interpolation_duration", 99)) {
 			int i = compoundTag.getInt("interpolation_duration");
-			this.setInterpolationDuration(i);
+			this.setTransformationInterpolationDuration(i);
 		}
 
 		if (compoundTag.contains("start_interpolation", 99)) {
 			int i = compoundTag.getInt("start_interpolation");
-			this.setInterpolationDelay(i);
+			this.setTransformationInterpolationDelay(i);
+		}
+
+		if (compoundTag.contains("teleport_duration", 99)) {
+			int i = compoundTag.getInt("teleport_duration");
+			this.setPosRotInterpolationDuration(Mth.clamp(i, 0, 59));
 		}
 
 		if (compoundTag.contains("billboard", 8)) {
@@ -254,7 +278,8 @@ public abstract class Display extends Entity {
 			.result()
 			.ifPresent(tag -> compoundTag.put("transformation", tag));
 		Display.BillboardConstraints.CODEC.encodeStart(NbtOps.INSTANCE, this.getBillboardConstraints()).result().ifPresent(tag -> compoundTag.put("billboard", tag));
-		compoundTag.putInt("interpolation_duration", this.getInterpolationDuration());
+		compoundTag.putInt("interpolation_duration", this.getTransformationInterpolationDuration());
+		compoundTag.putInt("teleport_duration", this.getPosRotInterpolationDuration());
 		compoundTag.putFloat("view_range", this.getViewRange());
 		compoundTag.putFloat("shadow_radius", this.getShadowRadius());
 		compoundTag.putFloat("shadow_strength", this.getShadowStrength());
@@ -268,8 +293,9 @@ public abstract class Display extends Entity {
 	}
 
 	@Override
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket(this);
+	public void lerpTo(double d, double e, double f, float g, float h, int i) {
+		int j = this.getPosRotInterpolationDuration();
+		this.posRotInterpolationTarget = new Display.PosRotInterpolationTarget(j, d, e, f, (double)g, (double)h);
 	}
 
 	@Override
@@ -287,29 +313,33 @@ public abstract class Display extends Entity {
 		return true;
 	}
 
-	public Quaternionf orientation() {
-		return this.orientation;
-	}
-
 	@Nullable
 	public Display.RenderState renderState() {
 		return this.renderState;
 	}
 
-	private void setInterpolationDuration(int i) {
-		this.entityData.set(DATA_INTERPOLATION_DURATION_ID, i);
+	private void setTransformationInterpolationDuration(int i) {
+		this.entityData.set(DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID, i);
 	}
 
-	private int getInterpolationDuration() {
-		return this.entityData.get(DATA_INTERPOLATION_DURATION_ID);
+	private int getTransformationInterpolationDuration() {
+		return this.entityData.get(DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID);
 	}
 
-	private void setInterpolationDelay(int i) {
-		this.entityData.set(DATA_INTERPOLATION_START_DELTA_TICKS_ID, i, true);
+	private void setTransformationInterpolationDelay(int i) {
+		this.entityData.set(DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID, i, true);
 	}
 
-	private int getInterpolationDelay() {
-		return this.entityData.get(DATA_INTERPOLATION_START_DELTA_TICKS_ID);
+	private int getTransformationInterpolationDelay() {
+		return this.entityData.get(DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID);
+	}
+
+	private void setPosRotInterpolationDuration(int i) {
+		this.entityData.set(DATA_POS_ROT_INTERPOLATION_DURATION_ID, i);
+	}
+
+	private int getPosRotInterpolationDuration() {
+		return this.entityData.get(DATA_POS_ROT_INTERPOLATION_DURATION_ID);
 	}
 
 	private void setBillboardConstraints(Display.BillboardConstraints billboardConstraints) {
@@ -414,22 +444,6 @@ public abstract class Display extends Entity {
 		} else {
 			this.noCulling = true;
 		}
-	}
-
-	@Override
-	public void setXRot(float f) {
-		super.setXRot(f);
-		this.updateOrientation();
-	}
-
-	@Override
-	public void setYRot(float f) {
-		super.setYRot(f);
-		this.updateOrientation();
-	}
-
-	private void updateOrientation() {
-		this.orientation.rotationYXZ((float) (-Math.PI / 180.0) * this.getYRot(), (float) (Math.PI / 180.0) * this.getXRot(), 0.0F);
 	}
 
 	@Override
@@ -696,6 +710,33 @@ public abstract class Display extends Entity {
 		@Override
 		public int get(float f) {
 			return Mth.lerpInt(f, this.previous, this.current);
+		}
+	}
+
+	static class PosRotInterpolationTarget {
+		int steps;
+		private final double targetX;
+		private final double targetY;
+		private final double targetZ;
+		private final double targetYRot;
+		private final double targetXRot;
+
+		PosRotInterpolationTarget(int i, double d, double e, double f, double g, double h) {
+			this.steps = i;
+			this.targetX = d;
+			this.targetY = e;
+			this.targetZ = f;
+			this.targetYRot = g;
+			this.targetXRot = h;
+		}
+
+		void applyTargetPosAndRot(Entity entity) {
+			entity.setPos(this.targetX, this.targetY, this.targetZ);
+			entity.setRot((float)this.targetYRot, (float)this.targetXRot);
+		}
+
+		void applyLerpStep(Entity entity) {
+			entity.lerpPositionAndRotationStep(this.steps, this.targetX, this.targetY, this.targetZ, this.targetYRot, this.targetXRot);
 		}
 	}
 

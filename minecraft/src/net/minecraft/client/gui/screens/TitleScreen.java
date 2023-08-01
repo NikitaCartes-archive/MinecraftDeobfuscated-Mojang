@@ -19,11 +19,12 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.CommonButtons;
 import net.minecraft.client.gui.components.LogoRenderer;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.components.SplashRenderer;
+import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -126,22 +127,12 @@ public class TitleScreen extends Screen {
 			this.createNormalMenuOptions(l, 24);
 		}
 
-		this.addRenderableWidget(
-			new ImageButton(
-				this.width / 2 - 124,
-				l + 72 + 12,
-				20,
-				20,
-				0,
-				106,
-				20,
-				Button.WIDGETS_LOCATION,
-				256,
-				256,
-				button -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())),
-				Component.translatable("narrator.button.language")
+		SpriteIconButton spriteIconButton = this.addRenderableWidget(
+			CommonButtons.language(
+				20, button -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())), true
 			)
 		);
+		spriteIconButton.setPosition(this.width / 2 - 124, l + 72 + 12);
 		this.addRenderableWidget(
 			Button.builder(Component.translatable("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options)))
 				.bounds(this.width / 2 - 100, l + 72 + 12, 98, 20)
@@ -150,26 +141,13 @@ public class TitleScreen extends Screen {
 		this.addRenderableWidget(
 			Button.builder(Component.translatable("menu.quit"), button -> this.minecraft.stop()).bounds(this.width / 2 + 2, l + 72 + 12, 98, 20).build()
 		);
-		this.addRenderableWidget(
-			new ImageButton(
-				this.width / 2 + 104,
-				l + 72 + 12,
-				20,
-				20,
-				0,
-				0,
-				20,
-				Button.ACCESSIBILITY_TEXTURE,
-				32,
-				64,
-				button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)),
-				Component.translatable("narrator.button.accessibility")
-			)
+		SpriteIconButton spriteIconButton2 = this.addRenderableWidget(
+			CommonButtons.accessibility(20, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), true)
 		);
+		spriteIconButton2.setPosition(this.width / 2 + 104, l + 72 + 12);
 		this.addRenderableWidget(
 			new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new CreditsAndAttributionScreen(this)), this.font)
 		);
-		this.minecraft.setConnectedToRealms(false);
 		if (this.realmsNotificationsScreen == null) {
 			this.realmsNotificationsScreen = new RealmsNotificationsScreen();
 		}
@@ -341,6 +319,10 @@ public class TitleScreen extends Screen {
 				this.realmsNotificationsScreen.render(guiGraphics, i, j, f);
 			}
 		}
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
 	}
 
 	@Override

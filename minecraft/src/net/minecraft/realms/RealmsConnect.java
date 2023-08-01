@@ -3,8 +3,6 @@ package net.minecraft.realms;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.RealmsServer;
 import java.net.InetSocketAddress;
-import java.util.Optional;
-import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,10 +13,8 @@ import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.quickplay.QuickPlayLog;
 import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import org.slf4j.Logger;
 
@@ -36,7 +32,6 @@ public class RealmsConnect {
 
 	public void connect(RealmsServer realmsServer, ServerAddress serverAddress) {
 		final Minecraft minecraft = Minecraft.getInstance();
-		minecraft.setConnectedToRealms(true);
 		minecraft.prepareForMultiplayer();
 		minecraft.getNarrator().sayNow(Component.translatable("mco.connect.success"));
 		final String string = serverAddress.getHost();
@@ -64,19 +59,16 @@ public class RealmsConnect {
 							clientHandshakePacketListenerImpl.setMinigameName(realmsServer.minigameName);
 						}
 
-						RealmsConnect.this.connection.setListener(clientHandshakePacketListenerImpl);
 						if (RealmsConnect.this.aborted) {
 							return;
 						}
 
-						RealmsConnect.this.connection.send(new ClientIntentionPacket(string, i, ConnectionProtocol.LOGIN));
+						RealmsConnect.this.connection.initiateServerboundPlayConnection(string, i, clientHandshakePacketListenerImpl);
 						if (RealmsConnect.this.aborted) {
 							return;
 						}
 
-						String string = minecraft.getUser().getName();
-						UUID uUID = minecraft.getUser().getProfileId();
-						RealmsConnect.this.connection.send(new ServerboundHelloPacket(string, Optional.ofNullable(uUID)));
+						RealmsConnect.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getUser().getProfileId()));
 						minecraft.updateReportEnvironment(ReportEnvironment.realm(realmsServer));
 						minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.REALMS, String.valueOf(realmsServer.id), realmsServer.name);
 					} catch (Exception var5) {

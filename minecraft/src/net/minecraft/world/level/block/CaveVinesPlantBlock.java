@@ -51,7 +51,7 @@ public class CaveVinesPlantBlock extends GrowingPlantBodyBlock implements Boneme
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return !(Boolean)blockState.getValue(BERRIES);
 	}
 

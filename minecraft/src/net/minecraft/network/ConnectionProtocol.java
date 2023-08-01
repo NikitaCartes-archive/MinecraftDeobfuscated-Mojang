@@ -4,15 +4,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -21,6 +20,20 @@ import net.minecraft.network.protocol.BundlePacket;
 import net.minecraft.network.protocol.BundlerInfo;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
+import net.minecraft.network.protocol.common.ClientboundPingPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
+import net.minecraft.network.protocol.common.ServerboundPongPacket;
+import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.configuration.ClientboundFinishConfigurationPacket;
+import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
+import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket;
+import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
@@ -34,6 +47,8 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundChunkBatchFinishedPacket;
+import net.minecraft.network.protocol.game.ClientboundChunkBatchStartPacket;
 import net.minecraft.network.protocol.game.ClientboundChunksBiomesPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -44,10 +59,8 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
-import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -56,7 +69,6 @@ import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
-import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
@@ -69,7 +81,6 @@ import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
-import net.minecraft.network.protocol.game.ClientboundPingPacket;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
@@ -83,7 +94,6 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
-import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
@@ -118,6 +128,7 @@ import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundTabListPacket;
@@ -126,10 +137,8 @@ import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateEnabledFeaturesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
@@ -137,18 +146,18 @@ import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
+import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundJigsawGeneratePacket;
-import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
@@ -159,11 +168,9 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
-import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
-import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.network.protocol.game.ServerboundSetBeaconPacket;
@@ -184,9 +191,10 @@ import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundHelloPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.network.protocol.login.ServerboundKeyPacket;
+import net.minecraft.network.protocol.login.ServerboundLoginAcknowledgedPacket;
 import net.minecraft.network.protocol.status.ClientboundPongResponsePacket;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerboundPingRequestPacket;
@@ -194,12 +202,15 @@ import net.minecraft.network.protocol.status.ServerboundStatusRequestPacket;
 import net.minecraft.util.VisibleForDebug;
 import org.slf4j.Logger;
 
-public enum ConnectionProtocol implements BundlerInfo.Provider {
+public enum ConnectionProtocol {
 	HANDSHAKING(
-		-1, protocol().addFlow(PacketFlow.SERVERBOUND, new ConnectionProtocol.PacketSet().addPacket(ClientIntentionPacket.class, ClientIntentionPacket::new))
+		"handshake",
+		protocol()
+			.addFlow(PacketFlow.CLIENTBOUND, new ConnectionProtocol.PacketSet())
+			.addFlow(PacketFlow.SERVERBOUND, new ConnectionProtocol.PacketSet().addPacket(ClientIntentionPacket.class, ClientIntentionPacket::new))
 	),
 	PLAY(
-		0,
+		"play",
 		protocol()
 			.addFlow(
 				PacketFlow.CLIENTBOUND,
@@ -217,6 +228,8 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 					.addPacket(ClientboundBlockUpdatePacket.class, ClientboundBlockUpdatePacket::new)
 					.addPacket(ClientboundBossEventPacket.class, ClientboundBossEventPacket::new)
 					.addPacket(ClientboundChangeDifficultyPacket.class, ClientboundChangeDifficultyPacket::new)
+					.addPacket(ClientboundChunkBatchFinishedPacket.class, ClientboundChunkBatchFinishedPacket::new)
+					.addPacket(ClientboundChunkBatchStartPacket.class, ClientboundChunkBatchStartPacket::new)
 					.addPacket(ClientboundChunksBiomesPacket.class, ClientboundChunksBiomesPacket::new)
 					.addPacket(ClientboundClearTitlesPacket.class, ClientboundClearTitlesPacket::new)
 					.addPacket(ClientboundCommandSuggestionsPacket.class, ClientboundCommandSuggestionsPacket::new)
@@ -303,6 +316,7 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 					.addPacket(ClientboundSetTitlesAnimationPacket.class, ClientboundSetTitlesAnimationPacket::new)
 					.addPacket(ClientboundSoundEntityPacket.class, ClientboundSoundEntityPacket::new)
 					.addPacket(ClientboundSoundPacket.class, ClientboundSoundPacket::new)
+					.addPacket(ClientboundStartConfigurationPacket.class, ClientboundStartConfigurationPacket::new)
 					.addPacket(ClientboundStopSoundPacket.class, ClientboundStopSoundPacket::new)
 					.addPacket(ClientboundSystemChatPacket.class, ClientboundSystemChatPacket::new)
 					.addPacket(ClientboundTabListPacket.class, ClientboundTabListPacket::new)
@@ -311,7 +325,6 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 					.addPacket(ClientboundTeleportEntityPacket.class, ClientboundTeleportEntityPacket::new)
 					.addPacket(ClientboundUpdateAdvancementsPacket.class, ClientboundUpdateAdvancementsPacket::new)
 					.addPacket(ClientboundUpdateAttributesPacket.class, ClientboundUpdateAttributesPacket::new)
-					.addPacket(ClientboundUpdateEnabledFeaturesPacket.class, ClientboundUpdateEnabledFeaturesPacket::new)
 					.addPacket(ClientboundUpdateMobEffectPacket.class, ClientboundUpdateMobEffectPacket::new)
 					.addPacket(ClientboundUpdateRecipesPacket.class, ClientboundUpdateRecipesPacket::new)
 					.addPacket(ClientboundUpdateTagsPacket.class, ClientboundUpdateTagsPacket::new)
@@ -326,9 +339,11 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 					.addPacket(ServerboundChatCommandPacket.class, ServerboundChatCommandPacket::new)
 					.addPacket(ServerboundChatPacket.class, ServerboundChatPacket::new)
 					.addPacket(ServerboundChatSessionUpdatePacket.class, ServerboundChatSessionUpdatePacket::new)
+					.addPacket(ServerboundChunkBatchReceivedPacket.class, ServerboundChunkBatchReceivedPacket::new)
 					.addPacket(ServerboundClientCommandPacket.class, ServerboundClientCommandPacket::new)
 					.addPacket(ServerboundClientInformationPacket.class, ServerboundClientInformationPacket::new)
 					.addPacket(ServerboundCommandSuggestionPacket.class, ServerboundCommandSuggestionPacket::new)
+					.addPacket(ServerboundConfigurationAcknowledgedPacket.class, ServerboundConfigurationAcknowledgedPacket::new)
 					.addPacket(ServerboundContainerButtonClickPacket.class, ServerboundContainerButtonClickPacket::new)
 					.addPacket(ServerboundContainerClickPacket.class, ServerboundContainerClickPacket::new)
 					.addPacket(ServerboundContainerClosePacket.class, ServerboundContainerClosePacket::new)
@@ -373,7 +388,7 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 			)
 	),
 	STATUS(
-		1,
+		"status",
 		protocol()
 			.addFlow(
 				PacketFlow.SERVERBOUND,
@@ -389,7 +404,7 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 			)
 	),
 	LOGIN(
-		2,
+		"login",
 		protocol()
 			.addFlow(
 				PacketFlow.CLIENTBOUND,
@@ -405,102 +420,118 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 				new ConnectionProtocol.PacketSet()
 					.addPacket(ServerboundHelloPacket.class, ServerboundHelloPacket::new)
 					.addPacket(ServerboundKeyPacket.class, ServerboundKeyPacket::new)
-					.addPacket(ServerboundCustomQueryPacket.class, ServerboundCustomQueryPacket::new)
+					.addPacket(ServerboundCustomQueryAnswerPacket.class, ServerboundCustomQueryAnswerPacket::read)
+					.addPacket(ServerboundLoginAcknowledgedPacket.class, ServerboundLoginAcknowledgedPacket::new)
+			)
+	),
+	CONFIGURATION(
+		"configuration",
+		protocol()
+			.addFlow(
+				PacketFlow.CLIENTBOUND,
+				new ConnectionProtocol.PacketSet()
+					.addPacket(ClientboundCustomPayloadPacket.class, ClientboundCustomPayloadPacket::new)
+					.addPacket(ClientboundDisconnectPacket.class, ClientboundDisconnectPacket::new)
+					.addPacket(ClientboundFinishConfigurationPacket.class, ClientboundFinishConfigurationPacket::new)
+					.addPacket(ClientboundKeepAlivePacket.class, ClientboundKeepAlivePacket::new)
+					.addPacket(ClientboundPingPacket.class, ClientboundPingPacket::new)
+					.addPacket(ClientboundRegistryDataPacket.class, ClientboundRegistryDataPacket::new)
+					.addPacket(ClientboundResourcePackPacket.class, ClientboundResourcePackPacket::new)
+					.addPacket(ClientboundUpdateEnabledFeaturesPacket.class, ClientboundUpdateEnabledFeaturesPacket::new)
+					.addPacket(ClientboundUpdateTagsPacket.class, ClientboundUpdateTagsPacket::new)
+			)
+			.addFlow(
+				PacketFlow.SERVERBOUND,
+				new ConnectionProtocol.PacketSet()
+					.addPacket(ServerboundCustomPayloadPacket.class, ServerboundCustomPayloadPacket::new)
+					.addPacket(ServerboundFinishConfigurationPacket.class, ServerboundFinishConfigurationPacket::new)
+					.addPacket(ServerboundKeepAlivePacket.class, ServerboundKeepAlivePacket::new)
+					.addPacket(ServerboundPongPacket.class, ServerboundPongPacket::new)
+					.addPacket(ServerboundResourcePackPacket.class, ServerboundResourcePackPacket::new)
 			)
 	);
 
 	public static final int NOT_REGISTERED = -1;
-	private static final int MIN_PROTOCOL_ID = -1;
-	private static final int MAX_PROTOCOL_ID = 2;
-	private static final ConnectionProtocol[] LOOKUP = new ConnectionProtocol[4];
-	private static final Map<Class<? extends Packet<?>>, ConnectionProtocol> PROTOCOL_BY_PACKET = Maps.<Class<? extends Packet<?>>, ConnectionProtocol>newHashMap();
-	private final int id;
-	private final Map<PacketFlow, ? extends ConnectionProtocol.PacketSet<?>> flows;
+	private final String id;
+	private final Map<PacketFlow, ConnectionProtocol.CodecData<?>> flows;
 
 	private static ConnectionProtocol.ProtocolBuilder protocol() {
 		return new ConnectionProtocol.ProtocolBuilder();
 	}
 
-	private ConnectionProtocol(int j, ConnectionProtocol.ProtocolBuilder protocolBuilder) {
-		this.id = j;
-		this.flows = protocolBuilder.flows;
-	}
-
-	public int getPacketId(PacketFlow packetFlow, Packet<?> packet) {
-		return ((ConnectionProtocol.PacketSet)this.flows.get(packetFlow)).getId(packet.getClass());
-	}
-
-	@Override
-	public BundlerInfo getBundlerInfo(PacketFlow packetFlow) {
-		return ((ConnectionProtocol.PacketSet)this.flows.get(packetFlow)).bundlerInfo();
+	private ConnectionProtocol(String string2, ConnectionProtocol.ProtocolBuilder protocolBuilder) {
+		this.id = string2;
+		this.flows = protocolBuilder.buildCodecs(this);
 	}
 
 	@VisibleForDebug
 	public Int2ObjectMap<Class<? extends Packet<?>>> getPacketsByIds(PacketFlow packetFlow) {
-		Int2ObjectMap<Class<? extends Packet<?>>> int2ObjectMap = new Int2ObjectOpenHashMap<>();
-		ConnectionProtocol.PacketSet<?> packetSet = (ConnectionProtocol.PacketSet<?>)this.flows.get(packetFlow);
-		if (packetSet == null) {
-			return Int2ObjectMaps.emptyMap();
-		} else {
-			packetSet.classToId.forEach((class_, integer) -> int2ObjectMap.put(integer.intValue(), class_));
-			return int2ObjectMap;
-		}
+		return ((ConnectionProtocol.CodecData)this.flows.get(packetFlow)).packetsByIds();
 	}
 
-	@Nullable
-	public Packet<?> createPacket(PacketFlow packetFlow, int i, FriendlyByteBuf friendlyByteBuf) {
-		return ((ConnectionProtocol.PacketSet)this.flows.get(packetFlow)).createPacket(i, friendlyByteBuf);
-	}
-
-	public int getId() {
+	@VisibleForDebug
+	public String id() {
 		return this.id;
 	}
 
-	@Nullable
-	public static ConnectionProtocol getById(int i) {
-		return i >= -1 && i <= 2 ? LOOKUP[i - -1] : null;
+	public ConnectionProtocol.CodecData<?> codec(PacketFlow packetFlow) {
+		return (ConnectionProtocol.CodecData<?>)this.flows.get(packetFlow);
 	}
 
-	@Nullable
-	public static ConnectionProtocol getProtocolForPacket(Packet<?> packet) {
-		return (ConnectionProtocol)PROTOCOL_BY_PACKET.get(packet.getClass());
-	}
+	public static class CodecData<T extends PacketListener> implements BundlerInfo.Provider {
+		private final ConnectionProtocol protocol;
+		private final PacketFlow flow;
+		private final ConnectionProtocol.PacketSet<T> packetSet;
 
-	static {
-		for (ConnectionProtocol connectionProtocol : values()) {
-			int i = connectionProtocol.getId();
-			if (i < -1 || i > 2) {
-				throw new Error("Invalid protocol ID " + i);
-			}
+		public CodecData(ConnectionProtocol connectionProtocol, PacketFlow packetFlow, ConnectionProtocol.PacketSet<T> packetSet) {
+			this.protocol = connectionProtocol;
+			this.flow = packetFlow;
+			this.packetSet = packetSet;
+		}
 
-			LOOKUP[i - -1] = connectionProtocol;
-			connectionProtocol.flows
-				.forEach(
-					(packetFlow, packetSet) -> packetSet.listAllPackets(
-							class_ -> {
-								if (PROTOCOL_BY_PACKET.containsKey(class_) && PROTOCOL_BY_PACKET.get(class_) != connectionProtocol) {
-									throw new IllegalStateException(
-										"Packet " + class_ + " is already assigned to protocol " + PROTOCOL_BY_PACKET.get(class_) + " - can't reassign to " + connectionProtocol
-									);
-								} else {
-									PROTOCOL_BY_PACKET.put(class_, connectionProtocol);
-								}
-							}
-						)
-				);
+		public ConnectionProtocol protocol() {
+			return this.protocol;
+		}
+
+		public PacketFlow flow() {
+			return this.flow;
+		}
+
+		public int packetId(Packet<?> packet) {
+			return this.packetSet.getId(packet.getClass());
+		}
+
+		@Override
+		public BundlerInfo bundlerInfo() {
+			return this.packetSet.bundlerInfo();
+		}
+
+		Int2ObjectMap<Class<? extends Packet<?>>> packetsByIds() {
+			Int2ObjectMap<Class<? extends Packet<?>>> int2ObjectMap = new Int2ObjectOpenHashMap<>();
+			this.packetSet.classToId.forEach((class_, integer) -> int2ObjectMap.put(integer.intValue(), class_));
+			return int2ObjectMap;
+		}
+
+		@Nullable
+		public Packet<?> createPacket(int i, FriendlyByteBuf friendlyByteBuf) {
+			return this.packetSet.createPacket(i, friendlyByteBuf);
+		}
+
+		public boolean isValidPacketType(Packet<?> packet) {
+			return this.packetSet.isKnownPacket(packet.getClass());
 		}
 	}
 
 	static class PacketSet<T extends PacketListener> {
 		private static final Logger LOGGER = LogUtils.getLogger();
-		final Object2IntMap<Class<? extends Packet<T>>> classToId = Util.make(
+		final Object2IntMap<Class<? extends Packet<? super T>>> classToId = Util.make(
 			new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> object2IntOpenHashMap.defaultReturnValue(-1)
 		);
-		private final List<Function<FriendlyByteBuf, ? extends Packet<T>>> idToDeserializer = Lists.<Function<FriendlyByteBuf, ? extends Packet<T>>>newArrayList();
+		private final List<Function<FriendlyByteBuf, ? extends Packet<? super T>>> idToDeserializer = Lists.<Function<FriendlyByteBuf, ? extends Packet<? super T>>>newArrayList();
 		private BundlerInfo bundlerInfo = BundlerInfo.EMPTY;
 		private final Set<Class<? extends Packet<T>>> extraClasses = new HashSet();
 
-		public <P extends Packet<T>> ConnectionProtocol.PacketSet<T> addPacket(Class<P> class_, Function<FriendlyByteBuf, P> function) {
+		public <P extends Packet<? super T>> ConnectionProtocol.PacketSet<T> addPacket(Class<P> class_, Function<FriendlyByteBuf, P> function) {
 			int i = this.idToDeserializer.size();
 			int j = this.classToId.put(class_, i);
 			if (j != -1) {
@@ -529,15 +560,14 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 			return this.classToId.getInt(class_);
 		}
 
-		@Nullable
-		public Packet<?> createPacket(int i, FriendlyByteBuf friendlyByteBuf) {
-			Function<FriendlyByteBuf, ? extends Packet<T>> function = (Function<FriendlyByteBuf, ? extends Packet<T>>)this.idToDeserializer.get(i);
-			return function != null ? (Packet)function.apply(friendlyByteBuf) : null;
+		public boolean isKnownPacket(Class<?> class_) {
+			return this.classToId.containsKey(class_) || this.extraClasses.contains(class_);
 		}
 
-		public void listAllPackets(Consumer<Class<? extends Packet<?>>> consumer) {
-			this.classToId.keySet().stream().filter(class_ -> class_ != BundleDelimiterPacket.class).forEach(consumer);
-			this.extraClasses.forEach(consumer);
+		@Nullable
+		public Packet<?> createPacket(int i, FriendlyByteBuf friendlyByteBuf) {
+			Function<FriendlyByteBuf, ? extends Packet<? super T>> function = (Function<FriendlyByteBuf, ? extends Packet<? super T>>)this.idToDeserializer.get(i);
+			return function != null ? (Packet)function.apply(friendlyByteBuf) : null;
 		}
 
 		public BundlerInfo bundlerInfo() {
@@ -546,11 +576,26 @@ public enum ConnectionProtocol implements BundlerInfo.Provider {
 	}
 
 	static class ProtocolBuilder {
-		final Map<PacketFlow, ConnectionProtocol.PacketSet<?>> flows = Maps.newEnumMap(PacketFlow.class);
+		private final Map<PacketFlow, ConnectionProtocol.PacketSet<?>> flows = Maps.newEnumMap(PacketFlow.class);
 
 		public <T extends PacketListener> ConnectionProtocol.ProtocolBuilder addFlow(PacketFlow packetFlow, ConnectionProtocol.PacketSet<T> packetSet) {
 			this.flows.put(packetFlow, packetSet);
 			return this;
+		}
+
+		public Map<PacketFlow, ConnectionProtocol.CodecData<?>> buildCodecs(ConnectionProtocol connectionProtocol) {
+			Map<PacketFlow, ConnectionProtocol.CodecData<?>> map = new EnumMap(PacketFlow.class);
+
+			for (PacketFlow packetFlow : PacketFlow.values()) {
+				ConnectionProtocol.PacketSet<?> packetSet = (ConnectionProtocol.PacketSet<?>)this.flows.get(packetFlow);
+				if (packetSet == null) {
+					throw new IllegalStateException("Missing packets for flow " + packetFlow + " in protocol " + connectionProtocol);
+				}
+
+				map.put(packetFlow, new ConnectionProtocol.CodecData<>(connectionProtocol, packetFlow, packetSet));
+			}
+
+			return map;
 		}
 	}
 }

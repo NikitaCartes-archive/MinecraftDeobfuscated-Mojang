@@ -7,4 +7,8 @@ public interface ServerPlayerConnection {
 	ServerPlayer getPlayer();
 
 	void send(Packet<?> packet);
+
+	void sendNoFlush(Packet<?> packet);
+
+	void flush();
 }

@@ -3,26 +3,21 @@ package net.minecraft.client.gui.components;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class CommonButtons {
-	public static TextAndImageButton languageTextAndImage(Button.OnPress onPress) {
-		return TextAndImageButton.builder(Component.translatable("options.language"), Button.WIDGETS_LOCATION, onPress)
-			.texStart(3, 109)
-			.offset(65, 3)
-			.yDiffTex(20)
-			.usedTextureSize(14, 14)
-			.textureSize(256, 256)
+	public static SpriteIconButton language(int i, Button.OnPress onPress, boolean bl) {
+		return SpriteIconButton.builder(Component.translatable("options.language"), onPress, bl)
+			.width(i)
+			.sprite(new ResourceLocation("icon/language"), 15, 15)
 			.build();
 	}
 
-	public static TextAndImageButton accessibilityTextAndImage(Button.OnPress onPress) {
-		return TextAndImageButton.builder(Component.translatable("options.accessibility.title"), Button.ACCESSIBILITY_TEXTURE, onPress)
-			.texStart(3, 2)
-			.offset(65, 2)
-			.yDiffTex(20)
-			.usedTextureSize(14, 16)
-			.textureSize(32, 64)
+	public static SpriteIconButton accessibility(int i, Button.OnPress onPress, boolean bl) {
+		return SpriteIconButton.builder(Component.translatable("options.accessibility.title"), onPress, bl)
+			.width(i)
+			.sprite(new ResourceLocation("icon/accessibility"), 15, 15)
 			.build();
 	}
 }

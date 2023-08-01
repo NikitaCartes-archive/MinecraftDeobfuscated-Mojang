@@ -64,7 +64,7 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 					this.renderModel(poseStack, multiBufferSource, i, armorItem, humanoidModel, bl, 1.0F, 1.0F, 1.0F, null);
 				}
 
-				ArmorTrim.getTrim(livingEntity.level().registryAccess(), itemStack)
+				ArmorTrim.getTrim(livingEntity.level().registryAccess(), itemStack, true)
 					.ifPresent(armorTrim -> this.renderTrim(armorItem.getMaterial(), poseStack, multiBufferSource, i, armorTrim, humanoidModel, bl));
 				if (itemStack.hasFoil()) {
 					this.renderGlint(poseStack, multiBufferSource, i, humanoidModel);

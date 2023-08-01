@@ -35,19 +35,24 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 @Environment(EnvType.CLIENT)
 public class PlayerTabOverlay {
+	private static final ResourceLocation PING_UNKNOWN_SPRITE = new ResourceLocation("icon/ping_unknown");
+	private static final ResourceLocation PING_1_SPRITE = new ResourceLocation("icon/ping_1");
+	private static final ResourceLocation PING_2_SPRITE = new ResourceLocation("icon/ping_2");
+	private static final ResourceLocation PING_3_SPRITE = new ResourceLocation("icon/ping_3");
+	private static final ResourceLocation PING_4_SPRITE = new ResourceLocation("icon/ping_4");
+	private static final ResourceLocation PING_5_SPRITE = new ResourceLocation("icon/ping_5");
+	private static final ResourceLocation HEART_CONTAINER_BLINKING_SPRITE = new ResourceLocation("hud/heart/container_blinking");
+	private static final ResourceLocation HEART_CONTAINER_SPRITE = new ResourceLocation("hud/heart/container");
+	private static final ResourceLocation HEART_FULL_BLINKING_SPRITE = new ResourceLocation("hud/heart/full_blinking");
+	private static final ResourceLocation HEART_HALF_BLINKING_SPRITE = new ResourceLocation("hud/heart/half_blinking");
+	private static final ResourceLocation HEART_ABSORBING_FULL_BLINKING_SPRITE = new ResourceLocation("hud/heart/absorbing_full_blinking");
+	private static final ResourceLocation HEART_FULL_SPRITE = new ResourceLocation("hud/heart/full");
+	private static final ResourceLocation HEART_ABSORBING_HALF_BLINKING_SPRITE = new ResourceLocation("hud/heart/absorbing_half_blinking");
+	private static final ResourceLocation HEART_HALF_SPRITE = new ResourceLocation("hud/heart/half");
 	private static final Comparator<PlayerInfo> PLAYER_COMPARATOR = Comparator.comparingInt(playerInfo -> playerInfo.getGameMode() == GameType.SPECTATOR ? 1 : 0)
 		.thenComparing(playerInfo -> Optionull.mapOrDefault(playerInfo.getTeam(), PlayerTeam::getName, ""))
 		.thenComparing(playerInfo -> playerInfo.getProfile().getName(), String::compareToIgnoreCase);
-	private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
 	public static final int MAX_ROWS_PER_COL = 20;
-	public static final int HEART_EMPTY_CONTAINER = 16;
-	public static final int HEART_EMPTY_CONTAINER_BLINKING = 25;
-	public static final int HEART_FULL = 52;
-	public static final int HEART_HALF_FULL = 61;
-	public static final int HEART_GOLDEN_FULL = 160;
-	public static final int HEART_GOLDEN_HALF_FULL = 169;
-	public static final int HEART_GHOST_FULL = 70;
-	public static final int HEART_GHOST_HALF_FULL = 79;
 	private final Minecraft minecraft;
 	private final Gui gui;
 	@Nullable
@@ -177,7 +182,7 @@ public class PlayerTabOverlay {
 					Player player = this.minecraft.level.getPlayerByUUID(gameProfile.getId());
 					boolean bl2 = player != null && LivingEntityRenderer.isEntityUpsideDown(player);
 					boolean bl3 = player != null && player.isModelPartShown(PlayerModelPart.HAT);
-					PlayerFaceRenderer.draw(guiGraphics, playerInfo2.getSkinLocation(), x, y, 8, bl3, bl2);
+					PlayerFaceRenderer.draw(guiGraphics, playerInfo2.getSkin().texture(), x, y, 8, bl3, bl2);
 					x += 9;
 				}
 
@@ -207,25 +212,24 @@ public class PlayerTabOverlay {
 	}
 
 	protected void renderPingIcon(GuiGraphics guiGraphics, int i, int j, int k, PlayerInfo playerInfo) {
-		int l = 0;
-		int m;
+		ResourceLocation resourceLocation;
 		if (playerInfo.getLatency() < 0) {
-			m = 5;
+			resourceLocation = PING_UNKNOWN_SPRITE;
 		} else if (playerInfo.getLatency() < 150) {
-			m = 0;
+			resourceLocation = PING_5_SPRITE;
 		} else if (playerInfo.getLatency() < 300) {
-			m = 1;
+			resourceLocation = PING_4_SPRITE;
 		} else if (playerInfo.getLatency() < 600) {
-			m = 2;
+			resourceLocation = PING_3_SPRITE;
 		} else if (playerInfo.getLatency() < 1000) {
-			m = 3;
+			resourceLocation = PING_2_SPRITE;
 		} else {
-			m = 4;
+			resourceLocation = PING_1_SPRITE;
 		}
 
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
-		guiGraphics.blit(GUI_ICONS_LOCATION, j + i - 11, k, 0, 176 + m * 8, 10, 8);
+		guiGraphics.blitSprite(resourceLocation, j + i - 11, k, 10, 8);
 		guiGraphics.pose().popPose();
 	}
 
@@ -258,28 +262,30 @@ public class PlayerTabOverlay {
 
 				guiGraphics.drawString(this.minecraft.font, string, (k + j - this.minecraft.font.width(string)) / 2, i, p);
 			} else {
-				for (int q = m; q < n; q++) {
-					guiGraphics.blit(GUI_ICONS_LOCATION, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
+				ResourceLocation resourceLocation = bl ? HEART_CONTAINER_BLINKING_SPRITE : HEART_CONTAINER_SPRITE;
+
+				for (int p = m; p < n; p++) {
+					guiGraphics.blitSprite(resourceLocation, j + p * o, i, 9, 9);
 				}
 
-				for (int q = 0; q < m; q++) {
-					guiGraphics.blit(GUI_ICONS_LOCATION, j + q * o, i, bl ? 25 : 16, 0, 9, 9);
+				for (int p = 0; p < m; p++) {
+					guiGraphics.blitSprite(resourceLocation, j + p * o, i, 9, 9);
 					if (bl) {
-						if (q * 2 + 1 < healthState.displayedValue()) {
-							guiGraphics.blit(GUI_ICONS_LOCATION, j + q * o, i, 70, 0, 9, 9);
+						if (p * 2 + 1 < healthState.displayedValue()) {
+							guiGraphics.blitSprite(HEART_FULL_BLINKING_SPRITE, j + p * o, i, 9, 9);
 						}
 
-						if (q * 2 + 1 == healthState.displayedValue()) {
-							guiGraphics.blit(GUI_ICONS_LOCATION, j + q * o, i, 79, 0, 9, 9);
+						if (p * 2 + 1 == healthState.displayedValue()) {
+							guiGraphics.blitSprite(HEART_HALF_BLINKING_SPRITE, j + p * o, i, 9, 9);
 						}
 					}
 
-					if (q * 2 + 1 < l) {
-						guiGraphics.blit(GUI_ICONS_LOCATION, j + q * o, i, q >= 10 ? 160 : 52, 0, 9, 9);
+					if (p * 2 + 1 < l) {
+						guiGraphics.blitSprite(p >= 10 ? HEART_ABSORBING_FULL_BLINKING_SPRITE : HEART_FULL_SPRITE, j + p * o, i, 9, 9);
 					}
 
-					if (q * 2 + 1 == l) {
-						guiGraphics.blit(GUI_ICONS_LOCATION, j + q * o, i, q >= 10 ? 169 : 61, 0, 9, 9);
+					if (p * 2 + 1 == l) {
+						guiGraphics.blitSprite(p >= 10 ? HEART_ABSORBING_HALF_BLINKING_SPRITE : HEART_HALF_SPRITE, j + p * o, i, 9, 9);
 					}
 				}
 			}

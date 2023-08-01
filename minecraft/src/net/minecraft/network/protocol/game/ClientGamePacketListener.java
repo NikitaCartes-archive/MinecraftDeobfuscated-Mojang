@@ -1,8 +1,14 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.PacketListener;
+import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 
-public interface ClientGamePacketListener extends PacketListener {
+public interface ClientGamePacketListener extends ClientCommonPacketListener {
+	@Override
+	default ConnectionProtocol protocol() {
+		return ConnectionProtocol.PLAY;
+	}
+
 	void handleAddEntity(ClientboundAddEntityPacket clientboundAddEntityPacket);
 
 	void handleAddExperienceOrb(ClientboundAddExperienceOrbPacket clientboundAddExperienceOrbPacket);
@@ -51,10 +57,6 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleContainerSetSlot(ClientboundContainerSetSlotPacket clientboundContainerSetSlotPacket);
 
-	void handleCustomPayload(ClientboundCustomPayloadPacket clientboundCustomPayloadPacket);
-
-	void handleDisconnect(ClientboundDisconnectPacket clientboundDisconnectPacket);
-
 	void handleEntityEvent(ClientboundEntityEventPacket clientboundEntityEventPacket);
 
 	void handleEntityLinkPacket(ClientboundSetEntityLinkPacket clientboundSetEntityLinkPacket);
@@ -64,8 +66,6 @@ public interface ClientGamePacketListener extends PacketListener {
 	void handleExplosion(ClientboundExplodePacket clientboundExplodePacket);
 
 	void handleGameEvent(ClientboundGameEventPacket clientboundGameEventPacket);
-
-	void handleKeepAlive(ClientboundKeepAlivePacket clientboundKeepAlivePacket);
 
 	void handleLevelChunkWithLight(ClientboundLevelChunkWithLightPacket clientboundLevelChunkWithLightPacket);
 
@@ -82,8 +82,6 @@ public interface ClientGamePacketListener extends PacketListener {
 	void handleMovePlayer(ClientboundPlayerPositionPacket clientboundPlayerPositionPacket);
 
 	void handleParticleEvent(ClientboundLevelParticlesPacket clientboundLevelParticlesPacket);
-
-	void handlePing(ClientboundPingPacket clientboundPingPacket);
 
 	void handlePlayerAbilities(ClientboundPlayerAbilitiesPacket clientboundPlayerAbilitiesPacket);
 
@@ -133,8 +131,6 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleUpdateMobEffect(ClientboundUpdateMobEffectPacket clientboundUpdateMobEffectPacket);
 
-	void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket);
-
 	void handlePlayerCombatEnd(ClientboundPlayerCombatEndPacket clientboundPlayerCombatEndPacket);
 
 	void handlePlayerCombatEnter(ClientboundPlayerCombatEnterPacket clientboundPlayerCombatEnterPacket);
@@ -158,8 +154,6 @@ public interface ClientGamePacketListener extends PacketListener {
 	void handleSetBorderCenter(ClientboundSetBorderCenterPacket clientboundSetBorderCenterPacket);
 
 	void handleTabListCustomisation(ClientboundTabListPacket clientboundTabListPacket);
-
-	void handleResourcePack(ClientboundResourcePackPacket clientboundResourcePackPacket);
 
 	void handleBossUpdate(ClientboundBossEventPacket clientboundBossEventPacket);
 
@@ -215,9 +209,13 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleCustomChatCompletions(ClientboundCustomChatCompletionsPacket clientboundCustomChatCompletionsPacket);
 
-	void handleEnabledFeatures(ClientboundUpdateEnabledFeaturesPacket clientboundUpdateEnabledFeaturesPacket);
-
 	void handleBundlePacket(ClientboundBundlePacket clientboundBundlePacket);
 
 	void handleDamageEvent(ClientboundDamageEventPacket clientboundDamageEventPacket);
+
+	void handleConfigurationStart(ClientboundStartConfigurationPacket clientboundStartConfigurationPacket);
+
+	void handleChunkBatchStart(ClientboundChunkBatchStartPacket clientboundChunkBatchStartPacket);
+
+	void handleChunkBatchFinished(ClientboundChunkBatchFinishedPacket clientboundChunkBatchFinishedPacket);
 }

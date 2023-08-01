@@ -60,7 +60,7 @@ public class BoneMealItem extends Item {
 		BlockState blockState = level.getBlockState(blockPos);
 		if (blockState.getBlock() instanceof BonemealableBlock) {
 			BonemealableBlock bonemealableBlock = (BonemealableBlock)blockState.getBlock();
-			if (bonemealableBlock.isValidBonemealTarget(level, blockPos, blockState, level.isClientSide)) {
+			if (bonemealableBlock.isValidBonemealTarget(level, blockPos, blockState)) {
 				if (level instanceof ServerLevel) {
 					if (bonemealableBlock.isBonemealSuccess(level, level.random, blockPos, blockState)) {
 						bonemealableBlock.performBonemeal((ServerLevel)level, level.random, blockPos, blockState);

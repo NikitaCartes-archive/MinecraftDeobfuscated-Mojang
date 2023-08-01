@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -33,10 +32,12 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
+	static final ResourceLocation SLOT_FRAME_SPRITE = new ResourceLocation("widget/slot_frame");
+	static final ResourceLocation LINK_HIGHLIGHTED_SPRITE = new ResourceLocation("icon/link_highlighted");
+	static final ResourceLocation LINK_SPRITE = new ResourceLocation("icon/link");
+	static final ResourceLocation VIDEO_LINK_HIGHLIGHTED_SPRITE = new ResourceLocation("icon/video_link_highlighted");
+	static final ResourceLocation VIDEO_LINK_SPRITE = new ResourceLocation("icon/video_link");
 	static final Logger LOGGER = LogUtils.getLogger();
-	static final ResourceLocation LINK_ICON = new ResourceLocation("realms", "textures/gui/realms/link_icons.png");
-	static final ResourceLocation TRAILER_ICON = new ResourceLocation("realms", "textures/gui/realms/trailer_icons.png");
-	static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
 	static final Component PUBLISHER_LINK_TOOLTIP = Component.translatable("mco.template.info.tooltip");
 	static final Component TRAILER_LINK_TOOLTIP = Component.translatable("mco.template.trailer.tooltip");
 	private final Consumer<WorldTemplate> callback;
@@ -52,10 +53,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	private final RealmsServer.WorldType worldType;
 	int clicks;
 	@Nullable
-	private Component[] warning;
-	private String warningURL;
-	boolean displayWarning;
-	private boolean hoverWarning;
+	Component[] warning;
 	@Nullable
 	List<TextRenderingUtils.Line> noTemplatesMessage;
 
@@ -82,17 +80,6 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 	public void setWarning(Component... components) {
 		this.warning = components;
-		this.displayWarning = true;
-	}
-
-	@Override
-	public boolean mouseClicked(double d, double e, int i) {
-		if (this.hoverWarning && this.warningURL != null) {
-			Util.getPlatform().openUri("https://www.minecraft.net/realms/adventure-maps-in-1-9");
-			return true;
-		} else {
-			return super.mouseClicked(d, e, i);
-		}
 	}
 
 	@Override
@@ -210,12 +197,12 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 					RealmsClient realmsClient = RealmsClient.create();
 
 					while (worldTemplatePaginatedList != null) {
-						Either<WorldTemplatePaginatedList, String> either = RealmsSelectWorldTemplateScreen.this.fetchTemplates(worldTemplatePaginatedList, realmsClient);
+						Either<WorldTemplatePaginatedList, Exception> either = RealmsSelectWorldTemplateScreen.this.fetchTemplates(worldTemplatePaginatedList, realmsClient);
 						worldTemplatePaginatedList = (WorldTemplatePaginatedList)RealmsSelectWorldTemplateScreen.this.minecraft
 							.submit(
 								() -> {
 									if (either.right().isPresent()) {
-										RealmsSelectWorldTemplateScreen.LOGGER.error("Couldn't fetch templates: {}", either.right().get());
+										RealmsSelectWorldTemplateScreen.LOGGER.error("Couldn't fetch templates", (Throwable)either.right().get());
 										if (RealmsSelectWorldTemplateScreen.this.worldTemplateObjectSelectionList.isEmpty()) {
 											RealmsSelectWorldTemplateScreen.this.noTemplatesMessage = TextRenderingUtils.decompose(I18n.get("mco.template.select.failure"));
 										}
@@ -251,56 +238,35 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			.start();
 	}
 
-	Either<WorldTemplatePaginatedList, String> fetchTemplates(WorldTemplatePaginatedList worldTemplatePaginatedList, RealmsClient realmsClient) {
+	Either<WorldTemplatePaginatedList, Exception> fetchTemplates(WorldTemplatePaginatedList worldTemplatePaginatedList, RealmsClient realmsClient) {
 		try {
 			return Either.left(realmsClient.fetchWorldTemplates(worldTemplatePaginatedList.page + 1, worldTemplatePaginatedList.size, this.worldType));
 		} catch (RealmsServiceException var4) {
-			return Either.right(var4.getMessage());
+			return Either.right(var4);
 		}
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
 		this.toolTip = null;
 		this.currentLink = null;
-		this.hoverWarning = false;
-		this.renderBackground(guiGraphics);
 		this.worldTemplateObjectSelectionList.render(guiGraphics, i, j, f);
 		if (this.noTemplatesMessage != null) {
 			this.renderMultilineMessage(guiGraphics, i, j, this.noTemplatesMessage);
 		}
 
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 13, 16777215);
-		if (this.displayWarning) {
-			Component[] components = this.warning;
-
-			for (int k = 0; k < components.length; k++) {
-				int l = this.font.width(components[k]);
-				int m = this.width / 2 - l / 2;
-				int n = row(-1 + k);
-				if (i >= m && i <= m + l && j >= n && j <= n + 9) {
-					this.hoverWarning = true;
-				}
-			}
-
-			for (int kx = 0; kx < components.length; kx++) {
-				Component component = components[kx];
-				int m = 10526880;
-				if (this.warningURL != null) {
-					if (this.hoverWarning) {
-						m = 7107012;
-						component = component.copy().withStyle(ChatFormatting.STRIKETHROUGH);
-					} else {
-						m = 3368635;
-					}
-				}
-
-				guiGraphics.drawCenteredString(this.font, component, this.width / 2, row(-1 + kx), m);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 13, -1);
+		if (this.warning != null) {
+			for (int k = 0; k < this.warning.length; k++) {
+				Component component = this.warning[k];
+				guiGraphics.drawCenteredString(this.font, component, this.width / 2, row(-1 + k), -6250336);
 			}
 		}
 
-		super.render(guiGraphics, i, j, f);
-		this.renderMousehoverTooltip(guiGraphics, this.toolTip, i, j);
+		if (this.toolTip != null) {
+			guiGraphics.renderTooltip(this.font, this.toolTip, i, j);
+		}
 	}
 
 	private void renderMultilineMessage(GuiGraphics guiGraphics, int i, int j, List<TextRenderingUtils.Line> list) {
@@ -311,7 +277,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			int n = this.width / 2 - m / 2;
 
 			for (TextRenderingUtils.LineSegment lineSegment : line.segments) {
-				int o = lineSegment.isLink() ? 3368635 : 16777215;
+				int o = lineSegment.isLink() ? 3368635 : -1;
 				int p = guiGraphics.drawString(this.font, lineSegment.renderedText(), n, l, o);
 				if (lineSegment.isLink() && i > n && i < p && j > l - 3 && j < l + 8) {
 					this.toolTip = Component.literal(lineSegment.getLinkUrl());
@@ -320,16 +286,6 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 				n = p;
 			}
-		}
-	}
-
-	protected void renderMousehoverTooltip(GuiGraphics guiGraphics, @Nullable Component component, int i, int j) {
-		if (component != null) {
-			int k = i + 12;
-			int l = j - 12;
-			int m = this.font.width(component);
-			guiGraphics.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-			guiGraphics.drawString(this.font, component, k, l, 16777215);
 		}
 	}
 
@@ -348,7 +304,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 		private void renderWorldTemplateItem(GuiGraphics guiGraphics, WorldTemplate worldTemplate, int i, int j, int k, int l) {
 			int m = i + 45 + 20;
-			guiGraphics.drawString(RealmsSelectWorldTemplateScreen.this.font, worldTemplate.name, m, j + 2, 16777215, false);
+			guiGraphics.drawString(RealmsSelectWorldTemplateScreen.this.font, worldTemplate.name, m, j + 2, -1, false);
 			guiGraphics.drawString(RealmsSelectWorldTemplateScreen.this.font, worldTemplate.author, m, j + 15, 7105644, false);
 			guiGraphics.drawString(
 				RealmsSelectWorldTemplateScreen.this.font,
@@ -367,7 +323,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 		private void drawImage(GuiGraphics guiGraphics, int i, int j, int k, int l, WorldTemplate worldTemplate) {
 			guiGraphics.blit(RealmsTextureManager.worldTemplate(worldTemplate.id, worldTemplate.image), i + 1, j + 1, 0.0F, 0.0F, 38, 38, 38, 38);
-			guiGraphics.blit(RealmsSelectWorldTemplateScreen.SLOT_FRAME_LOCATION, i, j, 0.0F, 0.0F, 40, 40, 40, 40);
+			guiGraphics.blitSprite(RealmsSelectWorldTemplateScreen.SLOT_FRAME_SPRITE, i, j, 40, 40);
 		}
 
 		private void drawIcons(GuiGraphics guiGraphics, int i, int j, int k, int l, String string, String string2, String string3) {
@@ -392,14 +348,14 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			}
 
 			if (!bl3) {
-				float f = bl ? 15.0F : 0.0F;
-				guiGraphics.blit(RealmsSelectWorldTemplateScreen.LINK_ICON, i + m, j, f, 0.0F, 15, 15, 30, 15);
+				guiGraphics.blitSprite(bl ? RealmsSelectWorldTemplateScreen.LINK_HIGHLIGHTED_SPRITE : RealmsSelectWorldTemplateScreen.LINK_SPRITE, i + m, j, 15, 15);
 			}
 
 			if (!"".equals(string2)) {
 				int n = i + m + (bl3 ? 0 : 17);
-				float g = bl2 ? 15.0F : 0.0F;
-				guiGraphics.blit(RealmsSelectWorldTemplateScreen.TRAILER_ICON, n, j, g, 0.0F, 15, 15, 30, 15);
+				guiGraphics.blitSprite(
+					bl2 ? RealmsSelectWorldTemplateScreen.VIDEO_LINK_HIGHLIGHTED_SPRITE : RealmsSelectWorldTemplateScreen.VIDEO_LINK_SPRITE, n, j, 15, 15
+				);
 			}
 
 			if (bl) {
@@ -433,7 +389,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			super(
 				RealmsSelectWorldTemplateScreen.this.width,
 				RealmsSelectWorldTemplateScreen.this.height,
-				RealmsSelectWorldTemplateScreen.this.displayWarning ? RealmsSelectWorldTemplateScreen.row(1) : 32,
+				RealmsSelectWorldTemplateScreen.this.warning != null ? RealmsSelectWorldTemplateScreen.row(1) : 32,
 				RealmsSelectWorldTemplateScreen.this.height - 40,
 				46
 			);
@@ -487,11 +443,6 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		@Override
 		public int getRowWidth() {
 			return 300;
-		}
-
-		@Override
-		public void renderBackground(GuiGraphics guiGraphics) {
-			RealmsSelectWorldTemplateScreen.this.renderBackground(guiGraphics);
 		}
 
 		public boolean isEmpty() {

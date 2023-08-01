@@ -329,10 +329,6 @@ public abstract class PathNavigation {
 
 	protected abstract boolean canUpdatePath();
 
-	protected boolean isInLiquid() {
-		return this.mob.isInWaterOrBubble() || this.mob.isInLava();
-	}
-
 	protected void trimPath() {
 		if (this.path != null) {
 			for (int i = 0; i < this.path.getNodeCount(); i++) {

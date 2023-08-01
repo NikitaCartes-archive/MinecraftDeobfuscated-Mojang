@@ -58,8 +58,7 @@ public interface VibrationSystem {
 		object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH, 3);
 		object2IntOpenHashMap.put(GameEvent.PROJECTILE_SHOOT, 3);
 		object2IntOpenHashMap.put(GameEvent.INSTRUMENT_PLAY, 3);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_ROAR, 4);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_SHAKE, 4);
+		object2IntOpenHashMap.put(GameEvent.ENTITY_ACTION, 4);
 		object2IntOpenHashMap.put(GameEvent.ELYTRA_GLIDE, 4);
 		object2IntOpenHashMap.put(GameEvent.ENTITY_DISMOUNT, 5);
 		object2IntOpenHashMap.put(GameEvent.EQUIP, 5);

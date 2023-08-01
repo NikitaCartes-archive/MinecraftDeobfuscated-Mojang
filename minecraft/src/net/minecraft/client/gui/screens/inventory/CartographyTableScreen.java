@@ -15,6 +15,11 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 @Environment(EnvType.CLIENT)
 public class CartographyTableScreen extends AbstractContainerScreen<CartographyTableMenu> {
+	private static final ResourceLocation ERROR_SPRITE = new ResourceLocation("container/cartography_table/error");
+	private static final ResourceLocation SCALED_MAP_SPRITE = new ResourceLocation("container/cartography_table/scaled_map");
+	private static final ResourceLocation DUPLICATED_MAP_SPRITE = new ResourceLocation("container/cartography_table/duplicated_map");
+	private static final ResourceLocation MAP_SPRITE = new ResourceLocation("container/cartography_table/map");
+	private static final ResourceLocation LOCKED_SPRITE = new ResourceLocation("container/cartography_table/locked");
 	private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/cartography_table.png");
 
 	public CartographyTableScreen(CartographyTableMenu cartographyTableMenu, Inventory inventory, Component component) {
@@ -30,7 +35,6 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
-		this.renderBackground(guiGraphics);
 		int k = this.leftPos;
 		int l = this.topPos;
 		guiGraphics.blit(BG_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
@@ -49,13 +53,13 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 				if (mapItemSavedData.locked) {
 					bl4 = true;
 					if (bl2 || bl3) {
-						guiGraphics.blit(BG_LOCATION, k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
+						guiGraphics.blitSprite(ERROR_SPRITE, k + 35, l + 31, 28, 21);
 					}
 				}
 
 				if (bl2 && mapItemSavedData.scale >= 4) {
 					bl4 = true;
-					guiGraphics.blit(BG_LOCATION, k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
+					guiGraphics.blitSprite(ERROR_SPRITE, k + 35, l + 31, 28, 21);
 				}
 			}
 		} else {
@@ -72,25 +76,25 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 		int i = this.leftPos;
 		int j = this.topPos;
 		if (bl2 && !bl4) {
-			guiGraphics.blit(BG_LOCATION, i + 67, j + 13, this.imageWidth, 66, 66, 66);
+			guiGraphics.blitSprite(SCALED_MAP_SPRITE, i + 67, j + 13, 66, 66);
 			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 85, j + 31, 0.226F);
 		} else if (bl) {
-			guiGraphics.blit(BG_LOCATION, i + 67 + 16, j + 13, this.imageWidth, 132, 50, 66);
+			guiGraphics.blitSprite(DUPLICATED_MAP_SPRITE, i + 67 + 16, j + 13, 50, 66);
 			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 86, j + 16, 0.34F);
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0.0F, 0.0F, 1.0F);
-			guiGraphics.blit(BG_LOCATION, i + 67, j + 13 + 16, this.imageWidth, 132, 50, 66);
+			guiGraphics.blitSprite(DUPLICATED_MAP_SPRITE, i + 67, j + 13 + 16, 50, 66);
 			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 70, j + 32, 0.34F);
 			guiGraphics.pose().popPose();
 		} else if (bl3) {
-			guiGraphics.blit(BG_LOCATION, i + 67, j + 13, this.imageWidth, 0, 66, 66);
+			guiGraphics.blitSprite(MAP_SPRITE, i + 67, j + 13, 66, 66);
 			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 71, j + 17, 0.45F);
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0.0F, 0.0F, 1.0F);
-			guiGraphics.blit(BG_LOCATION, i + 66, j + 12, 0, this.imageHeight, 66, 66);
+			guiGraphics.blitSprite(LOCKED_SPRITE, i + 118, j + 60, 10, 14);
 			guiGraphics.pose().popPose();
 		} else {
-			guiGraphics.blit(BG_LOCATION, i + 67, j + 13, this.imageWidth, 0, 66, 66);
+			guiGraphics.blitSprite(MAP_SPRITE, i + 67, j + 13, 66, 66);
 			this.renderMap(guiGraphics, integer, mapItemSavedData, i + 71, j + 17, 0.45F);
 		}
 	}

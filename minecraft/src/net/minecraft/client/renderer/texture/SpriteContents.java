@@ -21,6 +21,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -33,11 +34,15 @@ public class SpriteContents implements Stitcher.Entry, AutoCloseable {
 	NativeImage[] byMipLevel;
 	@Nullable
 	private final SpriteContents.AnimatedTexture animatedTexture;
+	private final ResourceMetadata metadata;
 
-	public SpriteContents(ResourceLocation resourceLocation, FrameSize frameSize, NativeImage nativeImage, AnimationMetadataSection animationMetadataSection) {
+	public SpriteContents(ResourceLocation resourceLocation, FrameSize frameSize, NativeImage nativeImage, ResourceMetadata resourceMetadata) {
 		this.name = resourceLocation;
 		this.width = frameSize.width();
 		this.height = frameSize.height();
+		this.metadata = resourceMetadata;
+		AnimationMetadataSection animationMetadataSection = (AnimationMetadataSection)resourceMetadata.getSection(AnimationMetadataSection.SERIALIZER)
+			.orElse(AnimationMetadataSection.EMPTY);
 		this.animatedTexture = this.createAnimatedTexture(frameSize, nativeImage.getWidth(), nativeImage.getHeight(), animationMetadataSection);
 		this.originalImage = nativeImage;
 		this.byMipLevel = new NativeImage[]{this.originalImage};
@@ -143,6 +148,10 @@ public class SpriteContents implements Stitcher.Entry, AutoCloseable {
 	@Nullable
 	public SpriteTicker createTicker() {
 		return this.animatedTexture != null ? this.animatedTexture.createTicker() : null;
+	}
+
+	public ResourceMetadata metadata() {
+		return this.metadata;
 	}
 
 	public void close() {

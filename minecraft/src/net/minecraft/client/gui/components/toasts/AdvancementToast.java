@@ -8,12 +8,14 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class AdvancementToast implements Toast {
+	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("toast/advancement");
 	public static final int DISPLAY_TIME = 5000;
 	private final Advancement advancement;
 	private boolean playedSound;
@@ -25,7 +27,7 @@ public class AdvancementToast implements Toast {
 	@Override
 	public Toast.Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long l) {
 		DisplayInfo displayInfo = this.advancement.getDisplay();
-		guiGraphics.blit(TEXTURE, 0, 0, 0, 0, this.width(), this.height());
+		guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width(), this.height());
 		if (displayInfo != null) {
 			List<FormattedCharSequence> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
 			int i = displayInfo.getFrame() == FrameType.CHALLENGE ? 16746751 : 16776960;

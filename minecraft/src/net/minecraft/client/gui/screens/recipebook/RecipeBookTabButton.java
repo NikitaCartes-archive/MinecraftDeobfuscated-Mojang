@@ -9,13 +9,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.StateSwitchingButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookTabButton extends StateSwitchingButton {
+	private static final WidgetSprites SPRITES = new WidgetSprites(new ResourceLocation("recipe_book/tab"), new ResourceLocation("recipe_book/tab_selected"));
 	private final RecipeBookCategories category;
 	private static final float ANIMATION_TIME = 15.0F;
 	private float animationTime;
@@ -23,7 +26,7 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 	public RecipeBookTabButton(RecipeBookCategories recipeBookCategories) {
 		super(0, 0, 35, 27, false);
 		this.category = recipeBookCategories;
-		this.initTextureValues(153, 2, 35, 0, RecipeBookComponent.RECIPE_BOOK_LOCATION);
+		this.initTextureValues(SPRITES);
 	}
 
 	public void startAnimation(Minecraft minecraft) {
@@ -43,37 +46,30 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-		if (this.animationTime > 0.0F) {
-			float g = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float) Math.PI));
-			guiGraphics.pose().pushPose();
-			guiGraphics.pose().translate((float)(this.getX() + 8), (float)(this.getY() + 12), 0.0F);
-			guiGraphics.pose().scale(1.0F, g, 1.0F);
-			guiGraphics.pose().translate((float)(-(this.getX() + 8)), (float)(-(this.getY() + 12)), 0.0F);
-		}
+		if (this.sprites != null) {
+			if (this.animationTime > 0.0F) {
+				float g = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float) Math.PI));
+				guiGraphics.pose().pushPose();
+				guiGraphics.pose().translate((float)(this.getX() + 8), (float)(this.getY() + 12), 0.0F);
+				guiGraphics.pose().scale(1.0F, g, 1.0F);
+				guiGraphics.pose().translate((float)(-(this.getX() + 8)), (float)(-(this.getY() + 12)), 0.0F);
+			}
 
-		Minecraft minecraft = Minecraft.getInstance();
-		RenderSystem.disableDepthTest();
-		int k = this.xTexStart;
-		int l = this.yTexStart;
-		if (this.isStateTriggered) {
-			k += this.xDiffTex;
-		}
+			Minecraft minecraft = Minecraft.getInstance();
+			RenderSystem.disableDepthTest();
+			ResourceLocation resourceLocation = this.sprites.get(true, this.isStateTriggered);
+			int k = this.getX();
+			if (this.isStateTriggered) {
+				k -= 2;
+			}
 
-		if (this.isHoveredOrFocused()) {
-			l += this.yDiffTex;
-		}
-
-		int m = this.getX();
-		if (this.isStateTriggered) {
-			m -= 2;
-		}
-
-		guiGraphics.blit(this.resourceLocation, m, this.getY(), k, l, this.width, this.height);
-		RenderSystem.enableDepthTest();
-		this.renderIcon(guiGraphics, minecraft.getItemRenderer());
-		if (this.animationTime > 0.0F) {
-			guiGraphics.pose().popPose();
-			this.animationTime -= f;
+			guiGraphics.blitSprite(resourceLocation, k, this.getY(), this.width, this.height);
+			RenderSystem.enableDepthTest();
+			this.renderIcon(guiGraphics, minecraft.getItemRenderer());
+			if (this.animationTime > 0.0F) {
+				guiGraphics.pose().popPose();
+				this.animationTime -= f;
+			}
 		}
 	}
 

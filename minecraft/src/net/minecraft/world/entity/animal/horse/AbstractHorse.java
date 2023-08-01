@@ -75,6 +75,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public abstract class AbstractHorse extends Animal implements ContainerListener, HasCustomInventoryScreen, OwnableEntity, PlayerRideableJumping, Saddleable {
 	public static final int EQUIPMENT_SLOT_OFFSET = 400;
@@ -971,20 +972,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	protected void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
 		super.positionRider(entity, moveFunction);
-		if (this.standAnimO > 0.0F) {
-			float f = Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0));
-			float g = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
-			float h = 0.7F * this.standAnimO;
-			float i = 0.15F * this.standAnimO;
-			moveFunction.accept(
-				entity,
-				this.getX() + (double)(h * f),
-				this.getY() + this.getPassengersRidingOffset() + entity.getMyRidingOffset() + (double)i,
-				this.getZ() - (double)(h * g)
-			);
-			if (entity instanceof LivingEntity) {
-				((LivingEntity)entity).yBodyRot = this.yBodyRot;
-			}
+		if (entity instanceof LivingEntity) {
+			((LivingEntity)entity).yBodyRot = this.yBodyRot;
 		}
 	}
 
@@ -1066,19 +1055,14 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Nullable
 	@Override
 	public LivingEntity getControllingPassenger() {
-		Entity var3 = this.getFirstPassenger();
-		if (var3 instanceof Mob) {
-			return (Mob)var3;
-		} else {
-			if (this.isSaddled()) {
-				var3 = this.getFirstPassenger();
-				if (var3 instanceof Player) {
-					return (Player)var3;
-				}
+		if (this.isSaddled()) {
+			Entity var2 = this.getFirstPassenger();
+			if (var2 instanceof Player) {
+				return (Player)var2;
 			}
-
-			return null;
 		}
+
+		return super.getControllingPassenger();
 	}
 
 	@Nullable
@@ -1157,5 +1141,14 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	public int getAmbientStandInterval() {
 		return this.getAmbientSoundInterval();
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, this.getPassengersRidingOffsetY(entityDimensions, f) + 0.15F * this.standAnimO * f, -0.7F * this.standAnimO * f);
+	}
+
+	protected float getPassengersRidingOffsetY(EntityDimensions entityDimensions, float f) {
+		return entityDimensions.height + (this.isBaby() ? 0.125F : -0.15625F) * f;
 	}
 }

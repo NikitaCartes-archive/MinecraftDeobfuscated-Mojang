@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Chicken extends Animal {
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(
@@ -169,14 +170,14 @@ public class Chicken extends Animal {
 	@Override
 	protected void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
 		super.positionRider(entity, moveFunction);
-		float f = Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0));
-		float g = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
-		float h = 0.1F;
-		float i = 0.0F;
-		moveFunction.accept(entity, this.getX() + (double)(0.1F * f), this.getY(0.5) + entity.getMyRidingOffset() + 0.0, this.getZ() - (double)(0.1F * g));
 		if (entity instanceof LivingEntity) {
 			((LivingEntity)entity).yBodyRot = this.yBodyRot;
 		}
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height, -0.1F * f);
 	}
 
 	public boolean isChickenJockey() {

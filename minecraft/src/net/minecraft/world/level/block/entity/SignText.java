@@ -28,7 +28,7 @@ public class SignText {
 	public static final Codec<SignText> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					LINES_CODEC.fieldOf("messages").forGetter(signText -> signText.messages),
-					LINES_CODEC.optionalFieldOf("filtered_messages").forGetter(SignText::getOnlyFilteredMessages),
+					LINES_CODEC.optionalFieldOf("filtered_messages").forGetter(SignText::filteredMessages),
 					DyeColor.CODEC.fieldOf("color").orElse(DyeColor.BLACK).forGetter(signText -> signText.color),
 					Codec.BOOL.fieldOf("has_glowing_text").orElse(false).forGetter(signText -> signText.hasGlowingText)
 				)
@@ -59,17 +59,7 @@ public class SignText {
 	}
 
 	private static SignText load(Component[] components, Optional<Component[]> optional, DyeColor dyeColor, boolean bl) {
-		Component[] components2 = (Component[])optional.orElseGet(SignText::emptyMessages);
-		populateFilteredMessagesWithRawMessages(components, components2);
-		return new SignText(components, components2, dyeColor, bl);
-	}
-
-	private static void populateFilteredMessagesWithRawMessages(Component[] components, Component[] components2) {
-		for (int i = 0; i < 4; i++) {
-			if (components2[i].equals(CommonComponents.EMPTY)) {
-				components2[i] = components[i];
-			}
-		}
+		return new SignText(components, (Component[])optional.orElse((Component[])Arrays.copyOf(components, components.length)), dyeColor, bl);
 	}
 
 	public boolean hasGlowingText() {
@@ -125,21 +115,14 @@ public class SignText {
 		return this.renderMessages;
 	}
 
-	private Optional<Component[]> getOnlyFilteredMessages() {
-		Component[] components = new Component[4];
-		boolean bl = false;
-
+	private Optional<Component[]> filteredMessages() {
 		for (int i = 0; i < 4; i++) {
-			Component component = this.filteredMessages[i];
-			if (!component.equals(this.messages[i])) {
-				components[i] = component;
-				bl = true;
-			} else {
-				components[i] = CommonComponents.EMPTY;
+			if (!this.filteredMessages[i].equals(this.messages[i])) {
+				return Optional.of(this.filteredMessages);
 			}
 		}
 
-		return bl ? Optional.of(components) : Optional.empty();
+		return Optional.empty();
 	}
 
 	public boolean hasAnyClickCommands(Player player) {

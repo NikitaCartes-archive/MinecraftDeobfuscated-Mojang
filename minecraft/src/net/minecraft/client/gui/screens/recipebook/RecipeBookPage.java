@@ -11,12 +11,20 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.StateSwitchingButton;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookPage {
 	public static final int ITEMS_PER_PAGE = 20;
+	private static final WidgetSprites PAGE_FORWARD_SPRITES = new WidgetSprites(
+		new ResourceLocation("recipe_book/page_forward"), new ResourceLocation("recipe_book/page_forward_highlighted")
+	);
+	private static final WidgetSprites PAGE_BACKWARD_SPRITES = new WidgetSprites(
+		new ResourceLocation("recipe_book/page_backward"), new ResourceLocation("recipe_book/page_backward_highlighted")
+	);
 	private final List<RecipeButton> buttons = Lists.<RecipeButton>newArrayListWithCapacity(20);
 	@Nullable
 	private RecipeButton hoveredButton;
@@ -49,9 +57,9 @@ public class RecipeBookPage {
 		}
 
 		this.forwardButton = new StateSwitchingButton(i + 93, j + 137, 12, 17, false);
-		this.forwardButton.initTextureValues(1, 208, 13, 18, RecipeBookComponent.RECIPE_BOOK_LOCATION);
+		this.forwardButton.initTextureValues(PAGE_FORWARD_SPRITES);
 		this.backButton = new StateSwitchingButton(i + 38, j + 137, 12, 17, true);
-		this.backButton.initTextureValues(1, 208, 13, 18, RecipeBookComponent.RECIPE_BOOK_LOCATION);
+		this.backButton.initTextureValues(PAGE_BACKWARD_SPRITES);
 	}
 
 	public void addListener(RecipeBookComponent recipeBookComponent) {

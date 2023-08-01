@@ -6,10 +6,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class TutorialToast implements Toast {
+	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("toast/tutorial");
 	public static final int PROGRESS_BAR_WIDTH = 154;
 	public static final int PROGRESS_BAR_HEIGHT = 1;
 	public static final int PROGRESS_BAR_X = 3;
@@ -33,7 +35,7 @@ public class TutorialToast implements Toast {
 
 	@Override
 	public Toast.Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long l) {
-		guiGraphics.blit(TEXTURE, 0, 0, 0, 96, this.width(), this.height());
+		guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width(), this.height());
 		this.icon.render(guiGraphics, 6, 6);
 		if (this.message == null) {
 			guiGraphics.drawString(toastComponent.getMinecraft().font, this.title, 30, 12, -11534256, false);
@@ -70,25 +72,23 @@ public class TutorialToast implements Toast {
 
 	@Environment(EnvType.CLIENT)
 	public static enum Icons {
-		MOVEMENT_KEYS(0, 0),
-		MOUSE(1, 0),
-		TREE(2, 0),
-		RECIPE_BOOK(0, 1),
-		WOODEN_PLANKS(1, 1),
-		SOCIAL_INTERACTIONS(2, 1),
-		RIGHT_CLICK(3, 1);
+		MOVEMENT_KEYS(new ResourceLocation("toast/movement_keys")),
+		MOUSE(new ResourceLocation("toast/mouse")),
+		TREE(new ResourceLocation("toast/tree")),
+		RECIPE_BOOK(new ResourceLocation("toast/recipe_book")),
+		WOODEN_PLANKS(new ResourceLocation("toast/wooden_planks")),
+		SOCIAL_INTERACTIONS(new ResourceLocation("toast/social_interactions")),
+		RIGHT_CLICK(new ResourceLocation("toast/right_click"));
 
-		private final int x;
-		private final int y;
+		private final ResourceLocation sprite;
 
-		private Icons(int j, int k) {
-			this.x = j;
-			this.y = k;
+		private Icons(ResourceLocation resourceLocation) {
+			this.sprite = resourceLocation;
 		}
 
 		public void render(GuiGraphics guiGraphics, int i, int j) {
 			RenderSystem.enableBlend();
-			guiGraphics.blit(Toast.TEXTURE, i, j, 176 + this.x * 20, this.y * 20, 20, 20);
+			guiGraphics.blitSprite(this.sprite, i, j, 20, 20);
 		}
 	}
 }

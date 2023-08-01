@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
@@ -20,10 +19,10 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMenu> implements RecipeUpdateListener {
-	private static final ResourceLocation RECIPE_BUTTON_LOCATION = new ResourceLocation("textures/gui/recipe_button.png");
 	private float xMouse;
 	private float yMouse;
 	private final RecipeBookComponent recipeBookComponent = new RecipeBookComponent();
@@ -59,7 +58,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 			this.widthTooNarrow = this.width < 379;
 			this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
 			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-			this.addRenderableWidget(new ImageButton(this.leftPos + 104, this.height / 2 - 22, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
+			this.addRenderableWidget(new ImageButton(this.leftPos + 104, this.height / 2 - 22, 20, 18, RecipeBookComponent.RECIPE_BUTTON_SPRITES, button -> {
 				this.recipeBookComponent.toggleVisibility();
 				this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
 				button.setPosition(this.leftPos + 104, this.height / 2 - 22);
@@ -77,13 +76,12 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-			this.renderBg(guiGraphics, f, i, j);
+			this.renderBackground(guiGraphics, i, j, f);
 			this.recipeBookComponent.render(guiGraphics, i, j, f);
 		} else {
-			this.recipeBookComponent.render(guiGraphics, i, j, f);
 			super.render(guiGraphics, i, j, f);
+			this.recipeBookComponent.render(guiGraphics, i, j, f);
 			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, false, f);
 		}
 
@@ -98,39 +96,47 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		int k = this.leftPos;
 		int l = this.topPos;
 		guiGraphics.blit(INVENTORY_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
-		renderEntityInInventoryFollowsMouse(guiGraphics, k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
+		renderEntityInInventoryFollowsMouse(guiGraphics, k + 26, l + 8, k + 75, l + 78, 30, 0.0625F, this.xMouse, this.yMouse, this.minecraft.player);
 	}
 
-	public static void renderEntityInInventoryFollowsMouse(GuiGraphics guiGraphics, int i, int j, int k, float f, float g, LivingEntity livingEntity) {
-		float h = (float)Math.atan((double)(f / 40.0F));
-		float l = (float)Math.atan((double)(g / 40.0F));
+	public static void renderEntityInInventoryFollowsMouse(
+		GuiGraphics guiGraphics, int i, int j, int k, int l, int m, float f, float g, float h, LivingEntity livingEntity
+	) {
+		float n = (float)(i + k) / 2.0F;
+		float o = (float)(j + l) / 2.0F;
+		guiGraphics.enableScissor(i, j, k, l);
+		float p = (float)Math.atan((double)((n - g) / 40.0F));
+		float q = (float)Math.atan((double)((o - h) / 40.0F));
 		Quaternionf quaternionf = new Quaternionf().rotateZ((float) Math.PI);
-		Quaternionf quaternionf2 = new Quaternionf().rotateX(l * 20.0F * (float) (Math.PI / 180.0));
+		Quaternionf quaternionf2 = new Quaternionf().rotateX(q * 20.0F * (float) (Math.PI / 180.0));
 		quaternionf.mul(quaternionf2);
-		float m = livingEntity.yBodyRot;
-		float n = livingEntity.getYRot();
-		float o = livingEntity.getXRot();
-		float p = livingEntity.yHeadRotO;
-		float q = livingEntity.yHeadRot;
-		livingEntity.yBodyRot = 180.0F + h * 20.0F;
-		livingEntity.setYRot(180.0F + h * 40.0F);
-		livingEntity.setXRot(-l * 20.0F);
+		float r = livingEntity.yBodyRot;
+		float s = livingEntity.getYRot();
+		float t = livingEntity.getXRot();
+		float u = livingEntity.yHeadRotO;
+		float v = livingEntity.yHeadRot;
+		livingEntity.yBodyRot = 180.0F + p * 20.0F;
+		livingEntity.setYRot(180.0F + p * 40.0F);
+		livingEntity.setXRot(-q * 20.0F);
 		livingEntity.yHeadRot = livingEntity.getYRot();
 		livingEntity.yHeadRotO = livingEntity.getYRot();
-		renderEntityInInventory(guiGraphics, i, j, k, quaternionf, quaternionf2, livingEntity);
-		livingEntity.yBodyRot = m;
-		livingEntity.setYRot(n);
-		livingEntity.setXRot(o);
-		livingEntity.yHeadRotO = p;
-		livingEntity.yHeadRot = q;
+		Vector3f vector3f = new Vector3f(0.0F, livingEntity.getBbHeight() / 2.0F + f, 0.0F);
+		renderEntityInInventory(guiGraphics, n, o, m, vector3f, quaternionf, quaternionf2, livingEntity);
+		livingEntity.yBodyRot = r;
+		livingEntity.setYRot(s);
+		livingEntity.setXRot(t);
+		livingEntity.yHeadRotO = u;
+		livingEntity.yHeadRot = v;
+		guiGraphics.disableScissor();
 	}
 
 	public static void renderEntityInInventory(
-		GuiGraphics guiGraphics, int i, int j, int k, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity
+		GuiGraphics guiGraphics, float f, float g, int i, Vector3f vector3f, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity
 	) {
 		guiGraphics.pose().pushPose();
-		guiGraphics.pose().translate((double)i, (double)j, 50.0);
-		guiGraphics.pose().mulPoseMatrix(new Matrix4f().scaling((float)k, (float)k, (float)(-k)));
+		guiGraphics.pose().translate((double)f, (double)g, 50.0);
+		guiGraphics.pose().mulPoseMatrix(new Matrix4f().scaling((float)i, (float)i, (float)(-i)));
+		guiGraphics.pose().translate(vector3f.x, vector3f.y, vector3f.z);
 		guiGraphics.pose().mulPose(quaternionf);
 		Lighting.setupForEntityInInventory();
 		EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();

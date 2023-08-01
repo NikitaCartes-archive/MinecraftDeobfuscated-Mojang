@@ -30,8 +30,7 @@ public class GameEvent {
 	public static final GameEvent ENTITY_INTERACT = register("entity_interact");
 	public static final GameEvent ENTITY_MOUNT = register("entity_mount");
 	public static final GameEvent ENTITY_PLACE = register("entity_place");
-	public static final GameEvent ENTITY_ROAR = register("entity_roar");
-	public static final GameEvent ENTITY_SHAKE = register("entity_shake");
+	public static final GameEvent ENTITY_ACTION = register("entity_action");
 	public static final GameEvent EQUIP = register("equip");
 	public static final GameEvent EXPLODE = register("explode");
 	public static final GameEvent FLAP = register("flap");
@@ -71,17 +70,11 @@ public class GameEvent {
 	public static final GameEvent RESONATE_14 = register("resonate_14");
 	public static final GameEvent RESONATE_15 = register("resonate_15");
 	public static final int DEFAULT_NOTIFICATION_RADIUS = 16;
-	private final String name;
 	private final int notificationRadius;
 	private final Holder.Reference<GameEvent> builtInRegistryHolder = BuiltInRegistries.GAME_EVENT.createIntrusiveHolder(this);
 
-	public GameEvent(String string, int i) {
-		this.name = string;
+	public GameEvent(int i) {
 		this.notificationRadius = i;
-	}
-
-	public String getName() {
-		return this.name;
 	}
 
 	public int getNotificationRadius() {
@@ -93,11 +86,11 @@ public class GameEvent {
 	}
 
 	private static GameEvent register(String string, int i) {
-		return Registry.register(BuiltInRegistries.GAME_EVENT, string, new GameEvent(string, i));
+		return Registry.register(BuiltInRegistries.GAME_EVENT, string, new GameEvent(i));
 	}
 
 	public String toString() {
-		return "Game Event{ " + this.name + " , " + this.notificationRadius + "}";
+		return "Game Event{ " + this.builtInRegistryHolder().key().location() + " , " + this.notificationRadius + "}";
 	}
 
 	@Deprecated

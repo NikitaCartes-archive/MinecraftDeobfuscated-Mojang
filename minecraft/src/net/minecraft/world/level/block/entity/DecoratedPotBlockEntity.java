@@ -59,14 +59,29 @@ public class DecoratedPotBlockEntity extends BlockEntity {
 		this.decorations = DecoratedPotBlockEntity.Decorations.load(BlockItem.getBlockEntityData(itemStack));
 	}
 
+	public ItemStack getItem() {
+		return createDecoratedPotItem(this.decorations);
+	}
+
+	public static ItemStack createDecoratedPotItem(DecoratedPotBlockEntity.Decorations decorations) {
+		ItemStack itemStack = Items.DECORATED_POT.getDefaultInstance();
+		CompoundTag compoundTag = decorations.save(new CompoundTag());
+		BlockItem.setBlockEntityData(itemStack, BlockEntityType.DECORATED_POT, compoundTag);
+		return itemStack;
+	}
+
 	public static record Decorations(Item back, Item left, Item right, Item front) {
 		public static final DecoratedPotBlockEntity.Decorations EMPTY = new DecoratedPotBlockEntity.Decorations(Items.BRICK, Items.BRICK, Items.BRICK, Items.BRICK);
 
 		public CompoundTag save(CompoundTag compoundTag) {
-			ListTag listTag = new ListTag();
-			this.sorted().forEach(item -> listTag.add(StringTag.valueOf(BuiltInRegistries.ITEM.getKey(item).toString())));
-			compoundTag.put("sherds", listTag);
-			return compoundTag;
+			if (this.equals(EMPTY)) {
+				return compoundTag;
+			} else {
+				ListTag listTag = new ListTag();
+				this.sorted().forEach(item -> listTag.add(StringTag.valueOf(BuiltInRegistries.ITEM.getKey(item).toString())));
+				compoundTag.put("sherds", listTag);
+				return compoundTag;
+			}
 		}
 
 		public Stream<Item> sorted() {
@@ -87,7 +102,7 @@ public class DecoratedPotBlockEntity extends BlockEntity {
 				return Items.BRICK;
 			} else {
 				Tag tag = listTag.get(i);
-				return BuiltInRegistries.ITEM.get(new ResourceLocation(tag.getAsString()));
+				return BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(tag.getAsString()));
 			}
 		}
 	}

@@ -142,11 +142,11 @@ public class LiquidBlockRenderer {
 				float ag;
 				if (vec3.x == 0.0 && vec3.z == 0.0) {
 					TextureAtlasSprite textureAtlasSprite = textureAtlasSprites[0];
-					z = textureAtlasSprite.getU(0.0);
-					aa = textureAtlasSprite.getV(0.0);
+					z = textureAtlasSprite.getU(0.0F);
+					aa = textureAtlasSprite.getV(0.0F);
 					ab = z;
-					ac = textureAtlasSprite.getV(16.0);
-					ad = textureAtlasSprite.getU(16.0);
+					ac = textureAtlasSprite.getV(1.0F);
+					ad = textureAtlasSprite.getU(1.0F);
 					ae = ac;
 					af = ad;
 					ag = aa;
@@ -155,15 +155,15 @@ public class LiquidBlockRenderer {
 					float ah = (float)Mth.atan2(vec3.z, vec3.x) - (float) (Math.PI / 2);
 					float ai = Mth.sin(ah) * 0.25F;
 					float aj = Mth.cos(ah) * 0.25F;
-					float ak = 8.0F;
-					z = textureAtlasSprite.getU((double)(8.0F + (-aj - ai) * 16.0F));
-					aa = textureAtlasSprite.getV((double)(8.0F + (-aj + ai) * 16.0F));
-					ab = textureAtlasSprite.getU((double)(8.0F + (-aj + ai) * 16.0F));
-					ac = textureAtlasSprite.getV((double)(8.0F + (aj + ai) * 16.0F));
-					ad = textureAtlasSprite.getU((double)(8.0F + (aj + ai) * 16.0F));
-					ae = textureAtlasSprite.getV((double)(8.0F + (aj - ai) * 16.0F));
-					af = textureAtlasSprite.getU((double)(8.0F + (aj - ai) * 16.0F));
-					ag = textureAtlasSprite.getV((double)(8.0F + (-aj - ai) * 16.0F));
+					float ak = 0.5F;
+					z = textureAtlasSprite.getU(0.5F + (-aj - ai));
+					aa = textureAtlasSprite.getV(0.5F + -aj + ai);
+					ab = textureAtlasSprite.getU(0.5F + -aj + ai);
+					ac = textureAtlasSprite.getV(0.5F + aj + ai);
+					ad = textureAtlasSprite.getU(0.5F + aj + ai);
+					ae = textureAtlasSprite.getV(0.5F + (aj - ai));
+					af = textureAtlasSprite.getU(0.5F + (aj - ai));
+					ag = textureAtlasSprite.getV(0.5F + (-aj - ai));
 				}
 
 				float al = (z + ab + ad + af) / 4.0F;
@@ -267,11 +267,11 @@ public class LiquidBlockRenderer {
 						}
 					}
 
-					float av = textureAtlasSprite2.getU(0.0);
-					float aw = textureAtlasSprite2.getU(8.0);
-					float ax = textureAtlasSprite2.getV((double)((1.0F - afx) * 16.0F * 0.5F));
-					float ay = textureAtlasSprite2.getV((double)((1.0F - aax) * 16.0F * 0.5F));
-					float az = textureAtlasSprite2.getV(8.0);
+					float av = textureAtlasSprite2.getU(0.0F);
+					float aw = textureAtlasSprite2.getU(0.5F);
+					float ax = textureAtlasSprite2.getV((1.0F - afx) * 0.5F);
+					float ay = textureAtlasSprite2.getV((1.0F - aax) * 0.5F);
+					float az = textureAtlasSprite2.getV(0.5F);
 					float ba = direction.getAxis() == Direction.Axis.Z ? l : m;
 					float bb = k * ba * f;
 					float bc = k * ba * g;

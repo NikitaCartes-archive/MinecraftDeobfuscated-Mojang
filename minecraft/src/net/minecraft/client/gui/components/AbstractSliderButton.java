@@ -17,19 +17,14 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSliderButton extends AbstractWidget {
-	private static final ResourceLocation SLIDER_LOCATION = new ResourceLocation("textures/gui/slider.png");
-	protected static final int TEXTURE_WIDTH = 200;
-	protected static final int TEXTURE_HEIGHT = 20;
-	protected static final int TEXTURE_BORDER_X = 20;
-	protected static final int TEXTURE_BORDER_Y = 4;
+	private static final ResourceLocation SLIDER_SPRITE = new ResourceLocation("widget/slider");
+	private static final ResourceLocation HIGHLIGHTED_SPRITE = new ResourceLocation("widget/slider_highlighted");
+	private static final ResourceLocation SLIDER_HANDLE_SPRITE = new ResourceLocation("widget/slider_handle");
+	private static final ResourceLocation SLIDER_HANDLE_HIGHLIGHTED_SPRITE = new ResourceLocation("widget/slider_handle_highlighted");
 	protected static final int TEXT_MARGIN = 2;
 	private static final int HEIGHT = 20;
 	private static final int HANDLE_HALF_WIDTH = 4;
 	private static final int HANDLE_WIDTH = 8;
-	private static final int BACKGROUND = 0;
-	private static final int BACKGROUND_FOCUSED = 1;
-	private static final int HANDLE = 2;
-	private static final int HANDLE_FOCUSED = 3;
 	protected double value;
 	private boolean canChangeValue;
 
@@ -38,14 +33,12 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 		this.value = d;
 	}
 
-	private int getTextureY() {
-		int i = this.isFocused() && !this.canChangeValue ? 1 : 0;
-		return i * 20;
+	private ResourceLocation getSprite() {
+		return this.isFocused() && !this.canChangeValue ? HIGHLIGHTED_SPRITE : SLIDER_SPRITE;
 	}
 
-	private int getHandleTextureY() {
-		int i = !this.isHovered && !this.canChangeValue ? 2 : 3;
-		return i * 20;
+	private ResourceLocation getHandleSprite() {
+		return !this.isHovered && !this.canChangeValue ? SLIDER_HANDLE_SPRITE : SLIDER_HANDLE_HIGHLIGHTED_SPRITE;
 	}
 
 	@Override
@@ -72,10 +65,8 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableDepthTest();
-		guiGraphics.blitNineSliced(SLIDER_LOCATION, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
-		guiGraphics.blitNineSliced(
-			SLIDER_LOCATION, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, 20, 20, 4, 200, 20, 0, this.getHandleTextureY()
-		);
+		guiGraphics.blitSprite(this.getSprite(), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+		guiGraphics.blitSprite(this.getHandleSprite(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, 20);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		int k = this.active ? 16777215 : 10526880;
 		this.renderScrollingString(guiGraphics, minecraft.font, 2, k | Mth.ceil(this.alpha * 255.0F) << 24);

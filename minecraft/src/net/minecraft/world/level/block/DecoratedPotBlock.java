@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import java.util.List;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -9,6 +10,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -20,6 +22,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,7 +37,6 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
 
 public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	public static final ResourceLocation SHERDS_DYNAMIC_DROP_ID = new ResourceLocation("sherds");
@@ -72,6 +74,13 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 			.setValue(HORIZONTAL_FACING, blockPlaceContext.getHorizontalDirection())
 			.setValue(WATERLOGGED, Boolean.valueOf(fluidState.getType() == Fluids.WATER))
 			.setValue(CRACKED, Boolean.valueOf(false));
+	}
+
+	@Override
+	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
+		if (level.isClientSide) {
+			level.getBlockEntity(blockPos, BlockEntityType.DECORATED_POT).ifPresent(decoratedPotBlockEntity -> decoratedPotBlockEntity.setFromItem(itemStack));
+		}
 	}
 
 	@Override
@@ -138,5 +147,12 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 			Stream.of(decorations.front(), decorations.left(), decorations.right(), decorations.back())
 				.forEach(item -> list.add(new ItemStack(item, 1).getHoverName().plainCopy().withStyle(ChatFormatting.GRAY)));
 		}
+	}
+
+	@Override
+	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+		return blockGetter.getBlockEntity(blockPos) instanceof DecoratedPotBlockEntity decoratedPotBlockEntity
+			? decoratedPotBlockEntity.getItem()
+			: super.getCloneItemStack(blockGetter, blockPos, blockState);
 	}
 }

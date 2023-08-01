@@ -73,7 +73,7 @@ public class LevelLoadingScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		long l = Util.getMillis();
 		if (l - this.lastNarration > 2000L) {
 			this.lastNarration = l;

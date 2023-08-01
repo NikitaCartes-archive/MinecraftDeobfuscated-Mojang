@@ -23,11 +23,9 @@ import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
 import net.minecraft.client.quickplay.QuickPlay;
 import net.minecraft.client.quickplay.QuickPlayLog;
 import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import org.slf4j.Logger;
 
@@ -36,7 +34,7 @@ public class ConnectScreen extends Screen {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final long NARRATION_DELAY_MS = 2000L;
-	static final Component ABORT_CONNECTION = Component.translatable("connect.aborted");
+	public static final Component ABORT_CONNECTION = Component.translatable("connect.aborted");
 	public static final Component UNKNOWN_HOST_MESSAGE = Component.translatable("disconnect.genericReason", Component.translatable("disconnect.unknownHost"));
 	@Nullable
 	volatile Connection connection;
@@ -59,7 +57,7 @@ public class ConnectScreen extends Screen {
 			LOGGER.error("Attempt to connect while already connecting");
 		} else {
 			ConnectScreen connectScreen = new ConnectScreen(screen, bl ? QuickPlay.ERROR_TITLE : CommonComponents.CONNECT_FAILED);
-			minecraft.clearLevel();
+			minecraft.disconnect();
 			minecraft.prepareForMultiplayer();
 			minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(serverData != null ? serverData.ip : serverAddress.getHost()));
 			minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.MULTIPLAYER, serverData.ip, serverData.name);
@@ -113,13 +111,14 @@ public class ConnectScreen extends Screen {
 					}
 
 					ConnectScreen.this.connection
-						.setListener(
+						.initiateServerboundPlayConnection(
+							inetSocketAddress.getHostName(),
+							inetSocketAddress.getPort(),
 							new ClientHandshakePacketListenerImpl(
 								ConnectScreen.this.connection, minecraft, serverData, ConnectScreen.this.parent, false, null, ConnectScreen.this::updateStatus
 							)
 						);
-					ConnectScreen.this.connection.send(new ClientIntentionPacket(inetSocketAddress.getHostName(), inetSocketAddress.getPort(), ConnectionProtocol.LOGIN));
-					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), Optional.ofNullable(minecraft.getUser().getProfileId())));
+					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getUser().getProfileId()));
 				} catch (Exception var9) {
 					if (ConnectScreen.this.aborted) {
 						return;
@@ -191,7 +190,7 @@ public class ConnectScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		long l = Util.getMillis();
 		if (l - this.lastNarration > 2000L) {
 			this.lastNarration = l;
@@ -199,6 +198,5 @@ public class ConnectScreen extends Screen {
 		}
 
 		guiGraphics.drawCenteredString(this.font, this.status, this.width / 2, this.height / 2 - 50, 16777215);
-		super.render(guiGraphics, i, j, f);
 	}
 }

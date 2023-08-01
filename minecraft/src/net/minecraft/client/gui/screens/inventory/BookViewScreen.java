@@ -159,10 +159,9 @@ public class BookViewScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		int k = (this.width - 192) / 2;
 		int l = 2;
-		guiGraphics.blit(BOOK_LOCATION, k, 2, 0, 0, 192, 192);
 		if (this.cachedPage != this.currentPage) {
 			FormattedText formattedText = this.bookAccess.getPage(this.currentPage);
 			this.cachedPageComponents = this.font.split(formattedText, 114);
@@ -183,8 +182,12 @@ public class BookViewScreen extends Screen {
 		if (style != null) {
 			guiGraphics.renderComponentHoverEffect(this.font, style, i, j);
 		}
+	}
 
-		super.render(guiGraphics, i, j, f);
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.renderBackground(guiGraphics, i, j, f);
+		guiGraphics.blit(BOOK_LOCATION, (this.width - 192) / 2, 2, 0, 0, 192, 192);
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package net.minecraft.world.level.pathfinder;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -13,10 +12,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class Path {
 	private final List<Node> nodes;
-	private Node[] openSet = new Node[0];
-	private Node[] closedSet = new Node[0];
 	@Nullable
-	private Set<Target> targetNodes;
+	private Path.DebugData debugData;
 	private int nextNodeIndex;
 	private final BlockPos target;
 	private final float distToTarget;
@@ -125,84 +122,32 @@ public class Path {
 
 	@VisibleForDebug
 	void setDebug(Node[] nodes, Node[] nodes2, Set<Target> set) {
-		this.openSet = nodes;
-		this.closedSet = nodes2;
-		this.targetNodes = set;
+		this.debugData = new Path.DebugData(nodes, nodes2, set);
 	}
 
-	@VisibleForDebug
-	public Node[] getOpenSet() {
-		return this.openSet;
-	}
-
-	@VisibleForDebug
-	public Node[] getClosedSet() {
-		return this.closedSet;
+	@Nullable
+	public Path.DebugData debugData() {
+		return this.debugData;
 	}
 
 	public void writeToStream(FriendlyByteBuf friendlyByteBuf) {
-		if (this.targetNodes != null && !this.targetNodes.isEmpty()) {
+		if (this.debugData != null && !this.debugData.targetNodes.isEmpty()) {
 			friendlyByteBuf.writeBoolean(this.reached);
 			friendlyByteBuf.writeInt(this.nextNodeIndex);
-			friendlyByteBuf.writeInt(this.targetNodes.size());
-			this.targetNodes.forEach(target -> target.writeToStream(friendlyByteBuf));
-			friendlyByteBuf.writeInt(this.target.getX());
-			friendlyByteBuf.writeInt(this.target.getY());
-			friendlyByteBuf.writeInt(this.target.getZ());
-			friendlyByteBuf.writeInt(this.nodes.size());
-
-			for (Node node : this.nodes) {
-				node.writeToStream(friendlyByteBuf);
-			}
-
-			friendlyByteBuf.writeInt(this.openSet.length);
-
-			for (Node node2 : this.openSet) {
-				node2.writeToStream(friendlyByteBuf);
-			}
-
-			friendlyByteBuf.writeInt(this.closedSet.length);
-
-			for (Node node2 : this.closedSet) {
-				node2.writeToStream(friendlyByteBuf);
-			}
+			friendlyByteBuf.writeBlockPos(this.target);
+			friendlyByteBuf.writeCollection(this.nodes, (friendlyByteBufx, node) -> node.writeToStream(friendlyByteBufx));
+			this.debugData.write(friendlyByteBuf);
 		}
 	}
 
 	public static Path createFromStream(FriendlyByteBuf friendlyByteBuf) {
 		boolean bl = friendlyByteBuf.readBoolean();
 		int i = friendlyByteBuf.readInt();
-		int j = friendlyByteBuf.readInt();
-		Set<Target> set = Sets.<Target>newHashSet();
-
-		for (int k = 0; k < j; k++) {
-			set.add(Target.createFromStream(friendlyByteBuf));
-		}
-
-		BlockPos blockPos = new BlockPos(friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt());
-		List<Node> list = Lists.<Node>newArrayList();
-		int l = friendlyByteBuf.readInt();
-
-		for (int m = 0; m < l; m++) {
-			list.add(Node.createFromStream(friendlyByteBuf));
-		}
-
-		Node[] nodes = new Node[friendlyByteBuf.readInt()];
-
-		for (int n = 0; n < nodes.length; n++) {
-			nodes[n] = Node.createFromStream(friendlyByteBuf);
-		}
-
-		Node[] nodes2 = new Node[friendlyByteBuf.readInt()];
-
-		for (int o = 0; o < nodes2.length; o++) {
-			nodes2[o] = Node.createFromStream(friendlyByteBuf);
-		}
-
+		BlockPos blockPos = friendlyByteBuf.readBlockPos();
+		List<Node> list = friendlyByteBuf.readList(Node::createFromStream);
+		Path.DebugData debugData = Path.DebugData.read(friendlyByteBuf);
 		Path path = new Path(list, blockPos, bl);
-		path.openSet = nodes;
-		path.closedSet = nodes2;
-		path.targetNodes = set;
+		path.debugData = debugData;
 		path.nextNodeIndex = i;
 		return path;
 	}
@@ -217,5 +162,46 @@ public class Path {
 
 	public float getDistToTarget() {
 		return this.distToTarget;
+	}
+
+	static Node[] readNodeArray(FriendlyByteBuf friendlyByteBuf) {
+		Node[] nodes = new Node[friendlyByteBuf.readVarInt()];
+
+		for (int i = 0; i < nodes.length; i++) {
+			nodes[i] = Node.createFromStream(friendlyByteBuf);
+		}
+
+		return nodes;
+	}
+
+	static void writeNodeArray(FriendlyByteBuf friendlyByteBuf, Node[] nodes) {
+		friendlyByteBuf.writeVarInt(nodes.length);
+
+		for (Node node : nodes) {
+			node.writeToStream(friendlyByteBuf);
+		}
+	}
+
+	public Path copy() {
+		Path path = new Path(this.nodes, this.target, this.reached);
+		path.debugData = this.debugData;
+		path.nextNodeIndex = this.nextNodeIndex;
+		return path;
+	}
+
+	public static record DebugData(Node[] openSet, Node[] closedSet, Set<Target> targetNodes) {
+
+		public void write(FriendlyByteBuf friendlyByteBuf) {
+			friendlyByteBuf.writeCollection(this.targetNodes, (friendlyByteBufx, target) -> target.writeToStream(friendlyByteBufx));
+			Path.writeNodeArray(friendlyByteBuf, this.openSet);
+			Path.writeNodeArray(friendlyByteBuf, this.closedSet);
+		}
+
+		public static Path.DebugData read(FriendlyByteBuf friendlyByteBuf) {
+			HashSet<Target> hashSet = friendlyByteBuf.readCollection(HashSet::new, Target::createFromStream);
+			Node[] nodes = Path.readNodeArray(friendlyByteBuf);
+			Node[] nodes2 = Path.readNodeArray(friendlyByteBuf);
+			return new Path.DebugData(nodes, nodes2, hashSet);
+		}
 	}
 }

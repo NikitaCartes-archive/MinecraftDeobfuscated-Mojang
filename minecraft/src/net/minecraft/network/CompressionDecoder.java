@@ -1,11 +1,12 @@
 package net.minecraft.network;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.DecoderException;
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 public class CompressionDecoder extends ByteToMessageDecoder {
@@ -24,10 +25,9 @@ public class CompressionDecoder extends ByteToMessageDecoder {
 	@Override
 	protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
 		if (byteBuf.readableBytes() != 0) {
-			FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(byteBuf);
-			int i = friendlyByteBuf.readVarInt();
+			int i = VarInt.read(byteBuf);
 			if (i == 0) {
-				list.add(friendlyByteBuf.readBytes(friendlyByteBuf.readableBytes()));
+				list.add(byteBuf.readBytes(byteBuf.readableBytes()));
 			} else {
 				if (this.validateDecompressed) {
 					if (i < this.threshold) {
@@ -39,14 +39,45 @@ public class CompressionDecoder extends ByteToMessageDecoder {
 					}
 				}
 
-				byte[] bs = new byte[friendlyByteBuf.readableBytes()];
-				friendlyByteBuf.readBytes(bs);
-				this.inflater.setInput(bs);
-				byte[] cs = new byte[i];
-				this.inflater.inflate(cs);
-				list.add(Unpooled.wrappedBuffer(cs));
+				this.setupInflaterInput(byteBuf);
+				ByteBuf byteBuf2 = this.inflate(channelHandlerContext, i);
 				this.inflater.reset();
+				list.add(byteBuf2);
 			}
+		}
+	}
+
+	private void setupInflaterInput(ByteBuf byteBuf) {
+		ByteBuffer byteBuffer;
+		if (byteBuf.nioBufferCount() > 0) {
+			byteBuffer = byteBuf.nioBuffer();
+			byteBuf.skipBytes(byteBuf.readableBytes());
+		} else {
+			byteBuffer = ByteBuffer.allocateDirect(byteBuf.readableBytes());
+			byteBuf.readBytes(byteBuffer);
+			byteBuffer.flip();
+		}
+
+		this.inflater.setInput(byteBuffer);
+	}
+
+	private ByteBuf inflate(ChannelHandlerContext channelHandlerContext, int i) throws DataFormatException {
+		ByteBuf byteBuf = channelHandlerContext.alloc().directBuffer(i);
+
+		try {
+			ByteBuffer byteBuffer = byteBuf.internalNioBuffer(0, i);
+			int j = byteBuffer.position();
+			this.inflater.inflate(byteBuffer);
+			int k = byteBuffer.position() - j;
+			if (k != i) {
+				throw new DecoderException("Badly compressed packet - actual length of uncompressed payload " + k + " is does not match declared size " + i);
+			} else {
+				byteBuf.writerIndex(byteBuf.writerIndex() + k);
+				return byteBuf;
+			}
+		} catch (Exception var7) {
+			byteBuf.release();
+			throw var7;
 		}
 	}
 

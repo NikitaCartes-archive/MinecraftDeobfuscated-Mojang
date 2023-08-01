@@ -29,6 +29,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -56,6 +57,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Sniffer extends Animal {
 	private static final int DIGGING_PARTICLES_DELAY_TICKS = 1700;
@@ -112,10 +114,6 @@ public class Sniffer extends Animal {
 			: super.getDimensions(pose);
 	}
 
-	public boolean isPanicking() {
-		return this.brain.getMemory(MemoryModuleType.IS_PANICKING).isPresent();
-	}
-
 	public boolean isSearching() {
 		return this.getState() == Sniffer.State.SEARCHING;
 	}
@@ -125,7 +123,7 @@ public class Sniffer extends Animal {
 	}
 
 	public boolean canSniff() {
-		return !this.isTempted() && !this.isPanicking() && !this.isInWater() && !this.isInLove() && this.onGround() && !this.isPassenger();
+		return !this.isTempted() && !this.isPanicking() && !this.isInWater() && !this.isInLove() && this.onGround() && !this.isPassenger() && !this.isLeashed();
 	}
 
 	public boolean canPlayDiggingSound() {
@@ -301,7 +299,7 @@ public class Sniffer extends Animal {
 		}
 
 		if (this.tickCount % 10 == 0) {
-			this.level().gameEvent(GameEvent.ENTITY_SHAKE, this.getHeadBlock(), GameEvent.Context.of(this));
+			this.level().gameEvent(GameEvent.ENTITY_ACTION, this.getHeadBlock(), GameEvent.Context.of(this));
 		}
 
 		return this;
@@ -372,8 +370,8 @@ public class Sniffer extends Animal {
 	}
 
 	@Override
-	public double getPassengersRidingOffset() {
-		return 1.8;
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height + 0.34375F * f, 0.0F);
 	}
 
 	@Override

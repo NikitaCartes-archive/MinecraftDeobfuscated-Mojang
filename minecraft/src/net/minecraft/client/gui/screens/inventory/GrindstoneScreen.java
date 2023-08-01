@@ -10,6 +10,7 @@ import net.minecraft.world.inventory.GrindstoneMenu;
 
 @Environment(EnvType.CLIENT)
 public class GrindstoneScreen extends AbstractContainerScreen<GrindstoneMenu> {
+	private static final ResourceLocation ERROR_SPRITE = new ResourceLocation("container/grindstone/error");
 	private static final ResourceLocation GRINDSTONE_LOCATION = new ResourceLocation("textures/gui/container/grindstone.png");
 
 	public GrindstoneScreen(GrindstoneMenu grindstoneMenu, Inventory inventory, Component component) {
@@ -18,8 +19,6 @@ public class GrindstoneScreen extends AbstractContainerScreen<GrindstoneMenu> {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		this.renderBg(guiGraphics, f, i, j);
 		super.render(guiGraphics, i, j, f);
 		this.renderTooltip(guiGraphics, i, j);
 	}
@@ -30,7 +29,7 @@ public class GrindstoneScreen extends AbstractContainerScreen<GrindstoneMenu> {
 		int l = (this.height - this.imageHeight) / 2;
 		guiGraphics.blit(GRINDSTONE_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		if ((this.menu.getSlot(0).hasItem() || this.menu.getSlot(1).hasItem()) && !this.menu.getSlot(2).hasItem()) {
-			guiGraphics.blit(GRINDSTONE_LOCATION, k + 92, l + 31, this.imageWidth, 0, 28, 21);
+			guiGraphics.blitSprite(ERROR_SPRITE, k + 92, l + 31, 28, 21);
 		}
 	}
 }

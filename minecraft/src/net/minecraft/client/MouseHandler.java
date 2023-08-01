@@ -30,7 +30,8 @@ public class MouseHandler {
 	private final SmoothDouble smoothTurnY = new SmoothDouble();
 	private double accumulatedDX;
 	private double accumulatedDY;
-	private double accumulatedScroll;
+	private double accumulatedScrollX;
+	private double accumulatedScrollY;
 	private double lastMouseEventTime = Double.MIN_VALUE;
 	private boolean mouseGrabbed;
 
@@ -115,34 +116,45 @@ public class MouseHandler {
 
 	private void onScroll(long l, double d, double e) {
 		if (l == Minecraft.getInstance().getWindow().getWindow()) {
-			double f = (this.minecraft.options.discreteMouseScroll().get() ? Math.signum(e) : e) * this.minecraft.options.mouseWheelSensitivity().get();
+			boolean bl = this.minecraft.options.discreteMouseScroll().get();
+			double f = this.minecraft.options.mouseWheelSensitivity().get();
+			double g = (bl ? Math.signum(d) : d) * f;
+			double h = (bl ? Math.signum(e) : e) * f;
 			if (this.minecraft.getOverlay() == null) {
 				if (this.minecraft.screen != null) {
-					double g = this.xpos * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
-					double h = this.ypos * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();
-					this.minecraft.screen.mouseScrolled(g, h, f);
+					double i = this.xpos * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
+					double j = this.ypos * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();
+					this.minecraft.screen.mouseScrolled(i, j, g, h);
 					this.minecraft.screen.afterMouseAction();
 				} else if (this.minecraft.player != null) {
-					if (this.accumulatedScroll != 0.0 && Math.signum(f) != Math.signum(this.accumulatedScroll)) {
-						this.accumulatedScroll = 0.0;
+					if (this.accumulatedScrollX != 0.0 && Math.signum(g) != Math.signum(this.accumulatedScrollX)) {
+						this.accumulatedScrollX = 0.0;
 					}
 
-					this.accumulatedScroll += f;
-					int i = (int)this.accumulatedScroll;
-					if (i == 0) {
+					if (this.accumulatedScrollY != 0.0 && Math.signum(h) != Math.signum(this.accumulatedScrollY)) {
+						this.accumulatedScrollY = 0.0;
+					}
+
+					this.accumulatedScrollX += g;
+					this.accumulatedScrollY += h;
+					int k = (int)this.accumulatedScrollX;
+					int m = (int)this.accumulatedScrollY;
+					if (k == 0 && m == 0) {
 						return;
 					}
 
-					this.accumulatedScroll -= (double)i;
+					this.accumulatedScrollX -= (double)k;
+					this.accumulatedScrollY -= (double)m;
+					int n = m == 0 ? -k : m;
 					if (this.minecraft.player.isSpectator()) {
 						if (this.minecraft.gui.getSpectatorGui().isMenuActive()) {
-							this.minecraft.gui.getSpectatorGui().onMouseScrolled(-i);
+							this.minecraft.gui.getSpectatorGui().onMouseScrolled(-n);
 						} else {
-							float j = Mth.clamp(this.minecraft.player.getAbilities().getFlyingSpeed() + (float)i * 0.005F, 0.0F, 0.2F);
-							this.minecraft.player.getAbilities().setFlyingSpeed(j);
+							float o = Mth.clamp(this.minecraft.player.getAbilities().getFlyingSpeed() + (float)m * 0.005F, 0.0F, 0.2F);
+							this.minecraft.player.getAbilities().setFlyingSpeed(o);
 						}
 					} else {
-						this.minecraft.player.getInventory().swapPaint((double)i);
+						this.minecraft.player.getInventory().swapPaint((double)n);
 					}
 				}
 			}

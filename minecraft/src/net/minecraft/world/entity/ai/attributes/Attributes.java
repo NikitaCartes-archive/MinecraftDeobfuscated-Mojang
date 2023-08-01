@@ -29,6 +29,10 @@ public class Attributes {
 		"generic.armor_toughness", new RangedAttribute("attribute.name.generic.armor_toughness", 0.0, 0.0, 20.0).setSyncable(true)
 	);
 	public static final Attribute LUCK = register("generic.luck", new RangedAttribute("attribute.name.generic.luck", 0.0, -1024.0, 1024.0).setSyncable(true));
+	public static final Attribute MAX_ABSORPTION = register(
+			"generic.max_absorption", new RangedAttribute("attribute.name.generic.max_absorption", 0.0, 0.0, 2048.0)
+		)
+		.setSyncable(true);
 	public static final Attribute SPAWN_REINFORCEMENTS_CHANCE = register(
 		"zombie.spawn_reinforcements", new RangedAttribute("attribute.name.zombie.spawn_reinforcements", 0.0, 0.0, 1.0)
 	);

@@ -35,6 +35,7 @@ import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -43,6 +44,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class WanderingTrader extends AbstractVillager {
 	private static final int NUMBER_OF_TRADE_OFFERS = 5;
@@ -127,17 +129,30 @@ public class WanderingTrader extends AbstractVillager {
 
 	@Override
 	protected void updateTrades() {
-		VillagerTrades.ItemListing[] itemListings = VillagerTrades.WANDERING_TRADER_TRADES.get(1);
-		VillagerTrades.ItemListing[] itemListings2 = VillagerTrades.WANDERING_TRADER_TRADES.get(2);
-		if (itemListings != null && itemListings2 != null) {
-			MerchantOffers merchantOffers = this.getOffers();
-			this.addOffersFromItemListings(merchantOffers, itemListings, 5);
-			int i = this.random.nextInt(itemListings2.length);
-			VillagerTrades.ItemListing itemListing = itemListings2[i];
-			MerchantOffer merchantOffer = itemListing.getOffer(this, this.random);
-			if (merchantOffer != null) {
-				merchantOffers.add(merchantOffer);
+		if (this.level().enabledFeatures().contains(FeatureFlags.TRADE_REBALANCE)) {
+			this.experimentalUpdateTrades();
+		} else {
+			VillagerTrades.ItemListing[] itemListings = VillagerTrades.WANDERING_TRADER_TRADES.get(1);
+			VillagerTrades.ItemListing[] itemListings2 = VillagerTrades.WANDERING_TRADER_TRADES.get(2);
+			if (itemListings != null && itemListings2 != null) {
+				MerchantOffers merchantOffers = this.getOffers();
+				this.addOffersFromItemListings(merchantOffers, itemListings, 5);
+				int i = this.random.nextInt(itemListings2.length);
+				VillagerTrades.ItemListing itemListing = itemListings2[i];
+				MerchantOffer merchantOffer = itemListing.getOffer(this, this.random);
+				if (merchantOffer != null) {
+					merchantOffers.add(merchantOffer);
+				}
 			}
+		}
+	}
+
+	private void experimentalUpdateTrades() {
+		MerchantOffers merchantOffers = this.getOffers();
+
+		for (Pair<VillagerTrades.ItemListing[], Integer> pair : VillagerTrades.EXPERIMENTAL_WANDERING_TRADER_TRADES) {
+			VillagerTrades.ItemListing[] itemListings = pair.getLeft();
+			this.addOffersFromItemListings(merchantOffers, itemListings, pair.getRight());
 		}
 	}
 

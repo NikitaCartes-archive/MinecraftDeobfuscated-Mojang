@@ -45,6 +45,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Guardian extends Monster {
 	protected static final int ATTACK_TIME = 80;
@@ -364,6 +365,11 @@ public class Guardian extends Monster {
 		} else {
 			super.travel(vec3);
 		}
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height + 0.125F * f, 0.0F);
 	}
 
 	static class GuardianAttackGoal extends Goal {

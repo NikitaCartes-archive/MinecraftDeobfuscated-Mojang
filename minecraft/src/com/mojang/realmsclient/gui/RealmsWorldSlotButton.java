@@ -19,9 +19,9 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class RealmsWorldSlotButton extends Button {
-	public static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
-	public static final ResourceLocation EMPTY_SLOT_LOCATION = new ResourceLocation("realms", "textures/gui/realms/empty_frame.png");
-	public static final ResourceLocation CHECK_MARK_LOCATION = new ResourceLocation("minecraft", "textures/gui/checkmark.png");
+	private static final ResourceLocation SLOT_FRAME_SPRITE = new ResourceLocation("widget/slot_frame");
+	private static final ResourceLocation CHECKMARK_SPRITE = new ResourceLocation("icon/checkmark");
+	public static final ResourceLocation EMPTY_SLOT_LOCATION = new ResourceLocation("textures/gui/realms/empty_frame.png");
 	public static final ResourceLocation DEFAULT_WORLD_SLOT_1 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_0.png");
 	public static final ResourceLocation DEFAULT_WORLD_SLOT_2 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_2.png");
 	public static final ResourceLocation DEFAULT_WORLD_SLOT_3 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_3.png");
@@ -200,18 +200,18 @@ public class RealmsWorldSlotButton extends Button {
 			guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
 		}
 
-		guiGraphics.blit(SLOT_FRAME_LOCATION, i, j, 0.0F, 0.0F, 80, 80, 80, 80);
+		guiGraphics.blitSprite(SLOT_FRAME_SPRITE, i, j, 80, 80);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		if (bl) {
 			this.renderCheckMark(guiGraphics, i, j);
 		}
 
-		guiGraphics.drawCenteredString(minecraft.font, string, i + 40, j + 66, 16777215);
+		guiGraphics.drawCenteredString(minecraft.font, string, i + 40, j + 66, -1);
 	}
 
 	private void renderCheckMark(GuiGraphics guiGraphics, int i, int j) {
 		RenderSystem.enableBlend();
-		guiGraphics.blit(CHECK_MARK_LOCATION, i + 67, j + 4, 0.0F, 0.0F, 9, 8, 9, 8);
+		guiGraphics.blitSprite(CHECKMARK_SPRITE, i + 67, j + 4, 9, 8);
 		RenderSystem.disableBlend();
 	}
 

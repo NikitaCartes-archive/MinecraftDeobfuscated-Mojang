@@ -11,6 +11,9 @@ import net.minecraft.world.inventory.BrewingStandMenu;
 
 @Environment(EnvType.CLIENT)
 public class BrewingStandScreen extends AbstractContainerScreen<BrewingStandMenu> {
+	private static final ResourceLocation FUEL_LENGTH_SPRITE = new ResourceLocation("container/brewing_stand/fuel_length");
+	private static final ResourceLocation BREW_PROGRESS_SPRITE = new ResourceLocation("container/brewing_stand/brew_progress");
+	private static final ResourceLocation BUBBLES_SPRITE = new ResourceLocation("container/brewing_stand/bubbles");
 	private static final ResourceLocation BREWING_STAND_LOCATION = new ResourceLocation("textures/gui/container/brewing_stand.png");
 	private static final int[] BUBBLELENGTHS = new int[]{29, 24, 20, 16, 11, 6, 0};
 
@@ -26,7 +29,6 @@ public class BrewingStandScreen extends AbstractContainerScreen<BrewingStandMenu
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		super.render(guiGraphics, i, j, f);
 		this.renderTooltip(guiGraphics, i, j);
 	}
@@ -39,19 +41,19 @@ public class BrewingStandScreen extends AbstractContainerScreen<BrewingStandMenu
 		int m = this.menu.getFuel();
 		int n = Mth.clamp((18 * m + 20 - 1) / 20, 0, 18);
 		if (n > 0) {
-			guiGraphics.blit(BREWING_STAND_LOCATION, k + 60, l + 44, 176, 29, n, 4);
+			guiGraphics.blitSprite(FUEL_LENGTH_SPRITE, 18, 4, 0, 0, k + 60, l + 44, n, 4);
 		}
 
 		int o = this.menu.getBrewingTicks();
 		if (o > 0) {
 			int p = (int)(28.0F * (1.0F - (float)o / 400.0F));
 			if (p > 0) {
-				guiGraphics.blit(BREWING_STAND_LOCATION, k + 97, l + 16, 176, 0, 9, p);
+				guiGraphics.blitSprite(BREW_PROGRESS_SPRITE, 9, 28, 0, 0, k + 97, l + 16, 9, p);
 			}
 
 			p = BUBBLELENGTHS[o / 2 % 7];
 			if (p > 0) {
-				guiGraphics.blit(BREWING_STAND_LOCATION, k + 63, l + 14 + 29 - p, 185, 29 - p, 12, p);
+				guiGraphics.blitSprite(BUBBLES_SPRITE, 12, 29, 0, 29 - p, k + 63, l + 14 + 29 - p, 12, p);
 			}
 		}
 	}

@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.PoiTypeTags;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
@@ -31,6 +32,10 @@ public class Raids extends SavedData {
 	private final ServerLevel level;
 	private int nextAvailableID;
 	private int tick;
+
+	public static SavedData.Factory<Raids> factory(ServerLevel serverLevel) {
+		return new SavedData.Factory<>(() -> new Raids(serverLevel), compoundTag -> load(serverLevel, compoundTag), DataFixTypes.SAVED_DATA_RAIDS);
+	}
 
 	public Raids(ServerLevel serverLevel) {
 		this.level = serverLevel;

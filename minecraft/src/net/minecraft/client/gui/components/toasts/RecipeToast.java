@@ -6,11 +6,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class RecipeToast implements Toast {
+	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("toast/recipe");
 	private static final long DISPLAY_TIME = 5000L;
 	private static final Component TITLE_TEXT = Component.translatable("recipe.toast.title");
 	private static final Component DESCRIPTION_TEXT = Component.translatable("recipe.toast.description");
@@ -32,7 +34,7 @@ public class RecipeToast implements Toast {
 		if (this.recipes.isEmpty()) {
 			return Toast.Visibility.HIDE;
 		} else {
-			guiGraphics.blit(TEXTURE, 0, 0, 0, 32, this.width(), this.height());
+			guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width(), this.height());
 			guiGraphics.drawString(toastComponent.getMinecraft().font, TITLE_TEXT, 30, 7, -11534256, false);
 			guiGraphics.drawString(toastComponent.getMinecraft().font, DESCRIPTION_TEXT, 30, 18, -16777216, false);
 			Recipe<?> recipe = (Recipe<?>)this.recipes

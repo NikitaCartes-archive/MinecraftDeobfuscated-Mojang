@@ -13,6 +13,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -39,7 +40,9 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class Witch extends Raider implements RangedAttackMob {
 	private static final UUID SPEED_MODIFIER_DRINKING_UUID = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
@@ -129,7 +132,8 @@ public class Witch extends Raider implements RangedAttackMob {
 						}
 					}
 
-					this.getAttribute(Attributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_DRINKING);
+					this.gameEvent(GameEvent.DRINK);
+					this.getAttribute(Attributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_DRINKING.getId());
 				}
 			} else {
 				Potion potion = null;
@@ -158,7 +162,7 @@ public class Witch extends Raider implements RangedAttackMob {
 					}
 
 					AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-					attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING);
+					attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING.getId());
 					attributeInstance.addTransientModifier(SPEED_MODIFIER_DRINKING);
 				}
 			}
@@ -251,6 +255,11 @@ public class Witch extends Raider implements RangedAttackMob {
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
 		return 1.62F;
+	}
+
+	@Override
+	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return new Vector3f(0.0F, entityDimensions.height + 0.3125F * f, 0.0F);
 	}
 
 	@Override

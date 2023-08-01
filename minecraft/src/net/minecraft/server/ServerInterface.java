@@ -2,7 +2,7 @@ package net.minecraft.server;
 
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 
-public interface ServerInterface {
+public interface ServerInterface extends ServerInfo {
 	DedicatedServerProperties getProperties();
 
 	String getServerIp();
@@ -10,12 +10,6 @@ public interface ServerInterface {
 	int getServerPort();
 
 	String getServerName();
-
-	String getServerVersion();
-
-	int getPlayerCount();
-
-	int getMaxPlayers();
 
 	String[] getPlayerNames();
 

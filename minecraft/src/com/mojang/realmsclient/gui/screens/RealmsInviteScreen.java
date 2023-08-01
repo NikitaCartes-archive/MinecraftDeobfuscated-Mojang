@@ -42,11 +42,6 @@ public class RealmsInviteScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void tick() {
-		this.profileName.tick();
-	}
-
-	@Override
 	public void init() {
 		this.profileName = new EditBox(
 			this.minecraft.font, this.width / 2 - 100, row(2), 200, 20, null, Component.translatable("mco.configure.world.invite.profile.name")
@@ -110,13 +105,12 @@ public class RealmsInviteScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 100, row(1), -1, false);
 		if (this.message != null) {
 			guiGraphics.drawCenteredString(this.font, this.message, this.width / 2, row(5), -1);
 		}
 
 		this.profileName.render(guiGraphics, i, j, f);
-		super.render(guiGraphics, i, j, f);
 	}
 }

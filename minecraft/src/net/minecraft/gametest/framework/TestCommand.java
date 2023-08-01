@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,8 +44,10 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
 
 public class TestCommand {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int DEFAULT_CLEAR_RADIUS = 200;
 	private static final int MAX_CLEAR_RADIUS = 1024;
 	private static final int STRUCTURE_BLOCK_NEARBY_SEARCH_RADIUS = 15;
@@ -161,6 +164,7 @@ public class TestCommand {
 						)
 				)
 				.then(Commands.literal("exportthis").executes(commandContext -> exportNearestTestStructure(commandContext.getSource())))
+				.then(Commands.literal("exportthese").executes(commandContext -> exportAllNearbyTests(commandContext.getSource())))
 				.then(
 					Commands.literal("import")
 						.then(
@@ -438,6 +442,28 @@ public class TestCommand {
 		}
 	}
 
+	private static int exportAllNearbyTests(CommandSourceStack commandSourceStack) {
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
+		ServerLevel serverLevel = commandSourceStack.getLevel();
+		Collection<BlockPos> collection = StructureUtils.findStructureBlocks(blockPos, 200, serverLevel);
+		if (collection.isEmpty()) {
+			say(serverLevel, "Couldn't find any structure blocks within 200 block radius", ChatFormatting.RED);
+			return 1;
+		} else {
+			boolean bl = true;
+
+			for (BlockPos blockPos2 : collection) {
+				StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos2);
+				String string = structureBlockEntity.getStructurePath();
+				if (exportTestStructure(commandSourceStack, string) != 0) {
+					bl = false;
+				}
+			}
+
+			return bl ? 0 : 1;
+		}
+	}
+
 	private static int exportTestStructure(CommandSourceStack commandSourceStack, String string) {
 		Path path = Paths.get(StructureUtils.testStructuresDir);
 		ResourceLocation resourceLocation = new ResourceLocation("minecraft", string);
@@ -451,7 +477,7 @@ public class TestCommand {
 				Files.createDirectories(path3.getParent());
 			} catch (IOException var7) {
 				say(commandSourceStack, "Could not create folder " + path3.getParent());
-				var7.printStackTrace();
+				LOGGER.error("Could not create export folder", (Throwable)var7);
 				return 1;
 			}
 
@@ -492,8 +518,7 @@ public class TestCommand {
 			say(commandSourceStack, "Imported to " + path2.toAbsolutePath());
 			return 0;
 		} catch (CommandSyntaxException | IOException var12) {
-			System.err.println("Failed to load structure " + string);
-			var12.printStackTrace();
+			LOGGER.error("Failed to load structure {}", string, var12);
 			return 1;
 		}
 	}

@@ -6,16 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DirectoryValidator {
-	private final PathAllowList symlinkTargetAllowList;
+	private final PathMatcher symlinkTargetAllowList;
 
-	public DirectoryValidator(PathAllowList pathAllowList) {
-		this.symlinkTargetAllowList = pathAllowList;
+	public DirectoryValidator(PathMatcher pathMatcher) {
+		this.symlinkTargetAllowList = pathMatcher;
 	}
 
 	public void validateSymlink(Path path, List<ForbiddenSymlinkInfo> list) throws IOException {
@@ -25,8 +26,14 @@ public class DirectoryValidator {
 		}
 	}
 
-	public List<ForbiddenSymlinkInfo> validateSave(Path path, boolean bl) throws IOException {
-		final List<ForbiddenSymlinkInfo> list = new ArrayList();
+	public List<ForbiddenSymlinkInfo> validateSymlink(Path path) throws IOException {
+		List<ForbiddenSymlinkInfo> list = new ArrayList();
+		this.validateSymlink(path, list);
+		return list;
+	}
+
+	public List<ForbiddenSymlinkInfo> validateDirectory(Path path, boolean bl) throws IOException {
+		List<ForbiddenSymlinkInfo> list = new ArrayList();
 
 		BasicFileAttributes basicFileAttributes;
 		try {
@@ -45,26 +52,30 @@ public class DirectoryValidator {
 				path = Files.readSymbolicLink(path);
 			}
 
-			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-				private void validateSymlink(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-					if (basicFileAttributes.isSymbolicLink()) {
-						DirectoryValidator.this.validateSymlink(path, list);
-					}
-				}
-
-				public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-					this.validateSymlink(path, basicFileAttributes);
-					return super.preVisitDirectory(path, basicFileAttributes);
-				}
-
-				public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-					this.validateSymlink(path, basicFileAttributes);
-					return super.visitFile(path, basicFileAttributes);
-				}
-			});
+			this.validateKnownDirectory(path, list);
 			return list;
 		} else {
 			throw new IOException("Path " + path + " is not a directory");
 		}
+	}
+
+	public void validateKnownDirectory(Path path, List<ForbiddenSymlinkInfo> list) throws IOException {
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+			private void validateSymlink(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+				if (basicFileAttributes.isSymbolicLink()) {
+					DirectoryValidator.this.validateSymlink(path, list);
+				}
+			}
+
+			public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+				this.validateSymlink(path, basicFileAttributes);
+				return super.preVisitDirectory(path, basicFileAttributes);
+			}
+
+			public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+				this.validateSymlink(path, basicFileAttributes);
+				return super.visitFile(path, basicFileAttributes);
+			}
+		});
 	}
 }

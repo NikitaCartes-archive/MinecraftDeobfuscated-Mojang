@@ -28,6 +28,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -60,7 +61,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	private static final float MAX_SHADOW_RADIUS = 32.0F;
 	private static final float SHADOW_POWER_FALLOFF_Y = 0.5F;
 	private Map<EntityType<?>, EntityRenderer<?>> renderers = ImmutableMap.of();
-	private Map<String, EntityRenderer<? extends Player>> playerRenderers = ImmutableMap.of();
+	private Map<PlayerSkin.Model, EntityRenderer<? extends Player>> playerRenderers = Map.of();
 	public final TextureManager textureManager;
 	private Level level;
 	public Camera camera;
@@ -98,10 +99,10 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	}
 
 	public <T extends Entity> EntityRenderer<? super T> getRenderer(T entity) {
-		if (entity instanceof AbstractClientPlayer) {
-			String string = ((AbstractClientPlayer)entity).getModelName();
-			EntityRenderer<? extends Player> entityRenderer = (EntityRenderer<? extends Player>)this.playerRenderers.get(string);
-			return (EntityRenderer<? super T>)(entityRenderer != null ? entityRenderer : (EntityRenderer)this.playerRenderers.get("default"));
+		if (entity instanceof AbstractClientPlayer abstractClientPlayer) {
+			PlayerSkin.Model model = abstractClientPlayer.getSkin().model();
+			EntityRenderer<? extends Player> entityRenderer = (EntityRenderer<? extends Player>)this.playerRenderers.get(model);
+			return (EntityRenderer<? super T>)(entityRenderer != null ? entityRenderer : (EntityRenderer)this.playerRenderers.get(PlayerSkin.Model.WIDE));
 		} else {
 			return (EntityRenderer<? super T>)this.renderers.get(entity.getType());
 		}
@@ -224,16 +225,26 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			);
 		}
 
-		Vec3 vec3 = entity.getViewVector(f);
+		Entity entity2 = entity.getVehicle();
+		if (entity2 != null) {
+			float l = Math.min(entity2.getBbWidth(), entity.getBbWidth()) / 2.0F;
+			float m = 0.0625F;
+			Vec3 vec3 = entity2.getPassengerRidingPosition(entity).subtract(entity.position());
+			LevelRenderer.renderLineBox(
+				poseStack, vertexConsumer, vec3.x - (double)l, vec3.y, vec3.z - (double)l, vec3.x + (double)l, vec3.y + 0.0625, vec3.z + (double)l, 1.0F, 1.0F, 0.0F, 1.0F
+			);
+		}
+
+		Vec3 vec32 = entity.getViewVector(f);
 		Matrix4f matrix4f = poseStack.last().pose();
 		Matrix3f matrix3f = poseStack.last().normal();
 		vertexConsumer.vertex(matrix4f, 0.0F, entity.getEyeHeight(), 0.0F)
 			.color(0, 0, 255, 255)
-			.normal(matrix3f, (float)vec3.x, (float)vec3.y, (float)vec3.z)
+			.normal(matrix3f, (float)vec32.x, (float)vec32.y, (float)vec32.z)
 			.endVertex();
-		vertexConsumer.vertex(matrix4f, (float)(vec3.x * 2.0), (float)((double)entity.getEyeHeight() + vec3.y * 2.0), (float)(vec3.z * 2.0))
+		vertexConsumer.vertex(matrix4f, (float)(vec32.x * 2.0), (float)((double)entity.getEyeHeight() + vec32.y * 2.0), (float)(vec32.z * 2.0))
 			.color(0, 0, 255, 255)
-			.normal(matrix3f, (float)vec3.x, (float)vec3.y, (float)vec3.z)
+			.normal(matrix3f, (float)vec32.x, (float)vec32.y, (float)vec32.z)
 			.endVertex();
 	}
 

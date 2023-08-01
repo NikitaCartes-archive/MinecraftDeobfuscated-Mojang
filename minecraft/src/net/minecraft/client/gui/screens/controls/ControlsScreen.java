@@ -49,8 +49,7 @@ public class ControlsScreen extends OptionsSubScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
 		super.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
 	}
 }

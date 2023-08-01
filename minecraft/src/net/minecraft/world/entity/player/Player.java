@@ -18,7 +18,6 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -179,7 +178,7 @@ public abstract class Player extends LivingEntity {
 
 	public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
 		super(EntityType.PLAYER, level);
-		this.setUUID(UUIDUtil.getOrCreatePlayerUUID(gameProfile));
+		this.setUUID(gameProfile.getId());
 		this.gameProfile = gameProfile;
 		this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide, this);
 		this.containerMenu = this.inventoryMenu;
@@ -366,7 +365,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	protected void updatePlayerPose() {
-		if (this.canEnterPose(Pose.SWIMMING)) {
+		if (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SWIMMING)) {
 			Pose pose;
 			if (this.isFallFlying()) {
 				pose = Pose.FALL_FLYING;
@@ -383,9 +382,9 @@ public abstract class Player extends LivingEntity {
 			}
 
 			Pose pose2;
-			if (this.isSpectator() || this.isPassenger() || this.canEnterPose(pose)) {
+			if (this.isSpectator() || this.isPassenger() || this.canPlayerFitWithinBlocksAndEntitiesWhen(pose)) {
 				pose2 = pose;
-			} else if (this.canEnterPose(Pose.CROUCHING)) {
+			} else if (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING)) {
 				pose2 = Pose.CROUCHING;
 			} else {
 				pose2 = Pose.SWIMMING;
@@ -393,6 +392,10 @@ public abstract class Player extends LivingEntity {
 
 			this.setPose(pose2);
 		}
+	}
+
+	protected boolean canPlayerFitWithinBlocksAndEntitiesWhen(Pose pose) {
+		return this.level().noCollision(this, this.getDimensions(pose).makeBoundingBox(this.position()).deflate(1.0E-7));
 	}
 
 	@Override
@@ -741,7 +744,7 @@ public abstract class Player extends LivingEntity {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setUUID(UUIDUtil.getOrCreatePlayerUUID(this.gameProfile));
+		this.setUUID(this.gameProfile.getId());
 		ListTag listTag = compoundTag.getList("Inventory", 10);
 		this.inventory.load(listTag);
 		this.inventory.selected = compoundTag.getInt("SelectedItemSlot");
@@ -1012,8 +1015,8 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public double getMyRidingOffset() {
-		return -0.35;
+	protected float ridingOffset(Entity entity) {
+		return -0.6F;
 	}
 
 	@Override
@@ -1902,11 +1905,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public void setAbsorptionAmount(float f) {
-		if (f < 0.0F) {
-			f = 0.0F;
-		}
-
+	protected void internalSetAbsorptionAmount(float f) {
 		this.getEntityData().set(DATA_PLAYER_ABSORPTION_ID, f);
 	}
 

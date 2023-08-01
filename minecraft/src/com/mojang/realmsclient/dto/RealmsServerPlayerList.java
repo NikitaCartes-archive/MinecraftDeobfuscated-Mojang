@@ -7,7 +7,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.util.JsonUtils;
+import com.mojang.util.UndashedUuid;
 import java.util.List;
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.slf4j.Logger;
@@ -15,9 +17,8 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RealmsServerPlayerList extends ValueObject {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final JsonParser JSON_PARSER = new JsonParser();
 	public long serverId;
-	public List<String> players;
+	public List<UUID> players;
 
 	public static RealmsServerPlayerList parse(JsonObject jsonObject) {
 		RealmsServerPlayerList realmsServerPlayerList = new RealmsServerPlayerList();
@@ -26,14 +27,14 @@ public class RealmsServerPlayerList extends ValueObject {
 			realmsServerPlayerList.serverId = JsonUtils.getLongOr("serverId", jsonObject, -1L);
 			String string = JsonUtils.getStringOr("playerList", jsonObject, null);
 			if (string != null) {
-				JsonElement jsonElement = JSON_PARSER.parse(string);
+				JsonElement jsonElement = JsonParser.parseString(string);
 				if (jsonElement.isJsonArray()) {
 					realmsServerPlayerList.players = parsePlayers(jsonElement.getAsJsonArray());
 				} else {
-					realmsServerPlayerList.players = Lists.<String>newArrayList();
+					realmsServerPlayerList.players = Lists.<UUID>newArrayList();
 				}
 			} else {
-				realmsServerPlayerList.players = Lists.<String>newArrayList();
+				realmsServerPlayerList.players = Lists.<UUID>newArrayList();
 			}
 		} catch (Exception var4) {
 			LOGGER.error("Could not parse RealmsServerPlayerList: {}", var4.getMessage());
@@ -42,12 +43,12 @@ public class RealmsServerPlayerList extends ValueObject {
 		return realmsServerPlayerList;
 	}
 
-	private static List<String> parsePlayers(JsonArray jsonArray) {
-		List<String> list = Lists.<String>newArrayList();
+	private static List<UUID> parsePlayers(JsonArray jsonArray) {
+		List<UUID> list = Lists.<UUID>newArrayList();
 
 		for (JsonElement jsonElement : jsonArray) {
 			try {
-				list.add(jsonElement.getAsString());
+				list.add(UndashedUuid.fromStringLenient(jsonElement.getAsString()));
 			} catch (Exception var5) {
 			}
 		}

@@ -26,19 +26,19 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsResetWorldScreen extends RealmsScreen {
+	private static final ResourceLocation SLOT_FRAME_SPRITE = new ResourceLocation("widget/slot_frame");
 	static final Logger LOGGER = LogUtils.getLogger();
 	private final Screen lastScreen;
 	private final RealmsServer serverData;
 	private Component subtitle = Component.translatable("mco.reset.world.warning");
 	private Component buttonTitle = CommonComponents.GUI_CANCEL;
-	private int subtitleColor = 16711680;
-	private static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
-	private static final ResourceLocation UPLOAD_LOCATION = new ResourceLocation("realms", "textures/gui/realms/upload.png");
-	private static final ResourceLocation ADVENTURE_MAP_LOCATION = new ResourceLocation("realms", "textures/gui/realms/adventure.png");
-	private static final ResourceLocation SURVIVAL_SPAWN_LOCATION = new ResourceLocation("realms", "textures/gui/realms/survival_spawn.png");
-	private static final ResourceLocation NEW_WORLD_LOCATION = new ResourceLocation("realms", "textures/gui/realms/new_world.png");
-	private static final ResourceLocation EXPERIENCE_LOCATION = new ResourceLocation("realms", "textures/gui/realms/experience.png");
-	private static final ResourceLocation INSPIRATION_LOCATION = new ResourceLocation("realms", "textures/gui/realms/inspiration.png");
+	private int subtitleColor = -65536;
+	private static final ResourceLocation UPLOAD_LOCATION = new ResourceLocation("textures/gui/realms/upload.png");
+	private static final ResourceLocation ADVENTURE_MAP_LOCATION = new ResourceLocation("textures/gui/realms/adventure.png");
+	private static final ResourceLocation SURVIVAL_SPAWN_LOCATION = new ResourceLocation("textures/gui/realms/survival_spawn.png");
+	private static final ResourceLocation NEW_WORLD_LOCATION = new ResourceLocation("textures/gui/realms/new_world.png");
+	private static final ResourceLocation EXPERIENCE_LOCATION = new ResourceLocation("textures/gui/realms/experience.png");
+	private static final ResourceLocation INSPIRATION_LOCATION = new ResourceLocation("textures/gui/realms/inspiration.png");
 	WorldTemplatePaginatedList templates;
 	WorldTemplatePaginatedList adventuremaps;
 	WorldTemplatePaginatedList experiences;
@@ -201,9 +201,8 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 7, 16777215);
 		super.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 7, -1);
 	}
 
 	void drawFrame(GuiGraphics guiGraphics, int i, int j, Component component, ResourceLocation resourceLocation, boolean bl, boolean bl2) {
@@ -212,8 +211,8 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		}
 
 		guiGraphics.blit(resourceLocation, i + 2, j + 14, 0.0F, 0.0F, 56, 56, 56, 56);
-		guiGraphics.blit(SLOT_FRAME_LOCATION, i, j + 12, 0.0F, 0.0F, 60, 60, 60, 60);
-		int k = bl ? 10526880 : 16777215;
+		guiGraphics.blitSprite(SLOT_FRAME_SPRITE, i, j + 12, 60, 60);
+		int k = bl ? -6250336 : -1;
 		guiGraphics.drawCenteredString(this.font, component, i + 30, j, k);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}

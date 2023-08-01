@@ -26,6 +26,7 @@ import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.ScoreboardSlotArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
@@ -557,25 +558,25 @@ public class ScoreboardCommand {
 		return map.size();
 	}
 
-	private static int clearDisplaySlot(CommandSourceStack commandSourceStack, int i) throws CommandSyntaxException {
+	private static int clearDisplaySlot(CommandSourceStack commandSourceStack, DisplaySlot displaySlot) throws CommandSyntaxException {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
-		if (scoreboard.getDisplayObjective(i) == null) {
+		if (scoreboard.getDisplayObjective(displaySlot) == null) {
 			throw ERROR_DISPLAY_SLOT_ALREADY_EMPTY.create();
 		} else {
-			scoreboard.setDisplayObjective(i, null);
-			commandSourceStack.sendSuccess(() -> Component.translatable("commands.scoreboard.objectives.display.cleared", Scoreboard.getDisplaySlotNames()[i]), true);
+			scoreboard.setDisplayObjective(displaySlot, null);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.scoreboard.objectives.display.cleared", displaySlot.getSerializedName()), true);
 			return 0;
 		}
 	}
 
-	private static int setDisplaySlot(CommandSourceStack commandSourceStack, int i, Objective objective) throws CommandSyntaxException {
+	private static int setDisplaySlot(CommandSourceStack commandSourceStack, DisplaySlot displaySlot, Objective objective) throws CommandSyntaxException {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
-		if (scoreboard.getDisplayObjective(i) == objective) {
+		if (scoreboard.getDisplayObjective(displaySlot) == objective) {
 			throw ERROR_DISPLAY_SLOT_ALREADY_SET.create();
 		} else {
-			scoreboard.setDisplayObjective(i, objective);
+			scoreboard.setDisplayObjective(displaySlot, objective);
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.scoreboard.objectives.display.set", Scoreboard.getDisplaySlotNames()[i], objective.getDisplayName()), true
+				() -> Component.translatable("commands.scoreboard.objectives.display.set", displaySlot.getSerializedName(), objective.getDisplayName()), true
 			);
 			return 0;
 		}

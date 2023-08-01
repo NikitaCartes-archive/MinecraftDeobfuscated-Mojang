@@ -17,7 +17,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.VideoMode;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
@@ -65,6 +64,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -78,7 +78,7 @@ import org.slf4j.Logger;
 public class Options {
 	static final Logger LOGGER = LogUtils.getLogger();
 	static final Gson GSON = new Gson();
-	private static final TypeToken<List<String>> RESOURCE_PACK_TYPE = new TypeToken<List<String>>() {
+	private static final TypeToken<List<String>> LIST_OF_STRINGS_TYPE = new TypeToken<List<String>>() {
 	};
 	public static final int RENDER_DISTANCE_TINY = 2;
 	public static final int RENDER_DISTANCE_SHORT = 4;
@@ -135,20 +135,7 @@ public class Options {
 		OptionInstance.noTooltip(),
 		OptionInstance.forOptionEnum(),
 		new OptionInstance.Enum<>(
-			Arrays.asList(CloudStatus.values()),
-			Codec.either(Codec.BOOL, Codec.STRING).xmap(either -> either.map(boolean_ -> boolean_ ? CloudStatus.FANCY : CloudStatus.OFF, string -> {
-					return switch (string) {
-						case "true" -> CloudStatus.FANCY;
-						case "fast" -> CloudStatus.FAST;
-						default -> CloudStatus.OFF;
-					};
-				}), cloudStatus -> {
-				return Either.right(switch (cloudStatus) {
-					case FANCY -> "true";
-					case FAST -> "fast";
-					case OFF -> "false";
-				});
-			})
+			Arrays.asList(CloudStatus.values()), ExtraCodecs.withAlternative(CloudStatus.CODEC, Codec.BOOL, boolean_ -> boolean_ ? CloudStatus.FANCY : CloudStatus.OFF)
 		),
 		CloudStatus.FANCY,
 		cloudStatus -> {
@@ -278,10 +265,7 @@ public class Options {
 		"options.mainHand",
 		OptionInstance.noTooltip(),
 		OptionInstance.forOptionEnum(),
-		new OptionInstance.Enum<>(
-			Arrays.asList(HumanoidArm.values()),
-			Codec.STRING.xmap(string -> "left".equals(string) ? HumanoidArm.LEFT : HumanoidArm.RIGHT, humanoidArm -> humanoidArm == HumanoidArm.LEFT ? "left" : "right")
-		),
+		new OptionInstance.Enum<>(Arrays.asList(HumanoidArm.values()), HumanoidArm.CODEC),
 		HumanoidArm.RIGHT,
 		humanoidArm -> this.broadcastOptions()
 	);
@@ -1127,8 +1111,8 @@ public class Options {
 		fieldAccess.process("prioritizeChunkUpdates", this.prioritizeChunkUpdates);
 		fieldAccess.process("biomeBlendRadius", this.biomeBlendRadius);
 		fieldAccess.process("renderClouds", this.cloudStatus);
-		this.resourcePacks = fieldAccess.process("resourcePacks", this.resourcePacks, Options::readPackList, GSON::toJson);
-		this.incompatibleResourcePacks = fieldAccess.process("incompatibleResourcePacks", this.incompatibleResourcePacks, Options::readPackList, GSON::toJson);
+		this.resourcePacks = fieldAccess.process("resourcePacks", this.resourcePacks, Options::readListOfStrings, GSON::toJson);
+		this.incompatibleResourcePacks = fieldAccess.process("incompatibleResourcePacks", this.incompatibleResourcePacks, Options::readListOfStrings, GSON::toJson);
 		this.lastMpIp = fieldAccess.process("lastServer", this.lastMpIp);
 		this.languageCode = fieldAccess.process("lang", this.languageCode);
 		fieldAccess.process("soundDevice", this.soundDevice);
@@ -1505,8 +1489,8 @@ public class Options {
 		this.cameraType = cameraType;
 	}
 
-	private static List<String> readPackList(String string) {
-		List<String> list = GsonHelper.fromNullableJson(GSON, string, RESOURCE_PACK_TYPE);
+	private static List<String> readListOfStrings(String string) {
+		List<String> list = GsonHelper.fromNullableJson(GSON, string, LIST_OF_STRINGS_TYPE);
 		return (List<String>)(list != null ? list : Lists.<String>newArrayList());
 	}
 

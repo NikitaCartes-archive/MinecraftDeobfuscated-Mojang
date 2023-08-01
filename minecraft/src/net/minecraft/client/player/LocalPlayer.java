@@ -113,8 +113,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean wasSprinting;
 	private int positionReminder;
 	private boolean flashOnSetHealth;
-	@Nullable
-	private String serverBrand;
 	public Input input;
 	protected final Minecraft minecraft;
 	protected int sprintTriggerTime;
@@ -380,15 +378,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	public void sendOpenInventory() {
 		this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.OPEN_INVENTORY));
-	}
-
-	public void setServerBrand(@Nullable String string) {
-		this.serverBrand = string;
-	}
-
-	@Nullable
-	public String getServerBrand() {
-		return this.serverBrand;
 	}
 
 	public StatsCounter getStats() {
@@ -672,8 +661,9 @@ public class LocalPlayer extends AbstractClientPlayer {
 		boolean bl3 = this.hasEnoughImpulseToStartSprinting();
 		this.crouching = !this.getAbilities().flying
 			&& !this.isSwimming()
-			&& this.canEnterPose(Pose.CROUCHING)
-			&& (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
+			&& !this.isPassenger()
+			&& this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING)
+			&& (this.isShiftKeyDown() || !this.isSleeping() && !this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.STANDING));
 		float f = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(this), 0.0F, 1.0F);
 		this.input.tick(this.isMovingSlowly(), f);
 		this.minecraft.getTutorial().onInput(this.input);

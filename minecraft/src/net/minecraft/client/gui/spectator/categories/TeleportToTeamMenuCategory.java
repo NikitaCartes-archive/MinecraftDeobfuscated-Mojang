@@ -4,16 +4,17 @@ import com.mojang.authlib.GameProfile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerFaceRenderer;
-import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuCategory;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -24,6 +25,7 @@ import net.minecraft.world.scores.Scoreboard;
 
 @Environment(EnvType.CLIENT)
 public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, SpectatorMenuItem {
+	private static final ResourceLocation TELEPORT_TO_TEAM_SPRITE = new ResourceLocation("spectator/teleport_to_team");
 	private static final Component TELEPORT_TEXT = Component.translatable("spectatorMenu.team_teleport");
 	private static final Component TELEPORT_PROMPT = Component.translatable("spectatorMenu.team_teleport.prompt");
 	private final List<SpectatorMenuItem> items;
@@ -62,7 +64,7 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 
 	@Override
 	public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
-		guiGraphics.blit(SpectatorGui.SPECTATOR_LOCATION, 0, 0, 16.0F, 0.0F, 16, 16, 256, 256);
+		guiGraphics.blitSprite(TELEPORT_TO_TEAM_SPRITE, 0, 0, 16, 16);
 	}
 
 	@Override
@@ -73,13 +75,13 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 	@Environment(EnvType.CLIENT)
 	static class TeamSelectionItem implements SpectatorMenuItem {
 		private final PlayerTeam team;
-		private final ResourceLocation iconSkin;
+		private final Supplier<PlayerSkin> iconSkin;
 		private final List<PlayerInfo> players;
 
-		private TeamSelectionItem(PlayerTeam playerTeam, List<PlayerInfo> list, ResourceLocation resourceLocation) {
+		private TeamSelectionItem(PlayerTeam playerTeam, List<PlayerInfo> list, Supplier<PlayerSkin> supplier) {
 			this.team = playerTeam;
 			this.players = list;
-			this.iconSkin = resourceLocation;
+			this.iconSkin = supplier;
 		}
 
 		public static Optional<SpectatorMenuItem> create(Minecraft minecraft, PlayerTeam playerTeam) {
@@ -96,8 +98,8 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 				return Optional.empty();
 			} else {
 				GameProfile gameProfile = ((PlayerInfo)list.get(RandomSource.create().nextInt(list.size()))).getProfile();
-				ResourceLocation resourceLocation = minecraft.getSkinManager().getInsecureSkinLocation(gameProfile);
-				return Optional.of(new TeleportToTeamMenuCategory.TeamSelectionItem(playerTeam, list, resourceLocation));
+				Supplier<PlayerSkin> supplier = minecraft.getSkinManager().lookupInsecure(gameProfile);
+				return Optional.of(new TeleportToTeamMenuCategory.TeamSelectionItem(playerTeam, list, supplier));
 			}
 		}
 
@@ -122,7 +124,7 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 			}
 
 			guiGraphics.setColor(f, f, f, (float)i / 255.0F);
-			PlayerFaceRenderer.draw(guiGraphics, this.iconSkin, 2, 2, 12);
+			PlayerFaceRenderer.draw(guiGraphics, (PlayerSkin)this.iconSkin.get(), 2, 2, 12);
 			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		}
 

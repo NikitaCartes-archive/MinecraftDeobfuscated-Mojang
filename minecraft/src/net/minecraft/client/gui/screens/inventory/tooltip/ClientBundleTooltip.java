@@ -12,10 +12,9 @@ import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class ClientBundleTooltip implements ClientTooltipComponent {
-	public static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/gui/container/bundle.png");
+	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("container/bundle/background");
 	private static final int MARGIN_Y = 4;
 	private static final int BORDER_WIDTH = 1;
-	private static final int TEX_SIZE = 128;
 	private static final int SLOT_SIZE_X = 18;
 	private static final int SLOT_SIZE_Y = 20;
 	private final NonNullList<ItemStack> items;
@@ -28,18 +27,27 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 
 	@Override
 	public int getHeight() {
-		return this.gridSizeY() * 20 + 2 + 4;
+		return this.backgroundHeight() + 4;
 	}
 
 	@Override
 	public int getWidth(Font font) {
+		return this.backgroundWidth();
+	}
+
+	private int backgroundWidth() {
 		return this.gridSizeX() * 18 + 2;
+	}
+
+	private int backgroundHeight() {
+		return this.gridSizeY() * 20 + 2;
 	}
 
 	@Override
 	public void renderImage(Font font, int i, int j, GuiGraphics guiGraphics) {
 		int k = this.gridSizeX();
 		int l = this.gridSizeY();
+		guiGraphics.blitSprite(BACKGROUND_SPRITE, i, j, this.backgroundWidth(), this.backgroundHeight());
 		boolean bl = this.weight >= 64;
 		int m = 0;
 
@@ -50,8 +58,6 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 				this.renderSlot(p, q, m++, bl, guiGraphics, font);
 			}
 		}
-
-		this.drawBorder(i, j, k, l, guiGraphics);
 	}
 
 	private void renderSlot(int i, int j, int k, boolean bl, GuiGraphics guiGraphics, Font font) {
@@ -68,26 +74,8 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 		}
 	}
 
-	private void drawBorder(int i, int j, int k, int l, GuiGraphics guiGraphics) {
-		this.blit(guiGraphics, i, j, ClientBundleTooltip.Texture.BORDER_CORNER_TOP);
-		this.blit(guiGraphics, i + k * 18 + 1, j, ClientBundleTooltip.Texture.BORDER_CORNER_TOP);
-
-		for (int m = 0; m < k; m++) {
-			this.blit(guiGraphics, i + 1 + m * 18, j, ClientBundleTooltip.Texture.BORDER_HORIZONTAL_TOP);
-			this.blit(guiGraphics, i + 1 + m * 18, j + l * 20, ClientBundleTooltip.Texture.BORDER_HORIZONTAL_BOTTOM);
-		}
-
-		for (int m = 0; m < l; m++) {
-			this.blit(guiGraphics, i, j + m * 20 + 1, ClientBundleTooltip.Texture.BORDER_VERTICAL);
-			this.blit(guiGraphics, i + k * 18 + 1, j + m * 20 + 1, ClientBundleTooltip.Texture.BORDER_VERTICAL);
-		}
-
-		this.blit(guiGraphics, i, j + l * 20, ClientBundleTooltip.Texture.BORDER_CORNER_BOTTOM);
-		this.blit(guiGraphics, i + k * 18 + 1, j + l * 20, ClientBundleTooltip.Texture.BORDER_CORNER_BOTTOM);
-	}
-
 	private void blit(GuiGraphics guiGraphics, int i, int j, ClientBundleTooltip.Texture texture) {
-		guiGraphics.blit(TEXTURE_LOCATION, i, j, 0, (float)texture.x, (float)texture.y, texture.w, texture.h, 128, 128);
+		guiGraphics.blitSprite(texture.sprite, i, j, 0, texture.w, texture.h);
 	}
 
 	private int gridSizeX() {
@@ -100,24 +88,17 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 
 	@Environment(EnvType.CLIENT)
 	static enum Texture {
-		SLOT(0, 0, 18, 20),
-		BLOCKED_SLOT(0, 40, 18, 20),
-		BORDER_VERTICAL(0, 18, 1, 20),
-		BORDER_HORIZONTAL_TOP(0, 20, 18, 1),
-		BORDER_HORIZONTAL_BOTTOM(0, 60, 18, 1),
-		BORDER_CORNER_TOP(0, 20, 1, 1),
-		BORDER_CORNER_BOTTOM(0, 60, 1, 1);
+		BLOCKED_SLOT(new ResourceLocation("container/bundle/blocked_slot"), 18, 20),
+		SLOT(new ResourceLocation("container/bundle/slot"), 18, 20);
 
-		public final int x;
-		public final int y;
+		public final ResourceLocation sprite;
 		public final int w;
 		public final int h;
 
-		private Texture(int j, int k, int l, int m) {
-			this.x = j;
-			this.y = k;
-			this.w = l;
-			this.h = m;
+		private Texture(ResourceLocation resourceLocation, int j, int k) {
+			this.sprite = resourceLocation;
+			this.w = j;
+			this.h = k;
 		}
 	}
 }

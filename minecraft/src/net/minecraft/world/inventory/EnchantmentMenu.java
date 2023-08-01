@@ -1,11 +1,13 @@
 package net.minecraft.world.inventory;
 
+import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EnchantmentTableBlock;
 
 public class EnchantmentMenu extends AbstractContainerMenu {
+	static final ResourceLocation EMPTY_SLOT_LAPIS_LAZULI = new ResourceLocation("item/empty_slot_lapis_lazuli");
 	private final Container enchantSlots = new SimpleContainer(2) {
 		@Override
 		public void setChanged() {
@@ -47,11 +50,6 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 		this.access = containerLevelAccess;
 		this.addSlot(new Slot(this.enchantSlots, 0, 15, 47) {
 			@Override
-			public boolean mayPlace(ItemStack itemStack) {
-				return true;
-			}
-
-			@Override
 			public int getMaxStackSize() {
 				return 1;
 			}
@@ -60,6 +58,11 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
 				return itemStack.is(Items.LAPIS_LAZULI);
+			}
+
+			@Override
+			public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
+				return Pair.of(InventoryMenu.BLOCK_ATLAS, EnchantmentMenu.EMPTY_SLOT_LAPIS_LAZULI);
 			}
 		});
 

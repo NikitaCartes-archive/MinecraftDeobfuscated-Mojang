@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.TridentModel;
@@ -25,7 +24,6 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.item.BlockItem;
@@ -91,22 +89,11 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 		Item item = itemStack.getItem();
 		if (item instanceof BlockItem) {
 			Block block = ((BlockItem)item).getBlock();
-			if (block instanceof AbstractSkullBlock) {
-				GameProfile gameProfile = null;
-				if (itemStack.hasTag()) {
-					CompoundTag compoundTag = itemStack.getTag();
-					if (compoundTag.contains("SkullOwner", 10)) {
-						gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
-					} else if (compoundTag.contains("SkullOwner", 8) && !Util.isBlank(compoundTag.getString("SkullOwner"))) {
-						gameProfile = new GameProfile(null, compoundTag.getString("SkullOwner"));
-						compoundTag.remove("SkullOwner");
-						SkullBlockEntity.updateGameprofile(gameProfile, gameProfilex -> compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfilex)));
-					}
-				}
-
-				SkullBlock.Type type = ((AbstractSkullBlock)block).getType();
-				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(type);
-				RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
+			if (block instanceof AbstractSkullBlock abstractSkullBlock) {
+				CompoundTag compoundTag = itemStack.getTag();
+				GameProfile gameProfile = compoundTag != null ? SkullBlockEntity.getOrResolveGameProfile(compoundTag) : null;
+				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(abstractSkullBlock.getType());
+				RenderType renderType = SkullBlockRenderer.getRenderType(abstractSkullBlock.getType(), gameProfile);
 				SkullBlockRenderer.renderSkull(null, 180.0F, 0.0F, poseStack, multiBufferSource, i, skullModelBase, renderType);
 			} else {
 				BlockState blockState = block.defaultBlockState();

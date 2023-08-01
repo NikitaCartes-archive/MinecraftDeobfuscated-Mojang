@@ -1,6 +1,7 @@
 package net.minecraft.network.protocol.login;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -26,5 +27,10 @@ public class ClientboundGameProfilePacket implements Packet<ClientLoginPacketLis
 
 	public GameProfile getGameProfile() {
 		return this.gameProfile;
+	}
+
+	@Override
+	public ConnectionProtocol nextProtocol() {
+		return ConnectionProtocol.CONFIGURATION;
 	}
 }

@@ -30,6 +30,7 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.server.IntegratedServer;
@@ -170,14 +171,15 @@ public class DebugScreenOverlay {
 
 	protected List<String> getGameInformation() {
 		IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-		Connection connection = this.minecraft.getConnection().getConnection();
+		ClientPacketListener clientPacketListener = this.minecraft.getConnection();
+		Connection connection = clientPacketListener.getConnection();
 		float f = connection.getAverageSentPackets();
 		float g = connection.getAverageReceivedPackets();
 		String string;
 		if (integratedServer != null) {
 			string = String.format(Locale.ROOT, "Integrated server @ %.0f ms ticks, %.0f tx, %.0f rx", integratedServer.getAverageTickTime(), f, g);
 		} else {
-			string = String.format(Locale.ROOT, "\"%s\" server, %.0f tx, %.0f rx", this.minecraft.player.getServerBrand(), f, g);
+			string = String.format(Locale.ROOT, "\"%s\" server, %.0f tx, %.0f rx", clientPacketListener.serverBrand(), f, g);
 		}
 
 		BlockPos blockPos = this.minecraft.getCameraEntity().blockPosition();
@@ -192,7 +194,7 @@ public class DebugScreenOverlay {
 					+ ")",
 				this.minecraft.fpsString,
 				string,
-				this.minecraft.levelRenderer.getChunkStatistics(),
+				this.minecraft.levelRenderer.getSectionStatistics(),
 				this.minecraft.levelRenderer.getEntityStatistics(),
 				"P: " + this.minecraft.particleEngine.countParticles() + ". T: " + this.minecraft.level.getEntityCount(),
 				this.minecraft.level.gatherChunkSourceStats(),
@@ -229,7 +231,7 @@ public class DebugScreenOverlay {
 					+ ")",
 				this.minecraft.fpsString,
 				string,
-				this.minecraft.levelRenderer.getChunkStatistics(),
+				this.minecraft.levelRenderer.getSectionStatistics(),
 				this.minecraft.levelRenderer.getEntityStatistics(),
 				"P: " + this.minecraft.particleEngine.countParticles() + ". T: " + this.minecraft.level.getEntityCount(),
 				this.minecraft.level.gatherChunkSourceStats()
@@ -313,23 +315,22 @@ public class DebugScreenOverlay {
 				list.add(stringBuilder.toString());
 				if (blockPos.getY() >= this.minecraft.level.getMinBuildHeight() && blockPos.getY() < this.minecraft.level.getMaxBuildHeight()) {
 					list.add("Biome: " + printBiome(this.minecraft.level.getBiome(blockPos)));
-					long l = 0L;
-					float h = 0.0F;
 					if (levelChunk2 != null) {
-						h = level.getMoonBrightness();
-						l = levelChunk2.getInhabitedTime();
+						float h = level.getMoonBrightness();
+						long l = levelChunk2.getInhabitedTime();
+						DifficultyInstance difficultyInstance = new DifficultyInstance(level.getDifficulty(), level.getDayTime(), l, h);
+						list.add(
+							String.format(
+								Locale.ROOT,
+								"Local Difficulty: %.2f // %.2f (Day %d)",
+								difficultyInstance.getEffectiveDifficulty(),
+								difficultyInstance.getSpecialMultiplier(),
+								this.minecraft.level.getDayTime() / 24000L
+							)
+						);
+					} else {
+						list.add("Local Difficulty: ??");
 					}
-
-					DifficultyInstance difficultyInstance = new DifficultyInstance(level.getDifficulty(), level.getDayTime(), l, h);
-					list.add(
-						String.format(
-							Locale.ROOT,
-							"Local Difficulty: %.2f // %.2f (Day %d)",
-							difficultyInstance.getEffectiveDifficulty(),
-							difficultyInstance.getSpecialMultiplier(),
-							this.minecraft.level.getDayTime() / 24000L
-						)
-					);
 				}
 
 				if (levelChunk2 != null && levelChunk2.isOldNoiseGeneration()) {
@@ -403,15 +404,13 @@ public class DebugScreenOverlay {
 	private LevelChunk getServerChunk() {
 		if (this.serverChunk == null) {
 			ServerLevel serverLevel = this.getServerLevel();
-			if (serverLevel != null) {
-				this.serverChunk = serverLevel.getChunkSource()
-					.getChunkFuture(this.lastPos.x, this.lastPos.z, ChunkStatus.FULL, false)
-					.thenApply(either -> either.map(chunkAccess -> (LevelChunk)chunkAccess, chunkLoadingFailure -> null));
+			if (serverLevel == null) {
+				return null;
 			}
 
-			if (this.serverChunk == null) {
-				this.serverChunk = CompletableFuture.completedFuture(this.getClientChunk());
-			}
+			this.serverChunk = serverLevel.getChunkSource()
+				.getChunkFuture(this.lastPos.x, this.lastPos.z, ChunkStatus.FULL, false)
+				.thenApply(either -> either.map(chunkAccess -> (LevelChunk)chunkAccess, chunkLoadingFailure -> null));
 		}
 
 		return (LevelChunk)this.serverChunk.getNow(null);

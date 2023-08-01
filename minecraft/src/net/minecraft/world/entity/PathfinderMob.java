@@ -2,6 +2,8 @@ package net.minecraft.world.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -31,6 +33,12 @@ public abstract class PathfinderMob extends Mob {
 		return !this.getNavigation().isDone();
 	}
 
+	public boolean isPanicking() {
+		return this.brain.hasMemoryValue(MemoryModuleType.IS_PANICKING)
+			? this.brain.getMemory(MemoryModuleType.IS_PANICKING).isPresent()
+			: this.goalSelector.getRunningGoals().anyMatch(wrappedGoal -> wrappedGoal.getGoal() instanceof PanicGoal);
+	}
+
 	@Override
 	protected void tickLeash() {
 		super.tickLeash();
@@ -56,7 +64,7 @@ public abstract class PathfinderMob extends Mob {
 				double g = (entity.getZ() - this.getZ()) / (double)f;
 				this.setDeltaMovement(this.getDeltaMovement().add(Math.copySign(d * d * 0.4, d), Math.copySign(e * e * 0.4, e), Math.copySign(g * g * 0.4, g)));
 				this.checkSlowFallDistance();
-			} else if (this.shouldStayCloseToLeashHolder()) {
+			} else if (this.shouldStayCloseToLeashHolder() && !this.isPanicking()) {
 				this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
 				float h = 2.0F;
 				Vec3 vec3 = new Vec3(entity.getX() - this.getX(), entity.getY() - this.getY(), entity.getZ() - this.getZ())

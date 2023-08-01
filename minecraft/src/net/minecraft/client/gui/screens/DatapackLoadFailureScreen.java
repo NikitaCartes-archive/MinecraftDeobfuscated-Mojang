@@ -36,9 +36,8 @@ public class DatapackLoadFailureScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		this.message.renderCentered(guiGraphics, this.width / 2, 70);
 		super.render(guiGraphics, i, j, f);
+		this.message.renderCentered(guiGraphics, this.width / 2, 70);
 	}
 
 	@Override

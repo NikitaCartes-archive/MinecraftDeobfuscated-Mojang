@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
+import net.minecraft.world.level.validation.DirectoryValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -25,11 +26,15 @@ public abstract class BuiltInPackSource implements RepositorySource {
 	private final PackType packType;
 	private final VanillaPackResources vanillaPack;
 	private final ResourceLocation packDir;
+	private final DirectoryValidator validator;
 
-	public BuiltInPackSource(PackType packType, VanillaPackResources vanillaPackResources, ResourceLocation resourceLocation) {
+	public BuiltInPackSource(
+		PackType packType, VanillaPackResources vanillaPackResources, ResourceLocation resourceLocation, DirectoryValidator directoryValidator
+	) {
 		this.packType = packType;
 		this.vanillaPack = vanillaPackResources;
 		this.packDir = resourceLocation;
+		this.validator = directoryValidator;
 	}
 
 	@Override
@@ -71,6 +76,7 @@ public abstract class BuiltInPackSource implements RepositorySource {
 			try {
 				FolderRepositorySource.discoverPacks(
 					path,
+					this.validator,
 					true,
 					(pathx, resourcesSupplier) -> biConsumer.accept(
 							pathToId(pathx), (Function)string -> this.createBuiltinPack(string, resourcesSupplier, this.getPackTitle(string))
@@ -88,4 +94,18 @@ public abstract class BuiltInPackSource implements RepositorySource {
 
 	@Nullable
 	protected abstract Pack createBuiltinPack(String string, Pack.ResourcesSupplier resourcesSupplier, Component component);
+
+	protected static Pack.ResourcesSupplier fixedResources(PackResources packResources) {
+		return new Pack.ResourcesSupplier() {
+			@Override
+			public PackResources openPrimary(String string) {
+				return packResources;
+			}
+
+			@Override
+			public PackResources openFull(String string, Pack.Info info) {
+				return packResources;
+			}
+		};
+	}
 }

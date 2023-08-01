@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 public interface HolderSet<T> extends Iterable<Holder<T>> {

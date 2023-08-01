@@ -28,8 +28,10 @@ import java.util.function.IntFunction;
 import java.util.stream.Stream;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.FunctionInstantiationException;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -47,6 +49,7 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.SwizzleArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.item.FunctionArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -633,6 +636,17 @@ public class ExecuteCommand {
 							commandContext -> checkCustomPredicate(commandContext.getSource(), ResourceLocationArgument.getPredicate(commandContext, "predicate"))
 						)
 					)
+			)
+			.then(
+				Commands.literal("function")
+					.then(
+						addConditional(
+							commandNode,
+							Commands.argument("function", FunctionArgument.functions()).suggests(FunctionCommand.SUGGEST_FUNCTION),
+							bl,
+							commandContext -> checkFunction(commandContext.getSource(), FunctionArgument.getFunctions(commandContext, "function"))
+						)
+					)
 			);
 
 		for (DataCommands.DataProvider dataProvider : DataCommands.SOURCE_PROVIDERS) {
@@ -704,6 +718,22 @@ public class ExecuteCommand {
 		Objective objective = ObjectiveArgument.getObjective(commandContext, "targetObjective");
 		Scoreboard scoreboard = commandContext.getSource().getServer().getScoreboard();
 		return !scoreboard.hasPlayerScore(string, objective) ? false : ints.matches(scoreboard.getOrCreatePlayerScore(string, objective).getScore());
+	}
+
+	private static boolean checkFunction(CommandSourceStack commandSourceStack, Collection<CommandFunction> collection) {
+		boolean bl = false;
+
+		for (CommandFunction commandFunction : collection) {
+			try {
+				FunctionCommand.FunctionResult functionResult = FunctionCommand.runFunction(commandSourceStack, commandFunction, null);
+				if (functionResult.isReturn() && functionResult.value() != 0) {
+					bl = true;
+				}
+			} catch (FunctionInstantiationException var6) {
+			}
+		}
+
+		return bl;
 	}
 
 	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, LootItemCondition lootItemCondition) {

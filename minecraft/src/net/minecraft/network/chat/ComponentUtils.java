@@ -1,7 +1,6 @@
 package net.minecraft.network.chat;
 
 import com.google.common.collect.Lists;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.DataFixUtils;
@@ -65,14 +64,6 @@ public class ComponentUtils {
 		}
 
 		return style;
-	}
-
-	public static Component getDisplayName(GameProfile gameProfile) {
-		if (gameProfile.getName() != null) {
-			return Component.literal(gameProfile.getName());
-		} else {
-			return gameProfile.getId() != null ? Component.literal(gameProfile.getId().toString()) : Component.literal("(unknown)");
-		}
 	}
 
 	public static Component formatList(Collection<String> collection) {

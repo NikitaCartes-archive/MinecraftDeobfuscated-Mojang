@@ -48,7 +48,6 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
-import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket;
@@ -63,7 +62,6 @@ import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
-import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
@@ -72,6 +70,7 @@ import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceKey;
@@ -182,6 +181,7 @@ public class ServerPlayer extends Player {
 	private Vec3 levitationStartPos;
 	private int levitationStartTime;
 	private boolean disconnected;
+	private OptionalInt requestedViewDistance = OptionalInt.empty();
 	@Nullable
 	private Vec3 startingToFallPosition;
 	@Nullable
@@ -189,6 +189,7 @@ public class ServerPlayer extends Player {
 	@Nullable
 	private Vec3 enteredLavaOnVehiclePosition;
 	private SectionPos lastSectionPos = SectionPos.of(0, 0, 0);
+	private ChunkTrackingView chunkTrackingView = ChunkTrackingView.EMPTY;
 	private ResourceKey<Level> respawnDimension = Level.OVERWORLD;
 	@Nullable
 	private BlockPos respawnPosition;
@@ -247,7 +248,6 @@ public class ServerPlayer extends Player {
 	@Nullable
 	private RemoteChatSession chatSession;
 	private int containerCounter;
-	public int latency;
 	public boolean wonGame;
 
 	public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile) {
@@ -601,7 +601,8 @@ public class ServerPlayer extends Player {
 								.withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
 							return new ClientboundPlayerCombatKillPacket(this.getId(), component3);
 						}
-					)
+					),
+					true
 				);
 			Team team = this.getTeam();
 			if (team == null || team.getDeathMessageVisibility() == Team.Visibility.ALWAYS) {
@@ -745,21 +746,7 @@ public class ServerPlayer extends Player {
 			return this;
 		} else {
 			LevelData levelData = serverLevel.getLevelData();
-			this.connection
-				.send(
-					new ClientboundRespawnPacket(
-						serverLevel.dimensionTypeId(),
-						serverLevel.dimension(),
-						BiomeManager.obfuscateSeed(serverLevel.getSeed()),
-						this.gameMode.getGameModeForPlayer(),
-						this.gameMode.getPreviousGameModeForPlayer(),
-						serverLevel.isDebug(),
-						serverLevel.isFlat(),
-						(byte)3,
-						this.getLastDeathLocation(),
-						this.getPortalCooldown()
-					)
-				);
+			this.connection.send(new ClientboundRespawnPacket(this.createCommonSpawnInfo(serverLevel), (byte)3));
 			this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 			PlayerList playerList = this.server.getPlayerList();
 			playerList.sendPlayerPermissionLevel(this);
@@ -1178,6 +1165,8 @@ public class ServerPlayer extends Player {
 		this.recipeBook.copyOverData(serverPlayer.recipeBook);
 		this.seenCredits = serverPlayer.seenCredits;
 		this.enteredNetherPosition = serverPlayer.enteredNetherPosition;
+		this.chunkTrackingView = serverPlayer.chunkTrackingView;
+		this.requestedViewDistance = serverPlayer.requestedViewDistance;
 		this.setShoulderEntityLeft(serverPlayer.getShoulderEntityLeft());
 		this.setShoulderEntityRight(serverPlayer.getShoulderEntityRight());
 		this.setLastDeathLocation(serverPlayer.getLastDeathLocation());
@@ -1314,7 +1303,7 @@ public class ServerPlayer extends Player {
 				} else {
 					return null;
 				}
-			}));
+			}), true);
 		}
 	}
 
@@ -1331,6 +1320,7 @@ public class ServerPlayer extends Player {
 	}
 
 	public void updateOptions(ServerboundClientInformationPacket serverboundClientInformationPacket) {
+		this.requestedViewDistance = OptionalInt.of(serverboundClientInformationPacket.viewDistance());
 		this.chatVisibility = serverboundClientInformationPacket.chatVisibility();
 		this.canChatColor = serverboundClientInformationPacket.chatColors();
 		this.textFilteringEnabled = serverboundClientInformationPacket.textFilteringEnabled();
@@ -1355,8 +1345,8 @@ public class ServerPlayer extends Player {
 		return this.chatVisibility == ChatVisiblity.FULL;
 	}
 
-	public void sendTexturePack(String string, String string2, boolean bl, @Nullable Component component) {
-		this.connection.send(new ClientboundResourcePackPacket(string, string2, bl, component));
+	public OptionalInt requestedViewDistance() {
+		return this.requestedViewDistance;
 	}
 
 	public void sendServerStatus(ServerStatus serverStatus) {
@@ -1465,21 +1455,7 @@ public class ServerPlayer extends Player {
 		} else {
 			ServerLevel serverLevel2 = this.serverLevel();
 			LevelData levelData = serverLevel.getLevelData();
-			this.connection
-				.send(
-					new ClientboundRespawnPacket(
-						serverLevel.dimensionTypeId(),
-						serverLevel.dimension(),
-						BiomeManager.obfuscateSeed(serverLevel.getSeed()),
-						this.gameMode.getGameModeForPlayer(),
-						this.gameMode.getPreviousGameModeForPlayer(),
-						serverLevel.isDebug(),
-						serverLevel.isFlat(),
-						(byte)3,
-						this.getLastDeathLocation(),
-						this.getPortalCooldown()
-					)
-				);
+			this.connection.send(new ClientboundRespawnPacket(this.createCommonSpawnInfo(serverLevel), (byte)3));
 			this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 			this.server.getPlayerList().sendPlayerPermissionLevel(this);
 			serverLevel2.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
@@ -1530,22 +1506,20 @@ public class ServerPlayer extends Player {
 		}
 	}
 
-	public void trackChunk(ChunkPos chunkPos, Packet<?> packet) {
-		this.connection.send(packet);
-	}
-
-	public void untrackChunk(ChunkPos chunkPos) {
-		if (this.isAlive()) {
-			this.connection.send(new ClientboundForgetLevelChunkPacket(chunkPos.x, chunkPos.z));
-		}
-	}
-
 	public SectionPos getLastSectionPos() {
 		return this.lastSectionPos;
 	}
 
 	public void setLastSectionPos(SectionPos sectionPos) {
 		this.lastSectionPos = sectionPos;
+	}
+
+	public ChunkTrackingView getChunkTrackingView() {
+		return this.chunkTrackingView;
+	}
+
+	public void setChunkTrackingView(ChunkTrackingView chunkTrackingView) {
+		this.chunkTrackingView = chunkTrackingView;
 	}
 
 	@Override
@@ -1707,5 +1681,19 @@ public class ServerPlayer extends Player {
 				this.connection.send(new ClientboundRemoveMobEffectPacket(entity.getId(), mobEffectInstance.getEffect()));
 			}
 		}
+	}
+
+	public CommonPlayerSpawnInfo createCommonSpawnInfo(ServerLevel serverLevel) {
+		return new CommonPlayerSpawnInfo(
+			serverLevel.dimensionTypeId(),
+			serverLevel.dimension(),
+			BiomeManager.obfuscateSeed(serverLevel.getSeed()),
+			this.gameMode.getGameModeForPlayer(),
+			this.gameMode.getPreviousGameModeForPlayer(),
+			serverLevel.isDebug(),
+			serverLevel.isFlat(),
+			this.getLastDeathLocation(),
+			this.getPortalCooldown()
+		);
 	}
 }

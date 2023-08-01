@@ -150,9 +150,10 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 				if (listTag.isEmpty()) {
 					compoundTag.remove("Patterns");
 				}
-
-				BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
 			}
+
+			compoundTag.remove("id");
+			BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
 		}
 	}
 

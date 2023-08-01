@@ -2,26 +2,26 @@ package net.minecraft.network.protocol.login;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
+import net.minecraft.network.protocol.login.custom.DiscardedQueryPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public class ClientboundCustomQueryPacket implements Packet<ClientLoginPacketListener> {
+public record ClientboundCustomQueryPacket(int transactionId, CustomQueryPayload payload) implements Packet<ClientLoginPacketListener> {
 	private static final int MAX_PAYLOAD_SIZE = 1048576;
-	private final int transactionId;
-	private final ResourceLocation identifier;
-	private final FriendlyByteBuf data;
-
-	public ClientboundCustomQueryPacket(int i, ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
-		this.transactionId = i;
-		this.identifier = resourceLocation;
-		this.data = friendlyByteBuf;
-	}
 
 	public ClientboundCustomQueryPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.transactionId = friendlyByteBuf.readVarInt();
-		this.identifier = friendlyByteBuf.readResourceLocation();
+		this(friendlyByteBuf.readVarInt(), readPayload(friendlyByteBuf.readResourceLocation(), friendlyByteBuf));
+	}
+
+	private static DiscardedQueryPayload readPayload(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
+		return readUnknownPayload(resourceLocation, friendlyByteBuf);
+	}
+
+	private static DiscardedQueryPayload readUnknownPayload(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
 		int i = friendlyByteBuf.readableBytes();
 		if (i >= 0 && i <= 1048576) {
-			this.data = new FriendlyByteBuf(friendlyByteBuf.readBytes(i));
+			friendlyByteBuf.skipBytes(i);
+			return new DiscardedQueryPayload(resourceLocation);
 		} else {
 			throw new IllegalArgumentException("Payload may not be larger than 1048576 bytes");
 		}
@@ -30,23 +30,11 @@ public class ClientboundCustomQueryPacket implements Packet<ClientLoginPacketLis
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.transactionId);
-		friendlyByteBuf.writeResourceLocation(this.identifier);
-		friendlyByteBuf.writeBytes(this.data.copy());
+		friendlyByteBuf.writeResourceLocation(this.payload.id());
+		this.payload.write(friendlyByteBuf);
 	}
 
 	public void handle(ClientLoginPacketListener clientLoginPacketListener) {
 		clientLoginPacketListener.handleCustomQuery(this);
-	}
-
-	public int getTransactionId() {
-		return this.transactionId;
-	}
-
-	public ResourceLocation getIdentifier() {
-		return this.identifier;
-	}
-
-	public FriendlyByteBuf getData() {
-		return this.data;
 	}
 }

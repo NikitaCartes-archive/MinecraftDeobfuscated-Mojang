@@ -16,6 +16,7 @@ import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
@@ -49,10 +50,10 @@ public class ExperimentsScreen extends Screen {
 	@Override
 	protected void init() {
 		this.layout.addToHeader(new StringWidget(Component.translatable("selectWorld.experiments"), this.font));
-		GridLayout.RowHelper rowHelper = this.layout.addToContents(new GridLayout()).createRowHelper(1);
-		rowHelper.addChild(
+		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical());
+		linearLayout.addChild(
 			new MultiLineTextWidget(Component.translatable("selectWorld.experiments.info").withStyle(ChatFormatting.RED), this.font).setMaxWidth(310),
-			rowHelper.newCellSettings().paddingBottom(15)
+			layoutSettings -> layoutSettings.paddingBottom(15)
 		);
 		SwitchGrid.Builder builder = SwitchGrid.builder(310).withInfoUnderneath(2, true).withRowSpacing(4);
 		this.packs
@@ -62,10 +63,10 @@ public class ExperimentsScreen extends Screen {
 						)
 						.withInfo(pack.getDescription())
 			);
-		builder.build(rowHelper::addChild);
-		GridLayout.RowHelper rowHelper2 = this.layout.addToFooter(new GridLayout().columnSpacing(10)).createRowHelper(2);
-		rowHelper2.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).build());
-		rowHelper2.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).build());
+		builder.build(linearLayout::addChild);
+		GridLayout.RowHelper rowHelper = this.layout.addToFooter(new GridLayout().columnSpacing(10)).createRowHelper(2);
+		rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).build());
+		rowHelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).build());
 		this.layout.visitWidgets(guiEventListener -> {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
 		});
@@ -102,8 +103,8 @@ public class ExperimentsScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.renderBackground(guiGraphics, i, j, f);
 		guiGraphics.setColor(0.125F, 0.125F, 0.125F, 1.0F);
 		int k = 32;
 		guiGraphics.blit(
@@ -118,6 +119,5 @@ public class ExperimentsScreen extends Screen {
 			32
 		);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-		super.render(guiGraphics, i, j, f);
 	}
 }

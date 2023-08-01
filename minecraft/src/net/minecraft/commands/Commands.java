@@ -52,6 +52,7 @@ import net.minecraft.server.commands.DamageCommand;
 import net.minecraft.server.commands.DataPackCommand;
 import net.minecraft.server.commands.DeOpCommands;
 import net.minecraft.server.commands.DebugCommand;
+import net.minecraft.server.commands.DebugConfigCommand;
 import net.minecraft.server.commands.DefaultGameModeCommands;
 import net.minecraft.server.commands.DifficultyCommand;
 import net.minecraft.server.commands.EffectCommands;
@@ -83,6 +84,7 @@ import net.minecraft.server.commands.PerfCommand;
 import net.minecraft.server.commands.PlaceCommand;
 import net.minecraft.server.commands.PlaySoundCommand;
 import net.minecraft.server.commands.PublishCommand;
+import net.minecraft.server.commands.RandomCommand;
 import net.minecraft.server.commands.RecipeCommand;
 import net.minecraft.server.commands.ReloadCommand;
 import net.minecraft.server.commands.ReturnCommand;
@@ -165,6 +167,7 @@ public class Commands {
 		ParticleCommand.register(this.dispatcher, commandBuildContext);
 		PlaceCommand.register(this.dispatcher);
 		PlaySoundCommand.register(this.dispatcher);
+		RandomCommand.register(this.dispatcher);
 		ReloadCommand.register(this.dispatcher);
 		RecipeCommand.register(this.dispatcher);
 		ReturnCommand.register(this.dispatcher);
@@ -197,6 +200,9 @@ public class Commands {
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			TestCommand.register(this.dispatcher);
 			SpawnArmorTrimsCommand.register(this.dispatcher);
+			if (commandSelection.includeDedicated) {
+				DebugConfigCommand.register(this.dispatcher);
+			}
 		}
 
 		if (commandSelection.includeDedicated) {

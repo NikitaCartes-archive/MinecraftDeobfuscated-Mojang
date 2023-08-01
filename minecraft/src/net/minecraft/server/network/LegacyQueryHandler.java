@@ -2,23 +2,21 @@ package net.minecraft.server.network;
 
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
+import java.net.SocketAddress;
 import java.util.Locale;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerInfo;
 import org.slf4j.Logger;
 
 public class LegacyQueryHandler extends ChannelInboundHandlerAdapter {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final int FAKE_PROTOCOL_VERSION = 127;
-	private final ServerConnectionListener serverConnectionListener;
+	private final ServerInfo server;
 
-	public LegacyQueryHandler(ServerConnectionListener serverConnectionListener) {
-		this.serverConnectionListener = serverConnectionListener;
+	public LegacyQueryHandler(ServerInfo serverInfo) {
+		this.server = serverInfo;
 	}
 
 	@Override
@@ -33,93 +31,94 @@ public class LegacyQueryHandler extends ChannelInboundHandlerAdapter {
 					return;
 				}
 
-				InetSocketAddress inetSocketAddress = (InetSocketAddress)channelHandlerContext.channel().remoteAddress();
-				MinecraftServer minecraftServer = this.serverConnectionListener.getServer();
+				SocketAddress socketAddress = channelHandlerContext.channel().remoteAddress();
 				int i = byteBuf.readableBytes();
-				switch (i) {
-					case 0: {
-						LOGGER.debug("Ping: (<1.3.x) from {}:{}", inetSocketAddress.getAddress(), inetSocketAddress.getPort());
-						String string = String.format(Locale.ROOT, "%s§%d§%d", minecraftServer.getMotd(), minecraftServer.getPlayerCount(), minecraftServer.getMaxPlayers());
-						this.sendFlushAndClose(channelHandlerContext, this.createReply(string));
-						break;
+				if (i == 0) {
+					LOGGER.debug("Ping: (<1.3.x) from {}", socketAddress);
+					String string = createVersion0Response(this.server);
+					sendFlushAndClose(channelHandlerContext, createLegacyDisconnectPacket(channelHandlerContext.alloc(), string));
+				} else {
+					if (byteBuf.readUnsignedByte() != 1) {
+						return;
 					}
-					case 1: {
-						if (byteBuf.readUnsignedByte() != 1) {
+
+					if (byteBuf.isReadable()) {
+						if (!readCustomPayloadPacket(byteBuf)) {
 							return;
 						}
 
-						LOGGER.debug("Ping: (1.4-1.5.x) from {}:{}", inetSocketAddress.getAddress(), inetSocketAddress.getPort());
-						String string = String.format(
-							Locale.ROOT,
-							"§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-							127,
-							minecraftServer.getServerVersion(),
-							minecraftServer.getMotd(),
-							minecraftServer.getPlayerCount(),
-							minecraftServer.getMaxPlayers()
-						);
-						this.sendFlushAndClose(channelHandlerContext, this.createReply(string));
-						break;
+						LOGGER.debug("Ping: (1.6) from {}", socketAddress);
+					} else {
+						LOGGER.debug("Ping: (1.4-1.5.x) from {}", socketAddress);
 					}
-					default:
-						boolean bl2 = byteBuf.readUnsignedByte() == 1;
-						bl2 &= byteBuf.readUnsignedByte() == 250;
-						bl2 &= "MC|PingHost".equals(new String(byteBuf.readBytes(byteBuf.readShort() * 2).array(), StandardCharsets.UTF_16BE));
-						int j = byteBuf.readUnsignedShort();
-						bl2 &= byteBuf.readUnsignedByte() >= 73;
-						bl2 &= 3 + byteBuf.readBytes(byteBuf.readShort() * 2).array().length + 4 == j;
-						bl2 &= byteBuf.readInt() <= 65535;
-						bl2 &= byteBuf.readableBytes() == 0;
-						if (!bl2) {
-							return;
-						}
 
-						LOGGER.debug("Ping: (1.6) from {}:{}", inetSocketAddress.getAddress(), inetSocketAddress.getPort());
-						String string2 = String.format(
-							Locale.ROOT,
-							"§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-							127,
-							minecraftServer.getServerVersion(),
-							minecraftServer.getMotd(),
-							minecraftServer.getPlayerCount(),
-							minecraftServer.getMaxPlayers()
-						);
-						ByteBuf byteBuf2 = this.createReply(string2);
-
-						try {
-							this.sendFlushAndClose(channelHandlerContext, byteBuf2);
-						} finally {
-							byteBuf2.release();
-						}
+					String string = createVersion1Response(this.server);
+					sendFlushAndClose(channelHandlerContext, createLegacyDisconnectPacket(channelHandlerContext.alloc(), string));
 				}
 
 				byteBuf.release();
 				bl = false;
-			} catch (RuntimeException var21) {
+			} catch (RuntimeException var11) {
 			}
 		} finally {
 			if (bl) {
 				byteBuf.resetReaderIndex();
-				channelHandlerContext.channel().pipeline().remove("legacy_query");
+				channelHandlerContext.channel().pipeline().remove(this);
 				channelHandlerContext.fireChannelRead(object);
 			}
 		}
 	}
 
-	private void sendFlushAndClose(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) {
+	private static boolean readCustomPayloadPacket(ByteBuf byteBuf) {
+		short s = byteBuf.readUnsignedByte();
+		if (s != 250) {
+			return false;
+		} else {
+			String string = LegacyProtocolUtils.readLegacyString(byteBuf);
+			if (!"MC|PingHost".equals(string)) {
+				return false;
+			} else {
+				int i = byteBuf.readUnsignedShort();
+				if (byteBuf.readableBytes() != i) {
+					return false;
+				} else {
+					short t = byteBuf.readUnsignedByte();
+					if (t < 73) {
+						return false;
+					} else {
+						String string2 = LegacyProtocolUtils.readLegacyString(byteBuf);
+						int j = byteBuf.readInt();
+						return j <= 65535;
+					}
+				}
+			}
+		}
+	}
+
+	private static String createVersion0Response(ServerInfo serverInfo) {
+		return String.format(Locale.ROOT, "%s§%d§%d", serverInfo.getMotd(), serverInfo.getPlayerCount(), serverInfo.getMaxPlayers());
+	}
+
+	private static String createVersion1Response(ServerInfo serverInfo) {
+		return String.format(
+			Locale.ROOT,
+			"§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
+			127,
+			serverInfo.getServerVersion(),
+			serverInfo.getMotd(),
+			serverInfo.getPlayerCount(),
+			serverInfo.getMaxPlayers()
+		);
+	}
+
+	private static void sendFlushAndClose(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) {
 		channelHandlerContext.pipeline().firstContext().writeAndFlush(byteBuf).addListener(ChannelFutureListener.CLOSE);
 	}
 
-	private ByteBuf createReply(String string) {
-		ByteBuf byteBuf = Unpooled.buffer();
+	private static ByteBuf createLegacyDisconnectPacket(ByteBufAllocator byteBufAllocator, String string) {
+		ByteBuf byteBuf = byteBufAllocator.buffer();
 		byteBuf.writeByte(255);
-		char[] cs = string.toCharArray();
-		byteBuf.writeShort(cs.length);
-
-		for (char c : cs) {
-			byteBuf.writeChar(c);
-		}
-
+		LegacyProtocolUtils.writeLegacyString(byteBuf, string);
 		return byteBuf;
 	}
 }

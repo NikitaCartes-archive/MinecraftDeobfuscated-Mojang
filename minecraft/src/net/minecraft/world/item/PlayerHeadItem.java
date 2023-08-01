@@ -1,10 +1,7 @@
 package net.minecraft.world.item;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -41,9 +38,6 @@ public class PlayerHeadItem extends StandingAndWallBlockItem {
 	@Override
 	public void verifyTagAfterLoad(CompoundTag compoundTag) {
 		super.verifyTagAfterLoad(compoundTag);
-		if (compoundTag.contains("SkullOwner", 8) && !Util.isBlank(compoundTag.getString("SkullOwner"))) {
-			GameProfile gameProfile = new GameProfile(null, compoundTag.getString("SkullOwner"));
-			SkullBlockEntity.updateGameprofile(gameProfile, gameProfilex -> compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfilex)));
-		}
+		SkullBlockEntity.resolveGameProfile(compoundTag);
 	}
 }

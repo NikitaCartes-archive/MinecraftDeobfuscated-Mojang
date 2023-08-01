@@ -48,7 +48,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	@Nullable
 	private E selected;
 	private boolean renderBackground = true;
-	private boolean renderTopAndBottom = true;
 	@Nullable
 	private E hovered;
 
@@ -94,10 +93,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 	public void setRenderBackground(boolean bl) {
 		this.renderBackground = bl;
-	}
-
-	public void setRenderTopAndBottom(boolean bl) {
-		this.renderTopAndBottom = bl;
 	}
 
 	@Nullable
@@ -187,15 +182,11 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	protected void renderHeader(GuiGraphics guiGraphics, int i, int j) {
 	}
 
-	protected void renderBackground(GuiGraphics guiGraphics) {
-	}
-
 	protected void renderDecorations(GuiGraphics guiGraphics, int i, int j) {
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		int k = this.getScrollbarPosition();
 		int l = k + 6;
 		this.hovered = this.isMouseOver((double)i, (double)j) ? this.getEntryAtPosition((double)i, (double)j) : null;
@@ -206,6 +197,9 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				Screen.BACKGROUND_LOCATION, this.x0, this.y0, (float)this.x1, (float)(this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32
 			);
 			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+			int n = 4;
+			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0, 0);
+			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216, 0);
 		}
 
 		int m = this.getRowLeft();
@@ -217,17 +211,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 		this.renderList(guiGraphics, i, j, f);
 		guiGraphics.disableScissor();
-		if (this.renderTopAndBottom) {
-			int o = 32;
-			guiGraphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
-			guiGraphics.blit(Screen.BACKGROUND_LOCATION, this.x0, 0, 0.0F, 0.0F, this.width, this.y0, 32, 32);
-			guiGraphics.blit(Screen.BACKGROUND_LOCATION, this.x0, this.y1, 0.0F, (float)this.y1, this.width, this.height - this.y1, 32, 32);
-			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-			int p = 4;
-			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0, 0);
-			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216, 0);
-		}
-
 		int o = this.getMaxScroll();
 		if (o > 0) {
 			int p = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
@@ -355,8 +338,8 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
-		this.setScrollAmount(this.getScrollAmount() - f * (double)this.itemHeight / 2.0);
+	public boolean mouseScrolled(double d, double e, double f, double g) {
+		this.setScrollAmount(this.getScrollAmount() - g * (double)this.itemHeight / 2.0);
 		return true;
 	}
 

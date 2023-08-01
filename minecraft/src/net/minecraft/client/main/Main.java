@@ -10,6 +10,7 @@ import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.logging.LogUtils;
+import com.mojang.util.UndashedUuid;
 import java.io.File;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
@@ -19,6 +20,7 @@ import java.net.Proxy.Type;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
@@ -94,7 +96,7 @@ public class Main {
 		OptionSet optionSet = optionParser.parse(strings);
 		List<String> list = optionSet.valuesOf(optionSpec28);
 		if (!list.isEmpty()) {
-			System.out.println("Completely ignored arguments: " + list);
+			LOGGER.info("Completely ignored arguments: " + list);
 		}
 
 		String string = parseArgument(optionSet, optionSpec9);
@@ -132,14 +134,16 @@ public class Main {
 		File file = parseArgument(optionSet, optionSpec6);
 		File file2 = optionSet.has(optionSpec7) ? parseArgument(optionSet, optionSpec7) : new File(file, "assets/");
 		File file3 = optionSet.has(optionSpec8) ? parseArgument(optionSet, optionSpec8) : new File(file, "resourcepacks/");
-		String string6 = optionSet.has(optionSpec14) ? optionSpec14.value(optionSet) : UUIDUtil.createOfflinePlayerUUID(optionSpec13.value(optionSet)).toString();
-		String string7 = optionSet.has(optionSpec25) ? optionSpec25.value(optionSet) : null;
-		String string8 = optionSet.valueOf(optionSpec15);
-		String string9 = optionSet.valueOf(optionSpec16);
-		String string10 = parseArgument(optionSet, optionSpec2);
-		String string11 = parseArgument(optionSet, optionSpec3);
-		String string12 = parseArgument(optionSet, optionSpec4);
-		String string13 = parseArgument(optionSet, optionSpec5);
+		UUID uUID = optionSet.has(optionSpec14)
+			? UndashedUuid.fromStringLenient(optionSpec14.value(optionSet))
+			: UUIDUtil.createOfflinePlayerUUID(optionSpec13.value(optionSet));
+		String string6 = optionSet.has(optionSpec25) ? optionSpec25.value(optionSet) : null;
+		String string7 = optionSet.valueOf(optionSpec15);
+		String string8 = optionSet.valueOf(optionSpec16);
+		String string9 = parseArgument(optionSet, optionSpec2);
+		String string10 = parseArgument(optionSet, optionSpec3);
+		String string11 = parseArgument(optionSet, optionSpec4);
+		String string12 = parseArgument(optionSet, optionSpec5);
 		if (optionSet.has(optionSpec)) {
 			JvmProfiler.INSTANCE.start(net.minecraft.util.profiling.jfr.Environment.CLIENT);
 		}
@@ -149,21 +153,21 @@ public class Main {
 		GameLoadTimesEvent.INSTANCE.setBootstrapTime(Bootstrap.bootstrapDuration.get());
 		Bootstrap.validate();
 		Util.startTimerHackThread();
-		String string14 = optionSpec26.value(optionSet);
-		User.Type type = User.Type.byName(string14);
+		String string13 = optionSpec26.value(optionSet);
+		User.Type type = User.Type.byName(string13);
 		if (type == null) {
-			LOGGER.warn("Unrecognized user type: {}", string14);
+			LOGGER.warn("Unrecognized user type: {}", string13);
 		}
 
 		User user = new User(
-			optionSpec13.value(optionSet), string6, optionSpec17.value(optionSet), emptyStringToEmptyOptional(string8), emptyStringToEmptyOptional(string9), type
+			optionSpec13.value(optionSet), uUID, optionSpec17.value(optionSet), emptyStringToEmptyOptional(string7), emptyStringToEmptyOptional(string8), type
 		);
 		GameConfig gameConfig = new GameConfig(
 			new GameConfig.UserData(user, propertyMap, propertyMap2, proxy),
 			new DisplayData(i, j, optionalInt, optionalInt2, bl),
-			new GameConfig.FolderData(file, file3, file2, string7),
+			new GameConfig.FolderData(file, file3, file2, string6),
 			new GameConfig.GameData(bl2, string4, string5, bl3, bl4),
-			new GameConfig.QuickPlayData(string10, string11, string12, string13)
+			new GameConfig.QuickPlayData(string9, string10, string11, string12)
 		);
 		Thread thread = new Thread("Client Shutdown Thread") {
 			public void run() {

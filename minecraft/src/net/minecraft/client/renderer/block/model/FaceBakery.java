@@ -156,8 +156,8 @@ public class FaceBakery {
 		is[j + 1] = Float.floatToRawIntBits(vector3f.y());
 		is[j + 2] = Float.floatToRawIntBits(vector3f.z());
 		is[j + 3] = -1;
-		is[j + 4] = Float.floatToRawIntBits(textureAtlasSprite.getU((double)blockFaceUV.getU(i)));
-		is[j + 4 + 1] = Float.floatToRawIntBits(textureAtlasSprite.getV((double)blockFaceUV.getV(i)));
+		is[j + 4] = Float.floatToRawIntBits(textureAtlasSprite.getU(blockFaceUV.getU(i) / 16.0F));
+		is[j + 4 + 1] = Float.floatToRawIntBits(textureAtlasSprite.getV(blockFaceUV.getV(i) / 16.0F));
 	}
 
 	private void applyElementRotation(Vector3f vector3f, @Nullable BlockElementRotation blockElementRotation) {

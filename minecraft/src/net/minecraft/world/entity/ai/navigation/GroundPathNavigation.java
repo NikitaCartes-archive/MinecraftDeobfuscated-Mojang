@@ -30,7 +30,7 @@ public class GroundPathNavigation extends PathNavigation {
 
 	@Override
 	protected boolean canUpdatePath() {
-		return this.mob.onGround() || this.isInLiquid() || this.mob.isPassenger();
+		return this.mob.onGround() || this.mob.isInLiquid() || this.mob.isPassenger();
 	}
 
 	@Override

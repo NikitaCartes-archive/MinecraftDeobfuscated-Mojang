@@ -42,15 +42,6 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 		super(properties);
 	}
 
-	private boolean isMaxAge(BlockState blockState) {
-		return (Integer)blockState.getValue(AGE) >= 4;
-	}
-
-	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
-		return blockState.getValue(HALF) == DoubleBlockHalf.LOWER && !this.isMaxAge(blockState);
-	}
-
 	@Nullable
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
@@ -58,10 +49,10 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	}
 
 	@Override
-	public BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
-	) {
-		return !blockState.canSurvive(levelAccessor, blockPos) ? Blocks.AIR.defaultBlockState() : blockState;
+	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return blockState.getValue(HALF) == DoubleBlockHalf.UPPER
+			? UPPER_SHAPE_BY_AGE[Math.min(Math.abs(4 - ((Integer)blockState.getValue(AGE) + 1)), UPPER_SHAPE_BY_AGE.length - 1)]
+			: LOWER_SHAPE_BY_AGE[blockState.getValue(AGE)];
 	}
 
 	@Override
@@ -76,12 +67,19 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	}
 
 	@Override
+	public BlockState updateShape(
+		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+	) {
+		if (isDouble((Integer)blockState.getValue(AGE))) {
+			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		} else {
+			return blockState.canSurvive(levelAccessor, blockPos) ? blockState : Blocks.AIR.defaultBlockState();
+		}
+	}
+
+	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return !isLower(blockState)
-			? super.canSurvive(blockState, levelReader, blockPos)
-			: this.mayPlaceOn(levelReader.getBlockState(blockPos.below()), levelReader, blockPos.below())
-				&& sufficientLight(levelReader, blockPos)
-				&& ((Integer)blockState.getValue(AGE) < 3 || isUpper(levelReader.getBlockState(blockPos.above())));
+		return isLower(blockState) && !sufficientLight(levelReader, blockPos) ? false : super.canSurvive(blockState, levelReader, blockPos);
 	}
 
 	@Override
@@ -93,13 +91,6 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(AGE);
 		super.createBlockStateDefinition(builder);
-	}
-
-	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		return blockState.getValue(HALF) == DoubleBlockHalf.UPPER
-			? UPPER_SHAPE_BY_AGE[Math.min(Math.abs(4 - ((Integer)blockState.getValue(AGE) + 1)), UPPER_SHAPE_BY_AGE.length - 1)]
-			: LOWER_SHAPE_BY_AGE[blockState.getValue(AGE)];
 	}
 
 	@Override
@@ -121,6 +112,11 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	}
 
 	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return blockState.getValue(HALF) == DoubleBlockHalf.LOWER && !this.isMaxAge(blockState);
+	}
+
+	@Override
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		float f = CropBlock.getGrowthSpeed(this, serverLevel, blockPos);
 		boolean bl = randomSource.nextInt((int)(25.0F / f) + 1) == 0;
@@ -132,12 +128,10 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	private void grow(ServerLevel serverLevel, BlockState blockState, BlockPos blockPos, int i) {
 		int j = Math.min((Integer)blockState.getValue(AGE) + i, 4);
 		if (this.canGrow(serverLevel, blockPos, blockState, j)) {
-			serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(j)), 2);
-			if (j >= 3) {
-				BlockPos blockPos2 = blockPos.above();
-				serverLevel.setBlock(
-					blockPos2, copyWaterloggedFrom(serverLevel, blockPos, this.defaultBlockState().setValue(AGE, Integer.valueOf(j)).setValue(HALF, DoubleBlockHalf.UPPER)), 3
-				);
+			BlockState blockState2 = blockState.setValue(AGE, Integer.valueOf(j));
+			serverLevel.setBlock(blockPos, blockState2, 2);
+			if (isDouble(j)) {
+				serverLevel.setBlock(blockPos.above(), blockState2.setValue(HALF, DoubleBlockHalf.UPPER), 3);
 			}
 		}
 	}
@@ -148,19 +142,23 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	}
 
 	private static boolean sufficientLight(LevelReader levelReader, BlockPos blockPos) {
-		return levelReader.getRawBrightness(blockPos, 0) >= 8 || levelReader.canSeeSky(blockPos);
+		return CropBlock.hasSufficientLight(levelReader, blockPos);
 	}
 
 	private static boolean isLower(BlockState blockState) {
 		return blockState.is(Blocks.PITCHER_CROP) && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
 	}
 
-	private static boolean isUpper(BlockState blockState) {
-		return blockState.is(Blocks.PITCHER_CROP) && blockState.getValue(HALF) == DoubleBlockHalf.UPPER;
+	private static boolean isDouble(int i) {
+		return i >= 3;
 	}
 
 	private boolean canGrow(LevelReader levelReader, BlockPos blockPos, BlockState blockState, int i) {
-		return !this.isMaxAge(blockState) && sufficientLight(levelReader, blockPos) && (i < 3 || canGrowInto(levelReader, blockPos.above()));
+		return !this.isMaxAge(blockState) && sufficientLight(levelReader, blockPos) && (!isDouble(i) || canGrowInto(levelReader, blockPos.above()));
+	}
+
+	private boolean isMaxAge(BlockState blockState) {
+		return (Integer)blockState.getValue(AGE) >= 4;
 	}
 
 	@Nullable
@@ -175,7 +173,7 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	}
 
 	@Override
-	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
+	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		PitcherCropBlock.PosAndState posAndState = this.getLowerHalf(levelReader, blockPos, blockState);
 		return posAndState == null ? false : this.canGrow(levelReader, posAndState.pos, posAndState.state, (Integer)posAndState.state.getValue(AGE) + 1);
 	}

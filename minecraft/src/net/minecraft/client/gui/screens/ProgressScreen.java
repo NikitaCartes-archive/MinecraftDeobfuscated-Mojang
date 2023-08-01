@@ -67,7 +67,7 @@ public class ProgressScreen extends Screen implements ProgressListener {
 				this.minecraft.setScreen(null);
 			}
 		} else {
-			this.renderBackground(guiGraphics);
+			super.render(guiGraphics, i, j, f);
 			if (this.header != null) {
 				guiGraphics.drawCenteredString(this.font, this.header, this.width / 2, 70, 16777215);
 			}
@@ -75,8 +75,6 @@ public class ProgressScreen extends Screen implements ProgressListener {
 			if (this.stage != null && this.progress != 0) {
 				guiGraphics.drawCenteredString(this.font, Component.empty().append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 16777215);
 			}
-
-			super.render(guiGraphics, i, j, f);
 		}
 	}
 }

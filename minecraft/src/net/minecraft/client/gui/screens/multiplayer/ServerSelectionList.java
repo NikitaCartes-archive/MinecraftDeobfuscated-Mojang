@@ -37,6 +37,24 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList.Entry> {
+	static final ResourceLocation INCOMPATIBLE_SPRITE = new ResourceLocation("server_list/incompatible");
+	static final ResourceLocation UNREACHABLE_SPRITE = new ResourceLocation("server_list/unreachable");
+	static final ResourceLocation PING_1_SPRITE = new ResourceLocation("server_list/ping_1");
+	static final ResourceLocation PING_2_SPRITE = new ResourceLocation("server_list/ping_2");
+	static final ResourceLocation PING_3_SPRITE = new ResourceLocation("server_list/ping_3");
+	static final ResourceLocation PING_4_SPRITE = new ResourceLocation("server_list/ping_4");
+	static final ResourceLocation PING_5_SPRITE = new ResourceLocation("server_list/ping_5");
+	static final ResourceLocation PINGING_1_SPRITE = new ResourceLocation("server_list/pinging_1");
+	static final ResourceLocation PINGING_2_SPRITE = new ResourceLocation("server_list/pinging_2");
+	static final ResourceLocation PINGING_3_SPRITE = new ResourceLocation("server_list/pinging_3");
+	static final ResourceLocation PINGING_4_SPRITE = new ResourceLocation("server_list/pinging_4");
+	static final ResourceLocation PINGING_5_SPRITE = new ResourceLocation("server_list/pinging_5");
+	static final ResourceLocation JOIN_HIGHLIGHTED_SPRITE = new ResourceLocation("server_list/join_highlighted");
+	static final ResourceLocation JOIN_SPRITE = new ResourceLocation("server_list/join");
+	static final ResourceLocation MOVE_UP_HIGHLIGHTED_SPRITE = new ResourceLocation("server_list/move_up_highlighted");
+	static final ResourceLocation MOVE_UP_SPRITE = new ResourceLocation("server_list/move_up");
+	static final ResourceLocation MOVE_DOWN_HIGHLIGHTED_SPRITE = new ResourceLocation("server_list/move_down_highlighted");
+	static final ResourceLocation MOVE_DOWN_SPRITE = new ResourceLocation("server_list/move_down");
 	static final Logger LOGGER = LogUtils.getLogger();
 	static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(
 		5,
@@ -47,8 +65,6 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			.build()
 	);
 	private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
-	static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
-	static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
 	static final Component SCANNING_LABEL = Component.translatable("lanServer.scanning");
 	static final Component CANT_RESOLVE_TEXT = Component.translatable("multiplayer.status.cannot_resolve").withStyle(style -> style.withColor(-65536));
 	static final Component CANT_CONNECT_TEXT = Component.translatable("multiplayer.status.cannot_connect").withStyle(style -> style.withColor(-65536));
@@ -150,7 +166,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				false
 			);
 			String string = LoadingDotsText.get(Util.getMillis());
-			guiGraphics.drawString(this.minecraft.font, string, this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2, p + 9, 8421504, false);
+			guiGraphics.drawString(this.minecraft.font, string, this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2, p + 9, -8355712, false);
 		}
 
 		@Override
@@ -178,7 +194,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			guiGraphics.drawString(this.minecraft.font, LAN_SERVER_HEADER, k + 32 + 3, j + 1, 16777215, false);
-			guiGraphics.drawString(this.minecraft.font, this.serverData.getMotd(), k + 32 + 3, j + 12, 8421504, false);
+			guiGraphics.drawString(this.minecraft.font, this.serverData.getMotd(), k + 32 + 3, j + 12, -8355712, false);
 			if (this.minecraft.options.hideServerAddress) {
 				guiGraphics.drawString(this.minecraft.font, HIDDEN_ADDRESS_TEXT, k + 32 + 3, j + 12 + 11, 3158064, false);
 			} else {
@@ -215,12 +231,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	public class OnlineServerEntry extends ServerSelectionList.Entry {
 		private static final int ICON_WIDTH = 32;
 		private static final int ICON_HEIGHT = 32;
-		private static final int ICON_OVERLAY_X_MOVE_RIGHT = 0;
 		private static final int ICON_OVERLAY_X_MOVE_LEFT = 32;
-		private static final int ICON_OVERLAY_X_MOVE_DOWN = 64;
-		private static final int ICON_OVERLAY_X_MOVE_UP = 96;
-		private static final int ICON_OVERLAY_Y_UNSELECTED = 0;
-		private static final int ICON_OVERLAY_Y_SELECTED = 32;
 		private final JoinMultiplayerScreen screen;
 		private final Minecraft minecraft;
 		private final ServerData serverData;
@@ -261,33 +272,32 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			List<FormattedCharSequence> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
 
 			for (int p = 0; p < Math.min(list.size(), 2); p++) {
-				guiGraphics.drawString(this.minecraft.font, (FormattedCharSequence)list.get(p), k + 32 + 3, j + 12 + 9 * p, 8421504, false);
+				guiGraphics.drawString(this.minecraft.font, (FormattedCharSequence)list.get(p), k + 32 + 3, j + 12 + 9 * p, -8355712, false);
 			}
 
 			Component component = (Component)(bl2 ? this.serverData.version.copy().withStyle(ChatFormatting.RED) : this.serverData.status);
 			int q = this.minecraft.font.width(component);
-			guiGraphics.drawString(this.minecraft.font, component, k + l - q - 15 - 2, j + 1, 8421504, false);
-			int r = 0;
-			int s;
+			guiGraphics.drawString(this.minecraft.font, component, k + l - q - 15 - 2, j + 1, -8355712, false);
+			ResourceLocation resourceLocation;
 			List<Component> list2;
 			Component component2;
 			if (bl2) {
-				s = 5;
+				resourceLocation = ServerSelectionList.INCOMPATIBLE_SPRITE;
 				component2 = ServerSelectionList.INCOMPATIBLE_STATUS;
 				list2 = this.serverData.playerList;
 			} else if (this.pingCompleted()) {
 				if (this.serverData.ping < 0L) {
-					s = 5;
+					resourceLocation = ServerSelectionList.UNREACHABLE_SPRITE;
 				} else if (this.serverData.ping < 150L) {
-					s = 0;
+					resourceLocation = ServerSelectionList.PING_5_SPRITE;
 				} else if (this.serverData.ping < 300L) {
-					s = 1;
+					resourceLocation = ServerSelectionList.PING_4_SPRITE;
 				} else if (this.serverData.ping < 600L) {
-					s = 2;
+					resourceLocation = ServerSelectionList.PING_3_SPRITE;
 				} else if (this.serverData.ping < 1000L) {
-					s = 3;
+					resourceLocation = ServerSelectionList.PING_2_SPRITE;
 				} else {
-					s = 4;
+					resourceLocation = ServerSelectionList.PING_1_SPRITE;
 				}
 
 				if (this.serverData.ping < 0L) {
@@ -298,17 +308,22 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 					list2 = this.serverData.playerList;
 				}
 			} else {
-				r = 1;
-				s = (int)(Util.getMillis() / 100L + (long)(i * 2) & 7L);
-				if (s > 4) {
-					s = 8 - s;
+				int r = (int)(Util.getMillis() / 100L + (long)(i * 2) & 7L);
+				if (r > 4) {
+					r = 8 - r;
 				}
-
+				resourceLocation = switch (r) {
+					case 1 -> ServerSelectionList.PINGING_2_SPRITE;
+					case 2 -> ServerSelectionList.PINGING_3_SPRITE;
+					case 3 -> ServerSelectionList.PINGING_4_SPRITE;
+					case 4 -> ServerSelectionList.PINGING_5_SPRITE;
+					default -> ServerSelectionList.PINGING_1_SPRITE;
+				};
 				component2 = ServerSelectionList.PINGING_STATUS;
 				list2 = Collections.emptyList();
 			}
 
-			guiGraphics.blit(ServerSelectionList.GUI_ICONS_LOCATION, k + l - 15, j, (float)(r * 10), (float)(176 + s * 8), 10, 8, 256, 256);
+			guiGraphics.blitSprite(resourceLocation, k + l - 15, j, 10, 8);
 			byte[] bs = this.serverData.getIconBytes();
 			if (!Arrays.equals(bs, this.lastIconBytes)) {
 				if (this.uploadServerIcon(bs)) {
@@ -320,39 +335,39 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			this.drawIcon(guiGraphics, k, j, this.icon.textureLocation());
-			int t = n - k;
-			int u = o - j;
-			if (t >= l - 15 && t <= l - 5 && u >= 0 && u <= 8) {
+			int s = n - k;
+			int t = o - j;
+			if (s >= l - 15 && s <= l - 5 && t >= 0 && t <= 8) {
 				this.screen.setToolTip(Collections.singletonList(component2));
-			} else if (t >= l - q - 15 - 2 && t <= l - 15 - 2 && u >= 0 && u <= 8) {
+			} else if (s >= l - q - 15 - 2 && s <= l - 15 - 2 && t >= 0 && t <= 8) {
 				this.screen.setToolTip(list2);
 			}
 
 			if (this.minecraft.options.touchscreen().get() || bl) {
 				guiGraphics.fill(k, j, k + 32, j + 32, -1601138544);
-				int v = n - k;
-				int w = o - j;
+				int u = n - k;
+				int v = o - j;
 				if (this.canJoin()) {
-					if (v < 32 && v > 16) {
-						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, 32.0F, 32, 32, 256, 256);
+					if (u < 32 && u > 16) {
+						guiGraphics.blitSprite(ServerSelectionList.JOIN_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
-						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 0.0F, 0.0F, 32, 32, 256, 256);
+						guiGraphics.blitSprite(ServerSelectionList.JOIN_SPRITE, k, j, 32, 32);
 					}
 				}
 
 				if (i > 0) {
-					if (v < 16 && w < 16) {
-						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, 32.0F, 32, 32, 256, 256);
+					if (u < 16 && v < 16) {
+						guiGraphics.blitSprite(ServerSelectionList.MOVE_UP_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
-						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 96.0F, 0.0F, 32, 32, 256, 256);
+						guiGraphics.blitSprite(ServerSelectionList.MOVE_UP_SPRITE, k, j, 32, 32);
 					}
 				}
 
 				if (i < this.screen.getServers().size() - 1) {
-					if (v < 16 && w > 16) {
-						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, 32.0F, 32, 32, 256, 256);
+					if (u < 16 && v > 16) {
+						guiGraphics.blitSprite(ServerSelectionList.MOVE_DOWN_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
-						guiGraphics.blit(ServerSelectionList.ICON_OVERLAY_LOCATION, k, j, 64.0F, 0.0F, 32, 32, 256, 256);
+						guiGraphics.blitSprite(ServerSelectionList.MOVE_DOWN_SPRITE, k, j, 32, 32);
 					}
 				}
 			}

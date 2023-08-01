@@ -18,6 +18,7 @@ import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.FunctionInstantiationException;
 import net.minecraft.commands.arguments.item.FunctionArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -95,25 +96,30 @@ public class DebugCommand {
 				for (CommandFunction commandFunction : collection) {
 					printWriter.println(commandFunction.getId());
 					DebugCommand.Tracer tracer = new DebugCommand.Tracer(printWriter);
-					i += commandSourceStack.getServer().getFunctions().execute(commandFunction, commandSourceStack.withSource(tracer).withMaximumPermission(2), tracer);
+
+					try {
+						i += commandSourceStack.getServer().getFunctions().execute(commandFunction, commandSourceStack.withSource(tracer).withMaximumPermission(2), tracer, null);
+					} catch (FunctionInstantiationException var13) {
+						commandSourceStack.sendFailure(var13.messageComponent());
+					}
 				}
-			} catch (Throwable var12) {
+			} catch (Throwable var14) {
 				if (writer != null) {
 					try {
 						writer.close();
-					} catch (Throwable var11) {
-						var12.addSuppressed(var11);
+					} catch (Throwable var12) {
+						var14.addSuppressed(var12);
 					}
 				}
 
-				throw var12;
+				throw var14;
 			}
 
 			if (writer != null) {
 				writer.close();
 			}
-		} catch (IOException | UncheckedIOException var13) {
-			LOGGER.warn("Tracing failed", (Throwable)var13);
+		} catch (IOException | UncheckedIOException var15) {
+			LOGGER.warn("Tracing failed", (Throwable)var15);
 			commandSourceStack.sendFailure(Component.translatable("commands.debug.function.traceFailed"));
 		}
 

@@ -19,6 +19,7 @@ import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -49,6 +50,12 @@ public class MapItemSavedData extends SavedData {
 	final Map<String, MapDecoration> decorations = Maps.<String, MapDecoration>newLinkedHashMap();
 	private final Map<String, MapFrame> frameMarkers = Maps.<String, MapFrame>newHashMap();
 	private int trackedDecorationCount;
+
+	public static SavedData.Factory<MapItemSavedData> factory() {
+		return new SavedData.Factory<>(() -> {
+			throw new IllegalStateException("Should never create an empty map saved data");
+		}, MapItemSavedData::load, DataFixTypes.SAVED_DATA_MAP_DATA);
+	}
 
 	private MapItemSavedData(int i, int j, byte b, boolean bl, boolean bl2, boolean bl3, ResourceKey<Level> resourceKey) {
 		this.scale = b;

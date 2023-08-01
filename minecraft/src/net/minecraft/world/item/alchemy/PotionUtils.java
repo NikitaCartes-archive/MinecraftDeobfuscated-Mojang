@@ -15,6 +15,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.AttributeModifierTemplate;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -163,14 +164,10 @@ public class PotionUtils {
 			for (MobEffectInstance mobEffectInstance : list) {
 				MutableComponent mutableComponent = Component.translatable(mobEffectInstance.getDescriptionId());
 				MobEffect mobEffect = mobEffectInstance.getEffect();
-				Map<Attribute, AttributeModifier> map = mobEffect.getAttributeModifiers();
+				Map<Attribute, AttributeModifierTemplate> map = mobEffect.getAttributeModifiers();
 				if (!map.isEmpty()) {
-					for (Entry<Attribute, AttributeModifier> entry : map.entrySet()) {
-						AttributeModifier attributeModifier = (AttributeModifier)entry.getValue();
-						AttributeModifier attributeModifier2 = new AttributeModifier(
-							attributeModifier.getName(), mobEffect.getAttributeModifierValue(mobEffectInstance.getAmplifier(), attributeModifier), attributeModifier.getOperation()
-						);
-						list3.add(new Pair<>((Attribute)entry.getKey(), attributeModifier2));
+					for (Entry<Attribute, AttributeModifierTemplate> entry : map.entrySet()) {
+						list3.add(new Pair<>((Attribute)entry.getKey(), ((AttributeModifierTemplate)entry.getValue()).create(mobEffectInstance.getAmplifier())));
 					}
 				}
 
@@ -193,20 +190,20 @@ public class PotionUtils {
 			list2.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
 
 			for (Pair<Attribute, AttributeModifier> pair : list3) {
-				AttributeModifier attributeModifier3 = pair.getSecond();
-				double d = attributeModifier3.getAmount();
+				AttributeModifier attributeModifier = pair.getSecond();
+				double d = attributeModifier.getAmount();
 				double e;
-				if (attributeModifier3.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE
-					&& attributeModifier3.getOperation() != AttributeModifier.Operation.MULTIPLY_TOTAL) {
-					e = attributeModifier3.getAmount();
+				if (attributeModifier.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE
+					&& attributeModifier.getOperation() != AttributeModifier.Operation.MULTIPLY_TOTAL) {
+					e = attributeModifier.getAmount();
 				} else {
-					e = attributeModifier3.getAmount() * 100.0;
+					e = attributeModifier.getAmount() * 100.0;
 				}
 
 				if (d > 0.0) {
 					list2.add(
 						Component.translatable(
-								"attribute.modifier.plus." + attributeModifier3.getOperation().toValue(),
+								"attribute.modifier.plus." + attributeModifier.getOperation().toValue(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 								Component.translatable(pair.getFirst().getDescriptionId())
 							)
@@ -216,7 +213,7 @@ public class PotionUtils {
 					e *= -1.0;
 					list2.add(
 						Component.translatable(
-								"attribute.modifier.take." + attributeModifier3.getOperation().toValue(),
+								"attribute.modifier.take." + attributeModifier.getOperation().toValue(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 								Component.translatable(pair.getFirst().getDescriptionId())
 							)

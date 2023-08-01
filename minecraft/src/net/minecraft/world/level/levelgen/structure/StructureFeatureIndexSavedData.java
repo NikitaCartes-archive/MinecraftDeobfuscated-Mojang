@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.structure;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class StructureFeatureIndexSavedData extends SavedData {
@@ -10,6 +11,10 @@ public class StructureFeatureIndexSavedData extends SavedData {
 	private static final String TAG_All_INDEXES = "All";
 	private final LongSet all;
 	private final LongSet remaining;
+
+	public static SavedData.Factory<StructureFeatureIndexSavedData> factory() {
+		return new SavedData.Factory<>(StructureFeatureIndexSavedData::new, StructureFeatureIndexSavedData::load, DataFixTypes.SAVED_DATA_STRUCTURE_FEATURE_INDICES);
+	}
 
 	private StructureFeatureIndexSavedData(LongSet longSet, LongSet longSet2) {
 		this.all = longSet;

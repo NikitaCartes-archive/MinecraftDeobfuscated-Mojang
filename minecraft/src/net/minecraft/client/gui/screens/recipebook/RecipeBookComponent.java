@@ -18,6 +18,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -39,6 +40,15 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable, GuiEventListener, NarratableEntry, RecipeShownListener {
+	public static final WidgetSprites RECIPE_BUTTON_SPRITES = new WidgetSprites(
+		new ResourceLocation("recipe_book/button"), new ResourceLocation("recipe_book/button_highlighted")
+	);
+	private static final WidgetSprites FILTER_BUTTON_SPRITES = new WidgetSprites(
+		new ResourceLocation("recipe_book/filter_enabled"),
+		new ResourceLocation("recipe_book/filter_disabled"),
+		new ResourceLocation("recipe_book/filter_enabled_highlighted"),
+		new ResourceLocation("recipe_book/filter_disabled_highlighted")
+	);
 	protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
 	private static final Component SEARCH_HINT = Component.translatable("gui.recipebook.search_hint")
 		.withStyle(ChatFormatting.ITALIC)
@@ -131,7 +141,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 	}
 
 	protected void initFilterButtonTextures() {
-		this.filterButton.initTextureValues(152, 41, 28, 18, RECIPE_BOOK_LOCATION);
+		this.filterButton.initTextureValues(FILTER_BUTTON_SPRITES);
 	}
 
 	public int updateScreenPosition(int i, int j) {
@@ -230,8 +240,6 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 				this.updateStackedContents();
 				this.timesInventoryChanged = this.minecraft.player.getInventory().getTimesChanged();
 			}
-
-			this.searchBox.tick();
 		}
 	}
 

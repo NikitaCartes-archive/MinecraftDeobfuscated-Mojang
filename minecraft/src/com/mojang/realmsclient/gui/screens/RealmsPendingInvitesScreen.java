@@ -1,18 +1,19 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.PendingInvite;
 import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import com.mojang.realmsclient.gui.RowButton;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -26,16 +27,25 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsPendingInvitesScreen extends RealmsScreen {
-	static final Logger LOGGER = LogUtils.getLogger();
-	static final ResourceLocation ACCEPT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/accept_icon.png");
-	static final ResourceLocation REJECT_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/reject_icon.png");
+	static final ResourceLocation ACCEPT_HIGHLIGHTED_SPRITE = new ResourceLocation("pending_invite/accept_highlighted");
+	static final ResourceLocation ACCEPT_SPRITE = new ResourceLocation("pending_invite/accept");
+	static final ResourceLocation REJECT_HIGHLIGHTED_SPRITE = new ResourceLocation("pending_invite/reject_highlighted");
+	static final ResourceLocation REJECT_SPRITE = new ResourceLocation("pending_invite/reject");
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component NO_PENDING_INVITES_TEXT = Component.translatable("mco.invites.nopending");
 	static final Component ACCEPT_INVITE_TOOLTIP = Component.translatable("mco.invites.button.accept");
 	static final Component REJECT_INVITE_TOOLTIP = Component.translatable("mco.invites.button.reject");
 	private final Screen lastScreen;
+	private final CompletableFuture<List<PendingInvite>> pendingInvites = CompletableFuture.supplyAsync(() -> {
+		try {
+			return RealmsClient.create().pendingInvites().pendingInvites;
+		} catch (RealmsServiceException var1) {
+			LOGGER.error("Couldn't list invites", (Throwable)var1);
+			return List.of();
+		}
+	}, Util.ioPool());
 	@Nullable
 	Component toolTip;
-	boolean loaded;
 	RealmsPendingInvitesScreen.PendingInvitationSelectionList pendingInvitationSelectionList;
 	int selectedInvite = -1;
 	private Button acceptButton;
@@ -49,37 +59,19 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.pendingInvitationSelectionList = new RealmsPendingInvitesScreen.PendingInvitationSelectionList();
-		(new Thread("Realms-pending-invitations-fetcher") {
-				public void run() {
-					RealmsClient realmsClient = RealmsClient.create();
-
-					try {
-						List<PendingInvite> list = realmsClient.pendingInvites().pendingInvites;
-						List<RealmsPendingInvitesScreen.Entry> list2 = (List<RealmsPendingInvitesScreen.Entry>)list.stream()
-							.map(pendingInvite -> RealmsPendingInvitesScreen.this.new Entry(pendingInvite))
-							.collect(Collectors.toList());
-						RealmsPendingInvitesScreen.this.minecraft.execute(() -> RealmsPendingInvitesScreen.this.pendingInvitationSelectionList.replaceEntries(list2));
-					} catch (RealmsServiceException var7) {
-						RealmsPendingInvitesScreen.LOGGER.error("Couldn't list invites");
-					} finally {
-						RealmsPendingInvitesScreen.this.loaded = true;
-					}
-				}
-			})
-			.start();
+		this.pendingInvites.thenAcceptAsync(list -> {
+			List<RealmsPendingInvitesScreen.Entry> list2 = list.stream().map(pendingInvite -> new RealmsPendingInvitesScreen.Entry(pendingInvite)).toList();
+			this.pendingInvitationSelectionList.replaceEntries(list2);
+		}, this.screenExecutor);
 		this.addWidget(this.pendingInvitationSelectionList);
 		this.acceptButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.invites.button.accept"), button -> {
-			this.accept(this.selectedInvite);
+			this.handleInvitation(this.selectedInvite, true);
 			this.selectedInvite = -1;
 			this.updateButtonStates();
 		}).bounds(this.width / 2 - 174, this.height - 32, 100, 20).build());
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(new RealmsMainScreen(this.lastScreen)))
-				.bounds(this.width / 2 - 50, this.height - 32, 100, 20)
-				.build()
-		);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 - 50, this.height - 32, 100, 20).build());
 		this.rejectButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.invites.button.reject"), button -> {
-			this.reject(this.selectedInvite);
+			this.handleInvitation(this.selectedInvite, false);
 			this.selectedInvite = -1;
 			this.updateButtonStates();
 		}).bounds(this.width / 2 + 74, this.height - 32, 100, 20).build());
@@ -87,81 +79,53 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256) {
-			this.minecraft.setScreen(new RealmsMainScreen(this.lastScreen));
-			return true;
-		} else {
-			return super.keyPressed(i, j, k);
-		}
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
-	void updateList(int i) {
-		this.pendingInvitationSelectionList.removeAtIndex(i);
-	}
-
-	void reject(int i) {
+	void handleInvitation(int i, boolean bl) {
 		if (i < this.pendingInvitationSelectionList.getItemCount()) {
-			(new Thread("Realms-reject-invitation") {
-					public void run() {
-						try {
-							RealmsClient realmsClient = RealmsClient.create();
-							realmsClient.rejectInvitation(
-								((RealmsPendingInvitesScreen.Entry)RealmsPendingInvitesScreen.this.pendingInvitationSelectionList.children().get(i)).pendingInvite.invitationId
-							);
-							RealmsPendingInvitesScreen.this.minecraft.execute(() -> RealmsPendingInvitesScreen.this.updateList(i));
-						} catch (RealmsServiceException var2) {
-							RealmsPendingInvitesScreen.LOGGER.error("Couldn't reject invite");
-						}
+			String string = ((RealmsPendingInvitesScreen.Entry)this.pendingInvitationSelectionList.children().get(i)).pendingInvite.invitationId;
+			CompletableFuture.supplyAsync(() -> {
+				try {
+					RealmsClient realmsClient = RealmsClient.create();
+					if (bl) {
+						realmsClient.acceptInvitation(string);
+					} else {
+						realmsClient.rejectInvitation(string);
 					}
-				})
-				.start();
-		}
-	}
 
-	void accept(int i) {
-		if (i < this.pendingInvitationSelectionList.getItemCount()) {
-			(new Thread("Realms-accept-invitation") {
-					public void run() {
-						try {
-							RealmsClient realmsClient = RealmsClient.create();
-							realmsClient.acceptInvitation(
-								((RealmsPendingInvitesScreen.Entry)RealmsPendingInvitesScreen.this.pendingInvitationSelectionList.children().get(i)).pendingInvite.invitationId
-							);
-							RealmsPendingInvitesScreen.this.minecraft.execute(() -> RealmsPendingInvitesScreen.this.updateList(i));
-						} catch (RealmsServiceException var2) {
-							RealmsPendingInvitesScreen.LOGGER.error("Couldn't accept invite");
-						}
+					return true;
+				} catch (RealmsServiceException var3x) {
+					LOGGER.error("Couldn't handle invite", (Throwable)var3x);
+					return false;
+				}
+			}, Util.ioPool()).thenAcceptAsync(boolean_ -> {
+				if (boolean_) {
+					this.pendingInvitationSelectionList.removeAtIndex(i);
+					RealmsDataFetcher realmsDataFetcher = this.minecraft.realmsDataFetcher();
+					if (bl) {
+						realmsDataFetcher.serverListUpdateTask.reset();
 					}
-				})
-				.start();
+
+					realmsDataFetcher.pendingInvitesTask.reset();
+				}
+			}, this.screenExecutor);
 		}
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.toolTip = null;
-		this.renderBackground(guiGraphics);
-		this.pendingInvitationSelectionList.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 16777215);
-		if (this.toolTip != null) {
-			this.renderMousehoverTooltip(guiGraphics, this.toolTip, i, j);
-		}
-
-		if (this.pendingInvitationSelectionList.getItemCount() == 0 && this.loaded) {
-			guiGraphics.drawCenteredString(this.font, NO_PENDING_INVITES_TEXT, this.width / 2, this.height / 2 - 20, 16777215);
-		}
-
 		super.render(guiGraphics, i, j, f);
-	}
+		this.toolTip = null;
+		this.pendingInvitationSelectionList.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, -1);
+		if (this.toolTip != null) {
+			guiGraphics.renderTooltip(this.font, this.toolTip, i, j);
+		}
 
-	protected void renderMousehoverTooltip(GuiGraphics guiGraphics, @Nullable Component component, int i, int j) {
-		if (component != null) {
-			int k = i + 12;
-			int l = j - 12;
-			int m = this.font.width(component);
-			guiGraphics.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-			guiGraphics.drawString(this.font, component, k, l, 16777215);
+		if (this.pendingInvites.isDone() && this.pendingInvitationSelectionList.getItemCount() == 0) {
+			guiGraphics.drawCenteredString(this.font, NO_PENDING_INVITES_TEXT, this.width / 2, this.height / 2 - 20, -1);
 		}
 	}
 
@@ -197,7 +161,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		}
 
 		private void renderPendingInvitationItem(GuiGraphics guiGraphics, PendingInvite pendingInvite, int i, int j, int k, int l) {
-			guiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pendingInvite.worldName, i + 38, j + 1, 16777215, false);
+			guiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pendingInvite.worldName, i + 38, j + 1, -1, false);
 			guiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pendingInvite.worldOwnerName, i + 38, j + 12, 7105644, false);
 			guiGraphics.drawString(
 				RealmsPendingInvitesScreen.this.font, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), i + 38, j + 24, 7105644, false
@@ -224,8 +188,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 			@Override
 			protected void draw(GuiGraphics guiGraphics, int i, int j, boolean bl) {
-				float f = bl ? 19.0F : 0.0F;
-				guiGraphics.blit(RealmsPendingInvitesScreen.ACCEPT_ICON_LOCATION, i, j, f, 0.0F, 18, 18, 37, 18);
+				guiGraphics.blitSprite(bl ? RealmsPendingInvitesScreen.ACCEPT_HIGHLIGHTED_SPRITE : RealmsPendingInvitesScreen.ACCEPT_SPRITE, i, j, 18, 18);
 				if (bl) {
 					RealmsPendingInvitesScreen.this.toolTip = RealmsPendingInvitesScreen.ACCEPT_INVITE_TOOLTIP;
 				}
@@ -233,7 +196,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 			@Override
 			public void onClick(int i) {
-				RealmsPendingInvitesScreen.this.accept(i);
+				RealmsPendingInvitesScreen.this.handleInvitation(i, true);
 			}
 		}
 
@@ -245,8 +208,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 			@Override
 			protected void draw(GuiGraphics guiGraphics, int i, int j, boolean bl) {
-				float f = bl ? 19.0F : 0.0F;
-				guiGraphics.blit(RealmsPendingInvitesScreen.REJECT_ICON_LOCATION, i, j, f, 0.0F, 18, 18, 37, 18);
+				guiGraphics.blitSprite(bl ? RealmsPendingInvitesScreen.REJECT_HIGHLIGHTED_SPRITE : RealmsPendingInvitesScreen.REJECT_SPRITE, i, j, 18, 18);
 				if (bl) {
 					RealmsPendingInvitesScreen.this.toolTip = RealmsPendingInvitesScreen.REJECT_INVITE_TOOLTIP;
 				}
@@ -254,7 +216,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 			@Override
 			public void onClick(int i) {
-				RealmsPendingInvitesScreen.this.reject(i);
+				RealmsPendingInvitesScreen.this.handleInvitation(i, false);
 			}
 		}
 	}
@@ -277,11 +239,6 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		@Override
 		public int getRowWidth() {
 			return 260;
-		}
-
-		@Override
-		public void renderBackground(GuiGraphics guiGraphics) {
-			RealmsPendingInvitesScreen.this.renderBackground(guiGraphics);
 		}
 
 		@Override

@@ -1,19 +1,17 @@
 package net.minecraft.client.renderer.texture;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -21,16 +19,17 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.texture.atlas.SpriteResourceLoader;
+import net.minecraft.client.renderer.texture.atlas.SpriteSourceList;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
-import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class SpriteLoader {
+	public static final Set<MetadataSectionSerializer<?>> DEFAULT_METADATA_SECTIONS = Set.of(AnimationMetadataSection.SERIALIZER);
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final ResourceLocation location;
 	private final int maxSupportedTextureSize;
@@ -114,70 +113,26 @@ public class SpriteLoader {
 		return new SpriteLoader.Preparations(p, q, m, textureAtlasSprite, map, completableFuture);
 	}
 
-	public static CompletableFuture<List<SpriteContents>> runSpriteSuppliers(List<Supplier<SpriteContents>> list, Executor executor) {
-		List<CompletableFuture<SpriteContents>> list2 = list.stream().map(supplier -> CompletableFuture.supplyAsync(supplier, executor)).toList();
+	public static CompletableFuture<List<SpriteContents>> runSpriteSuppliers(
+		SpriteResourceLoader spriteResourceLoader, List<Function<SpriteResourceLoader, SpriteContents>> list, Executor executor
+	) {
+		List<CompletableFuture<SpriteContents>> list2 = list.stream()
+			.map(function -> CompletableFuture.supplyAsync(() -> (SpriteContents)function.apply(spriteResourceLoader), executor))
+			.toList();
 		return Util.sequence(list2).thenApply(listx -> listx.stream().filter(Objects::nonNull).toList());
 	}
 
 	public CompletableFuture<SpriteLoader.Preparations> loadAndStitch(ResourceManager resourceManager, ResourceLocation resourceLocation, int i, Executor executor) {
-		return CompletableFuture.supplyAsync(() -> SpriteResourceLoader.load(resourceManager, resourceLocation).list(resourceManager), executor)
-			.thenCompose(list -> runSpriteSuppliers(list, executor))
-			.thenApply(list -> this.stitch(list, i, executor));
+		return this.loadAndStitch(resourceManager, resourceLocation, i, executor, DEFAULT_METADATA_SECTIONS);
 	}
 
-	@Nullable
-	public static SpriteContents loadSprite(ResourceLocation resourceLocation, Resource resource) {
-		AnimationMetadataSection animationMetadataSection;
-		try {
-			animationMetadataSection = (AnimationMetadataSection)resource.metadata()
-				.getSection(AnimationMetadataSection.SERIALIZER)
-				.orElse(AnimationMetadataSection.EMPTY);
-		} catch (Exception var8) {
-			LOGGER.error("Unable to parse metadata from {}", resourceLocation, var8);
-			return null;
-		}
-
-		NativeImage nativeImage;
-		try {
-			InputStream inputStream = resource.open();
-
-			try {
-				nativeImage = NativeImage.read(inputStream);
-			} catch (Throwable var9) {
-				if (inputStream != null) {
-					try {
-						inputStream.close();
-					} catch (Throwable var7) {
-						var9.addSuppressed(var7);
-					}
-				}
-
-				throw var9;
-			}
-
-			if (inputStream != null) {
-				inputStream.close();
-			}
-		} catch (IOException var10) {
-			LOGGER.error("Using missing texture, unable to load {}", resourceLocation, var10);
-			return null;
-		}
-
-		FrameSize frameSize = animationMetadataSection.calculateFrameSize(nativeImage.getWidth(), nativeImage.getHeight());
-		if (Mth.isMultipleOf(nativeImage.getWidth(), frameSize.width()) && Mth.isMultipleOf(nativeImage.getHeight(), frameSize.height())) {
-			return new SpriteContents(resourceLocation, frameSize, nativeImage, animationMetadataSection);
-		} else {
-			LOGGER.error(
-				"Image {} size {},{} is not multiple of frame size {},{}",
-				resourceLocation,
-				nativeImage.getWidth(),
-				nativeImage.getHeight(),
-				frameSize.width(),
-				frameSize.height()
-			);
-			nativeImage.close();
-			return null;
-		}
+	public CompletableFuture<SpriteLoader.Preparations> loadAndStitch(
+		ResourceManager resourceManager, ResourceLocation resourceLocation, int i, Executor executor, Collection<MetadataSectionSerializer<?>> collection
+	) {
+		SpriteResourceLoader spriteResourceLoader = SpriteResourceLoader.create(collection);
+		return CompletableFuture.supplyAsync(() -> SpriteSourceList.load(resourceManager, resourceLocation).list(resourceManager), executor)
+			.thenCompose(list -> runSpriteSuppliers(spriteResourceLoader, list, executor))
+			.thenApply(list -> this.stitch(list, i, executor));
 	}
 
 	private Map<ResourceLocation, TextureAtlasSprite> getStitchedSprites(Stitcher<SpriteContents> stitcher, int i, int j) {

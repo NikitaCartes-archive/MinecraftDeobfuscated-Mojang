@@ -6,7 +6,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -15,12 +17,18 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractFurnaceRecipeBookComponent extends RecipeBookComponent {
+	private static final WidgetSprites FILTER_SPRITES = new WidgetSprites(
+		new ResourceLocation("recipe_book/furnace_filter_enabled"),
+		new ResourceLocation("recipe_book/furnace_filter_disabled"),
+		new ResourceLocation("recipe_book/furnace_filter_enabled_highlighted"),
+		new ResourceLocation("recipe_book/furnace_filter_disabled_highlighted")
+	);
 	@Nullable
 	private Ingredient fuels;
 
 	@Override
 	protected void initFilterButtonTextures() {
-		this.filterButton.initTextureValues(152, 182, 28, 18, RECIPE_BOOK_LOCATION);
+		this.filterButton.initTextureValues(FILTER_SPRITES);
 	}
 
 	@Override

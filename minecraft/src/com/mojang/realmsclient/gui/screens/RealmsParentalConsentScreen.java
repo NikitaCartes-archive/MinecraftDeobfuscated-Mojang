@@ -49,8 +49,7 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		this.messageLines.renderCentered(guiGraphics, this.width / 2, 15, 15, 16777215);
 		super.render(guiGraphics, i, j, f);
+		this.messageLines.renderCentered(guiGraphics, this.width / 2, 15, 15, 16777215);
 	}
 }

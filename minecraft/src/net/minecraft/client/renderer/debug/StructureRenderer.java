@@ -3,9 +3,9 @@ package net.minecraft.client.renderer.debug;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -14,16 +14,16 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.network.protocol.common.custom.StructuresDebugPayload;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 @Environment(EnvType.CLIENT)
 public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private final Minecraft minecraft;
-	private final Map<DimensionType, Map<String, BoundingBox>> postMainBoxes = Maps.<DimensionType, Map<String, BoundingBox>>newIdentityHashMap();
-	private final Map<DimensionType, Map<String, BoundingBox>> postPiecesBoxes = Maps.<DimensionType, Map<String, BoundingBox>>newIdentityHashMap();
-	private final Map<DimensionType, Map<String, Boolean>> startPiecesMap = Maps.<DimensionType, Map<String, Boolean>>newIdentityHashMap();
+	private final Map<ResourceKey<Level>, Map<String, BoundingBox>> postMainBoxes = Maps.<ResourceKey<Level>, Map<String, BoundingBox>>newIdentityHashMap();
+	private final Map<ResourceKey<Level>, Map<String, StructuresDebugPayload.PieceInfo>> postPieces = Maps.<ResourceKey<Level>, Map<String, StructuresDebugPayload.PieceInfo>>newIdentityHashMap();
 	private static final int MAX_RENDER_DIST = 500;
 
 	public StructureRenderer(Minecraft minecraft) {
@@ -33,12 +33,11 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Camera camera = this.minecraft.gameRenderer.getMainCamera();
-		LevelAccessor levelAccessor = this.minecraft.level;
-		DimensionType dimensionType = levelAccessor.dimensionType();
+		ResourceKey<Level> resourceKey = this.minecraft.level.dimension();
 		BlockPos blockPos = BlockPos.containing(camera.getPosition().x, 0.0, camera.getPosition().z);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
-		if (this.postMainBoxes.containsKey(dimensionType)) {
-			for (BoundingBox boundingBox : ((Map)this.postMainBoxes.get(dimensionType)).values()) {
+		if (this.postMainBoxes.containsKey(resourceKey)) {
+			for (BoundingBox boundingBox : ((Map)this.postMainBoxes.get(resourceKey)).values()) {
 				if (blockPos.closerThan(boundingBox.getCenter(), 500.0)) {
 					LevelRenderer.renderLineBox(
 						poseStack,
@@ -61,13 +60,12 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}
 		}
 
-		if (this.postPiecesBoxes.containsKey(dimensionType)) {
-			for (Entry<String, BoundingBox> entry : ((Map)this.postPiecesBoxes.get(dimensionType)).entrySet()) {
-				String string = (String)entry.getKey();
-				BoundingBox boundingBox2 = (BoundingBox)entry.getValue();
-				Boolean boolean_ = (Boolean)((Map)this.startPiecesMap.get(dimensionType)).get(string);
+		Map<String, StructuresDebugPayload.PieceInfo> map = (Map<String, StructuresDebugPayload.PieceInfo>)this.postPieces.get(resourceKey);
+		if (map != null) {
+			for (StructuresDebugPayload.PieceInfo pieceInfo : map.values()) {
+				BoundingBox boundingBox2 = pieceInfo.boundingBox();
 				if (blockPos.closerThan(boundingBox2.getCenter(), 500.0)) {
-					if (boolean_) {
+					if (pieceInfo.isStart()) {
 						LevelRenderer.renderLineBox(
 							poseStack,
 							vertexConsumer,
@@ -109,30 +107,19 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 	}
 
-	public void addBoundingBox(BoundingBox boundingBox, List<BoundingBox> list, List<Boolean> list2, DimensionType dimensionType) {
-		if (!this.postMainBoxes.containsKey(dimensionType)) {
-			this.postMainBoxes.put(dimensionType, Maps.newHashMap());
-		}
+	public void addBoundingBox(BoundingBox boundingBox, List<StructuresDebugPayload.PieceInfo> list, ResourceKey<Level> resourceKey) {
+		((Map)this.postMainBoxes.computeIfAbsent(resourceKey, resourceKeyx -> new HashMap())).put(boundingBox.toString(), boundingBox);
+		Map<String, StructuresDebugPayload.PieceInfo> map = (Map<String, StructuresDebugPayload.PieceInfo>)this.postPieces
+			.computeIfAbsent(resourceKey, resourceKeyx -> new HashMap());
 
-		if (!this.postPiecesBoxes.containsKey(dimensionType)) {
-			this.postPiecesBoxes.put(dimensionType, Maps.newHashMap());
-			this.startPiecesMap.put(dimensionType, Maps.newHashMap());
-		}
-
-		((Map)this.postMainBoxes.get(dimensionType)).put(boundingBox.toString(), boundingBox);
-
-		for (int i = 0; i < list.size(); i++) {
-			BoundingBox boundingBox2 = (BoundingBox)list.get(i);
-			Boolean boolean_ = (Boolean)list2.get(i);
-			((Map)this.postPiecesBoxes.get(dimensionType)).put(boundingBox2.toString(), boundingBox2);
-			((Map)this.startPiecesMap.get(dimensionType)).put(boundingBox2.toString(), boolean_);
+		for (StructuresDebugPayload.PieceInfo pieceInfo : list) {
+			map.put(pieceInfo.boundingBox().toString(), pieceInfo);
 		}
 	}
 
 	@Override
 	public void clear() {
 		this.postMainBoxes.clear();
-		this.postPiecesBoxes.clear();
-		this.startPiecesMap.clear();
+		this.postPieces.clear();
 	}
 }

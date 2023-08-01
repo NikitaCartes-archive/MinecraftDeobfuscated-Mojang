@@ -26,7 +26,15 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class OverlayRecipeComponent implements Renderable, GuiEventListener {
-	static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+	private static final ResourceLocation OVERLAY_RECIPE_SPRITE = new ResourceLocation("recipe_book/overlay_recipe");
+	static final ResourceLocation FURNACE_OVERLAY_HIGHLIGHTED_SPRITE = new ResourceLocation("recipe_book/furnace_overlay_highlighted");
+	static final ResourceLocation FURNACE_OVERLAY_SPRITE = new ResourceLocation("recipe_book/furnace_overlay");
+	static final ResourceLocation CRAFTING_OVERLAY_HIGHLIGHTED_SPRITE = new ResourceLocation("recipe_book/crafting_overlay_highlighted");
+	static final ResourceLocation CRAFTING_OVERLAY_SPRITE = new ResourceLocation("recipe_book/crafting_overlay");
+	static final ResourceLocation FURNACE_OVERLAY_DISABLED_HIGHLIGHTED_SPRITE = new ResourceLocation("recipe_book/furnace_overlay_disabled_highlighted");
+	static final ResourceLocation FURNACE_OVERLAY_DISABLED_SPRITE = new ResourceLocation("recipe_book/furnace_overlay_disabled");
+	static final ResourceLocation CRAFTING_OVERLAY_DISABLED_HIGHLIGHTED_SPRITE = new ResourceLocation("recipe_book/crafting_overlay_disabled_highlighted");
+	static final ResourceLocation CRAFTING_OVERLAY_DISABLED_SPRITE = new ResourceLocation("recipe_book/crafting_overlay_disabled");
 	private static final int MAX_ROW = 4;
 	private static final int MAX_ROW_LARGE = 5;
 	private static final float ITEM_RENDER_SCALE = 0.375F;
@@ -135,7 +143,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 			int l = Math.min(this.recipeButtons.size(), k);
 			int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
 			int n = 4;
-			guiGraphics.blitNineSliced(RECIPE_BOOK_LOCATION, this.x, this.y, l * 25 + 8, m * 25 + 8, 4, 32, 32, 82, 208);
+			guiGraphics.blitSprite(OVERLAY_RECIPE_SPRITE, this.x, this.y, l * 25 + 8, m * 25 + 8);
 			RenderSystem.disableBlend();
 
 			for (OverlayRecipeComponent.OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
@@ -197,17 +205,24 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 
 		@Override
 		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-			int k = 152;
-			if (!this.isCraftable) {
-				k += 26;
+			ResourceLocation resourceLocation;
+			if (this.isCraftable) {
+				if (OverlayRecipeComponent.this.isFurnaceMenu) {
+					resourceLocation = this.isHoveredOrFocused() ? OverlayRecipeComponent.FURNACE_OVERLAY_HIGHLIGHTED_SPRITE : OverlayRecipeComponent.FURNACE_OVERLAY_SPRITE;
+				} else {
+					resourceLocation = this.isHoveredOrFocused() ? OverlayRecipeComponent.CRAFTING_OVERLAY_HIGHLIGHTED_SPRITE : OverlayRecipeComponent.CRAFTING_OVERLAY_SPRITE;
+				}
+			} else if (OverlayRecipeComponent.this.isFurnaceMenu) {
+				resourceLocation = this.isHoveredOrFocused()
+					? OverlayRecipeComponent.FURNACE_OVERLAY_DISABLED_HIGHLIGHTED_SPRITE
+					: OverlayRecipeComponent.FURNACE_OVERLAY_DISABLED_SPRITE;
+			} else {
+				resourceLocation = this.isHoveredOrFocused()
+					? OverlayRecipeComponent.CRAFTING_OVERLAY_DISABLED_HIGHLIGHTED_SPRITE
+					: OverlayRecipeComponent.CRAFTING_OVERLAY_DISABLED_SPRITE;
 			}
 
-			int l = OverlayRecipeComponent.this.isFurnaceMenu ? 130 : 78;
-			if (this.isHoveredOrFocused()) {
-				l += 26;
-			}
-
-			guiGraphics.blit(OverlayRecipeComponent.RECIPE_BOOK_LOCATION, this.getX(), this.getY(), k, l, this.width, this.height);
+			guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate((double)(this.getX() + 2), (double)(this.getY() + 2), 150.0);
 

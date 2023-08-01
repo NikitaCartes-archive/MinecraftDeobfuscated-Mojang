@@ -1,11 +1,10 @@
 package net.minecraft.client.renderer.texture.atlas;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.SpriteContents;
-import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -22,7 +21,7 @@ public interface SpriteSource {
 	@Environment(EnvType.CLIENT)
 	public interface Output {
 		default void add(ResourceLocation resourceLocation, Resource resource) {
-			this.add(resourceLocation, () -> SpriteLoader.loadSprite(resourceLocation, resource));
+			this.add(resourceLocation, spriteResourceLoader -> spriteResourceLoader.loadSprite(resourceLocation, resource));
 		}
 
 		void add(ResourceLocation resourceLocation, SpriteSource.SpriteSupplier spriteSupplier);
@@ -31,7 +30,7 @@ public interface SpriteSource {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public interface SpriteSupplier extends Supplier<SpriteContents> {
+	public interface SpriteSupplier extends Function<SpriteResourceLoader, SpriteContents> {
 		default void discard() {
 		}
 	}

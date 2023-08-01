@@ -1,7 +1,7 @@
 package net.minecraft.world.inventory;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.OptionalInt;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -97,22 +97,16 @@ public class SmithingMenu extends ItemCombinerMenu {
 
 	@Override
 	public int getSlotToQuickMoveTo(ItemStack itemStack) {
-		return (Integer)((Optional)this.recipes
-				.stream()
-				.map(smithingRecipe -> findSlotMatchingIngredient(smithingRecipe, itemStack))
-				.filter(Optional::isPresent)
-				.findFirst()
-				.orElse(Optional.of(0)))
-			.get();
+		return this.findSlotToQuickMoveTo(itemStack).orElse(0);
 	}
 
-	private static Optional<Integer> findSlotMatchingIngredient(SmithingRecipe smithingRecipe, ItemStack itemStack) {
+	private static OptionalInt findSlotMatchingIngredient(SmithingRecipe smithingRecipe, ItemStack itemStack) {
 		if (smithingRecipe.isTemplateIngredient(itemStack)) {
-			return Optional.of(0);
+			return OptionalInt.of(0);
 		} else if (smithingRecipe.isBaseIngredient(itemStack)) {
-			return Optional.of(1);
+			return OptionalInt.of(1);
 		} else {
-			return smithingRecipe.isAdditionIngredient(itemStack) ? Optional.of(2) : Optional.empty();
+			return smithingRecipe.isAdditionIngredient(itemStack) ? OptionalInt.of(2) : OptionalInt.empty();
 		}
 	}
 
@@ -123,6 +117,14 @@ public class SmithingMenu extends ItemCombinerMenu {
 
 	@Override
 	public boolean canMoveIntoInputSlots(ItemStack itemStack) {
-		return this.recipes.stream().map(smithingRecipe -> findSlotMatchingIngredient(smithingRecipe, itemStack)).anyMatch(Optional::isPresent);
+		return this.findSlotToQuickMoveTo(itemStack).isPresent();
+	}
+
+	private OptionalInt findSlotToQuickMoveTo(ItemStack itemStack) {
+		return this.recipes
+			.stream()
+			.flatMapToInt(smithingRecipe -> findSlotMatchingIngredient(smithingRecipe, itemStack).stream())
+			.filter(i -> !this.getSlot(i).hasItem())
+			.findFirst();
 	}
 }

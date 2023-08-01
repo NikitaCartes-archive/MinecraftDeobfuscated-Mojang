@@ -2,6 +2,7 @@ package net.minecraft.world;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.RandomSupport;
@@ -19,11 +20,20 @@ public class RandomSequence {
 	}
 
 	public RandomSequence(long l, ResourceLocation resourceLocation) {
-		this(createSequence(l, resourceLocation));
+		this(createSequence(l, Optional.of(resourceLocation)));
 	}
 
-	private static XoroshiroRandomSource createSequence(long l, ResourceLocation resourceLocation) {
-		return new XoroshiroRandomSource(RandomSupport.upgradeSeedTo128bitUnmixed(l).xor(seedForKey(resourceLocation)).mixed());
+	public RandomSequence(long l, Optional<ResourceLocation> optional) {
+		this(createSequence(l, optional));
+	}
+
+	private static XoroshiroRandomSource createSequence(long l, Optional<ResourceLocation> optional) {
+		RandomSupport.Seed128bit seed128bit = RandomSupport.upgradeSeedTo128bitUnmixed(l);
+		if (optional.isPresent()) {
+			seed128bit = seed128bit.xor(seedForKey((ResourceLocation)optional.get()));
+		}
+
+		return new XoroshiroRandomSource(seed128bit.mixed());
 	}
 
 	public static RandomSupport.Seed128bit seedForKey(ResourceLocation resourceLocation) {

@@ -31,9 +31,8 @@ public class RealmsConfirmScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		guiGraphics.drawCenteredString(this.font, this.title1, this.width / 2, row(3), 16777215);
-		guiGraphics.drawCenteredString(this.font, this.title2, this.width / 2, row(5), 16777215);
 		super.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title1, this.width / 2, row(3), -1);
+		guiGraphics.drawCenteredString(this.font, this.title2, this.width / 2, row(5), -1);
 	}
 }

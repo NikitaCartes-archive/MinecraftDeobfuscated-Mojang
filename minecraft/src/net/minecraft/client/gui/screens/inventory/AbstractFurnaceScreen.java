@@ -16,21 +16,26 @@ import net.minecraft.world.inventory.Slot;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> extends AbstractContainerScreen<T> implements RecipeUpdateListener {
-	private static final ResourceLocation RECIPE_BUTTON_LOCATION = new ResourceLocation("textures/gui/recipe_button.png");
 	public final AbstractFurnaceRecipeBookComponent recipeBookComponent;
 	private boolean widthTooNarrow;
 	private final ResourceLocation texture;
+	private final ResourceLocation litProgressSprite;
+	private final ResourceLocation burnProgressSprite;
 
 	public AbstractFurnaceScreen(
 		T abstractFurnaceMenu,
 		AbstractFurnaceRecipeBookComponent abstractFurnaceRecipeBookComponent,
 		Inventory inventory,
 		Component component,
-		ResourceLocation resourceLocation
+		ResourceLocation resourceLocation,
+		ResourceLocation resourceLocation2,
+		ResourceLocation resourceLocation3
 	) {
 		super(abstractFurnaceMenu, inventory, component);
 		this.recipeBookComponent = abstractFurnaceRecipeBookComponent;
 		this.texture = resourceLocation;
+		this.litProgressSprite = resourceLocation2;
+		this.burnProgressSprite = resourceLocation3;
 	}
 
 	@Override
@@ -39,7 +44,7 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
 		this.widthTooNarrow = this.width < 379;
 		this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
 		this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-		this.addRenderableWidget(new ImageButton(this.leftPos + 20, this.height / 2 - 49, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
+		this.addRenderableWidget(new ImageButton(this.leftPos + 20, this.height / 2 - 49, 20, 18, RecipeBookComponent.RECIPE_BUTTON_SPRITES, button -> {
 			this.recipeBookComponent.toggleVisibility();
 			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
 			button.setPosition(this.leftPos + 20, this.height / 2 - 49);
@@ -55,13 +60,12 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-			this.renderBg(guiGraphics, f, i, j);
+			this.renderBackground(guiGraphics, i, j, f);
 			this.recipeBookComponent.render(guiGraphics, i, j, f);
 		} else {
-			this.recipeBookComponent.render(guiGraphics, i, j, f);
 			super.render(guiGraphics, i, j, f);
+			this.recipeBookComponent.render(guiGraphics, i, j, f);
 			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, true, f);
 		}
 
@@ -76,11 +80,11 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
 		guiGraphics.blit(this.texture, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		if (this.menu.isLit()) {
 			int m = this.menu.getLitProgress();
-			guiGraphics.blit(this.texture, k + 56, l + 36 + 12 - m, 176, 12 - m, 14, m + 1);
+			guiGraphics.blitSprite(this.litProgressSprite, 14, 14, 0, 12 - m, k + 56, l + 36 + 12 - m, 14, m + 1);
 		}
 
 		int m = this.menu.getBurnProgress();
-		guiGraphics.blit(this.texture, k + 79, l + 34, 176, 14, m + 1, 16);
+		guiGraphics.blitSprite(this.burnProgressSprite, 24, 16, 0, 0, k + 79, l + 34, m + 1, 16);
 	}
 
 	@Override

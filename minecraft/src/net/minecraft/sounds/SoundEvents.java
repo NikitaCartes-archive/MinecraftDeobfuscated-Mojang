@@ -1260,6 +1260,7 @@ public class SoundEvents {
 	public static final SoundEvent SPIDER_STEP = register("entity.spider.step");
 	public static final SoundEvent SPLASH_POTION_BREAK = register("entity.splash_potion.break");
 	public static final SoundEvent SPLASH_POTION_THROW = register("entity.splash_potion.throw");
+	public static final SoundEvent SPONGE_ABSORB = register("block.sponge.absorb");
 	public static final SoundEvent SPYGLASS_USE = register("item.spyglass.use");
 	public static final SoundEvent SPYGLASS_STOP_USING = register("item.spyglass.stop_using");
 	public static final SoundEvent SQUID_AMBIENT = register("entity.squid.ambient");

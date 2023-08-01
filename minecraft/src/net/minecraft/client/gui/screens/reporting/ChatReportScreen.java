@@ -195,8 +195,8 @@ public class ChatReportScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		super.render(guiGraphics, i, j, f);
 		int k = this.width / 2;
-		this.renderBackground(guiGraphics);
 		guiGraphics.drawCenteredString(this.font, this.title, k, 10, 16777215);
 		guiGraphics.drawCenteredString(this.font, OBSERVED_WHAT_LABEL, k, this.selectChatTop() - 9 - 6, 16777215);
 		if (this.reasonDescriptionLabel != null) {
@@ -204,13 +204,6 @@ public class ChatReportScreen extends Screen {
 		}
 
 		guiGraphics.drawString(this.font, MORE_COMMENTS_LABEL, this.contentLeft(), this.commentBoxTop() - 9 - 6, 16777215);
-		super.render(guiGraphics, i, j, f);
-	}
-
-	@Override
-	public void tick() {
-		this.commentBox.tick();
-		super.tick();
 	}
 
 	@Override

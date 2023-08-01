@@ -12,6 +12,10 @@ import net.minecraft.world.inventory.HorseInventoryMenu;
 
 @Environment(EnvType.CLIENT)
 public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventoryMenu> {
+	private static final ResourceLocation CHEST_SLOTS_SPRITE = new ResourceLocation("container/horse/chest_slots");
+	private static final ResourceLocation SADDLE_SLOT_SPRITE = new ResourceLocation("container/horse/saddle_slot");
+	private static final ResourceLocation LLAMA_ARMOR_SLOT_SPRITE = new ResourceLocation("container/horse/llama_armor_slot");
+	private static final ResourceLocation ARMOR_SLOT_SPRITE = new ResourceLocation("container/horse/armor_slot");
 	private static final ResourceLocation HORSE_INVENTORY_LOCATION = new ResourceLocation("textures/gui/container/horse.png");
 	private final AbstractHorse horse;
 	private float xMouse;
@@ -28,29 +32,26 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
 		int l = (this.height - this.imageHeight) / 2;
 		guiGraphics.blit(HORSE_INVENTORY_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		if (this.horse instanceof AbstractChestedHorse abstractChestedHorse && abstractChestedHorse.hasChest()) {
-			guiGraphics.blit(HORSE_INVENTORY_LOCATION, k + 79, l + 17, 0, this.imageHeight, abstractChestedHorse.getInventoryColumns() * 18, 54);
+			guiGraphics.blitSprite(CHEST_SLOTS_SPRITE, 90, 54, 0, 0, k + 79, l + 17, abstractChestedHorse.getInventoryColumns() * 18, 54);
 		}
 
 		if (this.horse.isSaddleable()) {
-			guiGraphics.blit(HORSE_INVENTORY_LOCATION, k + 7, l + 35 - 18, 18, this.imageHeight + 54, 18, 18);
+			guiGraphics.blitSprite(SADDLE_SLOT_SPRITE, k + 7, l + 35 - 18, 18, 18);
 		}
 
 		if (this.horse.canWearArmor()) {
 			if (this.horse instanceof Llama) {
-				guiGraphics.blit(HORSE_INVENTORY_LOCATION, k + 7, l + 35, 36, this.imageHeight + 54, 18, 18);
+				guiGraphics.blitSprite(LLAMA_ARMOR_SLOT_SPRITE, k + 7, l + 35, 18, 18);
 			} else {
-				guiGraphics.blit(HORSE_INVENTORY_LOCATION, k + 7, l + 35, 0, this.imageHeight + 54, 18, 18);
+				guiGraphics.blitSprite(ARMOR_SLOT_SPRITE, k + 7, l + 35, 18, 18);
 			}
 		}
 
-		InventoryScreen.renderEntityInInventoryFollowsMouse(
-			guiGraphics, k + 51, l + 60, 17, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.horse
-		);
+		InventoryScreen.renderEntityInInventoryFollowsMouse(guiGraphics, k + 26, l + 18, k + 78, l + 70, 17, 0.25F, this.xMouse, this.yMouse, this.horse);
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		this.xMouse = (float)i;
 		this.yMouse = (float)j;
 		super.render(guiGraphics, i, j, f);

@@ -74,20 +74,6 @@ public class StructureBlockEditScreen extends Screen {
 		this.decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
 	}
 
-	@Override
-	public void tick() {
-		this.nameEdit.tick();
-		this.posXEdit.tick();
-		this.posYEdit.tick();
-		this.posZEdit.tick();
-		this.sizeXEdit.tick();
-		this.sizeYEdit.tick();
-		this.sizeZEdit.tick();
-		this.integrityEdit.tick();
-		this.seedEdit.tick();
-		this.dataEdit.tick();
-	}
-
 	private void onDone() {
 		if (this.sendToServer(StructureBlockEntity.UpdateType.UPDATE_DATA)) {
 			this.minecraft.setScreen(null);
@@ -413,7 +399,7 @@ public class StructureBlockEditScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		StructureMode structureMode = this.structure.getMode();
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
 		if (structureMode != StructureMode.DATA) {
@@ -451,7 +437,6 @@ public class StructureBlockEditScreen extends Screen {
 		}
 
 		guiGraphics.drawString(this.font, structureMode.getDisplayName(), this.width / 2 - 153, 174, 10526880);
-		super.render(guiGraphics, i, j, f);
 	}
 
 	@Override

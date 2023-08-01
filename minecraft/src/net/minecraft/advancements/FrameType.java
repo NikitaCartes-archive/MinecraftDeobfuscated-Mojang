@@ -4,28 +4,22 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
 public enum FrameType {
-	TASK("task", 0, ChatFormatting.GREEN),
-	CHALLENGE("challenge", 26, ChatFormatting.DARK_PURPLE),
-	GOAL("goal", 52, ChatFormatting.GREEN);
+	TASK("task", ChatFormatting.GREEN),
+	CHALLENGE("challenge", ChatFormatting.DARK_PURPLE),
+	GOAL("goal", ChatFormatting.GREEN);
 
 	private final String name;
-	private final int texture;
 	private final ChatFormatting chatColor;
 	private final Component displayName;
 
-	private FrameType(String string2, int j, ChatFormatting chatFormatting) {
+	private FrameType(String string2, ChatFormatting chatFormatting) {
 		this.name = string2;
-		this.texture = j;
 		this.chatColor = chatFormatting;
 		this.displayName = Component.translatable("advancements.toast." + string2);
 	}
 
 	public String getName() {
 		return this.name;
-	}
-
-	public int getTexture() {
-		return this.texture;
 	}
 
 	public static FrameType byName(String string) {

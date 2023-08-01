@@ -37,15 +37,13 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, row(3), 16711680);
+		super.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, row(3), -65536);
 		Component[] components = this.getMessages();
 
 		for (int k = 0; k < components.length; k++) {
-			guiGraphics.drawCenteredString(this.font, components[k], this.width / 2, row(5) + k * 12, 16777215);
+			guiGraphics.drawCenteredString(this.font, components[k], this.width / 2, row(5) + k * 12, -1);
 		}
-
-		super.render(guiGraphics, i, j, f);
 	}
 
 	private Component[] getMessages() {

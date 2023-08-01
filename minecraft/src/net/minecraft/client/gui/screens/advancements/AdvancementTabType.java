@@ -3,27 +3,84 @@ package net.minecraft.client.gui.screens.advancements;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 enum AdvancementTabType {
-	ABOVE(0, 0, 28, 32, 8),
-	BELOW(84, 0, 28, 32, 8),
-	LEFT(0, 64, 32, 28, 5),
-	RIGHT(96, 64, 32, 28, 5);
+	ABOVE(
+		new AdvancementTabType.Sprites(
+			new ResourceLocation("advancements/tab_above_left_selected"),
+			new ResourceLocation("advancements/tab_above_middle_selected"),
+			new ResourceLocation("advancements/tab_above_right_selected")
+		),
+		new AdvancementTabType.Sprites(
+			new ResourceLocation("advancements/tab_above_left"),
+			new ResourceLocation("advancements/tab_above_middle"),
+			new ResourceLocation("advancements/tab_above_right")
+		),
+		28,
+		32,
+		8
+	),
+	BELOW(
+		new AdvancementTabType.Sprites(
+			new ResourceLocation("advancements/tab_below_left_selected"),
+			new ResourceLocation("advancements/tab_below_middle_selected"),
+			new ResourceLocation("advancements/tab_below_right_selected")
+		),
+		new AdvancementTabType.Sprites(
+			new ResourceLocation("advancements/tab_below_left"),
+			new ResourceLocation("advancements/tab_below_middle"),
+			new ResourceLocation("advancements/tab_below_right")
+		),
+		28,
+		32,
+		8
+	),
+	LEFT(
+		new AdvancementTabType.Sprites(
+			new ResourceLocation("advancements/tab_left_top_selected"),
+			new ResourceLocation("advancements/tab_left_middle_selected"),
+			new ResourceLocation("advancements/tab_left_bottom_selected")
+		),
+		new AdvancementTabType.Sprites(
+			new ResourceLocation("advancements/tab_left_top"),
+			new ResourceLocation("advancements/tab_left_middle"),
+			new ResourceLocation("advancements/tab_left_bottom")
+		),
+		32,
+		28,
+		5
+	),
+	RIGHT(
+		new AdvancementTabType.Sprites(
+			new ResourceLocation("advancements/tab_right_top_selected"),
+			new ResourceLocation("advancements/tab_right_middle_selected"),
+			new ResourceLocation("advancements/tab_right_bottom_selected")
+		),
+		new AdvancementTabType.Sprites(
+			new ResourceLocation("advancements/tab_right_top"),
+			new ResourceLocation("advancements/tab_right_middle"),
+			new ResourceLocation("advancements/tab_right_bottom")
+		),
+		32,
+		28,
+		5
+	);
 
-	private final int textureX;
-	private final int textureY;
+	private final AdvancementTabType.Sprites selectedSprites;
+	private final AdvancementTabType.Sprites unselectedSprites;
 	private final int width;
 	private final int height;
 	private final int max;
 
-	private AdvancementTabType(int j, int k, int l, int m, int n) {
-		this.textureX = j;
-		this.textureY = k;
-		this.width = l;
-		this.height = m;
-		this.max = n;
+	private AdvancementTabType(AdvancementTabType.Sprites sprites, AdvancementTabType.Sprites sprites2, int j, int k, int l) {
+		this.selectedSprites = sprites;
+		this.unselectedSprites = sprites2;
+		this.width = j;
+		this.height = k;
+		this.max = l;
 	}
 
 	public int getMax() {
@@ -31,17 +88,17 @@ enum AdvancementTabType {
 	}
 
 	public void draw(GuiGraphics guiGraphics, int i, int j, boolean bl, int k) {
-		int l = this.textureX;
-		if (k > 0) {
-			l += this.width;
+		AdvancementTabType.Sprites sprites = bl ? this.selectedSprites : this.unselectedSprites;
+		ResourceLocation resourceLocation;
+		if (k == 0) {
+			resourceLocation = sprites.first();
+		} else if (k == this.max - 1) {
+			resourceLocation = sprites.last();
+		} else {
+			resourceLocation = sprites.middle();
 		}
 
-		if (k == this.max - 1) {
-			l += this.width;
-		}
-
-		int m = bl ? this.textureY + this.height : this.textureY;
-		guiGraphics.blit(AdvancementsScreen.TABS_LOCATION, i + this.getX(k), j + this.getY(k), l, m, this.width, this.height);
+		guiGraphics.blitSprite(resourceLocation, i + this.getX(k), j + this.getY(k), this.width, this.height);
 	}
 
 	public void drawIcon(GuiGraphics guiGraphics, int i, int j, int k, ItemStack itemStack) {
@@ -102,5 +159,9 @@ enum AdvancementTabType {
 		int l = i + this.getX(k);
 		int m = j + this.getY(k);
 		return d > (double)l && d < (double)(l + this.width) && e > (double)m && e < (double)(m + this.height);
+	}
+
+	@Environment(EnvType.CLIENT)
+	static record Sprites(ResourceLocation first, ResourceLocation middle, ResourceLocation last) {
 	}
 }

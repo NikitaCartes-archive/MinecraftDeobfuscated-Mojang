@@ -10,6 +10,7 @@ import net.minecraft.client.resources.metadata.animation.AnimationFrame;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 
 @Environment(EnvType.CLIENT)
 public final class MissingTextureAtlasSprite {
@@ -17,9 +18,9 @@ public final class MissingTextureAtlasSprite {
 	private static final int MISSING_IMAGE_HEIGHT = 16;
 	private static final String MISSING_TEXTURE_NAME = "missingno";
 	private static final ResourceLocation MISSING_TEXTURE_LOCATION = new ResourceLocation("missingno");
-	private static final AnimationMetadataSection EMPTY_ANIMATION_META = new AnimationMetadataSection(
-		ImmutableList.of(new AnimationFrame(0, -1)), 16, 16, 1, false
-	);
+	private static final ResourceMetadata SPRITE_METADATA = new ResourceMetadata.Builder()
+		.put(AnimationMetadataSection.SERIALIZER, new AnimationMetadataSection(ImmutableList.of(new AnimationFrame(0, -1)), 16, 16, 1, false))
+		.build();
 	@Nullable
 	private static DynamicTexture missingTexture;
 
@@ -43,7 +44,7 @@ public final class MissingTextureAtlasSprite {
 
 	public static SpriteContents create() {
 		NativeImage nativeImage = generateMissingImage(16, 16);
-		return new SpriteContents(MISSING_TEXTURE_LOCATION, new FrameSize(16, 16), nativeImage, EMPTY_ANIMATION_META);
+		return new SpriteContents(MISSING_TEXTURE_LOCATION, new FrameSize(16, 16), nativeImage, SPRITE_METADATA);
 	}
 
 	public static ResourceLocation getLocation() {

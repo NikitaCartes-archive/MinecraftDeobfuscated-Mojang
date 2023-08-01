@@ -70,5 +70,6 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 				EntityType.TRADER_LLAMA,
 				EntityType.ZOMBIE_HORSE
 			);
+		this.tag(EntityTypeTags.NON_CONTROLLING_RIDER).add(EntityType.SLIME, EntityType.MAGMA_CUBE);
 	}
 }

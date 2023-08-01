@@ -15,7 +15,7 @@ import jdk.jfr.StackTrace;
 public abstract class PacketEvent extends Event {
 	@Name("protocolId")
 	@Label("Protocol Id")
-	public final int protocolId;
+	public final String protocolId;
 	@Name("packetId")
 	@Label("Packet Id")
 	public final int packetId;
@@ -27,11 +27,11 @@ public abstract class PacketEvent extends Event {
 	@DataAmount
 	public final int bytes;
 
-	public PacketEvent(int i, int j, SocketAddress socketAddress, int k) {
-		this.protocolId = i;
-		this.packetId = j;
+	public PacketEvent(String string, int i, SocketAddress socketAddress, int j) {
+		this.protocolId = string;
+		this.packetId = i;
 		this.remoteAddress = socketAddress.toString();
-		this.bytes = k;
+		this.bytes = j;
 	}
 
 	public static final class Fields {

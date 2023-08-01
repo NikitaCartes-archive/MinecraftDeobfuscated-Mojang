@@ -16,7 +16,6 @@ import net.minecraft.world.inventory.Slot;
 @Environment(EnvType.CLIENT)
 public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implements RecipeUpdateListener {
 	private static final ResourceLocation CRAFTING_TABLE_LOCATION = new ResourceLocation("textures/gui/container/crafting_table.png");
-	private static final ResourceLocation RECIPE_BUTTON_LOCATION = new ResourceLocation("textures/gui/recipe_button.png");
 	private final RecipeBookComponent recipeBookComponent = new RecipeBookComponent();
 	private boolean widthTooNarrow;
 
@@ -30,7 +29,7 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 		this.widthTooNarrow = this.width < 379;
 		this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
 		this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-		this.addRenderableWidget(new ImageButton(this.leftPos + 5, this.height / 2 - 49, 20, 18, 0, 0, 19, RECIPE_BUTTON_LOCATION, button -> {
+		this.addRenderableWidget(new ImageButton(this.leftPos + 5, this.height / 2 - 49, 20, 18, RecipeBookComponent.RECIPE_BUTTON_SPRITES, button -> {
 			this.recipeBookComponent.toggleVisibility();
 			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
 			button.setPosition(this.leftPos + 5, this.height / 2 - 49);
@@ -48,13 +47,12 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
 		if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-			this.renderBg(guiGraphics, f, i, j);
+			this.renderBackground(guiGraphics, i, j, f);
 			this.recipeBookComponent.render(guiGraphics, i, j, f);
 		} else {
-			this.recipeBookComponent.render(guiGraphics, i, j, f);
 			super.render(guiGraphics, i, j, f);
+			this.recipeBookComponent.render(guiGraphics, i, j, f);
 			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, true, f);
 		}
 

@@ -9,6 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -63,5 +64,10 @@ public class ZombieHorse extends AbstractHorse {
 
 	@Override
 	protected void addBehaviourGoals() {
+	}
+
+	@Override
+	protected float getPassengersRidingOffsetY(EntityDimensions entityDimensions, float f) {
+		return entityDimensions.height - (this.isBaby() ? 0.03125F : 0.28125F) * f;
 	}
 }

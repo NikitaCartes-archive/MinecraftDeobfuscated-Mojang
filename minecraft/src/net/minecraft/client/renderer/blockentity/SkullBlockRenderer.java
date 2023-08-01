@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Map;
@@ -24,8 +22,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.client.resources.SkinManager;
 import net.minecraft.core.Direction;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
@@ -44,7 +42,7 @@ public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity>
 		hashMap.put(SkullBlock.Types.CREEPER, new ResourceLocation("textures/entity/creeper/creeper.png"));
 		hashMap.put(SkullBlock.Types.DRAGON, new ResourceLocation("textures/entity/enderdragon/dragon.png"));
 		hashMap.put(SkullBlock.Types.PIGLIN, new ResourceLocation("textures/entity/piglin/piglin.png"));
-		hashMap.put(SkullBlock.Types.PLAYER, DefaultPlayerSkin.getDefaultSkin());
+		hashMap.put(SkullBlock.Types.PLAYER, DefaultPlayerSkin.getDefaultTexture());
 	});
 
 	public static Map<SkullBlock.Type, SkullModelBase> createSkullRenderers(EntityModelSet entityModelSet) {
@@ -104,11 +102,8 @@ public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity>
 	public static RenderType getRenderType(SkullBlock.Type type, @Nullable GameProfile gameProfile) {
 		ResourceLocation resourceLocation = (ResourceLocation)SKIN_BY_TYPE.get(type);
 		if (type == SkullBlock.Types.PLAYER && gameProfile != null) {
-			Minecraft minecraft = Minecraft.getInstance();
-			Map<Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(gameProfile);
-			return map.containsKey(Type.SKIN)
-				? RenderType.entityTranslucent(minecraft.getSkinManager().registerTexture((MinecraftProfileTexture)map.get(Type.SKIN), Type.SKIN))
-				: RenderType.entityCutoutNoCull(DefaultPlayerSkin.getDefaultSkin(UUIDUtil.getOrCreatePlayerUUID(gameProfile)));
+			SkinManager skinManager = Minecraft.getInstance().getSkinManager();
+			return RenderType.entityTranslucent(skinManager.getInsecureSkin(gameProfile).texture());
 		} else {
 			return RenderType.entityCutoutNoCullZOffset(resourceLocation);
 		}

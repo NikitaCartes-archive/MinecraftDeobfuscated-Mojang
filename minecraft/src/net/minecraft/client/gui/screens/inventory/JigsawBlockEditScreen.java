@@ -44,14 +44,6 @@ public class JigsawBlockEditScreen extends Screen {
 		this.jigsawEntity = jigsawBlockEntity;
 	}
 
-	@Override
-	public void tick() {
-		this.nameEdit.tick();
-		this.targetEdit.tick();
-		this.poolEdit.tick();
-		this.finalStateEdit.tick();
-	}
-
 	private void onDone() {
 		this.sendToServer();
 		this.minecraft.setScreen(null);
@@ -189,7 +181,7 @@ public class JigsawBlockEditScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawString(this.font, POOL_LABEL, this.width / 2 - 153, 10, 10526880);
 		this.poolEdit.render(guiGraphics, i, j, f);
 		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 153, 45, 10526880);
@@ -201,7 +193,5 @@ public class JigsawBlockEditScreen extends Screen {
 		if (JigsawBlock.getFrontFacing(this.jigsawEntity.getBlockState()).getAxis().isVertical()) {
 			guiGraphics.drawString(this.font, JOINT_LABEL, this.width / 2 - 153, 156, 16777215);
 		}
-
-		super.render(guiGraphics, i, j, f);
 	}
 }

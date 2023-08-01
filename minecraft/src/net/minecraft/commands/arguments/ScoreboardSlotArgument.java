@@ -13,9 +13,9 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.scores.DisplaySlot;
 
-public class ScoreboardSlotArgument implements ArgumentType<Integer> {
+public class ScoreboardSlotArgument implements ArgumentType<DisplaySlot> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("sidebar", "foo.bar");
 	public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
 		object -> Component.translatable("argument.scoreboardDisplaySlot.invalid", object)
@@ -28,23 +28,23 @@ public class ScoreboardSlotArgument implements ArgumentType<Integer> {
 		return new ScoreboardSlotArgument();
 	}
 
-	public static int getDisplaySlot(CommandContext<CommandSourceStack> commandContext, String string) {
-		return commandContext.<Integer>getArgument(string, Integer.class);
+	public static DisplaySlot getDisplaySlot(CommandContext<CommandSourceStack> commandContext, String string) {
+		return commandContext.getArgument(string, DisplaySlot.class);
 	}
 
-	public Integer parse(StringReader stringReader) throws CommandSyntaxException {
+	public DisplaySlot parse(StringReader stringReader) throws CommandSyntaxException {
 		String string = stringReader.readUnquotedString();
-		int i = Scoreboard.getDisplaySlotByName(string);
-		if (i == -1) {
+		DisplaySlot displaySlot = (DisplaySlot)DisplaySlot.CODEC.byName(string);
+		if (displaySlot == null) {
 			throw ERROR_INVALID_VALUE.create(string);
 		} else {
-			return i;
+			return displaySlot;
 		}
 	}
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggest(Scoreboard.getDisplaySlotNames(), suggestionsBuilder);
+		return SharedSuggestionProvider.suggest(Arrays.stream(DisplaySlot.values()).map(DisplaySlot::getSerializedName), suggestionsBuilder);
 	}
 
 	@Override

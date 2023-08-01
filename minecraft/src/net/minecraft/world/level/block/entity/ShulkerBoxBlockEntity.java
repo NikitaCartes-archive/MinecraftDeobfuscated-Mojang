@@ -71,6 +71,10 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 				break;
 			case OPENING:
 				this.progress += 0.1F;
+				if (this.progressOld == 0.0F) {
+					doNeighborUpdates(level, blockPos, blockState);
+				}
+
 				if (this.progress >= 1.0F) {
 					this.animationStatus = ShulkerBoxBlockEntity.AnimationStatus.OPENED;
 					this.progress = 1.0F;
@@ -81,6 +85,10 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 				break;
 			case CLOSING:
 				this.progress -= 0.1F;
+				if (this.progressOld == 1.0F) {
+					doNeighborUpdates(level, blockPos, blockState);
+				}
+
 				if (this.progress <= 0.0F) {
 					this.animationStatus = ShulkerBoxBlockEntity.AnimationStatus.CLOSED;
 					this.progress = 0.0F;
@@ -134,12 +142,10 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 			this.openCount = j;
 			if (j == 0) {
 				this.animationStatus = ShulkerBoxBlockEntity.AnimationStatus.CLOSING;
-				doNeighborUpdates(this.getLevel(), this.worldPosition, this.getBlockState());
 			}
 
 			if (j == 1) {
 				this.animationStatus = ShulkerBoxBlockEntity.AnimationStatus.OPENING;
-				doNeighborUpdates(this.getLevel(), this.worldPosition, this.getBlockState());
 			}
 
 			return true;
@@ -150,6 +156,7 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 
 	private static void doNeighborUpdates(Level level, BlockPos blockPos, BlockState blockState) {
 		blockState.updateNeighbourShapes(level, blockPos, 3);
+		level.updateNeighborsAt(blockPos, blockState.getBlock());
 	}
 
 	@Override

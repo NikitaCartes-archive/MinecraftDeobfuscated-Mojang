@@ -16,6 +16,11 @@ import net.minecraft.world.item.crafting.StonecutterRecipe;
 
 @Environment(EnvType.CLIENT)
 public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> {
+	private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("container/stonecutter/scroller");
+	private static final ResourceLocation SCROLLER_DISABLED_SPRITE = new ResourceLocation("container/stonecutter/scroller_disabled");
+	private static final ResourceLocation RECIPE_SELECTED_SPRITE = new ResourceLocation("container/stonecutter/recipe_selected");
+	private static final ResourceLocation RECIPE_HIGHLIGHTED_SPRITE = new ResourceLocation("container/stonecutter/recipe_highlighted");
+	private static final ResourceLocation RECIPE_SPRITE = new ResourceLocation("container/stonecutter/recipe");
 	private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/stonecutter.png");
 	private static final int SCROLLER_WIDTH = 12;
 	private static final int SCROLLER_HEIGHT = 15;
@@ -45,12 +50,12 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
-		this.renderBackground(guiGraphics);
 		int k = this.leftPos;
 		int l = this.topPos;
 		guiGraphics.blit(BG_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		int m = (int)(41.0F * this.scrollOffs);
-		guiGraphics.blit(BG_LOCATION, k + 119, l + 15 + m, 176 + (this.isScrollBarActive() ? 0 : 12), 0, 12, 15);
+		ResourceLocation resourceLocation = this.isScrollBarActive() ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
+		guiGraphics.blitSprite(resourceLocation, k + 119, l + 15 + m, 12, 15);
 		int n = this.leftPos + 52;
 		int o = this.topPos + 14;
 		int p = this.startIndex + 12;
@@ -84,14 +89,16 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 			int p = k + o % 4 * 16;
 			int q = o / 4;
 			int r = l + q * 18 + 2;
-			int s = this.imageHeight;
+			ResourceLocation resourceLocation;
 			if (n == this.menu.getSelectedRecipeIndex()) {
-				s += 18;
+				resourceLocation = RECIPE_SELECTED_SPRITE;
 			} else if (i >= p && j >= r && i < p + 16 && j < r + 18) {
-				s += 36;
+				resourceLocation = RECIPE_HIGHLIGHTED_SPRITE;
+			} else {
+				resourceLocation = RECIPE_SPRITE;
 			}
 
-			guiGraphics.blit(BG_LOCATION, p, r - 1, 0, s, 16, 18);
+			guiGraphics.blitSprite(resourceLocation, p, r - 1, 16, 18);
 		}
 	}
 
@@ -151,11 +158,11 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 	}
 
 	@Override
-	public boolean mouseScrolled(double d, double e, double f) {
+	public boolean mouseScrolled(double d, double e, double f, double g) {
 		if (this.isScrollBarActive()) {
 			int i = this.getOffscreenRows();
-			float g = (float)f / (float)i;
-			this.scrollOffs = Mth.clamp(this.scrollOffs - g, 0.0F, 1.0F);
+			float h = (float)g / (float)i;
+			this.scrollOffs = Mth.clamp(this.scrollOffs - h, 0.0F, 1.0F);
 			this.startIndex = (int)((double)(this.scrollOffs * (float)i) + 0.5) * 4;
 		}
 

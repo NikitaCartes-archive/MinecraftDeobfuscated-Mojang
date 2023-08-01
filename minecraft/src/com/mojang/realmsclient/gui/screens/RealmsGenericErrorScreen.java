@@ -9,7 +9,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
@@ -40,18 +39,7 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
 
 	private static RealmsGenericErrorScreen.ErrorMessage errorMessage(RealmsServiceException realmsServiceException) {
 		RealmsError realmsError = realmsServiceException.realmsError;
-		if (realmsError == null) {
-			return errorMessage(
-				Component.translatable("mco.errorMessage.realmsService", realmsServiceException.httpResultCode), Component.literal(realmsServiceException.rawResponse)
-			);
-		} else {
-			int i = realmsError.getErrorCode();
-			String string = "mco.errorMessage." + i;
-			return errorMessage(
-				Component.translatable("mco.errorMessage.realmsService.realmsError", i),
-				(Component)(I18n.exists(string) ? Component.translatable(string) : Component.nullToEmpty(realmsError.getErrorMessage()))
-			);
-		}
+		return errorMessage(Component.translatable("mco.errorMessage.realmsService.realmsError", realmsError.errorCode()), realmsError.errorMessage());
 	}
 
 	private static RealmsGenericErrorScreen.ErrorMessage errorMessage(Component component) {
@@ -77,10 +65,9 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
-		guiGraphics.drawCenteredString(this.font, this.lines.title, this.width / 2, 80, 16777215);
-		this.line2Split.renderCentered(guiGraphics, this.width / 2, 100, 9, 16711680);
 		super.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.lines.title, this.width / 2, 80, -1);
+		this.line2Split.renderCentered(guiGraphics, this.width / 2, 100, 9, -65536);
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -2,8 +2,8 @@ package net.minecraft.server.network;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.handshake.ClientIntent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.handshake.ServerHandshakePacketListener;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
@@ -22,12 +22,12 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
 
 	@Override
 	public void handleIntention(ClientIntentionPacket clientIntentionPacket) {
-		switch (clientIntentionPacket.getIntention()) {
+		switch (clientIntentionPacket.intention()) {
 			case LOGIN:
-				this.connection.setProtocol(ConnectionProtocol.LOGIN);
-				if (clientIntentionPacket.getProtocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
+				this.connection.setClientboundProtocolAfterHandshake(ClientIntent.LOGIN);
+				if (clientIntentionPacket.protocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
 					Component component;
-					if (clientIntentionPacket.getProtocolVersion() < 754) {
+					if (clientIntentionPacket.protocolVersion() < 754) {
 						component = Component.translatable("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName());
 					} else {
 						component = Component.translatable("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
@@ -42,14 +42,14 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
 			case STATUS:
 				ServerStatus serverStatus = this.server.getStatus();
 				if (this.server.repliesToStatus() && serverStatus != null) {
-					this.connection.setProtocol(ConnectionProtocol.STATUS);
+					this.connection.setClientboundProtocolAfterHandshake(ClientIntent.STATUS);
 					this.connection.setListener(new ServerStatusPacketListenerImpl(serverStatus, this.connection));
 				} else {
 					this.connection.disconnect(IGNORE_STATUS_REASON);
 				}
 				break;
 			default:
-				throw new UnsupportedOperationException("Invalid intention " + clientIntentionPacket.getIntention());
+				throw new UnsupportedOperationException("Invalid intention " + clientIntentionPacket.intention());
 		}
 	}
 

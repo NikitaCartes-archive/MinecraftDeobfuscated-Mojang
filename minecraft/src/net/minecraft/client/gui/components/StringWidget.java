@@ -4,7 +4,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class StringWidget extends AbstractStringWidget {
@@ -49,8 +53,17 @@ public class StringWidget extends AbstractStringWidget {
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		Component component = this.getMessage();
 		Font font = this.getFont();
-		int k = this.getX() + Math.round(this.alignX * (float)(this.getWidth() - font.width(component)));
-		int l = this.getY() + (this.getHeight() - 9) / 2;
-		guiGraphics.drawString(font, component, k, l, this.getColor());
+		int k = this.getWidth();
+		int l = font.width(component);
+		int m = this.getX() + Math.round(this.alignX * (float)(k - l));
+		int n = this.getY() + (this.getHeight() - 9) / 2;
+		FormattedCharSequence formattedCharSequence = l > k ? this.clipText(component, k) : component.getVisualOrderText();
+		guiGraphics.drawString(font, formattedCharSequence, m, n, this.getColor());
+	}
+
+	private FormattedCharSequence clipText(Component component, int i) {
+		Font font = this.getFont();
+		FormattedText formattedText = font.substrByWidth(component, i - font.width(CommonComponents.ELLIPSIS));
+		return Language.getInstance().getVisualOrder(FormattedText.composite(formattedText, CommonComponents.ELLIPSIS));
 	}
 }

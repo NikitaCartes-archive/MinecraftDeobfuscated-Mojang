@@ -1,6 +1,14 @@
 package net.minecraft.network.protocol.game;
 
-public interface ServerGamePacketListener extends ServerPacketListener {
+import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.protocol.common.ServerCommonPacketListener;
+
+public interface ServerGamePacketListener extends ServerCommonPacketListener {
+	@Override
+	default ConnectionProtocol protocol() {
+		return ConnectionProtocol.PLAY;
+	}
+
 	void handleAnimate(ServerboundSwingPacket serverboundSwingPacket);
 
 	void handleChat(ServerboundChatPacket serverboundChatPacket);
@@ -21,15 +29,9 @@ public interface ServerGamePacketListener extends ServerPacketListener {
 
 	void handleContainerClose(ServerboundContainerClosePacket serverboundContainerClosePacket);
 
-	void handleCustomPayload(ServerboundCustomPayloadPacket serverboundCustomPayloadPacket);
-
 	void handleInteract(ServerboundInteractPacket serverboundInteractPacket);
 
-	void handleKeepAlive(ServerboundKeepAlivePacket serverboundKeepAlivePacket);
-
 	void handleMovePlayer(ServerboundMovePlayerPacket serverboundMovePlayerPacket);
-
-	void handlePong(ServerboundPongPacket serverboundPongPacket);
 
 	void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket serverboundPlayerAbilitiesPacket);
 
@@ -50,8 +52,6 @@ public interface ServerGamePacketListener extends ServerPacketListener {
 	void handleUseItem(ServerboundUseItemPacket serverboundUseItemPacket);
 
 	void handleTeleportToEntityPacket(ServerboundTeleportToEntityPacket serverboundTeleportToEntityPacket);
-
-	void handleResourcePackResponse(ServerboundResourcePackPacket serverboundResourcePackPacket);
 
 	void handlePaddleBoat(ServerboundPaddleBoatPacket serverboundPaddleBoatPacket);
 
@@ -96,4 +96,8 @@ public interface ServerGamePacketListener extends ServerPacketListener {
 	void handleLockDifficulty(ServerboundLockDifficultyPacket serverboundLockDifficultyPacket);
 
 	void handleChatSessionUpdate(ServerboundChatSessionUpdatePacket serverboundChatSessionUpdatePacket);
+
+	void handleConfigurationAcknowledged(ServerboundConfigurationAcknowledgedPacket serverboundConfigurationAcknowledgedPacket);
+
+	void handleChunkBatchReceived(ServerboundChunkBatchReceivedPacket serverboundChunkBatchReceivedPacket);
 }

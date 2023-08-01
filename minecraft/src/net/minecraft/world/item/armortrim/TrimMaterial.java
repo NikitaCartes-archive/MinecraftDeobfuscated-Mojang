@@ -18,7 +18,7 @@ public record TrimMaterial(
 ) {
 	public static final Codec<TrimMaterial> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.STRING.fieldOf("asset_name").forGetter(TrimMaterial::assetName),
+					ExtraCodecs.RESOURCE_PATH_CODEC.fieldOf("asset_name").forGetter(TrimMaterial::assetName),
 					RegistryFixedCodec.create(Registries.ITEM).fieldOf("ingredient").forGetter(TrimMaterial::ingredient),
 					Codec.FLOAT.fieldOf("item_model_index").forGetter(TrimMaterial::itemModelIndex),
 					Codec.unboundedMap(ArmorMaterials.CODEC, Codec.STRING)

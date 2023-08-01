@@ -30,7 +30,7 @@ public class FlyingPathNavigation extends PathNavigation {
 
 	@Override
 	protected boolean canUpdatePath() {
-		return this.canFloat() && this.isInLiquid() || !this.mob.isPassenger();
+		return this.canFloat() && this.mob.isInLiquid() || !this.mob.isPassenger();
 	}
 
 	@Override

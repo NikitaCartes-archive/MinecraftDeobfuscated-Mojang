@@ -306,6 +306,7 @@ public class ClientLevel extends Level {
 	public void onChunkLoaded(ChunkPos chunkPos) {
 		this.tintCaches.forEach((colorResolver, blockTintCache) -> blockTintCache.invalidateForChunk(chunkPos.x, chunkPos.z));
 		this.entityStorage.startTicking(chunkPos);
+		this.levelRenderer.onChunkLoaded(chunkPos);
 	}
 
 	public void clearTintCaches() {
@@ -472,7 +473,7 @@ public class ClientLevel extends Level {
 	@Override
 	public CrashReportCategory fillReportDetails(CrashReport crashReport) {
 		CrashReportCategory crashReportCategory = super.fillReportDetails(crashReport);
-		crashReportCategory.setDetail("Server brand", (CrashReportDetail<String>)(() -> this.minecraft.player.getServerBrand()));
+		crashReportCategory.setDetail("Server brand", (CrashReportDetail<String>)(() -> this.minecraft.player.connection.serverBrand()));
 		crashReportCategory.setDetail(
 			"Server type",
 			(CrashReportDetail<String>)(() -> this.minecraft.getSingleplayerServer() == null ? "Non-integrated multiplayer server" : "Integrated singleplayer server")

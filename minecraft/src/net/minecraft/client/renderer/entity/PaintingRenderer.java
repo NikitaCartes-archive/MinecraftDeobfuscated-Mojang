@@ -74,15 +74,15 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 		float o = textureAtlasSprite2.getU0();
 		float p = textureAtlasSprite2.getU1();
 		float q = textureAtlasSprite2.getV0();
-		float r = textureAtlasSprite2.getV(1.0);
+		float r = textureAtlasSprite2.getV(0.0625F);
 		float s = textureAtlasSprite2.getU0();
-		float t = textureAtlasSprite2.getU(1.0);
+		float t = textureAtlasSprite2.getU(0.0625F);
 		float u = textureAtlasSprite2.getV0();
 		float v = textureAtlasSprite2.getV1();
 		int w = i / 16;
 		int x = j / 16;
-		double d = 16.0 / (double)w;
-		double e = 16.0 / (double)x;
+		double d = 1.0 / (double)w;
+		double e = 1.0 / (double)x;
 
 		for (int y = 0; y < w; y++) {
 			for (int z = 0; z < x; z++) {
@@ -111,10 +111,10 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 				}
 
 				int ah = LevelRenderer.getLightColor(painting.level(), new BlockPos(ae, af, ag));
-				float ai = textureAtlasSprite.getU(d * (double)(w - y));
-				float aj = textureAtlasSprite.getU(d * (double)(w - (y + 1)));
-				float ak = textureAtlasSprite.getV(e * (double)(x - z));
-				float al = textureAtlasSprite.getV(e * (double)(x - (z + 1)));
+				float ai = textureAtlasSprite.getU((float)(d * (double)(w - y)));
+				float aj = textureAtlasSprite.getU((float)(d * (double)(w - (y + 1))));
+				float ak = textureAtlasSprite.getV((float)(e * (double)(x - z)));
+				float al = textureAtlasSprite.getV((float)(e * (double)(x - (z + 1))));
 				this.vertex(matrix4f, matrix3f, vertexConsumer, aa, ad, aj, ak, -0.5F, 0, 0, -1, ah);
 				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ad, ai, ak, -0.5F, 0, 0, -1, ah);
 				this.vertex(matrix4f, matrix3f, vertexConsumer, ab, ac, ai, al, -0.5F, 0, 0, -1, ah);

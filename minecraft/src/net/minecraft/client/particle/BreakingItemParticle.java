@@ -40,22 +40,22 @@ public class BreakingItemParticle extends TextureSheetParticle {
 
 	@Override
 	protected float getU0() {
-		return this.sprite.getU((double)((this.uo + 1.0F) / 4.0F * 16.0F));
+		return this.sprite.getU((this.uo + 1.0F) / 4.0F);
 	}
 
 	@Override
 	protected float getU1() {
-		return this.sprite.getU((double)(this.uo / 4.0F * 16.0F));
+		return this.sprite.getU(this.uo / 4.0F);
 	}
 
 	@Override
 	protected float getV0() {
-		return this.sprite.getV((double)(this.vo / 4.0F * 16.0F));
+		return this.sprite.getV(this.vo / 4.0F);
 	}
 
 	@Override
 	protected float getV1() {
-		return this.sprite.getV((double)((this.vo + 1.0F) / 4.0F * 16.0F));
+		return this.sprite.getV((this.vo + 1.0F) / 4.0F);
 	}
 
 	@Environment(EnvType.CLIENT)

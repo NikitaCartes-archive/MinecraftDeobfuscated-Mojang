@@ -76,7 +76,7 @@ public class KeyBindsScreen extends OptionsSubScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		this.keyBindsList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		boolean bl = false;
@@ -89,6 +89,10 @@ public class KeyBindsScreen extends OptionsSubScreen {
 		}
 
 		this.resetButton.active = bl;
-		super.render(guiGraphics, i, j, f);
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
 	}
 }

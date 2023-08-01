@@ -17,20 +17,19 @@ public class CompressionEncoder extends MessageToByteEncoder<ByteBuf> {
 
 	protected void encode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, ByteBuf byteBuf2) {
 		int i = byteBuf.readableBytes();
-		FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(byteBuf2);
 		if (i < this.threshold) {
-			friendlyByteBuf.writeVarInt(0);
-			friendlyByteBuf.writeBytes(byteBuf);
+			VarInt.write(byteBuf2, 0);
+			byteBuf2.writeBytes(byteBuf);
 		} else {
 			byte[] bs = new byte[i];
 			byteBuf.readBytes(bs);
-			friendlyByteBuf.writeVarInt(bs.length);
+			VarInt.write(byteBuf2, bs.length);
 			this.deflater.setInput(bs, 0, i);
 			this.deflater.finish();
 
 			while (!this.deflater.finished()) {
 				int j = this.deflater.deflate(this.encodeBuf);
-				friendlyByteBuf.writeBytes(this.encodeBuf, 0, j);
+				byteBuf2.writeBytes(this.encodeBuf, 0, j);
 			}
 
 			this.deflater.reset();

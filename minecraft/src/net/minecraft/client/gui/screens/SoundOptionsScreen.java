@@ -49,4 +49,9 @@ public class SoundOptionsScreen extends OptionsSubScreen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.basicListRender(guiGraphics, this.list, i, j, f);
 	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderDirtBackground(guiGraphics);
+	}
 }

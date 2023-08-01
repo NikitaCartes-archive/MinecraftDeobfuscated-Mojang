@@ -38,9 +38,8 @@ public class OutOfMemoryScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderBackground(guiGraphics);
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, this.height / 4 - 60 + 20, 16777215);
 		this.message.renderLeftAligned(guiGraphics, this.width / 2 - 145, this.height / 4, 9, 10526880);
-		super.render(guiGraphics, i, j, f);
 	}
 }

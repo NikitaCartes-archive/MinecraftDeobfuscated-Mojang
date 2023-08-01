@@ -2,6 +2,7 @@ package net.minecraft.server.network;
 
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Floats;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
@@ -29,10 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.CrashReportDetail;
-import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
@@ -47,7 +44,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
@@ -66,14 +62,13 @@ import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
-import net.minecraft.network.protocol.game.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
@@ -84,18 +79,18 @@ import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
+import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundJigsawGeneratePacket;
-import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
@@ -106,11 +101,9 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
-import net.minecraft.network.protocol.game.ServerboundPongPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
-import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.network.protocol.game.ServerboundSetBeaconPacket;
@@ -182,21 +175,20 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.slf4j.Logger;
 
-public class ServerGamePacketListenerImpl implements ServerPlayerConnection, TickablePacketListener, ServerGamePacketListener {
+public class ServerGamePacketListenerImpl
+	extends ServerCommonPacketListenerImpl
+	implements ServerGamePacketListener,
+	ServerPlayerConnection,
+	TickablePacketListener {
 	static final Logger LOGGER = LogUtils.getLogger();
-	private static final int LATENCY_CHECK_INTERVAL = 15000;
 	public static final double MAX_INTERACTION_DISTANCE = Mth.square(6.0);
 	private static final int NO_BLOCK_UPDATES_TO_ACK = -1;
 	private static final int TRACKED_MESSAGE_DISCONNECT_THRESHOLD = 4096;
 	private static final Component CHAT_VALIDATION_FAILED = Component.translatable("multiplayer.disconnect.chat_validation_failed");
-	private final Connection connection;
-	private final MinecraftServer server;
 	public ServerPlayer player;
+	public final PlayerChunkSender chunkSender;
 	private int tickCount;
 	private int ackBlockChangesUpTo = -1;
-	private long keepAliveTime;
-	private boolean keepAlivePending;
-	private long keepAliveChallenge;
 	private int chatSpamTickCount;
 	private int dropSpamTickCount;
 	private double firstGoodX;
@@ -230,14 +222,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	private final LastSeenMessagesValidator lastSeenMessages = new LastSeenMessagesValidator(20);
 	private final MessageSignatureCache messageSignatureCache = MessageSignatureCache.createDefault();
 	private final FutureChain chatMessageChain;
+	private boolean waitingForSwitchToConfig;
 
-	public ServerGamePacketListenerImpl(MinecraftServer minecraftServer, Connection connection, ServerPlayer serverPlayer) {
-		this.server = minecraftServer;
-		this.connection = connection;
+	public ServerGamePacketListenerImpl(MinecraftServer minecraftServer, Connection connection, ServerPlayer serverPlayer, int i) {
+		super(minecraftServer, connection, i);
+		this.chunkSender = new PlayerChunkSender(connection.isMemoryConnection());
 		connection.setListener(this);
 		this.player = serverPlayer;
 		serverPlayer.connection = this;
-		this.keepAliveTime = Util.getMillis();
 		serverPlayer.getTextFilter().join();
 		this.signedMessageDecoder = minecraftServer.enforceSecureProfile()
 			? SignedMessageChain.Decoder.REJECT_ALL
@@ -295,20 +287,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 			this.aboveGroundVehicleTickCount = 0;
 		}
 
-		this.server.getProfiler().push("keepAlive");
-		long l = Util.getMillis();
-		if (l - this.keepAliveTime >= 15000L) {
-			if (this.keepAlivePending) {
-				this.disconnect(Component.translatable("disconnect.timeout"));
-			} else {
-				this.keepAlivePending = true;
-				this.keepAliveTime = l;
-				this.keepAliveChallenge = l;
-				this.send(new ClientboundKeepAlivePacket(this.keepAliveChallenge));
-			}
-		}
-
-		this.server.getProfiler().pop();
+		this.keepConnectionAlive();
 		if (this.chatSpamTickCount > 0) {
 			this.chatSpamTickCount--;
 		}
@@ -335,17 +314,19 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 
 	@Override
 	public boolean isAcceptingMessages() {
-		return this.connection.isConnected();
+		return this.connection.isConnected() && !this.waitingForSwitchToConfig;
 	}
 
-	private boolean isSingleplayerOwner() {
-		return this.server.isSingleplayerOwner(this.player.getGameProfile());
+	@Override
+	public boolean shouldHandleMessage(Packet<?> packet) {
+		return super.shouldHandleMessage(packet)
+			? true
+			: this.waitingForSwitchToConfig && this.connection.isConnected() && packet instanceof ServerboundConfigurationAcknowledgedPacket;
 	}
 
-	public void disconnect(Component component) {
-		this.connection.send(new ClientboundDisconnectPacket(component), PacketSendListener.thenRun(() -> this.connection.disconnect(component)));
-		this.connection.setReadOnly();
-		this.server.executeBlocking(this.connection::handleDisconnection);
+	@Override
+	protected GameProfile playerProfile() {
+		return this.player.getGameProfile();
 	}
 
 	private <T, R> CompletableFuture<R> filterTextPacket(T object, BiFunction<TextFilter, T, CompletableFuture<R>> biFunction) {
@@ -1145,15 +1126,6 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	}
 
 	@Override
-	public void handleResourcePackResponse(ServerboundResourcePackPacket serverboundResourcePackPacket) {
-		PacketUtils.ensureRunningOnSameThread(serverboundResourcePackPacket, this, this.player.serverLevel());
-		if (serverboundResourcePackPacket.getAction() == ServerboundResourcePackPacket.Action.DECLINED && this.server.isResourcePackRequired()) {
-			LOGGER.info("Disconnecting {} due to resource pack rejection", this.player.getName());
-			this.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
-		}
-	}
-
-	@Override
 	public void handlePaddleBoat(ServerboundPaddleBoatPacket serverboundPaddleBoatPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPaddleBoatPacket, this, this.player.serverLevel());
 		if (this.player.getControlledVehicle() instanceof Boat boat) {
@@ -1162,13 +1134,14 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	}
 
 	@Override
-	public void handlePong(ServerboundPongPacket serverboundPongPacket) {
+	public void onDisconnect(Component component) {
+		LOGGER.info("{} lost connection: {}", this.player.getName().getString(), component.getString());
+		this.removePlayerFromWorld();
+		super.onDisconnect(component);
 	}
 
-	@Override
-	public void onDisconnect(Component component) {
+	private void removePlayerFromWorld() {
 		this.chatMessageChain.close();
-		LOGGER.info("{} lost connection: {}", this.player.getName().getString(), component.getString());
 		this.server.invalidateStatus();
 		this.server
 			.getPlayerList()
@@ -1176,10 +1149,6 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 		this.player.disconnect();
 		this.server.getPlayerList().remove(this.player);
 		this.player.getTextFilter().leave();
-		if (this.isSingleplayerOwner()) {
-			LOGGER.info("Stopping singleplayer server as player logged out");
-			this.server.halt(false);
-		}
 	}
 
 	public void ackBlockChangesUpTo(int i) {
@@ -1187,22 +1156,6 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 			throw new IllegalArgumentException("Expected packet sequence nr >= 0");
 		} else {
 			this.ackBlockChangesUpTo = Math.max(i, this.ackBlockChangesUpTo);
-		}
-	}
-
-	@Override
-	public void send(Packet<?> packet) {
-		this.send(packet, null);
-	}
-
-	public void send(Packet<?> packet, @Nullable PacketSendListener packetSendListener) {
-		try {
-			this.connection.send(packet, packetSendListener);
-		} catch (Throwable var6) {
-			CrashReport crashReport = CrashReport.forThrowable(var6, "Sending packet");
-			CrashReportCategory crashReportCategory = crashReport.addCategory("Packet being sent");
-			crashReportCategory.setDetail("Packet class", (CrashReportDetail<String>)(() -> packet.getClass().getCanonicalName()));
-			throw new ReportedException(crashReport);
 		}
 	}
 
@@ -1500,6 +1453,12 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 		return this.connection.getRemoteAddress();
 	}
 
+	public void switchToConfig() {
+		this.waitingForSwitchToConfig = true;
+		this.removePlayerFromWorld();
+		this.send(new ClientboundStartConfigurationPacket());
+	}
+
 	@Override
 	public void handleInteract(ServerboundInteractPacket serverboundInteractPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundInteractPacket, this, this.player.serverLevel());
@@ -1716,17 +1675,6 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	}
 
 	@Override
-	public void handleKeepAlive(ServerboundKeepAlivePacket serverboundKeepAlivePacket) {
-		if (this.keepAlivePending && serverboundKeepAlivePacket.getId() == this.keepAliveChallenge) {
-			int i = (int)(Util.getMillis() - this.keepAliveTime);
-			this.player.latency = (this.player.latency * 3 + i) / 4;
-			this.keepAlivePending = false;
-		} else if (!this.isSingleplayerOwner()) {
-			this.disconnect(Component.translatable("disconnect.timeout"));
-		}
-	}
-
-	@Override
 	public void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket serverboundPlayerAbilitiesPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPlayerAbilitiesPacket, this, this.player.serverLevel());
 		this.player.getAbilities().flying = serverboundPlayerAbilitiesPacket.isFlying() && this.player.getAbilities().mayfly;
@@ -1736,10 +1684,6 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 	public void handleClientInformation(ServerboundClientInformationPacket serverboundClientInformationPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundClientInformationPacket, this, this.player.serverLevel());
 		this.player.updateOptions(serverboundClientInformationPacket);
-	}
-
-	@Override
-	public void handleCustomPayload(ServerboundCustomPayloadPacket serverboundCustomPayloadPacket) {
 	}
 
 	@Override
@@ -1782,6 +1726,21 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
 				}
 			}
 		}
+	}
+
+	@Override
+	public void handleConfigurationAcknowledged(ServerboundConfigurationAcknowledgedPacket serverboundConfigurationAcknowledgedPacket) {
+		if (!this.waitingForSwitchToConfig) {
+			throw new IllegalStateException("Client acknowledged config, but none was requested");
+		} else {
+			this.connection.setListener(new ServerConfigurationPacketListenerImpl(this.server, this.connection, this.playerProfile()));
+		}
+	}
+
+	@Override
+	public void handleChunkBatchReceived(ServerboundChunkBatchReceivedPacket serverboundChunkBatchReceivedPacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundChunkBatchReceivedPacket, this, this.player.serverLevel());
+		this.chunkSender.onChunkBatchReceivedByClient(serverboundChunkBatchReceivedPacket.desiredBatchSize());
 	}
 
 	private void resetPlayerChatState(RemoteChatSession remoteChatSession) {

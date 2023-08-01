@@ -14,7 +14,6 @@ import net.minecraft.world.level.Level;
 public class SmithingTemplateItem extends Item {
 	private static final ChatFormatting TITLE_FORMAT = ChatFormatting.GRAY;
 	private static final ChatFormatting DESCRIPTION_FORMAT = ChatFormatting.BLUE;
-	private static final String DESCRIPTION_ID = Util.makeDescriptionId("item", new ResourceLocation("smithing_template"));
 	private static final Component INGREDIENTS_TITLE = Component.translatable(
 			Util.makeDescriptionId("item", new ResourceLocation("smithing_template.ingredients"))
 		)
@@ -175,10 +174,5 @@ public class SmithingTemplateItem extends Item {
 
 	public List<ResourceLocation> getAdditionalSlotEmptyIcons() {
 		return this.additionalSlotEmptyIcons;
-	}
-
-	@Override
-	public String getDescriptionId() {
-		return DESCRIPTION_ID;
 	}
 }

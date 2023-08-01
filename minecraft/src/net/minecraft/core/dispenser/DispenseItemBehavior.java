@@ -51,7 +51,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.BeehiveBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -401,9 +400,8 @@ public interface DispenseItemBehavior {
 				LevelAccessor levelAccessor = blockSource.getLevel();
 				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 				BlockState blockState = levelAccessor.getBlockState(blockPos);
-				Block block = blockState.getBlock();
-				if (block instanceof BucketPickup) {
-					ItemStack itemStack2 = ((BucketPickup)block).pickupBlock(levelAccessor, blockPos, blockState);
+				if (blockState.getBlock() instanceof BucketPickup bucketPickup) {
+					ItemStack itemStack2 = bucketPickup.pickupBlock(null, levelAccessor, blockPos, blockState);
 					if (itemStack2.isEmpty()) {
 						return super.execute(blockSource, itemStack);
 					} else {

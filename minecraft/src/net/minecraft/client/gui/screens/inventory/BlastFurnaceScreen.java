@@ -10,9 +10,11 @@ import net.minecraft.world.inventory.BlastFurnaceMenu;
 
 @Environment(EnvType.CLIENT)
 public class BlastFurnaceScreen extends AbstractFurnaceScreen<BlastFurnaceMenu> {
+	private static final ResourceLocation LIT_PROGRESS_SPRITE = new ResourceLocation("container/blast_furnace/lit_progress");
+	private static final ResourceLocation BURN_PROGRESS_SPRITE = new ResourceLocation("container/blast_furnace/burn_progress");
 	private static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/container/blast_furnace.png");
 
 	public BlastFurnaceScreen(BlastFurnaceMenu blastFurnaceMenu, Inventory inventory, Component component) {
-		super(blastFurnaceMenu, new BlastingRecipeBookComponent(), inventory, component, TEXTURE);
+		super(blastFurnaceMenu, new BlastingRecipeBookComponent(), inventory, component, TEXTURE, LIT_PROGRESS_SPRITE, BURN_PROGRESS_SPRITE);
 	}
 }
