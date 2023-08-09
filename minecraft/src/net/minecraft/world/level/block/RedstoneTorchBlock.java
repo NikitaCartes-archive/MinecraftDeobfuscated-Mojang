@@ -117,8 +117,7 @@ public class RedstoneTorchBlock extends TorchBlock {
 
 		int i = 0;
 
-		for (int j = 0; j < list.size(); j++) {
-			RedstoneTorchBlock.Toggle toggle = (RedstoneTorchBlock.Toggle)list.get(j);
+		for (RedstoneTorchBlock.Toggle toggle : list) {
 			if (toggle.pos.equals(blockPos)) {
 				if (++i >= 8) {
 					return true;

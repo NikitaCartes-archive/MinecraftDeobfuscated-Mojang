@@ -81,18 +81,7 @@ public abstract class RenderType extends RenderStateShard {
 		translucentState(RENDERTYPE_TRANSLUCENT_NO_CRUMBLING_SHADER)
 	);
 	private static final Function<ResourceLocation, RenderType> ARMOR_CUTOUT_NO_CULL = Util.memoize(
-		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
-			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
-				.setShaderState(RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
-				.setTransparencyState(NO_TRANSPARENCY)
-				.setCullState(NO_CULL)
-				.setLightmapState(LIGHTMAP)
-				.setOverlayState(OVERLAY)
-				.setLayeringState(VIEW_OFFSET_Z_LAYERING)
-				.createCompositeState(true);
-			return create("armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, compositeState);
-		})
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> createArmorCutoutNoCull("armor_cutout_no_cull", resourceLocation, false))
 	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_SOLID = Util.memoize(
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
@@ -807,8 +796,26 @@ public abstract class RenderType extends RenderStateShard {
 		return TRANSLUCENT_NO_CRUMBLING;
 	}
 
+	private static RenderType.CompositeRenderType createArmorCutoutNoCull(String string, ResourceLocation resourceLocation, boolean bl) {
+		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setShaderState(RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTransparencyState(NO_TRANSPARENCY)
+			.setCullState(NO_CULL)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.setDepthTestState(bl ? EQUAL_DEPTH_TEST : LEQUAL_DEPTH_TEST)
+			.createCompositeState(true);
+		return create(string, DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, compositeState);
+	}
+
 	public static RenderType armorCutoutNoCull(ResourceLocation resourceLocation) {
 		return (RenderType)ARMOR_CUTOUT_NO_CULL.apply(resourceLocation);
+	}
+
+	public static RenderType createArmorDecalCutoutNoCull(ResourceLocation resourceLocation) {
+		return createArmorCutoutNoCull("armor_decal_cutout_no_cull", resourceLocation, true);
 	}
 
 	public static RenderType entitySolid(ResourceLocation resourceLocation) {

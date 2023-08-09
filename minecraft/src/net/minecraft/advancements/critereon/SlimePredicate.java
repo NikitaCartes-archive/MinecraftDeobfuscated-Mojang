@@ -1,33 +1,22 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.phys.Vec3;
 
-public class SlimePredicate implements EntitySubPredicate {
-	private final MinMaxBounds.Ints size;
-
-	private SlimePredicate(MinMaxBounds.Ints ints) {
-		this.size = ints;
-	}
+public record SlimePredicate(MinMaxBounds.Ints size) implements EntitySubPredicate {
+	public static final MapCodec<SlimePredicate> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "size", MinMaxBounds.Ints.ANY).forGetter(SlimePredicate::size))
+				.apply(instance, SlimePredicate::new)
+	);
 
 	public static SlimePredicate sized(MinMaxBounds.Ints ints) {
 		return new SlimePredicate(ints);
-	}
-
-	public static SlimePredicate fromJson(JsonObject jsonObject) {
-		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("size"));
-		return new SlimePredicate(ints);
-	}
-
-	@Override
-	public JsonObject serializeCustomData() {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.add("size", this.size.serializeToJson());
-		return jsonObject;
 	}
 
 	@Override

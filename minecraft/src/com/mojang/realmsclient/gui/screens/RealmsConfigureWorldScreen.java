@@ -14,6 +14,7 @@ import com.mojang.realmsclient.util.task.OpenServerTask;
 import com.mojang.realmsclient.util.task.SwitchMinigameTask;
 import com.mojang.realmsclient.util.task.SwitchSlotTask;
 import java.util.List;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -385,49 +386,38 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 
 	private void drawServerStatus(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		if (this.serverData.expired) {
-			this.drawExpired(guiGraphics, i, j, k, l);
+			this.drawRealmStatus(guiGraphics, i, j, k, l, EXPIRED_SPRITE, () -> SERVER_EXPIRED_TOOLTIP);
 		} else if (this.serverData.state == RealmsServer.State.CLOSED) {
-			this.drawClose(guiGraphics, i, j, k, l);
+			this.drawRealmStatus(guiGraphics, i, j, k, l, CLOSED_SPRITE, () -> SERVER_CLOSED_TOOLTIP);
 		} else if (this.serverData.state == RealmsServer.State.OPEN) {
 			if (this.serverData.daysLeft < 7) {
-				this.drawExpiring(guiGraphics, i, j, k, l, this.serverData.daysLeft);
+				this.drawRealmStatus(
+					guiGraphics,
+					i,
+					j,
+					k,
+					l,
+					EXPIRES_SOON_SPRITE,
+					() -> {
+						if (this.serverData.daysLeft <= 0) {
+							return SERVER_EXPIRING_SOON_TOOLTIP;
+						} else {
+							return (Component)(this.serverData.daysLeft == 1
+								? SERVER_EXPIRING_IN_DAY_TOOLTIP
+								: Component.translatable("mco.selectServer.expires.days", this.serverData.daysLeft));
+						}
+					}
+				);
 			} else {
-				this.drawOpen(guiGraphics, i, j, k, l);
+				this.drawRealmStatus(guiGraphics, i, j, k, l, OPEN_SPRITE, () -> SERVER_OPEN_TOOLTIP);
 			}
 		}
 	}
 
-	private void drawExpired(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blitSprite(EXPIRED_SPRITE, i, j, 10, 28);
+	private void drawRealmStatus(GuiGraphics guiGraphics, int i, int j, int k, int l, ResourceLocation resourceLocation, Supplier<Component> supplier) {
+		guiGraphics.blitSprite(resourceLocation, i, j, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
-			this.toolTip = SERVER_EXPIRED_TOOLTIP;
-		}
-	}
-
-	private void drawExpiring(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
-		guiGraphics.blitSprite(EXPIRES_SOON_SPRITE, i, j, 10, 28);
-		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
-			if (m <= 0) {
-				this.toolTip = SERVER_EXPIRING_SOON_TOOLTIP;
-			} else if (m == 1) {
-				this.toolTip = SERVER_EXPIRING_IN_DAY_TOOLTIP;
-			} else {
-				this.toolTip = Component.translatable("mco.selectServer.expires.days", m);
-			}
-		}
-	}
-
-	private void drawOpen(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blitSprite(OPEN_SPRITE, i, j, 10, 28);
-		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
-			this.toolTip = SERVER_OPEN_TOOLTIP;
-		}
-	}
-
-	private void drawClose(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blitSprite(CLOSED_SPRITE, i, j, 10, 28);
-		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
-			this.toolTip = SERVER_CLOSED_TOOLTIP;
+			this.toolTip = (Component)supplier.get();
 		}
 	}
 

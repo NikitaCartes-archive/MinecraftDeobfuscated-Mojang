@@ -335,8 +335,7 @@ public abstract class AbstractMinecart extends Entity {
 			if (this.getMinecartType() == AbstractMinecart.Type.RIDEABLE && this.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
 				List<Entity> list = this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, 0.0, 0.2F), EntitySelector.pushableBy(this));
 				if (!list.isEmpty()) {
-					for (int l = 0; l < list.size(); l++) {
-						Entity entity = (Entity)list.get(l);
+					for (Entity entity : list) {
 						if (!(entity instanceof Player) && !(entity instanceof IronGolem) && !(entity instanceof AbstractMinecart) && !this.isVehicle() && !entity.isPassenger()) {
 							entity.startRiding(this);
 						} else {

@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -16,11 +17,11 @@ public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigge
 	}
 
 	public TargetBlockTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("signal_strength"));
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "projectile", deserializationContext);
-		return new TargetBlockTrigger.TriggerInstance(contextAwarePredicate, ints, contextAwarePredicate2);
+		Optional<ContextAwarePredicate> optional2 = EntityPredicate.fromJson(jsonObject, "projectile", deserializationContext);
+		return new TargetBlockTrigger.TriggerInstance(optional, ints, optional2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Entity entity, Vec3 vec3, int i) {
@@ -30,28 +31,28 @@ public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigge
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final MinMaxBounds.Ints signalStrength;
-		private final ContextAwarePredicate projectile;
+		private final Optional<ContextAwarePredicate> projectile;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, MinMaxBounds.Ints ints, ContextAwarePredicate contextAwarePredicate2) {
-			super(TargetBlockTrigger.ID, contextAwarePredicate);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, MinMaxBounds.Ints ints, Optional<ContextAwarePredicate> optional2) {
+			super(TargetBlockTrigger.ID, optional);
 			this.signalStrength = ints;
-			this.projectile = contextAwarePredicate2;
+			this.projectile = optional2;
 		}
 
-		public static TargetBlockTrigger.TriggerInstance targetHit(MinMaxBounds.Ints ints, ContextAwarePredicate contextAwarePredicate) {
-			return new TargetBlockTrigger.TriggerInstance(ContextAwarePredicate.ANY, ints, contextAwarePredicate);
+		public static TargetBlockTrigger.TriggerInstance targetHit(MinMaxBounds.Ints ints, Optional<ContextAwarePredicate> optional) {
+			return new TargetBlockTrigger.TriggerInstance(Optional.empty(), ints, optional);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
 			jsonObject.add("signal_strength", this.signalStrength.serializeToJson());
-			jsonObject.add("projectile", this.projectile.toJson(serializationContext));
+			this.projectile.ifPresent(contextAwarePredicate -> jsonObject.add("projectile", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 
 		public boolean matches(LootContext lootContext, Vec3 vec3, int i) {
-			return !this.signalStrength.matches(i) ? false : this.projectile.matches(lootContext);
+			return !this.signalStrength.matches(i) ? false : !this.projectile.isPresent() || ((ContextAwarePredicate)this.projectile.get()).matches(lootContext);
 		}
 	}
 }

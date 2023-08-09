@@ -1,47 +1,24 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import javax.annotation.Nullable;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 
-public class LightPredicate {
-	public static final LightPredicate ANY = new LightPredicate(MinMaxBounds.Ints.ANY);
-	private final MinMaxBounds.Ints composite;
+public record LightPredicate(MinMaxBounds.Ints composite) {
+	public static final Codec<LightPredicate> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "light", MinMaxBounds.Ints.ANY).forGetter(LightPredicate::composite))
+				.apply(instance, LightPredicate::new)
+	);
 
-	LightPredicate(MinMaxBounds.Ints ints) {
-		this.composite = ints;
+	static Optional<LightPredicate> of(MinMaxBounds.Ints ints) {
+		return ints.isAny() ? Optional.empty() : Optional.of(new LightPredicate(ints));
 	}
 
 	public boolean matches(ServerLevel serverLevel, BlockPos blockPos) {
-		if (this == ANY) {
-			return true;
-		} else {
-			return !serverLevel.isLoaded(blockPos) ? false : this.composite.matches(serverLevel.getMaxLocalRawBrightness(blockPos));
-		}
-	}
-
-	public JsonElement serializeToJson() {
-		if (this == ANY) {
-			return JsonNull.INSTANCE;
-		} else {
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.add("light", this.composite.serializeToJson());
-			return jsonObject;
-		}
-	}
-
-	public static LightPredicate fromJson(@Nullable JsonElement jsonElement) {
-		if (jsonElement != null && !jsonElement.isJsonNull()) {
-			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "light");
-			MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("light"));
-			return new LightPredicate(ints);
-		} else {
-			return ANY;
-		}
+		return !serverLevel.isLoaded(blockPos) ? false : this.composite.matches(serverLevel.getMaxLocalRawBrightness(blockPos));
 	}
 
 	public static class Builder {
@@ -56,8 +33,8 @@ public class LightPredicate {
 			return this;
 		}
 
-		public LightPredicate build() {
-			return new LightPredicate(this.composite);
+		public Optional<LightPredicate> build() {
+			return LightPredicate.of(this.composite);
 		}
 	}
 }

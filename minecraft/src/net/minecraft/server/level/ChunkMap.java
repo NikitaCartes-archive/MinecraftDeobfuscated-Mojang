@@ -1162,7 +1162,6 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	protected void tick() {
 		for (ServerPlayer serverPlayer : this.playerMap.getAllPlayers()) {
 			this.updateChunkTracking(serverPlayer);
-			serverPlayer.connection.chunkSender.sendNextChunks(serverPlayer);
 		}
 
 		List<ServerPlayer> list = Lists.<ServerPlayer>newArrayList();

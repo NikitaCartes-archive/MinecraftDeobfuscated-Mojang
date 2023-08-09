@@ -1,7 +1,8 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -9,8 +10,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class ApplyExplosionDecay extends LootItemConditionalFunction {
-	ApplyExplosionDecay(LootItemCondition[] lootItemConditions) {
-		super(lootItemConditions);
+	public static final Codec<ApplyExplosionDecay> CODEC = RecordCodecBuilder.create(instance -> commonFields(instance).apply(instance, ApplyExplosionDecay::new));
+
+	private ApplyExplosionDecay(List<LootItemCondition> list) {
+		super(list);
 	}
 
 	@Override
@@ -41,11 +44,5 @@ public class ApplyExplosionDecay extends LootItemConditionalFunction {
 
 	public static LootItemConditionalFunction.Builder<?> explosionDecay() {
 		return simpleBuilder(ApplyExplosionDecay::new);
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<ApplyExplosionDecay> {
-		public ApplyExplosionDecay deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-			return new ApplyExplosionDecay(lootItemConditions);
-		}
 	}
 }

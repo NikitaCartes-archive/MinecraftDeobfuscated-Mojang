@@ -379,7 +379,7 @@ public final class NaturalSpawner {
 
 			while (randomSource.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
 				Optional<MobSpawnSettings.SpawnerData> optional = weightedRandomList.getRandom(randomSource);
-				if (optional.isPresent()) {
+				if (!optional.isEmpty()) {
 					MobSpawnSettings.SpawnerData spawnerData = (MobSpawnSettings.SpawnerData)optional.get();
 					int k = spawnerData.minCount + randomSource.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
 					SpawnGroupData spawnGroupData = null;

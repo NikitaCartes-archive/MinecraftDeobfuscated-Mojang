@@ -5,6 +5,8 @@ import com.google.common.hash.HashingOutputStream;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,6 +32,11 @@ public interface DataProvider {
 	CompletableFuture<?> run(CachedOutput cachedOutput);
 
 	String getName();
+
+	static <T> CompletableFuture<?> saveStable(CachedOutput cachedOutput, Codec<T> codec, T object, Path path) {
+		JsonElement jsonElement = Util.getOrThrow(codec.encodeStart(JsonOps.INSTANCE, object), IllegalStateException::new);
+		return saveStable(cachedOutput, jsonElement, path);
+	}
 
 	static CompletableFuture<?> saveStable(CachedOutput cachedOutput, JsonElement jsonElement, Path path) {
 		return CompletableFuture.runAsync(() -> {

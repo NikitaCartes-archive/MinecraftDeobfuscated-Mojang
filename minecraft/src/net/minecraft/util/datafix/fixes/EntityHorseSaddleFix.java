@@ -22,7 +22,7 @@ public class EntityHorseSaddleFix extends NamedEntityFix {
 		OpticFinder<?> opticFinder2 = DSL.fieldFinder("SaddleItem", type);
 		Optional<? extends Typed<?>> optional = typed.getOptionalTyped(opticFinder2);
 		Dynamic<?> dynamic = typed.get(DSL.remainderFinder());
-		if (!optional.isPresent() && dynamic.get("Saddle").asBoolean(false)) {
+		if (optional.isEmpty() && dynamic.get("Saddle").asBoolean(false)) {
 			Typed<?> typed2 = (Typed<?>)type.pointTyped(typed.getOps()).orElseThrow(IllegalStateException::new);
 			typed2 = typed2.set(opticFinder, Pair.of(References.ITEM_NAME.typeName(), "minecraft:saddle"));
 			Dynamic<?> dynamic2 = dynamic.emptyMap();

@@ -79,22 +79,22 @@ public class JigsawBlockEditScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.poolEdit = new EditBox(this.font, this.width / 2 - 152, 20, 300, 20, Component.translatable("jigsaw_block.pool"));
+		this.poolEdit = new EditBox(this.font, this.width / 2 - 153, 20, 300, 20, Component.translatable("jigsaw_block.pool"));
 		this.poolEdit.setMaxLength(128);
 		this.poolEdit.setValue(this.jigsawEntity.getPool().location().toString());
 		this.poolEdit.setResponder(string -> this.updateValidity());
 		this.addWidget(this.poolEdit);
-		this.nameEdit = new EditBox(this.font, this.width / 2 - 152, 55, 300, 20, Component.translatable("jigsaw_block.name"));
+		this.nameEdit = new EditBox(this.font, this.width / 2 - 153, 55, 300, 20, Component.translatable("jigsaw_block.name"));
 		this.nameEdit.setMaxLength(128);
 		this.nameEdit.setValue(this.jigsawEntity.getName().toString());
 		this.nameEdit.setResponder(string -> this.updateValidity());
 		this.addWidget(this.nameEdit);
-		this.targetEdit = new EditBox(this.font, this.width / 2 - 152, 90, 300, 20, Component.translatable("jigsaw_block.target"));
+		this.targetEdit = new EditBox(this.font, this.width / 2 - 153, 90, 300, 20, Component.translatable("jigsaw_block.target"));
 		this.targetEdit.setMaxLength(128);
 		this.targetEdit.setValue(this.jigsawEntity.getTarget().toString());
 		this.targetEdit.setResponder(string -> this.updateValidity());
 		this.addWidget(this.targetEdit);
-		this.finalStateEdit = new EditBox(this.font, this.width / 2 - 152, 125, 300, 20, Component.translatable("jigsaw_block.final_state"));
+		this.finalStateEdit = new EditBox(this.font, this.width / 2 - 153, 125, 300, 20, Component.translatable("jigsaw_block.final_state"));
 		this.finalStateEdit.setMaxLength(256);
 		this.finalStateEdit.setValue(this.jigsawEntity.getFinalState());
 		this.addWidget(this.finalStateEdit);

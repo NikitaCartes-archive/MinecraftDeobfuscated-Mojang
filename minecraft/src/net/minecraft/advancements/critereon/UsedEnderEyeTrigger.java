@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,10 +15,10 @@ public class UsedEnderEyeTrigger extends SimpleCriterionTrigger<UsedEnderEyeTrig
 	}
 
 	public UsedEnderEyeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		MinMaxBounds.Doubles doubles = MinMaxBounds.Doubles.fromJson(jsonObject.get("distance"));
-		return new UsedEnderEyeTrigger.TriggerInstance(contextAwarePredicate, doubles);
+		return new UsedEnderEyeTrigger.TriggerInstance(optional, doubles);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, BlockPos blockPos) {
@@ -30,8 +31,8 @@ public class UsedEnderEyeTrigger extends SimpleCriterionTrigger<UsedEnderEyeTrig
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final MinMaxBounds.Doubles level;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, MinMaxBounds.Doubles doubles) {
-			super(UsedEnderEyeTrigger.ID, contextAwarePredicate);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, MinMaxBounds.Doubles doubles) {
+			super(UsedEnderEyeTrigger.ID, optional);
 			this.level = doubles;
 		}
 

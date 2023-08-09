@@ -191,33 +191,32 @@ public class Explosion {
 		List<Entity> list = this.level.getEntities(this.source, new AABB((double)k, (double)r, (double)t, (double)lx, (double)s, (double)u));
 		Vec3 vec3 = new Vec3(this.x, this.y, this.z);
 
-		for (int v = 0; v < list.size(); v++) {
-			Entity entity = (Entity)list.get(v);
+		for (Entity entity : list) {
 			if (!entity.ignoreExplosion()) {
-				double w = Math.sqrt(entity.distanceToSqr(vec3)) / (double)q;
-				if (w <= 1.0) {
-					double x = entity.getX() - this.x;
-					double y = (entity instanceof PrimedTnt ? entity.getY() : entity.getEyeY()) - this.y;
-					double z = entity.getZ() - this.z;
-					double aa = Math.sqrt(x * x + y * y + z * z);
-					if (aa != 0.0) {
-						x /= aa;
-						y /= aa;
-						z /= aa;
-						double ab = (double)getSeenPercent(vec3, entity);
-						double ac = (1.0 - w) * ab;
-						entity.hurt(this.getDamageSource(), (float)((int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0)));
-						double ad;
+				double v = Math.sqrt(entity.distanceToSqr(vec3)) / (double)q;
+				if (v <= 1.0) {
+					double w = entity.getX() - this.x;
+					double x = (entity instanceof PrimedTnt ? entity.getY() : entity.getEyeY()) - this.y;
+					double y = entity.getZ() - this.z;
+					double z = Math.sqrt(w * w + x * x + y * y);
+					if (z != 0.0) {
+						w /= z;
+						x /= z;
+						y /= z;
+						double aa = (double)getSeenPercent(vec3, entity);
+						double ab = (1.0 - v) * aa;
+						entity.hurt(this.getDamageSource(), (float)((int)((ab * ab + ab) / 2.0 * 7.0 * (double)q + 1.0)));
+						double ac;
 						if (entity instanceof LivingEntity livingEntity) {
-							ad = ProtectionEnchantment.getExplosionKnockbackAfterDampener(livingEntity, ac);
+							ac = ProtectionEnchantment.getExplosionKnockbackAfterDampener(livingEntity, ab);
 						} else {
-							ad = ac;
+							ac = ab;
 						}
 
-						x *= ad;
-						y *= ad;
-						z *= ad;
-						Vec3 vec32 = new Vec3(x, y, z);
+						w *= ac;
+						x *= ac;
+						y *= ac;
+						Vec3 vec32 = new Vec3(w, x, y);
 						entity.setDeltaMovement(entity.getDeltaMovement().add(vec32));
 						if (entity instanceof Player) {
 							Player player = (Player)entity;

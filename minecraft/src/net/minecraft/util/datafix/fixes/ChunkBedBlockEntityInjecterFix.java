@@ -54,13 +54,11 @@ public class ChunkBedBlockEntityInjecterFix extends DataFix {
 					int ix = dynamic.get("xPos").asInt(0);
 					int j = dynamic.get("zPos").asInt(0);
 					List<TE> list = Lists.<TE>newArrayList(typed2.getOrCreate(opticFinder2));
-					List<? extends Dynamic<?>> list2 = dynamic.get("Sections").asList(Function.identity());
 
-					for (int k = 0; k < list2.size(); k++) {
-						Dynamic<?> dynamic2 = (Dynamic<?>)list2.get(k);
-						int l = dynamic2.get("Y").asInt(0);
-						Streams.mapWithIndex(dynamic2.get("Blocks").asIntStream(), (lx, m) -> {
-								if (416 == (lx & 0xFF) << 4) {
+					for (Dynamic<?> dynamic2 : dynamic.get("Sections").asList(Function.identity())) {
+						int k = dynamic2.get("Y").asInt(0);
+						Streams.mapWithIndex(dynamic2.get("Blocks").asIntStream(), (l, m) -> {
+								if (416 == (l & 0xFF) << 4) {
 									int n = (int)m;
 									int o = n & 15;
 									int p = n >> 8 & 15;
@@ -68,7 +66,7 @@ public class ChunkBedBlockEntityInjecterFix extends DataFix {
 									Map<Dynamic<?>, Dynamic<?>> map = Maps.<Dynamic<?>, Dynamic<?>>newHashMap();
 									map.put(dynamic2.createString("id"), dynamic2.createString("minecraft:bed"));
 									map.put(dynamic2.createString("x"), dynamic2.createInt(o + (ix << 4)));
-									map.put(dynamic2.createString("y"), dynamic2.createInt(p + (l << 4)));
+									map.put(dynamic2.createString("y"), dynamic2.createInt(p + (k << 4)));
 									map.put(dynamic2.createString("z"), dynamic2.createInt(q + (j << 4)));
 									map.put(dynamic2.createString("color"), dynamic2.createShort((short)14));
 									return map;

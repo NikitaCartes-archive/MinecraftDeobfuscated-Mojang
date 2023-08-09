@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -14,10 +15,10 @@ public class LootTableTrigger extends SimpleCriterionTrigger<LootTableTrigger.Tr
 	}
 
 	protected LootTableTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "loot_table"));
-		return new LootTableTrigger.TriggerInstance(contextAwarePredicate, resourceLocation);
+		return new LootTableTrigger.TriggerInstance(optional, resourceLocation);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ResourceLocation resourceLocation) {
@@ -27,13 +28,13 @@ public class LootTableTrigger extends SimpleCriterionTrigger<LootTableTrigger.Tr
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ResourceLocation lootTable;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ResourceLocation resourceLocation) {
-			super(LootTableTrigger.ID, contextAwarePredicate);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, ResourceLocation resourceLocation) {
+			super(LootTableTrigger.ID, optional);
 			this.lootTable = resourceLocation;
 		}
 
 		public static LootTableTrigger.TriggerInstance lootTableUsed(ResourceLocation resourceLocation) {
-			return new LootTableTrigger.TriggerInstance(ContextAwarePredicate.ANY, resourceLocation);
+			return new LootTableTrigger.TriggerInstance(Optional.empty(), resourceLocation);
 		}
 
 		public boolean matches(ResourceLocation resourceLocation) {
@@ -41,8 +42,8 @@ public class LootTableTrigger extends SimpleCriterionTrigger<LootTableTrigger.Tr
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
 			jsonObject.addProperty("loot_table", this.lootTable.toString());
 			return jsonObject;
 		}

@@ -22,9 +22,8 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	private static final ResourceLocation SLIDER_HANDLE_SPRITE = new ResourceLocation("widget/slider_handle");
 	private static final ResourceLocation SLIDER_HANDLE_HIGHLIGHTED_SPRITE = new ResourceLocation("widget/slider_handle_highlighted");
 	protected static final int TEXT_MARGIN = 2;
-	private static final int HEIGHT = 20;
-	private static final int HANDLE_HALF_WIDTH = 4;
 	private static final int HANDLE_WIDTH = 8;
+	private static final int HANDLE_HALF_WIDTH = 4;
 	protected double value;
 	private boolean canChangeValue;
 
@@ -66,7 +65,7 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableDepthTest();
 		guiGraphics.blitSprite(this.getSprite(), this.getX(), this.getY(), this.getWidth(), this.getHeight());
-		guiGraphics.blitSprite(this.getHandleSprite(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, 20);
+		guiGraphics.blitSprite(this.getHandleSprite(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, this.getHeight());
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		int k = this.active ? 16777215 : 10526880;
 		this.renderScrollingString(guiGraphics, minecraft.font, 2, k | Mth.ceil(this.alpha * 255.0F) << 24);

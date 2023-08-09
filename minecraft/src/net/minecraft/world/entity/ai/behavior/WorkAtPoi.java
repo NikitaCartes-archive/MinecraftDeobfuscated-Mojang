@@ -46,7 +46,7 @@ public class WorkAtPoi extends Behavior<Villager> {
 
 	protected boolean canStillUse(ServerLevel serverLevel, Villager villager, long l) {
 		Optional<GlobalPos> optional = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE);
-		if (!optional.isPresent()) {
+		if (optional.isEmpty()) {
 			return false;
 		} else {
 			GlobalPos globalPos = (GlobalPos)optional.get();

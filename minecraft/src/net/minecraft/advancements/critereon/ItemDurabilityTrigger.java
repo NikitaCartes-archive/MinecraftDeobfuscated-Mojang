@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -14,12 +15,12 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 	}
 
 	public ItemDurabilityTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
+		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("item"));
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("durability"));
 		MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject.get("delta"));
-		return new ItemDurabilityTrigger.TriggerInstance(contextAwarePredicate, itemPredicate, ints, ints2);
+		return new ItemDurabilityTrigger.TriggerInstance(optional, optional2, ints, ints2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, int i) {
@@ -27,29 +28,29 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ItemPredicate item;
+		private final Optional<ItemPredicate> item;
 		private final MinMaxBounds.Ints durability;
 		private final MinMaxBounds.Ints delta;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2) {
-			super(ItemDurabilityTrigger.ID, contextAwarePredicate);
-			this.item = itemPredicate;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2) {
+			super(ItemDurabilityTrigger.ID, optional);
+			this.item = optional2;
 			this.durability = ints;
 			this.delta = ints2;
 		}
 
-		public static ItemDurabilityTrigger.TriggerInstance changedDurability(ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
-			return changedDurability(ContextAwarePredicate.ANY, itemPredicate, ints);
+		public static ItemDurabilityTrigger.TriggerInstance changedDurability(Optional<ItemPredicate> optional, MinMaxBounds.Ints ints) {
+			return changedDurability(Optional.empty(), optional, ints);
 		}
 
 		public static ItemDurabilityTrigger.TriggerInstance changedDurability(
-			ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, MinMaxBounds.Ints ints
+			Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, MinMaxBounds.Ints ints
 		) {
-			return new ItemDurabilityTrigger.TriggerInstance(contextAwarePredicate, itemPredicate, ints, MinMaxBounds.Ints.ANY);
+			return new ItemDurabilityTrigger.TriggerInstance(optional, optional2, ints, MinMaxBounds.Ints.ANY);
 		}
 
 		public boolean matches(ItemStack itemStack, int i) {
-			if (!this.item.matches(itemStack)) {
+			if (this.item.isPresent() && !((ItemPredicate)this.item.get()).matches(itemStack)) {
 				return false;
 			} else {
 				return !this.durability.matches(itemStack.getMaxDamage() - i) ? false : this.delta.matches(itemStack.getDamageValue() - i);
@@ -57,9 +58,9 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("item", this.item.serializeToJson());
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
 			jsonObject.add("durability", this.durability.serializeToJson());
 			jsonObject.add("delta", this.delta.serializeToJson());
 			return jsonObject;

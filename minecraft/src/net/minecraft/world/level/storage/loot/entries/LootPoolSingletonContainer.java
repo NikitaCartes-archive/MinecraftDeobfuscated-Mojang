@@ -1,13 +1,14 @@
 package net.minecraft.world.level.storage.loot.entries;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.Products.P4;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -16,14 +17,13 @@ import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import org.apache.commons.lang3.ArrayUtils;
 
 public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer {
 	public static final int DEFAULT_WEIGHT = 1;
 	public static final int DEFAULT_QUALITY = 0;
 	protected final int weight;
 	protected final int quality;
-	protected final LootItemFunction[] functions;
+	protected final List<LootItemFunction> functions;
 	final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
 	private final LootPoolEntry entry = new LootPoolSingletonContainer.EntryBase() {
 		@Override
@@ -34,20 +34,34 @@ public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer 
 		}
 	};
 
-	protected LootPoolSingletonContainer(int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
-		super(lootItemConditions);
+	protected LootPoolSingletonContainer(int i, int j, List<LootItemCondition> list, List<LootItemFunction> list2) {
+		super(list);
 		this.weight = i;
 		this.quality = j;
-		this.functions = lootItemFunctions;
-		this.compositeFunction = LootItemFunctions.compose(lootItemFunctions);
+		this.functions = list2;
+		this.compositeFunction = LootItemFunctions.compose(list2);
+	}
+
+	protected static <T extends LootPoolSingletonContainer> P4<Mu<T>, Integer, Integer, List<LootItemCondition>, List<LootItemFunction>> singletonFields(
+		Instance<T> instance
+	) {
+		return instance.group(
+				ExtraCodecs.strictOptionalField(Codec.INT, "weight", 1).forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.weight),
+				ExtraCodecs.strictOptionalField(Codec.INT, "quality", 0).forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.quality)
+			)
+			.and(commonFields(instance).t1())
+			.and(
+				ExtraCodecs.strictOptionalField(LootItemFunctions.CODEC.listOf(), "functions", List.of())
+					.forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.functions)
+			);
 	}
 
 	@Override
 	public void validate(ValidationContext validationContext) {
 		super.validate(validationContext);
 
-		for (int i = 0; i < this.functions.length; i++) {
-			this.functions[i].validate(validationContext.forChild(".functions[" + i + "]"));
+		for (int i = 0; i < this.functions.size(); i++) {
+			((LootItemFunction)this.functions.get(i)).validate(validationContext.forChild(".functions[" + i + "]"));
 		}
 	}
 
@@ -72,15 +86,15 @@ public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer 
 		implements FunctionUserBuilder<T> {
 		protected int weight = 1;
 		protected int quality = 0;
-		private final List<LootItemFunction> functions = Lists.<LootItemFunction>newArrayList();
+		private final ImmutableList.Builder<LootItemFunction> functions = ImmutableList.builder();
 
 		public T apply(LootItemFunction.Builder builder) {
 			this.functions.add(builder.build());
 			return this.getThis();
 		}
 
-		protected LootItemFunction[] getFunctions() {
-			return (LootItemFunction[])this.functions.toArray(new LootItemFunction[0]);
+		protected List<LootItemFunction> getFunctions() {
+			return this.functions.build();
 		}
 
 		public T setWeight(int i) {
@@ -120,40 +134,6 @@ public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer 
 
 	@FunctionalInterface
 	protected interface EntryConstructor {
-		LootPoolSingletonContainer build(int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions);
-	}
-
-	public abstract static class Serializer<T extends LootPoolSingletonContainer> extends LootPoolEntryContainer.Serializer<T> {
-		public void serializeCustom(JsonObject jsonObject, T lootPoolSingletonContainer, JsonSerializationContext jsonSerializationContext) {
-			if (lootPoolSingletonContainer.weight != 1) {
-				jsonObject.addProperty("weight", lootPoolSingletonContainer.weight);
-			}
-
-			if (lootPoolSingletonContainer.quality != 0) {
-				jsonObject.addProperty("quality", lootPoolSingletonContainer.quality);
-			}
-
-			if (!ArrayUtils.isEmpty((Object[])lootPoolSingletonContainer.functions)) {
-				jsonObject.add("functions", jsonSerializationContext.serialize(lootPoolSingletonContainer.functions));
-			}
-		}
-
-		public final T deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-			int i = GsonHelper.getAsInt(jsonObject, "weight", 1);
-			int j = GsonHelper.getAsInt(jsonObject, "quality", 0);
-			LootItemFunction[] lootItemFunctions = GsonHelper.getAsObject(
-				jsonObject, "functions", new LootItemFunction[0], jsonDeserializationContext, LootItemFunction[].class
-			);
-			return this.deserialize(jsonObject, jsonDeserializationContext, i, j, lootItemConditions, lootItemFunctions);
-		}
-
-		protected abstract T deserialize(
-			JsonObject jsonObject,
-			JsonDeserializationContext jsonDeserializationContext,
-			int i,
-			int j,
-			LootItemCondition[] lootItemConditions,
-			LootItemFunction[] lootItemFunctions
-		);
+		LootPoolSingletonContainer build(int i, int j, List<LootItemCondition> list, List<LootItemFunction> list2);
 	}
 }

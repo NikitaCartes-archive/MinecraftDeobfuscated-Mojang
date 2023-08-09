@@ -92,7 +92,7 @@ public class GameTestRegistry {
 
 	public static TestFunction getTestFunction(String string) {
 		Optional<TestFunction> optional = findTestFunction(string);
-		if (!optional.isPresent()) {
+		if (optional.isEmpty()) {
 			throw new IllegalArgumentException("Can't find the test function for " + string);
 		} else {
 			return (TestFunction)optional.get();

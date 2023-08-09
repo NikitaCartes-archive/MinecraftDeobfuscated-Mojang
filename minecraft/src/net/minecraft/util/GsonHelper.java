@@ -24,7 +24,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.apache.commons.lang3.StringUtils;
@@ -104,18 +107,18 @@ public class GsonHelper {
 		return jsonObject.has(string) ? convertToString(jsonObject.get(string), string) : string2;
 	}
 
-	public static Item convertToItem(JsonElement jsonElement, String string) {
+	public static Holder<Item> convertToItem(JsonElement jsonElement, String string) {
 		if (jsonElement.isJsonPrimitive()) {
 			String string2 = jsonElement.getAsString();
-			return (Item)BuiltInRegistries.ITEM
-				.getOptional(new ResourceLocation(string2))
+			return (Holder<Item>)BuiltInRegistries.ITEM
+				.getHolder(ResourceKey.create(Registries.ITEM, new ResourceLocation(string2)))
 				.orElseThrow(() -> new JsonSyntaxException("Expected " + string + " to be an item, was unknown string '" + string2 + "'"));
 		} else {
 			throw new JsonSyntaxException("Expected " + string + " to be an item, was " + getType(jsonElement));
 		}
 	}
 
-	public static Item getAsItem(JsonObject jsonObject, String string) {
+	public static Holder<Item> getAsItem(JsonObject jsonObject, String string) {
 		if (jsonObject.has(string)) {
 			return convertToItem(jsonObject.get(string), string);
 		} else {
@@ -125,8 +128,8 @@ public class GsonHelper {
 
 	@Nullable
 	@Contract("_,_,!null->!null;_,_,null->_")
-	public static Item getAsItem(JsonObject jsonObject, String string, @Nullable Item item) {
-		return jsonObject.has(string) ? convertToItem(jsonObject.get(string), string) : item;
+	public static Holder<Item> getAsItem(JsonObject jsonObject, String string, @Nullable Holder<Item> holder) {
+		return jsonObject.has(string) ? convertToItem(jsonObject.get(string), string) : holder;
 	}
 
 	public static boolean convertToBoolean(JsonElement jsonElement, String string) {

@@ -16,6 +16,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -87,6 +88,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CaveVines;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -412,10 +414,9 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		ListTag listTag = compoundTag.getList("Trusted", 11);
 
-		for (int i = 0; i < listTag.size(); i++) {
-			this.addTrustedUUID(NbtUtils.loadUUID(listTag.get(i)));
+		for (Tag tag : compoundTag.getList("Trusted", 11)) {
+			this.addTrustedUUID(NbtUtils.loadUUID(tag));
 		}
 
 		this.setSleeping(compoundTag.getBoolean("Sleeping"));
@@ -955,6 +956,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 
 			Fox.this.playSound(SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, 1.0F, 1.0F);
 			Fox.this.level().setBlock(this.blockPos, blockState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1)), 2);
+			Fox.this.level().gameEvent(GameEvent.BLOCK_CHANGE, this.blockPos, GameEvent.Context.of(Fox.this));
 		}
 
 		@Override

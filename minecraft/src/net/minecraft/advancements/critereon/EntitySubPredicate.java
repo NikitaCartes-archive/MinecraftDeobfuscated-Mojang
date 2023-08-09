@@ -2,16 +2,14 @@ package net.minecraft.advancements.critereon;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.CatVariant;
@@ -34,56 +32,9 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.phys.Vec3;
 
 public interface EntitySubPredicate {
-	EntitySubPredicate ANY = new EntitySubPredicate() {
-		@Override
-		public boolean matches(Entity entity, ServerLevel serverLevel, @Nullable Vec3 vec3) {
-			return true;
-		}
-
-		@Override
-		public JsonObject serializeCustomData() {
-			return new JsonObject();
-		}
-
-		@Override
-		public EntitySubPredicate.Type type() {
-			return EntitySubPredicate.Types.ANY;
-		}
-	};
-
-	static EntitySubPredicate fromJson(@Nullable JsonElement jsonElement) {
-		if (jsonElement != null && !jsonElement.isJsonNull()) {
-			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "type_specific");
-			String string = GsonHelper.getAsString(jsonObject, "type", null);
-			if (string == null) {
-				return ANY;
-			} else {
-				EntitySubPredicate.Type type = (EntitySubPredicate.Type)EntitySubPredicate.Types.TYPES.get(string);
-				if (type == null) {
-					throw new JsonSyntaxException("Unknown sub-predicate type: " + string);
-				} else {
-					return type.deserialize(jsonObject);
-				}
-			}
-		} else {
-			return ANY;
-		}
-	}
+	Codec<EntitySubPredicate> CODEC = EntitySubPredicate.Types.TYPE_CODEC.dispatch(EntitySubPredicate::type, type -> type.codec().codec());
 
 	boolean matches(Entity entity, ServerLevel serverLevel, @Nullable Vec3 vec3);
-
-	JsonObject serializeCustomData();
-
-	default JsonElement serialize() {
-		if (this.type() == EntitySubPredicate.Types.ANY) {
-			return JsonNull.INSTANCE;
-		} else {
-			JsonObject jsonObject = this.serializeCustomData();
-			String string = (String)EntitySubPredicate.Types.TYPES.inverse().get(this.type());
-			jsonObject.addProperty("type", string);
-			return jsonObject;
-		}
-	}
 
 	EntitySubPredicate.Type type();
 
@@ -95,16 +46,25 @@ public interface EntitySubPredicate {
 		return EntitySubPredicate.Types.FROG.createPredicate(frogVariant);
 	}
 
-	public interface Type {
-		EntitySubPredicate deserialize(JsonObject jsonObject);
+	public static record Type(MapCodec<? extends EntitySubPredicate> codec) {
 	}
 
 	public static final class Types {
-		public static final EntitySubPredicate.Type ANY = jsonObject -> EntitySubPredicate.ANY;
-		public static final EntitySubPredicate.Type LIGHTNING = LighthingBoltPredicate::fromJson;
-		public static final EntitySubPredicate.Type FISHING_HOOK = FishingHookPredicate::fromJson;
-		public static final EntitySubPredicate.Type PLAYER = PlayerPredicate::fromJson;
-		public static final EntitySubPredicate.Type SLIME = SlimePredicate::fromJson;
+		public static final EntitySubPredicate.Type ANY = new EntitySubPredicate.Type(MapCodec.unit(new EntitySubPredicate() {
+			@Override
+			public boolean matches(Entity entity, ServerLevel serverLevel, @Nullable Vec3 vec3) {
+				return true;
+			}
+
+			@Override
+			public EntitySubPredicate.Type type() {
+				return EntitySubPredicate.Types.ANY;
+			}
+		}));
+		public static final EntitySubPredicate.Type LIGHTNING = new EntitySubPredicate.Type(LightningBoltPredicate.CODEC);
+		public static final EntitySubPredicate.Type FISHING_HOOK = new EntitySubPredicate.Type(FishingHookPredicate.CODEC);
+		public static final EntitySubPredicate.Type PLAYER = new EntitySubPredicate.Type(PlayerPredicate.CODEC);
+		public static final EntitySubPredicate.Type SLIME = new EntitySubPredicate.Type(SlimePredicate.CODEC);
 		public static final EntityVariantPredicate<CatVariant> CAT = EntityVariantPredicate.create(
 			BuiltInRegistries.CAT_VARIANT, entity -> entity instanceof Cat cat ? Optional.of(cat.getVariant()) : Optional.empty()
 		);
@@ -166,5 +126,6 @@ public interface EntitySubPredicate {
 			.put("parrot", PARROT.type())
 			.put("tropical_fish", TROPICAL_FISH.type())
 			.buildOrThrow();
+		public static final Codec<EntitySubPredicate.Type> TYPE_CODEC = ExtraCodecs.stringResolverCodec(TYPES.inverse()::get, TYPES::get);
 	}
 }

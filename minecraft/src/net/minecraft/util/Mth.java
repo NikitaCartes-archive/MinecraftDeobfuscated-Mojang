@@ -88,6 +88,10 @@ public class Mth {
 		return Math.min(Math.max(i, j), k);
 	}
 
+	public static long clamp(long l, long m, long n) {
+		return Math.min(Math.max(l, m), n);
+	}
+
 	public static float clamp(float f, float g, float h) {
 		return f < g ? g : Math.min(f, h);
 	}
@@ -483,6 +487,11 @@ public class Mth {
 
 	public static int lerpInt(float f, int i, int j) {
 		return i + floor(f * (float)(j - i));
+	}
+
+	public static int lerpDiscrete(float f, int i, int j) {
+		int k = j - i;
+		return i + floor(f * (float)(k - 1)) + (f > 0.0F ? 1 : 0);
 	}
 
 	public static float lerp(float f, float g, float h) {

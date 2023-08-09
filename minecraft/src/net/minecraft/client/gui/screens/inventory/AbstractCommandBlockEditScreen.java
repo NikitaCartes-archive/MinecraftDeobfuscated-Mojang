@@ -138,12 +138,12 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, SET_COMMAND_LABEL, this.width / 2, 20, 16777215);
-		guiGraphics.drawString(this.font, COMMAND_LABEL, this.width / 2 - 150, 40, 10526880);
+		guiGraphics.drawString(this.font, COMMAND_LABEL, this.width / 2 - 150 + 1, 40, 10526880);
 		this.commandEdit.render(guiGraphics, i, j, f);
 		int k = 75;
 		if (!this.previousEdit.getValue().isEmpty()) {
 			k += 5 * 9 + 1 + this.getPreviousY() - 135;
-			guiGraphics.drawString(this.font, PREVIOUS_OUTPUT_LABEL, this.width / 2 - 150, k + 4, 10526880);
+			guiGraphics.drawString(this.font, PREVIOUS_OUTPUT_LABEL, this.width / 2 - 150 + 1, k + 4, 10526880);
 			this.previousEdit.render(guiGraphics, i, j, f);
 		}
 

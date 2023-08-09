@@ -2,27 +2,39 @@ package net.minecraft.world.level.storage.loot;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import java.lang.reflect.Type;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Function;
 import javax.annotation.Nullable;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
 public class IntRange {
+	private static final Codec<IntRange> RECORD_CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					ExtraCodecs.strictOptionalField(NumberProviders.CODEC, "min").forGetter(intRange -> Optional.ofNullable(intRange.min)),
+					ExtraCodecs.strictOptionalField(NumberProviders.CODEC, "max").forGetter(intRange -> Optional.ofNullable(intRange.max))
+				)
+				.apply(instance, IntRange::new)
+	);
+	public static final Codec<IntRange> CODEC = Codec.either(Codec.INT, RECORD_CODEC)
+		.xmap(either -> either.map(IntRange::exact, Function.identity()), intRange -> {
+			OptionalInt optionalInt = intRange.unpackExact();
+			return optionalInt.isPresent() ? Either.left(optionalInt.getAsInt()) : Either.right(intRange);
+		});
 	@Nullable
-	final NumberProvider min;
+	private final NumberProvider min;
 	@Nullable
-	final NumberProvider max;
+	private final NumberProvider max;
 	private final IntRange.IntLimiter limiter;
 	private final IntRange.IntChecker predicate;
 
@@ -39,7 +51,11 @@ public class IntRange {
 		return builder.build();
 	}
 
-	IntRange(@Nullable NumberProvider numberProvider, @Nullable NumberProvider numberProvider2) {
+	private IntRange(Optional<NumberProvider> optional, Optional<NumberProvider> optional2) {
+		this((NumberProvider)optional.orElse(null), (NumberProvider)optional2.orElse(null));
+	}
+
+	private IntRange(@Nullable NumberProvider numberProvider, @Nullable NumberProvider numberProvider2) {
 		this.min = numberProvider;
 		this.max = numberProvider2;
 		if (numberProvider == null) {
@@ -61,19 +77,19 @@ public class IntRange {
 
 	public static IntRange exact(int i) {
 		ConstantValue constantValue = ConstantValue.exactly((float)i);
-		return new IntRange(constantValue, constantValue);
+		return new IntRange(Optional.of(constantValue), Optional.of(constantValue));
 	}
 
 	public static IntRange range(int i, int j) {
-		return new IntRange(ConstantValue.exactly((float)i), ConstantValue.exactly((float)j));
+		return new IntRange(Optional.of(ConstantValue.exactly((float)i)), Optional.of(ConstantValue.exactly((float)j)));
 	}
 
 	public static IntRange lowerBound(int i) {
-		return new IntRange(ConstantValue.exactly((float)i), null);
+		return new IntRange(Optional.of(ConstantValue.exactly((float)i)), Optional.empty());
 	}
 
 	public static IntRange upperBound(int i) {
-		return new IntRange(null, ConstantValue.exactly((float)i));
+		return new IntRange(Optional.empty(), Optional.of(ConstantValue.exactly((float)i)));
 	}
 
 	public int clamp(LootContext lootContext, int i) {
@@ -84,6 +100,14 @@ public class IntRange {
 		return this.predicate.test(lootContext, i);
 	}
 
+	private OptionalInt unpackExact() {
+		return Objects.equals(this.min, this.max)
+				&& this.min instanceof ConstantValue constantValue
+				&& Math.floor((double)constantValue.value()) == (double)constantValue.value()
+			? OptionalInt.of((int)constantValue.value())
+			: OptionalInt.empty();
+	}
+
 	@FunctionalInterface
 	interface IntChecker {
 		boolean test(LootContext lootContext, int i);
@@ -92,35 +116,5 @@ public class IntRange {
 	@FunctionalInterface
 	interface IntLimiter {
 		int apply(LootContext lootContext, int i);
-	}
-
-	public static class Serializer implements JsonDeserializer<IntRange>, JsonSerializer<IntRange> {
-		public IntRange deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
-			if (jsonElement.isJsonPrimitive()) {
-				return IntRange.exact(jsonElement.getAsInt());
-			} else {
-				JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "value");
-				NumberProvider numberProvider = jsonObject.has("min") ? GsonHelper.getAsObject(jsonObject, "min", jsonDeserializationContext, NumberProvider.class) : null;
-				NumberProvider numberProvider2 = jsonObject.has("max") ? GsonHelper.getAsObject(jsonObject, "max", jsonDeserializationContext, NumberProvider.class) : null;
-				return new IntRange(numberProvider, numberProvider2);
-			}
-		}
-
-		public JsonElement serialize(IntRange intRange, Type type, JsonSerializationContext jsonSerializationContext) {
-			JsonObject jsonObject = new JsonObject();
-			if (Objects.equals(intRange.max, intRange.min)) {
-				return jsonSerializationContext.serialize(intRange.min);
-			} else {
-				if (intRange.max != null) {
-					jsonObject.add("max", jsonSerializationContext.serialize(intRange.max));
-				}
-
-				if (intRange.min != null) {
-					jsonObject.add("min", jsonSerializationContext.serialize(intRange.min));
-				}
-
-				return jsonObject;
-			}
-		}
 	}
 }

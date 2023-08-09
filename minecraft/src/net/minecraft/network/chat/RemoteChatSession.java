@@ -8,8 +8,8 @@ import net.minecraft.util.SignatureValidator;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 
 public record RemoteChatSession(UUID sessionId, ProfilePublicKey profilePublicKey) {
-	public SignedMessageValidator createMessageValidator() {
-		return new SignedMessageValidator.KeyBased(this.profilePublicKey.createSignatureValidator());
+	public SignedMessageValidator createMessageValidator(Duration duration) {
+		return new SignedMessageValidator.KeyBased(this.profilePublicKey.createSignatureValidator(), () -> this.profilePublicKey.data().hasExpired(duration));
 	}
 
 	public SignedMessageChain.Decoder createMessageDecoder(UUID uUID) {
@@ -34,8 +34,8 @@ public record RemoteChatSession(UUID sessionId, ProfilePublicKey profilePublicKe
 			data.profilePublicKey.write(friendlyByteBuf);
 		}
 
-		public RemoteChatSession validate(GameProfile gameProfile, SignatureValidator signatureValidator, Duration duration) throws ProfilePublicKey.ValidationException {
-			return new RemoteChatSession(this.sessionId, ProfilePublicKey.createValidated(signatureValidator, gameProfile.getId(), this.profilePublicKey, duration));
+		public RemoteChatSession validate(GameProfile gameProfile, SignatureValidator signatureValidator) throws ProfilePublicKey.ValidationException {
+			return new RemoteChatSession(this.sessionId, ProfilePublicKey.createValidated(signatureValidator, gameProfile.getId(), this.profilePublicKey));
 		}
 	}
 }

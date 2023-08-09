@@ -1,16 +1,18 @@
 package net.minecraft.world.level.storage.loot.entries;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Codec;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import org.apache.commons.lang3.ArrayUtils;
 
 public class AlternativesEntry extends CompositeEntryBase {
-	AlternativesEntry(LootPoolEntryContainer[] lootPoolEntryContainers, LootItemCondition[] lootItemConditions) {
-		super(lootPoolEntryContainers, lootItemConditions);
+	public static final Codec<AlternativesEntry> CODEC = createCodec(AlternativesEntry::new);
+
+	AlternativesEntry(List<LootPoolEntryContainer> list, List<LootItemCondition> list2) {
+		super(list, list2);
 	}
 
 	@Override
@@ -19,33 +21,29 @@ public class AlternativesEntry extends CompositeEntryBase {
 	}
 
 	@Override
-	protected ComposableEntryContainer compose(ComposableEntryContainer[] composableEntryContainers) {
-		switch (composableEntryContainers.length) {
-			case 0:
-				return ALWAYS_FALSE;
-			case 1:
-				return composableEntryContainers[0];
-			case 2:
-				return composableEntryContainers[0].or(composableEntryContainers[1]);
-			default:
-				return (lootContext, consumer) -> {
-					for (ComposableEntryContainer composableEntryContainer : composableEntryContainers) {
-						if (composableEntryContainer.expand(lootContext, consumer)) {
-							return true;
-						}
-					}
+	protected ComposableEntryContainer compose(List<? extends ComposableEntryContainer> list) {
+		return switch (list.size()) {
+			case 0 -> ALWAYS_FALSE;
+			case 1 -> (ComposableEntryContainer)list.get(0);
+			case 2 -> ((ComposableEntryContainer)list.get(0)).or((ComposableEntryContainer)list.get(1));
+			default -> (lootContext, consumer) -> {
+			for (ComposableEntryContainer composableEntryContainer : list) {
+				if (composableEntryContainer.expand(lootContext, consumer)) {
+					return true;
+				}
+			}
 
-					return false;
-				};
-		}
+			return false;
+		};
+		};
 	}
 
 	@Override
 	public void validate(ValidationContext validationContext) {
 		super.validate(validationContext);
 
-		for (int i = 0; i < this.children.length - 1; i++) {
-			if (ArrayUtils.isEmpty((Object[])this.children[i].conditions)) {
+		for (int i = 0; i < this.children.size() - 1; i++) {
+			if (((LootPoolEntryContainer)this.children.get(i)).conditions.isEmpty()) {
 				validationContext.reportProblem("Unreachable entry!");
 			}
 		}
@@ -62,7 +60,7 @@ public class AlternativesEntry extends CompositeEntryBase {
 	}
 
 	public static class Builder extends LootPoolEntryContainer.Builder<AlternativesEntry.Builder> {
-		private final List<LootPoolEntryContainer> entries = Lists.<LootPoolEntryContainer>newArrayList();
+		private final ImmutableList.Builder<LootPoolEntryContainer> entries = ImmutableList.builder();
 
 		public Builder(LootPoolEntryContainer.Builder<?>... builders) {
 			for (LootPoolEntryContainer.Builder<?> builder : builders) {
@@ -82,7 +80,7 @@ public class AlternativesEntry extends CompositeEntryBase {
 
 		@Override
 		public LootPoolEntryContainer build() {
-			return new AlternativesEntry((LootPoolEntryContainer[])this.entries.toArray(new LootPoolEntryContainer[0]), this.getConditions());
+			return new AlternativesEntry(this.entries.build(), this.getConditions());
 		}
 	}
 }

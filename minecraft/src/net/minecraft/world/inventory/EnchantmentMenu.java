@@ -165,8 +165,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 							this.enchantSlots.setItem(0, itemStack3);
 						}
 
-						for (int k = 0; k < list.size(); k++) {
-							EnchantmentInstance enchantmentInstance = (EnchantmentInstance)list.get(k);
+						for (EnchantmentInstance enchantmentInstance : list) {
 							if (bl) {
 								EnchantedBookItem.addEnchantment(itemStack3, enchantmentInstance);
 							} else {

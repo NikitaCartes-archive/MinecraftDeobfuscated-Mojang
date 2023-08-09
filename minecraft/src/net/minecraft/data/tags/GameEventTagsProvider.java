@@ -49,7 +49,8 @@ public class GameEventTagsProvider extends IntrinsicHolderTagsProvider<GameEvent
 		GameEvent.SPLASH,
 		GameEvent.STEP,
 		GameEvent.SWIM,
-		GameEvent.TELEPORT
+		GameEvent.TELEPORT,
+		GameEvent.UNEQUIP
 	};
 
 	public GameEventTagsProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {

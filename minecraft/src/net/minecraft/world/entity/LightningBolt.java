@@ -199,7 +199,7 @@ public class LightningBolt extends Entity {
 
 		for (int j = 0; j < i; j++) {
 			Optional<BlockPos> optional = randomStepCleaningCopper(level, mutableBlockPos);
-			if (!optional.isPresent()) {
+			if (optional.isEmpty()) {
 				break;
 			}
 

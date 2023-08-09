@@ -1,23 +1,16 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.logging.LogUtils;
-import java.util.Collection;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.EnchantedBookItem;
@@ -31,11 +24,20 @@ import org.slf4j.Logger;
 
 public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	final List<Enchantment> enchantments;
+	private static final Codec<HolderSet<Enchantment>> ENCHANTMENT_SET_CODEC = BuiltInRegistries.ENCHANTMENT
+		.holderByNameCodec()
+		.listOf()
+		.xmap(HolderSet::direct, holderSet -> holderSet.stream().toList());
+	public static final Codec<EnchantRandomlyFunction> CODEC = RecordCodecBuilder.create(
+		instance -> commonFields(instance)
+				.and(ExtraCodecs.strictOptionalField(ENCHANTMENT_SET_CODEC, "enchantments").forGetter(enchantRandomlyFunction -> enchantRandomlyFunction.enchantments))
+				.apply(instance, EnchantRandomlyFunction::new)
+	);
+	private final Optional<HolderSet<Enchantment>> enchantments;
 
-	EnchantRandomlyFunction(LootItemCondition[] lootItemConditions, Collection<Enchantment> collection) {
-		super(lootItemConditions);
-		this.enchantments = ImmutableList.copyOf(collection);
+	EnchantRandomlyFunction(List<LootItemCondition> list, Optional<HolderSet<Enchantment>> optional) {
+		super(list);
+		this.enchantments = optional;
 	}
 
 	@Override
@@ -46,25 +48,25 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		RandomSource randomSource = lootContext.getRandom();
-		Enchantment enchantment;
-		if (this.enchantments.isEmpty()) {
-			boolean bl = itemStack.is(Items.BOOK);
-			List<Enchantment> list = (List<Enchantment>)BuiltInRegistries.ENCHANTMENT
-				.stream()
-				.filter(Enchantment::isDiscoverable)
-				.filter(enchantmentx -> bl || enchantmentx.canEnchant(itemStack))
-				.collect(Collectors.toList());
-			if (list.isEmpty()) {
-				LOGGER.warn("Couldn't find a compatible enchantment for {}", itemStack);
-				return itemStack;
-			}
-
-			enchantment = (Enchantment)list.get(randomSource.nextInt(list.size()));
+		Optional<Holder<Enchantment>> optional = this.enchantments
+			.flatMap(holderSet -> holderSet.getRandomElement(randomSource))
+			.or(
+				() -> {
+					boolean bl = itemStack.is(Items.BOOK);
+					List<Holder.Reference<Enchantment>> list = BuiltInRegistries.ENCHANTMENT
+						.holders()
+						.filter(reference -> ((Enchantment)reference.value()).isDiscoverable())
+						.filter(reference -> bl || ((Enchantment)reference.value()).canEnchant(itemStack))
+						.toList();
+					return Util.getRandomSafe(list, randomSource);
+				}
+			);
+		if (optional.isEmpty()) {
+			LOGGER.warn("Couldn't find a compatible enchantment for {}", itemStack);
+			return itemStack;
 		} else {
-			enchantment = (Enchantment)this.enchantments.get(randomSource.nextInt(this.enchantments.size()));
+			return enchantItem(itemStack, (Enchantment)((Holder)optional.get()).value(), randomSource);
 		}
-
-		return enchantItem(itemStack, enchantment, randomSource);
 	}
 
 	private static ItemStack enchantItem(ItemStack itemStack, Enchantment enchantment, RandomSource randomSource) {
@@ -84,61 +86,24 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 	}
 
 	public static LootItemConditionalFunction.Builder<?> randomApplicableEnchantment() {
-		return simpleBuilder(lootItemConditions -> new EnchantRandomlyFunction(lootItemConditions, ImmutableList.<Enchantment>of()));
+		return simpleBuilder(list -> new EnchantRandomlyFunction(list, Optional.empty()));
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<EnchantRandomlyFunction.Builder> {
-		private final Set<Enchantment> enchantments = Sets.<Enchantment>newHashSet();
+		private final List<Holder<Enchantment>> enchantments = new ArrayList();
 
 		protected EnchantRandomlyFunction.Builder getThis() {
 			return this;
 		}
 
 		public EnchantRandomlyFunction.Builder withEnchantment(Enchantment enchantment) {
-			this.enchantments.add(enchantment);
+			this.enchantments.add(enchantment.builtInRegistryHolder());
 			return this;
 		}
 
 		@Override
 		public LootItemFunction build() {
-			return new EnchantRandomlyFunction(this.getConditions(), this.enchantments);
-		}
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<EnchantRandomlyFunction> {
-		public void serialize(JsonObject jsonObject, EnchantRandomlyFunction enchantRandomlyFunction, JsonSerializationContext jsonSerializationContext) {
-			super.serialize(jsonObject, enchantRandomlyFunction, jsonSerializationContext);
-			if (!enchantRandomlyFunction.enchantments.isEmpty()) {
-				JsonArray jsonArray = new JsonArray();
-
-				for (Enchantment enchantment : enchantRandomlyFunction.enchantments) {
-					ResourceLocation resourceLocation = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
-					if (resourceLocation == null) {
-						throw new IllegalArgumentException("Don't know how to serialize enchantment " + enchantment);
-					}
-
-					jsonArray.add(new JsonPrimitive(resourceLocation.toString()));
-				}
-
-				jsonObject.add("enchantments", jsonArray);
-			}
-		}
-
-		public EnchantRandomlyFunction deserialize(
-			JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions
-		) {
-			List<Enchantment> list = Lists.<Enchantment>newArrayList();
-			if (jsonObject.has("enchantments")) {
-				for (JsonElement jsonElement : GsonHelper.getAsJsonArray(jsonObject, "enchantments")) {
-					String string = GsonHelper.convertToString(jsonElement, "enchantment");
-					Enchantment enchantment = (Enchantment)BuiltInRegistries.ENCHANTMENT
-						.getOptional(new ResourceLocation(string))
-						.orElseThrow(() -> new JsonSyntaxException("Unknown enchantment '" + string + "'"));
-					list.add(enchantment);
-				}
-			}
-
-			return new EnchantRandomlyFunction(lootItemConditions, list);
+			return new EnchantRandomlyFunction(this.getConditions(), this.enchantments.isEmpty() ? Optional.empty() : Optional.of(HolderSet.direct(this.enchantments)));
 		}
 	}
 }

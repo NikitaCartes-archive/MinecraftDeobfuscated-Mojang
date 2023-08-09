@@ -1,12 +1,11 @@
 package net.minecraft.world.level.storage.loot.entries;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -15,11 +14,16 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LootItem extends LootPoolSingletonContainer {
-	final Item item;
+	public static final Codec<LootItem> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("name").forGetter(lootItem -> lootItem.item))
+				.<int, int, List<LootItemCondition>, List<LootItemFunction>>and(singletonFields(instance))
+				.apply(instance, LootItem::new)
+	);
+	private final Holder<Item> item;
 
-	LootItem(Item item, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
-		super(i, j, lootItemConditions, lootItemFunctions);
-		this.item = item;
+	private LootItem(Holder<Item> holder, int i, int j, List<LootItemCondition> list, List<LootItemFunction> list2) {
+		super(i, j, list, list2);
+		this.item = holder;
 	}
 
 	@Override
@@ -33,30 +37,6 @@ public class LootItem extends LootPoolSingletonContainer {
 	}
 
 	public static LootPoolSingletonContainer.Builder<?> lootTableItem(ItemLike itemLike) {
-		return simpleBuilder((i, j, lootItemConditions, lootItemFunctions) -> new LootItem(itemLike.asItem(), i, j, lootItemConditions, lootItemFunctions));
-	}
-
-	public static class Serializer extends LootPoolSingletonContainer.Serializer<LootItem> {
-		public void serializeCustom(JsonObject jsonObject, LootItem lootItem, JsonSerializationContext jsonSerializationContext) {
-			super.serializeCustom(jsonObject, lootItem, jsonSerializationContext);
-			ResourceLocation resourceLocation = BuiltInRegistries.ITEM.getKey(lootItem.item);
-			if (resourceLocation == null) {
-				throw new IllegalArgumentException("Can't serialize unknown item " + lootItem.item);
-			} else {
-				jsonObject.addProperty("name", resourceLocation.toString());
-			}
-		}
-
-		protected LootItem deserialize(
-			JsonObject jsonObject,
-			JsonDeserializationContext jsonDeserializationContext,
-			int i,
-			int j,
-			LootItemCondition[] lootItemConditions,
-			LootItemFunction[] lootItemFunctions
-		) {
-			Item item = GsonHelper.getAsItem(jsonObject, "name");
-			return new LootItem(item, i, j, lootItemConditions, lootItemFunctions);
-		}
+		return simpleBuilder((i, j, list, list2) -> new LootItem(itemLike.asItem().builtInRegistryHolder(), i, j, list, list2));
 	}
 }

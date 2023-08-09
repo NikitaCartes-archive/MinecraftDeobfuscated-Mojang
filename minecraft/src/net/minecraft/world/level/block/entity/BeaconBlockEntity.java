@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -49,6 +51,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	public static final int NUM_DATA_VALUES = 3;
 	private static final int BLOCKS_CHECK_PER_TICK = 10;
 	private static final Component DEFAULT_NAME = Component.translatable("container.beacon");
+	private static final String TAG_PRIMARY = "primary_effect";
+	private static final String TAG_SECONDARY = "secondary_effect";
 	List<BeaconBlockEntity.BeaconBeamSection> beamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
 	private List<BeaconBlockEntity.BeaconBeamSection> checkingBeamSections = Lists.<BeaconBlockEntity.BeaconBeamSection>newArrayList();
 	int levels;
@@ -65,8 +69,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 		public int get(int i) {
 			return switch (i) {
 				case 0 -> BeaconBlockEntity.this.levels;
-				case 1 -> MobEffect.getIdFromNullable(BeaconBlockEntity.this.primaryPower);
-				case 2 -> MobEffect.getIdFromNullable(BeaconBlockEntity.this.secondaryPower);
+				case 1 -> BeaconMenu.encodeEffect(BeaconBlockEntity.this.primaryPower);
+				case 2 -> BeaconMenu.encodeEffect(BeaconBlockEntity.this.secondaryPower);
 				default -> 0;
 			};
 		}
@@ -82,10 +86,10 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 						BeaconBlockEntity.playSound(BeaconBlockEntity.this.level, BeaconBlockEntity.this.worldPosition, SoundEvents.BEACON_POWER_SELECT);
 					}
 
-					BeaconBlockEntity.this.primaryPower = BeaconBlockEntity.getValidEffectById(j);
+					BeaconBlockEntity.this.primaryPower = BeaconBlockEntity.filterEffect(BeaconMenu.decodeEffect(j));
 					break;
 				case 2:
-					BeaconBlockEntity.this.secondaryPower = BeaconBlockEntity.getValidEffectById(j);
+					BeaconBlockEntity.this.secondaryPower = BeaconBlockEntity.filterEffect(BeaconMenu.decodeEffect(j));
 			}
 		}
 
@@ -94,6 +98,11 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 			return 3;
 		}
 	};
+
+	@Nullable
+	static MobEffect filterEffect(@Nullable MobEffect mobEffect) {
+		return VALID_EFFECTS.contains(mobEffect) ? mobEffect : null;
+	}
 
 	public BeaconBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.BEACON, blockPos, blockState);
@@ -257,17 +266,30 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 		return this.saveWithoutMetadata();
 	}
 
+	private static void storeEffect(CompoundTag compoundTag, String string, @Nullable MobEffect mobEffect) {
+		if (mobEffect != null) {
+			ResourceLocation resourceLocation = BuiltInRegistries.MOB_EFFECT.getKey(mobEffect);
+			if (resourceLocation != null) {
+				compoundTag.putString(string, resourceLocation.toString());
+			}
+		}
+	}
+
 	@Nullable
-	static MobEffect getValidEffectById(int i) {
-		MobEffect mobEffect = MobEffect.byId(i);
-		return VALID_EFFECTS.contains(mobEffect) ? mobEffect : null;
+	private static MobEffect loadEffect(CompoundTag compoundTag, String string) {
+		if (compoundTag.contains(string, 8)) {
+			ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString(string));
+			return filterEffect(BuiltInRegistries.MOB_EFFECT.get(resourceLocation));
+		} else {
+			return null;
+		}
 	}
 
 	@Override
 	public void load(CompoundTag compoundTag) {
 		super.load(compoundTag);
-		this.primaryPower = getValidEffectById(compoundTag.getInt("Primary"));
-		this.secondaryPower = getValidEffectById(compoundTag.getInt("Secondary"));
+		this.primaryPower = loadEffect(compoundTag, "primary_effect");
+		this.secondaryPower = loadEffect(compoundTag, "secondary_effect");
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
 		}
@@ -278,8 +300,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag) {
 		super.saveAdditional(compoundTag);
-		compoundTag.putInt("Primary", MobEffect.getIdFromNullable(this.primaryPower));
-		compoundTag.putInt("Secondary", MobEffect.getIdFromNullable(this.secondaryPower));
+		storeEffect(compoundTag, "primary_effect", this.primaryPower);
+		storeEffect(compoundTag, "secondary_effect", this.secondaryPower);
 		compoundTag.putInt("Levels", this.levels);
 		if (this.name != null) {
 			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));

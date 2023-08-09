@@ -22,11 +22,15 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class EditBox extends AbstractWidget implements Renderable {
+	private static final WidgetSprites SPRITES = new WidgetSprites(
+		new ResourceLocation("widget/text_field"), new ResourceLocation("widget/text_field_highlighted")
+	);
 	public static final int BACKWARDS = -1;
 	public static final int FORWARDS = 1;
 	public static final int LABEL_SPACING = 4;
@@ -34,9 +38,6 @@ public class EditBox extends AbstractWidget implements Renderable {
 	private static final int CURSOR_INSERT_COLOR = -3092272;
 	private static final String CURSOR_APPEND_CHARACTER = "_";
 	public static final int DEFAULT_TEXT_COLOR = 14737632;
-	private static final int BORDER_COLOR_FOCUSED = -1;
-	private static final int BORDER_COLOR = -6250336;
-	private static final int BACKGROUND_COLOR = -16777216;
 	private static final int CURSOR_BLINK_INTERVAL_MS = 300;
 	private final Font font;
 	private String value = "";
@@ -357,9 +358,8 @@ public class EditBox extends AbstractWidget implements Renderable {
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.isVisible()) {
 			if (this.isBordered()) {
-				int k = this.isFocused() ? -1 : -6250336;
-				guiGraphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, k);
-				guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
+				ResourceLocation resourceLocation = SPRITES.get(this.isActive(), this.isFocused());
+				guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.getWidth(), this.getHeight());
 			}
 
 			int k = this.isEditable ? this.textColor : this.textColorUneditable;
@@ -452,7 +452,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 		return this.cursorPos;
 	}
 
-	private boolean isBordered() {
+	public boolean isBordered() {
 		return this.bordered;
 	}
 

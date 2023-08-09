@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.monster.Zombie;
@@ -16,11 +17,11 @@ public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZomb
 	}
 
 	public CuredZombieVillagerTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "zombie", deserializationContext);
-		ContextAwarePredicate contextAwarePredicate3 = EntityPredicate.fromJson(jsonObject, "villager", deserializationContext);
-		return new CuredZombieVillagerTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2, contextAwarePredicate3);
+		Optional<ContextAwarePredicate> optional2 = EntityPredicate.fromJson(jsonObject, "zombie", deserializationContext);
+		Optional<ContextAwarePredicate> optional3 = EntityPredicate.fromJson(jsonObject, "villager", deserializationContext);
+		return new CuredZombieVillagerTrigger.TriggerInstance(optional, optional2, optional3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Zombie zombie, Villager villager) {
@@ -30,30 +31,30 @@ public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZomb
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ContextAwarePredicate zombie;
-		private final ContextAwarePredicate villager;
+		private final Optional<ContextAwarePredicate> zombie;
+		private final Optional<ContextAwarePredicate> villager;
 
-		public TriggerInstance(
-			ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2, ContextAwarePredicate contextAwarePredicate3
-		) {
-			super(CuredZombieVillagerTrigger.ID, contextAwarePredicate);
-			this.zombie = contextAwarePredicate2;
-			this.villager = contextAwarePredicate3;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2, Optional<ContextAwarePredicate> optional3) {
+			super(CuredZombieVillagerTrigger.ID, optional);
+			this.zombie = optional2;
+			this.villager = optional3;
 		}
 
 		public static CuredZombieVillagerTrigger.TriggerInstance curedZombieVillager() {
-			return new CuredZombieVillagerTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ContextAwarePredicate.ANY);
+			return new CuredZombieVillagerTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty());
 		}
 
 		public boolean matches(LootContext lootContext, LootContext lootContext2) {
-			return !this.zombie.matches(lootContext) ? false : this.villager.matches(lootContext2);
+			return this.zombie.isPresent() && !((ContextAwarePredicate)this.zombie.get()).matches(lootContext)
+				? false
+				: !this.villager.isPresent() || ((ContextAwarePredicate)this.villager.get()).matches(lootContext2);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("zombie", this.zombie.toJson(serializationContext));
-			jsonObject.add("villager", this.villager.toJson(serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.zombie.ifPresent(contextAwarePredicate -> jsonObject.add("zombie", contextAwarePredicate.toJson()));
+			this.villager.ifPresent(contextAwarePredicate -> jsonObject.add("villager", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 	}

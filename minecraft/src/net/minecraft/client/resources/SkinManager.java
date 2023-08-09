@@ -107,11 +107,6 @@ public class SkinManager {
 			);
 	}
 
-	public boolean hasSecureTextureData(GameProfile gameProfile) {
-		Property property = getTextureProperty(gameProfile);
-		return property != null && property.hasSignature();
-	}
-
 	@Nullable
 	static Property getTextureProperty(GameProfile gameProfile) {
 		return Iterables.getFirst(gameProfile.getProperties().get("textures"), null);

@@ -1,145 +1,121 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.Items;
 
-public class EntityEquipmentPredicate {
-	public static final EntityEquipmentPredicate ANY = new EntityEquipmentPredicate(
-		ItemPredicate.ANY, ItemPredicate.ANY, ItemPredicate.ANY, ItemPredicate.ANY, ItemPredicate.ANY, ItemPredicate.ANY
+public record EntityEquipmentPredicate(
+	Optional<ItemPredicate> head,
+	Optional<ItemPredicate> chest,
+	Optional<ItemPredicate> legs,
+	Optional<ItemPredicate> feet,
+	Optional<ItemPredicate> mainhand,
+	Optional<ItemPredicate> offhand
+) {
+	public static final Codec<EntityEquipmentPredicate> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "head").forGetter(EntityEquipmentPredicate::head),
+					ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "chest").forGetter(EntityEquipmentPredicate::chest),
+					ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "legs").forGetter(EntityEquipmentPredicate::legs),
+					ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "feet").forGetter(EntityEquipmentPredicate::feet),
+					ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "mainhand").forGetter(EntityEquipmentPredicate::mainhand),
+					ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "offhand").forGetter(EntityEquipmentPredicate::offhand)
+				)
+				.apply(instance, EntityEquipmentPredicate::new)
 	);
 	public static final EntityEquipmentPredicate CAPTAIN = new EntityEquipmentPredicate(
 		ItemPredicate.Builder.item().of(Items.WHITE_BANNER).hasNbt(Raid.getLeaderBannerInstance().getTag()).build(),
-		ItemPredicate.ANY,
-		ItemPredicate.ANY,
-		ItemPredicate.ANY,
-		ItemPredicate.ANY,
-		ItemPredicate.ANY
+		Optional.empty(),
+		Optional.empty(),
+		Optional.empty(),
+		Optional.empty(),
+		Optional.empty()
 	);
-	private final ItemPredicate head;
-	private final ItemPredicate chest;
-	private final ItemPredicate legs;
-	private final ItemPredicate feet;
-	private final ItemPredicate mainhand;
-	private final ItemPredicate offhand;
 
-	public EntityEquipmentPredicate(
-		ItemPredicate itemPredicate,
-		ItemPredicate itemPredicate2,
-		ItemPredicate itemPredicate3,
-		ItemPredicate itemPredicate4,
-		ItemPredicate itemPredicate5,
-		ItemPredicate itemPredicate6
+	static Optional<EntityEquipmentPredicate> of(
+		Optional<ItemPredicate> optional,
+		Optional<ItemPredicate> optional2,
+		Optional<ItemPredicate> optional3,
+		Optional<ItemPredicate> optional4,
+		Optional<ItemPredicate> optional5,
+		Optional<ItemPredicate> optional6
 	) {
-		this.head = itemPredicate;
-		this.chest = itemPredicate2;
-		this.legs = itemPredicate3;
-		this.feet = itemPredicate4;
-		this.mainhand = itemPredicate5;
-		this.offhand = itemPredicate6;
+		return optional.isEmpty() && optional2.isEmpty() && optional3.isEmpty() && optional4.isEmpty() && optional5.isEmpty() && optional6.isEmpty()
+			? Optional.empty()
+			: Optional.of(new EntityEquipmentPredicate(optional, optional2, optional3, optional4, optional5, optional6));
 	}
 
 	public boolean matches(@Nullable Entity entity) {
-		if (this == ANY) {
-			return true;
-		} else if (!(entity instanceof LivingEntity livingEntity)) {
-			return false;
-		} else if (!this.head.matches(livingEntity.getItemBySlot(EquipmentSlot.HEAD))) {
-			return false;
-		} else if (!this.chest.matches(livingEntity.getItemBySlot(EquipmentSlot.CHEST))) {
-			return false;
-		} else if (!this.legs.matches(livingEntity.getItemBySlot(EquipmentSlot.LEGS))) {
-			return false;
-		} else if (!this.feet.matches(livingEntity.getItemBySlot(EquipmentSlot.FEET))) {
-			return false;
+		if (entity instanceof LivingEntity livingEntity) {
+			if (this.head.isPresent() && !((ItemPredicate)this.head.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.HEAD))) {
+				return false;
+			} else if (this.chest.isPresent() && !((ItemPredicate)this.chest.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.CHEST))) {
+				return false;
+			} else if (this.legs.isPresent() && !((ItemPredicate)this.legs.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.LEGS))) {
+				return false;
+			} else if (this.feet.isPresent() && !((ItemPredicate)this.feet.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.FEET))) {
+				return false;
+			} else {
+				return this.mainhand.isPresent() && !((ItemPredicate)this.mainhand.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.MAINHAND))
+					? false
+					: !this.offhand.isPresent() || ((ItemPredicate)this.offhand.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.OFFHAND));
+			}
 		} else {
-			return !this.mainhand.matches(livingEntity.getItemBySlot(EquipmentSlot.MAINHAND))
-				? false
-				: this.offhand.matches(livingEntity.getItemBySlot(EquipmentSlot.OFFHAND));
-		}
-	}
-
-	public static EntityEquipmentPredicate fromJson(@Nullable JsonElement jsonElement) {
-		if (jsonElement != null && !jsonElement.isJsonNull()) {
-			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "equipment");
-			ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("head"));
-			ItemPredicate itemPredicate2 = ItemPredicate.fromJson(jsonObject.get("chest"));
-			ItemPredicate itemPredicate3 = ItemPredicate.fromJson(jsonObject.get("legs"));
-			ItemPredicate itemPredicate4 = ItemPredicate.fromJson(jsonObject.get("feet"));
-			ItemPredicate itemPredicate5 = ItemPredicate.fromJson(jsonObject.get("mainhand"));
-			ItemPredicate itemPredicate6 = ItemPredicate.fromJson(jsonObject.get("offhand"));
-			return new EntityEquipmentPredicate(itemPredicate, itemPredicate2, itemPredicate3, itemPredicate4, itemPredicate5, itemPredicate6);
-		} else {
-			return ANY;
-		}
-	}
-
-	public JsonElement serializeToJson() {
-		if (this == ANY) {
-			return JsonNull.INSTANCE;
-		} else {
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.add("head", this.head.serializeToJson());
-			jsonObject.add("chest", this.chest.serializeToJson());
-			jsonObject.add("legs", this.legs.serializeToJson());
-			jsonObject.add("feet", this.feet.serializeToJson());
-			jsonObject.add("mainhand", this.mainhand.serializeToJson());
-			jsonObject.add("offhand", this.offhand.serializeToJson());
-			return jsonObject;
+			return false;
 		}
 	}
 
 	public static class Builder {
-		private ItemPredicate head = ItemPredicate.ANY;
-		private ItemPredicate chest = ItemPredicate.ANY;
-		private ItemPredicate legs = ItemPredicate.ANY;
-		private ItemPredicate feet = ItemPredicate.ANY;
-		private ItemPredicate mainhand = ItemPredicate.ANY;
-		private ItemPredicate offhand = ItemPredicate.ANY;
+		private Optional<ItemPredicate> head = Optional.empty();
+		private Optional<ItemPredicate> chest = Optional.empty();
+		private Optional<ItemPredicate> legs = Optional.empty();
+		private Optional<ItemPredicate> feet = Optional.empty();
+		private Optional<ItemPredicate> mainhand = Optional.empty();
+		private Optional<ItemPredicate> offhand = Optional.empty();
 
 		public static EntityEquipmentPredicate.Builder equipment() {
 			return new EntityEquipmentPredicate.Builder();
 		}
 
-		public EntityEquipmentPredicate.Builder head(ItemPredicate itemPredicate) {
-			this.head = itemPredicate;
+		public EntityEquipmentPredicate.Builder head(ItemPredicate.Builder builder) {
+			this.head = builder.build();
 			return this;
 		}
 
-		public EntityEquipmentPredicate.Builder chest(ItemPredicate itemPredicate) {
-			this.chest = itemPredicate;
+		public EntityEquipmentPredicate.Builder chest(ItemPredicate.Builder builder) {
+			this.chest = builder.build();
 			return this;
 		}
 
-		public EntityEquipmentPredicate.Builder legs(ItemPredicate itemPredicate) {
-			this.legs = itemPredicate;
+		public EntityEquipmentPredicate.Builder legs(ItemPredicate.Builder builder) {
+			this.legs = builder.build();
 			return this;
 		}
 
-		public EntityEquipmentPredicate.Builder feet(ItemPredicate itemPredicate) {
-			this.feet = itemPredicate;
+		public EntityEquipmentPredicate.Builder feet(ItemPredicate.Builder builder) {
+			this.feet = builder.build();
 			return this;
 		}
 
-		public EntityEquipmentPredicate.Builder mainhand(ItemPredicate itemPredicate) {
-			this.mainhand = itemPredicate;
+		public EntityEquipmentPredicate.Builder mainhand(ItemPredicate.Builder builder) {
+			this.mainhand = builder.build();
 			return this;
 		}
 
-		public EntityEquipmentPredicate.Builder offhand(ItemPredicate itemPredicate) {
-			this.offhand = itemPredicate;
+		public EntityEquipmentPredicate.Builder offhand(ItemPredicate.Builder builder) {
+			this.offhand = builder.build();
 			return this;
 		}
 
-		public EntityEquipmentPredicate build() {
-			return new EntityEquipmentPredicate(this.head, this.chest, this.legs, this.feet, this.mainhand, this.offhand);
+		public Optional<EntityEquipmentPredicate> build() {
+			return EntityEquipmentPredicate.of(this.head, this.chest, this.legs, this.feet, this.mainhand, this.offhand);
 		}
 	}
 }

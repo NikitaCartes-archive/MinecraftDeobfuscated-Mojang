@@ -1,23 +1,23 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
-public class DamageSourceCondition implements LootItemCondition {
-	final DamageSourcePredicate predicate;
-
-	DamageSourceCondition(DamageSourcePredicate damageSourcePredicate) {
-		this.predicate = damageSourcePredicate;
-	}
+public record DamageSourceCondition(Optional<DamageSourcePredicate> predicate) implements LootItemCondition {
+	public static final Codec<DamageSourceCondition> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(ExtraCodecs.strictOptionalField(DamageSourcePredicate.CODEC, "predicate").forGetter(DamageSourceCondition::predicate))
+				.apply(instance, DamageSourceCondition::new)
+	);
 
 	@Override
 	public LootItemConditionType getType() {
@@ -32,21 +32,12 @@ public class DamageSourceCondition implements LootItemCondition {
 	public boolean test(LootContext lootContext) {
 		DamageSource damageSource = lootContext.getParamOrNull(LootContextParams.DAMAGE_SOURCE);
 		Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
-		return vec3 != null && damageSource != null && this.predicate.matches(lootContext.getLevel(), vec3, damageSource);
+		return vec3 != null && damageSource != null
+			? this.predicate.isEmpty() || ((DamageSourcePredicate)this.predicate.get()).matches(lootContext.getLevel(), vec3, damageSource)
+			: false;
 	}
 
 	public static LootItemCondition.Builder hasDamageSource(DamageSourcePredicate.Builder builder) {
 		return () -> new DamageSourceCondition(builder.build());
-	}
-
-	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<DamageSourceCondition> {
-		public void serialize(JsonObject jsonObject, DamageSourceCondition damageSourceCondition, JsonSerializationContext jsonSerializationContext) {
-			jsonObject.add("predicate", damageSourceCondition.predicate.serializeToJson());
-		}
-
-		public DamageSourceCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-			DamageSourcePredicate damageSourcePredicate = DamageSourcePredicate.fromJson(jsonObject.get("predicate"));
-			return new DamageSourceCondition(damageSourcePredicate);
-		}
 	}
 }

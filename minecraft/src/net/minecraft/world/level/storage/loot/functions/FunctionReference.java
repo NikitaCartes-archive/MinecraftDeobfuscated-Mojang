@@ -1,11 +1,10 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootDataId;
@@ -16,10 +15,15 @@ import org.slf4j.Logger;
 
 public class FunctionReference extends LootItemConditionalFunction {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	final ResourceLocation name;
+	public static final Codec<FunctionReference> CODEC = RecordCodecBuilder.create(
+		instance -> commonFields(instance)
+				.and(ResourceLocation.CODEC.fieldOf("name").forGetter(functionReference -> functionReference.name))
+				.apply(instance, FunctionReference::new)
+	);
+	private final ResourceLocation name;
 
-	FunctionReference(LootItemCondition[] lootItemConditions, ResourceLocation resourceLocation) {
-		super(lootItemConditions);
+	private FunctionReference(List<LootItemCondition> list, ResourceLocation resourceLocation) {
+		super(list);
 		this.name = resourceLocation;
 	}
 
@@ -69,17 +73,6 @@ public class FunctionReference extends LootItemConditionalFunction {
 	}
 
 	public static LootItemConditionalFunction.Builder<?> functionReference(ResourceLocation resourceLocation) {
-		return simpleBuilder(lootItemConditions -> new FunctionReference(lootItemConditions, resourceLocation));
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<FunctionReference> {
-		public void serialize(JsonObject jsonObject, FunctionReference functionReference, JsonSerializationContext jsonSerializationContext) {
-			jsonObject.addProperty("name", functionReference.name.toString());
-		}
-
-		public FunctionReference deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "name"));
-			return new FunctionReference(lootItemConditions, resourceLocation);
-		}
+		return simpleBuilder(list -> new FunctionReference(list, resourceLocation));
 	}
 }

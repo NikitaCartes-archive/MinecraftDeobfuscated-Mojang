@@ -57,11 +57,11 @@ public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketList
 		friendlyByteBuf.writeByte(this.scale);
 		friendlyByteBuf.writeBoolean(this.locked);
 		friendlyByteBuf.writeNullable(this.decorations, (friendlyByteBufx, list) -> friendlyByteBufx.writeCollection(list, (friendlyByteBufxx, mapDecoration) -> {
-				friendlyByteBufxx.writeEnum(mapDecoration.getType());
-				friendlyByteBufxx.writeByte(mapDecoration.getX());
-				friendlyByteBufxx.writeByte(mapDecoration.getY());
-				friendlyByteBufxx.writeByte(mapDecoration.getRot() & 15);
-				friendlyByteBufxx.writeNullable(mapDecoration.getName(), FriendlyByteBuf::writeComponent);
+				friendlyByteBufxx.writeEnum(mapDecoration.type());
+				friendlyByteBufxx.writeByte(mapDecoration.x());
+				friendlyByteBufxx.writeByte(mapDecoration.y());
+				friendlyByteBufxx.writeByte(mapDecoration.rot() & 15);
+				friendlyByteBufxx.writeNullable(mapDecoration.name(), FriendlyByteBuf::writeComponent);
 			}));
 		if (this.colorPatch != null) {
 			friendlyByteBuf.writeByte(this.colorPatch.width);

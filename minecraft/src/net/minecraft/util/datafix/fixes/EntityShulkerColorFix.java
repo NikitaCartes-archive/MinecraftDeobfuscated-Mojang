@@ -11,7 +11,7 @@ public class EntityShulkerColorFix extends NamedEntityFix {
 	}
 
 	public Dynamic<?> fixTag(Dynamic<?> dynamic) {
-		return !dynamic.get("Color").map(Dynamic::asNumber).result().isPresent() ? dynamic.set("Color", dynamic.createByte((byte)10)) : dynamic;
+		return dynamic.get("Color").map(Dynamic::asNumber).result().isEmpty() ? dynamic.set("Color", dynamic.createByte((byte)10)) : dynamic;
 	}
 
 	@Override

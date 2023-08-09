@@ -2,13 +2,11 @@ package net.minecraft.client.multiplayer;
 
 import com.google.common.base.Suppliers;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.PlayerSkin;
@@ -16,6 +14,7 @@ import net.minecraft.client.resources.SkinManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.chat.SignedMessageValidator;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.PlayerTeam;
 
@@ -40,39 +39,14 @@ public class PlayerInfo {
 
 	private static Supplier<PlayerSkin> createSkinLookup(GameProfile gameProfile) {
 		Minecraft minecraft = Minecraft.getInstance();
-		CompletableFuture<PlayerSkin> completableFuture = loadSkin(gameProfile, minecraft.getSkinManager(), minecraft.getMinecraftSessionService());
+		SkinManager skinManager = minecraft.getSkinManager();
+		CompletableFuture<PlayerSkin> completableFuture = skinManager.getOrLoad(gameProfile);
 		boolean bl = !minecraft.isLocalPlayer(gameProfile.getId());
 		PlayerSkin playerSkin = DefaultPlayerSkin.get(gameProfile);
 		return () -> {
 			PlayerSkin playerSkin2 = (PlayerSkin)completableFuture.getNow(playerSkin);
 			return bl && !playerSkin2.secure() ? playerSkin : playerSkin2;
 		};
-	}
-
-	private static CompletableFuture<PlayerSkin> loadSkin(GameProfile gameProfile, SkinManager skinManager, MinecraftSessionService minecraftSessionService) {
-		CompletableFuture<GameProfile> completableFuture;
-		if (skinManager.hasSecureTextureData(gameProfile)) {
-			completableFuture = CompletableFuture.completedFuture(gameProfile);
-		} else {
-			completableFuture = CompletableFuture.supplyAsync(() -> fillProfileProperties(gameProfile, minecraftSessionService), Util.ioPool());
-		}
-
-		return completableFuture.thenCompose(skinManager::getOrLoad);
-	}
-
-	private static GameProfile fillProfileProperties(GameProfile gameProfile, MinecraftSessionService minecraftSessionService) {
-		Minecraft minecraft = Minecraft.getInstance();
-		gameProfile.getProperties().clear();
-		if (minecraft.isLocalPlayer(gameProfile.getId())) {
-			gameProfile.getProperties().putAll(minecraft.getProfileProperties());
-		} else {
-			GameProfile gameProfile2 = minecraftSessionService.fetchProfile(gameProfile.getId(), true);
-			if (gameProfile2 != null) {
-				gameProfile2.getProperties().putAll(gameProfile2.getProperties());
-			}
-		}
-
-		return gameProfile;
 	}
 
 	public GameProfile getProfile() {
@@ -94,7 +68,7 @@ public class PlayerInfo {
 
 	protected void setChatSession(RemoteChatSession remoteChatSession) {
 		this.chatSession = remoteChatSession;
-		this.messageValidator = remoteChatSession.createMessageValidator();
+		this.messageValidator = remoteChatSession.createMessageValidator(ProfilePublicKey.EXPIRY_GRACE_PERIOD);
 	}
 
 	protected void clearChatSession(boolean bl) {

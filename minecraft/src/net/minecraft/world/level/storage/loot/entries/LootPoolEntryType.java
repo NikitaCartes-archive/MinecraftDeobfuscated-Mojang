@@ -1,10 +1,6 @@
 package net.minecraft.world.level.storage.loot.entries;
 
-import net.minecraft.world.level.storage.loot.Serializer;
-import net.minecraft.world.level.storage.loot.SerializerType;
+import com.mojang.serialization.Codec;
 
-public class LootPoolEntryType extends SerializerType<LootPoolEntryContainer> {
-	public LootPoolEntryType(Serializer<? extends LootPoolEntryContainer> serializer) {
-		super(serializer);
-	}
+public record LootPoolEntryType(Codec<? extends LootPoolEntryContainer> codec) {
 }

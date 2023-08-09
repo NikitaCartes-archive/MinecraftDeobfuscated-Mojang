@@ -3,8 +3,8 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -19,10 +19,10 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
 	}
 
 	public ChanneledLightningTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ContextAwarePredicate[] contextAwarePredicates = EntityPredicate.fromJsonArray(jsonObject, "victims", deserializationContext);
-		return new ChanneledLightningTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicates);
+		List<ContextAwarePredicate> list = EntityPredicate.fromJsonArray(jsonObject, "victims", deserializationContext);
+		return new ChanneledLightningTrigger.TriggerInstance(optional, list);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Collection<? extends Entity> collection) {
@@ -33,17 +33,15 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ContextAwarePredicate[] victims;
+		private final List<ContextAwarePredicate> victims;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate[] contextAwarePredicates) {
-			super(ChanneledLightningTrigger.ID, contextAwarePredicate);
-			this.victims = contextAwarePredicates;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, List<ContextAwarePredicate> list) {
+			super(ChanneledLightningTrigger.ID, optional);
+			this.victims = list;
 		}
 
-		public static ChanneledLightningTrigger.TriggerInstance channeledLightning(EntityPredicate... entityPredicates) {
-			return new ChanneledLightningTrigger.TriggerInstance(
-				ContextAwarePredicate.ANY, (ContextAwarePredicate[])Stream.of(entityPredicates).map(EntityPredicate::wrap).toArray(ContextAwarePredicate[]::new)
-			);
+		public static ChanneledLightningTrigger.TriggerInstance channeledLightning(EntityPredicate.Builder... builders) {
+			return new ChanneledLightningTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(builders));
 		}
 
 		public boolean matches(Collection<? extends LootContext> collection) {
@@ -66,9 +64,9 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("victims", ContextAwarePredicate.toJson(this.victims, serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			jsonObject.add("victims", ContextAwarePredicate.toJson(this.victims));
 			return jsonObject;
 		}
 	}

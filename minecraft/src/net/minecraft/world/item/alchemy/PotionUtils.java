@@ -24,7 +24,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 
 public class PotionUtils {
-	public static final String TAG_CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
+	public static final String TAG_CUSTOM_POTION_EFFECTS = "custom_potion_effects";
 	public static final String TAG_CUSTOM_POTION_COLOR = "CustomPotionColor";
 	public static final String TAG_POTION = "Potion";
 	private static final int EMPTY_COLOR = 16253176;
@@ -59,8 +59,8 @@ public class PotionUtils {
 	}
 
 	public static void getCustomEffects(@Nullable CompoundTag compoundTag, List<MobEffectInstance> list) {
-		if (compoundTag != null && compoundTag.contains("CustomPotionEffects", 9)) {
-			ListTag listTag = compoundTag.getList("CustomPotionEffects", 10);
+		if (compoundTag != null && compoundTag.contains("custom_potion_effects", 9)) {
+			ListTag listTag = compoundTag.getList("custom_potion_effects", 10);
 
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag2 = listTag.getCompound(i);
@@ -141,13 +141,13 @@ public class PotionUtils {
 			return itemStack;
 		} else {
 			CompoundTag compoundTag = itemStack.getOrCreateTag();
-			ListTag listTag = compoundTag.getList("CustomPotionEffects", 9);
+			ListTag listTag = compoundTag.getList("custom_potion_effects", 9);
 
 			for (MobEffectInstance mobEffectInstance : collection) {
 				listTag.add(mobEffectInstance.save(new CompoundTag()));
 			}
 
-			compoundTag.put("CustomPotionEffects", listTag);
+			compoundTag.put("custom_potion_effects", listTag);
 			return itemStack;
 		}
 	}

@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,11 +18,11 @@ public class EffectsChangedTrigger extends SimpleCriterionTrigger<EffectsChanged
 	}
 
 	public EffectsChangedTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		MobEffectsPredicate mobEffectsPredicate = MobEffectsPredicate.fromJson(jsonObject.get("effects"));
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "source", deserializationContext);
-		return new EffectsChangedTrigger.TriggerInstance(contextAwarePredicate, mobEffectsPredicate, contextAwarePredicate2);
+		Optional<MobEffectsPredicate> optional2 = MobEffectsPredicate.fromJson(jsonObject.get("effects"));
+		Optional<ContextAwarePredicate> optional3 = EntityPredicate.fromJson(jsonObject, "source", deserializationContext);
+		return new EffectsChangedTrigger.TriggerInstance(optional, optional2, optional3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, @Nullable Entity entity) {
@@ -30,34 +31,34 @@ public class EffectsChangedTrigger extends SimpleCriterionTrigger<EffectsChanged
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final MobEffectsPredicate effects;
-		private final ContextAwarePredicate source;
+		private final Optional<MobEffectsPredicate> effects;
+		private final Optional<ContextAwarePredicate> source;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, MobEffectsPredicate mobEffectsPredicate, ContextAwarePredicate contextAwarePredicate2) {
-			super(EffectsChangedTrigger.ID, contextAwarePredicate);
-			this.effects = mobEffectsPredicate;
-			this.source = contextAwarePredicate2;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<MobEffectsPredicate> optional2, Optional<ContextAwarePredicate> optional3) {
+			super(EffectsChangedTrigger.ID, optional);
+			this.effects = optional2;
+			this.source = optional3;
 		}
 
-		public static EffectsChangedTrigger.TriggerInstance hasEffects(MobEffectsPredicate mobEffectsPredicate) {
-			return new EffectsChangedTrigger.TriggerInstance(ContextAwarePredicate.ANY, mobEffectsPredicate, ContextAwarePredicate.ANY);
+		public static EffectsChangedTrigger.TriggerInstance hasEffects(MobEffectsPredicate.Builder builder) {
+			return new EffectsChangedTrigger.TriggerInstance(Optional.empty(), builder.build(), Optional.empty());
 		}
 
-		public static EffectsChangedTrigger.TriggerInstance gotEffectsFrom(EntityPredicate entityPredicate) {
-			return new EffectsChangedTrigger.TriggerInstance(ContextAwarePredicate.ANY, MobEffectsPredicate.ANY, EntityPredicate.wrap(entityPredicate));
+		public static EffectsChangedTrigger.TriggerInstance gotEffectsFrom(Optional<EntityPredicate> optional) {
+			return new EffectsChangedTrigger.TriggerInstance(Optional.empty(), Optional.empty(), EntityPredicate.wrap(optional));
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, @Nullable LootContext lootContext) {
-			return !this.effects.matches((LivingEntity)serverPlayer)
+			return this.effects.isPresent() && !((MobEffectsPredicate)this.effects.get()).matches((LivingEntity)serverPlayer)
 				? false
-				: this.source == ContextAwarePredicate.ANY || lootContext != null && this.source.matches(lootContext);
+				: !this.source.isPresent() || lootContext != null && ((ContextAwarePredicate)this.source.get()).matches(lootContext);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("effects", this.effects.serializeToJson());
-			jsonObject.add("source", this.source.toJson(serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.effects.ifPresent(mobEffectsPredicate -> jsonObject.add("effects", mobEffectsPredicate.serializeToJson()));
+			this.source.ifPresent(contextAwarePredicate -> jsonObject.add("source", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 	}

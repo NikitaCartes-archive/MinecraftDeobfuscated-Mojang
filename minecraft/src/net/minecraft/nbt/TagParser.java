@@ -7,6 +7,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Lifecycle;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.minecraft.network.chat.Component;
@@ -37,6 +40,13 @@ public class TagParser {
 	private static final Pattern LONG_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)l", 2);
 	private static final Pattern SHORT_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)s", 2);
 	private static final Pattern INT_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)");
+	public static final Codec<CompoundTag> AS_CODEC = Codec.STRING.comapFlatMap(string -> {
+		try {
+			return DataResult.success(new TagParser(new StringReader(string)).readSingleStruct(), Lifecycle.stable());
+		} catch (CommandSyntaxException var2) {
+			return DataResult.error(var2::getMessage);
+		}
+	}, CompoundTag::toString);
 	private final StringReader reader;
 
 	public static CompoundTag parseTag(String string) throws CommandSyntaxException {

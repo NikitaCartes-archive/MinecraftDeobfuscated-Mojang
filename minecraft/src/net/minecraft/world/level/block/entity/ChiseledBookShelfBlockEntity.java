@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.slf4j.Logger;
 
 public class ChiseledBookShelfBlockEntity extends BlockEntity implements Container {
@@ -39,6 +40,7 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 			}
 
 			((Level)Objects.requireNonNull(this.level)).setBlock(this.worldPosition, blockState, 3);
+			this.level.gameEvent(GameEvent.BLOCK_CHANGE, this.worldPosition, GameEvent.Context.of(blockState));
 		} else {
 			LOGGER.error("Expected slot 0-5, got {}", i);
 		}

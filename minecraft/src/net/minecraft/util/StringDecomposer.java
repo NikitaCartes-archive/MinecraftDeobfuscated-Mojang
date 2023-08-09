@@ -126,8 +126,7 @@ public class StringDecomposer {
 	}
 
 	public static boolean iterateFormatted(FormattedText formattedText, Style style, FormattedCharSink formattedCharSink) {
-		return !formattedText.visit((stylex, string) -> iterateFormatted(string, 0, stylex, formattedCharSink) ? Optional.empty() : STOP_ITERATION, style)
-			.isPresent();
+		return formattedText.visit((stylex, string) -> iterateFormatted(string, 0, stylex, formattedCharSink) ? Optional.empty() : STOP_ITERATION, style).isEmpty();
 	}
 
 	public static String filterBrokenSurrogates(String string) {

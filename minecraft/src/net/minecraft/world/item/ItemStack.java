@@ -26,6 +26,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -219,6 +220,10 @@ public final class ItemStack {
 
 	public boolean is(Holder<Item> holder) {
 		return this.getItem().builtInRegistryHolder() == holder;
+	}
+
+	public boolean is(HolderSet<Item> holderSet) {
+		return holderSet.contains(this.getItemHolder());
 	}
 
 	public Stream<TagKey<Item>> getTags() {
@@ -854,7 +859,7 @@ public final class ItemStack {
 				CompoundTag compoundTag = listTag.getCompound(i);
 				if (!compoundTag.contains("Slot", 8) || compoundTag.getString("Slot").equals(equipmentSlot.getName())) {
 					Optional<Attribute> optional = BuiltInRegistries.ATTRIBUTE.getOptional(ResourceLocation.tryParse(compoundTag.getString("AttributeName")));
-					if (optional.isPresent()) {
+					if (!optional.isEmpty()) {
 						AttributeModifier attributeModifier = AttributeModifier.load(compoundTag);
 						if (attributeModifier != null && attributeModifier.getId().getLeastSignificantBits() != 0L && attributeModifier.getId().getMostSignificantBits() != 0L) {
 							multimap.put((Attribute)optional.get(), attributeModifier);

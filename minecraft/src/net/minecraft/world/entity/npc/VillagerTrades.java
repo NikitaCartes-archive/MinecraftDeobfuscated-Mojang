@@ -45,6 +45,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SuspiciousEffectHolder;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -1137,23 +1138,25 @@ public class VillagerTrades {
 	}
 
 	static class SuspiciousStewForEmerald implements VillagerTrades.ItemListing {
-		final MobEffect effect;
-		final int duration;
-		final int xp;
+		private final List<SuspiciousEffectHolder.EffectEntry> effects;
+		private final int xp;
 		private final float priceMultiplier;
 
 		public SuspiciousStewForEmerald(MobEffect mobEffect, int i, int j) {
-			this.effect = mobEffect;
-			this.duration = i;
-			this.xp = j;
-			this.priceMultiplier = 0.05F;
+			this(List.of(new SuspiciousEffectHolder.EffectEntry(mobEffect, i)), j, 0.05F);
+		}
+
+		public SuspiciousStewForEmerald(List<SuspiciousEffectHolder.EffectEntry> list, int i, float f) {
+			this.effects = list;
+			this.xp = i;
+			this.priceMultiplier = f;
 		}
 
 		@Nullable
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
-			SuspiciousStewItem.saveMobEffect(itemStack, this.effect, this.duration);
+			SuspiciousStewItem.saveMobEffects(itemStack, this.effects);
 			return new MerchantOffer(new ItemStack(Items.EMERALD, 1), itemStack, 12, this.xp, this.priceMultiplier);
 		}
 	}

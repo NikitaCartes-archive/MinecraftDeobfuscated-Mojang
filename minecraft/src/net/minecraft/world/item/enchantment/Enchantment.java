@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -22,6 +23,7 @@ public abstract class Enchantment {
 	public final EnchantmentCategory category;
 	@Nullable
 	protected String descriptionId;
+	private final Holder.Reference<Enchantment> builtInRegistryHolder = BuiltInRegistries.ENCHANTMENT.createIntrusiveHolder(this);
 
 	@Nullable
 	public static Enchantment byId(int i) {
@@ -134,6 +136,11 @@ public abstract class Enchantment {
 
 	public boolean isDiscoverable() {
 		return true;
+	}
+
+	@Deprecated
+	public Holder.Reference<Enchantment> builtInRegistryHolder() {
+		return this.builtInRegistryHolder;
 	}
 
 	public static enum Rarity {

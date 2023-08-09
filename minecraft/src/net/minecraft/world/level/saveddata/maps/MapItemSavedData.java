@@ -251,7 +251,7 @@ public class MapItemSavedData extends SavedData {
 
 	private void removeDecoration(String string) {
 		MapDecoration mapDecoration = (MapDecoration)this.decorations.remove(string);
-		if (mapDecoration != null && mapDecoration.getType().shouldTrackCount()) {
+		if (mapDecoration != null && mapDecoration.type().shouldTrackCount()) {
 			this.trackedDecorationCount--;
 		}
 
@@ -336,7 +336,7 @@ public class MapItemSavedData extends SavedData {
 		MapDecoration mapDecoration = new MapDecoration(type, b, c, k, component);
 		MapDecoration mapDecoration2 = (MapDecoration)this.decorations.put(string, mapDecoration);
 		if (!mapDecoration.equals(mapDecoration2)) {
-			if (mapDecoration2 != null && mapDecoration2.getType().shouldTrackCount()) {
+			if (mapDecoration2 != null && mapDecoration2.type().shouldTrackCount()) {
 				this.trackedDecorationCount--;
 			}
 
@@ -447,7 +447,7 @@ public class MapItemSavedData extends SavedData {
 
 	public boolean isExplorationMap() {
 		for (MapDecoration mapDecoration : this.decorations.values()) {
-			if (mapDecoration.getType() == MapDecoration.Type.MANSION || mapDecoration.getType() == MapDecoration.Type.MONUMENT) {
+			if (mapDecoration.type() == MapDecoration.Type.MANSION || mapDecoration.type() == MapDecoration.Type.MONUMENT) {
 				return true;
 			}
 		}
@@ -462,7 +462,7 @@ public class MapItemSavedData extends SavedData {
 		for (int i = 0; i < list.size(); i++) {
 			MapDecoration mapDecoration = (MapDecoration)list.get(i);
 			this.decorations.put("icon-" + i, mapDecoration);
-			if (mapDecoration.getType().shouldTrackCount()) {
+			if (mapDecoration.type().shouldTrackCount()) {
 				this.trackedDecorationCount++;
 			}
 		}

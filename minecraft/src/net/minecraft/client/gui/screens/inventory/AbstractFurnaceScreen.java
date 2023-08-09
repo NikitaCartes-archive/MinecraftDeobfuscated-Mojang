@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -79,12 +80,14 @@ public abstract class AbstractFurnaceScreen<T extends AbstractFurnaceMenu> exten
 		int l = this.topPos;
 		guiGraphics.blit(this.texture, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		if (this.menu.isLit()) {
-			int m = this.menu.getLitProgress();
-			guiGraphics.blitSprite(this.litProgressSprite, 14, 14, 0, 12 - m, k + 56, l + 36 + 12 - m, 14, m + 1);
+			int m = 14;
+			int n = Mth.ceil(this.menu.getLitProgress() * 13.0F) + 1;
+			guiGraphics.blitSprite(this.litProgressSprite, 14, 14, 0, 14 - n, k + 56, l + 36 + 14 - n, 14, n);
 		}
 
-		int m = this.menu.getBurnProgress();
-		guiGraphics.blitSprite(this.burnProgressSprite, 24, 16, 0, 0, k + 79, l + 34, m + 1, 16);
+		int m = 24;
+		int n = Mth.ceil(this.menu.getBurnProgress() * 24.0F);
+		guiGraphics.blitSprite(this.burnProgressSprite, 24, 16, 0, 0, k + 79, l + 34, n, 16);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -15,10 +16,10 @@ public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntity
 	}
 
 	public SummonedEntityTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
-		return new SummonedEntityTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2);
+		Optional<ContextAwarePredicate> optional2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
+		return new SummonedEntityTrigger.TriggerInstance(optional, optional2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Entity entity) {
@@ -27,25 +28,25 @@ public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntity
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ContextAwarePredicate entity;
+		private final Optional<ContextAwarePredicate> entity;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2) {
-			super(SummonedEntityTrigger.ID, contextAwarePredicate);
-			this.entity = contextAwarePredicate2;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2) {
+			super(SummonedEntityTrigger.ID, optional);
+			this.entity = optional2;
 		}
 
 		public static SummonedEntityTrigger.TriggerInstance summonedEntity(EntityPredicate.Builder builder) {
-			return new SummonedEntityTrigger.TriggerInstance(ContextAwarePredicate.ANY, EntityPredicate.wrap(builder.build()));
+			return new SummonedEntityTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(builder));
 		}
 
 		public boolean matches(LootContext lootContext) {
-			return this.entity.matches(lootContext);
+			return this.entity.isEmpty() || ((ContextAwarePredicate)this.entity.get()).matches(lootContext);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("entity", this.entity.toJson(serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.entity.ifPresent(contextAwarePredicate -> jsonObject.add("entity", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 	}

@@ -139,6 +139,7 @@ import net.minecraft.util.datafix.fixes.LevelUUIDFix;
 import net.minecraft.util.datafix.fixes.MapIdFix;
 import net.minecraft.util.datafix.fixes.MemoryExpiryDataFix;
 import net.minecraft.util.datafix.fixes.MissingDimensionFix;
+import net.minecraft.util.datafix.fixes.MobEffectIdFix;
 import net.minecraft.util.datafix.fixes.MobSpawnerEntityIdentifiersFix;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
 import net.minecraft.util.datafix.fixes.NamespacedTypeRenameFix;
@@ -1163,6 +1164,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new RandomSequenceSettingsFix(schema190));
 		Schema schema191 = dataFixerBuilder.addSchema(3566, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new ScoreboardDisplaySlotFix(schema191));
+		Schema schema192 = dataFixerBuilder.addSchema(3568, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new MobEffectIdFix(schema192));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

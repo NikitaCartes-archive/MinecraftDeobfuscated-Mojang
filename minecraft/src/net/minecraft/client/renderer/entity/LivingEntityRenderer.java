@@ -57,8 +57,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		float h = Mth.rotLerp(g, livingEntity.yBodyRotO, livingEntity.yBodyRot);
 		float j = Mth.rotLerp(g, livingEntity.yHeadRotO, livingEntity.yHeadRot);
 		float k = j - h;
-		if (livingEntity.isPassenger() && livingEntity.getVehicle() instanceof LivingEntity) {
-			LivingEntity livingEntity2 = (LivingEntity)livingEntity.getVehicle();
+		if (livingEntity.isPassenger() && livingEntity.getVehicle() instanceof LivingEntity livingEntity2) {
 			h = Mth.rotLerp(g, livingEntity2.yBodyRotO, livingEntity2.yBodyRot);
 			k = j - h;
 			float l = Mth.wrapDegrees(k);

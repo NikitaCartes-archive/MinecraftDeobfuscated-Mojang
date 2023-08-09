@@ -1,22 +1,24 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSyntaxException;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetNbtFunction extends LootItemConditionalFunction {
-	final CompoundTag tag;
+	public static final Codec<SetNbtFunction> CODEC = RecordCodecBuilder.create(
+		instance -> commonFields(instance)
+				.and(TagParser.AS_CODEC.fieldOf("tag").forGetter(setNbtFunction -> setNbtFunction.tag))
+				.apply(instance, SetNbtFunction::new)
+	);
+	private final CompoundTag tag;
 
-	SetNbtFunction(LootItemCondition[] lootItemConditions, CompoundTag compoundTag) {
-		super(lootItemConditions);
+	private SetNbtFunction(List<LootItemCondition> list, CompoundTag compoundTag) {
+		super(list);
 		this.tag = compoundTag;
 	}
 
@@ -33,22 +35,6 @@ public class SetNbtFunction extends LootItemConditionalFunction {
 
 	@Deprecated
 	public static LootItemConditionalFunction.Builder<?> setTag(CompoundTag compoundTag) {
-		return simpleBuilder(lootItemConditions -> new SetNbtFunction(lootItemConditions, compoundTag));
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<SetNbtFunction> {
-		public void serialize(JsonObject jsonObject, SetNbtFunction setNbtFunction, JsonSerializationContext jsonSerializationContext) {
-			super.serialize(jsonObject, setNbtFunction, jsonSerializationContext);
-			jsonObject.addProperty("tag", setNbtFunction.tag.toString());
-		}
-
-		public SetNbtFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-			try {
-				CompoundTag compoundTag = TagParser.parseTag(GsonHelper.getAsString(jsonObject, "tag"));
-				return new SetNbtFunction(lootItemConditions, compoundTag);
-			} catch (CommandSyntaxException var5) {
-				throw new JsonSyntaxException(var5.getMessage());
-			}
-		}
+		return simpleBuilder(list -> new SetNbtFunction(list, compoundTag));
 	}
 }

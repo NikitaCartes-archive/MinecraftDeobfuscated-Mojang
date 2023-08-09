@@ -818,11 +818,11 @@ public class Gui {
 					int aa = n - y * 8 - 9;
 					guiGraphics.blitSprite(resourceLocation, aa, z, 9, 9);
 					if (y * 2 + 1 < k) {
-						guiGraphics.blitSprite(resourceLocation2, aa, z, 9, 9);
+						guiGraphics.blitSprite(resourceLocation3, aa, z, 9, 9);
 					}
 
 					if (y * 2 + 1 == k) {
-						guiGraphics.blitSprite(resourceLocation3, aa, z, 9, 9);
+						guiGraphics.blitSprite(resourceLocation2, aa, z, 9, 9);
 					}
 				}
 

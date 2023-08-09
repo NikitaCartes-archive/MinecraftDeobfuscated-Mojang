@@ -601,8 +601,7 @@ public class ServerPlayer extends Player {
 								.withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
 							return new ClientboundPlayerCombatKillPacket(this.getId(), component3);
 						}
-					),
-					true
+					)
 				);
 			Team team = this.getTeam();
 			if (team == null || team.getDeathMessageVisibility() == Team.Visibility.ALWAYS) {
@@ -808,7 +807,7 @@ public class ServerPlayer extends Player {
 		} else {
 			Direction.Axis axis = (Direction.Axis)this.level().getBlockState(this.portalEntrancePos).getOptionalValue(NetherPortalBlock.AXIS).orElse(Direction.Axis.X);
 			Optional<BlockUtil.FoundRectangle> optional2 = serverLevel.getPortalForcer().createPortal(blockPos, axis);
-			if (!optional2.isPresent()) {
+			if (optional2.isEmpty()) {
 				LOGGER.error("Unable to create a portal, likely target out of worldborder");
 			}
 
@@ -1303,7 +1302,7 @@ public class ServerPlayer extends Player {
 				} else {
 					return null;
 				}
-			}), true);
+			}));
 		}
 	}
 

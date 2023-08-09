@@ -1,24 +1,20 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootDataId;
 import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import org.slf4j.Logger;
 
-public class ConditionReference implements LootItemCondition {
+public record ConditionReference(ResourceLocation name) implements LootItemCondition {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	final ResourceLocation name;
-
-	ConditionReference(ResourceLocation resourceLocation) {
-		this.name = resourceLocation;
-	}
+	public static final Codec<ConditionReference> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(ResourceLocation.CODEC.fieldOf("name").forGetter(ConditionReference::name)).apply(instance, ConditionReference::new)
+	);
 
 	@Override
 	public LootItemConditionType getType() {
@@ -66,16 +62,5 @@ public class ConditionReference implements LootItemCondition {
 
 	public static LootItemCondition.Builder conditionReference(ResourceLocation resourceLocation) {
 		return () -> new ConditionReference(resourceLocation);
-	}
-
-	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<ConditionReference> {
-		public void serialize(JsonObject jsonObject, ConditionReference conditionReference, JsonSerializationContext jsonSerializationContext) {
-			jsonObject.addProperty("name", conditionReference.name.toString());
-		}
-
-		public ConditionReference deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "name"));
-			return new ConditionReference(resourceLocation);
-		}
 	}
 }

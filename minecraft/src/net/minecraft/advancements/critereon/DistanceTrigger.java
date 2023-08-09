@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -20,11 +21,11 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 	}
 
 	public DistanceTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		LocationPredicate locationPredicate = LocationPredicate.fromJson(jsonObject.get("start_position"));
-		DistancePredicate distancePredicate = DistancePredicate.fromJson(jsonObject.get("distance"));
-		return new DistanceTrigger.TriggerInstance(this.id, contextAwarePredicate, locationPredicate, distancePredicate);
+		Optional<LocationPredicate> optional2 = LocationPredicate.fromJson(jsonObject.get("start_position"));
+		Optional<DistancePredicate> optional3 = DistancePredicate.fromJson(jsonObject.get("distance"));
+		return new DistanceTrigger.TriggerInstance(this.id, optional, optional2, optional3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Vec3 vec3) {
@@ -33,43 +34,47 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final LocationPredicate startPosition;
-		private final DistancePredicate distance;
+		private final Optional<LocationPredicate> startPosition;
+		private final Optional<DistancePredicate> distance;
 
 		public TriggerInstance(
-			ResourceLocation resourceLocation, ContextAwarePredicate contextAwarePredicate, LocationPredicate locationPredicate, DistancePredicate distancePredicate
+			ResourceLocation resourceLocation, Optional<ContextAwarePredicate> optional, Optional<LocationPredicate> optional2, Optional<DistancePredicate> optional3
 		) {
-			super(resourceLocation, contextAwarePredicate);
-			this.startPosition = locationPredicate;
-			this.distance = distancePredicate;
+			super(resourceLocation, optional);
+			this.startPosition = optional2;
+			this.distance = optional3;
 		}
 
 		public static DistanceTrigger.TriggerInstance fallFromHeight(
-			EntityPredicate.Builder builder, DistancePredicate distancePredicate, LocationPredicate locationPredicate
+			EntityPredicate.Builder builder, DistancePredicate distancePredicate, LocationPredicate.Builder builder2
 		) {
-			return new DistanceTrigger.TriggerInstance(CriteriaTriggers.FALL_FROM_HEIGHT.id, EntityPredicate.wrap(builder.build()), locationPredicate, distancePredicate);
+			return new DistanceTrigger.TriggerInstance(
+				CriteriaTriggers.FALL_FROM_HEIGHT.id, EntityPredicate.wrap(builder), builder2.build(), Optional.of(distancePredicate)
+			);
 		}
 
 		public static DistanceTrigger.TriggerInstance rideEntityInLava(EntityPredicate.Builder builder, DistancePredicate distancePredicate) {
 			return new DistanceTrigger.TriggerInstance(
-				CriteriaTriggers.RIDE_ENTITY_IN_LAVA_TRIGGER.id, EntityPredicate.wrap(builder.build()), LocationPredicate.ANY, distancePredicate
+				CriteriaTriggers.RIDE_ENTITY_IN_LAVA_TRIGGER.id, EntityPredicate.wrap(builder), Optional.empty(), Optional.of(distancePredicate)
 			);
 		}
 
 		public static DistanceTrigger.TriggerInstance travelledThroughNether(DistancePredicate distancePredicate) {
-			return new DistanceTrigger.TriggerInstance(CriteriaTriggers.NETHER_TRAVEL.id, ContextAwarePredicate.ANY, LocationPredicate.ANY, distancePredicate);
+			return new DistanceTrigger.TriggerInstance(CriteriaTriggers.NETHER_TRAVEL.id, Optional.empty(), Optional.empty(), Optional.of(distancePredicate));
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("start_position", this.startPosition.serializeToJson());
-			jsonObject.add("distance", this.distance.serializeToJson());
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.startPosition.ifPresent(locationPredicate -> jsonObject.add("start_position", locationPredicate.serializeToJson()));
+			this.distance.ifPresent(distancePredicate -> jsonObject.add("distance", distancePredicate.serializeToJson()));
 			return jsonObject;
 		}
 
 		public boolean matches(ServerLevel serverLevel, Vec3 vec3, Vec3 vec32) {
-			return !this.startPosition.matches(serverLevel, vec3.x, vec3.y, vec3.z) ? false : this.distance.matches(vec3.x, vec3.y, vec3.z, vec32.x, vec32.y, vec32.z);
+			return this.startPosition.isPresent() && !((LocationPredicate)this.startPosition.get()).matches(serverLevel, vec3.x, vec3.y, vec3.z)
+				? false
+				: !this.distance.isPresent() || ((DistancePredicate)this.distance.get()).matches(vec3.x, vec3.y, vec3.z, vec32.x, vec32.y, vec32.z);
 		}
 	}
 }

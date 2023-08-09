@@ -200,11 +200,8 @@ public class EntitySelector {
 			Vec3 vec3 = (Vec3)this.position.apply(commandSourceStack.getPosition());
 			Predicate<Entity> predicate = this.getPredicate(vec3);
 			if (this.currentEntity) {
-				if (commandSourceStack.getEntity() instanceof ServerPlayer) {
-					ServerPlayer serverPlayer2 = (ServerPlayer)commandSourceStack.getEntity();
-					if (predicate.test(serverPlayer2)) {
-						return Lists.<ServerPlayer>newArrayList(serverPlayer2);
-					}
+				if (commandSourceStack.getEntity() instanceof ServerPlayer serverPlayer2 && predicate.test(serverPlayer2)) {
+					return Lists.<ServerPlayer>newArrayList(serverPlayer2);
 				}
 
 				return Collections.emptyList();

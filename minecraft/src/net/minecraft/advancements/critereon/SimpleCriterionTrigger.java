@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.advancements.CriterionTrigger;
@@ -37,11 +38,11 @@ public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerI
 		this.players.remove(playerAdvancements);
 	}
 
-	protected abstract T createInstance(JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext);
+	protected abstract T createInstance(JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext);
 
 	public final T createInstance(JsonObject jsonObject, DeserializationContext deserializationContext) {
-		ContextAwarePredicate contextAwarePredicate = EntityPredicate.fromJson(jsonObject, "player", deserializationContext);
-		return this.createInstance(jsonObject, contextAwarePredicate, deserializationContext);
+		Optional<ContextAwarePredicate> optional = EntityPredicate.fromJson(jsonObject, "player", deserializationContext);
+		return this.createInstance(jsonObject, optional, deserializationContext);
 	}
 
 	protected void trigger(ServerPlayer serverPlayer, Predicate<T> predicate) {
@@ -53,12 +54,15 @@ public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerI
 
 			for (CriterionTrigger.Listener<T> listener : set) {
 				T abstractCriterionTriggerInstance = listener.getTriggerInstance();
-				if (predicate.test(abstractCriterionTriggerInstance) && abstractCriterionTriggerInstance.getPlayerPredicate().matches(lootContext)) {
-					if (list == null) {
-						list = Lists.<CriterionTrigger.Listener<T>>newArrayList();
-					}
+				if (predicate.test(abstractCriterionTriggerInstance)) {
+					Optional<ContextAwarePredicate> optional = abstractCriterionTriggerInstance.getPlayerPredicate();
+					if (optional.isEmpty() || ((ContextAwarePredicate)optional.get()).matches(lootContext)) {
+						if (list == null) {
+							list = Lists.<CriterionTrigger.Listener<T>>newArrayList();
+						}
 
-					list.add(listener);
+						list.add(listener);
+					}
 				}
 			}
 

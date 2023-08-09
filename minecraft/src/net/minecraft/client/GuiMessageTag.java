@@ -15,11 +15,13 @@ public record GuiMessageTag(int indicatorColor, @Nullable GuiMessageTag.Icon ico
 	private static final Component SYSTEM_TEXT_SINGLE_PLAYER = Component.translatable("chat.tag.system_single_player");
 	private static final Component CHAT_NOT_SECURE_TEXT = Component.translatable("chat.tag.not_secure");
 	private static final Component CHAT_MODIFIED_TEXT = Component.translatable("chat.tag.modified");
+	private static final Component CHAT_ERROR_TEXT = Component.translatable("chat.tag.error");
 	private static final int CHAT_NOT_SECURE_INDICATOR_COLOR = 13684944;
 	private static final int CHAT_MODIFIED_INDICATOR_COLOR = 6316128;
 	private static final GuiMessageTag SYSTEM = new GuiMessageTag(13684944, null, SYSTEM_TEXT, "System");
 	private static final GuiMessageTag SYSTEM_SINGLE_PLAYER = new GuiMessageTag(13684944, null, SYSTEM_TEXT_SINGLE_PLAYER, "System");
 	private static final GuiMessageTag CHAT_NOT_SECURE = new GuiMessageTag(13684944, null, CHAT_NOT_SECURE_TEXT, "Not Secure");
+	private static final GuiMessageTag CHAT_ERROR = new GuiMessageTag(16733525, null, CHAT_ERROR_TEXT, "Chat Error");
 
 	public static GuiMessageTag system() {
 		return SYSTEM;
@@ -37,6 +39,10 @@ public record GuiMessageTag(int indicatorColor, @Nullable GuiMessageTag.Icon ico
 		Component component = Component.literal(string).withStyle(ChatFormatting.GRAY);
 		Component component2 = Component.empty().append(CHAT_MODIFIED_TEXT).append(CommonComponents.NEW_LINE).append(component);
 		return new GuiMessageTag(6316128, GuiMessageTag.Icon.CHAT_MODIFIED, component2, "Modified");
+	}
+
+	public static GuiMessageTag chatError() {
+		return CHAT_ERROR;
 	}
 
 	@Environment(EnvType.CLIENT)

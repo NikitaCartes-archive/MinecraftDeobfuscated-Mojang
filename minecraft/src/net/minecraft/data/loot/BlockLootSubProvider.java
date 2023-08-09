@@ -507,8 +507,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 								.setBlock(
 									BlockPredicate.Builder.block()
 										.of(block)
-										.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER).build())
-										.build()
+										.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER))
 								),
 							new BlockPos(0, 1, 0)
 						)
@@ -527,8 +526,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 								.setBlock(
 									BlockPredicate.Builder.block()
 										.of(block)
-										.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER).build())
-										.build()
+										.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER))
 								),
 							new BlockPos(0, -1, 0)
 						)

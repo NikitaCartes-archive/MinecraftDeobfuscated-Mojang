@@ -35,6 +35,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class Evoker extends SpellcasterIllager {
@@ -203,6 +205,7 @@ public class Evoker extends SpellcasterIllager {
 
 			if (bl) {
 				Evoker.this.level().addFreshEntity(new EvokerFangs(Evoker.this.level(), d, (double)blockPos.getY() + j, e, h, i, Evoker.this));
+				Evoker.this.level().gameEvent(GameEvent.ENTITY_PLACE, new Vec3(d, (double)blockPos.getY() + j, e), GameEvent.Context.of(Evoker.this));
 			}
 		}
 
@@ -265,6 +268,7 @@ public class Evoker extends SpellcasterIllager {
 					vex.setBoundOrigin(blockPos);
 					vex.setLimitedLife(20 * (30 + Evoker.this.random.nextInt(90)));
 					serverLevel.addFreshEntityWithPassengers(vex);
+					serverLevel.gameEvent(GameEvent.ENTITY_PLACE, blockPos, GameEvent.Context.of(Evoker.this));
 				}
 			}
 		}

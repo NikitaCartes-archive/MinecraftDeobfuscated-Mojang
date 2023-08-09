@@ -2,6 +2,7 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -19,17 +20,17 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
 	}
 
 	public EnterBlockTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		Block block = deserializeBlock(jsonObject);
-		StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
+		Optional<StatePropertiesPredicate> optional2 = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
 		if (block != null) {
-			statePropertiesPredicate.checkState(block.getStateDefinition(), string -> {
-				throw new JsonSyntaxException("Block " + block + " has no property " + string);
-			});
+			optional2.ifPresent(statePropertiesPredicate -> statePropertiesPredicate.checkState(block.getStateDefinition(), string -> {
+					throw new JsonSyntaxException("Block " + block + " has no property " + string);
+				}));
 		}
 
-		return new EnterBlockTrigger.TriggerInstance(contextAwarePredicate, block, statePropertiesPredicate);
+		return new EnterBlockTrigger.TriggerInstance(optional, block, optional2);
 	}
 
 	@Nullable
@@ -51,31 +52,33 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		@Nullable
 		private final Block block;
-		private final StatePropertiesPredicate state;
+		private final Optional<StatePropertiesPredicate> state;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, @Nullable Block block, StatePropertiesPredicate statePropertiesPredicate) {
-			super(EnterBlockTrigger.ID, contextAwarePredicate);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, @Nullable Block block, Optional<StatePropertiesPredicate> optional2) {
+			super(EnterBlockTrigger.ID, optional);
 			this.block = block;
-			this.state = statePropertiesPredicate;
+			this.state = optional2;
 		}
 
 		public static EnterBlockTrigger.TriggerInstance entersBlock(Block block) {
-			return new EnterBlockTrigger.TriggerInstance(ContextAwarePredicate.ANY, block, StatePropertiesPredicate.ANY);
+			return new EnterBlockTrigger.TriggerInstance(Optional.empty(), block, Optional.empty());
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
 			if (this.block != null) {
 				jsonObject.addProperty("block", BuiltInRegistries.BLOCK.getKey(this.block).toString());
 			}
 
-			jsonObject.add("state", this.state.serializeToJson());
+			this.state.ifPresent(statePropertiesPredicate -> jsonObject.add("state", statePropertiesPredicate.serializeToJson()));
 			return jsonObject;
 		}
 
 		public boolean matches(BlockState blockState) {
-			return this.block != null && !blockState.is(this.block) ? false : this.state.matches(blockState);
+			return this.block != null && !blockState.is(this.block)
+				? false
+				: !this.state.isPresent() || ((StatePropertiesPredicate)this.state.get()).matches(blockState);
 		}
 	}
 }

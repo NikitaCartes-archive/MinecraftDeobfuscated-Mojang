@@ -1,6 +1,7 @@
 package net.minecraft.client.multiplayer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.logging.LogUtils;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
@@ -50,10 +51,12 @@ import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagNetworkSerialization;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public abstract class ClientCommonPacketListenerImpl implements ClientCommonPacketListener {
 	private static final Component GENERIC_DISCONNECT_MESSAGE = Component.translatable("disconnect.lost");
+	private static final Logger LOGGER = LogUtils.getLogger();
 	protected final Minecraft minecraft;
 	protected final Connection connection;
 	@Nullable
@@ -237,6 +240,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	public void onDisconnect(Component component) {
 		this.telemetryManager.onDisconnect();
 		this.minecraft.disconnect(this.createDisconnectScreen(component));
+		LOGGER.warn("Client disconnected with reason: {}", component.getString());
 	}
 
 	protected Screen createDisconnectScreen(Component component) {

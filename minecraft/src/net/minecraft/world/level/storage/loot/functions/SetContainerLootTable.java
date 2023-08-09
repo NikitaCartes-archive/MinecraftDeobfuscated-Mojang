@@ -1,13 +1,13 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -19,15 +19,26 @@ import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetContainerLootTable extends LootItemConditionalFunction {
-	final ResourceLocation name;
-	final long seed;
-	final BlockEntityType<?> type;
+	public static final Codec<SetContainerLootTable> CODEC = RecordCodecBuilder.create(
+		instance -> commonFields(instance)
+				.<ResourceLocation, long, Holder<BlockEntityType<?>>>and(
+					instance.group(
+						ResourceLocation.CODEC.fieldOf("name").forGetter(setContainerLootTable -> setContainerLootTable.name),
+						ExtraCodecs.strictOptionalField(Codec.LONG, "seed", 0L).forGetter(setContainerLootTable -> setContainerLootTable.seed),
+						BuiltInRegistries.BLOCK_ENTITY_TYPE.holderByNameCodec().fieldOf("type").forGetter(setContainerLootTable -> setContainerLootTable.type)
+					)
+				)
+				.apply(instance, SetContainerLootTable::new)
+	);
+	private final ResourceLocation name;
+	private final long seed;
+	private final Holder<BlockEntityType<?>> type;
 
-	SetContainerLootTable(LootItemCondition[] lootItemConditions, ResourceLocation resourceLocation, long l, BlockEntityType<?> blockEntityType) {
-		super(lootItemConditions);
+	private SetContainerLootTable(List<LootItemCondition> list, ResourceLocation resourceLocation, long l, Holder<BlockEntityType<?>> holder) {
+		super(list);
 		this.name = resourceLocation;
 		this.seed = l;
-		this.type = blockEntityType;
+		this.type = holder;
 	}
 
 	@Override
@@ -50,7 +61,7 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
 				compoundTag.putLong("LootTableSeed", this.seed);
 			}
 
-			BlockItem.setBlockEntityData(itemStack, this.type, compoundTag);
+			BlockItem.setBlockEntityData(itemStack, this.type.value(), compoundTag);
 			return itemStack;
 		}
 	}
@@ -65,31 +76,10 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
 	}
 
 	public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> blockEntityType, ResourceLocation resourceLocation) {
-		return simpleBuilder(lootItemConditions -> new SetContainerLootTable(lootItemConditions, resourceLocation, 0L, blockEntityType));
+		return simpleBuilder(list -> new SetContainerLootTable(list, resourceLocation, 0L, blockEntityType.builtInRegistryHolder()));
 	}
 
 	public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> blockEntityType, ResourceLocation resourceLocation, long l) {
-		return simpleBuilder(lootItemConditions -> new SetContainerLootTable(lootItemConditions, resourceLocation, l, blockEntityType));
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<SetContainerLootTable> {
-		public void serialize(JsonObject jsonObject, SetContainerLootTable setContainerLootTable, JsonSerializationContext jsonSerializationContext) {
-			super.serialize(jsonObject, setContainerLootTable, jsonSerializationContext);
-			jsonObject.addProperty("name", setContainerLootTable.name.toString());
-			jsonObject.addProperty("type", BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(setContainerLootTable.type).toString());
-			if (setContainerLootTable.seed != 0L) {
-				jsonObject.addProperty("seed", setContainerLootTable.seed);
-			}
-		}
-
-		public SetContainerLootTable deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "name"));
-			long l = GsonHelper.getAsLong(jsonObject, "seed", 0L);
-			ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "type"));
-			BlockEntityType<?> blockEntityType = (BlockEntityType<?>)BuiltInRegistries.BLOCK_ENTITY_TYPE
-				.getOptional(resourceLocation2)
-				.orElseThrow(() -> new JsonSyntaxException("Unknown block entity type id '" + resourceLocation2 + "'"));
-			return new SetContainerLootTable(lootItemConditions, resourceLocation, l, blockEntityType);
-		}
+		return simpleBuilder(list -> new SetContainerLootTable(list, resourceLocation, l, blockEntityType.builtInRegistryHolder()));
 	}
 }

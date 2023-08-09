@@ -539,6 +539,7 @@ public class Options {
 	public boolean renderDebug;
 	public boolean renderDebugCharts;
 	public boolean renderFpsChart;
+	public boolean renderNetworkChart;
 	public String lastMpIp = "";
 	public boolean smoothCamera;
 	private final OptionInstance<Integer> fov = new OptionInstance<>(

@@ -1,9 +1,10 @@
 package net.minecraft.network.protocol.game;
 
+import net.minecraft.network.ClientPongPacketListener;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 
-public interface ClientGamePacketListener extends ClientCommonPacketListener {
+public interface ClientGamePacketListener extends ClientPongPacketListener, ClientCommonPacketListener {
 	@Override
 	default ConnectionProtocol protocol() {
 		return ConnectionProtocol.PLAY;

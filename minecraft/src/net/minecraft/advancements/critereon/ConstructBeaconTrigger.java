@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -13,10 +14,10 @@ public class ConstructBeaconTrigger extends SimpleCriterionTrigger<ConstructBeac
 	}
 
 	public ConstructBeaconTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("level"));
-		return new ConstructBeaconTrigger.TriggerInstance(contextAwarePredicate, ints);
+		return new ConstructBeaconTrigger.TriggerInstance(optional, ints);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, int i) {
@@ -26,17 +27,17 @@ public class ConstructBeaconTrigger extends SimpleCriterionTrigger<ConstructBeac
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final MinMaxBounds.Ints level;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, MinMaxBounds.Ints ints) {
-			super(ConstructBeaconTrigger.ID, contextAwarePredicate);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, MinMaxBounds.Ints ints) {
+			super(ConstructBeaconTrigger.ID, optional);
 			this.level = ints;
 		}
 
 		public static ConstructBeaconTrigger.TriggerInstance constructedBeacon() {
-			return new ConstructBeaconTrigger.TriggerInstance(ContextAwarePredicate.ANY, MinMaxBounds.Ints.ANY);
+			return new ConstructBeaconTrigger.TriggerInstance(Optional.empty(), MinMaxBounds.Ints.ANY);
 		}
 
 		public static ConstructBeaconTrigger.TriggerInstance constructedBeacon(MinMaxBounds.Ints ints) {
-			return new ConstructBeaconTrigger.TriggerInstance(ContextAwarePredicate.ANY, ints);
+			return new ConstructBeaconTrigger.TriggerInstance(Optional.empty(), ints);
 		}
 
 		public boolean matches(int i) {
@@ -44,8 +45,8 @@ public class ConstructBeaconTrigger extends SimpleCriterionTrigger<ConstructBeac
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
 			jsonObject.add("level", this.level.serializeToJson());
 			return jsonObject;
 		}

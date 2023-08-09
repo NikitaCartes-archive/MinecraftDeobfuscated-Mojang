@@ -140,18 +140,17 @@ public class StackedContents {
 
 				this.data.clear(0, this.ingredientCount + this.itemCount + this.ingredientCount);
 				int m = 0;
-				List<Ingredient> list = this.recipe.getIngredients();
 
-				for (int n = 0; n < list.size(); n++) {
-					if (bl2 && ((Ingredient)list.get(n)).isEmpty()) {
+				for (Ingredient ingredient : this.recipe.getIngredients()) {
+					if (bl2 && ingredient.isEmpty()) {
 						intList.add(0);
 					} else {
-						for (int o = 0; o < this.itemCount; o++) {
-							if (this.hasResidual(false, m, o)) {
-								this.toggleResidual(true, o, m);
-								StackedContents.this.put(this.items[o], i);
+						for (int n = 0; n < this.itemCount; n++) {
+							if (this.hasResidual(false, m, n)) {
+								this.toggleResidual(true, n, m);
+								StackedContents.this.put(this.items[n], i);
 								if (bl2) {
-									intList.add(this.items[o]);
+									intList.add(this.items[n]);
 								}
 							}
 						}

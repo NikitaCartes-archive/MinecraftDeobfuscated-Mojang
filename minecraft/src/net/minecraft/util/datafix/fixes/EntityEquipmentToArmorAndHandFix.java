@@ -68,12 +68,12 @@ public class EntityEquipmentToArmorAndHandFix extends DataFix {
 				if (optional2.isPresent()) {
 					Iterator<? extends Dynamic<?>> iterator = Stream.concat((Stream)optional2.get(), Stream.generate(() -> dynamic2.createInt(0))).iterator();
 					float f = ((Dynamic)iterator.next()).asFloat(0.0F);
-					if (!dynamic.get("HandDropChances").result().isPresent()) {
+					if (dynamic.get("HandDropChances").result().isEmpty()) {
 						Dynamic<?> dynamic3 = dynamic.createList(Stream.of(f, 0.0F).map(dynamic::createFloat));
 						dynamic = dynamic.set("HandDropChances", dynamic3);
 					}
 
-					if (!dynamic.get("ArmorDropChances").result().isPresent()) {
+					if (dynamic.get("ArmorDropChances").result().isEmpty()) {
 						Dynamic<?> dynamic3 = dynamic.createList(
 							Stream.of(
 									((Dynamic)iterator.next()).asFloat(0.0F),

@@ -1,14 +1,10 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
@@ -16,23 +12,33 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetLoreFunction extends LootItemConditionalFunction {
-	final boolean replace;
-	final List<Component> lore;
-	@Nullable
-	final LootContext.EntityTarget resolutionContext;
+	public static final Codec<SetLoreFunction> CODEC = RecordCodecBuilder.create(
+		instance -> commonFields(instance)
+				.<boolean, List<Component>, Optional<LootContext.EntityTarget>>and(
+					instance.group(
+						Codec.BOOL.fieldOf("replace").orElse(false).forGetter(setLoreFunction -> setLoreFunction.replace),
+						ExtraCodecs.COMPONENT.listOf().fieldOf("lore").forGetter(setLoreFunction -> setLoreFunction.lore),
+						ExtraCodecs.strictOptionalField(LootContext.EntityTarget.CODEC, "entity").forGetter(setLoreFunction -> setLoreFunction.resolutionContext)
+					)
+				)
+				.apply(instance, SetLoreFunction::new)
+	);
+	private final boolean replace;
+	private final List<Component> lore;
+	private final Optional<LootContext.EntityTarget> resolutionContext;
 
-	public SetLoreFunction(LootItemCondition[] lootItemConditions, boolean bl, List<Component> list, @Nullable LootContext.EntityTarget entityTarget) {
-		super(lootItemConditions);
+	public SetLoreFunction(List<LootItemCondition> list, boolean bl, List<Component> list2, Optional<LootContext.EntityTarget> optional) {
+		super(list);
 		this.replace = bl;
-		this.lore = ImmutableList.copyOf(list);
-		this.resolutionContext = entityTarget;
+		this.lore = List.copyOf(list2);
+		this.resolutionContext = optional;
 	}
 
 	@Override
@@ -42,7 +48,7 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 
 	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return this.resolutionContext != null ? ImmutableSet.of(this.resolutionContext.getParam()) : ImmutableSet.of();
+		return (Set<LootContextParam<?>>)this.resolutionContext.map(entityTarget -> Set.of(entityTarget.getParam())).orElseGet(Set::of);
 	}
 
 	@Override
@@ -53,7 +59,7 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 				listTag.clear();
 			}
 
-			UnaryOperator<Component> unaryOperator = SetNameFunction.createResolver(lootContext, this.resolutionContext);
+			UnaryOperator<Component> unaryOperator = SetNameFunction.createResolver(lootContext, (LootContext.EntityTarget)this.resolutionContext.orElse(null));
 			this.lore.stream().map(unaryOperator).map(Component.Serializer::toJson).map(StringTag::valueOf).forEach(listTag::add);
 		}
 
@@ -103,8 +109,8 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 
 	public static class Builder extends LootItemConditionalFunction.Builder<SetLoreFunction.Builder> {
 		private boolean replace;
-		private LootContext.EntityTarget resolutionContext;
-		private final List<Component> lore = Lists.<Component>newArrayList();
+		private Optional<LootContext.EntityTarget> resolutionContext = Optional.empty();
+		private final ImmutableList.Builder<Component> lore = ImmutableList.builder();
 
 		public SetLoreFunction.Builder setReplace(boolean bl) {
 			this.replace = bl;
@@ -112,7 +118,7 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 		}
 
 		public SetLoreFunction.Builder setResolutionContext(LootContext.EntityTarget entityTarget) {
-			this.resolutionContext = entityTarget;
+			this.resolutionContext = Optional.of(entityTarget);
 			return this;
 		}
 
@@ -127,33 +133,7 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 
 		@Override
 		public LootItemFunction build() {
-			return new SetLoreFunction(this.getConditions(), this.replace, this.lore, this.resolutionContext);
-		}
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<SetLoreFunction> {
-		public void serialize(JsonObject jsonObject, SetLoreFunction setLoreFunction, JsonSerializationContext jsonSerializationContext) {
-			super.serialize(jsonObject, setLoreFunction, jsonSerializationContext);
-			jsonObject.addProperty("replace", setLoreFunction.replace);
-			JsonArray jsonArray = new JsonArray();
-
-			for (Component component : setLoreFunction.lore) {
-				jsonArray.add(Component.Serializer.toJsonTree(component));
-			}
-
-			jsonObject.add("lore", jsonArray);
-			if (setLoreFunction.resolutionContext != null) {
-				jsonObject.add("entity", jsonSerializationContext.serialize(setLoreFunction.resolutionContext));
-			}
-		}
-
-		public SetLoreFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-			boolean bl = GsonHelper.getAsBoolean(jsonObject, "replace", false);
-			List<Component> list = (List<Component>)Streams.stream(GsonHelper.getAsJsonArray(jsonObject, "lore"))
-				.map(Component.Serializer::fromJson)
-				.collect(ImmutableList.toImmutableList());
-			LootContext.EntityTarget entityTarget = GsonHelper.getAsObject(jsonObject, "entity", null, jsonDeserializationContext, LootContext.EntityTarget.class);
-			return new SetLoreFunction(lootItemConditions, bl, list, entityTarget);
+			return new SetLoreFunction(this.getConditions(), this.replace, this.lore.build(), this.resolutionContext);
 		}
 	}
 }

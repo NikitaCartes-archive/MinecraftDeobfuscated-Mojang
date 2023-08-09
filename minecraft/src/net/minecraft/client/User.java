@@ -1,6 +1,5 @@
 package net.minecraft.client;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.util.UndashedUuid;
 import java.util.Arrays;
 import java.util.Locale;
@@ -53,10 +52,6 @@ public class User {
 
 	public Optional<String> getXuid() {
 		return this.xuid;
-	}
-
-	public GameProfile getGameProfile() {
-		return new GameProfile(this.getProfileId(), this.getName());
 	}
 
 	public User.Type getType() {

@@ -65,10 +65,10 @@ public class DripstoneClusterFeature extends Feature<DripstoneClusterConfigurati
 		Optional<Column> optional = Column.scan(
 			worldGenLevel, blockPos, dripstoneClusterConfiguration.floorToCeilingSearchRange, DripstoneUtils::isEmptyOrWater, DripstoneUtils::isNeitherEmptyNorWater
 		);
-		if (optional.isPresent()) {
+		if (!optional.isEmpty()) {
 			OptionalInt optionalInt = ((Column)optional.get()).getCeiling();
 			OptionalInt optionalInt2 = ((Column)optional.get()).getFloor();
-			if (optionalInt.isPresent() || optionalInt2.isPresent()) {
+			if (!optionalInt.isEmpty() || !optionalInt2.isEmpty()) {
 				boolean bl = randomSource.nextFloat() < f;
 				Column column;
 				if (bl && optionalInt2.isPresent() && this.canPlacePool(worldGenLevel, blockPos.atY(optionalInt2.getAsInt()))) {

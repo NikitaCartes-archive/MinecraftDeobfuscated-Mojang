@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -16,11 +17,11 @@ public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteract
 	}
 
 	protected PlayerInteractTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
-		return new PlayerInteractTrigger.TriggerInstance(contextAwarePredicate, itemPredicate, contextAwarePredicate2);
+		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("item"));
+		Optional<ContextAwarePredicate> optional3 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
+		return new PlayerInteractTrigger.TriggerInstance(optional, optional2, optional3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, Entity entity) {
@@ -29,34 +30,36 @@ public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteract
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ItemPredicate item;
-		private final ContextAwarePredicate entity;
+		private final Optional<ItemPredicate> item;
+		private final Optional<ContextAwarePredicate> entity;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, ContextAwarePredicate contextAwarePredicate2) {
-			super(PlayerInteractTrigger.ID, contextAwarePredicate);
-			this.item = itemPredicate;
-			this.entity = contextAwarePredicate2;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, Optional<ContextAwarePredicate> optional3) {
+			super(PlayerInteractTrigger.ID, optional);
+			this.item = optional2;
+			this.entity = optional3;
 		}
 
 		public static PlayerInteractTrigger.TriggerInstance itemUsedOnEntity(
-			ContextAwarePredicate contextAwarePredicate, ItemPredicate.Builder builder, ContextAwarePredicate contextAwarePredicate2
+			Optional<ContextAwarePredicate> optional, ItemPredicate.Builder builder, Optional<ContextAwarePredicate> optional2
 		) {
-			return new PlayerInteractTrigger.TriggerInstance(contextAwarePredicate, builder.build(), contextAwarePredicate2);
+			return new PlayerInteractTrigger.TriggerInstance(optional, builder.build(), optional2);
 		}
 
-		public static PlayerInteractTrigger.TriggerInstance itemUsedOnEntity(ItemPredicate.Builder builder, ContextAwarePredicate contextAwarePredicate) {
-			return itemUsedOnEntity(ContextAwarePredicate.ANY, builder, contextAwarePredicate);
+		public static PlayerInteractTrigger.TriggerInstance itemUsedOnEntity(ItemPredicate.Builder builder, Optional<ContextAwarePredicate> optional) {
+			return itemUsedOnEntity(Optional.empty(), builder, optional);
 		}
 
 		public boolean matches(ItemStack itemStack, LootContext lootContext) {
-			return !this.item.matches(itemStack) ? false : this.entity.matches(lootContext);
+			return this.item.isPresent() && !((ItemPredicate)this.item.get()).matches(itemStack)
+				? false
+				: this.entity.isEmpty() || ((ContextAwarePredicate)this.entity.get()).matches(lootContext);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("item", this.item.serializeToJson());
-			jsonObject.add("entity", this.entity.toJson(serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
+			this.entity.ifPresent(contextAwarePredicate -> jsonObject.add("entity", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 	}

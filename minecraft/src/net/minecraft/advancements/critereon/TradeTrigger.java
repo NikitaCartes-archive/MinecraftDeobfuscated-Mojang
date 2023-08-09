@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -16,11 +17,11 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 	}
 
 	public TradeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "villager", deserializationContext);
-		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new TradeTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2, itemPredicate);
+		Optional<ContextAwarePredicate> optional2 = EntityPredicate.fromJson(jsonObject, "villager", deserializationContext);
+		Optional<ItemPredicate> optional3 = ItemPredicate.fromJson(jsonObject.get("item"));
+		return new TradeTrigger.TriggerInstance(optional, optional2, optional3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, AbstractVillager abstractVillager, ItemStack itemStack) {
@@ -29,32 +30,34 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ContextAwarePredicate villager;
-		private final ItemPredicate item;
+		private final Optional<ContextAwarePredicate> villager;
+		private final Optional<ItemPredicate> item;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2, ItemPredicate itemPredicate) {
-			super(TradeTrigger.ID, contextAwarePredicate);
-			this.villager = contextAwarePredicate2;
-			this.item = itemPredicate;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2, Optional<ItemPredicate> optional3) {
+			super(TradeTrigger.ID, optional);
+			this.villager = optional2;
+			this.item = optional3;
 		}
 
 		public static TradeTrigger.TriggerInstance tradedWithVillager() {
-			return new TradeTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ItemPredicate.ANY);
+			return new TradeTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty());
 		}
 
 		public static TradeTrigger.TriggerInstance tradedWithVillager(EntityPredicate.Builder builder) {
-			return new TradeTrigger.TriggerInstance(EntityPredicate.wrap(builder.build()), ContextAwarePredicate.ANY, ItemPredicate.ANY);
+			return new TradeTrigger.TriggerInstance(EntityPredicate.wrap(builder), Optional.empty(), Optional.empty());
 		}
 
 		public boolean matches(LootContext lootContext, ItemStack itemStack) {
-			return !this.villager.matches(lootContext) ? false : this.item.matches(itemStack);
+			return this.villager.isPresent() && !((ContextAwarePredicate)this.villager.get()).matches(lootContext)
+				? false
+				: !this.item.isPresent() || ((ItemPredicate)this.item.get()).matches(itemStack);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("item", this.item.serializeToJson());
-			jsonObject.add("villager", this.villager.toJson(serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
+			this.villager.ifPresent(contextAwarePredicate -> jsonObject.add("villager", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 	}

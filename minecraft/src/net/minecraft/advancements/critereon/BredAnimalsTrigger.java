@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,12 +18,12 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 	}
 
 	public BredAnimalsTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "parent", deserializationContext);
-		ContextAwarePredicate contextAwarePredicate3 = EntityPredicate.fromJson(jsonObject, "partner", deserializationContext);
-		ContextAwarePredicate contextAwarePredicate4 = EntityPredicate.fromJson(jsonObject, "child", deserializationContext);
-		return new BredAnimalsTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2, contextAwarePredicate3, contextAwarePredicate4);
+		Optional<ContextAwarePredicate> optional2 = EntityPredicate.fromJson(jsonObject, "parent", deserializationContext);
+		Optional<ContextAwarePredicate> optional3 = EntityPredicate.fromJson(jsonObject, "partner", deserializationContext);
+		Optional<ContextAwarePredicate> optional4 = EntityPredicate.fromJson(jsonObject, "child", deserializationContext);
+		return new BredAnimalsTrigger.TriggerInstance(optional, optional2, optional3, optional4);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Animal animal, Animal animal2, @Nullable AgeableMob ageableMob) {
@@ -33,52 +34,54 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ContextAwarePredicate parent;
-		private final ContextAwarePredicate partner;
-		private final ContextAwarePredicate child;
+		private final Optional<ContextAwarePredicate> parent;
+		private final Optional<ContextAwarePredicate> partner;
+		private final Optional<ContextAwarePredicate> child;
 
 		public TriggerInstance(
-			ContextAwarePredicate contextAwarePredicate,
-			ContextAwarePredicate contextAwarePredicate2,
-			ContextAwarePredicate contextAwarePredicate3,
-			ContextAwarePredicate contextAwarePredicate4
+			Optional<ContextAwarePredicate> optional,
+			Optional<ContextAwarePredicate> optional2,
+			Optional<ContextAwarePredicate> optional3,
+			Optional<ContextAwarePredicate> optional4
 		) {
-			super(BredAnimalsTrigger.ID, contextAwarePredicate);
-			this.parent = contextAwarePredicate2;
-			this.partner = contextAwarePredicate3;
-			this.child = contextAwarePredicate4;
+			super(BredAnimalsTrigger.ID, optional);
+			this.parent = optional2;
+			this.partner = optional3;
+			this.child = optional4;
 		}
 
 		public static BredAnimalsTrigger.TriggerInstance bredAnimals() {
-			return new BredAnimalsTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ContextAwarePredicate.ANY);
+			return new BredAnimalsTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 		}
 
 		public static BredAnimalsTrigger.TriggerInstance bredAnimals(EntityPredicate.Builder builder) {
-			return new BredAnimalsTrigger.TriggerInstance(
-				ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, ContextAwarePredicate.ANY, EntityPredicate.wrap(builder.build())
-			);
+			return new BredAnimalsTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty(), EntityPredicate.wrap(builder));
 		}
 
 		public static BredAnimalsTrigger.TriggerInstance bredAnimals(
-			EntityPredicate entityPredicate, EntityPredicate entityPredicate2, EntityPredicate entityPredicate3
+			Optional<EntityPredicate> optional, Optional<EntityPredicate> optional2, Optional<EntityPredicate> optional3
 		) {
 			return new BredAnimalsTrigger.TriggerInstance(
-				ContextAwarePredicate.ANY, EntityPredicate.wrap(entityPredicate), EntityPredicate.wrap(entityPredicate2), EntityPredicate.wrap(entityPredicate3)
+				Optional.empty(), EntityPredicate.wrap(optional), EntityPredicate.wrap(optional2), EntityPredicate.wrap(optional3)
 			);
 		}
 
 		public boolean matches(LootContext lootContext, LootContext lootContext2, @Nullable LootContext lootContext3) {
-			return this.child == ContextAwarePredicate.ANY || lootContext3 != null && this.child.matches(lootContext3)
-				? this.parent.matches(lootContext) && this.partner.matches(lootContext2) || this.parent.matches(lootContext2) && this.partner.matches(lootContext)
+			return !this.child.isPresent() || lootContext3 != null && ((ContextAwarePredicate)this.child.get()).matches(lootContext3)
+				? matches(this.parent, lootContext) && matches(this.partner, lootContext2) || matches(this.parent, lootContext2) && matches(this.partner, lootContext)
 				: false;
 		}
 
+		private static boolean matches(Optional<ContextAwarePredicate> optional, LootContext lootContext) {
+			return optional.isEmpty() || ((ContextAwarePredicate)optional.get()).matches(lootContext);
+		}
+
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("parent", this.parent.toJson(serializationContext));
-			jsonObject.add("partner", this.partner.toJson(serializationContext));
-			jsonObject.add("child", this.child.toJson(serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.parent.ifPresent(contextAwarePredicate -> jsonObject.add("parent", contextAwarePredicate.toJson()));
+			this.partner.ifPresent(contextAwarePredicate -> jsonObject.add("partner", contextAwarePredicate.toJson()));
+			this.child.ifPresent(contextAwarePredicate -> jsonObject.add("child", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 	}

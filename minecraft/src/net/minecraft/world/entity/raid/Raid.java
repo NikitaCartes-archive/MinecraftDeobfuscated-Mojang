@@ -21,6 +21,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.server.level.ServerBossEvent;
@@ -131,10 +132,8 @@ public class Raid {
 		this.status = Raid.RaidStatus.getByName(compoundTag.getString("Status"));
 		this.heroesOfTheVillage.clear();
 		if (compoundTag.contains("HeroesOfTheVillage", 9)) {
-			ListTag listTag = compoundTag.getList("HeroesOfTheVillage", 11);
-
-			for (int i = 0; i < listTag.size(); i++) {
-				this.heroesOfTheVillage.add(NbtUtils.loadUUID(listTag.get(i)));
+			for (Tag tag : compoundTag.getList("HeroesOfTheVillage", 11)) {
+				this.heroesOfTheVillage.add(NbtUtils.loadUUID(tag));
 			}
 		}
 	}
@@ -355,12 +354,14 @@ public class Raid {
 
 						for (UUID uUID : this.heroesOfTheVillage) {
 							Entity entity = this.level.getEntity(uUID);
-							if (entity instanceof LivingEntity && !entity.isSpectator()) {
+							if (entity instanceof LivingEntity) {
 								LivingEntity livingEntity = (LivingEntity)entity;
-								livingEntity.addEffect(new MobEffectInstance(MobEffects.HERO_OF_THE_VILLAGE, 48000, this.badOmenLevel - 1, false, false, true));
-								if (livingEntity instanceof ServerPlayer serverPlayer) {
-									serverPlayer.awardStat(Stats.RAID_WIN);
-									CriteriaTriggers.RAID_WIN.trigger(serverPlayer);
+								if (!entity.isSpectator()) {
+									livingEntity.addEffect(new MobEffectInstance(MobEffects.HERO_OF_THE_VILLAGE, 48000, this.badOmenLevel - 1, false, false, true));
+									if (livingEntity instanceof ServerPlayer serverPlayer) {
+										serverPlayer.awardStat(Stats.RAID_WIN);
+										CriteriaTriggers.RAID_WIN.trigger(serverPlayer);
+									}
 								}
 							}
 						}

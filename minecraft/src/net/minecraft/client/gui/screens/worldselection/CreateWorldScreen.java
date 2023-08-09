@@ -627,7 +627,7 @@ public class CreateWorldScreen extends Screen {
 			GridLayout.RowHelper rowHelper2 = new GridLayout().rowSpacing(4).createRowHelper(1);
 			rowHelper2.addChild(new StringWidget(CreateWorldScreen.NAME_LABEL, CreateWorldScreen.this.minecraft.font), rowHelper2.newCellSettings().paddingLeft(1));
 			this.nameEdit = rowHelper2.addChild(
-				new EditBox(CreateWorldScreen.this.font, 208, 20, Component.translatable("selectWorld.enterName")), rowHelper2.newCellSettings().padding(1)
+				new EditBox(CreateWorldScreen.this.font, 210, 20, Component.translatable("selectWorld.enterName")), rowHelper2.newCellSettings()
 			);
 			this.nameEdit.setValue(CreateWorldScreen.this.uiState.getName());
 			this.nameEdit.setResponder(CreateWorldScreen.this.uiState::setName);
@@ -771,12 +771,12 @@ public class CreateWorldScreen extends Screen {
 				.addListener(worldCreationUiState -> this.customizeTypeButton.active = !worldCreationUiState.isDebug() && worldCreationUiState.getPresetEditor() != null);
 			GridLayout.RowHelper rowHelper2 = new GridLayout().rowSpacing(4).createRowHelper(1);
 			rowHelper2.addChild(new StringWidget(SEED_LABEL, CreateWorldScreen.this.font).alignLeft());
-			this.seedEdit = rowHelper2.addChild(new EditBox(CreateWorldScreen.this.font, 308, 20, Component.translatable("selectWorld.enterSeed")) {
+			this.seedEdit = rowHelper2.addChild(new EditBox(CreateWorldScreen.this.font, 310, 20, Component.translatable("selectWorld.enterSeed")) {
 				@Override
 				protected MutableComponent createNarrationMessage() {
 					return super.createNarrationMessage().append(CommonComponents.NARRATION_SEPARATOR).append(CreateWorldScreen.WorldTab.SEED_EMPTY_HINT);
 				}
-			}, rowHelper.newCellSettings().padding(1));
+			});
 			this.seedEdit.setHint(SEED_EMPTY_HINT);
 			this.seedEdit.setValue(CreateWorldScreen.this.uiState.getSeed());
 			this.seedEdit.setResponder(string -> CreateWorldScreen.this.uiState.setSeed(this.seedEdit.getValue()));

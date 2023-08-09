@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -14,10 +15,10 @@ public class UsingItemTrigger extends SimpleCriterionTrigger<UsingItemTrigger.Tr
 	}
 
 	public UsingItemTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new UsingItemTrigger.TriggerInstance(contextAwarePredicate, itemPredicate);
+		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("item"));
+		return new UsingItemTrigger.TriggerInstance(optional, optional2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack) {
@@ -25,25 +26,25 @@ public class UsingItemTrigger extends SimpleCriterionTrigger<UsingItemTrigger.Tr
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ItemPredicate item;
+		private final Optional<ItemPredicate> item;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate) {
-			super(UsingItemTrigger.ID, contextAwarePredicate);
-			this.item = itemPredicate;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
+			super(UsingItemTrigger.ID, optional);
+			this.item = optional2;
 		}
 
 		public static UsingItemTrigger.TriggerInstance lookingAt(EntityPredicate.Builder builder, ItemPredicate.Builder builder2) {
-			return new UsingItemTrigger.TriggerInstance(EntityPredicate.wrap(builder.build()), builder2.build());
+			return new UsingItemTrigger.TriggerInstance(EntityPredicate.wrap(builder), builder2.build());
 		}
 
 		public boolean matches(ItemStack itemStack) {
-			return this.item.matches(itemStack);
+			return !this.item.isPresent() || ((ItemPredicate)this.item.get()).matches(itemStack);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("item", this.item.serializeToJson());
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
 			return jsonObject;
 		}
 	}

@@ -255,11 +255,11 @@ public class TestCommand {
 		BlockPos blockPos = blockHitResult.getBlockPos();
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		Optional<BlockPos> optional = StructureUtils.findStructureBlockContainingPos(blockPos, 15, serverLevel);
-		if (!optional.isPresent()) {
+		if (optional.isEmpty()) {
 			optional = StructureUtils.findStructureBlockContainingPos(blockPos, 200, serverLevel);
 		}
 
-		if (!optional.isPresent()) {
+		if (optional.isEmpty()) {
 			commandSourceStack.sendFailure(Component.literal("Can't find a structure block that contains the targeted pos " + blockPos));
 			return 0;
 		} else {

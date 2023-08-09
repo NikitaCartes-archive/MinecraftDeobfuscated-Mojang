@@ -9,6 +9,7 @@ import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class ChatListener {
+	private static final Component CHAT_VALIDATION_ERROR = Component.translatable("chat.validation_error").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC);
 	private final Minecraft minecraft;
 	private final Deque<ChatListener.Message> delayedMessageQueue = Queues.<ChatListener.Message>newArrayDeque();
 	private long messageDelay;
@@ -96,6 +98,19 @@ public class ChatListener {
 			}
 
 			return bl2;
+		});
+	}
+
+	public void handleChatMessageError(UUID uUID, ChatType.Bound bound) {
+		this.handleMessage(null, () -> {
+			if (this.minecraft.isBlocked(uUID)) {
+				return false;
+			} else {
+				Component component = bound.decorate(CHAT_VALIDATION_ERROR);
+				this.minecraft.gui.getChat().addMessage(component, null, GuiMessageTag.chatError());
+				this.previousMessageTime = Util.getMillis();
+				return true;
+			}
 		});
 	}
 

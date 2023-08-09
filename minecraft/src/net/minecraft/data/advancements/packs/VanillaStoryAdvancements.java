@@ -54,7 +54,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("get_stone", InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(ItemTags.STONE_TOOL_MATERIALS).build()))
+			.addCriterion("get_stone", InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(ItemTags.STONE_TOOL_MATERIALS)))
 			.save(consumer, "story/mine_stone");
 		Advancement advancement3 = Advancement.Builder.advancement()
 			.parent(advancement2)
@@ -249,7 +249,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("in_stronghold", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.STRONGHOLD)))
+			.addCriterion("in_stronghold", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.STRONGHOLD)))
 			.save(consumer, "story/follow_ender_eye");
 		Advancement.Builder.advancement()
 			.parent(advancement11)

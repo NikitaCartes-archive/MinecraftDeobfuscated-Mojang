@@ -16,7 +16,7 @@ public class EntityPaintingItemFrameDirectionFix extends DataFix {
 	}
 
 	private Dynamic<?> doFix(Dynamic<?> dynamic, boolean bl, boolean bl2) {
-		if ((bl || bl2) && !dynamic.get("Facing").asNumber().result().isPresent()) {
+		if ((bl || bl2) && dynamic.get("Facing").asNumber().result().isEmpty()) {
 			int i;
 			if (dynamic.get("Direction").asNumber().result().isPresent()) {
 				i = dynamic.get("Direction").asByte((byte)0) % DIRECTIONS.length;

@@ -2,6 +2,7 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,11 +19,11 @@ public class LightningStrikeTrigger extends SimpleCriterionTrigger<LightningStri
 	}
 
 	public LightningStrikeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "lightning", deserializationContext);
-		ContextAwarePredicate contextAwarePredicate3 = EntityPredicate.fromJson(jsonObject, "bystander", deserializationContext);
-		return new LightningStrikeTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2, contextAwarePredicate3);
+		Optional<ContextAwarePredicate> optional2 = EntityPredicate.fromJson(jsonObject, "lightning", deserializationContext);
+		Optional<ContextAwarePredicate> optional3 = EntityPredicate.fromJson(jsonObject, "bystander", deserializationContext);
+		return new LightningStrikeTrigger.TriggerInstance(optional, optional2, optional3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, LightningBolt lightningBolt, List<Entity> list) {
@@ -32,30 +33,30 @@ public class LightningStrikeTrigger extends SimpleCriterionTrigger<LightningStri
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ContextAwarePredicate lightning;
-		private final ContextAwarePredicate bystander;
+		private final Optional<ContextAwarePredicate> lightning;
+		private final Optional<ContextAwarePredicate> bystander;
 
-		public TriggerInstance(
-			ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2, ContextAwarePredicate contextAwarePredicate3
-		) {
-			super(LightningStrikeTrigger.ID, contextAwarePredicate);
-			this.lightning = contextAwarePredicate2;
-			this.bystander = contextAwarePredicate3;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2, Optional<ContextAwarePredicate> optional3) {
+			super(LightningStrikeTrigger.ID, optional);
+			this.lightning = optional2;
+			this.bystander = optional3;
 		}
 
-		public static LightningStrikeTrigger.TriggerInstance lighthingStrike(EntityPredicate entityPredicate, EntityPredicate entityPredicate2) {
-			return new LightningStrikeTrigger.TriggerInstance(ContextAwarePredicate.ANY, EntityPredicate.wrap(entityPredicate), EntityPredicate.wrap(entityPredicate2));
+		public static LightningStrikeTrigger.TriggerInstance lighthingStrike(Optional<EntityPredicate> optional, Optional<EntityPredicate> optional2) {
+			return new LightningStrikeTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional), EntityPredicate.wrap(optional2));
 		}
 
 		public boolean matches(LootContext lootContext, List<LootContext> list) {
-			return !this.lightning.matches(lootContext) ? false : this.bystander == ContextAwarePredicate.ANY || !list.stream().noneMatch(this.bystander::matches);
+			return this.lightning.isPresent() && !((ContextAwarePredicate)this.lightning.get()).matches(lootContext)
+				? false
+				: !this.bystander.isPresent() || !list.stream().noneMatch(((ContextAwarePredicate)this.bystander.get())::matches);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("lightning", this.lightning.toJson(serializationContext));
-			jsonObject.add("bystander", this.bystander.toJson(serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.lightning.ifPresent(contextAwarePredicate -> jsonObject.add("lightning", contextAwarePredicate.toJson()));
+			this.bystander.ifPresent(contextAwarePredicate -> jsonObject.add("bystander", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 	}

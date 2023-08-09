@@ -8,8 +8,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,6 +20,14 @@ import org.slf4j.Logger;
 public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int INFINITE_DURATION = -1;
+	private static final String TAG_ID = "id";
+	private static final String TAG_AMBIENT = "ambient";
+	private static final String TAG_HIDDEN_EFFECT = "hidden_effect";
+	private static final String TAG_AMPLIFIER = "amplifier";
+	private static final String TAG_DURATION = "duration";
+	private static final String TAG_SHOW_PARTICLES = "show_particles";
+	private static final String TAG_SHOW_ICON = "show_icon";
+	private static final String TAG_FACTOR_CALCULATION_DATA = "factor_calculation_data";
 	private final MobEffect effect;
 	private int duration;
 	private int amplifier;
@@ -254,21 +264,22 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	}
 
 	public CompoundTag save(CompoundTag compoundTag) {
-		compoundTag.putInt("Id", MobEffect.getId(this.getEffect()));
+		ResourceLocation resourceLocation = BuiltInRegistries.MOB_EFFECT.getKey(this.effect);
+		compoundTag.putString("id", resourceLocation.toString());
 		this.writeDetailsTo(compoundTag);
 		return compoundTag;
 	}
 
 	private void writeDetailsTo(CompoundTag compoundTag) {
-		compoundTag.putByte("Amplifier", (byte)this.getAmplifier());
-		compoundTag.putInt("Duration", this.getDuration());
-		compoundTag.putBoolean("Ambient", this.isAmbient());
-		compoundTag.putBoolean("ShowParticles", this.isVisible());
-		compoundTag.putBoolean("ShowIcon", this.showIcon());
+		compoundTag.putByte("amplifier", (byte)this.getAmplifier());
+		compoundTag.putInt("duration", this.getDuration());
+		compoundTag.putBoolean("ambient", this.isAmbient());
+		compoundTag.putBoolean("show_particles", this.isVisible());
+		compoundTag.putBoolean("show_icon", this.showIcon());
 		if (this.hiddenEffect != null) {
 			CompoundTag compoundTag2 = new CompoundTag();
 			this.hiddenEffect.save(compoundTag2);
-			compoundTag.put("HiddenEffect", compoundTag2);
+			compoundTag.put("hidden_effect", compoundTag2);
 		}
 
 		this.factorData
@@ -276,40 +287,40 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 				factorData -> MobEffectInstance.FactorData.CODEC
 						.encodeStart(NbtOps.INSTANCE, factorData)
 						.resultOrPartial(LOGGER::error)
-						.ifPresent(tag -> compoundTag.put("FactorCalculationData", tag))
+						.ifPresent(tag -> compoundTag.put("factor_calculation_data", tag))
 			);
 	}
 
 	@Nullable
 	public static MobEffectInstance load(CompoundTag compoundTag) {
-		int i = compoundTag.getInt("Id");
-		MobEffect mobEffect = MobEffect.byId(i);
+		String string = compoundTag.getString("id");
+		MobEffect mobEffect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.tryParse(string));
 		return mobEffect == null ? null : loadSpecifiedEffect(mobEffect, compoundTag);
 	}
 
 	private static MobEffectInstance loadSpecifiedEffect(MobEffect mobEffect, CompoundTag compoundTag) {
-		int i = compoundTag.getByte("Amplifier");
-		int j = compoundTag.getInt("Duration");
-		boolean bl = compoundTag.getBoolean("Ambient");
+		int i = compoundTag.getByte("amplifier");
+		int j = compoundTag.getInt("duration");
+		boolean bl = compoundTag.getBoolean("ambient");
 		boolean bl2 = true;
-		if (compoundTag.contains("ShowParticles", 1)) {
-			bl2 = compoundTag.getBoolean("ShowParticles");
+		if (compoundTag.contains("show_particles", 1)) {
+			bl2 = compoundTag.getBoolean("show_particles");
 		}
 
 		boolean bl3 = bl2;
-		if (compoundTag.contains("ShowIcon", 1)) {
-			bl3 = compoundTag.getBoolean("ShowIcon");
+		if (compoundTag.contains("show_icon", 1)) {
+			bl3 = compoundTag.getBoolean("show_icon");
 		}
 
 		MobEffectInstance mobEffectInstance = null;
-		if (compoundTag.contains("HiddenEffect", 10)) {
-			mobEffectInstance = loadSpecifiedEffect(mobEffect, compoundTag.getCompound("HiddenEffect"));
+		if (compoundTag.contains("hidden_effect", 10)) {
+			mobEffectInstance = loadSpecifiedEffect(mobEffect, compoundTag.getCompound("hidden_effect"));
 		}
 
 		Optional<MobEffectInstance.FactorData> optional;
-		if (compoundTag.contains("FactorCalculationData", 10)) {
+		if (compoundTag.contains("factor_calculation_data", 10)) {
 			optional = MobEffectInstance.FactorData.CODEC
-				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("FactorCalculationData")))
+				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("factor_calculation_data")))
 				.resultOrPartial(LOGGER::error);
 		} else {
 			optional = Optional.empty();

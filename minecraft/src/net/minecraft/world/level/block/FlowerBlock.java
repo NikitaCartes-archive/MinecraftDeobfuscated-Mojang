@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.BlockGetter;
@@ -12,17 +13,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class FlowerBlock extends BushBlock implements SuspiciousEffectHolder {
 	protected static final float AABB_OFFSET = 3.0F;
 	protected static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0);
-	private final MobEffect suspiciousStewEffect;
-	private final int effectDuration;
+	private final List<SuspiciousEffectHolder.EffectEntry> suspiciousStewEffects;
 
 	public FlowerBlock(MobEffect mobEffect, int i, BlockBehaviour.Properties properties) {
 		super(properties);
-		this.suspiciousStewEffect = mobEffect;
+		int j;
 		if (mobEffect.isInstantenous()) {
-			this.effectDuration = i;
+			j = i;
 		} else {
-			this.effectDuration = i * 20;
+			j = i * 20;
 		}
+
+		this.suspiciousStewEffects = List.of(new SuspiciousEffectHolder.EffectEntry(mobEffect, j));
 	}
 
 	@Override
@@ -32,12 +34,7 @@ public class FlowerBlock extends BushBlock implements SuspiciousEffectHolder {
 	}
 
 	@Override
-	public MobEffect getSuspiciousEffect() {
-		return this.suspiciousStewEffect;
-	}
-
-	@Override
-	public int getEffectDuration() {
-		return this.effectDuration;
+	public List<SuspiciousEffectHolder.EffectEntry> getSuspiciousEffects() {
+		return this.suspiciousStewEffects;
 	}
 }

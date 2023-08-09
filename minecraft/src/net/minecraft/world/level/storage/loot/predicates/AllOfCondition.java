@@ -1,8 +1,18 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
+import com.mojang.serialization.Codec;
+import java.util.List;
+
 public class AllOfCondition extends CompositeLootItemCondition {
-	AllOfCondition(LootItemCondition[] lootItemConditions) {
-		super(lootItemConditions, LootItemConditions.andConditions(lootItemConditions));
+	public static final Codec<AllOfCondition> CODEC = createCodec(AllOfCondition::new);
+	public static final Codec<AllOfCondition> INLINE_CODEC = createInlineCodec(AllOfCondition::new);
+
+	AllOfCondition(List<LootItemCondition> list) {
+		super(list, LootItemConditions.andConditions(list));
+	}
+
+	public static AllOfCondition allOf(List<LootItemCondition> list) {
+		return new AllOfCondition(List.copyOf(list));
 	}
 
 	@Override
@@ -26,14 +36,8 @@ public class AllOfCondition extends CompositeLootItemCondition {
 		}
 
 		@Override
-		protected LootItemCondition create(LootItemCondition[] lootItemConditions) {
-			return new AllOfCondition(lootItemConditions);
-		}
-	}
-
-	public static class Serializer extends CompositeLootItemCondition.Serializer<AllOfCondition> {
-		protected AllOfCondition create(LootItemCondition[] lootItemConditions) {
-			return new AllOfCondition(lootItemConditions);
+		protected LootItemCondition create(List<LootItemCondition> list) {
+			return new AllOfCondition(list);
 		}
 	}
 }

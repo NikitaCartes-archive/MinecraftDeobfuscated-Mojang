@@ -1,5 +1,6 @@
 package net.minecraft.world.inventory;
 
+import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -168,19 +169,19 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 		return AbstractFurnaceBlockEntity.isFuel(itemStack);
 	}
 
-	public int getBurnProgress() {
+	public float getBurnProgress() {
 		int i = this.data.get(2);
 		int j = this.data.get(3);
-		return j != 0 && i != 0 ? i * 24 / j : 0;
+		return j != 0 && i != 0 ? Mth.clamp((float)i / (float)j, 0.0F, 1.0F) : 0.0F;
 	}
 
-	public int getLitProgress() {
+	public float getLitProgress() {
 		int i = this.data.get(1);
 		if (i == 0) {
 			i = 200;
 		}
 
-		return this.data.get(0) * 13 / i;
+		return Mth.clamp((float)this.data.get(0) / (float)i, 0.0F, 1.0F);
 	}
 
 	public boolean isLit() {

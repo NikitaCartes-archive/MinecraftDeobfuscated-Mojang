@@ -27,13 +27,13 @@ public class RegistryCodecs {
 
 	public static <T> Codec<Registry<T>> networkCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
 		return withNameAndId(resourceKey, codec.fieldOf("element")).codec().listOf().xmap(list -> {
-			WritableRegistry<T> writableRegistry = new MappedRegistry<>(resourceKey, lifecycle);
+			MappedRegistry<T> mappedRegistry = new MappedRegistry<>(resourceKey, lifecycle);
 
 			for (RegistryCodecs.RegistryEntry<T> registryEntry : list) {
-				writableRegistry.registerMapping(registryEntry.id(), registryEntry.key(), registryEntry.value(), lifecycle);
+				mappedRegistry.registerMapping(registryEntry.id(), registryEntry.key(), registryEntry.value(), lifecycle);
 			}
 
-			return writableRegistry;
+			return mappedRegistry;
 		}, registry -> {
 			Builder<RegistryCodecs.RegistryEntry<T>> builder = ImmutableList.builder();
 

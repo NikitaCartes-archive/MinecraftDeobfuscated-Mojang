@@ -20,7 +20,7 @@ public class ItemWrittenBookPagesStrictJsonFix extends DataFix {
 
 	public Dynamic<?> fixTag(Dynamic<?> dynamic) {
 		return dynamic.update("pages", dynamic2 -> DataFixUtils.orElse(dynamic2.asStreamOpt().map(stream -> stream.map(dynamicxx -> {
-					if (!dynamicxx.asString().result().isPresent()) {
+					if (dynamicxx.asString().result().isEmpty()) {
 						return dynamicxx;
 					} else {
 						String string = dynamicxx.asString("");

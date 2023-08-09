@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -15,10 +16,10 @@ public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.Tr
 	}
 
 	public UsedTotemTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new UsedTotemTrigger.TriggerInstance(contextAwarePredicate, itemPredicate);
+		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("item"));
+		return new UsedTotemTrigger.TriggerInstance(optional, optional2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack) {
@@ -26,29 +27,29 @@ public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.Tr
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ItemPredicate item;
+		private final Optional<ItemPredicate> item;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate) {
-			super(UsedTotemTrigger.ID, contextAwarePredicate);
-			this.item = itemPredicate;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
+			super(UsedTotemTrigger.ID, optional);
+			this.item = optional2;
 		}
 
 		public static UsedTotemTrigger.TriggerInstance usedTotem(ItemPredicate itemPredicate) {
-			return new UsedTotemTrigger.TriggerInstance(ContextAwarePredicate.ANY, itemPredicate);
+			return new UsedTotemTrigger.TriggerInstance(Optional.empty(), Optional.of(itemPredicate));
 		}
 
 		public static UsedTotemTrigger.TriggerInstance usedTotem(ItemLike itemLike) {
-			return new UsedTotemTrigger.TriggerInstance(ContextAwarePredicate.ANY, ItemPredicate.Builder.item().of(itemLike).build());
+			return new UsedTotemTrigger.TriggerInstance(Optional.empty(), ItemPredicate.Builder.item().of(itemLike).build());
 		}
 
 		public boolean matches(ItemStack itemStack) {
-			return this.item.matches(itemStack);
+			return this.item.isEmpty() || ((ItemPredicate)this.item.get()).matches(itemStack);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("item", this.item.serializeToJson());
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
 			return jsonObject;
 		}
 	}

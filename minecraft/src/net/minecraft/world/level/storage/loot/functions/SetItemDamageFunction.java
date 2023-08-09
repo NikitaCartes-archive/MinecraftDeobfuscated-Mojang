@@ -1,26 +1,36 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import java.util.Set;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 import org.slf4j.Logger;
 
 public class SetItemDamageFunction extends LootItemConditionalFunction {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	final NumberProvider damage;
-	final boolean add;
+	public static final Codec<SetItemDamageFunction> CODEC = RecordCodecBuilder.create(
+		instance -> commonFields(instance)
+				.<NumberProvider, boolean>and(
+					instance.group(
+						NumberProviders.CODEC.fieldOf("damage").forGetter(setItemDamageFunction -> setItemDamageFunction.damage),
+						Codec.BOOL.fieldOf("add").orElse(false).forGetter(setItemDamageFunction -> setItemDamageFunction.add)
+					)
+				)
+				.apply(instance, SetItemDamageFunction::new)
+	);
+	private final NumberProvider damage;
+	private final boolean add;
 
-	SetItemDamageFunction(LootItemCondition[] lootItemConditions, NumberProvider numberProvider, boolean bl) {
-		super(lootItemConditions);
+	private SetItemDamageFunction(List<LootItemCondition> list, NumberProvider numberProvider, boolean bl) {
+		super(list);
 		this.damage = numberProvider;
 		this.add = bl;
 	}
@@ -50,24 +60,10 @@ public class SetItemDamageFunction extends LootItemConditionalFunction {
 	}
 
 	public static LootItemConditionalFunction.Builder<?> setDamage(NumberProvider numberProvider) {
-		return simpleBuilder(lootItemConditions -> new SetItemDamageFunction(lootItemConditions, numberProvider, false));
+		return simpleBuilder(list -> new SetItemDamageFunction(list, numberProvider, false));
 	}
 
 	public static LootItemConditionalFunction.Builder<?> setDamage(NumberProvider numberProvider, boolean bl) {
-		return simpleBuilder(lootItemConditions -> new SetItemDamageFunction(lootItemConditions, numberProvider, bl));
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<SetItemDamageFunction> {
-		public void serialize(JsonObject jsonObject, SetItemDamageFunction setItemDamageFunction, JsonSerializationContext jsonSerializationContext) {
-			super.serialize(jsonObject, setItemDamageFunction, jsonSerializationContext);
-			jsonObject.add("damage", jsonSerializationContext.serialize(setItemDamageFunction.damage));
-			jsonObject.addProperty("add", setItemDamageFunction.add);
-		}
-
-		public SetItemDamageFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-			NumberProvider numberProvider = GsonHelper.getAsObject(jsonObject, "damage", jsonDeserializationContext, NumberProvider.class);
-			boolean bl = GsonHelper.getAsBoolean(jsonObject, "add", false);
-			return new SetItemDamageFunction(lootItemConditions, numberProvider, bl);
-		}
+		return simpleBuilder(list -> new SetItemDamageFunction(list, numberProvider, bl));
 	}
 }

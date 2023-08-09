@@ -1,14 +1,13 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -16,14 +15,14 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
-public class BonusLevelTableCondition implements LootItemCondition {
-	final Enchantment enchantment;
-	final float[] values;
-
-	BonusLevelTableCondition(Enchantment enchantment, float[] fs) {
-		this.enchantment = enchantment;
-		this.values = fs;
-	}
+public record BonusLevelTableCondition(Holder<Enchantment> enchantment, List<Float> values) implements LootItemCondition {
+	public static final Codec<BonusLevelTableCondition> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					BuiltInRegistries.ENCHANTMENT.holderByNameCodec().fieldOf("enchantment").forGetter(BonusLevelTableCondition::enchantment),
+					Codec.FLOAT.listOf().fieldOf("chances").forGetter(BonusLevelTableCondition::values)
+				)
+				.apply(instance, BonusLevelTableCondition::new)
+	);
 
 	@Override
 	public LootItemConditionType getType() {
@@ -37,28 +36,18 @@ public class BonusLevelTableCondition implements LootItemCondition {
 
 	public boolean test(LootContext lootContext) {
 		ItemStack itemStack = lootContext.getParamOrNull(LootContextParams.TOOL);
-		int i = itemStack != null ? EnchantmentHelper.getItemEnchantmentLevel(this.enchantment, itemStack) : 0;
-		float f = this.values[Math.min(i, this.values.length - 1)];
+		int i = itemStack != null ? EnchantmentHelper.getItemEnchantmentLevel(this.enchantment.value(), itemStack) : 0;
+		float f = (Float)this.values.get(Math.min(i, this.values.size() - 1));
 		return lootContext.getRandom().nextFloat() < f;
 	}
 
 	public static LootItemCondition.Builder bonusLevelFlatChance(Enchantment enchantment, float... fs) {
-		return () -> new BonusLevelTableCondition(enchantment, fs);
-	}
+		List<Float> list = new ArrayList(fs.length);
 
-	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<BonusLevelTableCondition> {
-		public void serialize(JsonObject jsonObject, BonusLevelTableCondition bonusLevelTableCondition, JsonSerializationContext jsonSerializationContext) {
-			jsonObject.addProperty("enchantment", BuiltInRegistries.ENCHANTMENT.getKey(bonusLevelTableCondition.enchantment).toString());
-			jsonObject.add("chances", jsonSerializationContext.serialize(bonusLevelTableCondition.values));
+		for (float f : fs) {
+			list.add(f);
 		}
 
-		public BonusLevelTableCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "enchantment"));
-			Enchantment enchantment = (Enchantment)BuiltInRegistries.ENCHANTMENT
-				.getOptional(resourceLocation)
-				.orElseThrow(() -> new JsonParseException("Invalid enchantment id: " + resourceLocation));
-			float[] fs = GsonHelper.getAsObject(jsonObject, "chances", jsonDeserializationContext, float[].class);
-			return new BonusLevelTableCondition(enchantment, fs);
-		}
+		return () -> new BonusLevelTableCondition(enchantment.builtInRegistryHolder(), list);
 	}
 }

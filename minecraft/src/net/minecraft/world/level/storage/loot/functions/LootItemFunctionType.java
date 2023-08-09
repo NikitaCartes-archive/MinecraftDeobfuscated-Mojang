@@ -1,10 +1,6 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import net.minecraft.world.level.storage.loot.Serializer;
-import net.minecraft.world.level.storage.loot.SerializerType;
+import com.mojang.serialization.Codec;
 
-public class LootItemFunctionType extends SerializerType<LootItemFunction> {
-	public LootItemFunctionType(Serializer<? extends LootItemFunction> serializer) {
-		super(serializer);
-	}
+public record LootItemFunctionType(Codec<? extends LootItemFunction> codec) {
 }

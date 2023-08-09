@@ -468,7 +468,7 @@ public abstract class Raider extends PatrollingMonster {
 			BlockPos blockPos = this.raider.blockPosition();
 			Optional<BlockPos> optional = serverLevel.getPoiManager()
 				.getRandom(holder -> holder.is(PoiTypes.HOME), this::hasNotVisited, PoiManager.Occupancy.ANY, blockPos, 48, this.raider.random);
-			if (!optional.isPresent()) {
+			if (optional.isEmpty()) {
 				return false;
 			} else {
 				this.poiPos = ((BlockPos)optional.get()).immutable();

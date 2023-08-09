@@ -121,6 +121,7 @@ import org.slf4j.Logger;
 
 public abstract class LivingEntity extends Entity implements Attackable {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final String TAG_ACTIVE_EFFECTS = "active_effects";
 	private static final UUID SPEED_MODIFIER_SOUL_SPEED_UUID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
 	private static final UUID SPEED_MODIFIER_POWDER_SNOW_UUID = UUID.fromString("1eaf83ff-7207-4596-b37a-d7a07b3ec4ce");
 	private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
@@ -667,13 +668,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		boolean bl = itemStack2.isEmpty() && itemStack.isEmpty();
 		if (!bl && !ItemStack.isSameItemSameTags(itemStack, itemStack2) && !this.firstTick) {
 			Equipable equipable = Equipable.get(itemStack2);
-			if (equipable != null && !this.isSpectator() && equipable.getEquipmentSlot() == equipmentSlot) {
-				if (!this.level().isClientSide() && !this.isSilent()) {
+			if (!this.level().isClientSide() && !this.isSpectator()) {
+				if (!this.isSilent() && equipable != null && equipable.getEquipmentSlot() == equipmentSlot) {
 					this.level().playSound(null, this.getX(), this.getY(), this.getZ(), equipable.getEquipSound(), this.getSoundSource(), 1.0F, 1.0F);
 				}
 
 				if (this.doesEmitEquipEvent(equipmentSlot)) {
-					this.gameEvent(GameEvent.EQUIP);
+					this.gameEvent(equipable != null ? GameEvent.EQUIP : GameEvent.UNEQUIP);
 				}
 			}
 		}
@@ -700,7 +701,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				listTag.add(mobEffectInstance.save(new CompoundTag()));
 			}
 
-			compoundTag.put("ActiveEffects", listTag);
+			compoundTag.put("active_effects", listTag);
 		}
 
 		compoundTag.putBoolean("FallFlying", this.isFallFlying());
@@ -720,8 +721,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.getAttributes().load(compoundTag.getList("Attributes", 10));
 		}
 
-		if (compoundTag.contains("ActiveEffects", 9)) {
-			ListTag listTag = compoundTag.getList("ActiveEffects", 10);
+		if (compoundTag.contains("active_effects", 9)) {
+			ListTag listTag = compoundTag.getList("active_effects", 10);
 
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag2 = listTag.getCompound(i);
@@ -2651,8 +2652,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				if (i > 0 && list.size() > i - 1 && this.random.nextInt(4) == 0) {
 					int j = 0;
 
-					for (int k = 0; k < list.size(); k++) {
-						if (!((Entity)list.get(k)).isPassenger()) {
+					for (Entity entity : list) {
+						if (!entity.isPassenger()) {
 							j++;
 						}
 					}
@@ -2662,9 +2663,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					}
 				}
 
-				for (int j = 0; j < list.size(); j++) {
-					Entity entity = (Entity)list.get(j);
-					this.doPush(entity);
+				for (Entity entity2 : list) {
+					this.doPush(entity2);
 				}
 			}
 		}
@@ -2674,8 +2674,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		AABB aABB3 = aABB.minmax(aABB2);
 		List<Entity> list = this.level().getEntities(this, aABB3);
 		if (!list.isEmpty()) {
-			for (int i = 0; i < list.size(); i++) {
-				Entity entity = (Entity)list.get(i);
+			for (Entity entity : list) {
 				if (entity instanceof LivingEntity) {
 					this.doAutoAttackOnTouch((LivingEntity)entity);
 					this.autoSpinAttackTicks = 0;

@@ -150,8 +150,8 @@ public class RandomCommand {
 			randomSource = commandSourceStack.getLevel().getRandom();
 		}
 
-		int i = ints.getMin() == null ? Integer.MIN_VALUE : (Integer)ints.getMin();
-		int j = ints.getMax() == null ? Integer.MAX_VALUE : (Integer)ints.getMax();
+		int i = (Integer)ints.min().orElse(Integer.MIN_VALUE);
+		int j = (Integer)ints.max().orElse(Integer.MAX_VALUE);
 		long l = (long)j - (long)i;
 		if (l == 0L) {
 			throw ERROR_RANGE_TOO_SMALL.create();

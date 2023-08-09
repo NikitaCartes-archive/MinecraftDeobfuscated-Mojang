@@ -742,7 +742,7 @@ public class ExecuteCommand {
 			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition())
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
 			.create(LootContextParamSets.COMMAND);
-		LootContext lootContext = new LootContext.Builder(lootParams).create(null);
+		LootContext lootContext = new LootContext.Builder(lootParams).create(Optional.empty());
 		lootContext.pushVisitedElement(LootContext.createVisitedEntry(lootItemCondition));
 		return lootItemCondition.test(lootContext);
 	}

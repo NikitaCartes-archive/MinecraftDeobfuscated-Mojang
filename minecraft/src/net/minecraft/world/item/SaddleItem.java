@@ -15,17 +15,14 @@ public class SaddleItem extends Item {
 
 	@Override
 	public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
-		if (livingEntity instanceof Saddleable && livingEntity.isAlive()) {
-			Saddleable saddleable = (Saddleable)livingEntity;
-			if (!saddleable.isSaddled() && saddleable.isSaddleable()) {
-				if (!player.level().isClientSide) {
-					saddleable.equipSaddle(SoundSource.NEUTRAL);
-					livingEntity.level().gameEvent(livingEntity, GameEvent.EQUIP, livingEntity.position());
-					itemStack.shrink(1);
-				}
-
-				return InteractionResult.sidedSuccess(player.level().isClientSide);
+		if (livingEntity instanceof Saddleable saddleable && livingEntity.isAlive() && !saddleable.isSaddled() && saddleable.isSaddleable()) {
+			if (!player.level().isClientSide) {
+				saddleable.equipSaddle(SoundSource.NEUTRAL);
+				livingEntity.level().gameEvent(livingEntity, GameEvent.EQUIP, livingEntity.position());
+				itemStack.shrink(1);
 			}
+
+			return InteractionResult.sidedSuccess(player.level().isClientSide);
 		}
 
 		return InteractionResult.PASS;

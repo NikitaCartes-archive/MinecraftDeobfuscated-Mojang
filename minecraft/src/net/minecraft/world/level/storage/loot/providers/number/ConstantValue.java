@@ -1,20 +1,14 @@
 package net.minecraft.world.level.storage.loot.providers.number;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.level.storage.loot.GsonAdapterFactory;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.storage.loot.LootContext;
 
-public final class ConstantValue implements NumberProvider {
-	final float value;
-
-	ConstantValue(float f) {
-		this.value = f;
-	}
+public record ConstantValue(float value) implements NumberProvider {
+	public static final Codec<ConstantValue> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(Codec.FLOAT.fieldOf("value").forGetter(ConstantValue::value)).apply(instance, ConstantValue::new)
+	);
+	public static final Codec<ConstantValue> INLINE_CODEC = Codec.FLOAT.xmap(ConstantValue::new, ConstantValue::value);
 
 	@Override
 	public LootNumberProviderType getType() {
@@ -40,26 +34,5 @@ public final class ConstantValue implements NumberProvider {
 
 	public int hashCode() {
 		return this.value != 0.0F ? Float.floatToIntBits(this.value) : 0;
-	}
-
-	public static class InlineSerializer implements GsonAdapterFactory.InlineSerializer<ConstantValue> {
-		public JsonElement serialize(ConstantValue constantValue, JsonSerializationContext jsonSerializationContext) {
-			return new JsonPrimitive(constantValue.value);
-		}
-
-		public ConstantValue deserialize(JsonElement jsonElement, JsonDeserializationContext jsonDeserializationContext) {
-			return new ConstantValue(GsonHelper.convertToFloat(jsonElement, "value"));
-		}
-	}
-
-	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<ConstantValue> {
-		public void serialize(JsonObject jsonObject, ConstantValue constantValue, JsonSerializationContext jsonSerializationContext) {
-			jsonObject.addProperty("value", constantValue.value);
-		}
-
-		public ConstantValue deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-			float f = GsonHelper.getAsFloat(jsonObject, "value");
-			return new ConstantValue(f);
-		}
 	}
 }

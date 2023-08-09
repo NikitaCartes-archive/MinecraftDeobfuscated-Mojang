@@ -1,21 +1,25 @@
 package net.minecraft.world.level.storage.loot.entries;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class DynamicLoot extends LootPoolSingletonContainer {
-	final ResourceLocation name;
+	public static final Codec<DynamicLoot> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(ResourceLocation.CODEC.fieldOf("name").forGetter(dynamicLoot -> dynamicLoot.name))
+				.<int, int, List<LootItemCondition>, List<LootItemFunction>>and(singletonFields(instance))
+				.apply(instance, DynamicLoot::new)
+	);
+	private final ResourceLocation name;
 
-	DynamicLoot(ResourceLocation resourceLocation, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
-		super(i, j, lootItemConditions, lootItemFunctions);
+	private DynamicLoot(ResourceLocation resourceLocation, int i, int j, List<LootItemCondition> list, List<LootItemFunction> list2) {
+		super(i, j, list, list2);
 		this.name = resourceLocation;
 	}
 
@@ -30,25 +34,6 @@ public class DynamicLoot extends LootPoolSingletonContainer {
 	}
 
 	public static LootPoolSingletonContainer.Builder<?> dynamicEntry(ResourceLocation resourceLocation) {
-		return simpleBuilder((i, j, lootItemConditions, lootItemFunctions) -> new DynamicLoot(resourceLocation, i, j, lootItemConditions, lootItemFunctions));
-	}
-
-	public static class Serializer extends LootPoolSingletonContainer.Serializer<DynamicLoot> {
-		public void serializeCustom(JsonObject jsonObject, DynamicLoot dynamicLoot, JsonSerializationContext jsonSerializationContext) {
-			super.serializeCustom(jsonObject, dynamicLoot, jsonSerializationContext);
-			jsonObject.addProperty("name", dynamicLoot.name.toString());
-		}
-
-		protected DynamicLoot deserialize(
-			JsonObject jsonObject,
-			JsonDeserializationContext jsonDeserializationContext,
-			int i,
-			int j,
-			LootItemCondition[] lootItemConditions,
-			LootItemFunction[] lootItemFunctions
-		) {
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "name"));
-			return new DynamicLoot(resourceLocation, i, j, lootItemConditions, lootItemFunctions);
-		}
+		return simpleBuilder((i, j, list, list2) -> new DynamicLoot(resourceLocation, i, j, list, list2));
 	}
 }

@@ -192,7 +192,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 	private void dowseFire(BlockPos blockPos) {
 		BlockState blockState = this.level().getBlockState(blockPos);
 		if (blockState.is(BlockTags.FIRE)) {
-			this.level().removeBlock(blockPos, false);
+			this.level().destroyBlock(blockPos, false, this);
 		} else if (AbstractCandleBlock.isLit(blockState)) {
 			AbstractCandleBlock.extinguish(null, blockState, this.level(), blockPos);
 		} else if (CampfireBlock.isLitCampfire(blockState)) {

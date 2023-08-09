@@ -34,6 +34,7 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 	private boolean keepAlivePending;
 	private long keepAliveChallenge;
 	private int latency;
+	private volatile boolean suspendFlushingOnServerThread = false;
 
 	public ServerCommonPacketListenerImpl(MinecraftServer minecraftServer, Connection connection, int i) {
 		this.server = minecraftServer;
@@ -95,19 +96,22 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 		this.server.getProfiler().pop();
 	}
 
-	public void send(Packet<?> packet) {
-		this.send(packet, null, true);
+	public void suspendFlushing() {
+		this.suspendFlushingOnServerThread = true;
 	}
 
-	public void sendNoFlush(Packet<?> packet) {
-		this.send(packet, null, false);
-	}
-
-	public void flush() {
+	public void resumeFlushing() {
+		this.suspendFlushingOnServerThread = false;
 		this.connection.flushChannel();
 	}
 
-	public void send(Packet<?> packet, @Nullable PacketSendListener packetSendListener, boolean bl) {
+	public void send(Packet<?> packet) {
+		this.send(packet, null);
+	}
+
+	public void send(Packet<?> packet, @Nullable PacketSendListener packetSendListener) {
+		boolean bl = !this.suspendFlushingOnServerThread || !this.server.isSameThread();
+
 		try {
 			this.connection.send(packet, packetSendListener, bl);
 		} catch (Throwable var7) {

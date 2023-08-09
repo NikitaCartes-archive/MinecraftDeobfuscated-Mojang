@@ -1,10 +1,10 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -19,11 +19,11 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 	}
 
 	protected RecipeCraftedTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "recipe_id"));
-		ItemPredicate[] itemPredicates = ItemPredicate.fromJsonArray(jsonObject.get("ingredients"));
-		return new RecipeCraftedTrigger.TriggerInstance(contextAwarePredicate, resourceLocation, List.of(itemPredicates));
+		List<ItemPredicate> list = ItemPredicate.fromJsonArray(jsonObject.get("ingredients"));
+		return new RecipeCraftedTrigger.TriggerInstance(optional, resourceLocation, list);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ResourceLocation resourceLocation, List<ItemStack> list) {
@@ -34,18 +34,18 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 		private final ResourceLocation recipeId;
 		private final List<ItemPredicate> predicates;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ResourceLocation resourceLocation, List<ItemPredicate> list) {
-			super(RecipeCraftedTrigger.ID, contextAwarePredicate);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, ResourceLocation resourceLocation, List<ItemPredicate> list) {
+			super(RecipeCraftedTrigger.ID, optional);
 			this.recipeId = resourceLocation;
 			this.predicates = list;
 		}
 
-		public static RecipeCraftedTrigger.TriggerInstance craftedItem(ResourceLocation resourceLocation, List<ItemPredicate> list) {
-			return new RecipeCraftedTrigger.TriggerInstance(ContextAwarePredicate.ANY, resourceLocation, list);
+		public static RecipeCraftedTrigger.TriggerInstance craftedItem(ResourceLocation resourceLocation, List<ItemPredicate.Builder> list) {
+			return new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, list.stream().flatMap(builder -> builder.build().stream()).toList());
 		}
 
 		public static RecipeCraftedTrigger.TriggerInstance craftedItem(ResourceLocation resourceLocation) {
-			return new RecipeCraftedTrigger.TriggerInstance(ContextAwarePredicate.ANY, resourceLocation, List.of());
+			return new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, List.of());
 		}
 
 		boolean matches(ResourceLocation resourceLocation, List<ItemStack> list) {
@@ -76,17 +76,11 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
 			jsonObject.addProperty("recipe_id", this.recipeId.toString());
-			if (this.predicates.size() > 0) {
-				JsonArray jsonArray = new JsonArray();
-
-				for (ItemPredicate itemPredicate : this.predicates) {
-					jsonArray.add(itemPredicate.serializeToJson());
-				}
-
-				jsonObject.add("ingredients", jsonArray);
+			if (!this.predicates.isEmpty()) {
+				jsonObject.add("ingredients", ItemPredicate.serializeToJsonArray(this.predicates));
 			}
 
 			return jsonObject;

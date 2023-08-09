@@ -23,6 +23,7 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -30,6 +31,8 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	extends AbstractContainerEventHandler
 	implements Renderable,
 	NarratableEntry {
+	protected static final int SCROLLBAR_WIDTH = 6;
+	private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("widget/scroller");
 	protected final Minecraft minecraft;
 	protected final int itemHeight;
 	private final List<E> children = new AbstractSelectionList.TrackedList();
@@ -187,42 +190,40 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		int k = this.getScrollbarPosition();
-		int l = k + 6;
 		this.hovered = this.isMouseOver((double)i, (double)j) ? this.getEntryAtPosition((double)i, (double)j) : null;
 		if (this.renderBackground) {
 			guiGraphics.setColor(0.125F, 0.125F, 0.125F, 1.0F);
-			int m = 32;
+			int k = 32;
 			guiGraphics.blit(
 				Screen.BACKGROUND_LOCATION, this.x0, this.y0, (float)this.x1, (float)(this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32
 			);
 			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-			int n = 4;
+			int l = 4;
 			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0, 0);
 			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216, 0);
 		}
 
-		int m = this.getRowLeft();
-		int n = this.y0 + 4 - (int)this.getScrollAmount();
+		int k = this.getRowLeft();
+		int l = this.y0 + 4 - (int)this.getScrollAmount();
 		this.enableScissor(guiGraphics);
 		if (this.renderHeader) {
-			this.renderHeader(guiGraphics, m, n);
+			this.renderHeader(guiGraphics, k, l);
 		}
 
 		this.renderList(guiGraphics, i, j, f);
 		guiGraphics.disableScissor();
-		int o = this.getMaxScroll();
-		if (o > 0) {
-			int p = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
-			p = Mth.clamp(p, 32, this.y1 - this.y0 - 8);
-			int q = (int)this.getScrollAmount() * (this.y1 - this.y0 - p) / o + this.y0;
-			if (q < this.y0) {
-				q = this.y0;
+		int m = this.getMaxScroll();
+		if (m > 0) {
+			int n = this.getScrollbarPosition();
+			int o = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+			o = Mth.clamp(o, 32, this.y1 - this.y0 - 8);
+			int p = (int)this.getScrollAmount() * (this.y1 - this.y0 - o) / m + this.y0;
+			if (p < this.y0) {
+				p = this.y0;
 			}
 
-			guiGraphics.fill(k, this.y0, l, this.y1, -16777216);
-			guiGraphics.fill(k, q, l, q + p, -8355712);
-			guiGraphics.fill(k, q, l - 1, q + p - 1, -4144960);
+			guiGraphics.fill(n, this.y0, n + 6, this.y1, -16777216);
+			guiGraphics.blitSprite(SCROLLER_SPRITE, n, p, 6, o);
 		}
 
 		this.renderDecorations(guiGraphics, i, j);

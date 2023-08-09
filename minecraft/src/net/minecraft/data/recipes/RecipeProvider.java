@@ -5,20 +5,20 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.EnterBlockTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.BlockFamilies;
 import net.minecraft.data.BlockFamily;
@@ -606,24 +606,28 @@ public abstract class RecipeProvider implements DataProvider {
 	}
 
 	private static EnterBlockTrigger.TriggerInstance insideOf(Block block) {
-		return new EnterBlockTrigger.TriggerInstance(ContextAwarePredicate.ANY, block, StatePropertiesPredicate.ANY);
+		return new EnterBlockTrigger.TriggerInstance(Optional.empty(), block, Optional.empty());
 	}
 
 	private static InventoryChangeTrigger.TriggerInstance has(MinMaxBounds.Ints ints, ItemLike itemLike) {
-		return inventoryTrigger(ItemPredicate.Builder.item().of(itemLike).withCount(ints).build());
+		return inventoryTrigger(ItemPredicate.Builder.item().of(itemLike).withCount(ints));
 	}
 
 	protected static InventoryChangeTrigger.TriggerInstance has(ItemLike itemLike) {
-		return inventoryTrigger(ItemPredicate.Builder.item().of(itemLike).build());
+		return inventoryTrigger(ItemPredicate.Builder.item().of(itemLike));
 	}
 
 	protected static InventoryChangeTrigger.TriggerInstance has(TagKey<Item> tagKey) {
-		return inventoryTrigger(ItemPredicate.Builder.item().of(tagKey).build());
+		return inventoryTrigger(ItemPredicate.Builder.item().of(tagKey));
+	}
+
+	private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate.Builder... builders) {
+		return inventoryTrigger((ItemPredicate[])Arrays.stream(builders).flatMap(builder -> builder.build().stream()).toArray(ItemPredicate[]::new));
 	}
 
 	private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... itemPredicates) {
 		return new InventoryChangeTrigger.TriggerInstance(
-			ContextAwarePredicate.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates
+			Optional.empty(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, List.of(itemPredicates)
 		);
 	}
 

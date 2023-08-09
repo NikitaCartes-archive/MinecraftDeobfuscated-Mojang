@@ -1,9 +1,10 @@
 package net.minecraft.network.protocol.status;
 
+import net.minecraft.network.ClientPongPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
-public class ClientboundPongResponsePacket implements Packet<ClientStatusPacketListener> {
+public class ClientboundPongResponsePacket implements Packet<ClientPongPacketListener> {
 	private final long time;
 
 	public ClientboundPongResponsePacket(long l) {
@@ -19,8 +20,8 @@ public class ClientboundPongResponsePacket implements Packet<ClientStatusPacketL
 		friendlyByteBuf.writeLong(this.time);
 	}
 
-	public void handle(ClientStatusPacketListener clientStatusPacketListener) {
-		clientStatusPacketListener.handlePongResponse(this);
+	public void handle(ClientPongPacketListener clientPongPacketListener) {
+		clientPongPacketListener.handlePongResponse(this);
 	}
 
 	public long getTime() {

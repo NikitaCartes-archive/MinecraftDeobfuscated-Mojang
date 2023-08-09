@@ -2,20 +2,16 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -26,14 +22,26 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
 public class SetEnchantmentsFunction extends LootItemConditionalFunction {
-	final Map<Enchantment, NumberProvider> enchantments;
-	final boolean add;
+	public static final Codec<SetEnchantmentsFunction> CODEC = RecordCodecBuilder.create(
+		instance -> commonFields(instance)
+				.<Map<Holder<Enchantment>, NumberProvider>, boolean>and(
+					instance.group(
+						ExtraCodecs.strictOptionalField(Codec.unboundedMap(BuiltInRegistries.ENCHANTMENT.holderByNameCodec(), NumberProviders.CODEC), "enchantments", Map.of())
+							.forGetter(setEnchantmentsFunction -> setEnchantmentsFunction.enchantments),
+						Codec.BOOL.fieldOf("add").orElse(false).forGetter(setEnchantmentsFunction -> setEnchantmentsFunction.add)
+					)
+				)
+				.apply(instance, SetEnchantmentsFunction::new)
+	);
+	private final Map<Holder<Enchantment>, NumberProvider> enchantments;
+	private final boolean add;
 
-	SetEnchantmentsFunction(LootItemCondition[] lootItemConditions, Map<Enchantment, NumberProvider> map, boolean bl) {
-		super(lootItemConditions);
-		this.enchantments = ImmutableMap.copyOf(map);
+	SetEnchantmentsFunction(List<LootItemCondition> list, Map<Holder<Enchantment>, NumberProvider> map, boolean bl) {
+		super(list);
+		this.enchantments = Map.copyOf(map);
 		this.add = bl;
 	}
 
@@ -54,7 +62,7 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		Object2IntMap<Enchantment> object2IntMap = new Object2IntOpenHashMap<>();
-		this.enchantments.forEach((enchantment, numberProvider) -> object2IntMap.put(enchantment, numberProvider.getInt(lootContext)));
+		this.enchantments.forEach((holder, numberProvider) -> object2IntMap.put((Enchantment)holder.value(), numberProvider.getInt(lootContext)));
 		if (itemStack.getItem() == Items.BOOK) {
 			ItemStack itemStack2 = new ItemStack(Items.ENCHANTED_BOOK);
 			object2IntMap.forEach((enchantment, integer) -> EnchantedBookItem.addEnchantment(itemStack2, new EnchantmentInstance(enchantment, integer)));
@@ -81,7 +89,7 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<SetEnchantmentsFunction.Builder> {
-		private final Map<Enchantment, NumberProvider> enchantments = Maps.<Enchantment, NumberProvider>newHashMap();
+		private final ImmutableMap.Builder<Holder<Enchantment>, NumberProvider> enchantments = ImmutableMap.builder();
 		private final boolean add;
 
 		public Builder() {
@@ -97,52 +105,13 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 		}
 
 		public SetEnchantmentsFunction.Builder withEnchantment(Enchantment enchantment, NumberProvider numberProvider) {
-			this.enchantments.put(enchantment, numberProvider);
+			this.enchantments.put(enchantment.builtInRegistryHolder(), numberProvider);
 			return this;
 		}
 
 		@Override
 		public LootItemFunction build() {
-			return new SetEnchantmentsFunction(this.getConditions(), this.enchantments, this.add);
-		}
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<SetEnchantmentsFunction> {
-		public void serialize(JsonObject jsonObject, SetEnchantmentsFunction setEnchantmentsFunction, JsonSerializationContext jsonSerializationContext) {
-			super.serialize(jsonObject, setEnchantmentsFunction, jsonSerializationContext);
-			JsonObject jsonObject2 = new JsonObject();
-			setEnchantmentsFunction.enchantments.forEach((enchantment, numberProvider) -> {
-				ResourceLocation resourceLocation = BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
-				if (resourceLocation == null) {
-					throw new IllegalArgumentException("Don't know how to serialize enchantment " + enchantment);
-				} else {
-					jsonObject2.add(resourceLocation.toString(), jsonSerializationContext.serialize(numberProvider));
-				}
-			});
-			jsonObject.add("enchantments", jsonObject2);
-			jsonObject.addProperty("add", setEnchantmentsFunction.add);
-		}
-
-		public SetEnchantmentsFunction deserialize(
-			JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions
-		) {
-			Map<Enchantment, NumberProvider> map = Maps.<Enchantment, NumberProvider>newHashMap();
-			if (jsonObject.has("enchantments")) {
-				JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "enchantments");
-
-				for (Entry<String, JsonElement> entry : jsonObject2.entrySet()) {
-					String string = (String)entry.getKey();
-					JsonElement jsonElement = (JsonElement)entry.getValue();
-					Enchantment enchantment = (Enchantment)BuiltInRegistries.ENCHANTMENT
-						.getOptional(new ResourceLocation(string))
-						.orElseThrow(() -> new JsonSyntaxException("Unknown enchantment '" + string + "'"));
-					NumberProvider numberProvider = jsonDeserializationContext.deserialize(jsonElement, NumberProvider.class);
-					map.put(enchantment, numberProvider);
-				}
-			}
-
-			boolean bl = GsonHelper.getAsBoolean(jsonObject, "add", false);
-			return new SetEnchantmentsFunction(lootItemConditions, map, bl);
+			return new SetEnchantmentsFunction(this.getConditions(), this.enchantments.build(), this.add);
 		}
 	}
 }

@@ -95,7 +95,7 @@ public class VanillaTheEndAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("in_city", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(BuiltinStructures.END_CITY)))
+			.addCriterion("in_city", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.END_CITY)))
 			.save(consumer, "end/find_end_city");
 		Advancement.Builder.advancement()
 			.parent(advancement2)

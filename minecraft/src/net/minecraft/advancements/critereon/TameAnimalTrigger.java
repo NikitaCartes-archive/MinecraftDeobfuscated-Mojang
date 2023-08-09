@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.Animal;
@@ -15,10 +16,10 @@ public class TameAnimalTrigger extends SimpleCriterionTrigger<TameAnimalTrigger.
 	}
 
 	public TameAnimalTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
-		return new TameAnimalTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicate2);
+		Optional<ContextAwarePredicate> optional2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
+		return new TameAnimalTrigger.TriggerInstance(optional, optional2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Animal animal) {
@@ -27,29 +28,29 @@ public class TameAnimalTrigger extends SimpleCriterionTrigger<TameAnimalTrigger.
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ContextAwarePredicate entity;
+		private final Optional<ContextAwarePredicate> entity;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate contextAwarePredicate2) {
-			super(TameAnimalTrigger.ID, contextAwarePredicate);
-			this.entity = contextAwarePredicate2;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2) {
+			super(TameAnimalTrigger.ID, optional);
+			this.entity = optional2;
 		}
 
 		public static TameAnimalTrigger.TriggerInstance tamedAnimal() {
-			return new TameAnimalTrigger.TriggerInstance(ContextAwarePredicate.ANY, ContextAwarePredicate.ANY);
+			return new TameAnimalTrigger.TriggerInstance(Optional.empty(), Optional.empty());
 		}
 
-		public static TameAnimalTrigger.TriggerInstance tamedAnimal(EntityPredicate entityPredicate) {
-			return new TameAnimalTrigger.TriggerInstance(ContextAwarePredicate.ANY, EntityPredicate.wrap(entityPredicate));
+		public static TameAnimalTrigger.TriggerInstance tamedAnimal(Optional<EntityPredicate> optional) {
+			return new TameAnimalTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional));
 		}
 
 		public boolean matches(LootContext lootContext) {
-			return this.entity.matches(lootContext);
+			return this.entity.isEmpty() || ((ContextAwarePredicate)this.entity.get()).matches(lootContext);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("entity", this.entity.toJson(serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.entity.ifPresent(contextAwarePredicate -> jsonObject.add("entity", contextAwarePredicate.toJson()));
 			return jsonObject;
 		}
 	}

@@ -88,7 +88,7 @@ public class DirectJoinServerScreen extends Screen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
-		guiGraphics.drawString(this.font, ENTER_IP_LABEL, this.width / 2 - 100, 100, 10526880);
+		guiGraphics.drawString(this.font, ENTER_IP_LABEL, this.width / 2 - 100 + 1, 100, 10526880);
 		this.ipEdit.render(guiGraphics, i, j, f);
 	}
 }

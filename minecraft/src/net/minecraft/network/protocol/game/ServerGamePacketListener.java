@@ -3,7 +3,7 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.common.ServerCommonPacketListener;
 
-public interface ServerGamePacketListener extends ServerCommonPacketListener {
+public interface ServerGamePacketListener extends ServerPingPacketListener, ServerCommonPacketListener {
 	@Override
 	default ConnectionProtocol protocol() {
 		return ConnectionProtocol.PLAY;

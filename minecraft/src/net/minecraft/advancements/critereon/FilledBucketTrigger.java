@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -14,10 +15,10 @@ public class FilledBucketTrigger extends SimpleCriterionTrigger<FilledBucketTrig
 	}
 
 	public FilledBucketTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new FilledBucketTrigger.TriggerInstance(contextAwarePredicate, itemPredicate);
+		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("item"));
+		return new FilledBucketTrigger.TriggerInstance(optional, optional2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack) {
@@ -25,25 +26,25 @@ public class FilledBucketTrigger extends SimpleCriterionTrigger<FilledBucketTrig
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ItemPredicate item;
+		private final Optional<ItemPredicate> item;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate) {
-			super(FilledBucketTrigger.ID, contextAwarePredicate);
-			this.item = itemPredicate;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
+			super(FilledBucketTrigger.ID, optional);
+			this.item = optional2;
 		}
 
-		public static FilledBucketTrigger.TriggerInstance filledBucket(ItemPredicate itemPredicate) {
-			return new FilledBucketTrigger.TriggerInstance(ContextAwarePredicate.ANY, itemPredicate);
+		public static FilledBucketTrigger.TriggerInstance filledBucket(Optional<ItemPredicate> optional) {
+			return new FilledBucketTrigger.TriggerInstance(Optional.empty(), optional);
 		}
 
 		public boolean matches(ItemStack itemStack) {
-			return this.item.matches(itemStack);
+			return !this.item.isPresent() || ((ItemPredicate)this.item.get()).matches(itemStack);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("item", this.item.serializeToJson());
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
 			return jsonObject;
 		}
 	}

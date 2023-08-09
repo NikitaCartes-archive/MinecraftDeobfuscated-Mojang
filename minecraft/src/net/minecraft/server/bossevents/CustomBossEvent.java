@@ -7,6 +7,7 @@ import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
@@ -164,10 +165,9 @@ public class CustomBossEvent extends ServerBossEvent {
 		customBossEvent.setDarkenScreen(compoundTag.getBoolean("DarkenScreen"));
 		customBossEvent.setPlayBossMusic(compoundTag.getBoolean("PlayBossMusic"));
 		customBossEvent.setCreateWorldFog(compoundTag.getBoolean("CreateWorldFog"));
-		ListTag listTag = compoundTag.getList("Players", 11);
 
-		for (int i = 0; i < listTag.size(); i++) {
-			customBossEvent.addOfflinePlayer(NbtUtils.loadUUID(listTag.get(i)));
+		for (Tag tag : compoundTag.getList("Players", 11)) {
+			customBossEvent.addOfflinePlayer(NbtUtils.loadUUID(tag));
 		}
 
 		return customBossEvent;

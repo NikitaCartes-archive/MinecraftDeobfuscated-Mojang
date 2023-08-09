@@ -8,7 +8,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -109,10 +108,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 	}
 
 	static void onEquipItem(Player player, EquipmentSlot equipmentSlot, ItemStack itemStack, ItemStack itemStack2) {
-		Equipable equipable = Equipable.get(itemStack);
-		if (equipable != null) {
-			player.onEquipItem(equipmentSlot, itemStack2, itemStack);
-		}
+		player.onEquipItem(equipmentSlot, itemStack2, itemStack);
 	}
 
 	public static boolean isHotbarSlot(int i) {

@@ -149,18 +149,18 @@ public final class NbtUtils {
 			}
 
 			return true;
-		} else if (tag instanceof ListTag && bl) {
-			ListTag listTag = (ListTag)tag;
-			ListTag listTag2 = (ListTag)tag2;
-			if (listTag.isEmpty()) {
-				return listTag2.isEmpty();
-			} else {
-				for (int i = 0; i < listTag.size(); i++) {
-					Tag tag4 = listTag.get(i);
+		} else {
+			if (tag instanceof ListTag listTag && bl) {
+				ListTag listTag2 = (ListTag)tag2;
+				if (listTag.isEmpty()) {
+					return listTag2.isEmpty();
+				}
+
+				for (Tag tag4 : listTag) {
 					boolean bl2 = false;
 
-					for (int j = 0; j < listTag2.size(); j++) {
-						if (compareNbt(tag4, listTag2.get(j), bl)) {
+					for (Tag tag5 : listTag2) {
+						if (compareNbt(tag4, tag5, bl)) {
 							bl2 = true;
 							break;
 						}
@@ -173,7 +173,7 @@ public final class NbtUtils {
 
 				return true;
 			}
-		} else {
+
 			return tag.equals(tag2);
 		}
 	}
@@ -242,7 +242,7 @@ public final class NbtUtils {
 		if (optional.isPresent()) {
 			return stateHolder.setValue(property, (Comparable)optional.get());
 		} else {
-			LOGGER.warn("Unable to read property: {} with value: {} for blockstate: {}", string, compoundTag.getString(string), compoundTag2.toString());
+			LOGGER.warn("Unable to read property: {} with value: {} for blockstate: {}", string, compoundTag.getString(string), compoundTag2);
 			return stateHolder;
 		}
 	}

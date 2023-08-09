@@ -1,31 +1,37 @@
 package net.minecraft.world.level.storage.loot.entries;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.Products.P1;
+import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.List;
 import java.util.function.Predicate;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
-import org.apache.commons.lang3.ArrayUtils;
 
 public abstract class LootPoolEntryContainer implements ComposableEntryContainer {
-	protected final LootItemCondition[] conditions;
+	protected final List<LootItemCondition> conditions;
 	private final Predicate<LootContext> compositeCondition;
 
-	protected LootPoolEntryContainer(LootItemCondition[] lootItemConditions) {
-		this.conditions = lootItemConditions;
-		this.compositeCondition = LootItemConditions.andConditions(lootItemConditions);
+	protected LootPoolEntryContainer(List<LootItemCondition> list) {
+		this.conditions = list;
+		this.compositeCondition = LootItemConditions.andConditions(list);
+	}
+
+	protected static <T extends LootPoolEntryContainer> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> instance) {
+		return instance.group(
+			ExtraCodecs.strictOptionalField(LootItemConditions.CODEC.listOf(), "conditions", List.of())
+				.forGetter(lootPoolEntryContainer -> lootPoolEntryContainer.conditions)
+		);
 	}
 
 	public void validate(ValidationContext validationContext) {
-		for (int i = 0; i < this.conditions.length; i++) {
-			this.conditions[i].validate(validationContext.forChild(".condition[" + i + "]"));
+		for (int i = 0; i < this.conditions.size(); i++) {
+			((LootItemCondition)this.conditions.get(i)).validate(validationContext.forChild(".condition[" + i + "]"));
 		}
 	}
 
@@ -36,7 +42,7 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 	public abstract LootPoolEntryType getType();
 
 	public abstract static class Builder<T extends LootPoolEntryContainer.Builder<T>> implements ConditionUserBuilder<T> {
-		private final List<LootItemCondition> conditions = Lists.<LootItemCondition>newArrayList();
+		private final ImmutableList.Builder<LootItemCondition> conditions = ImmutableList.builder();
 
 		protected abstract T getThis();
 
@@ -49,8 +55,8 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 			return this.getThis();
 		}
 
-		protected LootItemCondition[] getConditions() {
-			return (LootItemCondition[])this.conditions.toArray(new LootItemCondition[0]);
+		protected List<LootItemCondition> getConditions() {
+			return this.conditions.build();
 		}
 
 		public AlternativesEntry.Builder otherwise(LootPoolEntryContainer.Builder<?> builder) {
@@ -66,26 +72,5 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 		}
 
 		public abstract LootPoolEntryContainer build();
-	}
-
-	public abstract static class Serializer<T extends LootPoolEntryContainer> implements net.minecraft.world.level.storage.loot.Serializer<T> {
-		public final void serialize(JsonObject jsonObject, T lootPoolEntryContainer, JsonSerializationContext jsonSerializationContext) {
-			if (!ArrayUtils.isEmpty((Object[])lootPoolEntryContainer.conditions)) {
-				jsonObject.add("conditions", jsonSerializationContext.serialize(lootPoolEntryContainer.conditions));
-			}
-
-			this.serializeCustom(jsonObject, lootPoolEntryContainer, jsonSerializationContext);
-		}
-
-		public final T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-			LootItemCondition[] lootItemConditions = GsonHelper.getAsObject(
-				jsonObject, "conditions", new LootItemCondition[0], jsonDeserializationContext, LootItemCondition[].class
-			);
-			return this.deserializeCustom(jsonObject, jsonDeserializationContext, lootItemConditions);
-		}
-
-		public abstract void serializeCustom(JsonObject jsonObject, T lootPoolEntryContainer, JsonSerializationContext jsonSerializationContext);
-
-		public abstract T deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions);
 	}
 }

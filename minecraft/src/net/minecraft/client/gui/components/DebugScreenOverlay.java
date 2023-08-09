@@ -30,9 +30,12 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.debugchart.BandwidthDebugChart;
+import net.minecraft.client.gui.components.debugchart.FpsDebugChart;
+import net.minecraft.client.gui.components.debugchart.PingDebugChart;
+import net.minecraft.client.gui.components.debugchart.TpsDebugChart;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.PostChain;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -42,7 +45,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
@@ -90,14 +92,19 @@ public class DebugScreenOverlay {
 	private LevelChunk clientChunk;
 	@Nullable
 	private CompletableFuture<LevelChunk> serverChunk;
-	private static final int RED = -65536;
-	private static final int YELLOW = -256;
-	private static final int GREEN = -16711936;
+	private final FpsDebugChart fpsChart;
+	private final PingDebugChart pingChart;
+	private final BandwidthDebugChart bandwidthChart;
+	@Nullable
+	private TpsDebugChart tpsChart;
 
 	public DebugScreenOverlay(Minecraft minecraft) {
 		this.minecraft = minecraft;
 		this.allocationRateCalculator = new DebugScreenOverlay.AllocationRateCalculator();
 		this.font = minecraft.font;
+		this.fpsChart = new FpsDebugChart(this.font, minecraft.frameTimeLogger);
+		this.pingChart = new PingDebugChart(this.font, minecraft.pingLogger);
+		this.bandwidthChart = new BandwidthDebugChart(this.font, minecraft.bandwidthLogger);
 	}
 
 	public void clearChunkCache() {
@@ -115,14 +122,41 @@ public class DebugScreenOverlay {
 			this.drawSystemInformation(guiGraphics);
 			if (this.minecraft.options.renderFpsChart) {
 				int i = guiGraphics.guiWidth();
-				this.drawChart(guiGraphics, this.minecraft.getFrameTimer(), 0, i / 2, true);
-				IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-				if (integratedServer != null) {
-					this.drawChart(guiGraphics, integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
+				int j = i / 2;
+				this.fpsChart.drawChart(guiGraphics, 0, this.fpsChart.getWidth(j));
+				TpsDebugChart tpsDebugChart = this.getTpsChart();
+				if (tpsDebugChart != null) {
+					int k = tpsDebugChart.getWidth(j);
+					tpsDebugChart.drawChart(guiGraphics, i - k, k);
 				}
+			}
+
+			if (this.minecraft.options.renderNetworkChart) {
+				int i = guiGraphics.guiWidth();
+				int j = i / 2;
+				if (!this.minecraft.isLocalServer()) {
+					this.bandwidthChart.drawChart(guiGraphics, 0, this.bandwidthChart.getWidth(j));
+				}
+
+				int l = this.pingChart.getWidth(j);
+				this.pingChart.drawChart(guiGraphics, i - l, l);
 			}
 		});
 		this.minecraft.getProfiler().pop();
+	}
+
+	@Nullable
+	private TpsDebugChart getTpsChart() {
+		if (this.tpsChart != null) {
+			return this.tpsChart;
+		} else {
+			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
+			if (integratedServer != null) {
+				this.tpsChart = new TpsDebugChart(this.font, integratedServer.getTickTimeLogger());
+			}
+
+			return this.tpsChart;
+		}
 	}
 
 	protected void drawGameInformation(GuiGraphics guiGraphics) {
@@ -496,86 +530,6 @@ public class DebugScreenOverlay {
 		}
 
 		return property.getName() + ": " + string;
-	}
-
-	private void drawChart(GuiGraphics guiGraphics, FrameTimer frameTimer, int i, int j, boolean bl) {
-		int k = frameTimer.getLogStart();
-		int l = frameTimer.getLogEnd();
-		long[] ls = frameTimer.getLog();
-		int n = i;
-		int o = Math.max(0, ls.length - j);
-		int p = ls.length - o;
-		int m = frameTimer.wrapIndex(k + o);
-		long q = 0L;
-		int r = Integer.MAX_VALUE;
-		int s = Integer.MIN_VALUE;
-
-		for (int t = 0; t < p; t++) {
-			int u = (int)(ls[frameTimer.wrapIndex(m + t)] / 1000000L);
-			r = Math.min(r, u);
-			s = Math.max(s, u);
-			q += (long)u;
-		}
-
-		int t = guiGraphics.guiHeight();
-		guiGraphics.fill(RenderType.guiOverlay(), i, t - 60, i + p, t, -1873784752);
-
-		while (m != l) {
-			int u = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);
-			int v = bl ? 100 : 60;
-			int w = this.getSampleColor(Mth.clamp(u, 0, v), 0, v / 2, v);
-			guiGraphics.fill(RenderType.guiOverlay(), n, t - u, n + 1, t, w);
-			n++;
-			m = frameTimer.wrapIndex(m + 1);
-		}
-
-		if (bl) {
-			guiGraphics.fill(RenderType.guiOverlay(), i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
-			guiGraphics.drawString(this.font, "60 FPS", i + 2, t - 30 + 2, 14737632, false);
-			guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 30, -1);
-			guiGraphics.fill(RenderType.guiOverlay(), i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-			guiGraphics.drawString(this.font, "30 FPS", i + 2, t - 60 + 2, 14737632, false);
-			guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 60, -1);
-		} else {
-			guiGraphics.fill(RenderType.guiOverlay(), i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-			guiGraphics.drawString(this.font, "20 TPS", i + 2, t - 60 + 2, 14737632, false);
-			guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 60, -1);
-		}
-
-		guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 1, -1);
-		guiGraphics.vLine(RenderType.guiOverlay(), i, t - 60, t, -1);
-		guiGraphics.vLine(RenderType.guiOverlay(), i + p - 1, t - 60, t, -1);
-		int u = this.minecraft.options.framerateLimit().get();
-		if (bl && u > 0 && u <= 250) {
-			guiGraphics.hLine(RenderType.guiOverlay(), i, i + p - 1, t - 1 - (int)(1800.0 / (double)u), -16711681);
-		}
-
-		String string = r + " ms min";
-		String string2 = q / (long)p + " ms avg";
-		String string3 = s + " ms max";
-		guiGraphics.drawString(this.font, string, i + 2, t - 60 - 9, 14737632);
-		guiGraphics.drawCenteredString(this.font, string2, i + p / 2, t - 60 - 9, 14737632);
-		guiGraphics.drawString(this.font, string3, i + p - this.font.width(string3), t - 60 - 9, 14737632);
-	}
-
-	private int getSampleColor(int i, int j, int k, int l) {
-		return i < k ? this.colorLerp(-16711936, -256, (float)i / (float)k) : this.colorLerp(-256, -65536, (float)(i - k) / (float)(l - k));
-	}
-
-	private int colorLerp(int i, int j, float f) {
-		int k = i >> 24 & 0xFF;
-		int l = i >> 16 & 0xFF;
-		int m = i >> 8 & 0xFF;
-		int n = i & 0xFF;
-		int o = j >> 24 & 0xFF;
-		int p = j >> 16 & 0xFF;
-		int q = j >> 8 & 0xFF;
-		int r = j & 0xFF;
-		int s = Mth.clamp((int)Mth.lerp(f, (float)k, (float)o), 0, 255);
-		int t = Mth.clamp((int)Mth.lerp(f, (float)l, (float)p), 0, 255);
-		int u = Mth.clamp((int)Mth.lerp(f, (float)m, (float)q), 0, 255);
-		int v = Mth.clamp((int)Mth.lerp(f, (float)n, (float)r), 0, 255);
-		return s << 24 | t << 16 | u << 8 | v;
 	}
 
 	private static long bytesToMegabytes(long l) {

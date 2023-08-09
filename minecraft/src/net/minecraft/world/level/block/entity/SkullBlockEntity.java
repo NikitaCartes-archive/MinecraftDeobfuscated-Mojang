@@ -133,7 +133,7 @@ public class SkullBlockEntity extends BlockEntity {
 			fetchGameProfile(this.owner.getName()).thenAcceptAsync(optional -> {
 				this.owner = (GameProfile)optional.orElse(this.owner);
 				this.setChanged();
-			}, this.level.getServer());
+			}, CHECKED_MAIN_THREAD_EXECUTOR);
 		} else {
 			this.setChanged();
 		}

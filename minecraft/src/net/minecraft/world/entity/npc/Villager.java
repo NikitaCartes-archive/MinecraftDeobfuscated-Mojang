@@ -893,10 +893,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			List<Villager> list = serverLevel.getEntitiesOfClass(Villager.class, aABB);
 			List<Villager> list2 = (List<Villager>)list.stream().filter(villager -> villager.wantsToSpawnGolem(l)).limit(5L).collect(Collectors.toList());
 			if (list2.size() >= i) {
-				if (SpawnUtil.trySpawnMob(
+				if (!SpawnUtil.trySpawnMob(
 						EntityType.IRON_GOLEM, MobSpawnType.MOB_SUMMONED, serverLevel, this.blockPosition(), 10, 8, 6, SpawnUtil.Strategy.LEGACY_IRON_GOLEM
 					)
-					.isPresent()) {
+					.isEmpty()) {
 					list.forEach(GolemSensor::golemDetected);
 				}
 			}

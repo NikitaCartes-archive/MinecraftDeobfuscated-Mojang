@@ -50,7 +50,7 @@ public class ServerStatusPinger {
 			this.onPingFailed(ConnectScreen.UNKNOWN_HOST_MESSAGE, serverData);
 		} else {
 			final InetSocketAddress inetSocketAddress = (InetSocketAddress)optional.get();
-			final Connection connection = Connection.connectToServer(inetSocketAddress, false);
+			final Connection connection = Connection.connectToServer(inetSocketAddress, false, null);
 			this.connections.add(connection);
 			serverData.motd = Component.translatable("multiplayer.status.pinging");
 			serverData.ping = -1L;

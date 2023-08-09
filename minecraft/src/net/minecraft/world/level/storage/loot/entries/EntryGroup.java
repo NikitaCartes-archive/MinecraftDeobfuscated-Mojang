@@ -1,12 +1,15 @@
 package net.minecraft.world.level.storage.loot.entries;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class EntryGroup extends CompositeEntryBase {
-	EntryGroup(LootPoolEntryContainer[] lootPoolEntryContainers, LootItemCondition[] lootItemConditions) {
-		super(lootPoolEntryContainers, lootItemConditions);
+	public static final Codec<EntryGroup> CODEC = createCodec(EntryGroup::new);
+
+	EntryGroup(List<LootPoolEntryContainer> list, List<LootItemCondition> list2) {
+		super(list, list2);
 	}
 
 	@Override
@@ -15,29 +18,27 @@ public class EntryGroup extends CompositeEntryBase {
 	}
 
 	@Override
-	protected ComposableEntryContainer compose(ComposableEntryContainer[] composableEntryContainers) {
-		switch (composableEntryContainers.length) {
-			case 0:
-				return ALWAYS_TRUE;
-			case 1:
-				return composableEntryContainers[0];
-			case 2:
-				ComposableEntryContainer composableEntryContainer = composableEntryContainers[0];
-				ComposableEntryContainer composableEntryContainer2 = composableEntryContainers[1];
-				return (lootContext, consumer) -> {
+	protected ComposableEntryContainer compose(List<? extends ComposableEntryContainer> list) {
+		return switch (list.size()) {
+			case 0 -> ALWAYS_TRUE;
+			case 1 -> (ComposableEntryContainer)list.get(0);
+			case 2 -> {
+				ComposableEntryContainer composableEntryContainer = (ComposableEntryContainer)list.get(0);
+				ComposableEntryContainer composableEntryContainer2 = (ComposableEntryContainer)list.get(1);
+				yield (lootContext, consumer) -> {
 					composableEntryContainer.expand(lootContext, consumer);
 					composableEntryContainer2.expand(lootContext, consumer);
 					return true;
 				};
-			default:
-				return (lootContext, consumer) -> {
-					for (ComposableEntryContainer composableEntryContainerx : composableEntryContainers) {
-						composableEntryContainerx.expand(lootContext, consumer);
-					}
+			}
+			default -> (lootContext, consumer) -> {
+			for (ComposableEntryContainer composableEntryContainerx : list) {
+				composableEntryContainerx.expand(lootContext, consumer);
+			}
 
-					return true;
-				};
-		}
+			return true;
+		};
+		};
 	}
 
 	public static EntryGroup.Builder list(LootPoolEntryContainer.Builder<?>... builders) {
@@ -45,7 +46,7 @@ public class EntryGroup extends CompositeEntryBase {
 	}
 
 	public static class Builder extends LootPoolEntryContainer.Builder<EntryGroup.Builder> {
-		private final List<LootPoolEntryContainer> entries = Lists.<LootPoolEntryContainer>newArrayList();
+		private final ImmutableList.Builder<LootPoolEntryContainer> entries = ImmutableList.builder();
 
 		public Builder(LootPoolEntryContainer.Builder<?>... builders) {
 			for (LootPoolEntryContainer.Builder<?> builder : builders) {
@@ -65,7 +66,7 @@ public class EntryGroup extends CompositeEntryBase {
 
 		@Override
 		public LootPoolEntryContainer build() {
-			return new EntryGroup((LootPoolEntryContainer[])this.entries.toArray(new LootPoolEntryContainer[0]), this.getConditions());
+			return new EntryGroup(this.entries.build(), this.getConditions());
 		}
 	}
 }

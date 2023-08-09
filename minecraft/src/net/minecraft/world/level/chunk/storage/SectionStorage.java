@@ -185,7 +185,7 @@ public class SectionStorage<R> implements AutoCloseable {
 			long l = getKey(chunkPos, i);
 			this.dirty.remove(l);
 			Optional<R> optional = this.storage.get(l);
-			if (optional != null && optional.isPresent()) {
+			if (optional != null && !optional.isEmpty()) {
 				DataResult<T> dataResult = ((Codec)this.codec.apply((Runnable)() -> this.setDirty(l))).encodeStart(dynamicOps, optional.get());
 				String string = Integer.toString(i);
 				dataResult.resultOrPartial(LOGGER::error).ifPresent(object -> map.put(dynamicOps.createString(string), object));
@@ -214,7 +214,7 @@ public class SectionStorage<R> implements AutoCloseable {
 
 	protected void setDirty(long l) {
 		Optional<R> optional = this.storage.get(l);
-		if (optional != null && optional.isPresent()) {
+		if (optional != null && !optional.isEmpty()) {
 			this.dirty.add(l);
 		} else {
 			LOGGER.warn("No data for position: {}", SectionPos.of(l));

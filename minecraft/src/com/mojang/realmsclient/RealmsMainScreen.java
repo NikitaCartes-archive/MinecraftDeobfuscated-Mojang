@@ -34,6 +34,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -77,10 +78,10 @@ import org.slf4j.Logger;
 public class RealmsMainScreen extends RealmsScreen {
 	static final ResourceLocation INFO_SPRITE = new ResourceLocation("icon/info");
 	static final ResourceLocation NEW_REALM_SPRITE = new ResourceLocation("icon/new_realm");
-	private static final ResourceLocation EXPIRED_SPRITE = new ResourceLocation("realm_status/expired");
-	private static final ResourceLocation EXPIRES_SOON_SPRITE = new ResourceLocation("realm_status/expires_soon");
-	private static final ResourceLocation OPEN_SPRITE = new ResourceLocation("realm_status/open");
-	private static final ResourceLocation CLOSED_SPRITE = new ResourceLocation("realm_status/closed");
+	static final ResourceLocation EXPIRED_SPRITE = new ResourceLocation("realm_status/expired");
+	static final ResourceLocation EXPIRES_SOON_SPRITE = new ResourceLocation("realm_status/expires_soon");
+	static final ResourceLocation OPEN_SPRITE = new ResourceLocation("realm_status/open");
+	static final ResourceLocation CLOSED_SPRITE = new ResourceLocation("realm_status/closed");
 	private static final ResourceLocation INVITE_SPRITE = new ResourceLocation("icon/invite");
 	private static final ResourceLocation NEWS_SPRITE = new ResourceLocation("icon/news");
 	static final Logger LOGGER = LogUtils.getLogger();
@@ -96,11 +97,11 @@ public class RealmsMainScreen extends RealmsScreen {
 	private static final Component PLAY_TEXT = Component.translatable("mco.selectServer.play");
 	private static final Component LEAVE_SERVER_TEXT = Component.translatable("mco.selectServer.leave");
 	private static final Component CONFIGURE_SERVER_TEXT = Component.translatable("mco.selectServer.configure");
-	private static final Component SERVER_EXPIRED_TOOLTIP = Component.translatable("mco.selectServer.expired");
-	private static final Component SERVER_EXPIRES_SOON_TOOLTIP = Component.translatable("mco.selectServer.expires.soon");
-	private static final Component SERVER_EXPIRES_IN_DAY_TOOLTIP = Component.translatable("mco.selectServer.expires.day");
-	private static final Component SERVER_OPEN_TOOLTIP = Component.translatable("mco.selectServer.open");
-	private static final Component SERVER_CLOSED_TOOLTIP = Component.translatable("mco.selectServer.closed");
+	static final Component SERVER_EXPIRED_TOOLTIP = Component.translatable("mco.selectServer.expired");
+	static final Component SERVER_EXPIRES_SOON_TOOLTIP = Component.translatable("mco.selectServer.expires.soon");
+	static final Component SERVER_EXPIRES_IN_DAY_TOOLTIP = Component.translatable("mco.selectServer.expires.day");
+	static final Component SERVER_OPEN_TOOLTIP = Component.translatable("mco.selectServer.open");
+	static final Component SERVER_CLOSED_TOOLTIP = Component.translatable("mco.selectServer.closed");
 	static final Component UNITIALIZED_WORLD_NARRATION = Component.translatable("gui.narrate.button", SERVER_UNITIALIZED_TEXT);
 	private static final Component NO_REALMS_TEXT = Component.translatable("mco.selectServer.noRealms");
 	private static final Tooltip NO_PENDING_INVITES = Tooltip.create(Component.translatable("mco.invites.nopending"));
@@ -574,40 +575,6 @@ public class RealmsMainScreen extends RealmsScreen {
 		return this.isSelfOwnedServer(realmsServer) && !realmsServer.expired;
 	}
 
-	void drawExpired(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blitSprite(EXPIRED_SPRITE, i, j, 10, 28);
-		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32) {
-			this.setTooltipForNextRenderPass(SERVER_EXPIRED_TOOLTIP);
-		}
-	}
-
-	void drawExpiring(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
-		guiGraphics.blitSprite(EXPIRES_SOON_SPRITE, i, j, 10, 28);
-		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32) {
-			if (m <= 0) {
-				this.setTooltipForNextRenderPass(SERVER_EXPIRES_SOON_TOOLTIP);
-			} else if (m == 1) {
-				this.setTooltipForNextRenderPass(SERVER_EXPIRES_IN_DAY_TOOLTIP);
-			} else {
-				this.setTooltipForNextRenderPass(Component.translatable("mco.selectServer.expires.days", m));
-			}
-		}
-	}
-
-	void drawOpen(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blitSprite(OPEN_SPRITE, i, j, 10, 28);
-		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32) {
-			this.setTooltipForNextRenderPass(SERVER_OPEN_TOOLTIP);
-		}
-	}
-
-	void drawClose(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		guiGraphics.blitSprite(CLOSED_SPRITE, i, j, 10, 28);
-		if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < this.height - 40 && l > 32) {
-			this.setTooltipForNextRenderPass(SERVER_CLOSED_TOOLTIP);
-		}
-	}
-
 	private void renderEnvironment(GuiGraphics guiGraphics, String string, int i) {
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate((float)(this.width / 2 - 25), 20.0F, 0.0F);
@@ -947,13 +914,36 @@ public class RealmsMainScreen extends RealmsScreen {
 		private void renderStatusLights(RealmsServer realmsServer, GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n) {
 			int o = i + m + 22;
 			if (realmsServer.expired) {
-				RealmsMainScreen.this.drawExpired(guiGraphics, o, j + n, k, l);
+				this.drawRealmStatus(guiGraphics, o, j + n, k, l, RealmsMainScreen.EXPIRED_SPRITE, () -> RealmsMainScreen.SERVER_EXPIRED_TOOLTIP);
 			} else if (realmsServer.state == RealmsServer.State.CLOSED) {
-				RealmsMainScreen.this.drawClose(guiGraphics, o, j + n, k, l);
+				this.drawRealmStatus(guiGraphics, o, j + n, k, l, RealmsMainScreen.CLOSED_SPRITE, () -> RealmsMainScreen.SERVER_CLOSED_TOOLTIP);
 			} else if (RealmsMainScreen.this.isSelfOwnedServer(realmsServer) && realmsServer.daysLeft < 7) {
-				RealmsMainScreen.this.drawExpiring(guiGraphics, o, j + n, k, l, realmsServer.daysLeft);
+				this.drawRealmStatus(
+					guiGraphics,
+					o,
+					j + n,
+					k,
+					l,
+					RealmsMainScreen.EXPIRES_SOON_SPRITE,
+					() -> {
+						if (realmsServer.daysLeft <= 0) {
+							return RealmsMainScreen.SERVER_EXPIRES_SOON_TOOLTIP;
+						} else {
+							return (Component)(realmsServer.daysLeft == 1
+								? RealmsMainScreen.SERVER_EXPIRES_IN_DAY_TOOLTIP
+								: Component.translatable("mco.selectServer.expires.days", realmsServer.daysLeft));
+						}
+					}
+				);
 			} else if (realmsServer.state == RealmsServer.State.OPEN) {
-				RealmsMainScreen.this.drawOpen(guiGraphics, o, j + n, k, l);
+				this.drawRealmStatus(guiGraphics, o, j + n, k, l, RealmsMainScreen.OPEN_SPRITE, () -> RealmsMainScreen.SERVER_OPEN_TOOLTIP);
+			}
+		}
+
+		private void drawRealmStatus(GuiGraphics guiGraphics, int i, int j, int k, int l, ResourceLocation resourceLocation, Supplier<Component> supplier) {
+			guiGraphics.blitSprite(resourceLocation, i, j, 10, 28);
+			if (k >= i && k <= i + 9 && l >= j && l <= j + 27 && l < RealmsMainScreen.this.height - 40 && l > 32) {
+				RealmsMainScreen.this.setTooltipForNextRenderPass((Component)supplier.get());
 			}
 		}
 

@@ -1,19 +1,16 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.mojang.logging.LogUtils;
-import java.util.Locale;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -25,24 +22,35 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
-import org.slf4j.Logger;
 
 public class ExplorationMapFunction extends LootItemConditionalFunction {
-	static final Logger LOGGER = LogUtils.getLogger();
 	public static final TagKey<Structure> DEFAULT_DESTINATION = StructureTags.ON_TREASURE_MAPS;
-	public static final String DEFAULT_DECORATION_NAME = "mansion";
 	public static final MapDecoration.Type DEFAULT_DECORATION = MapDecoration.Type.MANSION;
 	public static final byte DEFAULT_ZOOM = 2;
 	public static final int DEFAULT_SEARCH_RADIUS = 50;
 	public static final boolean DEFAULT_SKIP_EXISTING = true;
-	final TagKey<Structure> destination;
-	final MapDecoration.Type mapDecoration;
-	final byte zoom;
-	final int searchRadius;
-	final boolean skipKnownStructures;
+	public static final Codec<ExplorationMapFunction> CODEC = RecordCodecBuilder.create(
+		instance -> commonFields(instance)
+				.<TagKey<Structure>, MapDecoration.Type, byte, int, boolean>and(
+					instance.group(
+						ExtraCodecs.strictOptionalField(TagKey.codec(Registries.STRUCTURE), "destination", DEFAULT_DESTINATION)
+							.forGetter(explorationMapFunction -> explorationMapFunction.destination),
+						MapDecoration.Type.CODEC.optionalFieldOf("decoration", DEFAULT_DECORATION).forGetter(explorationMapFunction -> explorationMapFunction.mapDecoration),
+						ExtraCodecs.strictOptionalField(Codec.BYTE, "zoom", (byte)2).forGetter(explorationMapFunction -> explorationMapFunction.zoom),
+						ExtraCodecs.strictOptionalField(Codec.INT, "search_radius", 50).forGetter(explorationMapFunction -> explorationMapFunction.searchRadius),
+						ExtraCodecs.strictOptionalField(Codec.BOOL, "skip_existing_chunks", true).forGetter(explorationMapFunction -> explorationMapFunction.skipKnownStructures)
+					)
+				)
+				.apply(instance, ExplorationMapFunction::new)
+	);
+	private final TagKey<Structure> destination;
+	private final MapDecoration.Type mapDecoration;
+	private final byte zoom;
+	private final int searchRadius;
+	private final boolean skipKnownStructures;
 
-	ExplorationMapFunction(LootItemCondition[] lootItemConditions, TagKey<Structure> tagKey, MapDecoration.Type type, byte b, int i, boolean bl) {
-		super(lootItemConditions);
+	ExplorationMapFunction(List<LootItemCondition> list, TagKey<Structure> tagKey, MapDecoration.Type type, byte b, int i, boolean bl) {
+		super(list);
 		this.destination = tagKey;
 		this.mapDecoration = type;
 		this.zoom = b;
@@ -124,60 +132,6 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 		@Override
 		public LootItemFunction build() {
 			return new ExplorationMapFunction(this.getConditions(), this.destination, this.mapDecoration, this.zoom, this.searchRadius, this.skipKnownStructures);
-		}
-	}
-
-	public static class Serializer extends LootItemConditionalFunction.Serializer<ExplorationMapFunction> {
-		public void serialize(JsonObject jsonObject, ExplorationMapFunction explorationMapFunction, JsonSerializationContext jsonSerializationContext) {
-			super.serialize(jsonObject, explorationMapFunction, jsonSerializationContext);
-			if (!explorationMapFunction.destination.equals(ExplorationMapFunction.DEFAULT_DESTINATION)) {
-				jsonObject.addProperty("destination", explorationMapFunction.destination.location().toString());
-			}
-
-			if (explorationMapFunction.mapDecoration != ExplorationMapFunction.DEFAULT_DECORATION) {
-				jsonObject.add("decoration", jsonSerializationContext.serialize(explorationMapFunction.mapDecoration.toString().toLowerCase(Locale.ROOT)));
-			}
-
-			if (explorationMapFunction.zoom != 2) {
-				jsonObject.addProperty("zoom", explorationMapFunction.zoom);
-			}
-
-			if (explorationMapFunction.searchRadius != 50) {
-				jsonObject.addProperty("search_radius", explorationMapFunction.searchRadius);
-			}
-
-			if (!explorationMapFunction.skipKnownStructures) {
-				jsonObject.addProperty("skip_existing_chunks", explorationMapFunction.skipKnownStructures);
-			}
-		}
-
-		public ExplorationMapFunction deserialize(
-			JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions
-		) {
-			TagKey<Structure> tagKey = readStructure(jsonObject);
-			String string = jsonObject.has("decoration") ? GsonHelper.getAsString(jsonObject, "decoration") : "mansion";
-			MapDecoration.Type type = ExplorationMapFunction.DEFAULT_DECORATION;
-
-			try {
-				type = MapDecoration.Type.valueOf(string.toUpperCase(Locale.ROOT));
-			} catch (IllegalArgumentException var10) {
-				ExplorationMapFunction.LOGGER
-					.error("Error while parsing loot table decoration entry. Found {}. Defaulting to {}", string, ExplorationMapFunction.DEFAULT_DECORATION);
-			}
-
-			byte b = GsonHelper.getAsByte(jsonObject, "zoom", (byte)2);
-			int i = GsonHelper.getAsInt(jsonObject, "search_radius", 50);
-			boolean bl = GsonHelper.getAsBoolean(jsonObject, "skip_existing_chunks", true);
-			return new ExplorationMapFunction(lootItemConditions, tagKey, type, b, i, bl);
-		}
-
-		private static TagKey<Structure> readStructure(JsonObject jsonObject) {
-			if (jsonObject.has("destination")) {
-				String string = GsonHelper.getAsString(jsonObject, "destination");
-				return TagKey.create(Registries.STRUCTURE, new ResourceLocation(string));
-			} else {
-				return ExplorationMapFunction.DEFAULT_DESTINATION;
-			}
 		}
 	}
 }

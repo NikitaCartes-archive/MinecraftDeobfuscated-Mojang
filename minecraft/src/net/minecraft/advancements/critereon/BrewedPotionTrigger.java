@@ -2,6 +2,7 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -18,7 +19,7 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 	}
 
 	public BrewedPotionTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		Potion potion = null;
 		if (jsonObject.has("potion")) {
@@ -28,7 +29,7 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 				.orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation + "'"));
 		}
 
-		return new BrewedPotionTrigger.TriggerInstance(contextAwarePredicate, potion);
+		return new BrewedPotionTrigger.TriggerInstance(optional, potion);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Potion potion) {
@@ -39,13 +40,13 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 		@Nullable
 		private final Potion potion;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, @Nullable Potion potion) {
-			super(BrewedPotionTrigger.ID, contextAwarePredicate);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, @Nullable Potion potion) {
+			super(BrewedPotionTrigger.ID, optional);
 			this.potion = potion;
 		}
 
 		public static BrewedPotionTrigger.TriggerInstance brewedPotion() {
-			return new BrewedPotionTrigger.TriggerInstance(ContextAwarePredicate.ANY, null);
+			return new BrewedPotionTrigger.TriggerInstance(Optional.empty(), null);
 		}
 
 		public boolean matches(Potion potion) {
@@ -53,8 +54,8 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
 			if (this.potion != null) {
 				jsonObject.addProperty("potion", BuiltInRegistries.POTION.getKey(this.potion).toString());
 			}

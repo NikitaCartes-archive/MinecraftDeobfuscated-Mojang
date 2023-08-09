@@ -113,7 +113,7 @@ public class ItemSpawnEggFix extends DataFix {
 					Optional<String> optional5 = optional4.flatMap(typedx -> typedx.getOptional(opticFinder2));
 					Typed<?> typed2 = typed;
 					String string = ID_TO_ENTITY[s & 255];
-					if (string != null && (!optional5.isPresent() || !Objects.equals(optional5.get(), string))) {
+					if (string != null && (optional5.isEmpty() || !Objects.equals(optional5.get(), string))) {
 						Typed<?> typed3 = typed.getOrCreateTyped(opticFinder3);
 						Typed<?> typed4 = typed3.getOrCreateTyped(opticFinder4);
 						Typed<?> typed5 = typed4.getOrCreateTyped(opticFinder5);

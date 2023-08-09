@@ -131,11 +131,6 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 		return registerForHolder(registry, ResourceKey.create(registry.key(), resourceLocation), object);
 	}
 
-	static <V, T extends V> T registerMapping(Registry<V> registry, int i, String string, T object) {
-		((WritableRegistry)registry).registerMapping(i, ResourceKey.create(registry.key(), new ResourceLocation(string)), (V)object, Lifecycle.stable());
-		return object;
-	}
-
 	Registry<T> freeze();
 
 	Holder.Reference<T> createIntrusiveHolder(T object);

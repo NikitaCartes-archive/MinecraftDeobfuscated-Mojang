@@ -5,14 +5,17 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractScrollWidget extends AbstractWidget implements Renderable, GuiEventListener {
-	private static final int BORDER_COLOR_FOCUSED = -1;
-	private static final int BORDER_COLOR = -6250336;
-	private static final int BACKGROUND_COLOR = -16777216;
+	private static final WidgetSprites BACKGROUND_SPRITES = new WidgetSprites(
+		new ResourceLocation("widget/text_field"), new ResourceLocation("widget/text_field_highlighted")
+	);
+	private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("widget/scroller");
 	private static final int INNER_PADDING = 4;
+	private static final int SCROLL_BAR_WIDTH = 8;
 	private double scrollAmount;
 	private boolean scrolling;
 
@@ -146,19 +149,15 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 	}
 
 	protected void renderBorder(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		int m = this.isFocused() ? -1 : -6250336;
-		guiGraphics.fill(i, j, i + k, j + l, m);
-		guiGraphics.fill(i + 1, j + 1, i + k - 1, j + l - 1, -16777216);
+		ResourceLocation resourceLocation = BACKGROUND_SPRITES.get(this.isActive(), this.isFocused());
+		guiGraphics.blitSprite(resourceLocation, i, j, k, l);
 	}
 
 	private void renderScrollBar(GuiGraphics guiGraphics) {
 		int i = this.getScrollBarHeight();
 		int j = this.getX() + this.width;
-		int k = this.getX() + this.width + 8;
-		int l = Math.max(this.getY(), (int)this.scrollAmount * (this.height - i) / this.getMaxScrollAmount() + this.getY());
-		int m = l + i;
-		guiGraphics.fill(j, l, k, m, -8355712);
-		guiGraphics.fill(j, l, k - 1, m - 1, -4144960);
+		int k = Math.max(this.getY(), (int)this.scrollAmount * (this.height - i) / this.getMaxScrollAmount() + this.getY());
+		guiGraphics.blitSprite(SCROLLER_SPRITE, j, k, 8, i);
 	}
 
 	protected boolean withinContentAreaTopBottom(int i, int j) {

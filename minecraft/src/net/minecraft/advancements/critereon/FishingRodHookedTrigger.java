@@ -2,6 +2,7 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Collection;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -20,12 +21,12 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 	}
 
 	public FishingRodHookedTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("rod"));
-		ContextAwarePredicate contextAwarePredicate2 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
-		ItemPredicate itemPredicate2 = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new FishingRodHookedTrigger.TriggerInstance(contextAwarePredicate, itemPredicate, contextAwarePredicate2, itemPredicate2);
+		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("rod"));
+		Optional<ContextAwarePredicate> optional3 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
+		Optional<ItemPredicate> optional4 = ItemPredicate.fromJson(jsonObject.get("item"));
+		return new FishingRodHookedTrigger.TriggerInstance(optional, optional2, optional3, optional4);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, FishingHook fishingHook, Collection<ItemStack> collection) {
@@ -34,38 +35,40 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ItemPredicate rod;
-		private final ContextAwarePredicate entity;
-		private final ItemPredicate item;
+		private final Optional<ItemPredicate> rod;
+		private final Optional<ContextAwarePredicate> entity;
+		private final Optional<ItemPredicate> item;
 
 		public TriggerInstance(
-			ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate, ContextAwarePredicate contextAwarePredicate2, ItemPredicate itemPredicate2
+			Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, Optional<ContextAwarePredicate> optional3, Optional<ItemPredicate> optional4
 		) {
-			super(FishingRodHookedTrigger.ID, contextAwarePredicate);
-			this.rod = itemPredicate;
-			this.entity = contextAwarePredicate2;
-			this.item = itemPredicate2;
+			super(FishingRodHookedTrigger.ID, optional);
+			this.rod = optional2;
+			this.entity = optional3;
+			this.item = optional4;
 		}
 
-		public static FishingRodHookedTrigger.TriggerInstance fishedItem(ItemPredicate itemPredicate, EntityPredicate entityPredicate, ItemPredicate itemPredicate2) {
-			return new FishingRodHookedTrigger.TriggerInstance(ContextAwarePredicate.ANY, itemPredicate, EntityPredicate.wrap(entityPredicate), itemPredicate2);
+		public static FishingRodHookedTrigger.TriggerInstance fishedItem(
+			Optional<ItemPredicate> optional, Optional<EntityPredicate> optional2, Optional<ItemPredicate> optional3
+		) {
+			return new FishingRodHookedTrigger.TriggerInstance(Optional.empty(), optional, EntityPredicate.wrap(optional2), optional3);
 		}
 
 		public boolean matches(ItemStack itemStack, LootContext lootContext, Collection<ItemStack> collection) {
-			if (!this.rod.matches(itemStack)) {
+			if (this.rod.isPresent() && !((ItemPredicate)this.rod.get()).matches(itemStack)) {
 				return false;
-			} else if (!this.entity.matches(lootContext)) {
+			} else if (this.entity.isPresent() && !((ContextAwarePredicate)this.entity.get()).matches(lootContext)) {
 				return false;
 			} else {
-				if (this.item != ItemPredicate.ANY) {
+				if (this.item.isPresent()) {
 					boolean bl = false;
 					Entity entity = lootContext.getParamOrNull(LootContextParams.THIS_ENTITY);
-					if (entity instanceof ItemEntity itemEntity && this.item.matches(itemEntity.getItem())) {
+					if (entity instanceof ItemEntity itemEntity && ((ItemPredicate)this.item.get()).matches(itemEntity.getItem())) {
 						bl = true;
 					}
 
 					for (ItemStack itemStack2 : collection) {
-						if (this.item.matches(itemStack2)) {
+						if (((ItemPredicate)this.item.get()).matches(itemStack2)) {
 							bl = true;
 							break;
 						}
@@ -81,11 +84,11 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("rod", this.rod.serializeToJson());
-			jsonObject.add("entity", this.entity.toJson(serializationContext));
-			jsonObject.add("item", this.item.serializeToJson());
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.rod.ifPresent(itemPredicate -> jsonObject.add("rod", itemPredicate.serializeToJson()));
+			this.entity.ifPresent(contextAwarePredicate -> jsonObject.add("entity", contextAwarePredicate.toJson()));
+			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
 			return jsonObject;
 		}
 	}

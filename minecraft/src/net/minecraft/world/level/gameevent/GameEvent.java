@@ -54,6 +54,7 @@ public class GameEvent {
 	public static final GameEvent STEP = register("step");
 	public static final GameEvent SWIM = register("swim");
 	public static final GameEvent TELEPORT = register("teleport");
+	public static final GameEvent UNEQUIP = register("unequip");
 	public static final GameEvent RESONATE_1 = register("resonate_1");
 	public static final GameEvent RESONATE_2 = register("resonate_2");
 	public static final GameEvent RESONATE_3 = register("resonate_3");

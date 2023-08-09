@@ -1,10 +1,11 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import net.minecraft.core.HolderSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -21,14 +22,14 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 	}
 
 	public InventoryChangeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "slots", new JsonObject());
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject2.get("occupied"));
 		MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject2.get("full"));
 		MinMaxBounds.Ints ints3 = MinMaxBounds.Ints.fromJson(jsonObject2.get("empty"));
-		ItemPredicate[] itemPredicates = ItemPredicate.fromJsonArray(jsonObject.get("items"));
-		return new InventoryChangeTrigger.TriggerInstance(contextAwarePredicate, ints, ints2, ints3, itemPredicates);
+		List<ItemPredicate> list = ItemPredicate.fromJsonArray(jsonObject.get("items"));
+		return new InventoryChangeTrigger.TriggerInstance(optional, ints, ints2, ints3, list);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack) {
@@ -59,21 +60,25 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 		private final MinMaxBounds.Ints slotsOccupied;
 		private final MinMaxBounds.Ints slotsFull;
 		private final MinMaxBounds.Ints slotsEmpty;
-		private final ItemPredicate[] predicates;
+		private final List<ItemPredicate> predicates;
 
 		public TriggerInstance(
-			ContextAwarePredicate contextAwarePredicate, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, MinMaxBounds.Ints ints3, ItemPredicate[] itemPredicates
+			Optional<ContextAwarePredicate> optional, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, MinMaxBounds.Ints ints3, List<ItemPredicate> list
 		) {
-			super(InventoryChangeTrigger.ID, contextAwarePredicate);
+			super(InventoryChangeTrigger.ID, optional);
 			this.slotsOccupied = ints;
 			this.slotsFull = ints2;
 			this.slotsEmpty = ints3;
-			this.predicates = itemPredicates;
+			this.predicates = list;
+		}
+
+		public static InventoryChangeTrigger.TriggerInstance hasItems(ItemPredicate.Builder... builders) {
+			return hasItems((ItemPredicate[])Arrays.stream(builders).flatMap(builder -> builder.build().stream()).toArray(ItemPredicate[]::new));
 		}
 
 		public static InventoryChangeTrigger.TriggerInstance hasItems(ItemPredicate... itemPredicates) {
 			return new InventoryChangeTrigger.TriggerInstance(
-				ContextAwarePredicate.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates
+				Optional.empty(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, List.of(itemPredicates)
 			);
 		}
 
@@ -82,14 +87,14 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 
 			for (int i = 0; i < itemLikes.length; i++) {
 				itemPredicates[i] = new ItemPredicate(
-					null,
-					ImmutableSet.of(itemLikes[i].asItem()),
+					Optional.empty(),
+					Optional.of(HolderSet.direct(itemLikes[i].asItem().builtInRegistryHolder())),
 					MinMaxBounds.Ints.ANY,
 					MinMaxBounds.Ints.ANY,
-					EnchantmentPredicate.NONE,
-					EnchantmentPredicate.NONE,
-					null,
-					NbtPredicate.ANY
+					List.of(),
+					List.of(),
+					Optional.empty(),
+					Optional.empty()
 				);
 			}
 
@@ -97,8 +102,8 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
 			if (!this.slotsOccupied.isAny() || !this.slotsFull.isAny() || !this.slotsEmpty.isAny()) {
 				JsonObject jsonObject2 = new JsonObject();
 				jsonObject2.add("occupied", this.slotsOccupied.serializeToJson());
@@ -107,14 +112,8 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 				jsonObject.add("slots", jsonObject2);
 			}
 
-			if (this.predicates.length > 0) {
-				JsonArray jsonArray = new JsonArray();
-
-				for (ItemPredicate itemPredicate : this.predicates) {
-					jsonArray.add(itemPredicate.serializeToJson());
-				}
-
-				jsonObject.add("items", jsonArray);
+			if (!this.predicates.isEmpty()) {
+				jsonObject.add("items", ItemPredicate.serializeToJsonArray(this.predicates));
 			}
 
 			return jsonObject;
@@ -127,29 +126,26 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 				return false;
 			} else if (!this.slotsOccupied.matches(k)) {
 				return false;
-			} else {
-				int l = this.predicates.length;
-				if (l == 0) {
-					return true;
-				} else if (l != 1) {
-					List<ItemPredicate> list = new ObjectArrayList<>(this.predicates);
-					int m = inventory.getContainerSize();
+			} else if (this.predicates.isEmpty()) {
+				return true;
+			} else if (this.predicates.size() != 1) {
+				List<ItemPredicate> list = new ObjectArrayList<>(this.predicates);
+				int l = inventory.getContainerSize();
 
-					for (int n = 0; n < m; n++) {
-						if (list.isEmpty()) {
-							return true;
-						}
-
-						ItemStack itemStack2 = inventory.getItem(n);
-						if (!itemStack2.isEmpty()) {
-							list.removeIf(itemPredicate -> itemPredicate.matches(itemStack2));
-						}
+				for (int m = 0; m < l; m++) {
+					if (list.isEmpty()) {
+						return true;
 					}
 
-					return list.isEmpty();
-				} else {
-					return !itemStack.isEmpty() && this.predicates[0].matches(itemStack);
+					ItemStack itemStack2 = inventory.getItem(m);
+					if (!itemStack2.isEmpty()) {
+						list.removeIf(itemPredicate -> itemPredicate.matches(itemStack2));
+					}
 				}
+
+				return list.isEmpty();
+			} else {
+				return !itemStack.isEmpty() && ((ItemPredicate)this.predicates.get(0)).matches(itemStack);
 			}
 		}
 	}

@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 
 public class PlayerChunkSender {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final double DESIRED_BATCH_DURATION = 25.0;
 	public static final float MIN_CHUNKS_PER_TICK = 0.01F;
 	public static final float MAX_CHUNKS_PER_TICK = 64.0F;
 	private static final float START_CHUNKS_PER_TICK = 9.0F;
@@ -75,7 +74,7 @@ public class PlayerChunkSender {
 	}
 
 	private static void sendChunk(ServerGamePacketListenerImpl serverGamePacketListenerImpl, ServerLevel serverLevel, LevelChunk levelChunk) {
-		serverGamePacketListenerImpl.sendNoFlush(new ClientboundLevelChunkWithLightPacket(levelChunk, serverLevel.getLightEngine(), null, null));
+		serverGamePacketListenerImpl.send(new ClientboundLevelChunkWithLightPacket(levelChunk, serverLevel.getLightEngine(), null, null));
 		ChunkPos chunkPos = levelChunk.getPos();
 		DebugPackets.sendPoiPacketsForChunk(serverLevel, chunkPos);
 	}

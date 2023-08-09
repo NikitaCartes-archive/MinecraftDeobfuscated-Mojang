@@ -3,16 +3,15 @@ package net.minecraft.data.recipes.packs;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.data.CachedOutput;
@@ -551,9 +550,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("###")
 			.unlockedBy(
 				"has_lots_of_items",
-				new InventoryChangeTrigger.TriggerInstance(
-					ContextAwarePredicate.ANY, MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new ItemPredicate[0]
-				)
+				new InventoryChangeTrigger.TriggerInstance(Optional.empty(), MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, List.of())
 			)
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, Items.CHEST_MINECART)

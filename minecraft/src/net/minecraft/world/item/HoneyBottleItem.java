@@ -34,9 +34,8 @@ public class HoneyBottleItem extends Item {
 		if (itemStack.isEmpty()) {
 			return new ItemStack(Items.GLASS_BOTTLE);
 		} else {
-			if (livingEntity instanceof Player && !((Player)livingEntity).getAbilities().instabuild) {
+			if (livingEntity instanceof Player player && !player.getAbilities().instabuild) {
 				ItemStack itemStack2 = new ItemStack(Items.GLASS_BOTTLE);
-				Player player = (Player)livingEntity;
 				if (!player.getInventory().add(itemStack2)) {
 					player.drop(itemStack2, false);
 				}

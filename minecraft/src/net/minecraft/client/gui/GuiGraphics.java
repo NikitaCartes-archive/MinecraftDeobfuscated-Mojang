@@ -358,38 +358,42 @@ public class GuiGraphics {
 		if (guiSpriteScaling instanceof GuiSpriteScaling.Stretch) {
 			this.blitSprite(textureAtlasSprite, i, j, k, l, m, n, o, p, q);
 		} else {
-			this.blitSprite(resourceLocation, m, n, o, p, q);
+			this.blitSprite(textureAtlasSprite, m, n, o, p, q);
 		}
 	}
 
 	private void blitSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
-		this.innerBlit(
-			textureAtlasSprite.atlasLocation(),
-			m,
-			m + p,
-			n,
-			n + q,
-			o,
-			textureAtlasSprite.getU((float)k / (float)i),
-			textureAtlasSprite.getU((float)(k + p) / (float)i),
-			textureAtlasSprite.getV((float)l / (float)j),
-			textureAtlasSprite.getV((float)(l + q) / (float)j)
-		);
+		if (p != 0 && q != 0) {
+			this.innerBlit(
+				textureAtlasSprite.atlasLocation(),
+				m,
+				m + p,
+				n,
+				n + q,
+				o,
+				textureAtlasSprite.getU((float)k / (float)i),
+				textureAtlasSprite.getU((float)(k + p) / (float)i),
+				textureAtlasSprite.getV((float)l / (float)j),
+				textureAtlasSprite.getV((float)(l + q) / (float)j)
+			);
+		}
 	}
 
 	private void blitSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m) {
-		this.innerBlit(
-			textureAtlasSprite.atlasLocation(),
-			i,
-			i + l,
-			j,
-			j + m,
-			k,
-			textureAtlasSprite.getU0(),
-			textureAtlasSprite.getU1(),
-			textureAtlasSprite.getV0(),
-			textureAtlasSprite.getV1()
-		);
+		if (l != 0 && m != 0) {
+			this.innerBlit(
+				textureAtlasSprite.atlasLocation(),
+				i,
+				i + l,
+				j,
+				j + m,
+				k,
+				textureAtlasSprite.getU0(),
+				textureAtlasSprite.getU1(),
+				textureAtlasSprite.getV0(),
+				textureAtlasSprite.getV1()
+			);
+		}
 	}
 
 	public void blit(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n) {
@@ -491,19 +495,19 @@ public class GuiGraphics {
 	}
 
 	private void blitTiledSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r, int s) {
-		int t = 0;
+		if (l > 0 && m > 0) {
+			if (p > 0 && q > 0) {
+				for (int t = 0; t < l; t += p) {
+					int u = Math.min(p, l - t);
 
-		while (t < l) {
-			int u = Math.min(p, l - t);
-			int v = 0;
-
-			while (v < m) {
-				int w = Math.min(q, m - v);
-				this.blitSprite(textureAtlasSprite, r, s, n, o, i + t, j + v, k, u, w);
-				v += q;
+					for (int v = 0; v < m; v += q) {
+						int w = Math.min(q, m - v);
+						this.blitSprite(textureAtlasSprite, r, s, n, o, i + t, j + v, k, u, w);
+					}
+				}
+			} else {
+				throw new IllegalArgumentException("Tiled sprite texture size must be positive, got " + p + "x" + q);
 			}
-
-			t += p;
 		}
 	}
 

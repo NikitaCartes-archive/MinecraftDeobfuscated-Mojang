@@ -123,7 +123,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		}
 
 		this.nameEdit = new EditBox(
-			this.minecraft.font, this.column1X + 2, row(1), this.columnWidth - 4, 20, null, Component.translatable("mco.configure.world.edit.slot.name")
+			this.minecraft.font, this.column1X, row(1), this.columnWidth, 20, null, Component.translatable("mco.configure.world.edit.slot.name")
 		);
 		this.nameEdit.setMaxLength(10);
 		this.nameEdit.setValue(this.worldName);

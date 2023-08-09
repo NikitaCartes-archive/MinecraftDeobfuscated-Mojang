@@ -21,9 +21,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.Codec.ResultFunction;
+import com.mojang.serialization.MapCodec.MapCodecCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -57,19 +61,7 @@ import org.joml.Vector3f;
 public class ExtraCodecs {
 	public static final Codec<JsonElement> JSON = Codec.PASSTHROUGH
 		.xmap(dynamic -> dynamic.convert(JsonOps.INSTANCE).getValue(), jsonElement -> new Dynamic<>(JsonOps.INSTANCE, jsonElement));
-	public static final Codec<Component> COMPONENT = JSON.flatXmap(jsonElement -> {
-		try {
-			return DataResult.success(Component.Serializer.fromJson(jsonElement));
-		} catch (JsonParseException var2) {
-			return DataResult.error(var2::getMessage);
-		}
-	}, component -> {
-		try {
-			return DataResult.success(Component.Serializer.toJsonTree(component));
-		} catch (IllegalArgumentException var2) {
-			return DataResult.error(var2::getMessage);
-		}
-	});
+	public static final Codec<Component> COMPONENT = adaptJsonSerializer(Component.Serializer::fromJson, Component.Serializer::toJsonTree);
 	public static final Codec<Component> FLAT_COMPONENT = Codec.STRING.flatXmap(string -> {
 		try {
 			return DataResult.success(Component.Serializer.fromJson(string));
@@ -203,6 +195,23 @@ public class ExtraCodecs {
 				: DataResult.success(string)
 	);
 
+	@Deprecated
+	public static <T> Codec<T> adaptJsonSerializer(Function<JsonElement, T> function, Function<T, JsonElement> function2) {
+		return JSON.flatXmap(jsonElement -> {
+			try {
+				return DataResult.success(function.apply(jsonElement));
+			} catch (JsonParseException var3) {
+				return DataResult.error(var3::getMessage);
+			}
+		}, object -> {
+			try {
+				return DataResult.success((JsonElement)function2.apply(object));
+			} catch (IllegalArgumentException var3) {
+				return DataResult.error(var3::getMessage);
+			}
+		});
+	}
+
 	public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
 		return new ExtraCodecs.XorCodec<>(codec, codec2);
 	}
@@ -310,7 +319,7 @@ public class ExtraCodecs {
 	}
 
 	public static <T> Codec<T> validate(Codec<T> codec, Function<T, DataResult<T>> function) {
-		return codec.flatXmap(function, function);
+		return codec instanceof MapCodecCodec<T> mapCodecCodec ? validate(mapCodecCodec.codec(), function).codec() : codec.flatXmap(function, function);
 	}
 
 	public static <T> MapCodec<T> validate(MapCodec<T> mapCodec, Function<T, DataResult<T>> function) {
@@ -348,8 +357,21 @@ public class ExtraCodecs {
 		);
 	}
 
+	public static <T> Codec<T> recursive(Function<Codec<T>, Codec<T>> function) {
+		return new ExtraCodecs.RecursiveCodec<>(function);
+	}
+
 	public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> supplier) {
-		return new ExtraCodecs.LazyInitializedCodec<>(supplier);
+		return new ExtraCodecs.RecursiveCodec<>(codec -> (Codec)supplier.get());
+	}
+
+	public static <A> MapCodec<Optional<A>> strictOptionalField(Codec<A> codec, String string) {
+		return new ExtraCodecs.StrictOptionalFieldCodec<>(string, codec);
+	}
+
+	public static <A> MapCodec<A> strictOptionalField(Codec<A> codec, String string, A object) {
+		return strictOptionalField(codec, string)
+			.xmap(optional -> optional.orElse(object), object2 -> Objects.equals(object2, object) ? Optional.empty() : Optional.of(object2));
 	}
 
 	public static <E> MapCodec<E> retrieveContext(Function<DynamicOps<?>, DataResult<E>> function) {
@@ -439,12 +461,16 @@ public class ExtraCodecs {
 		);
 	}
 
-	public static <T> Codec<T> withAlternative(Codec<T> codec, Codec<T> codec2) {
+	public static <T> Codec<T> withAlternative(Codec<T> codec, Codec<? extends T> codec2) {
 		return Codec.either(codec, codec2).xmap(either -> either.map(object -> object, object -> object), Either::left);
 	}
 
 	public static <T, U> Codec<T> withAlternative(Codec<T> codec, Codec<U> codec2, Function<U, T> function) {
 		return Codec.either(codec, codec2).xmap(either -> either.map(object -> object, function), Either::left);
+	}
+
+	public static <T> Codec<Object2BooleanMap<T>> object2BooleanMap(Codec<T> codec) {
+		return Codec.unboundedMap(codec, Codec.BOOL).xmap(Object2BooleanOpenHashMap::new, Object2ObjectOpenHashMap::new);
 	}
 
 	static final class EitherCodec<F, S> implements Codec<Either<F, S>> {
@@ -459,11 +485,11 @@ public class ExtraCodecs {
 		@Override
 		public <T> DataResult<Pair<Either<F, S>, T>> decode(DynamicOps<T> dynamicOps, T object) {
 			DataResult<Pair<Either<F, S>, T>> dataResult = this.first.decode(dynamicOps, object).map(pair -> pair.mapFirst(Either::left));
-			if (!dataResult.error().isPresent()) {
+			if (dataResult.error().isEmpty()) {
 				return dataResult;
 			} else {
 				DataResult<Pair<Either<F, S>, T>> dataResult2 = this.second.decode(dynamicOps, object).map(pair -> pair.mapFirst(Either::right));
-				return !dataResult2.error().isPresent() ? dataResult2 : dataResult.apply2((pair, pair2) -> pair2, dataResult2);
+				return dataResult2.error().isEmpty() ? dataResult2 : dataResult.apply2((pair, pair2) -> pair2, dataResult2);
 			}
 		}
 
@@ -491,20 +517,68 @@ public class ExtraCodecs {
 		}
 	}
 
-	static record LazyInitializedCodec<A>(Supplier<Codec<A>> delegate) implements Codec<A> {
-		LazyInitializedCodec(Supplier<Codec<A>> delegate) {
-			Supplier<Codec<A>> var2 = Suppliers.memoize(delegate::get);
-			this.delegate = var2;
+	static class RecursiveCodec<T> implements Codec<T> {
+		private final Supplier<Codec<T>> wrapped;
+
+		RecursiveCodec(Function<Codec<T>, Codec<T>> function) {
+			this.wrapped = Suppliers.memoize(() -> (Codec<T>)function.apply(this));
 		}
 
 		@Override
-		public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> dynamicOps, T object) {
-			return ((Codec)this.delegate.get()).decode(dynamicOps, object);
+		public <S> DataResult<Pair<T, S>> decode(DynamicOps<S> dynamicOps, S object) {
+			return ((Codec)this.wrapped.get()).decode(dynamicOps, object);
 		}
 
 		@Override
-		public <T> DataResult<T> encode(A object, DynamicOps<T> dynamicOps, T object2) {
-			return ((Codec)this.delegate.get()).encode(object, dynamicOps, object2);
+		public <S> DataResult<S> encode(T object, DynamicOps<S> dynamicOps, S object2) {
+			return ((Codec)this.wrapped.get()).encode(object, dynamicOps, object2);
+		}
+
+		public String toString() {
+			return "RecursiveCodec[" + this.wrapped + "]";
+		}
+	}
+
+	static final class StrictOptionalFieldCodec<A> extends MapCodec<Optional<A>> {
+		private final String name;
+		private final Codec<A> elementCodec;
+
+		public StrictOptionalFieldCodec(String string, Codec<A> codec) {
+			this.name = string;
+			this.elementCodec = codec;
+		}
+
+		@Override
+		public <T> DataResult<Optional<A>> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
+			T object = mapLike.get(this.name);
+			return object == null ? DataResult.success(Optional.empty()) : this.elementCodec.parse(dynamicOps, object).map(Optional::of);
+		}
+
+		public <T> RecordBuilder<T> encode(Optional<A> optional, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
+			return optional.isPresent() ? recordBuilder.add(this.name, this.elementCodec.encodeStart(dynamicOps, (A)optional.get())) : recordBuilder;
+		}
+
+		@Override
+		public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
+			return Stream.of(dynamicOps.createString(this.name));
+		}
+
+		public boolean equals(Object object) {
+			if (this == object) {
+				return true;
+			} else {
+				return !(object instanceof ExtraCodecs.StrictOptionalFieldCodec<?> strictOptionalFieldCodec)
+					? false
+					: Objects.equals(this.name, strictOptionalFieldCodec.name) && Objects.equals(this.elementCodec, strictOptionalFieldCodec.elementCodec);
+			}
+		}
+
+		public int hashCode() {
+			return Objects.hash(new Object[]{this.name, this.elementCodec});
+		}
+
+		public String toString() {
+			return "StrictOptionalFieldCodec[" + this.name + ": " + this.elementCodec + "]";
 		}
 	}
 

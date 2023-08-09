@@ -1,25 +1,20 @@
 package net.minecraft.world.level.storage.loot;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
@@ -29,26 +24,33 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 
 public class LootTable {
-	static final Logger LOGGER = LogUtils.getLogger();
-	public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, null, new LootPool[0], new LootItemFunction[0]);
+	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, Optional.empty(), List.of(), List.of());
 	public static final LootContextParamSet DEFAULT_PARAM_SET = LootContextParamSets.ALL_PARAMS;
-	final LootContextParamSet paramSet;
-	@Nullable
-	final ResourceLocation randomSequence;
-	final LootPool[] pools;
-	final LootItemFunction[] functions;
+	public static final Codec<LootTable> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					LootContextParamSets.CODEC.optionalFieldOf("type", DEFAULT_PARAM_SET).forGetter(lootTable -> lootTable.paramSet),
+					ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "random_sequence").forGetter(lootTable -> lootTable.randomSequence),
+					ExtraCodecs.strictOptionalField(LootPool.CODEC.listOf(), "pools", List.of()).forGetter(lootTable -> lootTable.pools),
+					ExtraCodecs.strictOptionalField(LootItemFunctions.CODEC.listOf(), "functions", List.of()).forGetter(lootTable -> lootTable.functions)
+				)
+				.apply(instance, LootTable::new)
+	);
+	private final LootContextParamSet paramSet;
+	private final Optional<ResourceLocation> randomSequence;
+	private final List<LootPool> pools;
+	private final List<LootItemFunction> functions;
 	private final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
 
-	LootTable(LootContextParamSet lootContextParamSet, @Nullable ResourceLocation resourceLocation, LootPool[] lootPools, LootItemFunction[] lootItemFunctions) {
+	LootTable(LootContextParamSet lootContextParamSet, Optional<ResourceLocation> optional, List<LootPool> list, List<LootItemFunction> list2) {
 		this.paramSet = lootContextParamSet;
-		this.randomSequence = resourceLocation;
-		this.pools = lootPools;
-		this.functions = lootItemFunctions;
-		this.compositeFunction = LootItemFunctions.compose(lootItemFunctions);
+		this.randomSequence = optional;
+		this.pools = list;
+		this.functions = list2;
+		this.compositeFunction = LootItemFunctions.compose(list2);
 	}
 
 	public static Consumer<ItemStack> createStackSplitter(ServerLevel serverLevel, Consumer<ItemStack> consumer) {
@@ -121,12 +123,12 @@ public class LootTable {
 	}
 
 	public void validate(ValidationContext validationContext) {
-		for (int i = 0; i < this.pools.length; i++) {
-			this.pools[i].validate(validationContext.forChild(".pools[" + i + "]"));
+		for (int i = 0; i < this.pools.size(); i++) {
+			((LootPool)this.pools.get(i)).validate(validationContext.forChild(".pools[" + i + "]"));
 		}
 
-		for (int i = 0; i < this.functions.length; i++) {
-			this.functions[i].validate(validationContext.forChild(".functions[" + i + "]"));
+		for (int i = 0; i < this.functions.size(); i++) {
+			((LootItemFunction)this.functions.get(i)).validate(validationContext.forChild(".functions[" + i + "]"));
 		}
 	}
 
@@ -204,11 +206,10 @@ public class LootTable {
 	}
 
 	public static class Builder implements FunctionUserBuilder<LootTable.Builder> {
-		private final List<LootPool> pools = Lists.<LootPool>newArrayList();
-		private final List<LootItemFunction> functions = Lists.<LootItemFunction>newArrayList();
+		private final ImmutableList.Builder<LootPool> pools = ImmutableList.builder();
+		private final ImmutableList.Builder<LootItemFunction> functions = ImmutableList.builder();
 		private LootContextParamSet paramSet = LootTable.DEFAULT_PARAM_SET;
-		@Nullable
-		private ResourceLocation randomSequence = null;
+		private Optional<ResourceLocation> randomSequence = Optional.empty();
 
 		public LootTable.Builder withPool(LootPool.Builder builder) {
 			this.pools.add(builder.build());
@@ -221,7 +222,7 @@ public class LootTable {
 		}
 
 		public LootTable.Builder setRandomSequence(ResourceLocation resourceLocation) {
-			this.randomSequence = resourceLocation;
+			this.randomSequence = Optional.of(resourceLocation);
 			return this;
 		}
 
@@ -235,60 +236,7 @@ public class LootTable {
 		}
 
 		public LootTable build() {
-			return new LootTable(
-				this.paramSet, this.randomSequence, (LootPool[])this.pools.toArray(new LootPool[0]), (LootItemFunction[])this.functions.toArray(new LootItemFunction[0])
-			);
-		}
-	}
-
-	public static class Serializer implements JsonDeserializer<LootTable>, JsonSerializer<LootTable> {
-		public LootTable deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "loot table");
-			LootPool[] lootPools = GsonHelper.getAsObject(jsonObject, "pools", new LootPool[0], jsonDeserializationContext, LootPool[].class);
-			LootContextParamSet lootContextParamSet = null;
-			if (jsonObject.has("type")) {
-				String string = GsonHelper.getAsString(jsonObject, "type");
-				lootContextParamSet = LootContextParamSets.get(new ResourceLocation(string));
-			}
-
-			ResourceLocation resourceLocation;
-			if (jsonObject.has("random_sequence")) {
-				String string2 = GsonHelper.getAsString(jsonObject, "random_sequence");
-				resourceLocation = new ResourceLocation(string2);
-			} else {
-				resourceLocation = null;
-			}
-
-			LootItemFunction[] lootItemFunctions = GsonHelper.getAsObject(
-				jsonObject, "functions", new LootItemFunction[0], jsonDeserializationContext, LootItemFunction[].class
-			);
-			return new LootTable(lootContextParamSet != null ? lootContextParamSet : LootContextParamSets.ALL_PARAMS, resourceLocation, lootPools, lootItemFunctions);
-		}
-
-		public JsonElement serialize(LootTable lootTable, Type type, JsonSerializationContext jsonSerializationContext) {
-			JsonObject jsonObject = new JsonObject();
-			if (lootTable.paramSet != LootTable.DEFAULT_PARAM_SET) {
-				ResourceLocation resourceLocation = LootContextParamSets.getKey(lootTable.paramSet);
-				if (resourceLocation != null) {
-					jsonObject.addProperty("type", resourceLocation.toString());
-				} else {
-					LootTable.LOGGER.warn("Failed to find id for param set {}", lootTable.paramSet);
-				}
-			}
-
-			if (lootTable.randomSequence != null) {
-				jsonObject.addProperty("random_sequence", lootTable.randomSequence.toString());
-			}
-
-			if (lootTable.pools.length > 0) {
-				jsonObject.add("pools", jsonSerializationContext.serialize(lootTable.pools));
-			}
-
-			if (!ArrayUtils.isEmpty((Object[])lootTable.functions)) {
-				jsonObject.add("functions", jsonSerializationContext.serialize(lootTable.functions));
-			}
-
-			return jsonObject;
+			return new LootTable(this.paramSet, this.randomSequence, this.pools.build(), this.functions.build());
 		}
 	}
 }

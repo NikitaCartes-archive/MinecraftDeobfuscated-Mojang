@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -14,11 +15,11 @@ public class LevitationTrigger extends SimpleCriterionTrigger<LevitationTrigger.
 	}
 
 	public LevitationTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		DistancePredicate distancePredicate = DistancePredicate.fromJson(jsonObject.get("distance"));
+		Optional<DistancePredicate> optional2 = DistancePredicate.fromJson(jsonObject.get("distance"));
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("duration"));
-		return new LevitationTrigger.TriggerInstance(contextAwarePredicate, distancePredicate, ints);
+		return new LevitationTrigger.TriggerInstance(optional, optional2, ints);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Vec3 vec3, int i) {
@@ -26,27 +27,30 @@ public class LevitationTrigger extends SimpleCriterionTrigger<LevitationTrigger.
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final DistancePredicate distance;
+		private final Optional<DistancePredicate> distance;
 		private final MinMaxBounds.Ints duration;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, DistancePredicate distancePredicate, MinMaxBounds.Ints ints) {
-			super(LevitationTrigger.ID, contextAwarePredicate);
-			this.distance = distancePredicate;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<DistancePredicate> optional2, MinMaxBounds.Ints ints) {
+			super(LevitationTrigger.ID, optional);
+			this.distance = optional2;
 			this.duration = ints;
 		}
 
 		public static LevitationTrigger.TriggerInstance levitated(DistancePredicate distancePredicate) {
-			return new LevitationTrigger.TriggerInstance(ContextAwarePredicate.ANY, distancePredicate, MinMaxBounds.Ints.ANY);
+			return new LevitationTrigger.TriggerInstance(Optional.empty(), Optional.of(distancePredicate), MinMaxBounds.Ints.ANY);
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, Vec3 vec3, int i) {
-			return !this.distance.matches(vec3.x, vec3.y, vec3.z, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ()) ? false : this.duration.matches(i);
+			return this.distance.isPresent()
+					&& !((DistancePredicate)this.distance.get()).matches(vec3.x, vec3.y, vec3.z, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ())
+				? false
+				: this.duration.matches(i);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("distance", this.distance.serializeToJson());
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.distance.ifPresent(distancePredicate -> jsonObject.add("distance", distancePredicate.serializeToJson()));
 			jsonObject.add("duration", this.duration.serializeToJson());
 			return jsonObject;
 		}

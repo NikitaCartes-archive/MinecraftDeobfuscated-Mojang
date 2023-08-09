@@ -119,8 +119,8 @@ public class MapRenderer implements AutoCloseable {
 			for (MapDecoration mapDecoration : this.data.getDecorations()) {
 				if (!bl || mapDecoration.renderOnFrame()) {
 					poseStack.pushPose();
-					poseStack.translate(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F, -0.02F);
-					poseStack.mulPose(Axis.ZP.rotationDegrees((float)(mapDecoration.getRot() * 360) / 16.0F));
+					poseStack.translate(0.0F + (float)mapDecoration.x() / 2.0F + 64.0F, 0.0F + (float)mapDecoration.y() / 2.0F + 64.0F, -0.02F);
+					poseStack.mulPose(Axis.ZP.rotationDegrees((float)(mapDecoration.rot() * 360) / 16.0F));
 					poseStack.scale(4.0F, 4.0F, 3.0F);
 					poseStack.translate(-0.125F, 0.125F, 0.0F);
 					byte b = mapDecoration.getImage();
@@ -136,13 +136,13 @@ public class MapRenderer implements AutoCloseable {
 					vertexConsumer2.vertex(matrix4f2, 1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(m, n).uv2(i).endVertex();
 					vertexConsumer2.vertex(matrix4f2, -1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(g, n).uv2(i).endVertex();
 					poseStack.popPose();
-					if (mapDecoration.getName() != null) {
+					if (mapDecoration.name() != null) {
 						Font font = Minecraft.getInstance().font;
-						Component component = mapDecoration.getName();
+						Component component = mapDecoration.name();
 						float p = (float)font.width(component);
 						float q = Mth.clamp(25.0F / p, 0.0F, 6.0F / 9.0F);
 						poseStack.pushPose();
-						poseStack.translate(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F - p * q / 2.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F + 4.0F, -0.025F);
+						poseStack.translate(0.0F + (float)mapDecoration.x() / 2.0F + 64.0F - p * q / 2.0F, 0.0F + (float)mapDecoration.y() / 2.0F + 64.0F + 4.0F, -0.025F);
 						poseStack.scale(q, q, 1.0F);
 						poseStack.translate(0.0F, 0.0F, -0.1F);
 						font.drawInBatch(component, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, i);

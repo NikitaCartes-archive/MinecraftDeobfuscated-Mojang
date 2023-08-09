@@ -916,8 +916,7 @@ public class GameRenderer implements AutoCloseable {
 
 	private void tickFov() {
 		float f = 1.0F;
-		if (this.minecraft.getCameraEntity() instanceof AbstractClientPlayer) {
-			AbstractClientPlayer abstractClientPlayer = (AbstractClientPlayer)this.minecraft.getCameraEntity();
+		if (this.minecraft.getCameraEntity() instanceof AbstractClientPlayer abstractClientPlayer) {
 			f = abstractClientPlayer.getFieldOfViewModifier();
 		}
 
@@ -957,8 +956,7 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	private void bobHurt(PoseStack poseStack, float f) {
-		if (this.minecraft.getCameraEntity() instanceof LivingEntity) {
-			LivingEntity livingEntity = (LivingEntity)this.minecraft.getCameraEntity();
+		if (this.minecraft.getCameraEntity() instanceof LivingEntity livingEntity) {
 			float g = (float)livingEntity.hurtTime - f;
 			if (livingEntity.isDeadOrDying()) {
 				float h = Math.min((float)livingEntity.deathTime + f, 20.0F);
@@ -1087,6 +1085,7 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		if (!this.minecraft.noRender) {
+			boolean bl2 = this.minecraft.isGameLoadFinished();
 			int i = (int)(
 				this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth()
 			);
@@ -1094,7 +1093,7 @@ public class GameRenderer implements AutoCloseable {
 				this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight()
 			);
 			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
-			if (bl && this.minecraft.level != null) {
+			if (bl2 && bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
 				this.renderLevel(f, l, new PoseStack());
 				this.tryTakeScreenshotIfNeeded();
@@ -1123,7 +1122,7 @@ public class GameRenderer implements AutoCloseable {
 			RenderSystem.applyModelViewMatrix();
 			Lighting.setupFor3DItems();
 			GuiGraphics guiGraphics = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
-			if (bl && this.minecraft.level != null) {
+			if (bl2 && bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
 				if (this.minecraft.player != null) {
 					float g = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity);
@@ -1145,17 +1144,17 @@ public class GameRenderer implements AutoCloseable {
 			if (this.minecraft.getOverlay() != null) {
 				try {
 					this.minecraft.getOverlay().render(guiGraphics, i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var16) {
-					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering overlay");
+				} catch (Throwable var17) {
+					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.getOverlay().getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
 				}
-			} else if (this.minecraft.screen != null) {
+			} else if (bl2 && this.minecraft.screen != null) {
 				try {
 					this.minecraft.screen.renderWithTooltip(guiGraphics, i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var15) {
-					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering screen");
+				} catch (Throwable var16) {
+					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(
@@ -1183,17 +1182,20 @@ public class GameRenderer implements AutoCloseable {
 					if (this.minecraft.screen != null) {
 						this.minecraft.screen.handleDelayedNarration();
 					}
-				} catch (Throwable var14) {
-					CrashReport crashReport = CrashReport.forThrowable(var14, "Narrating screen");
+				} catch (Throwable var15) {
+					CrashReport crashReport = CrashReport.forThrowable(var15, "Narrating screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
 				}
 			}
 
-			this.minecraft.getProfiler().push("toasts");
-			this.minecraft.getToasts().render(guiGraphics);
-			this.minecraft.getProfiler().pop();
+			if (bl2) {
+				this.minecraft.getProfiler().push("toasts");
+				this.minecraft.getToasts().render(guiGraphics);
+				this.minecraft.getProfiler().pop();
+			}
+
 			guiGraphics.flush();
 			poseStack.popPose();
 			RenderSystem.applyModelViewMatrix();

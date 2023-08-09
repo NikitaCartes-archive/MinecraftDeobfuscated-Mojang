@@ -93,8 +93,8 @@ public class EditServerScreen extends Screen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, 16777215);
-		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 100, 53, 10526880);
-		guiGraphics.drawString(this.font, IP_LABEL, this.width / 2 - 100, 94, 10526880);
+		guiGraphics.drawString(this.font, NAME_LABEL, this.width / 2 - 100 + 1, 53, 10526880);
+		guiGraphics.drawString(this.font, IP_LABEL, this.width / 2 - 100 + 1, 94, 10526880);
 		this.nameEdit.render(guiGraphics, i, j, f);
 		this.ipEdit.render(guiGraphics, i, j, f);
 	}

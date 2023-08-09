@@ -1,7 +1,7 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -16,9 +16,9 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
 	}
 
 	public ConsumeItemTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		return new ConsumeItemTrigger.TriggerInstance(contextAwarePredicate, ItemPredicate.fromJson(jsonObject.get("item")));
+		return new ConsumeItemTrigger.TriggerInstance(optional, ItemPredicate.fromJson(jsonObject.get("item")));
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack) {
@@ -26,45 +26,33 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ItemPredicate item;
+		private final Optional<ItemPredicate> item;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ItemPredicate itemPredicate) {
-			super(ConsumeItemTrigger.ID, contextAwarePredicate);
-			this.item = itemPredicate;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
+			super(ConsumeItemTrigger.ID, optional);
+			this.item = optional2;
 		}
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem() {
-			return new ConsumeItemTrigger.TriggerInstance(ContextAwarePredicate.ANY, ItemPredicate.ANY);
+			return new ConsumeItemTrigger.TriggerInstance(Optional.empty(), Optional.empty());
 		}
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem(ItemPredicate itemPredicate) {
-			return new ConsumeItemTrigger.TriggerInstance(ContextAwarePredicate.ANY, itemPredicate);
+			return new ConsumeItemTrigger.TriggerInstance(Optional.empty(), Optional.of(itemPredicate));
 		}
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem(ItemLike itemLike) {
-			return new ConsumeItemTrigger.TriggerInstance(
-				ContextAwarePredicate.ANY,
-				new ItemPredicate(
-					null,
-					ImmutableSet.of(itemLike.asItem()),
-					MinMaxBounds.Ints.ANY,
-					MinMaxBounds.Ints.ANY,
-					EnchantmentPredicate.NONE,
-					EnchantmentPredicate.NONE,
-					null,
-					NbtPredicate.ANY
-				)
-			);
+			return new ConsumeItemTrigger.TriggerInstance(Optional.empty(), ItemPredicate.Builder.item().of(itemLike.asItem()).build());
 		}
 
 		public boolean matches(ItemStack itemStack) {
-			return this.item.matches(itemStack);
+			return this.item.isEmpty() || ((ItemPredicate)this.item.get()).matches(itemStack);
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("item", this.item.serializeToJson());
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
 			return jsonObject;
 		}
 	}

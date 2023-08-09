@@ -63,7 +63,7 @@ public class ChunkTaskPriorityQueue<T> {
 				if (bl) {
 					list.clear();
 				} else {
-					list.removeIf(optional -> !optional.isPresent());
+					list.removeIf(optional -> optional.isEmpty());
 				}
 
 				if (list.isEmpty()) {

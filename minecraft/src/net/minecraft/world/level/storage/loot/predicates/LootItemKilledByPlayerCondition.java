@@ -1,16 +1,15 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.Codec;
 import java.util.Set;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class LootItemKilledByPlayerCondition implements LootItemCondition {
-	static final LootItemKilledByPlayerCondition INSTANCE = new LootItemKilledByPlayerCondition();
+	private static final LootItemKilledByPlayerCondition INSTANCE = new LootItemKilledByPlayerCondition();
+	public static final Codec<LootItemKilledByPlayerCondition> CODEC = Codec.unit(INSTANCE);
 
 	private LootItemKilledByPlayerCondition() {
 	}
@@ -31,16 +30,5 @@ public class LootItemKilledByPlayerCondition implements LootItemCondition {
 
 	public static LootItemCondition.Builder killedByPlayer() {
 		return () -> INSTANCE;
-	}
-
-	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<LootItemKilledByPlayerCondition> {
-		public void serialize(
-			JsonObject jsonObject, LootItemKilledByPlayerCondition lootItemKilledByPlayerCondition, JsonSerializationContext jsonSerializationContext
-		) {
-		}
-
-		public LootItemKilledByPlayerCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-			return LootItemKilledByPlayerCondition.INSTANCE;
-		}
 	}
 }

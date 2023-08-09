@@ -534,8 +534,7 @@ public abstract class Player extends LivingEntity {
 			List<Entity> list = this.level().getEntities(this, aABB);
 			List<Entity> list2 = Lists.<Entity>newArrayList();
 
-			for (int i = 0; i < list.size(); i++) {
-				Entity entity = (Entity)list.get(i);
+			for (Entity entity : list) {
 				if (entity.getType() == EntityType.EXPERIENCE_ORB) {
 					list2.add(entity);
 				} else if (!entity.isRemoved()) {

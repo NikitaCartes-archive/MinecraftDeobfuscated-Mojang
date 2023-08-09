@@ -82,7 +82,7 @@ public class ConnectScreen extends Screen {
 						return;
 					}
 
-					if (!optional.isPresent()) {
+					if (optional.isEmpty()) {
 						minecraft.execute(
 							() -> minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, ConnectScreen.this.connectFailedTitle, ConnectScreen.UNKNOWN_HOST_MESSAGE))
 						);
@@ -97,6 +97,7 @@ public class ConnectScreen extends Screen {
 						}
 
 						connection = new Connection(PacketFlow.CLIENTBOUND);
+						connection.setBandwidthLogger(minecraft.bandwidthLogger);
 						ConnectScreen.this.channelFuture = Connection.connect(inetSocketAddress, minecraft.options.useNativeTransport(), connection);
 					}
 

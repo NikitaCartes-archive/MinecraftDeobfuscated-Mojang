@@ -1,16 +1,17 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.resources.ResourceLocation;
 
 public abstract class AbstractCriterionTriggerInstance implements CriterionTriggerInstance {
 	private final ResourceLocation criterion;
-	private final ContextAwarePredicate player;
+	private final Optional<ContextAwarePredicate> player;
 
-	public AbstractCriterionTriggerInstance(ResourceLocation resourceLocation, ContextAwarePredicate contextAwarePredicate) {
+	public AbstractCriterionTriggerInstance(ResourceLocation resourceLocation, Optional<ContextAwarePredicate> optional) {
 		this.criterion = resourceLocation;
-		this.player = contextAwarePredicate;
+		this.player = optional;
 	}
 
 	@Override
@@ -18,14 +19,14 @@ public abstract class AbstractCriterionTriggerInstance implements CriterionTrigg
 		return this.criterion;
 	}
 
-	protected ContextAwarePredicate getPlayerPredicate() {
+	protected Optional<ContextAwarePredicate> getPlayerPredicate() {
 		return this.player;
 	}
 
 	@Override
-	public JsonObject serializeToJson(SerializationContext serializationContext) {
+	public JsonObject serializeToJson() {
 		JsonObject jsonObject = new JsonObject();
-		jsonObject.add("player", this.player.toJson(serializationContext));
+		this.player.ifPresent(contextAwarePredicate -> jsonObject.add("player", contextAwarePredicate.toJson()));
 		return jsonObject;
 	}
 

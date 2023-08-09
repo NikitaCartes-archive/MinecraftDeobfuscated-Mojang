@@ -605,13 +605,12 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			return this.canReplaceEqualItem(itemStack, itemStack2);
 		} else if (itemStack.getItem() instanceof CrossbowItem && itemStack2.getItem() instanceof CrossbowItem) {
 			return this.canReplaceEqualItem(itemStack, itemStack2);
-		} else if (itemStack.getItem() instanceof ArmorItem) {
+		} else if (itemStack.getItem() instanceof ArmorItem armorItem) {
 			if (EnchantmentHelper.hasBindingCurse(itemStack2)) {
 				return false;
 			} else if (!(itemStack2.getItem() instanceof ArmorItem)) {
 				return true;
 			} else {
-				ArmorItem armorItem = (ArmorItem)itemStack.getItem();
 				ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
 				if (armorItem.getDefense() != armorItem2.getDefense()) {
 					return armorItem.getDefense() > armorItem2.getDefense();
@@ -627,11 +626,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 					return true;
 				}
 
-				if (itemStack2.getItem() instanceof DiggerItem) {
-					DiggerItem diggerItem = (DiggerItem)itemStack.getItem();
-					DiggerItem diggerItem2 = (DiggerItem)itemStack2.getItem();
-					if (diggerItem.getAttackDamage() != diggerItem2.getAttackDamage()) {
-						return diggerItem.getAttackDamage() > diggerItem2.getAttackDamage();
+				if (itemStack2.getItem() instanceof DiggerItem diggerItem) {
+					DiggerItem diggerItem2 = (DiggerItem)itemStack.getItem();
+					if (diggerItem2.getAttackDamage() != diggerItem.getAttackDamage()) {
+						return diggerItem2.getAttackDamage() > diggerItem.getAttackDamage();
 					}
 
 					return this.canReplaceEqualItem(itemStack, itemStack2);

@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -13,9 +14,9 @@ public class StartRidingTrigger extends SimpleCriterionTrigger<StartRidingTrigge
 	}
 
 	public StartRidingTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		return new StartRidingTrigger.TriggerInstance(contextAwarePredicate);
+		return new StartRidingTrigger.TriggerInstance(optional);
 	}
 
 	public void trigger(ServerPlayer serverPlayer) {
@@ -23,12 +24,12 @@ public class StartRidingTrigger extends SimpleCriterionTrigger<StartRidingTrigge
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate) {
-			super(StartRidingTrigger.ID, contextAwarePredicate);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional) {
+			super(StartRidingTrigger.ID, optional);
 		}
 
 		public static StartRidingTrigger.TriggerInstance playerStartsRiding(EntityPredicate.Builder builder) {
-			return new StartRidingTrigger.TriggerInstance(EntityPredicate.wrap(builder.build()));
+			return new StartRidingTrigger.TriggerInstance(EntityPredicate.wrap(builder));
 		}
 	}
 }

@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,11 +23,11 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 	}
 
 	public KilledByCrossbowTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, ContextAwarePredicate contextAwarePredicate, DeserializationContext deserializationContext
+		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
-		ContextAwarePredicate[] contextAwarePredicates = EntityPredicate.fromJsonArray(jsonObject, "victims", deserializationContext);
+		List<ContextAwarePredicate> list = EntityPredicate.fromJsonArray(jsonObject, "victims", deserializationContext);
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("unique_entity_types"));
-		return new KilledByCrossbowTrigger.TriggerInstance(contextAwarePredicate, contextAwarePredicates, ints);
+		return new KilledByCrossbowTrigger.TriggerInstance(optional, list, ints);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Collection<Entity> collection) {
@@ -42,33 +43,25 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final ContextAwarePredicate[] victims;
+		private final List<ContextAwarePredicate> victims;
 		private final MinMaxBounds.Ints uniqueEntityTypes;
 
-		public TriggerInstance(ContextAwarePredicate contextAwarePredicate, ContextAwarePredicate[] contextAwarePredicates, MinMaxBounds.Ints ints) {
-			super(KilledByCrossbowTrigger.ID, contextAwarePredicate);
-			this.victims = contextAwarePredicates;
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, List<ContextAwarePredicate> list, MinMaxBounds.Ints ints) {
+			super(KilledByCrossbowTrigger.ID, optional);
+			this.victims = list;
 			this.uniqueEntityTypes = ints;
 		}
 
 		public static KilledByCrossbowTrigger.TriggerInstance crossbowKilled(EntityPredicate.Builder... builders) {
-			ContextAwarePredicate[] contextAwarePredicates = new ContextAwarePredicate[builders.length];
-
-			for (int i = 0; i < builders.length; i++) {
-				EntityPredicate.Builder builder = builders[i];
-				contextAwarePredicates[i] = EntityPredicate.wrap(builder.build());
-			}
-
-			return new KilledByCrossbowTrigger.TriggerInstance(ContextAwarePredicate.ANY, contextAwarePredicates, MinMaxBounds.Ints.ANY);
+			return new KilledByCrossbowTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(builders), MinMaxBounds.Ints.ANY);
 		}
 
 		public static KilledByCrossbowTrigger.TriggerInstance crossbowKilled(MinMaxBounds.Ints ints) {
-			ContextAwarePredicate[] contextAwarePredicates = new ContextAwarePredicate[0];
-			return new KilledByCrossbowTrigger.TriggerInstance(ContextAwarePredicate.ANY, contextAwarePredicates, ints);
+			return new KilledByCrossbowTrigger.TriggerInstance(Optional.empty(), List.of(), ints);
 		}
 
 		public boolean matches(Collection<LootContext> collection, int i) {
-			if (this.victims.length > 0) {
+			if (!this.victims.isEmpty()) {
 				List<LootContext> list = Lists.<LootContext>newArrayList(collection);
 
 				for (ContextAwarePredicate contextAwarePredicate : this.victims) {
@@ -94,9 +87,9 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 		}
 
 		@Override
-		public JsonObject serializeToJson(SerializationContext serializationContext) {
-			JsonObject jsonObject = super.serializeToJson(serializationContext);
-			jsonObject.add("victims", ContextAwarePredicate.toJson(this.victims, serializationContext));
+		public JsonObject serializeToJson() {
+			JsonObject jsonObject = super.serializeToJson();
+			jsonObject.add("victims", ContextAwarePredicate.toJson(this.victims));
 			jsonObject.add("unique_entity_types", this.uniqueEntityTypes.serializeToJson());
 			return jsonObject;
 		}

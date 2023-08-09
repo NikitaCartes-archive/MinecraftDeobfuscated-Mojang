@@ -47,10 +47,11 @@ public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Prope
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (object instanceof EnumProperty && super.equals(object)) {
-			EnumProperty<?> enumProperty = (EnumProperty<?>)object;
-			return this.values.equals(enumProperty.values) && this.names.equals(enumProperty.names);
 		} else {
+			if (object instanceof EnumProperty<?> enumProperty && super.equals(object)) {
+				return this.values.equals(enumProperty.values) && this.names.equals(enumProperty.names);
+			}
+
 			return false;
 		}
 	}
