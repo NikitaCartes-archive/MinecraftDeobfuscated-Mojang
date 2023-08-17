@@ -7,6 +7,7 @@ import java.time.Instant;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.multiplayer.chat.report.BanReason;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -15,13 +16,47 @@ import net.minecraft.network.chat.Style;
 import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
-public class BanNoticeScreen {
+public class BanNoticeScreens {
 	private static final Component TEMPORARY_BAN_TITLE = Component.translatable("gui.banned.title.temporary").withStyle(ChatFormatting.BOLD);
 	private static final Component PERMANENT_BAN_TITLE = Component.translatable("gui.banned.title.permanent").withStyle(ChatFormatting.BOLD);
+	public static final Component NAME_BAN_TITLE = Component.translatable("gui.banned.name.title").withStyle(ChatFormatting.BOLD);
+	private static final Component SKIN_BAN_TITLE = Component.translatable("gui.banned.skin.title").withStyle(ChatFormatting.BOLD);
+	private static final Component SKIN_BAN_DESCRIPTION = Component.translatable(
+		"gui.banned.skin.description", Component.literal("https://aka.ms/mcjavamoderation")
+	);
 
 	public static ConfirmLinkScreen create(BooleanConsumer booleanConsumer, BanDetails banDetails) {
 		return new ConfirmLinkScreen(
 			booleanConsumer, getBannedTitle(banDetails), getBannedScreenText(banDetails), "https://aka.ms/mcjavamoderation", CommonComponents.GUI_ACKNOWLEDGE, true
+		);
+	}
+
+	public static ConfirmLinkScreen createSkinBan(Runnable runnable) {
+		String string = "https://aka.ms/mcjavamoderation";
+		return new ConfirmLinkScreen(bl -> {
+			if (bl) {
+				Util.getPlatform().openUri("https://aka.ms/mcjavamoderation");
+			}
+
+			runnable.run();
+		}, SKIN_BAN_TITLE, SKIN_BAN_DESCRIPTION, "https://aka.ms/mcjavamoderation", CommonComponents.GUI_ACKNOWLEDGE, true);
+	}
+
+	public static ConfirmLinkScreen createNameBan(String string, Runnable runnable) {
+		String string2 = "https://aka.ms/mcjavamoderation";
+		return new ConfirmLinkScreen(
+			bl -> {
+				if (bl) {
+					Util.getPlatform().openUri("https://aka.ms/mcjavamoderation");
+				}
+
+				runnable.run();
+			},
+			NAME_BAN_TITLE,
+			Component.translatable("gui.banned.name.description", Component.literal(string).withStyle(ChatFormatting.YELLOW), "https://aka.ms/mcjavamoderation"),
+			"https://aka.ms/mcjavamoderation",
+			CommonComponents.GUI_ACKNOWLEDGE,
+			true
 		);
 	}
 

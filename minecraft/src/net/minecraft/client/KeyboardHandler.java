@@ -19,6 +19,7 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
 import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
@@ -124,6 +125,15 @@ public class KeyboardHandler {
 			return true;
 		} else {
 			switch (i) {
+				case 49:
+					this.minecraft.getDebugOverlay().toggleProfilerChart();
+					return true;
+				case 50:
+					this.minecraft.getDebugOverlay().toggleFpsCharts();
+					return true;
+				case 51:
+					this.minecraft.getDebugOverlay().toggleNetworkCharts();
+					return true;
 				case 65:
 					this.minecraft.levelRenderer.allChanged();
 					this.debugFeedbackTranslated("debug.reload_chunks.message");
@@ -321,13 +331,12 @@ public class KeyboardHandler {
 
 	public void keyPress(long l, int i, int j, int k, int m) {
 		if (l == this.minecraft.getWindow().getWindow()) {
+			boolean bl = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292);
 			if (this.debugCrashKeyTime > 0L) {
-				if (!InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 67)
-					|| !InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292)) {
+				if (!InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 67) || !bl) {
 					this.debugCrashKeyTime = -1L;
 				}
-			} else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 67)
-				&& InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292)) {
+			} else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 67) && bl) {
 				this.handledDebugKey = true;
 				this.debugCrashKeyTime = Util.getMillis();
 				this.debugCrashKeyReportedTime = Util.getMillis();
@@ -372,16 +381,16 @@ public class KeyboardHandler {
 				}
 			}
 
-			if (this.minecraft.getNarrator().isActive()) {
-				boolean bl = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
-				if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
-					boolean bl2 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
+			if (this.minecraft.getNarrator().isActive() && this.minecraft.options.narratorHotkey().get()) {
+				boolean bl2 = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
+				if (k != 0 && i == 66 && Screen.hasControlDown() && bl2) {
+					boolean bl3 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
 					this.minecraft.options.narrator().set(NarratorStatus.byId(this.minecraft.options.narrator().get().getId() + 1));
 					if (screen instanceof SimpleOptionsSubScreen) {
 						((SimpleOptionsSubScreen)screen).updateNarratorButton();
 					}
 
-					if (bl2 && screen != null) {
+					if (bl3 && screen != null) {
 						screen.narrationEnabled();
 					}
 				}
@@ -402,7 +411,7 @@ public class KeyboardHandler {
 				}
 			}
 
-			if (this.minecraft.screen == null) {
+			if (this.minecraft.screen == null || this.minecraft.screen instanceof PauseScreen pauseScreen && !pauseScreen.showsPauseMenu()) {
 				InputConstants.Key key = InputConstants.getKey(i, j);
 				if (k == 0) {
 					KeyMapping.set(key, false);
@@ -410,10 +419,7 @@ public class KeyboardHandler {
 						if (this.handledDebugKey) {
 							this.handledDebugKey = false;
 						} else {
-							this.minecraft.options.renderDebug = !this.minecraft.options.renderDebug;
-							this.minecraft.options.renderDebugCharts = this.minecraft.options.renderDebug && Screen.hasShiftDown();
-							this.minecraft.options.renderFpsChart = this.minecraft.options.renderDebug && Screen.hasAltDown();
-							this.minecraft.options.renderNetworkChart = this.minecraft.options.renderDebug && Screen.hasControlDown() && !Screen.hasAltDown();
+							this.minecraft.getDebugOverlay().toggleOverlay();
 						}
 					}
 				} else {
@@ -421,26 +427,26 @@ public class KeyboardHandler {
 						this.minecraft.gameRenderer.togglePostEffect();
 					}
 
-					boolean bl2x = false;
+					boolean bl4 = false;
 					if (i == 256) {
-						boolean bl3 = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292);
-						this.minecraft.pauseGame(bl3);
+						this.minecraft.pauseGame(bl);
+						bl4 |= bl;
 					}
 
-					bl2x = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292) && this.handleDebugKeys(i);
-					this.handledDebugKey |= bl2x;
+					bl4 |= bl && this.handleDebugKeys(i);
+					this.handledDebugKey |= bl4;
 					if (i == 290) {
 						this.minecraft.options.hideGui = !this.minecraft.options.hideGui;
 					}
 
-					if (bl2x) {
+					if (bl4) {
 						KeyMapping.set(key, false);
 					} else {
 						KeyMapping.set(key, true);
 						KeyMapping.click(key);
 					}
 
-					if (this.minecraft.options.renderDebugCharts && i >= 48 && i <= 57) {
+					if (this.minecraft.getDebugOverlay().showProfilerChart() && !bl && i >= 48 && i <= 57) {
 						this.minecraft.debugFpsMeterKeyPress(i - 48);
 					}
 				}

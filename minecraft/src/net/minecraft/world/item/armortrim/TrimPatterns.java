@@ -60,7 +60,10 @@ public class TrimPatterns {
 
 	private static void register(BootstapContext<TrimPattern> bootstapContext, Item item, ResourceKey<TrimPattern> resourceKey) {
 		TrimPattern trimPattern = new TrimPattern(
-			resourceKey.location(), BuiltInRegistries.ITEM.wrapAsHolder(item), Component.translatable(Util.makeDescriptionId("trim_pattern", resourceKey.location()))
+			resourceKey.location(),
+			BuiltInRegistries.ITEM.wrapAsHolder(item),
+			Component.translatable(Util.makeDescriptionId("trim_pattern", resourceKey.location())),
+			false
 		);
 		bootstapContext.register(resourceKey, trimPattern);
 	}

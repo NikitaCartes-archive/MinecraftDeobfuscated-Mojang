@@ -46,7 +46,9 @@ public class RealmsConnect {
 							return;
 						}
 
-						RealmsConnect.this.connection = Connection.connectToServer(inetSocketAddress, minecraft.options.useNativeTransport(), minecraft.bandwidthLogger);
+						RealmsConnect.this.connection = Connection.connectToServer(
+							inetSocketAddress, minecraft.options.useNativeTransport(), minecraft.getDebugOverlay().getBandwidthLogger()
+						);
 						if (RealmsConnect.this.aborted) {
 							return;
 						}

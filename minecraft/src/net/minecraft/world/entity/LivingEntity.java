@@ -1460,14 +1460,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.skipDropExperience;
 	}
 
-	protected Vec3 getMeleeAttackReferencePosition() {
-		return this.getVehicle() instanceof RiderShieldingMount riderShieldingMount
-			? this.position().add(0.0, riderShieldingMount.getRiderShieldingHeight(), 0.0)
-			: this.position();
-	}
-
 	public float getHurtDir() {
 		return 0.0F;
+	}
+
+	protected AABB getHitbox() {
+		AABB aABB = this.getBoundingBox();
+		Entity entity = this.getVehicle();
+		if (entity != null) {
+			Vec3 vec3 = entity.getPassengerRidingPosition(this);
+			return aABB.setMinY(Math.max(vec3.y, aABB.minY));
+		} else {
+			return aABB;
+		}
 	}
 
 	public LivingEntity.Fallsounds getFallSounds() {

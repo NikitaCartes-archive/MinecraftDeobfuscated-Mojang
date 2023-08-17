@@ -3,6 +3,7 @@ package net.minecraft.client.multiplayer;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
+import com.mojang.authlib.exceptions.ForcedUsernameChangeException;
 import com.mojang.authlib.exceptions.InsufficientPrivilegesException;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.exceptions.UserBannedException;
@@ -122,7 +123,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 			return Component.translatable("disconnect.loginFailedInfo", Component.translatable("disconnect.loginFailedInfo.invalidSession"));
 		} catch (InsufficientPrivilegesException var5) {
 			return Component.translatable("disconnect.loginFailedInfo", Component.translatable("disconnect.loginFailedInfo.insufficientPrivileges"));
-		} catch (UserBannedException var6) {
+		} catch (ForcedUsernameChangeException | UserBannedException var6) {
 			return Component.translatable("disconnect.loginFailedInfo", Component.translatable("disconnect.loginFailedInfo.userBanned"));
 		} catch (AuthenticationException var7) {
 			return Component.translatable("disconnect.loginFailedInfo", var7.getMessage());

@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component;
 public class ReportReasonSelectionScreen extends Screen {
 	private static final Component REASON_TITLE = Component.translatable("gui.abuseReport.reason.title");
 	private static final Component REASON_DESCRIPTION = Component.translatable("gui.abuseReport.reason.description");
-	private static final Component READ_INFO_LABEL = Component.translatable("gui.chatReport.read_info");
+	private static final Component READ_INFO_LABEL = Component.translatable("gui.abuseReport.read_info");
 	private static final int FOOTER_HEIGHT = 95;
 	private static final int BUTTON_WIDTH = 150;
 	private static final int BUTTON_HEIGHT = 20;

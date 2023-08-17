@@ -6,8 +6,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -17,48 +20,40 @@ import net.minecraft.world.level.GameType;
 
 @Environment(EnvType.CLIENT)
 public class RealmsBackupInfoScreen extends RealmsScreen {
+	private static final Component TITLE = Component.translatable("mco.backup.info.title");
 	private static final Component UNKNOWN = Component.translatable("mco.backup.unknown");
 	private final Screen lastScreen;
 	final Backup backup;
+	final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 	private RealmsBackupInfoScreen.BackupInfoList backupInfoList;
 
 	public RealmsBackupInfoScreen(Screen screen, Backup backup) {
-		super(Component.translatable("mco.backup.info.title"));
+		super(TITLE);
 		this.lastScreen = screen;
 		this.backup = backup;
 	}
 
 	@Override
-	public void tick() {
-	}
-
-	@Override
 	public void init() {
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen))
-				.bounds(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20)
-				.build()
-		);
+		this.layout.addToHeader(new StringWidget(TITLE, this.font));
 		this.backupInfoList = new RealmsBackupInfoScreen.BackupInfoList(this.minecraft);
-		this.addWidget(this.backupInfoList);
-		this.magicalSpecialHackyFocus(this.backupInfoList);
+		this.addRenderableWidget(this.backupInfoList);
+		this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
+		this.layout.arrangeElements();
+		this.layout.visitWidgets(guiEventListener -> {
+			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
+		});
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256) {
-			this.minecraft.setScreen(this.lastScreen);
-			return true;
-		} else {
-			return super.keyPressed(i, j, k);
-		}
+	protected void repositionElements() {
+		this.layout.arrangeElements();
+		this.backupInfoList.updateSize(this.width, this.height, this.layout.getHeaderHeight(), this.height - this.layout.getFooterHeight());
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		this.backupInfoList.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	Component checkForSpecificMetadata(String string, String string2) {
@@ -89,8 +84,14 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class BackupInfoList extends ObjectSelectionList<RealmsBackupInfoScreen.BackupInfoListEntry> {
 		public BackupInfoList(Minecraft minecraft) {
-			super(minecraft, RealmsBackupInfoScreen.this.width, RealmsBackupInfoScreen.this.height, 32, RealmsBackupInfoScreen.this.height - 64, 36);
-			this.setRenderSelection(false);
+			super(
+				minecraft,
+				RealmsBackupInfoScreen.this.width,
+				RealmsBackupInfoScreen.this.height,
+				RealmsBackupInfoScreen.this.layout.getHeaderHeight(),
+				RealmsBackupInfoScreen.this.height - RealmsBackupInfoScreen.this.layout.getFooterHeight(),
+				36
+			);
 			if (RealmsBackupInfoScreen.this.backup.changeList != null) {
 				RealmsBackupInfoScreen.this.backup
 					.changeList

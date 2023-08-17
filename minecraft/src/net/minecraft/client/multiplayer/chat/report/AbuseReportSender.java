@@ -22,7 +22,7 @@ public interface AbuseReportSender {
 		return new AbuseReportSender.Services(reportEnvironment, userApiService);
 	}
 
-	CompletableFuture<Unit> send(UUID uUID, AbuseReport abuseReport);
+	CompletableFuture<Unit> send(UUID uUID, ReportType reportType, AbuseReport abuseReport);
 
 	boolean isEnabled();
 
@@ -44,22 +44,22 @@ public interface AbuseReportSender {
 		private static final Component JSON_ERROR_TEXT = Component.translatable("gui.abuseReport.send.json_error");
 
 		@Override
-		public CompletableFuture<Unit> send(UUID uUID, AbuseReport abuseReport) {
+		public CompletableFuture<Unit> send(UUID uUID, ReportType reportType, AbuseReport abuseReport) {
 			return CompletableFuture.supplyAsync(
 				() -> {
 					AbuseReportRequest abuseReportRequest = new AbuseReportRequest(
-						1, uUID, abuseReport, this.environment.clientInfo(), this.environment.thirdPartyServerInfo(), this.environment.realmInfo()
+						1, uUID, abuseReport, this.environment.clientInfo(), this.environment.thirdPartyServerInfo(), this.environment.realmInfo(), reportType.backendName()
 					);
 
 					try {
 						this.userApiService.reportAbuse(abuseReportRequest);
 						return Unit.INSTANCE;
-					} catch (MinecraftClientHttpException var6) {
-						Component component = this.getHttpErrorDescription(var6);
-						throw new CompletionException(new AbuseReportSender.SendException(component, var6));
-					} catch (MinecraftClientException var7) {
-						Component componentx = this.getErrorDescription(var7);
-						throw new CompletionException(new AbuseReportSender.SendException(componentx, var7));
+					} catch (MinecraftClientHttpException var7) {
+						Component component = this.getHttpErrorDescription(var7);
+						throw new CompletionException(new AbuseReportSender.SendException(component, var7));
+					} catch (MinecraftClientException var8) {
+						Component componentx = this.getErrorDescription(var8);
+						throw new CompletionException(new AbuseReportSender.SendException(componentx, var8));
 					}
 				},
 				Util.ioPool()

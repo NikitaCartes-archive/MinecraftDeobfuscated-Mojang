@@ -10,8 +10,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.CommonLayouts;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -42,10 +42,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 		this.setInitialFocus(this.seedEdit);
 		this.layout.addToHeader(new StringWidget(this.title, this.font));
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical()).spacing(10);
-		linearLayout.defaultCellSetting().alignHorizontallyCenter();
-		LinearLayout linearLayout2 = linearLayout.addChild(LinearLayout.vertical().spacing(4));
-		linearLayout2.addChild(new StringWidget(SEED_LABEL, this.font), LayoutSettings::alignHorizontallyLeft);
-		linearLayout2.addChild(this.seedEdit);
+		linearLayout.addChild(CommonLayouts.labeledElement(this.font, this.seedEdit, SEED_LABEL));
 		linearLayout.addChild(
 			CycleButton.<LevelType>builder(LevelType::getName)
 				.withValues(LevelType.values())
@@ -56,9 +53,9 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 			CycleButton.onOffBuilder(this.generateStructures)
 				.create(0, 0, 210, 20, Component.translatable("selectWorld.mapFeatures"), (cycleButton, boolean_) -> this.generateStructures = boolean_)
 		);
-		LinearLayout linearLayout3 = this.layout.addToFooter(LinearLayout.horizontal().spacing(10));
-		linearLayout3.addChild(Button.builder(this.buttonTitle, button -> this.callback.accept(this.createWorldGenerationInfo())).build());
-		linearLayout3.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
+		LinearLayout linearLayout2 = this.layout.addToFooter(LinearLayout.horizontal().spacing(10));
+		linearLayout2.addChild(Button.builder(this.buttonTitle, button -> this.callback.accept(this.createWorldGenerationInfo())).build());
+		linearLayout2.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
 		this.layout.visitWidgets(guiEventListener -> {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
 		});

@@ -241,6 +241,10 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 		this.width = i;
 	}
 
+	public void setHeight(int i) {
+		this.height = i;
+	}
+
 	public void setAlpha(float f) {
 		this.alpha = f;
 	}

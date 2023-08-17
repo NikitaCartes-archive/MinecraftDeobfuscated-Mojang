@@ -255,6 +255,9 @@ public class Options {
 			}
 		}
 	);
+	private final OptionInstance<Boolean> narratorHotkey = OptionInstance.createBoolean(
+		"options.accessibility.narrator_hotkey", OptionInstance.cachedConstantTooltip(Component.translatable("options.accessibility.narrator_hotkey.tooltip")), true
+	);
 	@Nullable
 	public String fullscreenVideoModeString;
 	public boolean hideServerAddress;
@@ -536,10 +539,6 @@ public class Options {
 	private final File optionsFile;
 	public boolean hideGui;
 	private CameraType cameraType = CameraType.FIRST_PERSON;
-	public boolean renderDebug;
-	public boolean renderDebugCharts;
-	public boolean renderFpsChart;
-	public boolean renderNetworkChart;
 	public String lastMpIp = "";
 	public boolean smoothCamera;
 	private final OptionInstance<Integer> fov = new OptionInstance<>(
@@ -796,6 +795,10 @@ public class Options {
 
 	public OptionInstance<Boolean> highContrast() {
 		return this.highContrast;
+	}
+
+	public OptionInstance<Boolean> narratorHotkey() {
+		return this.narratorHotkey;
 	}
 
 	public OptionInstance<HumanoidArm> mainHand() {
@@ -1100,6 +1103,7 @@ public class Options {
 		fieldAccess.process("glintStrength", this.glintStrength);
 		fieldAccess.process("damageTiltStrength", this.damageTiltStrength);
 		fieldAccess.process("highContrast", this.highContrast);
+		fieldAccess.process("narratorHotkey", this.narratorHotkey);
 		fieldAccess.process("gamma", this.gamma);
 		fieldAccess.process("renderDistance", this.renderDistance);
 		fieldAccess.process("simulationDistance", this.simulationDistance);

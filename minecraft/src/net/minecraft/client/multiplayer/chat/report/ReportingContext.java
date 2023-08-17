@@ -9,7 +9,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.reporting.ChatReportScreen;
 import net.minecraft.client.multiplayer.chat.ChatLog;
 import net.minecraft.network.chat.Component;
 
@@ -20,7 +19,7 @@ public final class ReportingContext {
 	private final ReportEnvironment environment;
 	private final ChatLog chatLog;
 	@Nullable
-	private ChatReportBuilder.ChatReport chatReportDraft;
+	private Report draftReport;
 
 	public ReportingContext(AbuseReportSender abuseReportSender, ReportEnvironment reportEnvironment, ChatLog chatLog) {
 		this.sender = abuseReportSender;
@@ -34,23 +33,23 @@ public final class ReportingContext {
 		return new ReportingContext(abuseReportSender, reportEnvironment, chatLog);
 	}
 
-	public void draftReportHandled(Minecraft minecraft, @Nullable Screen screen, Runnable runnable, boolean bl) {
-		if (this.chatReportDraft != null) {
-			ChatReportBuilder.ChatReport chatReport = this.chatReportDraft.copy();
+	public void draftReportHandled(Minecraft minecraft, Screen screen, Runnable runnable, boolean bl) {
+		if (this.draftReport != null) {
+			Report report = this.draftReport.copy();
 			minecraft.setScreen(
 				new ConfirmScreen(
 					blx -> {
-						this.setChatReportDraft(null);
+						this.setReportDraft(null);
 						if (blx) {
-							minecraft.setScreen(new ChatReportScreen(screen, this, chatReport));
+							minecraft.setScreen(report.createScreen(screen, this));
 						} else {
 							runnable.run();
 						}
 					},
-					Component.translatable(bl ? "gui.chatReport.draft.quittotitle.title" : "gui.chatReport.draft.title"),
-					Component.translatable(bl ? "gui.chatReport.draft.quittotitle.content" : "gui.chatReport.draft.content"),
-					Component.translatable("gui.chatReport.draft.edit"),
-					Component.translatable("gui.chatReport.draft.discard")
+					Component.translatable(bl ? "gui.abuseReport.draft.quittotitle.title" : "gui.abuseReport.draft.title"),
+					Component.translatable(bl ? "gui.abuseReport.draft.quittotitle.content" : "gui.abuseReport.draft.content"),
+					Component.translatable("gui.abuseReport.draft.edit"),
+					Component.translatable("gui.abuseReport.draft.discard")
 				)
 			);
 		} else {
@@ -70,15 +69,15 @@ public final class ReportingContext {
 		return Objects.equals(this.environment, reportEnvironment);
 	}
 
-	public void setChatReportDraft(@Nullable ChatReportBuilder.ChatReport chatReport) {
-		this.chatReportDraft = chatReport;
+	public void setReportDraft(@Nullable Report report) {
+		this.draftReport = report;
 	}
 
 	public boolean hasDraftReport() {
-		return this.chatReportDraft != null;
+		return this.draftReport != null;
 	}
 
 	public boolean hasDraftReportFor(UUID uUID) {
-		return this.hasDraftReport() && this.chatReportDraft.isReportedPlayer(uUID);
+		return this.hasDraftReport() && this.draftReport.isReportedPlayer(uUID);
 	}
 }

@@ -10,8 +10,8 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.CommonLayouts;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -39,21 +39,16 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 	public void init() {
 		this.layout.addToHeader(new StringWidget(this.title, this.font));
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical()).spacing(10);
-		linearLayout.defaultCellSetting().alignHorizontallyCenter();
 		Button button = Button.builder(Component.translatable("mco.create.world"), buttonx -> this.createWorld()).build();
 		button.active = false;
 		this.nameBox = new EditBox(this.font, 210, 20, Component.translatable("mco.configure.world.name"));
 		this.nameBox.setResponder(string -> button.active = !Util.isBlank(string));
 		this.descriptionBox = new EditBox(this.font, 210, 20, Component.translatable("mco.configure.world.description"));
-		LinearLayout linearLayout2 = linearLayout.addChild(LinearLayout.vertical().spacing(4));
-		linearLayout2.addChild(new StringWidget(NAME_LABEL, this.font), LayoutSettings::alignHorizontallyLeft);
-		linearLayout2.addChild(this.nameBox);
-		LinearLayout linearLayout3 = linearLayout.addChild(LinearLayout.vertical().spacing(4));
-		linearLayout3.addChild(new StringWidget(DESCRIPTION_LABEL, this.font), LayoutSettings::alignHorizontallyLeft);
-		linearLayout3.addChild(this.descriptionBox);
-		LinearLayout linearLayout4 = this.layout.addToFooter(LinearLayout.horizontal().spacing(10));
-		linearLayout4.addChild(button);
-		linearLayout4.addChild(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.onClose()).build());
+		linearLayout.addChild(CommonLayouts.labeledElement(this.font, this.nameBox, NAME_LABEL));
+		linearLayout.addChild(CommonLayouts.labeledElement(this.font, this.descriptionBox, DESCRIPTION_LABEL));
+		LinearLayout linearLayout2 = this.layout.addToFooter(LinearLayout.horizontal().spacing(10));
+		linearLayout2.addChild(button);
+		linearLayout2.addChild(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.onClose()).build());
 		this.layout.visitWidgets(guiEventListener -> {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
 		});

@@ -42,6 +42,6 @@ public class DefaultPlayerSkin {
 	}
 
 	private static PlayerSkin create(String string, PlayerSkin.Model model) {
-		return new PlayerSkin(new ResourceLocation(string), null, null, model, true);
+		return new PlayerSkin(new ResourceLocation(string), null, null, null, model, true);
 	}
 }

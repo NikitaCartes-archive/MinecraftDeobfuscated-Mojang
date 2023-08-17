@@ -641,6 +641,12 @@ public class SoundType {
 		SoundEvents.DECORATED_POT_HIT,
 		SoundEvents.DECORATED_POT_FALL
 	);
+	public static final SoundType SPONGE = new SoundType(
+		1.0F, 1.0F, SoundEvents.SPONGE_BREAK, SoundEvents.SPONGE_STEP, SoundEvents.SPONGE_PLACE, SoundEvents.SPONGE_HIT, SoundEvents.SPONGE_FALL
+	);
+	public static final SoundType WET_SPONGE = new SoundType(
+		1.0F, 1.0F, SoundEvents.WET_SPONGE_BREAK, SoundEvents.WET_SPONGE_STEP, SoundEvents.WET_SPONGE_PLACE, SoundEvents.WET_SPONGE_HIT, SoundEvents.WET_SPONGE_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

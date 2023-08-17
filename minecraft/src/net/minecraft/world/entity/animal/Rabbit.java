@@ -354,7 +354,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 	public void setVariant(Rabbit.Variant variant) {
 		if (variant == Rabbit.Variant.EVIL) {
 			this.getAttribute(Attributes.ARMOR).setBaseValue(8.0);
-			this.goalSelector.addGoal(4, new Rabbit.EvilRabbitAttackGoal(this));
+			this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.4, true));
 			this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
 			this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
 			this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Wolf.class, true));
@@ -422,17 +422,6 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.6F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
-	}
-
-	static class EvilRabbitAttackGoal extends MeleeAttackGoal {
-		public EvilRabbitAttackGoal(Rabbit rabbit) {
-			super(rabbit, 1.4, true);
-		}
-
-		@Override
-		protected double getAttackReachSqr(LivingEntity livingEntity) {
-			return (double)(4.0F + livingEntity.getBbWidth());
-		}
 	}
 
 	static class RabbitAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {

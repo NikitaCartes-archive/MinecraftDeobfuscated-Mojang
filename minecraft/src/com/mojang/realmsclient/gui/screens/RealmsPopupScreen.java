@@ -39,7 +39,7 @@ public class RealmsPopupScreen extends RealmsScreen {
 	private static final int PADDING = 10;
 	private static final int WIDTH = 320;
 	private static final int HEIGHT = 172;
-	private static final int TEXT_WIDTH = 99;
+	private static final int TEXT_WIDTH = 100;
 	private static final int BUTTON_WIDTH = 99;
 	private static final int CAROUSEL_SWITCH_INTERVAL = 100;
 	private static List<ResourceLocation> carouselImages = List.of();
@@ -79,18 +79,28 @@ public class RealmsPopupScreen extends RealmsScreen {
 			);
 		}
 
-		this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.buy"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-				if (bl) {
-					Util.getPlatform().openUri("https://aka.ms/BuyJavaRealms");
-				}
+		this.setFocused(
+			this.addRenderableWidget(Button.builder(Component.translatable("mco.selectServer.buy"), button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+					if (bl) {
+						Util.getPlatform().openUri("https://aka.ms/BuyJavaRealms");
+					}
 
-				this.minecraft.setScreen(this);
-			}, "https://aka.ms/BuyJavaRealms", true))).bounds(this.right() - 10 - 99, this.bottom() - 10 - 20, 99, 20).build());
+					this.minecraft.setScreen(this);
+				}, "https://aka.ms/BuyJavaRealms", true))).bounds(this.right() - 10 - 99, this.bottom() - 10 - 20, 99, 20).build())
+		);
 		ImageButton imageButton = this.addRenderableWidget(
 			new ImageButton(this.left() + 4, this.top() + 4, 14, 14, CROSS_BUTTON_SPRITES, button -> this.onClose(), CLOSE_TEXT)
 		);
 		imageButton.setTooltip(Tooltip.create(CLOSE_TEXT));
-		this.addRenderableWidget(new FittingMultiLineTextWidget(this.right() - 10 - 99, this.top() + 10, 99, 127, POPUP_TEXT, this.font));
+		int i = 142 - (this.trialAvailable ? 40 : 20);
+		FittingMultiLineTextWidget fittingMultiLineTextWidget = new FittingMultiLineTextWidget(
+			this.right() - 10 - 100, this.top() + 10, 100, i, POPUP_TEXT, this.font
+		);
+		if (fittingMultiLineTextWidget.showingScrollBar()) {
+			fittingMultiLineTextWidget.setWidth(100 - fittingMultiLineTextWidget.scrollbarWidth());
+		}
+
+		this.addRenderableWidget(fittingMultiLineTextWidget);
 	}
 
 	@Override

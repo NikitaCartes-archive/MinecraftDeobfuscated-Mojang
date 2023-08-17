@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 
 @Environment(EnvType.CLIENT)
 public class HeaderAndFooterLayout implements Layout {
-	private static final int DEFAULT_HEADER_AND_FOOTER_HEIGHT = 36;
+	public static final int DEFAULT_HEADER_AND_FOOTER_HEIGHT = 36;
 	private static final int CONTENT_MARGIN_TOP = 30;
 	private final FrameLayout headerFrame = new FrameLayout();
 	private final FrameLayout footerFrame = new FrameLayout();

@@ -25,7 +25,6 @@ import net.minecraft.client.multiplayer.ServerList;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.resources.ReloadInstance;
 
 @Environment(EnvType.CLIENT)
 public class QuickPlay {
@@ -37,19 +36,17 @@ public class QuickPlay {
 	private static final Component TO_WORLD_LIST = Component.translatable("gui.toWorld");
 	private static final Component TO_REALMS_LIST = Component.translatable("gui.toRealms");
 
-	public static void connect(Minecraft minecraft, GameConfig.QuickPlayData quickPlayData, ReloadInstance reloadInstance, RealmsClient realmsClient) {
+	public static void connect(Minecraft minecraft, GameConfig.QuickPlayData quickPlayData, RealmsClient realmsClient) {
 		String string = quickPlayData.singleplayer();
 		String string2 = quickPlayData.multiplayer();
 		String string3 = quickPlayData.realms();
-		reloadInstance.done().thenRunAsync(() -> {
-			if (!Util.isBlank(string)) {
-				joinSingleplayerWorld(minecraft, string);
-			} else if (!Util.isBlank(string2)) {
-				joinMultiplayerWorld(minecraft, string2);
-			} else if (!Util.isBlank(string3)) {
-				joinRealmsWorld(minecraft, realmsClient, string3);
-			}
-		}, minecraft);
+		if (!Util.isBlank(string)) {
+			joinSingleplayerWorld(minecraft, string);
+		} else if (!Util.isBlank(string2)) {
+			joinMultiplayerWorld(minecraft, string2);
+		} else if (!Util.isBlank(string3)) {
+			joinRealmsWorld(minecraft, realmsClient, string3);
+		}
 	}
 
 	private static void joinSingleplayerWorld(Minecraft minecraft, String string) {

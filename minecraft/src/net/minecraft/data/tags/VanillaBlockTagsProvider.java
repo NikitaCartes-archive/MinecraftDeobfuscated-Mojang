@@ -637,7 +637,15 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 		this.tag(BlockTags.FLOWERS)
 			.addTag(BlockTags.SMALL_FLOWERS)
 			.addTag(BlockTags.TALL_FLOWERS)
-			.add(Blocks.FLOWERING_AZALEA_LEAVES, Blocks.FLOWERING_AZALEA, Blocks.MANGROVE_PROPAGULE, Blocks.CHERRY_LEAVES, Blocks.PINK_PETALS);
+			.add(
+				Blocks.FLOWERING_AZALEA_LEAVES,
+				Blocks.FLOWERING_AZALEA,
+				Blocks.MANGROVE_PROPAGULE,
+				Blocks.CHERRY_LEAVES,
+				Blocks.PINK_PETALS,
+				Blocks.CHORUS_FLOWER,
+				Blocks.SPORE_BLOSSOM
+			);
 		this.tag(BlockTags.BEEHIVES).add(Blocks.BEE_NEST, Blocks.BEEHIVE);
 		this.tag(BlockTags.CROPS)
 			.add(Blocks.BEETROOTS, Blocks.CARROTS, Blocks.POTATOES, Blocks.WHEAT, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM, Blocks.TORCHFLOWER_CROP, Blocks.PITCHER_CROP);

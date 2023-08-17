@@ -950,8 +950,8 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		}
 
 		@Override
-		public void setByPlayer(ItemStack itemStack) {
-			this.target.setByPlayer(itemStack);
+		public void setByPlayer(ItemStack itemStack, ItemStack itemStack2) {
+			this.target.setByPlayer(itemStack, itemStack2);
 		}
 
 		@Override

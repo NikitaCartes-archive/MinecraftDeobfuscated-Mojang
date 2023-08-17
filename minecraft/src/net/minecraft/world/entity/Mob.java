@@ -70,6 +70,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.AABB;
 
 public abstract class Mob extends LivingEntity implements Targeting {
 	private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
@@ -86,6 +87,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
 	public static final int PRESERVE_ITEM_DROP_CHANCE = 2;
 	public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
+	private static final double DEFAULT_ATTACK_REACH = Math.sqrt(2.04F) - 0.6F;
 	public int ambientSoundTime;
 	protected int xpReward;
 	protected LookControl lookControl;
@@ -1333,17 +1335,24 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		return this.isLeftHanded() ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
 	}
 
-	public double getMeleeAttackRangeSqr(LivingEntity livingEntity) {
-		return (double)(this.getBbWidth() * 2.0F * this.getBbWidth() * 2.0F + livingEntity.getBbWidth());
-	}
-
-	public double getPerceivedTargetDistanceSquareForMeleeAttack(LivingEntity livingEntity) {
-		return Math.max(this.distanceToSqr(livingEntity.getMeleeAttackReferencePosition()), this.distanceToSqr(livingEntity.position()));
-	}
-
 	public boolean isWithinMeleeAttackRange(LivingEntity livingEntity) {
-		double d = this.getPerceivedTargetDistanceSquareForMeleeAttack(livingEntity);
-		return d <= this.getMeleeAttackRangeSqr(livingEntity);
+		return this.getAttackBoundingBox().intersects(livingEntity.getHitbox());
+	}
+
+	protected AABB getAttackBoundingBox() {
+		Entity entity = this.getVehicle();
+		AABB aABB3;
+		if (entity != null) {
+			AABB aABB = entity.getBoundingBox();
+			AABB aABB2 = this.getBoundingBox();
+			aABB3 = new AABB(
+				Math.min(aABB2.minX, aABB.minX), aABB2.minY, Math.min(aABB2.minZ, aABB.minZ), Math.max(aABB2.maxX, aABB.maxX), aABB2.maxY, Math.max(aABB2.maxZ, aABB.maxZ)
+			);
+		} else {
+			aABB3 = this.getBoundingBox();
+		}
+
+		return aABB3.inflate(DEFAULT_ATTACK_REACH, 0.0, DEFAULT_ATTACK_REACH);
 	}
 
 	@Override

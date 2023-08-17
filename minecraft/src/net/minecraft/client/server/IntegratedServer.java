@@ -111,6 +111,11 @@ public class IntegratedServer extends MinecraftServer {
 		}
 	}
 
+	@Override
+	public void logTickTime(long l) {
+		this.minecraft.getDebugOverlay().logTickDuration(l);
+	}
+
 	private void tickPaused() {
 		for (ServerPlayer serverPlayer : this.getPlayerList().getPlayers()) {
 			serverPlayer.awardStat(Stats.TOTAL_WORLD_TIME);

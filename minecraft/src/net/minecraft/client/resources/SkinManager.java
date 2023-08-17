@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Optionull;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -87,6 +88,7 @@ public class SkinManager {
 			model = playerSkin.model();
 		}
 
+		String string = Optionull.map(minecraftProfileTexture, MinecraftProfileTexture::getUrl);
 		MinecraftProfileTexture minecraftProfileTexture2 = textureInfo.cape();
 		CompletableFuture<ResourceLocation> completableFuture2 = minecraftProfileTexture2 != null
 			? this.capeTextures.getOrLoad(minecraftProfileTexture2)
@@ -99,6 +101,7 @@ public class SkinManager {
 			.thenApply(
 				void_ -> new PlayerSkin(
 						(ResourceLocation)completableFuture.join(),
+						string,
 						(ResourceLocation)completableFuture2.join(),
 						(ResourceLocation)completableFuture3.join(),
 						model,

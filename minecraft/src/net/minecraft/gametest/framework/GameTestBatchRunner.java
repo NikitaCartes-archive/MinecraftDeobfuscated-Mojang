@@ -22,12 +22,15 @@ public class GameTestBatchRunner {
 	private final int testsPerRow;
 	private final List<GameTestInfo> allTestInfos;
 	private final List<Pair<GameTestBatch, Collection<GameTestInfo>>> batches;
+	private int count;
+	private AABB rowBounds;
 	private final BlockPos.MutableBlockPos nextTestNorthWestCorner;
 
 	public GameTestBatchRunner(
 		Collection<GameTestBatch> collection, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel, GameTestTicker gameTestTicker, int i
 	) {
 		this.nextTestNorthWestCorner = blockPos.mutable();
+		this.rowBounds = new AABB(this.nextTestNorthWestCorner);
 		this.firstTestNorthWestCorner = blockPos;
 		this.level = serverLevel;
 		this.testTicker = gameTestTicker;
@@ -99,23 +102,21 @@ public class GameTestBatchRunner {
 
 	private Map<GameTestInfo, BlockPos> createStructuresForBatch(Collection<GameTestInfo> collection) {
 		Map<GameTestInfo, BlockPos> map = Maps.<GameTestInfo, BlockPos>newHashMap();
-		int i = 0;
-		AABB aABB = new AABB(this.nextTestNorthWestCorner);
 
 		for (GameTestInfo gameTestInfo : collection) {
 			BlockPos blockPos = new BlockPos(this.nextTestNorthWestCorner);
 			StructureBlockEntity structureBlockEntity = StructureUtils.spawnStructure(
 				gameTestInfo.getStructureName(), blockPos, gameTestInfo.getRotation(), 2, this.level, true
 			);
-			AABB aABB2 = StructureUtils.getStructureBounds(structureBlockEntity);
+			AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
 			gameTestInfo.setStructureBlockPos(structureBlockEntity.getBlockPos());
 			map.put(gameTestInfo, new BlockPos(this.nextTestNorthWestCorner));
-			aABB = aABB.minmax(aABB2);
-			this.nextTestNorthWestCorner.move((int)aABB2.getXsize() + 5, 0, 0);
-			if (i++ % this.testsPerRow == this.testsPerRow - 1) {
-				this.nextTestNorthWestCorner.move(0, 0, (int)aABB.getZsize() + 6);
+			this.rowBounds = this.rowBounds.minmax(aABB);
+			this.nextTestNorthWestCorner.move((int)aABB.getXsize() + 5, 0, 0);
+			if (this.count++ % this.testsPerRow == this.testsPerRow - 1) {
+				this.nextTestNorthWestCorner.move(0, 0, (int)this.rowBounds.getZsize() + 6);
 				this.nextTestNorthWestCorner.setX(this.firstTestNorthWestCorner.getX());
-				aABB = new AABB(this.nextTestNorthWestCorner);
+				this.rowBounds = new AABB(this.nextTestNorthWestCorner);
 			}
 		}
 

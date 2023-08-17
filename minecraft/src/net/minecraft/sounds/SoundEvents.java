@@ -1260,6 +1260,11 @@ public class SoundEvents {
 	public static final SoundEvent SPIDER_STEP = register("entity.spider.step");
 	public static final SoundEvent SPLASH_POTION_BREAK = register("entity.splash_potion.break");
 	public static final SoundEvent SPLASH_POTION_THROW = register("entity.splash_potion.throw");
+	public static final SoundEvent SPONGE_BREAK = register("block.sponge.break");
+	public static final SoundEvent SPONGE_FALL = register("block.sponge.fall");
+	public static final SoundEvent SPONGE_HIT = register("block.sponge.hit");
+	public static final SoundEvent SPONGE_PLACE = register("block.sponge.place");
+	public static final SoundEvent SPONGE_STEP = register("block.sponge.step");
 	public static final SoundEvent SPONGE_ABSORB = register("block.sponge.absorb");
 	public static final SoundEvent SPYGLASS_USE = register("item.spyglass.use");
 	public static final SoundEvent SPYGLASS_STOP_USING = register("item.spyglass.stop_using");
@@ -1405,6 +1410,11 @@ public class SoundEvents {
 	public static final SoundEvent WET_GRASS_HIT = register("block.wet_grass.hit");
 	public static final SoundEvent WET_GRASS_PLACE = register("block.wet_grass.place");
 	public static final SoundEvent WET_GRASS_STEP = register("block.wet_grass.step");
+	public static final SoundEvent WET_SPONGE_BREAK = register("block.wet_sponge.break");
+	public static final SoundEvent WET_SPONGE_FALL = register("block.wet_sponge.fall");
+	public static final SoundEvent WET_SPONGE_HIT = register("block.wet_sponge.hit");
+	public static final SoundEvent WET_SPONGE_PLACE = register("block.wet_sponge.place");
+	public static final SoundEvent WET_SPONGE_STEP = register("block.wet_sponge.step");
 	public static final SoundEvent WITCH_AMBIENT = register("entity.witch.ambient");
 	public static final SoundEvent WITCH_CELEBRATE = register("entity.witch.celebrate");
 	public static final SoundEvent WITCH_DEATH = register("entity.witch.death");

@@ -7,7 +7,12 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public record PlayerSkin(
-	ResourceLocation texture, @Nullable ResourceLocation capeTexture, @Nullable ResourceLocation elytraTexture, PlayerSkin.Model model, boolean secure
+	ResourceLocation texture,
+	@Nullable String textureUrl,
+	@Nullable ResourceLocation capeTexture,
+	@Nullable ResourceLocation elytraTexture,
+	PlayerSkin.Model model,
+	boolean secure
 ) {
 	@Environment(EnvType.CLIENT)
 	public static enum Model {

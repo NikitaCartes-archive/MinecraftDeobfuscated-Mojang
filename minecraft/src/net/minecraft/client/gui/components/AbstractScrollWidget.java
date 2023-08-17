@@ -172,6 +172,10 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 		return this.getInnerHeight() > this.getHeight();
 	}
 
+	public int scrollbarWidth() {
+		return 8;
+	}
+
 	protected abstract int getInnerHeight();
 
 	protected abstract double scrollRate();

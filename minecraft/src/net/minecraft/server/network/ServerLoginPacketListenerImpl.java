@@ -3,6 +3,7 @@ package net.minecraft.server.network;
 import com.google.common.primitives.Ints;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
+import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.logging.LogUtils;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -186,8 +187,9 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 				String string = (String)Objects.requireNonNull(ServerLoginPacketListenerImpl.this.requestedUsername, "Player name not initialized");
 
 				try {
-					GameProfile gameProfile = ServerLoginPacketListenerImpl.this.server.getSessionService().hasJoinedServer(string, string, this.getAddress());
-					if (gameProfile != null) {
+					ProfileResult profileResult = ServerLoginPacketListenerImpl.this.server.getSessionService().hasJoinedServer(string, string, this.getAddress());
+					if (profileResult != null) {
+						GameProfile gameProfile = profileResult.profile();
 						ServerLoginPacketListenerImpl.LOGGER.info("UUID of player {} is {}", gameProfile.getName(), gameProfile.getId());
 						ServerLoginPacketListenerImpl.this.startClientVerification(gameProfile);
 					} else if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
@@ -197,7 +199,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 						ServerLoginPacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.unverified_username"));
 						ServerLoginPacketListenerImpl.LOGGER.error("Username '{}' tried to join with an invalid session", string);
 					}
-				} catch (AuthenticationUnavailableException var3) {
+				} catch (AuthenticationUnavailableException var4) {
 					if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
 						ServerLoginPacketListenerImpl.LOGGER.warn("Authentication servers are down but will let them in anyway!");
 						ServerLoginPacketListenerImpl.this.startClientVerification(ServerLoginPacketListenerImpl.createOfflineProfile(string));

@@ -217,11 +217,6 @@ public class Spider extends Monster {
 				return super.canContinueToUse();
 			}
 		}
-
-		@Override
-		protected double getAttackReachSqr(LivingEntity livingEntity) {
-			return (double)(4.0F + livingEntity.getBbWidth());
-		}
 	}
 
 	public static class SpiderEffectsGroupData implements SpawnGroupData {

@@ -33,7 +33,6 @@ public class EditBox extends AbstractWidget implements Renderable {
 	);
 	public static final int BACKWARDS = -1;
 	public static final int FORWARDS = 1;
-	public static final int LABEL_SPACING = 4;
 	private static final int CURSOR_INSERT_WIDTH = 1;
 	private static final int CURSOR_INSERT_COLOR = -3092272;
 	private static final String CURSOR_APPEND_CHARACTER = "_";

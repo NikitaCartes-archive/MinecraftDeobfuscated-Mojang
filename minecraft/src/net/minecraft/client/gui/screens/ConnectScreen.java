@@ -97,7 +97,7 @@ public class ConnectScreen extends Screen {
 						}
 
 						connection = new Connection(PacketFlow.CLIENTBOUND);
-						connection.setBandwidthLogger(minecraft.bandwidthLogger);
+						connection.setBandwidthLogger(minecraft.getDebugOverlay().getBandwidthLogger());
 						ConnectScreen.this.channelFuture = Connection.connect(inetSocketAddress, minecraft.options.useNativeTransport(), connection);
 					}
 

@@ -50,6 +50,10 @@ public class PauseScreen extends Screen {
 		this.showPauseMenu = bl;
 	}
 
+	public boolean showsPauseMenu() {
+		return this.showPauseMenu;
+	}
+
 	@Override
 	protected void init() {
 		if (this.showPauseMenu) {

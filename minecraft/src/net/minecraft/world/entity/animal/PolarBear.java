@@ -314,13 +314,12 @@ public class PolarBear extends Animal implements NeutralMob {
 		}
 
 		@Override
-		protected void checkAndPerformAttack(LivingEntity livingEntity, double d) {
-			double e = this.getAttackReachSqr(livingEntity);
-			if (d <= e && this.isTimeToAttack()) {
+		protected void checkAndPerformAttack(LivingEntity livingEntity) {
+			if (this.isTimeToAttack() && this.mob.isWithinMeleeAttackRange(livingEntity)) {
 				this.resetAttackCooldown();
 				this.mob.doHurtTarget(livingEntity);
 				PolarBear.this.setStanding(false);
-			} else if (d <= e * 2.0) {
+			} else if (this.mob.distanceToSqr(livingEntity) < (double)((livingEntity.getBbWidth() + 3.0F) * (livingEntity.getBbWidth() + 3.0F))) {
 				if (this.isTimeToAttack()) {
 					PolarBear.this.setStanding(false);
 					this.resetAttackCooldown();
@@ -340,11 +339,6 @@ public class PolarBear extends Animal implements NeutralMob {
 		public void stop() {
 			PolarBear.this.setStanding(false);
 			super.stop();
-		}
-
-		@Override
-		protected double getAttackReachSqr(LivingEntity livingEntity) {
-			return (double)(4.0F + livingEntity.getBbWidth());
 		}
 	}
 

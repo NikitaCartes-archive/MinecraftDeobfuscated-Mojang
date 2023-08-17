@@ -102,7 +102,6 @@ import net.minecraft.util.ModCheck;
 import net.minecraft.util.Mth;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.SampleLogger;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.EmptyProfileResults;
@@ -237,7 +236,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private CommandStorage commandStorage;
 	private final CustomBossEvents customBossEvents = new CustomBossEvents();
 	private final ServerFunctionManager functionManager;
-	private final SampleLogger tickTimeLogger = new SampleLogger();
 	private boolean enforceWhitelist;
 	private float averageTickTime;
 	private final Executor executor;
@@ -836,8 +834,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		long m = this.tickTimes[this.tickCount % 100] = Util.getNanos() - l;
 		this.averageTickTime = this.averageTickTime * 0.8F + (float)m / 1000000.0F * 0.19999999F;
 		long n = Util.getNanos();
-		this.tickTimeLogger.logSample(n - l);
+		this.logTickTime(n - l);
 		this.profiler.pop();
+	}
+
+	protected void logTickTime(long l) {
 	}
 
 	private ServerStatus buildServerStatus() {
@@ -1549,10 +1550,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		} else {
 			return 0;
 		}
-	}
-
-	public SampleLogger getTickTimeLogger() {
-		return this.tickTimeLogger;
 	}
 
 	public ProfilerFiller getProfiler() {

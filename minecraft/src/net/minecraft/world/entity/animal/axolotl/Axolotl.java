@@ -283,11 +283,6 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	}
 
 	@Override
-	public double getMeleeAttackRangeSqr(LivingEntity livingEntity) {
-		return 1.5 + (double)livingEntity.getBbWidth() * 2.0;
-	}
-
-	@Override
 	public boolean isFood(ItemStack itemStack) {
 		return itemStack.is(ItemTags.AXOLOTL_TEMPT_ITEMS);
 	}

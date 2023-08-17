@@ -32,13 +32,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.tabs.GridLayoutTab;
 import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.components.tabs.TabNavigationBar;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.layouts.CommonLayouts;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LayoutSettings;
@@ -88,7 +88,6 @@ public class CreateWorldScreen extends Screen {
 	private static final int GROUP_BOTTOM = 1;
 	private static final int TAB_COLUMN_WIDTH = 210;
 	private static final int FOOTER_HEIGHT = 36;
-	private static final int TEXT_INDENT = 1;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String TEMP_WORLD_PREFIX = "mcworld-";
 	static final Component GAME_MODEL_LABEL = Component.translatable("selectWorld.gameMode");
@@ -624,11 +623,7 @@ public class CreateWorldScreen extends Screen {
 			super(TITLE);
 			GridLayout.RowHelper rowHelper = this.layout.rowSpacing(8).createRowHelper(1);
 			LayoutSettings layoutSettings = rowHelper.newCellSettings();
-			GridLayout.RowHelper rowHelper2 = new GridLayout().rowSpacing(4).createRowHelper(1);
-			rowHelper2.addChild(new StringWidget(CreateWorldScreen.NAME_LABEL, CreateWorldScreen.this.minecraft.font), rowHelper2.newCellSettings().paddingLeft(1));
-			this.nameEdit = rowHelper2.addChild(
-				new EditBox(CreateWorldScreen.this.font, 210, 20, Component.translatable("selectWorld.enterName")), rowHelper2.newCellSettings()
-			);
+			this.nameEdit = new EditBox(CreateWorldScreen.this.font, 208, 20, Component.translatable("selectWorld.enterName"));
 			this.nameEdit.setValue(CreateWorldScreen.this.uiState.getName());
 			this.nameEdit.setResponder(CreateWorldScreen.this.uiState::setName);
 			CreateWorldScreen.this.uiState
@@ -641,7 +636,10 @@ public class CreateWorldScreen extends Screen {
 							)
 				);
 			CreateWorldScreen.this.setInitialFocus(this.nameEdit);
-			rowHelper.addChild(rowHelper2.getGrid(), rowHelper.newCellSettings().alignHorizontallyCenter());
+			rowHelper.addChild(
+				CommonLayouts.labeledElement(CreateWorldScreen.this.font, this.nameEdit, CreateWorldScreen.NAME_LABEL),
+				rowHelper.newCellSettings().alignHorizontallyCenter()
+			);
 			CycleButton<WorldCreationUiState.SelectedGameMode> cycleButton = rowHelper.addChild(
 				CycleButton.<WorldCreationUiState.SelectedGameMode>builder(selectedGameMode -> selectedGameMode.displayName)
 					.withValues(WorldCreationUiState.SelectedGameMode.SURVIVAL, WorldCreationUiState.SelectedGameMode.HARDCORE, WorldCreationUiState.SelectedGameMode.CREATIVE)
@@ -769,19 +767,17 @@ public class CreateWorldScreen extends Screen {
 			this.customizeTypeButton = rowHelper.addChild(Button.builder(Component.translatable("selectWorld.customizeType"), button -> this.openPresetEditor()).build());
 			CreateWorldScreen.this.uiState
 				.addListener(worldCreationUiState -> this.customizeTypeButton.active = !worldCreationUiState.isDebug() && worldCreationUiState.getPresetEditor() != null);
-			GridLayout.RowHelper rowHelper2 = new GridLayout().rowSpacing(4).createRowHelper(1);
-			rowHelper2.addChild(new StringWidget(SEED_LABEL, CreateWorldScreen.this.font).alignLeft());
-			this.seedEdit = rowHelper2.addChild(new EditBox(CreateWorldScreen.this.font, 310, 20, Component.translatable("selectWorld.enterSeed")) {
+			this.seedEdit = new EditBox(CreateWorldScreen.this.font, 308, 20, Component.translatable("selectWorld.enterSeed")) {
 				@Override
 				protected MutableComponent createNarrationMessage() {
 					return super.createNarrationMessage().append(CommonComponents.NARRATION_SEPARATOR).append(CreateWorldScreen.WorldTab.SEED_EMPTY_HINT);
 				}
-			});
+			};
 			this.seedEdit.setHint(SEED_EMPTY_HINT);
 			this.seedEdit.setValue(CreateWorldScreen.this.uiState.getSeed());
 			this.seedEdit.setResponder(string -> CreateWorldScreen.this.uiState.setSeed(this.seedEdit.getValue()));
-			rowHelper.addChild(rowHelper2.getGrid(), 2);
-			SwitchGrid.Builder builder = SwitchGrid.builder(310).withPaddingLeft(1);
+			rowHelper.addChild(CommonLayouts.labeledElement(CreateWorldScreen.this.font, this.seedEdit, SEED_LABEL), 2);
+			SwitchGrid.Builder builder = SwitchGrid.builder(310);
 			builder.addSwitch(GENERATE_STRUCTURES, CreateWorldScreen.this.uiState::isGenerateStructures, CreateWorldScreen.this.uiState::setGenerateStructures)
 				.withIsActiveCondition(() -> !CreateWorldScreen.this.uiState.isDebug())
 				.withInfo(GENERATE_STRUCTURES_INFO);

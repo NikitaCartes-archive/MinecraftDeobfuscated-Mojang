@@ -524,7 +524,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					.map(packResources -> Component.literal(packResources.packId()))
 					.orElse(null);
 				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
-				this.minecraft.clearResourcePacksOnError(transparencyShaderException, component);
+				this.minecraft.clearResourcePacksOnError(transparencyShaderException, component, null);
 			} else {
 				CrashReport crashReport = this.minecraft.fillReport(new CrashReport(string2, transparencyShaderException));
 				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);

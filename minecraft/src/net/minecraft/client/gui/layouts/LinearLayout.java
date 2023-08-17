@@ -11,7 +11,7 @@ public class LinearLayout implements Layout {
 	private final LinearLayout.Orientation orientation;
 	private int nextChildIndex = 0;
 
-	public LinearLayout(LinearLayout.Orientation orientation) {
+	private LinearLayout(LinearLayout.Orientation orientation) {
 		this(0, 0, orientation);
 	}
 

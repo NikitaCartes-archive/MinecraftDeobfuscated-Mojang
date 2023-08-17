@@ -66,7 +66,7 @@ public class Ravager extends Raider {
 	protected void registerGoals() {
 		super.registerGoals();
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(4, new Ravager.RavagerMeleeAttackGoal());
+		this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0, true));
 		this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.4));
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
 		this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));
@@ -312,15 +312,9 @@ public class Ravager extends Raider {
 		return false;
 	}
 
-	class RavagerMeleeAttackGoal extends MeleeAttackGoal {
-		public RavagerMeleeAttackGoal() {
-			super(Ravager.this, 1.0, true);
-		}
-
-		@Override
-		protected double getAttackReachSqr(LivingEntity livingEntity) {
-			float f = Ravager.this.getBbWidth() - 0.1F;
-			return (double)(f * 2.0F * f * 2.0F + livingEntity.getBbWidth());
-		}
+	@Override
+	protected AABB getAttackBoundingBox() {
+		AABB aABB = super.getAttackBoundingBox();
+		return aABB.deflate(0.05, 0.0, 0.05);
 	}
 }
