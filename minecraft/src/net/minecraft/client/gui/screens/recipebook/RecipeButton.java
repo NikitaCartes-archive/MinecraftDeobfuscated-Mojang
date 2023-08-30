@@ -17,7 +17,7 @@ import net.minecraft.stats.RecipeBook;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public class RecipeButton extends AbstractWidget {
@@ -44,10 +44,10 @@ public class RecipeButton extends AbstractWidget {
 		this.collection = recipeCollection;
 		this.menu = (RecipeBookMenu<?>)recipeBookPage.getMinecraft().player.containerMenu;
 		this.book = recipeBookPage.getRecipeBook();
-		List<Recipe<?>> list = recipeCollection.getRecipes(this.book.isFiltering(this.menu));
+		List<RecipeHolder<?>> list = recipeCollection.getRecipes(this.book.isFiltering(this.menu));
 
-		for (Recipe<?> recipe : list) {
-			if (this.book.willHighlight(recipe)) {
+		for (RecipeHolder<?> recipeHolder : list) {
+			if (this.book.willHighlight(recipeHolder)) {
 				recipeBookPage.recipesShown(list);
 				this.animationTime = 15.0F;
 				break;
@@ -89,9 +89,9 @@ public class RecipeButton extends AbstractWidget {
 		}
 
 		guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
-		List<Recipe<?>> list = this.getOrderedRecipes();
+		List<RecipeHolder<?>> list = this.getOrderedRecipes();
 		this.currentIndex = Mth.floor(this.time / 30.0F) % list.size();
-		ItemStack itemStack = ((Recipe)list.get(this.currentIndex)).getResultItem(this.collection.registryAccess());
+		ItemStack itemStack = ((RecipeHolder)list.get(this.currentIndex)).value().getResultItem(this.collection.registryAccess());
 		int k = 4;
 		if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
 			guiGraphics.renderItem(itemStack, this.getX() + k + 1, this.getY() + k + 1, 0, 10);
@@ -104,8 +104,8 @@ public class RecipeButton extends AbstractWidget {
 		}
 	}
 
-	private List<Recipe<?>> getOrderedRecipes() {
-		List<Recipe<?>> list = this.collection.getDisplayRecipes(true);
+	private List<RecipeHolder<?>> getOrderedRecipes() {
+		List<RecipeHolder<?>> list = this.collection.getDisplayRecipes(true);
 		if (!this.book.isFiltering(this.menu)) {
 			list.addAll(this.collection.getDisplayRecipes(false));
 		}
@@ -117,13 +117,13 @@ public class RecipeButton extends AbstractWidget {
 		return this.getOrderedRecipes().size() == 1;
 	}
 
-	public Recipe<?> getRecipe() {
-		List<Recipe<?>> list = this.getOrderedRecipes();
-		return (Recipe<?>)list.get(this.currentIndex);
+	public RecipeHolder<?> getRecipe() {
+		List<RecipeHolder<?>> list = this.getOrderedRecipes();
+		return (RecipeHolder<?>)list.get(this.currentIndex);
 	}
 
 	public List<Component> getTooltipText() {
-		ItemStack itemStack = ((Recipe)this.getOrderedRecipes().get(this.currentIndex)).getResultItem(this.collection.registryAccess());
+		ItemStack itemStack = ((RecipeHolder)this.getOrderedRecipes().get(this.currentIndex)).value().getResultItem(this.collection.registryAccess());
 		List<Component> list = Lists.<Component>newArrayList(Screen.getTooltipFromItem(Minecraft.getInstance(), itemStack));
 		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
 			list.add(MORE_RECIPES_TOOLTIP);
@@ -134,7 +134,7 @@ public class RecipeButton extends AbstractWidget {
 
 	@Override
 	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-		ItemStack itemStack = ((Recipe)this.getOrderedRecipes().get(this.currentIndex)).getResultItem(this.collection.registryAccess());
+		ItemStack itemStack = ((RecipeHolder)this.getOrderedRecipes().get(this.currentIndex)).value().getResultItem(this.collection.registryAccess());
 		narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narration.recipe", itemStack.getHoverName()));
 		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
 			narrationElementOutput.add(

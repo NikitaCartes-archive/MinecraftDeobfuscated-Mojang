@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Equipable;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -12,14 +13,19 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 
 public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equipable {
+	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private final SkullBlock.Type type;
 
 	public AbstractSkullBlock(SkullBlock.Type type, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.type = type;
+		this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)));
 	}
 
 	@Override
@@ -55,5 +61,25 @@ public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equi
 	@Override
 	public EquipmentSlot getEquipmentSlot() {
 		return EquipmentSlot.HEAD;
+	}
+
+	@Override
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		builder.add(POWERED);
+	}
+
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+		return this.defaultBlockState().setValue(POWERED, Boolean.valueOf(blockPlaceContext.getLevel().hasNeighborSignal(blockPlaceContext.getClickedPos())));
+	}
+
+	@Override
+	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+		if (!level.isClientSide) {
+			boolean bl2 = level.hasNeighborSignal(blockPos);
+			if (bl2 != (Boolean)blockState.getValue(POWERED)) {
+				level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(bl2)), 2);
+			}
+		}
 	}
 }

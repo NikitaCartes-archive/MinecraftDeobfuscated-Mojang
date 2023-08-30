@@ -20,6 +20,7 @@ import net.minecraft.realms.RealmsScreen;
 @Environment(EnvType.CLIENT)
 public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	private static final Component SEED_LABEL = Component.translatable("mco.reset.world.seed");
+	public static final Component TITLE = Component.translatable("mco.reset.world.generate");
 	private static final int BUTTON_SPACING = 10;
 	private static final int CONTENT_WIDTH = 210;
 	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
@@ -30,7 +31,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	private final Component buttonTitle;
 
 	public RealmsResetNormalWorldScreen(Consumer<WorldGenerationInfo> consumer, Component component) {
-		super(Component.translatable("mco.reset.world.generate"));
+		super(TITLE);
 		this.callback = consumer;
 		this.buttonTitle = component;
 	}

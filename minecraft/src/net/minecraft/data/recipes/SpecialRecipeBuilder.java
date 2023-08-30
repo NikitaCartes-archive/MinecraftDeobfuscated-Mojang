@@ -1,8 +1,7 @@
 package net.minecraft.data.recipes;
 
-import com.google.gson.JsonObject;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -19,27 +18,26 @@ public class SpecialRecipeBuilder extends CraftingRecipeBuilder {
 		return new SpecialRecipeBuilder(recipeSerializer);
 	}
 
-	public void save(Consumer<FinishedRecipe> consumer, String string) {
-		consumer.accept(new CraftingRecipeBuilder.CraftingResult(CraftingBookCategory.MISC) {
+	public void save(RecipeOutput recipeOutput, String string) {
+		this.save(recipeOutput, new ResourceLocation(string));
+	}
+
+	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
+		recipeOutput.accept(new CraftingRecipeBuilder.CraftingResult(CraftingBookCategory.MISC) {
 			@Override
-			public RecipeSerializer<?> getType() {
+			public RecipeSerializer<?> type() {
 				return SpecialRecipeBuilder.this.serializer;
 			}
 
 			@Override
-			public ResourceLocation getId() {
-				return new ResourceLocation(string);
+			public ResourceLocation id() {
+				return resourceLocation;
 			}
 
 			@Nullable
 			@Override
-			public JsonObject serializeAdvancement() {
+			public AdvancementHolder advancement() {
 				return null;
-			}
-
-			@Override
-			public ResourceLocation getAdvancementId() {
-				return new ResourceLocation("");
 			}
 		});
 	}

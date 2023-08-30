@@ -2,19 +2,13 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class TameAnimalTrigger extends SimpleCriterionTrigger<TameAnimalTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("tame_animal");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public TameAnimalTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -31,16 +25,16 @@ public class TameAnimalTrigger extends SimpleCriterionTrigger<TameAnimalTrigger.
 		private final Optional<ContextAwarePredicate> entity;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2) {
-			super(TameAnimalTrigger.ID, optional);
+			super(optional);
 			this.entity = optional2;
 		}
 
-		public static TameAnimalTrigger.TriggerInstance tamedAnimal() {
-			return new TameAnimalTrigger.TriggerInstance(Optional.empty(), Optional.empty());
+		public static Criterion<TameAnimalTrigger.TriggerInstance> tamedAnimal() {
+			return CriteriaTriggers.TAME_ANIMAL.createCriterion(new TameAnimalTrigger.TriggerInstance(Optional.empty(), Optional.empty()));
 		}
 
-		public static TameAnimalTrigger.TriggerInstance tamedAnimal(Optional<EntityPredicate> optional) {
-			return new TameAnimalTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional));
+		public static Criterion<TameAnimalTrigger.TriggerInstance> tamedAnimal(EntityPredicate.Builder builder) {
+			return CriteriaTriggers.TAME_ANIMAL.createCriterion(new TameAnimalTrigger.TriggerInstance(Optional.empty(), Optional.of(EntityPredicate.wrap(builder))));
 		}
 
 		public boolean matches(LootContext lootContext) {

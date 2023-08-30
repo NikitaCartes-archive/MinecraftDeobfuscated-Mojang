@@ -193,32 +193,35 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				Screen.BACKGROUND_LOCATION, this.x0, this.y0, (float)this.x1, (float)(this.y1 + (int)this.getScrollAmount()), this.x1 - this.x0, this.y1 - this.y0, 32, 32
 			);
 			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-			int l = 4;
-			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0, 0);
-			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216, 0);
 		}
 
-		int k = this.getRowLeft();
-		int l = this.y0 + 4 - (int)this.getScrollAmount();
 		this.enableScissor(guiGraphics);
 		if (this.renderHeader) {
+			int k = this.getRowLeft();
+			int l = this.y0 + 4 - (int)this.getScrollAmount();
 			this.renderHeader(guiGraphics, k, l);
 		}
 
 		this.renderList(guiGraphics, i, j, f);
 		guiGraphics.disableScissor();
-		int m = this.getMaxScroll();
-		if (m > 0) {
-			int n = this.getScrollbarPosition();
-			int o = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
-			o = Mth.clamp(o, 32, this.y1 - this.y0 - 8);
-			int p = (int)this.getScrollAmount() * (this.y1 - this.y0 - o) / m + this.y0;
-			if (p < this.y0) {
-				p = this.y0;
+		if (this.renderBackground) {
+			int k = 4;
+			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y0, this.x1, this.y0 + 4, -16777216, 0, 0);
+			guiGraphics.fillGradient(RenderType.guiOverlay(), this.x0, this.y1 - 4, this.x1, this.y1, 0, -16777216, 0);
+		}
+
+		int k = this.getMaxScroll();
+		if (k > 0) {
+			int l = this.getScrollbarPosition();
+			int m = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+			m = Mth.clamp(m, 32, this.y1 - this.y0 - 8);
+			int n = (int)this.getScrollAmount() * (this.y1 - this.y0 - m) / k + this.y0;
+			if (n < this.y0) {
+				n = this.y0;
 			}
 
-			guiGraphics.fill(n, this.y0, n + 6, this.y1, -16777216);
-			guiGraphics.blitSprite(SCROLLER_SPRITE, n, p, 6, o);
+			guiGraphics.fill(l, this.y0, l + 6, this.y1, -16777216);
+			guiGraphics.blitSprite(SCROLLER_SPRITE, l, n, 6, m);
 		}
 
 		this.renderDecorations(guiGraphics, i, j);
@@ -274,30 +277,38 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return this.width / 2 + 124;
 	}
 
+	protected boolean isValidMouseClick(int i) {
+		return i == 0;
+	}
+
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
-		this.updateScrollingState(d, e, i);
-		if (!this.isMouseOver(d, e)) {
+		if (!this.isValidMouseClick(i)) {
 			return false;
 		} else {
-			E entry = this.getEntryAtPosition(d, e);
-			if (entry != null) {
-				if (entry.mouseClicked(d, e, i)) {
-					E entry2 = this.getFocused();
-					if (entry2 != entry && entry2 instanceof ContainerEventHandler containerEventHandler) {
-						containerEventHandler.setFocused(null);
-					}
+			this.updateScrollingState(d, e, i);
+			if (!this.isMouseOver(d, e)) {
+				return false;
+			} else {
+				E entry = this.getEntryAtPosition(d, e);
+				if (entry != null) {
+					if (entry.mouseClicked(d, e, i)) {
+						E entry2 = this.getFocused();
+						if (entry2 != entry && entry2 instanceof ContainerEventHandler containerEventHandler) {
+							containerEventHandler.setFocused(null);
+						}
 
-					this.setFocused(entry);
-					this.setDragging(true);
+						this.setFocused(entry);
+						this.setDragging(true);
+						return true;
+					} else {
+						return this.scrolling;
+					}
+				} else {
+					this.clickedHeader((int)(d - (double)(this.x0 + this.width / 2 - this.getRowWidth() / 2)), (int)(e - (double)this.y0) + (int)this.getScrollAmount() - 4);
 					return true;
 				}
-			} else if (i == 0) {
-				this.clickedHeader((int)(d - (double)(this.x0 + this.width / 2 - this.getRowWidth() / 2)), (int)(e - (double)this.y0) + (int)this.getScrollAmount() - 4);
-				return true;
 			}
-
-			return this.scrolling;
 		}
 	}
 

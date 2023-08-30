@@ -2,7 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -50,8 +49,6 @@ public interface Recipe<C extends Container> {
 	default ItemStack getToastSymbol() {
 		return new ItemStack(Blocks.CRAFTING_TABLE);
 	}
-
-	ResourceLocation getId();
 
 	RecipeSerializer<?> getSerializer();
 

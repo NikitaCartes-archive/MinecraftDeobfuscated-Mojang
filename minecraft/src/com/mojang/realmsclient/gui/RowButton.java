@@ -53,19 +53,17 @@ public abstract class RowButton {
 	public static void rowButtonMouseClicked(
 		RealmsObjectSelectionList<?> realmsObjectSelectionList, ObjectSelectionList.Entry<?> entry, List<RowButton> list, int i, double d, double e
 	) {
-		if (i == 0) {
-			int j = realmsObjectSelectionList.children().indexOf(entry);
-			if (j > -1) {
-				realmsObjectSelectionList.selectItem(j);
-				int k = realmsObjectSelectionList.getRowLeft();
-				int l = realmsObjectSelectionList.getRowTop(j);
-				int m = (int)(d - (double)k);
-				int n = (int)(e - (double)l);
+		int j = realmsObjectSelectionList.children().indexOf(entry);
+		if (j > -1) {
+			realmsObjectSelectionList.selectItem(j);
+			int k = realmsObjectSelectionList.getRowLeft();
+			int l = realmsObjectSelectionList.getRowTop(j);
+			int m = (int)(d - (double)k);
+			int n = (int)(e - (double)l);
 
-				for (RowButton rowButton : list) {
-					if (m >= rowButton.xOffset && m <= rowButton.getRight() && n >= rowButton.yOffset && n <= rowButton.getBottom()) {
-						rowButton.onClick(j);
-					}
+			for (RowButton rowButton : list) {
+				if (m >= rowButton.xOffset && m <= rowButton.getRight() && n >= rowButton.yOffset && n <= rowButton.getBottom()) {
+					rowButton.onClick(j);
 				}
 			}
 		}

@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,13 +15,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BeeNestDestroyedTrigger extends SimpleCriterionTrigger<BeeNestDestroyedTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("bee_nest_destroyed");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public BeeNestDestroyedTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -52,14 +47,15 @@ public class BeeNestDestroyedTrigger extends SimpleCriterionTrigger<BeeNestDestr
 		private final MinMaxBounds.Ints numBees;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, @Nullable Block block, Optional<ItemPredicate> optional2, MinMaxBounds.Ints ints) {
-			super(BeeNestDestroyedTrigger.ID, optional);
+			super(optional);
 			this.block = block;
 			this.item = optional2;
 			this.numBees = ints;
 		}
 
-		public static BeeNestDestroyedTrigger.TriggerInstance destroyedBeeNest(Block block, ItemPredicate.Builder builder, MinMaxBounds.Ints ints) {
-			return new BeeNestDestroyedTrigger.TriggerInstance(Optional.empty(), block, builder.build(), ints);
+		public static Criterion<BeeNestDestroyedTrigger.TriggerInstance> destroyedBeeNest(Block block, ItemPredicate.Builder builder, MinMaxBounds.Ints ints) {
+			return CriteriaTriggers.BEE_NEST_DESTROYED
+				.createCriterion(new BeeNestDestroyedTrigger.TriggerInstance(Optional.empty(), block, Optional.of(builder.build()), ints));
 		}
 
 		public boolean matches(BlockState blockState, ItemStack itemStack, int i) {

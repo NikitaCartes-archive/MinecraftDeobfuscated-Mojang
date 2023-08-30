@@ -3,9 +3,10 @@ package net.minecraft.data.advancements.packs;
 import java.util.Optional;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.BrewedPotionTrigger;
 import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
@@ -80,8 +81,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 	);
 
 	@Override
-	public void generate(HolderLookup.Provider provider, Consumer<Advancement> consumer) {
-		Advancement advancement = Advancement.Builder.advancement()
+	public void generate(HolderLookup.Provider provider, Consumer<AdvancementHolder> consumer) {
+		AdvancementHolder advancementHolder = Advancement.Builder.advancement()
 			.display(
 				Blocks.RED_NETHER_BRICKS,
 				Component.translatable("advancements.nether.root.title"),
@@ -94,8 +95,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("entered_nether", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.NETHER))
 			.save(consumer, "nether/root");
-		Advancement advancement2 = Advancement.Builder.advancement()
-			.parent(advancement)
+		AdvancementHolder advancementHolder2 = Advancement.Builder.advancement()
+			.parent(advancementHolder)
 			.display(
 				Items.FIRE_CHARGE,
 				Component.translatable("advancements.nether.return_to_sender.title"),
@@ -117,8 +118,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "nether/return_to_sender");
-		Advancement advancement3 = Advancement.Builder.advancement()
-			.parent(advancement)
+		AdvancementHolder advancementHolder3 = Advancement.Builder.advancement()
+			.parent(advancementHolder)
 			.display(
 				Blocks.NETHER_BRICKS,
 				Component.translatable("advancements.nether.find_fortress.title"),
@@ -132,7 +133,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion("fortress", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.FORTRESS)))
 			.save(consumer, "nether/find_fortress");
 		Advancement.Builder.advancement()
-			.parent(advancement)
+			.parent(advancementHolder)
 			.display(
 				Items.MAP,
 				Component.translatable("advancements.nether.fast_travel.title"),
@@ -147,7 +148,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion("travelled", DistanceTrigger.TriggerInstance.travelledThroughNether(DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(7000.0))))
 			.save(consumer, "nether/fast_travel");
 		Advancement.Builder.advancement()
-			.parent(advancement2)
+			.parent(advancementHolder2)
 			.display(
 				Items.GHAST_TEAR,
 				Component.translatable("advancements.nether.uneasy_alliance.title"),
@@ -166,8 +167,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "nether/uneasy_alliance");
-		Advancement advancement4 = Advancement.Builder.advancement()
-			.parent(advancement3)
+		AdvancementHolder advancementHolder4 = Advancement.Builder.advancement()
+			.parent(advancementHolder3)
 			.display(
 				Blocks.WITHER_SKELETON_SKULL,
 				Component.translatable("advancements.nether.get_wither_skull.title"),
@@ -180,8 +181,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("wither_skull", InventoryChangeTrigger.TriggerInstance.hasItems(Blocks.WITHER_SKELETON_SKULL))
 			.save(consumer, "nether/get_wither_skull");
-		Advancement advancement5 = Advancement.Builder.advancement()
-			.parent(advancement4)
+		AdvancementHolder advancementHolder5 = Advancement.Builder.advancement()
+			.parent(advancementHolder4)
 			.display(
 				Items.NETHER_STAR,
 				Component.translatable("advancements.nether.summon_wither.title"),
@@ -194,8 +195,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("summoned", SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity().of(EntityType.WITHER)))
 			.save(consumer, "nether/summon_wither");
-		Advancement advancement6 = Advancement.Builder.advancement()
-			.parent(advancement3)
+		AdvancementHolder advancementHolder6 = Advancement.Builder.advancement()
+			.parent(advancementHolder3)
 			.display(
 				Items.BLAZE_ROD,
 				Component.translatable("advancements.nether.obtain_blaze_rod.title"),
@@ -208,8 +209,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("blaze_rod", InventoryChangeTrigger.TriggerInstance.hasItems(Items.BLAZE_ROD))
 			.save(consumer, "nether/obtain_blaze_rod");
-		Advancement advancement7 = Advancement.Builder.advancement()
-			.parent(advancement5)
+		AdvancementHolder advancementHolder7 = Advancement.Builder.advancement()
+			.parent(advancementHolder5)
 			.display(
 				Blocks.BEACON,
 				Component.translatable("advancements.nether.create_beacon.title"),
@@ -223,7 +224,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion("beacon", ConstructBeaconTrigger.TriggerInstance.constructedBeacon(MinMaxBounds.Ints.atLeast(1)))
 			.save(consumer, "nether/create_beacon");
 		Advancement.Builder.advancement()
-			.parent(advancement7)
+			.parent(advancementHolder7)
 			.display(
 				Blocks.BEACON,
 				Component.translatable("advancements.nether.create_full_beacon.title"),
@@ -236,8 +237,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("beacon", ConstructBeaconTrigger.TriggerInstance.constructedBeacon(MinMaxBounds.Ints.exactly(4)))
 			.save(consumer, "nether/create_full_beacon");
-		Advancement advancement8 = Advancement.Builder.advancement()
-			.parent(advancement6)
+		AdvancementHolder advancementHolder8 = Advancement.Builder.advancement()
+			.parent(advancementHolder6)
 			.display(
 				Items.POTION,
 				Component.translatable("advancements.nether.brew_potion.title"),
@@ -250,8 +251,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("potion", BrewedPotionTrigger.TriggerInstance.brewedPotion())
 			.save(consumer, "nether/brew_potion");
-		Advancement advancement9 = Advancement.Builder.advancement()
-			.parent(advancement8)
+		AdvancementHolder advancementHolder9 = Advancement.Builder.advancement()
+			.parent(advancementHolder8)
 			.display(
 				Items.MILK_BUCKET,
 				Component.translatable("advancements.nether.all_potions.title"),
@@ -284,7 +285,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.save(consumer, "nether/all_potions");
 		Advancement.Builder.advancement()
-			.parent(advancement9)
+			.parent(advancementHolder9)
 			.display(
 				Items.BUCKET,
 				Component.translatable("advancements.nether.all_effects.title"),
@@ -330,8 +331,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "nether/all_effects");
-		Advancement advancement10 = Advancement.Builder.advancement()
-			.parent(advancement)
+		AdvancementHolder advancementHolder10 = Advancement.Builder.advancement()
+			.parent(advancementHolder)
 			.display(
 				Items.ANCIENT_DEBRIS,
 				Component.translatable("advancements.nether.obtain_ancient_debris.title"),
@@ -345,7 +346,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion("ancient_debris", InventoryChangeTrigger.TriggerInstance.hasItems(Items.ANCIENT_DEBRIS))
 			.save(consumer, "nether/obtain_ancient_debris");
 		Advancement.Builder.advancement()
-			.parent(advancement10)
+			.parent(advancementHolder10)
 			.display(
 				Items.NETHERITE_CHESTPLATE,
 				Component.translatable("advancements.nether.netherite_armor.title"),
@@ -363,7 +364,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.save(consumer, "nether/netherite_armor");
 		Advancement.Builder.advancement()
-			.parent(advancement10)
+			.parent(advancementHolder10)
 			.display(
 				Items.LODESTONE,
 				Component.translatable("advancements.nether.use_lodestone.title"),
@@ -381,8 +382,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "nether/use_lodestone");
-		Advancement advancement11 = Advancement.Builder.advancement()
-			.parent(advancement)
+		AdvancementHolder advancementHolder11 = Advancement.Builder.advancement()
+			.parent(advancementHolder)
 			.display(
 				Items.CRYING_OBSIDIAN,
 				Component.translatable("advancements.nether.obtain_crying_obsidian.title"),
@@ -396,7 +397,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion("crying_obsidian", InventoryChangeTrigger.TriggerInstance.hasItems(Items.CRYING_OBSIDIAN))
 			.save(consumer, "nether/obtain_crying_obsidian");
 		Advancement.Builder.advancement()
-			.parent(advancement11)
+			.parent(advancementHolder11)
 			.display(
 				Items.RESPAWN_ANCHOR,
 				Component.translatable("advancements.nether.charge_respawn_anchor.title"),
@@ -420,8 +421,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "nether/charge_respawn_anchor");
-		Advancement advancement12 = Advancement.Builder.advancement()
-			.parent(advancement)
+		AdvancementHolder advancementHolder12 = Advancement.Builder.advancement()
+			.parent(advancementHolder)
 			.display(
 				Items.WARPED_FUNGUS_ON_A_STICK,
 				Component.translatable("advancements.nether.ride_strider.title"),
@@ -435,14 +436,14 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"used_warped_fungus_on_a_stick",
 				ItemDurabilityTrigger.TriggerInstance.changedDurability(
-					EntityPredicate.wrap(EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER))),
-					ItemPredicate.Builder.item().of(Items.WARPED_FUNGUS_ON_A_STICK).build(),
+					Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER)))),
+					Optional.of(ItemPredicate.Builder.item().of(Items.WARPED_FUNGUS_ON_A_STICK).build()),
 					MinMaxBounds.Ints.ANY
 				)
 			)
 			.save(consumer, "nether/ride_strider");
 		Advancement.Builder.advancement()
-			.parent(advancement12)
+			.parent(advancementHolder12)
 			.display(
 				Items.WARPED_FUNGUS_ON_A_STICK,
 				Component.translatable("advancements.nether.ride_strider_in_overworld_lava.title"),
@@ -464,7 +465,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.save(consumer, "nether/ride_strider_in_overworld_lava");
 		VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSourceParameterList.Preset.NETHER.usedBiomes().toList())
-			.parent(advancement12)
+			.parent(advancementHolder12)
 			.display(
 				Items.NETHERITE_BOOTS,
 				Component.translatable("advancements.nether.explore_nether.title"),
@@ -477,8 +478,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			)
 			.rewards(AdvancementRewards.Builder.experience(500))
 			.save(consumer, "nether/explore_nether");
-		Advancement advancement13 = Advancement.Builder.advancement()
-			.parent(advancement)
+		AdvancementHolder advancementHolder13 = Advancement.Builder.advancement()
+			.parent(advancementHolder)
 			.display(
 				Items.POLISHED_BLACKSTONE_BRICKS,
 				Component.translatable("advancements.nether.find_bastion.title"),
@@ -492,7 +493,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion("bastion", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.BASTION_REMNANT)))
 			.save(consumer, "nether/find_bastion");
 		Advancement.Builder.advancement()
-			.parent(advancement13)
+			.parent(advancementHolder13)
 			.display(
 				Blocks.CHEST,
 				Component.translatable("advancements.nether.loot_bastion.title"),
@@ -503,15 +504,15 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.requirements(RequirementsStrategy.OR)
+			.requirements(AdvancementRequirements.Strategy.OR)
 			.addCriterion("loot_bastion_other", LootTableTrigger.TriggerInstance.lootTableUsed(new ResourceLocation("minecraft:chests/bastion_other")))
 			.addCriterion("loot_bastion_treasure", LootTableTrigger.TriggerInstance.lootTableUsed(new ResourceLocation("minecraft:chests/bastion_treasure")))
 			.addCriterion("loot_bastion_hoglin_stable", LootTableTrigger.TriggerInstance.lootTableUsed(new ResourceLocation("minecraft:chests/bastion_hoglin_stable")))
 			.addCriterion("loot_bastion_bridge", LootTableTrigger.TriggerInstance.lootTableUsed(new ResourceLocation("minecraft:chests/bastion_bridge")))
 			.save(consumer, "nether/loot_bastion");
 		Advancement.Builder.advancement()
-			.parent(advancement)
-			.requirements(RequirementsStrategy.OR)
+			.parent(advancementHolder)
+			.requirements(AdvancementRequirements.Strategy.OR)
 			.display(
 				Items.GOLD_INGOT,
 				Component.translatable("advancements.nether.distract_piglin.title"),
@@ -526,8 +527,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				"distract_piglin",
 				PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByEntity(
 					DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE,
-					ItemPredicate.Builder.item().of(ItemTags.PIGLIN_LOVED).build(),
-					EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false)))
+					Optional.of(ItemPredicate.Builder.item().of(ItemTags.PIGLIN_LOVED).build()),
+					Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false))))
 				)
 			)
 			.addCriterion(
@@ -535,7 +536,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
 					Optional.of(DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE),
 					ItemPredicate.Builder.item().of(PiglinAi.BARTERING_ITEM),
-					EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false)))
+					Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false))))
 				)
 			)
 			.save(consumer, "nether/distract_piglin");

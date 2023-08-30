@@ -105,11 +105,17 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 				return;
 			}
 
+			Component component = playerList.canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile);
+			if (component != null) {
+				this.disconnect(component);
+				return;
+			}
+
 			ServerPlayer serverPlayer = playerList.getPlayerForLogin(this.gameProfile);
 			playerList.placeNewPlayer(this.connection, serverPlayer, this.latency());
 			this.connection.resumeInboundAfterProtocolChange();
-		} catch (Exception var4) {
-			LOGGER.error("Couldn't place player in world", (Throwable)var4);
+		} catch (Exception var5) {
+			LOGGER.error("Couldn't place player in world", (Throwable)var5);
 			this.connection.send(new ClientboundDisconnectPacket(DISCONNECT_REASON_INVALID_DATA));
 			this.connection.disconnect(DISCONNECT_REASON_INVALID_DATA);
 		}

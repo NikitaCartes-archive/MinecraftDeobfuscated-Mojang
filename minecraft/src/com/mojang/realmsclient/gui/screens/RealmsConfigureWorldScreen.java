@@ -145,12 +145,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 					Component.translatable("mco.configure.world.buttons.resetworld"),
 					button -> this.minecraft
 							.setScreen(
-								new RealmsResetWorldScreen(
-									this,
-									this.serverData.clone(),
-									() -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())),
-									() -> this.minecraft.setScreen(this.getNewScreen())
-								)
+								RealmsResetWorldScreen.forResetSlot(this, this.serverData.clone(), () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())))
 							)
 				)
 				.bounds(this.leftButton(2), row(13) - 5, 90, 20)
@@ -359,18 +354,9 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 				new RealmsLongConfirmationScreen(
 					bl -> {
 						if (bl) {
-							RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(
-								this,
-								realmsServer,
-								Component.translatable("mco.configure.world.switch.slot"),
-								Component.translatable("mco.configure.world.switch.slot.subtitle"),
-								-6250336,
-								CommonComponents.GUI_CANCEL,
-								() -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())),
-								() -> this.minecraft.setScreen(this.getNewScreen())
+							RealmsResetWorldScreen realmsResetWorldScreen = RealmsResetWorldScreen.forEmptySlot(
+								this, i, realmsServer, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen()))
 							);
-							realmsResetWorldScreen.setSlot(i);
-							realmsResetWorldScreen.setResetTitle(Component.translatable("mco.create.world.reset.title"));
 							this.minecraft.setScreen(realmsResetWorldScreen);
 						} else {
 							this.minecraft.setScreen(this);

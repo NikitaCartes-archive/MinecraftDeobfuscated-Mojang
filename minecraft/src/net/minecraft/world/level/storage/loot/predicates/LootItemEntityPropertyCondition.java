@@ -43,7 +43,7 @@ public record LootItemEntityPropertyCondition(Optional<EntityPredicate> predicat
 	}
 
 	public static LootItemCondition.Builder hasProperties(LootContext.EntityTarget entityTarget, EntityPredicate.Builder builder) {
-		return () -> new LootItemEntityPropertyCondition(builder.build(), entityTarget);
+		return () -> new LootItemEntityPropertyCondition(Optional.of(builder.build()), entityTarget);
 	}
 
 	public static LootItemCondition.Builder hasProperties(LootContext.EntityTarget entityTarget, EntityPredicate entityPredicate) {

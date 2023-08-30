@@ -28,10 +28,6 @@ public record DamageSourcePredicate(List<TagPredicate<DamageType>> tags, Optiona
 				.apply(instance, DamageSourcePredicate::new)
 	);
 
-	static Optional<DamageSourcePredicate> of(List<TagPredicate<DamageType>> list, Optional<EntityPredicate> optional, Optional<EntityPredicate> optional2) {
-		return list.isEmpty() && optional.isEmpty() && optional2.isEmpty() ? Optional.empty() : Optional.of(new DamageSourcePredicate(list, optional, optional2));
-	}
-
 	public boolean matches(ServerPlayer serverPlayer, DamageSource damageSource) {
 		return this.matches(serverPlayer.serverLevel(), serverPlayer.position(), damageSource);
 	}
@@ -73,17 +69,17 @@ public record DamageSourcePredicate(List<TagPredicate<DamageType>> tags, Optiona
 		}
 
 		public DamageSourcePredicate.Builder direct(EntityPredicate.Builder builder) {
-			this.directEntity = builder.build();
+			this.directEntity = Optional.of(builder.build());
 			return this;
 		}
 
 		public DamageSourcePredicate.Builder source(EntityPredicate.Builder builder) {
-			this.sourceEntity = builder.build();
+			this.sourceEntity = Optional.of(builder.build());
 			return this;
 		}
 
-		public Optional<DamageSourcePredicate> build() {
-			return DamageSourcePredicate.of(this.tags.build(), this.directEntity, this.sourceEntity);
+		public DamageSourcePredicate build() {
+			return new DamageSourcePredicate(this.tags.build(), this.directEntity, this.sourceEntity);
 		}
 	}
 }

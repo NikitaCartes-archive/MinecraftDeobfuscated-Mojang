@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.advancements.critereon.MinMaxBounds;
@@ -448,8 +448,8 @@ public class EntitySelectorOptions {
 							ServerAdvancementManager serverAdvancementManager = serverPlayer.getServer().getAdvancements();
 
 							for (Entry<ResourceLocation, Predicate<AdvancementProgress>> entry : map.entrySet()) {
-								Advancement advancement = serverAdvancementManager.getAdvancement((ResourceLocation)entry.getKey());
-								if (advancement == null || !((Predicate)entry.getValue()).test(playerAdvancements.getOrStartProgress(advancement))) {
+								AdvancementHolder advancementHolder = serverAdvancementManager.get((ResourceLocation)entry.getKey());
+								if (advancementHolder == null || !((Predicate)entry.getValue()).test(playerAdvancements.getOrStartProgress(advancementHolder))) {
 									return false;
 								}
 							}

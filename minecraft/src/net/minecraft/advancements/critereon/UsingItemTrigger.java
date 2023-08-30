@@ -2,18 +2,12 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 public class UsingItemTrigger extends SimpleCriterionTrigger<UsingItemTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("using_item");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public UsingItemTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -29,12 +23,13 @@ public class UsingItemTrigger extends SimpleCriterionTrigger<UsingItemTrigger.Tr
 		private final Optional<ItemPredicate> item;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
-			super(UsingItemTrigger.ID, optional);
+			super(optional);
 			this.item = optional2;
 		}
 
-		public static UsingItemTrigger.TriggerInstance lookingAt(EntityPredicate.Builder builder, ItemPredicate.Builder builder2) {
-			return new UsingItemTrigger.TriggerInstance(EntityPredicate.wrap(builder), builder2.build());
+		public static Criterion<UsingItemTrigger.TriggerInstance> lookingAt(EntityPredicate.Builder builder, ItemPredicate.Builder builder2) {
+			return CriteriaTriggers.USING_ITEM
+				.createCriterion(new UsingItemTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(builder)), Optional.of(builder2.build())));
 		}
 
 		public boolean matches(ItemStack itemStack) {

@@ -198,12 +198,8 @@ public class CreateFlatWorldScreen extends Screen {
 
 			@Override
 			public boolean mouseClicked(double d, double e, int i) {
-				if (i == 0) {
-					DetailsList.this.setSelected(this);
-					return true;
-				} else {
-					return false;
-				}
+				DetailsList.this.setSelected(this);
+				return true;
 			}
 
 			private void blitSlot(GuiGraphics guiGraphics, int i, int j, ItemStack itemStack) {

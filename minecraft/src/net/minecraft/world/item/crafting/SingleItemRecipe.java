@@ -1,13 +1,14 @@
 package net.minecraft.world.item.crafting;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class SingleItemRecipe implements Recipe<Container> {
@@ -15,15 +16,11 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 	protected final ItemStack result;
 	private final RecipeType<?> type;
 	private final RecipeSerializer<?> serializer;
-	protected final ResourceLocation id;
 	protected final String group;
 
-	public SingleItemRecipe(
-		RecipeType<?> recipeType, RecipeSerializer<?> recipeSerializer, ResourceLocation resourceLocation, String string, Ingredient ingredient, ItemStack itemStack
-	) {
+	public SingleItemRecipe(RecipeType<?> recipeType, RecipeSerializer<?> recipeSerializer, String string, Ingredient ingredient, ItemStack itemStack) {
 		this.type = recipeType;
 		this.serializer = recipeSerializer;
-		this.id = resourceLocation;
 		this.group = string;
 		this.ingredient = ingredient;
 		this.result = itemStack;
@@ -37,11 +34,6 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 	@Override
 	public RecipeSerializer<?> getSerializer() {
 		return this.serializer;
-	}
-
-	@Override
-	public ResourceLocation getId() {
-		return this.id;
 	}
 
 	@Override
@@ -73,31 +65,31 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 
 	public static class Serializer<T extends SingleItemRecipe> implements RecipeSerializer<T> {
 		final SingleItemRecipe.Serializer.SingleItemMaker<T> factory;
+		private final Codec<T> codec;
 
 		protected Serializer(SingleItemRecipe.Serializer.SingleItemMaker<T> singleItemMaker) {
 			this.factory = singleItemMaker;
+			this.codec = RecordCodecBuilder.create(
+				instance -> instance.group(
+							ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(singleItemRecipe -> singleItemRecipe.group),
+							Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(singleItemRecipe -> singleItemRecipe.ingredient),
+							BuiltInRegistries.ITEM.byNameCodec().fieldOf("result").forGetter(singleItemRecipe -> singleItemRecipe.result.getItem()),
+							Codec.INT.fieldOf("count").forGetter(singleItemRecipe -> singleItemRecipe.result.getCount())
+						)
+						.apply(instance, singleItemMaker::create)
+			);
 		}
 
-		public T fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
-			String string = GsonHelper.getAsString(jsonObject, "group", "");
-			Ingredient ingredient;
-			if (GsonHelper.isArrayNode(jsonObject, "ingredient")) {
-				ingredient = Ingredient.fromJson(GsonHelper.getAsJsonArray(jsonObject, "ingredient"), false);
-			} else {
-				ingredient = Ingredient.fromJson(GsonHelper.getAsJsonObject(jsonObject, "ingredient"), false);
-			}
-
-			String string2 = GsonHelper.getAsString(jsonObject, "result");
-			int i = GsonHelper.getAsInt(jsonObject, "count");
-			ItemStack itemStack = new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(string2)), i);
-			return this.factory.create(resourceLocation, string, ingredient, itemStack);
+		@Override
+		public Codec<T> codec() {
+			return this.codec;
 		}
 
-		public T fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
+		public T fromNetwork(FriendlyByteBuf friendlyByteBuf) {
 			String string = friendlyByteBuf.readUtf();
 			Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
 			ItemStack itemStack = friendlyByteBuf.readItem();
-			return this.factory.create(resourceLocation, string, ingredient, itemStack);
+			return this.factory.create(string, ingredient, itemStack.getItem(), itemStack.getCount());
 		}
 
 		public void toNetwork(FriendlyByteBuf friendlyByteBuf, T singleItemRecipe) {
@@ -107,7 +99,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 		}
 
 		interface SingleItemMaker<T extends SingleItemRecipe> {
-			T create(ResourceLocation resourceLocation, String string, Ingredient ingredient, ItemStack itemStack);
+			T create(String string, Ingredient ingredient, Item item, int i);
 		}
 	}
 }

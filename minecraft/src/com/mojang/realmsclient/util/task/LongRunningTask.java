@@ -1,20 +1,22 @@
 package com.mojang.realmsclient.util.task;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.realmsclient.gui.ErrorCallback;
-import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
+import com.mojang.realmsclient.RealmsMainScreen;
+import com.mojang.realmsclient.exception.RealmsServiceException;
+import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public abstract class LongRunningTask implements ErrorCallback, Runnable {
+public abstract class LongRunningTask implements Runnable {
 	protected static final int NUMBER_OF_RETRIES = 25;
 	private static final Logger LOGGER = LogUtils.getLogger();
-	protected RealmsLongRunningMcoTaskScreen longRunningMcoTaskScreen;
+	private boolean aborted = false;
 
 	protected static void pause(long l) {
 		try {
@@ -30,21 +32,28 @@ public abstract class LongRunningTask implements ErrorCallback, Runnable {
 		minecraft.execute(() -> minecraft.setScreen(screen));
 	}
 
-	public void setScreen(RealmsLongRunningMcoTaskScreen realmsLongRunningMcoTaskScreen) {
-		this.longRunningMcoTaskScreen = realmsLongRunningMcoTaskScreen;
+	protected void error(Component component) {
+		this.abortTask();
+		Minecraft minecraft = Minecraft.getInstance();
+		minecraft.execute(() -> minecraft.setScreen(new RealmsGenericErrorScreen(component, new RealmsMainScreen(new TitleScreen()))));
 	}
 
-	@Override
-	public void error(Component component) {
-		this.longRunningMcoTaskScreen.error(component);
+	protected void error(Exception exception) {
+		if (exception instanceof RealmsServiceException realmsServiceException) {
+			this.error(realmsServiceException.realmsError.errorMessage());
+		} else {
+			this.error(Component.literal(exception.getMessage()));
+		}
 	}
 
-	public void setTitle(Component component) {
-		this.longRunningMcoTaskScreen.setTitle(component);
+	protected void error(RealmsServiceException realmsServiceException) {
+		this.error(realmsServiceException.realmsError.errorMessage());
 	}
+
+	public abstract Component getTitle();
 
 	public boolean aborted() {
-		return this.longRunningMcoTaskScreen.aborted();
+		return this.aborted;
 	}
 
 	public void tick() {
@@ -54,5 +63,6 @@ public abstract class LongRunningTask implements ErrorCallback, Runnable {
 	}
 
 	public void abortTask() {
+		this.aborted = true;
 	}
 }

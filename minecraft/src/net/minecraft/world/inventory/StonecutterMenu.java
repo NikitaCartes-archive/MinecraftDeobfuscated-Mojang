@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.Level;
@@ -25,7 +26,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 	private final ContainerLevelAccess access;
 	private final DataSlot selectedRecipeIndex = DataSlot.standalone();
 	private final Level level;
-	private List<StonecutterRecipe> recipes = Lists.<StonecutterRecipe>newArrayList();
+	private List<RecipeHolder<StonecutterRecipe>> recipes = Lists.<RecipeHolder<StonecutterRecipe>>newArrayList();
 	private ItemStack input = ItemStack.EMPTY;
 	long lastSoundTime;
 	final Slot inputSlot;
@@ -98,7 +99,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 		return this.selectedRecipeIndex.get();
 	}
 
-	public List<StonecutterRecipe> getRecipes() {
+	public List<RecipeHolder<StonecutterRecipe>> getRecipes() {
 		return this.recipes;
 	}
 
@@ -149,10 +150,10 @@ public class StonecutterMenu extends AbstractContainerMenu {
 
 	void setupResultSlot() {
 		if (!this.recipes.isEmpty() && this.isValidRecipeIndex(this.selectedRecipeIndex.get())) {
-			StonecutterRecipe stonecutterRecipe = (StonecutterRecipe)this.recipes.get(this.selectedRecipeIndex.get());
-			ItemStack itemStack = stonecutterRecipe.assemble(this.container, this.level.registryAccess());
+			RecipeHolder<StonecutterRecipe> recipeHolder = (RecipeHolder<StonecutterRecipe>)this.recipes.get(this.selectedRecipeIndex.get());
+			ItemStack itemStack = recipeHolder.value().assemble(this.container, this.level.registryAccess());
 			if (itemStack.isItemEnabled(this.level.enabledFeatures())) {
-				this.resultContainer.setRecipeUsed(stonecutterRecipe);
+				this.resultContainer.setRecipeUsed(recipeHolder);
 				this.resultSlot.set(itemStack);
 			} else {
 				this.resultSlot.set(ItemStack.EMPTY);

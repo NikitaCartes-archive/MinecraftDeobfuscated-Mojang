@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class WorldCreationTask extends LongRunningTask {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Component TITLE = Component.translatable("mco.create.world.wait");
 	private final String name;
 	private final String motd;
 	private final long worldId;
@@ -25,7 +26,6 @@ public class WorldCreationTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(Component.translatable("mco.create.world.wait"));
 		RealmsClient realmsClient = RealmsClient.create();
 
 		try {
@@ -38,5 +38,10 @@ public class WorldCreationTask extends LongRunningTask {
 			LOGGER.error("Could not create world", (Throwable)var4);
 			this.error(var4);
 		}
+	}
+
+	@Override
+	public Component getTitle() {
+		return TITLE;
 	}
 }

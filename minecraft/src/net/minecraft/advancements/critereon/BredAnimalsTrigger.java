@@ -3,20 +3,14 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("bred_animals");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public BredAnimalsTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -44,26 +38,29 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 			Optional<ContextAwarePredicate> optional3,
 			Optional<ContextAwarePredicate> optional4
 		) {
-			super(BredAnimalsTrigger.ID, optional);
+			super(optional);
 			this.parent = optional2;
 			this.partner = optional3;
 			this.child = optional4;
 		}
 
-		public static BredAnimalsTrigger.TriggerInstance bredAnimals() {
-			return new BredAnimalsTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+		public static Criterion<BredAnimalsTrigger.TriggerInstance> bredAnimals() {
+			return CriteriaTriggers.BRED_ANIMALS
+				.createCriterion(new BredAnimalsTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
 		}
 
-		public static BredAnimalsTrigger.TriggerInstance bredAnimals(EntityPredicate.Builder builder) {
-			return new BredAnimalsTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty(), EntityPredicate.wrap(builder));
+		public static Criterion<BredAnimalsTrigger.TriggerInstance> bredAnimals(EntityPredicate.Builder builder) {
+			return CriteriaTriggers.BRED_ANIMALS
+				.createCriterion(new BredAnimalsTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(EntityPredicate.wrap(builder))));
 		}
 
-		public static BredAnimalsTrigger.TriggerInstance bredAnimals(
+		public static Criterion<BredAnimalsTrigger.TriggerInstance> bredAnimals(
 			Optional<EntityPredicate> optional, Optional<EntityPredicate> optional2, Optional<EntityPredicate> optional3
 		) {
-			return new BredAnimalsTrigger.TriggerInstance(
-				Optional.empty(), EntityPredicate.wrap(optional), EntityPredicate.wrap(optional2), EntityPredicate.wrap(optional3)
-			);
+			return CriteriaTriggers.BRED_ANIMALS
+				.createCriterion(
+					new BredAnimalsTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional), EntityPredicate.wrap(optional2), EntityPredicate.wrap(optional3))
+				);
 		}
 
 		public boolean matches(LootContext lootContext, LootContext lootContext2, @Nullable LootContext lootContext3) {

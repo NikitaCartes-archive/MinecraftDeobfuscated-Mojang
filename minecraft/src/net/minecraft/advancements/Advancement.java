@@ -1,17 +1,13 @@
 package net.minecraft.advancements;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.DeserializationContext;
@@ -24,200 +20,131 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import org.apache.commons.lang3.ArrayUtils;
 
-public class Advancement {
-	@Nullable
-	private final Advancement parent;
-	@Nullable
-	private final DisplayInfo display;
-	private final AdvancementRewards rewards;
-	private final ResourceLocation id;
-	private final Map<String, Criterion> criteria;
-	private final String[][] requirements;
-	private final Set<Advancement> children = Sets.<Advancement>newLinkedHashSet();
-	private final Component chatComponent;
-	private final boolean sendsTelemetryEvent;
-
+public record Advancement(
+	Optional<ResourceLocation> parent,
+	Optional<DisplayInfo> display,
+	AdvancementRewards rewards,
+	Map<String, Criterion<?>> criteria,
+	AdvancementRequirements requirements,
+	boolean sendsTelemetryEvent,
+	Optional<Component> name
+) {
 	public Advancement(
-		ResourceLocation resourceLocation,
-		@Nullable Advancement advancement,
-		@Nullable DisplayInfo displayInfo,
+		Optional<ResourceLocation> optional,
+		Optional<DisplayInfo> optional2,
 		AdvancementRewards advancementRewards,
-		Map<String, Criterion> map,
-		String[][] strings,
+		Map<String, Criterion<?>> map,
+		AdvancementRequirements advancementRequirements,
 		boolean bl
 	) {
-		this.id = resourceLocation;
-		this.display = displayInfo;
-		this.criteria = ImmutableMap.copyOf(map);
-		this.parent = advancement;
-		this.rewards = advancementRewards;
-		this.requirements = strings;
-		this.sendsTelemetryEvent = bl;
-		if (advancement != null) {
-			advancement.addChild(this);
+		this(optional, optional2, advancementRewards, Map.copyOf(map), advancementRequirements, bl, optional2.map(Advancement::decorateName));
+	}
+
+	private static Component decorateName(DisplayInfo displayInfo) {
+		Component component = displayInfo.getTitle();
+		ChatFormatting chatFormatting = displayInfo.getFrame().getChatColor();
+		Component component2 = ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withColor(chatFormatting)).append("\n").append(displayInfo.getDescription());
+		Component component3 = component.copy().withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
+		return ComponentUtils.wrapInSquareBrackets(component3).withStyle(chatFormatting);
+	}
+
+	public static Component name(AdvancementHolder advancementHolder) {
+		return (Component)advancementHolder.value().name().orElseGet(() -> Component.literal(advancementHolder.id().toString()));
+	}
+
+	public JsonObject serializeToJson() {
+		JsonObject jsonObject = new JsonObject();
+		this.parent.ifPresent(resourceLocation -> jsonObject.addProperty("parent", resourceLocation.toString()));
+		this.display.ifPresent(displayInfo -> jsonObject.add("display", displayInfo.serializeToJson()));
+		jsonObject.add("rewards", this.rewards.serializeToJson());
+		JsonObject jsonObject2 = new JsonObject();
+
+		for (Entry<String, Criterion<?>> entry : this.criteria.entrySet()) {
+			jsonObject2.add((String)entry.getKey(), ((Criterion)entry.getValue()).serializeToJson());
 		}
 
-		if (displayInfo == null) {
-			this.chatComponent = Component.literal(resourceLocation.toString());
+		jsonObject.add("criteria", jsonObject2);
+		jsonObject.add("requirements", this.requirements.toJson());
+		jsonObject.addProperty("sends_telemetry_event", this.sendsTelemetryEvent);
+		return jsonObject;
+	}
+
+	public static Advancement fromJson(JsonObject jsonObject, DeserializationContext deserializationContext) {
+		Optional<ResourceLocation> optional = jsonObject.has("parent")
+			? Optional.of(new ResourceLocation(GsonHelper.getAsString(jsonObject, "parent")))
+			: Optional.empty();
+		Optional<DisplayInfo> optional2 = jsonObject.has("display")
+			? Optional.of(DisplayInfo.fromJson(GsonHelper.getAsJsonObject(jsonObject, "display")))
+			: Optional.empty();
+		AdvancementRewards advancementRewards = jsonObject.has("rewards")
+			? AdvancementRewards.deserialize(GsonHelper.getAsJsonObject(jsonObject, "rewards"))
+			: AdvancementRewards.EMPTY;
+		Map<String, Criterion<?>> map = Criterion.criteriaFromJson(GsonHelper.getAsJsonObject(jsonObject, "criteria"), deserializationContext);
+		if (map.isEmpty()) {
+			throw new JsonSyntaxException("Advancement criteria cannot be empty");
 		} else {
-			Component component = displayInfo.getTitle();
-			ChatFormatting chatFormatting = displayInfo.getFrame().getChatColor();
-			Component component2 = ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withColor(chatFormatting)).append("\n").append(displayInfo.getDescription());
-			Component component3 = component.copy().withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
-			this.chatComponent = ComponentUtils.wrapInSquareBrackets(component3).withStyle(chatFormatting);
+			AdvancementRequirements advancementRequirements = AdvancementRequirements.fromJson(
+				GsonHelper.getAsJsonArray(jsonObject, "requirements", new JsonArray()), map.keySet()
+			);
+			if (advancementRequirements.isEmpty()) {
+				advancementRequirements = AdvancementRequirements.allOf(map.keySet());
+			}
+
+			boolean bl = GsonHelper.getAsBoolean(jsonObject, "sends_telemetry_event", false);
+			return new Advancement(optional, optional2, advancementRewards, map, advancementRequirements, bl);
 		}
 	}
 
-	public Advancement.Builder deconstruct() {
-		return new Advancement.Builder(
-			this.parent == null ? null : this.parent.getId(), this.display, this.rewards, this.criteria, this.requirements, this.sendsTelemetryEvent
+	public void write(FriendlyByteBuf friendlyByteBuf) {
+		friendlyByteBuf.writeOptional(this.parent, FriendlyByteBuf::writeResourceLocation);
+		friendlyByteBuf.writeOptional(this.display, (friendlyByteBufx, displayInfo) -> displayInfo.serializeToNetwork(friendlyByteBufx));
+		this.requirements.write(friendlyByteBuf);
+		friendlyByteBuf.writeBoolean(this.sendsTelemetryEvent);
+	}
+
+	public static Advancement read(FriendlyByteBuf friendlyByteBuf) {
+		return new Advancement(
+			friendlyByteBuf.readOptional(FriendlyByteBuf::readResourceLocation),
+			friendlyByteBuf.readOptional(DisplayInfo::fromNetwork),
+			AdvancementRewards.EMPTY,
+			Map.of(),
+			new AdvancementRequirements(friendlyByteBuf),
+			friendlyByteBuf.readBoolean()
 		);
 	}
 
-	@Nullable
-	public Advancement getParent() {
-		return this.parent;
-	}
-
-	public Advancement getRoot() {
-		return getRoot(this);
-	}
-
-	public static Advancement getRoot(Advancement advancement) {
-		Advancement advancement2 = advancement;
-
-		while (true) {
-			Advancement advancement3 = advancement2.getParent();
-			if (advancement3 == null) {
-				return advancement2;
-			}
-
-			advancement2 = advancement3;
-		}
-	}
-
-	@Nullable
-	public DisplayInfo getDisplay() {
-		return this.display;
-	}
-
-	public boolean sendsTelemetryEvent() {
-		return this.sendsTelemetryEvent;
-	}
-
-	public AdvancementRewards getRewards() {
-		return this.rewards;
-	}
-
-	public String toString() {
-		return "SimpleAdvancement{id="
-			+ this.getId()
-			+ ", parent="
-			+ (this.parent == null ? "null" : this.parent.getId())
-			+ ", display="
-			+ this.display
-			+ ", rewards="
-			+ this.rewards
-			+ ", criteria="
-			+ this.criteria
-			+ ", requirements="
-			+ Arrays.deepToString(this.requirements)
-			+ ", sendsTelemetryEvent="
-			+ this.sendsTelemetryEvent
-			+ "}";
-	}
-
-	public Iterable<Advancement> getChildren() {
-		return this.children;
-	}
-
-	public Map<String, Criterion> getCriteria() {
-		return this.criteria;
-	}
-
-	public int getMaxCriteraRequired() {
-		return this.requirements.length;
-	}
-
-	public void addChild(Advancement advancement) {
-		this.children.add(advancement);
-	}
-
-	public ResourceLocation getId() {
-		return this.id;
-	}
-
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else {
-			return !(object instanceof Advancement advancement) ? false : this.id.equals(advancement.id);
-		}
-	}
-
-	public int hashCode() {
-		return this.id.hashCode();
-	}
-
-	public String[][] getRequirements() {
-		return this.requirements;
-	}
-
-	public Component getChatComponent() {
-		return this.chatComponent;
+	public boolean isRoot() {
+		return this.parent.isEmpty();
 	}
 
 	public static class Builder {
-		@Nullable
-		private ResourceLocation parentId;
-		@Nullable
-		private Advancement parent;
-		@Nullable
-		private DisplayInfo display;
+		private Optional<ResourceLocation> parent = Optional.empty();
+		private Optional<DisplayInfo> display = Optional.empty();
 		private AdvancementRewards rewards = AdvancementRewards.EMPTY;
-		private Map<String, Criterion> criteria = Maps.<String, Criterion>newLinkedHashMap();
-		@Nullable
-		private String[][] requirements;
-		private RequirementsStrategy requirementsStrategy = RequirementsStrategy.AND;
-		private final boolean sendsTelemetryEvent;
-
-		Builder(
-			@Nullable ResourceLocation resourceLocation,
-			@Nullable DisplayInfo displayInfo,
-			AdvancementRewards advancementRewards,
-			Map<String, Criterion> map,
-			String[][] strings,
-			boolean bl
-		) {
-			this.parentId = resourceLocation;
-			this.display = displayInfo;
-			this.rewards = advancementRewards;
-			this.criteria = map;
-			this.requirements = strings;
-			this.sendsTelemetryEvent = bl;
-		}
-
-		private Builder(boolean bl) {
-			this.sendsTelemetryEvent = bl;
-		}
+		private final ImmutableMap.Builder<String, Criterion<?>> criteria = ImmutableMap.builder();
+		private Optional<AdvancementRequirements> requirements = Optional.empty();
+		private AdvancementRequirements.Strategy requirementsStrategy = AdvancementRequirements.Strategy.AND;
+		private boolean sendsTelemetryEvent;
 
 		public static Advancement.Builder advancement() {
-			return new Advancement.Builder(true);
+			return new Advancement.Builder().sendsTelemetryEvent();
 		}
 
 		public static Advancement.Builder recipeAdvancement() {
-			return new Advancement.Builder(false);
+			return new Advancement.Builder();
 		}
 
-		public Advancement.Builder parent(Advancement advancement) {
-			this.parent = advancement;
+		public Advancement.Builder parent(AdvancementHolder advancementHolder) {
+			this.parent = Optional.of(advancementHolder.id());
 			return this;
 		}
 
+		@Deprecated(
+			forRemoval = true
+		)
 		public Advancement.Builder parent(ResourceLocation resourceLocation) {
-			this.parentId = resourceLocation;
+			this.parent = Optional.of(resourceLocation);
 			return this;
 		}
 
@@ -248,7 +175,7 @@ public class Advancement {
 		}
 
 		public Advancement.Builder display(DisplayInfo displayInfo) {
-			this.display = displayInfo;
+			this.display = Optional.of(displayInfo);
 			return this;
 		}
 
@@ -261,222 +188,38 @@ public class Advancement {
 			return this;
 		}
 
-		public Advancement.Builder addCriterion(String string, CriterionTriggerInstance criterionTriggerInstance) {
-			return this.addCriterion(string, new Criterion(criterionTriggerInstance));
-		}
-
-		public Advancement.Builder addCriterion(String string, Criterion criterion) {
-			if (this.criteria.containsKey(string)) {
-				throw new IllegalArgumentException("Duplicate criterion " + string);
-			} else {
-				this.criteria.put(string, criterion);
-				return this;
-			}
-		}
-
-		public Advancement.Builder requirements(RequirementsStrategy requirementsStrategy) {
-			this.requirementsStrategy = requirementsStrategy;
+		public Advancement.Builder addCriterion(String string, Criterion<?> criterion) {
+			this.criteria.put(string, criterion);
 			return this;
 		}
 
-		public Advancement.Builder requirements(String[][] strings) {
-			this.requirements = strings;
+		public Advancement.Builder requirements(AdvancementRequirements.Strategy strategy) {
+			this.requirementsStrategy = strategy;
 			return this;
 		}
 
-		public boolean canBuild(Function<ResourceLocation, Advancement> function) {
-			if (this.parentId == null) {
-				return true;
-			} else {
-				if (this.parent == null) {
-					this.parent = (Advancement)function.apply(this.parentId);
-				}
-
-				return this.parent != null;
-			}
+		public Advancement.Builder requirements(AdvancementRequirements advancementRequirements) {
+			this.requirements = Optional.of(advancementRequirements);
+			return this;
 		}
 
-		public Advancement build(ResourceLocation resourceLocation) {
-			if (!this.canBuild(resourceLocationx -> null)) {
-				throw new IllegalStateException("Tried to build incomplete advancement!");
-			} else {
-				if (this.requirements == null) {
-					this.requirements = this.requirementsStrategy.createRequirements(this.criteria.keySet());
-				}
-
-				return new Advancement(resourceLocation, this.parent, this.display, this.rewards, this.criteria, this.requirements, this.sendsTelemetryEvent);
-			}
+		public Advancement.Builder sendsTelemetryEvent() {
+			this.sendsTelemetryEvent = true;
+			return this;
 		}
 
-		public Advancement save(Consumer<Advancement> consumer, String string) {
-			Advancement advancement = this.build(new ResourceLocation(string));
-			consumer.accept(advancement);
-			return advancement;
+		public AdvancementHolder build(ResourceLocation resourceLocation) {
+			Map<String, Criterion<?>> map = this.criteria.buildOrThrow();
+			AdvancementRequirements advancementRequirements = (AdvancementRequirements)this.requirements.orElseGet(() -> this.requirementsStrategy.create(map.keySet()));
+			return new AdvancementHolder(
+				resourceLocation, new Advancement(this.parent, this.display, this.rewards, map, advancementRequirements, this.sendsTelemetryEvent)
+			);
 		}
 
-		public JsonObject serializeToJson() {
-			if (this.requirements == null) {
-				this.requirements = this.requirementsStrategy.createRequirements(this.criteria.keySet());
-			}
-
-			JsonObject jsonObject = new JsonObject();
-			if (this.parent != null) {
-				jsonObject.addProperty("parent", this.parent.getId().toString());
-			} else if (this.parentId != null) {
-				jsonObject.addProperty("parent", this.parentId.toString());
-			}
-
-			if (this.display != null) {
-				jsonObject.add("display", this.display.serializeToJson());
-			}
-
-			jsonObject.add("rewards", this.rewards.serializeToJson());
-			JsonObject jsonObject2 = new JsonObject();
-
-			for (Entry<String, Criterion> entry : this.criteria.entrySet()) {
-				jsonObject2.add((String)entry.getKey(), ((Criterion)entry.getValue()).serializeToJson());
-			}
-
-			jsonObject.add("criteria", jsonObject2);
-			JsonArray jsonArray = new JsonArray();
-
-			for (String[] strings : this.requirements) {
-				JsonArray jsonArray2 = new JsonArray();
-
-				for (String string : strings) {
-					jsonArray2.add(string);
-				}
-
-				jsonArray.add(jsonArray2);
-			}
-
-			jsonObject.add("requirements", jsonArray);
-			jsonObject.addProperty("sends_telemetry_event", this.sendsTelemetryEvent);
-			return jsonObject;
-		}
-
-		public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-			if (this.requirements == null) {
-				this.requirements = this.requirementsStrategy.createRequirements(this.criteria.keySet());
-			}
-
-			friendlyByteBuf.writeNullable(this.parentId, FriendlyByteBuf::writeResourceLocation);
-			friendlyByteBuf.writeNullable(this.display, (friendlyByteBufx, displayInfo) -> displayInfo.serializeToNetwork(friendlyByteBufx));
-			Criterion.serializeToNetwork(this.criteria, friendlyByteBuf);
-			friendlyByteBuf.writeVarInt(this.requirements.length);
-
-			for (String[] strings : this.requirements) {
-				friendlyByteBuf.writeVarInt(strings.length);
-
-				for (String string : strings) {
-					friendlyByteBuf.writeUtf(string);
-				}
-			}
-
-			friendlyByteBuf.writeBoolean(this.sendsTelemetryEvent);
-		}
-
-		public String toString() {
-			return "Task Advancement{parentId="
-				+ this.parentId
-				+ ", display="
-				+ this.display
-				+ ", rewards="
-				+ this.rewards
-				+ ", criteria="
-				+ this.criteria
-				+ ", requirements="
-				+ Arrays.deepToString(this.requirements)
-				+ ", sends_telemetry_event="
-				+ this.sendsTelemetryEvent
-				+ "}";
-		}
-
-		public static Advancement.Builder fromJson(JsonObject jsonObject, DeserializationContext deserializationContext) {
-			ResourceLocation resourceLocation = jsonObject.has("parent") ? new ResourceLocation(GsonHelper.getAsString(jsonObject, "parent")) : null;
-			DisplayInfo displayInfo = jsonObject.has("display") ? DisplayInfo.fromJson(GsonHelper.getAsJsonObject(jsonObject, "display")) : null;
-			AdvancementRewards advancementRewards = jsonObject.has("rewards")
-				? AdvancementRewards.deserialize(GsonHelper.getAsJsonObject(jsonObject, "rewards"))
-				: AdvancementRewards.EMPTY;
-			Map<String, Criterion> map = Criterion.criteriaFromJson(GsonHelper.getAsJsonObject(jsonObject, "criteria"), deserializationContext);
-			if (map.isEmpty()) {
-				throw new JsonSyntaxException("Advancement criteria cannot be empty");
-			} else {
-				JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "requirements", new JsonArray());
-				String[][] strings = new String[jsonArray.size()][];
-
-				for (int i = 0; i < jsonArray.size(); i++) {
-					JsonArray jsonArray2 = GsonHelper.convertToJsonArray(jsonArray.get(i), "requirements[" + i + "]");
-					strings[i] = new String[jsonArray2.size()];
-
-					for (int j = 0; j < jsonArray2.size(); j++) {
-						strings[i][j] = GsonHelper.convertToString(jsonArray2.get(j), "requirements[" + i + "][" + j + "]");
-					}
-				}
-
-				if (strings.length == 0) {
-					strings = new String[map.size()][];
-					int i = 0;
-
-					for (String string : map.keySet()) {
-						strings[i++] = new String[]{string};
-					}
-				}
-
-				for (String[] strings2 : strings) {
-					if (strings2.length == 0 && map.isEmpty()) {
-						throw new JsonSyntaxException("Requirement entry cannot be empty");
-					}
-
-					for (String string2 : strings2) {
-						if (!map.containsKey(string2)) {
-							throw new JsonSyntaxException("Unknown required criterion '" + string2 + "'");
-						}
-					}
-				}
-
-				for (String string3 : map.keySet()) {
-					boolean bl = false;
-
-					for (String[] strings3 : strings) {
-						if (ArrayUtils.contains(strings3, string3)) {
-							bl = true;
-							break;
-						}
-					}
-
-					if (!bl) {
-						throw new JsonSyntaxException(
-							"Criterion '" + string3 + "' isn't a requirement for completion. This isn't supported behaviour, all criteria must be required."
-						);
-					}
-				}
-
-				boolean bl2 = GsonHelper.getAsBoolean(jsonObject, "sends_telemetry_event", false);
-				return new Advancement.Builder(resourceLocation, displayInfo, advancementRewards, map, strings, bl2);
-			}
-		}
-
-		public static Advancement.Builder fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			ResourceLocation resourceLocation = friendlyByteBuf.readNullable(FriendlyByteBuf::readResourceLocation);
-			DisplayInfo displayInfo = friendlyByteBuf.readNullable(DisplayInfo::fromNetwork);
-			Map<String, Criterion> map = Criterion.criteriaFromNetwork(friendlyByteBuf);
-			String[][] strings = new String[friendlyByteBuf.readVarInt()][];
-
-			for (int i = 0; i < strings.length; i++) {
-				strings[i] = new String[friendlyByteBuf.readVarInt()];
-
-				for (int j = 0; j < strings[i].length; j++) {
-					strings[i][j] = friendlyByteBuf.readUtf();
-				}
-			}
-
-			boolean bl = friendlyByteBuf.readBoolean();
-			return new Advancement.Builder(resourceLocation, displayInfo, AdvancementRewards.EMPTY, map, strings, bl);
-		}
-
-		public Map<String, Criterion> getCriteria() {
-			return this.criteria;
+		public AdvancementHolder save(Consumer<AdvancementHolder> consumer, String string) {
+			AdvancementHolder advancementHolder = this.build(new ResourceLocation(string));
+			consumer.accept(advancementHolder);
+			return advancementHolder;
 		}
 	}
 }

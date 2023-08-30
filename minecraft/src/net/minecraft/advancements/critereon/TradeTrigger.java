@@ -2,20 +2,14 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("villager_trade");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public TradeTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -34,17 +28,18 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 		private final Optional<ItemPredicate> item;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2, Optional<ItemPredicate> optional3) {
-			super(TradeTrigger.ID, optional);
+			super(optional);
 			this.villager = optional2;
 			this.item = optional3;
 		}
 
-		public static TradeTrigger.TriggerInstance tradedWithVillager() {
-			return new TradeTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty());
+		public static Criterion<TradeTrigger.TriggerInstance> tradedWithVillager() {
+			return CriteriaTriggers.TRADE.createCriterion(new TradeTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty()));
 		}
 
-		public static TradeTrigger.TriggerInstance tradedWithVillager(EntityPredicate.Builder builder) {
-			return new TradeTrigger.TriggerInstance(EntityPredicate.wrap(builder), Optional.empty(), Optional.empty());
+		public static Criterion<TradeTrigger.TriggerInstance> tradedWithVillager(EntityPredicate.Builder builder) {
+			return CriteriaTriggers.TRADE
+				.createCriterion(new TradeTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(builder)), Optional.empty(), Optional.empty()));
 		}
 
 		public boolean matches(LootContext lootContext, ItemStack itemStack) {

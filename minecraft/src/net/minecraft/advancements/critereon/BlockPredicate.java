@@ -33,14 +33,6 @@ public record BlockPredicate(
 				.apply(instance, BlockPredicate::new)
 	);
 
-	static Optional<BlockPredicate> of(
-		Optional<TagKey<Block>> optional, Optional<HolderSet<Block>> optional2, Optional<StatePropertiesPredicate> optional3, Optional<NbtPredicate> optional4
-	) {
-		return optional.isEmpty() && optional2.isEmpty() && optional3.isEmpty() && optional4.isEmpty()
-			? Optional.empty()
-			: Optional.of(new BlockPredicate(optional, optional2, optional3, optional4));
-	}
-
 	public boolean matches(ServerLevel serverLevel, BlockPos blockPos) {
 		if (!serverLevel.isLoaded(blockPos)) {
 			return false;
@@ -103,8 +95,8 @@ public record BlockPredicate(
 			return this;
 		}
 
-		public Optional<BlockPredicate> build() {
-			return BlockPredicate.of(this.tag, this.blocks, this.properties, this.nbt);
+		public BlockPredicate build() {
+			return new BlockPredicate(this.tag, this.blocks, this.properties, this.nbt);
 		}
 	}
 }

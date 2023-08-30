@@ -36,7 +36,7 @@ import net.minecraft.world.inventory.RecipeBookType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable, GuiEventListener, NarratableEntry, RecipeShownListener {
@@ -306,15 +306,15 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 	public boolean mouseClicked(double d, double e, int i) {
 		if (this.isVisible() && !this.minecraft.player.isSpectator()) {
 			if (this.recipeBookPage.mouseClicked(d, e, i, (this.width - 147) / 2 - this.xOffset, (this.height - 166) / 2, 147, 166)) {
-				Recipe<?> recipe = this.recipeBookPage.getLastClickedRecipe();
+				RecipeHolder<?> recipeHolder = this.recipeBookPage.getLastClickedRecipe();
 				RecipeCollection recipeCollection = this.recipeBookPage.getLastClickedRecipeCollection();
-				if (recipe != null && recipeCollection != null) {
-					if (!recipeCollection.isCraftable(recipe) && this.ghostRecipe.getRecipe() == recipe) {
+				if (recipeHolder != null && recipeCollection != null) {
+					if (!recipeCollection.isCraftable(recipeHolder) && this.ghostRecipe.getRecipe() == recipeHolder) {
 						return false;
 					}
 
 					this.ghostRecipe.clear();
-					this.minecraft.gameMode.handlePlaceRecipe(this.minecraft.player.containerMenu.containerId, recipe, Screen.hasShiftDown());
+					this.minecraft.gameMode.handlePlaceRecipe(this.minecraft.player.containerMenu.containerId, recipeHolder, Screen.hasShiftDown());
 					if (!this.isOffsetNextToMainGUI()) {
 						this.setVisible(false);
 					}
@@ -468,17 +468,19 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 	}
 
 	@Override
-	public void recipesShown(List<Recipe<?>> list) {
-		for (Recipe<?> recipe : list) {
-			this.minecraft.player.removeRecipeHighlight(recipe);
+	public void recipesShown(List<RecipeHolder<?>> list) {
+		for (RecipeHolder<?> recipeHolder : list) {
+			this.minecraft.player.removeRecipeHighlight(recipeHolder);
 		}
 	}
 
-	public void setupGhostRecipe(Recipe<?> recipe, List<Slot> list) {
-		ItemStack itemStack = recipe.getResultItem(this.minecraft.level.registryAccess());
-		this.ghostRecipe.setRecipe(recipe);
+	public void setupGhostRecipe(RecipeHolder<?> recipeHolder, List<Slot> list) {
+		ItemStack itemStack = recipeHolder.value().getResultItem(this.minecraft.level.registryAccess());
+		this.ghostRecipe.setRecipe(recipeHolder);
 		this.ghostRecipe.addIngredient(Ingredient.of(itemStack), ((Slot)list.get(0)).x, ((Slot)list.get(0)).y);
-		this.placeRecipe(this.menu.getGridWidth(), this.menu.getGridHeight(), this.menu.getResultSlotIndex(), recipe, recipe.getIngredients().iterator(), 0);
+		this.placeRecipe(
+			this.menu.getGridWidth(), this.menu.getGridHeight(), this.menu.getResultSlotIndex(), recipeHolder, recipeHolder.value().getIngredients().iterator(), 0
+		);
 	}
 
 	@Override

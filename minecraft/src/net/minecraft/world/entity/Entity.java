@@ -975,6 +975,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 			for (int i = blockPos.getX(); i <= blockPos2.getX(); i++) {
 				for (int j = blockPos.getY(); j <= blockPos2.getY(); j++) {
 					for (int k = blockPos.getZ(); k <= blockPos2.getZ(); k++) {
+						if (!this.isAlive()) {
+							return;
+						}
+
 						mutableBlockPos.set(i, j, k);
 						BlockState blockState = this.level().getBlockState(mutableBlockPos);
 

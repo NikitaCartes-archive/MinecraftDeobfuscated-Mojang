@@ -11,7 +11,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
@@ -35,18 +35,18 @@ public class KnowledgeBookItem extends Item {
 		if (compoundTag != null && compoundTag.contains("Recipes", 9)) {
 			if (!level.isClientSide) {
 				ListTag listTag = compoundTag.getList("Recipes", 8);
-				List<Recipe<?>> list = Lists.<Recipe<?>>newArrayList();
+				List<RecipeHolder<?>> list = Lists.<RecipeHolder<?>>newArrayList();
 				RecipeManager recipeManager = level.getServer().getRecipeManager();
 
 				for (int i = 0; i < listTag.size(); i++) {
 					String string = listTag.getString(i);
-					Optional<? extends Recipe<?>> optional = recipeManager.byKey(new ResourceLocation(string));
+					Optional<RecipeHolder<?>> optional = recipeManager.byKey(new ResourceLocation(string));
 					if (!optional.isPresent()) {
 						LOGGER.error("Invalid recipe: {}", string);
 						return InteractionResultHolder.fail(itemStack);
 					}
 
-					list.add((Recipe)optional.get());
+					list.add((RecipeHolder)optional.get());
 				}
 
 				player.awardRecipes(list);

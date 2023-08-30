@@ -70,9 +70,8 @@ public class RealmsUploadScreen extends RealmsScreen {
 	@Nullable
 	private Long previousTimeSnapshot;
 	private long bytesPersSecond;
-	private final Runnable callback;
 
-	public RealmsUploadScreen(long l, int i, RealmsResetWorldScreen realmsResetWorldScreen, LevelSummary levelSummary, Runnable runnable) {
+	public RealmsUploadScreen(long l, int i, RealmsResetWorldScreen realmsResetWorldScreen, LevelSummary levelSummary) {
 		super(GameNarrator.NO_TITLE);
 		this.worldId = l;
 		this.slotId = i;
@@ -80,7 +79,6 @@ public class RealmsUploadScreen extends RealmsScreen {
 		this.selectedLevel = levelSummary;
 		this.uploadStatus = new UploadStatus();
 		this.narrationRateLimiter = RateLimiter.create(0.1F);
-		this.callback = runnable;
 	}
 
 	@Override
@@ -108,7 +106,7 @@ public class RealmsUploadScreen extends RealmsScreen {
 	}
 
 	private void onBack() {
-		this.callback.run();
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	private void onCancel() {

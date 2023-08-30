@@ -311,7 +311,7 @@ public class PalettedContainer<T> implements PaletteResize<T>, PalettedContainer
 		}
 
 		public int getSerializedSize() {
-			return 1 + this.palette.getSerializedSize() + VarInt.getByteSize(this.storage.getSize()) + this.storage.getRaw().length * 8;
+			return 1 + this.palette.getSerializedSize() + VarInt.getByteSize(this.storage.getRaw().length) + this.storage.getRaw().length * 8;
 		}
 
 		public void write(FriendlyByteBuf friendlyByteBuf) {

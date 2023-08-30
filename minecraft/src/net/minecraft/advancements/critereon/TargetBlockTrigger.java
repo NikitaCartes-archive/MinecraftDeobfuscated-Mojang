@@ -2,20 +2,14 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.Vec3;
 
 public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("target_hit");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public TargetBlockTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -34,13 +28,13 @@ public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigge
 		private final Optional<ContextAwarePredicate> projectile;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, MinMaxBounds.Ints ints, Optional<ContextAwarePredicate> optional2) {
-			super(TargetBlockTrigger.ID, optional);
+			super(optional);
 			this.signalStrength = ints;
 			this.projectile = optional2;
 		}
 
-		public static TargetBlockTrigger.TriggerInstance targetHit(MinMaxBounds.Ints ints, Optional<ContextAwarePredicate> optional) {
-			return new TargetBlockTrigger.TriggerInstance(Optional.empty(), ints, optional);
+		public static Criterion<TargetBlockTrigger.TriggerInstance> targetHit(MinMaxBounds.Ints ints, Optional<ContextAwarePredicate> optional) {
+			return CriteriaTriggers.TARGET_BLOCK_HIT.createCriterion(new TargetBlockTrigger.TriggerInstance(Optional.empty(), ints, optional));
 		}
 
 		@Override

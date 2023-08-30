@@ -45,7 +45,6 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 		Component.translatable("mco.brokenworld.message.line1"), Component.translatable("mco.brokenworld.message.line2")
 	};
 	private int leftX;
-	private int rightX;
 	private final List<Integer> slotsThatHasBeenDownloaded = Lists.<Integer>newArrayList();
 	private int animTick;
 
@@ -59,10 +58,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.leftX = this.width / 2 - 150;
-		this.rightX = this.width / 2 + 190;
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_BACK, button -> this.backButtonClicked()).bounds(this.rightX - 80 + 8, row(13) - 5, 70, 20).build()
-		);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).bounds((this.width - 150) / 2, row(13) - 5, 150, 20).build());
 		if (this.serverData == null) {
 			this.fetchServerData(this.serverId);
 		} else {
@@ -85,31 +81,12 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 			if (bl) {
 				button = Button.builder(
 						Component.translatable("mco.brokenworld.play"),
-						buttonx -> {
-							if (((RealmsWorldOptions)this.serverData.slots.get(i)).empty) {
-								RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(
-									this,
-									this.serverData,
-									Component.translatable("mco.configure.world.switch.slot"),
-									Component.translatable("mco.configure.world.switch.slot.subtitle"),
-									-6250336,
-									CommonComponents.GUI_CANCEL,
-									this::doSwitchOrReset,
-									() -> {
-										this.minecraft.setScreen(this);
-										this.doSwitchOrReset();
-									}
-								);
-								realmsResetWorldScreen.setSlot(i);
-								realmsResetWorldScreen.setResetTitle(Component.translatable("mco.create.world.reset.title"));
-								this.minecraft.setScreen(realmsResetWorldScreen);
-							} else {
-								this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new SwitchSlotTask(this.serverData.id, i, this::doSwitchOrReset)));
-							}
-						}
+						buttonx -> this.minecraft
+								.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new SwitchSlotTask(this.serverData.id, i, this::doSwitchOrReset)))
 					)
 					.bounds(this.getFramePositionX(i), row(8), 80, 20)
 					.build();
+				button.active = !((RealmsWorldOptions)this.serverData.slots.get(i)).empty;
 			} else {
 				button = Button.builder(Component.translatable("mco.brokenworld.download"), buttonx -> {
 					Component component = Component.translatable("mco.configure.world.restore.download.question.line1");
@@ -130,17 +107,6 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 			}
 
 			this.addRenderableWidget(button);
-			this.addRenderableWidget(Button.builder(Component.translatable("mco.brokenworld.reset"), buttonx -> {
-				RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this, this.serverData, this::doSwitchOrReset, () -> {
-					this.minecraft.setScreen(this);
-					this.doSwitchOrReset();
-				});
-				if (i != this.serverData.activeSlot || this.serverData.worldType == RealmsServer.WorldType.MINIGAME) {
-					realmsResetWorldScreen.setSlot(i);
-				}
-
-				this.minecraft.setScreen(realmsResetWorldScreen);
-			}).bounds(this.getFramePositionX(i), row(10), 80, 20).build());
 		}
 	}
 
@@ -195,20 +161,6 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 
 	private int getFramePositionX(int i) {
 		return this.leftX + (i - 1) * 110;
-	}
-
-	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256) {
-			this.backButtonClicked();
-			return true;
-		} else {
-			return super.keyPressed(i, j, k);
-		}
-	}
-
-	private void backButtonClicked() {
-		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	private void fetchServerData(long l) {
@@ -270,6 +222,11 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 			LOGGER.error("Couldn't download world data", (Throwable)var5);
 			this.minecraft.setScreen(new RealmsGenericErrorScreen(var5, this));
 		}
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	private boolean isMinigame() {

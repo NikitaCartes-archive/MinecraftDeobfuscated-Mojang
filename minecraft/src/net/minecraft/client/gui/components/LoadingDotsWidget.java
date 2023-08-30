@@ -15,7 +15,7 @@ public class LoadingDotsWidget extends AbstractWidget {
 	private final Font font;
 
 	public LoadingDotsWidget(Font font, Component component) {
-		super(0, 0, font.width(component), 9 * 2, component);
+		super(0, 0, font.width(component), 9 * 3, component);
 		this.font = font;
 	}
 
@@ -26,7 +26,7 @@ public class LoadingDotsWidget extends AbstractWidget {
 		Component component = this.getMessage();
 		guiGraphics.drawString(this.font, component, k - this.font.width(component) / 2, l - 9, -1, false);
 		String string = LoadingDotsText.get(Util.getMillis());
-		guiGraphics.drawString(this.font, string, k - this.font.width(string) / 2, l, -8355712, false);
+		guiGraphics.drawString(this.font, string, k - this.font.width(string) / 2, l + 9, -8355712, false);
 	}
 
 	@Override

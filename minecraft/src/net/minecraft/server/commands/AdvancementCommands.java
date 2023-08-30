@@ -1,13 +1,17 @@
 package net.minecraft.server.commands;
 
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.AdvancementTree;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -19,8 +23,8 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class AdvancementCommands {
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_ADVANCEMENTS = (commandContext, suggestionsBuilder) -> {
-		Collection<Advancement> collection = commandContext.getSource().getServer().getAdvancements().getAllAdvancements();
-		return SharedSuggestionProvider.suggestResource(collection.stream().map(Advancement::getId), suggestionsBuilder);
+		Collection<AdvancementHolder> collection = commandContext.getSource().getServer().getAdvancements().getAllAdvancements();
+		return SharedSuggestionProvider.suggestResource(collection.stream().map(AdvancementHolder::id), suggestionsBuilder);
 	};
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -41,14 +45,14 @@ public class AdvancementCommands {
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.GRANT,
-															getAdvancements(ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.ONLY)
+															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.ONLY)
 														)
 												)
 												.then(
 													Commands.argument("criterion", StringArgumentType.greedyString())
 														.suggests(
 															(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(
-																	ResourceLocationArgument.getAdvancement(commandContext, "advancement").getCriteria().keySet(), suggestionsBuilder
+																	ResourceLocationArgument.getAdvancement(commandContext, "advancement").value().criteria().keySet(), suggestionsBuilder
 																)
 														)
 														.executes(
@@ -73,7 +77,7 @@ public class AdvancementCommands {
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.GRANT,
-															getAdvancements(ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.FROM)
+															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.FROM)
 														)
 												)
 										)
@@ -88,7 +92,7 @@ public class AdvancementCommands {
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.GRANT,
-															getAdvancements(ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.UNTIL)
+															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.UNTIL)
 														)
 												)
 										)
@@ -103,7 +107,7 @@ public class AdvancementCommands {
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.GRANT,
-															getAdvancements(ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.THROUGH)
+															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.THROUGH)
 														)
 												)
 										)
@@ -135,14 +139,14 @@ public class AdvancementCommands {
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.REVOKE,
-															getAdvancements(ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.ONLY)
+															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.ONLY)
 														)
 												)
 												.then(
 													Commands.argument("criterion", StringArgumentType.greedyString())
 														.suggests(
 															(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(
-																	ResourceLocationArgument.getAdvancement(commandContext, "advancement").getCriteria().keySet(), suggestionsBuilder
+																	ResourceLocationArgument.getAdvancement(commandContext, "advancement").value().criteria().keySet(), suggestionsBuilder
 																)
 														)
 														.executes(
@@ -167,7 +171,7 @@ public class AdvancementCommands {
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.REVOKE,
-															getAdvancements(ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.FROM)
+															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.FROM)
 														)
 												)
 										)
@@ -182,7 +186,7 @@ public class AdvancementCommands {
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.REVOKE,
-															getAdvancements(ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.UNTIL)
+															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.UNTIL)
 														)
 												)
 										)
@@ -197,7 +201,7 @@ public class AdvancementCommands {
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.REVOKE,
-															getAdvancements(ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.THROUGH)
+															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.THROUGH)
 														)
 												)
 										)
@@ -219,7 +223,7 @@ public class AdvancementCommands {
 	}
 
 	private static int perform(
-		CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, AdvancementCommands.Action action, Collection<Advancement> collection2
+		CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, AdvancementCommands.Action action, Collection<AdvancementHolder> collection2
 	) {
 		int i = 0;
 
@@ -233,13 +237,13 @@ public class AdvancementCommands {
 					throw new CommandRuntimeException(
 						Component.translatable(
 							action.getKey() + ".one.to.one.failure",
-							((Advancement)collection2.iterator().next()).getChatComponent(),
+							Advancement.name((AdvancementHolder)collection2.iterator().next()),
 							((ServerPlayer)collection.iterator().next()).getDisplayName()
 						)
 					);
 				} else {
 					throw new CommandRuntimeException(
-						Component.translatable(action.getKey() + ".one.to.many.failure", ((Advancement)collection2.iterator().next()).getChatComponent(), collection.size())
+						Component.translatable(action.getKey() + ".one.to.many.failure", Advancement.name((AdvancementHolder)collection2.iterator().next()), collection.size())
 					);
 				}
 			} else if (collection.size() == 1) {
@@ -255,14 +259,16 @@ public class AdvancementCommands {
 					commandSourceStack.sendSuccess(
 						() -> Component.translatable(
 								action.getKey() + ".one.to.one.success",
-								((Advancement)collection2.iterator().next()).getChatComponent(),
+								Advancement.name((AdvancementHolder)collection2.iterator().next()),
 								((ServerPlayer)collection.iterator().next()).getDisplayName()
 							),
 						true
 					);
 				} else {
 					commandSourceStack.sendSuccess(
-						() -> Component.translatable(action.getKey() + ".one.to.many.success", ((Advancement)collection2.iterator().next()).getChatComponent(), collection.size()),
+						() -> Component.translatable(
+								action.getKey() + ".one.to.many.success", Advancement.name((AdvancementHolder)collection2.iterator().next()), collection.size()
+							),
 						true
 					);
 				}
@@ -280,14 +286,19 @@ public class AdvancementCommands {
 	}
 
 	private static int performCriterion(
-		CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, AdvancementCommands.Action action, Advancement advancement, String string
+		CommandSourceStack commandSourceStack,
+		Collection<ServerPlayer> collection,
+		AdvancementCommands.Action action,
+		AdvancementHolder advancementHolder,
+		String string
 	) {
 		int i = 0;
-		if (!advancement.getCriteria().containsKey(string)) {
-			throw new CommandRuntimeException(Component.translatable("commands.advancement.criterionNotFound", advancement.getChatComponent(), string));
+		Advancement advancement = advancementHolder.value();
+		if (!advancement.criteria().containsKey(string)) {
+			throw new CommandRuntimeException(Component.translatable("commands.advancement.criterionNotFound", Advancement.name(advancementHolder), string));
 		} else {
 			for (ServerPlayer serverPlayer : collection) {
-				if (action.performCriterion(serverPlayer, advancement, string)) {
+				if (action.performCriterion(serverPlayer, advancementHolder, string)) {
 					i++;
 				}
 			}
@@ -296,25 +307,31 @@ public class AdvancementCommands {
 				if (collection.size() == 1) {
 					throw new CommandRuntimeException(
 						Component.translatable(
-							action.getKey() + ".criterion.to.one.failure", string, advancement.getChatComponent(), ((ServerPlayer)collection.iterator().next()).getDisplayName()
+							action.getKey() + ".criterion.to.one.failure",
+							string,
+							Advancement.name(advancementHolder),
+							((ServerPlayer)collection.iterator().next()).getDisplayName()
 						)
 					);
 				} else {
 					throw new CommandRuntimeException(
-						Component.translatable(action.getKey() + ".criterion.to.many.failure", string, advancement.getChatComponent(), collection.size())
+						Component.translatable(action.getKey() + ".criterion.to.many.failure", string, Advancement.name(advancementHolder), collection.size())
 					);
 				}
 			} else {
 				if (collection.size() == 1) {
 					commandSourceStack.sendSuccess(
 						() -> Component.translatable(
-								action.getKey() + ".criterion.to.one.success", string, advancement.getChatComponent(), ((ServerPlayer)collection.iterator().next()).getDisplayName()
+								action.getKey() + ".criterion.to.one.success",
+								string,
+								Advancement.name(advancementHolder),
+								((ServerPlayer)collection.iterator().next()).getDisplayName()
 							),
 						true
 					);
 				} else {
 					commandSourceStack.sendSuccess(
-						() -> Component.translatable(action.getKey() + ".criterion.to.many.success", string, advancement.getChatComponent(), collection.size()), true
+						() -> Component.translatable(action.getKey() + ".criterion.to.many.success", string, Advancement.name(advancementHolder), collection.size()), true
 					);
 				}
 
@@ -323,39 +340,47 @@ public class AdvancementCommands {
 		}
 	}
 
-	private static List<Advancement> getAdvancements(Advancement advancement, AdvancementCommands.Mode mode) {
-		List<Advancement> list = Lists.<Advancement>newArrayList();
-		if (mode.parents) {
-			for (Advancement advancement2 = advancement.getParent(); advancement2 != null; advancement2 = advancement2.getParent()) {
-				list.add(advancement2);
+	private static List<AdvancementHolder> getAdvancements(
+		CommandContext<CommandSourceStack> commandContext, AdvancementHolder advancementHolder, AdvancementCommands.Mode mode
+	) {
+		AdvancementTree advancementTree = commandContext.getSource().getServer().getAdvancements().tree();
+		AdvancementNode advancementNode = advancementTree.get(advancementHolder);
+		if (advancementNode == null) {
+			return List.of(advancementHolder);
+		} else {
+			List<AdvancementHolder> list = new ArrayList();
+			if (mode.parents) {
+				for (AdvancementNode advancementNode2 = advancementNode.parent(); advancementNode2 != null; advancementNode2 = advancementNode2.parent()) {
+					list.add(advancementNode2.holder());
+				}
 			}
-		}
 
-		list.add(advancement);
-		if (mode.children) {
-			addChildren(advancement, list);
-		}
+			list.add(advancementHolder);
+			if (mode.children) {
+				addChildren(advancementNode, list);
+			}
 
-		return list;
+			return list;
+		}
 	}
 
-	private static void addChildren(Advancement advancement, List<Advancement> list) {
-		for (Advancement advancement2 : advancement.getChildren()) {
-			list.add(advancement2);
-			addChildren(advancement2, list);
+	private static void addChildren(AdvancementNode advancementNode, List<AdvancementHolder> list) {
+		for (AdvancementNode advancementNode2 : advancementNode.children()) {
+			list.add(advancementNode2.holder());
+			addChildren(advancementNode2, list);
 		}
 	}
 
 	static enum Action {
 		GRANT("grant") {
 			@Override
-			protected boolean perform(ServerPlayer serverPlayer, Advancement advancement) {
-				AdvancementProgress advancementProgress = serverPlayer.getAdvancements().getOrStartProgress(advancement);
+			protected boolean perform(ServerPlayer serverPlayer, AdvancementHolder advancementHolder) {
+				AdvancementProgress advancementProgress = serverPlayer.getAdvancements().getOrStartProgress(advancementHolder);
 				if (advancementProgress.isDone()) {
 					return false;
 				} else {
 					for (String string : advancementProgress.getRemainingCriteria()) {
-						serverPlayer.getAdvancements().award(advancement, string);
+						serverPlayer.getAdvancements().award(advancementHolder, string);
 					}
 
 					return true;
@@ -363,19 +388,19 @@ public class AdvancementCommands {
 			}
 
 			@Override
-			protected boolean performCriterion(ServerPlayer serverPlayer, Advancement advancement, String string) {
-				return serverPlayer.getAdvancements().award(advancement, string);
+			protected boolean performCriterion(ServerPlayer serverPlayer, AdvancementHolder advancementHolder, String string) {
+				return serverPlayer.getAdvancements().award(advancementHolder, string);
 			}
 		},
 		REVOKE("revoke") {
 			@Override
-			protected boolean perform(ServerPlayer serverPlayer, Advancement advancement) {
-				AdvancementProgress advancementProgress = serverPlayer.getAdvancements().getOrStartProgress(advancement);
+			protected boolean perform(ServerPlayer serverPlayer, AdvancementHolder advancementHolder) {
+				AdvancementProgress advancementProgress = serverPlayer.getAdvancements().getOrStartProgress(advancementHolder);
 				if (!advancementProgress.hasProgress()) {
 					return false;
 				} else {
 					for (String string : advancementProgress.getCompletedCriteria()) {
-						serverPlayer.getAdvancements().revoke(advancement, string);
+						serverPlayer.getAdvancements().revoke(advancementHolder, string);
 					}
 
 					return true;
@@ -383,8 +408,8 @@ public class AdvancementCommands {
 			}
 
 			@Override
-			protected boolean performCriterion(ServerPlayer serverPlayer, Advancement advancement, String string) {
-				return serverPlayer.getAdvancements().revoke(advancement, string);
+			protected boolean performCriterion(ServerPlayer serverPlayer, AdvancementHolder advancementHolder, String string) {
+				return serverPlayer.getAdvancements().revoke(advancementHolder, string);
 			}
 		};
 
@@ -394,11 +419,11 @@ public class AdvancementCommands {
 			this.key = "commands.advancement." + string2;
 		}
 
-		public int perform(ServerPlayer serverPlayer, Iterable<Advancement> iterable) {
+		public int perform(ServerPlayer serverPlayer, Iterable<AdvancementHolder> iterable) {
 			int i = 0;
 
-			for (Advancement advancement : iterable) {
-				if (this.perform(serverPlayer, advancement)) {
+			for (AdvancementHolder advancementHolder : iterable) {
+				if (this.perform(serverPlayer, advancementHolder)) {
 					i++;
 				}
 			}
@@ -406,9 +431,9 @@ public class AdvancementCommands {
 			return i;
 		}
 
-		protected abstract boolean perform(ServerPlayer serverPlayer, Advancement advancement);
+		protected abstract boolean perform(ServerPlayer serverPlayer, AdvancementHolder advancementHolder);
 
-		protected abstract boolean performCriterion(ServerPlayer serverPlayer, Advancement advancement, String string);
+		protected abstract boolean performCriterion(ServerPlayer serverPlayer, AdvancementHolder advancementHolder, String string);
 
 		protected String getKey() {
 			return this.key;

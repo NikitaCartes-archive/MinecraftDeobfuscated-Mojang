@@ -14,6 +14,7 @@ import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
@@ -49,27 +50,17 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 	private static void resolveSignedMessage(Consumer<PlayerChatMessage> consumer, CommandSourceStack commandSourceStack, PlayerChatMessage playerChatMessage) {
 		MinecraftServer minecraftServer = commandSourceStack.getServer();
 		CompletableFuture<FilteredText> completableFuture = filterPlainText(commandSourceStack, playerChatMessage);
-		CompletableFuture<Component> completableFuture2 = minecraftServer.getChatDecorator()
-			.decorate(commandSourceStack.getPlayer(), playerChatMessage.decoratedContent());
-		commandSourceStack.getChatMessageChainer()
-			.append(
-				executor -> CompletableFuture.allOf(completableFuture, completableFuture2)
-						.thenAcceptAsync(
-							void_ -> {
-								PlayerChatMessage playerChatMessage2 = playerChatMessage.withUnsignedContent((Component)completableFuture2.join())
-									.filter(((FilteredText)completableFuture.join()).mask());
-								consumer.accept(playerChatMessage2);
-							},
-							executor
-						)
-			);
+		Component component = minecraftServer.getChatDecorator().decorate(commandSourceStack.getPlayer(), playerChatMessage.decoratedContent());
+		commandSourceStack.getChatMessageChainer().append(executor -> completableFuture.thenAcceptAsync(filteredText -> {
+				PlayerChatMessage playerChatMessage2 = playerChatMessage.withUnsignedContent(component).filter(filteredText.mask());
+				consumer.accept(playerChatMessage2);
+			}, executor));
 	}
 
 	private static void resolveDisguisedMessage(Consumer<PlayerChatMessage> consumer, CommandSourceStack commandSourceStack, PlayerChatMessage playerChatMessage) {
-		MinecraftServer minecraftServer = commandSourceStack.getServer();
-		minecraftServer.getChatDecorator()
-			.decorate(commandSourceStack.getPlayer(), playerChatMessage.decoratedContent())
-			.thenAcceptAsync(component -> consumer.accept(playerChatMessage.withUnsignedContent(component)), minecraftServer);
+		ChatDecorator chatDecorator = commandSourceStack.getServer().getChatDecorator();
+		Component component = chatDecorator.decorate(commandSourceStack.getPlayer(), playerChatMessage.decoratedContent());
+		consumer.accept(playerChatMessage.withUnsignedContent(component));
 	}
 
 	private static CompletableFuture<FilteredText> filterPlainText(CommandSourceStack commandSourceStack, PlayerChatMessage playerChatMessage) {

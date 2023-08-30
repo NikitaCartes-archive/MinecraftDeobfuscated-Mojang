@@ -3,13 +3,15 @@ package net.minecraft.data.recipes;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +27,7 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 	private final Item result;
 	private final int count;
 	private final List<Ingredient> ingredients = Lists.<Ingredient>newArrayList();
-	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
+	private final Map<String, Criterion<?>> criteria = new LinkedHashMap();
 	@Nullable
 	private String group;
 
@@ -71,8 +73,8 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 		return this;
 	}
 
-	public ShapelessRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
-		this.advancement.addCriterion(string, criterionTriggerInstance);
+	public ShapelessRecipeBuilder unlockedBy(String string, Criterion<?> criterion) {
+		this.criteria.put(string, criterion);
 		return this;
 	}
 
@@ -87,14 +89,14 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 	}
 
 	@Override
-	public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
+	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
 		this.ensureValid(resourceLocation);
-		this.advancement
-			.parent(ROOT_RECIPE_ADVANCEMENT)
+		Advancement.Builder builder = recipeOutput.advancement()
 			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
-			.requirements(RequirementsStrategy.OR);
-		consumer.accept(
+			.requirements(AdvancementRequirements.Strategy.OR);
+		this.criteria.forEach(builder::addCriterion);
+		recipeOutput.accept(
 			new ShapelessRecipeBuilder.Result(
 				resourceLocation,
 				this.result,
@@ -102,14 +104,13 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 				this.group == null ? "" : this.group,
 				determineBookCategory(this.category),
 				this.ingredients,
-				this.advancement,
-				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")
+				builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/"))
 			)
 		);
 	}
 
 	private void ensureValid(ResourceLocation resourceLocation) {
-		if (this.advancement.getCriteria().isEmpty()) {
+		if (this.criteria.isEmpty()) {
 			throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
 		}
 	}
@@ -120,8 +121,7 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 		private final int count;
 		private final String group;
 		private final List<Ingredient> ingredients;
-		private final Advancement.Builder advancement;
-		private final ResourceLocation advancementId;
+		private final AdvancementHolder advancement;
 
 		public Result(
 			ResourceLocation resourceLocation,
@@ -130,8 +130,7 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 			String string,
 			CraftingBookCategory craftingBookCategory,
 			List<Ingredient> list,
-			Advancement.Builder builder,
-			ResourceLocation resourceLocation2
+			AdvancementHolder advancementHolder
 		) {
 			super(craftingBookCategory);
 			this.id = resourceLocation;
@@ -139,8 +138,7 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 			this.count = i;
 			this.group = string;
 			this.ingredients = list;
-			this.advancement = builder;
-			this.advancementId = resourceLocation2;
+			this.advancement = advancementHolder;
 		}
 
 		@Override
@@ -153,7 +151,7 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 			JsonArray jsonArray = new JsonArray();
 
 			for (Ingredient ingredient : this.ingredients) {
-				jsonArray.add(ingredient.toJson());
+				jsonArray.add(ingredient.toJson(false));
 			}
 
 			jsonObject.add("ingredients", jsonArray);
@@ -167,25 +165,18 @@ public class ShapelessRecipeBuilder extends CraftingRecipeBuilder implements Rec
 		}
 
 		@Override
-		public RecipeSerializer<?> getType() {
+		public RecipeSerializer<?> type() {
 			return RecipeSerializer.SHAPELESS_RECIPE;
 		}
 
 		@Override
-		public ResourceLocation getId() {
+		public ResourceLocation id() {
 			return this.id;
 		}
 
-		@Nullable
 		@Override
-		public JsonObject serializeAdvancement() {
-			return this.advancement.serializeToJson();
-		}
-
-		@Nullable
-		@Override
-		public ResourceLocation getAdvancementId() {
-			return this.advancementId;
+		public AdvancementHolder advancement() {
+			return this.advancement;
 		}
 	}
 }

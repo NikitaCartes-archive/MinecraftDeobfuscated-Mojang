@@ -3,7 +3,6 @@ package net.minecraft.world.item.crafting;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.DyeableLeatherItem;
@@ -12,8 +11,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class ArmorDyeRecipe extends CustomRecipe {
-	public ArmorDyeRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
-		super(resourceLocation, craftingBookCategory);
+	public ArmorDyeRecipe(CraftingBookCategory craftingBookCategory) {
+		super(craftingBookCategory);
 	}
 
 	public boolean matches(CraftingContainer craftingContainer, Level level) {

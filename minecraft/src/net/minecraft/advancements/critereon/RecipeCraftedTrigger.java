@@ -5,19 +5,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 
 public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("recipe_crafted");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	protected RecipeCraftedTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -35,17 +30,18 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 		private final List<ItemPredicate> predicates;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, ResourceLocation resourceLocation, List<ItemPredicate> list) {
-			super(RecipeCraftedTrigger.ID, optional);
+			super(optional);
 			this.recipeId = resourceLocation;
 			this.predicates = list;
 		}
 
-		public static RecipeCraftedTrigger.TriggerInstance craftedItem(ResourceLocation resourceLocation, List<ItemPredicate.Builder> list) {
-			return new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, list.stream().flatMap(builder -> builder.build().stream()).toList());
+		public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceLocation resourceLocation, List<ItemPredicate.Builder> list) {
+			return CriteriaTriggers.RECIPE_CRAFTED
+				.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, list.stream().map(ItemPredicate.Builder::build).toList()));
 		}
 
-		public static RecipeCraftedTrigger.TriggerInstance craftedItem(ResourceLocation resourceLocation) {
-			return new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, List.of());
+		public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceLocation resourceLocation) {
+			return CriteriaTriggers.RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, List.of()));
 		}
 
 		boolean matches(ResourceLocation resourceLocation, List<ItemStack> list) {

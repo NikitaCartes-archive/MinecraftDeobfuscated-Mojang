@@ -15,7 +15,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.protocol.game.ClientboundRecipePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import org.slf4j.Logger;
 
@@ -23,17 +23,17 @@ public class ServerRecipeBook extends RecipeBook {
 	public static final String RECIPE_BOOK_TAG = "recipeBook";
 	private static final Logger LOGGER = LogUtils.getLogger();
 
-	public int addRecipes(Collection<Recipe<?>> collection, ServerPlayer serverPlayer) {
+	public int addRecipes(Collection<RecipeHolder<?>> collection, ServerPlayer serverPlayer) {
 		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList();
 		int i = 0;
 
-		for (Recipe<?> recipe : collection) {
-			ResourceLocation resourceLocation = recipe.getId();
-			if (!this.known.contains(resourceLocation) && !recipe.isSpecial()) {
+		for (RecipeHolder<?> recipeHolder : collection) {
+			ResourceLocation resourceLocation = recipeHolder.id();
+			if (!this.known.contains(resourceLocation) && !recipeHolder.value().isSpecial()) {
 				this.add(resourceLocation);
 				this.addHighlight(resourceLocation);
 				list.add(resourceLocation);
-				CriteriaTriggers.RECIPE_UNLOCKED.trigger(serverPlayer, recipe);
+				CriteriaTriggers.RECIPE_UNLOCKED.trigger(serverPlayer, recipeHolder);
 				i++;
 			}
 		}
@@ -45,12 +45,12 @@ public class ServerRecipeBook extends RecipeBook {
 		return i;
 	}
 
-	public int removeRecipes(Collection<Recipe<?>> collection, ServerPlayer serverPlayer) {
+	public int removeRecipes(Collection<RecipeHolder<?>> collection, ServerPlayer serverPlayer) {
 		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList();
 		int i = 0;
 
-		for (Recipe<?> recipe : collection) {
-			ResourceLocation resourceLocation = recipe.getId();
+		for (RecipeHolder<?> recipeHolder : collection) {
+			ResourceLocation resourceLocation = recipeHolder.id();
 			if (this.known.contains(resourceLocation)) {
 				this.remove(resourceLocation);
 				list.add(resourceLocation);
@@ -94,17 +94,17 @@ public class ServerRecipeBook extends RecipeBook {
 		this.loadRecipes(listTag2, this::addHighlight, recipeManager);
 	}
 
-	private void loadRecipes(ListTag listTag, Consumer<Recipe<?>> consumer, RecipeManager recipeManager) {
+	private void loadRecipes(ListTag listTag, Consumer<RecipeHolder<?>> consumer, RecipeManager recipeManager) {
 		for (int i = 0; i < listTag.size(); i++) {
 			String string = listTag.getString(i);
 
 			try {
 				ResourceLocation resourceLocation = new ResourceLocation(string);
-				Optional<? extends Recipe<?>> optional = recipeManager.byKey(resourceLocation);
+				Optional<RecipeHolder<?>> optional = recipeManager.byKey(resourceLocation);
 				if (optional.isEmpty()) {
 					LOGGER.error("Tried to load unrecognized recipe: {} removed now.", resourceLocation);
 				} else {
-					consumer.accept((Recipe)optional.get());
+					consumer.accept((RecipeHolder)optional.get());
 				}
 			} catch (ResourceLocationException var8) {
 				LOGGER.error("Tried to load improperly formatted recipe: {} removed now.", string);

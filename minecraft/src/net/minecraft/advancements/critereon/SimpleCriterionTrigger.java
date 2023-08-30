@@ -10,11 +10,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.loot.LootContext;
 
-public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerInstance> implements CriterionTrigger<T> {
+public abstract class SimpleCriterionTrigger<T extends SimpleCriterionTrigger.SimpleInstance> implements CriterionTrigger<T> {
 	private final Map<PlayerAdvancements, Set<CriterionTrigger.Listener<T>>> players = Maps.<PlayerAdvancements, Set<CriterionTrigger.Listener<T>>>newIdentityHashMap();
 
 	@Override
@@ -53,9 +54,9 @@ public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerI
 			List<CriterionTrigger.Listener<T>> list = null;
 
 			for (CriterionTrigger.Listener<T> listener : set) {
-				T abstractCriterionTriggerInstance = listener.getTriggerInstance();
-				if (predicate.test(abstractCriterionTriggerInstance)) {
-					Optional<ContextAwarePredicate> optional = abstractCriterionTriggerInstance.getPlayerPredicate();
+				T simpleInstance = listener.trigger();
+				if (predicate.test(simpleInstance)) {
+					Optional<ContextAwarePredicate> optional = simpleInstance.playerPredicate();
 					if (optional.isEmpty() || ((ContextAwarePredicate)optional.get()).matches(lootContext)) {
 						if (list == null) {
 							list = Lists.<CriterionTrigger.Listener<T>>newArrayList();
@@ -72,5 +73,9 @@ public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerI
 				}
 			}
 		}
+	}
+
+	public interface SimpleInstance extends CriterionTriggerInstance {
+		Optional<ContextAwarePredicate> playerPredicate();
 	}
 }

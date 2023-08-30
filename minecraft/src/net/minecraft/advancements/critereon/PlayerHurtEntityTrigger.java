@@ -2,20 +2,14 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class PlayerHurtEntityTrigger extends SimpleCriterionTrigger<PlayerHurtEntityTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("player_hurt_entity");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public PlayerHurtEntityTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -34,33 +28,38 @@ public class PlayerHurtEntityTrigger extends SimpleCriterionTrigger<PlayerHurtEn
 		private final Optional<ContextAwarePredicate> entity;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<DamagePredicate> optional2, Optional<ContextAwarePredicate> optional3) {
-			super(PlayerHurtEntityTrigger.ID, optional);
+			super(optional);
 			this.damage = optional2;
 			this.entity = optional3;
 		}
 
-		public static PlayerHurtEntityTrigger.TriggerInstance playerHurtEntity() {
-			return new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty());
+		public static Criterion<PlayerHurtEntityTrigger.TriggerInstance> playerHurtEntity() {
+			return CriteriaTriggers.PLAYER_HURT_ENTITY
+				.createCriterion(new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty()));
 		}
 
-		public static PlayerHurtEntityTrigger.TriggerInstance playerHurtEntityWithDamage(Optional<DamagePredicate> optional) {
-			return new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), optional, Optional.empty());
+		public static Criterion<PlayerHurtEntityTrigger.TriggerInstance> playerHurtEntityWithDamage(Optional<DamagePredicate> optional) {
+			return CriteriaTriggers.PLAYER_HURT_ENTITY.createCriterion(new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), optional, Optional.empty()));
 		}
 
-		public static PlayerHurtEntityTrigger.TriggerInstance playerHurtEntityWithDamage(DamagePredicate.Builder builder) {
-			return new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), builder.build(), Optional.empty());
+		public static Criterion<PlayerHurtEntityTrigger.TriggerInstance> playerHurtEntityWithDamage(DamagePredicate.Builder builder) {
+			return CriteriaTriggers.PLAYER_HURT_ENTITY
+				.createCriterion(new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), Optional.of(builder.build()), Optional.empty()));
 		}
 
-		public static PlayerHurtEntityTrigger.TriggerInstance playerHurtEntity(Optional<EntityPredicate> optional) {
-			return new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), Optional.empty(), EntityPredicate.wrap(optional));
+		public static Criterion<PlayerHurtEntityTrigger.TriggerInstance> playerHurtEntity(Optional<EntityPredicate> optional) {
+			return CriteriaTriggers.PLAYER_HURT_ENTITY
+				.createCriterion(new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), Optional.empty(), EntityPredicate.wrap(optional)));
 		}
 
-		public static PlayerHurtEntityTrigger.TriggerInstance playerHurtEntity(Optional<DamagePredicate> optional, Optional<EntityPredicate> optional2) {
-			return new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), optional, EntityPredicate.wrap(optional2));
+		public static Criterion<PlayerHurtEntityTrigger.TriggerInstance> playerHurtEntity(Optional<DamagePredicate> optional, Optional<EntityPredicate> optional2) {
+			return CriteriaTriggers.PLAYER_HURT_ENTITY
+				.createCriterion(new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), optional, EntityPredicate.wrap(optional2)));
 		}
 
-		public static PlayerHurtEntityTrigger.TriggerInstance playerHurtEntity(DamagePredicate.Builder builder, Optional<EntityPredicate> optional) {
-			return new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), builder.build(), EntityPredicate.wrap(optional));
+		public static Criterion<PlayerHurtEntityTrigger.TriggerInstance> playerHurtEntity(DamagePredicate.Builder builder, Optional<EntityPredicate> optional) {
+			return CriteriaTriggers.PLAYER_HURT_ENTITY
+				.createCriterion(new PlayerHurtEntityTrigger.TriggerInstance(Optional.empty(), Optional.of(builder.build()), EntityPredicate.wrap(optional)));
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, LootContext lootContext, DamageSource damageSource, float f, float g, boolean bl) {

@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.DebugQueryHandler;
 import net.minecraft.client.Minecraft;
@@ -306,7 +306,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private static final Component UNSERURE_SERVER_TOAST = Component.translatable("multiplayer.unsecureserver.toast");
 	private static final Component INVALID_PACKET = Component.translatable("multiplayer.disconnect.invalid_packet");
 	private static final Component CHAT_VALIDATION_FAILED_ERROR = Component.translatable("multiplayer.disconnect.chat_validation_failed");
-	private static final Component RECONFIGURE_SCREEN_MESSAGE = Component.translatable("connect.reconfiging");
+	private static final Component RECONFIGURE_SCREEN_MESSAGE = Component.translatable("connect.reconfiguring");
 	private static final int PENDING_OFFSET_THRESHOLD = 64;
 	private final GameProfile localGameProfile;
 	private ClientLevel level;
@@ -1412,8 +1412,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		if (resourceLocation == null) {
 			this.advancements.setSelectedTab(null, false);
 		} else {
-			Advancement advancement = this.advancements.getAdvancements().get(resourceLocation);
-			this.advancements.setSelectedTab(advancement, false);
+			AdvancementHolder advancementHolder = this.advancements.get(resourceLocation);
+			this.advancements.setSelectedTab(advancementHolder, false);
 		}
 	}
 
@@ -1499,11 +1499,11 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				break;
 			case ADD:
 				for (ResourceLocation resourceLocation : clientboundRecipePacket.getRecipes()) {
-					this.recipeManager.byKey(resourceLocation).ifPresent(recipe -> {
-						clientRecipeBook.add(recipe);
-						clientRecipeBook.addHighlight(recipe);
-						if (recipe.showNotification()) {
-							RecipeToast.addOrUpdate(this.minecraft.getToasts(), recipe);
+					this.recipeManager.byKey(resourceLocation).ifPresent(recipeHolder -> {
+						clientRecipeBook.add(recipeHolder);
+						clientRecipeBook.addHighlight(recipeHolder);
+						if (recipeHolder.value().showNotification()) {
+							RecipeToast.addOrUpdate(this.minecraft.getToasts(), recipeHolder);
 						}
 					});
 				}
@@ -2157,10 +2157,10 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundPlaceGhostRecipePacket, this, this.minecraft);
 		AbstractContainerMenu abstractContainerMenu = this.minecraft.player.containerMenu;
 		if (abstractContainerMenu.containerId == clientboundPlaceGhostRecipePacket.getContainerId()) {
-			this.recipeManager.byKey(clientboundPlaceGhostRecipePacket.getRecipe()).ifPresent(recipe -> {
+			this.recipeManager.byKey(clientboundPlaceGhostRecipePacket.getRecipe()).ifPresent(recipeHolder -> {
 				if (this.minecraft.screen instanceof RecipeUpdateListener) {
 					RecipeBookComponent recipeBookComponent = ((RecipeUpdateListener)this.minecraft.screen).getRecipeBookComponent();
-					recipeBookComponent.setupGhostRecipe(recipe, abstractContainerMenu.slots);
+					recipeBookComponent.setupGhostRecipe(recipeHolder, abstractContainerMenu.slots);
 				}
 			});
 		}

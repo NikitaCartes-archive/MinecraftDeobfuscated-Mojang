@@ -3,7 +3,6 @@ package net.minecraft.world.item.crafting;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
@@ -14,8 +13,8 @@ import net.minecraft.world.level.Level;
 public class FireworkStarFadeRecipe extends CustomRecipe {
 	private static final Ingredient STAR_INGREDIENT = Ingredient.of(Items.FIREWORK_STAR);
 
-	public FireworkStarFadeRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
-		super(resourceLocation, craftingBookCategory);
+	public FireworkStarFadeRecipe(CraftingBookCategory craftingBookCategory) {
+		super(craftingBookCategory);
 	}
 
 	public boolean matches(CraftingContainer craftingContainer, Level level) {

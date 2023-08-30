@@ -33,6 +33,6 @@ public record MatchTool(Optional<ItemPredicate> predicate) implements LootItemCo
 	}
 
 	public static LootItemCondition.Builder toolMatches(ItemPredicate.Builder builder) {
-		return () -> new MatchTool(builder.build());
+		return () -> new MatchTool(Optional.of(builder.build()));
 	}
 }

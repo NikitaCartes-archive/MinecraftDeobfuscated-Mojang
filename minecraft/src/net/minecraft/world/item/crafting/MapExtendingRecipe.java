@@ -2,7 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -11,9 +10,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class MapExtendingRecipe extends ShapedRecipe {
-	public MapExtendingRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
+	public MapExtendingRecipe(CraftingBookCategory craftingBookCategory) {
 		super(
-			resourceLocation,
 			"",
 			craftingBookCategory,
 			3,

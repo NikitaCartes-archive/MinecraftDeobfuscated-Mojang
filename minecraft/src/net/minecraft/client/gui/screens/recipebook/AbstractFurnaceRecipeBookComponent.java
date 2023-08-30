@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractFurnaceRecipeBookComponent extends RecipeBookComponent {
@@ -40,11 +40,11 @@ public abstract class AbstractFurnaceRecipeBookComponent extends RecipeBookCompo
 	}
 
 	@Override
-	public void setupGhostRecipe(Recipe<?> recipe, List<Slot> list) {
-		ItemStack itemStack = recipe.getResultItem(this.minecraft.level.registryAccess());
-		this.ghostRecipe.setRecipe(recipe);
+	public void setupGhostRecipe(RecipeHolder<?> recipeHolder, List<Slot> list) {
+		ItemStack itemStack = recipeHolder.value().getResultItem(this.minecraft.level.registryAccess());
+		this.ghostRecipe.setRecipe(recipeHolder);
 		this.ghostRecipe.addIngredient(Ingredient.of(itemStack), ((Slot)list.get(2)).x, ((Slot)list.get(2)).y);
-		NonNullList<Ingredient> nonNullList = recipe.getIngredients();
+		NonNullList<Ingredient> nonNullList = recipeHolder.value().getIngredients();
 		Slot slot = (Slot)list.get(1);
 		if (slot.getItem().isEmpty()) {
 			if (this.fuels == null) {

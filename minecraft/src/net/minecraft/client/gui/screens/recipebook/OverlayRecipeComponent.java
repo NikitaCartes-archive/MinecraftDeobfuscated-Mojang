@@ -22,7 +22,7 @@ import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public class OverlayRecipeComponent implements Renderable, GuiEventListener {
@@ -46,7 +46,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 	private Minecraft minecraft;
 	private RecipeCollection collection;
 	@Nullable
-	private Recipe<?> lastRecipeClicked;
+	private RecipeHolder<?> lastRecipeClicked;
 	float time;
 	boolean isFurnaceMenu;
 
@@ -58,8 +58,8 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 		}
 
 		boolean bl = minecraft.player.getRecipeBook().isFiltering((RecipeBookMenu<?>)minecraft.player.containerMenu);
-		List<Recipe<?>> list = recipeCollection.getDisplayRecipes(true);
-		List<Recipe<?>> list2 = bl ? Collections.emptyList() : recipeCollection.getDisplayRecipes(false);
+		List<RecipeHolder<?>> list = recipeCollection.getDisplayRecipes(true);
+		List<RecipeHolder<?>> list2 = bl ? Collections.emptyList() : recipeCollection.getDisplayRecipes(false);
 		int m = list.size();
 		int n = m + list2.size();
 		int o = n <= 16 ? 4 : 5;
@@ -89,13 +89,13 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 
 		for (int u = 0; u < n; u++) {
 			boolean bl2 = u < m;
-			Recipe<?> recipe = bl2 ? (Recipe)list.get(u) : (Recipe)list2.get(u - m);
+			RecipeHolder<?> recipeHolder = bl2 ? (RecipeHolder)list.get(u) : (RecipeHolder)list2.get(u - m);
 			int v = this.x + 4 + 25 * (u % o);
 			int w = this.y + 5 + 25 * (u / o);
 			if (this.isFurnaceMenu) {
-				this.recipeButtons.add(new OverlayRecipeComponent.OverlaySmeltingRecipeButton(v, w, recipe, bl2));
+				this.recipeButtons.add(new OverlayRecipeComponent.OverlaySmeltingRecipeButton(v, w, recipeHolder, bl2));
 			} else {
-				this.recipeButtons.add(new OverlayRecipeComponent.OverlayRecipeButton(v, w, recipe, bl2));
+				this.recipeButtons.add(new OverlayRecipeComponent.OverlayRecipeButton(v, w, recipeHolder, bl2));
 			}
 		}
 
@@ -107,7 +107,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 	}
 
 	@Nullable
-	public Recipe<?> getLastRecipeClicked() {
+	public RecipeHolder<?> getLastRecipeClicked() {
 		return this.lastRecipeClicked;
 	}
 
@@ -173,21 +173,21 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 
 	@Environment(EnvType.CLIENT)
 	class OverlayRecipeButton extends AbstractWidget implements PlaceRecipe<Ingredient> {
-		final Recipe<?> recipe;
+		final RecipeHolder<?> recipe;
 		private final boolean isCraftable;
 		protected final List<OverlayRecipeComponent.OverlayRecipeButton.Pos> ingredientPos = Lists.<OverlayRecipeComponent.OverlayRecipeButton.Pos>newArrayList();
 
-		public OverlayRecipeButton(int i, int j, Recipe<?> recipe, boolean bl) {
+		public OverlayRecipeButton(int i, int j, RecipeHolder<?> recipeHolder, boolean bl) {
 			super(i, j, 200, 20, CommonComponents.EMPTY);
 			this.width = 24;
 			this.height = 24;
-			this.recipe = recipe;
+			this.recipe = recipeHolder;
 			this.isCraftable = bl;
-			this.calculateIngredientsPositions(recipe);
+			this.calculateIngredientsPositions(recipeHolder);
 		}
 
-		protected void calculateIngredientsPositions(Recipe<?> recipe) {
-			this.placeRecipe(3, 3, -1, recipe, recipe.getIngredients().iterator(), 0);
+		protected void calculateIngredientsPositions(RecipeHolder<?> recipeHolder) {
+			this.placeRecipe(3, 3, -1, recipeHolder, recipeHolder.value().getIngredients().iterator(), 0);
 		}
 
 		@Override
@@ -257,13 +257,14 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 
 	@Environment(EnvType.CLIENT)
 	class OverlaySmeltingRecipeButton extends OverlayRecipeComponent.OverlayRecipeButton {
-		public OverlaySmeltingRecipeButton(int i, int j, Recipe<?> recipe, boolean bl) {
-			super(i, j, recipe, bl);
+		public OverlaySmeltingRecipeButton(int i, int j, RecipeHolder<?> recipeHolder, boolean bl) {
+			super(i, j, recipeHolder, bl);
 		}
 
 		@Override
-		protected void calculateIngredientsPositions(Recipe<?> recipe) {
-			ItemStack[] itemStacks = recipe.getIngredients().get(0).getItems();
+		protected void calculateIngredientsPositions(RecipeHolder<?> recipeHolder) {
+			Ingredient ingredient = recipeHolder.value().getIngredients().get(0);
+			ItemStack[] itemStacks = ingredient.getItems();
 			this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(10, 10, itemStacks));
 		}
 	}

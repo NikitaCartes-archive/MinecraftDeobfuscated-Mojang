@@ -1,7 +1,6 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -10,8 +9,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 
 public class DecoratedPotRecipe extends CustomRecipe {
-	public DecoratedPotRecipe(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory) {
-		super(resourceLocation, craftingBookCategory);
+	public DecoratedPotRecipe(CraftingBookCategory craftingBookCategory) {
+		super(craftingBookCategory);
 	}
 
 	public boolean matches(CraftingContainer craftingContainer, Level level) {

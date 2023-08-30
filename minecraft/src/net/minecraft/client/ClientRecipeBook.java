@@ -21,6 +21,7 @@ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.slf4j.Logger;
 
@@ -30,8 +31,8 @@ public class ClientRecipeBook extends RecipeBook {
 	private Map<RecipeBookCategories, List<RecipeCollection>> collectionsByTab = ImmutableMap.of();
 	private List<RecipeCollection> allCollections = ImmutableList.of();
 
-	public void setupCollections(Iterable<Recipe<?>> iterable, RegistryAccess registryAccess) {
-		Map<RecipeBookCategories, List<List<Recipe<?>>>> map = categorizeAndGroupRecipes(iterable);
+	public void setupCollections(Iterable<RecipeHolder<?>> iterable, RegistryAccess registryAccess) {
+		Map<RecipeBookCategories, List<List<RecipeHolder<?>>>> map = categorizeAndGroupRecipes(iterable);
 		Map<RecipeBookCategories, List<RecipeCollection>> map2 = Maps.<RecipeBookCategories, List<RecipeCollection>>newHashMap();
 		Builder<RecipeCollection> builder = ImmutableList.builder();
 		map.forEach(
@@ -53,25 +54,26 @@ public class ClientRecipeBook extends RecipeBook {
 		this.allCollections = builder.build();
 	}
 
-	private static Map<RecipeBookCategories, List<List<Recipe<?>>>> categorizeAndGroupRecipes(Iterable<Recipe<?>> iterable) {
-		Map<RecipeBookCategories, List<List<Recipe<?>>>> map = Maps.<RecipeBookCategories, List<List<Recipe<?>>>>newHashMap();
-		Table<RecipeBookCategories, String, List<Recipe<?>>> table = HashBasedTable.create();
+	private static Map<RecipeBookCategories, List<List<RecipeHolder<?>>>> categorizeAndGroupRecipes(Iterable<RecipeHolder<?>> iterable) {
+		Map<RecipeBookCategories, List<List<RecipeHolder<?>>>> map = Maps.<RecipeBookCategories, List<List<RecipeHolder<?>>>>newHashMap();
+		Table<RecipeBookCategories, String, List<RecipeHolder<?>>> table = HashBasedTable.create();
 
-		for (Recipe<?> recipe : iterable) {
+		for (RecipeHolder<?> recipeHolder : iterable) {
+			Recipe<?> recipe = recipeHolder.value();
 			if (!recipe.isSpecial() && !recipe.isIncomplete()) {
-				RecipeBookCategories recipeBookCategories = getCategory(recipe);
+				RecipeBookCategories recipeBookCategories = getCategory(recipeHolder);
 				String string = recipe.getGroup();
 				if (string.isEmpty()) {
-					((List)map.computeIfAbsent(recipeBookCategories, recipeBookCategoriesx -> Lists.newArrayList())).add(ImmutableList.of(recipe));
+					((List)map.computeIfAbsent(recipeBookCategories, recipeBookCategoriesx -> Lists.newArrayList())).add(ImmutableList.of(recipeHolder));
 				} else {
-					List<Recipe<?>> list = table.get(recipeBookCategories, string);
+					List<RecipeHolder<?>> list = table.get(recipeBookCategories, string);
 					if (list == null) {
-						list = Lists.<Recipe<?>>newArrayList();
+						list = Lists.<RecipeHolder<?>>newArrayList();
 						table.put(recipeBookCategories, string, list);
 						((List)map.computeIfAbsent(recipeBookCategories, recipeBookCategoriesx -> Lists.newArrayList())).add(list);
 					}
 
-					list.add(recipe);
+					list.add(recipeHolder);
 				}
 			}
 		}
@@ -79,7 +81,8 @@ public class ClientRecipeBook extends RecipeBook {
 		return map;
 	}
 
-	private static RecipeBookCategories getCategory(Recipe<?> recipe) {
+	private static RecipeBookCategories getCategory(RecipeHolder<?> recipeHolder) {
+		Recipe<?> recipe = recipeHolder.value();
 		if (recipe instanceof CraftingRecipe craftingRecipe) {
 			return switch (craftingRecipe.category()) {
 				case BUILDING -> RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
@@ -117,7 +120,9 @@ public class ClientRecipeBook extends RecipeBook {
 			} else if (recipeType == RecipeType.SMITHING) {
 				return RecipeBookCategories.SMITHING;
 			} else {
-				LOGGER.warn("Unknown recipe category: {}/{}", LogUtils.defer(() -> BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType())), LogUtils.defer(recipe::getId));
+				LOGGER.warn(
+					"Unknown recipe category: {}/{}", LogUtils.defer(() -> BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType())), LogUtils.defer(recipeHolder::id)
+				);
 				return RecipeBookCategories.UNKNOWN;
 			}
 		}

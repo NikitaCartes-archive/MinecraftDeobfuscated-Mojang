@@ -1,12 +1,14 @@
 package net.minecraft.data.recipes;
 
 import com.google.gson.JsonObject;
-import java.util.function.Consumer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -20,7 +22,7 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 	private final Item result;
 	private final Ingredient ingredient;
 	private final int count;
-	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
+	private final Map<String, Criterion<?>> criteria = new LinkedHashMap();
 	@Nullable
 	private String group;
 	private final RecipeSerializer<?> type;
@@ -41,8 +43,8 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 		return new SingleItemRecipeBuilder(recipeCategory, RecipeSerializer.STONECUTTER, ingredient, itemLike, i);
 	}
 
-	public SingleItemRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
-		this.advancement.addCriterion(string, criterionTriggerInstance);
+	public SingleItemRecipeBuilder unlockedBy(String string, Criterion<?> criterion) {
+		this.criteria.put(string, criterion);
 		return this;
 	}
 
@@ -57,14 +59,14 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 	}
 
 	@Override
-	public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
+	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
 		this.ensureValid(resourceLocation);
-		this.advancement
-			.parent(ROOT_RECIPE_ADVANCEMENT)
+		Advancement.Builder builder = recipeOutput.advancement()
 			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
-			.requirements(RequirementsStrategy.OR);
-		consumer.accept(
+			.requirements(AdvancementRequirements.Strategy.OR);
+		this.criteria.forEach(builder::addCriterion);
+		recipeOutput.accept(
 			new SingleItemRecipeBuilder.Result(
 				resourceLocation,
 				this.type,
@@ -72,79 +74,29 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 				this.ingredient,
 				this.result,
 				this.count,
-				this.advancement,
-				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")
+				builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/"))
 			)
 		);
 	}
 
 	private void ensureValid(ResourceLocation resourceLocation) {
-		if (this.advancement.getCriteria().isEmpty()) {
+		if (this.criteria.isEmpty()) {
 			throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
 		}
 	}
 
-	public static class Result implements FinishedRecipe {
-		private final ResourceLocation id;
-		private final String group;
-		private final Ingredient ingredient;
-		private final Item result;
-		private final int count;
-		private final Advancement.Builder advancement;
-		private final ResourceLocation advancementId;
-		private final RecipeSerializer<?> type;
-
-		public Result(
-			ResourceLocation resourceLocation,
-			RecipeSerializer<?> recipeSerializer,
-			String string,
-			Ingredient ingredient,
-			Item item,
-			int i,
-			Advancement.Builder builder,
-			ResourceLocation resourceLocation2
-		) {
-			this.id = resourceLocation;
-			this.type = recipeSerializer;
-			this.group = string;
-			this.ingredient = ingredient;
-			this.result = item;
-			this.count = i;
-			this.advancement = builder;
-			this.advancementId = resourceLocation2;
-		}
-
+	public static record Result(
+		ResourceLocation id, RecipeSerializer<?> type, String group, Ingredient ingredient, Item result, int count, AdvancementHolder advancement
+	) implements FinishedRecipe {
 		@Override
 		public void serializeRecipeData(JsonObject jsonObject) {
 			if (!this.group.isEmpty()) {
 				jsonObject.addProperty("group", this.group);
 			}
 
-			jsonObject.add("ingredient", this.ingredient.toJson());
+			jsonObject.add("ingredient", this.ingredient.toJson(false));
 			jsonObject.addProperty("result", BuiltInRegistries.ITEM.getKey(this.result).toString());
 			jsonObject.addProperty("count", this.count);
-		}
-
-		@Override
-		public ResourceLocation getId() {
-			return this.id;
-		}
-
-		@Override
-		public RecipeSerializer<?> getType() {
-			return this.type;
-		}
-
-		@Nullable
-		@Override
-		public JsonObject serializeAdvancement() {
-			return this.advancement.serializeToJson();
-		}
-
-		@Nullable
-		@Override
-		public ResourceLocation getAdvancementId() {
-			return this.advancementId;
 		}
 	}
 }

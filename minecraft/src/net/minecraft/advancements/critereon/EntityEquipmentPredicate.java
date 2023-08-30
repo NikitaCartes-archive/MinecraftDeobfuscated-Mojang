@@ -30,27 +30,9 @@ public record EntityEquipmentPredicate(
 				)
 				.apply(instance, EntityEquipmentPredicate::new)
 	);
-	public static final EntityEquipmentPredicate CAPTAIN = new EntityEquipmentPredicate(
-		ItemPredicate.Builder.item().of(Items.WHITE_BANNER).hasNbt(Raid.getLeaderBannerInstance().getTag()).build(),
-		Optional.empty(),
-		Optional.empty(),
-		Optional.empty(),
-		Optional.empty(),
-		Optional.empty()
-	);
-
-	static Optional<EntityEquipmentPredicate> of(
-		Optional<ItemPredicate> optional,
-		Optional<ItemPredicate> optional2,
-		Optional<ItemPredicate> optional3,
-		Optional<ItemPredicate> optional4,
-		Optional<ItemPredicate> optional5,
-		Optional<ItemPredicate> optional6
-	) {
-		return optional.isEmpty() && optional2.isEmpty() && optional3.isEmpty() && optional4.isEmpty() && optional5.isEmpty() && optional6.isEmpty()
-			? Optional.empty()
-			: Optional.of(new EntityEquipmentPredicate(optional, optional2, optional3, optional4, optional5, optional6));
-	}
+	public static final EntityEquipmentPredicate CAPTAIN = EntityEquipmentPredicate.Builder.equipment()
+		.head(ItemPredicate.Builder.item().of(Items.WHITE_BANNER).hasNbt(Raid.getLeaderBannerInstance().getTag()))
+		.build();
 
 	public boolean matches(@Nullable Entity entity) {
 		if (entity instanceof LivingEntity livingEntity) {
@@ -85,37 +67,37 @@ public record EntityEquipmentPredicate(
 		}
 
 		public EntityEquipmentPredicate.Builder head(ItemPredicate.Builder builder) {
-			this.head = builder.build();
+			this.head = Optional.of(builder.build());
 			return this;
 		}
 
 		public EntityEquipmentPredicate.Builder chest(ItemPredicate.Builder builder) {
-			this.chest = builder.build();
+			this.chest = Optional.of(builder.build());
 			return this;
 		}
 
 		public EntityEquipmentPredicate.Builder legs(ItemPredicate.Builder builder) {
-			this.legs = builder.build();
+			this.legs = Optional.of(builder.build());
 			return this;
 		}
 
 		public EntityEquipmentPredicate.Builder feet(ItemPredicate.Builder builder) {
-			this.feet = builder.build();
+			this.feet = Optional.of(builder.build());
 			return this;
 		}
 
 		public EntityEquipmentPredicate.Builder mainhand(ItemPredicate.Builder builder) {
-			this.mainhand = builder.build();
+			this.mainhand = Optional.of(builder.build());
 			return this;
 		}
 
 		public EntityEquipmentPredicate.Builder offhand(ItemPredicate.Builder builder) {
-			this.offhand = builder.build();
+			this.offhand = Optional.of(builder.build());
 			return this;
 		}
 
-		public Optional<EntityEquipmentPredicate> build() {
-			return EntityEquipmentPredicate.of(this.head, this.chest, this.legs, this.feet, this.mainhand, this.offhand);
+		public EntityEquipmentPredicate build() {
+			return new EntityEquipmentPredicate(this.head, this.chest, this.legs, this.feet, this.mainhand, this.offhand);
 		}
 	}
 }

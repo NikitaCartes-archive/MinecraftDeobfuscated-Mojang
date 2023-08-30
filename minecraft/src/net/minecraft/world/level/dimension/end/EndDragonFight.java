@@ -416,7 +416,10 @@ public class EndDragonFight {
 			}
 		}
 
-		endPodiumFeature.place(FeatureConfiguration.NONE, this.level, this.level.getChunkSource().getGenerator(), RandomSource.create(), this.portalLocation);
+		if (endPodiumFeature.place(FeatureConfiguration.NONE, this.level, this.level.getChunkSource().getGenerator(), RandomSource.create(), this.portalLocation)) {
+			int i = Mth.positiveCeilDiv(4, 16);
+			this.level.getChunkSource().chunkMap.waitForLightBeforeSending(new ChunkPos(this.portalLocation), i);
+		}
 	}
 
 	@Nullable

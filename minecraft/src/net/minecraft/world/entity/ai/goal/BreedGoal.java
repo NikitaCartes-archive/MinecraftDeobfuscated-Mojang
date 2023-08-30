@@ -42,7 +42,7 @@ public class BreedGoal extends Goal {
 
 	@Override
 	public boolean canContinueToUse() {
-		return this.partner.isAlive() && this.partner.isInLove() && this.loveTime < 60;
+		return this.partner.isAlive() && this.partner.isInLove() && this.loveTime < 60 && !this.partner.isPanicking();
 	}
 
 	@Override
@@ -68,7 +68,7 @@ public class BreedGoal extends Goal {
 		Animal animal = null;
 
 		for (Animal animal2 : list) {
-			if (this.animal.canMate(animal2) && this.animal.distanceToSqr(animal2) < d) {
+			if (this.animal.canMate(animal2) && !animal2.isPanicking() && this.animal.distanceToSqr(animal2) < d) {
 				animal = animal2;
 				d = this.animal.distanceToSqr(animal2);
 			}

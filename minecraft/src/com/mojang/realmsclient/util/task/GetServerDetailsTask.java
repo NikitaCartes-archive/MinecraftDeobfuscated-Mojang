@@ -11,6 +11,7 @@ import com.mojang.realmsclient.gui.screens.RealmsBrokenWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
+import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTickTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.net.URL;
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class GetServerDetailsTask extends LongRunningTask {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Component TITLE = Component.translatable("mco.connect.connecting");
 	private final RealmsServer server;
 	private final Screen lastScreen;
 	private final RealmsMainScreen mainScreen;
@@ -42,8 +44,6 @@ public class GetServerDetailsTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(Component.translatable("mco.connect.connecting"));
-
 		RealmsServerAddress realmsServerAddress;
 		try {
 			realmsServerAddress = this.fetchServerAddress();
@@ -86,6 +86,11 @@ public class GetServerDetailsTask extends LongRunningTask {
 		setScreen(screen);
 	}
 
+	@Override
+	public Component getTitle() {
+		return TITLE;
+	}
+
 	private RealmsServerAddress fetchServerAddress() throws RealmsServiceException, TimeoutException, CancellationException {
 		RealmsClient realmsClient = RealmsClient.create();
 
@@ -105,7 +110,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 	}
 
 	public RealmsLongRunningMcoTaskScreen connectScreen(RealmsServerAddress realmsServerAddress) {
-		return new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, realmsServerAddress));
+		return new RealmsLongRunningMcoTickTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, realmsServerAddress));
 	}
 
 	private RealmsLongConfirmationScreen resourcePackDownloadConfirmationScreen(

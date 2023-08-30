@@ -3,17 +3,9 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 public class UsedEnderEyeTrigger extends SimpleCriterionTrigger<UsedEnderEyeTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("used_ender_eye");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public UsedEnderEyeTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -32,7 +24,7 @@ public class UsedEnderEyeTrigger extends SimpleCriterionTrigger<UsedEnderEyeTrig
 		private final MinMaxBounds.Doubles level;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, MinMaxBounds.Doubles doubles) {
-			super(UsedEnderEyeTrigger.ID, optional);
+			super(optional);
 			this.level = doubles;
 		}
 

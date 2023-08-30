@@ -62,9 +62,13 @@ public class RepeaterBlock extends DiodeBlock {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		return !levelAccessor.isClientSide() && direction.getAxis() != ((Direction)blockState.getValue(FACING)).getAxis()
-			? blockState.setValue(LOCKED, Boolean.valueOf(this.isLocked(levelAccessor, blockPos, blockState)))
-			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		if (direction == Direction.DOWN && !this.canSurviveOn(levelAccessor, blockPos2, blockState2)) {
+			return Blocks.AIR.defaultBlockState();
+		} else {
+			return !levelAccessor.isClientSide() && direction.getAxis() != ((Direction)blockState.getValue(FACING)).getAxis()
+				? blockState.setValue(LOCKED, Boolean.valueOf(this.isLocked(levelAccessor, blockPos, blockState)))
+				: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		}
 	}
 
 	@Override

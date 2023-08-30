@@ -8,13 +8,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public class ClientboundUpdateRecipesPacket implements Packet<ClientGamePacketListener> {
-	private final List<Recipe<?>> recipes;
+	private final List<RecipeHolder<?>> recipes;
 
-	public ClientboundUpdateRecipesPacket(Collection<Recipe<?>> collection) {
-		this.recipes = Lists.<Recipe<?>>newArrayList(collection);
+	public ClientboundUpdateRecipesPacket(Collection<RecipeHolder<?>> collection) {
+		this.recipes = Lists.<RecipeHolder<?>>newArrayList(collection);
 	}
 
 	public ClientboundUpdateRecipesPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -30,22 +31,23 @@ public class ClientboundUpdateRecipesPacket implements Packet<ClientGamePacketLi
 		clientGamePacketListener.handleUpdateRecipes(this);
 	}
 
-	public List<Recipe<?>> getRecipes() {
+	public List<RecipeHolder<?>> getRecipes() {
 		return this.recipes;
 	}
 
-	public static Recipe<?> fromNetwork(FriendlyByteBuf friendlyByteBuf) {
+	private static RecipeHolder<?> fromNetwork(FriendlyByteBuf friendlyByteBuf) {
 		ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
 		ResourceLocation resourceLocation2 = friendlyByteBuf.readResourceLocation();
-		return ((RecipeSerializer)BuiltInRegistries.RECIPE_SERIALIZER
+		Recipe<?> recipe = ((RecipeSerializer)BuiltInRegistries.RECIPE_SERIALIZER
 				.getOptional(resourceLocation)
 				.orElseThrow(() -> new IllegalArgumentException("Unknown recipe serializer " + resourceLocation)))
-			.fromNetwork(resourceLocation2, friendlyByteBuf);
+			.fromNetwork(friendlyByteBuf);
+		return new RecipeHolder<>(resourceLocation2, recipe);
 	}
 
-	public static <T extends Recipe<?>> void toNetwork(FriendlyByteBuf friendlyByteBuf, T recipe) {
-		friendlyByteBuf.writeResourceLocation(BuiltInRegistries.RECIPE_SERIALIZER.getKey(recipe.getSerializer()));
-		friendlyByteBuf.writeResourceLocation(recipe.getId());
-		((RecipeSerializer<T>)recipe.getSerializer()).toNetwork(friendlyByteBuf, recipe);
+	public static <T extends Recipe<?>> void toNetwork(FriendlyByteBuf friendlyByteBuf, RecipeHolder<?> recipeHolder) {
+		friendlyByteBuf.writeResourceLocation(BuiltInRegistries.RECIPE_SERIALIZER.getKey(recipeHolder.value().getSerializer()));
+		friendlyByteBuf.writeResourceLocation(recipeHolder.id());
+		((RecipeSerializer<Recipe<?>>)recipeHolder.value().getSerializer()).toNetwork(friendlyByteBuf, recipeHolder.value());
 	}
 }

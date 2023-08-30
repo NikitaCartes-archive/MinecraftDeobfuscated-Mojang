@@ -6,12 +6,12 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
-public class ResultContainer implements Container, RecipeHolder {
+public class ResultContainer implements Container, RecipeCraftingHolder {
 	private final NonNullList<ItemStack> itemStacks = NonNullList.withSize(1, ItemStack.EMPTY);
 	@Nullable
-	private Recipe<?> recipeUsed;
+	private RecipeHolder<?> recipeUsed;
 
 	@Override
 	public int getContainerSize() {
@@ -64,13 +64,13 @@ public class ResultContainer implements Container, RecipeHolder {
 	}
 
 	@Override
-	public void setRecipeUsed(@Nullable Recipe<?> recipe) {
-		this.recipeUsed = recipe;
+	public void setRecipeUsed(@Nullable RecipeHolder<?> recipeHolder) {
+		this.recipeUsed = recipeHolder;
 	}
 
 	@Nullable
 	@Override
-	public Recipe<?> getRecipeUsed() {
+	public RecipeHolder<?> getRecipeUsed() {
 		return this.recipeUsed;
 	}
 }

@@ -3,10 +3,12 @@ package net.minecraft.client.gui.screens.advancements;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,12 +24,12 @@ public class AdvancementTab {
 	private final AdvancementsScreen screen;
 	private final AdvancementTabType type;
 	private final int index;
-	private final Advancement advancement;
+	private final AdvancementNode rootNode;
 	private final DisplayInfo display;
 	private final ItemStack icon;
 	private final Component title;
 	private final AdvancementWidget root;
-	private final Map<Advancement, AdvancementWidget> widgets = Maps.<Advancement, AdvancementWidget>newLinkedHashMap();
+	private final Map<AdvancementHolder, AdvancementWidget> widgets = Maps.<AdvancementHolder, AdvancementWidget>newLinkedHashMap();
 	private double scrollX;
 	private double scrollY;
 	private int minX = Integer.MAX_VALUE;
@@ -38,18 +40,23 @@ public class AdvancementTab {
 	private boolean centered;
 
 	public AdvancementTab(
-		Minecraft minecraft, AdvancementsScreen advancementsScreen, AdvancementTabType advancementTabType, int i, Advancement advancement, DisplayInfo displayInfo
+		Minecraft minecraft,
+		AdvancementsScreen advancementsScreen,
+		AdvancementTabType advancementTabType,
+		int i,
+		AdvancementNode advancementNode,
+		DisplayInfo displayInfo
 	) {
 		this.minecraft = minecraft;
 		this.screen = advancementsScreen;
 		this.type = advancementTabType;
 		this.index = i;
-		this.advancement = advancement;
+		this.rootNode = advancementNode;
 		this.display = displayInfo;
 		this.icon = displayInfo.getIcon();
 		this.title = displayInfo.getTitle();
-		this.root = new AdvancementWidget(this, minecraft, advancement, displayInfo);
-		this.addWidget(this.root, advancement);
+		this.root = new AdvancementWidget(this, minecraft, advancementNode, displayInfo);
+		this.addWidget(this.root, advancementNode.holder());
 	}
 
 	public AdvancementTabType getType() {
@@ -60,8 +67,8 @@ public class AdvancementTab {
 		return this.index;
 	}
 
-	public Advancement getAdvancement() {
-		return this.advancement;
+	public AdvancementNode getRootNode() {
+		return this.rootNode;
 	}
 
 	public Component getTitle() {
@@ -139,13 +146,14 @@ public class AdvancementTab {
 	}
 
 	@Nullable
-	public static AdvancementTab create(Minecraft minecraft, AdvancementsScreen advancementsScreen, int i, Advancement advancement) {
-		if (advancement.getDisplay() == null) {
+	public static AdvancementTab create(Minecraft minecraft, AdvancementsScreen advancementsScreen, int i, AdvancementNode advancementNode) {
+		Optional<DisplayInfo> optional = advancementNode.advancement().display();
+		if (optional.isEmpty()) {
 			return null;
 		} else {
 			for (AdvancementTabType advancementTabType : AdvancementTabType.values()) {
 				if (i < advancementTabType.getMax()) {
-					return new AdvancementTab(minecraft, advancementsScreen, advancementTabType, i, advancement, advancement.getDisplay());
+					return new AdvancementTab(minecraft, advancementsScreen, advancementTabType, i, advancementNode, (DisplayInfo)optional.get());
 				}
 
 				i -= advancementTabType.getMax();
@@ -165,15 +173,16 @@ public class AdvancementTab {
 		}
 	}
 
-	public void addAdvancement(Advancement advancement) {
-		if (advancement.getDisplay() != null) {
-			AdvancementWidget advancementWidget = new AdvancementWidget(this, this.minecraft, advancement, advancement.getDisplay());
-			this.addWidget(advancementWidget, advancement);
+	public void addAdvancement(AdvancementNode advancementNode) {
+		Optional<DisplayInfo> optional = advancementNode.advancement().display();
+		if (!optional.isEmpty()) {
+			AdvancementWidget advancementWidget = new AdvancementWidget(this, this.minecraft, advancementNode, (DisplayInfo)optional.get());
+			this.addWidget(advancementWidget, advancementNode.holder());
 		}
 	}
 
-	private void addWidget(AdvancementWidget advancementWidget, Advancement advancement) {
-		this.widgets.put(advancement, advancementWidget);
+	private void addWidget(AdvancementWidget advancementWidget, AdvancementHolder advancementHolder) {
+		this.widgets.put(advancementHolder, advancementWidget);
 		int i = advancementWidget.getX();
 		int j = i + 28;
 		int k = advancementWidget.getY();
@@ -189,8 +198,8 @@ public class AdvancementTab {
 	}
 
 	@Nullable
-	public AdvancementWidget getWidget(Advancement advancement) {
-		return (AdvancementWidget)this.widgets.get(advancement);
+	public AdvancementWidget getWidget(AdvancementHolder advancementHolder) {
+		return (AdvancementWidget)this.widgets.get(advancementHolder);
 	}
 
 	public AdvancementsScreen getScreen() {

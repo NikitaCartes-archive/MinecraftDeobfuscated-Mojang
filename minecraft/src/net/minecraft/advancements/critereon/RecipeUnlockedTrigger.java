@@ -2,19 +2,14 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 public class RecipeUnlockedTrigger extends SimpleCriterionTrigger<RecipeUnlockedTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("recipe_unlocked");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public RecipeUnlockedTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -22,19 +17,19 @@ public class RecipeUnlockedTrigger extends SimpleCriterionTrigger<RecipeUnlocked
 		return new RecipeUnlockedTrigger.TriggerInstance(optional, resourceLocation);
 	}
 
-	public void trigger(ServerPlayer serverPlayer, Recipe<?> recipe) {
-		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(recipe));
+	public void trigger(ServerPlayer serverPlayer, RecipeHolder<?> recipeHolder) {
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(recipeHolder));
 	}
 
-	public static RecipeUnlockedTrigger.TriggerInstance unlocked(ResourceLocation resourceLocation) {
-		return new RecipeUnlockedTrigger.TriggerInstance(Optional.empty(), resourceLocation);
+	public static Criterion<RecipeUnlockedTrigger.TriggerInstance> unlocked(ResourceLocation resourceLocation) {
+		return CriteriaTriggers.RECIPE_UNLOCKED.createCriterion(new RecipeUnlockedTrigger.TriggerInstance(Optional.empty(), resourceLocation));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ResourceLocation recipe;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, ResourceLocation resourceLocation) {
-			super(RecipeUnlockedTrigger.ID, optional);
+			super(optional);
 			this.recipe = resourceLocation;
 		}
 
@@ -45,8 +40,8 @@ public class RecipeUnlockedTrigger extends SimpleCriterionTrigger<RecipeUnlocked
 			return jsonObject;
 		}
 
-		public boolean matches(Recipe<?> recipe) {
-			return this.recipe.equals(recipe.getId());
+		public boolean matches(RecipeHolder<?> recipeHolder) {
+			return this.recipe.equals(recipeHolder.id());
 		}
 	}
 }

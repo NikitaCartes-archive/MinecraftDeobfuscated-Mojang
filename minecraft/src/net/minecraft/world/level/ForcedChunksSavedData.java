@@ -12,7 +12,7 @@ public class ForcedChunksSavedData extends SavedData {
 	private final LongSet chunks;
 
 	public static SavedData.Factory<ForcedChunksSavedData> factory() {
-		return new SavedData.Factory<>(ForcedChunksSavedData::new, ForcedChunksSavedData::load, DataFixTypes.SAVED_DATA_RANDOM_SEQUENCES);
+		return new SavedData.Factory<>(ForcedChunksSavedData::new, ForcedChunksSavedData::load, DataFixTypes.SAVED_DATA_FORCED_CHUNKS);
 	}
 
 	private ForcedChunksSavedData(LongSet longSet) {

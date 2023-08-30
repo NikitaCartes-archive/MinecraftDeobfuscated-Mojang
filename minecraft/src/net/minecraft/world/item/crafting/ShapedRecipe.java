@@ -1,49 +1,34 @@
 package net.minecraft.world.item.crafting;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import org.apache.commons.lang3.NotImplementedException;
 
 public class ShapedRecipe implements CraftingRecipe {
 	final int width;
 	final int height;
 	final NonNullList<Ingredient> recipeItems;
 	final ItemStack result;
-	private final ResourceLocation id;
 	final String group;
 	final CraftingBookCategory category;
 	final boolean showNotification;
 
 	public ShapedRecipe(
-		ResourceLocation resourceLocation,
-		String string,
-		CraftingBookCategory craftingBookCategory,
-		int i,
-		int j,
-		NonNullList<Ingredient> nonNullList,
-		ItemStack itemStack,
-		boolean bl
+		String string, CraftingBookCategory craftingBookCategory, int i, int j, NonNullList<Ingredient> nonNullList, ItemStack itemStack, boolean bl
 	) {
-		this.id = resourceLocation;
 		this.group = string;
 		this.category = craftingBookCategory;
 		this.width = i;
@@ -53,21 +38,8 @@ public class ShapedRecipe implements CraftingRecipe {
 		this.showNotification = bl;
 	}
 
-	public ShapedRecipe(
-		ResourceLocation resourceLocation,
-		String string,
-		CraftingBookCategory craftingBookCategory,
-		int i,
-		int j,
-		NonNullList<Ingredient> nonNullList,
-		ItemStack itemStack
-	) {
-		this(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, true);
-	}
-
-	@Override
-	public ResourceLocation getId() {
-		return this.id;
+	public ShapedRecipe(String string, CraftingBookCategory craftingBookCategory, int i, int j, NonNullList<Ingredient> nonNullList, ItemStack itemStack) {
+		this(string, craftingBookCategory, i, j, nonNullList, itemStack, true);
 	}
 
 	@Override
@@ -156,40 +128,15 @@ public class ShapedRecipe implements CraftingRecipe {
 		return this.height;
 	}
 
-	static NonNullList<Ingredient> dissolvePattern(String[] strings, Map<String, Ingredient> map, int i, int j) {
-		NonNullList<Ingredient> nonNullList = NonNullList.withSize(i * j, Ingredient.EMPTY);
-		Set<String> set = Sets.<String>newHashSet(map.keySet());
-		set.remove(" ");
-
-		for (int k = 0; k < strings.length; k++) {
-			for (int l = 0; l < strings[k].length(); l++) {
-				String string = strings[k].substring(l, l + 1);
-				Ingredient ingredient = (Ingredient)map.get(string);
-				if (ingredient == null) {
-					throw new JsonSyntaxException("Pattern references symbol '" + string + "' but it's not defined in the key");
-				}
-
-				set.remove(string);
-				nonNullList.set(l + i * k, ingredient);
-			}
-		}
-
-		if (!set.isEmpty()) {
-			throw new JsonSyntaxException("Key defines symbols that aren't used in pattern: " + set);
-		} else {
-			return nonNullList;
-		}
-	}
-
 	@VisibleForTesting
-	static String[] shrink(String... strings) {
+	static String[] shrink(List<String> list) {
 		int i = Integer.MAX_VALUE;
 		int j = 0;
 		int k = 0;
 		int l = 0;
 
-		for (int m = 0; m < strings.length; m++) {
-			String string = strings[m];
+		for (int m = 0; m < list.size(); m++) {
+			String string = (String)list.get(m);
 			i = Math.min(i, firstNonSpace(string));
 			int n = lastNonSpace(string);
 			j = Math.max(j, n);
@@ -204,16 +151,16 @@ public class ShapedRecipe implements CraftingRecipe {
 			}
 		}
 
-		if (strings.length == l) {
+		if (list.size() == l) {
 			return new String[0];
 		} else {
-			String[] strings2 = new String[strings.length - l - k];
+			String[] strings = new String[list.size() - l - k];
 
-			for (int o = 0; o < strings2.length; o++) {
-				strings2[o] = strings[o + k].substring(i, j + 1);
+			for (int o = 0; o < strings.length; o++) {
+				strings[o] = ((String)list.get(o + k)).substring(i, j + 1);
 			}
 
-			return strings2;
+			return strings;
 		}
 	}
 
@@ -243,91 +190,79 @@ public class ShapedRecipe implements CraftingRecipe {
 		return i;
 	}
 
-	static String[] patternFromJson(JsonArray jsonArray) {
-		String[] strings = new String[jsonArray.size()];
-		if (strings.length > 3) {
-			throw new JsonSyntaxException("Invalid pattern: too many rows, 3 is maximum");
-		} else if (strings.length == 0) {
-			throw new JsonSyntaxException("Invalid pattern: empty pattern not allowed");
-		} else {
-			for (int i = 0; i < strings.length; i++) {
-				String string = GsonHelper.convertToString(jsonArray.get(i), "pattern[" + i + "]");
-				if (string.length() > 3) {
-					throw new JsonSyntaxException("Invalid pattern: too many columns, 3 is maximum");
-				}
-
-				if (i > 0 && strings[0].length() != string.length()) {
-					throw new JsonSyntaxException("Invalid pattern: each row must be the same width");
-				}
-
-				strings[i] = string;
-			}
-
-			return strings;
-		}
-	}
-
-	static Map<String, Ingredient> keyFromJson(JsonObject jsonObject) {
-		Map<String, Ingredient> map = Maps.<String, Ingredient>newHashMap();
-
-		for (Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-			if (((String)entry.getKey()).length() != 1) {
-				throw new JsonSyntaxException("Invalid key entry: '" + (String)entry.getKey() + "' is an invalid symbol (must be 1 character only).");
-			}
-
-			if (" ".equals(entry.getKey())) {
-				throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
-			}
-
-			map.put((String)entry.getKey(), Ingredient.fromJson((JsonElement)entry.getValue(), false));
-		}
-
-		map.put(" ", Ingredient.EMPTY);
-		return map;
-	}
-
-	public static ItemStack itemStackFromJson(JsonObject jsonObject) {
-		Item item = itemFromJson(jsonObject);
-		if (jsonObject.has("data")) {
-			throw new JsonParseException("Disallowed data tag found");
-		} else {
-			int i = GsonHelper.getAsInt(jsonObject, "count", 1);
-			if (i < 1) {
-				throw new JsonSyntaxException("Invalid output count: " + i);
-			} else {
-				return new ItemStack(item, i);
-			}
-		}
-	}
-
-	public static Item itemFromJson(JsonObject jsonObject) {
-		String string = GsonHelper.getAsString(jsonObject, "item");
-		Item item = (Item)BuiltInRegistries.ITEM
-			.getOptional(ResourceLocation.tryParse(string))
-			.orElseThrow(() -> new JsonSyntaxException("Unknown item '" + string + "'"));
-		if (item == Items.AIR) {
-			throw new JsonSyntaxException("Empty ingredient not allowed here");
-		} else {
-			return item;
-		}
-	}
-
 	public static class Serializer implements RecipeSerializer<ShapedRecipe> {
-		public ShapedRecipe fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
-			String string = GsonHelper.getAsString(jsonObject, "group", "");
-			CraftingBookCategory craftingBookCategory = (CraftingBookCategory)CraftingBookCategory.CODEC
-				.byName(GsonHelper.getAsString(jsonObject, "category", null), CraftingBookCategory.MISC);
-			Map<String, Ingredient> map = ShapedRecipe.keyFromJson(GsonHelper.getAsJsonObject(jsonObject, "key"));
-			String[] strings = ShapedRecipe.shrink(ShapedRecipe.patternFromJson(GsonHelper.getAsJsonArray(jsonObject, "pattern")));
-			int i = strings[0].length();
-			int j = strings.length;
-			NonNullList<Ingredient> nonNullList = ShapedRecipe.dissolvePattern(strings, map, i, j);
-			ItemStack itemStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
-			boolean bl = GsonHelper.getAsBoolean(jsonObject, "show_notification", true);
-			return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, bl);
+		static final Codec<List<String>> PATTERN_CODEC = Codec.STRING.listOf().flatXmap(list -> {
+			if (list.size() > 3) {
+				return DataResult.error(() -> "Invalid pattern: too many rows, 3 is maximum");
+			} else if (list.isEmpty()) {
+				return DataResult.error(() -> "Invalid pattern: empty pattern not allowed");
+			} else {
+				int i = ((String)list.get(0)).length();
+
+				for (String string : list) {
+					if (string.length() > 3) {
+						return DataResult.error(() -> "Invalid pattern: too many columns, 3 is maximum");
+					}
+
+					if (i != string.length()) {
+						return DataResult.error(() -> "Invalid pattern: each row must be the same width");
+					}
+				}
+
+				return DataResult.success(list);
+			}
+		}, DataResult::success);
+		static final Codec<String> SINGLE_CHARACTER_STRING_CODEC = Codec.STRING.flatXmap(string -> {
+			if (string.length() != 1) {
+				return DataResult.error(() -> "Invalid key entry: '" + string + "' is an invalid symbol (must be 1 character only).");
+			} else {
+				return " ".equals(string) ? DataResult.error(() -> "Invalid key entry: ' ' is a reserved symbol.") : DataResult.success(string);
+			}
+		}, DataResult::success);
+		private static final Codec<ShapedRecipe> CODEC = ShapedRecipe.Serializer.RawShapedRecipe.CODEC
+			.flatXmap(
+				rawShapedRecipe -> {
+					String[] strings = ShapedRecipe.shrink(rawShapedRecipe.pattern);
+					int i = strings[0].length();
+					int j = strings.length;
+					NonNullList<Ingredient> nonNullList = NonNullList.withSize(i * j, Ingredient.EMPTY);
+					Set<String> set = Sets.<String>newHashSet(rawShapedRecipe.key.keySet());
+
+					for (int k = 0; k < strings.length; k++) {
+						String string = strings[k];
+
+						for (int l = 0; l < string.length(); l++) {
+							String string2 = string.substring(l, l + 1);
+							Ingredient ingredient = string2.equals(" ") ? Ingredient.EMPTY : (Ingredient)rawShapedRecipe.key.get(string2);
+							if (ingredient == null) {
+								return DataResult.error(() -> "Pattern references symbol '" + string2 + "' but it's not defined in the key");
+							}
+
+							set.remove(string2);
+							nonNullList.set(l + i * k, ingredient);
+						}
+					}
+
+					if (!set.isEmpty()) {
+						return DataResult.error(() -> "Key defines symbols that aren't used in pattern: " + set);
+					} else {
+						ShapedRecipe shapedRecipe = new ShapedRecipe(
+							rawShapedRecipe.group, rawShapedRecipe.category, i, j, nonNullList, rawShapedRecipe.result, rawShapedRecipe.showNotification
+						);
+						return DataResult.success(shapedRecipe);
+					}
+				},
+				shapedRecipe -> {
+					throw new NotImplementedException("Serializing ShapedRecipe is not implemented yet.");
+				}
+			);
+
+		@Override
+		public Codec<ShapedRecipe> codec() {
+			return CODEC;
 		}
 
-		public ShapedRecipe fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
+		public ShapedRecipe fromNetwork(FriendlyByteBuf friendlyByteBuf) {
 			int i = friendlyByteBuf.readVarInt();
 			int j = friendlyByteBuf.readVarInt();
 			String string = friendlyByteBuf.readUtf();
@@ -340,7 +275,7 @@ public class ShapedRecipe implements CraftingRecipe {
 
 			ItemStack itemStack = friendlyByteBuf.readItem();
 			boolean bl = friendlyByteBuf.readBoolean();
-			return new ShapedRecipe(resourceLocation, string, craftingBookCategory, i, j, nonNullList, itemStack, bl);
+			return new ShapedRecipe(string, craftingBookCategory, i, j, nonNullList, itemStack, bl);
 		}
 
 		public void toNetwork(FriendlyByteBuf friendlyByteBuf, ShapedRecipe shapedRecipe) {
@@ -355,6 +290,24 @@ public class ShapedRecipe implements CraftingRecipe {
 
 			friendlyByteBuf.writeItem(shapedRecipe.result);
 			friendlyByteBuf.writeBoolean(shapedRecipe.showNotification);
+		}
+
+		static record RawShapedRecipe(
+			String group, CraftingBookCategory category, Map<String, Ingredient> key, List<String> pattern, ItemStack result, boolean showNotification
+		) {
+			public static final Codec<ShapedRecipe.Serializer.RawShapedRecipe> CODEC = RecordCodecBuilder.create(
+				instance -> instance.group(
+							ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(rawShapedRecipe -> rawShapedRecipe.group),
+							CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(rawShapedRecipe -> rawShapedRecipe.category),
+							ExtraCodecs.strictUnboundedMap(ShapedRecipe.Serializer.SINGLE_CHARACTER_STRING_CODEC, Ingredient.CODEC_NONEMPTY)
+								.fieldOf("key")
+								.forGetter(rawShapedRecipe -> rawShapedRecipe.key),
+							ShapedRecipe.Serializer.PATTERN_CODEC.fieldOf("pattern").forGetter(rawShapedRecipe -> rawShapedRecipe.pattern),
+							CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("result").forGetter(rawShapedRecipe -> rawShapedRecipe.result),
+							ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(rawShapedRecipe -> rawShapedRecipe.showNotification)
+						)
+						.apply(instance, ShapedRecipe.Serializer.RawShapedRecipe::new)
+			);
 		}
 	}
 }

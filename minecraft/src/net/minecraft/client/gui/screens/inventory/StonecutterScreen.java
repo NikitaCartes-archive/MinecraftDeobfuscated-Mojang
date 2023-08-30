@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.StonecutterMenu;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 
 @Environment(EnvType.CLIENT)
@@ -70,14 +71,14 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 			int k = this.leftPos + 52;
 			int l = this.topPos + 14;
 			int m = this.startIndex + 12;
-			List<StonecutterRecipe> list = this.menu.getRecipes();
+			List<RecipeHolder<StonecutterRecipe>> list = this.menu.getRecipes();
 
 			for (int n = this.startIndex; n < m && n < this.menu.getNumRecipes(); n++) {
 				int o = n - this.startIndex;
 				int p = k + o % 4 * 16;
 				int q = l + o / 4 * 18 + 2;
 				if (i >= p && i < p + 16 && j >= q && j < q + 18) {
-					guiGraphics.renderTooltip(this.font, ((StonecutterRecipe)list.get(n)).getResultItem(this.minecraft.level.registryAccess()), i, j);
+					guiGraphics.renderTooltip(this.font, ((StonecutterRecipe)((RecipeHolder)list.get(n)).value()).getResultItem(this.minecraft.level.registryAccess()), i, j);
 				}
 			}
 		}
@@ -103,14 +104,14 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 	}
 
 	private void renderRecipes(GuiGraphics guiGraphics, int i, int j, int k) {
-		List<StonecutterRecipe> list = this.menu.getRecipes();
+		List<RecipeHolder<StonecutterRecipe>> list = this.menu.getRecipes();
 
 		for (int l = this.startIndex; l < k && l < this.menu.getNumRecipes(); l++) {
 			int m = l - this.startIndex;
 			int n = i + m % 4 * 16;
 			int o = m / 4;
 			int p = j + o * 18 + 2;
-			guiGraphics.renderItem(((StonecutterRecipe)list.get(l)).getResultItem(this.minecraft.level.registryAccess()), n, p);
+			guiGraphics.renderItem(((StonecutterRecipe)((RecipeHolder)list.get(l)).value()).getResultItem(this.minecraft.level.registryAccess()), n, p);
 		}
 	}
 

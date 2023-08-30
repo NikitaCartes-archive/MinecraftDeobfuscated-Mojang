@@ -26,7 +26,6 @@ public abstract class ResettingWorldTask extends LongRunningTask {
 
 	public void run() {
 		RealmsClient realmsClient = RealmsClient.create();
-		this.setTitle(this.title);
 		int i = 0;
 
 		while (i < 25) {
@@ -59,5 +58,10 @@ public abstract class ResettingWorldTask extends LongRunningTask {
 				return;
 			}
 		}
+	}
+
+	@Override
+	public Component getTitle() {
+		return this.title;
 	}
 }

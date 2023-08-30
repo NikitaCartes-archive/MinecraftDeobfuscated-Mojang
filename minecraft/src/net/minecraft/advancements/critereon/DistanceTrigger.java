@@ -3,29 +3,18 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.TriggerInstance> {
-	final ResourceLocation id;
-
-	public DistanceTrigger(ResourceLocation resourceLocation) {
-		this.id = resourceLocation;
-	}
-
-	@Override
-	public ResourceLocation getId() {
-		return this.id;
-	}
-
 	public DistanceTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
 		Optional<LocationPredicate> optional2 = LocationPredicate.fromJson(jsonObject.get("start_position"));
 		Optional<DistancePredicate> optional3 = DistancePredicate.fromJson(jsonObject.get("distance"));
-		return new DistanceTrigger.TriggerInstance(this.id, optional, optional2, optional3);
+		return new DistanceTrigger.TriggerInstance(optional, optional2, optional3);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Vec3 vec3) {
@@ -37,30 +26,29 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 		private final Optional<LocationPredicate> startPosition;
 		private final Optional<DistancePredicate> distance;
 
-		public TriggerInstance(
-			ResourceLocation resourceLocation, Optional<ContextAwarePredicate> optional, Optional<LocationPredicate> optional2, Optional<DistancePredicate> optional3
-		) {
-			super(resourceLocation, optional);
+		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<LocationPredicate> optional2, Optional<DistancePredicate> optional3) {
+			super(optional);
 			this.startPosition = optional2;
 			this.distance = optional3;
 		}
 
-		public static DistanceTrigger.TriggerInstance fallFromHeight(
+		public static Criterion<DistanceTrigger.TriggerInstance> fallFromHeight(
 			EntityPredicate.Builder builder, DistancePredicate distancePredicate, LocationPredicate.Builder builder2
 		) {
-			return new DistanceTrigger.TriggerInstance(
-				CriteriaTriggers.FALL_FROM_HEIGHT.id, EntityPredicate.wrap(builder), builder2.build(), Optional.of(distancePredicate)
-			);
+			return CriteriaTriggers.FALL_FROM_HEIGHT
+				.createCriterion(
+					new DistanceTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(builder)), Optional.of(builder2.build()), Optional.of(distancePredicate))
+				);
 		}
 
-		public static DistanceTrigger.TriggerInstance rideEntityInLava(EntityPredicate.Builder builder, DistancePredicate distancePredicate) {
-			return new DistanceTrigger.TriggerInstance(
-				CriteriaTriggers.RIDE_ENTITY_IN_LAVA_TRIGGER.id, EntityPredicate.wrap(builder), Optional.empty(), Optional.of(distancePredicate)
-			);
+		public static Criterion<DistanceTrigger.TriggerInstance> rideEntityInLava(EntityPredicate.Builder builder, DistancePredicate distancePredicate) {
+			return CriteriaTriggers.RIDE_ENTITY_IN_LAVA_TRIGGER
+				.createCriterion(new DistanceTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(builder)), Optional.empty(), Optional.of(distancePredicate)));
 		}
 
-		public static DistanceTrigger.TriggerInstance travelledThroughNether(DistancePredicate distancePredicate) {
-			return new DistanceTrigger.TriggerInstance(CriteriaTriggers.NETHER_TRAVEL.id, Optional.empty(), Optional.empty(), Optional.of(distancePredicate));
+		public static Criterion<DistanceTrigger.TriggerInstance> travelledThroughNether(DistancePredicate distancePredicate) {
+			return CriteriaTriggers.NETHER_TRAVEL
+				.createCriterion(new DistanceTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.of(distancePredicate)));
 		}
 
 		@Override

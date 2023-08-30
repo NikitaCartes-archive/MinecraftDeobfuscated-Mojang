@@ -2,15 +2,13 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public abstract class AbstractCookingRecipe implements Recipe<Container> {
 	protected final RecipeType<?> type;
-	protected final ResourceLocation id;
-	private final CookingBookCategory category;
+	protected final CookingBookCategory category;
 	protected final String group;
 	protected final Ingredient ingredient;
 	protected final ItemStack result;
@@ -18,18 +16,10 @@ public abstract class AbstractCookingRecipe implements Recipe<Container> {
 	protected final int cookingTime;
 
 	public AbstractCookingRecipe(
-		RecipeType<?> recipeType,
-		ResourceLocation resourceLocation,
-		String string,
-		CookingBookCategory cookingBookCategory,
-		Ingredient ingredient,
-		ItemStack itemStack,
-		float f,
-		int i
+		RecipeType<?> recipeType, String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i
 	) {
 		this.type = recipeType;
 		this.category = cookingBookCategory;
-		this.id = resourceLocation;
 		this.group = string;
 		this.ingredient = ingredient;
 		this.result = itemStack;
@@ -75,11 +65,6 @@ public abstract class AbstractCookingRecipe implements Recipe<Container> {
 
 	public int getCookingTime() {
 		return this.cookingTime;
-	}
-
-	@Override
-	public ResourceLocation getId() {
-		return this.id;
 	}
 
 	@Override

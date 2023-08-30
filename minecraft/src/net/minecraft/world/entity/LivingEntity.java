@@ -716,7 +716,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
-		this.setAbsorptionAmount(compoundTag.getFloat("AbsorptionAmount"));
+		this.internalSetAbsorptionAmount(compoundTag.getFloat("AbsorptionAmount"));
 		if (compoundTag.contains("Attributes", 9) && this.level() != null && !this.level().isClientSide) {
 			this.getAttributes().load(compoundTag.getList("Attributes", 10));
 		}

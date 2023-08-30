@@ -1,49 +1,48 @@
 package net.minecraft.world.item.crafting;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 
 public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements RecipeSerializer<T> {
-	private final int defaultCookingTime;
 	private final SimpleCookingSerializer.CookieBaker<T> factory;
+	private final Codec<T> codec;
 
 	public SimpleCookingSerializer(SimpleCookingSerializer.CookieBaker<T> cookieBaker, int i) {
-		this.defaultCookingTime = i;
 		this.factory = cookieBaker;
-	}
-
-	public T fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
-		String string = GsonHelper.getAsString(jsonObject, "group", "");
-		CookingBookCategory cookingBookCategory = (CookingBookCategory)CookingBookCategory.CODEC
-			.byName(GsonHelper.getAsString(jsonObject, "category", null), CookingBookCategory.MISC);
-		JsonElement jsonElement = (JsonElement)(GsonHelper.isArrayNode(jsonObject, "ingredient")
-			? GsonHelper.getAsJsonArray(jsonObject, "ingredient")
-			: GsonHelper.getAsJsonObject(jsonObject, "ingredient"));
-		Ingredient ingredient = Ingredient.fromJson(jsonElement, false);
-		String string2 = GsonHelper.getAsString(jsonObject, "result");
-		ResourceLocation resourceLocation2 = new ResourceLocation(string2);
-		ItemStack itemStack = new ItemStack(
-			(ItemLike)BuiltInRegistries.ITEM.getOptional(resourceLocation2).orElseThrow(() -> new IllegalStateException("Item: " + string2 + " does not exist"))
+		this.codec = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(abstractCookingRecipe -> abstractCookingRecipe.group),
+						CookingBookCategory.CODEC.fieldOf("category").orElse(CookingBookCategory.MISC).forGetter(abstractCookingRecipe -> abstractCookingRecipe.category),
+						Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(abstractCookingRecipe -> abstractCookingRecipe.ingredient),
+						BuiltInRegistries.ITEM
+							.byNameCodec()
+							.xmap(ItemStack::new, ItemStack::getItem)
+							.fieldOf("result")
+							.forGetter(abstractCookingRecipe -> abstractCookingRecipe.result),
+						Codec.FLOAT.fieldOf("experience").orElse(0.0F).forGetter(abstractCookingRecipe -> abstractCookingRecipe.experience),
+						Codec.INT.fieldOf("cookingtime").orElse(i).forGetter(abstractCookingRecipe -> abstractCookingRecipe.cookingTime)
+					)
+					.apply(instance, cookieBaker::create)
 		);
-		float f = GsonHelper.getAsFloat(jsonObject, "experience", 0.0F);
-		int i = GsonHelper.getAsInt(jsonObject, "cookingtime", this.defaultCookingTime);
-		return this.factory.create(resourceLocation, string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
-	public T fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
+	@Override
+	public Codec<T> codec() {
+		return this.codec;
+	}
+
+	public T fromNetwork(FriendlyByteBuf friendlyByteBuf) {
 		String string = friendlyByteBuf.readUtf();
 		CookingBookCategory cookingBookCategory = friendlyByteBuf.readEnum(CookingBookCategory.class);
 		Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
 		ItemStack itemStack = friendlyByteBuf.readItem();
 		float f = friendlyByteBuf.readFloat();
 		int i = friendlyByteBuf.readVarInt();
-		return this.factory.create(resourceLocation, string, cookingBookCategory, ingredient, itemStack, f, i);
+		return this.factory.create(string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
 	public void toNetwork(FriendlyByteBuf friendlyByteBuf, T abstractCookingRecipe) {
@@ -56,8 +55,6 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 	}
 
 	interface CookieBaker<T extends AbstractCookingRecipe> {
-		T create(
-			ResourceLocation resourceLocation, String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i
-		);
+		T create(String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i);
 	}
 }

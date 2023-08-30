@@ -1,26 +1,29 @@
 package net.minecraft.world.item.crafting;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 
 public class SimpleCraftingRecipeSerializer<T extends CraftingRecipe> implements RecipeSerializer<T> {
 	private final SimpleCraftingRecipeSerializer.Factory<T> constructor;
+	private final Codec<T> codec;
 
 	public SimpleCraftingRecipeSerializer(SimpleCraftingRecipeSerializer.Factory<T> factory) {
 		this.constructor = factory;
+		this.codec = RecordCodecBuilder.create(
+			instance -> instance.group(CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(CraftingRecipe::category))
+					.apply(instance, factory::create)
+		);
 	}
 
-	public T fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
-		CraftingBookCategory craftingBookCategory = (CraftingBookCategory)CraftingBookCategory.CODEC
-			.byName(GsonHelper.getAsString(jsonObject, "category", null), CraftingBookCategory.MISC);
-		return this.constructor.create(resourceLocation, craftingBookCategory);
+	@Override
+	public Codec<T> codec() {
+		return this.codec;
 	}
 
-	public T fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
+	public T fromNetwork(FriendlyByteBuf friendlyByteBuf) {
 		CraftingBookCategory craftingBookCategory = friendlyByteBuf.readEnum(CraftingBookCategory.class);
-		return this.constructor.create(resourceLocation, craftingBookCategory);
+		return this.constructor.create(craftingBookCategory);
 	}
 
 	public void toNetwork(FriendlyByteBuf friendlyByteBuf, T craftingRecipe) {
@@ -29,6 +32,6 @@ public class SimpleCraftingRecipeSerializer<T extends CraftingRecipe> implements
 
 	@FunctionalInterface
 	public interface Factory<T extends CraftingRecipe> {
-		T create(ResourceLocation resourceLocation, CraftingBookCategory craftingBookCategory);
+		T create(CraftingBookCategory craftingBookCategory);
 	}
 }

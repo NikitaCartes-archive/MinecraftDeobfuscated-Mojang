@@ -124,18 +124,13 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 
 			@Override
 			public boolean mouseClicked(double d, double e, int i) {
-				if (i == 0) {
-					this.select();
-					if (Util.getMillis() - this.lastClickTime < 250L) {
-						LanguageSelectScreen.this.onDone();
-					}
-
-					this.lastClickTime = Util.getMillis();
-					return true;
-				} else {
-					this.lastClickTime = Util.getMillis();
-					return false;
+				this.select();
+				if (Util.getMillis() - this.lastClickTime < 250L) {
+					LanguageSelectScreen.this.onDone();
 				}
+
+				this.lastClickTime = Util.getMillis();
+				return true;
 			}
 
 			void select() {

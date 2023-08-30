@@ -3,16 +3,16 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 public class ServerboundPlaceRecipePacket implements Packet<ServerGamePacketListener> {
 	private final int containerId;
 	private final ResourceLocation recipe;
 	private final boolean shiftDown;
 
-	public ServerboundPlaceRecipePacket(int i, Recipe<?> recipe, boolean bl) {
+	public ServerboundPlaceRecipePacket(int i, RecipeHolder<?> recipeHolder, boolean bl) {
 		this.containerId = i;
-		this.recipe = recipe.getId();
+		this.recipe = recipeHolder.id();
 		this.shiftDown = bl;
 	}
 

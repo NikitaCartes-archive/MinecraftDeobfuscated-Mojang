@@ -1064,7 +1064,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 
 		@Override
 		protected void checkAndPerformAttack(LivingEntity livingEntity) {
-			if (this.isTimeToAttack() && this.mob.isWithinMeleeAttackRange(livingEntity)) {
+			if (this.canPerformAttack(livingEntity)) {
 				this.resetAttackCooldown();
 				this.mob.doHurtTarget(livingEntity);
 				Fox.this.playSound(SoundEvents.FOX_BITE, 1.0F, 1.0F);

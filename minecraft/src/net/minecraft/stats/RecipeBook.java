@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.RecipeBookType;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 public class RecipeBook {
 	protected final Set<ResourceLocation> known = Sets.<ResourceLocation>newHashSet();
@@ -21,9 +21,9 @@ public class RecipeBook {
 		this.highlight.addAll(recipeBook.highlight);
 	}
 
-	public void add(Recipe<?> recipe) {
-		if (!recipe.isSpecial()) {
-			this.add(recipe.getId());
+	public void add(RecipeHolder<?> recipeHolder) {
+		if (!recipeHolder.value().isSpecial()) {
+			this.add(recipeHolder.id());
 		}
 	}
 
@@ -31,16 +31,16 @@ public class RecipeBook {
 		this.known.add(resourceLocation);
 	}
 
-	public boolean contains(@Nullable Recipe<?> recipe) {
-		return recipe == null ? false : this.known.contains(recipe.getId());
+	public boolean contains(@Nullable RecipeHolder<?> recipeHolder) {
+		return recipeHolder == null ? false : this.known.contains(recipeHolder.id());
 	}
 
 	public boolean contains(ResourceLocation resourceLocation) {
 		return this.known.contains(resourceLocation);
 	}
 
-	public void remove(Recipe<?> recipe) {
-		this.remove(recipe.getId());
+	public void remove(RecipeHolder<?> recipeHolder) {
+		this.remove(recipeHolder.id());
 	}
 
 	protected void remove(ResourceLocation resourceLocation) {
@@ -48,16 +48,16 @@ public class RecipeBook {
 		this.highlight.remove(resourceLocation);
 	}
 
-	public boolean willHighlight(Recipe<?> recipe) {
-		return this.highlight.contains(recipe.getId());
+	public boolean willHighlight(RecipeHolder<?> recipeHolder) {
+		return this.highlight.contains(recipeHolder.id());
 	}
 
-	public void removeHighlight(Recipe<?> recipe) {
-		this.highlight.remove(recipe.getId());
+	public void removeHighlight(RecipeHolder<?> recipeHolder) {
+		this.highlight.remove(recipeHolder.id());
 	}
 
-	public void addHighlight(Recipe<?> recipe) {
-		this.addHighlight(recipe.getId());
+	public void addHighlight(RecipeHolder<?> recipeHolder) {
+		this.addHighlight(recipeHolder.id());
 	}
 
 	protected void addHighlight(ResourceLocation resourceLocation) {

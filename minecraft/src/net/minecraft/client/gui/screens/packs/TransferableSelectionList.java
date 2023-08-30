@@ -128,7 +128,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			PackCompatibility packCompatibility = this.pack.getCompatibility();
 			if (!packCompatibility.isCompatible()) {
-				guiGraphics.fill(k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
+				guiGraphics.fill(k - 1, j - 1, k + l - 3, j + m + 1, -8978432);
 			}
 
 			guiGraphics.blit(this.pack.getIconTexture(), k, j, 0.0F, 0.0F, 32, 32, 32, 32);
@@ -227,36 +227,32 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 
 		@Override
 		public boolean mouseClicked(double d, double e, int i) {
-			if (i != 0) {
-				return false;
-			} else {
-				double f = d - (double)this.parent.getRowLeft();
-				double g = e - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
-				if (this.showHoverOverlay() && f <= 32.0) {
-					this.parent.screen.clearSelected();
-					if (this.pack.canSelect()) {
-						this.handlePackSelection();
-						return true;
-					}
-
-					if (f < 16.0 && this.pack.canUnselect()) {
-						this.pack.unselect();
-						return true;
-					}
-
-					if (f > 16.0 && g < 16.0 && this.pack.canMoveUp()) {
-						this.pack.moveUp();
-						return true;
-					}
-
-					if (f > 16.0 && g > 16.0 && this.pack.canMoveDown()) {
-						this.pack.moveDown();
-						return true;
-					}
+			double f = d - (double)this.parent.getRowLeft();
+			double g = e - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
+			if (this.showHoverOverlay() && f <= 32.0) {
+				this.parent.screen.clearSelected();
+				if (this.pack.canSelect()) {
+					this.handlePackSelection();
+					return true;
 				}
 
-				return false;
+				if (f < 16.0 && this.pack.canUnselect()) {
+					this.pack.unselect();
+					return true;
+				}
+
+				if (f > 16.0 && g < 16.0 && this.pack.canMoveUp()) {
+					this.pack.moveUp();
+					return true;
+				}
+
+				if (f > 16.0 && g > 16.0 && this.pack.canMoveDown()) {
+					this.pack.moveDown();
+					return true;
+				}
 			}
+
+			return false;
 		}
 	}
 }

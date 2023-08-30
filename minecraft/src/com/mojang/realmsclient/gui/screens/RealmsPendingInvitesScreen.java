@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.PendingInvite;
 import com.mojang.realmsclient.exception.RealmsServiceException;
@@ -33,8 +34,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 	static final ResourceLocation REJECT_SPRITE = new ResourceLocation("pending_invite/reject");
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component NO_PENDING_INVITES_TEXT = Component.translatable("mco.invites.nopending");
-	static final Component ACCEPT_INVITE_TOOLTIP = Component.translatable("mco.invites.button.accept");
-	static final Component REJECT_INVITE_TOOLTIP = Component.translatable("mco.invites.button.reject");
+	static final Component ACCEPT_INVITE = Component.translatable("mco.invites.button.accept");
+	static final Component REJECT_INVITE = Component.translatable("mco.invites.button.reject");
 	private final Screen lastScreen;
 	private final CompletableFuture<List<PendingInvite>> pendingInvites = CompletableFuture.supplyAsync(() -> {
 		try {
@@ -58,19 +59,20 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
+		RealmsMainScreen.refreshPendingInvites();
 		this.pendingInvitationSelectionList = new RealmsPendingInvitesScreen.PendingInvitationSelectionList();
 		this.pendingInvites.thenAcceptAsync(list -> {
 			List<RealmsPendingInvitesScreen.Entry> list2 = list.stream().map(pendingInvite -> new RealmsPendingInvitesScreen.Entry(pendingInvite)).toList();
 			this.pendingInvitationSelectionList.replaceEntries(list2);
 		}, this.screenExecutor);
-		this.addWidget(this.pendingInvitationSelectionList);
-		this.acceptButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.invites.button.accept"), button -> {
+		this.addRenderableWidget(this.pendingInvitationSelectionList);
+		this.acceptButton = this.addRenderableWidget(Button.builder(ACCEPT_INVITE, button -> {
 			this.handleInvitation(this.selectedInvite, true);
 			this.selectedInvite = -1;
 			this.updateButtonStates();
 		}).bounds(this.width / 2 - 174, this.height - 32, 100, 20).build());
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 - 50, this.height - 32, 100, 20).build());
-		this.rejectButton = this.addRenderableWidget(Button.builder(Component.translatable("mco.invites.button.reject"), button -> {
+		this.rejectButton = this.addRenderableWidget(Button.builder(REJECT_INVITE, button -> {
 			this.handleInvitation(this.selectedInvite, false);
 			this.selectedInvite = -1;
 			this.updateButtonStates();
@@ -118,7 +120,6 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		this.toolTip = null;
-		this.pendingInvitationSelectionList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, -1);
 		if (this.toolTip != null) {
 			guiGraphics.renderTooltip(this.font, this.toolTip, i, j);
@@ -190,7 +191,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			protected void draw(GuiGraphics guiGraphics, int i, int j, boolean bl) {
 				guiGraphics.blitSprite(bl ? RealmsPendingInvitesScreen.ACCEPT_HIGHLIGHTED_SPRITE : RealmsPendingInvitesScreen.ACCEPT_SPRITE, i, j, 18, 18);
 				if (bl) {
-					RealmsPendingInvitesScreen.this.toolTip = RealmsPendingInvitesScreen.ACCEPT_INVITE_TOOLTIP;
+					RealmsPendingInvitesScreen.this.toolTip = RealmsPendingInvitesScreen.ACCEPT_INVITE;
 				}
 			}
 
@@ -210,7 +211,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			protected void draw(GuiGraphics guiGraphics, int i, int j, boolean bl) {
 				guiGraphics.blitSprite(bl ? RealmsPendingInvitesScreen.REJECT_HIGHLIGHTED_SPRITE : RealmsPendingInvitesScreen.REJECT_SPRITE, i, j, 18, 18);
 				if (bl) {
-					RealmsPendingInvitesScreen.this.toolTip = RealmsPendingInvitesScreen.REJECT_INVITE_TOOLTIP;
+					RealmsPendingInvitesScreen.this.toolTip = RealmsPendingInvitesScreen.REJECT_INVITE;
 				}
 			}
 

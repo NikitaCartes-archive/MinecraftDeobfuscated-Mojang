@@ -5,7 +5,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.telemetry.events.PerformanceMetricsEvent;
 import net.minecraft.client.telemetry.events.WorldLoadEvent;
 import net.minecraft.client.telemetry.events.WorldLoadTimesEvent;
@@ -65,9 +65,9 @@ public class WorldSessionTelemetryManager {
 		this.worldUnloadEvent.send(this.eventSender);
 	}
 
-	public void onAdvancementDone(Level level, Advancement advancement) {
-		ResourceLocation resourceLocation = advancement.getId();
-		if (advancement.sendsTelemetryEvent() && "minecraft".equals(resourceLocation.getNamespace())) {
+	public void onAdvancementDone(Level level, AdvancementHolder advancementHolder) {
+		ResourceLocation resourceLocation = advancementHolder.id();
+		if (advancementHolder.value().sendsTelemetryEvent() && "minecraft".equals(resourceLocation.getNamespace())) {
 			long l = level.getGameTime();
 			this.eventSender.send(TelemetryEventType.ADVANCEMENT_MADE, builder -> {
 				builder.put(TelemetryProperty.ADVANCEMENT_ID, resourceLocation.toString());

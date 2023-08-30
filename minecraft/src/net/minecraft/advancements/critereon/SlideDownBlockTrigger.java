@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,13 +14,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlockTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("slide_down_block");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public SlideDownBlockTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -55,13 +50,13 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
 		private final Optional<StatePropertiesPredicate> state;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, @Nullable Block block, Optional<StatePropertiesPredicate> optional2) {
-			super(SlideDownBlockTrigger.ID, optional);
+			super(optional);
 			this.block = block;
 			this.state = optional2;
 		}
 
-		public static SlideDownBlockTrigger.TriggerInstance slidesDownBlock(Block block) {
-			return new SlideDownBlockTrigger.TriggerInstance(Optional.empty(), block, Optional.empty());
+		public static Criterion<SlideDownBlockTrigger.TriggerInstance> slidesDownBlock(Block block) {
+			return CriteriaTriggers.HONEY_BLOCK_SLIDE.createCriterion(new SlideDownBlockTrigger.TriggerInstance(Optional.empty(), block, Optional.empty()));
 		}
 
 		@Override

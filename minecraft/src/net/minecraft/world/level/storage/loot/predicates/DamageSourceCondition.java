@@ -38,6 +38,6 @@ public record DamageSourceCondition(Optional<DamageSourcePredicate> predicate) i
 	}
 
 	public static LootItemCondition.Builder hasDamageSource(DamageSourcePredicate.Builder builder) {
-		return () -> new DamageSourceCondition(builder.build());
+		return () -> new DamageSourceCondition(Optional.of(builder.build()));
 	}
 }

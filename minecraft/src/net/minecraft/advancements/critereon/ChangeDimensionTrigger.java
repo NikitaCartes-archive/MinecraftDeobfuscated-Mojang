@@ -3,6 +3,8 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -11,13 +13,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 
 public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensionTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("changed_dimension");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public ChangeDimensionTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -41,25 +36,25 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
 		private final ResourceKey<Level> to;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, @Nullable ResourceKey<Level> resourceKey, @Nullable ResourceKey<Level> resourceKey2) {
-			super(ChangeDimensionTrigger.ID, optional);
+			super(optional);
 			this.from = resourceKey;
 			this.to = resourceKey2;
 		}
 
-		public static ChangeDimensionTrigger.TriggerInstance changedDimension() {
-			return new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), null, null);
+		public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimension() {
+			return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), null, null));
 		}
 
-		public static ChangeDimensionTrigger.TriggerInstance changedDimension(ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {
-			return new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), resourceKey, resourceKey2);
+		public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimension(ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {
+			return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), resourceKey, resourceKey2));
 		}
 
-		public static ChangeDimensionTrigger.TriggerInstance changedDimensionTo(ResourceKey<Level> resourceKey) {
-			return new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), null, resourceKey);
+		public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimensionTo(ResourceKey<Level> resourceKey) {
+			return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), null, resourceKey));
 		}
 
-		public static ChangeDimensionTrigger.TriggerInstance changedDimensionFrom(ResourceKey<Level> resourceKey) {
-			return new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), resourceKey, null);
+		public static Criterion<ChangeDimensionTrigger.TriggerInstance> changedDimensionFrom(ResourceKey<Level> resourceKey) {
+			return CriteriaTriggers.CHANGED_DIMENSION.createCriterion(new ChangeDimensionTrigger.TriggerInstance(Optional.empty(), resourceKey, null));
 		}
 
 		public boolean matches(ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {

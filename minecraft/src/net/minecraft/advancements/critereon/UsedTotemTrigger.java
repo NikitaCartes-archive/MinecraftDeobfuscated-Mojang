@@ -2,19 +2,13 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("used_totem");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public UsedTotemTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -30,16 +24,17 @@ public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.Tr
 		private final Optional<ItemPredicate> item;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
-			super(UsedTotemTrigger.ID, optional);
+			super(optional);
 			this.item = optional2;
 		}
 
-		public static UsedTotemTrigger.TriggerInstance usedTotem(ItemPredicate itemPredicate) {
-			return new UsedTotemTrigger.TriggerInstance(Optional.empty(), Optional.of(itemPredicate));
+		public static Criterion<UsedTotemTrigger.TriggerInstance> usedTotem(ItemPredicate itemPredicate) {
+			return CriteriaTriggers.USED_TOTEM.createCriterion(new UsedTotemTrigger.TriggerInstance(Optional.empty(), Optional.of(itemPredicate)));
 		}
 
-		public static UsedTotemTrigger.TriggerInstance usedTotem(ItemLike itemLike) {
-			return new UsedTotemTrigger.TriggerInstance(Optional.empty(), ItemPredicate.Builder.item().of(itemLike).build());
+		public static Criterion<UsedTotemTrigger.TriggerInstance> usedTotem(ItemLike itemLike) {
+			return CriteriaTriggers.USED_TOTEM
+				.createCriterion(new UsedTotemTrigger.TriggerInstance(Optional.empty(), Optional.of(ItemPredicate.Builder.item().of(itemLike).build())));
 		}
 
 		public boolean matches(ItemStack itemStack) {

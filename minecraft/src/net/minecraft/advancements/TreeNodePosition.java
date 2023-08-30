@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 public class TreeNodePosition {
-	private final Advancement advancement;
+	private final AdvancementNode node;
 	@Nullable
 	private final TreeNodePosition parent;
 	@Nullable
@@ -21,11 +21,13 @@ public class TreeNodePosition {
 	private float change;
 	private float shift;
 
-	public TreeNodePosition(Advancement advancement, @Nullable TreeNodePosition treeNodePosition, @Nullable TreeNodePosition treeNodePosition2, int i, int j) {
-		if (advancement.getDisplay() == null) {
+	public TreeNodePosition(
+		AdvancementNode advancementNode, @Nullable TreeNodePosition treeNodePosition, @Nullable TreeNodePosition treeNodePosition2, int i, int j
+	) {
+		if (advancementNode.advancement().display().isEmpty()) {
 			throw new IllegalArgumentException("Can't position an invisible advancement!");
 		} else {
-			this.advancement = advancement;
+			this.node = advancementNode;
 			this.parent = treeNodePosition;
 			this.previousSibling = treeNodePosition2;
 			this.childIndex = i;
@@ -34,20 +36,20 @@ public class TreeNodePosition {
 			this.y = -1.0F;
 			TreeNodePosition treeNodePosition3 = null;
 
-			for (Advancement advancement2 : advancement.getChildren()) {
-				treeNodePosition3 = this.addChild(advancement2, treeNodePosition3);
+			for (AdvancementNode advancementNode2 : advancementNode.children()) {
+				treeNodePosition3 = this.addChild(advancementNode2, treeNodePosition3);
 			}
 		}
 	}
 
 	@Nullable
-	private TreeNodePosition addChild(Advancement advancement, @Nullable TreeNodePosition treeNodePosition) {
-		if (advancement.getDisplay() != null) {
-			treeNodePosition = new TreeNodePosition(advancement, this, treeNodePosition, this.children.size() + 1, this.x + 1);
+	private TreeNodePosition addChild(AdvancementNode advancementNode, @Nullable TreeNodePosition treeNodePosition) {
+		if (advancementNode.advancement().display().isPresent()) {
+			treeNodePosition = new TreeNodePosition(advancementNode, this, treeNodePosition, this.children.size() + 1, this.x + 1);
 			this.children.add(treeNodePosition);
 		} else {
-			for (Advancement advancement2 : advancement.getChildren()) {
-				treeNodePosition = this.addChild(advancement2, treeNodePosition);
+			for (AdvancementNode advancementNode2 : advancementNode.children()) {
+				treeNodePosition = this.addChild(advancementNode2, treeNodePosition);
 			}
 		}
 
@@ -197,10 +199,7 @@ public class TreeNodePosition {
 	}
 
 	private void finalizePosition() {
-		if (this.advancement.getDisplay() != null) {
-			this.advancement.getDisplay().setLocation((float)this.x, this.y);
-		}
-
+		this.node.advancement().display().ifPresent(displayInfo -> displayInfo.setLocation((float)this.x, this.y));
 		if (!this.children.isEmpty()) {
 			for (TreeNodePosition treeNodePosition : this.children) {
 				treeNodePosition.finalizePosition();
@@ -208,11 +207,11 @@ public class TreeNodePosition {
 		}
 	}
 
-	public static void run(Advancement advancement) {
-		if (advancement.getDisplay() == null) {
+	public static void run(AdvancementNode advancementNode) {
+		if (advancementNode.advancement().display().isEmpty()) {
 			throw new IllegalArgumentException("Can't position children of an invisible root!");
 		} else {
-			TreeNodePosition treeNodePosition = new TreeNodePosition(advancement, null, null, 1, 0);
+			TreeNodePosition treeNodePosition = new TreeNodePosition(advancementNode, null, null, 1, 0);
 			treeNodePosition.firstWalk();
 			float f = treeNodePosition.secondWalk(0.0F, 0, treeNodePosition.y);
 			if (f < 0.0F) {

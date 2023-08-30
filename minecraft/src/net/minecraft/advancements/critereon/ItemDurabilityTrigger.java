@@ -2,18 +2,12 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurabilityTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("item_durability_changed");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public ItemDurabilityTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -33,20 +27,20 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 		private final MinMaxBounds.Ints delta;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2) {
-			super(ItemDurabilityTrigger.ID, optional);
+			super(optional);
 			this.item = optional2;
 			this.durability = ints;
 			this.delta = ints2;
 		}
 
-		public static ItemDurabilityTrigger.TriggerInstance changedDurability(Optional<ItemPredicate> optional, MinMaxBounds.Ints ints) {
+		public static Criterion<ItemDurabilityTrigger.TriggerInstance> changedDurability(Optional<ItemPredicate> optional, MinMaxBounds.Ints ints) {
 			return changedDurability(Optional.empty(), optional, ints);
 		}
 
-		public static ItemDurabilityTrigger.TriggerInstance changedDurability(
+		public static Criterion<ItemDurabilityTrigger.TriggerInstance> changedDurability(
 			Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, MinMaxBounds.Ints ints
 		) {
-			return new ItemDurabilityTrigger.TriggerInstance(optional, optional2, ints, MinMaxBounds.Ints.ANY);
+			return CriteriaTriggers.ITEM_DURABILITY_CHANGED.createCriterion(new ItemDurabilityTrigger.TriggerInstance(optional, optional2, ints, MinMaxBounds.Ints.ANY));
 		}
 
 		public boolean matches(ItemStack itemStack, int i) {

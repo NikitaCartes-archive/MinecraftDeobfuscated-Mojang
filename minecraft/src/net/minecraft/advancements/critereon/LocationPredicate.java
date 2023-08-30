@@ -42,7 +42,7 @@ public record LocationPredicate(
 				.apply(instance, LocationPredicate::new)
 	);
 
-	static Optional<LocationPredicate> of(
+	private static Optional<LocationPredicate> of(
 		Optional<LocationPredicate.PositionPredicate> optional,
 		Optional<ResourceKey<Biome>> optional2,
 		Optional<ResourceKey<Structure>> optional3,
@@ -168,17 +168,17 @@ public record LocationPredicate(
 		}
 
 		public LocationPredicate.Builder setLight(LightPredicate.Builder builder) {
-			this.light = builder.build();
+			this.light = Optional.of(builder.build());
 			return this;
 		}
 
 		public LocationPredicate.Builder setBlock(BlockPredicate.Builder builder) {
-			this.block = builder.build();
+			this.block = Optional.of(builder.build());
 			return this;
 		}
 
 		public LocationPredicate.Builder setFluid(FluidPredicate.Builder builder) {
-			this.fluid = builder.build();
+			this.fluid = Optional.of(builder.build());
 			return this;
 		}
 
@@ -187,10 +187,9 @@ public record LocationPredicate(
 			return this;
 		}
 
-		public Optional<LocationPredicate> build() {
-			return LocationPredicate.of(
-				LocationPredicate.PositionPredicate.of(this.x, this.y, this.z), this.biome, this.structure, this.dimension, this.smokey, this.light, this.block, this.fluid
-			);
+		public LocationPredicate build() {
+			Optional<LocationPredicate.PositionPredicate> optional = LocationPredicate.PositionPredicate.of(this.x, this.y, this.z);
+			return new LocationPredicate(optional, this.biome, this.structure, this.dimension, this.smokey, this.light, this.block, this.fluid);
 		}
 	}
 

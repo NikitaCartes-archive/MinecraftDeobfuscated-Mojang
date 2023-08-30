@@ -3,20 +3,14 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonObject;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class EffectsChangedTrigger extends SimpleCriterionTrigger<EffectsChangedTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("effects_changed");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public EffectsChangedTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -35,17 +29,18 @@ public class EffectsChangedTrigger extends SimpleCriterionTrigger<EffectsChanged
 		private final Optional<ContextAwarePredicate> source;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<MobEffectsPredicate> optional2, Optional<ContextAwarePredicate> optional3) {
-			super(EffectsChangedTrigger.ID, optional);
+			super(optional);
 			this.effects = optional2;
 			this.source = optional3;
 		}
 
-		public static EffectsChangedTrigger.TriggerInstance hasEffects(MobEffectsPredicate.Builder builder) {
-			return new EffectsChangedTrigger.TriggerInstance(Optional.empty(), builder.build(), Optional.empty());
+		public static Criterion<EffectsChangedTrigger.TriggerInstance> hasEffects(MobEffectsPredicate.Builder builder) {
+			return CriteriaTriggers.EFFECTS_CHANGED.createCriterion(new EffectsChangedTrigger.TriggerInstance(Optional.empty(), builder.build(), Optional.empty()));
 		}
 
-		public static EffectsChangedTrigger.TriggerInstance gotEffectsFrom(Optional<EntityPredicate> optional) {
-			return new EffectsChangedTrigger.TriggerInstance(Optional.empty(), Optional.empty(), EntityPredicate.wrap(optional));
+		public static Criterion<EffectsChangedTrigger.TriggerInstance> gotEffectsFrom(EntityPredicate.Builder builder) {
+			return CriteriaTriggers.EFFECTS_CHANGED
+				.createCriterion(new EffectsChangedTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.of(EntityPredicate.wrap(builder.build()))));
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, @Nullable LootContext lootContext) {

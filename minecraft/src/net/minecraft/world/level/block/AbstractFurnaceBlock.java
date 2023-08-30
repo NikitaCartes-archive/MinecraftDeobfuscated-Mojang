@@ -74,10 +74,11 @@ public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 					((AbstractFurnaceBlockEntity)blockEntity).getRecipesToAwardAndPopExperience((ServerLevel)level, Vec3.atCenterOf(blockPos));
 				}
 
+				super.onRemove(blockState, level, blockPos, blockState2, bl);
 				level.updateNeighbourForOutputSignal(blockPos, this);
+			} else {
+				super.onRemove(blockState, level, blockPos, blockState2, bl);
 			}
-
-			super.onRemove(blockState, level, blockPos, blockState2, bl);
 		}
 	}
 

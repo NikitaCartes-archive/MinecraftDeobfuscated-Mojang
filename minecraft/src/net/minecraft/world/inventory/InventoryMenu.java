@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
@@ -127,8 +128,8 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 	}
 
 	@Override
-	public boolean recipeMatches(Recipe<? super CraftingContainer> recipe) {
-		return recipe.matches(this.craftSlots, this.owner.level());
+	public boolean recipeMatches(RecipeHolder<? extends Recipe<CraftingContainer>> recipeHolder) {
+		return recipeHolder.value().matches(this.craftSlots, this.owner.level());
 	}
 
 	@Override
@@ -194,7 +195,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 			}
 
 			if (itemStack2.isEmpty()) {
-				slot.setByPlayer(ItemStack.EMPTY);
+				slot.setByPlayer(ItemStack.EMPTY, itemStack);
 			} else {
 				slot.setChanged();
 			}

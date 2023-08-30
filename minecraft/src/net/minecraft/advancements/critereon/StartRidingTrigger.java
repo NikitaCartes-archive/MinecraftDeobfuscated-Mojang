@@ -2,17 +2,11 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 
 public class StartRidingTrigger extends SimpleCriterionTrigger<StartRidingTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("started_riding");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public StartRidingTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -25,11 +19,11 @@ public class StartRidingTrigger extends SimpleCriterionTrigger<StartRidingTrigge
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		public TriggerInstance(Optional<ContextAwarePredicate> optional) {
-			super(StartRidingTrigger.ID, optional);
+			super(optional);
 		}
 
-		public static StartRidingTrigger.TriggerInstance playerStartsRiding(EntityPredicate.Builder builder) {
-			return new StartRidingTrigger.TriggerInstance(EntityPredicate.wrap(builder));
+		public static Criterion<StartRidingTrigger.TriggerInstance> playerStartsRiding(EntityPredicate.Builder builder) {
+			return CriteriaTriggers.START_RIDING_TRIGGER.createCriterion(new StartRidingTrigger.TriggerInstance(Optional.of(EntityPredicate.wrap(builder))));
 		}
 	}
 }

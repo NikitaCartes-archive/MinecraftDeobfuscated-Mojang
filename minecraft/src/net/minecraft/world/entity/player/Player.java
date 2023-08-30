@@ -90,7 +90,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.BaseCommandBlock;
@@ -1407,17 +1407,17 @@ public abstract class Player extends LivingEntity {
 	public void resetStat(Stat<?> stat) {
 	}
 
-	public int awardRecipes(Collection<Recipe<?>> collection) {
+	public int awardRecipes(Collection<RecipeHolder<?>> collection) {
 		return 0;
 	}
 
-	public void triggerRecipeCrafted(Recipe<?> recipe, List<ItemStack> list) {
+	public void triggerRecipeCrafted(RecipeHolder<?> recipeHolder, List<ItemStack> list) {
 	}
 
 	public void awardRecipesByKey(ResourceLocation[] resourceLocations) {
 	}
 
-	public int resetRecipes(Collection<Recipe<?>> collection) {
+	public int resetRecipes(Collection<RecipeHolder<?>> collection) {
 		return 0;
 	}
 

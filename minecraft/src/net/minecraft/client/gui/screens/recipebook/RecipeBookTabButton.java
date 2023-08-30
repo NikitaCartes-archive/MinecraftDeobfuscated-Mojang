@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookTabButton extends StateSwitchingButton {
@@ -34,8 +34,8 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		List<RecipeCollection> list = clientRecipeBook.getCollection(this.category);
 		if (minecraft.player.containerMenu instanceof RecipeBookMenu) {
 			for (RecipeCollection recipeCollection : list) {
-				for (Recipe<?> recipe : recipeCollection.getRecipes(clientRecipeBook.isFiltering((RecipeBookMenu<?>)minecraft.player.containerMenu))) {
-					if (clientRecipeBook.willHighlight(recipe)) {
+				for (RecipeHolder<?> recipeHolder : recipeCollection.getRecipes(clientRecipeBook.isFiltering((RecipeBookMenu<?>)minecraft.player.containerMenu))) {
+					if (clientRecipeBook.willHighlight(recipeHolder)) {
 						this.animationTime = 15.0F;
 						return;
 					}

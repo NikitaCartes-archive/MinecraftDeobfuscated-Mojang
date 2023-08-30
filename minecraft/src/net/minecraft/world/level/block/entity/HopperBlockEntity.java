@@ -215,6 +215,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 		ItemStack itemStack2 = addItem(null, container, itemStack, null);
 		if (itemStack2.isEmpty()) {
 			bl = true;
+			itemEntity.setItem(ItemStack.EMPTY);
 			itemEntity.discard();
 		} else {
 			itemEntity.setItem(itemStack2);
@@ -400,13 +401,14 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 	}
 
 	public static void entityInside(Level level, BlockPos blockPos, BlockState blockState, Entity entity, HopperBlockEntity hopperBlockEntity) {
-		if (entity instanceof ItemEntity
+		if (entity instanceof ItemEntity itemEntity
+			&& !itemEntity.getItem().isEmpty()
 			&& Shapes.joinIsNotEmpty(
 				Shapes.create(entity.getBoundingBox().move((double)(-blockPos.getX()), (double)(-blockPos.getY()), (double)(-blockPos.getZ()))),
 				hopperBlockEntity.getSuckShape(),
 				BooleanOp.AND
 			)) {
-			tryMoveItems(level, blockPos, blockState, hopperBlockEntity, () -> addItem(hopperBlockEntity, (ItemEntity)entity));
+			tryMoveItems(level, blockPos, blockState, hopperBlockEntity, () -> addItem(hopperBlockEntity, itemEntity));
 		}
 	}
 

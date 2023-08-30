@@ -76,8 +76,7 @@ public record MobEffectsPredicate(Map<Holder<MobEffect>, MobEffectsPredicate.Mob
 		}
 
 		public Optional<MobEffectsPredicate> build() {
-			ImmutableMap<Holder<MobEffect>, MobEffectsPredicate.MobEffectInstancePredicate> immutableMap = this.effectMap.build();
-			return immutableMap.isEmpty() ? Optional.empty() : Optional.of(new MobEffectsPredicate(immutableMap));
+			return Optional.of(new MobEffectsPredicate(this.effectMap.build()));
 		}
 	}
 

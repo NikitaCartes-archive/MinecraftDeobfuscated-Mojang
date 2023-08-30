@@ -173,12 +173,8 @@ public class ReportReasonSelectionScreen extends Screen {
 
 			@Override
 			public boolean mouseClicked(double d, double e, int i) {
-				if (i == 0) {
-					ReasonSelectionList.this.setSelected(this);
-					return true;
-				} else {
-					return false;
-				}
+				ReasonSelectionList.this.setSelected(this);
+				return true;
 			}
 
 			public ReportReason getReason() {

@@ -2,18 +2,12 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 public class LevitationTrigger extends SimpleCriterionTrigger<LevitationTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("levitation");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public LevitationTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -31,13 +25,14 @@ public class LevitationTrigger extends SimpleCriterionTrigger<LevitationTrigger.
 		private final MinMaxBounds.Ints duration;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<DistancePredicate> optional2, MinMaxBounds.Ints ints) {
-			super(LevitationTrigger.ID, optional);
+			super(optional);
 			this.distance = optional2;
 			this.duration = ints;
 		}
 
-		public static LevitationTrigger.TriggerInstance levitated(DistancePredicate distancePredicate) {
-			return new LevitationTrigger.TriggerInstance(Optional.empty(), Optional.of(distancePredicate), MinMaxBounds.Ints.ANY);
+		public static Criterion<LevitationTrigger.TriggerInstance> levitated(DistancePredicate distancePredicate) {
+			return CriteriaTriggers.LEVITATION
+				.createCriterion(new LevitationTrigger.TriggerInstance(Optional.empty(), Optional.of(distancePredicate), MinMaxBounds.Ints.ANY));
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, Vec3 vec3, int i) {

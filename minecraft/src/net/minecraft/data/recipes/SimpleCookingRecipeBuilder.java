@@ -1,12 +1,14 @@
 package net.minecraft.data.recipes;
 
 import com.google.gson.JsonObject;
-import java.util.function.Consumer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +27,7 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 	private final Ingredient ingredient;
 	private final float experience;
 	private final int cookingTime;
-	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
+	private final Map<String, Criterion<?>> criteria = new LinkedHashMap();
 	@Nullable
 	private String group;
 	private final RecipeSerializer<? extends AbstractCookingRecipe> serializer;
@@ -70,8 +72,8 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 		return new SimpleCookingRecipeBuilder(recipeCategory, CookingBookCategory.FOOD, itemLike, ingredient, f, i, RecipeSerializer.SMOKING_RECIPE);
 	}
 
-	public SimpleCookingRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
-		this.advancement.addCriterion(string, criterionTriggerInstance);
+	public SimpleCookingRecipeBuilder unlockedBy(String string, Criterion<?> criterion) {
+		this.criteria.put(string, criterion);
 		return this;
 	}
 
@@ -86,14 +88,14 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 	}
 
 	@Override
-	public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
+	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
 		this.ensureValid(resourceLocation);
-		this.advancement
-			.parent(ROOT_RECIPE_ADVANCEMENT)
+		Advancement.Builder builder = recipeOutput.advancement()
 			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
-			.requirements(RequirementsStrategy.OR);
-		consumer.accept(
+			.requirements(AdvancementRequirements.Strategy.OR);
+		this.criteria.forEach(builder::addCriterion);
+		recipeOutput.accept(
 			new SimpleCookingRecipeBuilder.Result(
 				resourceLocation,
 				this.group == null ? "" : this.group,
@@ -102,8 +104,7 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 				this.result,
 				this.experience,
 				this.cookingTime,
-				this.advancement,
-				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/"),
+				builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")),
 				this.serializer
 			)
 		);
@@ -134,47 +135,22 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 	}
 
 	private void ensureValid(ResourceLocation resourceLocation) {
-		if (this.advancement.getCriteria().isEmpty()) {
+		if (this.criteria.isEmpty()) {
 			throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
 		}
 	}
 
-	static class Result implements FinishedRecipe {
-		private final ResourceLocation id;
-		private final String group;
-		private final CookingBookCategory category;
-		private final Ingredient ingredient;
-		private final Item result;
-		private final float experience;
-		private final int cookingTime;
-		private final Advancement.Builder advancement;
-		private final ResourceLocation advancementId;
-		private final RecipeSerializer<? extends AbstractCookingRecipe> serializer;
-
-		public Result(
-			ResourceLocation resourceLocation,
-			String string,
-			CookingBookCategory cookingBookCategory,
-			Ingredient ingredient,
-			Item item,
-			float f,
-			int i,
-			Advancement.Builder builder,
-			ResourceLocation resourceLocation2,
-			RecipeSerializer<? extends AbstractCookingRecipe> recipeSerializer
-		) {
-			this.id = resourceLocation;
-			this.group = string;
-			this.category = cookingBookCategory;
-			this.ingredient = ingredient;
-			this.result = item;
-			this.experience = f;
-			this.cookingTime = i;
-			this.advancement = builder;
-			this.advancementId = resourceLocation2;
-			this.serializer = recipeSerializer;
-		}
-
+	static record Result(
+		ResourceLocation id,
+		String group,
+		CookingBookCategory category,
+		Ingredient ingredient,
+		Item result,
+		float experience,
+		int cookingTime,
+		AdvancementHolder advancement,
+		RecipeSerializer<? extends AbstractCookingRecipe> type
+	) implements FinishedRecipe {
 		@Override
 		public void serializeRecipeData(JsonObject jsonObject) {
 			if (!this.group.isEmpty()) {
@@ -182,32 +158,10 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 			}
 
 			jsonObject.addProperty("category", this.category.getSerializedName());
-			jsonObject.add("ingredient", this.ingredient.toJson());
+			jsonObject.add("ingredient", this.ingredient.toJson(false));
 			jsonObject.addProperty("result", BuiltInRegistries.ITEM.getKey(this.result).toString());
 			jsonObject.addProperty("experience", this.experience);
 			jsonObject.addProperty("cookingtime", this.cookingTime);
-		}
-
-		@Override
-		public RecipeSerializer<?> getType() {
-			return this.serializer;
-		}
-
-		@Override
-		public ResourceLocation getId() {
-			return this.id;
-		}
-
-		@Nullable
-		@Override
-		public JsonObject serializeAdvancement() {
-			return this.advancement.serializeToJson();
-		}
-
-		@Nullable
-		@Override
-		public ResourceLocation getAdvancementId() {
-			return this.advancementId;
 		}
 	}
 }

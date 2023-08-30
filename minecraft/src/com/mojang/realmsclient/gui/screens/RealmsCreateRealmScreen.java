@@ -62,17 +62,10 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 	}
 
 	private void createWorld() {
-		RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(
-			this.lastScreen,
-			this.server,
-			Component.translatable("mco.selectServer.create"),
-			Component.translatable("mco.create.world.subtitle"),
-			-6250336,
-			Component.translatable("mco.create.world.skip"),
-			() -> this.minecraft.execute(() -> this.minecraft.setScreen(this.lastScreen.newScreen())),
-			() -> this.minecraft.setScreen(this.lastScreen.newScreen())
-		);
-		realmsResetWorldScreen.setResetTitle(Component.translatable("mco.create.world.reset.title"));
+		RealmsResetWorldScreen realmsResetWorldScreen = RealmsResetWorldScreen.forNewRealm(this.lastScreen, this.server, () -> this.minecraft.execute(() -> {
+				this.lastScreen.refreshServerList();
+				this.minecraft.setScreen(this.lastScreen.newScreen());
+			}));
 		this.minecraft
 			.setScreen(
 				new RealmsLongRunningMcoTaskScreen(

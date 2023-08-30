@@ -3,7 +3,7 @@ package net.minecraft.client.gui.components.toasts;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,16 +17,16 @@ import net.minecraft.util.Mth;
 public class AdvancementToast implements Toast {
 	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("toast/advancement");
 	public static final int DISPLAY_TIME = 5000;
-	private final Advancement advancement;
+	private final AdvancementHolder advancement;
 	private boolean playedSound;
 
-	public AdvancementToast(Advancement advancement) {
-		this.advancement = advancement;
+	public AdvancementToast(AdvancementHolder advancementHolder) {
+		this.advancement = advancementHolder;
 	}
 
 	@Override
 	public Toast.Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long l) {
-		DisplayInfo displayInfo = this.advancement.getDisplay();
+		DisplayInfo displayInfo = (DisplayInfo)this.advancement.value().display().orElse(null);
 		guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width(), this.height());
 		if (displayInfo != null) {
 			List<FormattedCharSequence> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);

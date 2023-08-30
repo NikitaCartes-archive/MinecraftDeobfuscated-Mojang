@@ -7,11 +7,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import java.util.Arrays;
 import java.util.Collection;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.storage.loot.LootDataManager;
 import net.minecraft.world.level.storage.loot.LootDataType;
@@ -37,20 +37,20 @@ public class ResourceLocationArgument implements ArgumentType<ResourceLocation> 
 		return new ResourceLocationArgument();
 	}
 
-	public static Advancement getAdvancement(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+	public static AdvancementHolder getAdvancement(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
 		ResourceLocation resourceLocation = getId(commandContext, string);
-		Advancement advancement = commandContext.getSource().getServer().getAdvancements().getAdvancement(resourceLocation);
-		if (advancement == null) {
+		AdvancementHolder advancementHolder = commandContext.getSource().getServer().getAdvancements().get(resourceLocation);
+		if (advancementHolder == null) {
 			throw ERROR_UNKNOWN_ADVANCEMENT.create(resourceLocation);
 		} else {
-			return advancement;
+			return advancementHolder;
 		}
 	}
 
-	public static Recipe<?> getRecipe(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+	public static RecipeHolder<?> getRecipe(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
 		RecipeManager recipeManager = commandContext.getSource().getServer().getRecipeManager();
 		ResourceLocation resourceLocation = getId(commandContext, string);
-		return (Recipe<?>)recipeManager.byKey(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_RECIPE.create(resourceLocation));
+		return (RecipeHolder<?>)recipeManager.byKey(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_RECIPE.create(resourceLocation));
 	}
 
 	public static LootItemCondition getPredicate(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {

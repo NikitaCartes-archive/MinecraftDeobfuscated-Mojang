@@ -372,12 +372,8 @@ public class ChatSelectionScreen extends Screen {
 
 			@Override
 			public boolean mouseClicked(double d, double e, int i) {
-				if (i == 0) {
-					ChatSelectionList.this.setSelected(null);
-					return this.toggleReport();
-				} else {
-					return false;
-				}
+				ChatSelectionList.this.setSelected(null);
+				return this.toggleReport();
 			}
 
 			@Override

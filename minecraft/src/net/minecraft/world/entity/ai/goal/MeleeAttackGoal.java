@@ -94,8 +94,7 @@ public class MeleeAttackGoal extends Goal {
 		if (livingEntity != null) {
 			this.mob.getLookControl().setLookAt(livingEntity, 30.0F, 30.0F);
 			this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);
-			boolean bl = this.followingTargetEvenIfNotSeen || this.mob.getSensing().hasLineOfSight(livingEntity);
-			if (bl
+			if ((this.followingTargetEvenIfNotSeen || this.mob.getSensing().hasLineOfSight(livingEntity))
 				&& this.ticksUntilNextPathRecalculation <= 0
 				&& (
 					this.pathedTargetX == 0.0 && this.pathedTargetY == 0.0 && this.pathedTargetZ == 0.0
@@ -121,14 +120,12 @@ public class MeleeAttackGoal extends Goal {
 			}
 
 			this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
-			if (bl) {
-				this.checkAndPerformAttack(livingEntity);
-			}
+			this.checkAndPerformAttack(livingEntity);
 		}
 	}
 
 	protected void checkAndPerformAttack(LivingEntity livingEntity) {
-		if (this.ticksUntilNextAttack <= 0 && this.mob.isWithinMeleeAttackRange(livingEntity)) {
+		if (this.canPerformAttack(livingEntity)) {
 			this.resetAttackCooldown();
 			this.mob.swing(InteractionHand.MAIN_HAND);
 			this.mob.doHurtTarget(livingEntity);
@@ -141,6 +138,10 @@ public class MeleeAttackGoal extends Goal {
 
 	protected boolean isTimeToAttack() {
 		return this.ticksUntilNextAttack <= 0;
+	}
+
+	protected boolean canPerformAttack(LivingEntity livingEntity) {
+		return this.isTimeToAttack() && this.mob.isWithinMeleeAttackRange(livingEntity) && this.mob.getSensing().hasLineOfSight(livingEntity);
 	}
 
 	protected int getTicksUntilNextAttack() {

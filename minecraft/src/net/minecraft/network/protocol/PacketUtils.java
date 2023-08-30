@@ -1,6 +1,7 @@
 package net.minecraft.network.protocol;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.ReportedException;
 import net.minecraft.network.PacketListener;
 import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.level.ServerLevel;
@@ -16,21 +17,24 @@ public class PacketUtils {
 
 	public static <T extends PacketListener> void ensureRunningOnSameThread(Packet<T> packet, T packetListener, BlockableEventLoop<?> blockableEventLoop) throws RunningOnDifferentThreadException {
 		if (!blockableEventLoop.isSameThread()) {
-			blockableEventLoop.executeIfPossible(() -> {
-				if (packetListener.shouldHandleMessage(packet)) {
-					try {
-						packet.handle(packetListener);
-					} catch (Exception var3) {
-						if (packetListener.shouldPropagateHandlingExceptions()) {
-							throw var3;
-						}
+			blockableEventLoop.executeIfPossible(
+				() -> {
+					if (packetListener.shouldHandleMessage(packet)) {
+						try {
+							packet.handle(packetListener);
+						} catch (Exception var4) {
+							if (var4 instanceof ReportedException reportedException && reportedException.getCause() instanceof OutOfMemoryError
+								|| packetListener.shouldPropagateHandlingExceptions()) {
+								throw var4;
+							}
 
-						LOGGER.error("Failed to handle packet {}, suppressing error", packet, var3);
+							LOGGER.error("Failed to handle packet {}, suppressing error", packet, var4);
+						}
+					} else {
+						LOGGER.debug("Ignoring packet due to disconnection: {}", packet);
 					}
-				} else {
-					LOGGER.debug("Ignoring packet due to disconnection: {}", packet);
 				}
-			});
+			);
 			throw RunningOnDifferentThreadException.RUNNING_ON_DIFFERENT_THREAD;
 		}
 	}

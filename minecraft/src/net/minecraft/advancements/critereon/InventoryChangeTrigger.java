@@ -2,11 +2,12 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.core.HolderSet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,13 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChangeTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("inventory_changed");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public InventoryChangeTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -65,24 +59,25 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 		public TriggerInstance(
 			Optional<ContextAwarePredicate> optional, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, MinMaxBounds.Ints ints3, List<ItemPredicate> list
 		) {
-			super(InventoryChangeTrigger.ID, optional);
+			super(optional);
 			this.slotsOccupied = ints;
 			this.slotsFull = ints2;
 			this.slotsEmpty = ints3;
 			this.predicates = list;
 		}
 
-		public static InventoryChangeTrigger.TriggerInstance hasItems(ItemPredicate.Builder... builders) {
-			return hasItems((ItemPredicate[])Arrays.stream(builders).flatMap(builder -> builder.build().stream()).toArray(ItemPredicate[]::new));
+		public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemPredicate.Builder... builders) {
+			return hasItems((ItemPredicate[])Stream.of(builders).map(ItemPredicate.Builder::build).toArray(ItemPredicate[]::new));
 		}
 
-		public static InventoryChangeTrigger.TriggerInstance hasItems(ItemPredicate... itemPredicates) {
-			return new InventoryChangeTrigger.TriggerInstance(
-				Optional.empty(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, List.of(itemPredicates)
-			);
+		public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemPredicate... itemPredicates) {
+			return CriteriaTriggers.INVENTORY_CHANGED
+				.createCriterion(
+					new InventoryChangeTrigger.TriggerInstance(Optional.empty(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, List.of(itemPredicates))
+				);
 		}
 
-		public static InventoryChangeTrigger.TriggerInstance hasItems(ItemLike... itemLikes) {
+		public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemLike... itemLikes) {
 			ItemPredicate[] itemPredicates = new ItemPredicate[itemLikes.length];
 
 			for (int i = 0; i < itemLikes.length; i++) {

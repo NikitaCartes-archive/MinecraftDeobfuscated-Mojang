@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
@@ -38,7 +38,7 @@ public class AdvancementWidget {
 	private static final int TITLE_MAX_WIDTH = 163;
 	private static final int[] TEST_SPLIT_OFFSETS = new int[]{0, 10, -10, 25, -25};
 	private final AdvancementTab tab;
-	private final Advancement advancement;
+	private final AdvancementNode advancementNode;
 	private final DisplayInfo display;
 	private final FormattedCharSequence title;
 	private final int width;
@@ -52,15 +52,15 @@ public class AdvancementWidget {
 	private final int x;
 	private final int y;
 
-	public AdvancementWidget(AdvancementTab advancementTab, Minecraft minecraft, Advancement advancement, DisplayInfo displayInfo) {
+	public AdvancementWidget(AdvancementTab advancementTab, Minecraft minecraft, AdvancementNode advancementNode, DisplayInfo displayInfo) {
 		this.tab = advancementTab;
-		this.advancement = advancement;
+		this.advancementNode = advancementNode;
 		this.display = displayInfo;
 		this.minecraft = minecraft;
 		this.title = Language.getInstance().getVisualOrder(minecraft.font.substrByWidth(displayInfo.getTitle(), 163));
 		this.x = Mth.floor(displayInfo.getX() * 28.0F);
 		this.y = Mth.floor(displayInfo.getY() * 27.0F);
-		int i = advancement.getMaxCriteraRequired();
+		int i = advancementNode.advancement().requirements().size();
 		int j = String.valueOf(i).length();
 		int k = i > 1 ? minecraft.font.width("  ") + minecraft.font.width("0") * j * 2 + minecraft.font.width("/") : 0;
 		int l = 29 + minecraft.font.width(this.title) + k;
@@ -102,12 +102,12 @@ public class AdvancementWidget {
 	}
 
 	@Nullable
-	private AdvancementWidget getFirstVisibleParent(Advancement advancement) {
+	private AdvancementWidget getFirstVisibleParent(AdvancementNode advancementNode) {
 		do {
-			advancement = advancement.getParent();
-		} while (advancement != null && advancement.getDisplay() == null);
+			advancementNode = advancementNode.parent();
+		} while (advancementNode != null && advancementNode.advancement().display().isEmpty());
 
-		return advancement != null && advancement.getDisplay() != null ? this.tab.getWidget(advancement) : null;
+		return advancementNode != null && !advancementNode.advancement().display().isEmpty() ? this.tab.getWidget(advancementNode.holder()) : null;
 	}
 
 	public void drawConnectivity(GuiGraphics guiGraphics, int i, int j, boolean bl) {
@@ -261,8 +261,8 @@ public class AdvancementWidget {
 	}
 
 	public void attachToParent() {
-		if (this.parent == null && this.advancement.getParent() != null) {
-			this.parent = this.getFirstVisibleParent(this.advancement);
+		if (this.parent == null && this.advancementNode.parent() != null) {
+			this.parent = this.getFirstVisibleParent(this.advancementNode);
 			if (this.parent != null) {
 				this.parent.addChild(this);
 			}

@@ -11,18 +11,18 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public class RecipeCollection {
 	private final RegistryAccess registryAccess;
-	private final List<Recipe<?>> recipes;
+	private final List<RecipeHolder<?>> recipes;
 	private final boolean singleResultItem;
-	private final Set<Recipe<?>> craftable = Sets.<Recipe<?>>newHashSet();
-	private final Set<Recipe<?>> fitsDimensions = Sets.<Recipe<?>>newHashSet();
-	private final Set<Recipe<?>> known = Sets.<Recipe<?>>newHashSet();
+	private final Set<RecipeHolder<?>> craftable = Sets.<RecipeHolder<?>>newHashSet();
+	private final Set<RecipeHolder<?>> fitsDimensions = Sets.<RecipeHolder<?>>newHashSet();
+	private final Set<RecipeHolder<?>> known = Sets.<RecipeHolder<?>>newHashSet();
 
-	public RecipeCollection(RegistryAccess registryAccess, List<Recipe<?>> list) {
+	public RecipeCollection(RegistryAccess registryAccess, List<RecipeHolder<?>> list) {
 		this.registryAccess = registryAccess;
 		this.recipes = ImmutableList.copyOf(list);
 		if (list.size() <= 1) {
@@ -32,12 +32,12 @@ public class RecipeCollection {
 		}
 	}
 
-	private static boolean allRecipesHaveSameResult(RegistryAccess registryAccess, List<Recipe<?>> list) {
+	private static boolean allRecipesHaveSameResult(RegistryAccess registryAccess, List<RecipeHolder<?>> list) {
 		int i = list.size();
-		ItemStack itemStack = ((Recipe)list.get(0)).getResultItem(registryAccess);
+		ItemStack itemStack = ((RecipeHolder)list.get(0)).value().getResultItem(registryAccess);
 
 		for (int j = 1; j < i; j++) {
-			ItemStack itemStack2 = ((Recipe)list.get(j)).getResultItem(registryAccess);
+			ItemStack itemStack2 = ((RecipeHolder)list.get(j)).value().getResultItem(registryAccess);
 			if (!ItemStack.isSameItemSameTags(itemStack, itemStack2)) {
 				return false;
 			}
@@ -55,32 +55,32 @@ public class RecipeCollection {
 	}
 
 	public void updateKnownRecipes(RecipeBook recipeBook) {
-		for (Recipe<?> recipe : this.recipes) {
-			if (recipeBook.contains(recipe)) {
-				this.known.add(recipe);
+		for (RecipeHolder<?> recipeHolder : this.recipes) {
+			if (recipeBook.contains(recipeHolder)) {
+				this.known.add(recipeHolder);
 			}
 		}
 	}
 
 	public void canCraft(StackedContents stackedContents, int i, int j, RecipeBook recipeBook) {
-		for (Recipe<?> recipe : this.recipes) {
-			boolean bl = recipe.canCraftInDimensions(i, j) && recipeBook.contains(recipe);
+		for (RecipeHolder<?> recipeHolder : this.recipes) {
+			boolean bl = recipeHolder.value().canCraftInDimensions(i, j) && recipeBook.contains(recipeHolder);
 			if (bl) {
-				this.fitsDimensions.add(recipe);
+				this.fitsDimensions.add(recipeHolder);
 			} else {
-				this.fitsDimensions.remove(recipe);
+				this.fitsDimensions.remove(recipeHolder);
 			}
 
-			if (bl && stackedContents.canCraft(recipe, null)) {
-				this.craftable.add(recipe);
+			if (bl && stackedContents.canCraft(recipeHolder.value(), null)) {
+				this.craftable.add(recipeHolder);
 			} else {
-				this.craftable.remove(recipe);
+				this.craftable.remove(recipeHolder);
 			}
 		}
 	}
 
-	public boolean isCraftable(Recipe<?> recipe) {
-		return this.craftable.contains(recipe);
+	public boolean isCraftable(RecipeHolder<?> recipeHolder) {
+		return this.craftable.contains(recipeHolder);
 	}
 
 	public boolean hasCraftable() {
@@ -91,29 +91,29 @@ public class RecipeCollection {
 		return !this.fitsDimensions.isEmpty();
 	}
 
-	public List<Recipe<?>> getRecipes() {
+	public List<RecipeHolder<?>> getRecipes() {
 		return this.recipes;
 	}
 
-	public List<Recipe<?>> getRecipes(boolean bl) {
-		List<Recipe<?>> list = Lists.<Recipe<?>>newArrayList();
-		Set<Recipe<?>> set = bl ? this.craftable : this.fitsDimensions;
+	public List<RecipeHolder<?>> getRecipes(boolean bl) {
+		List<RecipeHolder<?>> list = Lists.<RecipeHolder<?>>newArrayList();
+		Set<RecipeHolder<?>> set = bl ? this.craftable : this.fitsDimensions;
 
-		for (Recipe<?> recipe : this.recipes) {
-			if (set.contains(recipe)) {
-				list.add(recipe);
+		for (RecipeHolder<?> recipeHolder : this.recipes) {
+			if (set.contains(recipeHolder)) {
+				list.add(recipeHolder);
 			}
 		}
 
 		return list;
 	}
 
-	public List<Recipe<?>> getDisplayRecipes(boolean bl) {
-		List<Recipe<?>> list = Lists.<Recipe<?>>newArrayList();
+	public List<RecipeHolder<?>> getDisplayRecipes(boolean bl) {
+		List<RecipeHolder<?>> list = Lists.<RecipeHolder<?>>newArrayList();
 
-		for (Recipe<?> recipe : this.recipes) {
-			if (this.fitsDimensions.contains(recipe) && this.craftable.contains(recipe) == bl) {
-				list.add(recipe);
+		for (RecipeHolder<?> recipeHolder : this.recipes) {
+			if (this.fitsDimensions.contains(recipeHolder) && this.craftable.contains(recipeHolder) == bl) {
+				list.add(recipeHolder);
 			}
 		}
 

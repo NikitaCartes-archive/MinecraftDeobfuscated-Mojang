@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class SwitchSlotTask extends LongRunningTask {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Component TITLE = Component.translatable("mco.minigame.world.slot.screen.title");
 	private final long worldId;
 	private final int slot;
 	private final Runnable callback;
@@ -23,7 +24,6 @@ public class SwitchSlotTask extends LongRunningTask {
 
 	public void run() {
 		RealmsClient realmsClient = RealmsClient.create();
-		this.setTitle(Component.translatable("mco.minigame.world.slot.screen.title"));
 
 		for (int i = 0; i < 25; i++) {
 			try {
@@ -50,5 +50,10 @@ public class SwitchSlotTask extends LongRunningTask {
 				this.error(var5);
 			}
 		}
+	}
+
+	@Override
+	public Component getTitle() {
+		return TITLE;
 	}
 }

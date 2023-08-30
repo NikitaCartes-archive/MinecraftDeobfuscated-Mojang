@@ -186,7 +186,7 @@ public class RedStoneWireBlock extends Block {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction == Direction.DOWN) {
-			return blockState;
+			return !this.canSurviveOn(levelAccessor, blockPos2, blockState2) ? Blocks.AIR.defaultBlockState() : blockState;
 		} else if (direction == Direction.UP) {
 			return this.getConnectionState(levelAccessor, blockState, blockPos);
 		} else {

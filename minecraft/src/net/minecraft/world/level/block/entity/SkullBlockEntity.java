@@ -17,6 +17,7 @@ import net.minecraft.server.Services;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SkullBlockEntity extends BlockEntity {
@@ -89,7 +90,7 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	public static void animation(Level level, BlockPos blockPos, BlockState blockState, SkullBlockEntity skullBlockEntity) {
-		if (level.hasNeighborSignal(blockPos)) {
+		if (blockState.hasProperty(SkullBlock.POWERED) && (Boolean)blockState.getValue(SkullBlock.POWERED)) {
 			skullBlockEntity.isAnimating = true;
 			skullBlockEntity.animationTickCount++;
 		} else {

@@ -44,10 +44,10 @@ public record LocationCheck(Optional<LocationPredicate> predicate, BlockPos offs
 	}
 
 	public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder builder) {
-		return () -> new LocationCheck(builder.build(), BlockPos.ZERO);
+		return () -> new LocationCheck(Optional.of(builder.build()), BlockPos.ZERO);
 	}
 
 	public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder builder, BlockPos blockPos) {
-		return () -> new LocationCheck(builder.build(), blockPos);
+		return () -> new LocationCheck(Optional.of(builder.build()), blockPos);
 	}
 }

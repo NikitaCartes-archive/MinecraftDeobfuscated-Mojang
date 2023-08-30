@@ -15,24 +15,41 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.layouts.LayoutSettings;
+import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsResetWorldScreen extends RealmsScreen {
-	private static final ResourceLocation SLOT_FRAME_SPRITE = new ResourceLocation("widget/slot_frame");
 	static final Logger LOGGER = LogUtils.getLogger();
+	static final ResourceLocation SLOT_FRAME_SPRITE = new ResourceLocation("widget/slot_frame");
+	private static final Component CREATE_REALM_TITLE = Component.translatable("mco.selectServer.create");
+	private static final Component CREATE_REALM_SUBTITLE = Component.translatable("mco.selectServer.create.subtitle");
+	private static final Component CREATE_WORLD_TITLE = Component.translatable("mco.configure.world.switch.slot");
+	private static final Component CREATE_WORLD_SUBTITLE = Component.translatable("mco.configure.world.switch.slot.subtitle");
+	private static final Component RESET_WORLD_TITLE = Component.translatable("mco.reset.world.title");
+	private static final Component RESET_WORLD_SUBTITLE = Component.translatable("mco.reset.world.warning");
+	public static final Component CREATE_WORLD_RESET_TASK_TITLE = Component.translatable("mco.create.world.reset.title");
+	private static final Component RESET_WORLD_RESET_TASK_TITLE = Component.translatable("mco.reset.world.resetting.screen.title");
+	private static final Component WORLD_TEMPLATES_TITLE = Component.translatable("mco.reset.world.template");
+	private static final Component ADVENTURES_TITLE = Component.translatable("mco.reset.world.adventure");
+	private static final Component EXPERIENCES_TITLE = Component.translatable("mco.reset.world.experience");
+	private static final Component INSPIRATION_TITLE = Component.translatable("mco.reset.world.inspiration");
 	private final Screen lastScreen;
 	private final RealmsServer serverData;
-	private Component subtitle = Component.translatable("mco.reset.world.warning");
-	private Component buttonTitle = CommonComponents.GUI_CANCEL;
-	private int subtitleColor = -65536;
+	private final Component subtitle;
+	private final int subtitleColor;
+	private final Component resetTaskTitle;
 	private static final ResourceLocation UPLOAD_LOCATION = new ResourceLocation("textures/gui/realms/upload.png");
 	private static final ResourceLocation ADVENTURE_MAP_LOCATION = new ResourceLocation("textures/gui/realms/adventure.png");
 	private static final ResourceLocation SURVIVAL_SPAWN_LOCATION = new ResourceLocation("textures/gui/realms/survival_spawn.png");
@@ -43,45 +60,46 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 	WorldTemplatePaginatedList adventuremaps;
 	WorldTemplatePaginatedList experiences;
 	WorldTemplatePaginatedList inspirations;
-	public int slot = -1;
-	private Component resetTitle = Component.translatable("mco.reset.world.resetting.screen.title");
+	public final int slot;
 	private final Runnable resetWorldRunnable;
-	private final Runnable callback;
+	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 
-	public RealmsResetWorldScreen(Screen screen, RealmsServer realmsServer, Component component, Runnable runnable, Runnable runnable2) {
+	private RealmsResetWorldScreen(
+		Screen screen, RealmsServer realmsServer, int i, Component component, Component component2, int j, Component component3, Runnable runnable
+	) {
 		super(component);
 		this.lastScreen = screen;
 		this.serverData = realmsServer;
-		this.resetWorldRunnable = runnable;
-		this.callback = runnable2;
-	}
-
-	public RealmsResetWorldScreen(Screen screen, RealmsServer realmsServer, Runnable runnable, Runnable runnable2) {
-		this(screen, realmsServer, Component.translatable("mco.reset.world.title"), runnable, runnable2);
-	}
-
-	public RealmsResetWorldScreen(
-		Screen screen, RealmsServer realmsServer, Component component, Component component2, int i, Component component3, Runnable runnable, Runnable runnable2
-	) {
-		this(screen, realmsServer, component, runnable, runnable2);
-		this.subtitle = component2;
-		this.subtitleColor = i;
-		this.buttonTitle = component3;
-	}
-
-	public void setSlot(int i) {
 		this.slot = i;
+		this.subtitle = component2;
+		this.subtitleColor = j;
+		this.resetTaskTitle = component3;
+		this.resetWorldRunnable = runnable;
 	}
 
-	public void setResetTitle(Component component) {
-		this.resetTitle = component;
+	public static RealmsResetWorldScreen forNewRealm(Screen screen, RealmsServer realmsServer, Runnable runnable) {
+		return new RealmsResetWorldScreen(
+			screen, realmsServer, realmsServer.activeSlot, CREATE_REALM_TITLE, CREATE_REALM_SUBTITLE, -6250336, CREATE_WORLD_RESET_TASK_TITLE, runnable
+		);
+	}
+
+	public static RealmsResetWorldScreen forEmptySlot(Screen screen, int i, RealmsServer realmsServer, Runnable runnable) {
+		return new RealmsResetWorldScreen(screen, realmsServer, i, CREATE_WORLD_TITLE, CREATE_WORLD_SUBTITLE, -6250336, CREATE_WORLD_RESET_TASK_TITLE, runnable);
+	}
+
+	public static RealmsResetWorldScreen forResetSlot(Screen screen, RealmsServer realmsServer, Runnable runnable) {
+		return new RealmsResetWorldScreen(
+			screen, realmsServer, realmsServer.activeSlot, RESET_WORLD_TITLE, RESET_WORLD_SUBTITLE, -65536, RESET_WORLD_RESET_TASK_TITLE, runnable
+		);
 	}
 
 	@Override
 	public void init() {
-		this.addRenderableWidget(
-			Button.builder(this.buttonTitle, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 40, row(14) - 10, 80, 20).build()
-		);
+		LinearLayout linearLayout = LinearLayout.vertical();
+		linearLayout.addChild(new StringWidget(this.title, this.font), LayoutSettings::alignHorizontallyCenter);
+		linearLayout.addChild(SpacerElement.height(3));
+		linearLayout.addChild(new StringWidget(this.subtitle, this.font).setColor(this.subtitleColor), LayoutSettings::alignHorizontallyCenter);
+		this.layout.addToHeader(linearLayout);
 		(new Thread("Realms-reset-world-fetcher") {
 			public void run() {
 				RealmsClient realmsClient = RealmsClient.create();
@@ -102,12 +120,11 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 				}
 			}
 		}).start();
-		this.addLabel(new RealmsLabel(this.subtitle, this.width / 2, 22, this.subtitleColor));
 		this.addRenderableWidget(
 			new RealmsResetWorldScreen.FrameButton(
 				this.frame(1),
 				row(0) + 10,
-				Component.translatable("mco.reset.world.generate"),
+				RealmsResetNormalWorldScreen.TITLE,
 				NEW_WORLD_LOCATION,
 				button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this::generationSelectionCallback, this.title))
 			)
@@ -116,37 +133,30 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 			new RealmsResetWorldScreen.FrameButton(
 				this.frame(2),
 				row(0) + 10,
-				Component.translatable("mco.reset.world.upload"),
+				RealmsSelectFileToUploadScreen.TITLE,
 				UPLOAD_LOCATION,
-				button -> this.minecraft
-						.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot != -1 ? this.slot : this.serverData.activeSlot, this, this.callback))
+				button -> this.minecraft.setScreen(new RealmsSelectFileToUploadScreen(this.serverData.id, this.slot, this))
 			)
 		);
 		this.addRenderableWidget(
 			new RealmsResetWorldScreen.FrameButton(
 				this.frame(3),
 				row(0) + 10,
-				Component.translatable("mco.reset.world.template"),
+				WORLD_TEMPLATES_TITLE,
 				SURVIVAL_SPAWN_LOCATION,
 				button -> this.minecraft
-						.setScreen(
-							new RealmsSelectWorldTemplateScreen(
-								Component.translatable("mco.reset.world.template"), this::templateSelectionCallback, RealmsServer.WorldType.NORMAL, this.templates
-							)
-						)
+						.setScreen(new RealmsSelectWorldTemplateScreen(WORLD_TEMPLATES_TITLE, this::templateSelectionCallback, RealmsServer.WorldType.NORMAL, this.templates))
 			)
 		);
 		this.addRenderableWidget(
 			new RealmsResetWorldScreen.FrameButton(
 				this.frame(1),
 				row(6) + 20,
-				Component.translatable("mco.reset.world.adventure"),
+				ADVENTURES_TITLE,
 				ADVENTURE_MAP_LOCATION,
 				button -> this.minecraft
 						.setScreen(
-							new RealmsSelectWorldTemplateScreen(
-								Component.translatable("mco.reset.world.adventure"), this::templateSelectionCallback, RealmsServer.WorldType.ADVENTUREMAP, this.adventuremaps
-							)
+							new RealmsSelectWorldTemplateScreen(ADVENTURES_TITLE, this::templateSelectionCallback, RealmsServer.WorldType.ADVENTUREMAP, this.adventuremaps)
 						)
 			)
 		);
@@ -154,67 +164,41 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 			new RealmsResetWorldScreen.FrameButton(
 				this.frame(2),
 				row(6) + 20,
-				Component.translatable("mco.reset.world.experience"),
+				EXPERIENCES_TITLE,
 				EXPERIENCE_LOCATION,
 				button -> this.minecraft
-						.setScreen(
-							new RealmsSelectWorldTemplateScreen(
-								Component.translatable("mco.reset.world.experience"), this::templateSelectionCallback, RealmsServer.WorldType.EXPERIENCE, this.experiences
-							)
-						)
+						.setScreen(new RealmsSelectWorldTemplateScreen(EXPERIENCES_TITLE, this::templateSelectionCallback, RealmsServer.WorldType.EXPERIENCE, this.experiences))
 			)
 		);
 		this.addRenderableWidget(
 			new RealmsResetWorldScreen.FrameButton(
 				this.frame(3),
 				row(6) + 20,
-				Component.translatable("mco.reset.world.inspiration"),
+				INSPIRATION_TITLE,
 				INSPIRATION_LOCATION,
 				button -> this.minecraft
-						.setScreen(
-							new RealmsSelectWorldTemplateScreen(
-								Component.translatable("mco.reset.world.inspiration"), this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations
-							)
-						)
+						.setScreen(new RealmsSelectWorldTemplateScreen(INSPIRATION_TITLE, this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations))
 			)
 		);
+		this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
+		this.layout.visitWidgets(guiEventListener -> {
+			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
+		});
+		this.layout.arrangeElements();
 	}
 
 	@Override
 	public Component getNarrationMessage() {
-		return CommonComponents.joinForNarration(this.getTitle(), this.createLabelNarration());
+		return CommonComponents.joinForNarration(this.getTitle(), this.subtitle);
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256) {
-			this.minecraft.setScreen(this.lastScreen);
-			return true;
-		} else {
-			return super.keyPressed(i, j, k);
-		}
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	private int frame(int i) {
 		return this.width / 2 - 130 + (i - 1) * 100;
-	}
-
-	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 7, -1);
-	}
-
-	void drawFrame(GuiGraphics guiGraphics, int i, int j, Component component, ResourceLocation resourceLocation, boolean bl, boolean bl2) {
-		if (bl) {
-			guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
-		}
-
-		guiGraphics.blit(resourceLocation, i + 2, j + 14, 0.0F, 0.0F, 56, 56, 56, 56);
-		guiGraphics.blitSprite(SLOT_FRAME_SPRITE, i, j + 12, 60, 60);
-		int k = bl ? -6250336 : -1;
-		guiGraphics.drawCenteredString(this.font, component, i + 30, j, k);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
 	private void startTask(LongRunningTask longRunningTask) {
@@ -228,14 +212,14 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 	private void templateSelectionCallback(@Nullable WorldTemplate worldTemplate) {
 		this.minecraft.setScreen(this);
 		if (worldTemplate != null) {
-			this.resetWorld(() -> this.startTask(new ResettingTemplateWorldTask(worldTemplate, this.serverData.id, this.resetTitle, this.resetWorldRunnable)));
+			this.resetWorld(() -> this.startTask(new ResettingTemplateWorldTask(worldTemplate, this.serverData.id, this.resetTaskTitle, this.resetWorldRunnable)));
 		}
 	}
 
 	private void generationSelectionCallback(@Nullable WorldGenerationInfo worldGenerationInfo) {
 		this.minecraft.setScreen(this);
 		if (worldGenerationInfo != null) {
-			this.resetWorld(() -> this.startTask(new ResettingGeneratedWorldTask(worldGenerationInfo, this.serverData.id, this.resetTitle, this.resetWorldRunnable)));
+			this.resetWorld(() -> this.startTask(new ResettingGeneratedWorldTask(worldGenerationInfo, this.serverData.id, this.resetTaskTitle, this.resetWorldRunnable)));
 		}
 	}
 
@@ -249,18 +233,30 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 
 	@Environment(EnvType.CLIENT)
 	class FrameButton extends Button {
+		private static final int WIDTH = 60;
+		private static final int HEIGHT = 72;
+		private static final int IMAGE_SIZE = 56;
 		private final ResourceLocation image;
 
-		public FrameButton(int i, int j, Component component, ResourceLocation resourceLocation, Button.OnPress onPress) {
+		FrameButton(int i, int j, Component component, ResourceLocation resourceLocation, Button.OnPress onPress) {
 			super(i, j, 60, 72, component, onPress, DEFAULT_NARRATION);
 			this.image = resourceLocation;
 		}
 
 		@Override
 		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-			RealmsResetWorldScreen.this.drawFrame(
-				guiGraphics, this.getX(), this.getY(), this.getMessage(), this.image, this.isHoveredOrFocused(), this.isMouseOver((double)i, (double)j)
-			);
+			boolean bl = this.isHoveredOrFocused();
+			if (bl) {
+				guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
+			}
+
+			int k = this.getX();
+			int l = this.getY();
+			guiGraphics.blit(this.image, k + 2, l + 14, 0.0F, 0.0F, 56, 56, 56, 56);
+			guiGraphics.blitSprite(RealmsResetWorldScreen.SLOT_FRAME_SPRITE, k, l + 12, 60, 60);
+			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+			int m = bl ? -6250336 : -1;
+			guiGraphics.drawCenteredString(RealmsResetWorldScreen.this.font, this.getMessage(), k + 30, l, m);
 		}
 	}
 }

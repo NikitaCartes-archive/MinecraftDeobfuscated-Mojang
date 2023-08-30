@@ -5,11 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.internal.Streams;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import java.io.IOException;
 import java.io.Writer;
@@ -23,11 +22,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.FileUtil;
-import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.AdvancementTree;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.CriterionProgress;
@@ -46,30 +49,27 @@ import org.slf4j.Logger;
 
 public class PlayerAdvancements {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Gson GSON = new GsonBuilder()
-		.registerTypeAdapter(AdvancementProgress.class, new AdvancementProgress.Serializer())
-		.registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-		.setPrettyPrinting()
-		.create();
-	private static final TypeToken<Map<ResourceLocation, AdvancementProgress>> TYPE_TOKEN = new TypeToken<Map<ResourceLocation, AdvancementProgress>>() {
-	};
-	private final DataFixer dataFixer;
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private final PlayerList playerList;
 	private final Path playerSavePath;
-	private final Map<Advancement, AdvancementProgress> progress = new LinkedHashMap();
-	private final Set<Advancement> visible = new HashSet();
-	private final Set<Advancement> progressChanged = new HashSet();
-	private final Set<Advancement> rootsToUpdate = new HashSet();
+	private AdvancementTree tree;
+	private final Map<AdvancementHolder, AdvancementProgress> progress = new LinkedHashMap();
+	private final Set<AdvancementHolder> visible = new HashSet();
+	private final Set<AdvancementHolder> progressChanged = new HashSet();
+	private final Set<AdvancementNode> rootsToUpdate = new HashSet();
 	private ServerPlayer player;
 	@Nullable
-	private Advancement lastSelectedTab;
+	private AdvancementHolder lastSelectedTab;
 	private boolean isFirstPacket = true;
+	private final Codec<PlayerAdvancements.Data> codec;
 
 	public PlayerAdvancements(DataFixer dataFixer, PlayerList playerList, ServerAdvancementManager serverAdvancementManager, Path path, ServerPlayer serverPlayer) {
-		this.dataFixer = dataFixer;
 		this.playerList = playerList;
 		this.playerSavePath = path;
 		this.player = serverPlayer;
+		this.tree = serverAdvancementManager.tree();
+		int i = 1343;
+		this.codec = DataFixTypes.ADVANCEMENTS.wrapCodec(PlayerAdvancements.Data.CODEC, dataFixer, 1343);
 		this.load(serverAdvancementManager);
 	}
 
@@ -91,20 +91,22 @@ public class PlayerAdvancements {
 		this.progressChanged.clear();
 		this.isFirstPacket = true;
 		this.lastSelectedTab = null;
+		this.tree = serverAdvancementManager.tree();
 		this.load(serverAdvancementManager);
 	}
 
 	private void registerListeners(ServerAdvancementManager serverAdvancementManager) {
-		for (Advancement advancement : serverAdvancementManager.getAllAdvancements()) {
-			this.registerListeners(advancement);
+		for (AdvancementHolder advancementHolder : serverAdvancementManager.getAllAdvancements()) {
+			this.registerListeners(advancementHolder);
 		}
 	}
 
 	private void checkForAutomaticTriggers(ServerAdvancementManager serverAdvancementManager) {
-		for (Advancement advancement : serverAdvancementManager.getAllAdvancements()) {
-			if (advancement.getCriteria().isEmpty()) {
-				this.award(advancement, "");
-				advancement.getRewards().grant(this.player);
+		for (AdvancementHolder advancementHolder : serverAdvancementManager.getAllAdvancements()) {
+			Advancement advancement = advancementHolder.value();
+			if (advancement.criteria().isEmpty()) {
+				this.award(advancementHolder, "");
+				advancement.rewards().grant(this.player);
 			}
 		}
 	}
@@ -116,40 +118,24 @@ public class PlayerAdvancements {
 
 				try {
 					jsonReader.setLenient(false);
-					Dynamic<JsonElement> dynamic = new Dynamic<>(JsonOps.INSTANCE, Streams.parse(jsonReader));
-					int i = dynamic.get("DataVersion").asInt(1343);
-					dynamic = dynamic.remove("DataVersion");
-					dynamic = DataFixTypes.ADVANCEMENTS.updateToCurrentVersion(this.dataFixer, dynamic, i);
-					Map<ResourceLocation, AdvancementProgress> map = GSON.getAdapter(TYPE_TOKEN).fromJsonTree(dynamic.getValue());
-					if (map == null) {
-						throw new JsonParseException("Found null for advancements");
-					}
-
-					map.entrySet().stream().sorted(Entry.comparingByValue()).forEach(entry -> {
-						Advancement advancement = serverAdvancementManager.getAdvancement((ResourceLocation)entry.getKey());
-						if (advancement == null) {
-							LOGGER.warn("Ignored advancement '{}' in progress file {} - it doesn't exist anymore?", entry.getKey(), this.playerSavePath);
-						} else {
-							this.startProgress(advancement, (AdvancementProgress)entry.getValue());
-							this.progressChanged.add(advancement);
-							this.markForVisibilityUpdate(advancement);
-						}
-					});
-				} catch (Throwable var7) {
+					JsonElement jsonElement = Streams.parse(jsonReader);
+					PlayerAdvancements.Data data = Util.getOrThrow(this.codec.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new);
+					this.applyFrom(serverAdvancementManager, data);
+				} catch (Throwable var6) {
 					try {
 						jsonReader.close();
-					} catch (Throwable var6) {
-						var7.addSuppressed(var6);
+					} catch (Throwable var5) {
+						var6.addSuppressed(var5);
 					}
 
-					throw var7;
+					throw var6;
 				}
 
 				jsonReader.close();
-			} catch (JsonParseException var8) {
-				LOGGER.error("Couldn't parse player advancements in {}", this.playerSavePath, var8);
-			} catch (IOException var9) {
-				LOGGER.error("Couldn't access player advancements in {}", this.playerSavePath, var9);
+			} catch (JsonParseException var7) {
+				LOGGER.error("Couldn't parse player advancements in {}", this.playerSavePath, var7);
+			} catch (IOException var8) {
+				LOGGER.error("Couldn't access player advancements in {}", this.playerSavePath, var8);
 			}
 		}
 
@@ -158,17 +144,7 @@ public class PlayerAdvancements {
 	}
 
 	public void save() {
-		Map<ResourceLocation, AdvancementProgress> map = new LinkedHashMap();
-
-		for (Entry<Advancement, AdvancementProgress> entry : this.progress.entrySet()) {
-			AdvancementProgress advancementProgress = (AdvancementProgress)entry.getValue();
-			if (advancementProgress.hasProgress()) {
-				map.put(((Advancement)entry.getKey()).getId(), advancementProgress);
-			}
-		}
-
-		JsonElement jsonElement = GSON.toJsonTree(map);
-		jsonElement.getAsJsonObject().addProperty("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+		JsonElement jsonElement = Util.getOrThrow(this.codec.encodeStart(JsonOps.INSTANCE, this.asData()), IllegalStateException::new);
 
 		try {
 			FileUtil.createDirectoriesSafe(this.playerSavePath.getParent());
@@ -176,128 +152,152 @@ public class PlayerAdvancements {
 
 			try {
 				GSON.toJson(jsonElement, writer);
-			} catch (Throwable var7) {
+			} catch (Throwable var6) {
 				if (writer != null) {
 					try {
 						writer.close();
-					} catch (Throwable var6) {
-						var7.addSuppressed(var6);
+					} catch (Throwable var5) {
+						var6.addSuppressed(var5);
 					}
 				}
 
-				throw var7;
+				throw var6;
 			}
 
 			if (writer != null) {
 				writer.close();
 			}
-		} catch (IOException var8) {
-			LOGGER.error("Couldn't save player advancements to {}", this.playerSavePath, var8);
+		} catch (IOException var7) {
+			LOGGER.error("Couldn't save player advancements to {}", this.playerSavePath, var7);
 		}
 	}
 
-	public boolean award(Advancement advancement, String string) {
+	private void applyFrom(ServerAdvancementManager serverAdvancementManager, PlayerAdvancements.Data data) {
+		data.forEach((resourceLocation, advancementProgress) -> {
+			AdvancementHolder advancementHolder = serverAdvancementManager.get(resourceLocation);
+			if (advancementHolder == null) {
+				LOGGER.warn("Ignored advancement '{}' in progress file {} - it doesn't exist anymore?", resourceLocation, this.playerSavePath);
+			} else {
+				this.startProgress(advancementHolder, advancementProgress);
+				this.progressChanged.add(advancementHolder);
+				this.markForVisibilityUpdate(advancementHolder);
+			}
+		});
+	}
+
+	private PlayerAdvancements.Data asData() {
+		Map<ResourceLocation, AdvancementProgress> map = new LinkedHashMap();
+		this.progress.forEach((advancementHolder, advancementProgress) -> {
+			if (advancementProgress.hasProgress()) {
+				map.put(advancementHolder.id(), advancementProgress);
+			}
+		});
+		return new PlayerAdvancements.Data(map);
+	}
+
+	public boolean award(AdvancementHolder advancementHolder, String string) {
 		boolean bl = false;
-		AdvancementProgress advancementProgress = this.getOrStartProgress(advancement);
+		AdvancementProgress advancementProgress = this.getOrStartProgress(advancementHolder);
 		boolean bl2 = advancementProgress.isDone();
 		if (advancementProgress.grantProgress(string)) {
-			this.unregisterListeners(advancement);
-			this.progressChanged.add(advancement);
+			this.unregisterListeners(advancementHolder);
+			this.progressChanged.add(advancementHolder);
 			bl = true;
 			if (!bl2 && advancementProgress.isDone()) {
-				advancement.getRewards().grant(this.player);
-				if (advancement.getDisplay() != null
-					&& advancement.getDisplay().shouldAnnounceChat()
-					&& this.player.level().getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
-					this.playerList
-						.broadcastSystemMessage(
-							Component.translatable(
-								"chat.type.advancement." + advancement.getDisplay().getFrame().getName(), this.player.getDisplayName(), advancement.getChatComponent()
-							),
-							false
-						);
-				}
+				advancementHolder.value().rewards().grant(this.player);
+				advancementHolder.value()
+					.display()
+					.ifPresent(
+						displayInfo -> {
+							if (displayInfo.shouldAnnounceChat() && this.player.level().getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
+								this.playerList
+									.broadcastSystemMessage(
+										Component.translatable("chat.type.advancement." + displayInfo.getFrame().getName(), this.player.getDisplayName(), Advancement.name(advancementHolder)),
+										false
+									);
+							}
+						}
+					);
 			}
 		}
 
 		if (!bl2 && advancementProgress.isDone()) {
-			this.markForVisibilityUpdate(advancement);
+			this.markForVisibilityUpdate(advancementHolder);
 		}
 
 		return bl;
 	}
 
-	public boolean revoke(Advancement advancement, String string) {
+	public boolean revoke(AdvancementHolder advancementHolder, String string) {
 		boolean bl = false;
-		AdvancementProgress advancementProgress = this.getOrStartProgress(advancement);
+		AdvancementProgress advancementProgress = this.getOrStartProgress(advancementHolder);
 		boolean bl2 = advancementProgress.isDone();
 		if (advancementProgress.revokeProgress(string)) {
-			this.registerListeners(advancement);
-			this.progressChanged.add(advancement);
+			this.registerListeners(advancementHolder);
+			this.progressChanged.add(advancementHolder);
 			bl = true;
 		}
 
 		if (bl2 && !advancementProgress.isDone()) {
-			this.markForVisibilityUpdate(advancement);
+			this.markForVisibilityUpdate(advancementHolder);
 		}
 
 		return bl;
 	}
 
-	private void markForVisibilityUpdate(Advancement advancement) {
-		this.rootsToUpdate.add(advancement.getRoot());
+	private void markForVisibilityUpdate(AdvancementHolder advancementHolder) {
+		AdvancementNode advancementNode = this.tree.get(advancementHolder);
+		if (advancementNode != null) {
+			this.rootsToUpdate.add(advancementNode.root());
+		}
 	}
 
-	private void registerListeners(Advancement advancement) {
-		AdvancementProgress advancementProgress = this.getOrStartProgress(advancement);
+	private void registerListeners(AdvancementHolder advancementHolder) {
+		AdvancementProgress advancementProgress = this.getOrStartProgress(advancementHolder);
 		if (!advancementProgress.isDone()) {
-			for (Entry<String, Criterion> entry : advancement.getCriteria().entrySet()) {
+			for (Entry<String, Criterion<?>> entry : advancementHolder.value().criteria().entrySet()) {
 				CriterionProgress criterionProgress = advancementProgress.getCriterion((String)entry.getKey());
 				if (criterionProgress != null && !criterionProgress.isDone()) {
-					CriterionTriggerInstance criterionTriggerInstance = ((Criterion)entry.getValue()).getTrigger();
-					if (criterionTriggerInstance != null) {
-						CriterionTrigger<CriterionTriggerInstance> criterionTrigger = CriteriaTriggers.getCriterion(criterionTriggerInstance.getCriterion());
-						if (criterionTrigger != null) {
-							criterionTrigger.addPlayerListener(this, new CriterionTrigger.Listener<>(criterionTriggerInstance, advancement, (String)entry.getKey()));
-						}
-					}
+					this.registerListener(advancementHolder, (String)entry.getKey(), (Criterion)entry.getValue());
 				}
 			}
 		}
 	}
 
-	private void unregisterListeners(Advancement advancement) {
-		AdvancementProgress advancementProgress = this.getOrStartProgress(advancement);
+	private <T extends CriterionTriggerInstance> void registerListener(AdvancementHolder advancementHolder, String string, Criterion<T> criterion) {
+		criterion.trigger().addPlayerListener(this, new CriterionTrigger.Listener<>(criterion.triggerInstance(), advancementHolder, string));
+	}
 
-		for (Entry<String, Criterion> entry : advancement.getCriteria().entrySet()) {
+	private void unregisterListeners(AdvancementHolder advancementHolder) {
+		AdvancementProgress advancementProgress = this.getOrStartProgress(advancementHolder);
+
+		for (Entry<String, Criterion<?>> entry : advancementHolder.value().criteria().entrySet()) {
 			CriterionProgress criterionProgress = advancementProgress.getCriterion((String)entry.getKey());
 			if (criterionProgress != null && (criterionProgress.isDone() || advancementProgress.isDone())) {
-				CriterionTriggerInstance criterionTriggerInstance = ((Criterion)entry.getValue()).getTrigger();
-				if (criterionTriggerInstance != null) {
-					CriterionTrigger<CriterionTriggerInstance> criterionTrigger = CriteriaTriggers.getCriterion(criterionTriggerInstance.getCriterion());
-					if (criterionTrigger != null) {
-						criterionTrigger.removePlayerListener(this, new CriterionTrigger.Listener<>(criterionTriggerInstance, advancement, (String)entry.getKey()));
-					}
-				}
+				this.removeListener(advancementHolder, (String)entry.getKey(), (Criterion)entry.getValue());
 			}
 		}
+	}
+
+	private <T extends CriterionTriggerInstance> void removeListener(AdvancementHolder advancementHolder, String string, Criterion<T> criterion) {
+		criterion.trigger().removePlayerListener(this, new CriterionTrigger.Listener<>(criterion.triggerInstance(), advancementHolder, string));
 	}
 
 	public void flushDirty(ServerPlayer serverPlayer) {
 		if (this.isFirstPacket || !this.rootsToUpdate.isEmpty() || !this.progressChanged.isEmpty()) {
 			Map<ResourceLocation, AdvancementProgress> map = new HashMap();
-			Set<Advancement> set = new HashSet();
+			Set<AdvancementHolder> set = new HashSet();
 			Set<ResourceLocation> set2 = new HashSet();
 
-			for (Advancement advancement : this.rootsToUpdate) {
-				this.updateTreeVisibility(advancement, set, set2);
+			for (AdvancementNode advancementNode : this.rootsToUpdate) {
+				this.updateTreeVisibility(advancementNode, set, set2);
 			}
 
 			this.rootsToUpdate.clear();
 
-			for (Advancement advancement : this.progressChanged) {
-				if (this.visible.contains(advancement)) {
-					map.put(advancement.getId(), (AdvancementProgress)this.progress.get(advancement));
+			for (AdvancementHolder advancementHolder : this.progressChanged) {
+				if (this.visible.contains(advancementHolder)) {
+					map.put(advancementHolder.id(), (AdvancementProgress)this.progress.get(advancementHolder));
 				}
 			}
 
@@ -310,46 +310,62 @@ public class PlayerAdvancements {
 		this.isFirstPacket = false;
 	}
 
-	public void setSelectedTab(@Nullable Advancement advancement) {
-		Advancement advancement2 = this.lastSelectedTab;
-		if (advancement != null && advancement.getParent() == null && advancement.getDisplay() != null) {
-			this.lastSelectedTab = advancement;
+	public void setSelectedTab(@Nullable AdvancementHolder advancementHolder) {
+		AdvancementHolder advancementHolder2 = this.lastSelectedTab;
+		if (advancementHolder != null && advancementHolder.value().isRoot() && advancementHolder.value().display().isPresent()) {
+			this.lastSelectedTab = advancementHolder;
 		} else {
 			this.lastSelectedTab = null;
 		}
 
-		if (advancement2 != this.lastSelectedTab) {
-			this.player.connection.send(new ClientboundSelectAdvancementsTabPacket(this.lastSelectedTab == null ? null : this.lastSelectedTab.getId()));
+		if (advancementHolder2 != this.lastSelectedTab) {
+			this.player.connection.send(new ClientboundSelectAdvancementsTabPacket(this.lastSelectedTab == null ? null : this.lastSelectedTab.id()));
 		}
 	}
 
-	public AdvancementProgress getOrStartProgress(Advancement advancement) {
-		AdvancementProgress advancementProgress = (AdvancementProgress)this.progress.get(advancement);
+	public AdvancementProgress getOrStartProgress(AdvancementHolder advancementHolder) {
+		AdvancementProgress advancementProgress = (AdvancementProgress)this.progress.get(advancementHolder);
 		if (advancementProgress == null) {
 			advancementProgress = new AdvancementProgress();
-			this.startProgress(advancement, advancementProgress);
+			this.startProgress(advancementHolder, advancementProgress);
 		}
 
 		return advancementProgress;
 	}
 
-	private void startProgress(Advancement advancement, AdvancementProgress advancementProgress) {
-		advancementProgress.update(advancement.getCriteria(), advancement.getRequirements());
-		this.progress.put(advancement, advancementProgress);
+	private void startProgress(AdvancementHolder advancementHolder, AdvancementProgress advancementProgress) {
+		advancementProgress.update(advancementHolder.value().requirements());
+		this.progress.put(advancementHolder, advancementProgress);
 	}
 
-	private void updateTreeVisibility(Advancement advancement, Set<Advancement> set, Set<ResourceLocation> set2) {
-		AdvancementVisibilityEvaluator.evaluateVisibility(advancement, advancementx -> this.getOrStartProgress(advancementx).isDone(), (advancementx, bl) -> {
-			if (bl) {
-				if (this.visible.add(advancementx)) {
-					set.add(advancementx);
-					if (this.progress.containsKey(advancementx)) {
-						this.progressChanged.add(advancementx);
+	private void updateTreeVisibility(AdvancementNode advancementNode, Set<AdvancementHolder> set, Set<ResourceLocation> set2) {
+		AdvancementVisibilityEvaluator.evaluateVisibility(
+			advancementNode, advancementNodex -> this.getOrStartProgress(advancementNodex.holder()).isDone(), (advancementNodex, bl) -> {
+				AdvancementHolder advancementHolder = advancementNodex.holder();
+				if (bl) {
+					if (this.visible.add(advancementHolder)) {
+						set.add(advancementHolder);
+						if (this.progress.containsKey(advancementHolder)) {
+							this.progressChanged.add(advancementHolder);
+						}
 					}
+				} else if (this.visible.remove(advancementHolder)) {
+					set2.add(advancementHolder.id());
 				}
-			} else if (this.visible.remove(advancementx)) {
-				set2.add(advancementx.getId());
 			}
-		});
+		);
+	}
+
+	static record Data(Map<ResourceLocation, AdvancementProgress> map) {
+		public static final Codec<PlayerAdvancements.Data> CODEC = Codec.unboundedMap(ResourceLocation.CODEC, AdvancementProgress.CODEC)
+			.xmap(PlayerAdvancements.Data::new, PlayerAdvancements.Data::map);
+
+		public void forEach(BiConsumer<ResourceLocation, AdvancementProgress> biConsumer) {
+			this.map
+				.entrySet()
+				.stream()
+				.sorted(Entry.comparingByValue())
+				.forEach(entry -> biConsumer.accept((ResourceLocation)entry.getKey(), (AdvancementProgress)entry.getValue()));
+		}
 	}
 }

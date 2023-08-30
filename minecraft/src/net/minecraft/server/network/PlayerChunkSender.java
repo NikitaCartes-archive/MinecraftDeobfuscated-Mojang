@@ -86,18 +86,20 @@ public class PlayerChunkSender {
 			list = ((List)this.pendingChunks.stream().collect(Comparators.least(i, Comparator.comparingInt(chunkPos::distanceSquared))))
 				.stream()
 				.mapToLong(Long::longValue)
-				.peek(this.pendingChunks::remove)
-				.mapToObj(chunkMap::getTickingChunkIfPresent)
+				.mapToObj(chunkMap::getChunkToSend)
 				.filter(Objects::nonNull)
 				.toList();
 		} else {
 			list = this.pendingChunks
 				.longStream()
-				.mapToObj(chunkMap::getTickingChunkIfPresent)
+				.mapToObj(chunkMap::getChunkToSend)
 				.filter(Objects::nonNull)
-				.sorted(Comparator.comparingInt(levelChunk -> chunkPos.distanceSquared(levelChunk.getPos())))
+				.sorted(Comparator.comparingInt(levelChunkx -> chunkPos.distanceSquared(levelChunkx.getPos())))
 				.toList();
-			this.pendingChunks.clear();
+		}
+
+		for (LevelChunk levelChunk : list) {
+			this.pendingChunks.remove(levelChunk.getPos().toLong());
 		}
 
 		return list;

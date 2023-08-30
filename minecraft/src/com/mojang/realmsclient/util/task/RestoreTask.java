@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RestoreTask extends LongRunningTask {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Component TITLE = Component.translatable("mco.backup.restoring");
 	private final Backup backup;
 	private final long worldId;
 	private final RealmsConfigureWorldScreen lastScreen;
@@ -26,7 +27,6 @@ public class RestoreTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(Component.translatable("mco.backup.restoring"));
 		RealmsClient realmsClient = RealmsClient.create();
 		int i = 0;
 
@@ -69,5 +69,10 @@ public class RestoreTask extends LongRunningTask {
 				return;
 			}
 		}
+	}
+
+	@Override
+	public Component getTitle() {
+		return TITLE;
 	}
 }

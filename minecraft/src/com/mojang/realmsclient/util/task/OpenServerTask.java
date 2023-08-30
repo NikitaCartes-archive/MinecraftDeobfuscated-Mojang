@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class OpenServerTask extends LongRunningTask {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Component TITLE = Component.translatable("mco.configure.world.opening");
 	private final RealmsServer serverData;
 	private final Screen returnScreen;
 	private final boolean join;
@@ -31,7 +32,6 @@ public class OpenServerTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(Component.translatable("mco.configure.world.opening"));
 		RealmsClient realmsClient = RealmsClient.create();
 
 		for (int i = 0; i < 25; i++) {
@@ -71,5 +71,10 @@ public class OpenServerTask extends LongRunningTask {
 				this.error(var5);
 			}
 		}
+	}
+
+	@Override
+	public Component getTitle() {
+		return TITLE;
 	}
 }

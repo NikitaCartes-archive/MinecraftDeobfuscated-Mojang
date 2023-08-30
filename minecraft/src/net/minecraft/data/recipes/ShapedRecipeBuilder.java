@@ -5,16 +5,17 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +32,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 	private final int count;
 	private final List<String> rows = Lists.<String>newArrayList();
 	private final Map<Character, Ingredient> key = Maps.<Character, Ingredient>newLinkedHashMap();
-	private final Advancement.Builder advancement = Advancement.Builder.recipeAdvancement();
+	private final Map<String, Criterion<?>> criteria = new LinkedHashMap();
 	@Nullable
 	private String group;
 	private boolean showNotification = true;
@@ -78,8 +79,8 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 		}
 	}
 
-	public ShapedRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
-		this.advancement.addCriterion(string, criterionTriggerInstance);
+	public ShapedRecipeBuilder unlockedBy(String string, Criterion<?> criterion) {
+		this.criteria.put(string, criterion);
 		return this;
 	}
 
@@ -99,14 +100,14 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 	}
 
 	@Override
-	public void save(Consumer<FinishedRecipe> consumer, ResourceLocation resourceLocation) {
+	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
 		this.ensureValid(resourceLocation);
-		this.advancement
-			.parent(ROOT_RECIPE_ADVANCEMENT)
+		Advancement.Builder builder = recipeOutput.advancement()
 			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
-			.requirements(RequirementsStrategy.OR);
-		consumer.accept(
+			.requirements(AdvancementRequirements.Strategy.OR);
+		this.criteria.forEach(builder::addCriterion);
+		recipeOutput.accept(
 			new ShapedRecipeBuilder.Result(
 				resourceLocation,
 				this.result,
@@ -115,8 +116,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 				determineBookCategory(this.category),
 				this.rows,
 				this.key,
-				this.advancement,
-				resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/"),
+				builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")),
 				this.showNotification
 			)
 		);
@@ -144,7 +144,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 				throw new IllegalStateException("Ingredients are defined but not used in pattern for recipe " + resourceLocation);
 			} else if (this.rows.size() == 1 && ((String)this.rows.get(0)).length() == 1) {
 				throw new IllegalStateException("Shaped recipe " + resourceLocation + " only takes in a single item - should it be a shapeless recipe instead?");
-			} else if (this.advancement.getCriteria().isEmpty()) {
+			} else if (this.criteria.isEmpty()) {
 				throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
 			}
 		}
@@ -157,8 +157,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 		private final String group;
 		private final List<String> pattern;
 		private final Map<Character, Ingredient> key;
-		private final Advancement.Builder advancement;
-		private final ResourceLocation advancementId;
+		private final AdvancementHolder advancement;
 		private final boolean showNotification;
 
 		public Result(
@@ -169,8 +168,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 			CraftingBookCategory craftingBookCategory,
 			List<String> list,
 			Map<Character, Ingredient> map,
-			Advancement.Builder builder,
-			ResourceLocation resourceLocation2,
+			AdvancementHolder advancementHolder,
 			boolean bl
 		) {
 			super(craftingBookCategory);
@@ -180,8 +178,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 			this.group = string;
 			this.pattern = list;
 			this.key = map;
-			this.advancement = builder;
-			this.advancementId = resourceLocation2;
+			this.advancement = advancementHolder;
 			this.showNotification = bl;
 		}
 
@@ -202,7 +199,7 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 			JsonObject jsonObject2 = new JsonObject();
 
 			for (Entry<Character, Ingredient> entry : this.key.entrySet()) {
-				jsonObject2.add(String.valueOf(entry.getKey()), ((Ingredient)entry.getValue()).toJson());
+				jsonObject2.add(String.valueOf(entry.getKey()), ((Ingredient)entry.getValue()).toJson(false));
 			}
 
 			jsonObject.add("key", jsonObject2);
@@ -217,25 +214,18 @@ public class ShapedRecipeBuilder extends CraftingRecipeBuilder implements Recipe
 		}
 
 		@Override
-		public RecipeSerializer<?> getType() {
+		public RecipeSerializer<?> type() {
 			return RecipeSerializer.SHAPED_RECIPE;
 		}
 
 		@Override
-		public ResourceLocation getId() {
+		public ResourceLocation id() {
 			return this.id;
 		}
 
-		@Nullable
 		@Override
-		public JsonObject serializeAdvancement() {
-			return this.advancement.serializeToJson();
-		}
-
-		@Nullable
-		@Override
-		public ResourceLocation getAdvancementId() {
-			return this.advancementId;
+		public AdvancementHolder advancement() {
+			return this.advancement;
 		}
 	}
 }

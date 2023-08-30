@@ -12,12 +12,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public class GhostRecipe {
 	@Nullable
-	private Recipe<?> recipe;
+	private RecipeHolder<?> recipe;
 	private final List<GhostRecipe.GhostIngredient> ingredients = Lists.<GhostRecipe.GhostIngredient>newArrayList();
 	float time;
 
@@ -40,12 +40,12 @@ public class GhostRecipe {
 	}
 
 	@Nullable
-	public Recipe<?> getRecipe() {
+	public RecipeHolder<?> getRecipe() {
 		return this.recipe;
 	}
 
-	public void setRecipe(Recipe<?> recipe) {
-		this.recipe = recipe;
+	public void setRecipe(RecipeHolder<?> recipeHolder) {
+		this.recipe = recipeHolder;
 	}
 
 	public void render(GuiGraphics guiGraphics, Minecraft minecraft, int i, int j, boolean bl, float f) {

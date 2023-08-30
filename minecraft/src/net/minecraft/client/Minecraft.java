@@ -816,12 +816,14 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				list -> new FullTextSearchTree(
 						recipeCollection -> recipeCollection.getRecipes()
 								.stream()
-								.flatMap(recipe -> recipe.getResultItem(recipeCollection.registryAccess()).getTooltipLines(null, TooltipFlag.Default.NORMAL).stream())
+								.flatMap(
+									recipeHolder -> recipeHolder.value().getResultItem(recipeCollection.registryAccess()).getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()
+								)
 								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
 								.filter(string -> !string.isEmpty()),
 						recipeCollection -> recipeCollection.getRecipes()
 								.stream()
-								.map(recipe -> BuiltInRegistries.ITEM.getKey(recipe.getResultItem(recipeCollection.registryAccess()).getItem())),
+								.map(recipeHolder -> BuiltInRegistries.ITEM.getKey(recipeHolder.value().getResultItem(recipeCollection.registryAccess()).getItem())),
 						list
 					)
 			);

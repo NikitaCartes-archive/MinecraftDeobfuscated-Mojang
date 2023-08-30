@@ -4,20 +4,14 @@ import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class LightningStrikeTrigger extends SimpleCriterionTrigger<LightningStrikeTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("lightning_strike");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public LightningStrikeTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -37,13 +31,14 @@ public class LightningStrikeTrigger extends SimpleCriterionTrigger<LightningStri
 		private final Optional<ContextAwarePredicate> bystander;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2, Optional<ContextAwarePredicate> optional3) {
-			super(LightningStrikeTrigger.ID, optional);
+			super(optional);
 			this.lightning = optional2;
 			this.bystander = optional3;
 		}
 
-		public static LightningStrikeTrigger.TriggerInstance lighthingStrike(Optional<EntityPredicate> optional, Optional<EntityPredicate> optional2) {
-			return new LightningStrikeTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional), EntityPredicate.wrap(optional2));
+		public static Criterion<LightningStrikeTrigger.TriggerInstance> lightningStrike(Optional<EntityPredicate> optional, Optional<EntityPredicate> optional2) {
+			return CriteriaTriggers.LIGHTNING_STRIKE
+				.createCriterion(new LightningStrikeTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional), EntityPredicate.wrap(optional2)));
 		}
 
 		public boolean matches(LootContext lootContext, List<LootContext> list) {

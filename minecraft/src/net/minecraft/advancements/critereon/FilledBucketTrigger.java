@@ -2,18 +2,12 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 public class FilledBucketTrigger extends SimpleCriterionTrigger<FilledBucketTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("filled_bucket");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public FilledBucketTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -29,12 +23,12 @@ public class FilledBucketTrigger extends SimpleCriterionTrigger<FilledBucketTrig
 		private final Optional<ItemPredicate> item;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
-			super(FilledBucketTrigger.ID, optional);
+			super(optional);
 			this.item = optional2;
 		}
 
-		public static FilledBucketTrigger.TriggerInstance filledBucket(Optional<ItemPredicate> optional) {
-			return new FilledBucketTrigger.TriggerInstance(Optional.empty(), optional);
+		public static Criterion<FilledBucketTrigger.TriggerInstance> filledBucket(ItemPredicate.Builder builder) {
+			return CriteriaTriggers.FILLED_BUCKET.createCriterion(new FilledBucketTrigger.TriggerInstance(Optional.empty(), Optional.of(builder.build())));
 		}
 
 		public boolean matches(ItemStack itemStack) {

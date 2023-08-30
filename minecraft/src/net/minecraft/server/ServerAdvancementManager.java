@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -10,7 +11,9 @@ import java.util.Collection;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementList;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementNode;
+import net.minecraft.advancements.AdvancementTree;
 import net.minecraft.advancements.TreeNodePosition;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.resources.ResourceLocation;
@@ -24,7 +27,8 @@ import org.slf4j.Logger;
 public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Gson GSON = new GsonBuilder().create();
-	private AdvancementList advancements = new AdvancementList();
+	private Map<ResourceLocation, AdvancementHolder> advancements = Map.of();
+	private AdvancementTree tree = new AdvancementTree();
 	private final LootDataManager lootData;
 
 	public ServerAdvancementManager(LootDataManager lootDataManager) {
@@ -33,34 +37,39 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 	}
 
 	protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-		Map<ResourceLocation, Advancement.Builder> map2 = Maps.<ResourceLocation, Advancement.Builder>newHashMap();
+		Builder<ResourceLocation, AdvancementHolder> builder = ImmutableMap.builder();
 		map.forEach((resourceLocation, jsonElement) -> {
 			try {
 				JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "advancement");
-				Advancement.Builder builder = Advancement.Builder.fromJson(jsonObject, new DeserializationContext(resourceLocation, this.lootData));
-				map2.put(resourceLocation, builder);
+				Advancement advancement = Advancement.fromJson(jsonObject, new DeserializationContext(resourceLocation, this.lootData));
+				builder.put(resourceLocation, new AdvancementHolder(resourceLocation, advancement));
 			} catch (Exception var6) {
 				LOGGER.error("Parsing error loading custom advancement {}: {}", resourceLocation, var6.getMessage());
 			}
 		});
-		AdvancementList advancementList = new AdvancementList();
-		advancementList.add(map2);
+		this.advancements = builder.buildOrThrow();
+		AdvancementTree advancementTree = new AdvancementTree();
+		advancementTree.addAll(this.advancements.values());
 
-		for (Advancement advancement : advancementList.getRoots()) {
-			if (advancement.getDisplay() != null) {
-				TreeNodePosition.run(advancement);
+		for (AdvancementNode advancementNode : advancementTree.roots()) {
+			if (advancementNode.holder().value().display().isPresent()) {
+				TreeNodePosition.run(advancementNode);
 			}
 		}
 
-		this.advancements = advancementList;
+		this.tree = advancementTree;
 	}
 
 	@Nullable
-	public Advancement getAdvancement(ResourceLocation resourceLocation) {
-		return this.advancements.get(resourceLocation);
+	public AdvancementHolder get(ResourceLocation resourceLocation) {
+		return (AdvancementHolder)this.advancements.get(resourceLocation);
 	}
 
-	public Collection<Advancement> getAllAdvancements() {
-		return this.advancements.getAllAdvancements();
+	public AdvancementTree tree() {
+		return this.tree;
+	}
+
+	public Collection<AdvancementHolder> getAllAdvancements() {
+		return this.advancements.values();
 	}
 }

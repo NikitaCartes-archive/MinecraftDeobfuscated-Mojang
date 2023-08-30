@@ -1,25 +1,22 @@
 package net.minecraft.world.item.crafting;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.stream.Stream;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class SmithingTransformRecipe implements SmithingRecipe {
-	private final ResourceLocation id;
 	final Ingredient template;
 	final Ingredient base;
 	final Ingredient addition;
 	final ItemStack result;
 
-	public SmithingTransformRecipe(ResourceLocation resourceLocation, Ingredient ingredient, Ingredient ingredient2, Ingredient ingredient3, ItemStack itemStack) {
-		this.id = resourceLocation;
+	public SmithingTransformRecipe(Ingredient ingredient, Ingredient ingredient2, Ingredient ingredient3, ItemStack itemStack) {
 		this.template = ingredient;
 		this.base = ingredient2;
 		this.addition = ingredient3;
@@ -63,11 +60,6 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public ResourceLocation getId() {
-		return this.id;
-	}
-
-	@Override
 	public RecipeSerializer<?> getSerializer() {
 		return RecipeSerializer.SMITHING_TRANSFORM;
 	}
@@ -78,20 +70,27 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 	}
 
 	public static class Serializer implements RecipeSerializer<SmithingTransformRecipe> {
-		public SmithingTransformRecipe fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
-			Ingredient ingredient = Ingredient.fromJson(GsonHelper.getNonNull(jsonObject, "template"));
-			Ingredient ingredient2 = Ingredient.fromJson(GsonHelper.getNonNull(jsonObject, "base"));
-			Ingredient ingredient3 = Ingredient.fromJson(GsonHelper.getNonNull(jsonObject, "addition"));
-			ItemStack itemStack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(jsonObject, "result"));
-			return new SmithingTransformRecipe(resourceLocation, ingredient, ingredient2, ingredient3, itemStack);
+		private static final Codec<SmithingTransformRecipe> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						Ingredient.CODEC.fieldOf("template").forGetter(smithingTransformRecipe -> smithingTransformRecipe.template),
+						Ingredient.CODEC.fieldOf("base").forGetter(smithingTransformRecipe -> smithingTransformRecipe.base),
+						Ingredient.CODEC.fieldOf("addition").forGetter(smithingTransformRecipe -> smithingTransformRecipe.addition),
+						CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("result").forGetter(smithingTransformRecipe -> smithingTransformRecipe.result)
+					)
+					.apply(instance, SmithingTransformRecipe::new)
+		);
+
+		@Override
+		public Codec<SmithingTransformRecipe> codec() {
+			return CODEC;
 		}
 
-		public SmithingTransformRecipe fromNetwork(ResourceLocation resourceLocation, FriendlyByteBuf friendlyByteBuf) {
+		public SmithingTransformRecipe fromNetwork(FriendlyByteBuf friendlyByteBuf) {
 			Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
 			Ingredient ingredient2 = Ingredient.fromNetwork(friendlyByteBuf);
 			Ingredient ingredient3 = Ingredient.fromNetwork(friendlyByteBuf);
 			ItemStack itemStack = friendlyByteBuf.readItem();
-			return new SmithingTransformRecipe(resourceLocation, ingredient, ingredient2, ingredient3, itemStack);
+			return new SmithingTransformRecipe(ingredient, ingredient2, ingredient3, itemStack);
 		}
 
 		public void toNetwork(FriendlyByteBuf friendlyByteBuf, SmithingTransformRecipe smithingTransformRecipe) {

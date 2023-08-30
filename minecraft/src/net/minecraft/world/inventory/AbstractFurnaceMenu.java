@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
@@ -83,8 +84,8 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 	}
 
 	@Override
-	public boolean recipeMatches(Recipe<? super Container> recipe) {
-		return recipe.matches(this.container, this.level);
+	public boolean recipeMatches(RecipeHolder<? extends Recipe<Container>> recipeHolder) {
+		return recipeHolder.value().matches(this.container, this.level);
 	}
 
 	@Override

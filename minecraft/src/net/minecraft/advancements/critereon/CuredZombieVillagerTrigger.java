@@ -2,20 +2,14 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZombieVillagerTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("cured_zombie_villager");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public CuredZombieVillagerTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -35,13 +29,14 @@ public class CuredZombieVillagerTrigger extends SimpleCriterionTrigger<CuredZomb
 		private final Optional<ContextAwarePredicate> villager;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2, Optional<ContextAwarePredicate> optional3) {
-			super(CuredZombieVillagerTrigger.ID, optional);
+			super(optional);
 			this.zombie = optional2;
 			this.villager = optional3;
 		}
 
-		public static CuredZombieVillagerTrigger.TriggerInstance curedZombieVillager() {
-			return new CuredZombieVillagerTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty());
+		public static Criterion<CuredZombieVillagerTrigger.TriggerInstance> curedZombieVillager() {
+			return CriteriaTriggers.CURED_ZOMBIE_VILLAGER
+				.createCriterion(new CuredZombieVillagerTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty()));
 		}
 
 		public boolean matches(LootContext lootContext, LootContext lootContext2) {

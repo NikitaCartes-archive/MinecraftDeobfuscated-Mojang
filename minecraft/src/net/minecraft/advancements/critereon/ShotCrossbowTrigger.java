@@ -2,19 +2,13 @@ package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public class ShotCrossbowTrigger extends SimpleCriterionTrigger<ShotCrossbowTrigger.TriggerInstance> {
-	static final ResourceLocation ID = new ResourceLocation("shot_crossbow");
-
-	@Override
-	public ResourceLocation getId() {
-		return ID;
-	}
-
 	public ShotCrossbowTrigger.TriggerInstance createInstance(
 		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
 	) {
@@ -30,16 +24,17 @@ public class ShotCrossbowTrigger extends SimpleCriterionTrigger<ShotCrossbowTrig
 		private final Optional<ItemPredicate> item;
 
 		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
-			super(ShotCrossbowTrigger.ID, optional);
+			super(optional);
 			this.item = optional2;
 		}
 
-		public static ShotCrossbowTrigger.TriggerInstance shotCrossbow(Optional<ItemPredicate> optional) {
-			return new ShotCrossbowTrigger.TriggerInstance(Optional.empty(), optional);
+		public static Criterion<ShotCrossbowTrigger.TriggerInstance> shotCrossbow(Optional<ItemPredicate> optional) {
+			return CriteriaTriggers.SHOT_CROSSBOW.createCriterion(new ShotCrossbowTrigger.TriggerInstance(Optional.empty(), optional));
 		}
 
-		public static ShotCrossbowTrigger.TriggerInstance shotCrossbow(ItemLike itemLike) {
-			return new ShotCrossbowTrigger.TriggerInstance(Optional.empty(), ItemPredicate.Builder.item().of(itemLike).build());
+		public static Criterion<ShotCrossbowTrigger.TriggerInstance> shotCrossbow(ItemLike itemLike) {
+			return CriteriaTriggers.SHOT_CROSSBOW
+				.createCriterion(new ShotCrossbowTrigger.TriggerInstance(Optional.empty(), Optional.of(ItemPredicate.Builder.item().of(itemLike).build())));
 		}
 
 		public boolean matches(ItemStack itemStack) {

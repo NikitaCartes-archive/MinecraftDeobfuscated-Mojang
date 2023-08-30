@@ -55,28 +55,6 @@ public record ItemPredicate(
 				.apply(instance, ItemPredicate::new)
 	);
 
-	static Optional<ItemPredicate> of(
-		Optional<TagKey<Item>> optional,
-		Optional<HolderSet<Item>> optional2,
-		MinMaxBounds.Ints ints,
-		MinMaxBounds.Ints ints2,
-		List<EnchantmentPredicate> list,
-		List<EnchantmentPredicate> list2,
-		Optional<Holder<Potion>> optional3,
-		Optional<NbtPredicate> optional4
-	) {
-		return optional.isEmpty()
-				&& optional2.isEmpty()
-				&& ints.isAny()
-				&& ints2.isAny()
-				&& list.isEmpty()
-				&& list2.isEmpty()
-				&& optional3.isEmpty()
-				&& optional4.isEmpty()
-			? Optional.empty()
-			: Optional.of(new ItemPredicate(optional, optional2, ints, ints2, list, list2, optional3, optional4));
-	}
-
 	public boolean matches(ItemStack itemStack) {
 		if (this.tag.isPresent() && !itemStack.is((TagKey<Item>)this.tag.get())) {
 			return false;
@@ -192,8 +170,10 @@ public record ItemPredicate(
 			return this;
 		}
 
-		public Optional<ItemPredicate> build() {
-			return ItemPredicate.of(this.tag, this.items, this.count, this.durability, this.enchantments.build(), this.storedEnchantments.build(), this.potion, this.nbt);
+		public ItemPredicate build() {
+			List<EnchantmentPredicate> list = this.enchantments.build();
+			List<EnchantmentPredicate> list2 = this.storedEnchantments.build();
+			return new ItemPredicate(this.tag, this.items, this.count, this.durability, list, list2, this.potion, this.nbt);
 		}
 	}
 }

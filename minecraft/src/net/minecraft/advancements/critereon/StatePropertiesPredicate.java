@@ -106,8 +106,7 @@ public record StatePropertiesPredicate(List<StatePropertiesPredicate.PropertyMat
 		}
 
 		public Optional<StatePropertiesPredicate> build() {
-			ImmutableList<StatePropertiesPredicate.PropertyMatcher> immutableList = this.matchers.build();
-			return immutableList.isEmpty() ? Optional.empty() : Optional.of(new StatePropertiesPredicate(immutableList));
+			return Optional.of(new StatePropertiesPredicate(this.matchers.build()));
 		}
 	}
 
