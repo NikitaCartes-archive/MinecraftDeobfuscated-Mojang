@@ -51,9 +51,9 @@ public class DeathScreen extends Screen {
 		);
 		this.exitButtons.add(this.exitToTitleButton);
 		this.setButtonsActive(false);
-		this.deathScore = Component.translatable("deathScreen.score")
-			.append(": ")
-			.append(Component.literal(Integer.toString(this.minecraft.player.getScore())).withStyle(ChatFormatting.YELLOW));
+		this.deathScore = Component.translatable(
+			"deathScreen.score.value", Component.literal(Integer.toString(this.minecraft.player.getScore())).withStyle(ChatFormatting.YELLOW)
+		);
 	}
 
 	@Override

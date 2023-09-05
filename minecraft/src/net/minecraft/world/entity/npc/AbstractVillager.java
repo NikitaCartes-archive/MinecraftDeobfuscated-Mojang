@@ -1,7 +1,7 @@
 package net.minecraft.world.entity.npc;
 
-import com.google.common.collect.Sets;
-import java.util.Set;
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
@@ -227,22 +227,14 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 	protected abstract void updateTrades();
 
 	protected void addOffersFromItemListings(MerchantOffers merchantOffers, VillagerTrades.ItemListing[] itemListings, int i) {
-		Set<Integer> set = Sets.<Integer>newHashSet();
-		if (itemListings.length > i) {
-			while (set.size() < i) {
-				set.add(this.random.nextInt(itemListings.length));
-			}
-		} else {
-			for (int j = 0; j < itemListings.length; j++) {
-				set.add(j);
-			}
-		}
+		ArrayList<VillagerTrades.ItemListing> arrayList = Lists.newArrayList(itemListings);
+		int j = 0;
 
-		for (Integer integer : set) {
-			VillagerTrades.ItemListing itemListing = itemListings[integer];
-			MerchantOffer merchantOffer = itemListing.getOffer(this, this.random);
+		while (j < i && !arrayList.isEmpty()) {
+			MerchantOffer merchantOffer = ((VillagerTrades.ItemListing)arrayList.remove(this.random.nextInt(arrayList.size()))).getOffer(this, this.random);
 			if (merchantOffer != null) {
 				merchantOffers.add(merchantOffer);
+				j++;
 			}
 		}
 	}

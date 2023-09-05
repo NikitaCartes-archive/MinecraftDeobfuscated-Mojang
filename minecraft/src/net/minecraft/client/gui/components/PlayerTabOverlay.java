@@ -255,12 +255,16 @@ public class PlayerTabOverlay {
 			if (o <= 3) {
 				float f = Mth.clamp((float)l / 20.0F, 0.0F, 1.0F);
 				int p = (int)((1.0F - f) * 255.0F) << 16 | (int)(f * 255.0F) << 8;
-				String string = (float)l / 2.0F + "";
-				if (k - this.minecraft.font.width(string + "hp") >= j) {
-					string = string + "hp";
+				float g = (float)l / 2.0F;
+				Component component = Component.translatable("multiplayer.player.list.hp", g);
+				Component component2;
+				if (k - this.minecraft.font.width(component) >= j) {
+					component2 = component;
+				} else {
+					component2 = Component.literal(g + "");
 				}
 
-				guiGraphics.drawString(this.minecraft.font, string, (k + j - this.minecraft.font.width(string)) / 2, i, p);
+				guiGraphics.drawString(this.minecraft.font, component2, (k + j - this.minecraft.font.width(component2)) / 2, i, p);
 			} else {
 				ResourceLocation resourceLocation = bl ? HEART_CONTAINER_BLINKING_SPRITE : HEART_CONTAINER_SPRITE;
 

@@ -77,10 +77,8 @@ public class Raid {
 	public static final int DEFAULT_MAX_BAD_OMEN_LEVEL = 5;
 	private static final int LOW_MOB_THRESHOLD = 2;
 	private static final Component RAID_NAME_COMPONENT = Component.translatable("event.minecraft.raid");
-	private static final Component VICTORY = Component.translatable("event.minecraft.raid.victory");
-	private static final Component DEFEAT = Component.translatable("event.minecraft.raid.defeat");
-	private static final Component RAID_BAR_VICTORY_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(VICTORY);
-	private static final Component RAID_BAR_DEFEAT_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(DEFEAT);
+	private static final Component RAID_BAR_VICTORY_COMPONENT = Component.translatable("event.minecraft.raid.victory.full");
+	private static final Component RAID_BAR_DEFEAT_COMPONENT = Component.translatable("event.minecraft.raid.defeat.full");
 	private static final int HERO_OF_THE_VILLAGE_DURATION = 48000;
 	public static final int VALID_RAID_RADIUS_SQR = 9216;
 	public static final int RAID_REMOVAL_THRESHOLD_SQR = 12544;

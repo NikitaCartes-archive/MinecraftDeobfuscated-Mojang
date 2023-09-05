@@ -41,7 +41,7 @@ public class ProgressScreen extends Screen implements ProgressListener {
 	@Override
 	public void progressStart(Component component) {
 		this.header = component;
-		this.progressStage(Component.translatable("progress.working"));
+		this.progressStage(Component.translatable("menu.working"));
 	}
 
 	@Override

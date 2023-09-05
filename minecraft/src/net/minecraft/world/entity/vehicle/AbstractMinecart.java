@@ -747,6 +747,31 @@ public abstract class AbstractMinecart extends Entity {
 	}
 
 	@Override
+	public double lerpTargetX() {
+		return this.lerpX;
+	}
+
+	@Override
+	public double lerpTargetY() {
+		return this.lerpY;
+	}
+
+	@Override
+	public double lerpTargetZ() {
+		return this.lerpZ;
+	}
+
+	@Override
+	public float lerpTargetXRot() {
+		return (float)this.lerpXRot;
+	}
+
+	@Override
+	public float lerpTargetYRot() {
+		return (float)this.lerpYRot;
+	}
+
+	@Override
 	public void lerpMotion(double d, double e, double f) {
 		this.targetDeltaMovement = new Vec3(d, e, f);
 		this.setDeltaMovement(this.targetDeltaMovement);

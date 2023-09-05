@@ -65,8 +65,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -132,7 +134,7 @@ public abstract class PlayerList {
 		this.playerIo = playerDataStorage;
 	}
 
-	public void placeNewPlayer(Connection connection, ServerPlayer serverPlayer, int i) {
+	public void placeNewPlayer(Connection connection, ServerPlayer serverPlayer, CommonListenerCookie commonListenerCookie) {
 		GameProfile gameProfile = serverPlayer.getGameProfile();
 		GameProfileCache gameProfileCache = this.server.getProfileCache();
 		String string;
@@ -172,10 +174,11 @@ public abstract class PlayerList {
 		);
 		LevelData levelData = serverLevel2.getLevelData();
 		serverPlayer.loadGameTypes(compoundTag);
-		ServerGamePacketListenerImpl serverGamePacketListenerImpl = new ServerGamePacketListenerImpl(this.server, connection, serverPlayer, i);
+		ServerGamePacketListenerImpl serverGamePacketListenerImpl = new ServerGamePacketListenerImpl(this.server, connection, serverPlayer, commonListenerCookie);
 		GameRules gameRules = serverLevel2.getGameRules();
 		boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
 		boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
+		boolean bl3 = gameRules.getBoolean(GameRules.RULE_LIMITED_CRAFTING);
 		serverGamePacketListenerImpl.send(
 			new ClientboundLoginPacket(
 				serverPlayer.getId(),
@@ -186,6 +189,7 @@ public abstract class PlayerList {
 				this.simulationDistance,
 				bl2,
 				!bl,
+				bl3,
 				serverPlayer.createCommonSpawnInfo(serverLevel2)
 			)
 		);
@@ -402,8 +406,8 @@ public abstract class PlayerList {
 		}
 	}
 
-	public ServerPlayer getPlayerForLogin(GameProfile gameProfile) {
-		return new ServerPlayer(this.server, this.server.overworld(), gameProfile);
+	public ServerPlayer getPlayerForLogin(GameProfile gameProfile, ClientInformation clientInformation) {
+		return new ServerPlayer(this.server, this.server.overworld(), gameProfile, clientInformation);
 	}
 
 	public boolean disconnectAllPlayersWithProfile(GameProfile gameProfile) {
@@ -443,7 +447,7 @@ public abstract class PlayerList {
 		}
 
 		ServerLevel serverLevel2 = serverLevel != null && optional.isPresent() ? serverLevel : this.server.overworld();
-		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile());
+		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile(), serverPlayer.clientInformation());
 		serverPlayer2.connection = serverPlayer.connection;
 		serverPlayer2.restoreFrom(serverPlayer, bl);
 		serverPlayer2.setId(serverPlayer.getId());

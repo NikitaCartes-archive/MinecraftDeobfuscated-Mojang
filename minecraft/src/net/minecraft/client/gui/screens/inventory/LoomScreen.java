@@ -45,6 +45,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	private static final ResourceLocation PATTERN_SELECTED_SPRITE = new ResourceLocation("container/loom/pattern_selected");
 	private static final ResourceLocation PATTERN_HIGHLIGHTED_SPRITE = new ResourceLocation("container/loom/pattern_highlighted");
 	private static final ResourceLocation PATTERN_SPRITE = new ResourceLocation("container/loom/pattern");
+	private static final ResourceLocation ERROR_SPRITE = new ResourceLocation("container/loom/error");
 	private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/loom.png");
 	private static final int PATTERN_COLUMNS = 4;
 	private static final int PATTERN_ROWS = 4;
@@ -96,6 +97,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		Slot slot = this.menu.getBannerSlot();
 		Slot slot2 = this.menu.getDyeSlot();
 		Slot slot3 = this.menu.getPatternSlot();
+		Slot slot4 = this.menu.getResultSlot();
 		if (!slot.hasItem()) {
 			guiGraphics.blitSprite(BANNER_SLOT_SPRITE, k + slot.x, l + slot.y, 16, 16);
 		}
@@ -126,6 +128,8 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 			);
 			guiGraphics.pose().popPose();
 			guiGraphics.flush();
+		} else if (this.hasMaxPatterns) {
+			guiGraphics.blitSprite(ERROR_SPRITE, k + slot4.x - 5, l + slot4.y - 5, 26, 26);
 		}
 
 		if (this.displayPatterns) {

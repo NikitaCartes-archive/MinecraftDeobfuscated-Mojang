@@ -21,6 +21,7 @@ import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ServerboundPongPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.util.VisibleForDebug;
 import org.slf4j.Logger;
 
@@ -36,11 +37,11 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 	private int latency;
 	private volatile boolean suspendFlushingOnServerThread = false;
 
-	public ServerCommonPacketListenerImpl(MinecraftServer minecraftServer, Connection connection, int i) {
+	public ServerCommonPacketListenerImpl(MinecraftServer minecraftServer, Connection connection, CommonListenerCookie commonListenerCookie) {
 		this.server = minecraftServer;
 		this.connection = connection;
 		this.keepAliveTime = Util.getMillis();
-		this.latency = i;
+		this.latency = commonListenerCookie.latency();
 	}
 
 	@Override
@@ -141,5 +142,9 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 
 	public int latency() {
 		return this.latency;
+	}
+
+	protected CommonListenerCookie createCookie(ClientInformation clientInformation) {
+		return new CommonListenerCookie(this.playerProfile(), this.latency, clientInformation);
 	}
 }

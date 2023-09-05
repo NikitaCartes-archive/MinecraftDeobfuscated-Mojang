@@ -48,7 +48,6 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	private static final int SCROLL_BAR_TOP_POS_Y = 18;
 	private static final int SCROLL_BAR_START_X = 94;
 	private static final Component TRADES_LABEL = Component.translatable("merchant.trades");
-	private static final Component LEVEL_SEPARATOR = Component.literal(" - ");
 	private static final Component DEPRECATED_TOOLTIP = Component.translatable("merchant.deprecated");
 	private int shopItem;
 	private final MerchantScreen.TradeOfferButton[] tradeOfferButtons = new MerchantScreen.TradeOfferButton[7];
@@ -89,7 +88,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	protected void renderLabels(GuiGraphics guiGraphics, int i, int j) {
 		int k = this.menu.getTraderLevel();
 		if (k > 0 && k <= 5 && this.menu.showProgressBar()) {
-			Component component = this.title.copy().append(LEVEL_SEPARATOR).append(Component.translatable("merchant.level." + k));
+			Component component = Component.translatable("merchant.title", this.title, Component.translatable("merchant.level." + k));
 			int l = this.font.width(component);
 			int m = 49 + this.imageWidth / 2 - l / 2;
 			guiGraphics.drawString(this.font, component, m, 6, 4210752, false);

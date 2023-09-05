@@ -80,7 +80,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 	@Override
 	public void tick() {
 		Entity entity = this.getOwner();
-		if (entity instanceof Player && !entity.isAlive()) {
+		if (entity instanceof Player && !entity.isAlive() && this.level().getGameRules().getBoolean(GameRules.RULE_ENDER_PEARLS_VANISH_ON_DEATH)) {
 			this.discard();
 		} else {
 			super.tick();

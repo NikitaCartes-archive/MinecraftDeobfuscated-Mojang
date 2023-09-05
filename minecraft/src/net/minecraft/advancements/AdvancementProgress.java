@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.ExtraCodecs;
 
 public class AdvancementProgress implements Comparable<AdvancementProgress> {
@@ -131,7 +132,7 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
 	}
 
 	@Nullable
-	public String getProgressText() {
+	public Component getProgressText() {
 		if (this.criteria.isEmpty()) {
 			return null;
 		} else {
@@ -140,7 +141,7 @@ public class AdvancementProgress implements Comparable<AdvancementProgress> {
 				return null;
 			} else {
 				int j = this.countCompletedRequirements();
-				return j + "/" + i;
+				return Component.translatable("advancements.progress", j, i);
 			}
 		}
 	}

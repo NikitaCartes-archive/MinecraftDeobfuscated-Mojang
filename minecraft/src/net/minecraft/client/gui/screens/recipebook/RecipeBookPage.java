@@ -12,6 +12,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -101,9 +102,9 @@ public class RecipeBookPage {
 
 	public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, float f) {
 		if (this.totalPages > 1) {
-			String string = this.currentPage + 1 + "/" + this.totalPages;
-			int m = this.minecraft.font.width(string);
-			guiGraphics.drawString(this.minecraft.font, string, i - m / 2 + 73, j + 141, -1, false);
+			Component component = Component.translatable("gui.recipebook.page", this.currentPage + 1, this.totalPages);
+			int m = this.minecraft.font.width(component);
+			guiGraphics.drawString(this.minecraft.font, component, i - m / 2 + 73, j + 141, -1, false);
 		}
 
 		this.hoveredButton = null;

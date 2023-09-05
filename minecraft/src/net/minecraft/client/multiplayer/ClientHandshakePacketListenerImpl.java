@@ -26,6 +26,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.BrandPayload;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
@@ -156,6 +157,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 				)
 			);
 		this.connection.send(new ServerboundCustomPayloadPacket(new BrandPayload(ClientBrandRetriever.getClientModName())));
+		this.connection.send(new ServerboundClientInformationPacket(this.minecraft.options.buildPlayerInformation()));
 	}
 
 	@Override

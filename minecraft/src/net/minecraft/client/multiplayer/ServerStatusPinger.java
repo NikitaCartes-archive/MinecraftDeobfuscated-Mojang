@@ -164,10 +164,9 @@ public class ServerStatusPinger {
 	}
 
 	public static Component formatPlayerCount(int i, int j) {
-		return Component.literal(Integer.toString(i))
-			.append(Component.literal("/").withStyle(ChatFormatting.DARK_GRAY))
-			.append(Integer.toString(j))
-			.withStyle(ChatFormatting.GRAY);
+		Component component = Component.literal(Integer.toString(i)).withStyle(ChatFormatting.GRAY);
+		Component component2 = Component.literal(Integer.toString(j)).withStyle(ChatFormatting.GRAY);
+		return Component.translatable("multiplayer.status.player_count", component, component2).withStyle(ChatFormatting.DARK_GRAY);
 	}
 
 	public void tick() {

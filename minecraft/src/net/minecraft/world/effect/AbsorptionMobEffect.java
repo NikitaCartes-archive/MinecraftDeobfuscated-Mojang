@@ -10,7 +10,7 @@ class AbsorptionMobEffect extends MobEffect {
 	@Override
 	public void applyEffectTick(LivingEntity livingEntity, int i) {
 		super.applyEffectTick(livingEntity, i);
-		if (livingEntity.getAbsorptionAmount() <= 0.0F) {
+		if (livingEntity.getAbsorptionAmount() <= 0.0F && !livingEntity.level().isClientSide) {
 			livingEntity.removeEffect(this);
 		}
 	}
@@ -23,6 +23,6 @@ class AbsorptionMobEffect extends MobEffect {
 	@Override
 	public void onEffectStarted(LivingEntity livingEntity, int i) {
 		super.onEffectStarted(livingEntity, i);
-		livingEntity.setAbsorptionAmount(livingEntity.getAbsorptionAmount() + (float)(4 * (1 + i)));
+		livingEntity.setAbsorptionAmount(Math.max(livingEntity.getAbsorptionAmount(), (float)(4 * (1 + i))));
 	}
 }

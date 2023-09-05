@@ -1,8 +1,7 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -25,7 +24,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
-import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.recipebook.PlaceRecipe;
@@ -37,6 +35,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.GameRules;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable, GuiEventListener, NarratableEntry, RecipeShownListener {
@@ -192,16 +191,33 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 
 	private void updateCollections(boolean bl) {
 		List<RecipeCollection> list = this.book.getCollection(this.selectedTab.getCategory());
-		list.forEach(recipeCollection -> recipeCollection.canCraft(this.stackedContents, this.menu.getGridWidth(), this.menu.getGridHeight(), this.book));
+		boolean bl2 = this.minecraft.level.getGameRules().getBoolean(GameRules.RULE_LIMITED_CRAFTING);
+		list.forEach(recipeCollection -> recipeCollection.canCraft(this.stackedContents, this.menu.getGridWidth(), this.menu.getGridHeight(), this.book, bl2));
 		List<RecipeCollection> list2 = Lists.<RecipeCollection>newArrayList(list);
-		list2.removeIf(recipeCollection -> !recipeCollection.hasKnownRecipes());
 		list2.removeIf(recipeCollection -> !recipeCollection.hasFitting());
 		String string = this.searchBox.getValue();
+		if (string.isEmpty() || bl2) {
+			list2.removeIf(recipeCollection -> !recipeCollection.hasKnownRecipes());
+		}
+
 		if (!string.isEmpty()) {
-			ObjectSet<RecipeCollection> objectSet = new ObjectLinkedOpenHashSet<>(
-				this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(string.toLowerCase(Locale.ROOT))
+			list2.removeIf(
+				recipeCollection -> recipeCollection.getRecipes()
+						.stream()
+						.noneMatch(
+							recipeHolder -> Arrays.stream(
+										recipeHolder.value().getResultItem(this.minecraft.level.registryAccess()).getHoverName().getString().toLowerCase(Locale.ROOT).split("\\W+")
+									)
+									.anyMatch(string2 -> string2.startsWith(string.toLowerCase(Locale.ROOT)))
+						)
 			);
-			list2.removeIf(recipeCollection -> !objectSet.contains(recipeCollection));
+			list2.sort((recipeCollection, recipeCollection2) -> {
+				if (recipeCollection.hasKnownRecipes() == recipeCollection2.hasKnownRecipes()) {
+					return 0;
+				} else {
+					return recipeCollection.hasKnownRecipes() ? -1 : 1;
+				}
+			});
 		}
 
 		if (this.book.isFiltering(this.menu)) {

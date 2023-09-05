@@ -59,7 +59,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.sounds.SoundEvents;
@@ -1407,29 +1408,28 @@ public class Options {
 		this.broadcastOptions();
 	}
 
+	public ClientInformation buildPlayerInformation() {
+		int i = 0;
+
+		for (PlayerModelPart playerModelPart : this.modelParts) {
+			i |= playerModelPart.getMask();
+		}
+
+		return new ClientInformation(
+			this.languageCode,
+			this.renderDistance.get(),
+			this.chatVisibility.get(),
+			this.chatColors.get(),
+			i,
+			this.mainHand.get(),
+			this.minecraft.isTextFilteringEnabled(),
+			this.allowServerListing.get()
+		);
+	}
+
 	public void broadcastOptions() {
 		if (this.minecraft.player != null) {
-			int i = 0;
-
-			for (PlayerModelPart playerModelPart : this.modelParts) {
-				i |= playerModelPart.getMask();
-			}
-
-			this.minecraft
-				.player
-				.connection
-				.send(
-					new ServerboundClientInformationPacket(
-						this.languageCode,
-						this.renderDistance.get(),
-						this.chatVisibility.get(),
-						this.chatColors.get(),
-						i,
-						this.mainHand.get(),
-						this.minecraft.isTextFilteringEnabled(),
-						this.allowServerListing.get()
-					)
-				);
+			this.minecraft.player.connection.send(new ServerboundClientInformationPacket(this.buildPlayerInformation()));
 		}
 	}
 

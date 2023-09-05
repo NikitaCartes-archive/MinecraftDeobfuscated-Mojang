@@ -62,13 +62,12 @@ public class LevelLoadingScreen extends Screen {
 		if (this.done) {
 			narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narrator.loading.done"));
 		} else {
-			String string = this.getFormattedProgress();
-			narrationElementOutput.add(NarratedElementType.TITLE, string);
+			narrationElementOutput.add(NarratedElementType.TITLE, this.getFormattedProgress());
 		}
 	}
 
-	private String getFormattedProgress() {
-		return Mth.clamp(this.progressListener.getProgress(), 0, 100) + "%";
+	private Component getFormattedProgress() {
+		return Component.translatable("loading.progress", Mth.clamp(this.progressListener.getProgress(), 0, 100));
 	}
 
 	@Override

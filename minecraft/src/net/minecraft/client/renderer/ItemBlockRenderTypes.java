@@ -267,7 +267,6 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SCULK_VEIN, renderType3);
 		hashMap.put(Blocks.SCULK_SHRIEKER, renderType3);
 		hashMap.put(Blocks.MANGROVE_PROPAGULE, renderType3);
-		hashMap.put(Blocks.MANGROVE_LOG, renderType3);
 		hashMap.put(Blocks.FROGSPAWN, renderType3);
 		RenderType renderType4 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType4);

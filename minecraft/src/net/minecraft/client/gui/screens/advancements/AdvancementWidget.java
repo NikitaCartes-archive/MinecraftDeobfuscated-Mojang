@@ -172,8 +172,8 @@ public class AdvancementWidget {
 
 	public void drawHover(GuiGraphics guiGraphics, int i, int j, float f, int k, int l) {
 		boolean bl = k + i + this.x + this.width + 26 >= this.tab.getScreen().width;
-		String string = this.progress == null ? null : this.progress.getProgressText();
-		int m = string == null ? 0 : this.minecraft.font.width(string);
+		Component component = this.progress == null ? null : this.progress.getProgressText();
+		int m = component == null ? 0 : this.minecraft.font.width(component);
 		boolean bl2 = 113 - j - this.y - 26 <= 6 + this.description.size() * 9;
 		float g = this.progress == null ? 0.0F : this.progress.getPercent();
 		int n = Mth.floor(g * (float)this.width);
@@ -225,13 +225,13 @@ public class AdvancementWidget {
 		guiGraphics.blitSprite(advancementWidgetType3.frameSprite(this.display.getFrame()), i + this.x + 3, j + this.y, 26, 26);
 		if (bl) {
 			guiGraphics.drawString(this.minecraft.font, this.title, q + 5, j + this.y + 9, -1);
-			if (string != null) {
-				guiGraphics.drawString(this.minecraft.font, string, i + this.x - m, j + this.y + 9, -1);
+			if (component != null) {
+				guiGraphics.drawString(this.minecraft.font, component, i + this.x - m, j + this.y + 9, -1);
 			}
 		} else {
 			guiGraphics.drawString(this.minecraft.font, this.title, i + this.x + 32, j + this.y + 9, -1);
-			if (string != null) {
-				guiGraphics.drawString(this.minecraft.font, string, i + this.x + this.width - m - 5, j + this.y + 9, -1);
+			if (component != null) {
+				guiGraphics.drawString(this.minecraft.font, component, i + this.x + this.width - m - 5, j + this.y + 9, -1);
 			}
 		}
 

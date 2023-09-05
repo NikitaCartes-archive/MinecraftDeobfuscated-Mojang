@@ -365,7 +365,7 @@ public class MapItem extends ComplexItem {
 		if (tooltipFlag.isAdvanced()) {
 			if (mapItemSavedData != null) {
 				if (!bl && b == 0) {
-					list.add(Component.translatable("filled_map.id", integer).withStyle(ChatFormatting.GRAY));
+					list.add(getTooltipForId(integer));
 				}
 
 				int i = Math.min(mapItemSavedData.scale + b, 4);
@@ -375,6 +375,14 @@ public class MapItem extends ComplexItem {
 				list.add(Component.translatable("filled_map.unknown").withStyle(ChatFormatting.GRAY));
 			}
 		}
+	}
+
+	private static Component getTooltipForId(int i) {
+		return Component.translatable("filled_map.id", i).withStyle(ChatFormatting.GRAY);
+	}
+
+	public static Component getTooltipForId(ItemStack itemStack) {
+		return getTooltipForId(getMapId(itemStack));
 	}
 
 	public static int getColor(ItemStack itemStack) {

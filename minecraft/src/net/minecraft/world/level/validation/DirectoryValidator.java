@@ -42,7 +42,9 @@ public class DirectoryValidator {
 			return list;
 		}
 
-		if (!basicFileAttributes.isRegularFile() && !basicFileAttributes.isOther()) {
+		if (basicFileAttributes.isRegularFile()) {
+			throw new IOException("Path " + path + " is not a directory");
+		} else {
 			if (basicFileAttributes.isSymbolicLink()) {
 				if (!bl) {
 					this.validateSymlink(path, list);
@@ -54,8 +56,6 @@ public class DirectoryValidator {
 
 			this.validateKnownDirectory(path, list);
 			return list;
-		} else {
-			throw new IOException("Path " + path + " is not a directory");
 		}
 	}
 

@@ -44,6 +44,7 @@ import net.minecraft.server.Bootstrap;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -141,9 +142,9 @@ public class Main {
 		String string7 = optionSet.valueOf(optionSpec15);
 		String string8 = optionSet.valueOf(optionSpec16);
 		String string9 = parseArgument(optionSet, optionSpec2);
-		String string10 = parseArgument(optionSet, optionSpec3);
-		String string11 = parseArgument(optionSet, optionSpec4);
-		String string12 = parseArgument(optionSet, optionSpec5);
+		String string10 = unescapeJavaArgument(parseArgument(optionSet, optionSpec3));
+		String string11 = unescapeJavaArgument(parseArgument(optionSet, optionSpec4));
+		String string12 = unescapeJavaArgument(parseArgument(optionSet, optionSpec5));
 		if (optionSet.has(optionSpec)) {
 			JvmProfiler.INSTANCE.start(net.minecraft.util.profiling.jfr.Environment.CLIENT);
 		}
@@ -241,6 +242,11 @@ public class Main {
 		} finally {
 			minecraft.destroy();
 		}
+	}
+
+	@Nullable
+	private static String unescapeJavaArgument(@Nullable String string) {
+		return string == null ? null : StringEscapeUtils.unescapeJava(string);
 	}
 
 	private static Optional<String> emptyStringToEmptyOptional(String string) {

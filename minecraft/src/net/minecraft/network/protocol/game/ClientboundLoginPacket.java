@@ -17,6 +17,7 @@ public record ClientboundLoginPacket(
 	int simulationDistance,
 	boolean reducedDebugInfo,
 	boolean showDeathScreen,
+	boolean doLimitedCrafting,
 	CommonPlayerSpawnInfo commonPlayerSpawnInfo
 ) implements Packet<ClientGamePacketListener> {
 	public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf) {
@@ -27,6 +28,7 @@ public record ClientboundLoginPacket(
 			friendlyByteBuf.readVarInt(),
 			friendlyByteBuf.readVarInt(),
 			friendlyByteBuf.readVarInt(),
+			friendlyByteBuf.readBoolean(),
 			friendlyByteBuf.readBoolean(),
 			friendlyByteBuf.readBoolean(),
 			new CommonPlayerSpawnInfo(friendlyByteBuf)
@@ -43,6 +45,7 @@ public record ClientboundLoginPacket(
 		friendlyByteBuf.writeVarInt(this.simulationDistance);
 		friendlyByteBuf.writeBoolean(this.reducedDebugInfo);
 		friendlyByteBuf.writeBoolean(this.showDeathScreen);
+		friendlyByteBuf.writeBoolean(this.doLimitedCrafting);
 		this.commonPlayerSpawnInfo.write(friendlyByteBuf);
 	}
 

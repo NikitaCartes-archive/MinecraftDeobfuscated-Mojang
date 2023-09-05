@@ -26,6 +26,7 @@ import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ClientboundPingPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ServerboundPongPacket;
@@ -148,7 +149,6 @@ import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
-import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
@@ -445,6 +445,7 @@ public enum ConnectionProtocol {
 			.addFlow(
 				PacketFlow.SERVERBOUND,
 				new ConnectionProtocol.PacketSet()
+					.addPacket(ServerboundClientInformationPacket.class, ServerboundClientInformationPacket::new)
 					.addPacket(ServerboundCustomPayloadPacket.class, ServerboundCustomPayloadPacket::new)
 					.addPacket(ServerboundFinishConfigurationPacket.class, ServerboundFinishConfigurationPacket::new)
 					.addPacket(ServerboundKeepAlivePacket.class, ServerboundKeepAlivePacket::new)

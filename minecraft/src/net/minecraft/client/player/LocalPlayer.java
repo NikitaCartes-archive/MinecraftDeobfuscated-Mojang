@@ -133,6 +133,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean wasFallFlying;
 	private int waterVisionTime;
 	private boolean showDeathScreen = true;
+	private boolean doLimitedCrafting = false;
 
 	public LocalPlayer(
 		Minecraft minecraft,
@@ -471,6 +472,14 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	public boolean shouldShowDeathScreen() {
 		return this.showDeathScreen;
+	}
+
+	public void setDoLimitedCrafting(boolean bl) {
+		this.doLimitedCrafting = bl;
+	}
+
+	public boolean getDoLimitedCrafting() {
+		return this.doLimitedCrafting;
 	}
 
 	@Override

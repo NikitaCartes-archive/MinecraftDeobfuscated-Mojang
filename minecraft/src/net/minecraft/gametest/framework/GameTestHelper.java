@@ -20,6 +20,7 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -232,7 +233,10 @@ public class GameTestHelper {
 		forRemoval = true
 	)
 	public ServerPlayer makeMockServerPlayerInLevel() {
-		ServerPlayer serverPlayer = new ServerPlayer(this.getLevel().getServer(), this.getLevel(), new GameProfile(UUID.randomUUID(), "test-mock-player")) {
+		CommonListenerCookie commonListenerCookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-player"));
+		ServerPlayer serverPlayer = new ServerPlayer(
+			this.getLevel().getServer(), this.getLevel(), commonListenerCookie.gameProfile(), commonListenerCookie.clientInformation()
+		) {
 			@Override
 			public boolean isSpectator() {
 				return false;
@@ -246,7 +250,7 @@ public class GameTestHelper {
 		Connection connection = new Connection(PacketFlow.SERVERBOUND);
 		EmbeddedChannel embeddedChannel = new EmbeddedChannel(connection);
 		embeddedChannel.attr(Connection.ATTRIBUTE_SERVERBOUND_PROTOCOL).set(ConnectionProtocol.PLAY.codec(PacketFlow.SERVERBOUND));
-		this.getLevel().getServer().getPlayerList().placeNewPlayer(connection, serverPlayer, 0);
+		this.getLevel().getServer().getPlayerList().placeNewPlayer(connection, serverPlayer, commonListenerCookie);
 		return serverPlayer;
 	}
 

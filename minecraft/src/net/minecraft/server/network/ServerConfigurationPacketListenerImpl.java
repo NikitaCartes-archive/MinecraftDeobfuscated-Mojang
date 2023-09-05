@@ -15,6 +15,7 @@ import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.common.custom.BrandPayload;
 import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
@@ -23,6 +24,7 @@ import net.minecraft.network.protocol.configuration.ServerConfigurationPacketLis
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.config.JoinWorldTask;
 import net.minecraft.server.network.config.ServerResourcePackConfigurationTask;
@@ -38,10 +40,12 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 	private final Queue<ConfigurationTask> configurationTasks = new ConcurrentLinkedQueue();
 	@Nullable
 	private ConfigurationTask currentTask;
+	private ClientInformation clientInformation;
 
-	public ServerConfigurationPacketListenerImpl(MinecraftServer minecraftServer, Connection connection, GameProfile gameProfile) {
-		super(minecraftServer, connection, 0);
-		this.gameProfile = gameProfile;
+	public ServerConfigurationPacketListenerImpl(MinecraftServer minecraftServer, Connection connection, CommonListenerCookie commonListenerCookie) {
+		super(minecraftServer, connection, commonListenerCookie);
+		this.gameProfile = commonListenerCookie.gameProfile();
+		this.clientInformation = commonListenerCookie.clientInformation();
 	}
 
 	@Override
@@ -85,6 +89,11 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 	}
 
 	@Override
+	public void handleClientInformation(ServerboundClientInformationPacket serverboundClientInformationPacket) {
+		this.clientInformation = serverboundClientInformationPacket.information();
+	}
+
+	@Override
 	public void handleResourcePackResponse(ServerboundResourcePackPacket serverboundResourcePackPacket) {
 		super.handleResourcePackResponse(serverboundResourcePackPacket);
 		if (serverboundResourcePackPacket.getAction() != ServerboundResourcePackPacket.Action.ACCEPTED) {
@@ -111,8 +120,8 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 				return;
 			}
 
-			ServerPlayer serverPlayer = playerList.getPlayerForLogin(this.gameProfile);
-			playerList.placeNewPlayer(this.connection, serverPlayer, this.latency());
+			ServerPlayer serverPlayer = playerList.getPlayerForLogin(this.gameProfile, this.clientInformation);
+			playerList.placeNewPlayer(this.connection, serverPlayer, this.createCookie(this.clientInformation));
 			this.connection.resumeInboundAfterProtocolChange();
 		} catch (Exception var5) {
 			LOGGER.error("Couldn't place player in world", (Throwable)var5);

@@ -355,8 +355,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		return this.withRotation(new Vec2(h, i));
 	}
 
-	public CommandSourceStack withSigningContext(CommandSigningContext commandSigningContext) {
-		return commandSigningContext == this.signingContext
+	public CommandSourceStack withSigningContext(CommandSigningContext commandSigningContext, TaskChainer taskChainer) {
+		return commandSigningContext == this.signingContext && taskChainer == this.chatMessageChainer
 			? this
 			: new CommandSourceStack(
 				this.source,
@@ -372,28 +372,6 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.consumer,
 				this.anchor,
 				commandSigningContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
-			);
-	}
-
-	public CommandSourceStack withChatMessageChainer(TaskChainer taskChainer) {
-		return taskChainer == this.chatMessageChainer
-			? this
-			: new CommandSourceStack(
-				this.source,
-				this.worldPosition,
-				this.rotation,
-				this.level,
-				this.permissionLevel,
-				this.textName,
-				this.displayName,
-				this.server,
-				this.entity,
-				this.silent,
-				this.consumer,
-				this.anchor,
-				this.signingContext,
 				taskChainer,
 				this.returnValueConsumer
 			);

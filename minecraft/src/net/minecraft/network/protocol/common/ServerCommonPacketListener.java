@@ -10,4 +10,6 @@ public interface ServerCommonPacketListener extends ServerPacketListener {
 	void handleCustomPayload(ServerboundCustomPayloadPacket serverboundCustomPayloadPacket);
 
 	void handleResourcePackResponse(ServerboundResourcePackPacket serverboundResourcePackPacket);
+
+	void handleClientInformation(ServerboundClientInformationPacket serverboundClientInformationPacket);
 }

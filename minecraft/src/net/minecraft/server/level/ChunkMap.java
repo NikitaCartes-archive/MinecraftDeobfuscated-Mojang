@@ -103,7 +103,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	private static final int CHUNK_SAVED_PER_TICK = 200;
 	private static final int CHUNK_SAVED_EAGERLY_PER_TICK = 20;
 	private static final int EAGER_CHUNK_SAVE_COOLDOWN_IN_MILLIS = 10000;
-	private static final int MIN_VIEW_DISTANCE = 2;
+	public static final int MIN_VIEW_DISTANCE = 2;
 	public static final int MAX_VIEW_DISTANCE = 32;
 	public static final int FORCED_TICKET_LEVEL = ChunkLevel.byStatus(FullChunkStatus.ENTITY_TICKING);
 	private final Long2ObjectLinkedOpenHashMap<ChunkHolder> updatingChunkMap = new Long2ObjectLinkedOpenHashMap<>();
@@ -871,7 +871,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	int getPlayerViewDistance(ServerPlayer serverPlayer) {
-		return Mth.clamp(serverPlayer.requestedViewDistance().orElse(2), 2, this.serverViewDistance);
+		return Mth.clamp(serverPlayer.requestedViewDistance(), 2, this.serverViewDistance);
 	}
 
 	private void markChunkPendingToSend(ServerPlayer serverPlayer, ChunkPos chunkPos) {

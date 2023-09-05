@@ -19,8 +19,6 @@ public interface ServerGamePacketListener extends ServerPingPacketListener, Serv
 
 	void handleClientCommand(ServerboundClientCommandPacket serverboundClientCommandPacket);
 
-	void handleClientInformation(ServerboundClientInformationPacket serverboundClientInformationPacket);
-
 	void handleContainerButtonClick(ServerboundContainerButtonClickPacket serverboundContainerButtonClickPacket);
 
 	void handleContainerClick(ServerboundContainerClickPacket serverboundContainerClickPacket);

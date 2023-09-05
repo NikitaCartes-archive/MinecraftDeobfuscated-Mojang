@@ -230,8 +230,9 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 	@Override
 	public void handleLoginAcknowledgement(ServerboundLoginAcknowledgedPacket serverboundLoginAcknowledgedPacket) {
 		Validate.validState(this.state == ServerLoginPacketListenerImpl.State.PROTOCOL_SWITCHING, "Unexpected login acknowledgement packet");
+		CommonListenerCookie commonListenerCookie = CommonListenerCookie.createInitial((GameProfile)Objects.requireNonNull(this.authenticatedProfile));
 		ServerConfigurationPacketListenerImpl serverConfigurationPacketListenerImpl = new ServerConfigurationPacketListenerImpl(
-			this.server, this.connection, (GameProfile)Objects.requireNonNull(this.authenticatedProfile)
+			this.server, this.connection, commonListenerCookie
 		);
 		this.connection.setListener(serverConfigurationPacketListenerImpl);
 		serverConfigurationPacketListenerImpl.startConfiguration();

@@ -57,6 +57,7 @@ import net.minecraft.network.chat.SignedMessageBody;
 import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -80,7 +81,6 @@ import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
-import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
@@ -225,8 +225,10 @@ public class ServerGamePacketListenerImpl
 	private final FutureChain chatMessageChain;
 	private boolean waitingForSwitchToConfig;
 
-	public ServerGamePacketListenerImpl(MinecraftServer minecraftServer, Connection connection, ServerPlayer serverPlayer, int i) {
-		super(minecraftServer, connection, i);
+	public ServerGamePacketListenerImpl(
+		MinecraftServer minecraftServer, Connection connection, ServerPlayer serverPlayer, CommonListenerCookie commonListenerCookie
+	) {
+		super(minecraftServer, connection, commonListenerCookie);
 		this.chunkSender = new PlayerChunkSender(connection.isMemoryConnection());
 		connection.setListener(this);
 		this.player = serverPlayer;
@@ -1233,7 +1235,7 @@ public class ServerGamePacketListenerImpl
 		}
 
 		CommandSigningContext commandSigningContext = new CommandSigningContext.SignedArguments(map);
-		parseResults = Commands.mapSource(parseResults, commandSourceStack -> commandSourceStack.withSigningContext(commandSigningContext));
+		parseResults = Commands.mapSource(parseResults, commandSourceStack -> commandSourceStack.withSigningContext(commandSigningContext, this.chatMessageChain));
 		this.server.getCommands().performCommand(parseResults, serverboundChatCommandPacket.command());
 	}
 
@@ -1680,7 +1682,7 @@ public class ServerGamePacketListenerImpl
 	@Override
 	public void handleClientInformation(ServerboundClientInformationPacket serverboundClientInformationPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundClientInformationPacket, this, this.player.serverLevel());
-		this.player.updateOptions(serverboundClientInformationPacket);
+		this.player.updateOptions(serverboundClientInformationPacket.information());
 	}
 
 	@Override
@@ -1730,7 +1732,7 @@ public class ServerGamePacketListenerImpl
 		if (!this.waitingForSwitchToConfig) {
 			throw new IllegalStateException("Client acknowledged config, but none was requested");
 		} else {
-			this.connection.setListener(new ServerConfigurationPacketListenerImpl(this.server, this.connection, this.playerProfile()));
+			this.connection.setListener(new ServerConfigurationPacketListenerImpl(this.server, this.connection, this.createCookie(this.player.clientInformation())));
 		}
 	}
 

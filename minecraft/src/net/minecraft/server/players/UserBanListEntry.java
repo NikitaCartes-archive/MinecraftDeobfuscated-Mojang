@@ -32,7 +32,7 @@ public class UserBanListEntry extends BanListEntry<GameProfile> {
 	@Override
 	public Component getDisplayName() {
 		GameProfile gameProfile = this.getUser();
-		return Component.literal(gameProfile != null ? gameProfile.getName() : "(Unknown)");
+		return gameProfile != null ? Component.literal(gameProfile.getName()) : Component.translatable("commands.banlist.entry.unknown");
 	}
 
 	@Nullable

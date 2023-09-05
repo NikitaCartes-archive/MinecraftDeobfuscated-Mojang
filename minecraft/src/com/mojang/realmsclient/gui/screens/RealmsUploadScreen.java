@@ -166,7 +166,7 @@ public class RealmsUploadScreen extends RealmsScreen {
 		int j = i + (int)Math.round(200.0 * d);
 		guiGraphics.fill(i - 1, 79, j + 1, 96, -2501934);
 		guiGraphics.fill(i, 80, j, 95, -8355712);
-		guiGraphics.drawCenteredString(this.font, this.progress + " %", this.width / 2, 84, 16777215);
+		guiGraphics.drawCenteredString(this.font, Component.translatable("mco.upload.percent", this.progress), this.width / 2, 84, 16777215);
 	}
 
 	private void drawUploadSpeed(GuiGraphics guiGraphics) {
@@ -210,7 +210,7 @@ public class RealmsUploadScreen extends RealmsScreen {
 		List<Component> list = Lists.<Component>newArrayList();
 		list.add(this.status);
 		if (this.progress != null) {
-			list.add(Component.literal(this.progress + "%"));
+			list.add(Component.translatable("mco.upload.percent", this.progress));
 		}
 
 		if (this.errorMessage != null) {

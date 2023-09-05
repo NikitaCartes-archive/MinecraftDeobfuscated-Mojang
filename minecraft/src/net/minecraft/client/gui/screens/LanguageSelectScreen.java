@@ -17,10 +17,7 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class LanguageSelectScreen extends OptionsSubScreen {
-	private static final Component WARNING_LABEL = Component.literal("(")
-		.append(Component.translatable("options.languageWarning"))
-		.append(")")
-		.withStyle(ChatFormatting.GRAY);
+	private static final Component WARNING_LABEL = Component.translatable("options.languageAccuracyWarning").withStyle(ChatFormatting.GRAY);
 	private LanguageSelectScreen.LanguageSelectionList packSelectionList;
 	final LanguageManager languageManager;
 

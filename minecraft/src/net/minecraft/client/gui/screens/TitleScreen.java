@@ -50,7 +50,7 @@ import org.slf4j.Logger;
 public class TitleScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String DEMO_LEVEL_ID = "Demo_World";
-	public static final Component COPYRIGHT_TEXT = Component.literal("Copyright Mojang AB. Do not distribute!");
+	public static final Component COPYRIGHT_TEXT = Component.translatable("title.credits");
 	public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
 	private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
 	@Nullable

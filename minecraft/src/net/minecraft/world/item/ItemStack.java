@@ -592,7 +592,7 @@ public final class ItemStack {
 		if (!tooltipFlag.isAdvanced() && !this.hasCustomHoverName() && this.is(Items.FILLED_MAP)) {
 			Integer integer = MapItem.getMapId(this);
 			if (integer != null) {
-				list.add(Component.literal("#" + integer).withStyle(ChatFormatting.GRAY));
+				list.add(MapItem.getTooltipForId(this));
 			}
 		}
 

@@ -117,6 +117,8 @@ import org.slf4j.Logger;
 public abstract class Player extends LivingEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int MAX_NAME_LENGTH = 16;
+	public static final HumanoidArm DEFAULT_MAIN_HAND = HumanoidArm.RIGHT;
+	public static final int DEFAULT_MODEL_CUSTOMIZATION = 0;
 	public static final int MAX_HEALTH = 20;
 	public static final int SLEEP_DURATION = 100;
 	public static final int WAKE_UP_DURATION = 10;
@@ -214,7 +216,7 @@ public abstract class Player extends LivingEntity {
 		this.entityData.define(DATA_PLAYER_ABSORPTION_ID, 0.0F);
 		this.entityData.define(DATA_SCORE_ID, 0);
 		this.entityData.define(DATA_PLAYER_MODE_CUSTOMISATION, (byte)0);
-		this.entityData.define(DATA_PLAYER_MAIN_HAND, (byte)1);
+		this.entityData.define(DATA_PLAYER_MAIN_HAND, (byte)DEFAULT_MAIN_HAND.getId());
 		this.entityData.define(DATA_SHOULDER_LEFT, new CompoundTag());
 		this.entityData.define(DATA_SHOULDER_RIGHT, new CompoundTag());
 	}

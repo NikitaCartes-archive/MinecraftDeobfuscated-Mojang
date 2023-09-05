@@ -943,18 +943,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			return false;
 		} else {
 			MobEffectInstance mobEffectInstance2 = (MobEffectInstance)this.activeEffects.get(mobEffectInstance.getEffect());
+			boolean bl = false;
 			if (mobEffectInstance2 == null) {
 				this.activeEffects.put(mobEffectInstance.getEffect(), mobEffectInstance);
 				this.onEffectAdded(mobEffectInstance, entity);
-				mobEffectInstance.onEffectStarted(this);
-				return true;
+				bl = true;
 			} else if (mobEffectInstance2.update(mobEffectInstance)) {
 				this.onEffectUpdated(mobEffectInstance2, true, entity);
-				mobEffectInstance.onEffectStarted(this);
-				return true;
-			} else {
-				return false;
+				bl = true;
 			}
+
+			mobEffectInstance.onEffectStarted(this);
+			return bl;
 		}
 	}
 
@@ -2732,6 +2732,31 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.lerpYRot = (double)g;
 		this.lerpXRot = (double)h;
 		this.lerpSteps = i;
+	}
+
+	@Override
+	public double lerpTargetX() {
+		return this.lerpX;
+	}
+
+	@Override
+	public double lerpTargetY() {
+		return this.lerpY;
+	}
+
+	@Override
+	public double lerpTargetZ() {
+		return this.lerpZ;
+	}
+
+	@Override
+	public float lerpTargetXRot() {
+		return (float)this.lerpXRot;
+	}
+
+	@Override
+	public float lerpTargetYRot() {
+		return (float)this.lerpYRot;
 	}
 
 	@Override

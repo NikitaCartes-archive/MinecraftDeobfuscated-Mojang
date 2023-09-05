@@ -84,11 +84,12 @@ public record Advancement(
 		if (map.isEmpty()) {
 			throw new JsonSyntaxException("Advancement criteria cannot be empty");
 		} else {
-			AdvancementRequirements advancementRequirements = AdvancementRequirements.fromJson(
-				GsonHelper.getAsJsonArray(jsonObject, "requirements", new JsonArray()), map.keySet()
-			);
-			if (advancementRequirements.isEmpty()) {
+			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "requirements", new JsonArray());
+			AdvancementRequirements advancementRequirements;
+			if (jsonArray.isEmpty()) {
 				advancementRequirements = AdvancementRequirements.allOf(map.keySet());
+			} else {
+				advancementRequirements = AdvancementRequirements.fromJson(jsonArray, map.keySet());
 			}
 
 			boolean bl = GsonHelper.getAsBoolean(jsonObject, "sends_telemetry_event", false);

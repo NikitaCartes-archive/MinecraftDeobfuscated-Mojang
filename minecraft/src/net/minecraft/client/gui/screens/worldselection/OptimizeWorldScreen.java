@@ -127,8 +127,10 @@ public class OptimizeWorldScreen extends Screen {
 			}
 
 			int q = this.upgrader.getConverted() + this.upgrader.getSkipped();
-			guiGraphics.drawCenteredString(this.font, q + " / " + this.upgrader.getTotalChunks(), this.width / 2, m + 2 * 9 + 2, 10526880);
-			guiGraphics.drawCenteredString(this.font, Mth.floor(this.upgrader.getProgress() * 100.0F) + "%", this.width / 2, m + (n - m) / 2 - 9 / 2, 10526880);
+			Component component = Component.translatable("optimizeWorld.progress.counter", q, this.upgrader.getTotalChunks());
+			Component component2 = Component.translatable("optimizeWorld.progress.percentage", Mth.floor(this.upgrader.getProgress() * 100.0F));
+			guiGraphics.drawCenteredString(this.font, component, this.width / 2, m + 2 * 9 + 2, 10526880);
+			guiGraphics.drawCenteredString(this.font, component2, this.width / 2, m + (n - m) / 2 - 9 / 2, 10526880);
 		}
 	}
 }

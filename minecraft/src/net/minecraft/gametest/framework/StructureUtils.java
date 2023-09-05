@@ -19,13 +19,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.structures.NbtToSnbt;
-import net.minecraft.data.structures.StructureUpdater;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.Bootstrap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -80,20 +76,6 @@ public class StructureUtils {
 			default:
 				throw new IllegalArgumentException("Unknown rotation value, don't know how many steps it represents: " + rotation);
 		}
-	}
-
-	public static void main(String[] strings) throws IOException {
-		Bootstrap.bootStrap();
-		Files.walk(Paths.get(testStructuresDir)).filter(path -> path.toString().endsWith(".snbt")).forEach(path -> {
-			try {
-				String string = Files.readString(path);
-				CompoundTag compoundTag = NbtUtils.snbtToStructure(string);
-				CompoundTag compoundTag2 = StructureUpdater.update(path.toString(), compoundTag);
-				NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, path, NbtUtils.structureToSnbt(compoundTag2));
-			} catch (IOException | CommandSyntaxException var4) {
-				LOGGER.error("Something went wrong upgrading: {}", path, var4);
-			}
-		});
 	}
 
 	public static AABB getStructureBounds(StructureBlockEntity structureBlockEntity) {

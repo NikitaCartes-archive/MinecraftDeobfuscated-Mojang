@@ -299,6 +299,31 @@ public abstract class Display extends Entity {
 	}
 
 	@Override
+	public double lerpTargetX() {
+		return this.posRotInterpolationTarget != null ? this.posRotInterpolationTarget.targetX : this.getX();
+	}
+
+	@Override
+	public double lerpTargetY() {
+		return this.posRotInterpolationTarget != null ? this.posRotInterpolationTarget.targetY : this.getY();
+	}
+
+	@Override
+	public double lerpTargetZ() {
+		return this.posRotInterpolationTarget != null ? this.posRotInterpolationTarget.targetZ : this.getZ();
+	}
+
+	@Override
+	public float lerpTargetXRot() {
+		return this.posRotInterpolationTarget != null ? (float)this.posRotInterpolationTarget.targetXRot : this.getXRot();
+	}
+
+	@Override
+	public float lerpTargetYRot() {
+		return this.posRotInterpolationTarget != null ? (float)this.posRotInterpolationTarget.targetYRot : this.getYRot();
+	}
+
+	@Override
 	public AABB getBoundingBoxForCulling() {
 		return this.cullingBoundingBox;
 	}
@@ -715,11 +740,11 @@ public abstract class Display extends Entity {
 
 	static class PosRotInterpolationTarget {
 		int steps;
-		private final double targetX;
-		private final double targetY;
-		private final double targetZ;
-		private final double targetYRot;
-		private final double targetXRot;
+		final double targetX;
+		final double targetY;
+		final double targetZ;
+		final double targetYRot;
+		final double targetXRot;
 
 		PosRotInterpolationTarget(int i, double d, double e, double f, double g, double h) {
 			this.steps = i;

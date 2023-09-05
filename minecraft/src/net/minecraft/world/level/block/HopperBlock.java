@@ -124,7 +124,7 @@ public class HopperBlock extends BaseEntityBlock {
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
-			this.checkPoweredState(level, blockPos, blockState, 2);
+			this.checkPoweredState(level, blockPos, blockState);
 		}
 	}
 
@@ -147,13 +147,13 @@ public class HopperBlock extends BaseEntityBlock {
 
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		this.checkPoweredState(level, blockPos, blockState, 4);
+		this.checkPoweredState(level, blockPos, blockState);
 	}
 
-	private void checkPoweredState(Level level, BlockPos blockPos, BlockState blockState, int i) {
+	private void checkPoweredState(Level level, BlockPos blockPos, BlockState blockState) {
 		boolean bl = !level.hasNeighborSignal(blockPos);
 		if (bl != (Boolean)blockState.getValue(ENABLED)) {
-			level.setBlock(blockPos, blockState.setValue(ENABLED, Boolean.valueOf(bl)), i);
+			level.setBlock(blockPos, blockState.setValue(ENABLED, Boolean.valueOf(bl)), 2);
 		}
 	}
 

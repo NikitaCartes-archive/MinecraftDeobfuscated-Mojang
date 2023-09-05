@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.material.MapColor;
 
 public record MapDecoration(MapDecoration.Type type, byte x, byte y, byte rot, @Nullable Component name) {
 	public byte getImage() {
@@ -24,8 +25,8 @@ public record MapDecoration(MapDecoration.Type type, byte x, byte y, byte rot, @
 		TARGET_POINT("target_point", true, false),
 		PLAYER_OFF_MAP("player_off_map", false, true),
 		PLAYER_OFF_LIMITS("player_off_limits", false, true),
-		MANSION("mansion", true, 5393476, false),
-		MONUMENT("monument", true, 3830373, false),
+		MANSION("mansion", true, 5393476, false, true),
+		MONUMENT("monument", true, 3830373, false, true),
 		BANNER_WHITE("banner_white", true, true),
 		BANNER_ORANGE("banner_orange", true, true),
 		BANNER_MAGENTA("banner_magenta", true, true),
@@ -42,29 +43,42 @@ public record MapDecoration(MapDecoration.Type type, byte x, byte y, byte rot, @
 		BANNER_GREEN("banner_green", true, true),
 		BANNER_RED("banner_red", true, true),
 		BANNER_BLACK("banner_black", true, true),
-		RED_X("red_x", true, false);
+		RED_X("red_x", true, false),
+		DESERT_VILLAGE("village_desert", true, MapColor.COLOR_LIGHT_GRAY.col, false, true),
+		PLAINS_VILLAGE("village_plains", true, MapColor.COLOR_LIGHT_GRAY.col, false, true),
+		SAVANNA_VILLAGE("village_savanna", true, MapColor.COLOR_LIGHT_GRAY.col, false, true),
+		SNOWY_VILLAGE("village_snowy", true, MapColor.COLOR_LIGHT_GRAY.col, false, true),
+		TAIGA_VILLAGE("village_taiga", true, MapColor.COLOR_LIGHT_GRAY.col, false, true),
+		JUNGLE_TEMPLE("jungle_temple", true, MapColor.COLOR_LIGHT_GRAY.col, false, true),
+		SWAMP_HUT("swamp_hut", true, MapColor.COLOR_LIGHT_GRAY.col, false, true);
 
 		public static final Codec<MapDecoration.Type> CODEC = StringRepresentable.fromEnum(MapDecoration.Type::values);
 		private final String name;
 		private final byte icon;
 		private final boolean renderedOnFrame;
 		private final int mapColor;
+		private final boolean isExplorationMapElement;
 		private final boolean trackCount;
 
 		private Type(String string2, boolean bl, boolean bl2) {
-			this(string2, bl, -1, bl2);
+			this(string2, bl, -1, bl2, false);
 		}
 
-		private Type(String string2, boolean bl, int j, boolean bl2) {
+		private Type(String string2, boolean bl, int j, boolean bl2, boolean bl3) {
 			this.name = string2;
 			this.trackCount = bl2;
 			this.icon = (byte)this.ordinal();
 			this.renderedOnFrame = bl;
 			this.mapColor = j;
+			this.isExplorationMapElement = bl3;
 		}
 
 		public byte getIcon() {
 			return this.icon;
+		}
+
+		public boolean isExplorationMapElement() {
+			return this.isExplorationMapElement;
 		}
 
 		public boolean isRenderedOnFrame() {

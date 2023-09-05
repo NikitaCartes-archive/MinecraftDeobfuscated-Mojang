@@ -100,7 +100,7 @@ public class ServerConnectionListener {
 									int i = ServerConnectionListener.this.server.getRateLimitPacketsPerSecond();
 									Connection connection = (Connection)(i > 0 ? new RateKickingConnection(i) : new Connection(PacketFlow.SERVERBOUND));
 									ServerConnectionListener.this.connections.add(connection);
-									channelPipeline.addLast("packet_handler", connection);
+									connection.configurePacketHandler(channelPipeline);
 									connection.setListenerForServerboundHandshake(new ServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
 								}
 							}
@@ -125,7 +125,7 @@ public class ServerConnectionListener {
 					ServerConnectionListener.this.connections.add(connection);
 					ChannelPipeline channelPipeline = channel.pipeline();
 					Connection.configureInMemoryPipeline(channelPipeline, PacketFlow.SERVERBOUND);
-					channelPipeline.addLast("packet_handler", connection);
+					connection.configurePacketHandler(channelPipeline);
 				}
 			}).group((EventLoopGroup)SERVER_EVENT_GROUP.get()).localAddress(LocalAddress.ANY).bind().syncUninterruptibly();
 			this.channels.add(channelFuture);

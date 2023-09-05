@@ -94,7 +94,11 @@ public class GameRules {
 		"doWeatherCycle", GameRules.Category.UPDATES, GameRules.BooleanValue.create(true)
 	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_LIMITED_CRAFTING = register(
-		"doLimitedCrafting", GameRules.Category.PLAYER, GameRules.BooleanValue.create(false)
+		"doLimitedCrafting", GameRules.Category.PLAYER, GameRules.BooleanValue.create(false, (minecraftServer, booleanValue) -> {
+			for (ServerPlayer serverPlayer : minecraftServer.getPlayerList().getPlayers()) {
+				serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.LIMITED_CRAFTING, booleanValue.get() ? 1.0F : 0.0F));
+			}
+		})
 	);
 	public static final GameRules.Key<GameRules.IntegerValue> RULE_MAX_COMMAND_CHAIN_LENGTH = register(
 		"maxCommandChainLength", GameRules.Category.MISC, GameRules.IntegerValue.create(65536)
@@ -171,6 +175,9 @@ public class GameRules {
 	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_VINES_SPREAD = register(
 		"doVinesSpread", GameRules.Category.UPDATES, GameRules.BooleanValue.create(true)
+	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_ENDER_PEARLS_VANISH_ON_DEATH = register(
+		"enderPearlsVanishOnDeath", GameRules.Category.PLAYER, GameRules.BooleanValue.create(true)
 	);
 	private final Map<GameRules.Key<?>, GameRules.Value<?>> rules;
 

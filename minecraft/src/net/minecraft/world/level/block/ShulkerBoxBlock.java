@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.ContainerHelper;
@@ -194,7 +193,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
 		if (compoundTag != null) {
 			if (compoundTag.contains("LootTable", 8)) {
-				list.add(Component.literal("???????"));
+				list.add(Component.translatable("container.shulkerBox.unknownContents"));
 			}
 
 			if (compoundTag.contains("Items", 9)) {
@@ -208,9 +207,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 						j++;
 						if (i <= 4) {
 							i++;
-							MutableComponent mutableComponent = itemStack2.getHoverName().copy();
-							mutableComponent.append(" x").append(String.valueOf(itemStack2.getCount()));
-							list.add(mutableComponent);
+							list.add(Component.translatable("container.shulkerBox.itemCount", itemStack2.getHoverName(), String.valueOf(itemStack2.getCount())));
 						}
 					}
 				}

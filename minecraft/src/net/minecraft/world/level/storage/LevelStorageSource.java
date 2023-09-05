@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -387,7 +388,11 @@ public class LevelStorageSource {
 	}
 
 	public boolean levelExists(String string) {
-		return Files.isDirectory(this.getLevelPath(string), new LinkOption[0]);
+		try {
+			return Files.isDirectory(this.getLevelPath(string), new LinkOption[0]);
+		} catch (InvalidPathException var3) {
+			return false;
+		}
 	}
 
 	private Path getLevelPath(String string) {

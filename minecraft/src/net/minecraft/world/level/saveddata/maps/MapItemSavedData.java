@@ -447,7 +447,7 @@ public class MapItemSavedData extends SavedData {
 
 	public boolean isExplorationMap() {
 		for (MapDecoration mapDecoration : this.decorations.values()) {
-			if (mapDecoration.type() == MapDecoration.Type.MANSION || mapDecoration.type() == MapDecoration.Type.MONUMENT) {
+			if (mapDecoration.type().isExplorationMapElement()) {
 				return true;
 			}
 		}

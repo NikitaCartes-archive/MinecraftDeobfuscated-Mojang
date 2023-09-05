@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class LanguageManager implements ResourceManagerReloadListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final String DEFAULT_LANGUAGE_CODE = "en_us";
 	private static final LanguageInfo DEFAULT_LANGUAGE = new LanguageInfo("US", "English", false);
 	private Map<String, LanguageInfo> languages = ImmutableMap.of("en_us", DEFAULT_LANGUAGE);
 	private String currentCode;

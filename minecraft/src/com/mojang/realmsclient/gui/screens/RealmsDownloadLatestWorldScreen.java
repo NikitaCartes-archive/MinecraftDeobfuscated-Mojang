@@ -115,8 +115,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		list.add(this.downloadTitle);
 		list.add(this.status);
 		if (this.progress != null) {
-			list.add(Component.literal(this.progress + "%"));
-			list.add(Component.literal(Unit.humanReadable(this.bytesPersSecond) + "/s"));
+			list.add(Component.translatable("mco.download.percent", this.progress));
+			list.add(Component.translatable("mco.download.speed.narration", Unit.humanReadable(this.bytesPersSecond)));
 		}
 
 		if (this.errorMessage != null) {

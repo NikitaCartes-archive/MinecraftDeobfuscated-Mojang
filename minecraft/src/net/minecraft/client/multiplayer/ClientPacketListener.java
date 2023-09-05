@@ -58,7 +58,6 @@ import net.minecraft.client.resources.sounds.BeeSoundInstance;
 import net.minecraft.client.resources.sounds.GuardianAttackSoundInstance;
 import net.minecraft.client.resources.sounds.MinecartSoundInstance;
 import net.minecraft.client.resources.sounds.SnifferSoundInstance;
-import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ArgumentSignatures;
@@ -333,6 +332,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private final ChunkBatchSizeCalculator chunkBatchSizeCalculator = new ChunkBatchSizeCalculator();
 	private final PingDebugMonitor pingDebugMonitor;
 	private boolean seenInsecureChatWarning = false;
+	private volatile boolean closed;
 
 	public ClientPacketListener(Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie) {
 		super(minecraft, connection, commonListenerCookie);
@@ -349,6 +349,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	}
 
 	public void close() {
+		this.closed = true;
 		this.level = null;
 		this.telemetryManager.onDisconnect();
 	}
@@ -406,11 +407,11 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.minecraft.setScreen(new ReceivingLevelScreen());
 		this.minecraft.player.setReducedDebugInfo(clientboundLoginPacket.reducedDebugInfo());
 		this.minecraft.player.setShowDeathScreen(clientboundLoginPacket.showDeathScreen());
+		this.minecraft.player.setDoLimitedCrafting(clientboundLoginPacket.doLimitedCrafting());
 		this.minecraft.player.setLastDeathLocation(commonPlayerSpawnInfo.lastDeathLocation());
 		this.minecraft.player.setPortalCooldown(commonPlayerSpawnInfo.portalCooldown());
 		this.minecraft.gameMode.setLocalMode(commonPlayerSpawnInfo.gameType(), commonPlayerSpawnInfo.previousGameType());
 		this.minecraft.options.setServerRenderDistance(clientboundLoginPacket.chunkRadius());
-		this.minecraft.options.broadcastOptions();
 		this.chatSession = null;
 		this.lastSeenMessages = new LastSeenMessagesTracker(20);
 		this.messageSignatureCache = MessageSignatureCache.createDefault();
@@ -549,13 +550,13 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 						(long)clientboundMoveEntityPacket.getXa(), (long)clientboundMoveEntityPacket.getYa(), (long)clientboundMoveEntityPacket.getZa()
 					);
 					vecDeltaCodec.setBase(vec3);
-					float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0F : entity.getYRot();
-					float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F : entity.getXRot();
+					float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0F : entity.lerpTargetYRot();
+					float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F : entity.lerpTargetXRot();
 					entity.lerpTo(vec3.x(), vec3.y(), vec3.z(), f, g, 3);
 				} else if (clientboundMoveEntityPacket.hasRotation()) {
 					float h = (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0F;
 					float i = (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F;
-					entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), h, i, 3);
+					entity.lerpTo(entity.lerpTargetX(), entity.lerpTargetY(), entity.lerpTargetZ(), h, i, 3);
 				}
 
 				entity.setOnGround(clientboundMoveEntityPacket.isOnGround());
@@ -1368,6 +1369,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			}
 		} else if (type == ClientboundGameEventPacket.IMMEDIATE_RESPAWN) {
 			this.minecraft.player.setShowDeathScreen(f == 0.0F);
+		} else if (type == ClientboundGameEventPacket.LIMITED_CRAFTING) {
+			this.minecraft.player.setDoLimitedCrafting(f == 1.0F);
 		}
 	}
 
@@ -1441,7 +1444,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.recipeManager.replaceRecipes(clientboundUpdateRecipesPacket.getRecipes());
 		ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
 		clientRecipeBook.setupCollections(this.recipeManager.getRecipes(), this.minecraft.level.registryAccess());
-		this.minecraft.populateSearchTree(SearchRegistry.RECIPE_COLLECTIONS, clientRecipeBook.getCollections());
 	}
 
 	@Override
@@ -2271,7 +2273,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 	@Override
 	public boolean isAcceptingMessages() {
-		return this.connection.isConnected();
+		return this.connection.isConnected() && !this.closed;
 	}
 
 	public Collection<PlayerInfo> getListedOnlinePlayers() {

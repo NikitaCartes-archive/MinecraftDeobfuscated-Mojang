@@ -58,6 +58,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.joml.AxisAngle4f;
 import org.joml.Matrix4f;
@@ -136,6 +137,8 @@ public class ExtraCodecs {
 			return DataResult.error(() -> "Malformed base64 string");
 		}
 	}, bs -> Base64.getEncoder().encodeToString(bs));
+	public static final Codec<String> ESCAPED_STRING = Codec.STRING
+		.comapFlatMap(string -> DataResult.success(StringEscapeUtils.unescapeJava(string)), StringEscapeUtils::escapeJava);
 	public static final Codec<ExtraCodecs.TagOrElementLocation> TAG_OR_ELEMENT_ID = Codec.STRING
 		.comapFlatMap(
 			string -> string.startsWith("#")

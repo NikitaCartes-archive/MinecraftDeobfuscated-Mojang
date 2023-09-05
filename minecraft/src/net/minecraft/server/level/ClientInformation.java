@@ -1,11 +1,11 @@
-package net.minecraft.network.protocol.game;
+package net.minecraft.server.level;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
+import net.minecraft.world.entity.player.Player;
 
-public record ServerboundClientInformationPacket(
+public record ClientInformation(
 	String language,
 	int viewDistance,
 	ChatVisiblity chatVisibility,
@@ -14,10 +14,10 @@ public record ServerboundClientInformationPacket(
 	HumanoidArm mainHand,
 	boolean textFilteringEnabled,
 	boolean allowsListing
-) implements Packet<ServerGamePacketListener> {
+) {
 	public static final int MAX_LANGUAGE_LENGTH = 16;
 
-	public ServerboundClientInformationPacket(FriendlyByteBuf friendlyByteBuf) {
+	public ClientInformation(FriendlyByteBuf friendlyByteBuf) {
 		this(
 			friendlyByteBuf.readUtf(16),
 			friendlyByteBuf.readByte(),
@@ -30,7 +30,6 @@ public record ServerboundClientInformationPacket(
 		);
 	}
 
-	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(this.language);
 		friendlyByteBuf.writeByte(this.viewDistance);
@@ -42,7 +41,7 @@ public record ServerboundClientInformationPacket(
 		friendlyByteBuf.writeBoolean(this.allowsListing);
 	}
 
-	public void handle(ServerGamePacketListener serverGamePacketListener) {
-		serverGamePacketListener.handleClientInformation(this);
+	public static ClientInformation createDefault() {
+		return new ClientInformation("en_us", 2, ChatVisiblity.FULL, true, 0, Player.DEFAULT_MAIN_HAND, false, false);
 	}
 }
