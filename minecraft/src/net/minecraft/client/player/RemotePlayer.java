@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.phys.Vec3;
 
@@ -94,5 +95,11 @@ public class RemotePlayer extends AbstractClientPlayer {
 	public void sendSystemMessage(Component component) {
 		Minecraft minecraft = Minecraft.getInstance();
 		minecraft.gui.getChat().addMessage(component);
+	}
+
+	@Override
+	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+		super.recreateFromPacket(clientboundAddEntityPacket);
+		this.setOldPosAndRot();
 	}
 }

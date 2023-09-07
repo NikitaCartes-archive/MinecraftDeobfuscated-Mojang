@@ -50,6 +50,7 @@ public class ChatScreen extends Screen {
 		this.input.setCanLoseFocus(false);
 		this.addWidget(this.input);
 		this.commandSuggestions = new CommandSuggestions(this.minecraft, this, this.input, this.font, false, false, 1, 10, true, -805306368);
+		this.commandSuggestions.setAllowHiding(false);
 		this.commandSuggestions.updateCommandInfo();
 		this.setInitialFocus(this.input);
 	}

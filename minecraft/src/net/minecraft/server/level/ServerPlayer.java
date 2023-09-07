@@ -37,8 +37,6 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -1537,11 +1535,6 @@ public class ServerPlayer extends Player {
 					BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent), soundSource, this.getX(), this.getY(), this.getZ(), f, g, this.random.nextLong()
 				)
 			);
-	}
-
-	@Override
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return new ClientboundAddPlayerPacket(this);
 	}
 
 	@Override

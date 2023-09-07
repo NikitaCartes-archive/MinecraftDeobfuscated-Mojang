@@ -31,9 +31,9 @@ public class OptionsScreen extends Screen {
 	private static final Component VIDEO = Component.translatable("options.video");
 	private static final Component CONTROLS = Component.translatable("options.controls");
 	private static final Component LANGUAGE = Component.translatable("options.language");
-	private static final Component CHAT = Component.translatable("options.chat.title");
+	private static final Component CHAT = Component.translatable("options.chat");
 	private static final Component RESOURCEPACK = Component.translatable("options.resourcepack");
-	private static final Component ACCESSIBILITY = Component.translatable("options.accessibility.title");
+	private static final Component ACCESSIBILITY = Component.translatable("options.accessibility");
 	private static final Component TELEMETRY = Component.translatable("options.telemetry");
 	private static final Component CREDITS_AND_ATTRIBUTION = Component.translatable("options.credits_and_attribution");
 	private static final int COLUMNS = 2;

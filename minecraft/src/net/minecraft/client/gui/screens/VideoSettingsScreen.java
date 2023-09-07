@@ -90,10 +90,20 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 			(component, integer) -> {
 				if (monitor == null) {
 					return Component.translatable("options.fullscreen.unavailable");
+				} else if (integer == -1) {
+					return Options.genericValueLabel(component, Component.translatable("options.fullscreen.current"));
 				} else {
-					return integer == -1
-						? Options.genericValueLabel(component, Component.translatable("options.fullscreen.current"))
-						: Options.genericValueLabel(component, Component.literal(monitor.getMode(integer).toString()));
+					VideoMode videoMode = monitor.getMode(integer);
+					return Options.genericValueLabel(
+						component,
+						Component.translatable(
+							"options.fullscreen.entry",
+							videoMode.getWidth(),
+							videoMode.getHeight(),
+							videoMode.getRefreshRate(),
+							videoMode.getRedBits() + videoMode.getGreenBits() + videoMode.getBlueBits()
+						)
+					);
 				}
 			},
 			new OptionInstance.IntRange(-1, monitor != null ? monitor.getModeCount() - 1 : -1),

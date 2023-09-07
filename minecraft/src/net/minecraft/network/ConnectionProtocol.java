@@ -37,7 +37,6 @@ import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeat
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
@@ -218,7 +217,6 @@ public enum ConnectionProtocol {
 					.withBundlePacket(ClientboundBundlePacket.class, ClientboundBundlePacket::new)
 					.addPacket(ClientboundAddEntityPacket.class, ClientboundAddEntityPacket::new)
 					.addPacket(ClientboundAddExperienceOrbPacket.class, ClientboundAddExperienceOrbPacket::new)
-					.addPacket(ClientboundAddPlayerPacket.class, ClientboundAddPlayerPacket::new)
 					.addPacket(ClientboundAnimatePacket.class, ClientboundAnimatePacket::new)
 					.addPacket(ClientboundAwardStatsPacket.class, ClientboundAwardStatsPacket::new)
 					.addPacket(ClientboundBlockChangedAckPacket.class, ClientboundBlockChangedAckPacket::new)

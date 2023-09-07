@@ -83,6 +83,11 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 	}
 
 	@Override
+	protected Component getUsageNarration() {
+		return this.commandSuggestions.isVisible() ? this.commandSuggestions.getUsageNarration() : super.getUsageNarration();
+	}
+
+	@Override
 	public void resize(Minecraft minecraft, int i, int j) {
 		String string = this.commandEdit.getValue();
 		this.init(minecraft, i, j);

@@ -130,27 +130,38 @@ public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
 		if (this.file.exists()) {
 			BufferedReader bufferedReader = Files.newReader(this.file, StandardCharsets.UTF_8);
 
-			try {
-				JsonArray jsonArray = GSON.fromJson(bufferedReader, JsonArray.class);
-				this.map.clear();
-
-				for (JsonElement jsonElement : jsonArray) {
-					JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "entry");
-					StoredUserEntry<K> storedUserEntry = this.createEntry(jsonObject);
-					if (storedUserEntry.getUser() != null) {
-						this.map.put(this.getKeyForUser(storedUserEntry.getUser()), storedUserEntry);
+			label54: {
+				try {
+					this.map.clear();
+					JsonArray jsonArray = GSON.fromJson(bufferedReader, JsonArray.class);
+					if (jsonArray == null) {
+						break label54;
 					}
+
+					for (JsonElement jsonElement : jsonArray) {
+						JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "entry");
+						StoredUserEntry<K> storedUserEntry = this.createEntry(jsonObject);
+						if (storedUserEntry.getUser() != null) {
+							this.map.put(this.getKeyForUser(storedUserEntry.getUser()), storedUserEntry);
+						}
+					}
+				} catch (Throwable var8) {
+					if (bufferedReader != null) {
+						try {
+							bufferedReader.close();
+						} catch (Throwable var7) {
+							var8.addSuppressed(var7);
+						}
+					}
+
+					throw var8;
 				}
-			} catch (Throwable var8) {
+
 				if (bufferedReader != null) {
-					try {
-						bufferedReader.close();
-					} catch (Throwable var7) {
-						var8.addSuppressed(var7);
-					}
+					bufferedReader.close();
 				}
 
-				throw var8;
+				return;
 			}
 
 			if (bufferedReader != null) {

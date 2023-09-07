@@ -322,16 +322,8 @@ public class ClientLevel extends Level {
 		return this.entityStorage.count();
 	}
 
-	public void addPlayer(int i, AbstractClientPlayer abstractClientPlayer) {
-		this.addEntity(i, abstractClientPlayer);
-	}
-
-	public void putNonPlayerEntity(int i, Entity entity) {
-		this.addEntity(i, entity);
-	}
-
-	private void addEntity(int i, Entity entity) {
-		this.removeEntity(i, Entity.RemovalReason.DISCARDED);
+	public void addEntity(Entity entity) {
+		this.removeEntity(entity.getId(), Entity.RemovalReason.DISCARDED);
 		this.entityStorage.addEntity(entity);
 	}
 

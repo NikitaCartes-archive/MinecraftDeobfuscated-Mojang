@@ -75,6 +75,7 @@ public class CommandSuggestions {
 	private CommandSuggestions.SuggestionsList suggestions;
 	private boolean allowSuggestions;
 	boolean keepSuggestions;
+	private boolean allowHiding = true;
 
 	public CommandSuggestions(Minecraft minecraft, Screen screen, EditBox editBox, Font font, boolean bl, boolean bl2, int i, int j, boolean bl3, int k) {
 		this.minecraft = minecraft;
@@ -97,14 +98,19 @@ public class CommandSuggestions {
 		}
 	}
 
+	public void setAllowHiding(boolean bl) {
+		this.allowHiding = bl;
+	}
+
 	public boolean keyPressed(int i, int j, int k) {
-		if (this.suggestions != null && this.suggestions.keyPressed(i, j, k)) {
+		boolean bl = this.suggestions != null;
+		if (bl && this.suggestions.keyPressed(i, j, k)) {
 			return true;
-		} else if (this.screen.getFocused() == this.input && i == 258) {
+		} else if (this.screen.getFocused() != this.input || i != 258 || this.allowHiding && !bl) {
+			return false;
+		} else {
 			this.showSuggestions(true);
 			return true;
-		} else {
-			return false;
 		}
 	}
 
@@ -130,6 +136,22 @@ public class CommandSuggestions {
 				int k = this.anchorToBottom ? this.screen.height - 12 : 72;
 				this.suggestions = new CommandSuggestions.SuggestionsList(j, k, i, this.sortSuggestions(suggestions), bl);
 			}
+		}
+	}
+
+	public boolean isVisible() {
+		return this.suggestions != null;
+	}
+
+	public Component getUsageNarration() {
+		if (this.suggestions != null && this.suggestions.tabCycles) {
+			return this.allowHiding
+				? Component.translatable("narration.suggestion.usage.cycle.hidable")
+				: Component.translatable("narration.suggestion.usage.cycle.fixed");
+		} else {
+			return this.allowHiding
+				? Component.translatable("narration.suggestion.usage.fill.hidable")
+				: Component.translatable("narration.suggestion.usage.fill.fixed");
 		}
 	}
 
@@ -371,7 +393,7 @@ public class CommandSuggestions {
 		private int offset;
 		private int current;
 		private Vec2 lastMouse = Vec2.ZERO;
-		private boolean tabCycles;
+		boolean tabCycles;
 		private int lastNarratedEntry;
 
 		SuggestionsList(int i, int j, int k, List<Suggestion> list, boolean bl) {

@@ -62,16 +62,16 @@ public class RecipeCollection {
 		}
 	}
 
-	public void canCraft(StackedContents stackedContents, int i, int j, RecipeBook recipeBook, boolean bl) {
+	public void canCraft(StackedContents stackedContents, int i, int j, RecipeBook recipeBook) {
 		for (RecipeHolder<?> recipeHolder : this.recipes) {
-			boolean bl2 = recipeHolder.value().canCraftInDimensions(i, j) && (!bl || recipeBook.contains(recipeHolder));
-			if (bl2) {
+			boolean bl = recipeHolder.value().canCraftInDimensions(i, j) && recipeBook.contains(recipeHolder);
+			if (bl) {
 				this.fitsDimensions.add(recipeHolder);
 			} else {
 				this.fitsDimensions.remove(recipeHolder);
 			}
 
-			if (bl2 && stackedContents.canCraft(recipeHolder.value(), null)) {
+			if (bl && stackedContents.canCraft(recipeHolder.value(), null)) {
 				this.craftable.add(recipeHolder);
 			} else {
 				this.craftable.remove(recipeHolder);

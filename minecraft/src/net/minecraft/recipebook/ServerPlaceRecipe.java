@@ -17,7 +17,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.level.GameRules;
 import org.slf4j.Logger;
 
 public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integer> {
@@ -31,8 +30,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 	}
 
 	public void recipeClicked(ServerPlayer serverPlayer, @Nullable RecipeHolder<? extends Recipe<C>> recipeHolder, boolean bl) {
-		if (recipeHolder != null
-			&& (!serverPlayer.level().getGameRules().getBoolean(GameRules.RULE_LIMITED_CRAFTING) || serverPlayer.getRecipeBook().contains(recipeHolder))) {
+		if (recipeHolder != null && serverPlayer.getRecipeBook().contains(recipeHolder)) {
 			this.inventory = serverPlayer.getInventory();
 			if (this.testClearGrid() || serverPlayer.isCreative()) {
 				this.stackedContents.clear();

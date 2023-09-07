@@ -12,6 +12,8 @@ import com.mojang.logging.LogUtils;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.time.Duration;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.crypto.Cipher;
@@ -59,6 +61,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	private final Duration worldLoadDuration;
 	@Nullable
 	private String minigameName;
+	private final AtomicReference<ClientHandshakePacketListenerImpl.State> state = new AtomicReference(ClientHandshakePacketListenerImpl.State.CONNECTING);
 
 	public ClientHandshakePacketListenerImpl(
 		Connection connection,
@@ -78,8 +81,21 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 		this.worldLoadDuration = duration;
 	}
 
+	private void switchState(ClientHandshakePacketListenerImpl.State state) {
+		ClientHandshakePacketListenerImpl.State state2 = (ClientHandshakePacketListenerImpl.State)this.state.updateAndGet(state2x -> {
+			if (!state.fromStates.contains(state2x)) {
+				throw new IllegalStateException("Tried to switch to " + state + " from " + state2x + ", but expected one of " + state.fromStates);
+			} else {
+				return state;
+			}
+		});
+		this.updateStatus.accept(state2.message);
+	}
+
 	@Override
 	public void handleHello(ClientboundHelloPacket clientboundHelloPacket) {
+		this.switchState(ClientHandshakePacketListenerImpl.State.AUTHORIZING);
+
 		Cipher cipher;
 		Cipher cipher2;
 		String string;
@@ -96,7 +112,6 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 			throw new IllegalStateException("Protocol error", var9);
 		}
 
-		this.updateStatus.accept(Component.translatable("connect.authorizing"));
 		HttpUtil.DOWNLOAD_EXECUTOR.submit((Runnable)(() -> {
 			Component component = this.authenticateServer(string);
 			if (component != null) {
@@ -108,7 +123,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 				LOGGER.warn(component.getString());
 			}
 
-			this.updateStatus.accept(Component.translatable("connect.encrypting"));
+			this.switchState(ClientHandshakePacketListenerImpl.State.ENCRYPTING);
 			this.connection.send(serverboundKeyPacket, PacketSendListener.thenRun(() -> this.connection.setEncryptionKey(cipher, cipher2)));
 		}));
 	}
@@ -137,7 +152,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 
 	@Override
 	public void handleGameProfile(ClientboundGameProfilePacket clientboundGameProfilePacket) {
-		this.updateStatus.accept(Component.translatable("connect.joining"));
+		this.switchState(ClientHandshakePacketListenerImpl.State.JOINING);
 		GameProfile gameProfile = clientboundGameProfilePacket.getGameProfile();
 		this.connection.send(new ServerboundLoginAcknowledgedPacket());
 		this.connection
@@ -194,5 +209,21 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 
 	public void setMinigameName(String string) {
 		this.minigameName = string;
+	}
+
+	@Environment(EnvType.CLIENT)
+	static enum State {
+		CONNECTING(Component.translatable("connect.connecting"), Set.of()),
+		AUTHORIZING(Component.translatable("connect.authorizing"), Set.of(CONNECTING)),
+		ENCRYPTING(Component.translatable("connect.encrypting"), Set.of(AUTHORIZING)),
+		JOINING(Component.translatable("connect.joining"), Set.of(ENCRYPTING, CONNECTING));
+
+		final Component message;
+		final Set<ClientHandshakePacketListenerImpl.State> fromStates;
+
+		private State(Component component, Set<ClientHandshakePacketListenerImpl.State> set) {
+			this.message = component;
+			this.fromStates = set;
+		}
 	}
 }

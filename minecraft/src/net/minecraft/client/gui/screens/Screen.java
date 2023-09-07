@@ -516,12 +516,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 			if (list.size() > 1) {
 				narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.screen", narratableSearchResult.index + 1, list.size()));
 				if (narratableSearchResult.priority == NarratableEntry.NarrationPriority.FOCUSED) {
-					narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
+					narrationElementOutput.add(NarratedElementType.USAGE, this.getUsageNarration());
 				}
 			}
 
 			narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
 		}
+	}
+
+	protected Component getUsageNarration() {
+		return Component.translatable("narration.component_list.usage");
 	}
 
 	@Nullable

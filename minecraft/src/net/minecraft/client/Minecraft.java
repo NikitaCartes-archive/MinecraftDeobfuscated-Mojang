@@ -810,6 +810,23 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					)
 			);
 		this.searchRegistry.register(SearchRegistry.CREATIVE_TAGS, list -> new IdSearchTree(itemStack -> itemStack.getTags().map(TagKey::location), list));
+		this.searchRegistry
+			.register(
+				SearchRegistry.RECIPE_COLLECTIONS,
+				list -> new FullTextSearchTree(
+						recipeCollection -> recipeCollection.getRecipes()
+								.stream()
+								.flatMap(
+									recipeHolder -> recipeHolder.value().getResultItem(recipeCollection.registryAccess()).getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()
+								)
+								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
+								.filter(string -> !string.isEmpty()),
+						recipeCollection -> recipeCollection.getRecipes()
+								.stream()
+								.map(recipeHolder -> BuiltInRegistries.ITEM.getKey(recipeHolder.value().getResultItem(recipeCollection.registryAccess()).getItem())),
+						list
+					)
+			);
 		CreativeModeTabs.searchTab().setSearchTreeBuilder(list -> {
 			this.populateSearchTree(SearchRegistry.CREATIVE_NAMES, list);
 			this.populateSearchTree(SearchRegistry.CREATIVE_TAGS, list);
@@ -2372,6 +2389,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			systemReport.setDetail("Current Language", (Supplier<String>)(() -> languageManager.getSelected()));
 		}
 
+		systemReport.setDetail("Locale", String.valueOf(Locale.getDefault()));
 		systemReport.setDetail("CPU", GlUtil::getCpuInfo);
 		return systemReport;
 	}

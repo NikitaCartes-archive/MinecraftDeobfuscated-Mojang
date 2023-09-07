@@ -413,31 +413,6 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 	}
 
 	@Override
-	public double lerpTargetX() {
-		return this.getX();
-	}
-
-	@Override
-	public double lerpTargetY() {
-		return this.getY();
-	}
-
-	@Override
-	public double lerpTargetZ() {
-		return this.getZ();
-	}
-
-	@Override
-	public float lerpTargetXRot() {
-		return this.getXRot();
-	}
-
-	@Override
-	public float lerpTargetYRot() {
-		return this.getYRot();
-	}
-
-	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isClosed()) {
 			Entity entity = damageSource.getDirectEntity();

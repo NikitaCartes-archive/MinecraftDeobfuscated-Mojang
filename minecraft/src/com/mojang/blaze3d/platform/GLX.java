@@ -21,7 +21,9 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
+import org.lwjgl.glfw.GLFWNativeGLX;
 import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.opengl.GL;
 import org.slf4j.Logger;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -57,6 +59,7 @@ public class GLX {
 
 	public static LongSupplier _initGlfw() {
 		RenderSystem.assertInInitPhase();
+		GLFWNativeGLX.setPath(GL.getFunctionProvider());
 		Window.checkGlfwError((integer, stringx) -> {
 			throw new IllegalStateException(String.format(Locale.ROOT, "GLFW error before init: [0x%X]%s", integer, stringx));
 		});

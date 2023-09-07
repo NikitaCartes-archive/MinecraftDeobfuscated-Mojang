@@ -16,8 +16,6 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 
 	void handleAddObjective(ClientboundSetObjectivePacket clientboundSetObjectivePacket);
 
-	void handleAddPlayer(ClientboundAddPlayerPacket clientboundAddPlayerPacket);
-
 	void handleAnimate(ClientboundAnimatePacket clientboundAnimatePacket);
 
 	void handleHurtAnimation(ClientboundHurtAnimationPacket clientboundHurtAnimationPacket);

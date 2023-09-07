@@ -20,6 +20,7 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -116,7 +117,9 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 				(double)endSpike.getCenterX() + 0.5, (double)(endSpike.getHeight() + 1), (double)endSpike.getCenterZ() + 0.5, randomSource.nextFloat() * 360.0F, 0.0F
 			);
 			serverLevelAccessor.addFreshEntity(endCrystal);
-			this.setBlock(serverLevelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
+			BlockPos blockPosx = endCrystal.blockPosition();
+			this.setBlock(serverLevelAccessor, blockPosx.below(), Blocks.BEDROCK.defaultBlockState());
+			this.setBlock(serverLevelAccessor, blockPosx, FireBlock.getState(serverLevelAccessor, blockPosx));
 		}
 	}
 

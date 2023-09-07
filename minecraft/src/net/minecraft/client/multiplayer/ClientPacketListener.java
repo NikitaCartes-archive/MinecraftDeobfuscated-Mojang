@@ -58,6 +58,7 @@ import net.minecraft.client.resources.sounds.BeeSoundInstance;
 import net.minecraft.client.resources.sounds.GuardianAttackSoundInstance;
 import net.minecraft.client.resources.sounds.MinecartSoundInstance;
 import net.minecraft.client.resources.sounds.SnifferSoundInstance;
+import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ArgumentSignatures;
@@ -107,7 +108,6 @@ import net.minecraft.network.protocol.common.custom.WorldGenAttemptDebugPayload;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
@@ -398,9 +398,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 		this.minecraft.debugRenderer.clear();
 		this.minecraft.player.resetPos();
-		int i = clientboundLoginPacket.playerId();
-		this.minecraft.player.setId(i);
-		this.level.addPlayer(i, this.minecraft.player);
+		this.minecraft.player.setId(clientboundLoginPacket.playerId());
+		this.level.addEntity(this.minecraft.player);
 		this.minecraft.player.input = new KeyboardInput(this.minecraft.options);
 		this.minecraft.gameMode.adjustPlayer(this.minecraft.player);
 		this.minecraft.cameraEntity = this.minecraft.player;
@@ -426,28 +425,42 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleAddEntity(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundAddEntityPacket, this, this.minecraft);
-		EntityType<?> entityType = clientboundAddEntityPacket.getType();
-		Entity entity = entityType.create(this.level);
+		Entity entity = this.createEntityFromPacket(clientboundAddEntityPacket);
 		if (entity != null) {
 			entity.recreateFromPacket(clientboundAddEntityPacket);
-			int i = clientboundAddEntityPacket.getId();
-			this.level.putNonPlayerEntity(i, entity);
+			this.level.addEntity(entity);
 			this.postAddEntitySoundInstance(entity);
 		} else {
-			LOGGER.warn("Skipping Entity with id {}", entityType);
+			LOGGER.warn("Skipping Entity with id {}", clientboundAddEntityPacket.getType());
+		}
+	}
+
+	@Nullable
+	private Entity createEntityFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+		EntityType<?> entityType = clientboundAddEntityPacket.getType();
+		if (entityType == EntityType.PLAYER) {
+			PlayerInfo playerInfo = this.getPlayerInfo(clientboundAddEntityPacket.getUUID());
+			if (playerInfo == null) {
+				LOGGER.warn("Server attempted to add player prior to sending player info (Player id {})", clientboundAddEntityPacket.getUUID());
+				return null;
+			} else {
+				return new RemotePlayer(this.level, playerInfo.getProfile());
+			}
+		} else {
+			return entityType.create(this.level);
 		}
 	}
 
 	private void postAddEntitySoundInstance(Entity entity) {
-		if (entity instanceof AbstractMinecart) {
-			this.minecraft.getSoundManager().play(new MinecartSoundInstance((AbstractMinecart)entity));
-		} else if (entity instanceof Bee) {
-			boolean bl = ((Bee)entity).isAngry();
+		if (entity instanceof AbstractMinecart abstractMinecart) {
+			this.minecraft.getSoundManager().play(new MinecartSoundInstance(abstractMinecart));
+		} else if (entity instanceof Bee bee) {
+			boolean bl = bee.isAngry();
 			BeeSoundInstance beeSoundInstance;
 			if (bl) {
-				beeSoundInstance = new BeeAggressiveSoundInstance((Bee)entity);
+				beeSoundInstance = new BeeAggressiveSoundInstance(bee);
 			} else {
-				beeSoundInstance = new BeeFlyingSoundInstance((Bee)entity);
+				beeSoundInstance = new BeeFlyingSoundInstance(bee);
 			}
 
 			this.minecraft.getSoundManager().queueTickingSound(beeSoundInstance);
@@ -465,7 +478,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		entity.setYRot(0.0F);
 		entity.setXRot(0.0F);
 		entity.setId(clientboundAddExperienceOrbPacket.getId());
-		this.level.putNonPlayerEntity(clientboundAddExperienceOrbPacket.getId(), entity);
+		this.level.addEntity(entity);
 	}
 
 	@Override
@@ -487,28 +500,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		Entity entity = this.level.getEntity(clientboundSetEntityDataPacket.id());
 		if (entity != null) {
 			entity.getEntityData().assignValues(clientboundSetEntityDataPacket.packedItems());
-		}
-	}
-
-	@Override
-	public void handleAddPlayer(ClientboundAddPlayerPacket clientboundAddPlayerPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundAddPlayerPacket, this, this.minecraft);
-		PlayerInfo playerInfo = this.getPlayerInfo(clientboundAddPlayerPacket.getPlayerId());
-		if (playerInfo == null) {
-			LOGGER.warn("Server attempted to add player prior to sending player info (Player id {})", clientboundAddPlayerPacket.getPlayerId());
-		} else {
-			double d = clientboundAddPlayerPacket.getX();
-			double e = clientboundAddPlayerPacket.getY();
-			double f = clientboundAddPlayerPacket.getZ();
-			float g = (float)(clientboundAddPlayerPacket.getyRot() * 360) / 256.0F;
-			float h = (float)(clientboundAddPlayerPacket.getxRot() * 360) / 256.0F;
-			int i = clientboundAddPlayerPacket.getEntityId();
-			RemotePlayer remotePlayer = new RemotePlayer(this.minecraft.level, playerInfo.getProfile());
-			remotePlayer.setId(i);
-			remotePlayer.syncPacketPositionCodec(d, e, f);
-			remotePlayer.absMoveTo(d, e, f, g, h);
-			remotePlayer.setOldPosAndRot();
-			this.level.addPlayer(i, remotePlayer);
 		}
 	}
 
@@ -1058,7 +1049,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		ResourceKey<Level> resourceKey = commonPlayerSpawnInfo.dimension();
 		Holder<DimensionType> holder = this.registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(commonPlayerSpawnInfo.dimensionType());
 		LocalPlayer localPlayer = this.minecraft.player;
-		int i = localPlayer.getId();
 		if (resourceKey != localPlayer.level().dimension()) {
 			Scoreboard scoreboard = this.level.getScoreboard();
 			Map<String, MapItemSavedData> map = this.level.getAllMapData();
@@ -1098,7 +1088,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook());
 		}
 
-		localPlayer2.setId(i);
+		localPlayer2.setId(localPlayer.getId());
 		this.minecraft.player = localPlayer2;
 		if (resourceKey != localPlayer.level().dimension()) {
 			this.minecraft.getMusicManager().stopPlaying();
@@ -1117,7 +1107,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		}
 
 		localPlayer2.resetPos();
-		this.level.addPlayer(i, localPlayer2);
+		this.level.addEntity(localPlayer2);
 		localPlayer2.setYRot(-180.0F);
 		localPlayer2.input = new KeyboardInput(this.minecraft.options);
 		this.minecraft.gameMode.adjustPlayer(localPlayer2);
@@ -1444,6 +1434,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.recipeManager.replaceRecipes(clientboundUpdateRecipesPacket.getRecipes());
 		ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
 		clientRecipeBook.setupCollections(this.recipeManager.getRecipes(), this.minecraft.level.registryAccess());
+		this.minecraft.populateSearchTree(SearchRegistry.RECIPE_COLLECTIONS, clientRecipeBook.getCollections());
 	}
 
 	@Override
