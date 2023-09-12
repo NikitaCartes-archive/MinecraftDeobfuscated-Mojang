@@ -10,33 +10,30 @@ import org.apache.commons.lang3.ArrayUtils;
 public class IntArrayTag extends CollectionTag<IntTag> {
 	private static final int SELF_SIZE_IN_BYTES = 24;
 	public static final TagType<IntArrayTag> TYPE = new TagType.VariableSize<IntArrayTag>() {
-		public IntArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.accountBytes(24L);
-			int j = dataInput.readInt();
-			nbtAccounter.accountBytes(4L * (long)j);
-			int[] is = new int[j];
-
-			for (int k = 0; k < j; k++) {
-				is[k] = dataInput.readInt();
-			}
-
-			return new IntArrayTag(is);
+		public IntArrayTag load(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			return new IntArrayTag(readAccounted(dataInput, nbtAccounter));
 		}
 
 		@Override
-		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
+			return streamTagVisitor.visit(readAccounted(dataInput, nbtAccounter));
+		}
+
+		private static int[] readAccounted(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBytes(24L);
 			int i = dataInput.readInt();
+			nbtAccounter.accountBytes(4L * (long)i);
 			int[] is = new int[i];
 
 			for (int j = 0; j < i; j++) {
 				is[j] = dataInput.readInt();
 			}
 
-			return streamTagVisitor.visit(is);
+			return is;
 		}
 
 		@Override
-		public void skip(DataInput dataInput) throws IOException {
+		public void skip(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			dataInput.skipBytes(dataInput.readInt() * 4);
 		}
 

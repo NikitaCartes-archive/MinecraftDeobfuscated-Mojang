@@ -272,7 +272,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
@@ -1646,7 +1645,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundServerDataPacket, this, this.minecraft);
 		if (this.serverData != null) {
 			this.serverData.motd = clientboundServerDataPacket.getMotd();
-			clientboundServerDataPacket.getIconBytes().ifPresent(this.serverData::setIconBytes);
+			clientboundServerDataPacket.getIconBytes().map(ServerData::validateIcon).ifPresent(this.serverData::setIconBytes);
 			this.serverData.setEnforcesSecureChat(clientboundServerDataPacket.enforcesSecureChat());
 			ServerList.saveSingleServer(this.serverData);
 			if (!this.seenInsecureChatWarning && !clientboundServerDataPacket.enforcesSecureChat()) {
@@ -2186,7 +2185,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundMerchantOffersPacket, this, this.minecraft);
 		AbstractContainerMenu abstractContainerMenu = this.minecraft.player.containerMenu;
 		if (clientboundMerchantOffersPacket.getContainerId() == abstractContainerMenu.containerId && abstractContainerMenu instanceof MerchantMenu merchantMenu) {
-			merchantMenu.setOffers(new MerchantOffers(clientboundMerchantOffersPacket.getOffers().createTag()));
+			merchantMenu.setOffers(clientboundMerchantOffersPacket.getOffers());
 			merchantMenu.setXp(clientboundMerchantOffersPacket.getVillagerXp());
 			merchantMenu.setMerchantLevel(clientboundMerchantOffersPacket.getVillagerLevel());
 			merchantMenu.setShowProgressBar(clientboundMerchantOffersPacket.showProgress());

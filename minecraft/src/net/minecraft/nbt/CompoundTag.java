@@ -28,31 +28,55 @@ public class CompoundTag implements Tag {
 	private static final int SELF_SIZE_IN_BYTES = 48;
 	private static final int MAP_ENTRY_SIZE_IN_BYTES = 32;
 	public static final TagType<CompoundTag> TYPE = new TagType.VariableSize<CompoundTag>() {
-		public CompoundTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.accountBytes(48L);
-			if (i > 512) {
-				throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
-			} else {
-				Map<String, Tag> map = Maps.<String, Tag>newHashMap();
+		public CompoundTag load(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.pushDepth();
 
-				byte b;
-				while ((b = CompoundTag.readNamedTagType(dataInput, nbtAccounter)) != 0) {
-					String string = CompoundTag.readNamedTagName(dataInput, nbtAccounter);
-					nbtAccounter.accountBytes((long)(28 + 2 * string.length()));
-					Tag tag = CompoundTag.readNamedTagData(TagTypes.getType(b), string, dataInput, i + 1, nbtAccounter);
-					if (map.put(string, tag) == null) {
-						nbtAccounter.accountBytes(36L);
-					}
-				}
-
-				return new CompoundTag(map);
+			CompoundTag var3;
+			try {
+				var3 = loadCompound(dataInput, nbtAccounter);
+			} finally {
+				nbtAccounter.popDepth();
 			}
+
+			return var3;
+		}
+
+		private static CompoundTag loadCompound(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBytes(48L);
+			Map<String, Tag> map = Maps.<String, Tag>newHashMap();
+
+			byte b;
+			while ((b = dataInput.readByte()) != 0) {
+				String string = dataInput.readUTF();
+				nbtAccounter.accountBytes(28L + 2L * (long)string.length());
+				Tag tag = CompoundTag.readNamedTagData(TagTypes.getType(b), string, dataInput, nbtAccounter);
+				if (map.put(string, tag) == null) {
+					nbtAccounter.accountBytes(36L);
+				}
+			}
+
+			return new CompoundTag(map);
 		}
 
 		@Override
-		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.pushDepth();
+
+			StreamTagVisitor.ValueResult var4;
+			try {
+				var4 = parseCompound(dataInput, streamTagVisitor, nbtAccounter);
+			} finally {
+				nbtAccounter.popDepth();
+			}
+
+			return var4;
+		}
+
+		private static StreamTagVisitor.ValueResult parseCompound(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBytes(48L);
+
 			byte b;
-			label33:
+			label35:
 			while ((b = dataInput.readByte()) != 0) {
 				TagType<?> tagType = TagTypes.getType(b);
 				switch (streamTagVisitor.visitEntry(tagType)) {
@@ -60,25 +84,27 @@ public class CompoundTag implements Tag {
 						return StreamTagVisitor.ValueResult.HALT;
 					case BREAK:
 						StringTag.skipString(dataInput);
-						tagType.skip(dataInput);
-						break label33;
+						tagType.skip(dataInput, nbtAccounter);
+						break label35;
 					case SKIP:
 						StringTag.skipString(dataInput);
-						tagType.skip(dataInput);
+						tagType.skip(dataInput, nbtAccounter);
 						break;
 					default:
 						String string = dataInput.readUTF();
+						nbtAccounter.accountBytes(28L + 2L * (long)string.length());
 						switch (streamTagVisitor.visitEntry(tagType, string)) {
 							case HALT:
 								return StreamTagVisitor.ValueResult.HALT;
 							case BREAK:
-								tagType.skip(dataInput);
-								break label33;
+								tagType.skip(dataInput, nbtAccounter);
+								break label35;
 							case SKIP:
-								tagType.skip(dataInput);
+								tagType.skip(dataInput, nbtAccounter);
 								break;
 							default:
-								switch (tagType.parse(dataInput, streamTagVisitor)) {
+								nbtAccounter.accountBytes(36L);
+								switch (tagType.parse(dataInput, streamTagVisitor, nbtAccounter)) {
 									case HALT:
 										return StreamTagVisitor.ValueResult.HALT;
 									case BREAK:
@@ -90,7 +116,7 @@ public class CompoundTag implements Tag {
 			if (b != 0) {
 				while ((b = dataInput.readByte()) != 0) {
 					StringTag.skipString(dataInput);
-					TagTypes.getType(b).skip(dataInput);
+					TagTypes.getType(b).skip(dataInput, nbtAccounter);
 				}
 			}
 
@@ -98,11 +124,28 @@ public class CompoundTag implements Tag {
 		}
 
 		@Override
-		public void skip(DataInput dataInput) throws IOException {
+		public void skip(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.pushDepth();
+
+			try {
+				TagType.VariableSize.super.skip(dataInput, i, nbtAccounter);
+			} finally {
+				nbtAccounter.popDepth();
+			}
+		}
+
+		@Override
+		public void skip(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.pushDepth();
+
 			byte b;
-			while ((b = dataInput.readByte()) != 0) {
-				StringTag.skipString(dataInput);
-				TagTypes.getType(b).skip(dataInput);
+			try {
+				while ((b = dataInput.readByte()) != 0) {
+					StringTag.skipString(dataInput);
+					TagTypes.getType(b).skip(dataInput, nbtAccounter);
+				}
+			} finally {
+				nbtAccounter.popDepth();
 			}
 		}
 
@@ -453,19 +496,11 @@ public class CompoundTag implements Tag {
 		}
 	}
 
-	static byte readNamedTagType(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
-		return dataInput.readByte();
-	}
-
-	static String readNamedTagName(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
-		return dataInput.readUTF();
-	}
-
-	static Tag readNamedTagData(TagType<?> tagType, String string, DataInput dataInput, int i, NbtAccounter nbtAccounter) {
+	static Tag readNamedTagData(TagType<?> tagType, String string, DataInput dataInput, NbtAccounter nbtAccounter) {
 		try {
-			return tagType.load(dataInput, i, nbtAccounter);
-		} catch (IOException var8) {
-			CrashReport crashReport = CrashReport.forThrowable(var8, "Loading NBT data");
+			return tagType.load(dataInput, nbtAccounter);
+		} catch (IOException var7) {
+			CrashReport crashReport = CrashReport.forThrowable(var7, "Loading NBT data");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("NBT Tag");
 			crashReportCategory.setDetail("Tag name", string);
 			crashReportCategory.setDetail("Tag type", tagType.getName());

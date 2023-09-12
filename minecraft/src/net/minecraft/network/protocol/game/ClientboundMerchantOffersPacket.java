@@ -14,7 +14,7 @@ public class ClientboundMerchantOffersPacket implements Packet<ClientGamePacketL
 
 	public ClientboundMerchantOffersPacket(int i, MerchantOffers merchantOffers, int j, int k, boolean bl, boolean bl2) {
 		this.containerId = i;
-		this.offers = merchantOffers;
+		this.offers = merchantOffers.copy();
 		this.villagerLevel = j;
 		this.villagerXp = k;
 		this.showProgress = bl;

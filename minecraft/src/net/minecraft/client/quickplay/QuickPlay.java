@@ -7,7 +7,6 @@ import com.mojang.realmsclient.dto.RealmsServerList;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.util.task.GetServerDetailsTask;
-import java.util.concurrent.locks.ReentrantLock;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -95,7 +94,7 @@ public class QuickPlay {
 			minecraft.setScreen(new DisconnectedScreen(screen, ERROR_TITLE, REALM_PERMISSION, TO_REALMS_LIST));
 		} else {
 			TitleScreen titleScreen = new TitleScreen();
-			GetServerDetailsTask getServerDetailsTask = new GetServerDetailsTask(new RealmsMainScreen(titleScreen), titleScreen, realmsServer, new ReentrantLock());
+			GetServerDetailsTask getServerDetailsTask = new GetServerDetailsTask(titleScreen, realmsServer);
 			minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(titleScreen, getServerDetailsTask));
 		}
 	}

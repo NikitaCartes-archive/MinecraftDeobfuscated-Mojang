@@ -96,7 +96,7 @@ public class ServerStatusPinger {
 						}, () -> serverData.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY));
 						serverStatus.favicon().ifPresent(favicon -> {
 							if (!Arrays.equals(favicon.iconBytes(), serverData.getIconBytes())) {
-								serverData.setIconBytes(favicon.iconBytes());
+								serverData.setIconBytes(ServerData.validateIcon(favicon.iconBytes()));
 								runnable.run();
 							}
 						});

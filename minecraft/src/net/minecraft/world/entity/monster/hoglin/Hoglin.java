@@ -83,7 +83,8 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS,
 		MemoryModuleType.NEAREST_VISIBLE_ADULT,
 		MemoryModuleType.NEAREST_REPELLENT,
-		MemoryModuleType.PACIFIED
+		MemoryModuleType.PACIFIED,
+		MemoryModuleType.IS_PANICKING
 	);
 
 	public Hoglin(EntityType<? extends Hoglin> entityType, Level level) {

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -32,6 +33,8 @@ public class TextureAtlas extends AbstractTexture implements Dumpable, Tickable 
 	private List<SpriteContents> sprites = List.of();
 	private List<TextureAtlasSprite.Ticker> animatedTextures = List.of();
 	private Map<ResourceLocation, TextureAtlasSprite> texturesByName = Map.of();
+	@Nullable
+	private TextureAtlasSprite missingSprite;
 	private final ResourceLocation location;
 	private final int maxSupportedTextureSize;
 	private int width;
@@ -55,30 +58,35 @@ public class TextureAtlas extends AbstractTexture implements Dumpable, Tickable 
 		this.mipLevel = preparations.mipLevel();
 		this.clearTextureData();
 		this.texturesByName = Map.copyOf(preparations.regions());
-		List<SpriteContents> list = new ArrayList();
-		List<TextureAtlasSprite.Ticker> list2 = new ArrayList();
+		this.missingSprite = (TextureAtlasSprite)this.texturesByName.get(MissingTextureAtlasSprite.getLocation());
+		if (this.missingSprite == null) {
+			throw new IllegalStateException("Atlas '" + this.location + "' (" + this.texturesByName.size() + " sprites) has no missing texture sprite");
+		} else {
+			List<SpriteContents> list = new ArrayList();
+			List<TextureAtlasSprite.Ticker> list2 = new ArrayList();
 
-		for (TextureAtlasSprite textureAtlasSprite : preparations.regions().values()) {
-			list.add(textureAtlasSprite.contents());
+			for (TextureAtlasSprite textureAtlasSprite : preparations.regions().values()) {
+				list.add(textureAtlasSprite.contents());
 
-			try {
-				textureAtlasSprite.uploadFirstFrame();
-			} catch (Throwable var9) {
-				CrashReport crashReport = CrashReport.forThrowable(var9, "Stitching texture atlas");
-				CrashReportCategory crashReportCategory = crashReport.addCategory("Texture being stitched together");
-				crashReportCategory.setDetail("Atlas path", this.location);
-				crashReportCategory.setDetail("Sprite", textureAtlasSprite);
-				throw new ReportedException(crashReport);
+				try {
+					textureAtlasSprite.uploadFirstFrame();
+				} catch (Throwable var9) {
+					CrashReport crashReport = CrashReport.forThrowable(var9, "Stitching texture atlas");
+					CrashReportCategory crashReportCategory = crashReport.addCategory("Texture being stitched together");
+					crashReportCategory.setDetail("Atlas path", this.location);
+					crashReportCategory.setDetail("Sprite", textureAtlasSprite);
+					throw new ReportedException(crashReport);
+				}
+
+				TextureAtlasSprite.Ticker ticker = textureAtlasSprite.createTicker();
+				if (ticker != null) {
+					list2.add(ticker);
+				}
 			}
 
-			TextureAtlasSprite.Ticker ticker = textureAtlasSprite.createTicker();
-			if (ticker != null) {
-				list2.add(ticker);
-			}
+			this.sprites = List.copyOf(list);
+			this.animatedTextures = List.copyOf(list2);
 		}
-
-		this.sprites = List.copyOf(list);
-		this.animatedTextures = List.copyOf(list2);
 	}
 
 	@Override
@@ -147,8 +155,12 @@ public class TextureAtlas extends AbstractTexture implements Dumpable, Tickable 
 	}
 
 	public TextureAtlasSprite getSprite(ResourceLocation resourceLocation) {
-		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)this.texturesByName.get(resourceLocation);
-		return textureAtlasSprite == null ? (TextureAtlasSprite)this.texturesByName.get(MissingTextureAtlasSprite.getLocation()) : textureAtlasSprite;
+		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)this.texturesByName.getOrDefault(resourceLocation, this.missingSprite);
+		if (textureAtlasSprite == null) {
+			throw new IllegalStateException("Tried to lookup sprite, but atlas is not initialized");
+		} else {
+			return textureAtlasSprite;
+		}
 	}
 
 	public void clearTextureData() {
@@ -157,6 +169,7 @@ public class TextureAtlas extends AbstractTexture implements Dumpable, Tickable 
 		this.sprites = List.of();
 		this.animatedTextures = List.of();
 		this.texturesByName = Map.of();
+		this.missingSprite = null;
 	}
 
 	public ResourceLocation location() {

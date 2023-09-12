@@ -11,33 +11,30 @@ import org.apache.commons.lang3.ArrayUtils;
 public class LongArrayTag extends CollectionTag<LongTag> {
 	private static final int SELF_SIZE_IN_BYTES = 24;
 	public static final TagType<LongArrayTag> TYPE = new TagType.VariableSize<LongArrayTag>() {
-		public LongArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.accountBytes(24L);
-			int j = dataInput.readInt();
-			nbtAccounter.accountBytes(8L * (long)j);
-			long[] ls = new long[j];
-
-			for (int k = 0; k < j; k++) {
-				ls[k] = dataInput.readLong();
-			}
-
-			return new LongArrayTag(ls);
+		public LongArrayTag load(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			return new LongArrayTag(readAccounted(dataInput, nbtAccounter));
 		}
 
 		@Override
-		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
+			return streamTagVisitor.visit(readAccounted(dataInput, nbtAccounter));
+		}
+
+		private static long[] readAccounted(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBytes(24L);
 			int i = dataInput.readInt();
+			nbtAccounter.accountBytes(8L * (long)i);
 			long[] ls = new long[i];
 
 			for (int j = 0; j < i; j++) {
 				ls[j] = dataInput.readLong();
 			}
 
-			return streamTagVisitor.visit(ls);
+			return ls;
 		}
 
 		@Override
-		public void skip(DataInput dataInput) throws IOException {
+		public void skip(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			dataInput.skipBytes(dataInput.readInt() * 8);
 		}
 

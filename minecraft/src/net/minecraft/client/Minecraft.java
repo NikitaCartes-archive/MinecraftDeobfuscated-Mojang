@@ -926,7 +926,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 								completableFuture.complete(null);
 								this.onResourceLoadFinished(gameLoadCookie);
 							}),
-						true
+						!bl
 					)
 				);
 				return completableFuture;

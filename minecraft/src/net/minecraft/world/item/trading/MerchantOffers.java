@@ -89,4 +89,14 @@ public class MerchantOffers extends ArrayList<MerchantOffer> {
 		compoundTag.put("Recipes", listTag);
 		return compoundTag;
 	}
+
+	public MerchantOffers copy() {
+		MerchantOffers merchantOffers = new MerchantOffers(this.size());
+
+		for (MerchantOffer merchantOffer : this) {
+			merchantOffers.add(merchantOffer.copy());
+		}
+
+		return merchantOffers;
+	}
 }

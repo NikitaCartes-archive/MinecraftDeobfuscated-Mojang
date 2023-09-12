@@ -67,6 +67,19 @@ public class MerchantOffer {
 		this.demand = l;
 	}
 
+	private MerchantOffer(MerchantOffer merchantOffer) {
+		this.baseCostA = merchantOffer.baseCostA.copy();
+		this.costB = merchantOffer.costB.copy();
+		this.result = merchantOffer.result.copy();
+		this.uses = merchantOffer.uses;
+		this.maxUses = merchantOffer.maxUses;
+		this.rewardExp = merchantOffer.rewardExp;
+		this.specialPriceDiff = merchantOffer.specialPriceDiff;
+		this.demand = merchantOffer.demand;
+		this.priceMultiplier = merchantOffer.priceMultiplier;
+		this.xp = merchantOffer.xp;
+	}
+
 	public ItemStack getBaseCostA() {
 		return this.baseCostA;
 	}
@@ -204,5 +217,9 @@ public class MerchantOffer {
 
 			return true;
 		}
+	}
+
+	public MerchantOffer copy() {
+		return new MerchantOffer(this);
 	}
 }

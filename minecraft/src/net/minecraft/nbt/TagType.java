@@ -4,25 +4,25 @@ import java.io.DataInput;
 import java.io.IOException;
 
 public interface TagType<T extends Tag> {
-	T load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException;
+	T load(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException;
 
-	StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException;
+	StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException;
 
-	default void parseRoot(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+	default void parseRoot(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
 		switch (streamTagVisitor.visitRootEntry(this)) {
 			case CONTINUE:
-				this.parse(dataInput, streamTagVisitor);
+				this.parse(dataInput, streamTagVisitor, nbtAccounter);
 			case HALT:
 			default:
 				break;
 			case BREAK:
-				this.skip(dataInput);
+				this.skip(dataInput, nbtAccounter);
 		}
 	}
 
-	void skip(DataInput dataInput, int i) throws IOException;
+	void skip(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException;
 
-	void skip(DataInput dataInput) throws IOException;
+	void skip(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException;
 
 	default boolean isValue() {
 		return false;
@@ -38,22 +38,22 @@ public interface TagType<T extends Tag> {
 				return new IOException("Invalid tag id: " + i);
 			}
 
-			public EndTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			public EndTag load(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 				throw this.createException();
 			}
 
 			@Override
-			public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+			public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
 				throw this.createException();
 			}
 
 			@Override
-			public void skip(DataInput dataInput, int i) throws IOException {
+			public void skip(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 				throw this.createException();
 			}
 
 			@Override
-			public void skip(DataInput dataInput) throws IOException {
+			public void skip(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 				throw this.createException();
 			}
 
@@ -71,12 +71,12 @@ public interface TagType<T extends Tag> {
 
 	public interface StaticSize<T extends Tag> extends TagType<T> {
 		@Override
-		default void skip(DataInput dataInput) throws IOException {
+		default void skip(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			dataInput.skipBytes(this.size());
 		}
 
 		@Override
-		default void skip(DataInput dataInput, int i) throws IOException {
+		default void skip(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			dataInput.skipBytes(this.size() * i);
 		}
 
@@ -85,9 +85,9 @@ public interface TagType<T extends Tag> {
 
 	public interface VariableSize<T extends Tag> extends TagType<T> {
 		@Override
-		default void skip(DataInput dataInput, int i) throws IOException {
+		default void skip(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			for (int j = 0; j < i; j++) {
-				this.skip(dataInput);
+				this.skip(dataInput, nbtAccounter);
 			}
 		}
 	}

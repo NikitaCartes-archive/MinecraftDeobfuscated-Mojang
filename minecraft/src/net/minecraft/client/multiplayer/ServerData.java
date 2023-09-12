@@ -1,6 +1,7 @@
 package net.minecraft.client.multiplayer;
 
 import com.mojang.logging.LogUtils;
+import java.io.IOException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -11,11 +12,13 @@ import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
+import net.minecraft.util.PngInfo;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ServerData {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final int MAX_ICON_SIZE = 1024;
 	public String name;
 	public String ip;
 	public Component status;
@@ -68,7 +71,8 @@ public class ServerData {
 		ServerData serverData = new ServerData(compoundTag.getString("name"), compoundTag.getString("ip"), ServerData.Type.OTHER);
 		if (compoundTag.contains("icon", 8)) {
 			try {
-				serverData.setIconBytes(Base64.getDecoder().decode(compoundTag.getString("icon")));
+				byte[] bs = Base64.getDecoder().decode(compoundTag.getString("icon"));
+				serverData.setIconBytes(validateIcon(bs));
 			} catch (IllegalArgumentException var3) {
 				LOGGER.warn("Malformed base64 server icon", (Throwable)var3);
 			}
@@ -123,6 +127,22 @@ public class ServerData {
 		this.setResourcePackStatus(serverData.getResourcePackStatus());
 		this.type = serverData.type;
 		this.enforcesSecureChat = serverData.enforcesSecureChat;
+	}
+
+	@Nullable
+	public static byte[] validateIcon(@Nullable byte[] bs) {
+		if (bs != null) {
+			try {
+				PngInfo pngInfo = PngInfo.fromBytes(bs);
+				if (pngInfo.width() <= 1024 && pngInfo.height() <= 1024) {
+					return bs;
+				}
+			} catch (IOException var2) {
+				LOGGER.warn("Failed to decode server icon", (Throwable)var2);
+			}
+		}
+
+		return null;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -1,12 +1,10 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.util.task.GetServerDetailsTask;
-import java.util.concurrent.locks.ReentrantLock;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -27,14 +25,12 @@ public class RealmsTermsScreen extends RealmsScreen {
 	private static final Component TERMS_LINK_TEXT = CommonComponents.space()
 		.append(Component.translatable("mco.terms.sentence.2").withStyle(Style.EMPTY.withUnderlined(true)));
 	private final Screen lastScreen;
-	private final RealmsMainScreen mainScreen;
 	private final RealmsServer realmsServer;
 	private boolean onLink;
 
-	public RealmsTermsScreen(Screen screen, RealmsMainScreen realmsMainScreen, RealmsServer realmsServer) {
+	public RealmsTermsScreen(Screen screen, RealmsServer realmsServer) {
 		super(TITLE);
 		this.lastScreen = screen;
-		this.mainScreen = realmsMainScreen;
 		this.realmsServer = realmsServer;
 	}
 
@@ -66,10 +62,7 @@ public class RealmsTermsScreen extends RealmsScreen {
 
 		try {
 			realmsClient.agreeToTos();
-			this.minecraft
-				.setScreen(
-					new RealmsLongRunningMcoTaskScreen(this.lastScreen, new GetServerDetailsTask(this.mainScreen, this.lastScreen, this.realmsServer, new ReentrantLock()))
-				);
+			this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new GetServerDetailsTask(this.lastScreen, this.realmsServer)));
 		} catch (RealmsServiceException var3) {
 			LOGGER.error("Couldn't agree to TOS", (Throwable)var3);
 		}

@@ -1,6 +1,7 @@
 package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
@@ -8,7 +9,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class SingleItemRecipe implements Recipe<Container> {
@@ -64,6 +64,12 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 	}
 
 	public static class Serializer<T extends SingleItemRecipe> implements RecipeSerializer<T> {
+		private static final MapCodec<ItemStack> RESULT_CODEC = RecordCodecBuilder.mapCodec(
+			instance -> instance.group(
+						BuiltInRegistries.ITEM.byNameCodec().fieldOf("result").forGetter(ItemStack::getItem), Codec.INT.fieldOf("count").forGetter(ItemStack::getCount)
+					)
+					.apply(instance, ItemStack::new)
+		);
 		final SingleItemRecipe.Serializer.SingleItemMaker<T> factory;
 		private final Codec<T> codec;
 
@@ -73,8 +79,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 				instance -> instance.group(
 							ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(singleItemRecipe -> singleItemRecipe.group),
 							Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(singleItemRecipe -> singleItemRecipe.ingredient),
-							BuiltInRegistries.ITEM.byNameCodec().fieldOf("result").forGetter(singleItemRecipe -> singleItemRecipe.result.getItem()),
-							Codec.INT.fieldOf("count").forGetter(singleItemRecipe -> singleItemRecipe.result.getCount())
+							RESULT_CODEC.forGetter(singleItemRecipe -> singleItemRecipe.result)
 						)
 						.apply(instance, singleItemMaker::create)
 			);
@@ -89,7 +94,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 			String string = friendlyByteBuf.readUtf();
 			Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
 			ItemStack itemStack = friendlyByteBuf.readItem();
-			return this.factory.create(string, ingredient, itemStack.getItem(), itemStack.getCount());
+			return this.factory.create(string, ingredient, itemStack);
 		}
 
 		public void toNetwork(FriendlyByteBuf friendlyByteBuf, T singleItemRecipe) {
@@ -99,7 +104,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 		}
 
 		interface SingleItemMaker<T extends SingleItemRecipe> {
-			T create(String string, Ingredient ingredient, Item item, int i);
+			T create(String string, Ingredient ingredient, ItemStack itemStack);
 		}
 	}
 }

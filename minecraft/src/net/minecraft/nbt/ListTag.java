@@ -12,40 +12,64 @@ import java.util.Objects;
 public class ListTag extends CollectionTag<Tag> {
 	private static final int SELF_SIZE_IN_BYTES = 37;
 	public static final TagType<ListTag> TYPE = new TagType.VariableSize<ListTag>() {
-		public ListTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+		public ListTag load(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.pushDepth();
+
+			ListTag var3;
+			try {
+				var3 = loadList(dataInput, nbtAccounter);
+			} finally {
+				nbtAccounter.popDepth();
+			}
+
+			return var3;
+		}
+
+		private static ListTag loadList(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBytes(37L);
-			if (i > 512) {
-				throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
+			byte b = dataInput.readByte();
+			int i = dataInput.readInt();
+			if (b == 0 && i > 0) {
+				throw new RuntimeException("Missing type on ListTag");
 			} else {
-				byte b = dataInput.readByte();
-				int j = dataInput.readInt();
-				if (b == 0 && j > 0) {
-					throw new RuntimeException("Missing type on ListTag");
-				} else {
-					nbtAccounter.accountBytes(4L * (long)j);
-					TagType<?> tagType = TagTypes.getType(b);
-					List<Tag> list = Lists.<Tag>newArrayListWithCapacity(j);
+				nbtAccounter.accountBytes(4L * (long)i);
+				TagType<?> tagType = TagTypes.getType(b);
+				List<Tag> list = Lists.<Tag>newArrayListWithCapacity(i);
 
-					for (int k = 0; k < j; k++) {
-						list.add(tagType.load(dataInput, i + 1, nbtAccounter));
-					}
-
-					return new ListTag(list, b);
+				for (int j = 0; j < i; j++) {
+					list.add(tagType.load(dataInput, nbtAccounter));
 				}
+
+				return new ListTag(list, b);
 			}
 		}
 
 		@Override
-		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.pushDepth();
+
+			StreamTagVisitor.ValueResult var4;
+			try {
+				var4 = parseList(dataInput, streamTagVisitor, nbtAccounter);
+			} finally {
+				nbtAccounter.popDepth();
+			}
+
+			return var4;
+		}
+
+		private static StreamTagVisitor.ValueResult parseList(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBytes(37L);
 			TagType<?> tagType = TagTypes.getType(dataInput.readByte());
 			int i = dataInput.readInt();
 			switch (streamTagVisitor.visitList(tagType, i)) {
 				case HALT:
 					return StreamTagVisitor.ValueResult.HALT;
 				case BREAK:
-					tagType.skip(dataInput, i);
+					tagType.skip(dataInput, i, nbtAccounter);
 					return streamTagVisitor.visitContainerEnd();
 				default:
+					nbtAccounter.accountBytes(4L * (long)i);
 					int j = 0;
 
 					while (true) {
@@ -55,13 +79,13 @@ public class ListTag extends CollectionTag<Tag> {
 									case HALT:
 										return StreamTagVisitor.ValueResult.HALT;
 									case BREAK:
-										tagType.skip(dataInput);
+										tagType.skip(dataInput, nbtAccounter);
 										break;
 									case SKIP:
-										tagType.skip(dataInput);
+										tagType.skip(dataInput, nbtAccounter);
 										break label41;
 									default:
-										switch (tagType.parse(dataInput, streamTagVisitor)) {
+										switch (tagType.parse(dataInput, streamTagVisitor, nbtAccounter)) {
 											case HALT:
 												return StreamTagVisitor.ValueResult.HALT;
 											case BREAK:
@@ -74,7 +98,7 @@ public class ListTag extends CollectionTag<Tag> {
 
 							int k = i - 1 - j;
 							if (k > 0) {
-								tagType.skip(dataInput, k);
+								tagType.skip(dataInput, k, nbtAccounter);
 							}
 
 							return streamTagVisitor.visitContainerEnd();
@@ -86,10 +110,27 @@ public class ListTag extends CollectionTag<Tag> {
 		}
 
 		@Override
-		public void skip(DataInput dataInput) throws IOException {
-			TagType<?> tagType = TagTypes.getType(dataInput.readByte());
-			int i = dataInput.readInt();
-			tagType.skip(dataInput, i);
+		public void skip(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.pushDepth();
+
+			try {
+				TagType.VariableSize.super.skip(dataInput, i, nbtAccounter);
+			} finally {
+				nbtAccounter.popDepth();
+			}
+		}
+
+		@Override
+		public void skip(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.pushDepth();
+
+			try {
+				TagType<?> tagType = TagTypes.getType(dataInput.readByte());
+				int i = dataInput.readInt();
+				tagType.skip(dataInput, i, nbtAccounter);
+			} finally {
+				nbtAccounter.popDepth();
+			}
 		}
 
 		@Override

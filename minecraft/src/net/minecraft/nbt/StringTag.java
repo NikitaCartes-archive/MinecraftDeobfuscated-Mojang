@@ -10,20 +10,24 @@ import net.minecraft.Util;
 public class StringTag implements Tag {
 	private static final int SELF_SIZE_IN_BYTES = 36;
 	public static final TagType<StringTag> TYPE = new TagType.VariableSize<StringTag>() {
-		public StringTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+		public StringTag load(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			return StringTag.valueOf(readAccounted(dataInput, nbtAccounter));
+		}
+
+		@Override
+		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
+			return streamTagVisitor.visit(readAccounted(dataInput, nbtAccounter));
+		}
+
+		private static String readAccounted(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBytes(36L);
 			String string = dataInput.readUTF();
-			nbtAccounter.accountBytes((long)(2 * string.length()));
-			return StringTag.valueOf(string);
+			nbtAccounter.accountBytes(2L * (long)string.length());
+			return string;
 		}
 
 		@Override
-		public StreamTagVisitor.ValueResult parse(DataInput dataInput, StreamTagVisitor streamTagVisitor) throws IOException {
-			return streamTagVisitor.visit(dataInput.readUTF());
-		}
-
-		@Override
-		public void skip(DataInput dataInput) throws IOException {
+		public void skip(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			StringTag.skipString(dataInput);
 		}
 
