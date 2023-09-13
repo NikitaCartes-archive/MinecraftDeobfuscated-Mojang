@@ -1,6 +1,5 @@
 package net.minecraft.core.dispenser;
 
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -11,9 +10,9 @@ import net.minecraft.world.level.block.DispenserBlock;
 public abstract class AbstractProjectileDispenseBehavior extends DefaultDispenseItemBehavior {
 	@Override
 	public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-		Level level = blockSource.getLevel();
+		Level level = blockSource.level();
 		Position position = DispenserBlock.getDispensePosition(blockSource);
-		Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+		Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
 		Projectile projectile = this.getProjectile(level, position, itemStack);
 		projectile.shoot(
 			(double)direction.getStepX(), (double)((float)direction.getStepY() + 0.1F), (double)direction.getStepZ(), this.getPower(), this.getUncertainty()
@@ -25,7 +24,7 @@ public abstract class AbstractProjectileDispenseBehavior extends DefaultDispense
 
 	@Override
 	protected void playSound(BlockSource blockSource) {
-		blockSource.getLevel().levelEvent(1002, blockSource.getPos(), 0);
+		blockSource.level().levelEvent(1002, blockSource.pos(), 0);
 	}
 
 	protected abstract Projectile getProjectile(Level level, Position position, ItemStack itemStack);

@@ -1,8 +1,8 @@
 package net.minecraft.world.item;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.tags.BlockTags;
@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 
 public class MinecartItem extends Item {
 	private static final DispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior() {
@@ -22,12 +23,13 @@ public class MinecartItem extends Item {
 
 		@Override
 		public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-			Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-			Level level = blockSource.getLevel();
-			double d = blockSource.x() + (double)direction.getStepX() * 1.125;
-			double e = Math.floor(blockSource.y()) + (double)direction.getStepY();
-			double f = blockSource.z() + (double)direction.getStepZ() * 1.125;
-			BlockPos blockPos = blockSource.getPos().relative(direction);
+			Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+			Level level = blockSource.level();
+			Vec3 vec3 = blockSource.center();
+			double d = vec3.x() + (double)direction.getStepX() * 1.125;
+			double e = Math.floor(vec3.y()) + (double)direction.getStepY();
+			double f = vec3.z() + (double)direction.getStepZ() * 1.125;
+			BlockPos blockPos = blockSource.pos().relative(direction);
 			BlockState blockState = level.getBlockState(blockPos);
 			RailShape railShape = blockState.getBlock() instanceof BaseRailBlock
 				? blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty())
@@ -67,7 +69,7 @@ public class MinecartItem extends Item {
 
 		@Override
 		protected void playSound(BlockSource blockSource) {
-			blockSource.getLevel().levelEvent(1000, blockSource.getPos(), 0);
+			blockSource.level().levelEvent(1000, blockSource.pos(), 0);
 		}
 	};
 	final AbstractMinecart.Type type;

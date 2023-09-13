@@ -1,14 +1,13 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
-import net.minecraft.core.BlockSourceImpl;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
-import net.minecraft.core.PositionImpl;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +25,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.DropperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -36,8 +36,10 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
+import org.slf4j.Logger;
 
 public class DispenserBlock extends BaseEntityBlock {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
 	public static final BooleanProperty TRIGGERED = BlockStateProperties.TRIGGERED;
 	private static final Map<Item, DispenseItemBehavior> DISPENSER_REGISTRY = Util.make(
@@ -75,18 +77,22 @@ public class DispenserBlock extends BaseEntityBlock {
 		}
 	}
 
-	protected void dispenseFrom(ServerLevel serverLevel, BlockPos blockPos) {
-		BlockSourceImpl blockSourceImpl = new BlockSourceImpl(serverLevel, blockPos);
-		DispenserBlockEntity dispenserBlockEntity = blockSourceImpl.getEntity();
-		int i = dispenserBlockEntity.getRandomSlot(serverLevel.random);
-		if (i < 0) {
-			serverLevel.levelEvent(1001, blockPos, 0);
-			serverLevel.gameEvent(GameEvent.BLOCK_ACTIVATE, blockPos, GameEvent.Context.of(dispenserBlockEntity.getBlockState()));
+	protected void dispenseFrom(ServerLevel serverLevel, BlockState blockState, BlockPos blockPos) {
+		DispenserBlockEntity dispenserBlockEntity = (DispenserBlockEntity)serverLevel.getBlockEntity(blockPos, BlockEntityType.DISPENSER).orElse(null);
+		if (dispenserBlockEntity == null) {
+			LOGGER.warn("Ignoring dispensing attempt for Dispenser without matching block entity at {}", blockPos);
 		} else {
-			ItemStack itemStack = dispenserBlockEntity.getItem(i);
-			DispenseItemBehavior dispenseItemBehavior = this.getDispenseMethod(itemStack);
-			if (dispenseItemBehavior != DispenseItemBehavior.NOOP) {
-				dispenserBlockEntity.setItem(i, dispenseItemBehavior.dispense(blockSourceImpl, itemStack));
+			BlockSource blockSource = new BlockSource(serverLevel, blockPos, blockState, dispenserBlockEntity);
+			int i = dispenserBlockEntity.getRandomSlot(serverLevel.random);
+			if (i < 0) {
+				serverLevel.levelEvent(1001, blockPos, 0);
+				serverLevel.gameEvent(GameEvent.BLOCK_ACTIVATE, blockPos, GameEvent.Context.of(dispenserBlockEntity.getBlockState()));
+			} else {
+				ItemStack itemStack = dispenserBlockEntity.getItem(i);
+				DispenseItemBehavior dispenseItemBehavior = this.getDispenseMethod(itemStack);
+				if (dispenseItemBehavior != DispenseItemBehavior.NOOP) {
+					dispenserBlockEntity.setItem(i, dispenseItemBehavior.dispense(blockSource, itemStack));
+				}
 			}
 		}
 	}
@@ -109,7 +115,7 @@ public class DispenserBlock extends BaseEntityBlock {
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
-		this.dispenseFrom(serverLevel, blockPos);
+		this.dispenseFrom(serverLevel, blockState, blockPos);
 	}
 
 	@Override
@@ -146,11 +152,8 @@ public class DispenserBlock extends BaseEntityBlock {
 	}
 
 	public static Position getDispensePosition(BlockSource blockSource) {
-		Direction direction = blockSource.getBlockState().getValue(FACING);
-		double d = blockSource.x() + 0.7 * (double)direction.getStepX();
-		double e = blockSource.y() + 0.7 * (double)direction.getStepY();
-		double f = blockSource.z() + 0.7 * (double)direction.getStepZ();
-		return new PositionImpl(d, e, f);
+		Direction direction = blockSource.state().getValue(FACING);
+		return blockSource.center().add(0.7 * (double)direction.getStepX(), 0.7 * (double)direction.getStepY(), 0.7 * (double)direction.getStepZ());
 	}
 
 	@Override

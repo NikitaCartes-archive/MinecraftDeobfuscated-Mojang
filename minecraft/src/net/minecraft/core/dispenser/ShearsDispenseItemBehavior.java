@@ -1,7 +1,6 @@
 package net.minecraft.core.dispenser;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -20,9 +19,9 @@ import net.minecraft.world.phys.AABB;
 public class ShearsDispenseItemBehavior extends OptionalDispenseItemBehavior {
 	@Override
 	protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-		ServerLevel serverLevel = blockSource.getLevel();
+		ServerLevel serverLevel = blockSource.level();
 		if (!serverLevel.isClientSide()) {
-			BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+			BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 			this.setSuccess(tryShearBeehive(serverLevel, blockPos) || tryShearLivingEntity(serverLevel, blockPos));
 			if (this.isSuccess() && itemStack.hurt(1, serverLevel.getRandom(), null)) {
 				itemStack.setCount(0);

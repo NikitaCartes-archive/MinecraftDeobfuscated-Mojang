@@ -1,7 +1,5 @@
 package net.minecraft.core.dispenser;
 
-import net.minecraft.core.BlockSource;
-
 public abstract class OptionalDispenseItemBehavior extends DefaultDispenseItemBehavior {
 	private boolean success = true;
 
@@ -15,6 +13,6 @@ public abstract class OptionalDispenseItemBehavior extends DefaultDispenseItemBe
 
 	@Override
 	protected void playSound(BlockSource blockSource) {
-		blockSource.getLevel().levelEvent(this.isSuccess() ? 1000 : 1001, blockSource.getPos(), 0);
+		blockSource.level().levelEvent(this.isSuccess() ? 1000 : 1001, blockSource.pos(), 0);
 	}
 }

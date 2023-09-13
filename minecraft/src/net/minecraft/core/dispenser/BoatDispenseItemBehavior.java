@@ -1,7 +1,6 @@
 package net.minecraft.core.dispenser;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
@@ -10,6 +9,7 @@ import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.phys.Vec3;
 
 public class BoatDispenseItemBehavior extends DefaultDispenseItemBehavior {
 	private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
@@ -27,13 +27,14 @@ public class BoatDispenseItemBehavior extends DefaultDispenseItemBehavior {
 
 	@Override
 	public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-		Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-		Level level = blockSource.getLevel();
+		Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+		Level level = blockSource.level();
+		Vec3 vec3 = blockSource.center();
 		double d = 0.5625 + (double)EntityType.BOAT.getWidth() / 2.0;
-		double e = blockSource.x() + (double)direction.getStepX() * d;
-		double f = blockSource.y() + (double)((float)direction.getStepY() * 1.125F);
-		double g = blockSource.z() + (double)direction.getStepZ() * d;
-		BlockPos blockPos = blockSource.getPos().relative(direction);
+		double e = vec3.x() + (double)direction.getStepX() * d;
+		double f = vec3.y() + (double)((float)direction.getStepY() * 1.125F);
+		double g = vec3.z() + (double)direction.getStepZ() * d;
+		BlockPos blockPos = blockSource.pos().relative(direction);
 		double h;
 		if (level.getFluidState(blockPos).is(FluidTags.WATER)) {
 			h = 1.0;
@@ -55,6 +56,6 @@ public class BoatDispenseItemBehavior extends DefaultDispenseItemBehavior {
 
 	@Override
 	protected void playSound(BlockSource blockSource) {
-		blockSource.getLevel().levelEvent(1000, blockSource.getPos(), 0);
+		blockSource.level().levelEvent(1000, blockSource.pos(), 0);
 	}
 }

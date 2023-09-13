@@ -1,6 +1,5 @@
 package net.minecraft.core.dispenser;
 
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -13,15 +12,15 @@ public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
 	public final ItemStack dispense(BlockSource blockSource, ItemStack itemStack) {
 		ItemStack itemStack2 = this.execute(blockSource, itemStack);
 		this.playSound(blockSource);
-		this.playAnimation(blockSource, blockSource.getBlockState().getValue(DispenserBlock.FACING));
+		this.playAnimation(blockSource, blockSource.state().getValue(DispenserBlock.FACING));
 		return itemStack2;
 	}
 
 	protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-		Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+		Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
 		Position position = DispenserBlock.getDispensePosition(blockSource);
 		ItemStack itemStack2 = itemStack.split(1);
-		spawnItem(blockSource.getLevel(), itemStack2, 6, direction, position);
+		spawnItem(blockSource.level(), itemStack2, 6, direction, position);
 		return itemStack;
 	}
 
@@ -46,10 +45,10 @@ public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
 	}
 
 	protected void playSound(BlockSource blockSource) {
-		blockSource.getLevel().levelEvent(1000, blockSource.getPos(), 0);
+		blockSource.level().levelEvent(1000, blockSource.pos(), 0);
 	}
 
 	protected void playAnimation(BlockSource blockSource, Direction direction) {
-		blockSource.getLevel().levelEvent(2000, blockSource.getPos(), direction.get3DDataValue());
+		blockSource.level().levelEvent(2000, blockSource.pos(), direction.get3DDataValue());
 	}
 }

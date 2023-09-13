@@ -6,12 +6,15 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -39,6 +42,7 @@ import net.minecraft.server.WorldStem;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
+import net.minecraft.util.MemoryReserve;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -62,7 +66,21 @@ public class WorldOpenFlows {
 	}
 
 	public void loadLevel(Screen screen, String string) {
-		this.doLoadLevel(screen, string, false, true);
+		try {
+			this.doLoadLevel(screen, string, false, true);
+		} catch (OutOfMemoryError var9) {
+			MemoryReserve.release();
+			System.gc();
+			Path path = this.levelSource.getLevelPath(string);
+			String string2 = "Ran out of memory trying to read level data of world folder \"" + path + "\"";
+			LOGGER.error(LogUtils.FATAL_MARKER, string2);
+			OutOfMemoryError outOfMemoryError2 = new OutOfMemoryError("Ran out of memory reading level data");
+			outOfMemoryError2.initCause(var9);
+			CrashReport crashReport = CrashReport.forThrowable(outOfMemoryError2, string2);
+			CrashReportCategory crashReportCategory = crashReport.addCategory("World details");
+			crashReportCategory.setDetail("World folder", path);
+			throw new ReportedException(crashReport);
+		}
 	}
 
 	public void createFreshLevel(String string, LevelSettings levelSettings, WorldOptions worldOptions, Function<RegistryAccess, WorldDimensions> function) {

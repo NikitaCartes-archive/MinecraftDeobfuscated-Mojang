@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.particles.ParticleTypes;
@@ -16,7 +15,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
@@ -65,13 +63,13 @@ import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.WitherSkullBlock;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 public interface DispenseItemBehavior {
@@ -184,20 +182,18 @@ public interface DispenseItemBehavior {
 		DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
 				EntityType<?> entityType = ((SpawnEggItem)itemStack.getItem()).getType(itemStack.getTag());
 
 				try {
-					entityType.spawn(
-						blockSource.getLevel(), itemStack, null, blockSource.getPos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false
-					);
+					entityType.spawn(blockSource.level(), itemStack, null, blockSource.pos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false);
 				} catch (Exception var6) {
-					LOGGER.error("Error while dispensing spawn egg from dispenser at {}", blockSource.getPos(), var6);
+					LOGGER.error("Error while dispensing spawn egg from dispenser at {}", blockSource.pos(), var6);
 					return ItemStack.EMPTY;
 				}
 
 				itemStack.shrink(1);
-				blockSource.getLevel().gameEvent(null, GameEvent.ENTITY_PLACE, blockSource.getPos());
+				blockSource.level().gameEvent(null, GameEvent.ENTITY_PLACE, blockSource.pos());
 				return itemStack;
 			}
 		};
@@ -209,9 +205,9 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.ARMOR_STAND, new DefaultDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-				BlockPos blockPos = blockSource.getPos().relative(direction);
-				ServerLevel serverLevel = blockSource.getLevel();
+				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+				BlockPos blockPos = blockSource.pos().relative(direction);
+				ServerLevel serverLevel = blockSource.level();
 				Consumer<ArmorStand> consumer = EntityType.appendDefaultStackConfig(armorStandx -> armorStandx.setYRot(direction.toYRot()), serverLevel, itemStack, null);
 				ArmorStand armorStand = EntityType.ARMOR_STAND.spawn(serverLevel, itemStack.getTag(), consumer, blockPos, MobSpawnType.DISPENSER, false, false);
 				if (armorStand != null) {
@@ -226,8 +222,8 @@ public interface DispenseItemBehavior {
 			new OptionalDispenseItemBehavior() {
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-					List<LivingEntity> list = blockSource.getLevel()
+					BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
+					List<LivingEntity> list = blockSource.level()
 						.getEntitiesOfClass(
 							LivingEntity.class,
 							new AABB(blockPos),
@@ -247,9 +243,9 @@ public interface DispenseItemBehavior {
 		DefaultDispenseItemBehavior defaultDispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 
-				for (AbstractHorse abstractHorse : blockSource.getLevel()
+				for (AbstractHorse abstractHorse : blockSource.level()
 					.getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorsex -> abstractHorsex.isAlive() && abstractHorsex.canWearArmor())) {
 					if (abstractHorse.isArmor(itemStack) && !abstractHorse.isWearingArmor() && abstractHorse.isTamed()) {
 						abstractHorse.getSlot(401).set(itemStack.split(1));
@@ -286,9 +282,9 @@ public interface DispenseItemBehavior {
 			new OptionalDispenseItemBehavior() {
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+					BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 
-					for (AbstractChestedHorse abstractChestedHorse : blockSource.getLevel()
+					for (AbstractChestedHorse abstractChestedHorse : blockSource.level()
 						.getEntitiesOfClass(
 							AbstractChestedHorse.class, new AABB(blockPos), abstractChestedHorsex -> abstractChestedHorsex.isAlive() && !abstractChestedHorsex.hasChest()
 						)) {
@@ -303,37 +299,32 @@ public interface DispenseItemBehavior {
 				}
 			}
 		);
-		DispenserBlock.registerBehavior(
-			Items.FIREWORK_ROCKET,
-			new DefaultDispenseItemBehavior() {
-				@Override
-				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-					FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
-						blockSource.getLevel(), itemStack, blockSource.x(), blockSource.y(), blockSource.x(), true
-					);
-					DispenseItemBehavior.setEntityPokingOutOfBlock(blockSource, fireworkRocketEntity, direction);
-					fireworkRocketEntity.shoot((double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ(), 0.5F, 1.0F);
-					blockSource.getLevel().addFreshEntity(fireworkRocketEntity);
-					itemStack.shrink(1);
-					return itemStack;
-				}
-
-				@Override
-				protected void playSound(BlockSource blockSource) {
-					blockSource.getLevel().levelEvent(1004, blockSource.getPos(), 0);
-				}
+		DispenserBlock.registerBehavior(Items.FIREWORK_ROCKET, new DefaultDispenseItemBehavior() {
+			@Override
+			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+				Vec3 vec3 = DispenseItemBehavior.getEntityPokingOutOfBlockPos(blockSource, EntityType.FIREWORK_ROCKET, direction);
+				FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(blockSource.level(), itemStack, vec3.x(), vec3.y(), vec3.z(), true);
+				fireworkRocketEntity.shoot((double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ(), 0.5F, 1.0F);
+				blockSource.level().addFreshEntity(fireworkRocketEntity);
+				itemStack.shrink(1);
+				return itemStack;
 			}
-		);
+
+			@Override
+			protected void playSound(BlockSource blockSource) {
+				blockSource.level().levelEvent(1004, blockSource.pos(), 0);
+			}
+		});
 		DispenserBlock.registerBehavior(Items.FIRE_CHARGE, new DefaultDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
 				Position position = DispenserBlock.getDispensePosition(blockSource);
 				double d = position.x() + (double)((float)direction.getStepX() * 0.3F);
 				double e = position.y() + (double)((float)direction.getStepY() * 0.3F);
 				double f = position.z() + (double)((float)direction.getStepZ() * 0.3F);
-				Level level = blockSource.getLevel();
+				Level level = blockSource.level();
 				RandomSource randomSource = level.random;
 				double g = randomSource.triangle((double)direction.getStepX(), 0.11485000000000001);
 				double h = randomSource.triangle((double)direction.getStepY(), 0.11485000000000001);
@@ -346,7 +337,7 @@ public interface DispenseItemBehavior {
 
 			@Override
 			protected void playSound(BlockSource blockSource) {
-				blockSource.getLevel().levelEvent(1018, blockSource.getPos(), 0);
+				blockSource.level().levelEvent(1018, blockSource.pos(), 0);
 			}
 		});
 		DispenserBlock.registerBehavior(Items.OAK_BOAT, new BoatDispenseItemBehavior(Boat.Type.OAK));
@@ -373,8 +364,8 @@ public interface DispenseItemBehavior {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 				DispensibleContainerItem dispensibleContainerItem = (DispensibleContainerItem)itemStack.getItem();
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-				Level level = blockSource.getLevel();
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
+				Level level = blockSource.level();
 				if (dispensibleContainerItem.emptyContents(null, level, blockPos, null)) {
 					dispensibleContainerItem.checkExtraContent(null, level, itemStack, blockPos);
 					return new ItemStack(Items.BUCKET);
@@ -397,8 +388,8 @@ public interface DispenseItemBehavior {
 
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				LevelAccessor levelAccessor = blockSource.getLevel();
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+				LevelAccessor levelAccessor = blockSource.level();
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 				BlockState blockState = levelAccessor.getBlockState(blockPos);
 				if (blockState.getBlock() instanceof BucketPickup bucketPickup) {
 					ItemStack itemStack2 = bucketPickup.pickupBlock(null, levelAccessor, blockPos, blockState);
@@ -411,7 +402,7 @@ public interface DispenseItemBehavior {
 						if (itemStack.isEmpty()) {
 							return new ItemStack(item);
 						} else {
-							if (blockSource.<DispenserBlockEntity>getEntity().addItem(new ItemStack(item)) < 0) {
+							if (blockSource.blockEntity().addItem(new ItemStack(item)) < 0) {
 								this.defaultDispenseItemBehavior.dispense(blockSource, new ItemStack(item));
 							}
 
@@ -426,10 +417,10 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.FLINT_AND_STEEL, new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Level level = blockSource.getLevel();
+				Level level = blockSource.level();
 				this.setSuccess(true);
-				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-				BlockPos blockPos = blockSource.getPos().relative(direction);
+				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+				BlockPos blockPos = blockSource.pos().relative(direction);
 				BlockState blockState = level.getBlockState(blockPos);
 				if (BaseFireBlock.canBePlacedAt(level, blockPos, direction)) {
 					level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
@@ -455,8 +446,8 @@ public interface DispenseItemBehavior {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 				this.setSuccess(true);
-				Level level = blockSource.getLevel();
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+				Level level = blockSource.level();
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 				if (!BoneMealItem.growCrop(itemStack, level, blockPos) && !BoneMealItem.growWaterPlant(itemStack, level, blockPos, null)) {
 					this.setSuccess(false);
 				} else if (!level.isClientSide) {
@@ -469,8 +460,8 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Blocks.TNT, new DefaultDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Level level = blockSource.getLevel();
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+				Level level = blockSource.level();
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 				PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, null);
 				level.addFreshEntity(primedTnt);
 				level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -497,9 +488,9 @@ public interface DispenseItemBehavior {
 			new OptionalDispenseItemBehavior() {
 				@Override
 				protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					Level level = blockSource.getLevel();
-					Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-					BlockPos blockPos = blockSource.getPos().relative(direction);
+					Level level = blockSource.level();
+					Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+					BlockPos blockPos = blockSource.pos().relative(direction);
 					if (level.isEmptyBlock(blockPos) && WitherSkullBlock.canSpawnMob(level, blockPos, itemStack)) {
 						level.setBlock(
 							blockPos,
@@ -525,8 +516,8 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Blocks.CARVED_PUMPKIN, new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Level level = blockSource.getLevel();
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+				Level level = blockSource.level();
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 				CarvedPumpkinBlock carvedPumpkinBlock = (CarvedPumpkinBlock)Blocks.CARVED_PUMPKIN;
 				if (level.isEmptyBlock(blockPos) && carvedPumpkinBlock.canSpawnGolem(level, blockPos)) {
 					if (!level.isClientSide) {
@@ -557,10 +548,10 @@ public interface DispenseItemBehavior {
 				private ItemStack takeLiquid(BlockSource blockSource, ItemStack itemStack, ItemStack itemStack2) {
 					itemStack.shrink(1);
 					if (itemStack.isEmpty()) {
-						blockSource.getLevel().gameEvent(null, GameEvent.FLUID_PICKUP, blockSource.getPos());
+						blockSource.level().gameEvent(null, GameEvent.FLUID_PICKUP, blockSource.pos());
 						return itemStack2.copy();
 					} else {
-						if (blockSource.<DispenserBlockEntity>getEntity().addItem(itemStack2.copy()) < 0) {
+						if (blockSource.blockEntity().addItem(itemStack2.copy()) < 0) {
 							this.defaultDispenseItemBehavior.dispense(blockSource, itemStack2.copy());
 						}
 
@@ -571,8 +562,8 @@ public interface DispenseItemBehavior {
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 					this.setSuccess(false);
-					ServerLevel serverLevel = blockSource.getLevel();
-					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+					ServerLevel serverLevel = blockSource.level();
+					BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 					BlockState blockState = serverLevel.getBlockState(blockPos);
 					if (blockState.is(
 							BlockTags.BEEHIVES, blockStateBase -> blockStateBase.hasProperty(BeehiveBlock.HONEY_LEVEL) && blockStateBase.getBlock() instanceof BeehiveBlock
@@ -594,9 +585,9 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.GLOWSTONE, new OptionalDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-				BlockPos blockPos = blockSource.getPos().relative(direction);
-				Level level = blockSource.getLevel();
+				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+				BlockPos blockPos = blockSource.pos().relative(direction);
+				Level level = blockSource.level();
 				BlockState blockState = level.getBlockState(blockPos);
 				this.setSuccess(true);
 				if (blockState.is(Blocks.RESPAWN_ANCHOR)) {
@@ -617,8 +608,8 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.HONEYCOMB, new OptionalDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-				Level level = blockSource.getLevel();
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
+				Level level = blockSource.level();
 				BlockState blockState = level.getBlockState(blockPos);
 				Optional<BlockState> optional = HoneycombItem.getWaxed(blockState);
 				if (optional.isPresent()) {
@@ -642,9 +633,9 @@ public interface DispenseItemBehavior {
 					if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
 						return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
 					} else {
-						ServerLevel serverLevel = blockSource.getLevel();
-						BlockPos blockPos = blockSource.getPos();
-						BlockPos blockPos2 = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+						ServerLevel serverLevel = blockSource.level();
+						BlockPos blockPos = blockSource.pos();
+						BlockPos blockPos2 = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 						if (!serverLevel.getBlockState(blockPos2).is(BlockTags.CONVERTABLE_TO_MUD)) {
 							return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
 						} else {
@@ -675,11 +666,12 @@ public interface DispenseItemBehavior {
 		);
 	}
 
-	static void setEntityPokingOutOfBlock(BlockSource blockSource, Entity entity, Direction direction) {
-		entity.setPos(
-			blockSource.x() + (double)direction.getStepX() * (0.5000099999997474 - (double)entity.getBbWidth() / 2.0),
-			blockSource.y() + (double)direction.getStepY() * (0.5000099999997474 - (double)entity.getBbHeight() / 2.0) - (double)entity.getBbHeight() / 2.0,
-			blockSource.z() + (double)direction.getStepZ() * (0.5000099999997474 - (double)entity.getBbWidth() / 2.0)
-		);
+	static Vec3 getEntityPokingOutOfBlockPos(BlockSource blockSource, EntityType<?> entityType, Direction direction) {
+		return blockSource.center()
+			.add(
+				(double)direction.getStepX() * (0.5000099999997474 - (double)entityType.getWidth() / 2.0),
+				(double)direction.getStepY() * (0.5000099999997474 - (double)entityType.getHeight() / 2.0) - (double)entityType.getHeight() / 2.0,
+				(double)direction.getStepZ() * (0.5000099999997474 - (double)entityType.getWidth() / 2.0)
+			);
 	}
 }
