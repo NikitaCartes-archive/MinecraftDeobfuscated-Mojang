@@ -47,8 +47,7 @@ public class CompoundTag implements Tag {
 
 			byte b;
 			while ((b = dataInput.readByte()) != 0) {
-				String string = dataInput.readUTF();
-				nbtAccounter.accountBytes(28L + 2L * (long)string.length());
+				String string = readString(dataInput, nbtAccounter);
 				Tag tag = CompoundTag.readNamedTagData(TagTypes.getType(b), string, dataInput, nbtAccounter);
 				if (map.put(string, tag) == null) {
 					nbtAccounter.accountBytes(36L);
@@ -91,8 +90,7 @@ public class CompoundTag implements Tag {
 						tagType.skip(dataInput, nbtAccounter);
 						break;
 					default:
-						String string = dataInput.readUTF();
-						nbtAccounter.accountBytes(28L + 2L * (long)string.length());
+						String string = readString(dataInput, nbtAccounter);
 						switch (streamTagVisitor.visitEntry(tagType, string)) {
 							case HALT:
 								return StreamTagVisitor.ValueResult.HALT;
@@ -123,15 +121,11 @@ public class CompoundTag implements Tag {
 			return streamTagVisitor.visitContainerEnd();
 		}
 
-		@Override
-		public void skip(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.pushDepth();
-
-			try {
-				TagType.VariableSize.super.skip(dataInput, i, nbtAccounter);
-			} finally {
-				nbtAccounter.popDepth();
-			}
+		private static String readString(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
+			String string = dataInput.readUTF();
+			nbtAccounter.accountBytes(28L);
+			nbtAccounter.accountBytes(2L, (long)string.length());
+			return string;
 		}
 
 		@Override

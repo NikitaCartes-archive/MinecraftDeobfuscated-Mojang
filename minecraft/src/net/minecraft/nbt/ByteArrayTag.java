@@ -22,7 +22,7 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
 		private static byte[] readAccounted(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBytes(24L);
 			int i = dataInput.readInt();
-			nbtAccounter.accountBytes(1L * (long)i);
+			nbtAccounter.accountBytes(1L, (long)i);
 			byte[] bs = new byte[i];
 			dataInput.readFully(bs);
 			return bs;

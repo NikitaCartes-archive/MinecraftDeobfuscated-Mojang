@@ -47,6 +47,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public abstract class AbstractMinecart extends Entity {
+	private static final float PASSENGER_ATTACHMENT_Y = 0.1875F;
 	private static final EntityDataAccessor<Integer> DATA_ID_HURT = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_ID_HURTDIR = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> DATA_ID_DAMAGE = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.FLOAT);
@@ -148,7 +149,7 @@ public abstract class AbstractMinecart extends Entity {
 
 	@Override
 	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, 0.25F, 0.0F);
+		return new Vector3f(0.0F, 0.1875F, 0.0F);
 	}
 
 	@Override

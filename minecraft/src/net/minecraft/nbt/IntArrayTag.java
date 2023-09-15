@@ -22,7 +22,7 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 		private static int[] readAccounted(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBytes(24L);
 			int i = dataInput.readInt();
-			nbtAccounter.accountBytes(4L * (long)i);
+			nbtAccounter.accountBytes(4L, (long)i);
 			int[] is = new int[i];
 
 			for (int j = 0; j < i; j++) {

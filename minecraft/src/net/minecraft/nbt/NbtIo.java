@@ -234,7 +234,6 @@ public class NbtIo {
 	}
 
 	public static void parse(DataInput dataInput, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBytes(8L);
 		TagType<?> tagType = TagTypes.getType(dataInput.readByte());
 		if (tagType == EndTag.TYPE) {
 			if (streamTagVisitor.visitRootEntry(EndTag.TYPE) == StreamTagVisitor.ValueResult.CONTINUE) {

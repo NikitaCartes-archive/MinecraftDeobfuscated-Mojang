@@ -22,7 +22,7 @@ public class StringTag implements Tag {
 		private static String readAccounted(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBytes(36L);
 			String string = dataInput.readUTF();
-			nbtAccounter.accountBytes(2L * (long)string.length());
+			nbtAccounter.accountBytes(2L, (long)string.length());
 			return string;
 		}
 

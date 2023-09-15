@@ -8,6 +8,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
 public class TradeRebalanceLootTableProvider {
 	public static LootTableProvider create(PackOutput packOutput) {
-		return new LootTableProvider(packOutput, Set.of(), List.of(new LootTableProvider.SubProviderEntry(TradeRebalanceChestLoot::new, LootContextParamSets.ENTITY)));
+		return new LootTableProvider(packOutput, Set.of(), List.of(new LootTableProvider.SubProviderEntry(TradeRebalanceChestLoot::new, LootContextParamSets.CHEST)));
 	}
 }

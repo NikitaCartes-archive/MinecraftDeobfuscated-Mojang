@@ -32,7 +32,7 @@ public class ListTag extends CollectionTag<Tag> {
 			if (b == 0 && i > 0) {
 				throw new RuntimeException("Missing type on ListTag");
 			} else {
-				nbtAccounter.accountBytes(4L * (long)i);
+				nbtAccounter.accountBytes(4L, (long)i);
 				TagType<?> tagType = TagTypes.getType(b);
 				List<Tag> list = Lists.<Tag>newArrayListWithCapacity(i);
 
@@ -69,7 +69,7 @@ public class ListTag extends CollectionTag<Tag> {
 					tagType.skip(dataInput, i, nbtAccounter);
 					return streamTagVisitor.visitContainerEnd();
 				default:
-					nbtAccounter.accountBytes(4L * (long)i);
+					nbtAccounter.accountBytes(4L, (long)i);
 					int j = 0;
 
 					while (true) {
@@ -106,17 +106,6 @@ public class ListTag extends CollectionTag<Tag> {
 
 						j++;
 					}
-			}
-		}
-
-		@Override
-		public void skip(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-			nbtAccounter.pushDepth();
-
-			try {
-				TagType.VariableSize.super.skip(dataInput, i, nbtAccounter);
-			} finally {
-				nbtAccounter.popDepth();
 			}
 		}
 

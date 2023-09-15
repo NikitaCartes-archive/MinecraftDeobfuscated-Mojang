@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,7 +18,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -89,14 +89,18 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	private void angerNearbyBees(Level level, BlockPos blockPos) {
-		List<Bee> list = level.getEntitiesOfClass(Bee.class, new AABB(blockPos).inflate(8.0, 6.0, 8.0));
+		AABB aABB = new AABB(blockPos).inflate(8.0, 6.0, 8.0);
+		List<Bee> list = level.getEntitiesOfClass(Bee.class, aABB);
 		if (!list.isEmpty()) {
-			List<Player> list2 = level.getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(8.0, 6.0, 8.0));
-			int i = list2.size();
+			List<Player> list2 = level.getEntitiesOfClass(Player.class, aABB);
+			if (list2.isEmpty()) {
+				return;
+			}
 
 			for (Bee bee : list) {
 				if (bee.getTarget() == null) {
-					bee.setTarget((LivingEntity)list2.get(level.random.nextInt(i)));
+					Player player = Util.getRandom(list2, level.random);
+					bee.setTarget(player);
 				}
 			}
 		}

@@ -68,6 +68,7 @@ import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.CommonLinks;
+import net.minecraft.util.Mth;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -113,6 +114,8 @@ public class RealmsMainScreen extends RealmsScreen {
 	private static final int LOGO_PADDING = 5;
 	private static final int HEADER_HEIGHT = 44;
 	private static final int FOOTER_PADDING = 10;
+	private static final int ENTRY_WIDTH = 216;
+	private static final int ITEM_HEIGHT = 36;
 	private final CompletableFuture<RealmsAvailability.Result> availability = RealmsAvailability.get();
 	@Nullable
 	private DataFetcher.Subscription dataSubscription;
@@ -394,7 +397,15 @@ public class RealmsMainScreen extends RealmsScreen {
 
 	private void addEntriesForNotification(RealmsMainScreen.RealmSelectionList realmSelectionList, RealmsNotification realmsNotification) {
 		if (realmsNotification instanceof RealmsNotification.VisitUrl visitUrl) {
-			realmSelectionList.addEntry(new RealmsMainScreen.NotificationMessageEntry(visitUrl.getMessage(), visitUrl));
+			Component component = visitUrl.getMessage();
+			int i = this.font.wordWrapHeight(component, 216);
+			int j = Mth.positiveCeilDiv(i + 7, 36) - 1;
+			realmSelectionList.addEntry(new RealmsMainScreen.NotificationMessageEntry(component, j + 2, visitUrl));
+
+			for (int k = 0; k < j; k++) {
+				realmSelectionList.addEntry(new RealmsMainScreen.EmptyEntry());
+			}
+
 			realmSelectionList.addEntry(new RealmsMainScreen.ButtonEntry(visitUrl.buildOpenLinkButton(this)));
 		}
 	}
@@ -595,6 +606,18 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	@Environment(EnvType.CLIENT)
+	class EmptyEntry extends RealmsMainScreen.Entry {
+		@Override
+		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		}
+
+		@Override
+		public Component getNarration() {
+			return Component.empty();
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	abstract class Entry extends ObjectSelectionList.Entry<RealmsMainScreen.Entry> {
 		@Nullable
 		public RealmsServer getServer() {
@@ -652,9 +675,9 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class NotificationMessageEntry extends RealmsMainScreen.Entry {
 		private static final int SIDE_MARGINS = 40;
-		private static final int ITEM_HEIGHT = 36;
 		private static final int OUTLINE_COLOR = -12303292;
 		private final Component text;
+		private final int frameItemHeight;
 		private final List<AbstractWidget> children = new ArrayList();
 		@Nullable
 		private final RealmsMainScreen.CrossButton dismissButton;
@@ -663,16 +686,17 @@ public class RealmsMainScreen extends RealmsScreen {
 		private final FrameLayout textFrame;
 		private int lastEntryWidth = -1;
 
-		public NotificationMessageEntry(Component component, RealmsNotification realmsNotification) {
+		public NotificationMessageEntry(Component component, int i, RealmsNotification realmsNotification) {
 			this.text = component;
+			this.frameItemHeight = i;
 			this.gridLayout = new GridLayout();
-			int i = 7;
+			int j = 7;
 			this.gridLayout.addChild(ImageWidget.sprite(20, 20, RealmsMainScreen.INFO_SPRITE), 0, 0, this.gridLayout.newCellSettings().padding(7, 7, 0, 0));
 			this.gridLayout.addChild(SpacerElement.width(40), 0, 0);
-			this.textFrame = this.gridLayout.addChild(new FrameLayout(0, 9 * 3), 0, 1, this.gridLayout.newCellSettings().paddingTop(7));
+			this.textFrame = this.gridLayout.addChild(new FrameLayout(0, 9 * 3 * (i - 1)), 0, 1, this.gridLayout.newCellSettings().paddingTop(7));
 			this.textWidget = this.textFrame
 				.addChild(
-					new MultiLineTextWidget(component, RealmsMainScreen.this.font).setCentered(true).setMaxRows(3),
+					new MultiLineTextWidget(component, RealmsMainScreen.this.font).setCentered(true),
 					this.textFrame.newChildLayoutSettings().alignHorizontallyCenter().alignVerticallyTop()
 				);
 			this.gridLayout.addChild(SpacerElement.width(40), 0, 2);
@@ -715,7 +739,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		@Override
 		public void renderBack(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			super.renderBack(guiGraphics, i, j, k, l, m, n, o, bl, f);
-			guiGraphics.renderOutline(k - 2, j - 2, l, 70, -12303292);
+			guiGraphics.renderOutline(k - 2, j - 2, l, 36 * this.frameItemHeight - 2, -12303292);
 		}
 
 		@Override
