@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -16,7 +17,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class PipeBlock extends Block {
+public abstract class PipeBlock extends Block {
 	private static final Direction[] DIRECTIONS = Direction.values();
 	public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
 	public static final BooleanProperty EAST = BlockStateProperties.EAST;
@@ -38,6 +39,9 @@ public class PipeBlock extends Block {
 		super(properties);
 		this.shapeByIndex = this.makeShapes(f);
 	}
+
+	@Override
+	protected abstract MapCodec<? extends PipeBlock> codec();
 
 	private VoxelShape[] makeShapes(float f) {
 		float g = 0.5F - f;

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -26,10 +28,16 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LightBlock extends Block implements SimpleWaterloggedBlock {
+	public static final MapCodec<LightBlock> CODEC = simpleCodec(LightBlock::new);
 	public static final int MAX_LEVEL = 15;
 	public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final ToIntFunction<BlockState> LIGHT_EMISSION = blockState -> (Integer)blockState.getValue(LEVEL);
+
+	@Override
+	public MapCodec<LightBlock> codec() {
+		return CODEC;
+	}
 
 	public LightBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -90,8 +98,8 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		return setLightOnStack(super.getCloneItemStack(blockGetter, blockPos, blockState), (Integer)blockState.getValue(LEVEL));
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+		return setLightOnStack(super.getCloneItemStack(levelReader, blockPos, blockState), (Integer)blockState.getValue(LEVEL));
 	}
 
 	public static ItemStack setLightOnStack(ItemStack itemStack, int i) {

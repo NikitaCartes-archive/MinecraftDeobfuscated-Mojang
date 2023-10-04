@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -12,8 +13,15 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 
 public class SculkBlock extends DropExperienceBlock implements SculkBehaviour {
+	public static final MapCodec<SculkBlock> CODEC = simpleCodec(SculkBlock::new);
+
+	@Override
+	public MapCodec<SculkBlock> codec() {
+		return CODEC;
+	}
+
 	public SculkBlock(BlockBehaviour.Properties properties) {
-		super(properties, ConstantInt.of(1));
+		super(ConstantInt.of(1), properties);
 	}
 
 	@Override

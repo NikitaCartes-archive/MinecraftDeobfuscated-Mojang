@@ -44,7 +44,7 @@ public class EntitySelectorParser {
 	private static final char SELECTOR_ALL_ENTITIES = 'e';
 	public static final SimpleCommandExceptionType ERROR_INVALID_NAME_OR_UUID = new SimpleCommandExceptionType(Component.translatable("argument.entity.invalid"));
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SELECTOR_TYPE = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.entity.selector.unknown", object)
+		object -> Component.translatableEscape("argument.entity.selector.unknown", object)
 	);
 	public static final SimpleCommandExceptionType ERROR_SELECTORS_NOT_ALLOWED = new SimpleCommandExceptionType(
 		Component.translatable("argument.entity.selector.not_allowed")
@@ -56,7 +56,7 @@ public class EntitySelectorParser {
 		Component.translatable("argument.entity.options.unterminated")
 	);
 	public static final DynamicCommandExceptionType ERROR_EXPECTED_OPTION_VALUE = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.entity.options.valueless", object)
+		object -> Component.translatableEscape("argument.entity.options.valueless", object)
 	);
 	public static final BiConsumer<Vec3, List<? extends Entity>> ORDER_NEAREST = (vec3, list) -> list.sort(
 			(entity, entity2) -> Doubles.compare(entity.distanceToSqr(vec3), entity2.distanceToSqr(vec3))

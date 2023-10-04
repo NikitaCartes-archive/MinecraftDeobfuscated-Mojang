@@ -234,7 +234,7 @@ public class ExperienceOrb extends Entity {
 		Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, player, ItemStack::isDamaged);
 		if (entry != null) {
 			ItemStack itemStack = (ItemStack)entry.getValue();
-			int j = Math.min(this.xpToDurability(this.value), itemStack.getDamageValue());
+			int j = Math.min(this.xpToDurability(i), itemStack.getDamageValue());
 			itemStack.setDamageValue(itemStack.getDamageValue() - j);
 			int k = i - this.durabilityToXp(j);
 			return k > 0 ? this.repairPlayerItems(player, k) : 0;

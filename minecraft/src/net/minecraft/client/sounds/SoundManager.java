@@ -50,7 +50,7 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final String SOUNDS_PATH = "sounds.json";
 	private static final Gson GSON = new GsonBuilder()
-		.registerTypeHierarchyAdapter(Component.class, new Component.Serializer())
+		.registerTypeHierarchyAdapter(Component.class, new Component.SerializerAdapter())
 		.registerTypeAdapter(SoundEventRegistration.class, new SoundEventRegistrationSerializer())
 		.create();
 	private static final TypeToken<Map<String, SoundEventRegistration>> SOUND_EVENT_REGISTRATION_TYPE = new TypeToken<Map<String, SoundEventRegistration>>() {

@@ -1,14 +1,16 @@
 package net.minecraft.core.cauldron;
 
+import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -29,10 +31,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public interface CauldronInteraction {
-	Map<Item, CauldronInteraction> EMPTY = newInteractionMap();
-	Map<Item, CauldronInteraction> WATER = newInteractionMap();
-	Map<Item, CauldronInteraction> LAVA = newInteractionMap();
-	Map<Item, CauldronInteraction> POWDER_SNOW = newInteractionMap();
+	Map<String, CauldronInteraction.InteractionMap> INTERACTIONS = new Object2ObjectArrayMap<>();
+	Codec<CauldronInteraction.InteractionMap> CODEC = ExtraCodecs.stringResolverCodec(CauldronInteraction.InteractionMap::name, INTERACTIONS::get);
+	CauldronInteraction.InteractionMap EMPTY = newInteractionMap("empty");
+	CauldronInteraction.InteractionMap WATER = newInteractionMap("water");
+	CauldronInteraction.InteractionMap LAVA = newInteractionMap("lava");
+	CauldronInteraction.InteractionMap POWDER_SNOW = newInteractionMap("powder_snow");
 	CauldronInteraction FILL_WATER = (blockState, level, blockPos, player, interactionHand, itemStack) -> emptyBucket(
 			level,
 			blockPos,
@@ -115,20 +119,20 @@ public interface CauldronInteraction {
 		}
 	};
 
-	static Object2ObjectOpenHashMap<Item, CauldronInteraction> newInteractionMap() {
-		return Util.make(
-			new Object2ObjectOpenHashMap<>(),
-			object2ObjectOpenHashMap -> object2ObjectOpenHashMap.defaultReturnValue(
-					(blockState, level, blockPos, player, interactionHand, itemStack) -> InteractionResult.PASS
-				)
-		);
+	static CauldronInteraction.InteractionMap newInteractionMap(String string) {
+		Object2ObjectOpenHashMap<Item, CauldronInteraction> object2ObjectOpenHashMap = new Object2ObjectOpenHashMap<>();
+		object2ObjectOpenHashMap.defaultReturnValue((blockState, level, blockPos, player, interactionHand, itemStack) -> InteractionResult.PASS);
+		CauldronInteraction.InteractionMap interactionMap = new CauldronInteraction.InteractionMap(string, object2ObjectOpenHashMap);
+		INTERACTIONS.put(string, interactionMap);
+		return interactionMap;
 	}
 
 	InteractionResult interact(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack);
 
 	static void bootStrap() {
-		addDefaultInteractions(EMPTY);
-		EMPTY.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
+		Map<Item, CauldronInteraction> map = EMPTY.map();
+		addDefaultInteractions(map);
+		map.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
 			if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
 				return InteractionResult.PASS;
 			} else {
@@ -145,8 +149,9 @@ public interface CauldronInteraction {
 				return InteractionResult.sidedSuccess(level.isClientSide);
 			}
 		});
-		addDefaultInteractions(WATER);
-		WATER.put(
+		Map<Item, CauldronInteraction> map2 = WATER.map();
+		addDefaultInteractions(map2);
+		map2.put(
 			Items.BUCKET,
 			(CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> fillBucket(
 					blockState,
@@ -160,7 +165,7 @@ public interface CauldronInteraction {
 					SoundEvents.BUCKET_FILL
 				)
 		);
-		WATER.put(Items.GLASS_BOTTLE, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
+		map2.put(Items.GLASS_BOTTLE, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
 			if (!level.isClientSide) {
 				Item item = itemStack.getItem();
 				player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)));
@@ -173,7 +178,7 @@ public interface CauldronInteraction {
 
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		});
-		WATER.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
+		map2.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
 			if ((Integer)blockState.getValue(LayeredCauldronBlock.LEVEL) != 3 && PotionUtils.getPotion(itemStack) == Potions.WATER) {
 				if (!level.isClientSide) {
 					player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
@@ -189,51 +194,53 @@ public interface CauldronInteraction {
 				return InteractionResult.PASS;
 			}
 		});
-		WATER.put(Items.LEATHER_BOOTS, DYED_ITEM);
-		WATER.put(Items.LEATHER_LEGGINGS, DYED_ITEM);
-		WATER.put(Items.LEATHER_CHESTPLATE, DYED_ITEM);
-		WATER.put(Items.LEATHER_HELMET, DYED_ITEM);
-		WATER.put(Items.LEATHER_HORSE_ARMOR, DYED_ITEM);
-		WATER.put(Items.WHITE_BANNER, BANNER);
-		WATER.put(Items.GRAY_BANNER, BANNER);
-		WATER.put(Items.BLACK_BANNER, BANNER);
-		WATER.put(Items.BLUE_BANNER, BANNER);
-		WATER.put(Items.BROWN_BANNER, BANNER);
-		WATER.put(Items.CYAN_BANNER, BANNER);
-		WATER.put(Items.GREEN_BANNER, BANNER);
-		WATER.put(Items.LIGHT_BLUE_BANNER, BANNER);
-		WATER.put(Items.LIGHT_GRAY_BANNER, BANNER);
-		WATER.put(Items.LIME_BANNER, BANNER);
-		WATER.put(Items.MAGENTA_BANNER, BANNER);
-		WATER.put(Items.ORANGE_BANNER, BANNER);
-		WATER.put(Items.PINK_BANNER, BANNER);
-		WATER.put(Items.PURPLE_BANNER, BANNER);
-		WATER.put(Items.RED_BANNER, BANNER);
-		WATER.put(Items.YELLOW_BANNER, BANNER);
-		WATER.put(Items.WHITE_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.GRAY_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.BLACK_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.BLUE_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.BROWN_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.CYAN_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.GREEN_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.LIGHT_BLUE_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.LIGHT_GRAY_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.LIME_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.MAGENTA_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.ORANGE_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.PINK_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.PURPLE_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.RED_SHULKER_BOX, SHULKER_BOX);
-		WATER.put(Items.YELLOW_SHULKER_BOX, SHULKER_BOX);
-		LAVA.put(
+		map2.put(Items.LEATHER_BOOTS, DYED_ITEM);
+		map2.put(Items.LEATHER_LEGGINGS, DYED_ITEM);
+		map2.put(Items.LEATHER_CHESTPLATE, DYED_ITEM);
+		map2.put(Items.LEATHER_HELMET, DYED_ITEM);
+		map2.put(Items.LEATHER_HORSE_ARMOR, DYED_ITEM);
+		map2.put(Items.WHITE_BANNER, BANNER);
+		map2.put(Items.GRAY_BANNER, BANNER);
+		map2.put(Items.BLACK_BANNER, BANNER);
+		map2.put(Items.BLUE_BANNER, BANNER);
+		map2.put(Items.BROWN_BANNER, BANNER);
+		map2.put(Items.CYAN_BANNER, BANNER);
+		map2.put(Items.GREEN_BANNER, BANNER);
+		map2.put(Items.LIGHT_BLUE_BANNER, BANNER);
+		map2.put(Items.LIGHT_GRAY_BANNER, BANNER);
+		map2.put(Items.LIME_BANNER, BANNER);
+		map2.put(Items.MAGENTA_BANNER, BANNER);
+		map2.put(Items.ORANGE_BANNER, BANNER);
+		map2.put(Items.PINK_BANNER, BANNER);
+		map2.put(Items.PURPLE_BANNER, BANNER);
+		map2.put(Items.RED_BANNER, BANNER);
+		map2.put(Items.YELLOW_BANNER, BANNER);
+		map2.put(Items.WHITE_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.GRAY_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.BLACK_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.BLUE_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.BROWN_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.CYAN_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.GREEN_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.LIGHT_BLUE_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.LIGHT_GRAY_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.LIME_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.MAGENTA_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.ORANGE_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.PINK_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.PURPLE_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.RED_SHULKER_BOX, SHULKER_BOX);
+		map2.put(Items.YELLOW_SHULKER_BOX, SHULKER_BOX);
+		Map<Item, CauldronInteraction> map3 = LAVA.map();
+		map3.put(
 			Items.BUCKET,
 			(CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> fillBucket(
 					blockState, level, blockPos, player, interactionHand, itemStack, new ItemStack(Items.LAVA_BUCKET), blockStatex -> true, SoundEvents.BUCKET_FILL_LAVA
 				)
 		);
-		addDefaultInteractions(LAVA);
-		POWDER_SNOW.put(
+		addDefaultInteractions(map3);
+		Map<Item, CauldronInteraction> map4 = POWDER_SNOW.map();
+		map4.put(
 			Items.BUCKET,
 			(CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> fillBucket(
 					blockState,
@@ -247,7 +254,7 @@ public interface CauldronInteraction {
 					SoundEvents.BUCKET_FILL_POWDER_SNOW
 				)
 		);
-		addDefaultInteractions(POWDER_SNOW);
+		addDefaultInteractions(map4);
 	}
 
 	static void addDefaultInteractions(Map<Item, CauldronInteraction> map) {
@@ -298,5 +305,8 @@ public interface CauldronInteraction {
 		}
 
 		return InteractionResult.sidedSuccess(level.isClientSide);
+	}
+
+	public static record InteractionMap(String name, Map<Item, CauldronInteraction> map) {
 	}
 }

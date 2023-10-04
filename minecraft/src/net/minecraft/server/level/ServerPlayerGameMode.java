@@ -232,10 +232,10 @@ public class ServerPlayerGameMode {
 			} else if (this.player.blockActionRestricted(this.level, blockPos, this.gameModeForPlayer)) {
 				return false;
 			} else {
-				block.playerWillDestroy(this.level, blockPos, blockState, this.player);
+				BlockState blockState2 = block.playerWillDestroy(this.level, blockPos, blockState, this.player);
 				boolean bl = this.level.removeBlock(blockPos, false);
 				if (bl) {
-					block.destroy(this.level, blockPos, blockState);
+					block.destroy(this.level, blockPos, blockState2);
 				}
 
 				if (this.isCreative()) {
@@ -243,10 +243,10 @@ public class ServerPlayerGameMode {
 				} else {
 					ItemStack itemStack = this.player.getMainHandItem();
 					ItemStack itemStack2 = itemStack.copy();
-					boolean bl2 = this.player.hasCorrectToolForDrops(blockState);
-					itemStack.mineBlock(this.level, blockState, blockPos, this.player);
+					boolean bl2 = this.player.hasCorrectToolForDrops(blockState2);
+					itemStack.mineBlock(this.level, blockState2, blockPos, this.player);
 					if (bl && bl2) {
-						block.playerDestroy(this.level, this.player, blockPos, blockState, blockEntity, itemStack2);
+						block.playerDestroy(this.level, this.player, blockPos, blockState2, blockEntity, itemStack2);
 					}
 
 					return true;

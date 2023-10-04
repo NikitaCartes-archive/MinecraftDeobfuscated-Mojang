@@ -1,8 +1,14 @@
 package net.minecraft.world.level.block;
 
-import java.util.function.Supplier;
+import com.mojang.datafixers.DataFixUtils;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -10,7 +16,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -22,6 +27,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class StemBlock extends BushBlock implements BonemealableBlock {
+	public static final MapCodec<StemBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					ResourceKey.codec(Registries.BLOCK).fieldOf("fruit").forGetter(stemBlock -> stemBlock.fruit),
+					ResourceKey.codec(Registries.BLOCK).fieldOf("attached_stem").forGetter(stemBlock -> stemBlock.attachedStem),
+					ResourceKey.codec(Registries.ITEM).fieldOf("seed").forGetter(stemBlock -> stemBlock.seed),
+					propertiesCodec()
+				)
+				.apply(instance, StemBlock::new)
+	);
 	public static final int MAX_AGE = 7;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
 	protected static final float AABB_OFFSET = 1.0F;
@@ -35,13 +49,20 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 		Block.box(7.0, 0.0, 7.0, 9.0, 14.0, 9.0),
 		Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0)
 	};
-	private final StemGrownBlock fruit;
-	private final Supplier<Item> seedSupplier;
+	private final ResourceKey<Block> fruit;
+	private final ResourceKey<Block> attachedStem;
+	private final ResourceKey<Item> seed;
 
-	protected StemBlock(StemGrownBlock stemGrownBlock, Supplier<Item> supplier, BlockBehaviour.Properties properties) {
+	@Override
+	public MapCodec<StemBlock> codec() {
+		return CODEC;
+	}
+
+	protected StemBlock(ResourceKey<Block> resourceKey, ResourceKey<Block> resourceKey2, ResourceKey<Item> resourceKey3, BlockBehaviour.Properties properties) {
 		super(properties);
-		this.fruit = stemGrownBlock;
-		this.seedSupplier = supplier;
+		this.fruit = resourceKey;
+		this.attachedStem = resourceKey2;
+		this.seed = resourceKey3;
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
 	}
 
@@ -69,8 +90,13 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 					BlockPos blockPos2 = blockPos.relative(direction);
 					BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
 					if (serverLevel.getBlockState(blockPos2).isAir() && (blockState2.is(Blocks.FARMLAND) || blockState2.is(BlockTags.DIRT))) {
-						serverLevel.setBlockAndUpdate(blockPos2, this.fruit.defaultBlockState());
-						serverLevel.setBlockAndUpdate(blockPos, this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
+						Registry<Block> registry = serverLevel.registryAccess().registryOrThrow(Registries.BLOCK);
+						Optional<Block> optional = registry.getOptional(this.fruit);
+						Optional<Block> optional2 = registry.getOptional(this.attachedStem);
+						if (optional.isPresent() && optional2.isPresent()) {
+							serverLevel.setBlockAndUpdate(blockPos2, ((Block)optional.get()).defaultBlockState());
+							serverLevel.setBlockAndUpdate(blockPos, ((Block)optional2.get()).defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
+						}
 					}
 				}
 			}
@@ -78,8 +104,8 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		return new ItemStack((ItemLike)this.seedSupplier.get());
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+		return new ItemStack(DataFixUtils.orElse(levelReader.registryAccess().registryOrThrow(Registries.ITEM).getOptional(this.seed), this));
 	}
 
 	@Override
@@ -105,9 +131,5 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(AGE);
-	}
-
-	public StemGrownBlock getFruit() {
-		return this.fruit;
 	}
 }

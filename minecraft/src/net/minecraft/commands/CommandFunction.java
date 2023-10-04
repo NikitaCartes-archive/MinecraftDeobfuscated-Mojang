@@ -261,13 +261,15 @@ public class CommandFunction {
 			@Nullable CompoundTag compoundTag, CommandDispatcher<CommandSourceStack> commandDispatcher, CommandSourceStack commandSourceStack
 		) throws FunctionInstantiationException {
 			if (compoundTag == null) {
-				throw new FunctionInstantiationException(Component.translatable("commands.function.error.missing_arguments", this.getId()));
+				throw new FunctionInstantiationException(Component.translatable("commands.function.error.missing_arguments", Component.translationArg(this.getId())));
 			} else {
 				List<String> list = new ArrayList(this.parameters.size());
 
 				for (String string : this.parameters) {
 					if (!compoundTag.contains(string)) {
-						throw new FunctionInstantiationException(Component.translatable("commands.function.error.missing_argument", this.getId(), string));
+						throw new FunctionInstantiationException(
+							Component.translatable("commands.function.error.missing_argument", Component.translationArg(this.getId()), string)
+						);
 					}
 
 					list.add(stringify(compoundTag.get(string)));
@@ -331,7 +333,9 @@ public class CommandFunction {
 
 						entrys2[i] = new CommandFunction.CommandEntry(parseResults);
 					} catch (CommandSyntaxException var13) {
-						throw new FunctionInstantiationException(Component.translatable("commands.function.error.parse", this.getId(), string2, var13.getMessage()));
+						throw new FunctionInstantiationException(
+							Component.translatable("commands.function.error.parse", Component.translationArg(this.getId()), string2, var13.getMessage())
+						);
 					}
 				}
 			}

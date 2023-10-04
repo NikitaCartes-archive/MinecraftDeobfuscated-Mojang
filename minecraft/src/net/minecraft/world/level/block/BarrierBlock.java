@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,7 +19,13 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
 public class BarrierBlock extends Block implements SimpleWaterloggedBlock {
+	public static final MapCodec<BarrierBlock> CODEC = simpleCodec(BarrierBlock::new);
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+
+	@Override
+	public MapCodec<BarrierBlock> codec() {
+		return CODEC;
+	}
 
 	protected BarrierBlock(BlockBehaviour.Properties properties) {
 		super(properties);

@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -35,6 +36,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class RedStoneWireBlock extends Block {
+	public static final MapCodec<RedStoneWireBlock> CODEC = simpleCodec(RedStoneWireBlock::new);
 	public static final EnumProperty<RedstoneSide> NORTH = BlockStateProperties.NORTH_REDSTONE;
 	public static final EnumProperty<RedstoneSide> EAST = BlockStateProperties.EAST_REDSTONE;
 	public static final EnumProperty<RedstoneSide> SOUTH = BlockStateProperties.SOUTH_REDSTONE;
@@ -86,6 +88,11 @@ public class RedStoneWireBlock extends Block {
 	private static final float PARTICLE_DENSITY = 0.2F;
 	private final BlockState crossState;
 	private boolean shouldSignal = true;
+
+	@Override
+	public MapCodec<RedStoneWireBlock> codec() {
+		return CODEC;
+	}
 
 	public RedStoneWireBlock(BlockBehaviour.Properties properties) {
 		super(properties);

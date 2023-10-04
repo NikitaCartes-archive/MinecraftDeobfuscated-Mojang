@@ -23,16 +23,16 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class EnchantCommand {
 	private static final DynamicCommandExceptionType ERROR_NOT_LIVING_ENTITY = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.enchant.failed.entity", object)
+		object -> Component.translatableEscape("commands.enchant.failed.entity", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_NO_ITEM = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.enchant.failed.itemless", object)
+		object -> Component.translatableEscape("commands.enchant.failed.itemless", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_INCOMPATIBLE = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.enchant.failed.incompatible", object)
+		object -> Component.translatableEscape("commands.enchant.failed.incompatible", object)
 	);
 	private static final Dynamic2CommandExceptionType ERROR_LEVEL_TOO_HIGH = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.enchant.failed.level", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.enchant.failed.level", object, object2)
 	);
 	private static final SimpleCommandExceptionType ERROR_NOTHING_HAPPENED = new SimpleCommandExceptionType(Component.translatable("commands.enchant.failed"));
 

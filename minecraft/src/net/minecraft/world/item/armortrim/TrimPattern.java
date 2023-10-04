@@ -5,10 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 
 public record TrimPattern(ResourceLocation assetId, Holder<Item> templateItem, Component description, boolean decal) {
@@ -16,7 +16,7 @@ public record TrimPattern(ResourceLocation assetId, Holder<Item> templateItem, C
 		instance -> instance.group(
 					ResourceLocation.CODEC.fieldOf("asset_id").forGetter(TrimPattern::assetId),
 					RegistryFixedCodec.create(Registries.ITEM).fieldOf("template_item").forGetter(TrimPattern::templateItem),
-					ExtraCodecs.COMPONENT.fieldOf("description").forGetter(TrimPattern::description),
+					ComponentSerialization.CODEC.fieldOf("description").forGetter(TrimPattern::description),
 					Codec.BOOL.fieldOf("decal").orElse(false).forGetter(TrimPattern::decal)
 				)
 				.apply(instance, TrimPattern::new)

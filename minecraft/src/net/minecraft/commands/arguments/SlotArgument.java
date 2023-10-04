@@ -20,7 +20,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 
 public class SlotArgument implements ArgumentType<Integer> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("container.5", "12", "weapon");
-	private static final DynamicCommandExceptionType ERROR_UNKNOWN_SLOT = new DynamicCommandExceptionType(object -> Component.translatable("slot.unknown", object));
+	private static final DynamicCommandExceptionType ERROR_UNKNOWN_SLOT = new DynamicCommandExceptionType(
+		object -> Component.translatableEscape("slot.unknown", object)
+	);
 	private static final Map<String, Integer> SLOTS = Util.make(Maps.<String, Integer>newHashMap(), hashMap -> {
 		for (int i = 0; i < 54; i++) {
 			hashMap.put("container." + i, i);

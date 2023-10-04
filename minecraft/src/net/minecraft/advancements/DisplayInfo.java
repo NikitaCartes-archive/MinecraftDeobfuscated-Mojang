@@ -163,8 +163,8 @@ public class DisplayInfo {
 	}
 
 	public static DisplayInfo fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		Component component = friendlyByteBuf.readComponent();
-		Component component2 = friendlyByteBuf.readComponent();
+		Component component = friendlyByteBuf.readComponentTrusted();
+		Component component2 = friendlyByteBuf.readComponentTrusted();
 		ItemStack itemStack = friendlyByteBuf.readItem();
 		FrameType frameType = friendlyByteBuf.readEnum(FrameType.class);
 		int i = friendlyByteBuf.readInt();

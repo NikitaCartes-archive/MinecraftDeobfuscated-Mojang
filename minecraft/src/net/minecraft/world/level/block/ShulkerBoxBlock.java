@@ -1,8 +1,11 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -30,6 +33,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -47,6 +51,12 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ShulkerBoxBlock extends BaseEntityBlock {
+	public static final MapCodec<ShulkerBoxBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					DyeColor.CODEC.optionalFieldOf("color").forGetter(shulkerBoxBlock -> Optional.ofNullable(shulkerBoxBlock.color)), propertiesCodec()
+				)
+				.apply(instance, (optional, properties) -> new ShulkerBoxBlock((DyeColor)optional.orElse(null), properties))
+	);
 	private static final float OPEN_AABB_SIZE = 1.0F;
 	private static final VoxelShape UP_OPEN_AABB = Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0);
 	private static final VoxelShape DOWN_OPEN_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
@@ -66,6 +76,11 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	public static final ResourceLocation CONTENTS = new ResourceLocation("contents");
 	@Nullable
 	private final DyeColor color;
+
+	@Override
+	public MapCodec<ShulkerBoxBlock> codec() {
+		return CODEC;
+	}
 
 	public ShulkerBoxBlock(@Nullable DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(properties);
@@ -130,7 +145,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
 			if (!level.isClientSide && player.isCreative() && !shulkerBoxBlockEntity.isEmpty()) {
@@ -148,7 +163,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 			}
 		}
 
-		super.playerWillDestroy(level, blockPos, blockState, player);
+		return super.playerWillDestroy(level, blockPos, blockState, player);
 	}
 
 	@Override
@@ -245,9 +260,9 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		ItemStack itemStack = super.getCloneItemStack(blockGetter, blockPos, blockState);
-		blockGetter.getBlockEntity(blockPos, BlockEntityType.SHULKER_BOX).ifPresent(shulkerBoxBlockEntity -> shulkerBoxBlockEntity.saveToItem(itemStack));
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+		ItemStack itemStack = super.getCloneItemStack(levelReader, blockPos, blockState);
+		levelReader.getBlockEntity(blockPos, BlockEntityType.SHULKER_BOX).ifPresent(shulkerBoxBlockEntity -> shulkerBoxBlockEntity.saveToItem(itemStack));
 		return itemStack;
 	}
 

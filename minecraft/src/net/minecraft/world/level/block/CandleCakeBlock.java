@@ -2,9 +2,12 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -27,6 +30,12 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CandleCakeBlock extends AbstractCandleBlock {
+	public static final MapCodec<CandleCakeBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					BuiltInRegistries.BLOCK.byNameCodec().fieldOf("candle").forGetter(candleCakeBlock -> candleCakeBlock.candleBlock), propertiesCodec()
+				)
+				.apply(instance, CandleCakeBlock::new)
+	);
 	public static final BooleanProperty LIT = AbstractCandleBlock.LIT;
 	protected static final float AABB_OFFSET = 1.0F;
 	protected static final VoxelShape CAKE_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 8.0, 15.0);
@@ -34,11 +43,18 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 	protected static final VoxelShape SHAPE = Shapes.or(CAKE_SHAPE, CANDLE_SHAPE);
 	private static final Map<Block, CandleCakeBlock> BY_CANDLE = Maps.<Block, CandleCakeBlock>newHashMap();
 	private static final Iterable<Vec3> PARTICLE_OFFSETS = ImmutableList.<Vec3>of(new Vec3(0.5, 1.0, 0.5));
+	private final Block candleBlock;
+
+	@Override
+	public MapCodec<CandleCakeBlock> codec() {
+		return CODEC;
+	}
 
 	protected CandleCakeBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(LIT, Boolean.valueOf(false)));
 		BY_CANDLE.put(block, this);
+		this.candleBlock = block;
 	}
 
 	@Override
@@ -81,7 +97,7 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(Blocks.CAKE);
 	}
 

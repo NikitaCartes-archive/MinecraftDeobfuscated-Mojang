@@ -3,8 +3,10 @@ package net.minecraft.world.level.block;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.mojang.serialization.Codec;
 import java.util.Optional;
 import java.util.function.Supplier;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.WeatherState> {
@@ -62,10 +64,22 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
 		return this.getAge() == WeatheringCopper.WeatherState.UNAFFECTED ? 0.75F : 1.0F;
 	}
 
-	public static enum WeatherState {
-		UNAFFECTED,
-		EXPOSED,
-		WEATHERED,
-		OXIDIZED;
+	public static enum WeatherState implements StringRepresentable {
+		UNAFFECTED("unaffected"),
+		EXPOSED("exposed"),
+		WEATHERED("weathered"),
+		OXIDIZED("oxidized");
+
+		public static final Codec<WeatheringCopper.WeatherState> CODEC = StringRepresentable.fromEnum(WeatheringCopper.WeatherState::values);
+		private final String name;
+
+		private WeatherState(String string2) {
+			this.name = string2;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.name;
+		}
 	}
 }

@@ -126,7 +126,10 @@ public class DebugCommand {
 		int j = i;
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.debug.function.success.single", j, ((CommandFunction)collection.iterator().next()).getId(), string), true
+				() -> Component.translatable(
+						"commands.debug.function.success.single", j, Component.translationArg(((CommandFunction)collection.iterator().next()).getId()), string
+					),
+				true
 			);
 		} else {
 			commandSourceStack.sendSuccess(() -> Component.translatable("commands.debug.function.success.multiple", j, collection.size(), string), true);

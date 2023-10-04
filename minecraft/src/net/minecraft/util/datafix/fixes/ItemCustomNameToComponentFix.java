@@ -8,7 +8,7 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.serialization.Dynamic;
 import java.util.Optional;
-import net.minecraft.network.chat.Component;
+import net.minecraft.util.datafix.ComponentDataFixUtils;
 
 public class ItemCustomNameToComponentFix extends DataFix {
 	public ItemCustomNameToComponentFix(Schema schema, boolean bl) {
@@ -21,11 +21,11 @@ public class ItemCustomNameToComponentFix extends DataFix {
 			Dynamic<?> dynamic2 = (Dynamic<?>)optional.get();
 			Optional<String> optional2 = dynamic2.get("Name").asString().result();
 			if (optional2.isPresent()) {
-				dynamic2 = dynamic2.set("Name", dynamic2.createString(Component.Serializer.toJson(Component.literal((String)optional2.get()))));
+				dynamic2 = dynamic2.set("Name", ComponentDataFixUtils.createPlainTextComponent(dynamic2.getOps(), (String)optional2.get()));
 			} else {
 				Optional<String> optional3 = dynamic2.get("LocName").asString().result();
 				if (optional3.isPresent()) {
-					dynamic2 = dynamic2.set("Name", dynamic2.createString(Component.Serializer.toJson(Component.translatable((String)optional3.get()))));
+					dynamic2 = dynamic2.set("Name", ComponentDataFixUtils.createTranslatableComponent(dynamic2.getOps(), (String)optional3.get()));
 					dynamic2 = dynamic2.remove("LocName");
 				}
 			}

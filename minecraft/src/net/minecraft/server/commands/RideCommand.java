@@ -14,13 +14,13 @@ import net.minecraft.world.entity.EntityType;
 
 public class RideCommand {
 	private static final DynamicCommandExceptionType ERROR_NOT_RIDING = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.ride.not_riding", object)
+		object -> Component.translatableEscape("commands.ride.not_riding", object)
 	);
 	private static final Dynamic2CommandExceptionType ERROR_ALREADY_RIDING = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.ride.already_riding", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.ride.already_riding", object, object2)
 	);
 	private static final Dynamic2CommandExceptionType ERROR_MOUNT_FAILED = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.ride.mount.failure.generic", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.ride.mount.failure.generic", object, object2)
 	);
 	private static final SimpleCommandExceptionType ERROR_MOUNTING_PLAYER = new SimpleCommandExceptionType(
 		Component.translatable("commands.ride.mount.failure.cant_ride_players")

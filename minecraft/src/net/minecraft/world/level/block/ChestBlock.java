@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +55,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements SimpleWaterloggedBlock {
+	public static final MapCodec<ChestBlock> CODEC = simpleCodec(properties -> new ChestBlock(properties, () -> BlockEntityType.CHEST));
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final EnumProperty<ChestType> TYPE = BlockStateProperties.CHEST_TYPE;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -113,6 +115,11 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 			return Optional.empty();
 		}
 	};
+
+	@Override
+	public MapCodec<? extends ChestBlock> codec() {
+		return CODEC;
+	}
 
 	protected ChestBlock(BlockBehaviour.Properties properties, Supplier<BlockEntityType<? extends ChestBlockEntity>> supplier) {
 		super(properties, supplier);

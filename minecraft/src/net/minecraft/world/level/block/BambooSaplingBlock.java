@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -21,8 +22,14 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BambooSaplingBlock extends Block implements BonemealableBlock {
+	public static final MapCodec<BambooSaplingBlock> CODEC = simpleCodec(BambooSaplingBlock::new);
 	protected static final float SAPLING_AABB_OFFSET = 4.0F;
 	protected static final VoxelShape SAPLING_SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 12.0, 12.0);
+
+	@Override
+	public MapCodec<BambooSaplingBlock> codec() {
+		return CODEC;
+	}
 
 	public BambooSaplingBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -62,7 +69,7 @@ public class BambooSaplingBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(Items.BAMBOO);
 	}
 

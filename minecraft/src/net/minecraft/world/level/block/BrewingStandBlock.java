@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -30,10 +31,16 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BrewingStandBlock extends BaseEntityBlock {
+	public static final MapCodec<BrewingStandBlock> CODEC = simpleCodec(BrewingStandBlock::new);
 	public static final BooleanProperty[] HAS_BOTTLE = new BooleanProperty[]{
 		BlockStateProperties.HAS_BOTTLE_0, BlockStateProperties.HAS_BOTTLE_1, BlockStateProperties.HAS_BOTTLE_2
 	};
 	protected static final VoxelShape SHAPE = Shapes.or(Block.box(1.0, 0.0, 1.0, 15.0, 2.0, 15.0), Block.box(7.0, 0.0, 7.0, 9.0, 14.0, 9.0));
+
+	@Override
+	public MapCodec<BrewingStandBlock> codec() {
+		return CODEC;
+	}
 
 	public BrewingStandBlock(BlockBehaviour.Properties properties) {
 		super(properties);

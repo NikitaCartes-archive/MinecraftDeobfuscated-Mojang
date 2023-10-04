@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -30,6 +31,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class TurtleEggBlock extends Block {
+	public static final MapCodec<TurtleEggBlock> CODEC = simpleCodec(TurtleEggBlock::new);
 	public static final int MAX_HATCH_LEVEL = 2;
 	public static final int MIN_EGGS = 1;
 	public static final int MAX_EGGS = 4;
@@ -37,6 +39,11 @@ public class TurtleEggBlock extends Block {
 	private static final VoxelShape MULTIPLE_EGGS_AABB = Block.box(1.0, 0.0, 1.0, 15.0, 7.0, 15.0);
 	public static final IntegerProperty HATCH = BlockStateProperties.HATCH;
 	public static final IntegerProperty EGGS = BlockStateProperties.EGGS;
+
+	@Override
+	public MapCodec<TurtleEggBlock> codec() {
+		return CODEC;
+	}
 
 	public TurtleEggBlock(BlockBehaviour.Properties properties) {
 		super(properties);

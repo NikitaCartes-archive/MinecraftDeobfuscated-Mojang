@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -10,6 +11,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CarrotBlock extends CropBlock {
+	public static final MapCodec<CarrotBlock> CODEC = simpleCodec(CarrotBlock::new);
 	private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{
 		Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0),
 		Block.box(0.0, 0.0, 0.0, 16.0, 3.0, 16.0),
@@ -20,6 +22,11 @@ public class CarrotBlock extends CropBlock {
 		Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0),
 		Block.box(0.0, 0.0, 0.0, 16.0, 9.0, 16.0)
 	};
+
+	@Override
+	public MapCodec<CarrotBlock> codec() {
+		return CODEC;
+	}
 
 	public CarrotBlock(BlockBehaviour.Properties properties) {
 		super(properties);

@@ -35,16 +35,16 @@ import org.slf4j.Logger;
 public class LocateCommand {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final DynamicCommandExceptionType ERROR_STRUCTURE_NOT_FOUND = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.locate.structure.not_found", object)
+		object -> Component.translatableEscape("commands.locate.structure.not_found", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_STRUCTURE_INVALID = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.locate.structure.invalid", object)
+		object -> Component.translatableEscape("commands.locate.structure.invalid", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_BIOME_NOT_FOUND = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.locate.biome.not_found", object)
+		object -> Component.translatableEscape("commands.locate.biome.not_found", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_POI_NOT_FOUND = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.locate.poi.not_found", object)
+		object -> Component.translatableEscape("commands.locate.poi.not_found", object)
 	);
 	private static final int MAX_STRUCTURE_SEARCH_RADIUS = 100;
 	private static final int MAX_BIOME_SEARCH_RADIUS = 6400;

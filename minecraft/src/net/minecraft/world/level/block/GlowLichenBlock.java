@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,8 +21,14 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
 public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock, SimpleWaterloggedBlock {
+	public static final MapCodec<GlowLichenBlock> CODEC = simpleCodec(GlowLichenBlock::new);
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private final MultifaceSpreader spreader = new MultifaceSpreader(this);
+
+	@Override
+	public MapCodec<GlowLichenBlock> codec() {
+		return CODEC;
+	}
 
 	public GlowLichenBlock(BlockBehaviour.Properties properties) {
 		super(properties);

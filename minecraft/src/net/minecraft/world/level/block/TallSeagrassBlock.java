@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,9 +22,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class TallSeagrassBlock extends DoublePlantBlock implements LiquidBlockContainer {
+	public static final MapCodec<TallSeagrassBlock> CODEC = simpleCodec(TallSeagrassBlock::new);
 	public static final EnumProperty<DoubleBlockHalf> HALF = DoublePlantBlock.HALF;
 	protected static final float AABB_OFFSET = 6.0F;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0);
+
+	@Override
+	public MapCodec<TallSeagrassBlock> codec() {
+		return CODEC;
+	}
 
 	public TallSeagrassBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -40,7 +47,7 @@ public class TallSeagrassBlock extends DoublePlantBlock implements LiquidBlockCo
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(Blocks.SEAGRASS);
 	}
 

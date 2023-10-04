@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
@@ -17,7 +18,13 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class DragonEggBlock extends FallingBlock {
+	public static final MapCodec<DragonEggBlock> CODEC = simpleCodec(DragonEggBlock::new);
 	protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
+
+	@Override
+	public MapCodec<DragonEggBlock> codec() {
+		return CODEC;
+	}
 
 	public DragonEggBlock(BlockBehaviour.Properties properties) {
 		super(properties);

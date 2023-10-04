@@ -1,5 +1,8 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,8 +22,18 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class AmethystClusterBlock extends AmethystBlock implements SimpleWaterloggedBlock {
+	public static final MapCodec<AmethystClusterBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					Codec.FLOAT.fieldOf("height").forGetter(amethystClusterBlock -> amethystClusterBlock.height),
+					Codec.FLOAT.fieldOf("aabb_offset").forGetter(amethystClusterBlock -> amethystClusterBlock.aabbOffset),
+					propertiesCodec()
+				)
+				.apply(instance, AmethystClusterBlock::new)
+	);
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final DirectionProperty FACING = BlockStateProperties.FACING;
+	private final float height;
+	private final float aabbOffset;
 	protected final VoxelShape northAabb;
 	protected final VoxelShape southAabb;
 	protected final VoxelShape eastAabb;
@@ -28,15 +41,22 @@ public class AmethystClusterBlock extends AmethystBlock implements SimpleWaterlo
 	protected final VoxelShape upAabb;
 	protected final VoxelShape downAabb;
 
-	public AmethystClusterBlock(int i, int j, BlockBehaviour.Properties properties) {
+	@Override
+	public MapCodec<AmethystClusterBlock> codec() {
+		return CODEC;
+	}
+
+	public AmethystClusterBlock(float f, float g, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.defaultBlockState().setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(FACING, Direction.UP));
-		this.upAabb = Block.box((double)j, 0.0, (double)j, (double)(16 - j), (double)i, (double)(16 - j));
-		this.downAabb = Block.box((double)j, (double)(16 - i), (double)j, (double)(16 - j), 16.0, (double)(16 - j));
-		this.northAabb = Block.box((double)j, (double)j, (double)(16 - i), (double)(16 - j), (double)(16 - j), 16.0);
-		this.southAabb = Block.box((double)j, (double)j, 0.0, (double)(16 - j), (double)(16 - j), (double)i);
-		this.eastAabb = Block.box(0.0, (double)j, (double)j, (double)i, (double)(16 - j), (double)(16 - j));
-		this.westAabb = Block.box((double)(16 - i), (double)j, (double)j, 16.0, (double)(16 - j), (double)(16 - j));
+		this.upAabb = Block.box((double)g, 0.0, (double)g, (double)(16.0F - g), (double)f, (double)(16.0F - g));
+		this.downAabb = Block.box((double)g, (double)(16.0F - f), (double)g, (double)(16.0F - g), 16.0, (double)(16.0F - g));
+		this.northAabb = Block.box((double)g, (double)g, (double)(16.0F - f), (double)(16.0F - g), (double)(16.0F - g), 16.0);
+		this.southAabb = Block.box((double)g, (double)g, 0.0, (double)(16.0F - g), (double)(16.0F - g), (double)f);
+		this.eastAabb = Block.box(0.0, (double)g, (double)g, (double)f, (double)(16.0F - g), (double)(16.0F - g));
+		this.westAabb = Block.box((double)(16.0F - f), (double)g, (double)g, 16.0, (double)(16.0F - g), (double)(16.0F - g));
+		this.height = f;
+		this.aabbOffset = g;
 	}
 
 	@Override

@@ -96,13 +96,13 @@ import net.minecraft.world.scores.Scoreboard;
 public class ExecuteCommand {
 	private static final int MAX_TEST_AREA = 32768;
 	private static final Dynamic2CommandExceptionType ERROR_AREA_TOO_LARGE = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.execute.blocks.toobig", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.execute.blocks.toobig", object, object2)
 	);
 	private static final SimpleCommandExceptionType ERROR_CONDITIONAL_FAILED = new SimpleCommandExceptionType(
 		Component.translatable("commands.execute.conditional.fail")
 	);
 	private static final DynamicCommandExceptionType ERROR_CONDITIONAL_FAILED_COUNT = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.execute.conditional.fail_count", object)
+		object -> Component.translatableEscape("commands.execute.conditional.fail_count", object)
 	);
 	private static final BinaryOperator<ResultConsumer<CommandSourceStack>> CALLBACK_CHAINER = (resultConsumer, resultConsumer2) -> (commandContext, bl, i) -> {
 			resultConsumer.onCommandComplete(commandContext, bl, i);

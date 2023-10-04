@@ -3,42 +3,37 @@ package net.minecraft.network.chat;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.Message;
-import java.io.IOException;
+import com.mojang.serialization.JsonOps;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Map.Entry;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.network.chat.contents.BlockDataSource;
 import net.minecraft.network.chat.contents.DataSource;
-import net.minecraft.network.chat.contents.EntityDataSource;
 import net.minecraft.network.chat.contents.KeybindContents;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.NbtContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.ScoreContents;
 import net.minecraft.network.chat.contents.SelectorContents;
-import net.minecraft.network.chat.contents.StorageDataSource;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
+import net.minecraft.world.level.ChunkPos;
 
 public interface Component extends Message, FormattedText {
 	Style getStyle();
@@ -65,6 +60,15 @@ public interface Component extends Message, FormattedText {
 	}
 
 	List<Component> getSiblings();
+
+	@Nullable
+	default String tryCollapseToString() {
+		if (this.getContents() instanceof PlainTextContents plainTextContents && this.getSiblings().isEmpty() && this.getStyle().isEmpty()) {
+			return plainTextContents.text();
+		}
+
+		return null;
+	}
 
 	default MutableComponent plainCopy() {
 		return MutableComponent.create(this.getContents());
@@ -142,7 +146,7 @@ public interface Component extends Message, FormattedText {
 	}
 
 	static MutableComponent literal(String string) {
-		return MutableComponent.create(new LiteralContents(string));
+		return MutableComponent.create(PlainTextContents.create(string));
 	}
 
 	static MutableComponent translatable(String string) {
@@ -151,6 +155,17 @@ public interface Component extends Message, FormattedText {
 
 	static MutableComponent translatable(String string, Object... objects) {
 		return MutableComponent.create(new TranslatableContents(string, null, objects));
+	}
+
+	static MutableComponent translatableEscape(String string, Object... objects) {
+		for (int i = 0; i < objects.length; i++) {
+			Object object = objects[i];
+			if (!TranslatableContents.isAllowedPrimitiveArgument(object) && !(object instanceof Component)) {
+				objects[i] = String.valueOf(object);
+			}
+		}
+
+		return translatable(string, objects);
 	}
 
 	static MutableComponent translatableWithFallback(String string, @Nullable String string2) {
@@ -162,7 +177,7 @@ public interface Component extends Message, FormattedText {
 	}
 
 	static MutableComponent empty() {
-		return MutableComponent.create(ComponentContents.EMPTY);
+		return MutableComponent.create(PlainTextContents.EMPTY);
 	}
 
 	static MutableComponent keybind(String string) {
@@ -181,15 +196,28 @@ public interface Component extends Message, FormattedText {
 		return MutableComponent.create(new SelectorContents(string, optional));
 	}
 
-	public static class Serializer implements JsonDeserializer<MutableComponent>, JsonSerializer<Component> {
-		private static final Gson GSON = Util.make(() -> {
-			GsonBuilder gsonBuilder = new GsonBuilder();
-			gsonBuilder.disableHtmlEscaping();
-			gsonBuilder.registerTypeHierarchyAdapter(Component.class, new Component.Serializer());
-			gsonBuilder.registerTypeHierarchyAdapter(Style.class, new Style.Serializer());
-			gsonBuilder.registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory());
-			return gsonBuilder.create();
-		});
+	static Component translationArg(Date date) {
+		return literal(date.toString());
+	}
+
+	static Component translationArg(Message message) {
+		return (Component)(message instanceof Component component ? component : literal(message.getString()));
+	}
+
+	static Component translationArg(UUID uUID) {
+		return literal(uUID.toString());
+	}
+
+	static Component translationArg(ResourceLocation resourceLocation) {
+		return literal(resourceLocation.toString());
+	}
+
+	static Component translationArg(ChunkPos chunkPos) {
+		return literal(chunkPos.toString());
+	}
+
+	public static class Serializer {
+		private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 		private static final Field JSON_READER_POS = Util.make(() -> {
 			try {
 				new JsonReader(new StringReader(""));
@@ -211,241 +239,52 @@ public interface Component extends Message, FormattedText {
 			}
 		});
 
-		public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-			if (jsonElement.isJsonPrimitive()) {
-				return Component.literal(jsonElement.getAsString());
-			} else if (!jsonElement.isJsonObject()) {
-				if (jsonElement.isJsonArray()) {
-					JsonArray jsonArray3 = jsonElement.getAsJsonArray();
-					MutableComponent mutableComponent = null;
-
-					for (JsonElement jsonElement2 : jsonArray3) {
-						MutableComponent mutableComponent2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
-						if (mutableComponent == null) {
-							mutableComponent = mutableComponent2;
-						} else {
-							mutableComponent.append(mutableComponent2);
-						}
-					}
-
-					return mutableComponent;
-				} else {
-					throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
-				}
-			} else {
-				JsonObject jsonObject = jsonElement.getAsJsonObject();
-				MutableComponent mutableComponent;
-				if (jsonObject.has("text")) {
-					String string = GsonHelper.getAsString(jsonObject, "text");
-					mutableComponent = string.isEmpty() ? Component.empty() : Component.literal(string);
-				} else if (jsonObject.has("translate")) {
-					String string = GsonHelper.getAsString(jsonObject, "translate");
-					String string2 = GsonHelper.getAsString(jsonObject, "fallback", null);
-					if (jsonObject.has("with")) {
-						JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "with");
-						Object[] objects = new Object[jsonArray.size()];
-
-						for (int i = 0; i < objects.length; i++) {
-							objects[i] = unwrapTextArgument(this.deserialize(jsonArray.get(i), type, jsonDeserializationContext));
-						}
-
-						mutableComponent = Component.translatableWithFallback(string, string2, objects);
-					} else {
-						mutableComponent = Component.translatableWithFallback(string, string2);
-					}
-				} else if (jsonObject.has("score")) {
-					JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "score");
-					if (!jsonObject2.has("name") || !jsonObject2.has("objective")) {
-						throw new JsonParseException("A score component needs a least a name and an objective");
-					}
-
-					mutableComponent = Component.score(GsonHelper.getAsString(jsonObject2, "name"), GsonHelper.getAsString(jsonObject2, "objective"));
-				} else if (jsonObject.has("selector")) {
-					Optional<Component> optional = this.parseSeparator(type, jsonDeserializationContext, jsonObject);
-					mutableComponent = Component.selector(GsonHelper.getAsString(jsonObject, "selector"), optional);
-				} else if (jsonObject.has("keybind")) {
-					mutableComponent = Component.keybind(GsonHelper.getAsString(jsonObject, "keybind"));
-				} else {
-					if (!jsonObject.has("nbt")) {
-						throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
-					}
-
-					String string = GsonHelper.getAsString(jsonObject, "nbt");
-					Optional<Component> optional2 = this.parseSeparator(type, jsonDeserializationContext, jsonObject);
-					boolean bl = GsonHelper.getAsBoolean(jsonObject, "interpret", false);
-					DataSource dataSource;
-					if (jsonObject.has("block")) {
-						dataSource = new BlockDataSource(GsonHelper.getAsString(jsonObject, "block"));
-					} else if (jsonObject.has("entity")) {
-						dataSource = new EntityDataSource(GsonHelper.getAsString(jsonObject, "entity"));
-					} else {
-						if (!jsonObject.has("storage")) {
-							throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
-						}
-
-						dataSource = new StorageDataSource(new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")));
-					}
-
-					mutableComponent = Component.nbt(string, bl, optional2, dataSource);
-				}
-
-				if (jsonObject.has("extra")) {
-					JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "extra");
-					if (jsonArray2.size() <= 0) {
-						throw new JsonParseException("Unexpected empty array of components");
-					}
-
-					for (int j = 0; j < jsonArray2.size(); j++) {
-						mutableComponent.append(this.deserialize(jsonArray2.get(j), type, jsonDeserializationContext));
-					}
-				}
-
-				mutableComponent.setStyle(jsonDeserializationContext.deserialize(jsonElement, Style.class));
-				return mutableComponent;
-			}
+		private Serializer() {
 		}
 
-		private static Object unwrapTextArgument(Object object) {
-			if (object instanceof Component component
-				&& component.getStyle().isEmpty()
-				&& component.getSiblings().isEmpty()
-				&& component.getContents() instanceof LiteralContents literalContents) {
-				return literalContents.text();
-			}
-
-			return object;
+		static MutableComponent deserialize(JsonElement jsonElement) {
+			return (MutableComponent)Util.getOrThrow(ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new);
 		}
 
-		private Optional<Component> parseSeparator(Type type, JsonDeserializationContext jsonDeserializationContext, JsonObject jsonObject) {
-			return jsonObject.has("separator") ? Optional.of(this.deserialize(jsonObject.get("separator"), type, jsonDeserializationContext)) : Optional.empty();
-		}
-
-		private void serializeStyle(Style style, JsonObject jsonObject, JsonSerializationContext jsonSerializationContext) {
-			JsonElement jsonElement = jsonSerializationContext.serialize(style);
-			if (jsonElement.isJsonObject()) {
-				JsonObject jsonObject2 = (JsonObject)jsonElement;
-
-				for (Entry<String, JsonElement> entry : jsonObject2.entrySet()) {
-					jsonObject.add((String)entry.getKey(), (JsonElement)entry.getValue());
-				}
-			}
-		}
-
-		public JsonElement serialize(Component component, Type type, JsonSerializationContext jsonSerializationContext) {
-			JsonObject jsonObject = new JsonObject();
-			if (!component.getStyle().isEmpty()) {
-				this.serializeStyle(component.getStyle(), jsonObject, jsonSerializationContext);
-			}
-
-			if (!component.getSiblings().isEmpty()) {
-				JsonArray jsonArray = new JsonArray();
-
-				for (Component component2 : component.getSiblings()) {
-					jsonArray.add(this.serialize(component2, Component.class, jsonSerializationContext));
-				}
-
-				jsonObject.add("extra", jsonArray);
-			}
-
-			ComponentContents componentContents = component.getContents();
-			if (componentContents == ComponentContents.EMPTY) {
-				jsonObject.addProperty("text", "");
-			} else if (componentContents instanceof LiteralContents literalContents) {
-				jsonObject.addProperty("text", literalContents.text());
-			} else if (componentContents instanceof TranslatableContents translatableContents) {
-				jsonObject.addProperty("translate", translatableContents.getKey());
-				String string = translatableContents.getFallback();
-				if (string != null) {
-					jsonObject.addProperty("fallback", string);
-				}
-
-				if (translatableContents.getArgs().length > 0) {
-					JsonArray jsonArray2 = new JsonArray();
-
-					for (Object object : translatableContents.getArgs()) {
-						if (object instanceof Component) {
-							jsonArray2.add(this.serialize((Component)object, object.getClass(), jsonSerializationContext));
-						} else {
-							jsonArray2.add(new JsonPrimitive(String.valueOf(object)));
-						}
-					}
-
-					jsonObject.add("with", jsonArray2);
-				}
-			} else if (componentContents instanceof ScoreContents scoreContents) {
-				JsonObject jsonObject2 = new JsonObject();
-				jsonObject2.addProperty("name", scoreContents.getName());
-				jsonObject2.addProperty("objective", scoreContents.getObjective());
-				jsonObject.add("score", jsonObject2);
-			} else if (componentContents instanceof SelectorContents selectorContents) {
-				jsonObject.addProperty("selector", selectorContents.getPattern());
-				this.serializeSeparator(jsonSerializationContext, jsonObject, selectorContents.getSeparator());
-			} else if (componentContents instanceof KeybindContents keybindContents) {
-				jsonObject.addProperty("keybind", keybindContents.getName());
-			} else {
-				if (!(componentContents instanceof NbtContents nbtContents)) {
-					throw new IllegalArgumentException("Don't know how to serialize " + componentContents + " as a Component");
-				}
-
-				jsonObject.addProperty("nbt", nbtContents.getNbtPath());
-				jsonObject.addProperty("interpret", nbtContents.isInterpreting());
-				this.serializeSeparator(jsonSerializationContext, jsonObject, nbtContents.getSeparator());
-				DataSource dataSource = nbtContents.getDataSource();
-				if (dataSource instanceof BlockDataSource blockDataSource) {
-					jsonObject.addProperty("block", blockDataSource.posPattern());
-				} else if (dataSource instanceof EntityDataSource entityDataSource) {
-					jsonObject.addProperty("entity", entityDataSource.selectorPattern());
-				} else {
-					if (!(dataSource instanceof StorageDataSource storageDataSource)) {
-						throw new IllegalArgumentException("Don't know how to serialize " + componentContents + " as a Component");
-					}
-
-					jsonObject.addProperty("storage", storageDataSource.id().toString());
-				}
-			}
-
-			return jsonObject;
-		}
-
-		private void serializeSeparator(JsonSerializationContext jsonSerializationContext, JsonObject jsonObject, Optional<Component> optional) {
-			optional.ifPresent(component -> jsonObject.add("separator", this.serialize(component, component.getClass(), jsonSerializationContext)));
+		static JsonElement serialize(Component component) {
+			return Util.getOrThrow(ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, component), JsonParseException::new);
 		}
 
 		public static String toJson(Component component) {
-			return GSON.toJson(component);
-		}
-
-		public static String toStableJson(Component component) {
-			return GsonHelper.toStableString(toJsonTree(component));
+			return GSON.toJson(serialize(component));
 		}
 
 		public static JsonElement toJsonTree(Component component) {
-			return GSON.toJsonTree(component);
+			return serialize(component);
 		}
 
 		@Nullable
 		public static MutableComponent fromJson(String string) {
-			return GsonHelper.fromNullableJson(GSON, string, MutableComponent.class, false);
+			JsonElement jsonElement = JsonParser.parseString(string);
+			return jsonElement == null ? null : deserialize(jsonElement);
 		}
 
 		@Nullable
-		public static MutableComponent fromJson(JsonElement jsonElement) {
-			return GSON.fromJson(jsonElement, MutableComponent.class);
+		public static MutableComponent fromJson(@Nullable JsonElement jsonElement) {
+			return jsonElement == null ? null : deserialize(jsonElement);
 		}
 
 		@Nullable
 		public static MutableComponent fromJsonLenient(String string) {
-			return GsonHelper.fromNullableJson(GSON, string, MutableComponent.class, true);
+			JsonReader jsonReader = new JsonReader(new StringReader(string));
+			jsonReader.setLenient(true);
+			JsonElement jsonElement = JsonParser.parseReader(jsonReader);
+			return jsonElement == null ? null : deserialize(jsonElement);
 		}
 
 		public static MutableComponent fromJson(com.mojang.brigadier.StringReader stringReader) {
 			try {
 				JsonReader jsonReader = new JsonReader(new StringReader(stringReader.getRemaining()));
 				jsonReader.setLenient(false);
-				MutableComponent mutableComponent = GSON.<MutableComponent>getAdapter(MutableComponent.class).read(jsonReader);
+				JsonElement jsonElement = JsonParser.parseReader(jsonReader);
 				stringReader.setCursor(stringReader.getCursor() + getPos(jsonReader));
-				return mutableComponent;
-			} catch (StackOverflowError | IOException var3) {
+				return deserialize(jsonElement);
+			} catch (StackOverflowError var3) {
 				throw new JsonParseException(var3);
 			}
 		}
@@ -456,6 +295,16 @@ public interface Component extends Message, FormattedText {
 			} catch (IllegalAccessException var2) {
 				throw new IllegalStateException("Couldn't read position of JsonReader", var2);
 			}
+		}
+	}
+
+	public static class SerializerAdapter implements JsonDeserializer<MutableComponent>, JsonSerializer<Component> {
+		public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+			return Component.Serializer.deserialize(jsonElement);
+		}
+
+		public JsonElement serialize(Component component, Type type, JsonSerializationContext jsonSerializationContext) {
+			return Component.Serializer.serialize(component);
 		}
 	}
 }

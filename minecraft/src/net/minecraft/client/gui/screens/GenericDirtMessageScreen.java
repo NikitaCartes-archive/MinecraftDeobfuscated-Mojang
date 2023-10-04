@@ -17,6 +17,11 @@ public class GenericDirtMessageScreen extends Screen {
 	}
 
 	@Override
+	protected boolean shouldNarrateNavigation() {
+		return false;
+	}
+
+	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 70, 16777215);

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,6 +26,9 @@ public abstract class GrowingPlantBlock extends Block {
 		this.shape = voxelShape;
 		this.scheduleFluidTicks = bl;
 	}
+
+	@Override
+	protected abstract MapCodec<? extends GrowingPlantBlock> codec();
 
 	@Nullable
 	@Override

@@ -114,7 +114,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 			(friendlyByteBuf, entry) -> friendlyByteBuf.writeVarInt(entry.latency())
 		),
 		UPDATE_DISPLAY_NAME(
-			(entryBuilder, friendlyByteBuf) -> entryBuilder.displayName = friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent),
+			(entryBuilder, friendlyByteBuf) -> entryBuilder.displayName = friendlyByteBuf.readNullable(FriendlyByteBuf::readComponentTrusted),
 			(friendlyByteBuf, entry) -> friendlyByteBuf.writeNullable(entry.displayName(), FriendlyByteBuf::writeComponent)
 		);
 

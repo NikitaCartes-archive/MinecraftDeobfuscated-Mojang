@@ -2,17 +2,16 @@ package net.minecraft.core;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 
 public class IdMapper<T> implements IdMap<T> {
 	private int nextId;
-	private final Object2IntMap<T> tToId;
+	private final Reference2IntMap<T> tToId;
 	private final List<T> idToT;
 
 	public IdMapper() {
@@ -21,7 +20,7 @@ public class IdMapper<T> implements IdMap<T> {
 
 	public IdMapper(int i) {
 		this.idToT = Lists.<T>newArrayListWithExpectedSize(i);
-		this.tToId = new Object2IntOpenCustomHashMap<>(i, Util.identityStrategy());
+		this.tToId = new Reference2IntOpenHashMap<>(i);
 		this.tToId.defaultReturnValue(-1);
 	}
 

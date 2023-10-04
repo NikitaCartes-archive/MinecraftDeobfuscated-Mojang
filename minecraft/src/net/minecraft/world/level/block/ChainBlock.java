@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,12 +19,18 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ChainBlock extends RotatedPillarBlock implements SimpleWaterloggedBlock {
+	public static final MapCodec<ChainBlock> CODEC = simpleCodec(ChainBlock::new);
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	protected static final float AABB_MIN = 6.5F;
 	protected static final float AABB_MAX = 9.5F;
 	protected static final VoxelShape Y_AXIS_AABB = Block.box(6.5, 0.0, 6.5, 9.5, 16.0, 9.5);
 	protected static final VoxelShape Z_AXIS_AABB = Block.box(6.5, 6.5, 0.0, 9.5, 9.5, 16.0);
 	protected static final VoxelShape X_AXIS_AABB = Block.box(0.0, 6.5, 6.5, 16.0, 9.5, 9.5);
+
+	@Override
+	public MapCodec<ChainBlock> codec() {
+		return CODEC;
+	}
 
 	public ChainBlock(BlockBehaviour.Properties properties) {
 		super(properties);

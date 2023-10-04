@@ -26,16 +26,16 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public class AttributeCommand {
 	private static final DynamicCommandExceptionType ERROR_NOT_LIVING_ENTITY = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.attribute.failed.entity", object)
+		object -> Component.translatableEscape("commands.attribute.failed.entity", object)
 	);
 	private static final Dynamic2CommandExceptionType ERROR_NO_SUCH_ATTRIBUTE = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.attribute.failed.no_attribute", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.attribute.failed.no_attribute", object, object2)
 	);
 	private static final Dynamic3CommandExceptionType ERROR_NO_SUCH_MODIFIER = new Dynamic3CommandExceptionType(
-		(object, object2, object3) -> Component.translatable("commands.attribute.failed.no_modifier", object2, object, object3)
+		(object, object2, object3) -> Component.translatableEscape("commands.attribute.failed.no_modifier", object2, object, object3)
 	);
 	private static final Dynamic3CommandExceptionType ERROR_MODIFIER_ALREADY_PRESENT = new Dynamic3CommandExceptionType(
-		(object, object2, object3) -> Component.translatable("commands.attribute.failed.modifier_already_present", object3, object2, object)
+		(object, object2, object3) -> Component.translatableEscape("commands.attribute.failed.modifier_already_present", object3, object2, object)
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
@@ -259,7 +259,10 @@ public class AttributeCommand {
 		} else {
 			double e = attributeMap.getModifierValue(holder, uUID);
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.attribute.modifier.value.get.success", uUID, getAttributeDescription(holder), entity.getName(), e), false
+				() -> Component.translatable(
+						"commands.attribute.modifier.value.get.success", Component.translationArg(uUID), getAttributeDescription(holder), entity.getName(), e
+					),
+				false
 			);
 			return (int)(e * d);
 		}
@@ -283,7 +286,8 @@ public class AttributeCommand {
 		} else {
 			attributeInstance.addPermanentModifier(attributeModifier);
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.attribute.modifier.add.success", uUID, getAttributeDescription(holder), entity.getName()), false
+				() -> Component.translatable("commands.attribute.modifier.add.success", Component.translationArg(uUID), getAttributeDescription(holder), entity.getName()),
+				false
 			);
 			return 1;
 		}
@@ -293,7 +297,10 @@ public class AttributeCommand {
 		AttributeInstance attributeInstance = getAttributeInstance(entity, holder);
 		if (attributeInstance.removePermanentModifier(uUID)) {
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.attribute.modifier.remove.success", uUID, getAttributeDescription(holder), entity.getName()), false
+				() -> Component.translatable(
+						"commands.attribute.modifier.remove.success", Component.translationArg(uUID), getAttributeDescription(holder), entity.getName()
+					),
+				false
 			);
 			return 1;
 		} else {

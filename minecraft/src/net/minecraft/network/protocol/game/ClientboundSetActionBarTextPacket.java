@@ -12,7 +12,7 @@ public class ClientboundSetActionBarTextPacket implements Packet<ClientGamePacke
 	}
 
 	public ClientboundSetActionBarTextPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.text = friendlyByteBuf.readComponent();
+		this.text = friendlyByteBuf.readComponentTrusted();
 	}
 
 	@Override

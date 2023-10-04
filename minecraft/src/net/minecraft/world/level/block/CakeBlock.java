@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -27,6 +28,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CakeBlock extends Block {
+	public static final MapCodec<CakeBlock> CODEC = simpleCodec(CakeBlock::new);
 	public static final int MAX_BITES = 6;
 	public static final IntegerProperty BITES = BlockStateProperties.BITES;
 	public static final int FULL_CAKE_SIGNAL = getOutputSignal(0);
@@ -41,6 +43,11 @@ public class CakeBlock extends Block {
 		Block.box(11.0, 0.0, 1.0, 15.0, 8.0, 15.0),
 		Block.box(13.0, 0.0, 1.0, 15.0, 8.0, 15.0)
 	};
+
+	@Override
+	public MapCodec<CakeBlock> codec() {
+		return CODEC;
+	}
 
 	protected CakeBlock(BlockBehaviour.Properties properties) {
 		super(properties);

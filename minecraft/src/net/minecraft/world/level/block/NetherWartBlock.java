@@ -1,11 +1,13 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -15,6 +17,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class NetherWartBlock extends BushBlock {
+	public static final MapCodec<NetherWartBlock> CODEC = simpleCodec(NetherWartBlock::new);
 	public static final int MAX_AGE = 3;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
 	private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{
@@ -23,6 +26,11 @@ public class NetherWartBlock extends BushBlock {
 		Block.box(0.0, 0.0, 0.0, 16.0, 11.0, 16.0),
 		Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0)
 	};
+
+	@Override
+	public MapCodec<NetherWartBlock> codec() {
+		return CODEC;
+	}
 
 	protected NetherWartBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -54,7 +62,7 @@ public class NetherWartBlock extends BushBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(Items.NETHER_WART);
 	}
 

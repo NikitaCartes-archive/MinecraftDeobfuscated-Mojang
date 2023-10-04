@@ -14,9 +14,14 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 
 	@Override
 	protected void addTags(HolderLookup.Provider provider) {
-		this.tag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON, EntityType.STRAY, EntityType.WITHER_SKELETON);
+		this.tag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON, EntityType.STRAY, EntityType.WITHER_SKELETON, EntityType.SKELETON_HORSE);
+		this.tag(EntityTypeTags.ZOMBIES)
+			.add(
+				EntityType.ZOMBIE_HORSE, EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER, EntityType.ZOMBIFIED_PIGLIN, EntityType.ZOGLIN, EntityType.DROWNED, EntityType.HUSK
+			);
 		this.tag(EntityTypeTags.RAIDERS)
 			.add(EntityType.EVOKER, EntityType.PILLAGER, EntityType.RAVAGER, EntityType.VINDICATOR, EntityType.ILLUSIONER, EntityType.WITCH);
+		this.tag(EntityTypeTags.UNDEAD).addTag(EntityTypeTags.SKELETONS).addTag(EntityTypeTags.ZOMBIES).add(EntityType.WITHER).add(EntityType.PHANTOM);
 		this.tag(EntityTypeTags.BEEHIVE_INHABITORS).add(EntityType.BEE);
 		this.tag(EntityTypeTags.ARROWS).add(EntityType.ARROW, EntityType.SPECTRAL_ARROW);
 		this.tag(EntityTypeTags.IMPACT_PROJECTILES)
@@ -36,6 +41,23 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 		this.tag(EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES).add(EntityType.DROWNED, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN);
 		this.tag(EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES).add(EntityType.STRAY, EntityType.POLAR_BEAR, EntityType.SNOW_GOLEM, EntityType.WITHER);
 		this.tag(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES).add(EntityType.STRIDER, EntityType.BLAZE, EntityType.MAGMA_CUBE);
+		this.tag(EntityTypeTags.CAN_BREATHE_UNDER_WATER)
+			.addTag(EntityTypeTags.UNDEAD)
+			.add(
+				EntityType.AXOLOTL,
+				EntityType.FROG,
+				EntityType.GUARDIAN,
+				EntityType.ELDER_GUARDIAN,
+				EntityType.TURTLE,
+				EntityType.GLOW_SQUID,
+				EntityType.COD,
+				EntityType.PUFFERFISH,
+				EntityType.SALMON,
+				EntityType.SQUID,
+				EntityType.TROPICAL_FISH,
+				EntityType.TADPOLE,
+				EntityType.ARMOR_STAND
+			);
 		this.tag(EntityTypeTags.FROG_FOOD).add(EntityType.SLIME, EntityType.MAGMA_CUBE);
 		this.tag(EntityTypeTags.FALL_DAMAGE_IMMUNE)
 			.add(

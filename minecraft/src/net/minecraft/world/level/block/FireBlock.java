@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FireBlock extends BaseFireBlock {
+	public static final MapCodec<FireBlock> CODEC = simpleCodec(FireBlock::new);
 	public static final int MAX_AGE = 15;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
 	public static final BooleanProperty NORTH = PipeBlock.NORTH;
@@ -57,6 +59,11 @@ public class FireBlock extends BaseFireBlock {
 	private static final int BURN_HARD = 5;
 	private final Object2IntMap<Block> igniteOdds = new Object2IntOpenHashMap<>();
 	private final Object2IntMap<Block> burnOdds = new Object2IntOpenHashMap<>();
+
+	@Override
+	public MapCodec<FireBlock> codec() {
+		return CODEC;
+	}
 
 	public FireBlock(BlockBehaviour.Properties properties) {
 		super(properties, 1.0F);

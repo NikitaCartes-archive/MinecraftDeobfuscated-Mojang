@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
@@ -16,7 +17,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class SmithingTableBlock extends CraftingTableBlock {
+	public static final MapCodec<SmithingTableBlock> CODEC = simpleCodec(SmithingTableBlock::new);
 	private static final Component CONTAINER_TITLE = Component.translatable("container.upgrade");
+
+	@Override
+	public MapCodec<SmithingTableBlock> codec() {
+		return CODEC;
+	}
 
 	protected SmithingTableBlock(BlockBehaviour.Properties properties) {
 		super(properties);

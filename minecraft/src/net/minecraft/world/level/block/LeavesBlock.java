@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.OptionalInt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,11 +25,17 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
+	public static final MapCodec<LeavesBlock> CODEC = simpleCodec(LeavesBlock::new);
 	public static final int DECAY_DISTANCE = 7;
 	public static final IntegerProperty DISTANCE = BlockStateProperties.DISTANCE;
 	public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private static final int TICK_DELAY = 1;
+
+	@Override
+	public MapCodec<? extends LeavesBlock> codec() {
+		return CODEC;
+	}
 
 	public LeavesBlock(BlockBehaviour.Properties properties) {
 		super(properties);

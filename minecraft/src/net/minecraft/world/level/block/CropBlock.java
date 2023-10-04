@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -22,6 +23,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CropBlock extends BushBlock implements BonemealableBlock {
+	public static final MapCodec<CropBlock> CODEC = simpleCodec(CropBlock::new);
 	public static final int MAX_AGE = 7;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
 	private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{
@@ -34,6 +36,11 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 		Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0),
 		Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)
 	};
+
+	@Override
+	public MapCodec<? extends CropBlock> codec() {
+		return CODEC;
+	}
 
 	protected CropBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -169,7 +176,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(this.getBaseSeedId());
 	}
 

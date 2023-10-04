@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -10,6 +11,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class AmethystBlock extends Block {
+	public static final MapCodec<AmethystBlock> CODEC = simpleCodec(AmethystBlock::new);
+
+	@Override
+	public MapCodec<? extends AmethystBlock> codec() {
+		return CODEC;
+	}
+
 	public AmethystBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -56,7 +57,6 @@ import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -66,18 +66,17 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class ExtraCodecs {
-	public static final Codec<JsonElement> JSON = Codec.PASSTHROUGH
-		.xmap(dynamic -> dynamic.convert(JsonOps.INSTANCE).getValue(), jsonElement -> new Dynamic<>(JsonOps.INSTANCE, jsonElement));
-	public static final Codec<Component> COMPONENT = adaptJsonSerializer(Component.Serializer::fromJson, Component.Serializer::toJsonTree);
-	public static final Codec<Component> FLAT_COMPONENT = Codec.STRING.flatXmap(string -> {
+	public static final Codec<JsonElement> JSON = converter(JsonOps.INSTANCE);
+	public static final Codec<Object> JAVA = converter(JavaOps.INSTANCE);
+	public static final Codec<JsonElement> FLAT_JSON = Codec.STRING.flatXmap(string -> {
 		try {
-			return DataResult.success(Component.Serializer.fromJson(string));
+			return DataResult.success(JsonParser.parseString(string));
 		} catch (JsonParseException var2) {
 			return DataResult.error(var2::getMessage);
 		}
-	}, component -> {
+	}, jsonElement -> {
 		try {
-			return DataResult.success(Component.Serializer.toJson(component));
+			return DataResult.success(GsonHelper.toStableString(jsonElement));
 		} catch (IllegalArgumentException var2) {
 			return DataResult.error(var2::getMessage);
 		}
@@ -204,21 +203,8 @@ public class ExtraCodecs {
 				: DataResult.success(string)
 	);
 
-	@Deprecated
-	public static <T> Codec<T> adaptJsonSerializer(Function<JsonElement, T> function, Function<T, JsonElement> function2) {
-		return JSON.flatXmap(jsonElement -> {
-			try {
-				return DataResult.success(function.apply(jsonElement));
-			} catch (JsonParseException var3) {
-				return DataResult.error(var3::getMessage);
-			}
-		}, object -> {
-			try {
-				return DataResult.success((JsonElement)function2.apply(object));
-			} catch (IllegalArgumentException var3) {
-				return DataResult.error(var3::getMessage);
-			}
-		});
+	public static <T> Codec<T> converter(DynamicOps<T> dynamicOps) {
+		return Codec.PASSTHROUGH.xmap(dynamic -> dynamic.convert(dynamicOps).getValue(), object -> new Dynamic<>(dynamicOps, (T)object));
 	}
 
 	public static <F, S> Codec<Either<F, S>> xor(Codec<F> codec, Codec<S> codec2) {
@@ -305,6 +291,29 @@ public class ExtraCodecs {
 
 			public String toString() {
 				return codec + " orCompressed " + codec2;
+			}
+		};
+	}
+
+	public static <E> MapCodec<E> orCompressed(MapCodec<E> mapCodec, MapCodec<E> mapCodec2) {
+		return new MapCodec<E>() {
+			@Override
+			public <T> RecordBuilder<T> encode(E object, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
+				return dynamicOps.compressMaps() ? mapCodec2.encode(object, dynamicOps, recordBuilder) : mapCodec.encode(object, dynamicOps, recordBuilder);
+			}
+
+			@Override
+			public <T> DataResult<E> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
+				return dynamicOps.compressMaps() ? mapCodec2.decode(dynamicOps, mapLike) : mapCodec.decode(dynamicOps, mapLike);
+			}
+
+			@Override
+			public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
+				return mapCodec2.keys(dynamicOps);
+			}
+
+			public String toString() {
+				return mapCodec + " orCompressed " + mapCodec2;
 			}
 		};
 	}

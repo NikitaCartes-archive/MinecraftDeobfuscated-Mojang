@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,11 +30,17 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SculkShriekerBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
+	public static final MapCodec<SculkShriekerBlock> CODEC = simpleCodec(SculkShriekerBlock::new);
 	public static final BooleanProperty SHRIEKING = BlockStateProperties.SHRIEKING;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty CAN_SUMMON = BlockStateProperties.CAN_SUMMON;
 	protected static final VoxelShape COLLIDER = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
 	public static final double TOP_Y = COLLIDER.max(Direction.Axis.Y);
+
+	@Override
+	public MapCodec<SculkShriekerBlock> codec() {
+		return CODEC;
+	}
 
 	public SculkShriekerBlock(BlockBehaviour.Properties properties) {
 		super(properties);

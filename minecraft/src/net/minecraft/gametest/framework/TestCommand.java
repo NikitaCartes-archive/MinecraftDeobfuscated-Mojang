@@ -61,8 +61,12 @@ public class TestCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
 			Commands.literal("test")
-				.then(Commands.literal("runthis").executes(commandContext -> runNearbyTest(commandContext.getSource())))
-				.then(Commands.literal("runthese").executes(commandContext -> runAllNearbyTests(commandContext.getSource())))
+				.then(
+					Commands.literal("runthis")
+						.executes(commandContext -> runNearbyTest(commandContext.getSource(), false))
+						.then(Commands.literal("untilFailed").executes(commandContext -> runNearbyTest(commandContext.getSource(), true)))
+				)
+				.then(Commands.literal("runthese").executes(commandContext -> runAllNearbyTests(commandContext.getSource(), false)))
 				.then(
 					Commands.literal("runfailed")
 						.executes(commandContext -> runLastFailedTests(commandContext.getSource(), false, 0, 8))
@@ -281,7 +285,7 @@ public class TestCommand {
 		}
 	}
 
-	private static int runNearbyTest(CommandSourceStack commandSourceStack) {
+	private static int runNearbyTest(CommandSourceStack commandSourceStack, boolean bl) {
 		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		BlockPos blockPos2 = StructureUtils.findNearestStructureBlock(blockPos, 15, serverLevel);
@@ -290,12 +294,12 @@ public class TestCommand {
 			return 0;
 		} else {
 			GameTestRunner.clearMarkers(serverLevel);
-			runTest(serverLevel, blockPos2, null);
+			runTest(serverLevel, blockPos2, null, bl);
 			return 1;
 		}
 	}
 
-	private static int runAllNearbyTests(CommandSourceStack commandSourceStack) {
+	private static int runAllNearbyTests(CommandSourceStack commandSourceStack, boolean bl) {
 		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		Collection<BlockPos> collection = StructureUtils.findStructureBlocks(blockPos, 200, serverLevel);
@@ -306,16 +310,17 @@ public class TestCommand {
 			GameTestRunner.clearMarkers(serverLevel);
 			say(commandSourceStack, "Running " + collection.size() + " tests...");
 			MultipleTestTracker multipleTestTracker = new MultipleTestTracker();
-			collection.forEach(blockPosx -> runTest(serverLevel, blockPosx, multipleTestTracker));
+			collection.forEach(blockPosx -> runTest(serverLevel, blockPosx, multipleTestTracker, bl));
 			return 1;
 		}
 	}
 
-	private static void runTest(ServerLevel serverLevel, BlockPos blockPos, @Nullable MultipleTestTracker multipleTestTracker) {
+	private static void runTest(ServerLevel serverLevel, BlockPos blockPos, @Nullable MultipleTestTracker multipleTestTracker, boolean bl) {
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
 		String string = structureBlockEntity.getStructurePath();
 		TestFunction testFunction = GameTestRegistry.getTestFunction(string);
 		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, structureBlockEntity.getRotation(), serverLevel);
+		gameTestInfo.setRerunUntilFailed(bl);
 		if (multipleTestTracker != null) {
 			multipleTestTracker.addTestToTrack(gameTestInfo);
 			gameTestInfo.addListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));

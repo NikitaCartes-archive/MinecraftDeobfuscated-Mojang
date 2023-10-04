@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -15,7 +16,13 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class DirtPathBlock extends Block {
+	public static final MapCodec<DirtPathBlock> CODEC = simpleCodec(DirtPathBlock::new);
 	protected static final VoxelShape SHAPE = FarmBlock.SHAPE;
+
+	@Override
+	public MapCodec<DirtPathBlock> codec() {
+		return CODEC;
+	}
 
 	protected DirtPathBlock(BlockBehaviour.Properties properties) {
 		super(properties);

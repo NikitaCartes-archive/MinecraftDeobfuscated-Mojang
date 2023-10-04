@@ -1,5 +1,7 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -41,6 +43,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock {
+	public static final MapCodec<BedBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(DyeColor.CODEC.fieldOf("color").forGetter(BedBlock::getColor), propertiesCodec()).apply(instance, BedBlock::new)
+	);
 	public static final EnumProperty<BedPart> PART = BlockStateProperties.BED_PART;
 	public static final BooleanProperty OCCUPIED = BlockStateProperties.OCCUPIED;
 	protected static final int HEIGHT = 9;
@@ -55,6 +60,11 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	protected static final VoxelShape WEST_SHAPE = Shapes.or(BASE, LEG_NORTH_WEST, LEG_SOUTH_WEST);
 	protected static final VoxelShape EAST_SHAPE = Shapes.or(BASE, LEG_NORTH_EAST, LEG_SOUTH_EAST);
 	private final DyeColor color;
+
+	@Override
+	public MapCodec<BedBlock> codec() {
+		return CODEC;
+	}
 
 	public BedBlock(DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(properties);
@@ -164,7 +174,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Override
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide && player.isCreative()) {
 			BedPart bedPart = blockState.getValue(PART);
 			if (bedPart == BedPart.FOOT) {
@@ -177,7 +187,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 			}
 		}
 
-		super.playerWillDestroy(level, blockPos, blockState, player);
+		return super.playerWillDestroy(level, blockPos, blockState, player);
 	}
 
 	@Nullable

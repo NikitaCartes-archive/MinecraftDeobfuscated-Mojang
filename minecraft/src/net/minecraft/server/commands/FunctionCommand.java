@@ -25,7 +25,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 
 public class FunctionCommand {
 	private static final DynamicCommandExceptionType ERROR_ARGUMENT_NOT_COMPOUND = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.function.error.argument_not_compound", object)
+		object -> Component.translatableEscape("commands.function.error.argument_not_compound", object)
 	);
 	public static final SuggestionProvider<CommandSourceStack> SUGGEST_FUNCTION = (commandContext, suggestionsBuilder) -> {
 		ServerFunctionManager serverFunctionManager = commandContext.getSource().getServer().getFunctions();
@@ -107,11 +107,15 @@ public class FunctionCommand {
 			if (collection.size() == 1) {
 				if (bl) {
 					commandSourceStack.sendSuccess(
-						() -> Component.translatable("commands.function.success.single.result", j, ((CommandFunction)collection.iterator().next()).getId()), true
+						() -> Component.translatable(
+								"commands.function.success.single.result", j, Component.translationArg(((CommandFunction)collection.iterator().next()).getId())
+							),
+						true
 					);
 				} else {
 					commandSourceStack.sendSuccess(
-						() -> Component.translatable("commands.function.success.single", j, ((CommandFunction)collection.iterator().next()).getId()), true
+						() -> Component.translatable("commands.function.success.single", j, Component.translationArg(((CommandFunction)collection.iterator().next()).getId())),
+						true
 					);
 				}
 			} else if (bl) {

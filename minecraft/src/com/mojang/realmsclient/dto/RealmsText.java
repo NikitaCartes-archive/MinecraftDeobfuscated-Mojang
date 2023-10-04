@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,16 +17,21 @@ public class RealmsText {
 	private static final String ARGS = "args";
 	private final String translationKey;
 	@Nullable
-	private final Object[] args;
+	private final String[] args;
 
-	private RealmsText(String string, @Nullable Object[] objects) {
+	private RealmsText(String string, @Nullable String[] strings) {
 		this.translationKey = string;
-		this.args = objects;
+		this.args = strings;
 	}
 
 	public Component createComponent(Component component) {
+		return (Component)Objects.requireNonNullElse(this.createComponent(), component);
+	}
+
+	@Nullable
+	public Component createComponent() {
 		if (!I18n.exists(this.translationKey)) {
-			return component;
+			return null;
 		} else {
 			return this.args == null ? Component.translatable(this.translationKey) : Component.translatable(this.translationKey, this.args);
 		}
@@ -47,5 +53,9 @@ public class RealmsText {
 		}
 
 		return new RealmsText(string, strings);
+	}
+
+	public String toString() {
+		return this.translationKey;
 	}
 }

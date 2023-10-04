@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,6 +37,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BellBlock extends BaseEntityBlock {
+	public static final MapCodec<BellBlock> CODEC = simpleCodec(BellBlock::new);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final EnumProperty<BellAttachType> ATTACHMENT = BlockStateProperties.BELL_ATTACHMENT;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -52,6 +54,11 @@ public class BellBlock extends BaseEntityBlock {
 	private static final VoxelShape TO_SOUTH = Shapes.or(BELL_SHAPE, Block.box(7.0, 13.0, 3.0, 9.0, 15.0, 16.0));
 	private static final VoxelShape CEILING_SHAPE = Shapes.or(BELL_SHAPE, Block.box(7.0, 13.0, 7.0, 9.0, 16.0, 9.0));
 	public static final int EVENT_BELL_RING = 1;
+
+	@Override
+	public MapCodec<BellBlock> codec() {
+		return CODEC;
+	}
 
 	public BellBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -277,5 +284,15 @@ public class BellBlock extends BaseEntityBlock {
 	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
+	}
+
+	@Override
+	public BlockState rotate(BlockState blockState, Rotation rotation) {
+		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
+	}
+
+	@Override
+	public BlockState mirror(BlockState blockState, Mirror mirror) {
+		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 }

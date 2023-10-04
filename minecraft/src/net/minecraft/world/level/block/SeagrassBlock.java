@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,8 +23,14 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SeagrassBlock extends BushBlock implements BonemealableBlock, LiquidBlockContainer {
+	public static final MapCodec<SeagrassBlock> CODEC = simpleCodec(SeagrassBlock::new);
 	protected static final float AABB_OFFSET = 6.0F;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 12.0, 14.0);
+
+	@Override
+	public MapCodec<SeagrassBlock> codec() {
+		return CODEC;
+	}
 
 	protected SeagrassBlock(BlockBehaviour.Properties properties) {
 		super(properties);

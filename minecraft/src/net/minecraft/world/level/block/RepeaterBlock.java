@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -20,8 +21,14 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class RepeaterBlock extends DiodeBlock {
+	public static final MapCodec<RepeaterBlock> CODEC = simpleCodec(RepeaterBlock::new);
 	public static final BooleanProperty LOCKED = BlockStateProperties.LOCKED;
 	public static final IntegerProperty DELAY = BlockStateProperties.DELAY;
+
+	@Override
+	public MapCodec<RepeaterBlock> codec() {
+		return CODEC;
+	}
 
 	protected RepeaterBlock(BlockBehaviour.Properties properties) {
 		super(properties);

@@ -18,7 +18,7 @@ import net.minecraft.world.scores.DisplaySlot;
 public class ScoreboardSlotArgument implements ArgumentType<DisplaySlot> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("sidebar", "foo.bar");
 	public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.scoreboardDisplaySlot.invalid", object)
+		object -> Component.translatableEscape("argument.scoreboardDisplaySlot.invalid", object)
 	);
 
 	private ScoreboardSlotArgument() {

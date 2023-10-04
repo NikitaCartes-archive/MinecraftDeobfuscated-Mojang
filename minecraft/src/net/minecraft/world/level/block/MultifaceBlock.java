@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -59,6 +60,9 @@ public abstract class MultifaceBlock extends Block {
 		this.canMirrorX = Direction.Plane.HORIZONTAL.stream().filter(Direction.Axis.X).filter(this::isFaceSupported).count() % 2L == 0L;
 		this.canMirrorZ = Direction.Plane.HORIZONTAL.stream().filter(Direction.Axis.Z).filter(this::isFaceSupported).count() % 2L == 0L;
 	}
+
+	@Override
+	protected abstract MapCodec<? extends MultifaceBlock> codec();
 
 	public static Set<Direction> availableFaces(BlockState blockState) {
 		if (!(blockState.getBlock() instanceof MultifaceBlock)) {

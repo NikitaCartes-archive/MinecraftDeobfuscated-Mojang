@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
@@ -19,7 +20,13 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.phys.BlockHitResult;
 
 public class JigsawBlock extends Block implements EntityBlock, GameMasterBlock {
+	public static final MapCodec<JigsawBlock> CODEC = simpleCodec(JigsawBlock::new);
 	public static final EnumProperty<FrontAndTop> ORIENTATION = BlockStateProperties.ORIENTATION;
+
+	@Override
+	public MapCodec<JigsawBlock> codec() {
+		return CODEC;
+	}
 
 	protected JigsawBlock(BlockBehaviour.Properties properties) {
 		super(properties);

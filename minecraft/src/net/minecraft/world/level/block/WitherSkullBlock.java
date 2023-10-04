@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -23,10 +24,16 @@ import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
 import net.minecraft.world.level.block.state.predicate.BlockStatePredicate;
 
 public class WitherSkullBlock extends SkullBlock {
+	public static final MapCodec<WitherSkullBlock> CODEC = simpleCodec(WitherSkullBlock::new);
 	@Nullable
 	private static BlockPattern witherPatternFull;
 	@Nullable
 	private static BlockPattern witherPatternBase;
+
+	@Override
+	public MapCodec<WitherSkullBlock> codec() {
+		return CODEC;
+	}
 
 	protected WitherSkullBlock(BlockBehaviour.Properties properties) {
 		super(SkullBlock.Types.WITHER_SKELETON, properties);

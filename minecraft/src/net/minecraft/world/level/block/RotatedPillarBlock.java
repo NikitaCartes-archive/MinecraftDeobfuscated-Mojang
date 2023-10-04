@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -9,7 +10,13 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 
 public class RotatedPillarBlock extends Block {
+	public static final MapCodec<RotatedPillarBlock> CODEC = simpleCodec(RotatedPillarBlock::new);
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
+
+	@Override
+	public MapCodec<? extends RotatedPillarBlock> codec() {
+		return CODEC;
+	}
 
 	public RotatedPillarBlock(BlockBehaviour.Properties properties) {
 		super(properties);

@@ -21,7 +21,7 @@ public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListe
 	public ClientboundOpenScreenPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readVarInt();
 		this.type = friendlyByteBuf.readById(BuiltInRegistries.MENU);
-		this.title = friendlyByteBuf.readComponent();
+		this.title = friendlyByteBuf.readComponentTrusted();
 	}
 
 	@Override

@@ -11,7 +11,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PrivateKey;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import javax.crypto.Cipher;
@@ -36,6 +35,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
@@ -109,7 +109,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 	@Override
 	public void handleHello(ServerboundHelloPacket serverboundHelloPacket) {
 		Validate.validState(this.state == ServerLoginPacketListenerImpl.State.HELLO, "Unexpected hello packet");
-		Validate.validState(isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username");
+		Validate.validState(Player.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username");
 		this.requestedUsername = serverboundHelloPacket.name();
 		GameProfile gameProfile = this.server.getSingleplayerProfile();
 		if (gameProfile != null && this.requestedUsername.equalsIgnoreCase(gameProfile.getName())) {
@@ -119,7 +119,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 				this.state = ServerLoginPacketListenerImpl.State.KEY;
 				this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic().getEncoded(), this.challenge));
 			} else {
-				this.startClientVerification(createOfflineProfile(this.requestedUsername));
+				this.startClientVerification(UUIDUtil.createOfflineProfile(this.requestedUsername));
 			}
 		}
 	}
@@ -157,10 +157,6 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 		this.connection.send(new ClientboundGameProfilePacket(gameProfile));
 	}
 
-	public static boolean isValidUsername(String string) {
-		return string.chars().filter(i -> i <= 32 || i >= 127).findAny().isEmpty();
-	}
-
 	@Override
 	public void handleKey(ServerboundKeyPacket serverboundKeyPacket) {
 		Validate.validState(this.state == ServerLoginPacketListenerImpl.State.KEY, "Unexpected key packet");
@@ -194,7 +190,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 						ServerLoginPacketListenerImpl.this.startClientVerification(gameProfile);
 					} else if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
 						ServerLoginPacketListenerImpl.LOGGER.warn("Failed to verify username but will let them in anyway!");
-						ServerLoginPacketListenerImpl.this.startClientVerification(ServerLoginPacketListenerImpl.createOfflineProfile(string));
+						ServerLoginPacketListenerImpl.this.startClientVerification(UUIDUtil.createOfflineProfile(string));
 					} else {
 						ServerLoginPacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.unverified_username"));
 						ServerLoginPacketListenerImpl.LOGGER.error("Username '{}' tried to join with an invalid session", string);
@@ -202,7 +198,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 				} catch (AuthenticationUnavailableException var4) {
 					if (ServerLoginPacketListenerImpl.this.server.isSingleplayer()) {
 						ServerLoginPacketListenerImpl.LOGGER.warn("Authentication servers are down but will let them in anyway!");
-						ServerLoginPacketListenerImpl.this.startClientVerification(ServerLoginPacketListenerImpl.createOfflineProfile(string));
+						ServerLoginPacketListenerImpl.this.startClientVerification(UUIDUtil.createOfflineProfile(string));
 					} else {
 						ServerLoginPacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.authservers_down"));
 						ServerLoginPacketListenerImpl.LOGGER.error("Couldn't verify username because servers are unavailable");
@@ -237,11 +233,6 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 		this.connection.setListener(serverConfigurationPacketListenerImpl);
 		serverConfigurationPacketListenerImpl.startConfiguration();
 		this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
-	}
-
-	protected static GameProfile createOfflineProfile(String string) {
-		UUID uUID = UUIDUtil.createOfflinePlayerUUID(string);
-		return new GameProfile(uUID, string);
 	}
 
 	static enum State {

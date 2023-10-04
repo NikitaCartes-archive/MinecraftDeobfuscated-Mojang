@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -9,6 +10,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CryingObsidianBlock extends Block {
+	public static final MapCodec<CryingObsidianBlock> CODEC = simpleCodec(CryingObsidianBlock::new);
+
+	@Override
+	public MapCodec<CryingObsidianBlock> codec() {
+		return CODEC;
+	}
+
 	public CryingObsidianBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

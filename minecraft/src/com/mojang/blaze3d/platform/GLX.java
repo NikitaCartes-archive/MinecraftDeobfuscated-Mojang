@@ -24,6 +24,7 @@ import org.lwjgl.glfw.GLFWErrorCallbackI;
 import org.lwjgl.glfw.GLFWNativeGLX;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -64,7 +65,10 @@ public class GLX {
 			throw new IllegalStateException(String.format(Locale.ROOT, "GLFW error before init: [0x%X]%s", integer, stringx));
 		});
 		List<String> list = Lists.<String>newArrayList();
-		GLFWErrorCallback gLFWErrorCallback = GLFW.glfwSetErrorCallback((i, l) -> list.add(String.format(Locale.ROOT, "GLFW error during init: [0x%X]%s", i, l)));
+		GLFWErrorCallback gLFWErrorCallback = GLFW.glfwSetErrorCallback((i, l) -> {
+			String stringx = l == 0L ? "" : MemoryUtil.memUTF8(l);
+			list.add(String.format(Locale.ROOT, "GLFW error during init: [0x%X]%s", i, stringx));
+		});
 		if (!GLFW.glfwInit()) {
 			throw new IllegalStateException("Failed to initialize GLFW, errors: " + Joiner.on(",").join(list));
 		} else {

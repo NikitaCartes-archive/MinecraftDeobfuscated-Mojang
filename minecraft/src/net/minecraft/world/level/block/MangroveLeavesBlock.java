@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -9,6 +10,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class MangroveLeavesBlock extends LeavesBlock implements BonemealableBlock {
+	public static final MapCodec<MangroveLeavesBlock> CODEC = simpleCodec(MangroveLeavesBlock::new);
+
+	@Override
+	public MapCodec<MangroveLeavesBlock> codec() {
+		return CODEC;
+	}
+
 	public MangroveLeavesBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -19,6 +20,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BaseCoralWallFanBlock extends BaseCoralFanBlock {
+	public static final MapCodec<BaseCoralWallFanBlock> CODEC = simpleCodec(BaseCoralWallFanBlock::new);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	private static final Map<Direction, VoxelShape> SHAPES = Maps.newEnumMap(
 		ImmutableMap.of(
@@ -32,6 +34,11 @@ public class BaseCoralWallFanBlock extends BaseCoralFanBlock {
 			Block.box(0.0, 4.0, 0.0, 11.0, 12.0, 16.0)
 		)
 	);
+
+	@Override
+	public MapCodec<? extends BaseCoralWallFanBlock> codec() {
+		return CODEC;
+	}
 
 	protected BaseCoralWallFanBlock(BlockBehaviour.Properties properties) {
 		super(properties);

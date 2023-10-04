@@ -11,11 +11,14 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DataResult.PartialResult;
-import it.unimi.dsi.fastutil.Hash.Strategy;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceImmutableList;
+import it.unimi.dsi.fastutil.objects.ReferenceList;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -58,7 +61,6 @@ import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -86,6 +88,7 @@ public class Util {
 	private static final ExecutorService BACKGROUND_EXECUTOR = makeExecutor("Main");
 	private static final ExecutorService IO_POOL = makeIoExecutor();
 	private static final DateTimeFormatter FILENAME_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
+	private static final int LINEAR_LOOKUP_THRESHOLD = 8;
 	public static final long NANOS_PER_MILLI = 1000000L;
 	public static TimeSource.NanoTimeSource timeSource = System::nanoTime;
 	public static final Ticker TICKER = new Ticker() {
@@ -358,10 +361,6 @@ public class Util {
 	public static <T> T make(T object, Consumer<? super T> consumer) {
 		consumer.accept(object);
 		return object;
-	}
-
-	public static <K> Strategy<K> identityStrategy() {
-		return Util.IdentityStrategy.INSTANCE;
 	}
 
 	public static <V> CompletableFuture<List<V>> sequence(List<? extends CompletableFuture<V>> list) {
@@ -778,23 +777,42 @@ public class Util {
 	}
 
 	public static <T> ToIntFunction<T> createIndexLookup(List<T> list) {
-		return createIndexLookup(list, Object2IntOpenHashMap::new);
-	}
+		int i = list.size();
+		if (i < 8) {
+			return list::indexOf;
+		} else {
+			Object2IntMap<T> object2IntMap = new Object2IntOpenHashMap<>(i);
+			object2IntMap.defaultReturnValue(-1);
 
-	public static <T> ToIntFunction<T> createIndexLookup(List<T> list, IntFunction<Object2IntMap<T>> intFunction) {
-		Object2IntMap<T> object2IntMap = (Object2IntMap<T>)intFunction.apply(list.size());
+			for (int j = 0; j < i; j++) {
+				object2IntMap.put((T)list.get(j), j);
+			}
 
-		for (int i = 0; i < list.size(); i++) {
-			object2IntMap.put((T)list.get(i), i);
+			return object2IntMap;
 		}
-
-		return object2IntMap;
 	}
 
-	public static <T, E extends Exception> T getOrThrow(DataResult<T> dataResult, Function<String, E> function) throws E {
+	public static <T> ToIntFunction<T> createIndexIdentityLookup(List<T> list) {
+		int i = list.size();
+		if (i < 8) {
+			ReferenceList<T> referenceList = new ReferenceImmutableList<>(list);
+			return referenceList::indexOf;
+		} else {
+			Reference2IntMap<T> reference2IntMap = new Reference2IntOpenHashMap<>(i);
+			reference2IntMap.defaultReturnValue(-1);
+
+			for (int j = 0; j < i; j++) {
+				reference2IntMap.put((T)list.get(j), j);
+			}
+
+			return reference2IntMap;
+		}
+	}
+
+	public static <T, E extends Throwable> T getOrThrow(DataResult<T> dataResult, Function<String, E> function) throws E {
 		Optional<PartialResult<T>> optional = dataResult.error();
 		if (optional.isPresent()) {
-			throw (Exception)function.apply(((PartialResult)optional.get()).message());
+			throw (Throwable)function.apply(((PartialResult)optional.get()).message());
 		} else {
 			return (T)dataResult.result().orElseThrow();
 		}
@@ -806,20 +824,6 @@ public class Util {
 
 	public static boolean isBlank(@Nullable String string) {
 		return string != null && string.length() != 0 ? string.chars().allMatch(Util::isWhitespace) : true;
-	}
-
-	static enum IdentityStrategy implements Strategy<Object> {
-		INSTANCE;
-
-		@Override
-		public int hashCode(Object object) {
-			return System.identityHashCode(object);
-		}
-
-		@Override
-		public boolean equals(Object object, Object object2) {
-			return object == object2;
-		}
 	}
 
 	public static enum OS {

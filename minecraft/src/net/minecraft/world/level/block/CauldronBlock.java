@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.world.level.Level;
@@ -11,8 +12,14 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
 public class CauldronBlock extends AbstractCauldronBlock {
+	public static final MapCodec<CauldronBlock> CODEC = simpleCodec(CauldronBlock::new);
 	private static final float RAIN_FILL_CHANCE = 0.05F;
 	private static final float POWDER_SNOW_FILL_CHANCE = 0.1F;
+
+	@Override
+	public MapCodec<CauldronBlock> codec() {
+		return CODEC;
+	}
 
 	public CauldronBlock(BlockBehaviour.Properties properties) {
 		super(properties, CauldronInteraction.EMPTY);

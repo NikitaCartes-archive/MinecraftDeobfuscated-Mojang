@@ -10,9 +10,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 
 public interface StringRepresentable {
 	int PRE_BUILT_MAP_THRESHOLD = 16;
@@ -27,20 +29,34 @@ public interface StringRepresentable {
 		Supplier<E[]> supplier, Function<String, String> function
 	) {
 		E[] enums = (E[])supplier.get();
-		if (enums.length > 16) {
-			Map<String, E> map = (Map<String, E>)Arrays.stream(enums)
-				.collect(Collectors.toMap(enum_ -> (String)function.apply(((StringRepresentable)enum_).getSerializedName()), enum_ -> enum_));
-			return new StringRepresentable.EnumCodec<>(enums, string -> string == null ? null : (Enum)map.get(string));
+		Function<String, E> function2 = createNameLookup(enums, function);
+		return new StringRepresentable.EnumCodec<>(enums, function2);
+	}
+
+	static <T extends StringRepresentable> Codec<T> fromValues(Supplier<T[]> supplier) {
+		T[] stringRepresentables = (T[])supplier.get();
+		Function<String, T> function = createNameLookup(stringRepresentables, string -> string);
+		ToIntFunction<T> toIntFunction = Util.createIndexLookup(Arrays.asList(stringRepresentables));
+		return new StringRepresentable.StringRepresentableCodec<>(stringRepresentables, function, toIntFunction);
+	}
+
+	static <T extends StringRepresentable> Function<String, T> createNameLookup(T[] stringRepresentables, Function<String, String> function) {
+		if (stringRepresentables.length > 16) {
+			Map<String, T> map = (Map<String, T>)Arrays.stream(stringRepresentables)
+				.collect(
+					Collectors.toMap(stringRepresentable -> (String)function.apply(stringRepresentable.getSerializedName()), stringRepresentable -> stringRepresentable)
+				);
+			return string -> string == null ? null : (StringRepresentable)map.get(string);
 		} else {
-			return new StringRepresentable.EnumCodec<>(enums, string -> {
-				for (E enum_ : enums) {
-					if (((String)function.apply(enum_.getSerializedName())).equals(string)) {
-						return enum_;
+			return string -> {
+				for (T stringRepresentable : stringRepresentables) {
+					if (((String)function.apply(stringRepresentable.getSerializedName())).equals(string)) {
+						return stringRepresentable;
 					}
 				}
 
 				return null;
-			});
+			};
 		}
 	}
 
@@ -54,25 +70,12 @@ public interface StringRepresentable {
 	}
 
 	@Deprecated
-	public static class EnumCodec<E extends Enum<E> & StringRepresentable> implements Codec<E> {
-		private final Codec<E> codec;
+	public static class EnumCodec<E extends Enum<E> & StringRepresentable> extends StringRepresentable.StringRepresentableCodec<E> {
 		private final Function<String, E> resolver;
 
 		public EnumCodec(E[] enums, Function<String, E> function) {
-			this.codec = ExtraCodecs.orCompressed(
-				ExtraCodecs.stringResolverCodec(object -> ((StringRepresentable)object).getSerializedName(), function),
-				ExtraCodecs.idResolverCodec(object -> ((Enum)object).ordinal(), i -> i >= 0 && i < enums.length ? enums[i] : null, -1)
-			);
+			super(enums, function, object -> ((Enum)object).ordinal());
 			this.resolver = function;
-		}
-
-		@Override
-		public <T> DataResult<Pair<E, T>> decode(DynamicOps<T> dynamicOps, T object) {
-			return this.codec.decode(dynamicOps, object);
-		}
-
-		public <T> DataResult<T> encode(E enum_, DynamicOps<T> dynamicOps, T object) {
-			return this.codec.encode(enum_, dynamicOps, object);
 		}
 
 		@Nullable
@@ -82,6 +85,26 @@ public interface StringRepresentable {
 
 		public E byName(@Nullable String string, E enum_) {
 			return (E)Objects.requireNonNullElse(this.byName(string), enum_);
+		}
+	}
+
+	public static class StringRepresentableCodec<S extends StringRepresentable> implements Codec<S> {
+		private final Codec<S> codec;
+
+		public StringRepresentableCodec(S[] stringRepresentables, Function<String, S> function, ToIntFunction<S> toIntFunction) {
+			this.codec = ExtraCodecs.orCompressed(
+				ExtraCodecs.stringResolverCodec(StringRepresentable::getSerializedName, function),
+				ExtraCodecs.idResolverCodec(toIntFunction, i -> i >= 0 && i < stringRepresentables.length ? stringRepresentables[i] : null, -1)
+			);
+		}
+
+		@Override
+		public <T> DataResult<Pair<S, T>> decode(DynamicOps<T> dynamicOps, T object) {
+			return this.codec.decode(dynamicOps, object);
+		}
+
+		public <T> DataResult<T> encode(S stringRepresentable, DynamicOps<T> dynamicOps, T object) {
+			return this.codec.encode(stringRepresentable, dynamicOps, object);
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
@@ -25,6 +27,10 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FenceGateBlock extends HorizontalDirectionalBlock {
+	public static final MapCodec<FenceGateBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(WoodType.CODEC.fieldOf("wood_type").forGetter(fenceGateBlock -> fenceGateBlock.type), propertiesCodec())
+				.apply(instance, FenceGateBlock::new)
+	);
 	public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final BooleanProperty IN_WALL = BlockStateProperties.IN_WALL;
@@ -42,7 +48,12 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	protected static final VoxelShape X_OCCLUSION_SHAPE_LOW = Shapes.or(Block.box(7.0, 2.0, 0.0, 9.0, 13.0, 2.0), Block.box(7.0, 2.0, 14.0, 9.0, 13.0, 16.0));
 	private final WoodType type;
 
-	public FenceGateBlock(BlockBehaviour.Properties properties, WoodType woodType) {
+	@Override
+	public MapCodec<FenceGateBlock> codec() {
+		return CODEC;
+	}
+
+	public FenceGateBlock(WoodType woodType, BlockBehaviour.Properties properties) {
 		super(properties.sound(woodType.soundType()));
 		this.type = woodType;
 		this.registerDefaultState(

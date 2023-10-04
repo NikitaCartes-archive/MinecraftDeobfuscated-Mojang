@@ -119,7 +119,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		private AddOperation(FriendlyByteBuf friendlyByteBuf) {
-			this.name = friendlyByteBuf.readComponent();
+			this.name = friendlyByteBuf.readComponentTrusted();
 			this.progress = friendlyByteBuf.readFloat();
 			this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
 			this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
@@ -202,7 +202,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		private UpdateNameOperation(FriendlyByteBuf friendlyByteBuf) {
-			this.name = friendlyByteBuf.readComponent();
+			this.name = friendlyByteBuf.readComponentTrusted();
 		}
 
 		@Override

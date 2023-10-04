@@ -29,7 +29,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -400,7 +399,7 @@ public class ArmorStand extends LivingEntity {
 			this.causeDamage(damageSource, 4.0F);
 			return false;
 		} else {
-			boolean bl = "player".equals(damageSource.getMsgId());
+			boolean bl = damageSource.is(DamageTypeTags.CAN_BREAK_ARMOR_STAND);
 			boolean bl2 = damageSource.is(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS);
 			if (!bl && !bl2) {
 				return false;
@@ -413,11 +412,7 @@ public class ArmorStand extends LivingEntity {
 					this.playBrokenSound();
 					this.showBreakingParticles();
 					this.kill();
-					if (damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow && abstractArrow.getPierceLevel() > 0) {
-						return true;
-					}
-
-					return false;
+					return true;
 				} else {
 					long l = this.level().getGameTime();
 					if (l - this.lastHit > 5L && !bl2) {

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -20,11 +21,17 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class HoneyBlock extends HalfTransparentBlock {
+	public static final MapCodec<HoneyBlock> CODEC = simpleCodec(HoneyBlock::new);
 	private static final double SLIDE_STARTS_WHEN_VERTICAL_SPEED_IS_AT_LEAST = 0.13;
 	private static final double MIN_FALL_SPEED_TO_BE_CONSIDERED_SLIDING = 0.08;
 	private static final double THROTTLE_SLIDE_SPEED_TO = 0.05;
 	private static final int SLIDE_ADVANCEMENT_CHECK_INTERVAL = 20;
 	protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 15.0, 15.0);
+
+	@Override
+	public MapCodec<HoneyBlock> codec() {
+		return CODEC;
+	}
 
 	public HoneyBlock(BlockBehaviour.Properties properties) {
 		super(properties);

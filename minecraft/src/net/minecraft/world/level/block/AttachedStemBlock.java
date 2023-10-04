@@ -2,15 +2,20 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.DataFixUtils;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -19,6 +24,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class AttachedStemBlock extends BushBlock {
+	public static final MapCodec<AttachedStemBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					ResourceKey.codec(Registries.BLOCK).fieldOf("fruit").forGetter(attachedStemBlock -> attachedStemBlock.fruit),
+					ResourceKey.codec(Registries.BLOCK).fieldOf("stem").forGetter(attachedStemBlock -> attachedStemBlock.stem),
+					ResourceKey.codec(Registries.ITEM).fieldOf("seed").forGetter(attachedStemBlock -> attachedStemBlock.seed),
+					propertiesCodec()
+				)
+				.apply(instance, AttachedStemBlock::new)
+	);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	protected static final float AABB_OFFSET = 2.0F;
 	private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(
@@ -33,14 +47,23 @@ public class AttachedStemBlock extends BushBlock {
 			Block.box(6.0, 0.0, 6.0, 16.0, 10.0, 10.0)
 		)
 	);
-	private final StemGrownBlock fruit;
-	private final Supplier<Item> seedSupplier;
+	private final ResourceKey<Block> fruit;
+	private final ResourceKey<Block> stem;
+	private final ResourceKey<Item> seed;
 
-	protected AttachedStemBlock(StemGrownBlock stemGrownBlock, Supplier<Item> supplier, BlockBehaviour.Properties properties) {
+	@Override
+	public MapCodec<AttachedStemBlock> codec() {
+		return CODEC;
+	}
+
+	protected AttachedStemBlock(
+		ResourceKey<Block> resourceKey, ResourceKey<Block> resourceKey2, ResourceKey<Item> resourceKey3, BlockBehaviour.Properties properties
+	) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
-		this.fruit = stemGrownBlock;
-		this.seedSupplier = supplier;
+		this.stem = resourceKey;
+		this.fruit = resourceKey2;
+		this.seed = resourceKey3;
 	}
 
 	@Override
@@ -52,9 +75,14 @@ public class AttachedStemBlock extends BushBlock {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		return !blockState2.is(this.fruit) && direction == blockState.getValue(FACING)
-			? this.fruit.getStem().defaultBlockState().setValue(StemBlock.AGE, Integer.valueOf(7))
-			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		if (!blockState2.is(this.fruit) && direction == blockState.getValue(FACING)) {
+			Optional<Block> optional = levelAccessor.registryAccess().registryOrThrow(Registries.BLOCK).getOptional(this.stem);
+			if (optional.isPresent()) {
+				return ((Block)optional.get()).defaultBlockState().trySetValue(StemBlock.AGE, Integer.valueOf(7));
+			}
+		}
+
+		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
 	@Override
@@ -63,8 +91,8 @@ public class AttachedStemBlock extends BushBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		return new ItemStack((ItemLike)this.seedSupplier.get());
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+		return new ItemStack(DataFixUtils.orElse(levelReader.registryAccess().registryOrThrow(Registries.ITEM).getOptional(this.seed), this));
 	}
 
 	@Override

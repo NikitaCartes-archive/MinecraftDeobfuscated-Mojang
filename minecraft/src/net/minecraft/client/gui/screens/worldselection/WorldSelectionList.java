@@ -339,7 +339,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 		@Override
 		public Component getNarration() {
 			Component component = Component.translatable(
-				"narrator.select.world_info", this.summary.getLevelName(), new Date(this.summary.getLastPlayed()), this.summary.getInfo()
+				"narrator.select.world_info", this.summary.getLevelName(), Component.translationArg(new Date(this.summary.getLastPlayed())), this.summary.getInfo()
 			);
 			if (this.summary.isLocked()) {
 				component = CommonComponents.joinForNarration(component, WorldSelectionList.WORLD_LOCKED_TOOLTIP);

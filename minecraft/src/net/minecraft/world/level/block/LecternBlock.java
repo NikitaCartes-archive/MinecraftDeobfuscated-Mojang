@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,6 +38,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LecternBlock extends BaseEntityBlock {
+	public static final MapCodec<LecternBlock> CODEC = simpleCodec(LecternBlock::new);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final BooleanProperty HAS_BOOK = BlockStateProperties.HAS_BOOK;
@@ -70,6 +72,11 @@ public class LecternBlock extends BaseEntityBlock {
 		SHAPE_COMMON
 	);
 	private static final int PAGE_CHANGE_IMPULSE_TICKS = 2;
+
+	@Override
+	public MapCodec<LecternBlock> codec() {
+		return CODEC;
+	}
 
 	protected LecternBlock(BlockBehaviour.Properties properties) {
 		super(properties);

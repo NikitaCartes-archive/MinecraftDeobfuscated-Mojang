@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.MenuProvider;
@@ -14,6 +15,9 @@ public abstract class BaseEntityBlock extends Block implements EntityBlock {
 	protected BaseEntityBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
+
+	@Override
+	protected abstract MapCodec<? extends BaseEntityBlock> codec();
 
 	@Override
 	public RenderShape getRenderShape(BlockState blockState) {

@@ -3,7 +3,6 @@ package net.minecraft.client.renderer.entity;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -150,7 +149,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			poseStack.translate(j, k, l);
 			entityRenderer.render(entity, g, h, poseStack, multiBufferSource, i);
 			if (entity.displayFireAnimation()) {
-				this.renderFlame(poseStack, multiBufferSource, entity);
+				this.renderFlame(poseStack, multiBufferSource, entity, Mth.rotationAroundAxis(Mth.Y_AXIS, this.cameraOrientation, new Quaternionf()));
 			}
 
 			poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
@@ -248,7 +247,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			.endVertex();
 	}
 
-	private void renderFlame(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity) {
+	private void renderFlame(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, Quaternionf quaternionf) {
 		TextureAtlasSprite textureAtlasSprite = ModelBakery.FIRE_0.sprite();
 		TextureAtlasSprite textureAtlasSprite2 = ModelBakery.FIRE_1.sprite();
 		poseStack.pushPose();
@@ -258,7 +257,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		float h = 0.0F;
 		float i = entity.getBbHeight() / f;
 		float j = 0.0F;
-		poseStack.mulPose(Axis.YP.rotationDegrees(-this.camera.getYRot()));
+		poseStack.mulPose(quaternionf);
 		poseStack.translate(0.0F, 0.0F, -0.3F + (float)((int)i) * 0.02F);
 		float k = 0.0F;
 		int l = 0;

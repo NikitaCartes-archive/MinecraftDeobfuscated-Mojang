@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -17,7 +18,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class CartographyTableBlock extends Block {
+	public static final MapCodec<CartographyTableBlock> CODEC = simpleCodec(CartographyTableBlock::new);
 	private static final Component CONTAINER_TITLE = Component.translatable("container.cartography_table");
+
+	@Override
+	public MapCodec<CartographyTableBlock> codec() {
+		return CODEC;
+	}
 
 	protected CartographyTableBlock(BlockBehaviour.Properties properties) {
 		super(properties);

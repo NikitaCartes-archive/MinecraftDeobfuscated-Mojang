@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -11,6 +12,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
 public class EndRodBlock extends RodBlock {
+	public static final MapCodec<EndRodBlock> CODEC = simpleCodec(EndRodBlock::new);
+
+	@Override
+	public MapCodec<EndRodBlock> codec() {
+		return CODEC;
+	}
+
 	protected EndRodBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP));

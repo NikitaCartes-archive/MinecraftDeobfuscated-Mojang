@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +16,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TrappedChestBlock extends ChestBlock {
+	public static final MapCodec<TrappedChestBlock> CODEC = simpleCodec(TrappedChestBlock::new);
+
+	@Override
+	public MapCodec<TrappedChestBlock> codec() {
+		return CODEC;
+	}
+
 	public TrappedChestBlock(BlockBehaviour.Properties properties) {
 		super(properties, () -> BlockEntityType.TRAPPED_CHEST);
 	}

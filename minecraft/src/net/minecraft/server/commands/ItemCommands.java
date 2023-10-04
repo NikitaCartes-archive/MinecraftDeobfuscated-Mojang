@@ -42,22 +42,22 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class ItemCommands {
 	static final Dynamic3CommandExceptionType ERROR_TARGET_NOT_A_CONTAINER = new Dynamic3CommandExceptionType(
-		(object, object2, object3) -> Component.translatable("commands.item.target.not_a_container", object, object2, object3)
+		(object, object2, object3) -> Component.translatableEscape("commands.item.target.not_a_container", object, object2, object3)
 	);
 	private static final Dynamic3CommandExceptionType ERROR_SOURCE_NOT_A_CONTAINER = new Dynamic3CommandExceptionType(
-		(object, object2, object3) -> Component.translatable("commands.item.source.not_a_container", object, object2, object3)
+		(object, object2, object3) -> Component.translatableEscape("commands.item.source.not_a_container", object, object2, object3)
 	);
 	static final DynamicCommandExceptionType ERROR_TARGET_INAPPLICABLE_SLOT = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.item.target.no_such_slot", object)
+		object -> Component.translatableEscape("commands.item.target.no_such_slot", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_SOURCE_INAPPLICABLE_SLOT = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.item.source.no_such_slot", object)
+		object -> Component.translatableEscape("commands.item.source.no_such_slot", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_TARGET_NO_CHANGES = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.item.target.no_changes", object)
+		object -> Component.translatableEscape("commands.item.target.no_changes", object)
 	);
 	private static final Dynamic2CommandExceptionType ERROR_TARGET_NO_CHANGES_KNOWN_ITEM = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.item.target.no_changed.known_item", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.item.target.no_changed.known_item", object, object2)
 	);
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_MODIFIER = (commandContext, suggestionsBuilder) -> {
 		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();

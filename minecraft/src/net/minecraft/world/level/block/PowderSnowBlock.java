@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -31,6 +32,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PowderSnowBlock extends Block implements BucketPickup {
+	public static final MapCodec<PowderSnowBlock> CODEC = simpleCodec(PowderSnowBlock::new);
 	private static final float HORIZONTAL_PARTICLE_MOMENTUM_FACTOR = 0.083333336F;
 	private static final float IN_BLOCK_HORIZONTAL_SPEED_MULTIPLIER = 0.9F;
 	private static final float IN_BLOCK_VERTICAL_SPEED_MULTIPLIER = 1.5F;
@@ -38,6 +40,11 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 	private static final VoxelShape FALLING_COLLISION_SHAPE = Shapes.box(0.0, 0.0, 0.0, 1.0, 0.9F, 1.0);
 	private static final double MINIMUM_FALL_DISTANCE_FOR_SOUND = 4.0;
 	private static final double MINIMUM_FALL_DISTANCE_FOR_BIG_SOUND = 7.0;
+
+	@Override
+	public MapCodec<PowderSnowBlock> codec() {
+		return CODEC;
+	}
 
 	public PowderSnowBlock(BlockBehaviour.Properties properties) {
 		super(properties);

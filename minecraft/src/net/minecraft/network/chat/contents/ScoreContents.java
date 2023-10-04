@@ -2,6 +2,9 @@ package net.minecraft.network.chat.contents;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSourceStack;
@@ -19,6 +22,14 @@ import net.minecraft.world.scores.Scoreboard;
 
 public class ScoreContents implements ComponentContents {
 	private static final String SCORER_PLACEHOLDER = "*";
+	public static final MapCodec<ScoreContents> INNER_CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					Codec.STRING.fieldOf("name").forGetter(ScoreContents::getName), Codec.STRING.fieldOf("objective").forGetter(ScoreContents::getObjective)
+				)
+				.apply(instance, ScoreContents::new)
+	);
+	public static final MapCodec<ScoreContents> CODEC = INNER_CODEC.fieldOf("score");
+	public static final ComponentContents.Type<ScoreContents> TYPE = new ComponentContents.Type<>(CODEC, "score");
 	private final String name;
 	@Nullable
 	private final EntitySelector selector;
@@ -37,6 +48,11 @@ public class ScoreContents implements ComponentContents {
 		this.name = string;
 		this.selector = parseSelector(string);
 		this.objective = string2;
+	}
+
+	@Override
+	public ComponentContents.Type<?> type() {
+		return TYPE;
 	}
 
 	public String getName() {

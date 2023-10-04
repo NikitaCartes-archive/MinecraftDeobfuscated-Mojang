@@ -212,11 +212,6 @@ public class Turtle extends Animal {
 	}
 
 	@Override
-	public boolean canBreatheUnderwater() {
-		return true;
-	}
-
-	@Override
 	public MobType getMobType() {
 		return MobType.WATER;
 	}

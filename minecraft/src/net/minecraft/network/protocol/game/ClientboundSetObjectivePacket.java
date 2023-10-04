@@ -30,7 +30,7 @@ public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketLis
 			this.displayName = CommonComponents.EMPTY;
 			this.renderType = ObjectiveCriteria.RenderType.INTEGER;
 		} else {
-			this.displayName = friendlyByteBuf.readComponent();
+			this.displayName = friendlyByteBuf.readComponentTrusted();
 			this.renderType = friendlyByteBuf.readEnum(ObjectiveCriteria.RenderType.class);
 		}
 	}

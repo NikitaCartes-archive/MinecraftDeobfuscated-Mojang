@@ -14,10 +14,18 @@ import org.lwjgl.glfw.GLFWNativeCocoa;
 
 @Environment(EnvType.CLIENT)
 public class MacosUtil {
+	private static final int NS_RESIZABLE_WINDOW_MASK = 8;
 	private static final int NS_FULL_SCREEN_WINDOW_MASK = 16384;
 
-	public static void toggleFullscreen(long l) {
-		getNsWindow(l).filter(MacosUtil::isInKioskMode).ifPresent(MacosUtil::toggleFullscreen);
+	public static void exitNativeFullscreen(long l) {
+		getNsWindow(l).filter(MacosUtil::isInNativeFullscreen).ifPresent(MacosUtil::toggleNativeFullscreen);
+	}
+
+	public static void clearResizableBit(long l) {
+		getNsWindow(l).ifPresent(nSObject -> {
+			long lx = getStyleMask(nSObject);
+			nSObject.send("setStyleMask:", new Object[]{lx & -9L});
+		});
 	}
 
 	private static Optional<NSObject> getNsWindow(long l) {
@@ -25,11 +33,15 @@ public class MacosUtil {
 		return m != 0L ? Optional.of(new NSObject(new Pointer(m))) : Optional.empty();
 	}
 
-	private static boolean isInKioskMode(NSObject nSObject) {
-		return ((Long)nSObject.sendRaw("styleMask", new Object[0]) & 16384L) == 16384L;
+	private static boolean isInNativeFullscreen(NSObject nSObject) {
+		return (getStyleMask(nSObject) & 16384L) != 0L;
 	}
 
-	private static void toggleFullscreen(NSObject nSObject) {
+	private static long getStyleMask(NSObject nSObject) {
+		return (Long)nSObject.sendRaw("styleMask", new Object[0]);
+	}
+
+	private static void toggleNativeFullscreen(NSObject nSObject) {
 		nSObject.send("toggleFullScreen:", new Object[]{Pointer.NULL});
 	}
 

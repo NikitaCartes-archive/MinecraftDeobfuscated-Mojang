@@ -33,13 +33,13 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 	public static final SimpleCommandExceptionType ERROR_INVALID_NODE = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.node.invalid"));
 	public static final SimpleCommandExceptionType ERROR_DATA_TOO_DEEP = new SimpleCommandExceptionType(Component.translatable("arguments.nbtpath.too_deep"));
 	public static final DynamicCommandExceptionType ERROR_NOTHING_FOUND = new DynamicCommandExceptionType(
-		object -> Component.translatable("arguments.nbtpath.nothing_found", object)
+		object -> Component.translatableEscape("arguments.nbtpath.nothing_found", object)
 	);
 	static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.data.modify.expected_list", object)
+		object -> Component.translatableEscape("commands.data.modify.expected_list", object)
 	);
 	static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.data.modify.invalid_index", object)
+		object -> Component.translatableEscape("commands.data.modify.invalid_index", object)
 	);
 	private static final char INDEX_MATCH_START = '[';
 	private static final char INDEX_MATCH_END = ']';
@@ -696,6 +696,10 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 		}
 
 		public String toString() {
+			return this.original;
+		}
+
+		public String asString() {
 			return this.original;
 		}
 	}

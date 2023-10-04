@@ -13,6 +13,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.util.ExtraCodecs;
 
@@ -92,7 +93,7 @@ public interface LoggedChatMessage extends LoggedChatEvent {
 	public static record System(Component message, Instant timeStamp) implements LoggedChatMessage {
 		public static final Codec<LoggedChatMessage.System> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						ExtraCodecs.COMPONENT.fieldOf("message").forGetter(LoggedChatMessage.System::message),
+						ComponentSerialization.CODEC.fieldOf("message").forGetter(LoggedChatMessage.System::message),
 						ExtraCodecs.INSTANT_ISO8601.fieldOf("time_stamp").forGetter(LoggedChatMessage.System::timeStamp)
 					)
 					.apply(instance, LoggedChatMessage.System::new)

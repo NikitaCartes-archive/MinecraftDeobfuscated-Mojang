@@ -13,18 +13,20 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.FormattedText;
 
 @Environment(EnvType.CLIENT)
-public class PopupScreen extends Screen {
+public class UnsupportedGraphicsWarningScreen extends Screen {
 	private static final int BUTTON_PADDING = 20;
 	private static final int BUTTON_MARGIN = 5;
 	private static final int BUTTON_HEIGHT = 20;
 	private final Component narrationMessage;
 	private final FormattedText message;
-	private final ImmutableList<PopupScreen.ButtonOption> buttonOptions;
+	private final ImmutableList<UnsupportedGraphicsWarningScreen.ButtonOption> buttonOptions;
 	private MultiLineLabel messageLines = MultiLineLabel.EMPTY;
 	private int contentTop;
 	private int buttonWidth;
 
-	protected PopupScreen(Component component, List<Component> list, ImmutableList<PopupScreen.ButtonOption> immutableList) {
+	protected UnsupportedGraphicsWarningScreen(
+		Component component, List<Component> list, ImmutableList<UnsupportedGraphicsWarningScreen.ButtonOption> immutableList
+	) {
 		super(component);
 		this.message = FormattedText.composite(list);
 		this.narrationMessage = CommonComponents.joinForNarration(component, ComponentUtils.formatList(list, CommonComponents.EMPTY));
@@ -38,7 +40,7 @@ public class PopupScreen extends Screen {
 
 	@Override
 	public void init() {
-		for (PopupScreen.ButtonOption buttonOption : this.buttonOptions) {
+		for (UnsupportedGraphicsWarningScreen.ButtonOption buttonOption : this.buttonOptions) {
 			this.buttonWidth = Math.max(this.buttonWidth, 20 + this.font.width(buttonOption.message) + 20);
 		}
 
@@ -50,7 +52,7 @@ public class PopupScreen extends Screen {
 		int l = this.contentTop + k + 9 * 2;
 		int m = (int)((double)this.width / 2.0 - (double)j / 2.0);
 
-		for (PopupScreen.ButtonOption buttonOption2 : this.buttonOptions) {
+		for (UnsupportedGraphicsWarningScreen.ButtonOption buttonOption2 : this.buttonOptions) {
 			this.addRenderableWidget(Button.builder(buttonOption2.message, buttonOption2.onPress).bounds(m, l, this.buttonWidth, 20).build());
 			m += i;
 		}

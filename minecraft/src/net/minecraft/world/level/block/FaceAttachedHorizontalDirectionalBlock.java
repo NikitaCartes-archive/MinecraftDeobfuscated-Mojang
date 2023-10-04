@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,12 +13,15 @@ import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 
-public class FaceAttachedHorizontalDirectionalBlock extends HorizontalDirectionalBlock {
+public abstract class FaceAttachedHorizontalDirectionalBlock extends HorizontalDirectionalBlock {
 	public static final EnumProperty<AttachFace> FACE = BlockStateProperties.ATTACH_FACE;
 
 	protected FaceAttachedHorizontalDirectionalBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
+
+	@Override
+	protected abstract MapCodec<? extends FaceAttachedHorizontalDirectionalBlock> codec();
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {

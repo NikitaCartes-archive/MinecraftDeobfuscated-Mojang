@@ -1,5 +1,8 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,6 +31,14 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
+	public static final MapCodec<ButtonBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					BlockSetType.CODEC.fieldOf("block_set_type").forGetter(buttonBlock -> buttonBlock.type),
+					Codec.intRange(1, 1024).fieldOf("ticks_to_stay_pressed").forGetter(buttonBlock -> buttonBlock.ticksToStayPressed),
+					propertiesCodec()
+				)
+				.apply(instance, ButtonBlock::new)
+	);
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private static final int PRESSED_DEPTH = 1;
 	private static final int UNPRESSED_DEPTH = 2;
@@ -51,16 +62,19 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	protected static final VoxelShape PRESSED_EAST_AABB = Block.box(0.0, 6.0, 5.0, 1.0, 10.0, 11.0);
 	private final BlockSetType type;
 	private final int ticksToStayPressed;
-	private final boolean arrowsCanPress;
 
-	protected ButtonBlock(BlockBehaviour.Properties properties, BlockSetType blockSetType, int i, boolean bl) {
+	@Override
+	public MapCodec<ButtonBlock> codec() {
+		return CODEC;
+	}
+
+	protected ButtonBlock(BlockSetType blockSetType, int i, BlockBehaviour.Properties properties) {
 		super(properties.sound(blockSetType.soundType()));
 		this.type = blockSetType;
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(FACE, AttachFace.WALL)
 		);
 		this.ticksToStayPressed = i;
-		this.arrowsCanPress = bl;
 	}
 
 	@Override
@@ -154,13 +168,13 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (!level.isClientSide && this.arrowsCanPress && !(Boolean)blockState.getValue(POWERED)) {
+		if (!level.isClientSide && this.type.canButtonBeActivatedByArrows() && !(Boolean)blockState.getValue(POWERED)) {
 			this.checkPressed(blockState, level, blockPos);
 		}
 	}
 
 	protected void checkPressed(BlockState blockState, Level level, BlockPos blockPos) {
-		AbstractArrow abstractArrow = this.arrowsCanPress
+		AbstractArrow abstractArrow = this.type.canButtonBeActivatedByArrows()
 			? (AbstractArrow)level.getEntitiesOfClass(AbstractArrow.class, blockState.getShape(level, blockPos).bounds().move(blockPos))
 				.stream()
 				.findFirst()

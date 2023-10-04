@@ -285,6 +285,10 @@ public class Slime extends Mob implements Enemy {
 		EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
+			if (mobSpawnType == MobSpawnType.SPAWNER) {
+				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+			}
+
 			if (levelAccessor.getBiome(blockPos).is(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS)
 				&& blockPos.getY() > 50
 				&& blockPos.getY() < 70

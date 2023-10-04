@@ -12,7 +12,7 @@ public class ClientboundDisconnectPacket implements Packet<ClientCommonPacketLis
 	}
 
 	public ClientboundDisconnectPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.reason = friendlyByteBuf.readComponent();
+		this.reason = friendlyByteBuf.readComponentTrusted();
 	}
 
 	@Override

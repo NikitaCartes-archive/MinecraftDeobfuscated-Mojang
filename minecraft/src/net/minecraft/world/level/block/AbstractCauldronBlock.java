@@ -1,6 +1,6 @@
 package net.minecraft.world.level.block;
 
-import java.util.Map;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.server.level.ServerLevel;
@@ -9,7 +9,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -36,11 +35,14 @@ public abstract class AbstractCauldronBlock extends Block {
 		Shapes.or(box(0.0, 0.0, 4.0, 16.0, 3.0, 12.0), box(4.0, 0.0, 0.0, 12.0, 3.0, 16.0), box(2.0, 0.0, 2.0, 14.0, 3.0, 14.0), INSIDE),
 		BooleanOp.ONLY_FIRST
 	);
-	private final Map<Item, CauldronInteraction> interactions;
+	protected final CauldronInteraction.InteractionMap interactions;
 
-	public AbstractCauldronBlock(BlockBehaviour.Properties properties, Map<Item, CauldronInteraction> map) {
+	@Override
+	protected abstract MapCodec<? extends AbstractCauldronBlock> codec();
+
+	public AbstractCauldronBlock(BlockBehaviour.Properties properties, CauldronInteraction.InteractionMap interactionMap) {
 		super(properties);
-		this.interactions = map;
+		this.interactions = interactionMap;
 	}
 
 	protected double getContentHeight(BlockState blockState) {
@@ -56,7 +58,7 @@ public abstract class AbstractCauldronBlock extends Block {
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		CauldronInteraction cauldronInteraction = (CauldronInteraction)this.interactions.get(itemStack.getItem());
+		CauldronInteraction cauldronInteraction = (CauldronInteraction)this.interactions.map().get(itemStack.getItem());
 		return cauldronInteraction.interact(blockState, level, blockPos, player, interactionHand, itemStack);
 	}
 

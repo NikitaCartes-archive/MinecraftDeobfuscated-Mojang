@@ -10,7 +10,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType ANGRY_VILLAGER = register("angry_villager", false);
 	public static final ParticleType<BlockParticleOption> BLOCK = register("block", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec);
 	public static final ParticleType<BlockParticleOption> BLOCK_MARKER = register(
-		"block_marker", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec
+		"block_marker", true, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec
 	);
 	public static final SimpleParticleType BUBBLE = register("bubble", false);
 	public static final SimpleParticleType CLOUD = register("cloud", false);

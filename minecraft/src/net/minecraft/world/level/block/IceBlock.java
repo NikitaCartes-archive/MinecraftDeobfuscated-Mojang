@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class IceBlock extends HalfTransparentBlock {
+	public static final MapCodec<IceBlock> CODEC = simpleCodec(IceBlock::new);
+
+	@Override
+	public MapCodec<? extends IceBlock> codec() {
+		return CODEC;
+	}
+
 	public IceBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,9 +26,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class StonecutterBlock extends Block {
+	public static final MapCodec<StonecutterBlock> CODEC = simpleCodec(StonecutterBlock::new);
 	private static final Component CONTAINER_TITLE = Component.translatable("container.stonecutter");
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 9.0, 16.0);
+
+	@Override
+	public MapCodec<StonecutterBlock> codec() {
+		return CODEC;
+	}
 
 	public StonecutterBlock(BlockBehaviour.Properties properties) {
 		super(properties);

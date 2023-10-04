@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,11 +32,17 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class LightningRodBlock extends RodBlock implements SimpleWaterloggedBlock {
+	public static final MapCodec<LightningRodBlock> CODEC = simpleCodec(LightningRodBlock::new);
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private static final int ACTIVATION_TICKS = 8;
 	public static final int RANGE = 128;
 	private static final int SPARK_CYCLE = 200;
+
+	@Override
+	public MapCodec<LightningRodBlock> codec() {
+		return CODEC;
+	}
 
 	public LightningRodBlock(BlockBehaviour.Properties properties) {
 		super(properties);

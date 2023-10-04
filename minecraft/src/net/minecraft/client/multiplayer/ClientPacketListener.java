@@ -330,6 +330,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private MessageSignatureCache messageSignatureCache = MessageSignatureCache.createDefault();
 	private final ChunkBatchSizeCalculator chunkBatchSizeCalculator = new ChunkBatchSizeCalculator();
 	private final PingDebugMonitor pingDebugMonitor;
+	@Nullable
+	private LevelLoadStatusManager levelLoadStatusManager;
 	private boolean seenInsecureChatWarning = false;
 	private volatile boolean closed;
 
@@ -349,8 +351,13 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 	public void close() {
 		this.closed = true;
-		this.level = null;
+		this.clearLevel();
 		this.telemetryManager.onDisconnect();
+	}
+
+	public void clearLevel() {
+		this.level = null;
+		this.levelLoadStatusManager = null;
 	}
 
 	public RecipeManager getRecipeManager() {
@@ -402,7 +409,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.minecraft.player.input = new KeyboardInput(this.minecraft.options);
 		this.minecraft.gameMode.adjustPlayer(this.minecraft.player);
 		this.minecraft.cameraEntity = this.minecraft.player;
-		this.minecraft.setScreen(new ReceivingLevelScreen());
+		this.startWaitingForNewLevel(this.minecraft.player, this.level);
 		this.minecraft.player.setReducedDebugInfo(clientboundLoginPacket.reducedDebugInfo());
 		this.minecraft.player.setShowDeathScreen(clientboundLoginPacket.showDeathScreen());
 		this.minecraft.player.setDoLimitedCrafting(clientboundLoginPacket.doLimitedCrafting());
@@ -931,9 +938,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket clientboundSetDefaultSpawnPositionPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetDefaultSpawnPositionPacket, this, this.minecraft);
 		this.minecraft.level.setDefaultSpawnPos(clientboundSetDefaultSpawnPositionPacket.getPos(), clientboundSetDefaultSpawnPositionPacket.getAngle());
-		if (this.minecraft.screen instanceof ReceivingLevelScreen receivingLevelScreen) {
-			receivingLevelScreen.loadingPacketsReceived();
-		}
 	}
 
 	@Override
@@ -1070,7 +1074,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			this.level.setScoreboard(scoreboard);
 			this.level.addMapData(map);
 			this.minecraft.setLevel(this.level);
-			this.minecraft.setScreen(new ReceivingLevelScreen());
 		}
 
 		this.minecraft.cameraEntity = null;
@@ -1087,6 +1090,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook());
 		}
 
+		this.startWaitingForNewLevel(localPlayer2, this.level);
 		localPlayer2.setId(localPlayer.getId());
 		this.minecraft.player = localPlayer2;
 		if (resourceKey != localPlayer.level().dimension()) {
@@ -1312,7 +1316,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		} else if (type == ClientboundGameEventPacket.WIN_GAME) {
 			if (i == 0) {
 				this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
-				this.minecraft.setScreen(new ReceivingLevelScreen());
+				this.minecraft.setScreen(new ReceivingLevelScreen(() -> false));
 			} else if (i == 1) {
 				this.minecraft.setScreen(new WinScreen(true, () -> {
 					this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
@@ -1360,7 +1364,14 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			this.minecraft.player.setShowDeathScreen(f == 0.0F);
 		} else if (type == ClientboundGameEventPacket.LIMITED_CRAFTING) {
 			this.minecraft.player.setDoLimitedCrafting(f == 1.0F);
+		} else if (type == ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START && this.levelLoadStatusManager != null) {
+			this.levelLoadStatusManager.loadingPacketsReceived();
 		}
+	}
+
+	private void startWaitingForNewLevel(LocalPlayer localPlayer, ClientLevel clientLevel) {
+		this.levelLoadStatusManager = new LevelLoadStatusManager(localPlayer, clientLevel, this.minecraft.levelRenderer);
+		this.minecraft.setScreen(new ReceivingLevelScreen(this.levelLoadStatusManager::levelReady));
 	}
 
 	@Override
@@ -2389,6 +2400,9 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		}
 
 		this.telemetryManager.tick();
+		if (this.levelLoadStatusManager != null) {
+			this.levelLoadStatusManager.tick();
+		}
 	}
 
 	public void setKeyPair(ProfileKeyPair profileKeyPair) {

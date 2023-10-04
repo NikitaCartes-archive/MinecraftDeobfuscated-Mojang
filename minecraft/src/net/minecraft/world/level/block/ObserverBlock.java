@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -15,7 +16,13 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 public class ObserverBlock extends DirectionalBlock {
+	public static final MapCodec<ObserverBlock> CODEC = simpleCodec(ObserverBlock::new);
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+
+	@Override
+	public MapCodec<ObserverBlock> codec() {
+		return CODEC;
+	}
 
 	public ObserverBlock(BlockBehaviour.Properties properties) {
 		super(properties);

@@ -21,16 +21,16 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class ResourceLocationArgument implements ArgumentType<ResourceLocation> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ADVANCEMENT = new DynamicCommandExceptionType(
-		object -> Component.translatable("advancement.advancementNotFound", object)
+		object -> Component.translatableEscape("advancement.advancementNotFound", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType(
-		object -> Component.translatable("recipe.notFound", object)
+		object -> Component.translatableEscape("recipe.notFound", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType(
-		object -> Component.translatable("predicate.unknown", object)
+		object -> Component.translatableEscape("predicate.unknown", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType(
-		object -> Component.translatable("item_modifier.unknown", object)
+		object -> Component.translatableEscape("item_modifier.unknown", object)
 	);
 
 	public static ResourceLocationArgument id() {

@@ -480,6 +480,26 @@ public class GameTestHelper {
 		}
 	}
 
+	public void assertItemEntityPresent(Item item) {
+		for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
+			ItemEntity itemEntity = (ItemEntity)entity;
+			if (itemEntity.getItem().getItem().equals(item)) {
+				return;
+			}
+		}
+
+		throw new GameTestAssertException("Expected " + item.getDescription().getString() + " item");
+	}
+
+	public void assertItemEntityNotPresent(Item item) {
+		for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
+			ItemEntity itemEntity = (ItemEntity)entity;
+			if (itemEntity.getItem().getItem().equals(item)) {
+				throw new GameTestAssertException("Did not expect " + item.getDescription().getString() + " item");
+			}
+		}
+	}
+
 	public void assertEntityNotPresent(EntityType<?> entityType) {
 		List<? extends Entity> list = this.getLevel().getEntities(entityType, this.getBounds(), Entity::isAlive);
 		if (!list.isEmpty()) {
@@ -761,7 +781,7 @@ public class GameTestHelper {
 		return this.testInfo.getTick();
 	}
 
-	private AABB getBounds() {
+	public AABB getBounds() {
 		return this.testInfo.getStructureBounds();
 	}
 

@@ -179,23 +179,23 @@ public class PortalShape {
 		BlockPos blockPos = foundRectangle.minCorner;
 		double g;
 		if (d > 0.0) {
-			float f = (float)blockPos.get(axis) + entityDimensions.width / 2.0F;
-			g = Mth.clamp(Mth.inverseLerp(vec3.get(axis) - (double)f, 0.0, d), 0.0, 1.0);
+			double f = (double)blockPos.get(axis) + (double)entityDimensions.width / 2.0;
+			g = Mth.clamp(Mth.inverseLerp(vec3.get(axis) - f, 0.0, d), 0.0, 1.0);
 		} else {
 			g = 0.5;
 		}
 
-		double h;
+		double f;
 		if (e > 0.0) {
 			Direction.Axis axis2 = Direction.Axis.Y;
-			h = Mth.clamp(Mth.inverseLerp(vec3.get(axis2) - (double)blockPos.get(axis2), 0.0, e), 0.0, 1.0);
+			f = Mth.clamp(Mth.inverseLerp(vec3.get(axis2) - (double)blockPos.get(axis2), 0.0, e), 0.0, 1.0);
 		} else {
-			h = 0.0;
+			f = 0.0;
 		}
 
 		Direction.Axis axis2 = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
-		double i = vec3.get(axis2) - ((double)blockPos.get(axis2) + 0.5);
-		return new Vec3(g, h, i);
+		double h = vec3.get(axis2) - ((double)blockPos.get(axis2) + 0.5);
+		return new Vec3(g, f, h);
 	}
 
 	public static PortalInfo createPortalInfo(

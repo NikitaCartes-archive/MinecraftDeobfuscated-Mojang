@@ -1,10 +1,20 @@
 package net.minecraft.network.chat;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.StringRepresentable;
 
 public class ClickEvent {
+	public static final Codec<ClickEvent> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					ClickEvent.Action.CODEC.forGetter(clickEvent -> clickEvent.action), Codec.STRING.fieldOf("value").forGetter(clickEvent -> clickEvent.value)
+				)
+				.apply(instance, ClickEvent::new)
+	);
 	private final ClickEvent.Action action;
 	private final String value;
 
@@ -26,11 +36,7 @@ public class ClickEvent {
 			return true;
 		} else if (object != null && this.getClass() == object.getClass()) {
 			ClickEvent clickEvent = (ClickEvent)object;
-			if (this.action != clickEvent.action) {
-				return false;
-			} else {
-				return this.value != null ? this.value.equals(clickEvent.value) : clickEvent.value == null;
-			}
+			return this.action == clickEvent.action && this.value.equals(clickEvent.value);
 		} else {
 			return false;
 		}
@@ -42,10 +48,10 @@ public class ClickEvent {
 
 	public int hashCode() {
 		int i = this.action.hashCode();
-		return 31 * i + (this.value != null ? this.value.hashCode() : 0);
+		return 31 * i + this.value.hashCode();
 	}
 
-	public static enum Action {
+	public static enum Action implements StringRepresentable {
 		OPEN_URL("open_url", true),
 		OPEN_FILE("open_file", false),
 		RUN_COMMAND("run_command", true),
@@ -53,8 +59,8 @@ public class ClickEvent {
 		CHANGE_PAGE("change_page", true),
 		COPY_TO_CLIPBOARD("copy_to_clipboard", true);
 
-		private static final Map<String, ClickEvent.Action> LOOKUP = (Map<String, ClickEvent.Action>)Arrays.stream(values())
-			.collect(Collectors.toMap(ClickEvent.Action::getName, action -> action));
+		public static final MapCodec<ClickEvent.Action> UNSAFE_CODEC = StringRepresentable.fromEnum(ClickEvent.Action::values).fieldOf("action");
+		public static final MapCodec<ClickEvent.Action> CODEC = ExtraCodecs.validate(UNSAFE_CODEC, ClickEvent.Action::filterForSerialization);
 		private final boolean allowFromServer;
 		private final String name;
 
@@ -67,12 +73,13 @@ public class ClickEvent {
 			return this.allowFromServer;
 		}
 
-		public String getName() {
+		@Override
+		public String getSerializedName() {
 			return this.name;
 		}
 
-		public static ClickEvent.Action getByName(String string) {
-			return (ClickEvent.Action)LOOKUP.get(string);
+		public static DataResult<ClickEvent.Action> filterForSerialization(ClickEvent.Action action) {
+			return !action.isAllowedFromServer() ? DataResult.error(() -> "Action not allowed: " + action) : DataResult.success(action, Lifecycle.stable());
 		}
 	}
 }

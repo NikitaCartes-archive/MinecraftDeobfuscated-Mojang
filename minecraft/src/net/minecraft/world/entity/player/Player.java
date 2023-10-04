@@ -295,6 +295,11 @@ public abstract class Player extends LivingEntity {
 		this.updatePlayerPose();
 	}
 
+	@Override
+	protected float getMaxHeadRotationRelativeToBody() {
+		return this.isBlocking() ? 15.0F : super.getMaxHeadRotationRelativeToBody();
+	}
+
 	public boolean isSecondaryUseActive() {
 		return this.isShiftKeyDown();
 	}
@@ -2127,6 +2132,10 @@ public abstract class Player extends LivingEntity {
 		} else {
 			return this.isSprinting() ? 0.025999999F : 0.02F;
 		}
+	}
+
+	public static boolean isValidUsername(String string) {
+		return string.length() > 16 ? false : string.chars().filter(i -> i <= 32 || i >= 127).findAny().isEmpty();
 	}
 
 	public static enum BedSleepingProblem {

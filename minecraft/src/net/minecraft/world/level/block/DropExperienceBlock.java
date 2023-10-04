@@ -1,21 +1,27 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class DropExperienceBlock extends Block {
+	public static final MapCodec<DropExperienceBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(IntProvider.codec(0, 10).fieldOf("experience").forGetter(dropExperienceBlock -> dropExperienceBlock.xpRange), propertiesCodec())
+				.apply(instance, DropExperienceBlock::new)
+	);
 	private final IntProvider xpRange;
 
-	public DropExperienceBlock(BlockBehaviour.Properties properties) {
-		this(properties, ConstantInt.of(0));
+	@Override
+	public MapCodec<? extends DropExperienceBlock> codec() {
+		return CODEC;
 	}
 
-	public DropExperienceBlock(BlockBehaviour.Properties properties, IntProvider intProvider) {
+	public DropExperienceBlock(IntProvider intProvider, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.xpRange = intProvider;
 	}

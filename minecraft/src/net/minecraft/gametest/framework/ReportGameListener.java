@@ -44,7 +44,10 @@ class ReportGameListener implements GameTestListener {
 	@Override
 	public void testPassed(GameTestInfo gameTestInfo) {
 		this.successes++;
-		if (!gameTestInfo.isFlaky()) {
+		if (gameTestInfo.rerunUntilFailed()) {
+			reportPassed(gameTestInfo, gameTestInfo.getTestName() + " passed! (" + gameTestInfo.getRunTime() + "ms). Rerunning until failed.");
+			this.rerunTest();
+		} else if (!gameTestInfo.isFlaky()) {
 			reportPassed(gameTestInfo, gameTestInfo.getTestName() + " passed! (" + gameTestInfo.getRunTime() + "ms)");
 		} else {
 			if (this.successes >= gameTestInfo.requiredSuccesses()) {
@@ -111,6 +114,7 @@ class ReportGameListener implements GameTestListener {
 	private void rerunTest() {
 		this.originalTestInfo.clearStructure();
 		GameTestInfo gameTestInfo = new GameTestInfo(this.originalTestInfo.getTestFunction(), this.originalTestInfo.getRotation(), this.originalTestInfo.getLevel());
+		gameTestInfo.setRerunUntilFailed(this.originalTestInfo.rerunUntilFailed());
 		gameTestInfo.startExecution();
 		this.testTicker.add(gameTestInfo);
 		gameTestInfo.addListener(this);

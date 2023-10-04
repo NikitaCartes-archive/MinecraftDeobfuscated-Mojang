@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -25,7 +26,13 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FenceBlock extends CrossCollisionBlock {
+	public static final MapCodec<FenceBlock> CODEC = simpleCodec(FenceBlock::new);
 	private final VoxelShape[] occlusionByIndex;
+
+	@Override
+	public MapCodec<FenceBlock> codec() {
+		return CODEC;
+	}
 
 	public FenceBlock(BlockBehaviour.Properties properties) {
 		super(2.0F, 2.0F, 16.0F, 16.0F, 24.0F, properties);

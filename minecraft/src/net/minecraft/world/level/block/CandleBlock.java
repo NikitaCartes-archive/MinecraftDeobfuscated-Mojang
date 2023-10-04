@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -32,6 +33,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CandleBlock extends AbstractCandleBlock implements SimpleWaterloggedBlock {
+	public static final MapCodec<CandleBlock> CODEC = simpleCodec(CandleBlock::new);
 	public static final int MIN_CANDLES = 1;
 	public static final int MAX_CANDLES = 4;
 	public static final IntegerProperty CANDLES = BlockStateProperties.CANDLES;
@@ -51,6 +53,11 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 	private static final VoxelShape TWO_AABB = Block.box(5.0, 0.0, 6.0, 11.0, 6.0, 9.0);
 	private static final VoxelShape THREE_AABB = Block.box(5.0, 0.0, 6.0, 10.0, 6.0, 11.0);
 	private static final VoxelShape FOUR_AABB = Block.box(5.0, 0.0, 5.0, 11.0, 6.0, 10.0);
+
+	@Override
+	public MapCodec<CandleBlock> codec() {
+		return CODEC;
+	}
 
 	public CandleBlock(BlockBehaviour.Properties properties) {
 		super(properties);

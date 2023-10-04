@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -22,7 +23,13 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class RedStoneOreBlock extends Block {
+	public static final MapCodec<RedStoneOreBlock> CODEC = simpleCodec(RedStoneOreBlock::new);
 	public static final BooleanProperty LIT = RedstoneTorchBlock.LIT;
+
+	@Override
+	public MapCodec<RedStoneOreBlock> codec() {
+		return CODEC;
+	}
 
 	public RedStoneOreBlock(BlockBehaviour.Properties properties) {
 		super(properties);

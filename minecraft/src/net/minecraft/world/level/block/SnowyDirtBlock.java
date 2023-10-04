@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -12,7 +13,13 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 public class SnowyDirtBlock extends Block {
+	public static final MapCodec<SnowyDirtBlock> CODEC = simpleCodec(SnowyDirtBlock::new);
 	public static final BooleanProperty SNOWY = BlockStateProperties.SNOWY;
+
+	@Override
+	protected MapCodec<? extends SnowyDirtBlock> codec() {
+		return CODEC;
+	}
 
 	protected SnowyDirtBlock(BlockBehaviour.Properties properties) {
 		super(properties);

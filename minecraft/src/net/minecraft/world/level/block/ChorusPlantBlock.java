@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,13 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 
 public class ChorusPlantBlock extends PipeBlock {
+	public static final MapCodec<ChorusPlantBlock> CODEC = simpleCodec(ChorusPlantBlock::new);
+
+	@Override
+	public MapCodec<ChorusPlantBlock> codec() {
+		return CODEC;
+	}
+
 	protected ChorusPlantBlock(BlockBehaviour.Properties properties) {
 		super(0.3125F, properties);
 		this.registerDefaultState(
@@ -31,23 +39,23 @@ public class ChorusPlantBlock extends PipeBlock {
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-		return this.getStateForPlacement(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
+		return getStateWithConnections(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), this.defaultBlockState());
 	}
 
-	public BlockState getStateForPlacement(BlockGetter blockGetter, BlockPos blockPos) {
-		BlockState blockState = blockGetter.getBlockState(blockPos.below());
-		BlockState blockState2 = blockGetter.getBlockState(blockPos.above());
-		BlockState blockState3 = blockGetter.getBlockState(blockPos.north());
-		BlockState blockState4 = blockGetter.getBlockState(blockPos.east());
-		BlockState blockState5 = blockGetter.getBlockState(blockPos.south());
-		BlockState blockState6 = blockGetter.getBlockState(blockPos.west());
-		return this.defaultBlockState()
-			.setValue(DOWN, Boolean.valueOf(blockState.is(this) || blockState.is(Blocks.CHORUS_FLOWER) || blockState.is(Blocks.END_STONE)))
-			.setValue(UP, Boolean.valueOf(blockState2.is(this) || blockState2.is(Blocks.CHORUS_FLOWER)))
-			.setValue(NORTH, Boolean.valueOf(blockState3.is(this) || blockState3.is(Blocks.CHORUS_FLOWER)))
-			.setValue(EAST, Boolean.valueOf(blockState4.is(this) || blockState4.is(Blocks.CHORUS_FLOWER)))
-			.setValue(SOUTH, Boolean.valueOf(blockState5.is(this) || blockState5.is(Blocks.CHORUS_FLOWER)))
-			.setValue(WEST, Boolean.valueOf(blockState6.is(this) || blockState6.is(Blocks.CHORUS_FLOWER)));
+	public static BlockState getStateWithConnections(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+		BlockState blockState2 = blockGetter.getBlockState(blockPos.below());
+		BlockState blockState3 = blockGetter.getBlockState(blockPos.above());
+		BlockState blockState4 = blockGetter.getBlockState(blockPos.north());
+		BlockState blockState5 = blockGetter.getBlockState(blockPos.east());
+		BlockState blockState6 = blockGetter.getBlockState(blockPos.south());
+		BlockState blockState7 = blockGetter.getBlockState(blockPos.west());
+		Block block = blockState.getBlock();
+		return blockState.trySetValue(DOWN, Boolean.valueOf(blockState2.is(block) || blockState2.is(Blocks.CHORUS_FLOWER) || blockState2.is(Blocks.END_STONE)))
+			.trySetValue(UP, Boolean.valueOf(blockState3.is(block) || blockState3.is(Blocks.CHORUS_FLOWER)))
+			.trySetValue(NORTH, Boolean.valueOf(blockState4.is(block) || blockState4.is(Blocks.CHORUS_FLOWER)))
+			.trySetValue(EAST, Boolean.valueOf(blockState5.is(block) || blockState5.is(Blocks.CHORUS_FLOWER)))
+			.trySetValue(SOUTH, Boolean.valueOf(blockState6.is(block) || blockState6.is(Blocks.CHORUS_FLOWER)))
+			.trySetValue(WEST, Boolean.valueOf(blockState7.is(block) || blockState7.is(Blocks.CHORUS_FLOWER)));
 	}
 
 	@Override

@@ -1,12 +1,13 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,6 +21,9 @@ public abstract class AbstractBannerBlock extends BaseEntityBlock {
 		super(properties);
 		this.color = dyeColor;
 	}
+
+	@Override
+	protected abstract MapCodec<? extends AbstractBannerBlock> codec();
 
 	@Override
 	public boolean isPossibleToRespawnInThis(BlockState blockState) {
@@ -41,9 +45,9 @@ public abstract class AbstractBannerBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
-		return blockEntity instanceof BannerBlockEntity ? ((BannerBlockEntity)blockEntity).getItem() : super.getCloneItemStack(blockGetter, blockPos, blockState);
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+		BlockEntity blockEntity = levelReader.getBlockEntity(blockPos);
+		return blockEntity instanceof BannerBlockEntity ? ((BannerBlockEntity)blockEntity).getItem() : super.getCloneItemStack(levelReader, blockPos, blockState);
 	}
 
 	public DyeColor getColor() {

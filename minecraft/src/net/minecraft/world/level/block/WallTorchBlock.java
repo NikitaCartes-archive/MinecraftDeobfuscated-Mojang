@@ -2,12 +2,14 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -22,6 +24,10 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WallTorchBlock extends TorchBlock {
+	public static final MapCodec<WallTorchBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(PARTICLE_OPTIONS_FIELD.forGetter(wallTorchBlock -> wallTorchBlock.flameParticle), propertiesCodec())
+				.apply(instance, WallTorchBlock::new)
+	);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	protected static final float AABB_OFFSET = 2.5F;
 	private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(
@@ -37,8 +43,13 @@ public class WallTorchBlock extends TorchBlock {
 		)
 	);
 
-	protected WallTorchBlock(BlockBehaviour.Properties properties, ParticleOptions particleOptions) {
-		super(properties, particleOptions);
+	@Override
+	public MapCodec<WallTorchBlock> codec() {
+		return CODEC;
+	}
+
+	protected WallTorchBlock(SimpleParticleType simpleParticleType, BlockBehaviour.Properties properties) {
+		super(simpleParticleType, properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
 

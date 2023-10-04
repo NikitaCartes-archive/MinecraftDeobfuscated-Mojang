@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,6 +12,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PiglinWallSkullBlock extends WallSkullBlock {
+	public static final MapCodec<PiglinWallSkullBlock> CODEC = simpleCodec(PiglinWallSkullBlock::new);
 	private static final Map<Direction, VoxelShape> AABBS = Maps.immutableEnumMap(
 		Map.of(
 			Direction.NORTH,
@@ -23,6 +25,11 @@ public class PiglinWallSkullBlock extends WallSkullBlock {
 			Block.box(8.0, 4.0, 3.0, 16.0, 12.0, 13.0)
 		)
 	);
+
+	@Override
+	public MapCodec<PiglinWallSkullBlock> codec() {
+		return CODEC;
+	}
 
 	public PiglinWallSkullBlock(BlockBehaviour.Properties properties) {
 		super(SkullBlock.Types.PIGLIN, properties);

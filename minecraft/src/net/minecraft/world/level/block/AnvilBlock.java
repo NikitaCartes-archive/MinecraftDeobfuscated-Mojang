@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,6 +30,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class AnvilBlock extends FallingBlock {
+	public static final MapCodec<AnvilBlock> CODEC = simpleCodec(AnvilBlock::new);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	private static final VoxelShape BASE = Block.box(2.0, 0.0, 2.0, 14.0, 4.0, 14.0);
 	private static final VoxelShape X_LEG1 = Block.box(3.0, 4.0, 4.0, 13.0, 5.0, 12.0);
@@ -42,6 +44,11 @@ public class AnvilBlock extends FallingBlock {
 	private static final Component CONTAINER_TITLE = Component.translatable("container.repair");
 	private static final float FALL_DAMAGE_PER_DISTANCE = 2.0F;
 	private static final int FALL_DAMAGE_MAX = 40;
+
+	@Override
+	public MapCodec<AnvilBlock> codec() {
+		return CODEC;
+	}
 
 	public AnvilBlock(BlockBehaviour.Properties properties) {
 		super(properties);

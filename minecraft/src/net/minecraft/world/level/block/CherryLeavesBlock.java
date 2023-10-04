@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -10,6 +11,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CherryLeavesBlock extends LeavesBlock {
+	public static final MapCodec<CherryLeavesBlock> CODEC = simpleCodec(CherryLeavesBlock::new);
+
+	@Override
+	public MapCodec<CherryLeavesBlock> codec() {
+		return CODEC;
+	}
+
 	public CherryLeavesBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

@@ -24,7 +24,7 @@ public class TimeArgument implements ArgumentType<Integer> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("0d", "0s", "0t", "0");
 	private static final SimpleCommandExceptionType ERROR_INVALID_UNIT = new SimpleCommandExceptionType(Component.translatable("argument.time.invalid_unit"));
 	private static final Dynamic2CommandExceptionType ERROR_TICK_COUNT_TOO_LOW = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("argument.time.tick_count_too_low", object2, object)
+		(object, object2) -> Component.translatableEscape("argument.time.tick_count_too_low", object2, object)
 	);
 	private static final Object2IntMap<String> UNITS = new Object2IntOpenHashMap<>();
 	final int minimum;

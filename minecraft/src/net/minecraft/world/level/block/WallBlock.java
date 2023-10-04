@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,6 +28,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WallBlock extends Block implements SimpleWaterloggedBlock {
+	public static final MapCodec<WallBlock> CODEC = simpleCodec(WallBlock::new);
 	public static final BooleanProperty UP = BlockStateProperties.UP;
 	public static final EnumProperty<WallSide> EAST_WALL = BlockStateProperties.EAST_WALL;
 	public static final EnumProperty<WallSide> NORTH_WALL = BlockStateProperties.NORTH_WALL;
@@ -46,6 +48,11 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 	private static final VoxelShape SOUTH_TEST = Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 16.0);
 	private static final VoxelShape WEST_TEST = Block.box(0.0, 0.0, 7.0, 9.0, 16.0, 9.0);
 	private static final VoxelShape EAST_TEST = Block.box(7.0, 0.0, 7.0, 16.0, 16.0, 9.0);
+
+	@Override
+	public MapCodec<WallBlock> codec() {
+		return CODEC;
+	}
 
 	public WallBlock(BlockBehaviour.Properties properties) {
 		super(properties);

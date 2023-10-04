@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,6 +23,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SnowLayerBlock extends Block {
+	public static final MapCodec<SnowLayerBlock> CODEC = simpleCodec(SnowLayerBlock::new);
 	public static final int MAX_HEIGHT = 8;
 	public static final IntegerProperty LAYERS = BlockStateProperties.LAYERS;
 	protected static final VoxelShape[] SHAPE_BY_LAYER = new VoxelShape[]{
@@ -36,6 +38,11 @@ public class SnowLayerBlock extends Block {
 		Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)
 	};
 	public static final int HEIGHT_IMPASSABLE = 5;
+
+	@Override
+	public MapCodec<SnowLayerBlock> codec() {
+		return CODEC;
+	}
 
 	protected SnowLayerBlock(BlockBehaviour.Properties properties) {
 		super(properties);

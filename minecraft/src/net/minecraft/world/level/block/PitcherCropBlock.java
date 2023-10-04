@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,6 +26,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBlock {
+	public static final MapCodec<PitcherCropBlock> CODEC = simpleCodec(PitcherCropBlock::new);
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_4;
 	public static final int MAX_AGE = 4;
 	private static final int DOUBLE_PLANT_AGE_INTERSECTION = 3;
@@ -37,6 +39,11 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 	private static final VoxelShape[] LOWER_SHAPE_BY_AGE = new VoxelShape[]{
 		COLLISION_SHAPE_BULB, Block.box(3.0, -1.0, 3.0, 13.0, 14.0, 13.0), FULL_LOWER_SHAPE, FULL_LOWER_SHAPE, FULL_LOWER_SHAPE
 	};
+
+	@Override
+	public MapCodec<PitcherCropBlock> codec() {
+		return CODEC;
+	}
 
 	public PitcherCropBlock(BlockBehaviour.Properties properties) {
 		super(properties);

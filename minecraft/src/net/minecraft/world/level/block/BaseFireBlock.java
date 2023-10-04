@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,6 +29,9 @@ public abstract class BaseFireBlock extends Block {
 		super(properties);
 		this.fireDamage = f;
 	}
+
+	@Override
+	protected abstract MapCodec<? extends BaseFireBlock> codec();
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
@@ -160,12 +164,12 @@ public abstract class BaseFireBlock extends Block {
 	}
 
 	@Override
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide()) {
 			level.levelEvent(null, 1009, blockPos, 0);
 		}
 
-		super.playerWillDestroy(level, blockPos, blockState, player);
+		return super.playerWillDestroy(level, blockPos, blockState, player);
 	}
 
 	public static boolean canBePlacedAt(Level level, BlockPos blockPos, Direction direction) {

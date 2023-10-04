@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -24,6 +25,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
+	public static final MapCodec<LeverBlock> CODEC = simpleCodec(LeverBlock::new);
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	protected static final int DEPTH = 6;
 	protected static final int WIDTH = 6;
@@ -36,6 +38,11 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 	protected static final VoxelShape UP_AABB_X = Block.box(4.0, 0.0, 5.0, 12.0, 6.0, 11.0);
 	protected static final VoxelShape DOWN_AABB_Z = Block.box(5.0, 10.0, 4.0, 11.0, 16.0, 12.0);
 	protected static final VoxelShape DOWN_AABB_X = Block.box(4.0, 10.0, 5.0, 12.0, 16.0, 11.0);
+
+	@Override
+	public MapCodec<LeverBlock> codec() {
+		return CODEC;
+	}
 
 	protected LeverBlock(BlockBehaviour.Properties properties) {
 		super(properties);

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,12 +25,15 @@ public abstract class BasePressurePlateBlock extends Block {
 	protected static final VoxelShape PRESSED_AABB = Block.box(1.0, 0.0, 1.0, 15.0, 0.5, 15.0);
 	protected static final VoxelShape AABB = Block.box(1.0, 0.0, 1.0, 15.0, 1.0, 15.0);
 	protected static final AABB TOUCH_AABB = new AABB(0.0625, 0.0, 0.0625, 0.9375, 0.25, 0.9375);
-	private final BlockSetType type;
+	protected final BlockSetType type;
 
 	protected BasePressurePlateBlock(BlockBehaviour.Properties properties, BlockSetType blockSetType) {
 		super(properties.sound(blockSetType.soundType()));
 		this.type = blockSetType;
 	}
+
+	@Override
+	protected abstract MapCodec<? extends BasePressurePlateBlock> codec();
 
 	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {

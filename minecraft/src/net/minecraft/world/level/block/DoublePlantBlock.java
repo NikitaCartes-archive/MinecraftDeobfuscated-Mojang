@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,7 +22,13 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.Fluids;
 
 public class DoublePlantBlock extends BushBlock {
+	public static final MapCodec<DoublePlantBlock> CODEC = simpleCodec(DoublePlantBlock::new);
 	public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
+
+	@Override
+	public MapCodec<? extends DoublePlantBlock> codec() {
+		return CODEC;
+	}
 
 	public DoublePlantBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -83,7 +90,7 @@ public class DoublePlantBlock extends BushBlock {
 	}
 
 	@Override
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide) {
 			if (player.isCreative()) {
 				preventCreativeDropFromBottomPart(level, blockPos, blockState, player);
@@ -92,7 +99,7 @@ public class DoublePlantBlock extends BushBlock {
 			}
 		}
 
-		super.playerWillDestroy(level, blockPos, blockState, player);
+		return super.playerWillDestroy(level, blockPos, blockState, player);
 	}
 
 	@Override

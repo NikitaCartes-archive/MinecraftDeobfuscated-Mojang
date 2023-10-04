@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,9 +27,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class DaylightDetectorBlock extends BaseEntityBlock {
+	public static final MapCodec<DaylightDetectorBlock> CODEC = simpleCodec(DaylightDetectorBlock::new);
 	public static final IntegerProperty POWER = BlockStateProperties.POWER;
 	public static final BooleanProperty INVERTED = BlockStateProperties.INVERTED;
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 6.0, 16.0);
+
+	@Override
+	public MapCodec<DaylightDetectorBlock> codec() {
+		return CODEC;
+	}
 
 	public DaylightDetectorBlock(BlockBehaviour.Properties properties) {
 		super(properties);

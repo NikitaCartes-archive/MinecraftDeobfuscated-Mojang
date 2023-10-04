@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,6 +20,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LadderBlock extends Block implements SimpleWaterloggedBlock {
+	public static final MapCodec<LadderBlock> CODEC = simpleCodec(LadderBlock::new);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	protected static final float AABB_OFFSET = 3.0F;
@@ -26,6 +28,11 @@ public class LadderBlock extends Block implements SimpleWaterloggedBlock {
 	protected static final VoxelShape WEST_AABB = Block.box(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 	protected static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
 	protected static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
+
+	@Override
+	public MapCodec<LadderBlock> codec() {
+		return CODEC;
+	}
 
 	protected LadderBlock(BlockBehaviour.Properties properties) {
 		super(properties);

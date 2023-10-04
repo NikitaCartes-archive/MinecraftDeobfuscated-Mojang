@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,6 +11,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class SlimeBlock extends HalfTransparentBlock {
+	public static final MapCodec<SlimeBlock> CODEC = simpleCodec(SlimeBlock::new);
+
+	@Override
+	public MapCodec<SlimeBlock> codec() {
+		return CODEC;
+	}
+
 	public SlimeBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

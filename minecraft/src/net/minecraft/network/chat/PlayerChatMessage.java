@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.SignatureUpdater;
 import net.minecraft.util.SignatureValidator;
 
@@ -23,7 +22,7 @@ public record PlayerChatMessage(
 					SignedMessageLink.CODEC.fieldOf("link").forGetter(PlayerChatMessage::link),
 					MessageSignature.CODEC.optionalFieldOf("signature").forGetter(playerChatMessage -> Optional.ofNullable(playerChatMessage.signature)),
 					SignedMessageBody.MAP_CODEC.forGetter(PlayerChatMessage::signedBody),
-					ExtraCodecs.COMPONENT.optionalFieldOf("unsigned_content").forGetter(playerChatMessage -> Optional.ofNullable(playerChatMessage.unsignedContent)),
+					ComponentSerialization.CODEC.optionalFieldOf("unsigned_content").forGetter(playerChatMessage -> Optional.ofNullable(playerChatMessage.unsignedContent)),
 					FilterMask.CODEC.optionalFieldOf("filter_mask", FilterMask.PASS_THROUGH).forGetter(PlayerChatMessage::filterMask)
 				)
 				.apply(

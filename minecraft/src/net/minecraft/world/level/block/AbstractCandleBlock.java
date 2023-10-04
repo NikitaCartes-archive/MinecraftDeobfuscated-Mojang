@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -22,6 +23,9 @@ import net.minecraft.world.phys.Vec3;
 public abstract class AbstractCandleBlock extends Block {
 	public static final int LIGHT_PER_CANDLE = 3;
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
+
+	@Override
+	protected abstract MapCodec<? extends AbstractCandleBlock> codec();
 
 	protected AbstractCandleBlock(BlockBehaviour.Properties properties) {
 		super(properties);

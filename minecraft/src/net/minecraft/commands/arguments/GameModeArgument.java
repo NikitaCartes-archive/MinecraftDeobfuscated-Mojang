@@ -23,7 +23,7 @@ public class GameModeArgument implements ArgumentType<GameType> {
 		.collect(Collectors.toList());
 	private static final GameType[] VALUES = GameType.values();
 	private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.gamemode.invalid", object)
+		object -> Component.translatableEscape("argument.gamemode.invalid", object)
 	);
 
 	public GameType parse(StringReader stringReader) throws CommandSyntaxException {

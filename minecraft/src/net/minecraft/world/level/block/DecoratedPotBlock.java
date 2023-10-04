@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -21,6 +22,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
@@ -39,11 +41,17 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
+	public static final MapCodec<DecoratedPotBlock> CODEC = simpleCodec(DecoratedPotBlock::new);
 	public static final ResourceLocation SHERDS_DYNAMIC_DROP_ID = new ResourceLocation("sherds");
 	private static final VoxelShape BOUNDING_BOX = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 	private static final DirectionProperty HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
-	private static final BooleanProperty CRACKED = BlockStateProperties.CRACKED;
+	public static final BooleanProperty CRACKED = BlockStateProperties.CRACKED;
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+
+	@Override
+	public MapCodec<DecoratedPotBlock> codec() {
+		return CODEC;
+	}
 
 	protected DecoratedPotBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -117,7 +125,7 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		ItemStack itemStack = player.getMainHandItem();
 		BlockState blockState2 = blockState;
 		if (itemStack.is(ItemTags.BREAKS_DECORATED_POTS) && !EnchantmentHelper.hasSilkTouch(itemStack)) {
@@ -125,7 +133,7 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 			level.setBlock(blockPos, blockState2, 4);
 		}
 
-		super.playerWillDestroy(level, blockPos, blockState2, player);
+		return super.playerWillDestroy(level, blockPos, blockState2, player);
 	}
 
 	@Override
@@ -150,9 +158,9 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-		return blockGetter.getBlockEntity(blockPos) instanceof DecoratedPotBlockEntity decoratedPotBlockEntity
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+		return levelReader.getBlockEntity(blockPos) instanceof DecoratedPotBlockEntity decoratedPotBlockEntity
 			? decoratedPotBlockEntity.getItem()
-			: super.getCloneItemStack(blockGetter, blockPos, blockState);
+			: super.getCloneItemStack(levelReader, blockPos, blockState);
 	}
 }

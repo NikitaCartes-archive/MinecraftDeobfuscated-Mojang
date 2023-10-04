@@ -13,7 +13,7 @@ import net.minecraft.WorldVersion;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ExtraCodecs;
+import net.minecraft.network.chat.ComponentSerialization;
 
 public record ServerStatus(
 	Component description,
@@ -24,7 +24,7 @@ public record ServerStatus(
 ) {
 	public static final Codec<ServerStatus> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ExtraCodecs.COMPONENT.optionalFieldOf("description", CommonComponents.EMPTY).forGetter(ServerStatus::description),
+					ComponentSerialization.CODEC.optionalFieldOf("description", CommonComponents.EMPTY).forGetter(ServerStatus::description),
 					ServerStatus.Players.CODEC.optionalFieldOf("players").forGetter(ServerStatus::players),
 					ServerStatus.Version.CODEC.optionalFieldOf("version").forGetter(ServerStatus::version),
 					ServerStatus.Favicon.CODEC.optionalFieldOf("favicon").forGetter(ServerStatus::favicon),

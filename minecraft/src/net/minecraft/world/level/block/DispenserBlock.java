@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import net.minecraft.Util;
@@ -40,12 +41,18 @@ import org.slf4j.Logger;
 
 public class DispenserBlock extends BaseEntityBlock {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final MapCodec<DispenserBlock> CODEC = simpleCodec(DispenserBlock::new);
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
 	public static final BooleanProperty TRIGGERED = BlockStateProperties.TRIGGERED;
 	private static final Map<Item, DispenseItemBehavior> DISPENSER_REGISTRY = Util.make(
 		new Object2ObjectOpenHashMap<>(), object2ObjectOpenHashMap -> object2ObjectOpenHashMap.defaultReturnValue(new DefaultDispenseItemBehavior())
 	);
 	private static final int TRIGGER_DURATION = 4;
+
+	@Override
+	public MapCodec<? extends DispenserBlock> codec() {
+		return CODEC;
+	}
 
 	public static void registerBehavior(ItemLike itemLike, DispenseItemBehavior dispenseItemBehavior) {
 		DISPENSER_REGISTRY.put(itemLike.asItem(), dispenseItemBehavior);

@@ -19,10 +19,10 @@ import net.minecraft.world.scores.Scoreboard;
 public class ObjectiveArgument implements ArgumentType<String> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "*", "012");
 	private static final DynamicCommandExceptionType ERROR_OBJECTIVE_NOT_FOUND = new DynamicCommandExceptionType(
-		object -> Component.translatable("arguments.objective.notFound", object)
+		object -> Component.translatableEscape("arguments.objective.notFound", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_OBJECTIVE_READ_ONLY = new DynamicCommandExceptionType(
-		object -> Component.translatable("arguments.objective.readonly", object)
+		object -> Component.translatableEscape("arguments.objective.readonly", object)
 	);
 
 	public static ObjectiveArgument objective() {

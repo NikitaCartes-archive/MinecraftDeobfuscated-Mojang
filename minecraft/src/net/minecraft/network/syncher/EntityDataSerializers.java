@@ -37,9 +37,11 @@ public class EntityDataSerializers {
 	public static final EntityDataSerializer<Long> LONG = EntityDataSerializer.simple(FriendlyByteBuf::writeVarLong, FriendlyByteBuf::readVarLong);
 	public static final EntityDataSerializer<Float> FLOAT = EntityDataSerializer.simple(FriendlyByteBuf::writeFloat, FriendlyByteBuf::readFloat);
 	public static final EntityDataSerializer<String> STRING = EntityDataSerializer.simple(FriendlyByteBuf::writeUtf, FriendlyByteBuf::readUtf);
-	public static final EntityDataSerializer<Component> COMPONENT = EntityDataSerializer.simple(FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponent);
+	public static final EntityDataSerializer<Component> COMPONENT = EntityDataSerializer.simple(
+		FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponentTrusted
+	);
 	public static final EntityDataSerializer<Optional<Component>> OPTIONAL_COMPONENT = EntityDataSerializer.optional(
-		FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponent
+		FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponentTrusted
 	);
 	public static final EntityDataSerializer<ItemStack> ITEM_STACK = new EntityDataSerializer<ItemStack>() {
 		public void write(FriendlyByteBuf friendlyByteBuf, ItemStack itemStack) {

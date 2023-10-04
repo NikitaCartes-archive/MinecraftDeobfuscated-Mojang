@@ -173,13 +173,13 @@ public class RandomCommand {
 
 	private static int resetSequence(CommandSourceStack commandSourceStack, ResourceLocation resourceLocation) throws CommandSyntaxException {
 		commandSourceStack.getLevel().getRandomSequences().reset(resourceLocation);
-		commandSourceStack.sendSuccess(() -> Component.translatable("commands.random.reset.success", resourceLocation), false);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.random.reset.success", Component.translationArg(resourceLocation)), false);
 		return 1;
 	}
 
 	private static int resetSequence(CommandSourceStack commandSourceStack, ResourceLocation resourceLocation, int i, boolean bl, boolean bl2) throws CommandSyntaxException {
 		commandSourceStack.getLevel().getRandomSequences().reset(resourceLocation, i, bl, bl2);
-		commandSourceStack.sendSuccess(() -> Component.translatable("commands.random.reset.success", resourceLocation), false);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.random.reset.success", Component.translationArg(resourceLocation)), false);
 		return 1;
 	}
 

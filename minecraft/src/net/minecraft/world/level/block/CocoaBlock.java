@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,6 +22,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CocoaBlock extends HorizontalDirectionalBlock implements BonemealableBlock {
+	public static final MapCodec<CocoaBlock> CODEC = simpleCodec(CocoaBlock::new);
 	public static final int MAX_AGE = 2;
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_2;
 	protected static final int AGE_0_WIDTH = 4;
@@ -44,6 +46,11 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
 	protected static final VoxelShape[] SOUTH_AABB = new VoxelShape[]{
 		Block.box(6.0, 7.0, 11.0, 10.0, 12.0, 15.0), Block.box(5.0, 5.0, 9.0, 11.0, 12.0, 15.0), Block.box(4.0, 3.0, 7.0, 12.0, 12.0, 15.0)
 	};
+
+	@Override
+	public MapCodec<CocoaBlock> codec() {
+		return CODEC;
+	}
 
 	public CocoaBlock(BlockBehaviour.Properties properties) {
 		super(properties);

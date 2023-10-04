@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.piston;
 
+import com.mojang.serialization.MapCodec;
 import java.util.Arrays;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,6 +28,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PistonHeadBlock extends DirectionalBlock {
+	public static final MapCodec<PistonHeadBlock> CODEC = simpleCodec(PistonHeadBlock::new);
 	public static final EnumProperty<PistonType> TYPE = BlockStateProperties.PISTON_TYPE;
 	public static final BooleanProperty SHORT = BlockStateProperties.SHORT;
 	public static final float PLATFORM = 4.0F;
@@ -53,6 +55,11 @@ public class PistonHeadBlock extends DirectionalBlock {
 	protected static final VoxelShape SHORT_WEST_ARM_AABB = Block.box(4.0, 6.0, 6.0, 16.0, 10.0, 10.0);
 	private static final VoxelShape[] SHAPES_SHORT = makeShapes(true);
 	private static final VoxelShape[] SHAPES_LONG = makeShapes(false);
+
+	@Override
+	protected MapCodec<PistonHeadBlock> codec() {
+		return CODEC;
+	}
 
 	private static VoxelShape[] makeShapes(boolean bl) {
 		return (VoxelShape[])Arrays.stream(Direction.values()).map(direction -> calculateShape(direction, bl)).toArray(VoxelShape[]::new);
@@ -99,7 +106,7 @@ public class PistonHeadBlock extends DirectionalBlock {
 	}
 
 	@Override
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide && player.getAbilities().instabuild) {
 			BlockPos blockPos2 = blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite());
 			if (this.isFittingBase(blockState, level.getBlockState(blockPos2))) {
@@ -107,7 +114,7 @@ public class PistonHeadBlock extends DirectionalBlock {
 			}
 		}
 
-		super.playerWillDestroy(level, blockPos, blockState, player);
+		return super.playerWillDestroy(level, blockPos, blockState, player);
 	}
 
 	@Override
@@ -144,7 +151,7 @@ public class PistonHeadBlock extends DirectionalBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return new ItemStack(blockState.getValue(TYPE) == PistonType.STICKY ? Blocks.STICKY_PISTON : Blocks.PISTON);
 	}
 

@@ -1,46 +1,40 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class TorchBlock extends Block {
-	protected static final int AABB_STANDING_OFFSET = 2;
-	protected static final VoxelShape AABB = Block.box(6.0, 0.0, 6.0, 10.0, 10.0, 10.0);
-	protected final ParticleOptions flameParticle;
+public class TorchBlock extends BaseTorchBlock {
+	protected static final MapCodec<SimpleParticleType> PARTICLE_OPTIONS_FIELD = BuiltInRegistries.PARTICLE_TYPE
+		.byNameCodec()
+		.<SimpleParticleType>comapFlatMap(
+			particleType -> particleType instanceof SimpleParticleType simpleParticleType
+					? DataResult.success(simpleParticleType)
+					: DataResult.error(() -> "Not a SimpleParticleType: " + particleType),
+			simpleParticleType -> simpleParticleType
+		)
+		.fieldOf("particle_options");
+	public static final MapCodec<TorchBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(PARTICLE_OPTIONS_FIELD.forGetter(torchBlock -> torchBlock.flameParticle), propertiesCodec()).apply(instance, TorchBlock::new)
+	);
+	protected final SimpleParticleType flameParticle;
 
-	protected TorchBlock(BlockBehaviour.Properties properties, ParticleOptions particleOptions) {
+	@Override
+	public MapCodec<? extends TorchBlock> codec() {
+		return CODEC;
+	}
+
+	protected TorchBlock(SimpleParticleType simpleParticleType, BlockBehaviour.Properties properties) {
 		super(properties);
-		this.flameParticle = particleOptions;
-	}
-
-	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		return AABB;
-	}
-
-	@Override
-	public BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
-	) {
-		return direction == Direction.DOWN && !this.canSurvive(blockState, levelAccessor, blockPos)
-			? Blocks.AIR.defaultBlockState()
-			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
-	}
-
-	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return canSupportCenter(levelReader, blockPos.below(), Direction.UP);
+		this.flameParticle = simpleParticleType;
 	}
 
 	@Override

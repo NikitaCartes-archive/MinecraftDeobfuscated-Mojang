@@ -7,7 +7,7 @@ import net.minecraft.network.protocol.Packet;
 
 public record ClientboundDisguisedChatPacket(Component message, ChatType.BoundNetwork chatType) implements Packet<ClientGamePacketListener> {
 	public ClientboundDisguisedChatPacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readComponent(), new ChatType.BoundNetwork(friendlyByteBuf));
+		this(friendlyByteBuf.readComponentTrusted(), new ChatType.BoundNetwork(friendlyByteBuf));
 	}
 
 	@Override

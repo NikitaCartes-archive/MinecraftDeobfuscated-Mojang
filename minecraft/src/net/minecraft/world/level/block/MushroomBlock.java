@@ -1,5 +1,7 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -18,11 +20,22 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class MushroomBlock extends BushBlock implements BonemealableBlock {
+	public static final MapCodec<MushroomBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					ResourceKey.codec(Registries.CONFIGURED_FEATURE).fieldOf("feature").forGetter(mushroomBlock -> mushroomBlock.feature), propertiesCodec()
+				)
+				.apply(instance, MushroomBlock::new)
+	);
 	protected static final float AABB_OFFSET = 3.0F;
 	protected static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 6.0, 11.0);
 	private final ResourceKey<ConfiguredFeature<?, ?>> feature;
 
-	public MushroomBlock(BlockBehaviour.Properties properties, ResourceKey<ConfiguredFeature<?, ?>> resourceKey) {
+	@Override
+	public MapCodec<MushroomBlock> codec() {
+		return CODEC;
+	}
+
+	public MushroomBlock(ResourceKey<ConfiguredFeature<?, ?>> resourceKey, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.feature = resourceKey;
 	}

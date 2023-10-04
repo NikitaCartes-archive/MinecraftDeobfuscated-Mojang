@@ -1,12 +1,13 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.Arrays;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -43,10 +44,13 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
 	private final WoodType type;
 
-	protected SignBlock(BlockBehaviour.Properties properties, WoodType woodType) {
+	protected SignBlock(WoodType woodType, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.type = woodType;
 	}
+
+	@Override
+	protected abstract MapCodec<? extends SignBlock> codec();
 
 	@Override
 	public BlockState updateShape(
@@ -124,7 +128,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	private boolean hasEditableText(Player player, SignBlockEntity signBlockEntity, boolean bl) {
 		SignText signText = signBlockEntity.getText(bl);
 		return Arrays.stream(signText.getMessages(player.isTextFilteringEnabled()))
-			.allMatch(component -> component.equals(CommonComponents.EMPTY) || component.getContents() instanceof LiteralContents);
+			.allMatch(component -> component.equals(CommonComponents.EMPTY) || component.getContents() instanceof PlainTextContents);
 	}
 
 	public abstract float getYRotationDegrees(BlockState blockState);

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,6 +28,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BambooStalkBlock extends Block implements BonemealableBlock {
+	public static final MapCodec<BambooStalkBlock> CODEC = simpleCodec(BambooStalkBlock::new);
 	protected static final float SMALL_LEAVES_AABB_OFFSET = 3.0F;
 	protected static final float LARGE_LEAVES_AABB_OFFSET = 5.0F;
 	protected static final float COLLISION_AABB_OFFSET = 1.5F;
@@ -41,6 +43,11 @@ public class BambooStalkBlock extends Block implements BonemealableBlock {
 	public static final int STAGE_DONE_GROWING = 1;
 	public static final int AGE_THIN_BAMBOO = 0;
 	public static final int AGE_THICK_BAMBOO = 1;
+
+	@Override
+	public MapCodec<BambooStalkBlock> codec() {
+		return CODEC;
+	}
 
 	public BambooStalkBlock(BlockBehaviour.Properties properties) {
 		super(properties);

@@ -3,8 +3,8 @@ package net.minecraft.client.gui.screens.worldselection;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,14 +32,12 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class OptimizeWorldScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Object2IntMap<ResourceKey<Level>> DIMENSION_COLORS = Util.make(
-		new Object2IntOpenCustomHashMap<>(Util.identityStrategy()), object2IntOpenCustomHashMap -> {
-			object2IntOpenCustomHashMap.put(Level.OVERWORLD, -13408734);
-			object2IntOpenCustomHashMap.put(Level.NETHER, -10075085);
-			object2IntOpenCustomHashMap.put(Level.END, -8943531);
-			object2IntOpenCustomHashMap.defaultReturnValue(-2236963);
-		}
-	);
+	private static final ToIntFunction<ResourceKey<Level>> DIMENSION_COLORS = Util.make(new Reference2IntOpenHashMap<>(), reference2IntOpenHashMap -> {
+		reference2IntOpenHashMap.put(Level.OVERWORLD, -13408734);
+		reference2IntOpenHashMap.put(Level.NETHER, -10075085);
+		reference2IntOpenHashMap.put(Level.END, -8943531);
+		reference2IntOpenHashMap.defaultReturnValue(-2236963);
+	});
 	private final BooleanConsumer callback;
 	private final WorldUpgrader upgrader;
 
@@ -122,7 +120,7 @@ public class OptimizeWorldScreen extends Screen {
 
 			for (ResourceKey<Level> resourceKey : this.upgrader.levels()) {
 				int p = Mth.floor(this.upgrader.dimensionProgress(resourceKey) * (float)(l - k));
-				guiGraphics.fill(k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(resourceKey));
+				guiGraphics.fill(k + o, m, k + o + p, n, DIMENSION_COLORS.applyAsInt(resourceKey));
 				o += p;
 			}
 

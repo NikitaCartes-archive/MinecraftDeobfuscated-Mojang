@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import com.mojang.serialization.Codec;
 import java.util.EnumMap;
 import java.util.function.Supplier;
 import net.minecraft.Util;
@@ -53,7 +54,7 @@ public enum ArmorMaterials implements StringRepresentable, ArmorMaterial {
 		enumMap.put(ArmorItem.Type.HELMET, 3);
 	}), 15, SoundEvents.ARMOR_EQUIP_NETHERITE, 3.0F, 0.1F, () -> Ingredient.of(Items.NETHERITE_INGOT));
 
-	public static final StringRepresentable.EnumCodec<ArmorMaterials> CODEC = StringRepresentable.fromEnum(ArmorMaterials::values);
+	public static final Codec<ArmorMaterials> CODEC = StringRepresentable.fromEnum(ArmorMaterials::values);
 	private static final EnumMap<ArmorItem.Type, Integer> HEALTH_FUNCTION_FOR_TYPE = Util.make(new EnumMap(ArmorItem.Type.class), enumMap -> {
 		enumMap.put(ArmorItem.Type.BOOTS, 13);
 		enumMap.put(ArmorItem.Type.LEGGINGS, 15);

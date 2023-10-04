@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.base.Predicates;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -22,12 +23,18 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class EndPortalFrameBlock extends Block {
+	public static final MapCodec<EndPortalFrameBlock> CODEC = simpleCodec(EndPortalFrameBlock::new);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty HAS_EYE = BlockStateProperties.EYE;
 	protected static final VoxelShape BASE_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 13.0, 16.0);
 	protected static final VoxelShape EYE_SHAPE = Block.box(4.0, 13.0, 4.0, 12.0, 16.0, 12.0);
 	protected static final VoxelShape FULL_SHAPE = Shapes.or(BASE_SHAPE, EYE_SHAPE);
 	private static BlockPattern portalShape;
+
+	@Override
+	public MapCodec<EndPortalFrameBlock> codec() {
+		return CODEC;
+	}
 
 	public EndPortalFrameBlock(BlockBehaviour.Properties properties) {
 		super(properties);

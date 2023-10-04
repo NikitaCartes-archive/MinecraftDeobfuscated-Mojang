@@ -44,7 +44,7 @@ public class RecordItem extends Item {
 			if (!level.isClientSide) {
 				Player player = useOnContext.getPlayer();
 				if (level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
-					jukeboxBlockEntity.setFirstItem(itemStack.copy());
+					jukeboxBlockEntity.setTheItem(itemStack.copy());
 					level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState));
 				}
 

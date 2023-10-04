@@ -108,11 +108,6 @@ public class Guardian extends Monster {
 	}
 
 	@Override
-	public boolean canBreatheUnderwater() {
-		return true;
-	}
-
-	@Override
 	public MobType getMobType() {
 		return MobType.WATER;
 	}

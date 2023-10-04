@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -23,12 +24,18 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SnifferEggBlock extends Block {
+	public static final MapCodec<SnifferEggBlock> CODEC = simpleCodec(SnifferEggBlock::new);
 	public static final int MAX_HATCH_LEVEL = 2;
 	public static final IntegerProperty HATCH = BlockStateProperties.HATCH;
 	private static final int REGULAR_HATCH_TIME_TICKS = 24000;
 	private static final int BOOSTED_HATCH_TIME_TICKS = 12000;
 	private static final int RANDOM_HATCH_OFFSET_TICKS = 300;
 	private static final VoxelShape SHAPE = Block.box(1.0, 0.0, 2.0, 15.0, 16.0, 14.0);
+
+	@Override
+	public MapCodec<SnifferEggBlock> codec() {
+		return CODEC;
+	}
 
 	public SnifferEggBlock(BlockBehaviour.Properties properties) {
 		super(properties);

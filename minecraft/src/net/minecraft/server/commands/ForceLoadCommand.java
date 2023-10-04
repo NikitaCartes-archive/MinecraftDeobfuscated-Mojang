@@ -21,10 +21,10 @@ import net.minecraft.world.level.Level;
 public class ForceLoadCommand {
 	private static final int MAX_CHUNK_LIMIT = 256;
 	private static final Dynamic2CommandExceptionType ERROR_TOO_MANY_CHUNKS = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.forceload.toobig", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.forceload.toobig", object, object2)
 	);
 	private static final Dynamic2CommandExceptionType ERROR_NOT_TICKING = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.forceload.query.failure", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.forceload.query.failure", object, object2)
 	);
 	private static final SimpleCommandExceptionType ERROR_ALL_ADDED = new SimpleCommandExceptionType(Component.translatable("commands.forceload.added.failure"));
 	private static final SimpleCommandExceptionType ERROR_NONE_REMOVED = new SimpleCommandExceptionType(
@@ -91,7 +91,10 @@ public class ForceLoadCommand {
 		ResourceKey<Level> resourceKey = serverLevel.dimension();
 		boolean bl = serverLevel.getForcedChunks().contains(chunkPos.toLong());
 		if (bl) {
-			commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.query.success", chunkPos, resourceKey.location()), false);
+			commandSourceStack.sendSuccess(
+				() -> Component.translatable("commands.forceload.query.success", Component.translationArg(chunkPos), Component.translationArg(resourceKey.location())),
+				false
+			);
 			return 1;
 		} else {
 			throw ERROR_NOT_TICKING.create(chunkPos, resourceKey.location());
@@ -106,12 +109,16 @@ public class ForceLoadCommand {
 		if (i > 0) {
 			String string = Joiner.on(", ").join(longSet.stream().sorted().map(ChunkPos::new).map(ChunkPos::toString).iterator());
 			if (i == 1) {
-				commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.list.single", resourceKey.location(), string), false);
+				commandSourceStack.sendSuccess(
+					() -> Component.translatable("commands.forceload.list.single", Component.translationArg(resourceKey.location()), string), false
+				);
 			} else {
-				commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.list.multiple", i, resourceKey.location(), string), false);
+				commandSourceStack.sendSuccess(
+					() -> Component.translatable("commands.forceload.list.multiple", i, Component.translationArg(resourceKey.location()), string), false
+				);
 			}
 		} else {
-			commandSourceStack.sendFailure(Component.translatable("commands.forceload.added.none", resourceKey.location()));
+			commandSourceStack.sendFailure(Component.translatable("commands.forceload.added.none", Component.translationArg(resourceKey.location())));
 		}
 
 		return i;
@@ -122,7 +129,7 @@ public class ForceLoadCommand {
 		ResourceKey<Level> resourceKey = serverLevel.dimension();
 		LongSet longSet = serverLevel.getForcedChunks();
 		longSet.forEach(l -> serverLevel.setChunkForced(ChunkPos.getX(l), ChunkPos.getZ(l), false));
-		commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.removed.all", resourceKey.location()), true);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.forceload.removed.all", Component.translationArg(resourceKey.location())), true);
 		return 0;
 	}
 
@@ -163,13 +170,22 @@ public class ForceLoadCommand {
 				} else {
 					if (r == 1) {
 						commandSourceStack.sendSuccess(
-							() -> Component.translatable("commands.forceload." + (bl ? "added" : "removed") + ".single", chunkPos2, resourceKey.location()), true
+							() -> Component.translatable(
+									"commands.forceload." + (bl ? "added" : "removed") + ".single", Component.translationArg(chunkPos2), Component.translationArg(resourceKey.location())
+								),
+							true
 						);
 					} else {
 						ChunkPos chunkPos3 = new ChunkPos(m, n);
 						ChunkPos chunkPos4 = new ChunkPos(o, p);
 						commandSourceStack.sendSuccess(
-							() -> Component.translatable("commands.forceload." + (bl ? "added" : "removed") + ".multiple", chunkPos2, resourceKey.location(), chunkPos3, chunkPos4),
+							() -> Component.translatable(
+									"commands.forceload." + (bl ? "added" : "removed") + ".multiple",
+									Component.translationArg(chunkPos2),
+									Component.translationArg(resourceKey.location()),
+									Component.translationArg(chunkPos3),
+									Component.translationArg(chunkPos4)
+								),
 							true
 						);
 					}

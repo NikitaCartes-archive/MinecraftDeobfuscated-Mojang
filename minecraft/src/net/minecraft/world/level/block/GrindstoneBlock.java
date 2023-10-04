@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -25,6 +26,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class GrindstoneBlock extends FaceAttachedHorizontalDirectionalBlock {
+	public static final MapCodec<GrindstoneBlock> CODEC = simpleCodec(GrindstoneBlock::new);
 	public static final VoxelShape FLOOR_NORTH_SOUTH_LEFT_POST = Block.box(2.0, 0.0, 6.0, 4.0, 7.0, 10.0);
 	public static final VoxelShape FLOOR_NORTH_SOUTH_RIGHT_POST = Block.box(12.0, 0.0, 6.0, 14.0, 7.0, 10.0);
 	public static final VoxelShape FLOOR_NORTH_SOUTH_LEFT_PIVOT = Block.box(2.0, 7.0, 5.0, 4.0, 13.0, 11.0);
@@ -90,6 +92,11 @@ public class GrindstoneBlock extends FaceAttachedHorizontalDirectionalBlock {
 	public static final VoxelShape CEILING_EAST_WEST_ALL_LEGS = Shapes.or(CEILING_EAST_WEST_LEFT_LEG, CEILING_EAST_WEST_RIGHT_LEG);
 	public static final VoxelShape CEILING_EAST_WEST_GRINDSTONE = Shapes.or(CEILING_EAST_WEST_ALL_LEGS, Block.box(2.0, 0.0, 4.0, 14.0, 12.0, 12.0));
 	private static final Component CONTAINER_TITLE = Component.translatable("container.grindstone_title");
+
+	@Override
+	public MapCodec<GrindstoneBlock> codec() {
+		return CODEC;
+	}
 
 	protected GrindstoneBlock(BlockBehaviour.Properties properties) {
 		super(properties);

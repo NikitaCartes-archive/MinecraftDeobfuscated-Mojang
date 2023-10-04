@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BigDripleafBlock extends HorizontalDirectionalBlock implements BonemealableBlock, SimpleWaterloggedBlock {
+	public static final MapCodec<BigDripleafBlock> CODEC = simpleCodec(BigDripleafBlock::new);
 	private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private static final EnumProperty<Tilt> TILT = BlockStateProperties.TILT;
 	private static final int NO_TICK = -1;
@@ -75,6 +77,11 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 		Shapes.joinUnoptimized(BigDripleafStemBlock.WEST_SHAPE, STEM_SLICER, BooleanOp.ONLY_FIRST)
 	);
 	private final Map<BlockState, VoxelShape> shapesCache;
+
+	@Override
+	public MapCodec<BigDripleafBlock> codec() {
+		return CODEC;
+	}
 
 	protected BigDripleafBlock(BlockBehaviour.Properties properties) {
 		super(properties);

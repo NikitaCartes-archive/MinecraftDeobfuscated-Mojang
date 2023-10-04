@@ -1,9 +1,12 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -24,6 +27,10 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class TripWireBlock extends Block {
+	public static final MapCodec<TripWireBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(BuiltInRegistries.BLOCK.byNameCodec().fieldOf("hook").forGetter(tripWireBlock -> tripWireBlock.hook), propertiesCodec())
+				.apply(instance, TripWireBlock::new)
+	);
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final BooleanProperty ATTACHED = BlockStateProperties.ATTACHED;
 	public static final BooleanProperty DISARMED = BlockStateProperties.DISARMED;
@@ -35,9 +42,14 @@ public class TripWireBlock extends Block {
 	protected static final VoxelShape AABB = Block.box(0.0, 1.0, 0.0, 16.0, 2.5, 16.0);
 	protected static final VoxelShape NOT_ATTACHED_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
 	private static final int RECHECK_PERIOD = 10;
-	private final TripWireHookBlock hook;
+	private final Block hook;
 
-	public TripWireBlock(TripWireHookBlock tripWireHookBlock, BlockBehaviour.Properties properties) {
+	@Override
+	public MapCodec<TripWireBlock> codec() {
+		return CODEC;
+	}
+
+	public TripWireBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -50,7 +62,7 @@ public class TripWireBlock extends Block {
 				.setValue(SOUTH, Boolean.valueOf(false))
 				.setValue(WEST, Boolean.valueOf(false))
 		);
-		this.hook = tripWireHookBlock;
+		this.hook = block;
 	}
 
 	@Override
@@ -93,13 +105,13 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide && !player.getMainHandItem().isEmpty() && player.getMainHandItem().is(Items.SHEARS)) {
 			level.setBlock(blockPos, blockState.setValue(DISARMED, Boolean.valueOf(true)), 4);
 			level.gameEvent(player, GameEvent.SHEAR, blockPos);
 		}
 
-		super.playerWillDestroy(level, blockPos, blockState, player);
+		return super.playerWillDestroy(level, blockPos, blockState, player);
 	}
 
 	private void updateSource(Level level, BlockPos blockPos, BlockState blockState) {
@@ -109,7 +121,7 @@ public class TripWireBlock extends Block {
 				BlockState blockState2 = level.getBlockState(blockPos2);
 				if (blockState2.is(this.hook)) {
 					if (blockState2.getValue(TripWireHookBlock.FACING) == direction.getOpposite()) {
-						this.hook.calculateState(level, blockPos2, blockState2, false, true, i, blockState);
+						TripWireHookBlock.calculateState(level, blockPos2, blockState2, false, true, i, blockState);
 					}
 					break;
 				}

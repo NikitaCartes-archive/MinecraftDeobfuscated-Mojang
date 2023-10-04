@@ -26,7 +26,8 @@ public class ListPlayersCommand {
 
 	private static int listPlayersWithUuids(CommandSourceStack commandSourceStack) {
 		return format(
-			commandSourceStack, serverPlayer -> Component.translatable("commands.list.nameAndId", serverPlayer.getName(), serverPlayer.getGameProfile().getId())
+			commandSourceStack,
+			serverPlayer -> Component.translatable("commands.list.nameAndId", serverPlayer.getName(), Component.translationArg(serverPlayer.getGameProfile().getId()))
 		);
 	}
 

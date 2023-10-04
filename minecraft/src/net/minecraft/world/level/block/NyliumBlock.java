@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -17,6 +18,13 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.lighting.LightEngine;
 
 public class NyliumBlock extends Block implements BonemealableBlock {
+	public static final MapCodec<NyliumBlock> CODEC = simpleCodec(NyliumBlock::new);
+
+	@Override
+	public MapCodec<NyliumBlock> codec() {
+		return CODEC;
+	}
+
 	protected NyliumBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

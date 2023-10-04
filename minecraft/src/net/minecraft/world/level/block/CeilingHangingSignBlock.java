@@ -2,6 +2,8 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -38,6 +40,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class CeilingHangingSignBlock extends SignBlock {
+	public static final MapCodec<CeilingHangingSignBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(WoodType.CODEC.fieldOf("wood_type").forGetter(SignBlock::type), propertiesCodec()).apply(instance, CeilingHangingSignBlock::new)
+	);
 	public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
 	public static final BooleanProperty ATTACHED = BlockStateProperties.ATTACHED;
 	protected static final float AABB_OFFSET = 5.0F;
@@ -55,8 +60,13 @@ public class CeilingHangingSignBlock extends SignBlock {
 		)
 	);
 
-	public CeilingHangingSignBlock(BlockBehaviour.Properties properties, WoodType woodType) {
-		super(properties.sound(woodType.hangingSignSoundType()), woodType);
+	@Override
+	public MapCodec<CeilingHangingSignBlock> codec() {
+		return CODEC;
+	}
+
+	public CeilingHangingSignBlock(WoodType woodType, BlockBehaviour.Properties properties) {
+		super(woodType, properties.sound(woodType.hangingSignSoundType()));
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(ROTATION, Integer.valueOf(0)).setValue(ATTACHED, Boolean.valueOf(false)).setValue(WATERLOGGED, Boolean.valueOf(false))
 		);

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -54,10 +55,16 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BeehiveBlock extends BaseEntityBlock {
+	public static final MapCodec<BeehiveBlock> CODEC = simpleCodec(BeehiveBlock::new);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final IntegerProperty HONEY_LEVEL = BlockStateProperties.LEVEL_HONEY;
 	public static final int MAX_HONEY_LEVELS = 5;
 	private static final int SHEARED_HONEYCOMB_COUNT = 3;
+
+	@Override
+	public MapCodec<BeehiveBlock> codec() {
+		return CODEC;
+	}
 
 	public BeehiveBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -250,7 +257,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide
 			&& player.isCreative()
 			&& level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)
@@ -274,7 +281,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 			}
 		}
 
-		super.playerWillDestroy(level, blockPos, blockState, player);
+		return super.playerWillDestroy(level, blockPos, blockState, player);
 	}
 
 	@Override
@@ -304,5 +311,15 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+	}
+
+	@Override
+	public BlockState rotate(BlockState blockState, Rotation rotation) {
+		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
+	}
+
+	@Override
+	public BlockState mirror(BlockState blockState, Mirror mirror) {
+		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 }

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Map;
@@ -18,7 +19,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class CrossCollisionBlock extends Block implements SimpleWaterloggedBlock {
+public abstract class CrossCollisionBlock extends Block implements SimpleWaterloggedBlock {
 	public static final BooleanProperty NORTH = PipeBlock.NORTH;
 	public static final BooleanProperty EAST = PipeBlock.EAST;
 	public static final BooleanProperty SOUTH = PipeBlock.SOUTH;
@@ -42,6 +43,9 @@ public class CrossCollisionBlock extends Block implements SimpleWaterloggedBlock
 			this.getAABBIndex(blockState);
 		}
 	}
+
+	@Override
+	protected abstract MapCodec<? extends CrossCollisionBlock> codec();
 
 	protected VoxelShape[] makeShapes(float f, float g, float h, float i, float j) {
 		float k = 8.0F - f;

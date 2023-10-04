@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -15,8 +16,14 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SoulSandBlock extends Block {
+	public static final MapCodec<SoulSandBlock> CODEC = simpleCodec(SoulSandBlock::new);
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0);
 	private static final int BUBBLE_COLUMN_CHECK_DELAY = 20;
+
+	@Override
+	public MapCodec<SoulSandBlock> codec() {
+		return CODEC;
+	}
 
 	public SoulSandBlock(BlockBehaviour.Properties properties) {
 		super(properties);

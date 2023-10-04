@@ -1,15 +1,19 @@
 package net.minecraft.world.level.block.state.properties;
 
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
-import java.util.Set;
+import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.SoundType;
 
 public record BlockSetType(
 	String name,
 	boolean canOpenByHand,
+	boolean canButtonBeActivatedByArrows,
+	BlockSetType.PressurePlateSensitivity pressurePlateSensitivity,
 	SoundType soundType,
 	SoundEvent doorClose,
 	SoundEvent doorOpen,
@@ -20,11 +24,14 @@ public record BlockSetType(
 	SoundEvent buttonClickOff,
 	SoundEvent buttonClickOn
 ) {
-	private static final Set<BlockSetType> VALUES = new ObjectArraySet<>();
+	private static final Map<String, BlockSetType> TYPES = new Object2ObjectArrayMap<>();
+	public static final Codec<BlockSetType> CODEC = ExtraCodecs.stringResolverCodec(BlockSetType::name, TYPES::get);
 	public static final BlockSetType IRON = register(
 		new BlockSetType(
 			"iron",
 			false,
+			false,
+			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.METAL,
 			SoundEvents.IRON_DOOR_CLOSE,
 			SoundEvents.IRON_DOOR_OPEN,
@@ -40,6 +47,8 @@ public record BlockSetType(
 		new BlockSetType(
 			"gold",
 			false,
+			false,
+			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.METAL,
 			SoundEvents.IRON_DOOR_CLOSE,
 			SoundEvents.IRON_DOOR_OPEN,
@@ -55,6 +64,8 @@ public record BlockSetType(
 		new BlockSetType(
 			"stone",
 			true,
+			false,
+			BlockSetType.PressurePlateSensitivity.MOBS,
 			SoundType.STONE,
 			SoundEvents.IRON_DOOR_CLOSE,
 			SoundEvents.IRON_DOOR_OPEN,
@@ -70,6 +81,8 @@ public record BlockSetType(
 		new BlockSetType(
 			"polished_blackstone",
 			true,
+			false,
+			BlockSetType.PressurePlateSensitivity.MOBS,
 			SoundType.STONE,
 			SoundEvents.IRON_DOOR_CLOSE,
 			SoundEvents.IRON_DOOR_OPEN,
@@ -89,6 +102,8 @@ public record BlockSetType(
 		new BlockSetType(
 			"cherry",
 			true,
+			true,
+			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.CHERRY_WOOD,
 			SoundEvents.CHERRY_WOOD_DOOR_CLOSE,
 			SoundEvents.CHERRY_WOOD_DOOR_OPEN,
@@ -106,6 +121,8 @@ public record BlockSetType(
 		new BlockSetType(
 			"crimson",
 			true,
+			true,
+			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.NETHER_WOOD,
 			SoundEvents.NETHER_WOOD_DOOR_CLOSE,
 			SoundEvents.NETHER_WOOD_DOOR_OPEN,
@@ -121,6 +138,8 @@ public record BlockSetType(
 		new BlockSetType(
 			"warped",
 			true,
+			true,
+			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.NETHER_WOOD,
 			SoundEvents.NETHER_WOOD_DOOR_CLOSE,
 			SoundEvents.NETHER_WOOD_DOOR_OPEN,
@@ -137,6 +156,8 @@ public record BlockSetType(
 		new BlockSetType(
 			"bamboo",
 			true,
+			true,
+			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.BAMBOO_WOOD,
 			SoundEvents.BAMBOO_WOOD_DOOR_CLOSE,
 			SoundEvents.BAMBOO_WOOD_DOOR_OPEN,
@@ -153,6 +174,8 @@ public record BlockSetType(
 		this(
 			string,
 			true,
+			true,
+			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.WOOD,
 			SoundEvents.WOODEN_DOOR_CLOSE,
 			SoundEvents.WOODEN_DOOR_OPEN,
@@ -166,11 +189,16 @@ public record BlockSetType(
 	}
 
 	private static BlockSetType register(BlockSetType blockSetType) {
-		VALUES.add(blockSetType);
+		TYPES.put(blockSetType.name, blockSetType);
 		return blockSetType;
 	}
 
 	public static Stream<BlockSetType> values() {
-		return VALUES.stream();
+		return TYPES.values().stream();
+	}
+
+	public static enum PressurePlateSensitivity {
+		EVERYTHING,
+		MOBS;
 	}
 }

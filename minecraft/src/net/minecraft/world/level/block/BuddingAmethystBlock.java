@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -9,8 +10,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 
 public class BuddingAmethystBlock extends AmethystBlock {
+	public static final MapCodec<BuddingAmethystBlock> CODEC = simpleCodec(BuddingAmethystBlock::new);
 	public static final int GROWTH_CHANCE = 5;
 	private static final Direction[] DIRECTIONS = Direction.values();
+
+	@Override
+	public MapCodec<BuddingAmethystBlock> codec() {
+		return CODEC;
+	}
 
 	public BuddingAmethystBlock(BlockBehaviour.Properties properties) {
 		super(properties);

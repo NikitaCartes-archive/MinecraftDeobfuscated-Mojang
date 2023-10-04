@@ -23,6 +23,18 @@ public class JsonUtils {
 		}
 	}
 
+	@Nullable
+	public static <T> T getOptional(String string, JsonObject jsonObject, Function<JsonObject, T> function) {
+		JsonElement jsonElement = jsonObject.get(string);
+		if (jsonElement == null || jsonElement.isJsonNull()) {
+			return null;
+		} else if (!jsonElement.isJsonObject()) {
+			throw new IllegalStateException("Required property " + string + " was not a JsonObject as espected");
+		} else {
+			return (T)function.apply(jsonElement.getAsJsonObject());
+		}
+	}
+
 	public static String getRequiredString(String string, JsonObject jsonObject) {
 		String string2 = getStringOr(string, jsonObject, null);
 		if (string2 == null) {

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.function.BiFunction;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PinkPetalsBlock extends BushBlock implements BonemealableBlock {
+	public static final MapCodec<PinkPetalsBlock> CODEC = simpleCodec(PinkPetalsBlock::new);
 	public static final int MIN_FLOWERS = 1;
 	public static final int MAX_FLOWERS = 4;
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -44,6 +46,11 @@ public class PinkPetalsBlock extends BushBlock implements BonemealableBlock {
 			return voxelShape.singleEncompassing();
 		})
 	);
+
+	@Override
+	public MapCodec<PinkPetalsBlock> codec() {
+		return CODEC;
+	}
 
 	protected PinkPetalsBlock(BlockBehaviour.Properties properties) {
 		super(properties);

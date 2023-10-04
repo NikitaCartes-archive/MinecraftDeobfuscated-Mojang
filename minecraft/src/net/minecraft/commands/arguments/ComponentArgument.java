@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 public class ComponentArgument implements ArgumentType<Component> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("\"hello world\"", "\"\"", "\"{\"text\":\"hello world\"}", "[\"\"]");
 	public static final DynamicCommandExceptionType ERROR_INVALID_JSON = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.component.invalid", object)
+		object -> Component.translatableEscape("argument.component.invalid", object)
 	);
 
 	private ComponentArgument() {

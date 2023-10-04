@@ -1,10 +1,8 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -13,7 +11,6 @@ import net.minecraft.world.Clearable;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
@@ -26,7 +23,7 @@ import net.minecraft.world.ticks.ContainerSingleItem;
 
 public class JukeboxBlockEntity extends BlockEntity implements Clearable, ContainerSingleItem {
 	private static final int SONG_END_PADDING = 20;
-	private final NonNullList<ItemStack> items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+	private ItemStack item = ItemStack.EMPTY;
 	private int ticksSinceLastEvent;
 	private long tickCount;
 	private long recordStartedTick;
@@ -40,7 +37,7 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	public void load(CompoundTag compoundTag) {
 		super.load(compoundTag);
 		if (compoundTag.contains("RecordItem", 10)) {
-			this.items.set(0, ItemStack.of(compoundTag.getCompound("RecordItem")));
+			this.item = ItemStack.of(compoundTag.getCompound("RecordItem"));
 		}
 
 		this.isPlaying = compoundTag.getBoolean("IsPlaying");
@@ -51,8 +48,8 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag) {
 		super.saveAdditional(compoundTag);
-		if (!this.getFirstItem().isEmpty()) {
-			compoundTag.put("RecordItem", this.getFirstItem().save(new CompoundTag()));
+		if (!this.getTheItem().isEmpty()) {
+			compoundTag.put("RecordItem", this.getTheItem().save(new CompoundTag()));
 		}
 
 		compoundTag.putBoolean("IsPlaying", this.isPlaying);
@@ -61,7 +58,7 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	}
 
 	public boolean isRecordPlaying() {
-		return !this.getFirstItem().isEmpty() && this.isPlaying;
+		return !this.getTheItem().isEmpty() && this.isPlaying;
 	}
 
 	private void setHasRecordBlockState(@Nullable Entity entity, boolean bl) {
@@ -76,7 +73,7 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 		this.recordStartedTick = this.tickCount;
 		this.isPlaying = true;
 		this.level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
-		this.level.levelEvent(null, 1010, this.getBlockPos(), Item.getId(this.getFirstItem().getItem()));
+		this.level.levelEvent(null, 1010, this.getBlockPos(), Item.getId(this.getTheItem().getItem()));
 		this.setChanged();
 	}
 
@@ -90,7 +87,7 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 
 	private void tick(Level level, BlockPos blockPos, BlockState blockState) {
 		this.ticksSinceLastEvent++;
-		if (this.isRecordPlaying() && this.getFirstItem().getItem() instanceof RecordItem recordItem) {
+		if (this.isRecordPlaying() && this.getTheItem().getItem() instanceof RecordItem recordItem) {
 			if (this.shouldRecordStopPlaying(recordItem)) {
 				this.stopPlaying();
 			} else if (this.shouldSendJukeboxPlayingEvent()) {
@@ -112,14 +109,14 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	}
 
 	@Override
-	public ItemStack getItem(int i) {
-		return this.items.get(i);
+	public ItemStack getTheItem() {
+		return this.item;
 	}
 
 	@Override
-	public ItemStack removeItem(int i, int j) {
-		ItemStack itemStack = (ItemStack)Objects.requireNonNullElse(this.items.get(i), ItemStack.EMPTY);
-		this.items.set(i, ItemStack.EMPTY);
+	public ItemStack splitTheItem(int i) {
+		ItemStack itemStack = this.item;
+		this.item = ItemStack.EMPTY;
 		if (!itemStack.isEmpty()) {
 			this.setHasRecordBlockState(null, false);
 			this.stopPlaying();
@@ -129,13 +126,13 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	}
 
 	@Override
-	public void setItem(int i, ItemStack itemStack) {
+	public void setTheItem(ItemStack itemStack) {
 		if (itemStack.is(ItemTags.MUSIC_DISCS) && this.level != null) {
-			this.items.set(i, itemStack);
+			this.item = itemStack;
 			this.setHasRecordBlockState(null, true);
 			this.startPlaying();
 		} else if (itemStack.isEmpty()) {
-			this.removeItem(i, 1);
+			this.splitTheItem(1);
 		}
 	}
 
@@ -145,8 +142,8 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	}
 
 	@Override
-	public boolean stillValid(Player player) {
-		return Container.stillValidBlockEntity(this, player);
+	public BlockEntity getContainerBlockEntity() {
+		return this;
 	}
 
 	@Override
@@ -170,9 +167,9 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	public void popOutRecord() {
 		if (this.level != null && !this.level.isClientSide) {
 			BlockPos blockPos = this.getBlockPos();
-			ItemStack itemStack = this.getFirstItem();
+			ItemStack itemStack = this.getTheItem();
 			if (!itemStack.isEmpty()) {
-				this.removeFirstItem();
+				this.removeTheItem();
 				Vec3 vec3 = Vec3.atLowerCornerWithOffset(blockPos, 0.5, 1.01, 0.5).offsetRandom(this.level.random, 0.7F);
 				ItemStack itemStack2 = itemStack.copy();
 				ItemEntity itemEntity = new ItemEntity(this.level, vec3.x(), vec3.y(), vec3.z(), itemStack2);
@@ -188,7 +185,7 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 
 	@VisibleForTesting
 	public void setRecordWithoutPlaying(ItemStack itemStack) {
-		this.items.set(0, itemStack);
+		this.item = itemStack;
 		this.level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
 		this.setChanged();
 	}

@@ -98,7 +98,7 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 
 	public static record BoundNetwork(int chatType, Component name, @Nullable Component targetName) {
 		public BoundNetwork(FriendlyByteBuf friendlyByteBuf) {
-			this(friendlyByteBuf.readVarInt(), friendlyByteBuf.readComponent(), friendlyByteBuf.readNullable(FriendlyByteBuf::readComponent));
+			this(friendlyByteBuf.readVarInt(), friendlyByteBuf.readComponentTrusted(), friendlyByteBuf.readNullable(FriendlyByteBuf::readComponentTrusted));
 		}
 
 		public void write(FriendlyByteBuf friendlyByteBuf) {

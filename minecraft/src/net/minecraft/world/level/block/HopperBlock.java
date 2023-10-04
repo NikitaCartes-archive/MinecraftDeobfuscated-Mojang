@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,6 +35,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class HopperBlock extends BaseEntityBlock {
+	public static final MapCodec<HopperBlock> CODEC = simpleCodec(HopperBlock::new);
 	public static final DirectionProperty FACING = BlockStateProperties.FACING_HOPPER;
 	public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 	private static final VoxelShape TOP = Block.box(0.0, 10.0, 0.0, 16.0, 16.0, 16.0);
@@ -50,6 +52,11 @@ public class HopperBlock extends BaseEntityBlock {
 	private static final VoxelShape NORTH_INTERACTION_SHAPE = Shapes.or(Hopper.INSIDE, Block.box(6.0, 8.0, 0.0, 10.0, 10.0, 4.0));
 	private static final VoxelShape SOUTH_INTERACTION_SHAPE = Shapes.or(Hopper.INSIDE, Block.box(6.0, 8.0, 12.0, 10.0, 10.0, 16.0));
 	private static final VoxelShape WEST_INTERACTION_SHAPE = Shapes.or(Hopper.INSIDE, Block.box(0.0, 8.0, 6.0, 4.0, 10.0, 10.0));
+
+	@Override
+	public MapCodec<HopperBlock> codec() {
+		return CODEC;
+	}
 
 	public HopperBlock(BlockBehaviour.Properties properties) {
 		super(properties);

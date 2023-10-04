@@ -21,11 +21,6 @@ public abstract class WaterAnimal extends PathfinderMob {
 	}
 
 	@Override
-	public boolean canBreatheUnderwater() {
-		return true;
-	}
-
-	@Override
 	public MobType getMobType() {
 		return MobType.WATER;
 	}

@@ -1,16 +1,19 @@
 package net.minecraft.world.level.block.state.properties;
 
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
-import java.util.Set;
+import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.SoundType;
 
 public record WoodType(
 	String name, BlockSetType setType, SoundType soundType, SoundType hangingSignSoundType, SoundEvent fenceGateClose, SoundEvent fenceGateOpen
 ) {
-	private static final Set<WoodType> VALUES = new ObjectArraySet<>();
+	private static final Map<String, WoodType> TYPES = new Object2ObjectArrayMap<>();
+	public static final Codec<WoodType> CODEC = ExtraCodecs.stringResolverCodec(WoodType::name, TYPES::get);
 	public static final WoodType OAK = register(new WoodType("oak", BlockSetType.OAK));
 	public static final WoodType SPRUCE = register(new WoodType("spruce", BlockSetType.SPRUCE));
 	public static final WoodType BIRCH = register(new WoodType("birch", BlockSetType.BIRCH));
@@ -64,11 +67,11 @@ public record WoodType(
 	}
 
 	private static WoodType register(WoodType woodType) {
-		VALUES.add(woodType);
+		TYPES.put(woodType.name(), woodType);
 		return woodType;
 	}
 
 	public static Stream<WoodType> values() {
-		return VALUES.stream();
+		return TYPES.values().stream();
 	}
 }

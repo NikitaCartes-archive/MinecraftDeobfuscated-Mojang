@@ -18,10 +18,10 @@ import net.minecraft.resources.ResourceLocation;
 public class FunctionArgument implements ArgumentType<FunctionArgument.Result> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "#foo");
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType(
-		object -> Component.translatable("arguments.function.tag.unknown", object)
+		object -> Component.translatableEscape("arguments.function.tag.unknown", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_FUNCTION = new DynamicCommandExceptionType(
-		object -> Component.translatable("arguments.function.unknown", object)
+		object -> Component.translatableEscape("arguments.function.unknown", object)
 	);
 
 	public static FunctionArgument functions() {

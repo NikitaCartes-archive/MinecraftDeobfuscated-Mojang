@@ -49,10 +49,10 @@ public class LootCommand {
 		return SharedSuggestionProvider.suggestResource(lootDataManager.getKeys(LootDataType.TABLE), suggestionsBuilder);
 	};
 	private static final DynamicCommandExceptionType ERROR_NO_HELD_ITEMS = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.drop.no_held_items", object)
+		object -> Component.translatableEscape("commands.drop.no_held_items", object)
 	);
 	private static final DynamicCommandExceptionType ERROR_NO_LOOT_TABLE = new DynamicCommandExceptionType(
-		object -> Component.translatable("commands.drop.no_loot_table", object)
+		object -> Component.translatableEscape("commands.drop.no_loot_table", object)
 	);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
@@ -406,10 +406,15 @@ public class LootCommand {
 		if (list.size() == 1) {
 			ItemStack itemStack = (ItemStack)list.get(0);
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.drop.success.single_with_table", itemStack.getCount(), itemStack.getDisplayName(), resourceLocation), false
+				() -> Component.translatable(
+						"commands.drop.success.single_with_table", itemStack.getCount(), itemStack.getDisplayName(), Component.translationArg(resourceLocation)
+					),
+				false
 			);
 		} else {
-			commandSourceStack.sendSuccess(() -> Component.translatable("commands.drop.success.multiple_with_table", list.size(), resourceLocation), false);
+			commandSourceStack.sendSuccess(
+				() -> Component.translatable("commands.drop.success.multiple_with_table", list.size(), Component.translationArg(resourceLocation)), false
+			);
 		}
 	}
 

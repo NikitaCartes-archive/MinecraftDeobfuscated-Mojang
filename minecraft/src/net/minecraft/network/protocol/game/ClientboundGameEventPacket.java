@@ -19,6 +19,7 @@ public class ClientboundGameEventPacket implements Packet<ClientGamePacketListen
 	public static final ClientboundGameEventPacket.Type GUARDIAN_ELDER_EFFECT = new ClientboundGameEventPacket.Type(10);
 	public static final ClientboundGameEventPacket.Type IMMEDIATE_RESPAWN = new ClientboundGameEventPacket.Type(11);
 	public static final ClientboundGameEventPacket.Type LIMITED_CRAFTING = new ClientboundGameEventPacket.Type(12);
+	public static final ClientboundGameEventPacket.Type LEVEL_CHUNKS_LOAD_START = new ClientboundGameEventPacket.Type(13);
 	public static final int DEMO_PARAM_INTRO = 0;
 	public static final int DEMO_PARAM_HINT_1 = 101;
 	public static final int DEMO_PARAM_HINT_2 = 102;

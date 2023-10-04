@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -23,6 +24,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
+	public static final MapCodec<ScaffoldingBlock> CODEC = simpleCodec(ScaffoldingBlock::new);
 	private static final int TICK_DELAY = 1;
 	private static final VoxelShape STABLE_SHAPE;
 	private static final VoxelShape UNSTABLE_SHAPE;
@@ -32,6 +34,11 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	public static final IntegerProperty DISTANCE = BlockStateProperties.STABILITY_DISTANCE;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty BOTTOM = BlockStateProperties.BOTTOM;
+
+	@Override
+	public MapCodec<ScaffoldingBlock> codec() {
+		return CODEC;
+	}
 
 	protected ScaffoldingBlock(BlockBehaviour.Properties properties) {
 		super(properties);

@@ -1,7 +1,9 @@
 package net.minecraft.world.level.block.state;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -18,6 +21,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.DebugPackets;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
@@ -104,6 +108,20 @@ public abstract class BlockBehaviour implements FeatureElement {
 		this.dynamicShape = properties.dynamicShape;
 		this.requiredFeatures = properties.requiredFeatures;
 		this.properties = properties;
+	}
+
+	public BlockBehaviour.Properties properties() {
+		return this.properties;
+	}
+
+	protected abstract MapCodec<? extends Block> codec();
+
+	protected static <B extends Block> RecordCodecBuilder<B, BlockBehaviour.Properties> propertiesCodec() {
+		return BlockBehaviour.Properties.CODEC.fieldOf("properties").forGetter(BlockBehaviour::properties);
+	}
+
+	public static <B extends Block> MapCodec<B> simpleCodec(Function<BlockBehaviour.Properties, B> function) {
+		return RecordCodecBuilder.mapCodec(instance -> instance.group(propertiesCodec()).apply(instance, function));
 	}
 
 	@Deprecated
@@ -312,7 +330,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 	@Deprecated
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
-		this.tick(blockState, serverLevel, blockPos, randomSource);
 	}
 
 	@Deprecated
@@ -784,6 +801,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.getBlock() == block;
 		}
 
+		public boolean is(ResourceKey<Block> resourceKey) {
+			return this.getBlock().builtInRegistryHolder().is(resourceKey);
+		}
+
 		public FluidState getFluidState() {
 			return this.fluidState;
 		}
@@ -904,6 +925,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 	}
 
 	public static class Properties {
+		public static final Codec<BlockBehaviour.Properties> CODEC = Codec.unit((Supplier<BlockBehaviour.Properties>)(() -> of()));
 		Function<BlockState, MapColor> mapColor = blockState -> MapColor.NONE;
 		boolean hasCollision = true;
 		SoundType soundType = SoundType.STONE;

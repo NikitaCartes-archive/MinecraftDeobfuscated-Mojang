@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -14,6 +15,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class PlayerHeadBlock extends SkullBlock {
+	public static final MapCodec<PlayerHeadBlock> CODEC = simpleCodec(PlayerHeadBlock::new);
+
+	@Override
+	public MapCodec<PlayerHeadBlock> codec() {
+		return CODEC;
+	}
+
 	protected PlayerHeadBlock(BlockBehaviour.Properties properties) {
 		super(SkullBlock.Types.PLAYER, properties);
 	}

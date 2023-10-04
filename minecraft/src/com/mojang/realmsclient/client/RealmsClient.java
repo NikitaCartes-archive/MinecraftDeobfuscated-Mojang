@@ -119,8 +119,7 @@ public class RealmsClient {
 	public List<RealmsNotification> getNotifications() throws RealmsServiceException {
 		String string = this.url("notifications");
 		String string2 = this.execute(Request.get(string));
-		List<RealmsNotification> list = RealmsNotification.parseList(string2);
-		return list.size() > 1 ? List.of((RealmsNotification)list.get(0)) : list;
+		return RealmsNotification.parseList(string2);
 	}
 
 	private static JsonArray uuidListToJsonArray(List<UUID> list) {
@@ -280,7 +279,7 @@ public class RealmsClient {
 
 	public Boolean resetWorldWithSeed(long l, WorldGenerationInfo worldGenerationInfo) throws RealmsServiceException {
 		RealmsWorldResetDto realmsWorldResetDto = new RealmsWorldResetDto(
-			worldGenerationInfo.getSeed(), -1L, worldGenerationInfo.getLevelType().getDtoIndex(), worldGenerationInfo.shouldGenerateStructures()
+			worldGenerationInfo.seed(), -1L, worldGenerationInfo.levelType().getDtoIndex(), worldGenerationInfo.generateStructures()
 		);
 		String string = this.url("worlds" + "/$WORLD_ID/reset".replace("$WORLD_ID", String.valueOf(l)));
 		String string2 = this.execute(Request.post(string, GSON.toJson(realmsWorldResetDto), 30000, 80000));

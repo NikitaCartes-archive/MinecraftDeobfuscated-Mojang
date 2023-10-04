@@ -6,10 +6,10 @@ import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Lifecycle;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,8 +37,8 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	final ResourceKey<? extends Registry<T>> key;
 	private final ObjectList<Holder.Reference<T>> byId = new ObjectArrayList<>(256);
-	private final Object2IntMap<T> toId = Util.make(
-		new Object2IntOpenCustomHashMap<>(Util.identityStrategy()), object2IntOpenCustomHashMap -> object2IntOpenCustomHashMap.defaultReturnValue(-1)
+	private final Reference2IntMap<T> toId = Util.make(
+		new Reference2IntOpenHashMap<>(), reference2IntOpenHashMap -> reference2IntOpenHashMap.defaultReturnValue(-1)
 	);
 	private final Map<ResourceLocation, Holder.Reference<T>> byLocation = new HashMap();
 	private final Map<ResourceKey<T>, Holder.Reference<T>> byKey = new HashMap();

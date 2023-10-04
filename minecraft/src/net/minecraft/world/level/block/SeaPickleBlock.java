@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,6 +25,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class SeaPickleBlock extends BushBlock implements BonemealableBlock, SimpleWaterloggedBlock {
+	public static final MapCodec<SeaPickleBlock> CODEC = simpleCodec(SeaPickleBlock::new);
 	public static final int MAX_PICKLES = 4;
 	public static final IntegerProperty PICKLES = BlockStateProperties.PICKLES;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -31,6 +33,11 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 	protected static final VoxelShape TWO_AABB = Block.box(3.0, 0.0, 3.0, 13.0, 6.0, 13.0);
 	protected static final VoxelShape THREE_AABB = Block.box(2.0, 0.0, 2.0, 14.0, 6.0, 14.0);
 	protected static final VoxelShape FOUR_AABB = Block.box(2.0, 0.0, 2.0, 14.0, 7.0, 14.0);
+
+	@Override
+	public MapCodec<SeaPickleBlock> codec() {
+		return CODEC;
+	}
 
 	protected SeaPickleBlock(BlockBehaviour.Properties properties) {
 		super(properties);

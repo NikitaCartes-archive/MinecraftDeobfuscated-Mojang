@@ -182,11 +182,6 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 	}
 
 	@Override
-	public boolean canBreatheUnderwater() {
-		return true;
-	}
-
-	@Override
 	protected void customServerAiStep() {
 		this.level().getProfiler().push("frogBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);

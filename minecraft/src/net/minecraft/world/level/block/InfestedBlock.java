@@ -1,9 +1,12 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Silverfish;
@@ -16,10 +19,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public class InfestedBlock extends Block {
+	public static final MapCodec<InfestedBlock> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(BuiltInRegistries.BLOCK.byNameCodec().fieldOf("host").forGetter(InfestedBlock::getHostBlock), propertiesCodec())
+				.apply(instance, InfestedBlock::new)
+	);
 	private final Block hostBlock;
 	private static final Map<Block, Block> BLOCK_BY_HOST_BLOCK = Maps.<Block, Block>newIdentityHashMap();
 	private static final Map<BlockState, BlockState> HOST_TO_INFESTED_STATES = Maps.<BlockState, BlockState>newIdentityHashMap();
 	private static final Map<BlockState, BlockState> INFESTED_TO_HOST_STATES = Maps.<BlockState, BlockState>newIdentityHashMap();
+
+	@Override
+	public MapCodec<? extends InfestedBlock> codec() {
+		return CODEC;
+	}
 
 	public InfestedBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties.destroyTime(block.defaultDestroyTime() / 2.0F).explosionResistance(0.75F));

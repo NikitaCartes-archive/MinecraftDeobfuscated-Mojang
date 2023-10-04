@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -17,7 +18,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class PumpkinBlock extends StemGrownBlock {
+public class PumpkinBlock extends Block {
+	public static final MapCodec<PumpkinBlock> CODEC = simpleCodec(PumpkinBlock::new);
+
+	@Override
+	public MapCodec<PumpkinBlock> codec() {
+		return CODEC;
+	}
+
 	protected PumpkinBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
@@ -53,15 +61,5 @@ public class PumpkinBlock extends StemGrownBlock {
 		} else {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
-	}
-
-	@Override
-	public StemBlock getStem() {
-		return (StemBlock)Blocks.PUMPKIN_STEM;
-	}
-
-	@Override
-	public AttachedStemBlock getAttachedStem() {
-		return (AttachedStemBlock)Blocks.ATTACHED_PUMPKIN_STEM;
 	}
 }

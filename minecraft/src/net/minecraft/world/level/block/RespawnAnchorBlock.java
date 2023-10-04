@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.mojang.serialization.MapCodec;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -39,6 +40,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class RespawnAnchorBlock extends Block {
+	public static final MapCodec<RespawnAnchorBlock> CODEC = simpleCodec(RespawnAnchorBlock::new);
 	public static final int MIN_CHARGES = 0;
 	public static final int MAX_CHARGES = 4;
 	public static final IntegerProperty CHARGE = BlockStateProperties.RESPAWN_ANCHOR_CHARGES;
@@ -58,6 +60,11 @@ public class RespawnAnchorBlock extends Block {
 		.addAll(RESPAWN_HORIZONTAL_OFFSETS.stream().map(Vec3i::above).iterator())
 		.add(new Vec3i(0, 1, 0))
 		.build();
+
+	@Override
+	public MapCodec<RespawnAnchorBlock> codec() {
+		return CODEC;
+	}
 
 	public RespawnAnchorBlock(BlockBehaviour.Properties properties) {
 		super(properties);

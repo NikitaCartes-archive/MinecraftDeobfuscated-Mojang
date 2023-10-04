@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,6 +20,13 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BlastFurnaceBlock extends AbstractFurnaceBlock {
+	public static final MapCodec<BlastFurnaceBlock> CODEC = simpleCodec(BlastFurnaceBlock::new);
+
+	@Override
+	public MapCodec<BlastFurnaceBlock> codec() {
+		return CODEC;
+	}
+
 	protected BlastFurnaceBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}

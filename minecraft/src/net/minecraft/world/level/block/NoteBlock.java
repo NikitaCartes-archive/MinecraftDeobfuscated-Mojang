@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -31,10 +32,16 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class NoteBlock extends Block {
+	public static final MapCodec<NoteBlock> CODEC = simpleCodec(NoteBlock::new);
 	public static final EnumProperty<NoteBlockInstrument> INSTRUMENT = BlockStateProperties.NOTEBLOCK_INSTRUMENT;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final IntegerProperty NOTE = BlockStateProperties.NOTE;
 	public static final int NOTE_VOLUME = 3;
+
+	@Override
+	public MapCodec<NoteBlock> codec() {
+		return CODEC;
+	}
 
 	public NoteBlock(BlockBehaviour.Properties properties) {
 		super(properties);

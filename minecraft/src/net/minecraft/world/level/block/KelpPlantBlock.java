@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +15,13 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.Shapes;
 
 public class KelpPlantBlock extends GrowingPlantBodyBlock implements LiquidBlockContainer {
+	public static final MapCodec<KelpPlantBlock> CODEC = simpleCodec(KelpPlantBlock::new);
+
+	@Override
+	public MapCodec<KelpPlantBlock> codec() {
+		return CODEC;
+	}
+
 	protected KelpPlantBlock(BlockBehaviour.Properties properties) {
 		super(properties, Direction.UP, Shapes.block(), true);
 	}

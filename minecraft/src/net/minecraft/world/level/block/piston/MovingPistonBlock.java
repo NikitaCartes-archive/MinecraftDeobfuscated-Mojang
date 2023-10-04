@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.piston;
 
+import com.mojang.serialization.MapCodec;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -34,8 +36,14 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class MovingPistonBlock extends BaseEntityBlock {
+	public static final MapCodec<MovingPistonBlock> CODEC = simpleCodec(MovingPistonBlock::new);
 	public static final DirectionProperty FACING = PistonHeadBlock.FACING;
 	public static final EnumProperty<PistonType> TYPE = PistonHeadBlock.TYPE;
+
+	@Override
+	public MapCodec<MovingPistonBlock> codec() {
+		return CODEC;
+	}
 
 	public MovingPistonBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -113,7 +121,7 @@ public class MovingPistonBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return ItemStack.EMPTY;
 	}
 

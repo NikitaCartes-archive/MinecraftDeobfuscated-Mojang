@@ -1081,8 +1081,12 @@ public class Items {
 	public static final Item SHEARS = registerItem("shears", new ShearsItem(new Item.Properties().durability(238)));
 	public static final Item MELON_SLICE = registerItem("melon_slice", new Item(new Item.Properties().food(Foods.MELON_SLICE)));
 	public static final Item DRIED_KELP = registerItem("dried_kelp", new Item(new Item.Properties().food(Foods.DRIED_KELP)));
-	public static final Item PUMPKIN_SEEDS = registerItem("pumpkin_seeds", new ItemNameBlockItem(Blocks.PUMPKIN_STEM, new Item.Properties()));
-	public static final Item MELON_SEEDS = registerItem("melon_seeds", new ItemNameBlockItem(Blocks.MELON_STEM, new Item.Properties()));
+	public static final Item PUMPKIN_SEEDS = registerItem(
+		net.minecraft.references.Items.PUMPKIN_SEEDS, new ItemNameBlockItem(Blocks.PUMPKIN_STEM, new Item.Properties())
+	);
+	public static final Item MELON_SEEDS = registerItem(
+		net.minecraft.references.Items.MELON_SEEDS, new ItemNameBlockItem(Blocks.MELON_STEM, new Item.Properties())
+	);
 	public static final Item BEEF = registerItem("beef", new Item(new Item.Properties().food(Foods.BEEF)));
 	public static final Item COOKED_BEEF = registerItem("cooked_beef", new Item(new Item.Properties().food(Foods.COOKED_BEEF)));
 	public static final Item CHICKEN = registerItem("chicken", new Item(new Item.Properties().food(Foods.CHICKEN)));

@@ -52,10 +52,10 @@ import net.minecraft.world.scores.Team;
 public class EntitySelectorOptions {
 	private static final Map<String, EntitySelectorOptions.Option> OPTIONS = Maps.<String, EntitySelectorOptions.Option>newHashMap();
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_OPTION = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.entity.options.unknown", object)
+		object -> Component.translatableEscape("argument.entity.options.unknown", object)
 	);
 	public static final DynamicCommandExceptionType ERROR_INAPPLICABLE_OPTION = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.entity.options.inapplicable", object)
+		object -> Component.translatableEscape("argument.entity.options.inapplicable", object)
 	);
 	public static final SimpleCommandExceptionType ERROR_RANGE_NEGATIVE = new SimpleCommandExceptionType(
 		Component.translatable("argument.entity.options.distance.negative")
@@ -67,13 +67,13 @@ public class EntitySelectorOptions {
 		Component.translatable("argument.entity.options.limit.toosmall")
 	);
 	public static final DynamicCommandExceptionType ERROR_SORT_UNKNOWN = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.entity.options.sort.irreversible", object)
+		object -> Component.translatableEscape("argument.entity.options.sort.irreversible", object)
 	);
 	public static final DynamicCommandExceptionType ERROR_GAME_MODE_INVALID = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.entity.options.mode.invalid", object)
+		object -> Component.translatableEscape("argument.entity.options.mode.invalid", object)
 	);
 	public static final DynamicCommandExceptionType ERROR_ENTITY_TYPE_INVALID = new DynamicCommandExceptionType(
-		object -> Component.translatable("argument.entity.options.type.invalid", object)
+		object -> Component.translatableEscape("argument.entity.options.type.invalid", object)
 	);
 
 	private static void register(String string, EntitySelectorOptions.Modifier modifier, Predicate<EntitySelectorParser> predicate, Component component) {

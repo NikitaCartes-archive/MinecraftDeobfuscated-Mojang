@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -16,6 +17,9 @@ public abstract class AbstractChestBlock<E extends BlockEntity> extends BaseEnti
 		super(properties);
 		this.blockEntityType = supplier;
 	}
+
+	@Override
+	protected abstract MapCodec<? extends AbstractChestBlock<E>> codec();
 
 	public abstract DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> combine(
 		BlockState blockState, Level level, BlockPos blockPos, boolean bl

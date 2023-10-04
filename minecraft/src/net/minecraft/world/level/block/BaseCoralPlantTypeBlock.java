@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,7 +19,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class BaseCoralPlantTypeBlock extends Block implements SimpleWaterloggedBlock {
+public abstract class BaseCoralPlantTypeBlock extends Block implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private static final VoxelShape AABB = Block.box(2.0, 0.0, 2.0, 14.0, 4.0, 14.0);
 
@@ -26,6 +27,9 @@ public class BaseCoralPlantTypeBlock extends Block implements SimpleWaterloggedB
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(WATERLOGGED, Boolean.valueOf(true)));
 	}
+
+	@Override
+	protected abstract MapCodec<? extends BaseCoralPlantTypeBlock> codec();
 
 	protected void tryScheduleDieTick(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
 		if (!scanForWater(blockState, levelAccessor, blockPos)) {

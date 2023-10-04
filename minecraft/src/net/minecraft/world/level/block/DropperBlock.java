@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
@@ -20,7 +21,13 @@ import org.slf4j.Logger;
 
 public class DropperBlock extends DispenserBlock {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final MapCodec<DropperBlock> CODEC = simpleCodec(DropperBlock::new);
 	private static final DispenseItemBehavior DISPENSE_BEHAVIOUR = new DefaultDispenseItemBehavior();
+
+	@Override
+	public MapCodec<DropperBlock> codec() {
+		return CODEC;
+	}
 
 	public DropperBlock(BlockBehaviour.Properties properties) {
 		super(properties);

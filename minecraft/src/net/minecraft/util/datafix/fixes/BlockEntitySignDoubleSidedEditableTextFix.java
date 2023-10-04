@@ -8,13 +8,11 @@ import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
+import net.minecraft.util.datafix.ComponentDataFixUtils;
 
 public class BlockEntitySignDoubleSidedEditableTextFix extends NamedEntityFix {
 	public static final String FILTERED_CORRECT = "_filtered_correct";
 	private static final String DEFAULT_COLOR = "black";
-	private static final String EMPTY_COMPONENT = Component.Serializer.toJson(CommonComponents.EMPTY);
 
 	public BlockEntitySignDoubleSidedEditableTextFix(Schema schema, String string, String string2) {
 		super(schema, false, string, References.BLOCK_ENTITY, string2);
@@ -25,7 +23,7 @@ public class BlockEntitySignDoubleSidedEditableTextFix extends NamedEntityFix {
 	}
 
 	private static <T> Dynamic<T> fixFrontTextTag(Dynamic<T> dynamic) {
-		Dynamic<T> dynamic2 = dynamic.createString(EMPTY_COMPONENT);
+		Dynamic<T> dynamic2 = ComponentDataFixUtils.createEmptyComponent(dynamic.getOps());
 		List<Dynamic<T>> list = getLines(dynamic, "Text").map(optional -> (Dynamic)optional.orElse(dynamic2)).toList();
 		Dynamic<T> dynamic3 = dynamic.emptyMap()
 			.set("messages", dynamic.createList(list.stream()))
@@ -57,7 +55,7 @@ public class BlockEntitySignDoubleSidedEditableTextFix extends NamedEntityFix {
 	}
 
 	private static <T> Dynamic<T> createEmptyLines(Dynamic<T> dynamic) {
-		Dynamic<T> dynamic2 = dynamic.createString(EMPTY_COMPONENT);
+		Dynamic<T> dynamic2 = ComponentDataFixUtils.createEmptyComponent(dynamic.getOps());
 		return dynamic.createList(Stream.of(dynamic2, dynamic2, dynamic2, dynamic2));
 	}
 
