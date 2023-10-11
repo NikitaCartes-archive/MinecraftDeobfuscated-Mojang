@@ -256,7 +256,7 @@ public class MultiPlayerGameMode {
 	}
 
 	public float getPickRange() {
-		return this.localPlayerMode.isCreative() ? 5.0F : 4.5F;
+		return Player.getPickRange(this.localPlayerMode.isCreative());
 	}
 
 	public void tick() {

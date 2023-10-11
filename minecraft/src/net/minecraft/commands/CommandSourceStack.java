@@ -1,7 +1,7 @@
 package net.minecraft.commands;
 
 import com.google.common.collect.Lists;
-import com.mojang.brigadier.ResultConsumer;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -40,9 +40,11 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
-public class CommandSourceStack implements SharedSuggestionProvider {
+public class CommandSourceStack implements ExecutionCommandSource<CommandSourceStack>, SharedSuggestionProvider {
 	public static final SimpleCommandExceptionType ERROR_NOT_PLAYER = new SimpleCommandExceptionType(Component.translatable("permissions.requires.player"));
 	public static final SimpleCommandExceptionType ERROR_NOT_ENTITY = new SimpleCommandExceptionType(Component.translatable("permissions.requires.entity"));
+	private static final CommandResultConsumer<CommandSourceStack> EMPTY_CALLBACK = (commandSourceStack, bl, i) -> {
+	};
 	private final CommandSource source;
 	private final Vec3 worldPosition;
 	private final ServerLevel level;
@@ -53,8 +55,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	private final boolean silent;
 	@Nullable
 	private final Entity entity;
-	@Nullable
-	private final ResultConsumer<CommandSourceStack> consumer;
+	private final CommandResultConsumer<CommandSourceStack> consumer;
 	private final EntityAnchorArgument.Anchor anchor;
 	private final Vec2 rotation;
 	private final CommandSigningContext signingContext;
@@ -72,9 +73,24 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		MinecraftServer minecraftServer,
 		@Nullable Entity entity
 	) {
-		this(commandSource, vec3, vec2, serverLevel, i, string, component, minecraftServer, entity, false, (commandContext, bl, ix) -> {
-		}, EntityAnchorArgument.Anchor.FEET, CommandSigningContext.ANONYMOUS, TaskChainer.immediate(minecraftServer), ix -> {
-		});
+		this(
+			commandSource,
+			vec3,
+			vec2,
+			serverLevel,
+			i,
+			string,
+			component,
+			minecraftServer,
+			entity,
+			false,
+			EMPTY_CALLBACK,
+			EntityAnchorArgument.Anchor.FEET,
+			CommandSigningContext.ANONYMOUS,
+			TaskChainer.immediate(minecraftServer),
+			ix -> {
+			}
+		);
 	}
 
 	protected CommandSourceStack(
@@ -88,7 +104,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		MinecraftServer minecraftServer,
 		@Nullable Entity entity,
 		boolean bl,
-		@Nullable ResultConsumer<CommandSourceStack> resultConsumer,
+		CommandResultConsumer<CommandSourceStack> commandResultConsumer,
 		EntityAnchorArgument.Anchor anchor,
 		CommandSigningContext commandSigningContext,
 		TaskChainer taskChainer,
@@ -103,7 +119,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		this.textName = string;
 		this.displayName = component;
 		this.server = minecraftServer;
-		this.consumer = resultConsumer;
+		this.consumer = commandResultConsumer;
 		this.anchor = anchor;
 		this.rotation = vec2;
 		this.signingContext = commandSigningContext;
@@ -199,8 +215,8 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 			);
 	}
 
-	public CommandSourceStack withCallback(ResultConsumer<CommandSourceStack> resultConsumer) {
-		return Objects.equals(this.consumer, resultConsumer)
+	public CommandSourceStack withCallback(CommandResultConsumer<CommandSourceStack> commandResultConsumer) {
+		return Objects.equals(this.consumer, commandResultConsumer)
 			? this
 			: new CommandSourceStack(
 				this.source,
@@ -213,7 +229,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.server,
 				this.entity,
 				this.silent,
-				resultConsumer,
+				commandResultConsumer,
 				this.anchor,
 				this.signingContext,
 				this.chatMessageChainer,
@@ -221,9 +237,17 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 			);
 	}
 
-	public CommandSourceStack withCallback(ResultConsumer<CommandSourceStack> resultConsumer, BinaryOperator<ResultConsumer<CommandSourceStack>> binaryOperator) {
-		ResultConsumer<CommandSourceStack> resultConsumer2 = (ResultConsumer<CommandSourceStack>)binaryOperator.apply(this.consumer, resultConsumer);
-		return this.withCallback(resultConsumer2);
+	public CommandSourceStack clearCallbacks() {
+		return this.withCallback(EMPTY_CALLBACK);
+	}
+
+	public CommandSourceStack withCallback(
+		CommandResultConsumer<CommandSourceStack> commandResultConsumer, BinaryOperator<CommandResultConsumer<CommandSourceStack>> binaryOperator
+	) {
+		CommandResultConsumer<CommandSourceStack> commandResultConsumer2 = (CommandResultConsumer<CommandSourceStack>)binaryOperator.apply(
+			this.consumer, commandResultConsumer
+		);
+		return this.withCallback(commandResultConsumer2);
 	}
 
 	public CommandSourceStack withSuppressedOutput() {
@@ -471,10 +495,6 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		return this.chatMessageChainer;
 	}
 
-	public IntConsumer getReturnValueConsumer() {
-		return this.returnValueConsumer;
-	}
-
 	public boolean shouldFilterMessageTo(ServerPlayer serverPlayer) {
 		ServerPlayer serverPlayer2 = this.getPlayer();
 		return serverPlayer == serverPlayer2 ? false : serverPlayer2 != null && serverPlayer2.isTextFilteringEnabled() || serverPlayer.isTextFilteringEnabled();
@@ -538,10 +558,14 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		}
 	}
 
-	public void onCommandComplete(CommandContext<CommandSourceStack> commandContext, boolean bl, int i) {
-		if (this.consumer != null) {
-			this.consumer.onCommandComplete(commandContext, bl, i);
-		}
+	@Override
+	public void storeResults(boolean bl, int i) {
+		this.consumer.storeResult(this, bl, i);
+	}
+
+	@Override
+	public void storeReturnValue(int i) {
+		this.returnValueConsumer.accept(i);
 	}
 
 	@Override
@@ -595,5 +619,10 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	@Override
 	public FeatureFlagSet enabledFeatures() {
 		return this.level.enabledFeatures();
+	}
+
+	@Override
+	public CommandDispatcher<CommandSourceStack> dispatcher() {
+		return this.getServer().getFunctions().getDispatcher();
 	}
 }

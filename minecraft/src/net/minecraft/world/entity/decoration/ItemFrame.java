@@ -149,11 +149,6 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	@Override
-	public float getPickRadius() {
-		return 0.0F;
-	}
-
-	@Override
 	public void kill() {
 		this.removeFramedMap(this.getItem());
 		super.kill();

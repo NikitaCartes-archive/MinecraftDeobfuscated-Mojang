@@ -5,7 +5,6 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
@@ -16,13 +15,11 @@ public class WorldCreationTask extends LongRunningTask {
 	private final String name;
 	private final String motd;
 	private final long worldId;
-	private final Screen lastScreen;
 
-	public WorldCreationTask(long l, String string, String string2, Screen screen) {
+	public WorldCreationTask(long l, String string, String string2) {
 		this.worldId = l;
 		this.name = string;
 		this.motd = string2;
-		this.lastScreen = screen;
 	}
 
 	public void run() {
@@ -30,7 +27,6 @@ public class WorldCreationTask extends LongRunningTask {
 
 		try {
 			realmsClient.initializeWorld(this.worldId, this.name, this.motd);
-			setScreen(this.lastScreen);
 		} catch (RealmsServiceException var3) {
 			LOGGER.error("Couldn't create world", (Throwable)var3);
 			this.error(var3);

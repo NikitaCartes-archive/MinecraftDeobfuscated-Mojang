@@ -9,6 +9,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContextBuilder;
+import com.mojang.brigadier.context.ContextChain;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
@@ -16,6 +17,7 @@ import com.mojang.logging.LogUtils;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -24,6 +26,7 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.ArgumentUtils;
 import net.minecraft.commands.synchronization.SuggestionProviders;
@@ -40,6 +43,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.commands.AttributeCommand;
 import net.minecraft.server.commands.BanIpCommands;
@@ -121,6 +125,7 @@ import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
+import net.minecraft.world.level.GameRules;
 import org.slf4j.Logger;
 
 public class Commands {
@@ -226,7 +231,7 @@ public class Commands {
 			PublishCommand.register(this.dispatcher);
 		}
 
-		this.dispatcher.setConsumer((commandContext, bl, i) -> commandContext.getSource().onCommandComplete(commandContext, bl, i));
+		this.dispatcher.setConsumer(ExecutionCommandSource.resultConsumer());
 	}
 
 	public static <S> ParseResults<S> mapSource(ParseResults<S> parseResults, UnaryOperator<S> unaryOperator) {
@@ -235,21 +240,24 @@ public class Commands {
 		return new ParseResults<>(commandContextBuilder2, parseResults.getReader(), parseResults.getExceptions());
 	}
 
-	public int performPrefixedCommand(CommandSourceStack commandSourceStack, String string) {
+	public void performPrefixedCommand(CommandSourceStack commandSourceStack, String string) {
 		string = string.startsWith("/") ? string.substring(1) : string;
-		return this.performCommand(this.dispatcher.parse(string, commandSourceStack), string);
+		this.performCommand(this.dispatcher.parse(string, commandSourceStack), string);
 	}
 
-	public int performCommand(ParseResults<CommandSourceStack> parseResults, String string) {
+	public void performCommand(ParseResults<CommandSourceStack> parseResults, String string) {
 		CommandSourceStack commandSourceStack = parseResults.getContext().getSource();
 		commandSourceStack.getServer().getProfiler().push((Supplier<String>)(() -> "/" + string));
 
-		byte var20;
 		try {
-			return this.dispatcher.execute(parseResults);
+			validateParseResults(parseResults);
+			ContextChain<CommandSourceStack> contextChain = (ContextChain<CommandSourceStack>)ContextChain.tryFlatten(parseResults.getContext().build(string))
+				.orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader()));
+			executeCommandInContext(
+				commandSourceStack, executionContext -> ExecutionContext.queueInitialCommandExecution(executionContext, string, contextChain, commandSourceStack)
+			);
 		} catch (CommandRuntimeException var13) {
 			commandSourceStack.sendFailure(var13.getComponent());
-			return 0;
 		} catch (CommandSyntaxException var14) {
 			commandSourceStack.sendFailure(ComponentUtils.fromMessage(var14.getRawMessage()));
 			if (var14.getInput() != null && var14.getCursor() >= 0) {
@@ -270,8 +278,6 @@ public class Commands {
 				mutableComponent.append(Component.translatable("command.context.here").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
 				commandSourceStack.sendFailure(mutableComponent);
 			}
-
-			return 0;
 		} catch (Exception var15) {
 			MutableComponent mutableComponent2 = Component.literal(var15.getMessage() == null ? var15.getClass().getName() : var15.getMessage());
 			if (LOGGER.isDebugEnabled()) {
@@ -295,13 +301,20 @@ public class Commands {
 				commandSourceStack.sendFailure(Component.literal(Util.describeError(var15)));
 				LOGGER.error("'/{}' threw an exception", string, var15);
 			}
-
-			var20 = 0;
 		} finally {
 			commandSourceStack.getServer().getProfiler().pop();
 		}
+	}
 
-		return var20;
+	public static void executeCommandInContext(CommandSourceStack commandSourceStack, Consumer<ExecutionContext<CommandSourceStack>> consumer) throws CommandSyntaxException {
+		MinecraftServer minecraftServer = commandSourceStack.getServer();
+		int i = minecraftServer.getGameRules().getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH);
+		int j = minecraftServer.getGameRules().getInt(GameRules.RULE_MAX_COMMAND_FORK_COUNT);
+
+		try (ExecutionContext<CommandSourceStack> executionContext = new ExecutionContext<>(i, j, minecraftServer.getProfiler())) {
+			consumer.accept(executionContext);
+			executionContext.runCommandQueue();
+		}
 	}
 
 	public void sendCommands(ServerPlayer serverPlayer) {
@@ -368,6 +381,13 @@ public class Commands {
 
 	public CommandDispatcher<CommandSourceStack> getDispatcher() {
 		return this.dispatcher;
+	}
+
+	public static <S> void validateParseResults(ParseResults<S> parseResults) throws CommandSyntaxException {
+		CommandSyntaxException commandSyntaxException = getParseException(parseResults);
+		if (commandSyntaxException != null) {
+			throw commandSyntaxException;
+		}
 	}
 
 	@Nullable

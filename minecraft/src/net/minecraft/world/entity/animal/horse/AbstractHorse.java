@@ -439,7 +439,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	public InteractionResult fedFood(Player player, ItemStack itemStack) {
 		boolean bl = this.handleEating(player, itemStack);
-		if (!player.getAbilities().instabuild) {
+		if (bl & !player.getAbilities().instabuild) {
 			itemStack.shrink(1);
 		}
 
@@ -497,16 +497,13 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 			this.level().addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
 			if (!this.level().isClientSide) {
 				this.ageUp(i);
+				bl = true;
 			}
-
-			bl = true;
 		}
 
-		if (j > 0 && (bl || !this.isTamed()) && this.getTemper() < this.getMaxTemper()) {
+		if (j > 0 && (bl || !this.isTamed()) && this.getTemper() < this.getMaxTemper() && !this.level().isClientSide) {
+			this.modifyTemper(j);
 			bl = true;
-			if (!this.level().isClientSide) {
-				this.modifyTemper(j);
-			}
 		}
 
 		if (bl) {

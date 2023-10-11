@@ -67,7 +67,7 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.lines.title, this.width / 2, 80, -1);
-		this.line2Split.renderCentered(guiGraphics, this.width / 2, 100, 9, -65536);
+		this.line2Split.renderCentered(guiGraphics, this.width / 2, 100, 9, -2142128);
 	}
 
 	@Environment(EnvType.CLIENT)

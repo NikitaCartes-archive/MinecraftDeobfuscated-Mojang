@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class GameTestRunner {
-	private static final int MAX_TESTS_PER_BATCH = 100;
+	private static final int MAX_TESTS_PER_BATCH = 50;
 	public static final int PADDING_AROUND_EACH_STRUCTURE = 2;
 	public static final int SPACE_BETWEEN_COLUMNS = 5;
 	public static final int SPACE_BETWEEN_ROWS = 6;
@@ -56,7 +56,7 @@ public class GameTestRunner {
 					Consumer<ServerLevel> consumer2 = GameTestRegistry.getAfterBatchFunction(string);
 					MutableInt mutableInt = new MutableInt();
 					Collection<TestFunction> collectionx = (Collection<TestFunction>)entry.getValue();
-					return Streams.stream(Iterables.partition(collectionx, 100))
+					return Streams.stream(Iterables.partition(collectionx, 50))
 						.map(list -> new GameTestBatch(string + ":" + mutableInt.incrementAndGet(), ImmutableList.<TestFunction>copyOf(list), consumer, consumer2));
 				}
 			)

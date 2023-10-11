@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
@@ -43,6 +44,7 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
 	private final ModelPart top;
 	private final ModelPart bottom;
 	private final Material baseMaterial = (Material)Objects.requireNonNull(Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.BASE));
+	private static final float WOBBLE_AMPLITUDE = 0.125F;
 
 	public DecoratedPotRenderer(BlockEntityRendererProvider.Context context) {
 		ModelPart modelPart = context.bakeLayer(ModelLayers.DECORATED_POT_BASE);
@@ -103,6 +105,25 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
 		poseStack.translate(0.5, 0.0, 0.5);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - direction.toYRot()));
 		poseStack.translate(-0.5, 0.0, -0.5);
+		DecoratedPotBlockEntity.WobbleStyle wobbleStyle = decoratedPotBlockEntity.lastWobbleStyle;
+		if (wobbleStyle != null && decoratedPotBlockEntity.getLevel() != null) {
+			float g = ((float)(decoratedPotBlockEntity.getLevel().getGameTime() - decoratedPotBlockEntity.wobbleStartedAtTick) + f) / (float)wobbleStyle.duration;
+			if (g >= 0.0F && g <= 1.0F) {
+				if (wobbleStyle == DecoratedPotBlockEntity.WobbleStyle.POSITIVE) {
+					float h = 0.015625F;
+					float k = g * (float) (Math.PI * 2);
+					float l = -1.5F * (Mth.cos(k) + 0.5F) * Mth.sin(k / 2.0F);
+					poseStack.rotateAround(Axis.XP.rotation(l * 0.015625F), 0.5F, 0.0F, 0.5F);
+					float m = Mth.sin(k);
+					poseStack.rotateAround(Axis.ZP.rotation(m * 0.015625F), 0.5F, 0.0F, 0.5F);
+				} else {
+					float h = Mth.sin(-g * 3.0F * (float) Math.PI) * 0.125F;
+					float k = 1.0F - g;
+					poseStack.rotateAround(Axis.YP.rotation(h * k), 0.5F, 0.0F, 0.5F);
+				}
+			}
+		}
+
 		VertexConsumer vertexConsumer = this.baseMaterial.buffer(multiBufferSource, RenderType::entitySolid);
 		this.neck.render(poseStack, vertexConsumer, i, j);
 		this.top.render(poseStack, vertexConsumer, i, j);

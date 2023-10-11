@@ -17,7 +17,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.PlayerTeam;
 
 public abstract class TamableAnimal extends Animal implements OwnableEntity {
 	protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(TamableAnimal.class, EntityDataSerializers.BYTE);
@@ -165,7 +165,7 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 	}
 
 	@Override
-	public Team getTeam() {
+	public PlayerTeam getTeam() {
 		if (this.isTame()) {
 			LivingEntity livingEntity = this.getOwner();
 			if (livingEntity != null) {

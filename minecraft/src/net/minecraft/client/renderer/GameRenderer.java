@@ -61,7 +61,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Spider;
@@ -91,6 +90,7 @@ public class GameRenderer implements AutoCloseable {
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
 	public static final float PROJECTION_Z_NEAR = 0.05F;
 	private static final float GUI_Z_NEAR = 1000.0F;
+	private static final int ENTITY_INTERACTION_RANGE = 3;
 	final Minecraft minecraft;
 	private final ResourceManager resourceManager;
 	private final RandomSource random = RandomSource.create();
@@ -871,41 +871,24 @@ public class GameRenderer implements AutoCloseable {
 				double d = (double)this.minecraft.gameMode.getPickRange();
 				this.minecraft.hitResult = entity.pick(d, f, false);
 				Vec3 vec3 = entity.getEyePosition(f);
-				boolean bl = false;
-				int i = 3;
-				double e = d;
-				if (this.minecraft.gameMode.hasFarPickRange()) {
-					e = 6.0;
-					d = e;
-				} else {
-					if (d > 3.0) {
-						bl = true;
-					}
-
-					d = d;
-				}
-
-				e *= e;
-				if (this.minecraft.hitResult != null) {
-					e = this.minecraft.hitResult.getLocation().distanceToSqr(vec3);
-				}
-
+				boolean bl = this.minecraft.gameMode.hasFarPickRange();
+				d = bl ? 6.0 : d;
+				boolean bl2 = !bl;
+				double e = this.minecraft.hitResult != null ? this.minecraft.hitResult.getLocation().distanceToSqr(vec3) : d * d;
 				Vec3 vec32 = entity.getViewVector(1.0F);
 				Vec3 vec33 = vec3.add(vec32.x * d, vec32.y * d, vec32.z * d);
 				float g = 1.0F;
 				AABB aABB = entity.getBoundingBox().expandTowards(vec32.scale(d)).inflate(1.0, 1.0, 1.0);
 				EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable(), e);
 				if (entityHitResult != null) {
-					Entity entity2 = entityHitResult.getEntity();
 					Vec3 vec34 = entityHitResult.getLocation();
 					double h = vec3.distanceToSqr(vec34);
-					if (bl && h > 9.0) {
+					if (bl2 && h > 9.0) {
 						this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), BlockPos.containing(vec34));
 					} else if (h < e || this.minecraft.hitResult == null) {
 						this.minecraft.hitResult = entityHitResult;
-						if (entity2 instanceof LivingEntity || entity2 instanceof ItemFrame) {
-							this.minecraft.crosshairPickEntity = entity2;
-						}
+						Entity entity2 = entityHitResult.getEntity();
+						this.minecraft.crosshairPickEntity = entity2;
 					}
 				}
 

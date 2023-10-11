@@ -196,6 +196,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.SCRAPE, GlowParticle.ScrapeProvider::new);
 		this.register(ParticleTypes.SHRIEK, ShriekParticle.Provider::new);
 		this.register(ParticleTypes.EGG_CRACK, SuspendedTownParticle.EggCrackProvider::new);
+		this.register(ParticleTypes.DUST_PLUME, DustPlumeParticle.Provider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

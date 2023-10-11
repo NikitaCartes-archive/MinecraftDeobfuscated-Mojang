@@ -29,6 +29,7 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 	private static final float SPYGLASS_ARM_CROUCH_ROT_X = (float) (Math.PI / 12);
 	private static final float HIGHEST_SHIELD_BLOCKING_ANGLE = (float) (-Math.PI * 4.0 / 9.0);
 	private static final float LOWEST_SHIELD_BLOCKING_ANGLE = 0.43633232F;
+	private static final float HORIZONTAL_SHIELD_MOVEMENT_LIMIT = (float) (Math.PI / 6);
 	public static final float TOOT_HORN_XROT_BASE = 1.4835298F;
 	public static final float TOOT_HORN_YROT_BASE = (float) (Math.PI / 6);
 	public final ModelPart head;
@@ -342,7 +343,7 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 
 	private void poseBlockingArm(ModelPart modelPart, boolean bl) {
 		modelPart.xRot = modelPart.xRot * 0.5F - 0.9424779F + Mth.clamp(this.head.xRot, (float) (-Math.PI * 4.0 / 9.0), 0.43633232F);
-		modelPart.yRot = (bl ? -30.0F : 30.0F) * (float) (Math.PI / 180.0) + this.head.yRot;
+		modelPart.yRot = (bl ? -30.0F : 30.0F) * (float) (Math.PI / 180.0) + Mth.clamp(this.head.yRot, (float) (-Math.PI / 6), (float) (Math.PI / 6));
 	}
 
 	protected void setupAttackAnimation(T livingEntity, float f) {

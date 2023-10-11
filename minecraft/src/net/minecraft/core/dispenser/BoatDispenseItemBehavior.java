@@ -2,12 +2,12 @@ package net.minecraft.core.dispenser;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.Vec3;
 
@@ -28,7 +28,7 @@ public class BoatDispenseItemBehavior extends DefaultDispenseItemBehavior {
 	@Override
 	public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 		Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
-		Level level = blockSource.level();
+		ServerLevel serverLevel = blockSource.level();
 		Vec3 vec3 = blockSource.center();
 		double d = 0.5625 + (double)EntityType.BOAT.getWidth() / 2.0;
 		double e = vec3.x() + (double)direction.getStepX() * d;
@@ -36,20 +36,21 @@ public class BoatDispenseItemBehavior extends DefaultDispenseItemBehavior {
 		double g = vec3.z() + (double)direction.getStepZ() * d;
 		BlockPos blockPos = blockSource.pos().relative(direction);
 		double h;
-		if (level.getFluidState(blockPos).is(FluidTags.WATER)) {
+		if (serverLevel.getFluidState(blockPos).is(FluidTags.WATER)) {
 			h = 1.0;
 		} else {
-			if (!level.getBlockState(blockPos).isAir() || !level.getFluidState(blockPos.below()).is(FluidTags.WATER)) {
+			if (!serverLevel.getBlockState(blockPos).isAir() || !serverLevel.getFluidState(blockPos.below()).is(FluidTags.WATER)) {
 				return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
 			}
 
 			h = 0.0;
 		}
 
-		Boat boat = (Boat)(this.isChestBoat ? new ChestBoat(level, e, f + h, g) : new Boat(level, e, f + h, g));
+		Boat boat = (Boat)(this.isChestBoat ? new ChestBoat(serverLevel, e, f + h, g) : new Boat(serverLevel, e, f + h, g));
+		EntityType.createDefaultStackConfig(serverLevel, itemStack, null).accept(boat);
 		boat.setVariant(this.type);
 		boat.setYRot(direction.toYRot());
-		level.addFreshEntity(boat);
+		serverLevel.addFreshEntity(boat);
 		itemStack.shrink(1);
 		return itemStack;
 	}

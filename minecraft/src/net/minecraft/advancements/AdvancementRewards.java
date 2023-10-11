@@ -9,7 +9,7 @@ import com.google.gson.JsonParseException;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.commands.CommandFunction;
+import net.minecraft.commands.CacheableFunction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,17 +23,13 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class AdvancementRewards {
-	public static final AdvancementRewards EMPTY = new AdvancementRewards(
-		0, new ResourceLocation[0], new ResourceLocation[0], CommandFunction.CacheableFunction.NONE
-	);
+	public static final AdvancementRewards EMPTY = new AdvancementRewards(0, new ResourceLocation[0], new ResourceLocation[0], CacheableFunction.NONE);
 	private final int experience;
 	private final ResourceLocation[] loot;
 	private final ResourceLocation[] recipes;
-	private final CommandFunction.CacheableFunction function;
+	private final CacheableFunction function;
 
-	public AdvancementRewards(
-		int i, ResourceLocation[] resourceLocations, ResourceLocation[] resourceLocations2, CommandFunction.CacheableFunction cacheableFunction
-	) {
+	public AdvancementRewards(int i, ResourceLocation[] resourceLocations, ResourceLocation[] resourceLocations2, CacheableFunction cacheableFunction) {
 		this.experience = i;
 		this.loot = resourceLocations;
 		this.recipes = resourceLocations2;
@@ -159,11 +155,11 @@ public class AdvancementRewards {
 			resourceLocations2[k] = new ResourceLocation(GsonHelper.convertToString(jsonArray2.get(k), "recipes[" + k + "]"));
 		}
 
-		CommandFunction.CacheableFunction cacheableFunction;
+		CacheableFunction cacheableFunction;
 		if (jsonObject.has("function")) {
-			cacheableFunction = new CommandFunction.CacheableFunction(new ResourceLocation(GsonHelper.getAsString(jsonObject, "function")));
+			cacheableFunction = new CacheableFunction(new ResourceLocation(GsonHelper.getAsString(jsonObject, "function")));
 		} else {
-			cacheableFunction = CommandFunction.CacheableFunction.NONE;
+			cacheableFunction = CacheableFunction.NONE;
 		}
 
 		return new AdvancementRewards(i, resourceLocations, resourceLocations2, cacheableFunction);
@@ -217,7 +213,7 @@ public class AdvancementRewards {
 				this.experience,
 				(ResourceLocation[])this.loot.toArray(new ResourceLocation[0]),
 				(ResourceLocation[])this.recipes.toArray(new ResourceLocation[0]),
-				this.function == null ? CommandFunction.CacheableFunction.NONE : new CommandFunction.CacheableFunction(this.function)
+				this.function == null ? CacheableFunction.NONE : new CacheableFunction(this.function)
 			);
 		}
 	}

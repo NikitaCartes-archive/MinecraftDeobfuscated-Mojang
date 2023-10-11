@@ -2,6 +2,7 @@ package com.mojang.realmsclient.client;
 
 import com.google.gson.JsonArray;
 import com.mojang.logging.LogUtils;
+import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.dto.BackupList;
 import com.mojang.realmsclient.dto.GuardedSerializer;
 import com.mojang.realmsclient.dto.Ops;
@@ -33,6 +34,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -59,6 +61,9 @@ public class RealmsClient {
 	private static final String REGIONS_RESOURCE = "regions/ping/stat";
 	private static final String TRIALS_RESOURCE = "trial";
 	private static final String NOTIFICATIONS_RESOURCE = "notifications";
+	private static final String PATH_LIST_ALL_REALMS = "/listUserWorldsOfType/any";
+	private static final String PATH_CREATE_SNAPSHOT_REALM = "/$PARENT_WORLD_ID/createPrereleaseRealm";
+	private static final String PATH_SNAPSHOT_ELIGIBLE_REALMS = "/listPrereleaseEligibleWorlds";
 	private static final String PATH_INITIALIZE = "/$WORLD_ID/initialize";
 	private static final String PATH_GET_ACTIVTIES = "/$WORLD_ID";
 	private static final String PATH_GET_LIVESTATS = "/liveplayerlist";
@@ -112,8 +117,24 @@ public class RealmsClient {
 
 	public RealmsServerList listWorlds() throws RealmsServiceException {
 		String string = this.url("worlds");
+		if (RealmsMainScreen.isSnapshot()) {
+			string = string + "/listUserWorldsOfType/any";
+		}
+
 		String string2 = this.execute(Request.get(string));
 		return RealmsServerList.parse(string2);
+	}
+
+	public List<RealmsServer> listSnapshotEligibleRealms() throws RealmsServiceException {
+		String string = this.url("worlds/listPrereleaseEligibleWorlds");
+		String string2 = this.execute(Request.get(string));
+		return RealmsServerList.parse(string2).servers;
+	}
+
+	public RealmsServer createSnapshotRealm(Long long_) throws RealmsServiceException {
+		String string = String.valueOf(long_);
+		String string2 = this.url("worlds" + "/$PARENT_WORLD_ID/createPrereleaseRealm".replace("$PARENT_WORLD_ID", string));
+		return RealmsServer.parse(this.execute(Request.post(string2, string)));
 	}
 
 	public List<RealmsNotification> getNotifications() throws RealmsServiceException {
@@ -279,7 +300,7 @@ public class RealmsClient {
 
 	public Boolean resetWorldWithSeed(long l, WorldGenerationInfo worldGenerationInfo) throws RealmsServiceException {
 		RealmsWorldResetDto realmsWorldResetDto = new RealmsWorldResetDto(
-			worldGenerationInfo.seed(), -1L, worldGenerationInfo.levelType().getDtoIndex(), worldGenerationInfo.generateStructures()
+			worldGenerationInfo.seed(), -1L, worldGenerationInfo.levelType().getDtoIndex(), worldGenerationInfo.generateStructures(), worldGenerationInfo.experiments()
 		);
 		String string = this.url("worlds" + "/$WORLD_ID/reset".replace("$WORLD_ID", String.valueOf(l)));
 		String string2 = this.execute(Request.post(string, GSON.toJson(realmsWorldResetDto), 30000, 80000));
@@ -287,7 +308,7 @@ public class RealmsClient {
 	}
 
 	public Boolean resetWorldWithTemplate(long l, String string) throws RealmsServiceException {
-		RealmsWorldResetDto realmsWorldResetDto = new RealmsWorldResetDto(null, Long.valueOf(string), -1, false);
+		RealmsWorldResetDto realmsWorldResetDto = new RealmsWorldResetDto(null, Long.valueOf(string), -1, false, Set.of());
 		String string2 = this.url("worlds" + "/$WORLD_ID/reset".replace("$WORLD_ID", String.valueOf(l)));
 		String string3 = this.execute(Request.post(string2, GSON.toJson(realmsWorldResetDto), 30000, 80000));
 		return Boolean.valueOf(string3);
@@ -380,6 +401,7 @@ public class RealmsClient {
 		request.cookie("sid", this.sessionId);
 		request.cookie("user", this.username);
 		request.cookie("version", SharedConstants.getCurrentVersion().getName());
+		request.addSnapshotHeader(RealmsMainScreen.isSnapshot());
 
 		try {
 			int i = request.responseCode();

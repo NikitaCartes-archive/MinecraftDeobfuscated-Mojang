@@ -114,7 +114,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 			if (minecraftServer.isCommandBlockEnabled() && !StringUtil.isNullOrEmpty(this.command)) {
 				try {
 					this.lastOutput = null;
-					CommandSourceStack commandSourceStack = this.createCommandSourceStack().withCallback((commandContext, bl, i) -> {
+					CommandSourceStack commandSourceStack = this.createCommandSourceStack().withCallback((commandSourceStackx, bl, i) -> {
 						if (bl) {
 							this.successCount++;
 						}

@@ -35,7 +35,7 @@ public class ChestBoat extends Boat implements HasCustomInventoryScreen, Contain
 	}
 
 	public ChestBoat(Level level, double d, double e, double f) {
-		this(EntityType.CHEST_BOAT, level);
+		super(EntityType.CHEST_BOAT, level);
 		this.setPos(d, e, f);
 		this.xo = d;
 		this.yo = e;
@@ -66,7 +66,7 @@ public class ChestBoat extends Boat implements HasCustomInventoryScreen, Contain
 
 	@Override
 	public void destroy(DamageSource damageSource) {
-		super.destroy(damageSource);
+		this.destroy(this.getDropItem());
 		this.chestVehicleDestroyed(damageSource, this.level(), this);
 	}
 

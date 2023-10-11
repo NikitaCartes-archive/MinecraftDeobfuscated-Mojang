@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.scores.PlayerTeam;
 
 public class Evoker extends SpellcasterIllager {
 	@Nullable
@@ -257,6 +258,7 @@ public class Evoker extends SpellcasterIllager {
 		@Override
 		protected void performSpellCasting() {
 			ServerLevel serverLevel = (ServerLevel)Evoker.this.level();
+			PlayerTeam playerTeam = Evoker.this.getTeam();
 
 			for (int i = 0; i < 3; i++) {
 				BlockPos blockPos = Evoker.this.blockPosition().offset(-2 + Evoker.this.random.nextInt(5), 1, -2 + Evoker.this.random.nextInt(5));
@@ -267,6 +269,10 @@ public class Evoker extends SpellcasterIllager {
 					vex.setOwner(Evoker.this);
 					vex.setBoundOrigin(blockPos);
 					vex.setLimitedLife(20 * (30 + Evoker.this.random.nextInt(90)));
+					if (playerTeam != null) {
+						serverLevel.getScoreboard().addPlayerToTeam(vex.getScoreboardName(), playerTeam);
+					}
+
 					serverLevel.addFreshEntityWithPassengers(vex);
 					serverLevel.gameEvent(GameEvent.ENTITY_PLACE, blockPos, GameEvent.Context.of(Evoker.this));
 				}

@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -24,13 +25,13 @@ public class MinecartItem extends Item {
 		@Override
 		public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 			Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
-			Level level = blockSource.level();
+			ServerLevel serverLevel = blockSource.level();
 			Vec3 vec3 = blockSource.center();
 			double d = vec3.x() + (double)direction.getStepX() * 1.125;
 			double e = Math.floor(vec3.y()) + (double)direction.getStepY();
 			double f = vec3.z() + (double)direction.getStepZ() * 1.125;
 			BlockPos blockPos = blockSource.pos().relative(direction);
-			BlockState blockState = level.getBlockState(blockPos);
+			BlockState blockState = serverLevel.getBlockState(blockPos);
 			RailShape railShape = blockState.getBlock() instanceof BaseRailBlock
 				? blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty())
 				: RailShape.NORTH_SOUTH;
@@ -42,11 +43,11 @@ public class MinecartItem extends Item {
 					g = 0.1;
 				}
 			} else {
-				if (!blockState.isAir() || !level.getBlockState(blockPos.below()).is(BlockTags.RAILS)) {
+				if (!blockState.isAir() || !serverLevel.getBlockState(blockPos.below()).is(BlockTags.RAILS)) {
 					return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
 				}
 
-				BlockState blockState2 = level.getBlockState(blockPos.below());
+				BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
 				RailShape railShape2 = blockState2.getBlock() instanceof BaseRailBlock
 					? blockState2.getValue(((BaseRailBlock)blockState2.getBlock()).getShapeProperty())
 					: RailShape.NORTH_SOUTH;
@@ -57,12 +58,8 @@ public class MinecartItem extends Item {
 				}
 			}
 
-			AbstractMinecart abstractMinecart = AbstractMinecart.createMinecart(level, d, e + g, f, ((MinecartItem)itemStack.getItem()).type);
-			if (itemStack.hasCustomHoverName()) {
-				abstractMinecart.setCustomName(itemStack.getHoverName());
-			}
-
-			level.addFreshEntity(abstractMinecart);
+			AbstractMinecart abstractMinecart = AbstractMinecart.createMinecart(serverLevel, d, e + g, f, ((MinecartItem)itemStack.getItem()).type, itemStack, null);
+			serverLevel.addFreshEntity(abstractMinecart);
 			itemStack.shrink(1);
 			return itemStack;
 		}
@@ -89,7 +86,7 @@ public class MinecartItem extends Item {
 			return InteractionResult.FAIL;
 		} else {
 			ItemStack itemStack = useOnContext.getItemInHand();
-			if (!level.isClientSide) {
+			if (level instanceof ServerLevel serverLevel) {
 				RailShape railShape = blockState.getBlock() instanceof BaseRailBlock
 					? blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty())
 					: RailShape.NORTH_SOUTH;
@@ -99,14 +96,16 @@ public class MinecartItem extends Item {
 				}
 
 				AbstractMinecart abstractMinecart = AbstractMinecart.createMinecart(
-					level, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.0625 + d, (double)blockPos.getZ() + 0.5, this.type
+					serverLevel,
+					(double)blockPos.getX() + 0.5,
+					(double)blockPos.getY() + 0.0625 + d,
+					(double)blockPos.getZ() + 0.5,
+					this.type,
+					itemStack,
+					useOnContext.getPlayer()
 				);
-				if (itemStack.hasCustomHoverName()) {
-					abstractMinecart.setCustomName(itemStack.getHoverName());
-				}
-
-				level.addFreshEntity(abstractMinecart);
-				level.gameEvent(GameEvent.ENTITY_PLACE, blockPos, GameEvent.Context.of(useOnContext.getPlayer(), level.getBlockState(blockPos.below())));
+				serverLevel.addFreshEntity(abstractMinecart);
+				serverLevel.gameEvent(GameEvent.ENTITY_PLACE, blockPos, GameEvent.Context.of(useOnContext.getPlayer(), serverLevel.getBlockState(blockPos.below())));
 			}
 
 			itemStack.shrink(1);

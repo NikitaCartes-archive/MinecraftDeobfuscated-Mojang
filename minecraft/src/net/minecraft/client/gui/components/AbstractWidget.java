@@ -16,10 +16,6 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.tooltip.BelowOrAboveWidgetTooltipPositioner;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
-import net.minecraft.client.gui.screens.inventory.tooltip.MenuTooltipPositioner;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
@@ -44,9 +40,6 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 	private boolean focused;
 	@Nullable
 	private Tooltip tooltip;
-	private int tooltipMsDelay;
-	private long hoverOrFocusedStartTime;
-	private boolean wasHoveredOrFocused;
 
 	public AbstractWidget(int i, int j, int k, int l, Component component) {
 		this.x = i;
@@ -66,34 +59,10 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 		if (this.visible) {
 			this.isHovered = i >= this.getX() && j >= this.getY() && i < this.getX() + this.width && j < this.getY() + this.height;
 			this.renderWidget(guiGraphics, i, j, f);
-			this.updateTooltip();
-		}
-	}
-
-	private void updateTooltip() {
-		if (this.tooltip != null) {
-			boolean bl = this.isHovered || this.isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard();
-			if (bl != this.wasHoveredOrFocused) {
-				if (bl) {
-					this.hoverOrFocusedStartTime = Util.getMillis();
-				}
-
-				this.wasHoveredOrFocused = bl;
-			}
-
-			if (bl && Util.getMillis() - this.hoverOrFocusedStartTime > (long)this.tooltipMsDelay) {
-				Screen screen = Minecraft.getInstance().screen;
-				if (screen != null) {
-					screen.setTooltipForNextRenderPass(this.tooltip, this.createTooltipPositioner(), this.isFocused());
-				}
+			if (this.tooltip != null) {
+				this.tooltip.refreshTooltipForNextRenderPass(this.isHovered(), this.isFocused(), this.getRectangle());
 			}
 		}
-	}
-
-	protected ClientTooltipPositioner createTooltipPositioner() {
-		return (ClientTooltipPositioner)(!this.isHovered && this.isFocused() && Minecraft.getInstance().getLastInputType().isKeyboard()
-			? new BelowOrAboveWidgetTooltipPositioner(this)
-			: new MenuTooltipPositioner(this));
 	}
 
 	public void setTooltip(@Nullable Tooltip tooltip) {
@@ -106,7 +75,9 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 	}
 
 	public void setTooltipDelay(int i) {
-		this.tooltipMsDelay = i;
+		if (this.tooltip != null) {
+			this.tooltip.setDelay(i);
+		}
 	}
 
 	protected MutableComponent createNarrationMessage() {

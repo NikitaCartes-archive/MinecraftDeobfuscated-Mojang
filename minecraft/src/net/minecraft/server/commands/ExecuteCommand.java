@@ -4,11 +4,11 @@ import com.google.common.collect.Lists;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.RedirectModifier;
-import com.mojang.brigadier.ResultConsumer;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.context.ContextChain;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -16,6 +16,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -25,11 +26,16 @@ import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandResultConsumer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.ExecutionCommandSource;
+import net.minecraft.commands.FunctionInstantiationException;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -47,6 +53,13 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.SwizzleArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.item.FunctionArgument;
+import net.minecraft.commands.execution.CustomModifierExecutor;
+import net.minecraft.commands.execution.ExecutionControl;
+import net.minecraft.commands.execution.tasks.BuildContexts;
+import net.minecraft.commands.execution.tasks.CallFunction;
+import net.minecraft.commands.functions.CommandFunction;
+import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -92,6 +105,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class ExecuteCommand {
 	private static final int MAX_TEST_AREA = 32768;
@@ -104,9 +118,12 @@ public class ExecuteCommand {
 	private static final DynamicCommandExceptionType ERROR_CONDITIONAL_FAILED_COUNT = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("commands.execute.conditional.fail_count", object)
 	);
-	private static final BinaryOperator<ResultConsumer<CommandSourceStack>> CALLBACK_CHAINER = (resultConsumer, resultConsumer2) -> (commandContext, bl, i) -> {
-			resultConsumer.onCommandComplete(commandContext, bl, i);
-			resultConsumer2.onCommandComplete(commandContext, bl, i);
+	private static final Dynamic2CommandExceptionType ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE = new Dynamic2CommandExceptionType(
+		(object, object2) -> Component.translatableEscape("commands.execute.function.instantiationFailure", object, object2)
+	);
+	private static final BinaryOperator<CommandResultConsumer<CommandSourceStack>> CALLBACK_CHAINER = (commandResultConsumer, commandResultConsumer2) -> (commandSourceStack, bl, i) -> {
+			commandResultConsumer.storeResult(commandSourceStack, bl, i);
+			commandResultConsumer2.storeResult(commandSourceStack, bl, i);
 		};
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_PREDICATE = (commandContext, suggestionsBuilder) -> {
 		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
@@ -407,7 +424,7 @@ public class ExecuteCommand {
 
 	private static CommandSourceStack storeValue(CommandSourceStack commandSourceStack, Collection<String> collection, Objective objective, boolean bl) {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
-		return commandSourceStack.withCallback((commandContext, bl2, i) -> {
+		return commandSourceStack.withCallback((commandSourceStackx, bl2, i) -> {
 			for (String string : collection) {
 				Score score = scoreboard.getOrCreatePlayerScore(string, objective);
 				int j = bl ? i : (bl2 ? 1 : 0);
@@ -417,7 +434,7 @@ public class ExecuteCommand {
 	}
 
 	private static CommandSourceStack storeValue(CommandSourceStack commandSourceStack, CustomBossEvent customBossEvent, boolean bl, boolean bl2) {
-		return commandSourceStack.withCallback((commandContext, bl3, i) -> {
+		return commandSourceStack.withCallback((commandSourceStackx, bl3, i) -> {
 			int j = bl2 ? i : (bl3 ? 1 : 0);
 			if (bl) {
 				customBossEvent.setValue(j);
@@ -430,7 +447,7 @@ public class ExecuteCommand {
 	private static CommandSourceStack storeData(
 		CommandSourceStack commandSourceStack, DataAccessor dataAccessor, NbtPathArgument.NbtPath nbtPath, IntFunction<Tag> intFunction, boolean bl
 	) {
-		return commandSourceStack.withCallback((commandContext, bl2, i) -> {
+		return commandSourceStack.withCallback((commandSourceStackx, bl2, i) -> {
 			try {
 				CompoundTag compoundTag = dataAccessor.getData();
 				int j = bl ? i : (bl2 ? 1 : 0);
@@ -632,6 +649,14 @@ public class ExecuteCommand {
 							bl,
 							commandContext -> checkCustomPredicate(commandContext.getSource(), ResourceLocationArgument.getPredicate(commandContext, "predicate"))
 						)
+					)
+			)
+			.then(
+				Commands.literal("function")
+					.then(
+						Commands.argument("name", FunctionArgument.functions())
+							.suggests(FunctionCommand.SUGGEST_FUNCTION)
+							.fork(commandNode, new ExecuteCommand.ExecuteIfFunctionCustomModifier(bl))
 					)
 			);
 
@@ -893,6 +918,69 @@ public class ExecuteCommand {
 		return commandSourceStack.withEntity(entity);
 	}
 
+	public static <T extends ExecutionCommandSource<T>> void scheduleFunctionConditionsAndTest(
+		List<T> list,
+		Function<T, T> function,
+		IntPredicate intPredicate,
+		ContextChain<T> contextChain,
+		@Nullable CompoundTag compoundTag,
+		ExecutionControl<T> executionControl,
+		ExecuteCommand.CommandGetter<T, Collection<CommandFunction<T>>> commandGetter,
+		boolean bl
+	) throws CommandSyntaxException {
+		List<T> list2 = new ArrayList(list.size());
+		CommandContext<T> commandContext = contextChain.getTopContext();
+
+		for (T executionCommandSource : list) {
+			Collection<CommandFunction<T>> collection = commandGetter.get(commandContext.copyFor(executionCommandSource));
+			int i = collection.size();
+			if (i != 0) {
+				T executionCommandSource2 = prepareCallback(function, intPredicate, list2, executionCommandSource, i == 1);
+
+				for (CommandFunction<T> commandFunction : collection) {
+					InstantiatedFunction<T> instantiatedFunction;
+					try {
+						instantiatedFunction = commandFunction.instantiate(compoundTag, executionCommandSource2.dispatcher(), executionCommandSource2);
+					} catch (FunctionInstantiationException var19) {
+						throw ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE.create(commandFunction.id(), var19.messageComponent());
+					}
+
+					executionControl.queueNext(new CallFunction<>(instantiatedFunction).bind(executionCommandSource2));
+				}
+			}
+		}
+
+		ContextChain<T> contextChain2 = contextChain.nextStage();
+		String string = commandContext.getInput();
+		executionControl.queueNext(new BuildContexts.Continuation<>(string, contextChain2, bl, list2));
+	}
+
+	private static <T extends ExecutionCommandSource<T>> T prepareCallback(
+		Function<T, T> function, IntPredicate intPredicate, List<T> list, T executionCommandSource, boolean bl
+	) {
+		T executionCommandSource2 = (T)((ExecutionCommandSource)function.apply(executionCommandSource)).clearCallbacks();
+		if (bl) {
+			return executionCommandSource2.withReturnValueConsumer(i -> {
+				if (intPredicate.test(i)) {
+					list.add(executionCommandSource);
+				}
+			});
+		} else {
+			MutableBoolean mutableBoolean = new MutableBoolean();
+			return executionCommandSource2.withReturnValueConsumer(i -> {
+				if (mutableBoolean.isFalse() && intPredicate.test(i)) {
+					list.add(executionCommandSource);
+					mutableBoolean.setTrue();
+				}
+			});
+		}
+	}
+
+	@FunctionalInterface
+	public interface CommandGetter<T, R> {
+		R get(CommandContext<T> commandContext) throws CommandSyntaxException;
+	}
+
 	@FunctionalInterface
 	interface CommandNumericPredicate {
 		int test(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException;
@@ -901,5 +989,29 @@ public class ExecuteCommand {
 	@FunctionalInterface
 	interface CommandPredicate {
 		boolean test(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException;
+	}
+
+	static class ExecuteIfFunctionCustomModifier implements CustomModifierExecutor.ModifierAdapter<CommandSourceStack> {
+		private final IntPredicate check;
+
+		ExecuteIfFunctionCustomModifier(boolean bl) {
+			this.check = bl ? i -> i != 0 : i -> i == 0;
+		}
+
+		@Override
+		public void apply(
+			List<CommandSourceStack> list, ContextChain<CommandSourceStack> contextChain, boolean bl, ExecutionControl<CommandSourceStack> executionControl
+		) throws CommandSyntaxException {
+			ExecuteCommand.scheduleFunctionConditionsAndTest(
+				list,
+				FunctionCommand::modifySenderForExecution,
+				this.check,
+				contextChain,
+				null,
+				executionControl,
+				commandContext -> FunctionArgument.getFunctions(commandContext, "name"),
+				bl
+			);
+		}
 	}
 }

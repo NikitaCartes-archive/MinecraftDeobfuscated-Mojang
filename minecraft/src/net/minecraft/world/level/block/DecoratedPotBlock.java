@@ -7,12 +7,23 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,11 +43,13 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -85,6 +98,46 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
+		if (!(level.getBlockEntity(blockPos) instanceof DecoratedPotBlockEntity decoratedPotBlockEntity)) {
+			return InteractionResult.PASS;
+		} else {
+			ItemStack var13 = player.getItemInHand(interactionHand);
+			ItemStack itemStack2 = decoratedPotBlockEntity.getTheItem();
+			if (!var13.isEmpty() && (itemStack2.isEmpty() || ItemStack.isSameItemSameTags(itemStack2, var13) && itemStack2.getCount() < itemStack2.getMaxStackSize())) {
+				decoratedPotBlockEntity.wobble(DecoratedPotBlockEntity.WobbleStyle.POSITIVE);
+				player.awardStat(Stats.ITEM_USED.get(var13.getItem()));
+				ItemStack itemStack3 = player.isCreative() ? var13.copyWithCount(1) : var13.split(1);
+				float f;
+				if (decoratedPotBlockEntity.isEmpty()) {
+					decoratedPotBlockEntity.setTheItem(itemStack3);
+					f = (float)itemStack3.getCount() / (float)itemStack3.getMaxStackSize();
+				} else {
+					itemStack2.grow(1);
+					f = (float)itemStack2.getCount() / (float)itemStack2.getMaxStackSize();
+				}
+
+				level.playSound(null, blockPos, SoundEvents.DECORATED_POT_INSERT, SoundSource.BLOCKS, 1.0F, 0.7F + 0.5F * f);
+				if (level instanceof ServerLevel serverLevel) {
+					serverLevel.sendParticles(
+						ParticleTypes.DUST_PLUME, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + 0.5, 7, 0.0, 0.0, 0.0, 0.0
+					);
+				}
+
+				level.updateNeighbourForOutputSignal(blockPos, this);
+			} else {
+				level.playSound(null, blockPos, SoundEvents.DECORATED_POT_INSERT_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F);
+				decoratedPotBlockEntity.wobble(DecoratedPotBlockEntity.WobbleStyle.NEGATIVE);
+			}
+
+			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
+			return InteractionResult.SUCCESS;
+		}
+	}
+
+	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
 		if (level.isClientSide) {
 			level.getBlockEntity(blockPos, BlockEntityType.DECORATED_POT).ifPresent(decoratedPotBlockEntity -> decoratedPotBlockEntity.setFromItem(itemStack));
@@ -110,6 +163,12 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	@Override
 	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
 		return new DecoratedPotBlockEntity(blockPos, blockState);
+	}
+
+	@Override
+	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+		Containers.dropContentsOnDestroy(blockState, blockState2, level, blockPos);
+		super.onRemove(blockState, level, blockPos, blockState2, bl);
 	}
 
 	@Override
@@ -158,9 +217,28 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+		BlockPos blockPos = blockHitResult.getBlockPos();
+		if (!level.isClientSide && projectile.mayInteract(level, blockPos) && projectile.getType().is(EntityTypeTags.IMPACT_PROJECTILES)) {
+			level.setBlock(blockPos, blockState.setValue(CRACKED, Boolean.valueOf(true)), 4);
+			level.destroyBlock(blockPos, true, projectile);
+		}
+	}
+
+	@Override
 	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		return levelReader.getBlockEntity(blockPos) instanceof DecoratedPotBlockEntity decoratedPotBlockEntity
-			? decoratedPotBlockEntity.getItem()
+			? decoratedPotBlockEntity.getPotAsItem()
 			: super.getCloneItemStack(levelReader, blockPos, blockState);
+	}
+
+	@Override
+	public boolean hasAnalogOutputSignal(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
 	}
 }

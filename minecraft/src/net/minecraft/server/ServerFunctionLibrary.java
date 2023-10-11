@@ -16,9 +16,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
-import net.minecraft.commands.CommandFunction;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
@@ -34,22 +34,22 @@ import org.slf4j.Logger;
 public class ServerFunctionLibrary implements PreparableReloadListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final FileToIdConverter LISTER = new FileToIdConverter("functions", ".mcfunction");
-	private volatile Map<ResourceLocation, CommandFunction> functions = ImmutableMap.of();
-	private final TagLoader<CommandFunction> tagsLoader = new TagLoader<>(this::getFunction, "tags/functions");
-	private volatile Map<ResourceLocation, Collection<CommandFunction>> tags = Map.of();
+	private volatile Map<ResourceLocation, CommandFunction<CommandSourceStack>> functions = ImmutableMap.of();
+	private final TagLoader<CommandFunction<CommandSourceStack>> tagsLoader = new TagLoader<>(this::getFunction, "tags/functions");
+	private volatile Map<ResourceLocation, Collection<CommandFunction<CommandSourceStack>>> tags = Map.of();
 	private final int functionCompilationLevel;
 	private final CommandDispatcher<CommandSourceStack> dispatcher;
 
-	public Optional<CommandFunction> getFunction(ResourceLocation resourceLocation) {
+	public Optional<CommandFunction<CommandSourceStack>> getFunction(ResourceLocation resourceLocation) {
 		return Optional.ofNullable((CommandFunction)this.functions.get(resourceLocation));
 	}
 
-	public Map<ResourceLocation, CommandFunction> getFunctions() {
+	public Map<ResourceLocation, CommandFunction<CommandSourceStack>> getFunctions() {
 		return this.functions;
 	}
 
-	public Collection<CommandFunction> getTag(ResourceLocation resourceLocation) {
-		return (Collection<CommandFunction>)this.tags.getOrDefault(resourceLocation, List.of());
+	public Collection<CommandFunction<CommandSourceStack>> getTag(ResourceLocation resourceLocation) {
+		return (Collection<CommandFunction<CommandSourceStack>>)this.tags.getOrDefault(resourceLocation, List.of());
 	}
 
 	public Iterable<ResourceLocation> getAvailableTags() {
@@ -73,12 +73,12 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 		CompletableFuture<Map<ResourceLocation, List<TagLoader.EntryWithSource>>> completableFuture = CompletableFuture.supplyAsync(
 			() -> this.tagsLoader.load(resourceManager), executor
 		);
-		CompletableFuture<Map<ResourceLocation, CompletableFuture<CommandFunction>>> completableFuture2 = CompletableFuture.supplyAsync(
+		CompletableFuture<Map<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>>> completableFuture2 = CompletableFuture.supplyAsync(
 				() -> LISTER.listMatchingResources(resourceManager), executor
 			)
 			.thenCompose(
 				map -> {
-					Map<ResourceLocation, CompletableFuture<CommandFunction>> map2 = Maps.<ResourceLocation, CompletableFuture<CommandFunction>>newHashMap();
+					Map<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>> map2 = Maps.<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>>newHashMap();
 					CommandSourceStack commandSourceStack = new CommandSourceStack(
 						CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", CommonComponents.EMPTY, null, null
 					);
@@ -96,21 +96,26 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 					return CompletableFuture.allOf(completableFutures).handle((void_, throwable) -> map2);
 				}
 			);
-		return completableFuture.thenCombine(completableFuture2, Pair::of).thenCompose(preparationBarrier::wait).thenAcceptAsync(pair -> {
-			Map<ResourceLocation, CompletableFuture<CommandFunction>> map = (Map<ResourceLocation, CompletableFuture<CommandFunction>>)pair.getSecond();
-			Builder<ResourceLocation, CommandFunction> builder = ImmutableMap.builder();
-			map.forEach((resourceLocation, completableFuturex) -> completableFuturex.handle((commandFunction, throwable) -> {
-					if (throwable != null) {
-						LOGGER.error("Failed to load function {}", resourceLocation, throwable);
-					} else {
-						builder.put(resourceLocation, commandFunction);
-					}
+		return completableFuture.thenCombine(completableFuture2, Pair::of)
+			.thenCompose(preparationBarrier::wait)
+			.thenAcceptAsync(
+				pair -> {
+					Map<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>> map = (Map<ResourceLocation, CompletableFuture<CommandFunction<CommandSourceStack>>>)pair.getSecond();
+					Builder<ResourceLocation, CommandFunction<CommandSourceStack>> builder = ImmutableMap.builder();
+					map.forEach((resourceLocation, completableFuturex) -> completableFuturex.handle((commandFunction, throwable) -> {
+							if (throwable != null) {
+								LOGGER.error("Failed to load function {}", resourceLocation, throwable);
+							} else {
+								builder.put(resourceLocation, commandFunction);
+							}
 
-					return null;
-				}).join());
-			this.functions = builder.build();
-			this.tags = this.tagsLoader.build((Map<ResourceLocation, List<TagLoader.EntryWithSource>>)pair.getFirst());
-		}, executor2);
+							return null;
+						}).join());
+					this.functions = builder.build();
+					this.tags = this.tagsLoader.build((Map<ResourceLocation, List<TagLoader.EntryWithSource>>)pair.getFirst());
+				},
+				executor2
+			);
 	}
 
 	private static List<String> readLines(Resource resource) {

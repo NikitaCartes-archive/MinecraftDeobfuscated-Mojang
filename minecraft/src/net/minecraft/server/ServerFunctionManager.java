@@ -1,32 +1,25 @@
 package net.minecraft.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Queues;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.IntConsumer;
-import javax.annotation.Nullable;
-import net.minecraft.commands.CommandFunction;
+import java.util.function.Supplier;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.FunctionInstantiationException;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.commands.functions.CommandFunction;
+import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.util.profiling.ProfilerFiller;
 
 public class ServerFunctionManager {
-	private static final Component NO_RECURSIVE_TRACES = Component.translatable("commands.debug.function.noRecursion");
 	private static final ResourceLocation TICK_FUNCTION_TAG = new ResourceLocation("tick");
 	private static final ResourceLocation LOAD_FUNCTION_TAG = new ResourceLocation("load");
-	final MinecraftServer server;
-	@Nullable
-	private ServerFunctionManager.ExecutionContext context;
-	private List<CommandFunction> ticking = ImmutableList.of();
+	private final MinecraftServer server;
+	private List<CommandFunction<CommandSourceStack>> ticking = ImmutableList.of();
 	private boolean postReload;
 	private ServerFunctionLibrary library;
 
@@ -36,10 +29,6 @@ public class ServerFunctionManager {
 		this.postReload(serverFunctionLibrary);
 	}
 
-	public int getCommandLimit() {
-		return this.server.getGameRules().getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH);
-	}
-
 	public CommandDispatcher<CommandSourceStack> getDispatcher() {
 		return this.server.getCommands().getDispatcher();
 	}
@@ -47,56 +36,33 @@ public class ServerFunctionManager {
 	public void tick() {
 		if (this.postReload) {
 			this.postReload = false;
-			Collection<CommandFunction> collection = this.library.getTag(LOAD_FUNCTION_TAG);
+			Collection<CommandFunction<CommandSourceStack>> collection = this.library.getTag(LOAD_FUNCTION_TAG);
 			this.executeTagFunctions(collection, LOAD_FUNCTION_TAG);
 		}
 
 		this.executeTagFunctions(this.ticking, TICK_FUNCTION_TAG);
 	}
 
-	private void executeTagFunctions(Collection<CommandFunction> collection, ResourceLocation resourceLocation) {
+	private void executeTagFunctions(Collection<CommandFunction<CommandSourceStack>> collection, ResourceLocation resourceLocation) {
 		this.server.getProfiler().push(resourceLocation::toString);
 
-		for (CommandFunction commandFunction : collection) {
+		for (CommandFunction<CommandSourceStack> commandFunction : collection) {
 			this.execute(commandFunction, this.getGameLoopSender());
 		}
 
 		this.server.getProfiler().pop();
 	}
 
-	public int execute(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
+	public void execute(CommandFunction<CommandSourceStack> commandFunction, CommandSourceStack commandSourceStack) {
+		ProfilerFiller profilerFiller = this.server.getProfiler();
+		profilerFiller.push((Supplier<String>)(() -> "function " + commandFunction.id()));
+
 		try {
-			return this.execute(commandFunction, commandSourceStack, null, null);
-		} catch (FunctionInstantiationException var4) {
-			return 0;
-		}
-	}
-
-	public int execute(
-		CommandFunction commandFunction,
-		CommandSourceStack commandSourceStack,
-		@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks,
-		@Nullable CompoundTag compoundTag
-	) throws FunctionInstantiationException {
-		CommandFunction commandFunction2 = commandFunction.instantiate(compoundTag, this.getDispatcher(), commandSourceStack);
-		if (this.context != null) {
-			if (traceCallbacks != null) {
-				this.context.reportError(NO_RECURSIVE_TRACES.getString());
-				return 0;
-			} else {
-				this.context.delayFunctionCall(commandFunction2, commandSourceStack);
-				return 0;
-			}
-		} else {
-			int var6;
-			try {
-				this.context = new ServerFunctionManager.ExecutionContext(traceCallbacks);
-				var6 = this.context.runTopCommand(commandFunction2, commandSourceStack);
-			} finally {
-				this.context = null;
-			}
-
-			return var6;
+			InstantiatedFunction<CommandSourceStack> instantiatedFunction = commandFunction.instantiate(null, this.getDispatcher(), commandSourceStack);
+			Commands.executeCommandInContext(commandSourceStack, executionContext -> executionContext.queueInitialFunctionCall(instantiatedFunction, commandSourceStack));
+		} catch (CommandSyntaxException | FunctionInstantiationException var8) {
+		} finally {
+			profilerFiller.pop();
 		}
 	}
 
@@ -114,11 +80,11 @@ public class ServerFunctionManager {
 		return this.server.createCommandSourceStack().withPermission(2).withSuppressedOutput();
 	}
 
-	public Optional<CommandFunction> get(ResourceLocation resourceLocation) {
+	public Optional<CommandFunction<CommandSourceStack>> get(ResourceLocation resourceLocation) {
 		return this.library.getFunction(resourceLocation);
 	}
 
-	public Collection<CommandFunction> getTag(ResourceLocation resourceLocation) {
+	public Collection<CommandFunction<CommandSourceStack>> getTag(ResourceLocation resourceLocation) {
 		return this.library.getTag(resourceLocation);
 	}
 
@@ -128,138 +94,5 @@ public class ServerFunctionManager {
 
 	public Iterable<ResourceLocation> getTagNames() {
 		return this.library.getAvailableTags();
-	}
-
-	class ExecutionContext {
-		private int depth;
-		@Nullable
-		private final ServerFunctionManager.TraceCallbacks tracer;
-		private final Deque<ServerFunctionManager.QueuedCommand> commandQueue = Queues.<ServerFunctionManager.QueuedCommand>newArrayDeque();
-		private final List<ServerFunctionManager.QueuedCommand> nestedCalls = Lists.<ServerFunctionManager.QueuedCommand>newArrayList();
-		boolean abortCurrentDepth = false;
-
-		ExecutionContext(@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks) {
-			this.tracer = traceCallbacks;
-		}
-
-		void delayFunctionCall(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
-			int i = ServerFunctionManager.this.getCommandLimit();
-			CommandSourceStack commandSourceStack2 = this.wrapSender(commandSourceStack);
-			if (this.commandQueue.size() + this.nestedCalls.size() < i) {
-				this.nestedCalls.add(new ServerFunctionManager.QueuedCommand(commandSourceStack2, this.depth, new CommandFunction.FunctionEntry(commandFunction)));
-			}
-		}
-
-		private CommandSourceStack wrapSender(CommandSourceStack commandSourceStack) {
-			IntConsumer intConsumer = commandSourceStack.getReturnValueConsumer();
-			return intConsumer instanceof ServerFunctionManager.ExecutionContext.AbortingReturnValueConsumer
-				? commandSourceStack
-				: commandSourceStack.withReturnValueConsumer(new ServerFunctionManager.ExecutionContext.AbortingReturnValueConsumer(intConsumer));
-		}
-
-		int runTopCommand(CommandFunction commandFunction, CommandSourceStack commandSourceStack) {
-			int i = ServerFunctionManager.this.getCommandLimit();
-			CommandSourceStack commandSourceStack2 = this.wrapSender(commandSourceStack);
-			int j = 0;
-			CommandFunction.Entry[] entrys = commandFunction.getEntries();
-
-			for (int k = entrys.length - 1; k >= 0; k--) {
-				this.commandQueue.push(new ServerFunctionManager.QueuedCommand(commandSourceStack2, 0, entrys[k]));
-			}
-
-			while (!this.commandQueue.isEmpty()) {
-				try {
-					ServerFunctionManager.QueuedCommand queuedCommand = (ServerFunctionManager.QueuedCommand)this.commandQueue.removeFirst();
-					ServerFunctionManager.this.server.getProfiler().push(queuedCommand::toString);
-					this.depth = queuedCommand.depth;
-					queuedCommand.execute(ServerFunctionManager.this, this.commandQueue, i, this.tracer);
-					if (!this.abortCurrentDepth) {
-						if (!this.nestedCalls.isEmpty()) {
-							Lists.reverse(this.nestedCalls).forEach(this.commandQueue::addFirst);
-						}
-					} else {
-						while (!this.commandQueue.isEmpty() && ((ServerFunctionManager.QueuedCommand)this.commandQueue.peek()).depth >= this.depth) {
-							this.commandQueue.removeFirst();
-						}
-
-						this.abortCurrentDepth = false;
-					}
-
-					this.nestedCalls.clear();
-				} finally {
-					ServerFunctionManager.this.server.getProfiler().pop();
-				}
-
-				if (++j >= i) {
-					return j;
-				}
-			}
-
-			return j;
-		}
-
-		public void reportError(String string) {
-			if (this.tracer != null) {
-				this.tracer.onError(this.depth, string);
-			}
-		}
-
-		class AbortingReturnValueConsumer implements IntConsumer {
-			private final IntConsumer wrapped;
-
-			AbortingReturnValueConsumer(IntConsumer intConsumer) {
-				this.wrapped = intConsumer;
-			}
-
-			public void accept(int i) {
-				this.wrapped.accept(i);
-				ExecutionContext.this.abortCurrentDepth = true;
-			}
-		}
-	}
-
-	public static class QueuedCommand {
-		private final CommandSourceStack sender;
-		final int depth;
-		private final CommandFunction.Entry entry;
-
-		public QueuedCommand(CommandSourceStack commandSourceStack, int i, CommandFunction.Entry entry) {
-			this.sender = commandSourceStack;
-			this.depth = i;
-			this.entry = entry;
-		}
-
-		public void execute(
-			ServerFunctionManager serverFunctionManager,
-			Deque<ServerFunctionManager.QueuedCommand> deque,
-			int i,
-			@Nullable ServerFunctionManager.TraceCallbacks traceCallbacks
-		) {
-			try {
-				this.entry.execute(serverFunctionManager, this.sender, deque, i, this.depth, traceCallbacks);
-			} catch (CommandSyntaxException var6) {
-				if (traceCallbacks != null) {
-					traceCallbacks.onError(this.depth, var6.getRawMessage().getString());
-				}
-			} catch (Exception var7) {
-				if (traceCallbacks != null) {
-					traceCallbacks.onError(this.depth, var7.getMessage());
-				}
-			}
-		}
-
-		public String toString() {
-			return this.entry.toString();
-		}
-	}
-
-	public interface TraceCallbacks {
-		void onCommand(int i, String string);
-
-		void onReturn(int i, String string, int j);
-
-		void onError(int i, String string);
-
-		void onCall(int i, ResourceLocation resourceLocation, int j);
 	}
 }

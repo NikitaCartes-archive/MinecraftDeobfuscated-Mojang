@@ -2,7 +2,7 @@ package net.minecraft.client.gui.screens.inventory.tooltip;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.util.Mth;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
@@ -13,10 +13,10 @@ public class MenuTooltipPositioner implements ClientTooltipPositioner {
 	private static final int MOUSE_OFFSET_X = 12;
 	public static final int MAX_OVERLAP_WITH_WIDGET = 3;
 	public static final int MAX_DISTANCE_TO_WIDGET = 5;
-	private final AbstractWidget widget;
+	private final ScreenRectangle screenRectangle;
 
-	public MenuTooltipPositioner(AbstractWidget abstractWidget) {
-		this.widget = abstractWidget;
+	public MenuTooltipPositioner(ScreenRectangle screenRectangle) {
+		this.screenRectangle = screenRectangle;
 	}
 
 	@Override
@@ -28,12 +28,12 @@ public class MenuTooltipPositioner implements ClientTooltipPositioner {
 
 		vector2i.y += 3;
 		int o = n + 3 + 3;
-		int p = this.widget.getY() + this.widget.getHeight() + 3 + getOffset(0, 0, this.widget.getHeight());
+		int p = this.screenRectangle.bottom() + 3 + getOffset(0, 0, this.screenRectangle.height());
 		int q = j - 5;
 		if (p + o <= q) {
-			vector2i.y = vector2i.y + getOffset(vector2i.y, this.widget.getY(), this.widget.getHeight());
+			vector2i.y = vector2i.y + getOffset(vector2i.y, this.screenRectangle.top(), this.screenRectangle.height());
 		} else {
-			vector2i.y = vector2i.y - (o + getOffset(vector2i.y, this.widget.getY() + this.widget.getHeight(), this.widget.getHeight()));
+			vector2i.y = vector2i.y - (o + getOffset(vector2i.y, this.screenRectangle.bottom(), this.screenRectangle.height()));
 		}
 
 		return vector2i;

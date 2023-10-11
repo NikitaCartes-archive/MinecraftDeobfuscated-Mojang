@@ -2,11 +2,13 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
@@ -50,7 +52,7 @@ public class BoatItem extends Item {
 			}
 
 			if (hitResult.getType() == HitResult.Type.BLOCK) {
-				Boat boat = this.getBoat(level, hitResult);
+				Boat boat = this.getBoat(level, hitResult, itemStack, player);
 				boat.setVariant(this.type);
 				boat.setYRot(player.getYRot());
 				if (!level.noCollision(boat, boat.getBoundingBox())) {
@@ -73,9 +75,13 @@ public class BoatItem extends Item {
 		}
 	}
 
-	private Boat getBoat(Level level, HitResult hitResult) {
-		return (Boat)(this.hasChest
-			? new ChestBoat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z)
-			: new Boat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z));
+	private Boat getBoat(Level level, HitResult hitResult, ItemStack itemStack, Player player) {
+		Vec3 vec3 = hitResult.getLocation();
+		Boat boat = (Boat)(this.hasChest ? new ChestBoat(level, vec3.x, vec3.y, vec3.z) : new Boat(level, vec3.x, vec3.y, vec3.z));
+		if (level instanceof ServerLevel serverLevel) {
+			EntityType.createDefaultStackConfig(serverLevel, itemStack, player).accept(boat);
+		}
+
+		return boat;
 	}
 }

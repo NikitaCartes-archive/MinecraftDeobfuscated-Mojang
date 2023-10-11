@@ -319,7 +319,7 @@ public class FireBlock extends BaseFireBlock {
 		builder.add(AGE, NORTH, EAST, SOUTH, WEST, UP);
 	}
 
-	private void setFlammable(Block block, int i, int j) {
+	public void setFlammable(Block block, int i, int j) {
 		this.igniteOdds.put(block, i);
 		this.burnOdds.put(block, j);
 	}

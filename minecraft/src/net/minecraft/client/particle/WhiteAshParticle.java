@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 
 @Environment(EnvType.CLIENT)
@@ -12,9 +13,9 @@ public class WhiteAshParticle extends BaseAshSmokeParticle {
 
 	protected WhiteAshParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, float j, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, 0.1F, -0.1F, 0.1F, g, h, i, j, spriteSet, 0.0F, 20, 0.0125F, false);
-		this.rCol = 0.7294118F;
-		this.gCol = 0.69411767F;
-		this.bCol = 0.7607843F;
+		this.rCol = (float)FastColor.ARGB32.red(12235202) / 255.0F;
+		this.gCol = (float)FastColor.ARGB32.green(12235202) / 255.0F;
+		this.bCol = (float)FastColor.ARGB32.blue(12235202) / 255.0F;
 	}
 
 	@Environment(EnvType.CLIENT)

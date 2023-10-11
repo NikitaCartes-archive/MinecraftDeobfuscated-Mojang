@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.Subscription;
@@ -64,6 +65,13 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 				Component component2 = Component.translatable("mco.configure.world.delete.question.line2");
 				this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.WARNING, component, component2, true));
 			}).bounds(this.width / 2 - 100, row(10), 200, 20).build());
+		} else if (RealmsMainScreen.isSnapshot() && this.serverData.parentWorldName != null) {
+			this.addRenderableWidget(
+				new FittingMultiLineTextWidget(
+						this.width / 2 - 100, row(8), 200, 46, Component.translatable("mco.snapshot.subscription.info", this.serverData.parentWorldName), this.font
+					)
+					.setColor(-6250336)
+			);
 		} else {
 			this.addRenderableWidget(new FittingMultiLineTextWidget(this.width / 2 - 100, row(8), 200, 46, RECURRING_INFO, this.font).setColor(-6250336));
 		}

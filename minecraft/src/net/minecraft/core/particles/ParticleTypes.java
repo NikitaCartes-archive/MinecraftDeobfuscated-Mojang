@@ -115,6 +115,7 @@ public class ParticleTypes {
 		"shriek", false, ShriekParticleOption.DESERIALIZER, particleType -> ShriekParticleOption.CODEC
 	);
 	public static final SimpleParticleType EGG_CRACK = register("egg_crack", false);
+	public static final SimpleParticleType DUST_PLUME = register("dust_plume", false);
 	public static final Codec<ParticleOptions> CODEC = BuiltInRegistries.PARTICLE_TYPE
 		.byNameCodec()
 		.dispatch("type", ParticleOptions::getType, ParticleType::codec);

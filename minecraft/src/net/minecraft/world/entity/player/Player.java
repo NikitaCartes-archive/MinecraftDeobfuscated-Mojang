@@ -683,7 +683,7 @@ public abstract class Player extends LivingEntity {
 			ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), d, this.getZ(), itemStack);
 			itemEntity.setPickUpDelay(40);
 			if (bl2) {
-				itemEntity.setThrower(this.getUUID());
+				itemEntity.setThrower(this);
 			}
 
 			if (bl) {
@@ -2136,6 +2136,10 @@ public abstract class Player extends LivingEntity {
 
 	public static boolean isValidUsername(String string) {
 		return string.length() > 16 ? false : string.chars().filter(i -> i <= 32 || i >= 127).findAny().isEmpty();
+	}
+
+	public static float getPickRange(boolean bl) {
+		return bl ? 5.0F : 4.5F;
 	}
 
 	public static enum BedSleepingProblem {
