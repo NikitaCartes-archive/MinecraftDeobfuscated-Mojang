@@ -237,4 +237,8 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 
 		return listTag;
 	}
+
+	public NonNullList<ItemStack> getItems() {
+		return this.items;
+	}
 }

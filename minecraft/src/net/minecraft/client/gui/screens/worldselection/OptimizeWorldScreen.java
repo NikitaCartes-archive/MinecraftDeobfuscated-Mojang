@@ -20,6 +20,8 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.WorldStem;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.Level;
@@ -46,19 +48,22 @@ public class OptimizeWorldScreen extends Screen {
 		Minecraft minecraft, BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl
 	) {
 		try {
-			OptimizeWorldScreen var8;
-			try (WorldStem worldStem = minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, false)) {
+			WorldOpenFlows worldOpenFlows = minecraft.createWorldOpenFlows();
+			PackRepository packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
+
+			OptimizeWorldScreen var10;
+			try (WorldStem worldStem = worldOpenFlows.loadWorldStem(levelStorageAccess.getDataTag(), false, packRepository)) {
 				WorldData worldData = worldStem.worldData();
 				RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
 				levelStorageAccess.saveDataTag(frozen, worldData);
-				var8 = new OptimizeWorldScreen(
+				var10 = new OptimizeWorldScreen(
 					booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, frozen.registryOrThrow(Registries.LEVEL_STEM)
 				);
 			}
 
-			return var8;
-		} catch (Exception var11) {
-			LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)var11);
+			return var10;
+		} catch (Exception var13) {
+			LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)var13);
 			return null;
 		}
 	}

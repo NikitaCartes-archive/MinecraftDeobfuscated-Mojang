@@ -47,6 +47,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CrafterBlock;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.MangrovePropaguleBlock;
 import net.minecraft.world.level.block.PitcherCropBlock;
@@ -2437,6 +2438,25 @@ public class BlockModelGenerators {
 			);
 	}
 
+	private void createCrafterBlock() {
+		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.CRAFTER);
+		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.CRAFTER, "_triggered");
+		ResourceLocation resourceLocation3 = ModelLocationUtils.getModelLocation(Blocks.CRAFTER, "_crafting");
+		ResourceLocation resourceLocation4 = ModelLocationUtils.getModelLocation(Blocks.CRAFTER, "_crafting_triggered");
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(Blocks.CRAFTER)
+					.with(PropertyDispatch.property(BlockStateProperties.ORIENTATION).generate(frontAndTop -> this.applyRotation(frontAndTop, Variant.variant())))
+					.with(
+						PropertyDispatch.properties(BlockStateProperties.TRIGGERED, CrafterBlock.CRAFTING)
+							.select(false, false, Variant.variant().with(VariantProperties.MODEL, resourceLocation))
+							.select(true, true, Variant.variant().with(VariantProperties.MODEL, resourceLocation4))
+							.select(true, false, Variant.variant().with(VariantProperties.MODEL, resourceLocation2))
+							.select(false, true, Variant.variant().with(VariantProperties.MODEL, resourceLocation3))
+					)
+			);
+	}
+
 	private void createDispenserBlock(Block block) {
 		TextureMapping textureMapping = new TextureMapping()
 			.put(TextureSlot.TOP, TextureMapping.getBlockTexture(Blocks.FURNACE, "_top"))
@@ -3916,21 +3936,17 @@ public class BlockModelGenerators {
 	private void addSlotStateAndRotationVariants(
 		MultiPartGenerator multiPartGenerator, Condition.TerminalCondition terminalCondition, VariantProperties.Rotation rotation
 	) {
-		Map.of(
-				BlockStateProperties.CHISELED_BOOKSHELF_SLOT_0_OCCUPIED,
-				ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_LEFT,
-				BlockStateProperties.CHISELED_BOOKSHELF_SLOT_1_OCCUPIED,
-				ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_MID,
-				BlockStateProperties.CHISELED_BOOKSHELF_SLOT_2_OCCUPIED,
-				ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_RIGHT,
-				BlockStateProperties.CHISELED_BOOKSHELF_SLOT_3_OCCUPIED,
-				ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_LEFT,
-				BlockStateProperties.CHISELED_BOOKSHELF_SLOT_4_OCCUPIED,
-				ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_MID,
-				BlockStateProperties.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED,
-				ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_RIGHT
+		List.of(
+				Pair.of(BlockStateProperties.CHISELED_BOOKSHELF_SLOT_0_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_LEFT),
+				Pair.of(BlockStateProperties.CHISELED_BOOKSHELF_SLOT_1_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_MID),
+				Pair.of(BlockStateProperties.CHISELED_BOOKSHELF_SLOT_2_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_TOP_RIGHT),
+				Pair.of(BlockStateProperties.CHISELED_BOOKSHELF_SLOT_3_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_LEFT),
+				Pair.of(BlockStateProperties.CHISELED_BOOKSHELF_SLOT_4_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_MID),
+				Pair.of(BlockStateProperties.CHISELED_BOOKSHELF_SLOT_5_OCCUPIED, ModelTemplates.CHISELED_BOOKSHELF_SLOT_BOTTOM_RIGHT)
 			)
-			.forEach((booleanProperty, modelTemplate) -> {
+			.forEach(pair -> {
+				BooleanProperty booleanProperty = (BooleanProperty)pair.getFirst();
+				ModelTemplate modelTemplate = (ModelTemplate)pair.getSecond();
 				this.addBookSlotModel(multiPartGenerator, terminalCondition, rotation, booleanProperty, modelTemplate, true);
 				this.addBookSlotModel(multiPartGenerator, terminalCondition, rotation, booleanProperty, modelTemplate, false);
 			});
@@ -4304,6 +4320,7 @@ public class BlockModelGenerators {
 		this.createNyliumBlock(Blocks.WARPED_NYLIUM);
 		this.createDispenserBlock(Blocks.DISPENSER);
 		this.createDispenserBlock(Blocks.DROPPER);
+		this.createCrafterBlock();
 		this.createLantern(Blocks.LANTERN);
 		this.createLantern(Blocks.SOUL_LANTERN);
 		this.createAxisAlignedPillarBlockCustomModel(Blocks.CHAIN, ModelLocationUtils.getModelLocation(Blocks.CHAIN));

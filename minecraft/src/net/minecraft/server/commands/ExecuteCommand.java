@@ -1,5 +1,6 @@
 package net.minecraft.server.commands;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -118,7 +119,8 @@ public class ExecuteCommand {
 	private static final DynamicCommandExceptionType ERROR_CONDITIONAL_FAILED_COUNT = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("commands.execute.conditional.fail_count", object)
 	);
-	private static final Dynamic2CommandExceptionType ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE = new Dynamic2CommandExceptionType(
+	@VisibleForTesting
+	public static final Dynamic2CommandExceptionType ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE = new Dynamic2CommandExceptionType(
 		(object, object2) -> Component.translatableEscape("commands.execute.function.instantiationFailure", object, object2)
 	);
 	private static final BinaryOperator<CommandResultConsumer<CommandSourceStack>> CALLBACK_CHAINER = (commandResultConsumer, commandResultConsumer2) -> (commandSourceStack, bl, i) -> {
@@ -927,26 +929,30 @@ public class ExecuteCommand {
 		ExecutionControl<T> executionControl,
 		ExecuteCommand.CommandGetter<T, Collection<CommandFunction<T>>> commandGetter,
 		boolean bl
-	) throws CommandSyntaxException {
+	) {
 		List<T> list2 = new ArrayList(list.size());
 		CommandContext<T> commandContext = contextChain.getTopContext();
 
 		for (T executionCommandSource : list) {
-			Collection<CommandFunction<T>> collection = commandGetter.get(commandContext.copyFor(executionCommandSource));
-			int i = collection.size();
-			if (i != 0) {
-				T executionCommandSource2 = prepareCallback(function, intPredicate, list2, executionCommandSource, i == 1);
+			try {
+				Collection<CommandFunction<T>> collection = commandGetter.get(commandContext.copyFor(executionCommandSource));
+				int i = collection.size();
+				if (i != 0) {
+					T executionCommandSource2 = prepareCallback(function, intPredicate, list2, executionCommandSource, i == 1);
 
-				for (CommandFunction<T> commandFunction : collection) {
-					InstantiatedFunction<T> instantiatedFunction;
-					try {
-						instantiatedFunction = commandFunction.instantiate(compoundTag, executionCommandSource2.dispatcher(), executionCommandSource2);
-					} catch (FunctionInstantiationException var19) {
-						throw ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE.create(commandFunction.id(), var19.messageComponent());
+					for (CommandFunction<T> commandFunction : collection) {
+						InstantiatedFunction<T> instantiatedFunction;
+						try {
+							instantiatedFunction = commandFunction.instantiate(compoundTag, executionCommandSource2.dispatcher(), executionCommandSource2);
+						} catch (FunctionInstantiationException var19) {
+							throw ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE.create(commandFunction.id(), var19.messageComponent());
+						}
+
+						executionControl.queueNext(new CallFunction<>(instantiatedFunction).bind(executionCommandSource2));
 					}
-
-					executionControl.queueNext(new CallFunction<>(instantiatedFunction).bind(executionCommandSource2));
 				}
+			} catch (CommandSyntaxException var20) {
+				executionCommandSource.handleError(var20, bl, executionControl.tracer());
 			}
 		}
 
@@ -1001,7 +1007,7 @@ public class ExecuteCommand {
 		@Override
 		public void apply(
 			List<CommandSourceStack> list, ContextChain<CommandSourceStack> contextChain, boolean bl, ExecutionControl<CommandSourceStack> executionControl
-		) throws CommandSyntaxException {
+		) {
 			ExecuteCommand.scheduleFunctionConditionsAndTest(
 				list,
 				FunctionCommand::modifySenderForExecution,

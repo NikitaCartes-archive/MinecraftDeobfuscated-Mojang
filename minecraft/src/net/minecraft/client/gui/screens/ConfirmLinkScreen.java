@@ -23,11 +23,7 @@ public class ConfirmLinkScreen extends ConfirmScreen {
 	}
 
 	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, Component component, String string, boolean bl) {
-		this(booleanConsumer, component, string, bl ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_NO, bl);
-	}
-
-	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, Component component, String string, Component component2, boolean bl) {
-		this(booleanConsumer, component, confirmMessage(bl, string), string, component2, bl);
+		this(booleanConsumer, component, confirmMessage(bl, string), string, bl ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_NO, bl);
 	}
 
 	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, Component component, Component component2, String string, Component component3, boolean bl) {
@@ -68,18 +64,18 @@ public class ConfirmLinkScreen extends ConfirmScreen {
 		}
 	}
 
-	public static void confirmLinkNow(String string, Screen screen, boolean bl) {
+	public static void confirmLinkNow(Screen screen, String string) {
 		Minecraft minecraft = Minecraft.getInstance();
-		minecraft.setScreen(new ConfirmLinkScreen(blx -> {
-			if (blx) {
+		minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+			if (bl) {
 				Util.getPlatform().openUri(string);
 			}
 
 			minecraft.setScreen(screen);
-		}, string, bl));
+		}, string, true));
 	}
 
-	public static Button.OnPress confirmLink(String string, Screen screen, boolean bl) {
-		return button -> confirmLinkNow(string, screen, bl);
+	public static Button.OnPress confirmLink(Screen screen, String string) {
+		return button -> confirmLinkNow(screen, string);
 	}
 }

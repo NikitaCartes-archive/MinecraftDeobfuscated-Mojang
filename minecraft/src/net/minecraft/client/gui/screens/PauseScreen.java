@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
@@ -143,12 +142,6 @@ public class PauseScreen extends Screen {
 	}
 
 	private Button openLinkButton(Component component, String string) {
-		return this.openScreenButton(component, () -> new ConfirmLinkScreen(bl -> {
-				if (bl) {
-					Util.getPlatform().openUri(string);
-				}
-
-				this.minecraft.setScreen(this);
-			}, string, true));
+		return Button.builder(component, ConfirmLinkScreen.confirmLink(this, string)).width(98).build();
 	}
 }

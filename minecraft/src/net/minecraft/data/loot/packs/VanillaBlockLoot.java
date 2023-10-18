@@ -625,6 +625,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.MANGROVE_LOG);
 		this.dropSelf(Blocks.MUD);
 		this.dropSelf(Blocks.PACKED_MUD);
+		this.add(Blocks.CRAFTER, noDrop());
 		this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
 		this.dropOther(Blocks.TRIPWIRE, Items.STRING);
 		this.dropOther(Blocks.DIRT_PATH, Blocks.DIRT);

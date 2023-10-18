@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens;
 
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -21,23 +20,22 @@ public class NoticeWithLinkScreen extends Screen {
 	private static final Component SYMLINK_PACK_MESSAGE_TEXT = Component.translatable("symlink_warning.message.pack", "https://aka.ms/MinecraftSymLinks");
 	private final Component message;
 	private final String url;
-	@Nullable
-	private final Screen callbackScreen;
+	private final Runnable onClose;
 	private final GridLayout layout = new GridLayout().rowSpacing(10);
 
-	public NoticeWithLinkScreen(Component component, Component component2, String string, @Nullable Screen screen) {
+	public NoticeWithLinkScreen(Component component, Component component2, String string, Runnable runnable) {
 		super(component);
 		this.message = component2;
 		this.url = string;
-		this.callbackScreen = screen;
+		this.onClose = runnable;
 	}
 
-	public static Screen createWorldSymlinkWarningScreen(@Nullable Screen screen) {
-		return new NoticeWithLinkScreen(SYMLINK_WORLD_TITLE, SYMLINK_WORLD_MESSAGE_TEXT, "https://aka.ms/MinecraftSymLinks", screen);
+	public static Screen createWorldSymlinkWarningScreen(Runnable runnable) {
+		return new NoticeWithLinkScreen(SYMLINK_WORLD_TITLE, SYMLINK_WORLD_MESSAGE_TEXT, "https://aka.ms/MinecraftSymLinks", runnable);
 	}
 
-	public static Screen createPackSymlinkWarningScreen(@Nullable Screen screen) {
-		return new NoticeWithLinkScreen(SYMLINK_PACK_TITLE, SYMLINK_PACK_MESSAGE_TEXT, "https://aka.ms/MinecraftSymLinks", screen);
+	public static Screen createPackSymlinkWarningScreen(Runnable runnable) {
+		return new NoticeWithLinkScreen(SYMLINK_PACK_TITLE, SYMLINK_PACK_MESSAGE_TEXT, "https://aka.ms/MinecraftSymLinks", runnable);
 	}
 
 	@Override
@@ -73,6 +71,6 @@ public class NoticeWithLinkScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		this.minecraft.setScreen(this.callbackScreen);
+		this.onClose.run();
 	}
 }

@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -123,13 +122,9 @@ public class SocialInteractionsScreen extends Screen {
 		this.searchBox.setResponder(this::checkSearchStringUpdate);
 		this.addWidget(this.searchBox);
 		this.addWidget(this.socialInteractionsPlayerList);
-		this.blockingHintButton = this.addRenderableWidget(Button.builder(BLOCKING_HINT, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-				if (bl) {
-					Util.getPlatform().openUri("https://aka.ms/javablocking");
-				}
-
-				this.minecraft.setScreen(this);
-			}, "https://aka.ms/javablocking", true))).bounds(n, m, l, 20).build());
+		this.blockingHintButton = this.addRenderableWidget(
+			Button.builder(BLOCKING_HINT, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/javablocking")).bounds(n, m, l, 20).build()
+		);
 		this.initialized = true;
 		this.showPage(this.page);
 	}

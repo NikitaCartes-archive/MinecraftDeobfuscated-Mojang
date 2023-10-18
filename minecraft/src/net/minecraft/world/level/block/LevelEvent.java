@@ -41,13 +41,15 @@ public class LevelEvent {
 	public static final int SOUND_DRIP_LAVA_INTO_CAULDRON = 1046;
 	public static final int SOUND_DRIP_WATER_INTO_CAULDRON = 1047;
 	public static final int SOUND_SKELETON_TO_STRAY = 1048;
+	public static final int SOUND_CRAFTER_CRAFT = 1049;
+	public static final int SOUND_CRAFTER_FAIL = 1050;
 	public static final int COMPOSTER_FILL = 1500;
 	public static final int LAVA_FIZZ = 1501;
 	public static final int REDSTONE_TORCH_BURNOUT = 1502;
 	public static final int END_PORTAL_FRAME_FILL = 1503;
 	public static final int DRIPSTONE_DRIP = 1504;
 	public static final int PARTICLES_AND_SOUND_PLANT_GROWTH = 1505;
-	public static final int PARTICLES_SHOOT = 2000;
+	public static final int PARTICLES_SHOOT_SMOKE = 2000;
 	public static final int PARTICLES_DESTROY_BLOCK = 2001;
 	public static final int PARTICLES_SPELL_POTION_SPLASH = 2002;
 	public static final int PARTICLES_EYE_OF_ENDER_DEATH = 2003;
@@ -57,6 +59,7 @@ public class LevelEvent {
 	public static final int PARTICLES_INSTANT_POTION_SPLASH = 2007;
 	public static final int PARTICLES_DRAGON_BLOCK_BREAK = 2008;
 	public static final int PARTICLES_WATER_EVAPORATING = 2009;
+	public static final int PARTICLES_SHOOT_WHITE_SMOKE = 2010;
 	public static final int ANIMATION_END_GATEWAY_SPAWN = 3000;
 	public static final int ANIMATION_DRAGON_SUMMON_ROAR = 3001;
 	public static final int PARTICLES_ELECTRIC_SPARK = 3002;

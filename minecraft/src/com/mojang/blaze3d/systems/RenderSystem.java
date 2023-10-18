@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 public class RenderSystem {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final ConcurrentLinkedQueue<RenderCall> recordingQueue = Queues.newConcurrentLinkedQueue();
-	private static final Tesselator RENDER_THREAD_TESSELATOR = new Tesselator();
+	private static final Tesselator RENDER_THREAD_TESSELATOR = new Tesselator(1536);
 	private static final int MINIMUM_ATLAS_TEXTURE_SIZE = 1024;
 	private static boolean isReplayingQueue;
 	@Nullable
@@ -989,9 +989,11 @@ public class RenderSystem {
 			if (!this.hasStorage(i)) {
 				i = Mth.roundToward(i * 2, this.indexStride);
 				RenderSystem.LOGGER.debug("Growing IndexBuffer: Old limit {}, new limit {}.", this.indexCount, i);
-				VertexFormat.IndexType indexType = VertexFormat.IndexType.least(i);
-				int j = Mth.roundToward(i * indexType.bytes, 4);
-				GlStateManager._glBufferData(34963, (long)j, 35048);
+				int j = i / this.indexStride;
+				int k = j * this.vertexStride;
+				VertexFormat.IndexType indexType = VertexFormat.IndexType.least(k);
+				int l = Mth.roundToward(i * indexType.bytes, 4);
+				GlStateManager._glBufferData(34963, (long)l, 35048);
 				ByteBuffer byteBuffer = GlStateManager._glMapBuffer(34963, 35001);
 				if (byteBuffer == null) {
 					throw new RuntimeException("Failed to map GL buffer");
@@ -999,8 +1001,8 @@ public class RenderSystem {
 					this.type = indexType;
 					it.unimi.dsi.fastutil.ints.IntConsumer intConsumer = this.intConsumer(byteBuffer);
 
-					for (int k = 0; k < i; k += this.indexStride) {
-						this.generator.accept(intConsumer, k * this.vertexStride / this.indexStride);
+					for (int m = 0; m < i; m += this.indexStride) {
+						this.generator.accept(intConsumer, m * this.vertexStride / this.indexStride);
 					}
 
 					GlStateManager._glUnmapBuffer(34963);

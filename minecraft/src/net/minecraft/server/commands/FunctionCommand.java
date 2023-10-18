@@ -1,5 +1,6 @@
 package net.minecraft.server.commands;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -43,7 +44,8 @@ public class FunctionCommand {
 	static final DynamicCommandExceptionType ERROR_NO_FUNCTIONS = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("commands.function.scheduled.no_functions", object)
 	);
-	private static final Dynamic2CommandExceptionType ERROR_FUNCTION_INSTANTATION_FAILURE = new Dynamic2CommandExceptionType(
+	@VisibleForTesting
+	public static final Dynamic2CommandExceptionType ERROR_FUNCTION_INSTANTATION_FAILURE = new Dynamic2CommandExceptionType(
 		(object, object2) -> Component.translatableEscape("commands.function.instantiationFailure", object, object2)
 	);
 	public static final SuggestionProvider<CommandSourceStack> SUGGEST_FUNCTION = (commandContext, suggestionsBuilder) -> {
@@ -169,12 +171,6 @@ public class FunctionCommand {
 				}
 
 				FunctionCommand.queueFunctions(collection, compoundTag, commandSourceStack, commandSourceStack2, executionControl, FunctionCommand.FULL_CONTEXT_CALLBACKS);
-			}
-		}
-
-		protected void onError(CommandSyntaxException commandSyntaxException, CommandSourceStack commandSourceStack, boolean bl) {
-			if (!bl) {
-				commandSourceStack.sendFailure(ComponentUtils.fromMessage(commandSyntaxException.getRawMessage()));
 			}
 		}
 	}

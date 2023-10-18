@@ -117,9 +117,6 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TRANSLUCENT_MOVING_BLOCK_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeTranslucentMovingBlockShader
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TRANSLUCENT_NO_CRUMBLING_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTranslucentNoCrumblingShader
-	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeArmorCutoutNoCullShader
 	);

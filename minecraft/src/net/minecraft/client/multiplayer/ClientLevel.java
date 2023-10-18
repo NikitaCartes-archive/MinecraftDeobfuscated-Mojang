@@ -470,6 +470,7 @@ public class ClientLevel extends Level {
 			"Server type",
 			(CrashReportDetail<String>)(() -> this.minecraft.getSingleplayerServer() == null ? "Non-integrated multiplayer server" : "Integrated singleplayer server")
 		);
+		crashReportCategory.setDetail("Tracked entity count", (CrashReportDetail<String>)(() -> String.valueOf(this.getEntityCount())));
 		return crashReportCategory;
 	}
 

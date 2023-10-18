@@ -1077,6 +1077,7 @@ public class Items {
 	public static final Item RED_BED = registerBlock(new BedItem(Blocks.RED_BED, new Item.Properties().stacksTo(1)));
 	public static final Item BLACK_BED = registerBlock(new BedItem(Blocks.BLACK_BED, new Item.Properties().stacksTo(1)));
 	public static final Item COOKIE = registerItem("cookie", new Item(new Item.Properties().food(Foods.COOKIE)));
+	public static final Item CRAFTER = registerBlock(new BlockItem(Blocks.CRAFTER, new Item.Properties()));
 	public static final Item FILLED_MAP = registerItem("filled_map", new MapItem(new Item.Properties()));
 	public static final Item SHEARS = registerItem("shears", new ShearsItem(new Item.Properties().durability(238)));
 	public static final Item MELON_SLICE = registerItem("melon_slice", new Item(new Item.Properties().food(Foods.MELON_SLICE)));

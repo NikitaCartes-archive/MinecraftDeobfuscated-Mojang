@@ -17,7 +17,7 @@ public class ClientboundLoginDisconnectPacket implements Packet<ClientLoginPacke
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeComponent(this.reason);
+		friendlyByteBuf.writeUtf(Component.Serializer.toJson(this.reason));
 	}
 
 	public void handle(ClientLoginPacketListener clientLoginPacketListener) {

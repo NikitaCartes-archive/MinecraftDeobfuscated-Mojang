@@ -190,7 +190,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		guiGraphics.blit(OPTIONS_BACKGROUND, 0, k, 0.0F, 0.0F, this.width, this.height - k, 32, 32);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		String string = this.serverData.players != null ? Integer.toString(this.serverData.players.size()) : "0";
-		guiGraphics.drawString(this.font, Component.translatable("mco.configure.world.invited.number", string), this.column1X, row(0), -6250336, false);
+		guiGraphics.drawString(this.font, Component.translatable("mco.configure.world.invited.number", string), this.column1X, row(0), -1, false);
 	}
 
 	@Environment(EnvType.CLIENT)

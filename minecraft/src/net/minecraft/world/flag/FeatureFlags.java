@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 public class FeatureFlags {
 	public static final FeatureFlag VANILLA;
 	public static final FeatureFlag BUNDLE;
+	public static final FeatureFlag UPDATE_1_21;
 	public static final FeatureFlag TRADE_REBALANCE;
 	public static final FeatureFlagRegistry REGISTRY;
 	public static final Codec<FeatureFlagSet> CODEC;
@@ -33,6 +34,7 @@ public class FeatureFlags {
 		VANILLA = builder.createVanilla("vanilla");
 		BUNDLE = builder.createVanilla("bundle");
 		TRADE_REBALANCE = builder.createVanilla("trade_rebalance");
+		UPDATE_1_21 = builder.createVanilla("update_1_21");
 		REGISTRY = builder.build();
 		CODEC = REGISTRY.codec();
 		VANILLA_SET = FeatureFlagSet.of(VANILLA);

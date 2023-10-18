@@ -261,6 +261,7 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<DecoratedPotBlockEntity> DECORATED_POT = register(
 		"decorated_pot", BlockEntityType.Builder.of(DecoratedPotBlockEntity::new, Blocks.DECORATED_POT)
 	);
+	public static final BlockEntityType<CrafterBlockEntity> CRAFTER = register("crafter", BlockEntityType.Builder.of(CrafterBlockEntity::new, Blocks.CRAFTER));
 	private final BlockEntityType.BlockEntitySupplier<? extends T> factory;
 	private final Set<Block> validBlocks;
 	private final Type<?> dataType;

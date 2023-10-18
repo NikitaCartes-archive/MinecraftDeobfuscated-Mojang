@@ -14,6 +14,7 @@ public class CommonLinks {
 	public static final String SNAPSHOT_FEEDBACK = "https://aka.ms/snapshotfeedback?ref=game";
 	public static final String RELEASE_FEEDBACK = "https://aka.ms/javafeedback?ref=game";
 	public static final String SNAPSHOT_BUGS_FEEDBACK = "https://aka.ms/snapshotbugs?ref=game";
+	public static final String GENERAL_HELP = "https://aka.ms/Minecraft-Support";
 	public static final String ACCESSIBILITY_HELP = "https://aka.ms/MinecraftJavaAccessibility";
 	public static final String REPORTING_HELP = "https://aka.ms/aboutjavareporting";
 	public static final String SUSPENSION_HELP = "https://aka.ms/mcjavamoderation";
@@ -23,7 +24,6 @@ public class CommonLinks {
 	public static final String BUY_REALMS = "https://aka.ms/BuyJavaRealms";
 	public static final String REALMS_TERMS = "https://aka.ms/MinecraftRealmsTerms";
 	public static final String REALMS_CONTENT_CREATION = "https://aka.ms/MinecraftRealmsContentCreator";
-	public static final String REALMS_UPDATE_MOJANG_ACCOUNT = "https://aka.ms/UpdateMojangAccount";
 
 	public static String extendRealms(String string, UUID uUID, boolean bl) {
 		return extendRealms(string, uUID) + "&ref=" + (bl ? "expiredTrial" : "expiredRealm");

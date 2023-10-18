@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screens.inventory.BlastFurnaceScreen;
 import net.minecraft.client.gui.screens.inventory.BrewingStandScreen;
 import net.minecraft.client.gui.screens.inventory.CartographyTableScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CrafterScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.gui.screens.inventory.DispenserScreen;
 import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
@@ -87,6 +88,7 @@ public class MenuScreens {
 		register(MenuType.GENERIC_9x5, ContainerScreen::new);
 		register(MenuType.GENERIC_9x6, ContainerScreen::new);
 		register(MenuType.GENERIC_3x3, DispenserScreen::new);
+		register(MenuType.CRAFTER_3x3, CrafterScreen::new);
 		register(MenuType.ANVIL, AnvilScreen::new);
 		register(MenuType.BEACON, BeaconScreen::new);
 		register(MenuType.BLAST_FURNACE, BlastFurnaceScreen::new);

@@ -17,6 +17,7 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.biome.Biome;
@@ -6687,6 +6688,9 @@ public class Blocks {
 	public static final Block DECORATED_POT = register(
 		"decorated_pot",
 		new DecoratedPotBlock(BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_RED).strength(0.0F, 0.0F).pushReaction(PushReaction.DESTROY).noOcclusion())
+	);
+	public static final Block CRAFTER = register(
+		"crafter", new CrafterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.5F, 3.5F).requiredFeatures(FeatureFlags.UPDATE_1_21))
 	);
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {

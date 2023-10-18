@@ -156,6 +156,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.PORTAL, PortalParticle.Provider::new);
 		this.register(ParticleTypes.RAIN, WaterDropParticle.Provider::new);
 		this.register(ParticleTypes.SMOKE, SmokeParticle.Provider::new);
+		this.register(ParticleTypes.WHITE_SMOKE, WhiteSmokeParticle.Provider::new);
 		this.register(ParticleTypes.SNEEZE, PlayerCloudParticle.SneezeProvider::new);
 		this.register(ParticleTypes.SNOWFLAKE, SnowflakeParticle.Provider::new);
 		this.register(ParticleTypes.SPIT, SpitParticle.Provider::new);

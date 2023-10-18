@@ -312,7 +312,7 @@ public class MapItem extends ComplexItem {
 	}
 
 	@Override
-	public void onCraftedBy(ItemStack itemStack, Level level, Player player) {
+	public void onCraftedPostProcess(ItemStack itemStack, Level level) {
 		CompoundTag compoundTag = itemStack.getTag();
 		if (compoundTag != null && compoundTag.contains("map_scale_direction", 99)) {
 			scaleMap(itemStack, level, compoundTag.getInt("map_scale_direction"));

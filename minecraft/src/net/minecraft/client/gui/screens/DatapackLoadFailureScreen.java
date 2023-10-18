@@ -11,11 +11,13 @@ import net.minecraft.network.chat.Component;
 @Environment(EnvType.CLIENT)
 public class DatapackLoadFailureScreen extends Screen {
 	private MultiLineLabel message = MultiLineLabel.EMPTY;
-	private final Runnable callback;
+	private final Runnable cancelCallback;
+	private final Runnable safeModeCallback;
 
-	public DatapackLoadFailureScreen(Runnable runnable) {
+	public DatapackLoadFailureScreen(Runnable runnable, Runnable runnable2) {
 		super(Component.translatable("datapackFailure.title"));
-		this.callback = runnable;
+		this.cancelCallback = runnable;
+		this.safeModeCallback = runnable2;
 	}
 
 	@Override
@@ -23,14 +25,12 @@ public class DatapackLoadFailureScreen extends Screen {
 		super.init();
 		this.message = MultiLineLabel.create(this.font, this.getTitle(), this.width - 50);
 		this.addRenderableWidget(
-			Button.builder(Component.translatable("datapackFailure.safeMode"), button -> this.callback.run())
+			Button.builder(Component.translatable("datapackFailure.safeMode"), button -> this.safeModeCallback.run())
 				.bounds(this.width / 2 - 155, this.height / 6 + 96, 150, 20)
 				.build()
 		);
 		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_TO_TITLE, button -> this.minecraft.setScreen(null))
-				.bounds(this.width / 2 - 155 + 160, this.height / 6 + 96, 150, 20)
-				.build()
+			Button.builder(CommonComponents.GUI_BACK, button -> this.cancelCallback.run()).bounds(this.width / 2 - 155 + 160, this.height / 6 + 96, 150, 20).build()
 		);
 	}
 

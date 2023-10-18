@@ -1,6 +1,7 @@
 package net.minecraft.nbt;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -16,57 +17,56 @@ import java.util.zip.GZIPOutputStream;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.util.FastBufferedInputStream;
 
 public class NbtIo {
-	public static CompoundTag readCompressed(File file) throws IOException {
+	public static CompoundTag readCompressed(File file, NbtAccounter nbtAccounter) throws IOException {
 		InputStream inputStream = new FileInputStream(file);
 
-		CompoundTag var2;
+		CompoundTag var3;
 		try {
-			var2 = readCompressed(inputStream);
-		} catch (Throwable var5) {
+			var3 = readCompressed(inputStream, nbtAccounter);
+		} catch (Throwable var6) {
 			try {
 				inputStream.close();
-			} catch (Throwable var4) {
-				var5.addSuppressed(var4);
+			} catch (Throwable var5) {
+				var6.addSuppressed(var5);
 			}
 
-			throw var5;
+			throw var6;
 		}
 
 		inputStream.close();
-		return var2;
+		return var3;
 	}
 
 	private static DataInputStream createDecompressorStream(InputStream inputStream) throws IOException {
 		return new DataInputStream(new FastBufferedInputStream(new GZIPInputStream(inputStream)));
 	}
 
-	public static CompoundTag readCompressed(InputStream inputStream) throws IOException {
+	public static CompoundTag readCompressed(InputStream inputStream, NbtAccounter nbtAccounter) throws IOException {
 		DataInputStream dataInputStream = createDecompressorStream(inputStream);
 
-		CompoundTag var2;
+		CompoundTag var3;
 		try {
-			var2 = read(dataInputStream, NbtAccounter.unlimitedHeap());
-		} catch (Throwable var5) {
+			var3 = read(dataInputStream, nbtAccounter);
+		} catch (Throwable var6) {
 			if (dataInputStream != null) {
 				try {
 					dataInputStream.close();
-				} catch (Throwable var4) {
-					var5.addSuppressed(var4);
+				} catch (Throwable var5) {
+					var6.addSuppressed(var5);
 				}
 			}
 
-			throw var5;
+			throw var6;
 		}
 
 		if (dataInputStream != null) {
 			dataInputStream.close();
 		}
 
-		return var2;
+		return var3;
 	}
 
 	public static void parseCompressed(File file, StreamTagVisitor streamTagVisitor, NbtAccounter nbtAccounter) throws IOException {
@@ -107,6 +107,46 @@ public class NbtIo {
 		if (dataInputStream != null) {
 			dataInputStream.close();
 		}
+	}
+
+	public static byte[] writeToByteArrayCompressed(CompoundTag compoundTag) throws IOException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(byteArrayOutputStream)));
+
+		try {
+			write(compoundTag, dataOutputStream);
+		} catch (Throwable var6) {
+			try {
+				dataOutputStream.close();
+			} catch (Throwable var5) {
+				var6.addSuppressed(var5);
+			}
+
+			throw var6;
+		}
+
+		dataOutputStream.close();
+		return byteArrayOutputStream.toByteArray();
+	}
+
+	public static byte[] writeToByteArray(CompoundTag compoundTag) throws IOException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+
+		try {
+			write(compoundTag, dataOutputStream);
+		} catch (Throwable var6) {
+			try {
+				dataOutputStream.close();
+			} catch (Throwable var5) {
+				var6.addSuppressed(var5);
+			}
+
+			throw var6;
+		}
+
+		dataOutputStream.close();
+		return byteArrayOutputStream.toByteArray();
 	}
 
 	public static void writeCompressed(CompoundTag compoundTag, File file) throws IOException {
@@ -292,7 +332,7 @@ public class NbtIo {
 			CrashReport crashReport = CrashReport.forThrowable(var6, "Loading NBT data");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("NBT Tag");
 			crashReportCategory.setDetail("Tag type", b);
-			throw new ReportedException(crashReport);
+			throw new ReportedNbtException(crashReport);
 		}
 	}
 }

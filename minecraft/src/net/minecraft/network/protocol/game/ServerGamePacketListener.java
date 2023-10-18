@@ -83,6 +83,8 @@ public interface ServerGamePacketListener extends ServerPingPacketListener, Serv
 
 	void handleEntityTagQuery(ServerboundEntityTagQuery serverboundEntityTagQuery);
 
+	void handleContainerSlotStateChanged(ServerboundContainerSlotStateChangedPacket serverboundContainerSlotStateChangedPacket);
+
 	void handleBlockEntityTagQuery(ServerboundBlockEntityTagQuery serverboundBlockEntityTagQuery);
 
 	void handleSetJigsawBlock(ServerboundSetJigsawBlockPacket serverboundSetJigsawBlockPacket);

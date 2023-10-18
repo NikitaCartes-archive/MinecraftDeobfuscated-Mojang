@@ -17,9 +17,10 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class BufferBuilder extends DefaultedVertexConsumer implements BufferVertexConsumer {
-	private static final int GROWTH_SIZE = 2097152;
+	private static final int MAX_GROWTH_SIZE = 2097152;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private ByteBuffer buffer;
+	private boolean closed;
 	private int renderedBufferCount;
 	private int renderedBufferPointer;
 	private int nextElementByte;
@@ -39,7 +40,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 	private boolean indexOnly;
 
 	public BufferBuilder(int i) {
-		this.buffer = MemoryTracker.create(i * 6);
+		this.buffer = MemoryTracker.create(i);
 	}
 
 	private void ensureVertexCapacity() {
@@ -49,25 +50,13 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 	private void ensureCapacity(int i) {
 		if (this.nextElementByte + i > this.buffer.capacity()) {
 			int j = this.buffer.capacity();
-			int k = j + roundUp(i);
-			LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", j, k);
-			ByteBuffer byteBuffer = MemoryTracker.resize(this.buffer, k);
+			int k = Math.min(j, 2097152);
+			int l = j + i;
+			int m = Math.max(j + k, l);
+			LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", j, m);
+			ByteBuffer byteBuffer = MemoryTracker.resize(this.buffer, m);
 			byteBuffer.rewind();
 			this.buffer = byteBuffer;
-		}
-	}
-
-	private static int roundUp(int i) {
-		int j = 2097152;
-		if (i == 0) {
-			return j;
-		} else {
-			if (i < 0) {
-				j *= -1;
-			}
-
-			int k = i % j;
-			return k == 0 ? i : i + j - k;
 		}
 	}
 
@@ -84,7 +73,14 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		return new BufferBuilder.SortState(this.mode, this.vertices, this.sortingPoints, this.sorting);
 	}
 
+	private void checkOpen() {
+		if (this.closed) {
+			throw new IllegalStateException("This BufferBuilder has been closed");
+		}
+	}
+
 	public void restoreSortState(BufferBuilder.SortState sortState) {
+		this.checkOpen();
 		this.buffer.rewind();
 		this.mode = sortState.mode;
 		this.vertices = sortState.vertices;
@@ -98,6 +94,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		if (this.building) {
 			throw new IllegalStateException("Already building!");
 		} else {
+			this.checkOpen();
 			this.building = true;
 			this.mode = mode;
 			this.switchFormat(vertexFormat);
@@ -201,7 +198,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 	private BufferBuilder.RenderedBuffer storeRenderedBuffer() {
 		int i = this.mode.indexCount(this.vertices);
 		int j = !this.indexOnly ? this.vertices * this.format.getVertexSize() : 0;
-		VertexFormat.IndexType indexType = VertexFormat.IndexType.least(i);
+		VertexFormat.IndexType indexType = VertexFormat.IndexType.least(this.vertices);
 		boolean bl;
 		int l;
 		if (this.sortingPoints != null) {
@@ -343,6 +340,17 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		this.renderedBufferCount = 0;
 		this.renderedBufferPointer = 0;
 		this.nextElementByte = 0;
+	}
+
+	public void release() {
+		if (this.renderedBufferCount > 0) {
+			throw new IllegalStateException("BufferBuilder closed with unused batches");
+		} else if (this.building) {
+			throw new IllegalStateException("Cannot close BufferBuilder while it is building");
+		} else if (!this.closed) {
+			this.closed = true;
+			MemoryTracker.free(this.buffer);
+		}
 	}
 
 	@Override

@@ -11,7 +11,7 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class OutlineBufferSource implements MultiBufferSource {
 	private final MultiBufferSource.BufferSource bufferSource;
-	private final MultiBufferSource.BufferSource outlineBufferSource = MultiBufferSource.immediate(new BufferBuilder(256));
+	private final MultiBufferSource.BufferSource outlineBufferSource = MultiBufferSource.immediate(new BufferBuilder(1536));
 	private int teamR = 255;
 	private int teamG = 255;
 	private int teamB = 255;

@@ -2,7 +2,6 @@ package net.minecraft.world.level.storage;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
@@ -27,7 +26,6 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
@@ -44,6 +42,7 @@ import org.slf4j.Logger;
 
 public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final String LEVEL_NAME = "LevelName";
 	protected static final String PLAYER = "Player";
 	protected static final String WORLD_GEN_SETTINGS = "WorldGenSettings";
 	private LevelSettings settings;
@@ -57,11 +56,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private long gameTime;
 	private long dayTime;
 	@Nullable
-	private final DataFixer fixerUpper;
-	private final int playerDataVersion;
-	private boolean upgradedPlayerTag;
-	@Nullable
-	private CompoundTag loadedPlayerTag;
+	private final CompoundTag loadedPlayerTag;
 	private final int version;
 	private int clearWeatherTime;
 	private boolean raining;
@@ -84,27 +79,25 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private final TimerQueue<MinecraftServer> scheduledEvents;
 
 	private PrimaryLevelData(
-		@Nullable DataFixer dataFixer,
-		int i,
 		@Nullable CompoundTag compoundTag,
 		boolean bl,
+		int i,
 		int j,
 		int k,
-		int l,
 		float f,
+		long l,
 		long m,
-		long n,
+		int n,
 		int o,
 		int p,
-		int q,
 		boolean bl2,
-		int r,
+		int q,
 		boolean bl3,
 		boolean bl4,
 		boolean bl5,
 		WorldBorder.Settings settings,
+		int r,
 		int s,
-		int t,
 		@Nullable UUID uUID,
 		Set<String> set,
 		Set<String> set2,
@@ -116,30 +109,28 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		PrimaryLevelData.SpecialWorldProperty specialWorldProperty,
 		Lifecycle lifecycle
 	) {
-		this.fixerUpper = dataFixer;
 		this.wasModded = bl;
-		this.xSpawn = j;
-		this.ySpawn = k;
-		this.zSpawn = l;
+		this.xSpawn = i;
+		this.ySpawn = j;
+		this.zSpawn = k;
 		this.spawnAngle = f;
-		this.gameTime = m;
-		this.dayTime = n;
-		this.version = o;
-		this.clearWeatherTime = p;
-		this.rainTime = q;
+		this.gameTime = l;
+		this.dayTime = m;
+		this.version = n;
+		this.clearWeatherTime = o;
+		this.rainTime = p;
 		this.raining = bl2;
-		this.thunderTime = r;
+		this.thunderTime = q;
 		this.thundering = bl3;
 		this.initialized = bl4;
 		this.difficultyLocked = bl5;
 		this.worldBorder = settings;
-		this.wanderingTraderSpawnDelay = s;
-		this.wanderingTraderSpawnChance = t;
+		this.wanderingTraderSpawnDelay = r;
+		this.wanderingTraderSpawnChance = s;
 		this.wanderingTraderId = uUID;
 		this.knownServerBrands = set;
 		this.removedFeatureFlags = set2;
 		this.loadedPlayerTag = compoundTag;
-		this.playerDataVersion = i;
 		this.scheduledEvents = timerQueue;
 		this.customBossEvents = compoundTag2;
 		this.endDragonFightData = data;
@@ -153,8 +144,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		LevelSettings levelSettings, WorldOptions worldOptions, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, Lifecycle lifecycle
 	) {
 		this(
-			null,
-			SharedConstants.getCurrentVersion().getDataVersion().getVersion(),
 			null,
 			false,
 			0,
@@ -188,21 +177,11 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	public static <T> PrimaryLevelData parse(
-		Dynamic<T> dynamic,
-		DataFixer dataFixer,
-		int i,
-		@Nullable CompoundTag compoundTag,
-		LevelSettings levelSettings,
-		LevelVersion levelVersion,
-		PrimaryLevelData.SpecialWorldProperty specialWorldProperty,
-		WorldOptions worldOptions,
-		Lifecycle lifecycle
+		Dynamic<T> dynamic, LevelSettings levelSettings, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle
 	) {
 		long l = dynamic.get("Time").asLong(0L);
 		return new PrimaryLevelData(
-			dataFixer,
-			i,
-			compoundTag,
+			(CompoundTag)CompoundTag.CODEC.parse(dynamic.get("Player").orElseEmptyMap()).result().orElse(null),
 			dynamic.get("WasModded").asBoolean(false),
 			dynamic.get("SpawnX").asInt(0),
 			dynamic.get("SpawnY").asInt(0),
@@ -210,7 +189,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			dynamic.get("SpawnAngle").asFloat(0.0F),
 			l,
 			dynamic.get("DayTime").asLong(l),
-			levelVersion.levelDataVersion(),
+			LevelVersion.parse(dynamic).levelDataVersion(),
 			dynamic.get("clearWeatherTime").asInt(0),
 			dynamic.get("rainTime").asInt(0),
 			dynamic.get("raining").asBoolean(false),
@@ -239,7 +218,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 
 	@Override
 	public CompoundTag createTag(RegistryAccess registryAccess, @Nullable CompoundTag compoundTag) {
-		this.updatePlayerTag();
 		if (compoundTag == null) {
 			compoundTag = this.loadedPlayerTag;
 		}
@@ -346,23 +324,9 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		return this.dayTime;
 	}
 
-	private void updatePlayerTag() {
-		if (!this.upgradedPlayerTag && this.loadedPlayerTag != null) {
-			if (this.playerDataVersion < SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
-				if (this.fixerUpper == null) {
-					throw (NullPointerException)Util.pauseInIde(new NullPointerException("Fixer Upper not set inside LevelData, and the player tag is not upgraded."));
-				}
-
-				this.loadedPlayerTag = DataFixTypes.PLAYER.updateToCurrentVersion(this.fixerUpper, this.loadedPlayerTag, this.playerDataVersion);
-			}
-
-			this.upgradedPlayerTag = true;
-		}
-	}
-
+	@Nullable
 	@Override
 	public CompoundTag getLoadedPlayerTag() {
-		this.updatePlayerTag();
 		return this.loadedPlayerTag;
 	}
 

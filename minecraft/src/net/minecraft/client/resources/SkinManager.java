@@ -3,19 +3,20 @@ package net.minecraft.client.resources;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.InsecurePublicKeyException;
+import com.mojang.authlib.SignatureState;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.authlib.properties.Property;
+import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
@@ -27,37 +28,44 @@ import net.minecraft.Util;
 import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class SkinManager {
-	private static final String PROPERTY_TEXTURES = "textures";
+	static final Logger LOGGER = LogUtils.getLogger();
+	private final MinecraftSessionService sessionService;
 	private final LoadingCache<SkinManager.CacheKey, CompletableFuture<PlayerSkin>> skinCache;
 	private final SkinManager.TextureCache skinTextures;
 	private final SkinManager.TextureCache capeTextures;
 	private final SkinManager.TextureCache elytraTextures;
 
 	public SkinManager(TextureManager textureManager, Path path, MinecraftSessionService minecraftSessionService, Executor executor) {
+		this.sessionService = minecraftSessionService;
 		this.skinTextures = new SkinManager.TextureCache(textureManager, path, Type.SKIN);
 		this.capeTextures = new SkinManager.TextureCache(textureManager, path, Type.CAPE);
 		this.elytraTextures = new SkinManager.TextureCache(textureManager, path, Type.ELYTRA);
 		this.skinCache = CacheBuilder.newBuilder()
 			.expireAfterAccess(Duration.ofSeconds(15L))
-			.build(new CacheLoader<SkinManager.CacheKey, CompletableFuture<PlayerSkin>>() {
-				public CompletableFuture<PlayerSkin> load(SkinManager.CacheKey cacheKey) {
-					GameProfile gameProfile = cacheKey.profile();
-					return CompletableFuture.supplyAsync(() -> {
-						try {
-							try {
-								return SkinManager.TextureInfo.unpack(minecraftSessionService.getTextures(gameProfile, true), true);
-							} catch (InsecurePublicKeyException var3) {
-								return SkinManager.TextureInfo.unpack(minecraftSessionService.getTextures(gameProfile, false), false);
-							}
-						} catch (Throwable var4) {
-							return SkinManager.TextureInfo.EMPTY;
-						}
-					}, Util.backgroundExecutor()).thenComposeAsync(textureInfo -> SkinManager.this.registerTextures(gameProfile, textureInfo), executor);
+			.build(
+				new CacheLoader<SkinManager.CacheKey, CompletableFuture<PlayerSkin>>() {
+					public CompletableFuture<PlayerSkin> load(SkinManager.CacheKey cacheKey) {
+						return CompletableFuture.supplyAsync(() -> {
+								Property property = cacheKey.packedTextures();
+								if (property == null) {
+									return MinecraftProfileTextures.EMPTY;
+								} else {
+									MinecraftProfileTextures minecraftProfileTextures = minecraftSessionService.unpackTextures(property);
+									if (minecraftProfileTextures.signatureState() == SignatureState.INVALID) {
+										SkinManager.LOGGER.warn("Profile contained invalid signature for textures property (profile id: {})", cacheKey.profileId());
+									}
+
+									return minecraftProfileTextures;
+								}
+							}, Util.backgroundExecutor())
+							.thenComposeAsync(minecraftProfileTextures -> SkinManager.this.registerTextures(cacheKey.profileId(), minecraftProfileTextures), executor);
+					}
 				}
-			});
+			);
 	}
 
 	public Supplier<PlayerSkin> lookupInsecure(GameProfile gameProfile) {
@@ -72,28 +80,29 @@ public class SkinManager {
 	}
 
 	public CompletableFuture<PlayerSkin> getOrLoad(GameProfile gameProfile) {
-		return this.skinCache.getUnchecked(new SkinManager.CacheKey(gameProfile));
+		Property property = this.sessionService.getPackedTextures(gameProfile);
+		return this.skinCache.getUnchecked(new SkinManager.CacheKey(gameProfile.getId(), property));
 	}
 
-	CompletableFuture<PlayerSkin> registerTextures(GameProfile gameProfile, SkinManager.TextureInfo textureInfo) {
-		MinecraftProfileTexture minecraftProfileTexture = textureInfo.skin();
+	CompletableFuture<PlayerSkin> registerTextures(UUID uUID, MinecraftProfileTextures minecraftProfileTextures) {
+		MinecraftProfileTexture minecraftProfileTexture = minecraftProfileTextures.skin();
 		CompletableFuture<ResourceLocation> completableFuture;
 		PlayerSkin.Model model;
 		if (minecraftProfileTexture != null) {
 			completableFuture = this.skinTextures.getOrLoad(minecraftProfileTexture);
 			model = PlayerSkin.Model.byName(minecraftProfileTexture.getMetadata("model"));
 		} else {
-			PlayerSkin playerSkin = DefaultPlayerSkin.get(gameProfile);
+			PlayerSkin playerSkin = DefaultPlayerSkin.get(uUID);
 			completableFuture = CompletableFuture.completedFuture(playerSkin.texture());
 			model = playerSkin.model();
 		}
 
 		String string = Optionull.map(minecraftProfileTexture, MinecraftProfileTexture::getUrl);
-		MinecraftProfileTexture minecraftProfileTexture2 = textureInfo.cape();
+		MinecraftProfileTexture minecraftProfileTexture2 = minecraftProfileTextures.cape();
 		CompletableFuture<ResourceLocation> completableFuture2 = minecraftProfileTexture2 != null
 			? this.capeTextures.getOrLoad(minecraftProfileTexture2)
 			: CompletableFuture.completedFuture(null);
-		MinecraftProfileTexture minecraftProfileTexture3 = textureInfo.elytra();
+		MinecraftProfileTexture minecraftProfileTexture3 = minecraftProfileTextures.elytra();
 		CompletableFuture<ResourceLocation> completableFuture3 = minecraftProfileTexture3 != null
 			? this.elytraTextures.getOrLoad(minecraftProfileTexture3)
 			: CompletableFuture.completedFuture(null);
@@ -105,33 +114,13 @@ public class SkinManager {
 						(ResourceLocation)completableFuture2.join(),
 						(ResourceLocation)completableFuture3.join(),
 						model,
-						textureInfo.secure()
+						minecraftProfileTextures.signatureState() == SignatureState.SIGNED
 					)
 			);
 	}
 
-	@Nullable
-	static Property getTextureProperty(GameProfile gameProfile) {
-		return Iterables.getFirst(gameProfile.getProperties().get("textures"), null);
-	}
-
 	@Environment(EnvType.CLIENT)
-	static record CacheKey(GameProfile profile) {
-		public boolean equals(Object object) {
-			return !(object instanceof SkinManager.CacheKey cacheKey)
-				? false
-				: this.profile.getId().equals(cacheKey.profile.getId()) && Objects.equals(this.texturesData(), cacheKey.texturesData());
-		}
-
-		public int hashCode() {
-			return this.profile.getId().hashCode() + Objects.hashCode(this.texturesData()) * 31;
-		}
-
-		@Nullable
-		private String texturesData() {
-			Property property = SkinManager.getTextureProperty(this.profile);
-			return property != null ? property.value() : null;
-		}
+	static record CacheKey(UUID profileId, @Nullable Property packedTextures) {
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -181,21 +170,6 @@ public class SkinManager {
 				case ELYTRA -> "elytra";
 			};
 			return new ResourceLocation(string2 + "/" + string);
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static record TextureInfo(
-		@Nullable MinecraftProfileTexture skin, @Nullable MinecraftProfileTexture cape, @Nullable MinecraftProfileTexture elytra, boolean secure
-	) {
-		public static final SkinManager.TextureInfo EMPTY = new SkinManager.TextureInfo(null, null, null, true);
-
-		public static SkinManager.TextureInfo unpack(Map<Type, MinecraftProfileTexture> map, boolean bl) {
-			return map.isEmpty()
-				? EMPTY
-				: new SkinManager.TextureInfo(
-					(MinecraftProfileTexture)map.get(Type.SKIN), (MinecraftProfileTexture)map.get(Type.CAPE), (MinecraftProfileTexture)map.get(Type.ELYTRA), bl
-				);
 		}
 	}
 }

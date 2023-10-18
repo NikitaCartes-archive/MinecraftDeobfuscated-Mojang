@@ -1,19 +1,33 @@
 package com.mojang.blaze3d.vertex;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class Tesselator {
-	private static final int MAX_MEMORY_USE = 8388608;
-	private static final int MAX_FLOATS = 2097152;
+	private static final int MAX_BYTES = 786432;
 	private final BufferBuilder builder;
-	private static final Tesselator INSTANCE = new Tesselator();
+	@Nullable
+	private static Tesselator instance;
+
+	public static void init() {
+		RenderSystem.assertOnGameThreadOrInit();
+		if (instance != null) {
+			throw new IllegalStateException("Tesselator has already been initialized");
+		} else {
+			instance = new Tesselator();
+		}
+	}
 
 	public static Tesselator getInstance() {
 		RenderSystem.assertOnGameThreadOrInit();
-		return INSTANCE;
+		if (instance == null) {
+			throw new IllegalStateException("Tesselator has not been initialized");
+		} else {
+			return instance;
+		}
 	}
 
 	public Tesselator(int i) {
@@ -21,7 +35,7 @@ public class Tesselator {
 	}
 
 	public Tesselator() {
-		this(2097152);
+		this(786432);
 	}
 
 	public void end() {

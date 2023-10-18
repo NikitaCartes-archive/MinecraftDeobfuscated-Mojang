@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Optionull;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -48,13 +47,9 @@ public class ReportReasonSelectionScreen extends Screen {
 		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Optionull.map(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
 		this.reasonSelectionList.setSelected(entry);
 		int i = this.width / 2 - 150 - 5;
-		this.addRenderableWidget(Button.builder(READ_INFO_LABEL, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-				if (bl) {
-					Util.getPlatform().openUri("https://aka.ms/aboutjavareporting");
-				}
-
-				this.minecraft.setScreen(this);
-			}, "https://aka.ms/aboutjavareporting", true))).bounds(i, this.buttonTop(), 150, 20).build());
+		this.addRenderableWidget(
+			Button.builder(READ_INFO_LABEL, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/aboutjavareporting")).bounds(i, this.buttonTop(), 150, 20).build()
+		);
 		int j = this.width / 2 + 5;
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
 			ReportReasonSelectionScreen.ReasonSelectionList.Entry entryx = this.reasonSelectionList.getSelected();

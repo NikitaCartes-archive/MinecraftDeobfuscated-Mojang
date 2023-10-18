@@ -20,17 +20,15 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderType extends RenderStateShard {
-	private static final int BYTES_IN_INT = 4;
 	private static final int MEGABYTE = 1048576;
-	public static final int BIG_BUFFER_SIZE = 2097152;
-	public static final int MEDIUM_BUFFER_SIZE = 262144;
-	public static final int SMALL_BUFFER_SIZE = 131072;
-	public static final int TRANSIENT_BUFFER_SIZE = 256;
+	public static final int BIG_BUFFER_SIZE = 4194304;
+	public static final int SMALL_BUFFER_SIZE = 786432;
+	public static final int TRANSIENT_BUFFER_SIZE = 1536;
 	private static final RenderType SOLID = create(
 		"solid",
 		DefaultVertexFormat.BLOCK,
 		VertexFormat.Mode.QUADS,
-		2097152,
+		4194304,
 		true,
 		false,
 		RenderType.CompositeState.builder()
@@ -43,7 +41,7 @@ public abstract class RenderType extends RenderStateShard {
 		"cutout_mipped",
 		DefaultVertexFormat.BLOCK,
 		VertexFormat.Mode.QUADS,
-		131072,
+		4194304,
 		true,
 		false,
 		RenderType.CompositeState.builder()
@@ -56,7 +54,7 @@ public abstract class RenderType extends RenderStateShard {
 		"cutout",
 		DefaultVertexFormat.BLOCK,
 		VertexFormat.Mode.QUADS,
-		131072,
+		786432,
 		true,
 		false,
 		RenderType.CompositeState.builder()
@@ -66,19 +64,10 @@ public abstract class RenderType extends RenderStateShard {
 			.createCompositeState(true)
 	);
 	private static final RenderType TRANSLUCENT = create(
-		"translucent", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, true, translucentState(RENDERTYPE_TRANSLUCENT_SHADER)
+		"translucent", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 786432, true, true, translucentState(RENDERTYPE_TRANSLUCENT_SHADER)
 	);
 	private static final RenderType TRANSLUCENT_MOVING_BLOCK = create(
-		"translucent_moving_block", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 262144, false, true, translucentMovingBlockState()
-	);
-	private static final RenderType TRANSLUCENT_NO_CRUMBLING = create(
-		"translucent_no_crumbling",
-		DefaultVertexFormat.BLOCK,
-		VertexFormat.Mode.QUADS,
-		262144,
-		false,
-		true,
-		translucentState(RENDERTYPE_TRANSLUCENT_NO_CRUMBLING_SHADER)
+		"translucent_moving_block", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 786432, false, true, translucentMovingBlockState()
 	);
 	private static final Function<ResourceLocation, RenderType> ARMOR_CUTOUT_NO_CULL = Util.memoize(
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> createArmorCutoutNoCull("armor_cutout_no_cull", resourceLocation, false))
@@ -92,7 +81,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
 				.createCompositeState(true);
-			return create("entity_solid", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, compositeState);
+			return create("entity_solid", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, false, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_CUTOUT = Util.memoize(
@@ -104,7 +93,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
 				.createCompositeState(true);
-			return create("entity_cutout", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, compositeState);
+			return create("entity_cutout", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, false, compositeState);
 		})
 	);
 	private static final BiFunction<ResourceLocation, Boolean, RenderType> ENTITY_CUTOUT_NO_CULL = Util.memoize(
@@ -117,7 +106,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
 				.createCompositeState(boolean_);
-			return create("entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, compositeState);
+			return create("entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, false, compositeState);
 		})
 	);
 	private static final BiFunction<ResourceLocation, Boolean, RenderType> ENTITY_CUTOUT_NO_CULL_Z_OFFSET = Util.memoize(
@@ -131,7 +120,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setOverlayState(OVERLAY)
 				.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 				.createCompositeState(boolean_);
-			return create("entity_cutout_no_cull_z_offset", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, compositeState);
+			return create("entity_cutout_no_cull_z_offset", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, false, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> ITEM_ENTITY_TRANSLUCENT_CULL = Util.memoize(
@@ -145,7 +134,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setOverlayState(OVERLAY)
 				.setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
 				.createCompositeState(true);
-			return create("item_entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compositeState);
+			return create("item_entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_TRANSLUCENT_CULL = Util.memoize(
@@ -157,7 +146,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
 				.createCompositeState(true);
-			return create("entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compositeState);
+			return create("entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, compositeState);
 		})
 	);
 	private static final BiFunction<ResourceLocation, Boolean, RenderType> ENTITY_TRANSLUCENT = Util.memoize(
@@ -170,7 +159,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
 				.createCompositeState(boolean_);
-			return create("entity_translucent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compositeState);
+			return create("entity_translucent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, compositeState);
 		})
 	);
 	private static final BiFunction<ResourceLocation, Boolean, RenderType> ENTITY_TRANSLUCENT_EMISSIVE = Util.memoize(
@@ -183,7 +172,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setWriteMaskState(COLOR_WRITE)
 				.setOverlayState(OVERLAY)
 				.createCompositeState(boolean_);
-			return create("entity_translucent_emissive", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, true, compositeState);
+			return create("entity_translucent_emissive", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_SMOOTH_CUTOUT = Util.memoize(
@@ -194,7 +183,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setCullState(NO_CULL)
 				.setLightmapState(LIGHTMAP)
 				.createCompositeState(true);
-			return create("entity_smooth_cutout", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, compositeState);
+			return create("entity_smooth_cutout", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, compositeState);
 		})
 	);
 	private static final BiFunction<ResourceLocation, Boolean, RenderType> BEACON_BEAM = Util.memoize(
@@ -205,7 +194,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setTransparencyState(boolean_ ? TRANSLUCENT_TRANSPARENCY : NO_TRANSPARENCY)
 				.setWriteMaskState(boolean_ ? COLOR_WRITE : COLOR_DEPTH_WRITE)
 				.createCompositeState(false);
-			return create("beacon_beam", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 256, false, true, compositeState);
+			return create("beacon_beam", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 1536, false, true, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_DECAL = Util.memoize(
@@ -218,7 +207,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
 				.createCompositeState(false);
-			return create("entity_decal", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, compositeState);
+			return create("entity_decal", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_NO_OUTLINE = Util.memoize(
@@ -232,7 +221,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setOverlayState(OVERLAY)
 				.setWriteMaskState(COLOR_WRITE)
 				.createCompositeState(false);
-			return create("entity_no_outline", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true, compositeState);
+			return create("entity_no_outline", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, false, true, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_SHADOW = Util.memoize(
@@ -248,7 +237,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setDepthTestState(LEQUAL_DEPTH_TEST)
 				.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 				.createCompositeState(false);
-			return create("entity_shadow", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, false, compositeState);
+			return create("entity_shadow", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, false, false, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> DRAGON_EXPLOSION_ALPHA = Util.memoize(
@@ -258,7 +247,7 @@ public abstract class RenderType extends RenderStateShard {
 				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
 				.setCullState(NO_CULL)
 				.createCompositeState(true);
-			return create("entity_alpha", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, compositeState);
+			return create("entity_alpha", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, compositeState);
 		})
 	);
 	private static final Function<ResourceLocation, RenderType> EYES = Util.memoize(
@@ -268,7 +257,7 @@ public abstract class RenderType extends RenderStateShard {
 				"eyes",
 				DefaultVertexFormat.NEW_ENTITY,
 				VertexFormat.Mode.QUADS,
-				256,
+				1536,
 				false,
 				true,
 				RenderType.CompositeState.builder()
@@ -284,7 +273,7 @@ public abstract class RenderType extends RenderStateShard {
 		"leash",
 		DefaultVertexFormat.POSITION_COLOR_LIGHTMAP,
 		VertexFormat.Mode.TRIANGLE_STRIP,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_LEASH_SHADER)
 			.setTextureState(NO_TEXTURE)
@@ -296,7 +285,7 @@ public abstract class RenderType extends RenderStateShard {
 		"water_mask",
 		DefaultVertexFormat.POSITION,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_WATER_MASK_SHADER)
 			.setTextureState(NO_TEXTURE)
@@ -307,7 +296,7 @@ public abstract class RenderType extends RenderStateShard {
 		"armor_glint",
 		DefaultVertexFormat.POSITION_TEX,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ARMOR_GLINT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
@@ -323,7 +312,7 @@ public abstract class RenderType extends RenderStateShard {
 		"armor_entity_glint",
 		DefaultVertexFormat.POSITION_TEX,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ARMOR_ENTITY_GLINT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
@@ -339,7 +328,7 @@ public abstract class RenderType extends RenderStateShard {
 		"glint_translucent",
 		DefaultVertexFormat.POSITION_TEX,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_TRANSLUCENT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
@@ -355,7 +344,7 @@ public abstract class RenderType extends RenderStateShard {
 		"glint",
 		DefaultVertexFormat.POSITION_TEX,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
@@ -370,7 +359,7 @@ public abstract class RenderType extends RenderStateShard {
 		"glint_direct",
 		DefaultVertexFormat.POSITION_TEX,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_DIRECT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
@@ -385,7 +374,7 @@ public abstract class RenderType extends RenderStateShard {
 		"entity_glint",
 		DefaultVertexFormat.POSITION_TEX,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ENTITY_GLINT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
@@ -401,7 +390,7 @@ public abstract class RenderType extends RenderStateShard {
 		"entity_glint_direct",
 		DefaultVertexFormat.POSITION_TEX,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ENTITY_GLINT_DIRECT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
@@ -419,7 +408,7 @@ public abstract class RenderType extends RenderStateShard {
 				"crumbling",
 				DefaultVertexFormat.BLOCK,
 				VertexFormat.Mode.QUADS,
-				256,
+				1536,
 				false,
 				true,
 				RenderType.CompositeState.builder()
@@ -437,7 +426,7 @@ public abstract class RenderType extends RenderStateShard {
 				"text",
 				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
 				VertexFormat.Mode.QUADS,
-				256,
+				786432,
 				false,
 				true,
 				RenderType.CompositeState.builder()
@@ -452,7 +441,7 @@ public abstract class RenderType extends RenderStateShard {
 		"text_background",
 		DefaultVertexFormat.POSITION_COLOR_LIGHTMAP,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		false,
 		true,
 		RenderType.CompositeState.builder()
@@ -467,7 +456,7 @@ public abstract class RenderType extends RenderStateShard {
 				"text_intensity",
 				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
 				VertexFormat.Mode.QUADS,
-				256,
+				786432,
 				false,
 				true,
 				RenderType.CompositeState.builder()
@@ -483,7 +472,7 @@ public abstract class RenderType extends RenderStateShard {
 				"text_polygon_offset",
 				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
 				VertexFormat.Mode.QUADS,
-				256,
+				1536,
 				false,
 				true,
 				RenderType.CompositeState.builder()
@@ -500,7 +489,7 @@ public abstract class RenderType extends RenderStateShard {
 				"text_intensity_polygon_offset",
 				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
 				VertexFormat.Mode.QUADS,
-				256,
+				1536,
 				false,
 				true,
 				RenderType.CompositeState.builder()
@@ -517,7 +506,7 @@ public abstract class RenderType extends RenderStateShard {
 				"text_see_through",
 				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
 				VertexFormat.Mode.QUADS,
-				256,
+				1536,
 				false,
 				true,
 				RenderType.CompositeState.builder()
@@ -534,7 +523,7 @@ public abstract class RenderType extends RenderStateShard {
 		"text_background_see_through",
 		DefaultVertexFormat.POSITION_COLOR_LIGHTMAP,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		false,
 		true,
 		RenderType.CompositeState.builder()
@@ -551,7 +540,7 @@ public abstract class RenderType extends RenderStateShard {
 				"text_intensity_see_through",
 				DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
 				VertexFormat.Mode.QUADS,
-				256,
+				1536,
 				false,
 				true,
 				RenderType.CompositeState.builder()
@@ -568,7 +557,7 @@ public abstract class RenderType extends RenderStateShard {
 		"lightning",
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		false,
 		true,
 		RenderType.CompositeState.builder()
@@ -578,12 +567,12 @@ public abstract class RenderType extends RenderStateShard {
 			.setOutputState(WEATHER_TARGET)
 			.createCompositeState(false)
 	);
-	private static final RenderType TRIPWIRE = create("tripwire", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 262144, true, true, tripwireState());
+	private static final RenderType TRIPWIRE = create("tripwire", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 1536, true, true, tripwireState());
 	private static final RenderType END_PORTAL = create(
 		"end_portal",
 		DefaultVertexFormat.POSITION,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		false,
 		false,
 		RenderType.CompositeState.builder()
@@ -600,7 +589,7 @@ public abstract class RenderType extends RenderStateShard {
 		"end_gateway",
 		DefaultVertexFormat.POSITION,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		false,
 		false,
 		RenderType.CompositeState.builder()
@@ -617,7 +606,7 @@ public abstract class RenderType extends RenderStateShard {
 		"lines",
 		DefaultVertexFormat.POSITION_COLOR_NORMAL,
 		VertexFormat.Mode.LINES,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_LINES_SHADER)
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
@@ -632,7 +621,7 @@ public abstract class RenderType extends RenderStateShard {
 		"line_strip",
 		DefaultVertexFormat.POSITION_COLOR_NORMAL,
 		VertexFormat.Mode.LINE_STRIP,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_LINES_SHADER)
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
@@ -648,7 +637,7 @@ public abstract class RenderType extends RenderStateShard {
 				"debug_line_strip",
 				DefaultVertexFormat.POSITION_COLOR,
 				VertexFormat.Mode.DEBUG_LINE_STRIP,
-				256,
+				1536,
 				RenderType.CompositeState.builder()
 					.setShaderState(POSITION_COLOR_SHADER)
 					.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(double_)))
@@ -661,7 +650,7 @@ public abstract class RenderType extends RenderStateShard {
 		"debug_filled_box",
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.TRIANGLE_STRIP,
-		131072,
+		1536,
 		false,
 		true,
 		RenderType.CompositeState.builder()
@@ -674,7 +663,7 @@ public abstract class RenderType extends RenderStateShard {
 		"debug_quads",
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.QUADS,
-		131072,
+		1536,
 		false,
 		true,
 		RenderType.CompositeState.builder()
@@ -687,7 +676,7 @@ public abstract class RenderType extends RenderStateShard {
 		"debug_section_quads",
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.QUADS,
-		131072,
+		1536,
 		false,
 		true,
 		RenderType.CompositeState.builder()
@@ -701,7 +690,7 @@ public abstract class RenderType extends RenderStateShard {
 		"gui",
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.QUADS,
-		256,
+		786432,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GUI_SHADER)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
@@ -712,7 +701,7 @@ public abstract class RenderType extends RenderStateShard {
 		"gui_overlay",
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GUI_OVERLAY_SHADER)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
@@ -724,7 +713,7 @@ public abstract class RenderType extends RenderStateShard {
 		"gui_text_highlight",
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GUI_TEXT_HIGHLIGHT_SHADER)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
@@ -736,7 +725,7 @@ public abstract class RenderType extends RenderStateShard {
 		"gui_ghost_recipe_overlay",
 		DefaultVertexFormat.POSITION_COLOR,
 		VertexFormat.Mode.QUADS,
-		256,
+		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GUI_GHOST_RECIPE_OVERLAY_SHADER)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
@@ -792,10 +781,6 @@ public abstract class RenderType extends RenderStateShard {
 		return TRANSLUCENT_MOVING_BLOCK;
 	}
 
-	public static RenderType translucentNoCrumbling() {
-		return TRANSLUCENT_NO_CRUMBLING;
-	}
-
 	private static RenderType.CompositeRenderType createArmorCutoutNoCull(String string, ResourceLocation resourceLocation, boolean bl) {
 		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
@@ -807,7 +792,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.setDepthTestState(bl ? EQUAL_DEPTH_TEST : LEQUAL_DEPTH_TEST)
 			.createCompositeState(true);
-		return create(string, DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, true, false, compositeState);
+		return create(string, DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, false, compositeState);
 	}
 
 	public static RenderType armorCutoutNoCull(ResourceLocation resourceLocation) {
@@ -899,7 +884,7 @@ public abstract class RenderType extends RenderStateShard {
 			"energy_swirl",
 			DefaultVertexFormat.NEW_ENTITY,
 			VertexFormat.Mode.QUADS,
-			256,
+			1536,
 			false,
 			true,
 			RenderType.CompositeState.builder()
@@ -1137,7 +1122,7 @@ public abstract class RenderType extends RenderStateShard {
 					"outline",
 					DefaultVertexFormat.POSITION_COLOR_TEX,
 					VertexFormat.Mode.QUADS,
-					256,
+					1536,
 					RenderType.CompositeState.builder()
 						.setShaderState(RENDERTYPE_OUTLINE_SHADER)
 						.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))

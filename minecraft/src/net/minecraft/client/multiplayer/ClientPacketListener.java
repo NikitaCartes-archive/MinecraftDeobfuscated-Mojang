@@ -841,7 +841,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			PlayerInfo playerInfo = this.getPlayerInfo(uUID);
 			if (playerInfo == null) {
 				LOGGER.error("Received player chat packet for unknown player with ID: {}", uUID);
-				this.connection.disconnect(CHAT_VALIDATION_FAILED_ERROR);
+				this.minecraft.getChatListener().handleChatMessageError(uUID, (ChatType.Bound)optional2.get());
 			} else {
 				RemoteChatSession remoteChatSession = playerInfo.getChatSession();
 				SignedMessageLink signedMessageLink;

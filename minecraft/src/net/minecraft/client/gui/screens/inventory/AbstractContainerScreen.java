@@ -185,7 +185,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 
 	protected abstract void renderBg(GuiGraphics guiGraphics, float f, int i, int j);
 
-	private void renderSlot(GuiGraphics guiGraphics, Slot slot) {
+	protected void renderSlot(GuiGraphics guiGraphics, Slot slot) {
 		int i = slot.x;
 		int j = slot.y;
 		ItemStack itemStack = slot.getItem();
@@ -548,6 +548,10 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		}
 
 		this.minecraft.gameMode.handleInventoryMouseClick(this.menu.containerId, i, j, clickType, this.minecraft.player);
+	}
+
+	protected void handleSlotStateChanged(int i, int j, boolean bl) {
+		this.minecraft.gameMode.handleSlotStateChanged(i, j, bl);
 	}
 
 	@Override

@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.BlockGetter;
@@ -249,7 +248,7 @@ public class ChorusFlowerBlock extends Block {
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		BlockPos blockPos = blockHitResult.getBlockPos();
-		if (!level.isClientSide && projectile.mayInteract(level, blockPos) && projectile.getType().is(EntityTypeTags.IMPACT_PROJECTILES)) {
+		if (!level.isClientSide && projectile.mayInteract(level, blockPos) && projectile.mayBreak(level)) {
 			level.destroyBlock(blockPos, true, projectile);
 		}
 	}

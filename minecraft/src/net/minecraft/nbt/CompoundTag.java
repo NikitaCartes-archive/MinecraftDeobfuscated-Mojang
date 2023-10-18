@@ -23,7 +23,7 @@ import net.minecraft.ReportedException;
 public class CompoundTag implements Tag {
 	public static final Codec<CompoundTag> CODEC = Codec.PASSTHROUGH.comapFlatMap(dynamic -> {
 		Tag tag = dynamic.convert(NbtOps.INSTANCE).getValue();
-		return tag instanceof CompoundTag ? DataResult.success((CompoundTag)tag) : DataResult.error(() -> "Not a compound tag: " + tag);
+		return tag instanceof CompoundTag compoundTag ? DataResult.success(compoundTag) : DataResult.error(() -> "Not a compound tag: " + tag);
 	}, compoundTag -> new Dynamic<>(NbtOps.INSTANCE, compoundTag));
 	private static final int SELF_SIZE_IN_BYTES = 48;
 	private static final int MAP_ENTRY_SIZE_IN_BYTES = 32;
@@ -498,7 +498,7 @@ public class CompoundTag implements Tag {
 			CrashReportCategory crashReportCategory = crashReport.addCategory("NBT Tag");
 			crashReportCategory.setDetail("Tag name", string);
 			crashReportCategory.setDetail("Tag type", tagType.getName());
-			throw new ReportedException(crashReport);
+			throw new ReportedNbtException(crashReport);
 		}
 	}
 

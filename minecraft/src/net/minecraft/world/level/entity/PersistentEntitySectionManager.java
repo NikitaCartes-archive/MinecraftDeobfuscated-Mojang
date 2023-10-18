@@ -344,6 +344,11 @@ public class PersistentEntitySectionManager<T extends EntityAccess> implements A
 			+ this.chunksToUnload.size();
 	}
 
+	@VisibleForDebug
+	public int count() {
+		return this.visibleEntityStorage.count();
+	}
+
 	class Callback implements EntityInLevelCallback {
 		private final T entity;
 		private long currentSectionKey;

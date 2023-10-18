@@ -2,7 +2,9 @@ package net.minecraft.commands;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -18,11 +20,13 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.commands.execution.TraceCallbacks;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -624,5 +628,16 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 	@Override
 	public CommandDispatcher<CommandSourceStack> dispatcher() {
 		return this.getServer().getFunctions().getDispatcher();
+	}
+
+	@Override
+	public void handleError(CommandExceptionType commandExceptionType, Message message, boolean bl, @Nullable TraceCallbacks traceCallbacks) {
+		if (traceCallbacks != null) {
+			traceCallbacks.onError(message.getString());
+		}
+
+		if (!bl) {
+			this.sendFailure(ComponentUtils.fromMessage(message));
+		}
 	}
 }

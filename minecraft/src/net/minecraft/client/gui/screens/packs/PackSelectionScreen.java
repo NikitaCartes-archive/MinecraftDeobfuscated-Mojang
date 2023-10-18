@@ -258,7 +258,7 @@ public class PackSelectionScreen extends Screen {
 							}
 
 							if (!list3.isEmpty()) {
-								this.minecraft.setScreen(NoticeWithLinkScreen.createPackSymlinkWarningScreen(this));
+								this.minecraft.setScreen(NoticeWithLinkScreen.createPackSymlinkWarningScreen(() -> this.minecraft.setScreen(this)));
 								return;
 							}
 

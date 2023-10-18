@@ -153,6 +153,7 @@ import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedP
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ServerboundContainerSlotStateChangedPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
@@ -346,6 +347,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundContainerButtonClickPacket.class, ServerboundContainerButtonClickPacket::new)
 					.addPacket(ServerboundContainerClickPacket.class, ServerboundContainerClickPacket::new)
 					.addPacket(ServerboundContainerClosePacket.class, ServerboundContainerClosePacket::new)
+					.addPacket(ServerboundContainerSlotStateChangedPacket.class, ServerboundContainerSlotStateChangedPacket::new)
 					.addPacket(ServerboundCustomPayloadPacket.class, ServerboundCustomPayloadPacket::new)
 					.addPacket(ServerboundEditBookPacket.class, ServerboundEditBookPacket::new)
 					.addPacket(ServerboundEntityTagQuery.class, ServerboundEntityTagQuery::new)

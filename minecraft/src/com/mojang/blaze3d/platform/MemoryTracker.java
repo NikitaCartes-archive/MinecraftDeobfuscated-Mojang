@@ -27,4 +27,8 @@ public class MemoryTracker {
 			return MemoryUtil.memByteBuffer(l, i);
 		}
 	}
+
+	public static void free(ByteBuffer byteBuffer) {
+		ALLOCATOR.free(MemoryUtil.memAddress0(byteBuffer));
+	}
 }

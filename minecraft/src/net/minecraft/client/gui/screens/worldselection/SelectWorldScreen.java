@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens.worldselection;
 
 import com.mojang.logging.LogUtils;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.storage.LevelSummary;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -37,7 +39,7 @@ public class SelectWorldScreen extends Screen {
 		this.addWidget(this.searchBox);
 		this.addWidget(this.list);
 		this.selectButton = this.addRenderableWidget(
-			Button.builder(Component.translatable("selectWorld.select"), button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::joinWorld))
+			Button.builder(LevelSummary.PLAY_WORLD, button -> this.list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::joinWorld))
 				.bounds(this.width / 2 - 154, this.height - 52, 150, 20)
 				.build()
 		);
@@ -66,7 +68,7 @@ public class SelectWorldScreen extends Screen {
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 82, this.height - 28, 72, 20).build()
 		);
-		this.updateButtonStatus(false, false);
+		this.updateButtonStatus(null);
 		this.setInitialFocus(this.searchBox);
 	}
 
@@ -93,11 +95,20 @@ public class SelectWorldScreen extends Screen {
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 	}
 
-	public void updateButtonStatus(boolean bl, boolean bl2) {
-		this.selectButton.active = bl;
-		this.renameButton.active = bl;
-		this.copyButton.active = bl;
-		this.deleteButton.active = bl2;
+	public void updateButtonStatus(@Nullable LevelSummary levelSummary) {
+		if (levelSummary == null) {
+			this.selectButton.setMessage(LevelSummary.PLAY_WORLD);
+			this.selectButton.active = false;
+			this.renameButton.active = false;
+			this.copyButton.active = false;
+			this.deleteButton.active = false;
+		} else {
+			this.selectButton.setMessage(levelSummary.primaryActionMessage());
+			this.selectButton.active = levelSummary.primaryActionActive();
+			this.renameButton.active = levelSummary.canEdit();
+			this.copyButton.active = levelSummary.canRecreate();
+			this.deleteButton.active = levelSummary.canDelete();
+		}
 	}
 
 	@Override

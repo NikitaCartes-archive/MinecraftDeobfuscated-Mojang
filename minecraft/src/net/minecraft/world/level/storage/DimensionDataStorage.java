@@ -13,6 +13,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -86,7 +87,7 @@ public class DimensionDataStorage {
 			try {
 				CompoundTag compoundTag;
 				if (this.isGzip(pushbackInputStream)) {
-					compoundTag = NbtIo.readCompressed(pushbackInputStream);
+					compoundTag = NbtIo.readCompressed(pushbackInputStream, NbtAccounter.unlimitedHeap());
 				} else {
 					DataInputStream dataInputStream = new DataInputStream(pushbackInputStream);
 

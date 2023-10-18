@@ -194,6 +194,10 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 		this.soundEngine.destroy();
 	}
 
+	public void emergencyShutdown() {
+		this.soundEngine.emergencyShutdown();
+	}
+
 	public void tick(boolean bl) {
 		this.soundEngine.tick(bl);
 	}

@@ -2,9 +2,8 @@ package net.minecraft.server;
 
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -16,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import javax.annotation.Nullable;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -28,11 +28,10 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtException;
+import net.minecraft.nbt.ReportedNbtException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
@@ -52,6 +51,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -121,8 +121,31 @@ public class Main {
 			String string = (String)Optional.ofNullable(optionSet.valueOf(optionSpec10)).orElse(dedicatedServerSettings.getProperties().levelName);
 			LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
 			LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.validateAndCreateAccess(string);
-			LevelSummary levelSummary = levelStorageAccess.getSummary();
-			if (levelSummary != null) {
+			Dynamic<?> dynamic;
+			if (levelStorageAccess.hasWorldData()) {
+				LevelSummary levelSummary;
+				try {
+					dynamic = levelStorageAccess.getDataTag();
+					levelSummary = levelStorageAccess.getSummary(dynamic);
+				} catch (NbtException | ReportedNbtException | IOException var39) {
+					LevelStorageSource.LevelDirectory levelDirectory = levelStorageAccess.getLevelDirectory();
+					LOGGER.warn("Failed to load world data from {}", levelDirectory.dataFile(), var39);
+					LOGGER.info("Attempting to use fallback");
+
+					try {
+						dynamic = levelStorageAccess.getDataTagFallback();
+						levelSummary = levelStorageAccess.getSummary(dynamic);
+					} catch (NbtException | ReportedNbtException | IOException var38) {
+						LOGGER.error("Failed to load world data from {}", levelDirectory.oldDataFile(), var38);
+						LOGGER.error(
+							"Failed to load world data from {} and {}. World files may be corrupted. Shutting down.", levelDirectory.dataFile(), levelDirectory.oldDataFile()
+						);
+						return;
+					}
+
+					levelStorageAccess.restoreLevelDataFromOld();
+				}
+
 				if (levelSummary.requiresManualConversion()) {
 					LOGGER.info("This world must be opened in an older version (like 1.6.4) to be safely converted");
 					return;
@@ -132,8 +155,11 @@ public class Main {
 					LOGGER.info("This world was created by an incompatible version.");
 					return;
 				}
+			} else {
+				dynamic = null;
 			}
 
+			Dynamic<?> dynamic2 = dynamic;
 			boolean bl = optionSet.has(optionSpec7);
 			if (bl) {
 				LOGGER.warn("Safe mode active, only vanilla datapack will be loaded");
@@ -143,19 +169,19 @@ public class Main {
 
 			WorldStem worldStem;
 			try {
-				WorldLoader.InitConfig initConfig = loadOrCreateConfig(dedicatedServerSettings.getProperties(), levelStorageAccess, bl, packRepository);
+				WorldLoader.InitConfig initConfig = loadOrCreateConfig(dedicatedServerSettings.getProperties(), dynamic2, bl, packRepository);
 				worldStem = (WorldStem)Util.blockUntilDone(
 						executor -> WorldLoader.load(
 								initConfig,
 								dataLoadContext -> {
 									Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM);
-									DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, dataLoadContext.datapackWorldgen());
-									Pair<WorldData, WorldDimensions.Complete> pair = levelStorageAccess.getDataTag(
-										dynamicOps, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen().allRegistriesLifecycle()
-									);
-									if (pair != null) {
-										return new WorldLoader.DataLoadOutput<>(pair.getFirst(), pair.getSecond().dimensionsRegistryAccess());
+									if (dynamic2 != null) {
+										LevelDataAndDimensions levelDataAndDimensions = LevelStorageSource.getLevelDataAndDimensions(
+											dynamic2, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen()
+										);
+										return new WorldLoader.DataLoadOutput<>(levelDataAndDimensions.worldData(), levelDataAndDimensions.dimensions().dimensionsRegistryAccess());
 									} else {
+										LOGGER.info("No existing world data, creating new world");
 										LevelSettings levelSettings;
 										WorldOptions worldOptions;
 										WorldDimensions worldDimensions;
@@ -191,9 +217,9 @@ public class Main {
 							)
 					)
 					.get();
-			} catch (Exception var36) {
+			} catch (Exception var37) {
 				LOGGER.warn(
-					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var36
+					"Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)var37
 				);
 				return;
 			}
@@ -228,8 +254,8 @@ public class Main {
 			};
 			thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 			Runtime.getRuntime().addShutdownHook(thread);
-		} catch (Exception var37) {
-			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var37);
+		} catch (Exception var40) {
+			LOGGER.error(LogUtils.FATAL_MARKER, "Failed to start the minecraft server", (Throwable)var40);
 		}
 	}
 
@@ -243,12 +269,12 @@ public class Main {
 	}
 
 	private static WorldLoader.InitConfig loadOrCreateConfig(
-		DedicatedServerProperties dedicatedServerProperties, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl, PackRepository packRepository
+		DedicatedServerProperties dedicatedServerProperties, @Nullable Dynamic<?> dynamic, boolean bl, PackRepository packRepository
 	) {
-		WorldDataConfiguration worldDataConfiguration = levelStorageAccess.getDataConfiguration();
-		WorldDataConfiguration worldDataConfiguration2;
 		boolean bl2;
-		if (worldDataConfiguration != null) {
+		WorldDataConfiguration worldDataConfiguration2;
+		if (dynamic != null) {
+			WorldDataConfiguration worldDataConfiguration = LevelStorageSource.readDataConfig(dynamic);
 			bl2 = false;
 			worldDataConfiguration2 = worldDataConfiguration;
 		} else {

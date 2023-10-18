@@ -26,6 +26,7 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 		this.tag(EntityTypeTags.ARROWS).add(EntityType.ARROW, EntityType.SPECTRAL_ARROW);
 		this.tag(EntityTypeTags.IMPACT_PROJECTILES)
 			.addTag(EntityTypeTags.ARROWS)
+			.add(EntityType.FIREWORK_ROCKET)
 			.add(
 				EntityType.SNOWBALL,
 				EntityType.FIREBALL,

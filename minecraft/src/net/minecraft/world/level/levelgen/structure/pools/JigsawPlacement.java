@@ -5,6 +5,7 @@ import com.google.common.collect.Queues;
 import com.mojang.logging.LogUtils;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +15,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.Pools;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -32,6 +34,7 @@ import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
+import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.AABB;
@@ -52,7 +55,8 @@ public class JigsawPlacement {
 		BlockPos blockPos,
 		boolean bl,
 		Optional<Heightmap.Types> optional2,
-		int j
+		int j,
+		PoolAliasLookup poolAliasLookup
 	) {
 		RegistryAccess registryAccess = generationContext.registryAccess();
 		ChunkGenerator chunkGenerator = generationContext.chunkGenerator();
@@ -127,7 +131,8 @@ public class JigsawPlacement {
 								registry,
 								poolElementStructurePiece,
 								list,
-								voxelShape
+								voxelShape,
+								poolAliasLookup
 							);
 							list.forEach(structurePiecesBuilder::addPiece);
 						}
@@ -149,7 +154,9 @@ public class JigsawPlacement {
 		Optional<BlockPos> optional = Optional.empty();
 
 		for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
-			ResourceLocation resourceLocation2 = ResourceLocation.tryParse(structureBlockInfo.nbt().getString("name"));
+			ResourceLocation resourceLocation2 = ResourceLocation.tryParse(
+				((CompoundTag)Objects.requireNonNull(structureBlockInfo.nbt(), () -> structureBlockInfo + " nbt was null")).getString("name")
+			);
 			if (resourceLocation.equals(resourceLocation2)) {
 				optional = Optional.of(structureBlockInfo.pos());
 				break;
@@ -170,14 +177,15 @@ public class JigsawPlacement {
 		Registry<StructureTemplatePool> registry,
 		PoolElementStructurePiece poolElementStructurePiece,
 		List<PoolElementStructurePiece> list,
-		VoxelShape voxelShape
+		VoxelShape voxelShape,
+		PoolAliasLookup poolAliasLookup
 	) {
 		JigsawPlacement.Placer placer = new JigsawPlacement.Placer(registry, i, chunkGenerator, structureTemplateManager, list, randomSource);
 		placer.placing.addLast(new JigsawPlacement.PieceState(poolElementStructurePiece, new MutableObject<>(voxelShape), 0));
 
 		while (!placer.placing.isEmpty()) {
 			JigsawPlacement.PieceState pieceState = (JigsawPlacement.PieceState)placer.placing.removeFirst();
-			placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor, randomState);
+			placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor, randomState, poolAliasLookup);
 		}
 	}
 
@@ -199,7 +207,9 @@ public class JigsawPlacement {
 			serverLevel,
 			holderx -> true
 		);
-		Optional<Structure.GenerationStub> optional = addPieces(generationContext, holder, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128);
+		Optional<Structure.GenerationStub> optional = addPieces(
+			generationContext, holder, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128, PoolAliasLookup.EMPTY
+		);
 		if (optional.isPresent()) {
 			StructurePiecesBuilder structurePiecesBuilder = ((Structure.GenerationStub)optional.get()).getPiecesBuilder();
 
@@ -258,7 +268,8 @@ public class JigsawPlacement {
 			int i,
 			boolean bl,
 			LevelHeightAccessor levelHeightAccessor,
-			RandomState randomState
+			RandomState randomState,
+			PoolAliasLookup poolAliasLookup
 		) {
 			StructurePoolElement structurePoolElement = poolElementStructurePiece.getElement();
 			BlockPos blockPos = poolElementStructurePiece.getPosition();
@@ -278,7 +289,7 @@ public class JigsawPlacement {
 				BlockPos blockPos3 = blockPos2.relative(direction);
 				int k = blockPos2.getY() - j;
 				int l = -1;
-				ResourceKey<StructureTemplatePool> resourceKey = readPoolName(structureBlockInfo);
+				ResourceKey<StructureTemplatePool> resourceKey = readPoolKey(structureBlockInfo, poolAliasLookup);
 				Optional<? extends Holder<StructureTemplatePool>> optional = this.pools.getHolder(resourceKey);
 				if (optional.isEmpty()) {
 					JigsawPlacement.LOGGER.warn("Empty or non-existent pool: {}", resourceKey.location());
@@ -326,7 +337,7 @@ public class JigsawPlacement {
 											if (!boundingBox2.isInside(structureBlockInfox.pos().relative(JigsawBlock.getFrontFacing(structureBlockInfox.state())))) {
 												return 0;
 											} else {
-												ResourceKey<StructureTemplatePool> resourceKeyx = readPoolName(structureBlockInfox);
+												ResourceKey<StructureTemplatePool> resourceKeyx = readPoolKey(structureBlockInfox, poolAliasLookup);
 												Optional<? extends Holder<StructureTemplatePool>> optionalx = this.pools.getHolder(resourceKeyx);
 												Optional<Holder<StructureTemplatePool>> optional2 = optionalx.map(holderx -> ((StructureTemplatePool)holderx.value()).getFallback());
 												int ix = (Integer)optionalx.map(holderx -> ((StructureTemplatePool)holderx.value()).getMaxSize(this.structureTemplateManager)).orElse(0);
@@ -412,8 +423,10 @@ public class JigsawPlacement {
 			}
 		}
 
-		private static ResourceKey<StructureTemplatePool> readPoolName(StructureTemplate.StructureBlockInfo structureBlockInfo) {
-			return ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(structureBlockInfo.nbt().getString("pool")));
+		private static ResourceKey<StructureTemplatePool> readPoolKey(StructureTemplate.StructureBlockInfo structureBlockInfo, PoolAliasLookup poolAliasLookup) {
+			CompoundTag compoundTag = (CompoundTag)Objects.requireNonNull(structureBlockInfo.nbt(), () -> structureBlockInfo + " nbt was null");
+			ResourceKey<StructureTemplatePool> resourceKey = Pools.createKey(compoundTag.getString("pool"));
+			return poolAliasLookup.lookup(resourceKey);
 		}
 	}
 }

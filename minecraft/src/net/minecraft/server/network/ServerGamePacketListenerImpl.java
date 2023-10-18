@@ -86,6 +86,7 @@ import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedP
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ServerboundContainerSlotStateChangedPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
@@ -147,6 +148,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.BeaconMenu;
+import net.minecraft.world.inventory.CrafterMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.BlockItem;
@@ -163,6 +165,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CommandBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
+import net.minecraft.world.level.block.entity.CrafterBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
@@ -822,6 +825,16 @@ public class ServerGamePacketListenerImpl
 	}
 
 	@Override
+	public void handleContainerSlotStateChanged(ServerboundContainerSlotStateChangedPacket serverboundContainerSlotStateChangedPacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundContainerSlotStateChangedPacket, this, this.player.serverLevel());
+		if (!this.player.isSpectator() && serverboundContainerSlotStateChangedPacket.containerId() == this.player.containerMenu.containerId) {
+			if (this.player.containerMenu instanceof CrafterMenu crafterMenu && crafterMenu.getContainer() instanceof CrafterBlockEntity crafterBlockEntity) {
+				crafterBlockEntity.setSlotState(serverboundContainerSlotStateChangedPacket.slotId(), serverboundContainerSlotStateChangedPacket.newState());
+			}
+		}
+	}
+
+	@Override
 	public void handleBlockEntityTagQuery(ServerboundBlockEntityTagQuery serverboundBlockEntityTagQuery) {
 		PacketUtils.ensureRunningOnSameThread(serverboundBlockEntityTagQuery, this, this.player.serverLevel());
 		if (this.player.hasPermissions(2)) {
@@ -1197,10 +1210,10 @@ public class ServerGamePacketListenerImpl
 
 					CompletableFuture<FilteredText> completableFuture = this.filterTextPacket(playerChatMessage.signedContent());
 					Component component = this.server.getChatDecorator().decorate(this.player, playerChatMessage.decoratedContent());
-					this.chatMessageChain.append(executor -> completableFuture.thenAcceptAsync(filteredText -> {
-							PlayerChatMessage playerChatMessage2 = playerChatMessage.withUnsignedContent(component).filter(filteredText.mask());
-							this.broadcastChatMessage(playerChatMessage2);
-						}, executor));
+					this.chatMessageChain.append(completableFuture, filteredText -> {
+						PlayerChatMessage playerChatMessage2 = playerChatMessage.withUnsignedContent(component).filter(filteredText.mask());
+						this.broadcastChatMessage(playerChatMessage2);
+					});
 				});
 			}
 		}
@@ -1747,12 +1760,11 @@ public class ServerGamePacketListenerImpl
 		this.signedMessageDecoder = remoteChatSession.createMessageDecoder(this.player.getUUID());
 		this.chatMessageChain
 			.append(
-				executor -> {
+				() -> {
 					this.player.setChatSession(remoteChatSession);
 					this.server
 						.getPlayerList()
 						.broadcastAll(new ClientboundPlayerInfoUpdatePacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.INITIALIZE_CHAT), List.of(this.player)));
-					return CompletableFuture.completedFuture(null);
 				}
 			);
 	}

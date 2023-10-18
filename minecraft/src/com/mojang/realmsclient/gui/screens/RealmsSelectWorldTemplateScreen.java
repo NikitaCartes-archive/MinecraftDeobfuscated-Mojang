@@ -144,19 +144,13 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 	private void onTrailer() {
 		if (this.selectedTemplate != null && !this.selectedTemplate.trailer.isBlank()) {
-			this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-				if (bl) {
-					Util.getPlatform().openUri(this.selectedTemplate.trailer);
-				}
-
-				this.minecraft.setScreen(this);
-			}, this.selectedTemplate.trailer, true));
+			ConfirmLinkScreen.confirmLinkNow(this, this.selectedTemplate.trailer);
 		}
 	}
 
 	private void onPublish() {
 		if (this.selectedTemplate != null && !this.selectedTemplate.link.isBlank()) {
-			ConfirmLinkScreen.confirmLinkNow(this.selectedTemplate.link, this, true);
+			ConfirmLinkScreen.confirmLinkNow(this, this.selectedTemplate.link);
 		}
 	}
 
@@ -275,14 +269,14 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			this.template = worldTemplate;
 			if (!worldTemplate.link.isBlank()) {
 				this.websiteButton = new ImageButton(
-					15, 15, WEBSITE_LINK_SPRITES, ConfirmLinkScreen.confirmLink(worldTemplate.link, RealmsSelectWorldTemplateScreen.this, true), PUBLISHER_LINK_TOOLTIP
+					15, 15, WEBSITE_LINK_SPRITES, ConfirmLinkScreen.confirmLink(RealmsSelectWorldTemplateScreen.this, worldTemplate.link), PUBLISHER_LINK_TOOLTIP
 				);
 				this.websiteButton.setTooltip(Tooltip.create(PUBLISHER_LINK_TOOLTIP));
 			}
 
 			if (!worldTemplate.trailer.isBlank()) {
 				this.trailerButton = new ImageButton(
-					15, 15, TRAILER_LINK_SPRITES, ConfirmLinkScreen.confirmLink(worldTemplate.trailer, RealmsSelectWorldTemplateScreen.this, true), TRAILER_LINK_TOOLTIP
+					15, 15, TRAILER_LINK_SPRITES, ConfirmLinkScreen.confirmLink(RealmsSelectWorldTemplateScreen.this, worldTemplate.trailer), TRAILER_LINK_TOOLTIP
 				);
 				this.trailerButton.setTooltip(Tooltip.create(TRAILER_LINK_TOOLTIP));
 			}
@@ -374,7 +368,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		@Override
 		public boolean mouseClicked(double d, double e, int i) {
 			if (RealmsSelectWorldTemplateScreen.this.currentLink != null) {
-				ConfirmLinkScreen.confirmLinkNow(RealmsSelectWorldTemplateScreen.this.currentLink, RealmsSelectWorldTemplateScreen.this, true);
+				ConfirmLinkScreen.confirmLinkNow(RealmsSelectWorldTemplateScreen.this, RealmsSelectWorldTemplateScreen.this.currentLink);
 				return true;
 			} else {
 				return super.mouseClicked(d, e, i);

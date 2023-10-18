@@ -43,7 +43,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.LevelSummary;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -210,11 +209,11 @@ public class TitleScreen extends Screen {
 					Component.translatable("menu.playdemo"),
 					button -> {
 						if (bl) {
-							this.minecraft.createWorldOpenFlows().loadLevel(this, "Demo_World");
+							this.minecraft.createWorldOpenFlows().checkForBackupAndLoad("Demo_World", () -> this.minecraft.setScreen(this));
 						} else {
 							this.minecraft
 								.createWorldOpenFlows()
-								.createFreshLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, WorldOptions.DEMO_OPTIONS, WorldPresets::createNormalWorldDimensions);
+								.createFreshLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, WorldOptions.DEMO_OPTIONS, WorldPresets::createNormalWorldDimensions, this);
 						}
 					}
 				)
@@ -228,14 +227,13 @@ public class TitleScreen extends Screen {
 						LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
 
 						try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess("Demo_World")) {
-							LevelSummary levelSummary = levelStorageAccess.getSummary();
-							if (levelSummary != null) {
+							if (levelStorageAccess.hasWorldData()) {
 								this.minecraft
 									.setScreen(
 										new ConfirmScreen(
 											this::confirmDemo,
 											Component.translatable("selectWorld.deleteQuestion"),
-											Component.translatable("selectWorld.deleteWarning", levelSummary.getLevelName()),
+											Component.translatable("selectWorld.deleteWarning", MinecraftServer.DEMO_SETTINGS.levelName()),
 											Component.translatable("selectWorld.deleteButton"),
 											CommonComponents.GUI_CANCEL
 										)
@@ -257,7 +255,7 @@ public class TitleScreen extends Screen {
 		try {
 			boolean var2;
 			try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess("Demo_World")) {
-				var2 = levelStorageAccess.getSummary() != null;
+				var2 = levelStorageAccess.hasWorldData();
 			}
 
 			return var2;
@@ -292,7 +290,7 @@ public class TitleScreen extends Screen {
 				this.warningLabel.render(guiGraphics, k);
 			}
 
-			if (this.splash != null) {
+			if (this.splash != null && !this.minecraft.options.hideSplashTexts().get()) {
 				this.splash.render(guiGraphics, this.width, this.font, k);
 			}
 

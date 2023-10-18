@@ -14,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Path;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,9 +22,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.nbt.NbtException;
+import net.minecraft.nbt.ReportedNbtException;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.validation.ContentValidationException;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -334,29 +332,14 @@ public class FileDownload {
 			}
 
 			try (LevelStorageSource.LevelStorageAccess levelStorageAccess2 = levelStorageSource.validateAndCreateAccess(string3)) {
-				levelStorageAccess2.renameLevel(string3.trim());
-				Path path2 = levelStorageAccess2.getLevelPath(LevelResource.LEVEL_DATA_FILE);
-				deletePlayerTag(path2.toFile());
-			} catch (IOException var39) {
-				LOGGER.error("Failed to rename unpacked realms level {}", string3, var39);
+				levelStorageAccess2.renameAndDropPlayer(string3);
+			} catch (NbtException | ReportedNbtException | IOException var39) {
+				LOGGER.error("Failed to modify unpacked realms level {}", string3, var39);
 			} catch (ContentValidationException var40) {
 				LOGGER.warn("{}", var40.getMessage());
 			}
 
 			this.resourcePackPath = new File(file2, string3 + File.separator + "resources.zip");
-		}
-	}
-
-	private static void deletePlayerTag(File file) {
-		if (file.exists()) {
-			try {
-				CompoundTag compoundTag = NbtIo.readCompressed(file);
-				CompoundTag compoundTag2 = compoundTag.getCompound("Data");
-				compoundTag2.remove("Player");
-				NbtIo.writeCompressed(compoundTag, file);
-			} catch (Exception var3) {
-				LOGGER.info("Exception while removing player tag", (Throwable)var3);
-			}
 		}
 	}
 

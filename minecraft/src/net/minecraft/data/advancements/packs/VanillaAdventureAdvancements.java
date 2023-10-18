@@ -1,10 +1,10 @@
 package net.minecraft.data.advancements.packs;
 
+import com.mojang.datafixers.util.Pair;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
@@ -725,53 +725,43 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 
 	private static Advancement.Builder smithingWithStyle(Advancement.Builder builder) {
 		builder.requirements(AdvancementRequirements.Strategy.AND);
-		Map<Item, ResourceLocation> map = VanillaRecipeProvider.smithingTrims();
-		Stream.of(
-				Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE,
-				Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE,
-				Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE,
-				Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE,
-				Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE,
-				Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE,
-				Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE,
-				Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE
-			)
-			.forEach(item -> {
-				ResourceLocation resourceLocation = (ResourceLocation)map.get(item);
-				builder.addCriterion("armor_trimmed_" + resourceLocation, RecipeCraftedTrigger.TriggerInstance.craftedItem(resourceLocation));
-			});
+		Set<Item> set = Set.of(
+			Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE,
+			Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE,
+			Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE,
+			Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE,
+			Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE,
+			Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE,
+			Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE,
+			Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE
+		);
+		VanillaRecipeProvider.smithingTrims()
+			.filter(trimTemplate -> set.contains(trimTemplate.template()))
+			.forEach(trimTemplate -> builder.addCriterion("armor_trimmed_" + trimTemplate.id(), RecipeCraftedTrigger.TriggerInstance.craftedItem(trimTemplate.id())));
 		return builder;
 	}
 
 	private static Advancement.Builder craftingANewLook(Advancement.Builder builder) {
 		builder.requirements(AdvancementRequirements.Strategy.OR);
-
-		for (ResourceLocation resourceLocation : VanillaRecipeProvider.smithingTrims().values()) {
-			builder.addCriterion("armor_trimmed_" + resourceLocation, RecipeCraftedTrigger.TriggerInstance.craftedItem(resourceLocation));
-		}
-
+		VanillaRecipeProvider.smithingTrims()
+			.map(VanillaRecipeProvider.TrimTemplate::id)
+			.forEach(resourceLocation -> builder.addCriterion("armor_trimmed_" + resourceLocation, RecipeCraftedTrigger.TriggerInstance.craftedItem(resourceLocation)));
 		return builder;
 	}
 
 	private static Advancement.Builder respectingTheRemnantsCriterions(Advancement.Builder builder) {
-		Map<String, Criterion<LootTableTrigger.TriggerInstance>> map = Map.of(
-			"desert_pyramid",
-			LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.DESERT_PYRAMID_ARCHAEOLOGY),
-			"desert_well",
-			LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY),
-			"ocean_ruin_cold",
-			LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.OCEAN_RUIN_COLD_ARCHAEOLOGY),
-			"ocean_ruin_warm",
-			LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.OCEAN_RUIN_WARM_ARCHAEOLOGY),
-			"trail_ruins_rare",
-			LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_RARE),
-			"trail_ruins_common",
-			LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON)
+		List<Pair<String, Criterion<LootTableTrigger.TriggerInstance>>> list = List.of(
+			Pair.of("desert_pyramid", LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.DESERT_PYRAMID_ARCHAEOLOGY)),
+			Pair.of("desert_well", LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY)),
+			Pair.of("ocean_ruin_cold", LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.OCEAN_RUIN_COLD_ARCHAEOLOGY)),
+			Pair.of("ocean_ruin_warm", LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.OCEAN_RUIN_WARM_ARCHAEOLOGY)),
+			Pair.of("trail_ruins_rare", LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_RARE)),
+			Pair.of("trail_ruins_common", LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON))
 		);
-		map.forEach(builder::addCriterion);
+		list.forEach(pair -> builder.addCriterion((String)pair.getFirst(), (Criterion<?>)pair.getSecond()));
 		String string = "has_sherd";
 		builder.addCriterion("has_sherd", InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(ItemTags.DECORATED_POT_SHERDS)));
-		builder.requirements(new AdvancementRequirements(new String[][]{(String[])map.keySet().toArray(String[]::new), {"has_sherd"}}));
+		builder.requirements(new AdvancementRequirements(new String[][]{(String[])list.stream().map(Pair::getFirst).toArray(String[]::new), {"has_sherd"}}));
 		return builder;
 	}
 

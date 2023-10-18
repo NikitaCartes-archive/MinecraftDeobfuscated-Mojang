@@ -11,18 +11,18 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class BackupConfirmScreen extends Screen {
-	private final Screen lastScreen;
-	protected final BackupConfirmScreen.Listener listener;
+	private final Runnable onCancel;
+	protected final BackupConfirmScreen.Listener onProceed;
 	private final Component description;
 	private final boolean promptForCacheErase;
 	private MultiLineLabel message = MultiLineLabel.EMPTY;
 	protected int id;
 	private Checkbox eraseCache;
 
-	public BackupConfirmScreen(Screen screen, BackupConfirmScreen.Listener listener, Component component, Component component2, boolean bl) {
+	public BackupConfirmScreen(Runnable runnable, BackupConfirmScreen.Listener listener, Component component, Component component2, boolean bl) {
 		super(component);
-		this.lastScreen = screen;
-		this.listener = listener;
+		this.onCancel = runnable;
+		this.onProceed = listener;
 		this.description = component2;
 		this.promptForCacheErase = bl;
 	}
@@ -33,17 +33,17 @@ public class BackupConfirmScreen extends Screen {
 		this.message = MultiLineLabel.create(this.font, this.description, this.width - 50);
 		int i = (this.message.getLineCount() + 1) * 9;
 		this.addRenderableWidget(
-			Button.builder(Component.translatable("selectWorld.backupJoinConfirmButton"), button -> this.listener.proceed(true, this.eraseCache.selected()))
+			Button.builder(Component.translatable("selectWorld.backupJoinConfirmButton"), button -> this.onProceed.proceed(true, this.eraseCache.selected()))
 				.bounds(this.width / 2 - 155, 100 + i, 150, 20)
 				.build()
 		);
 		this.addRenderableWidget(
-			Button.builder(Component.translatable("selectWorld.backupJoinSkipButton"), button -> this.listener.proceed(false, this.eraseCache.selected()))
+			Button.builder(Component.translatable("selectWorld.backupJoinSkipButton"), button -> this.onProceed.proceed(false, this.eraseCache.selected()))
 				.bounds(this.width / 2 - 155 + 160, 100 + i, 150, 20)
 				.build()
 		);
 		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 155 + 80, 124 + i, 150, 20).build()
+			Button.builder(CommonComponents.GUI_CANCEL, button -> this.onCancel.run()).bounds(this.width / 2 - 155 + 80, 124 + i, 150, 20).build()
 		);
 		this.eraseCache = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, Component.translatable("selectWorld.backupEraseCache"), false);
 		if (this.promptForCacheErase) {
@@ -66,7 +66,7 @@ public class BackupConfirmScreen extends Screen {
 	@Override
 	public boolean keyPressed(int i, int j, int k) {
 		if (i == 256) {
-			this.minecraft.setScreen(this.lastScreen);
+			this.onCancel.run();
 			return true;
 		} else {
 			return super.keyPressed(i, j, k);

@@ -87,6 +87,8 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
+import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasBinding;
+import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasBindings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
@@ -223,6 +225,9 @@ public class BuiltInRegistries {
 	);
 	public static final Registry<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT = registerSimple(
 		Registries.STRUCTURE_POOL_ELEMENT, registry -> StructurePoolElementType.EMPTY
+	);
+	public static final Registry<Codec<? extends PoolAliasBinding>> POOL_ALIAS_BINDING_TYPE = registerSimple(
+		Registries.POOL_ALIAS_BINDING, PoolAliasBindings::bootstrap
 	);
 	public static final Registry<CatVariant> CAT_VARIANT = registerSimple(Registries.CAT_VARIANT, CatVariant::bootstrap);
 	public static final Registry<FrogVariant> FROG_VARIANT = registerSimple(Registries.FROG_VARIANT, registry -> FrogVariant.TEMPERATE);

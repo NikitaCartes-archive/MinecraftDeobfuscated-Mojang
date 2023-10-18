@@ -42,6 +42,9 @@ public class GameRules {
 		"doMobSpawning", GameRules.Category.SPAWNING, GameRules.BooleanValue.create(true)
 	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DOMOBLOOT = register("doMobLoot", GameRules.Category.DROPS, GameRules.BooleanValue.create(true));
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_PROJECTILESCANBREAKBLOCKS = register(
+		"projectilesCanBreakBlocks", GameRules.Category.DROPS, GameRules.BooleanValue.create(true)
+	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DOBLOCKDROPS = register(
 		"doTileDrops", GameRules.Category.DROPS, GameRules.BooleanValue.create(true)
 	);
@@ -124,6 +127,12 @@ public class GameRules {
 				serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.IMMEDIATE_RESPAWN, booleanValue.get() ? 1.0F : 0.0F));
 			}
 		})
+	);
+	public static final GameRules.Key<GameRules.IntegerValue> RULE_PLAYERS_NETHER_PORTAL_DEFAULT_DELAY = register(
+		"playersNetherPortalDefaultDelay", GameRules.Category.PLAYER, GameRules.IntegerValue.create(80)
+	);
+	public static final GameRules.Key<GameRules.IntegerValue> RULE_PLAYERS_NETHER_PORTAL_CREATIVE_DELAY = register(
+		"playersNetherPortalCreativeDelay", GameRules.Category.PLAYER, GameRules.IntegerValue.create(1)
 	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DROWNING_DAMAGE = register(
 		"drowningDamage", GameRules.Category.PLAYER, GameRules.BooleanValue.create(true)

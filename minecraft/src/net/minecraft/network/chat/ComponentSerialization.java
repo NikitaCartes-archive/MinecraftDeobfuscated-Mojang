@@ -39,14 +39,14 @@ public class ComponentSerialization {
 	}
 
 	public static <T extends StringRepresentable, E> MapCodec<E> createLegacyComponentMatcher(
-		T[] stringRepresentables, Function<T, MapCodec<? extends E>> function, Function<E, T> function2
+		T[] stringRepresentables, Function<T, MapCodec<? extends E>> function, Function<E, T> function2, String string
 	) {
 		MapCodec<E> mapCodec = new ComponentSerialization.FuzzyCodec(
 			Stream.of(stringRepresentables).map(function).toList(), object -> (MapEncoder)function.apply((StringRepresentable)function2.apply(object))
 		);
 		Codec<T> codec = StringRepresentable.fromValues(() -> stringRepresentables);
-		MapCodec<E> mapCodec2 = codec.dispatchMap(function2, stringRepresentable -> ((MapCodec)function.apply(stringRepresentable)).codec());
-		MapCodec<E> mapCodec3 = Codec.mapEither(mapCodec2, mapCodec).xmap(either -> either.map(object -> object, object -> object), Either::right);
+		MapCodec<E> mapCodec2 = codec.dispatchMap(string, function2, stringRepresentable -> ((MapCodec)function.apply(stringRepresentable)).codec());
+		MapCodec<E> mapCodec3 = new ComponentSerialization.StrictEither<>(string, mapCodec2, mapCodec);
 		return ExtraCodecs.orCompressed(mapCodec3, mapCodec2);
 	}
 
@@ -54,7 +54,7 @@ public class ComponentSerialization {
 		ComponentContents.Type<?>[] types = new ComponentContents.Type[]{
 			PlainTextContents.TYPE, TranslatableContents.TYPE, KeybindContents.TYPE, ScoreContents.TYPE, SelectorContents.TYPE, NbtContents.TYPE
 		};
-		MapCodec<ComponentContents> mapCodec = createLegacyComponentMatcher(types, ComponentContents.Type::codec, ComponentContents::type);
+		MapCodec<ComponentContents> mapCodec = createLegacyComponentMatcher(types, ComponentContents.Type::codec, ComponentContents::type, "type");
 		Codec<Component> codec2 = RecordCodecBuilder.create(
 			instance -> instance.group(
 						mapCodec.forGetter(Component::getContents),
@@ -104,6 +104,33 @@ public class ComponentSerialization {
 
 		public String toString() {
 			return "FuzzyCodec[" + this.codecs + "]";
+		}
+	}
+
+	static class StrictEither<T> extends MapCodec<T> {
+		private final String typeFieldName;
+		private final MapCodec<T> typed;
+		private final MapCodec<T> fuzzy;
+
+		public StrictEither(String string, MapCodec<T> mapCodec, MapCodec<T> mapCodec2) {
+			this.typeFieldName = string;
+			this.typed = mapCodec;
+			this.fuzzy = mapCodec2;
+		}
+
+		@Override
+		public <O> DataResult<T> decode(DynamicOps<O> dynamicOps, MapLike<O> mapLike) {
+			return mapLike.get(this.typeFieldName) != null ? this.typed.decode(dynamicOps, mapLike) : this.fuzzy.decode(dynamicOps, mapLike);
+		}
+
+		@Override
+		public <O> RecordBuilder<O> encode(T object, DynamicOps<O> dynamicOps, RecordBuilder<O> recordBuilder) {
+			return this.fuzzy.encode(object, dynamicOps, recordBuilder);
+		}
+
+		@Override
+		public <T1> Stream<T1> keys(DynamicOps<T1> dynamicOps) {
+			return Stream.concat(this.typed.keys(dynamicOps), this.fuzzy.keys(dynamicOps)).distinct();
 		}
 	}
 }

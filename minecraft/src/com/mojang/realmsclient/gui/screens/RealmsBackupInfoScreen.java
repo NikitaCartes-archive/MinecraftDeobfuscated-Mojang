@@ -134,7 +134,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 				case "name" -> NAME;
 				case "game_server_version" -> GAME_SERVER_VERSION;
 				case "uploaded" -> UPLOADED;
-				case "enabled_pack" -> ENABLED_PACK;
+				case "enabled_packs" -> ENABLED_PACK;
 				case "description" -> DESCRIPTION;
 				case "game_mode" -> GAME_MODE;
 				case "seed" -> SEED;

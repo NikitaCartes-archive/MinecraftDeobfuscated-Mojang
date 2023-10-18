@@ -70,6 +70,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType PORTAL = register("portal", false);
 	public static final SimpleParticleType RAIN = register("rain", false);
 	public static final SimpleParticleType SMOKE = register("smoke", false);
+	public static final SimpleParticleType WHITE_SMOKE = register("white_smoke", false);
 	public static final SimpleParticleType SNEEZE = register("sneeze", false);
 	public static final SimpleParticleType SPIT = register("spit", true);
 	public static final SimpleParticleType SQUID_INK = register("squid_ink", true);

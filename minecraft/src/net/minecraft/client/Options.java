@@ -98,6 +98,10 @@ public class Options {
 	private final OptionInstance<Boolean> hideLightningFlash = OptionInstance.createBoolean(
 		"options.hideLightningFlashes", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES), false
 	);
+	private static final Component ACCESSIBILITY_TOOLTIP_HIDE_SPLASH_TEXTS = Component.translatable("options.hideSplashTexts.tooltip");
+	private final OptionInstance<Boolean> hideSplashTexts = OptionInstance.createBoolean(
+		"options.hideSplashTexts", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_HIDE_SPLASH_TEXTS), false
+	);
 	private final OptionInstance<Double> sensitivity = new OptionInstance<>("options.sensitivity", OptionInstance.noTooltip(), (component, double_) -> {
 		if (double_ == 0.0) {
 			return genericValueLabel(component, Component.translatable("options.sensitivity.min"));
@@ -717,6 +721,10 @@ public class Options {
 		return this.hideLightningFlash;
 	}
 
+	public OptionInstance<Boolean> hideSplashTexts() {
+		return this.hideSplashTexts;
+	}
+
 	public OptionInstance<Double> sensitivity() {
 		return this.sensitivity;
 	}
@@ -1095,6 +1103,7 @@ public class Options {
 		fieldAccess.process("toggleSprint", this.toggleSprint);
 		fieldAccess.process("darkMojangStudiosBackground", this.darkMojangStudiosBackground);
 		fieldAccess.process("hideLightningFlashes", this.hideLightningFlash);
+		fieldAccess.process("hideSplashTexts", this.hideSplashTexts);
 		fieldAccess.process("mouseSensitivity", this.sensitivity);
 		fieldAccess.process("fov", this.fov);
 		fieldAccess.process("screenEffectScale", this.screenEffectScale);

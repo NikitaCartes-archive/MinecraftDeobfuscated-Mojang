@@ -97,7 +97,7 @@ public class Main {
 		OptionSet optionSet = optionParser.parse(strings);
 		List<String> list = optionSet.valuesOf(optionSpec28);
 		if (!list.isEmpty()) {
-			LOGGER.info("Completely ignored arguments: " + list);
+			LOGGER.info("Completely ignored arguments: {}", list);
 		}
 
 		String string = parseArgument(optionSet, optionSpec9);
@@ -105,7 +105,7 @@ public class Main {
 		if (string != null) {
 			try {
 				proxy = new Proxy(Type.SOCKS, new InetSocketAddress(string, parseArgument(optionSet, optionSpec10)));
-			} catch (Exception var83) {
+			} catch (Exception var85) {
 			}
 		}
 
@@ -150,10 +150,20 @@ public class Main {
 		}
 
 		CrashReport.preload();
-		Bootstrap.bootStrap();
-		GameLoadTimesEvent.INSTANCE.setBootstrapTime(Bootstrap.bootstrapDuration.get());
-		Bootstrap.validate();
-		Util.startTimerHackThread();
+
+		try {
+			Bootstrap.bootStrap();
+			GameLoadTimesEvent.INSTANCE.setBootstrapTime(Bootstrap.bootstrapDuration.get());
+			Bootstrap.validate();
+		} catch (Throwable var84) {
+			CrashReport crashReport = CrashReport.forThrowable(var84, "Bootstrap");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Initialization");
+			NativeModuleLister.addCrashSection(crashReportCategory);
+			Minecraft.fillReport(null, null, string4, null, crashReport);
+			Minecraft.crash(null, file, crashReport);
+			return;
+		}
+
 		String string13 = optionSpec26.value(optionSet);
 		User.Type type = User.Type.byName(string13);
 		if (type == null) {
@@ -170,6 +180,7 @@ public class Main {
 			new GameConfig.GameData(bl2, string4, string5, bl3, bl4),
 			new GameConfig.QuickPlayData(string9, string10, string11, string12)
 		);
+		Util.startTimerHackThread();
 		Thread thread = new Thread("Client Shutdown Thread") {
 			public void run() {
 				Minecraft minecraft = Minecraft.getInstance();
@@ -183,26 +194,28 @@ public class Main {
 		};
 		thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 		Runtime.getRuntime().addShutdownHook(thread);
+		final Minecraft minecraft = null;
 
-		final Minecraft minecraft;
 		try {
 			Thread.currentThread().setName("Render thread");
 			RenderSystem.initRenderThread();
 			RenderSystem.beginInitialization();
 			minecraft = new Minecraft(gameConfig);
 			RenderSystem.finishInitialization();
-		} catch (SilentInitException var81) {
-			LOGGER.warn("Failed to create window: ", (Throwable)var81);
+		} catch (SilentInitException var82) {
+			Util.shutdownExecutors();
+			LOGGER.warn("Failed to create window: ", (Throwable)var82);
 			return;
-		} catch (Throwable var82) {
-			CrashReport crashReport = CrashReport.forThrowable(var82, "Initializing game");
-			CrashReportCategory crashReportCategory = crashReport.addCategory("Initialization");
-			NativeModuleLister.addCrashSection(crashReportCategory);
-			Minecraft.fillReport(null, null, gameConfig.game.launchVersion, null, crashReport);
-			Minecraft.crash(crashReport);
+		} catch (Throwable var83) {
+			CrashReport crashReport2 = CrashReport.forThrowable(var83, "Initializing game");
+			CrashReportCategory crashReportCategory2 = crashReport2.addCategory("Initialization");
+			NativeModuleLister.addCrashSection(crashReportCategory2);
+			Minecraft.fillReport(minecraft, null, gameConfig.game.launchVersion, null, crashReport2);
+			Minecraft.crash(minecraft, gameConfig.location.gameDirectory, crashReport2);
 			return;
 		}
 
+		Minecraft minecraft2 = minecraft;
 		Thread thread2;
 		if (minecraft.renderOnThread()) {
 			thread2 = new Thread("Game thread") {
@@ -217,30 +230,30 @@ public class Main {
 			};
 			thread2.start();
 
-			while (minecraft.isRunning()) {
+			while (minecraft2.isRunning()) {
 			}
 		} else {
 			thread2 = null;
 
 			try {
 				RenderSystem.initGameThread(false);
-				minecraft.run();
-			} catch (Throwable var80) {
-				LOGGER.error("Unhandled game exception", var80);
+				minecraft2.run();
+			} catch (Throwable var81) {
+				LOGGER.error("Unhandled game exception", var81);
 			}
 		}
 
 		BufferUploader.reset();
 
 		try {
-			minecraft.stop();
+			minecraft2.stop();
 			if (thread2 != null) {
 				thread2.join();
 			}
-		} catch (InterruptedException var78) {
-			LOGGER.error("Exception during client thread shutdown", (Throwable)var78);
+		} catch (InterruptedException var79) {
+			LOGGER.error("Exception during client thread shutdown", (Throwable)var79);
 		} finally {
-			minecraft.destroy();
+			minecraft2.destroy();
 		}
 	}
 

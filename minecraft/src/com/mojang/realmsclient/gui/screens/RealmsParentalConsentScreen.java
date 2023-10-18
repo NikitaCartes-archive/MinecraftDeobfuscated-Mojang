@@ -1,12 +1,15 @@
 package com.mojang.realmsclient.gui.screens;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -14,42 +17,50 @@ import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsParentalConsentScreen extends RealmsScreen {
-	private static final Component MESSAGE = Component.translatable("mco.account.privacyinfo");
-	private final Screen nextScreen;
-	private MultiLineLabel messageLines = MultiLineLabel.EMPTY;
+	private static final Component MESSAGE = Component.translatable("mco.account.privacy.information");
+	private static final int SPACING = 15;
+	private final LinearLayout layout = LinearLayout.vertical();
+	private final Screen lastScreen;
+	@Nullable
+	private MultiLineTextWidget textWidget;
 
 	public RealmsParentalConsentScreen(Screen screen) {
 		super(GameNarrator.NO_TITLE);
-		this.nextScreen = screen;
+		this.lastScreen = screen;
 	}
 
 	@Override
 	public void init() {
-		Component component = Component.translatable("mco.account.update");
-		Component component2 = CommonComponents.GUI_BACK;
-		int i = Math.max(this.font.width(component), this.font.width(component2)) + 30;
-		Component component3 = Component.translatable("mco.account.privacy.info");
-		int j = (int)((double)this.font.width(component3) * 1.2);
-		this.addRenderableWidget(
-			Button.builder(component3, button -> Util.getPlatform().openUri("https://aka.ms/MinecraftGDPR")).bounds(this.width / 2 - j / 2, row(11), j, 20).build()
-		);
-		this.addRenderableWidget(
-			Button.builder(component, button -> Util.getPlatform().openUri("https://aka.ms/UpdateMojangAccount"))
-				.bounds(this.width / 2 - (i + 5), row(13), i, 20)
-				.build()
-		);
-		this.addRenderableWidget(Button.builder(component2, button -> this.minecraft.setScreen(this.nextScreen)).bounds(this.width / 2 + 5, row(13), i, 20).build());
-		this.messageLines = MultiLineLabel.create(this.font, MESSAGE, (int)Math.round((double)this.width * 0.9));
+		this.layout.spacing(15).defaultCellSetting().alignHorizontallyCenter();
+		this.textWidget = new MultiLineTextWidget(MESSAGE, this.font).setCentered(true);
+		this.layout.addChild(this.textWidget);
+		LinearLayout linearLayout = this.layout.addChild(LinearLayout.horizontal().spacing(8));
+		Component component = Component.translatable("mco.account.privacy.info.button");
+		linearLayout.addChild(Button.builder(component, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/MinecraftGDPR")).build());
+		linearLayout.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
+		this.layout.visitWidgets(guiEventListener -> {
+			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
+		});
+		this.repositionElements();
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
+	}
+
+	@Override
+	protected void repositionElements() {
+		if (this.textWidget != null) {
+			this.textWidget.setMaxWidth(this.width - 15);
+		}
+
+		this.layout.arrangeElements();
+		FrameLayout.centerInRectangle(this.layout, this.getRectangle());
 	}
 
 	@Override
 	public Component getNarrationMessage() {
 		return MESSAGE;
-	}
-
-	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		this.messageLines.renderCentered(guiGraphics, this.width / 2, 15, 15, 16777215);
 	}
 }

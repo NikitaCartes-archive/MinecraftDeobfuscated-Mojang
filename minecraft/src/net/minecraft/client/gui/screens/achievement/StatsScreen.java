@@ -312,7 +312,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void clickedHeader(int i, int j) {
+		protected boolean clickedHeader(int i, int j) {
 			this.headerPressed = -1;
 
 			for (int k = 0; k < this.iconSprites.length; k++) {
@@ -326,6 +326,9 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			if (this.headerPressed >= 0) {
 				this.sortByColumn(this.getColumn(this.headerPressed));
 				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+				return true;
+			} else {
+				return super.clickedHeader(i, j);
 			}
 		}
 

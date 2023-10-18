@@ -329,7 +329,8 @@ public class Structures {
 				ConstantHeight.of(VerticalAnchor.absolute(-27)),
 				false,
 				Optional.empty(),
-				116
+				116,
+				List.of()
 			)
 		);
 		bootstapContext.register(

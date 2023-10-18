@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface CustomModifierExecutor<T> {
-	void apply(List<T> list, ContextChain<T> contextChain, boolean bl, ExecutionControl<T> executionControl) throws CommandSyntaxException;
+	void apply(List<T> list, ContextChain<T> contextChain, boolean bl, ExecutionControl<T> executionControl);
 
 	public interface ModifierAdapter<T> extends RedirectModifier<T>, CustomModifierExecutor<T> {
 		@Override

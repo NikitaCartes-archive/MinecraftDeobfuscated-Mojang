@@ -51,10 +51,10 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 		MinecraftServer minecraftServer = commandSourceStack.getServer();
 		CompletableFuture<FilteredText> completableFuture = filterPlainText(commandSourceStack, playerChatMessage);
 		Component component = minecraftServer.getChatDecorator().decorate(commandSourceStack.getPlayer(), playerChatMessage.decoratedContent());
-		commandSourceStack.getChatMessageChainer().append(executor -> completableFuture.thenAcceptAsync(filteredText -> {
-				PlayerChatMessage playerChatMessage2 = playerChatMessage.withUnsignedContent(component).filter(filteredText.mask());
-				consumer.accept(playerChatMessage2);
-			}, executor));
+		commandSourceStack.getChatMessageChainer().append(completableFuture, filteredText -> {
+			PlayerChatMessage playerChatMessage2 = playerChatMessage.withUnsignedContent(component).filter(filteredText.mask());
+			consumer.accept(playerChatMessage2);
+		});
 	}
 
 	private static void resolveDisguisedMessage(Consumer<PlayerChatMessage> consumer, CommandSourceStack commandSourceStack, PlayerChatMessage playerChatMessage) {

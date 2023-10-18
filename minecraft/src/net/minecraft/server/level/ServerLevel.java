@@ -36,6 +36,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -1657,6 +1659,13 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public RandomSequences getRandomSequences() {
 		return this.randomSequences;
+	}
+
+	@Override
+	public CrashReportCategory fillReportDetails(CrashReport crashReport) {
+		CrashReportCategory crashReportCategory = super.fillReportDetails(crashReport);
+		crashReportCategory.setDetail("Loaded entity count", (CrashReportDetail<String>)(() -> String.valueOf(this.entityManager.count())));
+		return crashReportCategory;
 	}
 
 	final class EntityCallbacks implements LevelCallback<Entity> {

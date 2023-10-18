@@ -15,7 +15,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -219,7 +218,7 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		BlockPos blockPos = blockHitResult.getBlockPos();
-		if (!level.isClientSide && projectile.mayInteract(level, blockPos) && projectile.getType().is(EntityTypeTags.IMPACT_PROJECTILES)) {
+		if (!level.isClientSide && projectile.mayInteract(level, blockPos) && projectile.mayBreak(level)) {
 			level.setBlock(blockPos, blockState.setValue(CRACKED, Boolean.valueOf(true)), 4);
 			level.destroyBlock(blockPos, true, projectile);
 		}

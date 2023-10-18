@@ -276,7 +276,20 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 			boolean bl = this.worldType == RealmsServer.WorldType.NORMAL && this.difficulty != Difficulty.PEACEFUL && this.spawnMonsters;
 			this.parent
 				.saveSlotSettings(
-					new RealmsWorldOptions(this.pvp, this.spawnAnimals, bl, this.spawnNPCs, this.spawnProtection, this.commandBlocks, i, j, this.forceGameMode, this.worldName)
+					new RealmsWorldOptions(
+						this.pvp,
+						this.spawnAnimals,
+						bl,
+						this.spawnNPCs,
+						this.spawnProtection,
+						this.commandBlocks,
+						i,
+						j,
+						this.forceGameMode,
+						this.worldName,
+						this.options.version,
+						this.options.compatibility
+					)
 				);
 		} else {
 			this.parent
@@ -291,7 +304,9 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 						i,
 						j,
 						this.options.forceGameMode,
-						this.worldName
+						this.worldName,
+						this.options.version,
+						this.options.compatibility
 					)
 				);
 		}

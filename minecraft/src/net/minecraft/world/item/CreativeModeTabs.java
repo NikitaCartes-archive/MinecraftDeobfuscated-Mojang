@@ -1091,6 +1091,7 @@ public class CreativeModeTabs {
 					output.accept(Items.HONEY_BLOCK);
 					output.accept(Items.DISPENSER);
 					output.accept(Items.DROPPER);
+					output.accept(Items.CRAFTER);
 					output.accept(Items.HOPPER);
 					output.accept(Items.CHEST);
 					output.accept(Items.BARREL);
@@ -1098,6 +1099,7 @@ public class CreativeModeTabs {
 					output.accept(Items.FURNACE);
 					output.accept(Items.TRAPPED_CHEST);
 					output.accept(Items.JUKEBOX);
+					output.accept(Items.DECORATED_POT);
 					output.accept(Items.OBSERVER);
 					output.accept(Items.NOTE_BLOCK);
 					output.accept(Items.COMPOSTER);

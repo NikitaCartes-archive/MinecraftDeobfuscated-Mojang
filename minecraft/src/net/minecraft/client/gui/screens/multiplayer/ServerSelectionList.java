@@ -66,8 +66,8 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	);
 	private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
 	static final Component SCANNING_LABEL = Component.translatable("lanServer.scanning");
-	static final Component CANT_RESOLVE_TEXT = Component.translatable("multiplayer.status.cannot_resolve").withStyle(style -> style.withColor(-65536));
-	static final Component CANT_CONNECT_TEXT = Component.translatable("multiplayer.status.cannot_connect").withStyle(style -> style.withColor(-65536));
+	static final Component CANT_RESOLVE_TEXT = Component.translatable("multiplayer.status.cannot_resolve").withColor(-65536);
+	static final Component CANT_CONNECT_TEXT = Component.translatable("multiplayer.status.cannot_connect").withColor(-65536);
 	static final Component INCOMPATIBLE_STATUS = Component.translatable("multiplayer.status.incompatible");
 	static final Component NO_CONNECTION_STATUS = Component.translatable("multiplayer.status.no_connection");
 	static final Component PINGING_STATUS = Component.translatable("multiplayer.status.pinging");

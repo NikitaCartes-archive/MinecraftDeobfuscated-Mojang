@@ -32,6 +32,7 @@ import net.minecraft.ResourceLocationException;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.FileToIdConverter;
@@ -254,7 +255,7 @@ public class StructureTemplateManager {
 	}
 
 	private StructureTemplate readStructure(InputStream inputStream) throws IOException {
-		CompoundTag compoundTag = NbtIo.readCompressed(inputStream);
+		CompoundTag compoundTag = NbtIo.readCompressed(inputStream, NbtAccounter.unlimitedHeap());
 		return this.readStructure(compoundTag);
 	}
 

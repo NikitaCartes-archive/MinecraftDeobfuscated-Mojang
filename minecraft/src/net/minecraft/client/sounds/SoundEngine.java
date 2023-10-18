@@ -144,6 +144,12 @@ public class SoundEngine {
 		}
 	}
 
+	public void emergencyShutdown() {
+		if (this.loaded) {
+			this.library.cleanup();
+		}
+	}
+
 	public void stop(SoundInstance soundInstance) {
 		if (this.loaded) {
 			ChannelAccess.ChannelHandle channelHandle = (ChannelAccess.ChannelHandle)this.instanceToChannel.get(soundInstance);
