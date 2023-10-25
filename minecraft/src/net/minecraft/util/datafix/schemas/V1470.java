@@ -28,7 +28,11 @@ public class V1470 extends NamespacedSchema {
 		registerMob(schema, map, "minecraft:phantom");
 		registerMob(schema, map, "minecraft:dolphin");
 		registerMob(schema, map, "minecraft:drowned");
-		schema.register(map, "minecraft:trident", (Function<String, TypeTemplate>)(string -> DSL.optionalFields("inBlockState", References.BLOCK_STATE.in(schema))));
+		schema.register(
+			map,
+			"minecraft:trident",
+			(Function<String, TypeTemplate>)(string -> DSL.optionalFields("inBlockState", References.BLOCK_STATE.in(schema), "Trident", References.ITEM_STACK.in(schema)))
+		);
 		return map;
 	}
 }

@@ -43,6 +43,23 @@ public record BlockSetType(
 			SoundEvents.STONE_BUTTON_CLICK_ON
 		)
 	);
+	public static final BlockSetType COPPER = register(
+		new BlockSetType(
+			"copper",
+			true,
+			false,
+			BlockSetType.PressurePlateSensitivity.EVERYTHING,
+			SoundType.METAL,
+			SoundEvents.COPPER_DOOR_CLOSE,
+			SoundEvents.COPPER_DOOR_OPEN,
+			SoundEvents.COPPER_TRAPDOOR_CLOSE,
+			SoundEvents.COPPER_TRAPDOOR_OPEN,
+			SoundEvents.METAL_PRESSURE_PLATE_CLICK_OFF,
+			SoundEvents.METAL_PRESSURE_PLATE_CLICK_ON,
+			SoundEvents.STONE_BUTTON_CLICK_OFF,
+			SoundEvents.STONE_BUTTON_CLICK_ON
+		)
+	);
 	public static final BlockSetType GOLD = register(
 		new BlockSetType(
 			"gold",

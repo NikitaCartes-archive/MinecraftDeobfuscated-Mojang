@@ -41,7 +41,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -232,22 +232,19 @@ public class TestCommand {
 	private static int createNewStructure(CommandSourceStack commandSourceStack, String string, int i, int j, int k) {
 		if (i <= 48 && j <= 48 && k <= 48) {
 			ServerLevel serverLevel = commandSourceStack.getLevel();
-			BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
-			BlockPos blockPos2 = new BlockPos(
-				blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
-			);
-			StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos2, new Vec3i(i, j, k), Rotation.NONE, serverLevel);
+			BlockPos blockPos = createTestPositionAround(commandSourceStack);
+			StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos, new Vec3i(i, j, k), Rotation.NONE, serverLevel);
 
 			for (int l = 0; l < i; l++) {
 				for (int m = 0; m < k; m++) {
-					BlockPos blockPos3 = new BlockPos(blockPos2.getX() + l, blockPos2.getY() + 1, blockPos2.getZ() + m);
+					BlockPos blockPos2 = new BlockPos(blockPos.getX() + l, blockPos.getY() + 1, blockPos.getZ() + m);
 					Block block = Blocks.POLISHED_ANDESITE;
 					BlockInput blockInput = new BlockInput(block.defaultBlockState(), Collections.emptySet(), null);
-					blockInput.place(serverLevel, blockPos3, 2);
+					blockInput.place(serverLevel, blockPos2, 2);
 				}
 			}
 
-			StructureUtils.addCommandBlockAndButtonToStartTest(blockPos2, new BlockPos(1, 0, -1), Rotation.NONE, serverLevel);
+			StructureUtils.addCommandBlockAndButtonToStartTest(blockPos, new BlockPos(1, 0, -1), Rotation.NONE, serverLevel);
 			return 0;
 		} else {
 			throw new IllegalArgumentException("The structure must be less than 48 blocks big in each axis");
@@ -318,18 +315,23 @@ public class TestCommand {
 	private static void runTest(ServerLevel serverLevel, BlockPos blockPos, @Nullable MultipleTestTracker multipleTestTracker, boolean bl) {
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
 		String string = structureBlockEntity.getStructurePath();
-		TestFunction testFunction = GameTestRegistry.getTestFunction(string);
-		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, structureBlockEntity.getRotation(), serverLevel);
-		gameTestInfo.setRerunUntilFailed(bl);
-		if (multipleTestTracker != null) {
-			multipleTestTracker.addTestToTrack(gameTestInfo);
-			gameTestInfo.addListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));
-		}
+		Optional<TestFunction> optional = GameTestRegistry.findTestFunction(string);
+		if (optional.isEmpty()) {
+			say(serverLevel, "Test function for test " + string + " could not be found", ChatFormatting.RED);
+		} else {
+			TestFunction testFunction = (TestFunction)optional.get();
+			GameTestInfo gameTestInfo = new GameTestInfo(testFunction, structureBlockEntity.getRotation(), serverLevel);
+			gameTestInfo.setRerunUntilFailed(bl);
+			if (multipleTestTracker != null) {
+				multipleTestTracker.addTestToTrack(gameTestInfo);
+				gameTestInfo.addListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));
+			}
 
-		runTestPreparation(testFunction, serverLevel);
-		AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
-		BlockPos blockPos2 = BlockPos.containing(aABB.minX, aABB.minY, aABB.minZ);
-		GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
+			runTestPreparation(testFunction, serverLevel);
+			BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(structureBlockEntity);
+			BlockPos blockPos2 = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
+			GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
+		}
 	}
 
 	static void showTestSummaryIfAllDone(ServerLevel serverLevel, MultipleTestTracker multipleTestTracker) {
@@ -361,15 +363,19 @@ public class TestCommand {
 
 	private static int runTest(CommandSourceStack commandSourceStack, TestFunction testFunction, int i) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
-		int j = commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
-		BlockPos blockPos2 = new BlockPos(blockPos.getX(), j, blockPos.getZ() + 3);
+		BlockPos blockPos = createTestPositionAround(commandSourceStack);
 		GameTestRunner.clearMarkers(serverLevel);
 		runTestPreparation(testFunction, serverLevel);
 		Rotation rotation = StructureUtils.getRotationForRotationSteps(i);
 		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, rotation, serverLevel);
-		GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
+		GameTestRunner.runTest(gameTestInfo, blockPos, GameTestTicker.SINGLETON);
 		return 1;
+	}
+
+	private static BlockPos createTestPositionAround(CommandSourceStack commandSourceStack) {
+		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
+		int i = commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
+		return new BlockPos(blockPos.getX(), i + 1, blockPos.getZ() + 3);
 	}
 
 	private static void runTestPreparation(TestFunction testFunction, ServerLevel serverLevel) {
@@ -417,13 +423,10 @@ public class TestCommand {
 	}
 
 	private static void runTests(CommandSourceStack commandSourceStack, Collection<TestFunction> collection, int i, int j) {
-		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
-		BlockPos blockPos2 = new BlockPos(
-			blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
-		);
+		BlockPos blockPos = createTestPositionAround(commandSourceStack);
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		Rotation rotation = StructureUtils.getRotationForRotationSteps(i);
-		Collection<GameTestInfo> collection2 = GameTestRunner.runTests(collection, blockPos2, rotation, serverLevel, GameTestTicker.SINGLETON, j);
+		Collection<GameTestInfo> collection2 = GameTestRunner.runTests(collection, blockPos, rotation, serverLevel, GameTestTicker.SINGLETON, j);
 		MultipleTestTracker multipleTestTracker = new MultipleTestTracker(collection2);
 		multipleTestTracker.addListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));
 		multipleTestTracker.addFailureListener(gameTestInfo -> GameTestRegistry.rememberFailedTest(gameTestInfo.getTestFunction()));

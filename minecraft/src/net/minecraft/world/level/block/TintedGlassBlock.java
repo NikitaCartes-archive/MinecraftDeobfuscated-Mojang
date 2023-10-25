@@ -6,7 +6,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class TintedGlassBlock extends AbstractGlassBlock {
+public class TintedGlassBlock extends TransparentBlock {
 	public static final MapCodec<TintedGlassBlock> CODEC = simpleCodec(TintedGlassBlock::new);
 
 	@Override

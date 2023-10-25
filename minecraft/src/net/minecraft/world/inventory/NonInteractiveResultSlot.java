@@ -31,12 +31,12 @@ public class NonInteractiveResultSlot extends Slot {
 
 	@Override
 	public ItemStack safeInsert(ItemStack itemStack) {
-		return ItemStack.EMPTY;
+		return itemStack;
 	}
 
 	@Override
 	public ItemStack safeInsert(ItemStack itemStack, int i) {
-		return ItemStack.EMPTY;
+		return this.safeInsert(itemStack);
 	}
 
 	@Override

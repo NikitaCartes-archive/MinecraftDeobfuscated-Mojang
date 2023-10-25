@@ -43,11 +43,13 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
+import net.minecraft.server.ServerTickRateManager;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SampleLogger;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
@@ -111,7 +113,7 @@ public class DebugScreenOverlay {
 		this.allocationRateCalculator = new DebugScreenOverlay.AllocationRateCalculator();
 		this.font = minecraft.font;
 		this.fpsChart = new FpsDebugChart(this.font, this.frameTimeLogger);
-		this.tpsChart = new TpsDebugChart(this.font, this.tickTimeLogger);
+		this.tpsChart = new TpsDebugChart(this.font, this.tickTimeLogger, () -> minecraft.level.tickRateManager().millisecondsPerTick());
 		this.pingChart = new PingDebugChart(this.font, this.pingLogger);
 		this.bandwidthChart = new BandwidthDebugChart(this.font, this.bandwidthLogger);
 	}
@@ -206,11 +208,30 @@ public class DebugScreenOverlay {
 		Connection connection = clientPacketListener.getConnection();
 		float f = connection.getAverageSentPackets();
 		float g = connection.getAverageReceivedPackets();
+		TickRateManager tickRateManager = this.getLevel().tickRateManager();
 		String string;
-		if (integratedServer != null) {
-			string = String.format(Locale.ROOT, "Integrated server @ %.0f ms ticks, %.0f tx, %.0f rx", integratedServer.getAverageTickTime(), f, g);
+		if (tickRateManager.isSteppingForward()) {
+			string = " (frozen - stepping)";
+		} else if (tickRateManager.isFrozen()) {
+			string = " (frozen)";
 		} else {
-			string = String.format(Locale.ROOT, "\"%s\" server, %.0f tx, %.0f rx", clientPacketListener.serverBrand(), f, g);
+			string = "";
+		}
+
+		String string3;
+		if (integratedServer != null) {
+			ServerTickRateManager serverTickRateManager = integratedServer.tickRateManager();
+			boolean bl = serverTickRateManager.isSprinting();
+			if (bl) {
+				string = " (sprinting)";
+			}
+
+			String string2 = bl ? "-" : String.format(Locale.ROOT, "%.1f", tickRateManager.millisecondsPerTick());
+			string3 = String.format(
+				Locale.ROOT, "Integrated server @ %.1f/%s ms%s, %.0f tx, %.0f rx", integratedServer.getCurrentSmoothedTickTime(), string2, string, f, g
+			);
+		} else {
+			string3 = String.format(Locale.ROOT, "\"%s\" server%s, %.0f tx, %.0f rx", clientPacketListener.serverBrand(), string, f, g);
 		}
 
 		BlockPos blockPos = this.minecraft.getCameraEntity().blockPosition();
@@ -224,7 +245,7 @@ public class DebugScreenOverlay {
 					+ ClientBrandRetriever.getClientModName()
 					+ ")",
 				this.minecraft.fpsString,
-				string,
+				string3,
 				this.minecraft.levelRenderer.getSectionStatistics(),
 				this.minecraft.levelRenderer.getEntityStatistics(),
 				"P: " + this.minecraft.particleEngine.countParticles() + ". T: " + this.minecraft.level.getEntityCount(),
@@ -236,7 +257,7 @@ public class DebugScreenOverlay {
 			Entity entity = this.minecraft.getCameraEntity();
 			Direction direction = entity.getDirection();
 
-			String string2 = switch (direction) {
+			String string4 = switch (direction) {
 				case NORTH -> "Towards negative Z";
 				case SOUTH -> "Towards positive Z";
 				case WEST -> "Towards negative X";
@@ -261,15 +282,15 @@ public class DebugScreenOverlay {
 					+ ("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType())
 					+ ")",
 				this.minecraft.fpsString,
-				string,
+				string3,
 				this.minecraft.levelRenderer.getSectionStatistics(),
 				this.minecraft.levelRenderer.getEntityStatistics(),
 				"P: " + this.minecraft.particleEngine.countParticles() + ". T: " + this.minecraft.level.getEntityCount(),
 				this.minecraft.level.gatherChunkSourceStats()
 			);
-			String string3 = this.getServerChunkStats();
-			if (string3 != null) {
-				list.add(string3);
+			String string5 = this.getServerChunkStats();
+			if (string5 != null) {
+				list.add(string5);
 			}
 
 			list.add(this.minecraft.level.dimension().location() + " FC: " + longSet.size());
@@ -309,7 +330,7 @@ public class DebugScreenOverlay {
 				)
 			);
 			list.add(
-				String.format(Locale.ROOT, "Facing: %s (%s) (%.1f / %.1f)", direction, string2, Mth.wrapDegrees(entity.getYRot()), Mth.wrapDegrees(entity.getXRot()))
+				String.format(Locale.ROOT, "Facing: %s (%s) (%.1f / %.1f)", direction, string4, Mth.wrapDegrees(entity.getYRot()), Mth.wrapDegrees(entity.getXRot()))
 			);
 			LevelChunk levelChunk = this.getClientChunk();
 			if (levelChunk.isEmpty()) {

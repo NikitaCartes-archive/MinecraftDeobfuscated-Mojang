@@ -36,10 +36,6 @@ public class AABB {
 		);
 	}
 
-	public AABB(BlockPos blockPos, BlockPos blockPos2) {
-		this((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), (double)blockPos2.getX(), (double)blockPos2.getY(), (double)blockPos2.getZ());
-	}
-
 	public AABB(Vec3 vec3, Vec3 vec32) {
 		this(vec3.x, vec3.y, vec3.z, vec32.x, vec32.y, vec32.z);
 	}
@@ -57,6 +53,17 @@ public class AABB {
 
 	public static AABB unitCubeFromLowerCorner(Vec3 vec3) {
 		return new AABB(vec3.x, vec3.y, vec3.z, vec3.x + 1.0, vec3.y + 1.0, vec3.z + 1.0);
+	}
+
+	public static AABB encapsulatingFullBlocks(BlockPos blockPos, BlockPos blockPos2) {
+		return new AABB(
+			(double)Math.min(blockPos.getX(), blockPos2.getX()),
+			(double)Math.min(blockPos.getY(), blockPos2.getY()),
+			(double)Math.min(blockPos.getZ(), blockPos2.getZ()),
+			(double)(Math.max(blockPos.getX(), blockPos2.getX()) + 1),
+			(double)(Math.max(blockPos.getY(), blockPos2.getY()) + 1),
+			(double)(Math.max(blockPos.getZ(), blockPos2.getZ()) + 1)
+		);
 	}
 
 	public AABB setMinX(double d) {

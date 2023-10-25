@@ -581,6 +581,28 @@ public abstract class RecipeProvider implements DataProvider {
 			);
 	}
 
+	protected static void grate(RecipeOutput recipeOutput, Block block, Block block2) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, block, 4)
+			.define('M', block2)
+			.pattern(" M ")
+			.pattern("M M")
+			.pattern(" M ")
+			.unlockedBy(getHasName(block2), has(block2))
+			.save(recipeOutput);
+	}
+
+	protected static void copperBulb(RecipeOutput recipeOutput, Block block, Block block2) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, block, 4)
+			.define('C', block2)
+			.define('R', Items.REDSTONE)
+			.define('B', Items.BLAZE_ROD)
+			.pattern(" C ")
+			.pattern("CBC")
+			.pattern(" R ")
+			.unlockedBy(getHasName(block2), has(block2))
+			.save(recipeOutput);
+	}
+
 	protected static void generateRecipes(RecipeOutput recipeOutput, BlockFamily blockFamily) {
 		blockFamily.getVariants()
 			.forEach(

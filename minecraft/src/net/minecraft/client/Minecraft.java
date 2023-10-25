@@ -225,6 +225,7 @@ import net.minecraft.util.profiling.metrics.storage.MetricsPersister;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
@@ -272,7 +273,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final DataFixer fixerUpper;
 	private final VirtualScreen virtualScreen;
 	private final Window window;
-	private final Timer timer = new Timer(20.0F, 0L);
+	private final Timer timer = new Timer(20.0F, 0L, this::getTickTargetMillis);
 	private final RenderBuffers renderBuffers;
 	public final LevelRenderer levelRenderer;
 	private final EntityRenderDispatcher entityRenderDispatcher;
@@ -1790,6 +1791,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public void tick() {
 		this.clientTickCount++;
+		if (this.level != null && !this.pause) {
+			this.level.tickRateManager().tick();
+		}
+
 		if (this.rightClickDelay > 0) {
 			this.rightClickDelay--;
 		}
@@ -1806,7 +1811,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		this.profiler.popPush("textures");
-		this.textureManager.tick();
+		boolean bl = this.level == null || this.level.tickRateManager().runsNormally();
+		if (bl) {
+			this.textureManager.tick();
+		}
+
 		if (this.screen != null || this.player == null) {
 			if (this.screen instanceof InBedChatScreen inBedChatScreen && !this.player.isSleeping()) {
 				inBedChatScreen.onPlayerWokeUp();
@@ -1876,8 +1885,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 				try {
 					this.level.tick(() -> true);
-				} catch (Throwable var4) {
-					CrashReport crashReport = CrashReport.forThrowable(var4, "Exception in world tick");
+				} catch (Throwable var5) {
+					CrashReport crashReport = CrashReport.forThrowable(var5, "Exception in world tick");
 					if (this.level == null) {
 						CrashReportCategory crashReportCategory = crashReport.addCategory("Affected level");
 						crashReportCategory.setDetail("Problem", "Level is null!");
@@ -1890,12 +1899,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 
 			this.profiler.popPush("animateTick");
-			if (!this.pause && this.level != null) {
+			if (!this.pause && bl) {
 				this.level.animateTick(this.player.getBlockX(), this.player.getBlockY(), this.player.getBlockZ());
 			}
 
 			this.profiler.popPush("particles");
-			if (!this.pause) {
+			if (!this.pause && bl) {
 				this.particleEngine.tick();
 			}
 		} else if (this.pendingConnection != null) {
@@ -2931,6 +2940,17 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public DirectoryValidator directoryValidator() {
 		return this.directoryValidator;
+	}
+
+	private float getTickTargetMillis(float f) {
+		if (this.level != null) {
+			TickRateManager tickRateManager = this.level.tickRateManager();
+			if (tickRateManager.runsNormally()) {
+				return Math.max(f, tickRateManager.millisecondsPerTick());
+			}
+		}
+
+		return f;
 	}
 
 	@Nullable

@@ -23,6 +23,8 @@ public class JigsawBlockEntity extends BlockEntity {
 	public static final String TARGET = "target";
 	public static final String POOL = "pool";
 	public static final String JOINT = "joint";
+	public static final String PLACEMENT_PRIORITY = "placement_priority";
+	public static final String SELECTION_PRIORITY = "selection_priority";
 	public static final String NAME = "name";
 	public static final String FINAL_STATE = "final_state";
 	private ResourceLocation name = new ResourceLocation("empty");
@@ -30,6 +32,8 @@ public class JigsawBlockEntity extends BlockEntity {
 	private ResourceKey<StructureTemplatePool> pool = ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation("empty"));
 	private JigsawBlockEntity.JointType joint = JigsawBlockEntity.JointType.ROLLABLE;
 	private String finalState = "minecraft:air";
+	private int placementPriority;
+	private int selectionPriority;
 
 	public JigsawBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.JIGSAW, blockPos, blockState);
@@ -55,6 +59,14 @@ public class JigsawBlockEntity extends BlockEntity {
 		return this.joint;
 	}
 
+	public int getPlacementPriority() {
+		return this.placementPriority;
+	}
+
+	public int getSelectionPriority() {
+		return this.selectionPriority;
+	}
+
 	public void setName(ResourceLocation resourceLocation) {
 		this.name = resourceLocation;
 	}
@@ -75,6 +87,14 @@ public class JigsawBlockEntity extends BlockEntity {
 		this.joint = jointType;
 	}
 
+	public void setPlacementPriority(int i) {
+		this.placementPriority = i;
+	}
+
+	public void setSelectionPriority(int i) {
+		this.selectionPriority = i;
+	}
+
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag) {
 		super.saveAdditional(compoundTag);
@@ -83,6 +103,8 @@ public class JigsawBlockEntity extends BlockEntity {
 		compoundTag.putString("pool", this.pool.location().toString());
 		compoundTag.putString("final_state", this.finalState);
 		compoundTag.putString("joint", this.joint.getSerializedName());
+		compoundTag.putInt("placement_priority", this.placementPriority);
+		compoundTag.putInt("selection_priority", this.selectionPriority);
 	}
 
 	@Override
@@ -98,6 +120,8 @@ public class JigsawBlockEntity extends BlockEntity {
 						? JigsawBlockEntity.JointType.ALIGNED
 						: JigsawBlockEntity.JointType.ROLLABLE
 			);
+		this.placementPriority = compoundTag.getInt("placement_priority");
+		this.selectionPriority = compoundTag.getInt("selection_priority");
 	}
 
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {

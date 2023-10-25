@@ -65,18 +65,20 @@ public abstract class AbstractArrow extends Projectile {
 	private IntOpenHashSet piercingIgnoreEntityIds;
 	@Nullable
 	private List<Entity> piercedAndKilledEntities;
+	private ItemStack pickupItemStack;
 
-	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level) {
+	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level, ItemStack itemStack) {
 		super(entityType, level);
+		this.pickupItemStack = itemStack.copy();
 	}
 
-	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, double d, double e, double f, Level level) {
-		this(entityType, level);
+	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, double d, double e, double f, Level level, ItemStack itemStack) {
+		this(entityType, level, itemStack);
 		this.setPos(d, e, f);
 	}
 
-	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, LivingEntity livingEntity, Level level) {
-		this(entityType, livingEntity.getX(), livingEntity.getEyeY() - 0.1F, livingEntity.getZ(), level);
+	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, LivingEntity livingEntity, Level level, ItemStack itemStack) {
+		this(entityType, livingEntity.getX(), livingEntity.getEyeY() - 0.1F, livingEntity.getZ(), level, itemStack);
 		this.setOwner(livingEntity);
 		if (livingEntity instanceof Player) {
 			this.pickup = AbstractArrow.Pickup.ALLOWED;
@@ -451,6 +453,7 @@ public abstract class AbstractArrow extends Projectile {
 		compoundTag.putByte("PierceLevel", this.getPierceLevel());
 		compoundTag.putString("SoundEvent", BuiltInRegistries.SOUND_EVENT.getKey(this.soundEvent).toString());
 		compoundTag.putBoolean("ShotFromCrossbow", this.shotFromCrossbow());
+		compoundTag.put("item", this.pickupItemStack.save(new CompoundTag()));
 	}
 
 	@Override
@@ -477,6 +480,9 @@ public abstract class AbstractArrow extends Projectile {
 		}
 
 		this.setShotFromCrossbow(compoundTag.getBoolean("ShotFromCrossbow"));
+		if (compoundTag.contains("item", 10)) {
+			this.pickupItemStack = ItemStack.of(compoundTag.getCompound("item"));
+		}
 	}
 
 	@Override
@@ -508,11 +514,17 @@ public abstract class AbstractArrow extends Projectile {
 		}
 	}
 
-	protected abstract ItemStack getPickupItem();
+	protected ItemStack getPickupItem() {
+		return this.pickupItemStack.copy();
+	}
 
 	@Override
 	protected Entity.MovementEmission getMovementEmission() {
 		return Entity.MovementEmission.NONE;
+	}
+
+	public ItemStack getPickupItemStackOrigin() {
+		return this.pickupItemStack;
 	}
 
 	public void setBaseDamage(double d) {

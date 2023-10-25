@@ -11,7 +11,7 @@ public class ArrowItem extends Item {
 	}
 
 	public AbstractArrow createArrow(Level level, ItemStack itemStack, LivingEntity livingEntity) {
-		Arrow arrow = new Arrow(level, livingEntity);
+		Arrow arrow = new Arrow(level, livingEntity, itemStack.copyWithCount(1));
 		arrow.setEffectsFromItem(itemStack);
 		return arrow;
 	}

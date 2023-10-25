@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -28,11 +29,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class Bat extends AmbientCreature {
-	public static final float FLAP_DEGREES_PER_TICK = 74.48451F;
-	public static final int TICKS_PER_FLAP = Mth.ceil(2.4166098F);
+	public static final float FLAP_LENGTH_SECONDS = 0.5F;
+	public static final float TICKS_PER_FLAP = 10.0F;
 	private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(Bat.class, EntityDataSerializers.BYTE);
 	private static final int FLAG_RESTING = 1;
 	private static final TargetingConditions BAT_RESTING_TARGETING = TargetingConditions.forNonCombat().range(4.0);
+	public final AnimationState flyAnimationState = new AnimationState();
+	public final AnimationState restAnimationState = new AnimationState();
 	@Nullable
 	private BlockPos targetPosition;
 
@@ -45,7 +48,7 @@ public class Bat extends AmbientCreature {
 
 	@Override
 	public boolean isFlapping() {
-		return !this.isResting() && this.tickCount % TICKS_PER_FLAP == 0;
+		return !this.isResting() && (float)this.tickCount % 10.0F == 0.0F;
 	}
 
 	@Override
@@ -119,6 +122,8 @@ public class Bat extends AmbientCreature {
 		} else {
 			this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.6, 1.0));
 		}
+
+		this.setupAnimationStates();
 	}
 
 	@Override
@@ -241,5 +246,15 @@ public class Bat extends AmbientCreature {
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
 		return entityDimensions.height / 2.0F;
+	}
+
+	private void setupAnimationStates() {
+		if (this.isResting()) {
+			this.flyAnimationState.stop();
+			this.restAnimationState.startIfStopped(this.tickCount);
+		} else {
+			this.restAnimationState.stop();
+			this.flyAnimationState.startIfStopped(this.tickCount);
+		}
 	}
 }

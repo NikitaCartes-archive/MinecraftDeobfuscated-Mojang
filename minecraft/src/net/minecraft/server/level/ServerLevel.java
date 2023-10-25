@@ -81,6 +81,7 @@ import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.RandomSequences;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -310,10 +311,15 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	public void tick(BooleanSupplier booleanSupplier) {
 		ProfilerFiller profilerFiller = this.getProfiler();
 		this.handlingTick = true;
-		profilerFiller.push("world border");
-		this.getWorldBorder().tick();
-		profilerFiller.popPush("weather");
-		this.advanceWeatherCycle();
+		TickRateManager tickRateManager = this.tickRateManager();
+		boolean bl = tickRateManager.runsNormally();
+		if (bl) {
+			profilerFiller.push("world border");
+			this.getWorldBorder().tick();
+			profilerFiller.popPush("weather");
+			this.advanceWeatherCycle();
+		}
+
 		int i = this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
 		if (this.sleepStatus.areEnoughSleeping(i) && this.sleepStatus.areEnoughDeepSleeping(i, this.players)) {
 			if (this.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
@@ -328,9 +334,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		this.updateSkyBrightness();
-		this.tickTime();
+		if (bl) {
+			this.tickTime();
+		}
+
 		profilerFiller.popPush("tickPending");
-		if (!this.isDebug()) {
+		if (!this.isDebug() && bl) {
 			long l = this.getGameTime();
 			profilerFiller.push("blockTicks");
 			this.blockTicks.tick(l, 65536, this::tickBlock);
@@ -340,19 +349,25 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		profilerFiller.popPush("raid");
-		this.raids.tick();
+		if (bl) {
+			this.raids.tick();
+		}
+
 		profilerFiller.popPush("chunkSource");
 		this.getChunkSource().tick(booleanSupplier, true);
 		profilerFiller.popPush("blockEvents");
-		this.runBlockEvents();
+		if (bl) {
+			this.runBlockEvents();
+		}
+
 		this.handlingTick = false;
 		profilerFiller.pop();
-		boolean bl = !this.players.isEmpty() || !this.getForcedChunks().isEmpty();
-		if (bl) {
+		boolean bl2 = !this.players.isEmpty() || !this.getForcedChunks().isEmpty();
+		if (bl2) {
 			this.resetEmptyTime();
 		}
 
-		if (bl || this.emptyTime++ < 300) {
+		if (bl2 || this.emptyTime++ < 300) {
 			profilerFiller.push("entities");
 			if (this.dragonFight != null) {
 				profilerFiller.push("dragonFight");
@@ -364,7 +379,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				if (!entity.isRemoved()) {
 					if (this.shouldDiscardEntity(entity)) {
 						entity.discard();
-					} else {
+					} else if (!tickRateManager.isEntityFrozen(entity)) {
 						profilerFiller.push("checkDespawn");
 						entity.checkDespawn();
 						profilerFiller.pop();
@@ -555,7 +570,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		if (optional.isPresent()) {
 			return (BlockPos)optional.get();
 		} else {
-			AABB aABB = new AABB(blockPos2, new BlockPos(blockPos2.getX(), this.getMaxBuildHeight(), blockPos2.getZ())).inflate(3.0);
+			AABB aABB = AABB.encapsulatingFullBlocks(blockPos2, new BlockPos(blockPos2.atY(this.getMaxBuildHeight()))).inflate(3.0);
 			List<LivingEntity> list = this.getEntitiesOfClass(
 				LivingEntity.class, aABB, livingEntity -> livingEntity != null && livingEntity.isAlive() && this.canSeeSky(livingEntity.blockPosition())
 			);
@@ -1206,6 +1221,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@Override
 	public RecipeManager getRecipeManager() {
 		return this.server.getRecipeManager();
+	}
+
+	@Override
+	public TickRateManager tickRateManager() {
+		return this.server.tickRateManager();
 	}
 
 	@Override

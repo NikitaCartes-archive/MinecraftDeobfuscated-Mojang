@@ -50,7 +50,7 @@ public class VertexBuffer implements AutoCloseable {
 		}
 	}
 
-	private VertexFormat uploadVertexBuffer(BufferBuilder.DrawState drawState, ByteBuffer byteBuffer) {
+	private VertexFormat uploadVertexBuffer(BufferBuilder.DrawState drawState, @Nullable ByteBuffer byteBuffer) {
 		boolean bl = false;
 		if (!drawState.format().equals(this.format)) {
 			if (this.format != null) {
@@ -62,7 +62,7 @@ public class VertexBuffer implements AutoCloseable {
 			bl = true;
 		}
 
-		if (!drawState.indexOnly()) {
+		if (byteBuffer != null) {
 			if (!bl) {
 				GlStateManager._glBindBuffer(34962, this.vertexBufferId);
 			}
@@ -74,8 +74,8 @@ public class VertexBuffer implements AutoCloseable {
 	}
 
 	@Nullable
-	private RenderSystem.AutoStorageIndexBuffer uploadIndexBuffer(BufferBuilder.DrawState drawState, ByteBuffer byteBuffer) {
-		if (!drawState.sequentialIndex()) {
+	private RenderSystem.AutoStorageIndexBuffer uploadIndexBuffer(BufferBuilder.DrawState drawState, @Nullable ByteBuffer byteBuffer) {
+		if (byteBuffer != null) {
 			GlStateManager._glBindBuffer(34963, this.indexBufferId);
 			RenderSystem.glBufferData(34963, byteBuffer, this.usage.id);
 			return null;

@@ -343,13 +343,5 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 				)
 			);
 		}
-
-		@Override
-		public void onClick(double d, double e) {
-		}
-
-		@Override
-		public void onRelease(double d, double e) {
-		}
 	}
 }

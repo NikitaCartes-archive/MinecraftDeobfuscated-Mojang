@@ -15,6 +15,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.Util;
 import net.minecraft.server.Bootstrap;
+import net.minecraft.util.TimeUtil;
 import net.minecraft.world.level.GameRules;
 import org.slf4j.Logger;
 
@@ -23,24 +24,24 @@ public class ServerWatchdog implements Runnable {
 	private static final long MAX_SHUTDOWN_TIME = 10000L;
 	private static final int SHUTDOWN_STATUS = 1;
 	private final DedicatedServer server;
-	private final long maxTickTime;
+	private final long maxTickTimeNanos;
 
 	public ServerWatchdog(DedicatedServer dedicatedServer) {
 		this.server = dedicatedServer;
-		this.maxTickTime = dedicatedServer.getMaxTickLength();
+		this.maxTickTimeNanos = dedicatedServer.getMaxTickLength() * TimeUtil.NANOSECONDS_PER_MILLISECOND;
 	}
 
 	public void run() {
 		while (this.server.isRunning()) {
 			long l = this.server.getNextTickTime();
-			long m = Util.getMillis();
+			long m = Util.getNanos();
 			long n = m - l;
-			if (n > this.maxTickTime) {
+			if (n > this.maxTickTimeNanos) {
 				LOGGER.error(
 					LogUtils.FATAL_MARKER,
 					"A single server tick took {} seconds (should be max {})",
-					String.format(Locale.ROOT, "%.2f", (float)n / 1000.0F),
-					String.format(Locale.ROOT, "%.2f", 0.05F)
+					String.format(Locale.ROOT, "%.2f", (float)n / (float)TimeUtil.NANOSECONDS_PER_SECOND),
+					String.format(Locale.ROOT, "%.2f", this.server.tickRateManager().millisecondsPerTick() / (float)TimeUtil.MILLISECONDS_PER_SECOND)
 				);
 				LOGGER.error(LogUtils.FATAL_MARKER, "Considering it to be crashed, server will forcibly shutdown.");
 				ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
@@ -83,7 +84,7 @@ public class ServerWatchdog implements Runnable {
 			}
 
 			try {
-				Thread.sleep(l + this.maxTickTime - m);
+				Thread.sleep((l + this.maxTickTimeNanos - m) / TimeUtil.NANOSECONDS_PER_MILLISECOND);
 			} catch (InterruptedException var15) {
 			}
 		}

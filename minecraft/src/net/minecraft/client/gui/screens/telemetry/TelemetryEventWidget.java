@@ -28,6 +28,7 @@ public class TelemetryEventWidget extends AbstractScrollWidget {
 	private static final int HEADER_HORIZONTAL_PADDING = 32;
 	private static final String TELEMETRY_REQUIRED_TRANSLATION_KEY = "telemetry.event.required";
 	private static final String TELEMETRY_OPTIONAL_TRANSLATION_KEY = "telemetry.event.optional";
+	private static final String TELEMETRY_OPTIONAL_DISABLED_TRANSLATION_KEY = "telemetry.event.optional.disabled";
 	private static final Component PROPERTY_TITLE = Component.translatable("telemetry_info.property_title").withStyle(ChatFormatting.UNDERLINE);
 	private final Font font;
 	private TelemetryEventWidget.Content content;
@@ -49,13 +50,11 @@ public class TelemetryEventWidget extends AbstractScrollWidget {
 		TelemetryEventWidget.ContentBuilder contentBuilder = new TelemetryEventWidget.ContentBuilder(this.containerWidth());
 		List<TelemetryEventType> list = new ArrayList(TelemetryEventType.values());
 		list.sort(Comparator.comparing(TelemetryEventType::isOptIn));
-		if (!bl) {
-			list.removeIf(TelemetryEventType::isOptIn);
-		}
 
 		for (int i = 0; i < list.size(); i++) {
 			TelemetryEventType telemetryEventType = (TelemetryEventType)list.get(i);
-			this.addEventType(contentBuilder, telemetryEventType);
+			boolean bl2 = telemetryEventType.isOptIn() && !bl;
+			this.addEventType(contentBuilder, telemetryEventType, bl2);
 			if (i < list.size() - 1) {
 				contentBuilder.addSpacer(9);
 			}
@@ -101,18 +100,22 @@ public class TelemetryEventWidget extends AbstractScrollWidget {
 		narrationElementOutput.add(NarratedElementType.TITLE, this.content.narration());
 	}
 
-	private void addEventType(TelemetryEventWidget.ContentBuilder contentBuilder, TelemetryEventType telemetryEventType) {
-		String string = telemetryEventType.isOptIn() ? "telemetry.event.optional" : "telemetry.event.required";
-		contentBuilder.addHeader(this.font, Component.translatable(string, telemetryEventType.title()));
-		contentBuilder.addHeader(this.font, telemetryEventType.description().withStyle(ChatFormatting.GRAY));
-		contentBuilder.addSpacer(9 / 2);
-		contentBuilder.addLine(this.font, PROPERTY_TITLE, 2);
-		this.addEventTypeProperties(telemetryEventType, contentBuilder);
+	private Component grayOutIfDisabled(Component component, boolean bl) {
+		return (Component)(bl ? component.copy().withStyle(ChatFormatting.GRAY) : component);
 	}
 
-	private void addEventTypeProperties(TelemetryEventType telemetryEventType, TelemetryEventWidget.ContentBuilder contentBuilder) {
+	private void addEventType(TelemetryEventWidget.ContentBuilder contentBuilder, TelemetryEventType telemetryEventType, boolean bl) {
+		String string = telemetryEventType.isOptIn() ? (bl ? "telemetry.event.optional.disabled" : "telemetry.event.optional") : "telemetry.event.required";
+		contentBuilder.addHeader(this.font, this.grayOutIfDisabled(Component.translatable(string, telemetryEventType.title()), bl));
+		contentBuilder.addHeader(this.font, telemetryEventType.description().withStyle(ChatFormatting.GRAY));
+		contentBuilder.addSpacer(9 / 2);
+		contentBuilder.addLine(this.font, this.grayOutIfDisabled(PROPERTY_TITLE, bl), 2);
+		this.addEventTypeProperties(telemetryEventType, contentBuilder, bl);
+	}
+
+	private void addEventTypeProperties(TelemetryEventType telemetryEventType, TelemetryEventWidget.ContentBuilder contentBuilder, boolean bl) {
 		for (TelemetryProperty<?> telemetryProperty : telemetryEventType.properties()) {
-			contentBuilder.addLine(this.font, telemetryProperty.title());
+			contentBuilder.addLine(this.font, this.grayOutIfDisabled(telemetryProperty.title(), bl));
 		}
 	}
 

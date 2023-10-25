@@ -711,6 +711,8 @@ public class ServerGamePacketListenerImpl
 				jigsawBlockEntity.setPool(ResourceKey.create(Registries.TEMPLATE_POOL, serverboundSetJigsawBlockPacket.getPool()));
 				jigsawBlockEntity.setFinalState(serverboundSetJigsawBlockPacket.getFinalState());
 				jigsawBlockEntity.setJoint(serverboundSetJigsawBlockPacket.getJoint());
+				jigsawBlockEntity.setPlacementPriority(serverboundSetJigsawBlockPacket.getPlacementPriority());
+				jigsawBlockEntity.setSelectionPriority(serverboundSetJigsawBlockPacket.getSelectionPriority());
 				jigsawBlockEntity.setChanged();
 				this.player.level().sendBlockUpdated(blockPos, blockState, blockState, 3);
 			}
@@ -893,20 +895,22 @@ public class ServerGamePacketListenerImpl
 								this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), g, h);
 							}
 						} else {
-							this.receivedMovePacketCount++;
-							int q = this.receivedMovePacketCount - this.knownMovePacketCount;
-							if (q > 5) {
-								LOGGER.debug("{} is sending move packets too frequently ({} packets since last tick)", this.player.getName().getString(), q);
-								q = 1;
-							}
+							if (serverLevel.tickRateManager().runsNormally()) {
+								this.receivedMovePacketCount++;
+								int q = this.receivedMovePacketCount - this.knownMovePacketCount;
+								if (q > 5) {
+									LOGGER.debug("{} is sending move packets too frequently ({} packets since last tick)", this.player.getName().getString(), q);
+									q = 1;
+								}
 
-							if (!this.player.isChangingDimension()
-								&& (!this.player.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !this.player.isFallFlying())) {
-								float r = this.player.isFallFlying() ? 300.0F : 100.0F;
-								if (p - o > (double)(r * (float)q) && !this.isSingleplayerOwner()) {
-									LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName().getString(), l, m, n);
-									this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), this.player.getYRot(), this.player.getXRot());
-									return;
+								if (!this.player.isChangingDimension()
+									&& (!this.player.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !this.player.isFallFlying())) {
+									float r = this.player.isFallFlying() ? 300.0F : 100.0F;
+									if (p - o > (double)(r * (float)q) && !this.isSingleplayerOwner()) {
+										LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName().getString(), l, m, n);
+										this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), this.player.getYRot(), this.player.getXRot());
+										return;
+									}
 								}
 							}
 

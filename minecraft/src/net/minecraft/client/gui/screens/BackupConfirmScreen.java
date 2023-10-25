@@ -45,7 +45,7 @@ public class BackupConfirmScreen extends Screen {
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_CANCEL, button -> this.onCancel.run()).bounds(this.width / 2 - 155 + 80, 124 + i, 150, 20).build()
 		);
-		this.eraseCache = new Checkbox(this.width / 2 - 155 + 80, 76 + i, 150, 20, Component.translatable("selectWorld.backupEraseCache"), false);
+		this.eraseCache = Checkbox.builder(Component.translatable("selectWorld.backupEraseCache"), this.font).pos(this.width / 2 - 155 + 80, 76 + i).build();
 		if (this.promptForCacheErase) {
 			this.addRenderableWidget(this.eraseCache);
 		}

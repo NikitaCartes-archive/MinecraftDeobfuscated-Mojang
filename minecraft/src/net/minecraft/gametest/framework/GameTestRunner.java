@@ -19,7 +19,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 public class GameTestRunner {
 	private static final int MAX_TESTS_PER_BATCH = 50;
-	public static final int PADDING_AROUND_EACH_STRUCTURE = 2;
 	public static final int SPACE_BETWEEN_COLUMNS = 5;
 	public static final int SPACE_BETWEEN_ROWS = 6;
 	public static final int DEFAULT_TESTS_PER_ROW = 8;
@@ -28,7 +27,7 @@ public class GameTestRunner {
 		gameTestInfo.startExecution();
 		gameTestTicker.add(gameTestInfo);
 		gameTestInfo.addListener(new ReportGameListener(gameTestInfo, gameTestTicker, blockPos));
-		gameTestInfo.spawnStructure(blockPos, 2);
+		gameTestInfo.spawnStructure(blockPos);
 	}
 
 	public static Collection<GameTestInfo> runTestBatches(
@@ -71,9 +70,8 @@ public class GameTestRunner {
 			.filter(blockPosx -> serverLevel.getBlockState(blockPosx).is(Blocks.STRUCTURE_BLOCK))
 			.forEach(blockPosx -> {
 				StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPosx);
-				BlockPos blockPos2x = structureBlockEntity.getBlockPos();
 				BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(structureBlockEntity);
-				StructureUtils.clearSpaceForStructure(boundingBox, blockPos2x.getY(), serverLevel);
+				StructureUtils.clearSpaceForStructure(boundingBox, serverLevel);
 			});
 	}
 

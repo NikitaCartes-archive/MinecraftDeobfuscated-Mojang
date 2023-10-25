@@ -34,6 +34,7 @@ public class PartNames {
 	public static final String RIGHT_HIND_FOOT = "right_hind_foot";
 	public static final String LEFT_FRONT_FOOT = "left_front_foot";
 	public static final String RIGHT_FRONT_FOOT = "right_front_foot";
+	public static final String FEET = "feet";
 	public static final String LEFT_HIND_LEG_TIP = "left_hind_leg_tip";
 	public static final String RIGHT_HIND_LEG_TIP = "right_hind_leg_tip";
 	public static final String LEFT_FRONT_LEG_TIP = "left_front_leg_tip";

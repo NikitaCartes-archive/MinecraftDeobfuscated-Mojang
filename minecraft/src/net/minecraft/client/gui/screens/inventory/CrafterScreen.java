@@ -12,6 +12,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.CrafterMenu;
 import net.minecraft.world.inventory.CrafterSlot;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class CrafterScreen extends AbstractContainerScreen<CrafterMenu> {
@@ -35,29 +36,39 @@ public class CrafterScreen extends AbstractContainerScreen<CrafterMenu> {
 
 	@Override
 	protected void slotClicked(Slot slot, int i, int j, ClickType clickType) {
-		if (this.player.isSpectator()) {
-			super.slotClicked(slot, i, j, clickType);
-		} else {
-			if (i > -1 && i < 9 && slot instanceof CrafterSlot) {
-				if (slot.hasItem()) {
-					super.slotClicked(slot, i, j, clickType);
-					return;
-				}
-
-				boolean bl = this.menu.isSlotDisabled(i);
-				if (bl || this.menu.getCarried().isEmpty()) {
-					this.menu.setSlotState(i, bl);
-					super.handleSlotStateChanged(i, this.menu.containerId, bl);
-					if (bl) {
-						this.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.4F, 1.0F);
-					} else {
-						this.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.4F, 0.75F);
+		if (slot instanceof CrafterSlot && !slot.hasItem() && !this.player.isSpectator()) {
+			switch (clickType) {
+				case PICKUP:
+					if (this.menu.isSlotDisabled(i)) {
+						this.enableSlot(i);
+					} else if (this.menu.getCarried().isEmpty()) {
+						this.disableSlot(i);
 					}
-				}
+					break;
+				case SWAP:
+					ItemStack itemStack = this.player.getInventory().getItem(j);
+					if (this.menu.isSlotDisabled(i) && !itemStack.isEmpty()) {
+						this.enableSlot(i);
+					}
 			}
-
-			super.slotClicked(slot, i, j, clickType);
 		}
+
+		super.slotClicked(slot, i, j, clickType);
+	}
+
+	private void enableSlot(int i) {
+		this.updateSlotState(i, true);
+	}
+
+	private void disableSlot(int i) {
+		this.updateSlotState(i, false);
+	}
+
+	private void updateSlotState(int i, boolean bl) {
+		this.menu.setSlotState(i, bl);
+		super.handleSlotStateChanged(i, this.menu.containerId, bl);
+		float f = bl ? 1.0F : 0.75F;
+		this.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.4F, f);
 	}
 
 	@Override

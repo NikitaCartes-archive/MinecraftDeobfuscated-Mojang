@@ -201,7 +201,7 @@ public class GameTestServer extends MinecraftServer {
 
 	private void startTests(ServerLevel serverLevel) {
 		Collection<GameTestInfo> collection = GameTestRunner.runTestBatches(
-			this.testBatches, new BlockPos(0, -60, 0), Rotation.NONE, serverLevel, GameTestTicker.SINGLETON, 8
+			this.testBatches, new BlockPos(0, -59, 0), Rotation.NONE, serverLevel, GameTestTicker.SINGLETON, 8
 		);
 		this.testTracker = new MultipleTestTracker(collection);
 		LOGGER.info("{} tests are now running!", this.testTracker.getTotalCount());

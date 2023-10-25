@@ -34,6 +34,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
@@ -383,6 +384,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public abstract void playSeededSound(@Nullable Player player, Entity entity, Holder<SoundEvent> holder, SoundSource soundSource, float f, float g, long l);
 
+	public void playSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource) {
+		this.playSound(player, d, e, f, soundEvent, soundSource, 1.0F, 1.0F);
+	}
+
 	public void playSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
 		this.playSeededSound(player, d, e, f, soundEvent, soundSource, g, h, this.threadSafeRandom.nextLong());
 	}
@@ -430,12 +435,13 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		}
 
 		Iterator<TickingBlockEntity> iterator = this.blockEntityTickers.iterator();
+		boolean bl = this.tickRateManager().runsNormally();
 
 		while (iterator.hasNext()) {
 			TickingBlockEntity tickingBlockEntity = (TickingBlockEntity)iterator.next();
 			if (tickingBlockEntity.isRemoved()) {
 				iterator.remove();
-			} else if (this.shouldTickBlocksAt(tickingBlockEntity.getPos())) {
+			} else if (bl && this.shouldTickBlocksAt(tickingBlockEntity.getPos())) {
 				tickingBlockEntity.tick();
 			}
 		}
@@ -728,6 +734,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public GameRules getGameRules() {
 		return this.levelData.getGameRules();
 	}
+
+	public abstract TickRateManager tickRateManager();
 
 	public float getThunderLevel(float f) {
 		return Mth.lerp(f, this.oThunderLevel, this.thunderLevel) * this.getRainLevel(f);

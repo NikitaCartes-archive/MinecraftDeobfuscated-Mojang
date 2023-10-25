@@ -37,7 +37,7 @@ public class RaidDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	private static void highlightRaidCenter(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos) {
-		DebugRenderer.renderFilledBox(poseStack, multiBufferSource, blockPos.offset(-1, -1, -1), blockPos.offset(1, 1, 1), 1.0F, 0.0F, 0.0F, 0.15F);
+		DebugRenderer.renderFilledUnitCube(poseStack, multiBufferSource, blockPos, 1.0F, 0.0F, 0.0F, 0.15F);
 		int i = -65536;
 		renderTextOverBlock(poseStack, multiBufferSource, "Raid center", blockPos, -65536);
 	}

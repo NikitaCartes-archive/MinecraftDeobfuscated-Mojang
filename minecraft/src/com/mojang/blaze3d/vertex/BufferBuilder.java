@@ -415,16 +415,26 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 			this.drawState = drawState;
 		}
 
+		@Nullable
 		public ByteBuffer vertexBuffer() {
-			int i = this.pointer + this.drawState.vertexBufferStart();
-			int j = this.pointer + this.drawState.vertexBufferEnd();
-			return BufferBuilder.this.bufferSlice(i, j);
+			if (this.drawState.indexOnly()) {
+				return null;
+			} else {
+				int i = this.pointer + this.drawState.vertexBufferStart();
+				int j = this.pointer + this.drawState.vertexBufferEnd();
+				return BufferBuilder.this.bufferSlice(i, j);
+			}
 		}
 
+		@Nullable
 		public ByteBuffer indexBuffer() {
-			int i = this.pointer + this.drawState.indexBufferStart();
-			int j = this.pointer + this.drawState.indexBufferEnd();
-			return BufferBuilder.this.bufferSlice(i, j);
+			if (this.drawState.sequentialIndex()) {
+				return null;
+			} else {
+				int i = this.pointer + this.drawState.indexBufferStart();
+				int j = this.pointer + this.drawState.indexBufferEnd();
+				return BufferBuilder.this.bufferSlice(i, j);
+			}
 		}
 
 		public BufferBuilder.DrawState drawState() {

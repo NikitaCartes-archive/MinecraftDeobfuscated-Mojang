@@ -135,6 +135,8 @@ import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundTickingStatePacket;
+import net.minecraft.network.protocol.game.ClientboundTickingStepPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
@@ -323,6 +325,8 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundTagQueryPacket.class, ClientboundTagQueryPacket::new)
 					.addPacket(ClientboundTakeItemEntityPacket.class, ClientboundTakeItemEntityPacket::new)
 					.addPacket(ClientboundTeleportEntityPacket.class, ClientboundTeleportEntityPacket::new)
+					.addPacket(ClientboundTickingStatePacket.class, ClientboundTickingStatePacket::new)
+					.addPacket(ClientboundTickingStepPacket.class, ClientboundTickingStepPacket::new)
 					.addPacket(ClientboundUpdateAdvancementsPacket.class, ClientboundUpdateAdvancementsPacket::new)
 					.addPacket(ClientboundUpdateAttributesPacket.class, ClientboundUpdateAttributesPacket::new)
 					.addPacket(ClientboundUpdateMobEffectPacket.class, ClientboundUpdateMobEffectPacket::new)

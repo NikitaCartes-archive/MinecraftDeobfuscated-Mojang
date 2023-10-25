@@ -26,17 +26,16 @@ import net.minecraft.world.phys.Vec3;
 public class ThrownTrident extends AbstractArrow {
 	private static final EntityDataAccessor<Byte> ID_LOYALTY = SynchedEntityData.defineId(ThrownTrident.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Boolean> ID_FOIL = SynchedEntityData.defineId(ThrownTrident.class, EntityDataSerializers.BOOLEAN);
-	private ItemStack tridentItem = new ItemStack(Items.TRIDENT);
+	private static final ItemStack DEFAULT_ARROW_STACK = new ItemStack(Items.TRIDENT);
 	private boolean dealtDamage;
 	public int clientSideReturnTridentTickCount;
 
 	public ThrownTrident(EntityType<? extends ThrownTrident> entityType, Level level) {
-		super(entityType, level);
+		super(entityType, level, DEFAULT_ARROW_STACK);
 	}
 
 	public ThrownTrident(Level level, LivingEntity livingEntity, ItemStack itemStack) {
-		super(EntityType.TRIDENT, livingEntity, level);
-		this.tridentItem = itemStack.copy();
+		super(EntityType.TRIDENT, livingEntity, level, itemStack);
 		this.entityData.set(ID_LOYALTY, (byte)EnchantmentHelper.getLoyalty(itemStack));
 		this.entityData.set(ID_FOIL, itemStack.hasFoil());
 	}
@@ -89,11 +88,6 @@ public class ThrownTrident extends AbstractArrow {
 		return entity == null || !entity.isAlive() ? false : !(entity instanceof ServerPlayer) || !entity.isSpectator();
 	}
 
-	@Override
-	protected ItemStack getPickupItem() {
-		return this.tridentItem.copy();
-	}
-
 	public boolean isFoil() {
 		return this.entityData.get(ID_FOIL);
 	}
@@ -109,7 +103,7 @@ public class ThrownTrident extends AbstractArrow {
 		Entity entity = entityHitResult.getEntity();
 		float f = 8.0F;
 		if (entity instanceof LivingEntity livingEntity) {
-			f += EnchantmentHelper.getDamageBonus(this.tridentItem, livingEntity.getMobType());
+			f += EnchantmentHelper.getDamageBonus(this.getPickupItemStackOrigin(), livingEntity.getMobType());
 		}
 
 		Entity entity2 = this.getOwner();
@@ -151,7 +145,7 @@ public class ThrownTrident extends AbstractArrow {
 	}
 
 	public boolean isChanneling() {
-		return EnchantmentHelper.hasChanneling(this.tridentItem);
+		return EnchantmentHelper.hasChanneling(this.getPickupItemStackOrigin());
 	}
 
 	@Override
@@ -174,18 +168,13 @@ public class ThrownTrident extends AbstractArrow {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		if (compoundTag.contains("Trident", 10)) {
-			this.tridentItem = ItemStack.of(compoundTag.getCompound("Trident"));
-		}
-
 		this.dealtDamage = compoundTag.getBoolean("DealtDamage");
-		this.entityData.set(ID_LOYALTY, (byte)EnchantmentHelper.getLoyalty(this.tridentItem));
+		this.entityData.set(ID_LOYALTY, (byte)EnchantmentHelper.getLoyalty(this.getPickupItemStackOrigin()));
 	}
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.put("Trident", this.tridentItem.save(new CompoundTag()));
 		compoundTag.putBoolean("DealtDamage", this.dealtDamage);
 	}
 

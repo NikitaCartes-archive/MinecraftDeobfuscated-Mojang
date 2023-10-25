@@ -738,12 +738,12 @@ public class Util {
 		return objectArrayList2;
 	}
 
-	public static <T> void shuffle(ObjectArrayList<T> objectArrayList, RandomSource randomSource) {
-		int i = objectArrayList.size();
+	public static <T> void shuffle(List<T> list, RandomSource randomSource) {
+		int i = list.size();
 
 		for (int j = i; j > 1; j--) {
 			int k = randomSource.nextInt(j);
-			objectArrayList.set(j - 1, objectArrayList.set(k, objectArrayList.get(j - 1)));
+			list.set(j - 1, list.set(k, list.get(j - 1)));
 		}
 	}
 

@@ -114,7 +114,7 @@ public class StructureTemplate {
 			this.palettes.clear();
 			this.palettes.add(new StructureTemplate.Palette(list4));
 			if (bl) {
-				this.fillEntityList(level, blockPos3, blockPos4.offset(1, 1, 1));
+				this.fillEntityList(level, blockPos3, blockPos4);
 			} else {
 				this.entityInfoList.clear();
 			}
@@ -154,7 +154,7 @@ public class StructureTemplate {
 	}
 
 	private void fillEntityList(Level level, BlockPos blockPos, BlockPos blockPos2) {
-		List<Entity> list = level.getEntitiesOfClass(Entity.class, new AABB(blockPos, blockPos2), entityx -> !(entityx instanceof Player));
+		List<Entity> list = level.getEntitiesOfClass(Entity.class, AABB.encapsulatingFullBlocks(blockPos, blockPos2), entityx -> !(entityx instanceof Player));
 		this.entityInfoList.clear();
 
 		for (Entity entity : list) {

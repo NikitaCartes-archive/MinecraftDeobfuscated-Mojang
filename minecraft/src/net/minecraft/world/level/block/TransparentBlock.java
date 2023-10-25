@@ -9,13 +9,17 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public abstract class AbstractGlassBlock extends HalfTransparentBlock {
-	protected AbstractGlassBlock(BlockBehaviour.Properties properties) {
+public class TransparentBlock extends HalfTransparentBlock {
+	public static final MapCodec<TransparentBlock> CODEC = simpleCodec(TransparentBlock::new);
+
+	protected TransparentBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
 	@Override
-	protected abstract MapCodec<? extends AbstractGlassBlock> codec();
+	protected MapCodec<? extends TransparentBlock> codec() {
+		return CODEC;
+	}
 
 	@Override
 	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {

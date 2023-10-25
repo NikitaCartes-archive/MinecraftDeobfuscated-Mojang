@@ -206,71 +206,107 @@ public class BlockFamilies {
 		.stairs(Blocks.MOSSY_STONE_BRICK_STAIRS)
 		.slab(Blocks.MOSSY_STONE_BRICK_SLAB)
 		.getFamily();
-	public static final BlockFamily COPPER_BLOCK = familyBuilder(Blocks.COPPER_BLOCK).cut(Blocks.CUT_COPPER).dontGenerateModel().getFamily();
+	public static final BlockFamily COPPER_BLOCK = familyBuilder(Blocks.COPPER_BLOCK)
+		.cut(Blocks.CUT_COPPER)
+		.door(Blocks.COPPER_DOOR)
+		.trapdoor(Blocks.COPPER_TRAPDOOR)
+		.dontGenerateModel()
+		.getFamily();
 	public static final BlockFamily CUT_COPPER = familyBuilder(Blocks.CUT_COPPER)
 		.slab(Blocks.CUT_COPPER_SLAB)
 		.stairs(Blocks.CUT_COPPER_STAIRS)
+		.chiseled(Blocks.CHISELED_COPPER)
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WAXED_COPPER_BLOCK = familyBuilder(Blocks.WAXED_COPPER_BLOCK)
 		.cut(Blocks.WAXED_CUT_COPPER)
+		.door(Blocks.WAXED_COPPER_DOOR)
+		.trapdoor(Blocks.WAXED_COPPER_TRAPDOOR)
 		.recipeGroupPrefix("waxed_cut_copper")
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WAXED_CUT_COPPER = familyBuilder(Blocks.WAXED_CUT_COPPER)
 		.slab(Blocks.WAXED_CUT_COPPER_SLAB)
 		.stairs(Blocks.WAXED_CUT_COPPER_STAIRS)
+		.chiseled(Blocks.WAXED_CHISELED_COPPER)
 		.recipeGroupPrefix("waxed_cut_copper")
 		.dontGenerateModel()
 		.getFamily();
-	public static final BlockFamily EXPOSED_COPPER = familyBuilder(Blocks.EXPOSED_COPPER).cut(Blocks.EXPOSED_CUT_COPPER).dontGenerateModel().getFamily();
+	public static final BlockFamily EXPOSED_COPPER = familyBuilder(Blocks.EXPOSED_COPPER)
+		.cut(Blocks.EXPOSED_CUT_COPPER)
+		.door(Blocks.EXPOSED_COPPER_DOOR)
+		.trapdoor(Blocks.EXPOSED_COPPER_TRAPDOOR)
+		.dontGenerateModel()
+		.getFamily();
 	public static final BlockFamily EXPOSED_CUT_COPPER = familyBuilder(Blocks.EXPOSED_CUT_COPPER)
 		.slab(Blocks.EXPOSED_CUT_COPPER_SLAB)
 		.stairs(Blocks.EXPOSED_CUT_COPPER_STAIRS)
+		.chiseled(Blocks.EXPOSED_CHISELED_COPPER)
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WAXED_EXPOSED_COPPER = familyBuilder(Blocks.WAXED_EXPOSED_COPPER)
 		.cut(Blocks.WAXED_EXPOSED_CUT_COPPER)
+		.door(Blocks.WAXED_EXPOSED_COPPER_DOOR)
+		.trapdoor(Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR)
 		.recipeGroupPrefix("waxed_exposed_cut_copper")
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WAXED_EXPOSED_CUT_COPPER = familyBuilder(Blocks.WAXED_EXPOSED_CUT_COPPER)
 		.slab(Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB)
 		.stairs(Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS)
+		.chiseled(Blocks.WAXED_EXPOSED_CHISELED_COPPER)
 		.recipeGroupPrefix("waxed_exposed_cut_copper")
 		.dontGenerateModel()
 		.getFamily();
-	public static final BlockFamily WEATHERED_COPPER = familyBuilder(Blocks.WEATHERED_COPPER).cut(Blocks.WEATHERED_CUT_COPPER).dontGenerateModel().getFamily();
+	public static final BlockFamily WEATHERED_COPPER = familyBuilder(Blocks.WEATHERED_COPPER)
+		.cut(Blocks.WEATHERED_CUT_COPPER)
+		.door(Blocks.WEATHERED_COPPER_DOOR)
+		.trapdoor(Blocks.WEATHERED_COPPER_TRAPDOOR)
+		.dontGenerateModel()
+		.getFamily();
 	public static final BlockFamily WEATHERED_CUT_COPPER = familyBuilder(Blocks.WEATHERED_CUT_COPPER)
 		.slab(Blocks.WEATHERED_CUT_COPPER_SLAB)
 		.stairs(Blocks.WEATHERED_CUT_COPPER_STAIRS)
+		.chiseled(Blocks.WEATHERED_CHISELED_COPPER)
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WAXED_WEATHERED_COPPER = familyBuilder(Blocks.WAXED_WEATHERED_COPPER)
 		.cut(Blocks.WAXED_WEATHERED_CUT_COPPER)
+		.door(Blocks.WAXED_WEATHERED_COPPER_DOOR)
+		.trapdoor(Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR)
 		.recipeGroupPrefix("waxed_weathered_cut_copper")
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WAXED_WEATHERED_CUT_COPPER = familyBuilder(Blocks.WAXED_WEATHERED_CUT_COPPER)
 		.slab(Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB)
 		.stairs(Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS)
+		.chiseled(Blocks.WAXED_WEATHERED_CHISELED_COPPER)
 		.recipeGroupPrefix("waxed_weathered_cut_copper")
 		.dontGenerateModel()
 		.getFamily();
-	public static final BlockFamily OXIDIZED_COPPER = familyBuilder(Blocks.OXIDIZED_COPPER).cut(Blocks.OXIDIZED_CUT_COPPER).dontGenerateModel().getFamily();
+	public static final BlockFamily OXIDIZED_COPPER = familyBuilder(Blocks.OXIDIZED_COPPER)
+		.cut(Blocks.OXIDIZED_CUT_COPPER)
+		.door(Blocks.OXIDIZED_COPPER_DOOR)
+		.trapdoor(Blocks.OXIDIZED_COPPER_TRAPDOOR)
+		.dontGenerateModel()
+		.getFamily();
 	public static final BlockFamily OXIDIZED_CUT_COPPER = familyBuilder(Blocks.OXIDIZED_CUT_COPPER)
 		.slab(Blocks.OXIDIZED_CUT_COPPER_SLAB)
 		.stairs(Blocks.OXIDIZED_CUT_COPPER_STAIRS)
+		.chiseled(Blocks.OXIDIZED_CHISELED_COPPER)
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WAXED_OXIDIZED_COPPER = familyBuilder(Blocks.WAXED_OXIDIZED_COPPER)
 		.cut(Blocks.WAXED_OXIDIZED_CUT_COPPER)
+		.door(Blocks.WAXED_OXIDIZED_COPPER_DOOR)
+		.trapdoor(Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR)
 		.recipeGroupPrefix("waxed_oxidized_cut_copper")
 		.dontGenerateModel()
 		.getFamily();
 	public static final BlockFamily WAXED_OXIDIZED_CUT_COPPER = familyBuilder(Blocks.WAXED_OXIDIZED_CUT_COPPER)
 		.slab(Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB)
 		.stairs(Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS)
+		.chiseled(Blocks.WAXED_OXIDIZED_CHISELED_COPPER)
 		.recipeGroupPrefix("waxed_oxidized_cut_copper")
 		.dontGenerateModel()
 		.getFamily();
@@ -303,6 +339,25 @@ public class BlockFamilies {
 	public static final BlockFamily POLISHED_GRANITE = familyBuilder(Blocks.POLISHED_GRANITE)
 		.stairs(Blocks.POLISHED_GRANITE_STAIRS)
 		.slab(Blocks.POLISHED_GRANITE_SLAB)
+		.getFamily();
+	public static final BlockFamily TUFF = familyBuilder(Blocks.TUFF)
+		.wall(Blocks.TUFF_WALL)
+		.stairs(Blocks.TUFF_STAIRS)
+		.slab(Blocks.TUFF_SLAB)
+		.chiseled(Blocks.CHISELED_TUFF)
+		.polished(Blocks.POLISHED_TUFF)
+		.getFamily();
+	public static final BlockFamily POLISHED_TUFF = familyBuilder(Blocks.POLISHED_TUFF)
+		.wall(Blocks.POLISHED_TUFF_WALL)
+		.stairs(Blocks.POLISHED_TUFF_STAIRS)
+		.slab(Blocks.POLISHED_TUFF_SLAB)
+		.polished(Blocks.TUFF_BRICKS)
+		.getFamily();
+	public static final BlockFamily TUFF_BRICKS = familyBuilder(Blocks.TUFF_BRICKS)
+		.wall(Blocks.TUFF_BRICK_WALL)
+		.stairs(Blocks.TUFF_BRICK_STAIRS)
+		.slab(Blocks.TUFF_BRICK_SLAB)
+		.chiseled(Blocks.CHISELED_TUFF_BRICKS)
 		.getFamily();
 	public static final BlockFamily NETHER_BRICKS = familyBuilder(Blocks.NETHER_BRICKS)
 		.fence(Blocks.NETHER_BRICK_FENCE)

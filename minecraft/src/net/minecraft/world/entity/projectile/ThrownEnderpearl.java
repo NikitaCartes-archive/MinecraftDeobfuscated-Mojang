@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -66,6 +68,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 
 					entity.resetFallDistance();
 					entity.hurt(this.damageSources().fall(), 5.0F);
+					this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS);
 				}
 			} else if (entity != null) {
 				entity.teleportTo(this.getX(), this.getY(), this.getZ());

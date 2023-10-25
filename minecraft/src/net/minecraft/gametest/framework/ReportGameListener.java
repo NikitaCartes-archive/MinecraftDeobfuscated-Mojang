@@ -118,7 +118,7 @@ class ReportGameListener implements GameTestListener {
 		gameTestInfo.startExecution();
 		this.testTicker.add(gameTestInfo);
 		gameTestInfo.addListener(this);
-		gameTestInfo.spawnStructure(this.structurePos, 2);
+		gameTestInfo.spawnStructure(this.structurePos);
 	}
 
 	protected static void spawnBeacon(GameTestInfo gameTestInfo, Block block) {

@@ -321,7 +321,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	private boolean shouldConfigureButtonBeActive(RealmsServer realmsServer) {
-		return this.isSelfOwnedServer(realmsServer);
+		return this.isSelfOwnedServer(realmsServer) && realmsServer.state != RealmsServer.State.UNINITIALIZED;
 	}
 
 	private boolean shouldLeaveButtonBeActive(RealmsServer realmsServer) {
@@ -553,7 +553,7 @@ public class RealmsMainScreen extends RealmsScreen {
 					try {
 						RealmsClient realmsClient = RealmsClient.create();
 						realmsClient.uninviteMyselfFrom(realmsServer.id);
-						RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.removeServer(realmsServer));
+						RealmsMainScreen.this.minecraft.execute(RealmsMainScreen::refreshServerList);
 					} catch (RealmsServiceException var2) {
 						RealmsMainScreen.LOGGER.error("Couldn't configure world", (Throwable)var2);
 						RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.minecraft.setScreen(new RealmsGenericErrorScreen(var2, RealmsMainScreen.this)));
@@ -563,20 +563,6 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		this.minecraft.setScreen(this);
-	}
-
-	void removeServer(RealmsServer realmsServer) {
-		this.serverList.removeItem(realmsServer);
-		this.realmSelectionList.children().removeIf(entry -> {
-			if (entry instanceof RealmsMainScreen.ServerEntry serverEntry) {
-				RealmsServer realmsServer2 = serverEntry.getServer();
-				return realmsServer2.id == realmsServer.id;
-			} else {
-				return false;
-			}
-		});
-		this.realmSelectionList.setSelected(null);
-		this.updateButtonStates();
 	}
 
 	void dismissNotification(UUID uUID) {
@@ -1141,9 +1127,9 @@ public class RealmsMainScreen extends RealmsScreen {
 			boolean bl = RealmsMainScreen.this.isSelfOwnedServer(realmsServer);
 			if (RealmsMainScreen.isSnapshot() && bl && realmsServer.isSnapshotRealm()) {
 				this.tooltip = Tooltip.create(Component.translatable("mco.snapshot.paired", realmsServer.parentWorldName));
-			} else if (RealmsMainScreen.isSnapshot() && !bl && realmsServer.needsUpgrade()) {
+			} else if (!bl && realmsServer.needsUpgrade()) {
 				this.tooltip = Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.upgrade", realmsServer.owner));
-			} else if (RealmsMainScreen.isSnapshot() && !bl && realmsServer.needsDowngrade()) {
+			} else if (!bl && realmsServer.needsDowngrade()) {
 				this.tooltip = Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.downgrade", realmsServer.activeVersion));
 			} else {
 				this.tooltip = null;

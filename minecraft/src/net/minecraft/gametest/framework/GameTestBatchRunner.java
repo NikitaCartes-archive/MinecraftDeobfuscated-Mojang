@@ -4,11 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.phys.AABB;
@@ -75,6 +78,8 @@ public class GameTestBatchRunner {
 				private void testCompleted() {
 					if (multipleTestTracker.isDone()) {
 						gameTestBatch.runAfterBatchFunction(GameTestBatchRunner.this.level);
+						LongSet longSet = new LongArraySet(GameTestBatchRunner.this.level.getForcedChunks());
+						longSet.forEach(l -> GameTestBatchRunner.this.level.setChunkForced(ChunkPos.getX(l), ChunkPos.getZ(l), false));
 						GameTestBatchRunner.this.runBatch(i + 1);
 					}
 				}
@@ -106,7 +111,7 @@ public class GameTestBatchRunner {
 		for (GameTestInfo gameTestInfo : collection) {
 			BlockPos blockPos = new BlockPos(this.nextTestNorthWestCorner);
 			StructureBlockEntity structureBlockEntity = StructureUtils.spawnStructure(
-				gameTestInfo.getStructureName(), blockPos, gameTestInfo.getRotation(), 2, this.level, true
+				gameTestInfo.getStructureName(), blockPos, gameTestInfo.getRotation(), this.level, true
 			);
 			AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
 			gameTestInfo.setStructureBlockPos(structureBlockEntity.getBlockPos());

@@ -84,6 +84,7 @@ import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
@@ -100,14 +101,18 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.ContainerSynchronizer;
@@ -150,6 +155,7 @@ public class ServerPlayer extends Player {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_XZ = 32;
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_Y = 10;
+	private static final int FLY_STAT_RECORDING_SPEED = 25;
 	public ServerGamePacketListenerImpl connection;
 	public final MinecraftServer server;
 	public final ServerPlayerGameMode gameMode;
@@ -950,6 +956,13 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
+	protected void pushEntities() {
+		if (this.level().tickRateManager().runsNormally()) {
+			super.pushEntities();
+		}
+	}
+
+	@Override
 	public void openTextEdit(SignBlockEntity signBlockEntity, boolean bl) {
 		this.connection.send(new ClientboundBlockUpdatePacket(this.level(), signBlockEntity.getBlockPos()));
 		this.connection.send(new ClientboundOpenSignEditorPacket(signBlockEntity.getBlockPos(), bl));
@@ -1044,6 +1057,96 @@ public class ServerPlayer extends Player {
 			this.jumping = bl;
 			this.setShiftKeyDown(bl2);
 		}
+	}
+
+	@Override
+	public void travel(Vec3 vec3) {
+		double d = this.getX();
+		double e = this.getY();
+		double f = this.getZ();
+		super.travel(vec3);
+		this.checkMovementStatistics(this.getX() - d, this.getY() - e, this.getZ() - f);
+	}
+
+	@Override
+	public void rideTick() {
+		double d = this.getX();
+		double e = this.getY();
+		double f = this.getZ();
+		super.rideTick();
+		this.checkRidingStatistics(this.getX() - d, this.getY() - e, this.getZ() - f);
+	}
+
+	public void checkMovementStatistics(double d, double e, double f) {
+		if (!this.isPassenger() && !didNotMove(d, e, f)) {
+			if (this.isSwimming()) {
+				int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0F);
+				if (i > 0) {
+					this.awardStat(Stats.SWIM_ONE_CM, i);
+					this.causeFoodExhaustion(0.01F * (float)i * 0.01F);
+				}
+			} else if (this.isEyeInFluid(FluidTags.WATER)) {
+				int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0F);
+				if (i > 0) {
+					this.awardStat(Stats.WALK_UNDER_WATER_ONE_CM, i);
+					this.causeFoodExhaustion(0.01F * (float)i * 0.01F);
+				}
+			} else if (this.isInWater()) {
+				int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0F);
+				if (i > 0) {
+					this.awardStat(Stats.WALK_ON_WATER_ONE_CM, i);
+					this.causeFoodExhaustion(0.01F * (float)i * 0.01F);
+				}
+			} else if (this.onClimbable()) {
+				if (e > 0.0) {
+					this.awardStat(Stats.CLIMB_ONE_CM, (int)Math.round(e * 100.0));
+				}
+			} else if (this.onGround()) {
+				int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0F);
+				if (i > 0) {
+					if (this.isSprinting()) {
+						this.awardStat(Stats.SPRINT_ONE_CM, i);
+						this.causeFoodExhaustion(0.1F * (float)i * 0.01F);
+					} else if (this.isCrouching()) {
+						this.awardStat(Stats.CROUCH_ONE_CM, i);
+						this.causeFoodExhaustion(0.0F * (float)i * 0.01F);
+					} else {
+						this.awardStat(Stats.WALK_ONE_CM, i);
+						this.causeFoodExhaustion(0.0F * (float)i * 0.01F);
+					}
+				}
+			} else if (this.isFallFlying()) {
+				int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0F);
+				this.awardStat(Stats.AVIATE_ONE_CM, i);
+			} else {
+				int i = Math.round((float)Math.sqrt(d * d + f * f) * 100.0F);
+				if (i > 25) {
+					this.awardStat(Stats.FLY_ONE_CM, i);
+				}
+			}
+		}
+	}
+
+	private void checkRidingStatistics(double d, double e, double f) {
+		if (this.isPassenger() && !didNotMove(d, e, f)) {
+			int i = Math.round((float)Math.sqrt(d * d + e * e + f * f) * 100.0F);
+			Entity entity = this.getVehicle();
+			if (entity instanceof AbstractMinecart) {
+				this.awardStat(Stats.MINECART_ONE_CM, i);
+			} else if (entity instanceof Boat) {
+				this.awardStat(Stats.BOAT_ONE_CM, i);
+			} else if (entity instanceof Pig) {
+				this.awardStat(Stats.PIG_ONE_CM, i);
+			} else if (entity instanceof AbstractHorse) {
+				this.awardStat(Stats.HORSE_ONE_CM, i);
+			} else if (entity instanceof Strider) {
+				this.awardStat(Stats.STRIDER_ONE_CM, i);
+			}
+		}
+	}
+
+	private static boolean didNotMove(double d, double e, double f) {
+		return d == 0.0 && e == 0.0 && f == 0.0;
 	}
 
 	@Override

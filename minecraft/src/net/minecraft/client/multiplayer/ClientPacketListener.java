@@ -208,6 +208,8 @@ import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundTickingStatePacket;
+import net.minecraft.network.protocol.game.ClientboundTickingStepPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
@@ -239,6 +241,7 @@ import net.minecraft.util.SignatureValidator;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.TickRateManager;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -524,6 +527,25 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				entity.lerpTo(d, e, f, g, h, 3);
 				entity.setOnGround(clientboundTeleportEntityPacket.isOnGround());
 			}
+		}
+	}
+
+	@Override
+	public void handleTickingState(ClientboundTickingStatePacket clientboundTickingStatePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundTickingStatePacket, this, this.minecraft);
+		if (this.minecraft.level != null) {
+			TickRateManager tickRateManager = this.minecraft.level.tickRateManager();
+			tickRateManager.setTickRate(clientboundTickingStatePacket.tickRate());
+			tickRateManager.setFrozen(clientboundTickingStatePacket.isFrozen());
+		}
+	}
+
+	@Override
+	public void handleTickingStep(ClientboundTickingStepPacket clientboundTickingStepPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundTickingStepPacket, this, this.minecraft);
+		if (this.minecraft.level != null) {
+			TickRateManager tickRateManager = this.minecraft.level.tickRateManager();
+			tickRateManager.setFrozenTicksToRun(clientboundTickingStepPacket.tickSteps());
 		}
 	}
 

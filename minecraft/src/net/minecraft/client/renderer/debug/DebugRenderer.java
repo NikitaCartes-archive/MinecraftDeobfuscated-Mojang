@@ -123,13 +123,17 @@ public class DebugRenderer {
 		}
 	}
 
+	public static void renderFilledUnitCube(PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos, float f, float g, float h, float i) {
+		renderFilledBox(poseStack, multiBufferSource, blockPos, blockPos.offset(1, 1, 1), f, g, h, i);
+	}
+
 	public static void renderFilledBox(
 		PoseStack poseStack, MultiBufferSource multiBufferSource, BlockPos blockPos, BlockPos blockPos2, float f, float g, float h, float i
 	) {
 		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 		if (camera.isInitialized()) {
 			Vec3 vec3 = camera.getPosition().reverse();
-			AABB aABB = new AABB(blockPos, blockPos2).move(vec3);
+			AABB aABB = AABB.encapsulatingFullBlocks(blockPos, blockPos2).move(vec3);
 			renderFilledBox(poseStack, multiBufferSource, aABB, f, g, h, i);
 		}
 	}

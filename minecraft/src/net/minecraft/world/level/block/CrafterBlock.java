@@ -174,6 +174,7 @@ public class CrafterBlock extends BaseEntityBlock {
 						itemStackx.shrink(1);
 					}
 				});
+				crafterBlockEntity.setChanged();
 			}
 		}
 	}
