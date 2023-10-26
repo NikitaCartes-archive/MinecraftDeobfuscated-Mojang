@@ -239,11 +239,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 
 	@Override
 	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 		if (this.stateChanged) {
 			this.lastScreen.resetScreen();
 		}
-
-		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	private void fetchServerData(long l) {
