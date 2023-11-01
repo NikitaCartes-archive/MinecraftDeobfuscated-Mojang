@@ -21,35 +21,39 @@ public class ChorusFruitItem extends Item {
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
 		ItemStack itemStack2 = super.finishUsingItem(itemStack, level, livingEntity);
 		if (!level.isClientSide) {
-			double d = livingEntity.getX();
-			double e = livingEntity.getY();
-			double f = livingEntity.getZ();
-
 			for (int i = 0; i < 16; i++) {
-				double g = livingEntity.getX() + (livingEntity.getRandom().nextDouble() - 0.5) * 16.0;
-				double h = Mth.clamp(
+				double d = livingEntity.getX() + (livingEntity.getRandom().nextDouble() - 0.5) * 16.0;
+				double e = Mth.clamp(
 					livingEntity.getY() + (double)(livingEntity.getRandom().nextInt(16) - 8),
 					(double)level.getMinBuildHeight(),
 					(double)(level.getMinBuildHeight() + ((ServerLevel)level).getLogicalHeight() - 1)
 				);
-				double j = livingEntity.getZ() + (livingEntity.getRandom().nextDouble() - 0.5) * 16.0;
+				double f = livingEntity.getZ() + (livingEntity.getRandom().nextDouble() - 0.5) * 16.0;
 				if (livingEntity.isPassenger()) {
 					livingEntity.stopRiding();
 				}
 
 				Vec3 vec3 = livingEntity.position();
-				if (livingEntity.randomTeleport(g, h, j, true)) {
+				if (livingEntity.randomTeleport(d, e, f, true)) {
 					level.gameEvent(GameEvent.TELEPORT, vec3, GameEvent.Context.of(livingEntity));
-					SoundEvent soundEvent = livingEntity instanceof Fox ? SoundEvents.FOX_TELEPORT : SoundEvents.CHORUS_FRUIT_TELEPORT;
-					level.playSound(null, d, e, f, soundEvent, SoundSource.PLAYERS, 1.0F, 1.0F);
-					livingEntity.playSound(soundEvent, 1.0F, 1.0F);
+					SoundSource soundSource;
+					SoundEvent soundEvent;
+					if (livingEntity instanceof Fox) {
+						soundEvent = SoundEvents.FOX_TELEPORT;
+						soundSource = SoundSource.NEUTRAL;
+					} else {
+						soundEvent = SoundEvents.CHORUS_FRUIT_TELEPORT;
+						soundSource = SoundSource.PLAYERS;
+					}
+
+					level.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), soundEvent, soundSource);
 					livingEntity.resetFallDistance();
 					break;
 				}
 			}
 
-			if (livingEntity instanceof Player) {
-				((Player)livingEntity).getCooldowns().addCooldown(this, 20);
+			if (livingEntity instanceof Player player) {
+				player.getCooldowns().addCooldown(this, 20);
 			}
 		}
 

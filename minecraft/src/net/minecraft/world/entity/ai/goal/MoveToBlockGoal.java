@@ -63,7 +63,7 @@ public abstract class MoveToBlockGoal extends Goal {
 	protected void moveMobToBlock() {
 		this.mob
 			.getNavigation()
-			.moveTo((double)((float)this.blockPos.getX()) + 0.5, (double)(this.blockPos.getY() + 1), (double)((float)this.blockPos.getZ()) + 0.5, this.speedModifier);
+			.moveTo((double)this.blockPos.getX() + 0.5, (double)(this.blockPos.getY() + 1), (double)this.blockPos.getZ() + 0.5, this.speedModifier);
 	}
 
 	public double acceptedDistance() {
@@ -86,9 +86,7 @@ public abstract class MoveToBlockGoal extends Goal {
 			this.reachedTarget = false;
 			this.tryTicks++;
 			if (this.shouldRecalculatePath()) {
-				this.mob
-					.getNavigation()
-					.moveTo((double)((float)blockPos.getX()) + 0.5, (double)blockPos.getY(), (double)((float)blockPos.getZ()) + 0.5, this.speedModifier);
+				this.mob.getNavigation().moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, this.speedModifier);
 			}
 		} else {
 			this.reachedTarget = true;

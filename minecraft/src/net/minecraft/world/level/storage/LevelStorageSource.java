@@ -7,7 +7,6 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
@@ -276,7 +275,7 @@ public class LevelStorageSource {
 	}
 
 	static CompoundTag readLevelDataTagRaw(Path path) throws IOException {
-		return NbtIo.readCompressed(path.toFile(), NbtAccounter.create(104857600L));
+		return NbtIo.readCompressed(path, NbtAccounter.create(104857600L));
 	}
 
 	static Dynamic<?> readLevelDataTagFixed(Path path, DataFixer dataFixer) throws IOException {
@@ -366,7 +365,7 @@ public class LevelStorageSource {
 	@Nullable
 	private static Tag readLightweightData(Path path) throws IOException {
 		SkipFields skipFields = new SkipFields(new FieldSelector("Data", CompoundTag.TYPE, "Player"), new FieldSelector("Data", CompoundTag.TYPE, "WorldGenSettings"));
-		NbtIo.parseCompressed(path.toFile(), skipFields, NbtAccounter.create(104857600L));
+		NbtIo.parseCompressed(path, skipFields, NbtAccounter.create(104857600L));
 		return skipFields.getResult();
 	}
 
@@ -546,49 +545,45 @@ public class LevelStorageSource {
 		}
 
 		private void saveLevelData(CompoundTag compoundTag) {
-			File file = this.levelDirectory.path().toFile();
+			Path path = this.levelDirectory.path();
 			Exception exception = null;
 
 			try {
-				File file2 = File.createTempFile("level", ".dat", file);
-				NbtIo.writeCompressed(compoundTag, file2);
-				File file3 = this.levelDirectory.oldDataFile().toFile();
-				File file4 = this.levelDirectory.dataFile().toFile();
-				Util.safeReplaceFile(file4, file2, file3);
-			} catch (Exception var10) {
-				LevelStorageSource.LOGGER.error("Failed to save level {}", file, var10);
-				exception = var10;
+				Path path2 = Files.createTempFile(path, "level", ".dat");
+				NbtIo.writeCompressed(compoundTag, path2);
+				Path path3 = this.levelDirectory.oldDataFile();
+				Path path4 = this.levelDirectory.dataFile();
+				Util.safeReplaceFile(path4, path2, path3);
+			} catch (Exception var9) {
+				LevelStorageSource.LOGGER.error("Failed to save level {}", path, var9);
+				exception = var9;
 			}
 
-			Path path = this.levelDirectory.dataFile();
-			if (Files.exists(path, new LinkOption[0])) {
-				File file3 = path.toFile();
-
+			Path path2 = this.levelDirectory.dataFile();
+			if (Files.exists(path2, new LinkOption[0])) {
 				try {
-					NbtIo.readCompressed(file3, NbtAccounter.create(104857600L));
-				} catch (Exception var11) {
+					NbtIo.readCompressed(path2, NbtAccounter.create(104857600L));
+				} catch (Exception var10) {
 					if (LevelStorageSource.this.crashedWhileSaving) {
-						LevelStorageSource.LOGGER.error("Failed to save level {}. Skipping further handling, reported errors earlier already.", file, var11);
+						LevelStorageSource.LOGGER.error("Failed to save level {}. Skipping further handling, reported errors earlier already.", path, var10);
 					} else {
 						LevelStorageSource.this.crashedWhileSaving = true;
 						CrashReport crashReport = new CrashReport("Won the zlib-lottery?", new IllegalStateException("Failed to read back written world data", exception));
 						CrashReportCategory crashReportCategory = crashReport.addCategory("level.dat");
 						crashReportCategory.setDetail("World folder", this.levelDirectory.directoryName());
 						crashReportCategory.setDetail(
-							"Reading Exception", (var11 instanceof ReportedException reportedException ? reportedException.getCause() : var11).toString()
+							"Reading Exception", (var10 instanceof ReportedException reportedException ? reportedException.getCause() : var10).toString()
 						);
 						crashReportCategory.setDetail("Uncompressed", (CrashReportDetail<String>)(() -> Base64.getEncoder().encodeToString(NbtIo.writeToByteArray(compoundTag))));
-						crashReportCategory.setDetail(
-							"Compressed saved", (CrashReportDetail<String>)(() -> Base64.getEncoder().encodeToString(Files.readAllBytes(file3.toPath())))
-						);
+						crashReportCategory.setDetail("Compressed saved", (CrashReportDetail<String>)(() -> Base64.getEncoder().encodeToString(Files.readAllBytes(path2))));
 						crashReportCategory.setDetail(
 							"Compressed array", (CrashReportDetail<String>)(() -> Base64.getEncoder().encodeToString(NbtIo.writeToByteArrayCompressed(compoundTag)))
 						);
 						LocalDateTime localDateTime = LocalDateTime.now();
 						crashReportCategory.setDetail("Corrupted file", (CrashReportDetail<String>)(() -> {
-							Path pathx = this.levelDirectory.corruptedDataFile(localDateTime);
-							Files.move(file3.toPath(), pathx);
-							return pathx.getFileName().toString();
+							Path path2x = this.levelDirectory.corruptedDataFile(localDateTime);
+							Files.move(path2, path2x);
+							return path2x.getFileName().toString();
 						}));
 						crashReportCategory.setDetail("Raw file", (CrashReportDetail<String>)(() -> {
 							Path pathx = this.levelDirectory.rawDataFile(localDateTime);

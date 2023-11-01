@@ -15,14 +15,17 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Locale;
 import net.minecraft.Util;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.FunctionInstantiationException;
 import net.minecraft.commands.arguments.item.FunctionArgument;
+import net.minecraft.commands.execution.ChainModifiers;
 import net.minecraft.commands.execution.CustomCommandExecutor;
 import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.execution.ExecutionControl;
+import net.minecraft.commands.execution.Frame;
 import net.minecraft.commands.execution.TraceCallbacks;
 import net.minecraft.commands.execution.tasks.CallFunction;
 import net.minecraft.commands.functions.CommandFunction;
@@ -40,6 +43,7 @@ public class DebugCommand {
 	private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(Component.translatable("commands.debug.notRunning"));
 	private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(Component.translatable("commands.debug.alreadyRunning"));
 	static final SimpleCommandExceptionType NO_RECURSIVE_TRACES = new SimpleCommandExceptionType(Component.translatable("commands.debug.function.noRecursion"));
+	static final SimpleCommandExceptionType NO_RETURN_RUN = new SimpleCommandExceptionType(Component.translatable("commands.debug.function.noReturnRun"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -88,9 +92,14 @@ public class DebugCommand {
 		extends CustomCommandExecutor.WithErrorHandling<CommandSourceStack>
 		implements CustomCommandExecutor.CommandAdapter<CommandSourceStack> {
 		public void runGuarded(
-			CommandSourceStack commandSourceStack, ContextChain<CommandSourceStack> contextChain, boolean bl, ExecutionControl<CommandSourceStack> executionControl
+			CommandSourceStack commandSourceStack,
+			ContextChain<CommandSourceStack> contextChain,
+			ChainModifiers chainModifiers,
+			ExecutionControl<CommandSourceStack> executionControl
 		) throws CommandSyntaxException {
-			if (executionControl.tracer() != null) {
+			if (chainModifiers.isReturn()) {
+				throw DebugCommand.NO_RETURN_RUN.create();
+			} else if (executionControl.tracer() != null) {
 				throw DebugCommand.NO_RECURSIVE_TRACES.create();
 			} else {
 				CommandContext<CommandSourceStack> commandContext = contextChain.getTopContext();
@@ -111,10 +120,10 @@ public class DebugCommand {
 						try {
 							CommandSourceStack commandSourceStack2 = commandSourceStack.withSource(tracer).withMaximumPermission(2);
 							InstantiatedFunction<CommandSourceStack> instantiatedFunction = commandFunction.instantiate(null, commandDispatcher, commandSourceStack2);
-							executionControl.queueNext((new CallFunction<CommandSourceStack>(instantiatedFunction) {
-								public void execute(CommandSourceStack commandSourceStack, ExecutionContext<CommandSourceStack> executionContext, int i) {
+							executionControl.queueNext((new CallFunction<CommandSourceStack>(instantiatedFunction, CommandResultCallback.EMPTY, false) {
+								public void execute(CommandSourceStack commandSourceStack, ExecutionContext<CommandSourceStack> executionContext, Frame frame) {
 									printWriter.println(commandFunction.id());
-									super.execute(commandSourceStack, executionContext, i);
+									super.execute(commandSourceStack, executionContext, frame);
 								}
 							}).bind(commandSourceStack2));
 							i += instantiatedFunction.entries().size();
@@ -129,7 +138,7 @@ public class DebugCommand {
 
 				int j = i;
 				executionControl.queueNext(
-					(executionContext, jx) -> {
+					(executionContext, frame) -> {
 						if (collection.size() == 1) {
 							commandSourceStack.sendSuccess(
 								() -> Component.translatable(

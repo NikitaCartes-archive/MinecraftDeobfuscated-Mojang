@@ -441,7 +441,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		RenderSystem.setShaderGlintAlpha(this.options.glintStrength().get());
 		this.running = true;
 		this.tutorial = new Tutorial(this, this.options);
-		this.hotbarManager = new HotbarManager(this.gameDirectory, this.fixerUpper);
+		this.hotbarManager = new HotbarManager(path, this.fixerUpper);
 		LOGGER.info("Backend library: {}", RenderSystem.getBackendDescription());
 		DisplayData displayData;
 		if (this.options.overrideHeight > 0 && this.options.overrideWidth > 0) {

@@ -8,16 +8,19 @@ import com.mojang.brigadier.context.ContextChain.Stage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.ExecutionCommandSource;
+import net.minecraft.commands.execution.ChainModifiers;
 import net.minecraft.commands.execution.CommandQueueEntry;
 import net.minecraft.commands.execution.CustomCommandExecutor;
 import net.minecraft.commands.execution.CustomModifierExecutor;
 import net.minecraft.commands.execution.EntryAction;
 import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.execution.ExecutionControl;
+import net.minecraft.commands.execution.Frame;
 import net.minecraft.commands.execution.TraceCallbacks;
 import net.minecraft.commands.execution.UnboundEntryAction;
 import net.minecraft.network.chat.Component;
@@ -35,39 +38,44 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
 		this.command = contextChain;
 	}
 
-	protected void execute(List<T> list, ExecutionContext<T> executionContext, int i, boolean bl) {
+	protected void execute(T executionCommandSource, List<T> list, ExecutionContext<T> executionContext, Frame frame, ChainModifiers chainModifiers) {
 		ContextChain<T> contextChain = this.command;
-		boolean bl2 = bl;
+		ChainModifiers chainModifiers2 = chainModifiers;
 		List<T> list2 = list;
 		if (contextChain.getStage() != Stage.EXECUTE) {
 			executionContext.profiler().push((Supplier<String>)(() -> "prepare " + this.commandInput));
 
 			try {
-				for (int j = executionContext.forkLimit(); contextChain.getStage() != Stage.EXECUTE; contextChain = contextChain.nextStage()) {
+				for (int i = executionContext.forkLimit(); contextChain.getStage() != Stage.EXECUTE; contextChain = contextChain.nextStage()) {
 					CommandContext<T> commandContext = contextChain.getTopContext();
-					bl2 |= commandContext.isForked();
+					if (commandContext.isForked()) {
+						chainModifiers2 = chainModifiers2.setForked();
+					}
+
 					RedirectModifier<T> redirectModifier = commandContext.getRedirectModifier();
 					if (redirectModifier instanceof CustomModifierExecutor<T> customModifierExecutor) {
-						customModifierExecutor.apply(list2, contextChain, bl2, createExecutionControl(executionContext, i));
+						customModifierExecutor.apply(executionCommandSource, list2, contextChain, chainModifiers2, ExecutionControl.create(executionContext, frame));
 						return;
 					}
 
 					if (redirectModifier != null) {
 						executionContext.incrementCost();
+						boolean bl = chainModifiers2.isForked();
 						List<T> list3 = new ArrayList();
 
-						for (T executionCommandSource : list2) {
+						for (T executionCommandSource2 : list2) {
 							try {
-								for (T executionCommandSource2 : ContextChain.runModifier(commandContext, executionCommandSource, ExecutionCommandSource.resultConsumer(), bl2)) {
-									list3.add(executionCommandSource2);
-									if (list3.size() >= j) {
-										executionCommandSource2.handleError(ERROR_FORK_LIMIT_REACHED.create(j), bl2, executionContext.tracer());
-										return;
-									}
+								Collection<T> collection = ContextChain.runModifier(commandContext, executionCommandSource2, (commandContextx, blx, ix) -> {
+								}, bl);
+								if (list3.size() + collection.size() >= i) {
+									executionCommandSource.handleError(ERROR_FORK_LIMIT_REACHED.create(i), bl, executionContext.tracer());
+									return;
 								}
+
+								list3.addAll(collection);
 							} catch (CommandSyntaxException var20) {
-								executionCommandSource.handleError(var20, bl2, executionContext.tracer());
-								if (!bl2) {
+								executionCommandSource2.handleError(var20, bl, executionContext.tracer());
+								if (!bl) {
 									return;
 								}
 							}
@@ -81,50 +89,39 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
 			}
 		}
 
-		CommandContext<T> commandContext2 = contextChain.getTopContext();
-		if (commandContext2.getCommand() instanceof CustomCommandExecutor<T> customCommandExecutor) {
-			ExecutionControl<T> executionControl = createExecutionControl(executionContext, i);
-
-			for (T executionCommandSource : list2) {
-				customCommandExecutor.run(executionCommandSource, contextChain, bl2, executionControl);
+		if (list2.isEmpty()) {
+			if (chainModifiers2.isReturn()) {
+				executionContext.queueNext(new CommandQueueEntry<>(frame, FallthroughTask.instance()));
 			}
 		} else {
-			ExecuteCommand<T> executeCommand = new ExecuteCommand<>(this.commandInput, bl2, commandContext2);
-			ContinuationTask.schedule(
-				executionContext, i, list2, (ix, executionCommandSourcex) -> new CommandQueueEntry<>(ix, executeCommand.bind((T)executionCommandSourcex))
-			);
+			CommandContext<T> commandContext2 = contextChain.getTopContext();
+			if (commandContext2.getCommand() instanceof CustomCommandExecutor<T> customCommandExecutor) {
+				ExecutionControl<T> executionControl = ExecutionControl.create(executionContext, frame);
+
+				for (T executionCommandSource3 : list2) {
+					customCommandExecutor.run(executionCommandSource3, contextChain, chainModifiers2, executionControl);
+				}
+			} else {
+				if (chainModifiers2.isReturn()) {
+					T executionCommandSource4 = (T)list2.get(0);
+					executionCommandSource4 = executionCommandSource4.withCallback(
+						CommandResultCallback.chain(executionCommandSource4.callback(), frame.returnValueConsumer())
+					);
+					list2 = List.of(executionCommandSource4);
+				}
+
+				ExecuteCommand<T> executeCommand = new ExecuteCommand<>(this.commandInput, chainModifiers2, commandContext2);
+				ContinuationTask.schedule(
+					executionContext, frame, list2, (framex, executionCommandSourcex) -> new CommandQueueEntry<>(framex, executeCommand.bind((T)executionCommandSourcex))
+				);
+			}
 		}
 	}
 
-	private static <T extends ExecutionCommandSource<T>> ExecutionControl<T> createExecutionControl(ExecutionContext<T> executionContext, int i) {
-		return new ExecutionControl<T>() {
-			@Override
-			public void queueNext(EntryAction<T> entryAction) {
-				executionContext.queueNext(new CommandQueueEntry<>(i, entryAction));
-			}
-
-			@Override
-			public void discardCurrentDepth() {
-				executionContext.discardAtDepthOrHigher(i);
-			}
-
-			@Override
-			public void tracer(@Nullable TraceCallbacks traceCallbacks) {
-				executionContext.tracer(traceCallbacks);
-			}
-
-			@Nullable
-			@Override
-			public TraceCallbacks tracer() {
-				return executionContext.tracer();
-			}
-		};
-	}
-
-	protected void traceCommandStart(ExecutionContext<T> executionContext, int i) {
+	protected void traceCommandStart(ExecutionContext<T> executionContext, Frame frame) {
 		TraceCallbacks traceCallbacks = executionContext.tracer();
 		if (traceCallbacks != null) {
-			traceCallbacks.onCommand(i, this.commandInput);
+			traceCallbacks.onCommand(frame.depth(), this.commandInput);
 		}
 	}
 
@@ -133,18 +130,20 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
 	}
 
 	public static class Continuation<T extends ExecutionCommandSource<T>> extends BuildContexts<T> implements EntryAction<T> {
-		private final boolean startForked;
+		private final ChainModifiers modifiers;
+		private final T originalSource;
 		private final List<T> sources;
 
-		public Continuation(String string, ContextChain<T> contextChain, boolean bl, List<T> list) {
+		public Continuation(String string, ContextChain<T> contextChain, ChainModifiers chainModifiers, T executionCommandSource, List<T> list) {
 			super(string, contextChain);
-			this.startForked = bl;
+			this.originalSource = executionCommandSource;
 			this.sources = list;
+			this.modifiers = chainModifiers;
 		}
 
 		@Override
-		public void execute(ExecutionContext<T> executionContext, int i) {
-			this.execute(this.sources, executionContext, i, this.startForked);
+		public void execute(ExecutionContext<T> executionContext, Frame frame) {
+			this.execute(this.originalSource, this.sources, executionContext, frame, this.modifiers);
 		}
 	}
 
@@ -157,9 +156,9 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
 		}
 
 		@Override
-		public void execute(ExecutionContext<T> executionContext, int i) {
-			this.traceCommandStart(executionContext, i);
-			this.execute(List.of(this.source), executionContext, i, false);
+		public void execute(ExecutionContext<T> executionContext, Frame frame) {
+			this.traceCommandStart(executionContext, frame);
+			this.execute(this.source, List.of(this.source), executionContext, frame, ChainModifiers.DEFAULT);
 		}
 	}
 
@@ -168,9 +167,9 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
 			super(string, contextChain);
 		}
 
-		public void execute(T executionCommandSource, ExecutionContext<T> executionContext, int i) {
-			this.traceCommandStart(executionContext, i);
-			this.execute(List.of(executionCommandSource), executionContext, i, false);
+		public void execute(T executionCommandSource, ExecutionContext<T> executionContext, Frame frame) {
+			this.traceCommandStart(executionContext, frame);
+			this.execute(executionCommandSource, List.of(executionCommandSource), executionContext, frame, ChainModifiers.DEFAULT);
 		}
 	}
 }

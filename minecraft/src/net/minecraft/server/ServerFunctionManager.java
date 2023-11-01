@@ -6,9 +6,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.FunctionInstantiationException;
+import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.resources.ResourceLocation;
@@ -60,7 +62,10 @@ public class ServerFunctionManager {
 
 		try {
 			InstantiatedFunction<CommandSourceStack> instantiatedFunction = commandFunction.instantiate(null, this.getDispatcher(), commandSourceStack);
-			Commands.executeCommandInContext(commandSourceStack, executionContext -> executionContext.queueInitialFunctionCall(instantiatedFunction, commandSourceStack));
+			Commands.executeCommandInContext(
+				commandSourceStack,
+				executionContext -> ExecutionContext.queueInitialFunctionCall(executionContext, instantiatedFunction, commandSourceStack, CommandResultCallback.EMPTY)
+			);
 		} catch (FunctionInstantiationException var8) {
 		} finally {
 			profilerFiller.pop();

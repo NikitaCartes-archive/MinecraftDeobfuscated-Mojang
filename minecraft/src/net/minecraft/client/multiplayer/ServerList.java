@@ -2,7 +2,8 @@ package net.minecraft.client.multiplayer;
 
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -32,7 +33,7 @@ public class ServerList {
 		try {
 			this.serverList.clear();
 			this.hiddenServerList.clear();
-			CompoundTag compoundTag = NbtIo.read(new File(this.minecraft.gameDirectory, "servers.dat"));
+			CompoundTag compoundTag = NbtIo.read(this.minecraft.gameDirectory.toPath().resolve("servers.dat"));
 			if (compoundTag == null) {
 				return;
 			}
@@ -71,13 +72,14 @@ public class ServerList {
 
 			CompoundTag compoundTag2 = new CompoundTag();
 			compoundTag2.put("servers", listTag);
-			File file = File.createTempFile("servers", ".dat", this.minecraft.gameDirectory);
-			NbtIo.write(compoundTag2, file);
-			File file2 = new File(this.minecraft.gameDirectory, "servers.dat_old");
-			File file3 = new File(this.minecraft.gameDirectory, "servers.dat");
-			Util.safeReplaceFile(file3, file, file2);
-		} catch (Exception var6) {
-			LOGGER.error("Couldn't save server list", (Throwable)var6);
+			Path path = this.minecraft.gameDirectory.toPath();
+			Path path2 = Files.createTempFile(path, "servers", ".dat");
+			NbtIo.write(compoundTag2, path2);
+			Path path3 = path.resolve("servers.dat_old");
+			Path path4 = path.resolve("servers.dat");
+			Util.safeReplaceFile(path4, path2, path3);
+		} catch (Exception var7) {
+			LOGGER.error("Couldn't save server list", (Throwable)var7);
 		}
 	}
 

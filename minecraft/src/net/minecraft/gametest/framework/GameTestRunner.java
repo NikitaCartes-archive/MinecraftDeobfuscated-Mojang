@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -24,10 +25,9 @@ public class GameTestRunner {
 	public static final int DEFAULT_TESTS_PER_ROW = 8;
 
 	public static void runTest(GameTestInfo gameTestInfo, BlockPos blockPos, GameTestTicker gameTestTicker) {
-		gameTestInfo.startExecution();
 		gameTestTicker.add(gameTestInfo);
 		gameTestInfo.addListener(new ReportGameListener(gameTestInfo, gameTestTicker, blockPos));
-		gameTestInfo.spawnStructure(blockPos);
+		gameTestInfo.prepareTestStructure(blockPos);
 	}
 
 	public static Collection<GameTestInfo> runTestBatches(
@@ -45,7 +45,8 @@ public class GameTestRunner {
 	}
 
 	public static Collection<GameTestBatch> groupTestsIntoBatches(Collection<TestFunction> collection) {
-		Map<String, List<TestFunction>> map = (Map<String, List<TestFunction>>)collection.stream().collect(Collectors.groupingBy(TestFunction::getBatchName));
+		Map<String, List<TestFunction>> map = (Map<String, List<TestFunction>>)collection.stream()
+			.collect(Collectors.groupingBy(TestFunction::getBatchName, LinkedHashMap::new, Collectors.toList()));
 		return (Collection<GameTestBatch>)map.entrySet()
 			.stream()
 			.flatMap(

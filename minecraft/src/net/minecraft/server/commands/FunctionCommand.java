@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 import javax.annotation.Nullable;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.ExecutionCommandSource;
@@ -22,9 +23,11 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.commands.arguments.item.FunctionArgument;
+import net.minecraft.commands.execution.ChainModifiers;
 import net.minecraft.commands.execution.CustomCommandExecutor;
 import net.minecraft.commands.execution.ExecutionControl;
 import net.minecraft.commands.execution.tasks.CallFunction;
+import net.minecraft.commands.execution.tasks.FallthroughTask;
 import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.nbt.CompoundTag;
@@ -35,7 +38,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ServerFunctionManager;
 import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.server.commands.data.DataCommands;
-import org.apache.commons.lang3.mutable.MutableInt;
 
 public class FunctionCommand {
 	private static final DynamicCommandExceptionType ERROR_ARGUMENT_NOT_COMPOUND = new DynamicCommandExceptionType(
@@ -113,24 +115,124 @@ public class FunctionCommand {
 		T executionCommandSource,
 		T executionCommandSource2,
 		ExecutionControl<T> executionControl,
+		FunctionCommand.Callbacks<T> callbacks,
+		ChainModifiers chainModifiers
+	) throws CommandSyntaxException {
+		if (chainModifiers.isReturn()) {
+			queueFunctionsAsReturn(collection, compoundTag, executionCommandSource, executionCommandSource2, executionControl, callbacks);
+		} else {
+			queueFunctionsNoReturn(collection, compoundTag, executionCommandSource, executionCommandSource2, executionControl, callbacks);
+		}
+	}
+
+	private static <T extends ExecutionCommandSource<T>> void instantiateAndQueueFunctions(
+		@Nullable CompoundTag compoundTag,
+		ExecutionControl<T> executionControl,
+		CommandDispatcher<T> commandDispatcher,
+		T executionCommandSource,
+		CommandFunction<T> commandFunction,
+		ResourceLocation resourceLocation,
+		CommandResultCallback commandResultCallback,
+		boolean bl
+	) throws CommandSyntaxException {
+		try {
+			InstantiatedFunction<T> instantiatedFunction = commandFunction.instantiate(compoundTag, commandDispatcher, executionCommandSource);
+			executionControl.queueNext(new CallFunction<>(instantiatedFunction, commandResultCallback, bl).bind(executionCommandSource));
+		} catch (FunctionInstantiationException var9) {
+			throw ERROR_FUNCTION_INSTANTATION_FAILURE.create(resourceLocation, var9.messageComponent());
+		}
+	}
+
+	private static <T extends ExecutionCommandSource<T>> CommandResultCallback decorateOutputIfNeeded(
+		T executionCommandSource, FunctionCommand.Callbacks<T> callbacks, ResourceLocation resourceLocation, CommandResultCallback commandResultCallback
+	) {
+		return executionCommandSource.isSilent() ? commandResultCallback : (bl, i) -> {
+			callbacks.signalResult(executionCommandSource, resourceLocation, i);
+			commandResultCallback.onSuccess(i);
+		};
+	}
+
+	private static <T extends ExecutionCommandSource<T>> void queueFunctionsAsReturn(
+		Collection<CommandFunction<T>> collection,
+		@Nullable CompoundTag compoundTag,
+		T executionCommandSource,
+		T executionCommandSource2,
+		ExecutionControl<T> executionControl,
 		FunctionCommand.Callbacks<T> callbacks
 	) throws CommandSyntaxException {
 		CommandDispatcher<T> commandDispatcher = executionCommandSource.dispatcher();
-		MutableInt mutableInt = new MutableInt();
+		T executionCommandSource3 = executionCommandSource2.clearCallbacks();
+		CommandResultCallback commandResultCallback = CommandResultCallback.chain(
+			executionCommandSource.callback(), executionControl.currentFrame().returnValueConsumer()
+		);
 
 		for (CommandFunction<T> commandFunction : collection) {
 			ResourceLocation resourceLocation = commandFunction.id();
+			CommandResultCallback commandResultCallback2 = decorateOutputIfNeeded(executionCommandSource, callbacks, resourceLocation, commandResultCallback);
+			instantiateAndQueueFunctions(
+				compoundTag, executionControl, commandDispatcher, executionCommandSource3, commandFunction, resourceLocation, commandResultCallback2, true
+			);
+		}
 
-			try {
-				T executionCommandSource3 = executionCommandSource2.clearCallbacks().withReturnValueConsumer(i -> {
-					int j = mutableInt.addAndGet(i);
-					callbacks.signalResult(executionCommandSource, resourceLocation, j);
-					executionCommandSource.storeResults(true, j);
+		if (commandResultCallback != CommandResultCallback.EMPTY) {
+			executionControl.queueNext(FallthroughTask.instance());
+		}
+	}
+
+	private static <T extends ExecutionCommandSource<T>> void queueFunctionsNoReturn(
+		Collection<CommandFunction<T>> collection,
+		@Nullable CompoundTag compoundTag,
+		T executionCommandSource,
+		T executionCommandSource2,
+		ExecutionControl<T> executionControl,
+		FunctionCommand.Callbacks<T> callbacks
+	) throws CommandSyntaxException {
+		CommandDispatcher<T> commandDispatcher = executionCommandSource.dispatcher();
+		T executionCommandSource3 = executionCommandSource2.clearCallbacks();
+		CommandResultCallback commandResultCallback = executionCommandSource.callback();
+		if (!collection.isEmpty()) {
+			if (collection.size() == 1) {
+				CommandFunction<T> commandFunction = (CommandFunction<T>)collection.iterator().next();
+				ResourceLocation resourceLocation = commandFunction.id();
+				CommandResultCallback commandResultCallback2 = decorateOutputIfNeeded(executionCommandSource, callbacks, resourceLocation, commandResultCallback);
+				instantiateAndQueueFunctions(
+					compoundTag, executionControl, commandDispatcher, executionCommandSource3, commandFunction, resourceLocation, commandResultCallback2, false
+				);
+			} else if (commandResultCallback == CommandResultCallback.EMPTY) {
+				for (CommandFunction<T> commandFunction2 : collection) {
+					ResourceLocation resourceLocation2 = commandFunction2.id();
+					CommandResultCallback commandResultCallback3 = decorateOutputIfNeeded(executionCommandSource, callbacks, resourceLocation2, commandResultCallback);
+					instantiateAndQueueFunctions(
+						compoundTag, executionControl, commandDispatcher, executionCommandSource3, commandFunction2, resourceLocation2, commandResultCallback3, false
+					);
+				}
+			} else {
+				class Accumulator {
+					boolean anyResult;
+					int sum;
+
+					public void add(int i) {
+						this.anyResult = true;
+						this.sum += i;
+					}
+				}
+
+				Accumulator lv = new Accumulator();
+				CommandResultCallback commandResultCallback4 = (bl, i) -> lv.add(i);
+
+				for (CommandFunction<T> commandFunction3 : collection) {
+					ResourceLocation resourceLocation3 = commandFunction3.id();
+					CommandResultCallback commandResultCallback5 = decorateOutputIfNeeded(executionCommandSource, callbacks, resourceLocation3, commandResultCallback4);
+					instantiateAndQueueFunctions(
+						compoundTag, executionControl, commandDispatcher, executionCommandSource3, commandFunction3, resourceLocation3, commandResultCallback5, false
+					);
+				}
+
+				executionControl.queueNext((executionContext, frame) -> {
+					if (lv.anyResult) {
+						commandResultCallback.onSuccess(lv.sum);
+					}
 				});
-				InstantiatedFunction<T> instantiatedFunction = commandFunction.instantiate(compoundTag, commandDispatcher, executionCommandSource3);
-				executionControl.queueNext(new CallFunction<>(instantiatedFunction).bind(executionCommandSource3));
-			} catch (FunctionInstantiationException var13) {
-				throw ERROR_FUNCTION_INSTANTATION_FAILURE.create(resourceLocation, var13.messageComponent());
 			}
 		}
 	}
@@ -146,7 +248,10 @@ public class FunctionCommand {
 		protected abstract CompoundTag arguments(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException;
 
 		public void runGuarded(
-			CommandSourceStack commandSourceStack, ContextChain<CommandSourceStack> contextChain, boolean bl, ExecutionControl<CommandSourceStack> executionControl
+			CommandSourceStack commandSourceStack,
+			ContextChain<CommandSourceStack> contextChain,
+			ChainModifiers chainModifiers,
+			ExecutionControl<CommandSourceStack> executionControl
 		) throws CommandSyntaxException {
 			CommandContext<CommandSourceStack> commandContext = contextChain.getTopContext().copyFor(commandSourceStack);
 			Pair<ResourceLocation, Collection<CommandFunction<CommandSourceStack>>> pair = FunctionArgument.getFunctionOrTag(commandContext, "name")
@@ -170,7 +275,9 @@ public class FunctionCommand {
 					);
 				}
 
-				FunctionCommand.queueFunctions(collection, compoundTag, commandSourceStack, commandSourceStack2, executionControl, FunctionCommand.FULL_CONTEXT_CALLBACKS);
+				FunctionCommand.queueFunctions(
+					collection, compoundTag, commandSourceStack, commandSourceStack2, executionControl, FunctionCommand.FULL_CONTEXT_CALLBACKS, chainModifiers
+				);
 			}
 		}
 	}

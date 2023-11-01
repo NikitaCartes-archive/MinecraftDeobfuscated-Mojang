@@ -1,31 +1,20 @@
 package net.minecraft.gametest.framework;
 
 import com.google.common.collect.Lists;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -35,9 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.AABB;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 public class StructureUtils {
@@ -99,7 +86,7 @@ public class StructureUtils {
 	}
 
 	public static void createNewEmptyStructureBlock(String string, BlockPos blockPos, Vec3i vec3i, Rotation rotation, ServerLevel serverLevel) {
-		BoundingBox boundingBox = getStructureBoundingBox(blockPos, vec3i, rotation);
+		BoundingBox boundingBox = getStructureBoundingBox(blockPos.above(), vec3i, rotation);
 		clearSpaceForStructure(boundingBox, serverLevel);
 		serverLevel.setBlockAndUpdate(blockPos, Blocks.STRUCTURE_BLOCK.defaultBlockState());
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
@@ -110,8 +97,11 @@ public class StructureUtils {
 		structureBlockEntity.setShowBoundingBox(true);
 	}
 
-	public static StructureBlockEntity spawnStructure(String string, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel, boolean bl) {
-		Vec3i vec3i = getStructureTemplate(string, serverLevel).getSize();
+	public static StructureBlockEntity prepareTestStructure(String string, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
+		Vec3i vec3i = ((StructureTemplate)serverLevel.getStructureManager()
+				.get(new ResourceLocation(string))
+				.orElseThrow(() -> new IllegalStateException("Missing test structure: " + string)))
+			.getSize();
 		BoundingBox boundingBox = getStructureBoundingBox(blockPos, vec3i, rotation);
 		BlockPos blockPos2;
 		if (rotation == Rotation.NONE) {
@@ -130,23 +120,11 @@ public class StructureUtils {
 
 		forceLoadChunks(boundingBox, serverLevel);
 		clearSpaceForStructure(boundingBox, serverLevel);
-		StructureBlockEntity structureBlockEntity = createStructureBlock(string, blockPos2.below(), rotation, serverLevel, bl);
-		serverLevel.getBlockTicks().clearArea(boundingBox);
-		serverLevel.clearBlockEvents(boundingBox);
-		return structureBlockEntity;
+		return createStructureBlock(string, blockPos2.below(), rotation, serverLevel);
 	}
 
 	private static void forceLoadChunks(BoundingBox boundingBox, ServerLevel serverLevel) {
-		intersectingChunks(boundingBox, 0).forEach(chunkPos -> serverLevel.setChunkForced(chunkPos.x, chunkPos.z, true));
-		intersectingChunks(boundingBox, 3).forEach(chunkPos -> serverLevel.getChunk(chunkPos.x, chunkPos.z));
-	}
-
-	private static Stream<ChunkPos> intersectingChunks(BoundingBox boundingBox, int i) {
-		int j = SectionPos.blockToSectionCoord(boundingBox.minX()) - i;
-		int k = SectionPos.blockToSectionCoord(boundingBox.minZ()) - i;
-		int l = SectionPos.blockToSectionCoord(boundingBox.maxX()) + i;
-		int m = SectionPos.blockToSectionCoord(boundingBox.maxZ()) + i;
-		return ChunkPos.rangeClosed(new ChunkPos(j, k), new ChunkPos(l, m));
+		boundingBox.intersectingChunks().forEach(chunkPos -> serverLevel.setChunkForced(chunkPos.x, chunkPos.z, true));
 	}
 
 	public static void clearSpaceForStructure(BoundingBox boundingBox, ServerLevel serverLevel) {
@@ -205,54 +183,17 @@ public class StructureUtils {
 		return collection;
 	}
 
-	private static StructureTemplate getStructureTemplate(String string, ServerLevel serverLevel) {
-		StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
-		Optional<StructureTemplate> optional = structureTemplateManager.get(new ResourceLocation(string));
-		if (optional.isPresent()) {
-			return (StructureTemplate)optional.get();
-		} else {
-			String string2 = string + ".snbt";
-			Path path = Paths.get(testStructuresDir, string2);
-			CompoundTag compoundTag = tryLoadStructure(path);
-			if (compoundTag == null) {
-				throw new RuntimeException("Could not find structure file " + path + ", and the structure is not available in the world structures either.");
-			} else {
-				return structureTemplateManager.readStructure(compoundTag);
-			}
-		}
-	}
-
-	private static StructureBlockEntity createStructureBlock(String string, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel, boolean bl) {
+	private static StructureBlockEntity createStructureBlock(String string, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
 		serverLevel.setBlockAndUpdate(blockPos, Blocks.STRUCTURE_BLOCK.defaultBlockState());
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
 		structureBlockEntity.setMode(StructureMode.LOAD);
 		structureBlockEntity.setRotation(rotation);
 		structureBlockEntity.setIgnoreEntities(false);
 		structureBlockEntity.setStructureName(new ResourceLocation(string));
-		structureBlockEntity.loadStructure(serverLevel, bl);
-		if (structureBlockEntity.getStructureSize() != Vec3i.ZERO) {
-			return structureBlockEntity;
+		if (!structureBlockEntity.loadStructureInfo(serverLevel)) {
+			throw new RuntimeException("Failed to load structure info " + string);
 		} else {
-			StructureTemplate structureTemplate = getStructureTemplate(string, serverLevel);
-			structureBlockEntity.loadStructure(serverLevel, bl, structureTemplate);
-			if (structureBlockEntity.getStructureSize() == Vec3i.ZERO) {
-				throw new RuntimeException("Failed to load structure " + string);
-			} else {
-				return structureBlockEntity;
-			}
-		}
-	}
-
-	@Nullable
-	private static CompoundTag tryLoadStructure(Path path) {
-		try {
-			BufferedReader bufferedReader = Files.newBufferedReader(path);
-			String string = IOUtils.toString(bufferedReader);
-			return NbtUtils.snbtToStructure(string);
-		} catch (IOException var3) {
-			return null;
-		} catch (CommandSyntaxException var4) {
-			throw new RuntimeException("Error while trying to load structure " + path, var4);
+			return structureBlockEntity;
 		}
 	}
 

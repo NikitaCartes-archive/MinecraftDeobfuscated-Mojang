@@ -110,8 +110,8 @@ public class GameTestBatchRunner {
 
 		for (GameTestInfo gameTestInfo : collection) {
 			BlockPos blockPos = new BlockPos(this.nextTestNorthWestCorner);
-			StructureBlockEntity structureBlockEntity = StructureUtils.spawnStructure(
-				gameTestInfo.getStructureName(), blockPos, gameTestInfo.getRotation(), this.level, true
+			StructureBlockEntity structureBlockEntity = StructureUtils.prepareTestStructure(
+				gameTestInfo.getStructureName(), blockPos, gameTestInfo.getRotation(), this.level
 			);
 			AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
 			gameTestInfo.setStructureBlockPos(structureBlockEntity.getBlockPos());

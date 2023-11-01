@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.BiPredicate;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
@@ -32,7 +31,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandResultConsumer;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.ExecutionCommandSource;
@@ -55,10 +54,13 @@ import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.SwizzleArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.FunctionArgument;
+import net.minecraft.commands.execution.ChainModifiers;
 import net.minecraft.commands.execution.CustomModifierExecutor;
 import net.minecraft.commands.execution.ExecutionControl;
 import net.minecraft.commands.execution.tasks.BuildContexts;
 import net.minecraft.commands.execution.tasks.CallFunction;
+import net.minecraft.commands.execution.tasks.FallthroughTask;
+import net.minecraft.commands.execution.tasks.IsolatedCall;
 import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.commands.synchronization.SuggestionProviders;
@@ -106,7 +108,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class ExecuteCommand {
 	private static final int MAX_TEST_AREA = 32768;
@@ -123,10 +124,6 @@ public class ExecuteCommand {
 	public static final Dynamic2CommandExceptionType ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE = new Dynamic2CommandExceptionType(
 		(object, object2) -> Component.translatableEscape("commands.execute.function.instantiationFailure", object, object2)
 	);
-	private static final BinaryOperator<CommandResultConsumer<CommandSourceStack>> CALLBACK_CHAINER = (commandResultConsumer, commandResultConsumer2) -> (commandSourceStack, bl, i) -> {
-			commandResultConsumer.storeResult(commandSourceStack, bl, i);
-			commandResultConsumer2.storeResult(commandSourceStack, bl, i);
-		};
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_PREDICATE = (commandContext, suggestionsBuilder) -> {
 		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
 		return SharedSuggestionProvider.suggestResource(lootDataManager.getKeys(LootDataType.PREDICATE), suggestionsBuilder);
@@ -426,38 +423,38 @@ public class ExecuteCommand {
 
 	private static CommandSourceStack storeValue(CommandSourceStack commandSourceStack, Collection<String> collection, Objective objective, boolean bl) {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
-		return commandSourceStack.withCallback((commandSourceStackx, bl2, i) -> {
+		return commandSourceStack.withCallback((bl2, i) -> {
 			for (String string : collection) {
 				Score score = scoreboard.getOrCreatePlayerScore(string, objective);
 				int j = bl ? i : (bl2 ? 1 : 0);
 				score.setScore(j);
 			}
-		}, CALLBACK_CHAINER);
+		}, CommandResultCallback::chain);
 	}
 
 	private static CommandSourceStack storeValue(CommandSourceStack commandSourceStack, CustomBossEvent customBossEvent, boolean bl, boolean bl2) {
-		return commandSourceStack.withCallback((commandSourceStackx, bl3, i) -> {
+		return commandSourceStack.withCallback((bl3, i) -> {
 			int j = bl2 ? i : (bl3 ? 1 : 0);
 			if (bl) {
 				customBossEvent.setValue(j);
 			} else {
 				customBossEvent.setMax(j);
 			}
-		}, CALLBACK_CHAINER);
+		}, CommandResultCallback::chain);
 	}
 
 	private static CommandSourceStack storeData(
 		CommandSourceStack commandSourceStack, DataAccessor dataAccessor, NbtPathArgument.NbtPath nbtPath, IntFunction<Tag> intFunction, boolean bl
 	) {
-		return commandSourceStack.withCallback((commandSourceStackx, bl2, i) -> {
+		return commandSourceStack.withCallback((bl2, i) -> {
 			try {
 				CompoundTag compoundTag = dataAccessor.getData();
 				int j = bl ? i : (bl2 ? 1 : 0);
 				nbtPath.set(compoundTag, (Tag)intFunction.apply(j));
 				dataAccessor.setData(compoundTag);
-			} catch (CommandSyntaxException var9) {
+			} catch (CommandSyntaxException var8) {
 			}
-		}, CALLBACK_CHAINER);
+		}, CommandResultCallback::chain);
 	}
 
 	private static boolean isChunkLoaded(ServerLevel serverLevel, BlockPos blockPos) {
@@ -921,6 +918,7 @@ public class ExecuteCommand {
 	}
 
 	public static <T extends ExecutionCommandSource<T>> void scheduleFunctionConditionsAndTest(
+		T executionCommandSource,
 		List<T> list,
 		Function<T, T> function,
 		IntPredicate intPredicate,
@@ -928,57 +926,60 @@ public class ExecuteCommand {
 		@Nullable CompoundTag compoundTag,
 		ExecutionControl<T> executionControl,
 		ExecuteCommand.CommandGetter<T, Collection<CommandFunction<T>>> commandGetter,
-		boolean bl
+		ChainModifiers chainModifiers
 	) {
 		List<T> list2 = new ArrayList(list.size());
-		CommandContext<T> commandContext = contextChain.getTopContext();
 
-		for (T executionCommandSource : list) {
-			try {
-				Collection<CommandFunction<T>> collection = commandGetter.get(commandContext.copyFor(executionCommandSource));
-				int i = collection.size();
-				if (i != 0) {
-					T executionCommandSource2 = prepareCallback(function, intPredicate, list2, executionCommandSource, i == 1);
-
-					for (CommandFunction<T> commandFunction : collection) {
-						InstantiatedFunction<T> instantiatedFunction;
-						try {
-							instantiatedFunction = commandFunction.instantiate(compoundTag, executionCommandSource2.dispatcher(), executionCommandSource2);
-						} catch (FunctionInstantiationException var19) {
-							throw ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE.create(commandFunction.id(), var19.messageComponent());
-						}
-
-						executionControl.queueNext(new CallFunction<>(instantiatedFunction).bind(executionCommandSource2));
-					}
-				}
-			} catch (CommandSyntaxException var20) {
-				executionCommandSource.handleError(var20, bl, executionControl.tracer());
-			}
+		Collection<CommandFunction<T>> collection;
+		try {
+			collection = commandGetter.get(contextChain.getTopContext().copyFor(executionCommandSource));
+		} catch (CommandSyntaxException var18) {
+			executionCommandSource.handleError(var18, chainModifiers.isForked(), executionControl.tracer());
+			return;
 		}
 
-		ContextChain<T> contextChain2 = contextChain.nextStage();
-		String string = commandContext.getInput();
-		executionControl.queueNext(new BuildContexts.Continuation<>(string, contextChain2, bl, list2));
-	}
+		int i = collection.size();
+		if (i != 0) {
+			List<InstantiatedFunction<T>> list3 = new ArrayList(i);
 
-	private static <T extends ExecutionCommandSource<T>> T prepareCallback(
-		Function<T, T> function, IntPredicate intPredicate, List<T> list, T executionCommandSource, boolean bl
-	) {
-		T executionCommandSource2 = (T)((ExecutionCommandSource)function.apply(executionCommandSource)).clearCallbacks();
-		if (bl) {
-			return executionCommandSource2.withReturnValueConsumer(i -> {
-				if (intPredicate.test(i)) {
-					list.add(executionCommandSource);
+			try {
+				for (CommandFunction<T> commandFunction : collection) {
+					try {
+						list3.add(commandFunction.instantiate(compoundTag, executionCommandSource.dispatcher(), executionCommandSource));
+					} catch (FunctionInstantiationException var17) {
+						throw ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE.create(commandFunction.id(), var17.messageComponent());
+					}
 				}
-			});
-		} else {
-			MutableBoolean mutableBoolean = new MutableBoolean();
-			return executionCommandSource2.withReturnValueConsumer(i -> {
-				if (mutableBoolean.isFalse() && intPredicate.test(i)) {
-					list.add(executionCommandSource);
-					mutableBoolean.setTrue();
-				}
-			});
+			} catch (CommandSyntaxException var19) {
+				executionCommandSource.handleError(var19, chainModifiers.isForked(), executionControl.tracer());
+			}
+
+			for (T executionCommandSource2 : list) {
+				T executionCommandSource3 = (T)function.apply(executionCommandSource2.clearCallbacks());
+				CommandResultCallback commandResultCallback = (bl, ix) -> {
+					if (intPredicate.test(ix)) {
+						list2.add(executionCommandSource2);
+					}
+				};
+				executionControl.queueNext(
+					new IsolatedCall<>(
+						executionControlx -> {
+							for (InstantiatedFunction<T> instantiatedFunction : list3) {
+								executionControlx.queueNext(
+									new CallFunction<>(instantiatedFunction, executionControlx.currentFrame().returnValueConsumer(), true).bind(executionCommandSource3)
+								);
+							}
+
+							executionControlx.queueNext(FallthroughTask.instance());
+						},
+						commandResultCallback
+					)
+				);
+			}
+
+			ContextChain<T> contextChain2 = contextChain.nextStage();
+			String string = contextChain.getTopContext().getInput();
+			executionControl.queueNext(new BuildContexts.Continuation<>(string, contextChain2, chainModifiers, executionCommandSource, list2));
 		}
 	}
 
@@ -1004,11 +1005,15 @@ public class ExecuteCommand {
 			this.check = bl ? i -> i != 0 : i -> i == 0;
 		}
 
-		@Override
 		public void apply(
-			List<CommandSourceStack> list, ContextChain<CommandSourceStack> contextChain, boolean bl, ExecutionControl<CommandSourceStack> executionControl
+			CommandSourceStack commandSourceStack,
+			List<CommandSourceStack> list,
+			ContextChain<CommandSourceStack> contextChain,
+			ChainModifiers chainModifiers,
+			ExecutionControl<CommandSourceStack> executionControl
 		) {
 			ExecuteCommand.scheduleFunctionConditionsAndTest(
+				commandSourceStack,
 				list,
 				FunctionCommand::modifySenderForExecution,
 				this.check,
@@ -1016,7 +1021,7 @@ public class ExecuteCommand {
 				null,
 				executionControl,
 				commandContext -> FunctionArgument.getFunctions(commandContext, "name"),
-				bl
+				chainModifiers
 			);
 		}
 	}

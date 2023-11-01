@@ -570,10 +570,6 @@ public class Util {
 		return false;
 	}
 
-	public static void safeReplaceFile(File file, File file2, File file3) {
-		safeReplaceFile(file.toPath(), file2.toPath(), file3.toPath());
-	}
-
 	public static void safeReplaceFile(Path path, Path path2, Path path3) {
 		safeReplaceOrMoveFile(path, path2, path3, false);
 	}

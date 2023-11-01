@@ -266,7 +266,8 @@ public class Commands {
 		try {
 			if (contextChain != null) {
 				executeCommandInContext(
-					commandSourceStack, executionContext -> ExecutionContext.queueInitialCommandExecution(executionContext, string, contextChain, commandSourceStack)
+					commandSourceStack,
+					executionContext -> ExecutionContext.queueInitialCommandExecution(executionContext, string, contextChain, commandSourceStack, CommandResultCallback.EMPTY)
 				);
 			}
 		} catch (CommandRuntimeException var13) {

@@ -7,13 +7,13 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -113,7 +113,7 @@ public class ShipwreckPieces {
 		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 			ResourceLocation resourceLocation = (ResourceLocation)ShipwreckPieces.MARKERS_TO_LOOT.get(string);
 			if (resourceLocation != null) {
-				RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, randomSource, blockPos.below(), resourceLocation);
+				RandomizableContainer.setBlockEntityLootTable(serverLevelAccessor, randomSource, blockPos.below(), resourceLocation);
 			}
 		}
 

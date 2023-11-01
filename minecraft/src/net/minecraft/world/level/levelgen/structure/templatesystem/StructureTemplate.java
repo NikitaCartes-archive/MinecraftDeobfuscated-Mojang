@@ -26,6 +26,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Clearable;
+import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -42,7 +43,6 @@ import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.FluidState;
@@ -258,7 +258,7 @@ public class StructureTemplate {
 							if (structureBlockInfo.nbt != null) {
 								BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos3);
 								if (blockEntity != null) {
-									if (blockEntity instanceof RandomizableContainerBlockEntity) {
+									if (blockEntity instanceof RandomizableContainer) {
 										structureBlockInfo.nbt.putLong("LootTableSeed", randomSource.nextLong());
 									}
 

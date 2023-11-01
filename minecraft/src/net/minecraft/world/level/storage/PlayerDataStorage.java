@@ -3,6 +3,8 @@ package net.minecraft.world.level.storage;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
@@ -27,12 +29,13 @@ public class PlayerDataStorage {
 	public void save(Player player) {
 		try {
 			CompoundTag compoundTag = player.saveWithoutId(new CompoundTag());
-			File file = File.createTempFile(player.getStringUUID() + "-", ".dat", this.playerDir);
-			NbtIo.writeCompressed(compoundTag, file);
-			File file2 = new File(this.playerDir, player.getStringUUID() + ".dat");
-			File file3 = new File(this.playerDir, player.getStringUUID() + ".dat_old");
-			Util.safeReplaceFile(file2, file, file3);
-		} catch (Exception var6) {
+			Path path = this.playerDir.toPath();
+			Path path2 = Files.createTempFile(path, player.getStringUUID() + "-", ".dat");
+			NbtIo.writeCompressed(compoundTag, path2);
+			Path path3 = path.resolve(player.getStringUUID() + ".dat");
+			Path path4 = path.resolve(player.getStringUUID() + ".dat_old");
+			Util.safeReplaceFile(path3, path2, path4);
+		} catch (Exception var7) {
 			LOGGER.warn("Failed to save player data for {}", player.getName().getString());
 		}
 	}
@@ -44,7 +47,7 @@ public class PlayerDataStorage {
 		try {
 			File file = new File(this.playerDir, player.getStringUUID() + ".dat");
 			if (file.exists() && file.isFile()) {
-				compoundTag = NbtIo.readCompressed(file, NbtAccounter.unlimitedHeap());
+				compoundTag = NbtIo.readCompressed(file.toPath(), NbtAccounter.unlimitedHeap());
 			}
 		} catch (Exception var4) {
 			LOGGER.warn("Failed to load player data for {}", player.getName().getString());

@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.commands.ExecutionCommandSource;
 
 public interface CustomCommandExecutor<T> {
-	void run(T object, ContextChain<T> contextChain, boolean bl, ExecutionControl<T> executionControl);
+	void run(T object, ContextChain<T> contextChain, ChainModifiers chainModifiers, ExecutionControl<T> executionControl);
 
 	public interface CommandAdapter<T> extends Command<T>, CustomCommandExecutor<T> {
 		@Override
@@ -18,19 +18,23 @@ public interface CustomCommandExecutor<T> {
 	}
 
 	public abstract static class WithErrorHandling<T extends ExecutionCommandSource<T>> implements CustomCommandExecutor<T> {
-		public final void run(T executionCommandSource, ContextChain<T> contextChain, boolean bl, ExecutionControl<T> executionControl) {
+		public final void run(T executionCommandSource, ContextChain<T> contextChain, ChainModifiers chainModifiers, ExecutionControl<T> executionControl) {
 			try {
-				this.runGuarded(executionCommandSource, contextChain, bl, executionControl);
+				this.runGuarded(executionCommandSource, contextChain, chainModifiers, executionControl);
 			} catch (CommandSyntaxException var6) {
-				this.onError(var6, executionCommandSource, bl, executionControl.tracer());
-				executionCommandSource.storeResults(false, 0);
+				this.onError(var6, executionCommandSource, chainModifiers, executionControl.tracer());
+				executionCommandSource.callback().onFailure();
 			}
 		}
 
-		protected void onError(CommandSyntaxException commandSyntaxException, T executionCommandSource, boolean bl, @Nullable TraceCallbacks traceCallbacks) {
-			executionCommandSource.handleError(commandSyntaxException, bl, traceCallbacks);
+		protected void onError(
+			CommandSyntaxException commandSyntaxException, T executionCommandSource, ChainModifiers chainModifiers, @Nullable TraceCallbacks traceCallbacks
+		) {
+			executionCommandSource.handleError(commandSyntaxException, chainModifiers.isForked(), traceCallbacks);
 		}
 
-		protected abstract void runGuarded(T executionCommandSource, ContextChain<T> contextChain, boolean bl, ExecutionControl<T> executionControl) throws CommandSyntaxException;
+		protected abstract void runGuarded(
+			T executionCommandSource, ContextChain<T> contextChain, ChainModifiers chainModifiers, ExecutionControl<T> executionControl
+		) throws CommandSyntaxException;
 	}
 }

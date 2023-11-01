@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 public class GameTestServer extends MinecraftServer {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int PROGRESS_REPORT_INTERVAL = 20;
+	private static final int TEST_POSITION_RANGE = 14999992;
 	private static final Services NO_SERVICES = new Services(null, ServicesKeySet.EMPTY, null, null);
 	private final List<GameTestBatch> testBatches;
 	private final BlockPos spawnPos;
@@ -200,11 +201,12 @@ public class GameTestServer extends MinecraftServer {
 	}
 
 	private void startTests(ServerLevel serverLevel) {
-		Collection<GameTestInfo> collection = GameTestRunner.runTestBatches(
-			this.testBatches, new BlockPos(0, -59, 0), Rotation.NONE, serverLevel, GameTestTicker.SINGLETON, 8
+		BlockPos blockPos = new BlockPos(
+			serverLevel.random.nextIntBetweenInclusive(-14999992, 14999992), -59, serverLevel.random.nextIntBetweenInclusive(-14999992, 14999992)
 		);
+		Collection<GameTestInfo> collection = GameTestRunner.runTestBatches(this.testBatches, blockPos, Rotation.NONE, serverLevel, GameTestTicker.SINGLETON, 8);
 		this.testTracker = new MultipleTestTracker(collection);
-		LOGGER.info("{} tests are now running!", this.testTracker.getTotalCount());
+		LOGGER.info("{} tests are now running at position {}!", this.testTracker.getTotalCount(), blockPos.toShortString());
 	}
 
 	private boolean haveTestsStarted() {

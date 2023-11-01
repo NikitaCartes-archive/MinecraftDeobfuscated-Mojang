@@ -7,6 +7,7 @@ import com.mojang.logging.LogUtils;
 import java.util.Deque;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.ExecutionCommandSource;
 import net.minecraft.commands.execution.tasks.BuildContexts;
 import net.minecraft.commands.execution.tasks.CallFunction;
@@ -34,14 +35,27 @@ public class ExecutionContext<T> implements AutoCloseable {
 		this.commandQuota = i;
 	}
 
-	public void queueInitialFunctionCall(InstantiatedFunction<T> instantiatedFunction, T object) {
-		this.queueNext(new CommandQueueEntry<>(0, new CallFunction<>(instantiatedFunction).bind(object)));
+	private static <T extends ExecutionCommandSource<T>> Frame createTopFrame(ExecutionContext<T> executionContext, CommandResultCallback commandResultCallback) {
+		return new Frame(0, commandResultCallback, executionContext.commandQueue::clear);
+	}
+
+	public static <T extends ExecutionCommandSource<T>> void queueInitialFunctionCall(
+		ExecutionContext<T> executionContext, InstantiatedFunction<T> instantiatedFunction, T executionCommandSource, CommandResultCallback commandResultCallback
+	) {
+		executionContext.queueNext(
+			new CommandQueueEntry<>(
+				createTopFrame(executionContext, commandResultCallback),
+				new CallFunction<>(instantiatedFunction, executionCommandSource.callback(), false).bind(executionCommandSource)
+			)
+		);
 	}
 
 	public static <T extends ExecutionCommandSource<T>> void queueInitialCommandExecution(
-		ExecutionContext<T> executionContext, String string, ContextChain<T> contextChain, T executionCommandSource
+		ExecutionContext<T> executionContext, String string, ContextChain<T> contextChain, T executionCommandSource, CommandResultCallback commandResultCallback
 	) {
-		executionContext.queueNext(new CommandQueueEntry<>(0, new BuildContexts.TopLevel<>(string, contextChain, executionCommandSource)));
+		executionContext.queueNext(
+			new CommandQueueEntry<>(createTopFrame(executionContext, commandResultCallback), new BuildContexts.TopLevel<>(string, contextChain, executionCommandSource))
+		);
 	}
 
 	private void handleQueueOverflow() {
@@ -61,9 +75,13 @@ public class ExecutionContext<T> implements AutoCloseable {
 	}
 
 	public void discardAtDepthOrHigher(int i) {
-		while (!this.commandQueue.isEmpty() && ((CommandQueueEntry)this.commandQueue.peek()).depth() >= i) {
+		while (!this.commandQueue.isEmpty() && ((CommandQueueEntry)this.commandQueue.peek()).frame().depth() >= i) {
 			this.commandQueue.removeFirst();
 		}
+	}
+
+	public Frame.FrameControl frameControlForDepth(int i) {
+		return () -> this.discardAtDepthOrHigher(i);
 	}
 
 	public void runCommandQueue() {

@@ -35,6 +35,7 @@ public class StructureBlockEntity extends BlockEntity {
 	public static final int MAX_OFFSET_PER_AXIS = 48;
 	public static final int MAX_SIZE_PER_AXIS = 48;
 	public static final String AUTHOR_TAG = "author";
+	@Nullable
 	private ResourceLocation structureName;
 	private String author = "";
 	private String metaData = "";
@@ -317,11 +318,13 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	public boolean saveStructure() {
-		return this.saveStructure(true);
+		return this.mode != StructureMode.SAVE ? false : this.saveStructure(true);
 	}
 
 	public boolean saveStructure(boolean bl) {
-		if (this.mode == StructureMode.SAVE && !this.level.isClientSide && this.structureName != null) {
+		if (this.structureName == null) {
+			return false;
+		} else {
 			BlockPos blockPos = this.getBlockPos().offset(this.structurePos);
 			ServerLevel serverLevel = (ServerLevel)this.level;
 			StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
@@ -344,66 +347,70 @@ public class StructureBlockEntity extends BlockEntity {
 			} else {
 				return true;
 			}
-		} else {
-			return false;
 		}
-	}
-
-	public boolean loadStructure(ServerLevel serverLevel) {
-		return this.loadStructure(serverLevel, true);
 	}
 
 	public static RandomSource createRandom(long l) {
 		return l == 0L ? RandomSource.create(Util.getMillis()) : RandomSource.create(l);
 	}
 
-	public boolean loadStructure(ServerLevel serverLevel, boolean bl) {
+	public boolean placeStructureIfSameSize(ServerLevel serverLevel) {
 		if (this.mode == StructureMode.LOAD && this.structureName != null) {
-			StructureTemplateManager structureTemplateManager = serverLevel.getStructureManager();
-
-			Optional<StructureTemplate> optional;
-			try {
-				optional = structureTemplateManager.get(this.structureName);
-			} catch (ResourceLocationException var6) {
+			StructureTemplate structureTemplate = (StructureTemplate)serverLevel.getStructureManager().get(this.structureName).orElse(null);
+			if (structureTemplate == null) {
+				return false;
+			} else if (structureTemplate.getSize().equals(this.structureSize)) {
+				this.placeStructure(serverLevel, structureTemplate);
+				return true;
+			} else {
+				this.loadStructureInfo(structureTemplate);
 				return false;
 			}
-
-			return optional.isEmpty() ? false : this.loadStructure(serverLevel, bl, (StructureTemplate)optional.get());
 		} else {
 			return false;
 		}
 	}
 
-	public boolean loadStructure(ServerLevel serverLevel, boolean bl, StructureTemplate structureTemplate) {
-		BlockPos blockPos = this.getBlockPos();
-		if (!StringUtil.isNullOrEmpty(structureTemplate.getAuthor())) {
-			this.author = structureTemplate.getAuthor();
-		}
-
-		Vec3i vec3i = structureTemplate.getSize();
-		boolean bl2 = this.structureSize.equals(vec3i);
-		if (!bl2) {
-			this.structureSize = vec3i;
-			this.setChanged();
-			BlockState blockState = serverLevel.getBlockState(blockPos);
-			serverLevel.sendBlockUpdated(blockPos, blockState, blockState, 3);
-		}
-
-		if (bl && !bl2) {
+	public boolean loadStructureInfo(ServerLevel serverLevel) {
+		StructureTemplate structureTemplate = this.getStructureTemplate(serverLevel);
+		if (structureTemplate == null) {
 			return false;
 		} else {
-			StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
-				.setMirror(this.mirror)
-				.setRotation(this.rotation)
-				.setIgnoreEntities(this.ignoreEntities);
-			if (this.integrity < 1.0F) {
-				structurePlaceSettings.clearProcessors().addProcessor(new BlockRotProcessor(Mth.clamp(this.integrity, 0.0F, 1.0F))).setRandom(createRandom(this.seed));
-			}
-
-			BlockPos blockPos2 = blockPos.offset(this.structurePos);
-			structureTemplate.placeInWorld(serverLevel, blockPos2, blockPos2, structurePlaceSettings, createRandom(this.seed), 2);
+			this.loadStructureInfo(structureTemplate);
 			return true;
 		}
+	}
+
+	private void loadStructureInfo(StructureTemplate structureTemplate) {
+		this.author = !StringUtil.isNullOrEmpty(structureTemplate.getAuthor()) ? structureTemplate.getAuthor() : "";
+		this.structureSize = structureTemplate.getSize();
+		this.setChanged();
+	}
+
+	public void placeStructure(ServerLevel serverLevel) {
+		StructureTemplate structureTemplate = this.getStructureTemplate(serverLevel);
+		if (structureTemplate != null) {
+			this.placeStructure(serverLevel, structureTemplate);
+		}
+	}
+
+	@Nullable
+	private StructureTemplate getStructureTemplate(ServerLevel serverLevel) {
+		return this.structureName == null ? null : (StructureTemplate)serverLevel.getStructureManager().get(this.structureName).orElse(null);
+	}
+
+	private void placeStructure(ServerLevel serverLevel, StructureTemplate structureTemplate) {
+		this.loadStructureInfo(structureTemplate);
+		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
+			.setMirror(this.mirror)
+			.setRotation(this.rotation)
+			.setIgnoreEntities(this.ignoreEntities);
+		if (this.integrity < 1.0F) {
+			structurePlaceSettings.clearProcessors().addProcessor(new BlockRotProcessor(Mth.clamp(this.integrity, 0.0F, 1.0F))).setRandom(createRandom(this.seed));
+		}
+
+		BlockPos blockPos = this.getBlockPos().offset(this.structurePos);
+		structureTemplate.placeInWorld(serverLevel, blockPos, blockPos, structurePlaceSettings, createRandom(this.seed), 2);
 	}
 
 	public void unloadStructure() {

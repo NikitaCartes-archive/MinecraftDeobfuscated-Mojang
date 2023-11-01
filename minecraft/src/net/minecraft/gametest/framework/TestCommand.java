@@ -233,7 +233,7 @@ public class TestCommand {
 	private static int createNewStructure(CommandSourceStack commandSourceStack, String string, int i, int j, int k) {
 		if (i <= 48 && j <= 48 && k <= 48) {
 			ServerLevel serverLevel = commandSourceStack.getLevel();
-			BlockPos blockPos = createTestPositionAround(commandSourceStack);
+			BlockPos blockPos = createTestPositionAround(commandSourceStack).below();
 			StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos, new Vec3i(i, j, k), Rotation.NONE, serverLevel);
 
 			for (int l = 0; l < i; l++) {
@@ -328,10 +328,21 @@ public class TestCommand {
 				gameTestInfo.addListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));
 			}
 
-			runTestPreparation(testFunction, serverLevel);
-			BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(structureBlockEntity);
-			BlockPos blockPos2 = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
-			GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
+			if (verifyStructureExists(serverLevel, gameTestInfo)) {
+				runTestPreparation(testFunction, serverLevel);
+				BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(structureBlockEntity);
+				BlockPos blockPos2 = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
+				GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.SINGLETON);
+			}
+		}
+	}
+
+	private static boolean verifyStructureExists(ServerLevel serverLevel, GameTestInfo gameTestInfo) {
+		if (serverLevel.getStructureManager().get(new ResourceLocation(gameTestInfo.getStructureName())).isEmpty()) {
+			say(serverLevel, "Test structure " + gameTestInfo.getStructureName() + " could not be found", ChatFormatting.RED);
+			return false;
+		} else {
+			return true;
 		}
 	}
 
@@ -369,8 +380,12 @@ public class TestCommand {
 		runTestPreparation(testFunction, serverLevel);
 		Rotation rotation = StructureUtils.getRotationForRotationSteps(i);
 		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, rotation, serverLevel);
-		GameTestRunner.runTest(gameTestInfo, blockPos, GameTestTicker.SINGLETON);
-		return 1;
+		if (!verifyStructureExists(serverLevel, gameTestInfo)) {
+			return 0;
+		} else {
+			GameTestRunner.runTest(gameTestInfo, blockPos, GameTestTicker.SINGLETON);
+			return 1;
+		}
 	}
 
 	private static BlockPos createTestPositionAround(CommandSourceStack commandSourceStack) {
@@ -446,8 +461,7 @@ public class TestCommand {
 			return 0;
 		} else {
 			StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos2);
-			String string = structureBlockEntity.getStructurePath();
-			return exportTestStructure(commandSourceStack, string);
+			return saveAndExportTestStructure(commandSourceStack, structureBlockEntity);
 		}
 	}
 
@@ -463,14 +477,21 @@ public class TestCommand {
 
 			for (BlockPos blockPos2 : collection) {
 				StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos2);
-				String string = structureBlockEntity.getStructurePath();
-				if (exportTestStructure(commandSourceStack, string) != 0) {
+				if (saveAndExportTestStructure(commandSourceStack, structureBlockEntity) != 0) {
 					bl = false;
 				}
 			}
 
 			return bl ? 0 : 1;
 		}
+	}
+
+	private static int saveAndExportTestStructure(CommandSourceStack commandSourceStack, StructureBlockEntity structureBlockEntity) {
+		if (!structureBlockEntity.saveStructure(true)) {
+			say(commandSourceStack, "Failed to save structure " + structureBlockEntity.getStructureName());
+		}
+
+		return exportTestStructure(commandSourceStack, structureBlockEntity.getStructureName());
 	}
 
 	private static int exportTestStructure(CommandSourceStack commandSourceStack, String string) {

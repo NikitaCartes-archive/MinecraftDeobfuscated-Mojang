@@ -677,7 +677,7 @@ public class ServerGamePacketListenerImpl
 					} else if (serverboundSetStructureBlockPacket.getUpdateType() == StructureBlockEntity.UpdateType.LOAD_AREA) {
 						if (!structureBlockEntity.isStructureLoadable()) {
 							this.player.displayClientMessage(Component.translatable("structure_block.load_not_found", string), false);
-						} else if (structureBlockEntity.loadStructure(this.player.serverLevel())) {
+						} else if (structureBlockEntity.placeStructureIfSameSize(this.player.serverLevel())) {
 							this.player.displayClientMessage(Component.translatable("structure_block.load_success", string), false);
 						} else {
 							this.player.displayClientMessage(Component.translatable("structure_block.load_prepare", string), false);

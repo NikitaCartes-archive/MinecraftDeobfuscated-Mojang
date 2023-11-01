@@ -14,7 +14,13 @@ public class BatAnimation {
 		.addAnimation(
 			"head",
 			new AnimationChannel(
-				AnimationChannel.Targets.POSITION, new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, -2.5F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+				AnimationChannel.Targets.ROTATION, new Keyframe(0.0F, KeyframeAnimations.degreeVec(180.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+			)
+		)
+		.addAnimation(
+			"head",
+			new AnimationChannel(
+				AnimationChannel.Targets.POSITION, new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.5F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 			)
 		)
 		.addAnimation(
@@ -26,7 +32,7 @@ public class BatAnimation {
 		.addAnimation(
 			"body",
 			new AnimationChannel(
-				AnimationChannel.Targets.POSITION, new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, -2.5F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+				AnimationChannel.Targets.POSITION, new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.5F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 			)
 		)
 		.addAnimation(

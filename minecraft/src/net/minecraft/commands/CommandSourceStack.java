@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
-import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -47,8 +46,6 @@ import net.minecraft.world.phys.Vec3;
 public class CommandSourceStack implements ExecutionCommandSource<CommandSourceStack>, SharedSuggestionProvider {
 	public static final SimpleCommandExceptionType ERROR_NOT_PLAYER = new SimpleCommandExceptionType(Component.translatable("permissions.requires.player"));
 	public static final SimpleCommandExceptionType ERROR_NOT_ENTITY = new SimpleCommandExceptionType(Component.translatable("permissions.requires.entity"));
-	private static final CommandResultConsumer<CommandSourceStack> EMPTY_CALLBACK = (commandSourceStack, bl, i) -> {
-	};
 	private final CommandSource source;
 	private final Vec3 worldPosition;
 	private final ServerLevel level;
@@ -59,12 +56,11 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 	private final boolean silent;
 	@Nullable
 	private final Entity entity;
-	private final CommandResultConsumer<CommandSourceStack> consumer;
+	private final CommandResultCallback resultCallback;
 	private final EntityAnchorArgument.Anchor anchor;
 	private final Vec2 rotation;
 	private final CommandSigningContext signingContext;
 	private final TaskChainer chatMessageChainer;
-	private final IntConsumer returnValueConsumer;
 
 	public CommandSourceStack(
 		CommandSource commandSource,
@@ -88,12 +84,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 			minecraftServer,
 			entity,
 			false,
-			EMPTY_CALLBACK,
+			CommandResultCallback.EMPTY,
 			EntityAnchorArgument.Anchor.FEET,
 			CommandSigningContext.ANONYMOUS,
-			TaskChainer.immediate(minecraftServer),
-			ix -> {
-			}
+			TaskChainer.immediate(minecraftServer)
 		);
 	}
 
@@ -108,11 +102,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 		MinecraftServer minecraftServer,
 		@Nullable Entity entity,
 		boolean bl,
-		CommandResultConsumer<CommandSourceStack> commandResultConsumer,
+		CommandResultCallback commandResultCallback,
 		EntityAnchorArgument.Anchor anchor,
 		CommandSigningContext commandSigningContext,
-		TaskChainer taskChainer,
-		IntConsumer intConsumer
+		TaskChainer taskChainer
 	) {
 		this.source = commandSource;
 		this.worldPosition = vec3;
@@ -123,12 +116,11 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 		this.textName = string;
 		this.displayName = component;
 		this.server = minecraftServer;
-		this.consumer = commandResultConsumer;
+		this.resultCallback = commandResultCallback;
 		this.anchor = anchor;
 		this.rotation = vec2;
 		this.signingContext = commandSigningContext;
 		this.chatMessageChainer = taskChainer;
-		this.returnValueConsumer = intConsumer;
 	}
 
 	public CommandSourceStack withSource(CommandSource commandSource) {
@@ -145,11 +137,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 	}
 
@@ -167,11 +158,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 	}
 
@@ -189,11 +179,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 	}
 
@@ -211,16 +200,15 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 	}
 
-	public CommandSourceStack withCallback(CommandResultConsumer<CommandSourceStack> commandResultConsumer) {
-		return Objects.equals(this.consumer, commandResultConsumer)
+	public CommandSourceStack withCallback(CommandResultCallback commandResultCallback) {
+		return Objects.equals(this.resultCallback, commandResultCallback)
 			? this
 			: new CommandSourceStack(
 				this.source,
@@ -233,25 +221,16 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				commandResultConsumer,
+				commandResultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 	}
 
-	public CommandSourceStack clearCallbacks() {
-		return this.withCallback(EMPTY_CALLBACK);
-	}
-
-	public CommandSourceStack withCallback(
-		CommandResultConsumer<CommandSourceStack> commandResultConsumer, BinaryOperator<CommandResultConsumer<CommandSourceStack>> binaryOperator
-	) {
-		CommandResultConsumer<CommandSourceStack> commandResultConsumer2 = (CommandResultConsumer<CommandSourceStack>)binaryOperator.apply(
-			this.consumer, commandResultConsumer
-		);
-		return this.withCallback(commandResultConsumer2);
+	public CommandSourceStack withCallback(CommandResultCallback commandResultCallback, BinaryOperator<CommandResultCallback> binaryOperator) {
+		CommandResultCallback commandResultCallback2 = (CommandResultCallback)binaryOperator.apply(this.resultCallback, commandResultCallback);
+		return this.withCallback(commandResultCallback2);
 	}
 
 	public CommandSourceStack withSuppressedOutput() {
@@ -267,11 +246,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				true,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			)
 			: this;
 	}
@@ -290,11 +268,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 	}
 
@@ -312,11 +289,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 	}
 
@@ -334,11 +310,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 	}
 
@@ -359,11 +334,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				this.signingContext,
-				this.chatMessageChainer,
-				this.returnValueConsumer
+				this.chatMessageChainer
 			);
 		}
 	}
@@ -397,33 +371,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 				this.server,
 				this.entity,
 				this.silent,
-				this.consumer,
+				this.resultCallback,
 				this.anchor,
 				commandSigningContext,
-				taskChainer,
-				this.returnValueConsumer
-			);
-	}
-
-	public CommandSourceStack withReturnValueConsumer(IntConsumer intConsumer) {
-		return intConsumer == this.returnValueConsumer
-			? this
-			: new CommandSourceStack(
-				this.source,
-				this.worldPosition,
-				this.rotation,
-				this.level,
-				this.permissionLevel,
-				this.textName,
-				this.displayName,
-				this.server,
-				this.entity,
-				this.silent,
-				this.consumer,
-				this.anchor,
-				this.signingContext,
-				this.chatMessageChainer,
-				intConsumer
+				taskChainer
 			);
 	}
 
@@ -563,13 +514,8 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 	}
 
 	@Override
-	public void storeResults(boolean bl, int i) {
-		this.consumer.storeResult(this, bl, i);
-	}
-
-	@Override
-	public void storeReturnValue(int i) {
-		this.returnValueConsumer.accept(i);
+	public CommandResultCallback callback() {
+		return this.resultCallback;
 	}
 
 	@Override
@@ -639,5 +585,10 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 		if (!bl) {
 			this.sendFailure(ComponentUtils.fromMessage(message));
 		}
+	}
+
+	@Override
+	public boolean isSilent() {
+		return this.silent;
 	}
 }
