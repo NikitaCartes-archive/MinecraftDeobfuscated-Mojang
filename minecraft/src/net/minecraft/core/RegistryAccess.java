@@ -29,6 +29,11 @@ public interface RegistryAccess extends HolderLookup.Provider {
 
 	Stream<RegistryAccess.RegistryEntry<?>> registries();
 
+	@Override
+	default Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
+		return this.registries().map(RegistryAccess.RegistryEntry::key);
+	}
+
 	static RegistryAccess.Frozen fromRegistryOfRegistries(Registry<? extends Registry<?>> registry) {
 		return new RegistryAccess.Frozen() {
 			@Override

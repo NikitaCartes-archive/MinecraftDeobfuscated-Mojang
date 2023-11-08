@@ -1424,6 +1424,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.add(Blocks.BLACK_CANDLE_CAKE, createCandleCakeDrops(Blocks.BLACK_CANDLE));
 		this.add(Blocks.FROSTED_ICE, noDrop());
 		this.add(Blocks.SPAWNER, noDrop());
+		this.add(Blocks.TRIAL_SPAWNER, noDrop());
 		this.add(Blocks.FIRE, noDrop());
 		this.add(Blocks.SOUL_FIRE, noDrop());
 		this.add(Blocks.NETHER_PORTAL, noDrop());

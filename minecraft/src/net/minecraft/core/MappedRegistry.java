@@ -27,7 +27,6 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.Bootstrap;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.Validate;
@@ -89,7 +88,6 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 	}
 
 	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, boolean bl) {
-		Bootstrap.checkBootstrapCalled(() -> "registry " + resourceKey);
 		this.key = resourceKey;
 		this.registryLifecycle = lifecycle;
 		if (bl) {

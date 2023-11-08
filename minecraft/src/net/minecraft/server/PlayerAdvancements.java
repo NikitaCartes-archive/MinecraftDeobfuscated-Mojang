@@ -31,12 +31,11 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.AdvancementTree;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -78,7 +77,7 @@ public class PlayerAdvancements {
 	}
 
 	public void stopListening() {
-		for (CriterionTrigger<?> criterionTrigger : CriteriaTriggers.all()) {
+		for (CriterionTrigger<?> criterionTrigger : BuiltInRegistries.TRIGGER_TYPES) {
 			criterionTrigger.removePlayerListeners(this);
 		}
 	}
@@ -205,19 +204,11 @@ public class PlayerAdvancements {
 			bl = true;
 			if (!bl2 && advancementProgress.isDone()) {
 				advancementHolder.value().rewards().grant(this.player);
-				advancementHolder.value()
-					.display()
-					.ifPresent(
-						displayInfo -> {
-							if (displayInfo.shouldAnnounceChat() && this.player.level().getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
-								this.playerList
-									.broadcastSystemMessage(
-										Component.translatable("chat.type.advancement." + displayInfo.getFrame().getName(), this.player.getDisplayName(), Advancement.name(advancementHolder)),
-										false
-									);
-							}
-						}
-					);
+				advancementHolder.value().display().ifPresent(displayInfo -> {
+					if (displayInfo.shouldAnnounceChat() && this.player.level().getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
+						this.playerList.broadcastSystemMessage(displayInfo.getType().createAnnouncement(advancementHolder, this.player), false);
+					}
+				});
 			}
 		}
 

@@ -3,7 +3,6 @@ package net.minecraft.data.recipes;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +35,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -72,31 +74,35 @@ public abstract class RecipeProvider implements DataProvider {
 	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		final Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 		final List<CompletableFuture<?>> list = new ArrayList();
-		this.buildRecipes(new RecipeOutput() {
-			@Override
-			public void accept(FinishedRecipe finishedRecipe) {
-				if (!set.add(finishedRecipe.id())) {
-					throw new IllegalStateException("Duplicate recipe " + finishedRecipe.id());
-				} else {
-					list.add(DataProvider.saveStable(cachedOutput, finishedRecipe.serializeRecipe(), RecipeProvider.this.recipePathProvider.json(finishedRecipe.id())));
-					AdvancementHolder advancementHolder = finishedRecipe.advancement();
-					if (advancementHolder != null) {
-						JsonObject jsonObject = advancementHolder.value().serializeToJson();
-						list.add(DataProvider.saveStable(cachedOutput, jsonObject, RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())));
+		this.buildRecipes(
+			new RecipeOutput() {
+				@Override
+				public void accept(ResourceLocation resourceLocation, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
+					if (!set.add(resourceLocation)) {
+						throw new IllegalStateException("Duplicate recipe " + resourceLocation);
+					} else {
+						list.add(DataProvider.saveStable(cachedOutput, Recipe.CODEC, recipe, RecipeProvider.this.recipePathProvider.json(resourceLocation)));
+						if (advancementHolder != null) {
+							list.add(
+								DataProvider.saveStable(
+									cachedOutput, Advancement.CODEC, advancementHolder.value(), RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())
+								)
+							);
+						}
 					}
 				}
-			}
 
-			@Override
-			public Advancement.Builder advancement() {
-				return Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+				@Override
+				public Advancement.Builder advancement() {
+					return Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+				}
 			}
-		});
+		);
 		return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new));
 	}
 
 	protected CompletableFuture<?> buildAdvancement(CachedOutput cachedOutput, AdvancementHolder advancementHolder) {
-		return DataProvider.saveStable(cachedOutput, advancementHolder.value().serializeToJson(), this.advancementPathProvider.json(advancementHolder.id()));
+		return DataProvider.saveStable(cachedOutput, Advancement.CODEC, advancementHolder.value(), this.advancementPathProvider.json(advancementHolder.id()));
 	}
 
 	protected abstract void buildRecipes(RecipeOutput recipeOutput);
@@ -122,18 +128,19 @@ public abstract class RecipeProvider implements DataProvider {
 	protected static void oreSmelting(
 		RecipeOutput recipeOutput, List<ItemLike> list, RecipeCategory recipeCategory, ItemLike itemLike, float f, int i, String string
 	) {
-		oreCooking(recipeOutput, RecipeSerializer.SMELTING_RECIPE, list, recipeCategory, itemLike, f, i, string, "_from_smelting");
+		oreCooking(recipeOutput, RecipeSerializer.SMELTING_RECIPE, SmeltingRecipe::new, list, recipeCategory, itemLike, f, i, string, "_from_smelting");
 	}
 
 	protected static void oreBlasting(
 		RecipeOutput recipeOutput, List<ItemLike> list, RecipeCategory recipeCategory, ItemLike itemLike, float f, int i, String string
 	) {
-		oreCooking(recipeOutput, RecipeSerializer.BLASTING_RECIPE, list, recipeCategory, itemLike, f, i, string, "_from_blasting");
+		oreCooking(recipeOutput, RecipeSerializer.BLASTING_RECIPE, BlastingRecipe::new, list, recipeCategory, itemLike, f, i, string, "_from_blasting");
 	}
 
-	private static void oreCooking(
+	private static <T extends AbstractCookingRecipe> void oreCooking(
 		RecipeOutput recipeOutput,
-		RecipeSerializer<? extends AbstractCookingRecipe> recipeSerializer,
+		RecipeSerializer<T> recipeSerializer,
+		AbstractCookingRecipe.Factory<T> factory,
 		List<ItemLike> list,
 		RecipeCategory recipeCategory,
 		ItemLike itemLike,
@@ -143,7 +150,7 @@ public abstract class RecipeProvider implements DataProvider {
 		String string2
 	) {
 		for (ItemLike itemLike2 : list) {
-			SimpleCookingRecipeBuilder.generic(Ingredient.of(itemLike2), recipeCategory, itemLike, f, i, recipeSerializer)
+			SimpleCookingRecipeBuilder.generic(Ingredient.of(itemLike2), recipeCategory, itemLike, f, i, recipeSerializer, factory)
 				.group(string)
 				.unlockedBy(getHasName(itemLike2), has(itemLike2))
 				.save(recipeOutput, getItemName(itemLike) + string2 + "_" + getItemName(itemLike2));
@@ -543,28 +550,31 @@ public abstract class RecipeProvider implements DataProvider {
 			.save(recipeOutput);
 	}
 
-	protected static void cookRecipes(RecipeOutput recipeOutput, String string, RecipeSerializer<? extends AbstractCookingRecipe> recipeSerializer, int i) {
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.BEEF, Items.COOKED_BEEF, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.CHICKEN, Items.COOKED_CHICKEN, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.COD, Items.COOKED_COD, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.KELP, Items.DRIED_KELP, 0.1F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.SALMON, Items.COOKED_SALMON, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.MUTTON, Items.COOKED_MUTTON, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.PORKCHOP, Items.COOKED_PORKCHOP, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.POTATO, Items.BAKED_POTATO, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, i, Items.RABBIT, Items.COOKED_RABBIT, 0.35F);
+	protected static <T extends AbstractCookingRecipe> void cookRecipes(
+		RecipeOutput recipeOutput, String string, RecipeSerializer<T> recipeSerializer, AbstractCookingRecipe.Factory<T> factory, int i
+	) {
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.BEEF, Items.COOKED_BEEF, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.CHICKEN, Items.COOKED_CHICKEN, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.COD, Items.COOKED_COD, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.KELP, Items.DRIED_KELP, 0.1F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.SALMON, Items.COOKED_SALMON, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.MUTTON, Items.COOKED_MUTTON, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.PORKCHOP, Items.COOKED_PORKCHOP, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.POTATO, Items.BAKED_POTATO, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.RABBIT, Items.COOKED_RABBIT, 0.35F);
 	}
 
-	private static void simpleCookingRecipe(
+	private static <T extends AbstractCookingRecipe> void simpleCookingRecipe(
 		RecipeOutput recipeOutput,
 		String string,
-		RecipeSerializer<? extends AbstractCookingRecipe> recipeSerializer,
+		RecipeSerializer<T> recipeSerializer,
+		AbstractCookingRecipe.Factory<T> factory,
 		int i,
 		ItemLike itemLike,
 		ItemLike itemLike2,
 		float f
 	) {
-		SimpleCookingRecipeBuilder.generic(Ingredient.of(itemLike), RecipeCategory.FOOD, itemLike2, f, i, recipeSerializer)
+		SimpleCookingRecipeBuilder.generic(Ingredient.of(itemLike), RecipeCategory.FOOD, itemLike2, f, i, recipeSerializer, factory)
 			.unlockedBy(getHasName(itemLike), has(itemLike))
 			.save(recipeOutput, getItemName(itemLike2) + "_from_" + string);
 	}
@@ -637,7 +647,8 @@ public abstract class RecipeProvider implements DataProvider {
 	}
 
 	private static Criterion<EnterBlockTrigger.TriggerInstance> insideOf(Block block) {
-		return CriteriaTriggers.ENTER_BLOCK.createCriterion(new EnterBlockTrigger.TriggerInstance(Optional.empty(), block, Optional.empty()));
+		return CriteriaTriggers.ENTER_BLOCK
+			.createCriterion(new EnterBlockTrigger.TriggerInstance(Optional.empty(), Optional.of(block.builtInRegistryHolder()), Optional.empty()));
 	}
 
 	private static Criterion<InventoryChangeTrigger.TriggerInstance> has(MinMaxBounds.Ints ints, ItemLike itemLike) {
@@ -658,9 +669,7 @@ public abstract class RecipeProvider implements DataProvider {
 
 	private static Criterion<InventoryChangeTrigger.TriggerInstance> inventoryTrigger(ItemPredicate... itemPredicates) {
 		return CriteriaTriggers.INVENTORY_CHANGED
-			.createCriterion(
-				new InventoryChangeTrigger.TriggerInstance(Optional.empty(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, List.of(itemPredicates))
-			);
+			.createCriterion(new InventoryChangeTrigger.TriggerInstance(Optional.empty(), InventoryChangeTrigger.TriggerInstance.Slots.ANY, List.of(itemPredicates)));
 	}
 
 	protected static String getHasName(ItemLike itemLike) {

@@ -21,11 +21,15 @@ public class ClipContext {
 	private final CollisionContext collisionContext;
 
 	public ClipContext(Vec3 vec3, Vec3 vec32, ClipContext.Block block, ClipContext.Fluid fluid, Entity entity) {
+		this(vec3, vec32, block, fluid, CollisionContext.of(entity));
+	}
+
+	public ClipContext(Vec3 vec3, Vec3 vec32, ClipContext.Block block, ClipContext.Fluid fluid, CollisionContext collisionContext) {
 		this.from = vec3;
 		this.to = vec32;
 		this.block = block;
 		this.fluid = fluid;
-		this.collisionContext = CollisionContext.of(entity);
+		this.collisionContext = collisionContext;
 	}
 
 	public Vec3 getTo() {

@@ -17,6 +17,7 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.RandomSequence;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.storage.loot.LootDataId;
@@ -55,7 +56,8 @@ public class LootTableProvider implements DataProvider {
 					throw new IllegalStateException("Duplicate loot table " + resourceLocationx);
 				}
 			}));
-		ValidationContext validationContext = new ValidationContext(LootContextParamSets.ALL_PARAMS, new LootDataResolver() {
+		ProblemReporter.Collector collector = new ProblemReporter.Collector();
+		ValidationContext validationContext = new ValidationContext(collector, LootContextParamSets.ALL_PARAMS, new LootDataResolver() {
 			@Nullable
 			@Override
 			public <T> T getElement(LootDataId<T> lootDataId) {
@@ -64,7 +66,7 @@ public class LootTableProvider implements DataProvider {
 		});
 
 		for (ResourceLocation resourceLocation : Sets.difference(this.requiredTables, map.keySet())) {
-			validationContext.reportProblem("Missing built-in table: " + resourceLocation);
+			collector.report("Missing built-in table: " + resourceLocation);
 		}
 
 		map.forEach(
@@ -72,7 +74,7 @@ public class LootTableProvider implements DataProvider {
 					validationContext.setParams(lootTable.getParamSet()).enterElement("{" + resourceLocationx + "}", new LootDataId<>(LootDataType.TABLE, resourceLocationx))
 				)
 		);
-		Multimap<String, String> multimap = validationContext.getProblems();
+		Multimap<String, String> multimap = collector.get();
 		if (!multimap.isEmpty()) {
 			multimap.forEach((string, string2) -> LOGGER.warn("Found validation problem in {}: {}", string, string2));
 			throw new IllegalStateException("Failed to validate loot tables, see logs");

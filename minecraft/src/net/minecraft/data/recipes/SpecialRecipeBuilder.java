@@ -1,21 +1,19 @@
 package net.minecraft.data.recipes;
 
-import javax.annotation.Nullable;
-import net.minecraft.advancements.AdvancementHolder;
+import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.Recipe;
 
-public class SpecialRecipeBuilder extends CraftingRecipeBuilder {
-	final RecipeSerializer<?> serializer;
+public class SpecialRecipeBuilder {
+	private final Function<CraftingBookCategory, Recipe<?>> factory;
 
-	public SpecialRecipeBuilder(RecipeSerializer<?> recipeSerializer) {
-		this.serializer = recipeSerializer;
+	public SpecialRecipeBuilder(Function<CraftingBookCategory, Recipe<?>> function) {
+		this.factory = function;
 	}
 
-	public static SpecialRecipeBuilder special(RecipeSerializer<? extends CraftingRecipe> recipeSerializer) {
-		return new SpecialRecipeBuilder(recipeSerializer);
+	public static SpecialRecipeBuilder special(Function<CraftingBookCategory, Recipe<?>> function) {
+		return new SpecialRecipeBuilder(function);
 	}
 
 	public void save(RecipeOutput recipeOutput, String string) {
@@ -23,22 +21,6 @@ public class SpecialRecipeBuilder extends CraftingRecipeBuilder {
 	}
 
 	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
-		recipeOutput.accept(new CraftingRecipeBuilder.CraftingResult(CraftingBookCategory.MISC) {
-			@Override
-			public RecipeSerializer<?> type() {
-				return SpecialRecipeBuilder.this.serializer;
-			}
-
-			@Override
-			public ResourceLocation id() {
-				return resourceLocation;
-			}
-
-			@Nullable
-			@Override
-			public AdvancementHolder advancement() {
-				return null;
-			}
-		});
+		recipeOutput.accept(resourceLocation, (Recipe<?>)this.factory.apply(CraftingBookCategory.MISC), null);
 	}
 }

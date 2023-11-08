@@ -253,6 +253,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						.when(LootItemKilledByPlayerCondition.killedByPlayer())
 				)
 		);
+		this.add(EntityType.BREEZE, LootTable.lootTable());
 		this.add(EntityType.FOX, LootTable.lootTable());
 		this.add(EntityType.FROG, LootTable.lootTable());
 		this.add(

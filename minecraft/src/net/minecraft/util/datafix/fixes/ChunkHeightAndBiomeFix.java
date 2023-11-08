@@ -7,7 +7,6 @@ import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
-import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
@@ -34,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import net.minecraft.Util;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -133,52 +133,45 @@ public class ChunkHeightAndBiomeFix extends DataFix {
 						);
 						Set<String> set = Sets.<String>newHashSet();
 						MutableObject<Supplier<ChunkProtoTickListFix.PoorMansPalettedContainer>> mutableObject = new MutableObject<>(() -> null);
-						typed2 = typed2.updateTyped(
-							opticFinder2,
-							type4,
-							typedxx -> {
-								IntSet intSet = new IntOpenHashSet();
-								Dynamic<?> dynamic3 = (Dynamic<?>)typedxx.write().result().orElseThrow(() -> new IllegalStateException("Malformed Chunk.Level.Sections"));
-								List<Dynamic<?>> list = (List<Dynamic<?>>)dynamic3.asStream().map(dynamic2xx -> {
-									int jx = dynamic2xx.get("Y").asInt(0);
-									Dynamic<?> dynamic3x = DataFixUtils.orElse(dynamic2xx.get("Palette").result().flatMap(dynamic2xxx -> {
-										dynamic2xxx.asStream().map(dynamicxxxx -> dynamicxxxx.get("Name").asString("minecraft:air")).forEach(set::add);
-										return dynamic2xx.get("BlockStates").result().map(dynamic2xxxx -> makeOptimizedPalettedContainer(dynamic2xxx, dynamic2xxxx));
-									}), dynamic2);
-									Dynamic<?> dynamic4x = dynamic2xx;
-									int kx = jx - i;
-									if (kx >= 0 && kx < dynamics.length) {
-										dynamic4x = dynamic2xx.set("biomes", dynamics[kx]);
-									}
-
-									intSet.add(jx);
-									if (dynamic2xx.get("Y").asInt(Integer.MAX_VALUE) == 0) {
-										mutableObject.setValue(() -> {
-											List<? extends Dynamic<?>> listx = dynamic3x.get("palette").asList(Function.identity());
-											long[] ls = dynamic3x.get("data").asLongStream().toArray();
-											return new ChunkProtoTickListFix.PoorMansPalettedContainer(listx, ls);
-										});
-									}
-
-									return dynamic4x.set("block_states", dynamic3x).remove("Palette").remove("BlockStates");
-								}).collect(Collectors.toCollection(ArrayList::new));
-
-								for (int j = 0; j < dynamics.length; j++) {
-									int k = j + i;
-									if (intSet.add(k)) {
-										Dynamic<?> dynamic4 = dynamic.createMap(Map.of(dynamic.createString("Y"), dynamic.createInt(k)));
-										dynamic4 = dynamic4.set("block_states", dynamic2);
-										dynamic4 = dynamic4.set("biomes", dynamics[j]);
-										list.add(dynamic4);
-									}
+						typed2 = typed2.updateTyped(opticFinder2, type4, typedxx -> {
+							IntSet intSet = new IntOpenHashSet();
+							Dynamic<?> dynamic3 = (Dynamic<?>)typedxx.write().result().orElseThrow(() -> new IllegalStateException("Malformed Chunk.Level.Sections"));
+							List<Dynamic<?>> list = (List<Dynamic<?>>)dynamic3.asStream().map(dynamic2xx -> {
+								int jx = dynamic2xx.get("Y").asInt(0);
+								Dynamic<?> dynamic3x = DataFixUtils.orElse(dynamic2xx.get("Palette").result().flatMap(dynamic2xxx -> {
+									dynamic2xxx.asStream().map(dynamicxxxx -> dynamicxxxx.get("Name").asString("minecraft:air")).forEach(set::add);
+									return dynamic2xx.get("BlockStates").result().map(dynamic2xxxx -> makeOptimizedPalettedContainer(dynamic2xxx, dynamic2xxxx));
+								}), dynamic2);
+								Dynamic<?> dynamic4x = dynamic2xx;
+								int kx = jx - i;
+								if (kx >= 0 && kx < dynamics.length) {
+									dynamic4x = dynamic2xx.set("biomes", dynamics[kx]);
 								}
 
-								return (Typed)((Pair)type4.readTyped(dynamic.createList(list.stream()))
-										.result()
-										.orElseThrow(() -> new IllegalStateException("ChunkHeightAndBiomeFix failed.")))
-									.getFirst();
+								intSet.add(jx);
+								if (dynamic2xx.get("Y").asInt(Integer.MAX_VALUE) == 0) {
+									mutableObject.setValue(() -> {
+										List<? extends Dynamic<?>> listx = dynamic3x.get("palette").asList(Function.identity());
+										long[] ls = dynamic3x.get("data").asLongStream().toArray();
+										return new ChunkProtoTickListFix.PoorMansPalettedContainer(listx, ls);
+									});
+								}
+
+								return dynamic4x.set("block_states", dynamic3x).remove("Palette").remove("BlockStates");
+							}).collect(Collectors.toCollection(ArrayList::new));
+
+							for (int j = 0; j < dynamics.length; j++) {
+								int k = j + i;
+								if (intSet.add(k)) {
+									Dynamic<?> dynamic4 = dynamic.createMap(Map.of(dynamic.createString("Y"), dynamic.createInt(k)));
+									dynamic4 = dynamic4.set("block_states", dynamic2);
+									dynamic4 = dynamic4.set("biomes", dynamics[j]);
+									list.add(dynamic4);
+								}
 							}
-						);
+
+							return Util.readTypedOrThrow(type4, dynamic.createList(list.stream()));
+						});
 						return typed2.update(DSL.remainderFinder(), dynamicx -> {
 							if (bl) {
 								dynamicx = this.predictChunkStatusBeforeSurface(dynamicx, set);

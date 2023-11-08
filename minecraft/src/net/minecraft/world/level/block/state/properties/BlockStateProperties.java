@@ -3,6 +3,7 @@ package net.minecraft.world.level.block.state.properties;
 import java.util.function.Predicate;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 
 public class BlockStateProperties {
 	public static final BooleanProperty ATTACHED = BooleanProperty.create("attached");
@@ -142,4 +143,5 @@ public class BlockStateProperties {
 	public static final IntegerProperty DUSTED = IntegerProperty.create("dusted", 0, 3);
 	public static final BooleanProperty CRACKED = BooleanProperty.create("cracked");
 	public static final BooleanProperty CRAFTING = BooleanProperty.create("crafting");
+	public static final EnumProperty<TrialSpawnerState> TRIAL_SPAWNER_STATE = EnumProperty.create("trial_spawner_state", TrialSpawnerState.class);
 }

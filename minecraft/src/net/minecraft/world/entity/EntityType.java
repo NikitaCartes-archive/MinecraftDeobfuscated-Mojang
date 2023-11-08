@@ -109,6 +109,7 @@ import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.monster.breeze.Breeze;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
@@ -133,6 +134,7 @@ import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.projectile.WindCharge;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
@@ -196,6 +198,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Boat> BOAT = register(
 		"boat", EntityType.Builder.<Boat>of(Boat::new, MobCategory.MISC).sized(1.375F, 0.5625F).clientTrackingRange(10)
+	);
+	public static final EntityType<Breeze> BREEZE = register(
+		"breeze", EntityType.Builder.of(Breeze::new, MobCategory.MONSTER).sized(0.6F, 1.7F).clientTrackingRange(10).requiredFeatures(FeatureFlags.UPDATE_1_21)
 	);
 	public static final EntityType<Camel> CAMEL = register(
 		"camel", EntityType.Builder.of(Camel::new, MobCategory.CREATURE).sized(1.7F, 2.375F).clientTrackingRange(10)
@@ -498,6 +503,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Warden> WARDEN = register(
 		"warden", EntityType.Builder.of(Warden::new, MobCategory.MONSTER).sized(0.9F, 2.9F).clientTrackingRange(16).fireImmune()
+	);
+	public static final EntityType<WindCharge> WIND_CHARGE = register(
+		"wind_charge", EntityType.Builder.<WindCharge>of(WindCharge::new, MobCategory.MISC).sized(0.3125F, 0.3125F).clientTrackingRange(4).updateInterval(10)
 	);
 	public static final EntityType<Witch> WITCH = register(
 		"witch", EntityType.Builder.of(Witch::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8)

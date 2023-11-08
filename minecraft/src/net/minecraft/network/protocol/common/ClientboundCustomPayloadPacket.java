@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.custom.BeeDebugPayload;
 import net.minecraft.network.protocol.common.custom.BrainDebugPayload;
 import net.minecraft.network.protocol.common.custom.BrandPayload;
+import net.minecraft.network.protocol.common.custom.BreezeDebugPayload;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.common.custom.DiscardedPayload;
 import net.minecraft.network.protocol.common.custom.GameEventDebugPayload;
@@ -32,6 +33,7 @@ public record ClientboundCustomPayloadPacket(CustomPacketPayload payload) implem
 		.put(BrandPayload.ID, BrandPayload::new)
 		.put(BeeDebugPayload.ID, BeeDebugPayload::new)
 		.put(BrainDebugPayload.ID, BrainDebugPayload::new)
+		.put(BreezeDebugPayload.ID, BreezeDebugPayload::new)
 		.put(GameEventDebugPayload.ID, GameEventDebugPayload::new)
 		.put(GameEventListenerDebugPayload.ID, GameEventListenerDebugPayload::new)
 		.put(GameTestAddMarkerDebugPayload.ID, GameTestAddMarkerDebugPayload::new)

@@ -497,6 +497,11 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
+	public void playLocalSound(Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
+		this.minecraft.getSoundManager().play(new EntityBoundSoundInstance(soundEvent, soundSource, f, g, entity, this.random.nextLong()));
+	}
+
+	@Override
 	public void playLocalSound(double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, boolean bl) {
 		this.playSound(d, e, f, soundEvent, soundSource, g, h, bl, this.random.nextLong());
 	}

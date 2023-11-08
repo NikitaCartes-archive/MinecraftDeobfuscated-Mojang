@@ -1,7 +1,7 @@
 package net.minecraft.advancements;
 
-import com.google.gson.JsonObject;
+import net.minecraft.advancements.critereon.CriterionValidator;
 
 public interface CriterionTriggerInstance {
-	JsonObject serializeToJson();
+	void validate(CriterionValidator criterionValidator);
 }

@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.projectile;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +12,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -22,6 +24,11 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 
 	protected AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, Level level) {
 		super(entityType, level);
+	}
+
+	protected AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, double d, double e, double f, Level level) {
+		this(entityType, level);
+		this.setPos(d, e, f);
 	}
 
 	public AbstractHurtingProjectile(
@@ -61,6 +68,10 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		return d < e * e;
 	}
 
+	protected ClipContext.Block getClipType() {
+		return ClipContext.Block.COLLIDER;
+	}
+
 	@Override
 	public void tick() {
 		Entity entity = this.getOwner();
@@ -70,7 +81,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 				this.setSecondsOnFire(1);
 			}
 
-			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity, this.getClipType());
 			if (hitResult.getType() != HitResult.Type.MISS) {
 				this.onHit(hitResult);
 			}
@@ -92,7 +103,11 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 			}
 
 			this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale((double)g));
-			this.level().addParticle(this.getTrailParticle(), d, e + 0.5, f, 0.0, 0.0, 0.0);
+			ParticleOptions particleOptions = this.getTrailParticle();
+			if (particleOptions != null) {
+				this.level().addParticle(particleOptions, d, e + 0.5, f, 0.0, 0.0, 0.0);
+			}
+
 			this.setPos(d, e, f);
 		} else {
 			this.discard();
@@ -108,6 +123,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		return true;
 	}
 
+	@Nullable
 	protected ParticleOptions getTrailParticle() {
 		return ParticleTypes.SMOKE;
 	}

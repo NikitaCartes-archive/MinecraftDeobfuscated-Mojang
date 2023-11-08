@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class JigsawBlockEditScreen extends Screen {
-	private static final int MAX_LEVELS = 7;
 	private static final Component JOINT_LABEL = Component.translatable("jigsaw_block.joint_label");
 	private static final Component POOL_LABEL = Component.translatable("jigsaw_block.pool");
 	private static final Component NAME_LABEL = Component.translatable("jigsaw_block.name");
@@ -148,7 +147,7 @@ public class JigsawBlockEditScreen extends Screen {
 
 			@Override
 			protected void applyValue() {
-				JigsawBlockEditScreen.this.levels = Mth.floor(Mth.clampedLerp(0.0, 7.0, this.value));
+				JigsawBlockEditScreen.this.levels = Mth.floor(Mth.clampedLerp(0.0, 20.0, this.value));
 			}
 		});
 		this.addRenderableWidget(

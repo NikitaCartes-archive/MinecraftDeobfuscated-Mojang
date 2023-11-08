@@ -55,7 +55,8 @@ public class PlayerDataStorage {
 
 		if (compoundTag != null) {
 			int i = NbtUtils.getDataVersion(compoundTag, -1);
-			player.load(DataFixTypes.PLAYER.updateToCurrentVersion(this.fixerUpper, compoundTag, i));
+			compoundTag = DataFixTypes.PLAYER.updateToCurrentVersion(this.fixerUpper, compoundTag, i);
+			player.load(compoundTag);
 		}
 
 		return compoundTag;

@@ -1,20 +1,19 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.phys.Vec3;
 
 public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.TriggerInstance> {
-	public DistanceTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
-	) {
-		Optional<LocationPredicate> optional2 = LocationPredicate.fromJson(jsonObject.get("start_position"));
-		Optional<DistancePredicate> optional3 = DistancePredicate.fromJson(jsonObject.get("distance"));
-		return new DistanceTrigger.TriggerInstance(optional, optional2, optional3);
+	@Override
+	public Codec<DistanceTrigger.TriggerInstance> codec() {
+		return DistanceTrigger.TriggerInstance.CODEC;
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Vec3 vec3) {
@@ -22,15 +21,16 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer.serverLevel(), vec3, vec32));
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final Optional<LocationPredicate> startPosition;
-		private final Optional<DistancePredicate> distance;
-
-		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<LocationPredicate> optional2, Optional<DistancePredicate> optional3) {
-			super(optional);
-			this.startPosition = optional2;
-			this.distance = optional3;
-		}
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<LocationPredicate> startPosition, Optional<DistancePredicate> distance)
+		implements SimpleCriterionTrigger.SimpleInstance {
+		public static final Codec<DistanceTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(DistanceTrigger.TriggerInstance::player),
+						ExtraCodecs.strictOptionalField(LocationPredicate.CODEC, "start_position").forGetter(DistanceTrigger.TriggerInstance::startPosition),
+						ExtraCodecs.strictOptionalField(DistancePredicate.CODEC, "distance").forGetter(DistanceTrigger.TriggerInstance::distance)
+					)
+					.apply(instance, DistanceTrigger.TriggerInstance::new)
+		);
 
 		public static Criterion<DistanceTrigger.TriggerInstance> fallFromHeight(
 			EntityPredicate.Builder builder, DistancePredicate distancePredicate, LocationPredicate.Builder builder2
@@ -49,14 +49,6 @@ public class DistanceTrigger extends SimpleCriterionTrigger<DistanceTrigger.Trig
 		public static Criterion<DistanceTrigger.TriggerInstance> travelledThroughNether(DistancePredicate distancePredicate) {
 			return CriteriaTriggers.NETHER_TRAVEL
 				.createCriterion(new DistanceTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.of(distancePredicate)));
-		}
-
-		@Override
-		public JsonObject serializeToJson() {
-			JsonObject jsonObject = super.serializeToJson();
-			this.startPosition.ifPresent(locationPredicate -> jsonObject.add("start_position", locationPredicate.serializeToJson()));
-			this.distance.ifPresent(distancePredicate -> jsonObject.add("distance", distancePredicate.serializeToJson()));
-			return jsonObject;
 		}
 
 		public boolean matches(ServerLevel serverLevel, Vec3 vec3, Vec3 vec32) {

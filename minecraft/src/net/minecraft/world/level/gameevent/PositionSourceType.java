@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 
 public interface PositionSourceType<T extends PositionSource> {
 	PositionSourceType<BlockPositionSource> BLOCK = register("block", new BlockPositionSource.Type());
@@ -21,15 +20,16 @@ public interface PositionSourceType<T extends PositionSource> {
 	}
 
 	static PositionSource fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-		return ((PositionSourceType)BuiltInRegistries.POSITION_SOURCE_TYPE
-				.getOptional(resourceLocation)
-				.orElseThrow(() -> new IllegalArgumentException("Unknown position source type " + resourceLocation)))
-			.read(friendlyByteBuf);
+		PositionSourceType<?> positionSourceType = friendlyByteBuf.readById(BuiltInRegistries.POSITION_SOURCE_TYPE);
+		if (positionSourceType == null) {
+			throw new IllegalArgumentException("Unknown position source type");
+		} else {
+			return positionSourceType.read(friendlyByteBuf);
+		}
 	}
 
 	static <T extends PositionSource> void toNetwork(T positionSource, FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeResourceLocation(BuiltInRegistries.POSITION_SOURCE_TYPE.getKey(positionSource.getType()));
+		friendlyByteBuf.writeId(BuiltInRegistries.POSITION_SOURCE_TYPE, positionSource.getType());
 		((PositionSourceType<T>)positionSource.getType()).write(friendlyByteBuf, positionSource);
 	}
 }

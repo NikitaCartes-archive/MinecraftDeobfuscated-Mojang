@@ -622,6 +622,22 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.GOLD_BLOCK).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
 				)
 		);
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_SUPPLY, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_ENTRANCE, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_INTERSECTION, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_INTERSECTION_BARREL, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CHAMBER_DISPENSER, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR_DISPENSER, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_WATER_DISPENSER, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR_POT, LootTable.lootTable());
+		spawnerLootTables(biConsumer);
+	}
+
+	public static void spawnerLootTables(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
+		biConsumer.accept(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_KEY, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_CONSUMABLES, LootTable.lootTable());
 	}
 
 	public static LootTable.Builder shipwreckSupplyLootTable() {

@@ -7,6 +7,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import java.util.Objects;
+import net.minecraft.Util;
 
 public class EntityHorseSplitFix extends EntityRenameFix {
 	public EntityHorseSplitFix(Schema schema, boolean bl) {
@@ -20,18 +21,15 @@ public class EntityHorseSplitFix extends EntityRenameFix {
 			int i = dynamic.get("Type").asInt(0);
 
 			String string2 = switch (i) {
-				default -> "Horse";
 				case 1 -> "Donkey";
 				case 2 -> "Mule";
 				case 3 -> "ZombieHorse";
 				case 4 -> "SkeletonHorse";
+				default -> "Horse";
 			};
 			dynamic.remove("Type");
 			Type<?> type = (Type<?>)this.getOutputSchema().findChoiceType(References.ENTITY).types().get(string2);
-			return Pair.of(
-				string2,
-				(Typed<?>)((Pair)typed.write().flatMap(type::readTyped).result().orElseThrow(() -> new IllegalStateException("Could not parse the new horse"))).getFirst()
-			);
+			return Pair.of(string2, Util.writeAndReadTypedOrThrow(typed, type, dynamicx -> dynamicx));
 		} else {
 			return Pair.of(string, typed);
 		}

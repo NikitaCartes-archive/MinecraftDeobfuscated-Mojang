@@ -132,6 +132,8 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.EXPLOSION, HugeExplosionParticle.Provider::new);
 		this.register(ParticleTypes.SONIC_BOOM, SonicBoomParticle.Provider::new);
 		this.register(ParticleTypes.FALLING_DUST, FallingDustParticle.Provider::new);
+		this.register(ParticleTypes.GUST, GustParticle.Provider::new);
+		this.register(ParticleTypes.GUST_EMITTER, new GustSeedParticle.Provider());
 		this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
 		this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);
 		this.register(ParticleTypes.FLAME, FlameParticle.Provider::new);
@@ -198,6 +200,8 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.SHRIEK, ShriekParticle.Provider::new);
 		this.register(ParticleTypes.EGG_CRACK, SuspendedTownParticle.EggCrackProvider::new);
 		this.register(ParticleTypes.DUST_PLUME, DustPlumeParticle.Provider::new);
+		this.register(ParticleTypes.GUST_DUST, GustDustParticle.GustDustParticleProvider::new);
+		this.register(ParticleTypes.TRIAL_SPAWNER_DETECTION, TrialSpawnerDetectionParticle.Provider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

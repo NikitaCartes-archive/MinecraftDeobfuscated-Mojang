@@ -1,6 +1,6 @@
 package net.minecraft.world.item.crafting;
 
-import net.minecraft.core.NonNullList;
+import java.util.Map;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -14,20 +14,7 @@ public class MapExtendingRecipe extends ShapedRecipe {
 		super(
 			"",
 			craftingBookCategory,
-			3,
-			3,
-			NonNullList.of(
-				Ingredient.EMPTY,
-				Ingredient.of(Items.PAPER),
-				Ingredient.of(Items.PAPER),
-				Ingredient.of(Items.PAPER),
-				Ingredient.of(Items.PAPER),
-				Ingredient.of(Items.FILLED_MAP),
-				Ingredient.of(Items.PAPER),
-				Ingredient.of(Items.PAPER),
-				Ingredient.of(Items.PAPER),
-				Ingredient.of(Items.PAPER)
-			),
+			ShapedRecipePattern.of(Map.of('#', Ingredient.of(Items.PAPER), 'x', Ingredient.of(Items.FILLED_MAP)), "###", "#x#", "###"),
 			new ItemStack(Items.MAP)
 		);
 	}

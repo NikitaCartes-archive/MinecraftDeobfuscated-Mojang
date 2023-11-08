@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.TypeRewriteRule;
-import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
@@ -111,21 +110,18 @@ public class LevelDataGeneratorOptionsFix extends DataFix {
 	protected TypeRewriteRule makeRule() {
 		Type<?> type = this.getOutputSchema().getType(References.LEVEL);
 		return this.fixTypeEverywhereTyped(
-			"LevelDataGeneratorOptionsFix", this.getInputSchema().getType(References.LEVEL), type, typed -> (Typed)typed.write().flatMap(dynamic -> {
+			"LevelDataGeneratorOptionsFix", this.getInputSchema().getType(References.LEVEL), type, typed -> Util.writeAndReadTypedOrThrow(typed, type, dynamic -> {
 					Optional<String> optional = dynamic.get("generatorOptions").asString().result();
-					Dynamic<?> dynamic2;
 					if ("flat".equalsIgnoreCase(dynamic.get("generatorName").asString(""))) {
 						String string = (String)optional.orElse("");
-						dynamic2 = dynamic.set("generatorOptions", convert(string, dynamic.getOps()));
+						return dynamic.set("generatorOptions", convert(string, dynamic.getOps()));
 					} else if ("buffet".equalsIgnoreCase(dynamic.get("generatorName").asString("")) && optional.isPresent()) {
-						Dynamic<JsonElement> dynamic3 = new Dynamic<>(JsonOps.INSTANCE, GsonHelper.parse((String)optional.get(), true));
-						dynamic2 = dynamic.set("generatorOptions", dynamic3.convert(dynamic.getOps()));
+						Dynamic<JsonElement> dynamic2 = new Dynamic<>(JsonOps.INSTANCE, GsonHelper.parse((String)optional.get(), true));
+						return dynamic.set("generatorOptions", dynamic2.convert(dynamic.getOps()));
 					} else {
-						dynamic2 = dynamic;
+						return dynamic;
 					}
-
-					return type.readTyped(dynamic2);
-				}).map(Pair::getFirst).result().orElseThrow(() -> new IllegalStateException("Could not read new level type."))
+				})
 		);
 	}
 

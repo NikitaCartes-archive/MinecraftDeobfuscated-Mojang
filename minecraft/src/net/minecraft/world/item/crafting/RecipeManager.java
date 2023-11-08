@@ -8,11 +8,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +23,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -143,12 +139,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 	}
 
 	protected static RecipeHolder<?> fromJson(ResourceLocation resourceLocation, JsonObject jsonObject) {
-		String string = GsonHelper.getAsString(jsonObject, "type");
-		Codec<? extends Recipe<?>> codec = ((RecipeSerializer)BuiltInRegistries.RECIPE_SERIALIZER
-				.getOptional(new ResourceLocation(string))
-				.orElseThrow(() -> new JsonSyntaxException("Invalid or unsupported recipe type '" + string + "'")))
-			.codec();
-		Recipe<?> recipe = Util.getOrThrow((DataResult<Recipe<?>>)codec.parse(JsonOps.INSTANCE, jsonObject), JsonParseException::new);
+		Recipe<?> recipe = Util.getOrThrow(Recipe.CODEC.parse(JsonOps.INSTANCE, jsonObject), JsonParseException::new);
 		return new RecipeHolder<>(resourceLocation, recipe);
 	}
 

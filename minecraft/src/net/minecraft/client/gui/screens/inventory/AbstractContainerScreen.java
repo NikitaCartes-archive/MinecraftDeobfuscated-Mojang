@@ -233,7 +233,13 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				guiGraphics.fill(i, j, i + 16, j + 16, -2130706433);
 			}
 
-			guiGraphics.renderItem(itemStack, i, j, slot.x + slot.y * this.imageWidth);
+			int k = slot.x + slot.y * this.imageWidth;
+			if (slot.isFake()) {
+				guiGraphics.renderFakeItem(itemStack, i, j, k);
+			} else {
+				guiGraphics.renderItem(itemStack, i, j, k);
+			}
+
 			guiGraphics.renderItemDecorations(this.font, itemStack, i, j, string);
 		}
 

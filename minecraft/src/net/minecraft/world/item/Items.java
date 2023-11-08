@@ -11,6 +11,7 @@ import net.minecraft.tags.InstrumentTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.food.Foods;
 import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.level.block.Block;
@@ -1150,6 +1151,7 @@ public class Items {
 	public static final Item BAT_SPAWN_EGG = registerItem("bat_spawn_egg", new SpawnEggItem(EntityType.BAT, 4996656, 986895, new Item.Properties()));
 	public static final Item BEE_SPAWN_EGG = registerItem("bee_spawn_egg", new SpawnEggItem(EntityType.BEE, 15582019, 4400155, new Item.Properties()));
 	public static final Item BLAZE_SPAWN_EGG = registerItem("blaze_spawn_egg", new SpawnEggItem(EntityType.BLAZE, 16167425, 16775294, new Item.Properties()));
+	public static final Item BREEZE_SPAWN_EGG = registerItem("breeze_spawn_egg", new SpawnEggItem(EntityType.BREEZE, 11506911, 9529055, new Item.Properties()));
 	public static final Item CAT_SPAWN_EGG = registerItem("cat_spawn_egg", new SpawnEggItem(EntityType.CAT, 15714446, 9794134, new Item.Properties()));
 	public static final Item CAMEL_SPAWN_EGG = registerItem("camel_spawn_egg", new SpawnEggItem(EntityType.CAMEL, 16565097, 13341495, new Item.Properties()));
 	public static final Item CAVE_SPIDER_SPAWN_EGG = registerItem(
@@ -1631,6 +1633,8 @@ public class Items {
 	public static final Item WAXED_EXPOSED_COPPER_BULB = registerBlock(Blocks.WAXED_EXPOSED_COPPER_BULB);
 	public static final Item WAXED_WEATHERED_COPPER_BULB = registerBlock(Blocks.WAXED_WEATHERED_COPPER_BULB);
 	public static final Item WAXED_OXIDIZED_COPPER_BULB = registerBlock(Blocks.WAXED_OXIDIZED_COPPER_BULB);
+	public static final Item TRIAL_SPAWNER = registerBlock(Blocks.TRIAL_SPAWNER);
+	public static final Item TRIAL_KEY = registerItem("trial_key", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
 
 	public static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));

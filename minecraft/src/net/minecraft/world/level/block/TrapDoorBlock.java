@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -9,8 +10,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -106,15 +109,31 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 		if (!this.type.canOpenByHand()) {
 			return InteractionResult.PASS;
 		} else {
-			blockState = blockState.cycle(OPEN);
-			level.setBlock(blockPos, blockState, 2);
-			if ((Boolean)blockState.getValue(WATERLOGGED)) {
-				level.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
-			}
-
-			this.playSound(player, level, blockPos, (Boolean)blockState.getValue(OPEN));
+			this.toggle(blockState, level, blockPos, player);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
+	}
+
+	@Override
+	public void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK
+			&& !level.isClientSide()
+			&& this.type.canOpenByWindCharge()
+			&& !(Boolean)blockState.getValue(POWERED)) {
+			this.toggle(blockState, level, blockPos, null);
+		}
+
+		super.onExplosionHit(blockState, level, blockPos, explosion, biConsumer);
+	}
+
+	private void toggle(BlockState blockState, Level level, BlockPos blockPos, @Nullable Player player) {
+		BlockState blockState2 = blockState.cycle(OPEN);
+		level.setBlock(blockPos, blockState2, 2);
+		if ((Boolean)blockState2.getValue(WATERLOGGED)) {
+			level.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+		}
+
+		this.playSound(player, level, blockPos, (Boolean)blockState2.getValue(OPEN));
 	}
 
 	protected void playSound(@Nullable Player player, Level level, BlockPos blockPos, boolean bl) {

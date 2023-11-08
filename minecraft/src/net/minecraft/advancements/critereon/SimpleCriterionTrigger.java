@@ -3,7 +3,6 @@ package net.minecraft.advancements.critereon;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,13 +38,6 @@ public abstract class SimpleCriterionTrigger<T extends SimpleCriterionTrigger.Si
 		this.players.remove(playerAdvancements);
 	}
 
-	protected abstract T createInstance(JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext);
-
-	public final T createInstance(JsonObject jsonObject, DeserializationContext deserializationContext) {
-		Optional<ContextAwarePredicate> optional = EntityPredicate.fromJson(jsonObject, "player", deserializationContext);
-		return this.createInstance(jsonObject, optional, deserializationContext);
-	}
-
 	protected void trigger(ServerPlayer serverPlayer, Predicate<T> predicate) {
 		PlayerAdvancements playerAdvancements = serverPlayer.getAdvancements();
 		Set<CriterionTrigger.Listener<T>> set = (Set<CriterionTrigger.Listener<T>>)this.players.get(playerAdvancements);
@@ -56,7 +48,7 @@ public abstract class SimpleCriterionTrigger<T extends SimpleCriterionTrigger.Si
 			for (CriterionTrigger.Listener<T> listener : set) {
 				T simpleInstance = listener.trigger();
 				if (predicate.test(simpleInstance)) {
-					Optional<ContextAwarePredicate> optional = simpleInstance.playerPredicate();
+					Optional<ContextAwarePredicate> optional = simpleInstance.player();
 					if (optional.isEmpty() || ((ContextAwarePredicate)optional.get()).matches(lootContext)) {
 						if (list == null) {
 							list = Lists.<CriterionTrigger.Listener<T>>newArrayList();
@@ -76,6 +68,11 @@ public abstract class SimpleCriterionTrigger<T extends SimpleCriterionTrigger.Si
 	}
 
 	public interface SimpleInstance extends CriterionTriggerInstance {
-		Optional<ContextAwarePredicate> playerPredicate();
+		@Override
+		default void validate(CriterionValidator criterionValidator) {
+			criterionValidator.validateEntity(this.player(), ".player");
+		}
+
+		Optional<ContextAwarePredicate> player();
 	}
 }

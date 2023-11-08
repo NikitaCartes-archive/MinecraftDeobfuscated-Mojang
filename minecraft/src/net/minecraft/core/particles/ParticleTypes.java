@@ -36,6 +36,8 @@ public class ParticleTypes {
 	public static final SimpleParticleType ENTITY_EFFECT = register("entity_effect", false);
 	public static final SimpleParticleType EXPLOSION_EMITTER = register("explosion_emitter", true);
 	public static final SimpleParticleType EXPLOSION = register("explosion", true);
+	public static final SimpleParticleType GUST = register("gust", true);
+	public static final SimpleParticleType GUST_EMITTER = register("gust_emitter", true);
 	public static final SimpleParticleType SONIC_BOOM = register("sonic_boom", true);
 	public static final ParticleType<BlockParticleOption> FALLING_DUST = register(
 		"falling_dust", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec
@@ -117,6 +119,8 @@ public class ParticleTypes {
 	);
 	public static final SimpleParticleType EGG_CRACK = register("egg_crack", false);
 	public static final SimpleParticleType DUST_PLUME = register("dust_plume", false);
+	public static final SimpleParticleType GUST_DUST = register("gust_dust", false);
+	public static final SimpleParticleType TRIAL_SPAWNER_DETECTION = register("trial_spawner_detection", true);
 	public static final Codec<ParticleOptions> CODEC = BuiltInRegistries.PARTICLE_TYPE
 		.byNameCodec()
 		.dispatch("type", ParticleOptions::getType, ParticleType::codec);

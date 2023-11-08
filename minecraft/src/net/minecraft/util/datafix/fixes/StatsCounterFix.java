@@ -7,16 +7,15 @@ import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.TypeRewriteRule;
-import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.util.datafix.schemas.V1451_6;
 import org.apache.commons.lang3.StringUtils;
 
@@ -237,34 +236,26 @@ public class StatsCounterFix extends DataFix {
 	private TypeRewriteRule makeStatFixer() {
 		Type<?> type = this.getInputSchema().getType(References.STATS);
 		Type<?> type2 = this.getOutputSchema().getType(References.STATS);
-		return this.fixTypeEverywhereTyped(
-			"StatsCounterFix",
-			type,
-			type2,
-			typed -> {
-				Dynamic<?> dynamic = typed.get(DSL.remainderFinder());
-				Map<Dynamic<?>, Dynamic<?>> map = Maps.<Dynamic<?>, Dynamic<?>>newHashMap();
-				Optional<? extends Map<? extends Dynamic<?>, ? extends Dynamic<?>>> optional = dynamic.getMapValues().result();
-				if (optional.isPresent()) {
-					for (Entry<? extends Dynamic<?>, ? extends Dynamic<?>> entry : ((Map)optional.get()).entrySet()) {
-						if (((Dynamic)entry.getValue()).asNumber().result().isPresent()) {
-							String string = ((Dynamic)entry.getKey()).asString("");
-							StatsCounterFix.StatType statType = unpackLegacyKey(string);
-							if (statType != null) {
-								Dynamic<?> dynamic2 = dynamic.createString(statType.type());
-								Dynamic<?> dynamic3 = (Dynamic<?>)map.computeIfAbsent(dynamic2, dynamic2x -> dynamic.emptyMap());
-								map.put(dynamic2, dynamic3.set(statType.typeKey(), (Dynamic<?>)entry.getValue()));
-							}
+		return this.fixTypeEverywhereTyped("StatsCounterFix", type, type2, typed -> {
+			Dynamic<?> dynamic = typed.get(DSL.remainderFinder());
+			Map<Dynamic<?>, Dynamic<?>> map = Maps.<Dynamic<?>, Dynamic<?>>newHashMap();
+			Optional<? extends Map<? extends Dynamic<?>, ? extends Dynamic<?>>> optional = dynamic.getMapValues().result();
+			if (optional.isPresent()) {
+				for (Entry<? extends Dynamic<?>, ? extends Dynamic<?>> entry : ((Map)optional.get()).entrySet()) {
+					if (((Dynamic)entry.getValue()).asNumber().result().isPresent()) {
+						String string = ((Dynamic)entry.getKey()).asString("");
+						StatsCounterFix.StatType statType = unpackLegacyKey(string);
+						if (statType != null) {
+							Dynamic<?> dynamic2 = dynamic.createString(statType.type());
+							Dynamic<?> dynamic3 = (Dynamic<?>)map.computeIfAbsent(dynamic2, dynamic2x -> dynamic.emptyMap());
+							map.put(dynamic2, dynamic3.set(statType.typeKey(), (Dynamic<?>)entry.getValue()));
 						}
 					}
 				}
-
-				return (Typed)((Pair)type2.readTyped(dynamic.emptyMap().set("stats", dynamic.createMap(map)))
-						.result()
-						.orElseThrow(() -> new IllegalStateException("Could not parse new stats object.")))
-					.getFirst();
 			}
-		);
+
+			return Util.readTypedOrThrow(type2, dynamic.emptyMap().set("stats", dynamic.createMap(map)));
+		});
 	}
 
 	private TypeRewriteRule makeObjectiveFixer() {
@@ -280,7 +271,7 @@ public class StatsCounterFix extends DataFix {
 						return statType == null ? "dummy" : V1451_6.packNamespacedWithDot(statType.type) + ":" + V1451_6.packNamespacedWithDot(statType.typeKey);
 					}
 				}).map(dynamicx::createString), dynamicx));
-			return (Typed)((Pair)type2.readTyped(dynamic2).result().orElseThrow(() -> new IllegalStateException("Could not parse new objective object."))).getFirst();
+			return Util.readTypedOrThrow(type2, dynamic2);
 		});
 	}
 

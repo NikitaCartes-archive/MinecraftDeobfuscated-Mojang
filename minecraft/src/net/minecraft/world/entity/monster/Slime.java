@@ -284,32 +284,36 @@ public class Slime extends Mob implements Enemy {
 	public static boolean checkSlimeSpawnRules(
 		EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
-		if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
-			if (mobSpawnType == MobSpawnType.SPAWNER) {
-				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+		if (MobSpawnType.isSpawner(mobSpawnType)) {
+			return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+		} else {
+			if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
+				if (mobSpawnType == MobSpawnType.SPAWNER) {
+					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+				}
+
+				if (levelAccessor.getBiome(blockPos).is(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS)
+					&& blockPos.getY() > 50
+					&& blockPos.getY() < 70
+					&& randomSource.nextFloat() < 0.5F
+					&& randomSource.nextFloat() < levelAccessor.getMoonBrightness()
+					&& levelAccessor.getMaxLocalRawBrightness(blockPos) <= randomSource.nextInt(8)) {
+					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+				}
+
+				if (!(levelAccessor instanceof WorldGenLevel)) {
+					return false;
+				}
+
+				ChunkPos chunkPos = new ChunkPos(blockPos);
+				boolean bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, ((WorldGenLevel)levelAccessor).getSeed(), 987234911L).nextInt(10) == 0;
+				if (randomSource.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
+					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+				}
 			}
 
-			if (levelAccessor.getBiome(blockPos).is(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS)
-				&& blockPos.getY() > 50
-				&& blockPos.getY() < 70
-				&& randomSource.nextFloat() < 0.5F
-				&& randomSource.nextFloat() < levelAccessor.getMoonBrightness()
-				&& levelAccessor.getMaxLocalRawBrightness(blockPos) <= randomSource.nextInt(8)) {
-				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
-			}
-
-			if (!(levelAccessor instanceof WorldGenLevel)) {
-				return false;
-			}
-
-			ChunkPos chunkPos = new ChunkPos(blockPos);
-			boolean bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, ((WorldGenLevel)levelAccessor).getSeed(), 987234911L).nextInt(10) == 0;
-			if (randomSource.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
-				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
-			}
+			return false;
 		}
-
-		return false;
 	}
 
 	@Override

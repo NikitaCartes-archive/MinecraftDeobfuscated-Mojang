@@ -103,16 +103,20 @@ public class Drowned extends Zombie implements RangedAttackMob {
 	public static boolean checkDrownedSpawnRules(
 		EntityType<Drowned> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
-		if (!serverLevelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)) {
+		if (!serverLevelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER) && !MobSpawnType.isSpawner(mobSpawnType)) {
 			return false;
 		} else {
 			Holder<Biome> holder = serverLevelAccessor.getBiome(blockPos);
 			boolean bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL
-				&& isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource)
-				&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
-			return holder.is(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS)
-				? randomSource.nextInt(15) == 0 && bl
-				: randomSource.nextInt(40) == 0 && isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl;
+				&& (MobSpawnType.ignoresLightRequirements(mobSpawnType) || isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource))
+				&& (MobSpawnType.isSpawner(mobSpawnType) || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
+			if (bl && MobSpawnType.isSpawner(mobSpawnType)) {
+				return true;
+			} else {
+				return holder.is(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS)
+					? randomSource.nextInt(15) == 0 && bl
+					: randomSource.nextInt(40) == 0 && isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl;
+			}
 		}
 	}
 

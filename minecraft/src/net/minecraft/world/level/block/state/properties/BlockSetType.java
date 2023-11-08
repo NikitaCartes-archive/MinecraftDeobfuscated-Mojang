@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.SoundType;
 public record BlockSetType(
 	String name,
 	boolean canOpenByHand,
+	boolean canOpenByWindCharge,
 	boolean canButtonBeActivatedByArrows,
 	BlockSetType.PressurePlateSensitivity pressurePlateSensitivity,
 	SoundType soundType,
@@ -31,6 +32,7 @@ public record BlockSetType(
 			"iron",
 			false,
 			false,
+			false,
 			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.METAL,
 			SoundEvents.IRON_DOOR_CLOSE,
@@ -47,9 +49,10 @@ public record BlockSetType(
 		new BlockSetType(
 			"copper",
 			true,
+			true,
 			false,
 			BlockSetType.PressurePlateSensitivity.EVERYTHING,
-			SoundType.METAL,
+			SoundType.COPPER,
 			SoundEvents.COPPER_DOOR_CLOSE,
 			SoundEvents.COPPER_DOOR_OPEN,
 			SoundEvents.COPPER_TRAPDOOR_CLOSE,
@@ -64,6 +67,7 @@ public record BlockSetType(
 		new BlockSetType(
 			"gold",
 			false,
+			true,
 			false,
 			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.METAL,
@@ -81,6 +85,7 @@ public record BlockSetType(
 		new BlockSetType(
 			"stone",
 			true,
+			true,
 			false,
 			BlockSetType.PressurePlateSensitivity.MOBS,
 			SoundType.STONE,
@@ -97,6 +102,7 @@ public record BlockSetType(
 	public static final BlockSetType POLISHED_BLACKSTONE = register(
 		new BlockSetType(
 			"polished_blackstone",
+			true,
 			true,
 			false,
 			BlockSetType.PressurePlateSensitivity.MOBS,
@@ -120,6 +126,7 @@ public record BlockSetType(
 			"cherry",
 			true,
 			true,
+			true,
 			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.CHERRY_WOOD,
 			SoundEvents.CHERRY_WOOD_DOOR_CLOSE,
@@ -139,6 +146,7 @@ public record BlockSetType(
 			"crimson",
 			true,
 			true,
+			true,
 			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.NETHER_WOOD,
 			SoundEvents.NETHER_WOOD_DOOR_CLOSE,
@@ -154,6 +162,7 @@ public record BlockSetType(
 	public static final BlockSetType WARPED = register(
 		new BlockSetType(
 			"warped",
+			true,
 			true,
 			true,
 			BlockSetType.PressurePlateSensitivity.EVERYTHING,
@@ -174,6 +183,7 @@ public record BlockSetType(
 			"bamboo",
 			true,
 			true,
+			true,
 			BlockSetType.PressurePlateSensitivity.EVERYTHING,
 			SoundType.BAMBOO_WOOD,
 			SoundEvents.BAMBOO_WOOD_DOOR_CLOSE,
@@ -190,6 +200,7 @@ public record BlockSetType(
 	public BlockSetType(String string) {
 		this(
 			string,
+			true,
 			true,
 			true,
 			BlockSetType.PressurePlateSensitivity.EVERYTHING,

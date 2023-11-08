@@ -28,8 +28,24 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.ArmorDyeRecipe;
+import net.minecraft.world.item.crafting.BannerDuplicateRecipe;
+import net.minecraft.world.item.crafting.BookCloningRecipe;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.DecoratedPotRecipe;
+import net.minecraft.world.item.crafting.FireworkRocketRecipe;
+import net.minecraft.world.item.crafting.FireworkStarFadeRecipe;
+import net.minecraft.world.item.crafting.FireworkStarRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.MapCloningRecipe;
+import net.minecraft.world.item.crafting.MapExtendingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RepairItemRecipe;
+import net.minecraft.world.item.crafting.ShieldDecorationRecipe;
+import net.minecraft.world.item.crafting.ShulkerBoxColoring;
+import net.minecraft.world.item.crafting.SmokingRecipe;
+import net.minecraft.world.item.crafting.SuspiciousStewRecipe;
+import net.minecraft.world.item.crafting.TippedArrowRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 
@@ -554,7 +570,11 @@ public class VanillaRecipeProvider extends RecipeProvider {
 				"has_lots_of_items",
 				CriteriaTriggers.INVENTORY_CHANGED
 					.createCriterion(
-						new InventoryChangeTrigger.TriggerInstance(Optional.empty(), MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, List.of())
+						new InventoryChangeTrigger.TriggerInstance(
+							Optional.empty(),
+							new InventoryChangeTrigger.TriggerInstance.Slots(MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY),
+							List.of()
+						)
 					)
 			)
 			.save(recipeOutput);
@@ -2001,19 +2021,19 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_amethyst_shard", has(Items.AMETHYST_SHARD))
 			.save(recipeOutput);
 		threeByThreePacker(recipeOutput, RecipeCategory.MISC, Items.MUSIC_DISC_5, Items.DISC_FRAGMENT_5);
-		SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(recipeOutput, "armor_dye");
-		SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(recipeOutput, "banner_duplicate");
-		SpecialRecipeBuilder.special(RecipeSerializer.BOOK_CLONING).save(recipeOutput, "book_cloning");
-		SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_ROCKET).save(recipeOutput, "firework_rocket");
-		SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_STAR).save(recipeOutput, "firework_star");
-		SpecialRecipeBuilder.special(RecipeSerializer.FIREWORK_STAR_FADE).save(recipeOutput, "firework_star_fade");
-		SpecialRecipeBuilder.special(RecipeSerializer.MAP_CLONING).save(recipeOutput, "map_cloning");
-		SpecialRecipeBuilder.special(RecipeSerializer.MAP_EXTENDING).save(recipeOutput, "map_extending");
-		SpecialRecipeBuilder.special(RecipeSerializer.REPAIR_ITEM).save(recipeOutput, "repair_item");
-		SpecialRecipeBuilder.special(RecipeSerializer.SHIELD_DECORATION).save(recipeOutput, "shield_decoration");
-		SpecialRecipeBuilder.special(RecipeSerializer.SHULKER_BOX_COLORING).save(recipeOutput, "shulker_box_coloring");
-		SpecialRecipeBuilder.special(RecipeSerializer.TIPPED_ARROW).save(recipeOutput, "tipped_arrow");
-		SpecialRecipeBuilder.special(RecipeSerializer.SUSPICIOUS_STEW).save(recipeOutput, "suspicious_stew");
+		SpecialRecipeBuilder.special(ArmorDyeRecipe::new).save(recipeOutput, "armor_dye");
+		SpecialRecipeBuilder.special(BannerDuplicateRecipe::new).save(recipeOutput, "banner_duplicate");
+		SpecialRecipeBuilder.special(BookCloningRecipe::new).save(recipeOutput, "book_cloning");
+		SpecialRecipeBuilder.special(FireworkRocketRecipe::new).save(recipeOutput, "firework_rocket");
+		SpecialRecipeBuilder.special(FireworkStarRecipe::new).save(recipeOutput, "firework_star");
+		SpecialRecipeBuilder.special(FireworkStarFadeRecipe::new).save(recipeOutput, "firework_star_fade");
+		SpecialRecipeBuilder.special(MapCloningRecipe::new).save(recipeOutput, "map_cloning");
+		SpecialRecipeBuilder.special(MapExtendingRecipe::new).save(recipeOutput, "map_extending");
+		SpecialRecipeBuilder.special(RepairItemRecipe::new).save(recipeOutput, "repair_item");
+		SpecialRecipeBuilder.special(ShieldDecorationRecipe::new).save(recipeOutput, "shield_decoration");
+		SpecialRecipeBuilder.special(ShulkerBoxColoring::new).save(recipeOutput, "shulker_box_coloring");
+		SpecialRecipeBuilder.special(TippedArrowRecipe::new).save(recipeOutput, "tipped_arrow");
+		SpecialRecipeBuilder.special(SuspiciousStewRecipe::new).save(recipeOutput, "suspicious_stew");
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.POTATO), RecipeCategory.FOOD, Items.BAKED_POTATO, 0.35F, 200)
 			.unlockedBy("has_potato", has(Items.POTATO))
 			.save(recipeOutput);
@@ -2309,8 +2329,8 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.ANCIENT_DEBRIS), RecipeCategory.MISC, Items.NETHERITE_SCRAP, 2.0F, 100)
 			.unlockedBy("has_ancient_debris", has(Blocks.ANCIENT_DEBRIS))
 			.save(recipeOutput, getBlastingRecipeName(Items.NETHERITE_SCRAP));
-		cookRecipes(recipeOutput, "smoking", RecipeSerializer.SMOKING_RECIPE, 100);
-		cookRecipes(recipeOutput, "campfire_cooking", RecipeSerializer.CAMPFIRE_COOKING_RECIPE, 600);
+		cookRecipes(recipeOutput, "smoking", RecipeSerializer.SMOKING_RECIPE, SmokingRecipe::new, 100);
+		cookRecipes(recipeOutput, "campfire_cooking", RecipeSerializer.CAMPFIRE_COOKING_RECIPE, CampfireCookingRecipe::new, 600);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.STONE_SLAB, Blocks.STONE, 2);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.STONE_STAIRS, Blocks.STONE);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.STONE_BRICKS, Blocks.STONE);
@@ -2611,7 +2631,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern(" # ")
 			.unlockedBy("has_brick", has(ItemTags.DECORATED_POT_INGREDIENTS))
 			.save(recipeOutput, "decorated_pot_simple");
-		SpecialRecipeBuilder.special(RecipeSerializer.DECORATED_POT_RECIPE).save(recipeOutput, "decorated_pot");
+		SpecialRecipeBuilder.special(DecoratedPotRecipe::new).save(recipeOutput, "decorated_pot");
 	}
 
 	public static Stream<VanillaRecipeProvider.TrimTemplate> smithingTrims() {

@@ -21,6 +21,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.PngInfo;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.stb.STBIWriteCallback;
 import org.lwjgl.stb.STBImage;
@@ -133,6 +134,8 @@ public final class NativeImage implements AutoCloseable {
 		} else if (MemoryUtil.memAddress(byteBuffer) == 0L) {
 			throw new IllegalArgumentException("Invalid buffer");
 		} else {
+			PngInfo.validateHeader(byteBuffer);
+
 			NativeImage var7;
 			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
 				IntBuffer intBuffer = memoryStack.mallocInt(1);

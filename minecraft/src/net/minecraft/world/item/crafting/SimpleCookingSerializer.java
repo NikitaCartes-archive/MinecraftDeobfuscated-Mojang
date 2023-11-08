@@ -8,11 +8,11 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
 public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements RecipeSerializer<T> {
-	private final SimpleCookingSerializer.CookieBaker<T> factory;
+	private final AbstractCookingRecipe.Factory<T> factory;
 	private final Codec<T> codec;
 
-	public SimpleCookingSerializer(SimpleCookingSerializer.CookieBaker<T> cookieBaker, int i) {
-		this.factory = cookieBaker;
+	public SimpleCookingSerializer(AbstractCookingRecipe.Factory<T> factory, int i) {
+		this.factory = factory;
 		this.codec = RecordCodecBuilder.create(
 			instance -> instance.group(
 						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(abstractCookingRecipe -> abstractCookingRecipe.group),
@@ -26,7 +26,7 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 						Codec.FLOAT.fieldOf("experience").orElse(0.0F).forGetter(abstractCookingRecipe -> abstractCookingRecipe.experience),
 						Codec.INT.fieldOf("cookingtime").orElse(i).forGetter(abstractCookingRecipe -> abstractCookingRecipe.cookingTime)
 					)
-					.apply(instance, cookieBaker::create)
+					.apply(instance, factory::create)
 		);
 	}
 
@@ -54,7 +54,7 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 		friendlyByteBuf.writeVarInt(abstractCookingRecipe.cookingTime);
 	}
 
-	interface CookieBaker<T extends AbstractCookingRecipe> {
-		T create(String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i);
+	public AbstractCookingRecipe create(String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i) {
+		return this.factory.create(string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 }

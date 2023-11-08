@@ -6,7 +6,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.BrewedPotionTrigger;
 import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
@@ -88,7 +88,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.root.title"),
 				Component.translatable("advancements.nether.root.description"),
 				new ResourceLocation("textures/gui/advancements/backgrounds/nether.png"),
-				FrameType.TASK,
+				AdvancementType.TASK,
 				false,
 				false,
 				false
@@ -102,7 +102,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.return_to_sender.title"),
 				Component.translatable("advancements.nether.return_to_sender.description"),
 				null,
-				FrameType.CHALLENGE,
+				AdvancementType.CHALLENGE,
 				true,
 				true,
 				false
@@ -125,7 +125,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.find_fortress.title"),
 				Component.translatable("advancements.nether.find_fortress.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -139,7 +139,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.fast_travel.title"),
 				Component.translatable("advancements.nether.fast_travel.description"),
 				null,
-				FrameType.CHALLENGE,
+				AdvancementType.CHALLENGE,
 				true,
 				true,
 				false
@@ -154,7 +154,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.uneasy_alliance.title"),
 				Component.translatable("advancements.nether.uneasy_alliance.description"),
 				null,
-				FrameType.CHALLENGE,
+				AdvancementType.CHALLENGE,
 				true,
 				true,
 				false
@@ -174,7 +174,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.get_wither_skull.title"),
 				Component.translatable("advancements.nether.get_wither_skull.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -188,7 +188,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.summon_wither.title"),
 				Component.translatable("advancements.nether.summon_wither.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -202,7 +202,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.obtain_blaze_rod.title"),
 				Component.translatable("advancements.nether.obtain_blaze_rod.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -216,7 +216,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.create_beacon.title"),
 				Component.translatable("advancements.nether.create_beacon.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -230,7 +230,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.create_full_beacon.title"),
 				Component.translatable("advancements.nether.create_full_beacon.description"),
 				null,
-				FrameType.GOAL,
+				AdvancementType.GOAL,
 				true,
 				true,
 				false
@@ -244,7 +244,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.brew_potion.title"),
 				Component.translatable("advancements.nether.brew_potion.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -258,7 +258,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.all_potions.title"),
 				Component.translatable("advancements.nether.all_potions.description"),
 				null,
-				FrameType.CHALLENGE,
+				AdvancementType.CHALLENGE,
 				true,
 				true,
 				false
@@ -291,7 +291,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.all_effects.title"),
 				Component.translatable("advancements.nether.all_effects.description"),
 				null,
-				FrameType.CHALLENGE,
+				AdvancementType.CHALLENGE,
 				true,
 				true,
 				true
@@ -338,7 +338,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.obtain_ancient_debris.title"),
 				Component.translatable("advancements.nether.obtain_ancient_debris.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -352,7 +352,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.netherite_armor.title"),
 				Component.translatable("advancements.nether.netherite_armor.description"),
 				null,
-				FrameType.CHALLENGE,
+				AdvancementType.CHALLENGE,
 				true,
 				true,
 				false
@@ -370,7 +370,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.use_lodestone.title"),
 				Component.translatable("advancements.nether.use_lodestone.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -389,7 +389,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.obtain_crying_obsidian.title"),
 				Component.translatable("advancements.nether.obtain_crying_obsidian.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -403,7 +403,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.charge_respawn_anchor.title"),
 				Component.translatable("advancements.nether.charge_respawn_anchor.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -428,7 +428,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.ride_strider.title"),
 				Component.translatable("advancements.nether.ride_strider.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -449,7 +449,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.ride_strider_in_overworld_lava.title"),
 				Component.translatable("advancements.nether.ride_strider_in_overworld_lava.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -471,7 +471,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.explore_nether.title"),
 				Component.translatable("advancements.nether.explore_nether.description"),
 				null,
-				FrameType.CHALLENGE,
+				AdvancementType.CHALLENGE,
 				true,
 				true,
 				false
@@ -485,7 +485,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.find_bastion.title"),
 				Component.translatable("advancements.nether.find_bastion.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -499,7 +499,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.loot_bastion.title"),
 				Component.translatable("advancements.nether.loot_bastion.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -518,7 +518,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.nether.distract_piglin.title"),
 				Component.translatable("advancements.nether.distract_piglin.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false

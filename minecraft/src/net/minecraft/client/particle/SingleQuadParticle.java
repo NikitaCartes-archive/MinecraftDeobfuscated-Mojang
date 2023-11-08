@@ -12,14 +12,21 @@ import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public abstract class SingleQuadParticle extends Particle {
-	protected float quadSize = 0.1F * (this.random.nextFloat() * 0.5F + 0.5F) * 2.0F;
+	protected float quadSize;
+	private final Quaternionf rotation = new Quaternionf();
 
 	protected SingleQuadParticle(ClientLevel clientLevel, double d, double e, double f) {
 		super(clientLevel, d, e, f);
+		this.quadSize = 0.1F * (this.random.nextFloat() * 0.5F + 0.5F) * 2.0F;
 	}
 
 	protected SingleQuadParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 		super(clientLevel, d, e, f, g, h, i);
+		this.quadSize = 0.1F * (this.random.nextFloat() * 0.5F + 0.5F) * 2.0F;
+	}
+
+	public SingleQuadParticle.FacingCameraMode getFacingCameraMode() {
+		return SingleQuadParticle.FacingCameraMode.LOOKAT_XYZ;
 	}
 
 	@Override
@@ -28,12 +35,9 @@ public abstract class SingleQuadParticle extends Particle {
 		float g = (float)(Mth.lerp((double)f, this.xo, this.x) - vec3.x());
 		float h = (float)(Mth.lerp((double)f, this.yo, this.y) - vec3.y());
 		float i = (float)(Mth.lerp((double)f, this.zo, this.z) - vec3.z());
-		Quaternionf quaternionf;
-		if (this.roll == 0.0F) {
-			quaternionf = camera.rotation();
-		} else {
-			quaternionf = new Quaternionf(camera.rotation());
-			quaternionf.rotateZ(Mth.lerp(f, this.oRoll, this.roll));
+		this.getFacingCameraMode().setRotation(this.rotation, camera, f);
+		if (this.roll != 0.0F) {
+			this.rotation.rotateZ(Mth.lerp(f, this.oRoll, this.roll));
 		}
 
 		Vector3f[] vector3fs = new Vector3f[]{
@@ -43,7 +47,7 @@ public abstract class SingleQuadParticle extends Particle {
 
 		for (int k = 0; k < 4; k++) {
 			Vector3f vector3f = vector3fs[k];
-			vector3f.rotate(quaternionf);
+			vector3f.rotate(this.rotation);
 			vector3f.mul(j);
 			vector3f.add(g, h, i);
 		}
@@ -92,4 +96,12 @@ public abstract class SingleQuadParticle extends Particle {
 	protected abstract float getV0();
 
 	protected abstract float getV1();
+
+	@Environment(EnvType.CLIENT)
+	public interface FacingCameraMode {
+		SingleQuadParticle.FacingCameraMode LOOKAT_XYZ = (quaternionf, camera, f) -> quaternionf.set(camera.rotation());
+		SingleQuadParticle.FacingCameraMode LOOKAT_Y = (quaternionf, camera, f) -> quaternionf.set(0.0F, camera.rotation().y, 0.0F, camera.rotation().w);
+
+		void setRotation(Quaternionf quaternionf, Camera camera, float f);
+	}
 }

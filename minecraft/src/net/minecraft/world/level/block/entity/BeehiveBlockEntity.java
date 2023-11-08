@@ -316,7 +316,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag2 = listTag.getCompound(i);
 			BeehiveBlockEntity.BeeData beeData = new BeehiveBlockEntity.BeeData(
-				compoundTag2.getCompound("EntityData"), compoundTag2.getInt("TicksInHive"), compoundTag2.getInt("MinOccupationTicks")
+				compoundTag2.getCompound("EntityData").copy(), compoundTag2.getInt("TicksInHive"), compoundTag2.getInt("MinOccupationTicks")
 			);
 			this.stored.add(beeData);
 		}

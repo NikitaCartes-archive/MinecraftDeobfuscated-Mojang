@@ -4,8 +4,8 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.advancements.FrameType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
@@ -30,16 +30,16 @@ public class AdvancementToast implements Toast {
 		guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width(), this.height());
 		if (displayInfo != null) {
 			List<FormattedCharSequence> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
-			int i = displayInfo.getFrame() == FrameType.CHALLENGE ? 16746751 : 16776960;
+			int i = displayInfo.getType() == AdvancementType.CHALLENGE ? 16746751 : 16776960;
 			if (list.size() == 1) {
-				guiGraphics.drawString(toastComponent.getMinecraft().font, displayInfo.getFrame().getDisplayName(), 30, 7, i | 0xFF000000, false);
+				guiGraphics.drawString(toastComponent.getMinecraft().font, displayInfo.getType().getDisplayName(), 30, 7, i | 0xFF000000, false);
 				guiGraphics.drawString(toastComponent.getMinecraft().font, (FormattedCharSequence)list.get(0), 30, 18, -1, false);
 			} else {
 				int j = 1500;
 				float f = 300.0F;
 				if (l < 1500L) {
 					int k = Mth.floor(Mth.clamp((float)(1500L - l) / 300.0F, 0.0F, 1.0F) * 255.0F) << 24 | 67108864;
-					guiGraphics.drawString(toastComponent.getMinecraft().font, displayInfo.getFrame().getDisplayName(), 30, 11, i | k, false);
+					guiGraphics.drawString(toastComponent.getMinecraft().font, displayInfo.getType().getDisplayName(), 30, 11, i | k, false);
 				} else {
 					int k = Mth.floor(Mth.clamp((float)(l - 1500L) / 300.0F, 0.0F, 1.0F) * 252.0F) << 24 | 67108864;
 					int m = this.height() / 2 - list.size() * 9 / 2;
@@ -53,7 +53,7 @@ public class AdvancementToast implements Toast {
 
 			if (!this.playedSound && l > 0L) {
 				this.playedSound = true;
-				if (displayInfo.getFrame() == FrameType.CHALLENGE) {
+				if (displayInfo.getType() == AdvancementType.CHALLENGE) {
 					toastComponent.getMinecraft().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F));
 				}
 			}

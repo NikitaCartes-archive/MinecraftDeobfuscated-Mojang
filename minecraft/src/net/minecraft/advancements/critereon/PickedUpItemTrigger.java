@@ -1,22 +1,21 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class PickedUpItemTrigger extends SimpleCriterionTrigger<PickedUpItemTrigger.TriggerInstance> {
-	protected PickedUpItemTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
-	) {
-		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("item"));
-		Optional<ContextAwarePredicate> optional3 = EntityPredicate.fromJson(jsonObject, "entity", deserializationContext);
-		return new PickedUpItemTrigger.TriggerInstance(optional, optional2, optional3);
+	@Override
+	public Codec<PickedUpItemTrigger.TriggerInstance> codec() {
+		return PickedUpItemTrigger.TriggerInstance.CODEC;
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, @Nullable Entity entity) {
@@ -24,15 +23,16 @@ public class PickedUpItemTrigger extends SimpleCriterionTrigger<PickedUpItemTrig
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer, itemStack, lootContext));
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final Optional<ItemPredicate> item;
-		private final Optional<ContextAwarePredicate> entity;
-
-		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, Optional<ContextAwarePredicate> optional3) {
-			super(optional);
-			this.item = optional2;
-			this.entity = optional3;
-		}
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item, Optional<ContextAwarePredicate> entity)
+		implements SimpleCriterionTrigger.SimpleInstance {
+		public static final Codec<PickedUpItemTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(PickedUpItemTrigger.TriggerInstance::player),
+						ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(PickedUpItemTrigger.TriggerInstance::item),
+						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "entity").forGetter(PickedUpItemTrigger.TriggerInstance::entity)
+					)
+					.apply(instance, PickedUpItemTrigger.TriggerInstance::new)
+		);
 
 		public static Criterion<PickedUpItemTrigger.TriggerInstance> thrownItemPickedUpByEntity(
 			ContextAwarePredicate contextAwarePredicate, Optional<ItemPredicate> optional, Optional<ContextAwarePredicate> optional2
@@ -54,11 +54,9 @@ public class PickedUpItemTrigger extends SimpleCriterionTrigger<PickedUpItemTrig
 		}
 
 		@Override
-		public JsonObject serializeToJson() {
-			JsonObject jsonObject = super.serializeToJson();
-			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
-			this.entity.ifPresent(contextAwarePredicate -> jsonObject.add("entity", contextAwarePredicate.toJson()));
-			return jsonObject;
+		public void validate(CriterionValidator criterionValidator) {
+			SimpleCriterionTrigger.SimpleInstance.super.validate(criterionValidator);
+			criterionValidator.validateEntity(this.entity, ".entity");
 		}
 	}
 }

@@ -108,7 +108,7 @@ public interface Holder<T> {
 		@Nullable
 		private T value;
 
-		private Reference(Holder.Reference.Type type, HolderOwner<T> holderOwner, @Nullable ResourceKey<T> resourceKey, @Nullable T object) {
+		protected Reference(Holder.Reference.Type type, HolderOwner<T> holderOwner, @Nullable ResourceKey<T> resourceKey, @Nullable T object) {
 			this.owner = holderOwner;
 			this.type = type;
 			this.key = resourceKey;
@@ -194,7 +194,7 @@ public interface Holder<T> {
 			}
 		}
 
-		void bindValue(T object) {
+		protected void bindValue(T object) {
 			if (this.type == Holder.Reference.Type.INTRUSIVE && this.value != object) {
 				throw new IllegalStateException("Can't change holder " + this.key + " value: existing=" + this.value + ", new=" + object);
 			} else {
@@ -215,7 +215,7 @@ public interface Holder<T> {
 			return "Reference{" + this.key + "=" + this.value + "}";
 		}
 
-		static enum Type {
+		protected static enum Type {
 			STAND_ALONE,
 			INTRUSIVE;
 		}

@@ -6,6 +6,8 @@ import com.google.common.collect.Multimap;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -33,6 +35,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -44,6 +47,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -79,9 +83,33 @@ import org.slf4j.Logger;
 public final class ItemStack {
 	public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					BuiltInRegistries.ITEM.byNameCodec().fieldOf("id").forGetter(ItemStack::getItem),
+					BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("id").forGetter(ItemStack::getItemHolder),
 					Codec.INT.fieldOf("Count").forGetter(ItemStack::getCount),
 					CompoundTag.CODEC.optionalFieldOf("tag").forGetter(itemStack -> Optional.ofNullable(itemStack.getTag()))
+				)
+				.apply(instance, ItemStack::new)
+	);
+	private static final Codec<Item> ITEM_NON_AIR_CODEC = ExtraCodecs.validate(
+		BuiltInRegistries.ITEM.byNameCodec(), item -> item == Items.AIR ? DataResult.error(() -> "Item must not be minecraft:air") : DataResult.success(item)
+	);
+	public static final Codec<ItemStack> ADVANCEMENT_ICON_CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("item").forGetter(ItemStack::getItemHolder),
+					ExtraCodecs.strictOptionalField(TagParser.AS_CODEC, "nbt").forGetter(itemStack -> Optional.ofNullable(itemStack.getTag()))
+				)
+				.apply(instance, (holder, optional) -> new ItemStack(holder, 1, optional))
+	);
+	public static final Codec<ItemStack> ITEM_WITH_COUNT_CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					ITEM_NON_AIR_CODEC.fieldOf("item").forGetter(ItemStack::getItem),
+					ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "count", 1).forGetter(ItemStack::getCount)
+				)
+				.apply(instance, ItemStack::new)
+	);
+	public static final Codec<ItemStack> SINGLE_ITEM_CODEC = ITEM_NON_AIR_CODEC.xmap(ItemStack::new, ItemStack::getItem);
+	public static final MapCodec<ItemStack> RESULT_CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(
+					BuiltInRegistries.ITEM.byNameCodec().fieldOf("result").forGetter(ItemStack::getItem), Codec.INT.fieldOf("count").forGetter(ItemStack::getCount)
 				)
 				.apply(instance, ItemStack::new)
 	);
@@ -130,8 +158,8 @@ public final class ItemStack {
 		this(holder.value(), 1);
 	}
 
-	private ItemStack(ItemLike itemLike, int i, Optional<CompoundTag> optional) {
-		this(itemLike, i);
+	public ItemStack(Holder<Item> holder, int i, Optional<CompoundTag> optional) {
+		this(holder, i);
 		optional.ifPresent(this::setTag);
 	}
 
@@ -155,7 +183,7 @@ public final class ItemStack {
 		this.item = BuiltInRegistries.ITEM.get(new ResourceLocation(compoundTag.getString("id")));
 		this.count = compoundTag.getByte("Count");
 		if (compoundTag.contains("tag", 10)) {
-			this.tag = compoundTag.getCompound("tag");
+			this.tag = compoundTag.getCompound("tag").copy();
 			this.getItem().verifyTagAfterLoad(this.tag);
 		}
 

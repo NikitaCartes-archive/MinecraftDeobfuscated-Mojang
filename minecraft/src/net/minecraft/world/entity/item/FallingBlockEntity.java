@@ -282,7 +282,7 @@ public class FallingBlockEntity extends Entity {
 		}
 
 		if (compoundTag.contains("TileEntityData", 10)) {
-			this.blockData = compoundTag.getCompound("TileEntityData");
+			this.blockData = compoundTag.getCompound("TileEntityData").copy();
 		}
 
 		this.cancelDrop = compoundTag.getBoolean("CancelDrop");

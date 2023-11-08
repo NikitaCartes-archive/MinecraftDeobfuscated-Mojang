@@ -9,7 +9,12 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 public class UpdateOneTwentyOneLootTableProvider {
 	public static LootTableProvider create(PackOutput packOutput) {
 		return new LootTableProvider(
-			packOutput, Set.of(), List.of(new LootTableProvider.SubProviderEntry(UpdateOneTwentyOneBlockLoot::new, LootContextParamSets.BLOCK))
+			packOutput,
+			Set.of(),
+			List.of(
+				new LootTableProvider.SubProviderEntry(UpdateOneTwentyOneBlockLoot::new, LootContextParamSets.BLOCK),
+				new LootTableProvider.SubProviderEntry(UpdateOneTwentyOneChestLoot::new, LootContextParamSets.CHEST)
+			)
 		);
 	}
 }

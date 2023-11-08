@@ -66,7 +66,7 @@ public class AdvancementWidget {
 		int l = 29 + minecraft.font.width(this.title) + k;
 		this.description = Language.getInstance()
 			.getVisualOrder(
-				this.findOptimalLines(ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getFrame().getChatColor())), l)
+				this.findOptimalLines(ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getType().getChatColor())), l)
 			);
 
 		for (FormattedCharSequence formattedCharSequence : this.description) {
@@ -149,7 +149,7 @@ public class AdvancementWidget {
 				advancementWidgetType = AdvancementWidgetType.UNOBTAINED;
 			}
 
-			guiGraphics.blitSprite(advancementWidgetType.frameSprite(this.display.getFrame()), i + this.x + 3, j + this.y, 26, 26);
+			guiGraphics.blitSprite(advancementWidgetType.frameSprite(this.display.getType()), i + this.x + 3, j + this.y, 26, 26);
 			guiGraphics.renderFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
 		}
 
@@ -222,7 +222,7 @@ public class AdvancementWidget {
 
 		guiGraphics.blitSprite(advancementWidgetType.boxSprite(), 200, 26, 0, 0, q, p, n, 26);
 		guiGraphics.blitSprite(advancementWidgetType2.boxSprite(), 200, 26, 200 - o, 0, q + n, p, o, 26);
-		guiGraphics.blitSprite(advancementWidgetType3.frameSprite(this.display.getFrame()), i + this.x + 3, j + this.y, 26, 26);
+		guiGraphics.blitSprite(advancementWidgetType3.frameSprite(this.display.getType()), i + this.x + 3, j + this.y, 26, 26);
 		if (bl) {
 			guiGraphics.drawString(this.minecraft.font, this.title, q + 5, j + this.y + 9, -1);
 			if (component != null) {

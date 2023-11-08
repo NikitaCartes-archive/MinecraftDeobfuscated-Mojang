@@ -70,4 +70,9 @@ public class LevelEvent {
 	public static final int PARTICLES_SCULK_SHRIEK = 3007;
 	public static final int PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE = 3008;
 	public static final int PARTICLES_EGG_CRACK = 3009;
+	public static final int PARTICLES_GUST_DUST = 3010;
+	public static final int PARTICLES_TRIAL_SPAWNER_SPAWN = 3011;
+	public static final int PARTICLES_TRIAL_SPAWNER_SPAWN_MOB_AT = 3012;
+	public static final int PARTICLES_TRIAL_SPAWNER_DETECT_PLAYER = 3013;
+	public static final int ANIMATION_TRIAL_SPAWNER_EJECT_ITEM = 3014;
 }

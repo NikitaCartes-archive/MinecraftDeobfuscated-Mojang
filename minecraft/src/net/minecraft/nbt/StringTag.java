@@ -3,9 +3,7 @@ package net.minecraft.nbt;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.UTFDataFormatException;
 import java.util.Objects;
-import net.minecraft.Util;
 
 public class StringTag implements Tag {
 	private static final int SELF_SIZE_IN_BYTES = 36;
@@ -68,12 +66,7 @@ public class StringTag implements Tag {
 
 	@Override
 	public void write(DataOutput dataOutput) throws IOException {
-		try {
-			dataOutput.writeUTF(this.data);
-		} catch (UTFDataFormatException var3) {
-			Util.logAndPauseIfInIde("Failed to write NBT String", var3);
-			dataOutput.writeUTF("");
-		}
+		dataOutput.writeUTF(this.data);
 	}
 
 	@Override

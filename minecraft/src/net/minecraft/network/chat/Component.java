@@ -10,6 +10,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.Message;
 import com.mojang.serialization.JsonOps;
@@ -277,21 +278,27 @@ public interface Component extends Message, FormattedText {
 			return jsonElement == null ? null : deserialize(jsonElement);
 		}
 
+		@Nullable
 		public static MutableComponent fromJson(com.mojang.brigadier.StringReader stringReader) {
+			JsonReader jsonReader = new JsonReader(new StringReader(stringReader.getRemaining()));
+			jsonReader.setLenient(false);
+
+			MutableComponent var3;
 			try {
-				JsonReader jsonReader = new JsonReader(new StringReader(stringReader.getRemaining()));
-				jsonReader.setLenient(false);
-				JsonElement jsonElement = JsonParser.parseReader(jsonReader);
+				JsonElement jsonElement = Streams.parse(jsonReader);
+				var3 = jsonElement != null ? deserialize(jsonElement) : null;
+			} catch (StackOverflowError var7) {
+				throw new JsonParseException(var7);
+			} finally {
 				stringReader.setCursor(stringReader.getCursor() + getPos(jsonReader));
-				return deserialize(jsonElement);
-			} catch (StackOverflowError var3) {
-				throw new JsonParseException(var3);
 			}
+
+			return var3;
 		}
 
 		private static int getPos(JsonReader jsonReader) {
 			try {
-				return JSON_READER_POS.getInt(jsonReader) - JSON_READER_LINESTART.getInt(jsonReader) + 1;
+				return JSON_READER_POS.getInt(jsonReader) - JSON_READER_LINESTART.getInt(jsonReader);
 			} catch (IllegalAccessException var2) {
 				throw new IllegalStateException("Couldn't read position of JsonReader", var2);
 			}

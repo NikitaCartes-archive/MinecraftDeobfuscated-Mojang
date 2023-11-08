@@ -1,6 +1,7 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,21 +10,15 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.core.HolderSet;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChangeTrigger.TriggerInstance> {
-	public InventoryChangeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
-	) {
-		JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "slots", new JsonObject());
-		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject2.get("occupied"));
-		MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject2.get("full"));
-		MinMaxBounds.Ints ints3 = MinMaxBounds.Ints.fromJson(jsonObject2.get("empty"));
-		List<ItemPredicate> list = ItemPredicate.fromJsonArray(jsonObject.get("items"));
-		return new InventoryChangeTrigger.TriggerInstance(optional, ints, ints2, ints3, list);
+	@Override
+	public Codec<InventoryChangeTrigger.TriggerInstance> codec() {
+		return InventoryChangeTrigger.TriggerInstance.CODEC;
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack) {
@@ -50,21 +45,17 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(inventory, itemStack, i, j, k));
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final MinMaxBounds.Ints slotsOccupied;
-		private final MinMaxBounds.Ints slotsFull;
-		private final MinMaxBounds.Ints slotsEmpty;
-		private final List<ItemPredicate> predicates;
-
-		public TriggerInstance(
-			Optional<ContextAwarePredicate> optional, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, MinMaxBounds.Ints ints3, List<ItemPredicate> list
-		) {
-			super(optional);
-			this.slotsOccupied = ints;
-			this.slotsFull = ints2;
-			this.slotsEmpty = ints3;
-			this.predicates = list;
-		}
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, InventoryChangeTrigger.TriggerInstance.Slots slots, List<ItemPredicate> items)
+		implements SimpleCriterionTrigger.SimpleInstance {
+		public static final Codec<InventoryChangeTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(InventoryChangeTrigger.TriggerInstance::player),
+						ExtraCodecs.strictOptionalField(InventoryChangeTrigger.TriggerInstance.Slots.CODEC, "slots", InventoryChangeTrigger.TriggerInstance.Slots.ANY)
+							.forGetter(InventoryChangeTrigger.TriggerInstance::slots),
+						ExtraCodecs.strictOptionalField(ItemPredicate.CODEC.listOf(), "items", List.of()).forGetter(InventoryChangeTrigger.TriggerInstance::items)
+					)
+					.apply(instance, InventoryChangeTrigger.TriggerInstance::new)
+		);
 
 		public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemPredicate.Builder... builders) {
 			return hasItems((ItemPredicate[])Stream.of(builders).map(ItemPredicate.Builder::build).toArray(ItemPredicate[]::new));
@@ -72,9 +63,7 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 
 		public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemPredicate... itemPredicates) {
 			return CriteriaTriggers.INVENTORY_CHANGED
-				.createCriterion(
-					new InventoryChangeTrigger.TriggerInstance(Optional.empty(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, List.of(itemPredicates))
-				);
+				.createCriterion(new InventoryChangeTrigger.TriggerInstance(Optional.empty(), InventoryChangeTrigger.TriggerInstance.Slots.ANY, List.of(itemPredicates)));
 		}
 
 		public static Criterion<InventoryChangeTrigger.TriggerInstance> hasItems(ItemLike... itemLikes) {
@@ -96,35 +85,13 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 			return hasItems(itemPredicates);
 		}
 
-		@Override
-		public JsonObject serializeToJson() {
-			JsonObject jsonObject = super.serializeToJson();
-			if (!this.slotsOccupied.isAny() || !this.slotsFull.isAny() || !this.slotsEmpty.isAny()) {
-				JsonObject jsonObject2 = new JsonObject();
-				jsonObject2.add("occupied", this.slotsOccupied.serializeToJson());
-				jsonObject2.add("full", this.slotsFull.serializeToJson());
-				jsonObject2.add("empty", this.slotsEmpty.serializeToJson());
-				jsonObject.add("slots", jsonObject2);
-			}
-
-			if (!this.predicates.isEmpty()) {
-				jsonObject.add("items", ItemPredicate.serializeToJsonArray(this.predicates));
-			}
-
-			return jsonObject;
-		}
-
 		public boolean matches(Inventory inventory, ItemStack itemStack, int i, int j, int k) {
-			if (!this.slotsFull.matches(i)) {
+			if (!this.slots.matches(i, j, k)) {
 				return false;
-			} else if (!this.slotsEmpty.matches(j)) {
-				return false;
-			} else if (!this.slotsOccupied.matches(k)) {
-				return false;
-			} else if (this.predicates.isEmpty()) {
+			} else if (this.items.isEmpty()) {
 				return true;
-			} else if (this.predicates.size() != 1) {
-				List<ItemPredicate> list = new ObjectArrayList<>(this.predicates);
+			} else if (this.items.size() != 1) {
+				List<ItemPredicate> list = new ObjectArrayList<>(this.items);
 				int l = inventory.getContainerSize();
 
 				for (int m = 0; m < l; m++) {
@@ -140,7 +107,30 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 
 				return list.isEmpty();
 			} else {
-				return !itemStack.isEmpty() && ((ItemPredicate)this.predicates.get(0)).matches(itemStack);
+				return !itemStack.isEmpty() && ((ItemPredicate)this.items.get(0)).matches(itemStack);
+			}
+		}
+
+		public static record Slots(MinMaxBounds.Ints occupied, MinMaxBounds.Ints full, MinMaxBounds.Ints empty) {
+			public static final Codec<InventoryChangeTrigger.TriggerInstance.Slots> CODEC = RecordCodecBuilder.create(
+				instance -> instance.group(
+							ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "occupied", MinMaxBounds.Ints.ANY)
+								.forGetter(InventoryChangeTrigger.TriggerInstance.Slots::occupied),
+							ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "full", MinMaxBounds.Ints.ANY).forGetter(InventoryChangeTrigger.TriggerInstance.Slots::full),
+							ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "empty", MinMaxBounds.Ints.ANY).forGetter(InventoryChangeTrigger.TriggerInstance.Slots::empty)
+						)
+						.apply(instance, InventoryChangeTrigger.TriggerInstance.Slots::new)
+			);
+			public static final InventoryChangeTrigger.TriggerInstance.Slots ANY = new InventoryChangeTrigger.TriggerInstance.Slots(
+				MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY
+			);
+
+			public boolean matches(int i, int j, int k) {
+				if (!this.full.matches(i)) {
+					return false;
+				} else {
+					return !this.empty.matches(j) ? false : this.occupied.matches(k);
+				}
 			}
 		}
 	}

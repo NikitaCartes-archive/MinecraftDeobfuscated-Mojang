@@ -25,19 +25,26 @@ public final class ProjectileUtil {
 		Vec3 vec3 = entity.getDeltaMovement();
 		Level level = entity.level();
 		Vec3 vec32 = entity.position();
-		return getHitResult(vec32, entity, predicate, vec3, level, 0.3F);
+		return getHitResult(vec32, entity, predicate, vec3, level, 0.3F, ClipContext.Block.COLLIDER);
+	}
+
+	public static HitResult getHitResultOnMoveVector(Entity entity, Predicate<Entity> predicate, ClipContext.Block block) {
+		Vec3 vec3 = entity.getDeltaMovement();
+		Level level = entity.level();
+		Vec3 vec32 = entity.position();
+		return getHitResult(vec32, entity, predicate, vec3, level, 0.3F, block);
 	}
 
 	public static HitResult getHitResultOnViewVector(Entity entity, Predicate<Entity> predicate, double d) {
 		Vec3 vec3 = entity.getViewVector(0.0F).scale(d);
 		Level level = entity.level();
 		Vec3 vec32 = entity.getEyePosition();
-		return getHitResult(vec32, entity, predicate, vec3, level, 0.0F);
+		return getHitResult(vec32, entity, predicate, vec3, level, 0.0F, ClipContext.Block.COLLIDER);
 	}
 
-	private static HitResult getHitResult(Vec3 vec3, Entity entity, Predicate<Entity> predicate, Vec3 vec32, Level level, float f) {
+	private static HitResult getHitResult(Vec3 vec3, Entity entity, Predicate<Entity> predicate, Vec3 vec32, Level level, float f, ClipContext.Block block) {
 		Vec3 vec33 = vec3.add(vec32);
-		HitResult hitResult = level.clip(new ClipContext(vec3, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
+		HitResult hitResult = level.clip(new ClipContext(vec3, vec33, block, ClipContext.Fluid.NONE, entity));
 		if (hitResult.getType() != HitResult.Type.MISS) {
 			vec33 = hitResult.getLocation();
 		}

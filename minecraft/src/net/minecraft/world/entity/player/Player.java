@@ -1417,7 +1417,7 @@ public abstract class Player extends LivingEntity {
 	public void triggerRecipeCrafted(RecipeHolder<?> recipeHolder, List<ItemStack> list) {
 	}
 
-	public void awardRecipesByKey(ResourceLocation[] resourceLocations) {
+	public void awardRecipesByKey(List<ResourceLocation> list) {
 	}
 
 	public int resetRecipes(Collection<RecipeHolder<?>> collection) {

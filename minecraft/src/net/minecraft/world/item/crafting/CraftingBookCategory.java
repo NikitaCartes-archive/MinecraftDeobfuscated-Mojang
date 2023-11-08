@@ -1,5 +1,6 @@
 package net.minecraft.world.item.crafting;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
 
 public enum CraftingBookCategory implements StringRepresentable {
@@ -8,7 +9,7 @@ public enum CraftingBookCategory implements StringRepresentable {
 	EQUIPMENT("equipment"),
 	MISC("misc");
 
-	public static final StringRepresentable.EnumCodec<CraftingBookCategory> CODEC = StringRepresentable.fromEnum(CraftingBookCategory::values);
+	public static final Codec<CraftingBookCategory> CODEC = StringRepresentable.fromEnum(CraftingBookCategory::values);
 	private final String name;
 
 	private CraftingBookCategory(String string2) {

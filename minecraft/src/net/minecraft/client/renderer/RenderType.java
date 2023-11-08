@@ -250,8 +250,8 @@ public abstract class RenderType extends RenderStateShard {
 			return create("entity_alpha", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, compositeState);
 		})
 	);
-	private static final Function<ResourceLocation, RenderType> EYES = Util.memoize(
-		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
+	private static final BiFunction<ResourceLocation, RenderStateShard.TransparencyStateShard, RenderType> EYES = Util.memoize(
+		(BiFunction<ResourceLocation, RenderStateShard.TransparencyStateShard, RenderType>)((resourceLocation, transparencyStateShard) -> {
 			RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(resourceLocation, false, false);
 			return create(
 				"eyes",
@@ -263,7 +263,7 @@ public abstract class RenderType extends RenderStateShard {
 				RenderType.CompositeState.builder()
 					.setShaderState(RENDERTYPE_EYES_SHADER)
 					.setTextureState(textureStateShard)
-					.setTransparencyState(ADDITIVE_TRANSPARENCY)
+					.setTransparencyState(transparencyStateShard)
 					.setWriteMaskState(COLOR_WRITE)
 					.createCompositeState(false)
 			);
@@ -876,7 +876,31 @@ public abstract class RenderType extends RenderStateShard {
 	}
 
 	public static RenderType eyes(ResourceLocation resourceLocation) {
-		return (RenderType)EYES.apply(resourceLocation);
+		return (RenderType)EYES.apply(resourceLocation, ADDITIVE_TRANSPARENCY);
+	}
+
+	public static RenderType breezeEyes(ResourceLocation resourceLocation) {
+		return (RenderType)ENTITY_TRANSLUCENT_EMISSIVE.apply(resourceLocation, false);
+	}
+
+	public static RenderType breezeWind(ResourceLocation resourceLocation, float f, float g) {
+		return create(
+			"breeze_wind",
+			DefaultVertexFormat.NEW_ENTITY,
+			VertexFormat.Mode.QUADS,
+			1536,
+			false,
+			true,
+			RenderType.CompositeState.builder()
+				.setShaderState(RENDERTYPE_BREEZE_WIND_SHADER)
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTexturingState(new RenderStateShard.OffsetTexturingStateShard(f, g))
+				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+				.setCullState(NO_CULL)
+				.setLightmapState(LIGHTMAP)
+				.setOverlayState(NO_OVERLAY)
+				.createCompositeState(false)
+		);
 	}
 
 	public static RenderType energySwirl(ResourceLocation resourceLocation, float f, float g) {

@@ -524,7 +524,11 @@ public class GuiGraphics {
 	}
 
 	public void renderFakeItem(ItemStack itemStack, int i, int j) {
-		this.renderItem(null, this.minecraft.level, itemStack, i, j, 0);
+		this.renderFakeItem(itemStack, i, j, 0);
+	}
+
+	public void renderFakeItem(ItemStack itemStack, int i, int j, int k) {
+		this.renderItem(null, this.minecraft.level, itemStack, i, j, k);
 	}
 
 	public void renderItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j, int k) {

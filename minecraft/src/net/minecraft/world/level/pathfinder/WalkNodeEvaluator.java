@@ -442,39 +442,19 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		int k = mutableBlockPos.getZ();
 		BlockPathTypes blockPathTypes = getBlockPathTypeRaw(blockGetter, mutableBlockPos);
 		if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
-			BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
-			blockPathTypes = blockPathTypes2 != BlockPathTypes.WALKABLE
-					&& blockPathTypes2 != BlockPathTypes.OPEN
-					&& blockPathTypes2 != BlockPathTypes.WATER
-					&& blockPathTypes2 != BlockPathTypes.LAVA
-				? BlockPathTypes.WALKABLE
-				: BlockPathTypes.OPEN;
-			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE) {
-				blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
-			}
-
-			if (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER) {
-				blockPathTypes = BlockPathTypes.DAMAGE_OTHER;
-			}
-
-			if (blockPathTypes2 == BlockPathTypes.STICKY_HONEY) {
-				blockPathTypes = BlockPathTypes.STICKY_HONEY;
-			}
-
-			if (blockPathTypes2 == BlockPathTypes.POWDER_SNOW) {
-				blockPathTypes = BlockPathTypes.DANGER_POWDER_SNOW;
-			}
-
-			if (blockPathTypes2 == BlockPathTypes.DAMAGE_CAUTIOUS) {
-				blockPathTypes = BlockPathTypes.DAMAGE_CAUTIOUS;
-			}
+			return switch (getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k))) {
+				case OPEN, WATER, LAVA, WALKABLE -> BlockPathTypes.OPEN;
+				case DAMAGE_FIRE -> BlockPathTypes.DAMAGE_FIRE;
+				case DAMAGE_OTHER -> BlockPathTypes.DAMAGE_OTHER;
+				case STICKY_HONEY -> BlockPathTypes.STICKY_HONEY;
+				case POWDER_SNOW -> BlockPathTypes.DANGER_POWDER_SNOW;
+				case DAMAGE_CAUTIOUS -> BlockPathTypes.DAMAGE_CAUTIOUS;
+				case TRAPDOOR -> BlockPathTypes.DANGER_TRAPDOOR;
+				default -> checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), BlockPathTypes.WALKABLE);
+			};
+		} else {
+			return blockPathTypes;
 		}
-
-		if (blockPathTypes == BlockPathTypes.WALKABLE) {
-			blockPathTypes = checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), blockPathTypes);
-		}
-
-		return blockPathTypes;
 	}
 
 	public static BlockPathTypes checkNeighbourBlocks(BlockGetter blockGetter, BlockPos.MutableBlockPos mutableBlockPos, BlockPathTypes blockPathTypes) {

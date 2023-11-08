@@ -22,6 +22,8 @@ public final class EntityTypeTags {
 	public static final TagKey<EntityType<?>> FALL_DAMAGE_IMMUNE = create("fall_damage_immune");
 	public static final TagKey<EntityType<?>> DISMOUNTS_UNDERWATER = create("dismounts_underwater");
 	public static final TagKey<EntityType<?>> NON_CONTROLLING_RIDER = create("non_controlling_rider");
+	public static final TagKey<EntityType<?>> DEFLECTS_ARROWS = create("deflects_arrows");
+	public static final TagKey<EntityType<?>> DEFLECTS_TRIDENTS = create("deflects_tridents");
 
 	private EntityTypeTags() {
 	}

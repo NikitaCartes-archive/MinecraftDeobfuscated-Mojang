@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -123,6 +124,9 @@ public class ThrownTrident extends AbstractArrow {
 
 				this.doPostHurtEffects(livingEntity2);
 			}
+		} else if (entity.getType().is(EntityTypeTags.DEFLECTS_TRIDENTS)) {
+			this.deflect();
+			return;
 		}
 
 		this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));

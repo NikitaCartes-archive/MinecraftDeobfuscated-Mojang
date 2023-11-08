@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -97,7 +96,7 @@ public class AdvancementTab {
 		guiGraphics.enableScissor(i, j, i + 234, j + 113);
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate((float)i, (float)j, 0.0F);
-		ResourceLocation resourceLocation = (ResourceLocation)Objects.requireNonNullElse(this.display.getBackground(), TextureManager.INTENTIONAL_MISSING_TEXTURE);
+		ResourceLocation resourceLocation = (ResourceLocation)this.display.getBackground().orElse(TextureManager.INTENTIONAL_MISSING_TEXTURE);
 		int k = Mth.floor(this.scrollX);
 		int l = Mth.floor(this.scrollY);
 		int m = k % 16;

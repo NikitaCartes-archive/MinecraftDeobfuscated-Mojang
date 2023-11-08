@@ -1,29 +1,34 @@
 package net.minecraft.advancements;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import javax.annotation.Nullable;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.Item;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
 public class DisplayInfo {
+	public static final Codec<DisplayInfo> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					ItemStack.ADVANCEMENT_ICON_CODEC.fieldOf("icon").forGetter(DisplayInfo::getIcon),
+					ComponentSerialization.CODEC.fieldOf("title").forGetter(DisplayInfo::getTitle),
+					ComponentSerialization.CODEC.fieldOf("description").forGetter(DisplayInfo::getDescription),
+					ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "background").forGetter(DisplayInfo::getBackground),
+					ExtraCodecs.strictOptionalField(AdvancementType.CODEC, "frame", AdvancementType.TASK).forGetter(DisplayInfo::getType),
+					ExtraCodecs.strictOptionalField(Codec.BOOL, "show_toast", true).forGetter(DisplayInfo::shouldShowToast),
+					ExtraCodecs.strictOptionalField(Codec.BOOL, "announce_to_chat", true).forGetter(DisplayInfo::shouldAnnounceChat),
+					ExtraCodecs.strictOptionalField(Codec.BOOL, "hidden", false).forGetter(DisplayInfo::isHidden)
+				)
+				.apply(instance, DisplayInfo::new)
+	);
 	private final Component title;
 	private final Component description;
 	private final ItemStack icon;
-	@Nullable
-	private final ResourceLocation background;
-	private final FrameType frame;
+	private final Optional<ResourceLocation> background;
+	private final AdvancementType type;
 	private final boolean showToast;
 	private final boolean announceChat;
 	private final boolean hidden;
@@ -34,8 +39,8 @@ public class DisplayInfo {
 		ItemStack itemStack,
 		Component component,
 		Component component2,
-		@Nullable ResourceLocation resourceLocation,
-		FrameType frameType,
+		Optional<ResourceLocation> optional,
+		AdvancementType advancementType,
 		boolean bl,
 		boolean bl2,
 		boolean bl3
@@ -43,8 +48,8 @@ public class DisplayInfo {
 		this.title = component;
 		this.description = component2;
 		this.icon = itemStack;
-		this.background = resourceLocation;
-		this.frame = frameType;
+		this.background = optional;
+		this.type = advancementType;
 		this.showToast = bl;
 		this.announceChat = bl2;
 		this.hidden = bl3;
@@ -67,13 +72,12 @@ public class DisplayInfo {
 		return this.icon;
 	}
 
-	@Nullable
-	public ResourceLocation getBackground() {
+	public Optional<ResourceLocation> getBackground() {
 		return this.background;
 	}
 
-	public FrameType getFrame() {
-		return this.frame;
+	public AdvancementType getType() {
+		return this.type;
 	}
 
 	public float getX() {
@@ -96,52 +100,13 @@ public class DisplayInfo {
 		return this.hidden;
 	}
 
-	public static DisplayInfo fromJson(JsonObject jsonObject) {
-		Component component = Component.Serializer.fromJson(jsonObject.get("title"));
-		Component component2 = Component.Serializer.fromJson(jsonObject.get("description"));
-		if (component != null && component2 != null) {
-			ItemStack itemStack = getIcon(GsonHelper.getAsJsonObject(jsonObject, "icon"));
-			ResourceLocation resourceLocation = jsonObject.has("background") ? new ResourceLocation(GsonHelper.getAsString(jsonObject, "background")) : null;
-			FrameType frameType = jsonObject.has("frame") ? FrameType.byName(GsonHelper.getAsString(jsonObject, "frame")) : FrameType.TASK;
-			boolean bl = GsonHelper.getAsBoolean(jsonObject, "show_toast", true);
-			boolean bl2 = GsonHelper.getAsBoolean(jsonObject, "announce_to_chat", true);
-			boolean bl3 = GsonHelper.getAsBoolean(jsonObject, "hidden", false);
-			return new DisplayInfo(itemStack, component, component2, resourceLocation, frameType, bl, bl2, bl3);
-		} else {
-			throw new JsonSyntaxException("Both title and description must be set");
-		}
-	}
-
-	private static ItemStack getIcon(JsonObject jsonObject) {
-		if (!jsonObject.has("item")) {
-			throw new JsonSyntaxException("Unsupported icon type, currently only items are supported (add 'item' key)");
-		} else {
-			Holder<Item> holder = GsonHelper.getAsItem(jsonObject, "item");
-			if (jsonObject.has("data")) {
-				throw new JsonParseException("Disallowed data tag found");
-			} else {
-				ItemStack itemStack = new ItemStack(holder);
-				if (jsonObject.has("nbt")) {
-					try {
-						CompoundTag compoundTag = TagParser.parseTag(GsonHelper.convertToString(jsonObject.get("nbt"), "nbt"));
-						itemStack.setTag(compoundTag);
-					} catch (CommandSyntaxException var4) {
-						throw new JsonSyntaxException("Invalid nbt tag: " + var4.getMessage());
-					}
-				}
-
-				return itemStack;
-			}
-		}
-	}
-
 	public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeComponent(this.title);
 		friendlyByteBuf.writeComponent(this.description);
 		friendlyByteBuf.writeItem(this.icon);
-		friendlyByteBuf.writeEnum(this.frame);
+		friendlyByteBuf.writeEnum(this.type);
 		int i = 0;
-		if (this.background != null) {
+		if (this.background.isPresent()) {
 			i |= 1;
 		}
 
@@ -154,10 +119,7 @@ public class DisplayInfo {
 		}
 
 		friendlyByteBuf.writeInt(i);
-		if (this.background != null) {
-			friendlyByteBuf.writeResourceLocation(this.background);
-		}
-
+		this.background.ifPresent(friendlyByteBuf::writeResourceLocation);
 		friendlyByteBuf.writeFloat(this.x);
 		friendlyByteBuf.writeFloat(this.y);
 	}
@@ -166,39 +128,13 @@ public class DisplayInfo {
 		Component component = friendlyByteBuf.readComponentTrusted();
 		Component component2 = friendlyByteBuf.readComponentTrusted();
 		ItemStack itemStack = friendlyByteBuf.readItem();
-		FrameType frameType = friendlyByteBuf.readEnum(FrameType.class);
+		AdvancementType advancementType = friendlyByteBuf.readEnum(AdvancementType.class);
 		int i = friendlyByteBuf.readInt();
-		ResourceLocation resourceLocation = (i & 1) != 0 ? friendlyByteBuf.readResourceLocation() : null;
+		Optional<ResourceLocation> optional = (i & 1) != 0 ? Optional.of(friendlyByteBuf.readResourceLocation()) : Optional.empty();
 		boolean bl = (i & 2) != 0;
 		boolean bl2 = (i & 4) != 0;
-		DisplayInfo displayInfo = new DisplayInfo(itemStack, component, component2, resourceLocation, frameType, bl, false, bl2);
+		DisplayInfo displayInfo = new DisplayInfo(itemStack, component, component2, optional, advancementType, bl, false, bl2);
 		displayInfo.setLocation(friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat());
 		return displayInfo;
-	}
-
-	public JsonElement serializeToJson() {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.add("icon", this.serializeIcon());
-		jsonObject.add("title", Component.Serializer.toJsonTree(this.title));
-		jsonObject.add("description", Component.Serializer.toJsonTree(this.description));
-		jsonObject.addProperty("frame", this.frame.getName());
-		jsonObject.addProperty("show_toast", this.showToast);
-		jsonObject.addProperty("announce_to_chat", this.announceChat);
-		jsonObject.addProperty("hidden", this.hidden);
-		if (this.background != null) {
-			jsonObject.addProperty("background", this.background.toString());
-		}
-
-		return jsonObject;
-	}
-
-	private JsonObject serializeIcon() {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("item", BuiltInRegistries.ITEM.getKey(this.icon.getItem()).toString());
-		if (this.icon.hasTag()) {
-			jsonObject.addProperty("nbt", this.icon.getTag().toString());
-		}
-
-		return jsonObject;
 	}
 }

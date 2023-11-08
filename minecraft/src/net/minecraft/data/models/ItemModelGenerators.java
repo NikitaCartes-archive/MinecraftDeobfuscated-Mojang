@@ -410,6 +410,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SHELTER_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SKULL_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SNORT_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.TRIAL_KEY, ModelTemplates.FLAT_ITEM);
 	}
 
 	static record TrimModelData(String name, float itemModelIndex, Map<ArmorMaterial, String> overrideArmorMaterials) {

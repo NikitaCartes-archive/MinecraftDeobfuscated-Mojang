@@ -1,7 +1,6 @@
 package net.minecraft.advancements;
 
-import com.google.gson.JsonObject;
-import net.minecraft.advancements.critereon.DeserializationContext;
+import com.mojang.serialization.Codec;
 import net.minecraft.server.PlayerAdvancements;
 
 public interface CriterionTrigger<T extends CriterionTriggerInstance> {
@@ -11,7 +10,7 @@ public interface CriterionTrigger<T extends CriterionTriggerInstance> {
 
 	void removePlayerListeners(PlayerAdvancements playerAdvancements);
 
-	T createInstance(JsonObject jsonObject, DeserializationContext deserializationContext);
+	Codec<T> codec();
 
 	default Criterion<T> createCriterion(T criterionTriggerInstance) {
 		return new Criterion<>(this, criterionTriggerInstance);

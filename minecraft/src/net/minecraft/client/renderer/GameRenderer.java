@@ -219,6 +219,8 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	private static ShaderInstance rendertypeEnergySwirlShader;
 	@Nullable
+	private static ShaderInstance rendertypeBreezeWindShader;
+	@Nullable
 	private static ShaderInstance rendertypeLeashShader;
 	@Nullable
 	private static ShaderInstance rendertypeWaterMaskShader;
@@ -786,6 +788,12 @@ public class GameRenderer implements AutoCloseable {
 				Pair.of(
 					new ShaderInstance(resourceProvider, "rendertype_gui_ghost_recipe_overlay", DefaultVertexFormat.POSITION_COLOR),
 					shaderInstance -> rendertypeGuiGhostRecipeOverlayShader = shaderInstance
+				)
+			);
+			list2.add(
+				Pair.of(
+					new ShaderInstance(resourceProvider, "rendertype_breeze_wind", DefaultVertexFormat.NEW_ENTITY),
+					shaderInstance -> rendertypeBreezeWindShader = shaderInstance
 				)
 			);
 		} catch (IOException var5) {
@@ -1570,6 +1578,11 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	public static ShaderInstance getRendertypeEnergySwirlShader() {
 		return rendertypeEnergySwirlShader;
+	}
+
+	@Nullable
+	public static ShaderInstance getRendertypeBreezeWindShader() {
+		return rendertypeBreezeWindShader;
 	}
 
 	@Nullable

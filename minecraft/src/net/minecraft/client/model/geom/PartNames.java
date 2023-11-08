@@ -78,5 +78,10 @@ public class PartNames {
 	public static final String LEFT_TENDRIL = "left_tendril";
 	public static final String RIGHT_RIBCAGE = "right_ribcage";
 	public static final String LEFT_RIBCAGE = "left_ribcage";
+	public static final String WIND_BODY = "wind_body";
+	public static final String WIND_TOP = "wind_top";
+	public static final String WIND_MID = "wind_mid";
+	public static final String WIND_BOTTOM = "wind_bottom";
+	public static final String RODS = "rods";
 	public static final String BONE = "bone";
 }

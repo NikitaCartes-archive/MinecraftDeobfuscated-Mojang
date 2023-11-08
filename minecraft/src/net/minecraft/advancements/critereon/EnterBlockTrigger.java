@@ -1,77 +1,59 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.TriggerInstance> {
-	public EnterBlockTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
-	) {
-		Block block = deserializeBlock(jsonObject);
-		Optional<StatePropertiesPredicate> optional2 = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
-		if (block != null) {
-			optional2.ifPresent(statePropertiesPredicate -> statePropertiesPredicate.checkState(block.getStateDefinition(), string -> {
-					throw new JsonSyntaxException("Block " + block + " has no property " + string);
-				}));
-		}
-
-		return new EnterBlockTrigger.TriggerInstance(optional, block, optional2);
-	}
-
-	@Nullable
-	private static Block deserializeBlock(JsonObject jsonObject) {
-		if (jsonObject.has("block")) {
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-			return (Block)BuiltInRegistries.BLOCK
-				.getOptional(resourceLocation)
-				.orElseThrow(() -> new JsonSyntaxException("Unknown block type '" + resourceLocation + "'"));
-		} else {
-			return null;
-		}
+	@Override
+	public Codec<EnterBlockTrigger.TriggerInstance> codec() {
+		return EnterBlockTrigger.TriggerInstance.CODEC;
 	}
 
 	public void trigger(ServerPlayer serverPlayer, BlockState blockState) {
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(blockState));
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		@Nullable
-		private final Block block;
-		private final Optional<StatePropertiesPredicate> state;
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<Holder<Block>> block, Optional<StatePropertiesPredicate> state)
+		implements SimpleCriterionTrigger.SimpleInstance {
+		public static final Codec<EnterBlockTrigger.TriggerInstance> CODEC = ExtraCodecs.validate(
+			RecordCodecBuilder.create(
+				instance -> instance.group(
+							ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(EnterBlockTrigger.TriggerInstance::player),
+							ExtraCodecs.strictOptionalField(BuiltInRegistries.BLOCK.holderByNameCodec(), "block").forGetter(EnterBlockTrigger.TriggerInstance::block),
+							ExtraCodecs.strictOptionalField(StatePropertiesPredicate.CODEC, "state").forGetter(EnterBlockTrigger.TriggerInstance::state)
+						)
+						.apply(instance, EnterBlockTrigger.TriggerInstance::new)
+			),
+			EnterBlockTrigger.TriggerInstance::validate
+		);
 
-		public TriggerInstance(Optional<ContextAwarePredicate> optional, @Nullable Block block, Optional<StatePropertiesPredicate> optional2) {
-			super(optional);
-			this.block = block;
-			this.state = optional2;
+		private static DataResult<EnterBlockTrigger.TriggerInstance> validate(EnterBlockTrigger.TriggerInstance triggerInstance) {
+			return (DataResult<EnterBlockTrigger.TriggerInstance>)triggerInstance.block
+				.flatMap(
+					holder -> triggerInstance.state
+							.flatMap(statePropertiesPredicate -> statePropertiesPredicate.checkState(((Block)holder.value()).getStateDefinition()))
+							.map(string -> DataResult.error(() -> "Block" + holder + " has no property " + string))
+				)
+				.orElseGet(() -> DataResult.success(triggerInstance));
 		}
 
 		public static Criterion<EnterBlockTrigger.TriggerInstance> entersBlock(Block block) {
-			return CriteriaTriggers.ENTER_BLOCK.createCriterion(new EnterBlockTrigger.TriggerInstance(Optional.empty(), block, Optional.empty()));
-		}
-
-		@Override
-		public JsonObject serializeToJson() {
-			JsonObject jsonObject = super.serializeToJson();
-			if (this.block != null) {
-				jsonObject.addProperty("block", BuiltInRegistries.BLOCK.getKey(this.block).toString());
-			}
-
-			this.state.ifPresent(statePropertiesPredicate -> jsonObject.add("state", statePropertiesPredicate.serializeToJson()));
-			return jsonObject;
+			return CriteriaTriggers.ENTER_BLOCK
+				.createCriterion(new EnterBlockTrigger.TriggerInstance(Optional.empty(), Optional.of(block.builtInRegistryHolder()), Optional.empty()));
 		}
 
 		public boolean matches(BlockState blockState) {
-			return this.block != null && !blockState.is(this.block)
+			return this.block.isPresent() && !blockState.is((Holder<Block>)this.block.get())
 				? false
 				: !this.state.isPresent() || ((StatePropertiesPredicate)this.state.get()).matches(blockState);
 		}

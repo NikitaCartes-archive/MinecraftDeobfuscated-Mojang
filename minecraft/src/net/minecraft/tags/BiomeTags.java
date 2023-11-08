@@ -39,6 +39,7 @@ public class BiomeTags {
 	public static final TagKey<Biome> HAS_SHIPWRECK_BEACHED = create("has_structure/shipwreck_beached");
 	public static final TagKey<Biome> HAS_SHIPWRECK = create("has_structure/shipwreck");
 	public static final TagKey<Biome> HAS_STRONGHOLD = create("has_structure/stronghold");
+	public static final TagKey<Biome> HAS_TRIAL_CHAMBERS = create("has_structure/trial_chambers");
 	public static final TagKey<Biome> HAS_SWAMP_HUT = create("has_structure/swamp_hut");
 	public static final TagKey<Biome> HAS_VILLAGE_DESERT = create("has_structure/village_desert");
 	public static final TagKey<Biome> HAS_VILLAGE_PLAINS = create("has_structure/village_plains");

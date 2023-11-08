@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
-import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
 import net.minecraft.advancements.critereon.CuredZombieVillagerTrigger;
 import net.minecraft.advancements.critereon.DamagePredicate;
@@ -36,7 +36,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.root.title"),
 				Component.translatable("advancements.story.root.description"),
 				new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
-				FrameType.TASK,
+				AdvancementType.TASK,
 				false,
 				false,
 				false
@@ -50,7 +50,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.mine_stone.title"),
 				Component.translatable("advancements.story.mine_stone.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -64,7 +64,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.upgrade_tools.title"),
 				Component.translatable("advancements.story.upgrade_tools.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -78,7 +78,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.smelt_iron.title"),
 				Component.translatable("advancements.story.smelt_iron.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -92,7 +92,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.iron_tools.title"),
 				Component.translatable("advancements.story.iron_tools.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -106,7 +106,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.mine_diamond.title"),
 				Component.translatable("advancements.story.mine_diamond.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -120,7 +120,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.lava_bucket.title"),
 				Component.translatable("advancements.story.lava_bucket.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -134,7 +134,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.obtain_armor.title"),
 				Component.translatable("advancements.story.obtain_armor.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -152,7 +152,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.enchant_item.title"),
 				Component.translatable("advancements.story.enchant_item.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -166,7 +166,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.form_obsidian.title"),
 				Component.translatable("advancements.story.form_obsidian.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -180,7 +180,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.deflect_arrow.title"),
 				Component.translatable("advancements.story.deflect_arrow.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -199,7 +199,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.shiny_gear.title"),
 				Component.translatable("advancements.story.shiny_gear.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -217,7 +217,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.enter_the_nether.title"),
 				Component.translatable("advancements.story.enter_the_nether.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -231,7 +231,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.cure_zombie_villager.title"),
 				Component.translatable("advancements.story.cure_zombie_villager.description"),
 				null,
-				FrameType.GOAL,
+				AdvancementType.GOAL,
 				true,
 				true,
 				false
@@ -245,7 +245,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.follow_ender_eye.title"),
 				Component.translatable("advancements.story.follow_ender_eye.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false
@@ -259,7 +259,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Component.translatable("advancements.story.enter_the_end.title"),
 				Component.translatable("advancements.story.enter_the_end.description"),
 				null,
-				FrameType.TASK,
+				AdvancementType.TASK,
 				true,
 				true,
 				false

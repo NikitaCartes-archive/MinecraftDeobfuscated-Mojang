@@ -5,11 +5,13 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.mojang.datafixers.DataFixUtils;
+import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.DSL.TypeReference;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DataResult.PartialResult;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -64,6 +66,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -810,6 +813,25 @@ public class Util {
 			throw (Throwable)function.apply(((PartialResult)optional.get()).message());
 		} else {
 			return (T)dataResult.result().orElseThrow();
+		}
+	}
+
+	public static <A, B> Typed<B> writeAndReadTypedOrThrow(Typed<A> typed, Type<B> type, UnaryOperator<Dynamic<?>> unaryOperator) {
+		Dynamic<?> dynamic = getOrThrow((DataResult<Dynamic<?>>)typed.write(), IllegalStateException::new);
+		return readTypedOrThrow(type, (Dynamic<?>)unaryOperator.apply(dynamic));
+	}
+
+	public static <T> Typed<T> readTypedOrThrow(Type<T> type, Dynamic<?> dynamic) {
+		DataResult<Typed<T>> dataResult = type.readTyped(dynamic).map(Pair::getFirst);
+		Optional<PartialResult<Typed<T>>> optional = dataResult.error();
+		if (optional.isPresent()) {
+			CrashReport crashReport = CrashReport.forThrowable(new IllegalStateException(((PartialResult)optional.get()).message()), "Reading type");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Info");
+			crashReportCategory.setDetail("Data", dynamic);
+			crashReportCategory.setDetail("Type", type);
+			throw new ReportedException(crashReport);
+		} else {
+			return (Typed<T>)dataResult.result().orElseThrow();
 		}
 	}
 

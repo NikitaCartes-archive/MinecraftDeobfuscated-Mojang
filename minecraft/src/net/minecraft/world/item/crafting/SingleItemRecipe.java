@@ -1,11 +1,9 @@
 package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
@@ -63,25 +61,23 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 		return this.result.copy();
 	}
 
+	public interface Factory<T extends SingleItemRecipe> {
+		T create(String string, Ingredient ingredient, ItemStack itemStack);
+	}
+
 	public static class Serializer<T extends SingleItemRecipe> implements RecipeSerializer<T> {
-		private static final MapCodec<ItemStack> RESULT_CODEC = RecordCodecBuilder.mapCodec(
-			instance -> instance.group(
-						BuiltInRegistries.ITEM.byNameCodec().fieldOf("result").forGetter(ItemStack::getItem), Codec.INT.fieldOf("count").forGetter(ItemStack::getCount)
-					)
-					.apply(instance, ItemStack::new)
-		);
-		final SingleItemRecipe.Serializer.SingleItemMaker<T> factory;
+		final SingleItemRecipe.Factory<T> factory;
 		private final Codec<T> codec;
 
-		protected Serializer(SingleItemRecipe.Serializer.SingleItemMaker<T> singleItemMaker) {
-			this.factory = singleItemMaker;
+		protected Serializer(SingleItemRecipe.Factory<T> factory) {
+			this.factory = factory;
 			this.codec = RecordCodecBuilder.create(
 				instance -> instance.group(
 							ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(singleItemRecipe -> singleItemRecipe.group),
 							Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(singleItemRecipe -> singleItemRecipe.ingredient),
-							RESULT_CODEC.forGetter(singleItemRecipe -> singleItemRecipe.result)
+							ItemStack.RESULT_CODEC.forGetter(singleItemRecipe -> singleItemRecipe.result)
 						)
-						.apply(instance, singleItemMaker::create)
+						.apply(instance, factory::create)
 			);
 		}
 
@@ -101,10 +97,6 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 			friendlyByteBuf.writeUtf(singleItemRecipe.group);
 			singleItemRecipe.ingredient.toNetwork(friendlyByteBuf);
 			friendlyByteBuf.writeItem(singleItemRecipe.result);
-		}
-
-		interface SingleItemMaker<T extends SingleItemRecipe> {
-			T create(String string, Ingredient ingredient, ItemStack itemStack);
 		}
 	}
 }

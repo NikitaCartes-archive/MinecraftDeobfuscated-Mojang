@@ -124,6 +124,13 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<BlockPos> SNIFFER_SNIFFING_TARGET = register("sniffer_sniffing_target");
 	public static final MemoryModuleType<Boolean> SNIFFER_DIGGING = register("sniffer_digging");
 	public static final MemoryModuleType<Boolean> SNIFFER_HAPPY = register("sniffer_happy");
+	public static final MemoryModuleType<Unit> BREEZE_JUMP_COOLDOWN = register("breeze_jump_cooldown", Codec.unit(Unit.INSTANCE));
+	public static final MemoryModuleType<Unit> BREEZE_SHOOT = register("breeze_shoot", Codec.unit(Unit.INSTANCE));
+	public static final MemoryModuleType<Unit> BREEZE_SHOOT_CHARGING = register("breeze_shoot_charging", Codec.unit(Unit.INSTANCE));
+	public static final MemoryModuleType<Unit> BREEZE_SHOOT_RECOVERING = register("breeze_shoot_recover", Codec.unit(Unit.INSTANCE));
+	public static final MemoryModuleType<Unit> BREEZE_SHOOT_COOLDOWN = register("breeze_shoot_cooldown", Codec.unit(Unit.INSTANCE));
+	public static final MemoryModuleType<Unit> BREEZE_JUMP_INHALING = register("breeze_jump_inhaling", Codec.unit(Unit.INSTANCE));
+	public static final MemoryModuleType<BlockPos> BREEZE_JUMP_TARGET = register("breeze_jump_target", BlockPos.CODEC);
 	private final Optional<Codec<ExpirableValue<U>>> codec;
 
 	@VisibleForTesting

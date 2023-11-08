@@ -764,7 +764,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 		if (mobSpawnType == MobSpawnType.COMMAND
 			|| mobSpawnType == MobSpawnType.SPAWN_EGG
-			|| mobSpawnType == MobSpawnType.SPAWNER
+			|| MobSpawnType.isSpawner(mobSpawnType)
 			|| mobSpawnType == MobSpawnType.DISPENSER) {
 			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
 		}

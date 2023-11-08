@@ -1,16 +1,11 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -91,26 +86,6 @@ public record ItemPredicate(
 
 			return !this.potion.isPresent() || ((Holder)this.potion.get()).value() == PotionUtils.getPotion(itemStack);
 		}
-	}
-
-	public static Optional<ItemPredicate> fromJson(@Nullable JsonElement jsonElement) {
-		return jsonElement != null && !jsonElement.isJsonNull()
-			? Optional.of(Util.getOrThrow(CODEC.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new))
-			: Optional.empty();
-	}
-
-	public JsonElement serializeToJson() {
-		return Util.getOrThrow(CODEC.encodeStart(JsonOps.INSTANCE, this), IllegalStateException::new);
-	}
-
-	public static JsonElement serializeToJsonArray(List<ItemPredicate> list) {
-		return Util.getOrThrow(CODEC.listOf().encodeStart(JsonOps.INSTANCE, list), IllegalStateException::new);
-	}
-
-	public static List<ItemPredicate> fromJsonArray(@Nullable JsonElement jsonElement) {
-		return jsonElement != null && !jsonElement.isJsonNull()
-			? Util.getOrThrow(CODEC.listOf().parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new)
-			: List.of();
 	}
 
 	public static class Builder {

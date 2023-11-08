@@ -270,13 +270,11 @@ public class Commands {
 					executionContext -> ExecutionContext.queueInitialCommandExecution(executionContext, string, contextChain, commandSourceStack, CommandResultCallback.EMPTY)
 				);
 			}
-		} catch (CommandRuntimeException var13) {
-			commandSourceStack.sendFailure(var13.getComponent());
-		} catch (Exception var14) {
-			MutableComponent mutableComponent = Component.literal(var14.getMessage() == null ? var14.getClass().getName() : var14.getMessage());
+		} catch (Exception var12) {
+			MutableComponent mutableComponent = Component.literal(var12.getMessage() == null ? var12.getClass().getName() : var12.getMessage());
 			if (LOGGER.isDebugEnabled()) {
-				LOGGER.error("Command exception: /{}", string, var14);
-				StackTraceElement[] stackTraceElements = var14.getStackTrace();
+				LOGGER.error("Command exception: /{}", string, var12);
+				StackTraceElement[] stackTraceElements = var12.getStackTrace();
 
 				for (int i = 0; i < Math.min(stackTraceElements.length, 3); i++) {
 					mutableComponent.append("\n\n")
@@ -292,8 +290,8 @@ public class Commands {
 				Component.translatable("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent)))
 			);
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
-				commandSourceStack.sendFailure(Component.literal(Util.describeError(var14)));
-				LOGGER.error("'/{}' threw an exception", string, var14);
+				commandSourceStack.sendFailure(Component.literal(Util.describeError(var12)));
+				LOGGER.error("'/{}' threw an exception", string, var12);
 			}
 		} finally {
 			commandSourceStack.getServer().getProfiler().pop();

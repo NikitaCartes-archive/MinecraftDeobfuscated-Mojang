@@ -62,4 +62,9 @@ public class NonInteractiveResultSlot extends Slot {
 	public boolean isHighlightable() {
 		return false;
 	}
+
+	@Override
+	public boolean isFake() {
+		return true;
+	}
 }

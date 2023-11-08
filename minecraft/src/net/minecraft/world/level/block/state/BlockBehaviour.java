@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -45,6 +46,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -167,6 +169,31 @@ public abstract class BlockBehaviour implements FeatureElement {
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (blockState.hasBlockEntity() && !blockState.is(blockState2.getBlock())) {
 			level.removeBlockEntity(blockPos);
+		}
+	}
+
+	@Deprecated
+	public void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+		if (!blockState.isAir() && explosion.getBlockInteraction() != Explosion.BlockInteraction.TRIGGER_BLOCK) {
+			Block block = blockState.getBlock();
+			boolean bl = explosion.getIndirectSourceEntity() instanceof Player;
+			if (block.dropFromExplosion(explosion) && level instanceof ServerLevel serverLevel) {
+				BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos) : null;
+				LootParams.Builder builder = new LootParams.Builder(serverLevel)
+					.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
+					.withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+					.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity)
+					.withOptionalParameter(LootContextParams.THIS_ENTITY, explosion.getDirectSourceEntity());
+				if (explosion.getBlockInteraction() == Explosion.BlockInteraction.DESTROY_WITH_DECAY) {
+					builder.withParameter(LootContextParams.EXPLOSION_RADIUS, explosion.radius());
+				}
+
+				blockState.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY, bl);
+				blockState.getDrops(builder).forEach(itemStack -> biConsumer.accept(itemStack, blockPos));
+			}
+
+			level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+			block.wasExploded(level, blockPos, explosion);
 		}
 	}
 
@@ -699,6 +726,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 			this.getBlock().onRemove(this.asState(), level, blockPos, blockState, bl);
 		}
 
+		public void onExplosionHit(Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+			this.getBlock().onExplosionHit(this.asState(), level, blockPos, explosion, biConsumer);
+		}
+
 		public void tick(ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 			this.getBlock().tick(this.asState(), serverLevel, blockPos, randomSource);
 		}
@@ -971,32 +1002,47 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return new BlockBehaviour.Properties();
 		}
 
-		public static BlockBehaviour.Properties copy(BlockBehaviour blockBehaviour) {
+		public static BlockBehaviour.Properties ofFullCopy(BlockBehaviour blockBehaviour) {
+			BlockBehaviour.Properties properties = ofLegacyCopy(blockBehaviour);
+			BlockBehaviour.Properties properties2 = blockBehaviour.properties;
+			properties.jumpFactor = properties2.jumpFactor;
+			properties.isRedstoneConductor = properties2.isRedstoneConductor;
+			properties.isValidSpawn = properties2.isValidSpawn;
+			properties.hasPostProcess = properties2.hasPostProcess;
+			properties.isSuffocating = properties2.isSuffocating;
+			properties.isViewBlocking = properties2.isViewBlocking;
+			properties.drops = properties2.drops;
+			return properties;
+		}
+
+		@Deprecated
+		public static BlockBehaviour.Properties ofLegacyCopy(BlockBehaviour blockBehaviour) {
 			BlockBehaviour.Properties properties = new BlockBehaviour.Properties();
-			properties.destroyTime = blockBehaviour.properties.destroyTime;
-			properties.explosionResistance = blockBehaviour.properties.explosionResistance;
-			properties.hasCollision = blockBehaviour.properties.hasCollision;
-			properties.isRandomlyTicking = blockBehaviour.properties.isRandomlyTicking;
-			properties.lightEmission = blockBehaviour.properties.lightEmission;
-			properties.mapColor = blockBehaviour.properties.mapColor;
-			properties.soundType = blockBehaviour.properties.soundType;
-			properties.friction = blockBehaviour.properties.friction;
-			properties.speedFactor = blockBehaviour.properties.speedFactor;
-			properties.dynamicShape = blockBehaviour.properties.dynamicShape;
-			properties.canOcclude = blockBehaviour.properties.canOcclude;
-			properties.isAir = blockBehaviour.properties.isAir;
-			properties.ignitedByLava = blockBehaviour.properties.ignitedByLava;
-			properties.liquid = blockBehaviour.properties.liquid;
-			properties.forceSolidOff = blockBehaviour.properties.forceSolidOff;
-			properties.forceSolidOn = blockBehaviour.properties.forceSolidOn;
-			properties.pushReaction = blockBehaviour.properties.pushReaction;
-			properties.requiresCorrectToolForDrops = blockBehaviour.properties.requiresCorrectToolForDrops;
-			properties.offsetFunction = blockBehaviour.properties.offsetFunction;
-			properties.spawnTerrainParticles = blockBehaviour.properties.spawnTerrainParticles;
-			properties.requiredFeatures = blockBehaviour.properties.requiredFeatures;
-			properties.emissiveRendering = blockBehaviour.properties.emissiveRendering;
-			properties.instrument = blockBehaviour.properties.instrument;
-			properties.replaceable = blockBehaviour.properties.replaceable;
+			BlockBehaviour.Properties properties2 = blockBehaviour.properties;
+			properties.destroyTime = properties2.destroyTime;
+			properties.explosionResistance = properties2.explosionResistance;
+			properties.hasCollision = properties2.hasCollision;
+			properties.isRandomlyTicking = properties2.isRandomlyTicking;
+			properties.lightEmission = properties2.lightEmission;
+			properties.mapColor = properties2.mapColor;
+			properties.soundType = properties2.soundType;
+			properties.friction = properties2.friction;
+			properties.speedFactor = properties2.speedFactor;
+			properties.dynamicShape = properties2.dynamicShape;
+			properties.canOcclude = properties2.canOcclude;
+			properties.isAir = properties2.isAir;
+			properties.ignitedByLava = properties2.ignitedByLava;
+			properties.liquid = properties2.liquid;
+			properties.forceSolidOff = properties2.forceSolidOff;
+			properties.forceSolidOn = properties2.forceSolidOn;
+			properties.pushReaction = properties2.pushReaction;
+			properties.requiresCorrectToolForDrops = properties2.requiresCorrectToolForDrops;
+			properties.offsetFunction = properties2.offsetFunction;
+			properties.spawnTerrainParticles = properties2.spawnTerrainParticles;
+			properties.requiredFeatures = properties2.requiredFeatures;
+			properties.emissiveRendering = properties2.emissiveRendering;
+			properties.instrument = properties2.instrument;
+			properties.replaceable = properties2.replaceable;
 			return properties;
 		}
 

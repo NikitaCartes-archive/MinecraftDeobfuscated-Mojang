@@ -268,7 +268,7 @@ public class TestCommand {
 			StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity((BlockPos)optional.get());
 			BlockPos blockPos2 = blockPos.subtract((Vec3i)optional.get());
 			String string2 = blockPos2.getX() + ", " + blockPos2.getY() + ", " + blockPos2.getZ();
-			String string3 = structureBlockEntity.getStructurePath();
+			String string3 = structureBlockEntity.getMetaData();
 			Component component = Component.literal(string2)
 				.setStyle(
 					Style.EMPTY
@@ -315,7 +315,7 @@ public class TestCommand {
 
 	private static void runTest(ServerLevel serverLevel, BlockPos blockPos, @Nullable MultipleTestTracker multipleTestTracker, boolean bl) {
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
-		String string = structureBlockEntity.getStructurePath();
+		String string = structureBlockEntity.getMetaData();
 		Optional<TestFunction> optional = GameTestRegistry.findTestFunction(string);
 		if (optional.isEmpty()) {
 			say(serverLevel, "Test function for test " + string + " could not be found", ChatFormatting.RED);
@@ -487,11 +487,12 @@ public class TestCommand {
 	}
 
 	private static int saveAndExportTestStructure(CommandSourceStack commandSourceStack, StructureBlockEntity structureBlockEntity) {
+		String string = structureBlockEntity.getStructureName();
 		if (!structureBlockEntity.saveStructure(true)) {
-			say(commandSourceStack, "Failed to save structure " + structureBlockEntity.getStructureName());
+			say(commandSourceStack, "Failed to save structure " + string);
 		}
 
-		return exportTestStructure(commandSourceStack, structureBlockEntity.getStructureName());
+		return exportTestStructure(commandSourceStack, string);
 	}
 
 	private static int exportTestStructure(CommandSourceStack commandSourceStack, String string) {

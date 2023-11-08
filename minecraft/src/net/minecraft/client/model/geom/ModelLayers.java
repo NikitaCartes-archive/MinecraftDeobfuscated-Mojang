@@ -26,6 +26,9 @@ public class ModelLayers {
 	public static final ModelLayerLocation BELL = register("bell");
 	public static final ModelLayerLocation BLAZE = register("blaze");
 	public static final ModelLayerLocation BOOK = register("book");
+	public static final ModelLayerLocation BREEZE = register("breeze");
+	public static final ModelLayerLocation BREEZE_WIND = register("breeze", "wind");
+	public static final ModelLayerLocation BREEZE_EYES = register("breeze", "eyes");
 	public static final ModelLayerLocation CAT = register("cat");
 	public static final ModelLayerLocation CAT_COLLAR = register("cat", "collar");
 	public static final ModelLayerLocation CAMEL = register("camel");
@@ -156,6 +159,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation VINDICATOR = register("vindicator");
 	public static final ModelLayerLocation WARDEN = register("warden");
 	public static final ModelLayerLocation WANDERING_TRADER = register("wandering_trader");
+	public static final ModelLayerLocation WIND_CHARGE = register("wind_charge");
 	public static final ModelLayerLocation WITCH = register("witch");
 	public static final ModelLayerLocation WITHER = register("wither");
 	public static final ModelLayerLocation WITHER_ARMOR = register("wither", "armor");

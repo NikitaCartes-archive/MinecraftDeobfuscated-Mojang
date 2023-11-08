@@ -67,6 +67,8 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 	}
 
 	public interface Provider {
+		Stream<ResourceKey<? extends Registry<?>>> listRegistries();
+
 		<T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey);
 
 		default <T> HolderLookup.RegistryLookup<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> resourceKey) {
@@ -88,6 +90,11 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 				Collectors.toUnmodifiableMap(HolderLookup.RegistryLookup::key, registryLookup -> registryLookup)
 			);
 			return new HolderLookup.Provider() {
+				@Override
+				public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
+					return map.keySet().stream();
+				}
+
 				@Override
 				public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 					return Optional.ofNullable((HolderLookup.RegistryLookup)map.get(resourceKey));

@@ -251,9 +251,9 @@ public abstract class BaseSpawner {
 	}
 
 	@Nullable
-	public Entity getOrCreateDisplayEntity(Level level, RandomSource randomSource, BlockPos blockPos) {
+	public Entity getOrCreateDisplayEntity(Level level, BlockPos blockPos) {
 		if (this.displayEntity == null) {
-			CompoundTag compoundTag = this.getOrCreateNextSpawnData(level, randomSource, blockPos).getEntityToSpawn();
+			CompoundTag compoundTag = this.getOrCreateNextSpawnData(level, level.getRandom(), blockPos).getEntityToSpawn();
 			if (!compoundTag.contains("id", 8)) {
 				return null;
 			}

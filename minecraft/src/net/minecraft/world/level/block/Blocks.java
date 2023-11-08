@@ -23,6 +23,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.piston.MovingPistonBlock;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
@@ -345,7 +346,7 @@ public class Blocks {
 	public static final Block DEEPSLATE_GOLD_ORE = register(
 		"deepslate_gold_ore",
 		new DropExperienceBlock(
-			ConstantInt.of(0), BlockBehaviour.Properties.copy(GOLD_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
+			ConstantInt.of(0), BlockBehaviour.Properties.ofLegacyCopy(GOLD_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
 		)
 	);
 	public static final Block IRON_ORE = register(
@@ -358,7 +359,7 @@ public class Blocks {
 	public static final Block DEEPSLATE_IRON_ORE = register(
 		"deepslate_iron_ore",
 		new DropExperienceBlock(
-			ConstantInt.of(0), BlockBehaviour.Properties.copy(IRON_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
+			ConstantInt.of(0), BlockBehaviour.Properties.ofLegacyCopy(IRON_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
 		)
 	);
 	public static final Block COAL_ORE = register(
@@ -371,7 +372,7 @@ public class Blocks {
 	public static final Block DEEPSLATE_COAL_ORE = register(
 		"deepslate_coal_ore",
 		new DropExperienceBlock(
-			UniformInt.of(0, 2), BlockBehaviour.Properties.copy(COAL_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
+			UniformInt.of(0, 2), BlockBehaviour.Properties.ofLegacyCopy(COAL_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
 		)
 	);
 	public static final Block NETHER_GOLD_ORE = register(
@@ -597,7 +598,7 @@ public class Blocks {
 	public static final Block DEEPSLATE_LAPIS_ORE = register(
 		"deepslate_lapis_ore",
 		new DropExperienceBlock(
-			UniformInt.of(2, 5), BlockBehaviour.Properties.copy(LAPIS_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
+			UniformInt.of(2, 5), BlockBehaviour.Properties.ofLegacyCopy(LAPIS_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
 		)
 	);
 	public static final Block LAPIS_BLOCK = register(
@@ -1201,7 +1202,7 @@ public class Blocks {
 				.noOcclusion()
 		)
 	);
-	public static final Block OAK_STAIRS = register("oak_stairs", stair(OAK_PLANKS));
+	public static final Block OAK_STAIRS = register("oak_stairs", legacyStair(OAK_PLANKS));
 	public static final Block CHEST = register(
 		"chest",
 		new ChestBlock(
@@ -1222,7 +1223,7 @@ public class Blocks {
 	public static final Block DEEPSLATE_DIAMOND_ORE = register(
 		"deepslate_diamond_ore",
 		new DropExperienceBlock(
-			UniformInt.of(3, 7), BlockBehaviour.Properties.copy(DIAMOND_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
+			UniformInt.of(3, 7), BlockBehaviour.Properties.ofLegacyCopy(DIAMOND_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
 		)
 	);
 	public static final Block DIAMOND_BLOCK = register(
@@ -1387,7 +1388,7 @@ public class Blocks {
 		new LadderBlock(BlockBehaviour.Properties.of().forceSolidOff().strength(0.4F).sound(SoundType.LADDER).noOcclusion().pushReaction(PushReaction.DESTROY))
 	);
 	public static final Block RAIL = register("rail", new RailBlock(BlockBehaviour.Properties.of().noCollission().strength(0.7F).sound(SoundType.METAL)));
-	public static final Block COBBLESTONE_STAIRS = register("cobblestone_stairs", stair(COBBLESTONE));
+	public static final Block COBBLESTONE_STAIRS = register("cobblestone_stairs", legacyStair(COBBLESTONE));
 	public static final Block OAK_WALL_SIGN = register(
 		"oak_wall_sign",
 		new WallSignBlock(
@@ -1955,7 +1956,7 @@ public class Blocks {
 	);
 	public static final Block DEEPSLATE_REDSTONE_ORE = register(
 		"deepslate_redstone_ore",
-		new RedStoneOreBlock(BlockBehaviour.Properties.copy(REDSTONE_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
+		new RedStoneOreBlock(BlockBehaviour.Properties.ofLegacyCopy(REDSTONE_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE))
 	);
 	public static final Block REDSTONE_TORCH = register(
 		"redstone_torch",
@@ -2312,7 +2313,9 @@ public class Blocks {
 		"chiseled_stone_bricks",
 		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
-	public static final Block PACKED_MUD = register("packed_mud", new Block(BlockBehaviour.Properties.copy(DIRT).strength(1.0F, 3.0F).sound(SoundType.PACKED_MUD)));
+	public static final Block PACKED_MUD = register(
+		"packed_mud", new Block(BlockBehaviour.Properties.ofLegacyCopy(DIRT).strength(1.0F, 3.0F).sound(SoundType.PACKED_MUD))
+	);
 	public static final Block MUD_BRICKS = register(
 		"mud_bricks",
 		new Block(
@@ -2471,9 +2474,9 @@ public class Blocks {
 				.ignitedByLava()
 		)
 	);
-	public static final Block BRICK_STAIRS = register("brick_stairs", stair(BRICKS));
-	public static final Block STONE_BRICK_STAIRS = register("stone_brick_stairs", stair(STONE_BRICKS));
-	public static final Block MUD_BRICK_STAIRS = register("mud_brick_stairs", stair(MUD_BRICKS));
+	public static final Block BRICK_STAIRS = register("brick_stairs", legacyStair(BRICKS));
+	public static final Block STONE_BRICK_STAIRS = register("stone_brick_stairs", legacyStair(STONE_BRICKS));
+	public static final Block MUD_BRICK_STAIRS = register("mud_brick_stairs", legacyStair(MUD_BRICKS));
 	public static final Block MYCELIUM = register(
 		"mycelium", new MyceliumBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).randomTicks().strength(0.6F).sound(SoundType.GRASS))
 	);
@@ -2505,7 +2508,7 @@ public class Blocks {
 				.sound(SoundType.NETHER_BRICKS)
 		)
 	);
-	public static final Block NETHER_BRICK_STAIRS = register("nether_brick_stairs", stair(NETHER_BRICKS));
+	public static final Block NETHER_BRICK_STAIRS = register("nether_brick_stairs", legacyStair(NETHER_BRICKS));
 	public static final Block NETHER_WART = register(
 		"nether_wart",
 		new NetherWartBlock(
@@ -2533,13 +2536,13 @@ public class Blocks {
 		"cauldron", new CauldronBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).requiresCorrectToolForDrops().strength(2.0F).noOcclusion())
 	);
 	public static final Block WATER_CAULDRON = register(
-		"water_cauldron", new LayeredCauldronBlock(Biome.Precipitation.RAIN, CauldronInteraction.WATER, BlockBehaviour.Properties.copy(CAULDRON))
+		"water_cauldron", new LayeredCauldronBlock(Biome.Precipitation.RAIN, CauldronInteraction.WATER, BlockBehaviour.Properties.ofLegacyCopy(CAULDRON))
 	);
 	public static final Block LAVA_CAULDRON = register(
-		"lava_cauldron", new LavaCauldronBlock(BlockBehaviour.Properties.copy(CAULDRON).lightLevel(blockStatex -> 15))
+		"lava_cauldron", new LavaCauldronBlock(BlockBehaviour.Properties.ofLegacyCopy(CAULDRON).lightLevel(blockStatex -> 15))
 	);
 	public static final Block POWDER_SNOW_CAULDRON = register(
-		"powder_snow_cauldron", new LayeredCauldronBlock(Biome.Precipitation.SNOW, CauldronInteraction.POWDER_SNOW, BlockBehaviour.Properties.copy(CAULDRON))
+		"powder_snow_cauldron", new LayeredCauldronBlock(Biome.Precipitation.SNOW, CauldronInteraction.POWDER_SNOW, BlockBehaviour.Properties.ofLegacyCopy(CAULDRON))
 	);
 	public static final Block END_PORTAL = register(
 		"end_portal",
@@ -2596,7 +2599,7 @@ public class Blocks {
 				.pushReaction(PushReaction.DESTROY)
 		)
 	);
-	public static final Block SANDSTONE_STAIRS = register("sandstone_stairs", stair(SANDSTONE));
+	public static final Block SANDSTONE_STAIRS = register("sandstone_stairs", legacyStair(SANDSTONE));
 	public static final Block EMERALD_ORE = register(
 		"emerald_ore",
 		new DropExperienceBlock(
@@ -2607,7 +2610,7 @@ public class Blocks {
 	public static final Block DEEPSLATE_EMERALD_ORE = register(
 		"deepslate_emerald_ore",
 		new DropExperienceBlock(
-			UniformInt.of(3, 7), BlockBehaviour.Properties.copy(EMERALD_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
+			UniformInt.of(3, 7), BlockBehaviour.Properties.ofLegacyCopy(EMERALD_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
 		)
 	);
 	public static final Block ENDER_CHEST = register(
@@ -2638,9 +2641,9 @@ public class Blocks {
 				.sound(SoundType.METAL)
 		)
 	);
-	public static final Block SPRUCE_STAIRS = register("spruce_stairs", stair(SPRUCE_PLANKS));
-	public static final Block BIRCH_STAIRS = register("birch_stairs", stair(BIRCH_PLANKS));
-	public static final Block JUNGLE_STAIRS = register("jungle_stairs", stair(JUNGLE_PLANKS));
+	public static final Block SPRUCE_STAIRS = register("spruce_stairs", legacyStair(SPRUCE_PLANKS));
+	public static final Block BIRCH_STAIRS = register("birch_stairs", legacyStair(BIRCH_PLANKS));
+	public static final Block JUNGLE_STAIRS = register("jungle_stairs", legacyStair(JUNGLE_PLANKS));
 	public static final Block COMMAND_BLOCK = register(
 		"command_block",
 		new CommandBlock(false, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).requiresCorrectToolForDrops().strength(-1.0F, 3600000.0F).noLootTable())
@@ -2657,9 +2660,9 @@ public class Blocks {
 				.isRedstoneConductor(Blocks::never)
 		)
 	);
-	public static final Block COBBLESTONE_WALL = register("cobblestone_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLESTONE).forceSolidOn()));
+	public static final Block COBBLESTONE_WALL = register("cobblestone_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(COBBLESTONE).forceSolidOn()));
 	public static final Block MOSSY_COBBLESTONE_WALL = register(
-		"mossy_cobblestone_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLESTONE).forceSolidOn())
+		"mossy_cobblestone_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(COBBLESTONE).forceSolidOn())
 	);
 	public static final Block FLOWER_POT = register("flower_pot", flowerPot(AIR));
 	public static final Block POTTED_TORCHFLOWER = register("potted_torchflower", flowerPot(TORCHFLOWER));
@@ -2893,7 +2896,7 @@ public class Blocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(0.8F)
 		)
 	);
-	public static final Block QUARTZ_STAIRS = register("quartz_stairs", stair(QUARTZ_BLOCK));
+	public static final Block QUARTZ_STAIRS = register("quartz_stairs", legacyStair(QUARTZ_BLOCK));
 	public static final Block ACTIVATOR_RAIL = register(
 		"activator_rail", new PoweredRailBlock(BlockBehaviour.Properties.of().noCollission().strength(0.7F).sound(SoundType.METAL))
 	);
@@ -3159,12 +3162,12 @@ public class Blocks {
 			DyeColor.BLACK, BlockBehaviour.Properties.of().instrument(NoteBlockInstrument.HAT).strength(0.3F).sound(SoundType.GLASS).noOcclusion()
 		)
 	);
-	public static final Block ACACIA_STAIRS = register("acacia_stairs", stair(ACACIA_PLANKS));
-	public static final Block CHERRY_STAIRS = register("cherry_stairs", stair(CHERRY_PLANKS));
-	public static final Block DARK_OAK_STAIRS = register("dark_oak_stairs", stair(DARK_OAK_PLANKS));
-	public static final Block MANGROVE_STAIRS = register("mangrove_stairs", stair(MANGROVE_PLANKS));
-	public static final Block BAMBOO_STAIRS = register("bamboo_stairs", stair(BAMBOO_PLANKS));
-	public static final Block BAMBOO_MOSAIC_STAIRS = register("bamboo_mosaic_stairs", stair(BAMBOO_MOSAIC));
+	public static final Block ACACIA_STAIRS = register("acacia_stairs", legacyStair(ACACIA_PLANKS));
+	public static final Block CHERRY_STAIRS = register("cherry_stairs", legacyStair(CHERRY_PLANKS));
+	public static final Block DARK_OAK_STAIRS = register("dark_oak_stairs", legacyStair(DARK_OAK_PLANKS));
+	public static final Block MANGROVE_STAIRS = register("mangrove_stairs", legacyStair(MANGROVE_PLANKS));
+	public static final Block BAMBOO_STAIRS = register("bamboo_stairs", legacyStair(BAMBOO_PLANKS));
+	public static final Block BAMBOO_MOSAIC_STAIRS = register("bamboo_mosaic_stairs", legacyStair(BAMBOO_MOSAIC));
 	public static final Block SLIME_BLOCK = register(
 		"slime_block", new SlimeBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GRASS).friction(0.8F).sound(SoundType.SLIME_BLOCK).noOcclusion())
 	);
@@ -3209,9 +3212,9 @@ public class Blocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.DIAMOND).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
 		)
 	);
-	public static final Block PRISMARINE_STAIRS = register("prismarine_stairs", stair(PRISMARINE));
-	public static final Block PRISMARINE_BRICK_STAIRS = register("prismarine_brick_stairs", stair(PRISMARINE_BRICKS));
-	public static final Block DARK_PRISMARINE_STAIRS = register("dark_prismarine_stairs", stair(DARK_PRISMARINE));
+	public static final Block PRISMARINE_STAIRS = register("prismarine_stairs", legacyStair(PRISMARINE));
+	public static final Block PRISMARINE_BRICK_STAIRS = register("prismarine_brick_stairs", legacyStair(PRISMARINE_BRICKS));
+	public static final Block DARK_PRISMARINE_STAIRS = register("dark_prismarine_stairs", legacyStair(DARK_PRISMARINE));
 	public static final Block PRISMARINE_SLAB = register(
 		"prismarine_slab",
 		new SlabBlock(
@@ -3892,7 +3895,7 @@ public class Blocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(0.8F)
 		)
 	);
-	public static final Block RED_SANDSTONE_STAIRS = register("red_sandstone_stairs", stair(RED_SANDSTONE));
+	public static final Block RED_SANDSTONE_STAIRS = register("red_sandstone_stairs", legacyStair(RED_SANDSTONE));
 	public static final Block OAK_SLAB = register(
 		"oak_slab",
 		new SlabBlock(
@@ -4423,7 +4426,7 @@ public class Blocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_MAGENTA).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
 		)
 	);
-	public static final Block PURPUR_STAIRS = register("purpur_stairs", stair(PURPUR_BLOCK));
+	public static final Block PURPUR_STAIRS = register("purpur_stairs", legacyStair(PURPUR_BLOCK));
 	public static final Block END_STONE_BRICKS = register(
 		"end_stone_bricks",
 		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.SAND).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(3.0F, 9.0F))
@@ -5456,54 +5459,60 @@ public class Blocks {
 				.sound(SoundType.EMPTY)
 		)
 	);
-	public static final Block POLISHED_GRANITE_STAIRS = register("polished_granite_stairs", stair(POLISHED_GRANITE));
-	public static final Block SMOOTH_RED_SANDSTONE_STAIRS = register("smooth_red_sandstone_stairs", stair(SMOOTH_RED_SANDSTONE));
-	public static final Block MOSSY_STONE_BRICK_STAIRS = register("mossy_stone_brick_stairs", stair(MOSSY_STONE_BRICKS));
-	public static final Block POLISHED_DIORITE_STAIRS = register("polished_diorite_stairs", stair(POLISHED_DIORITE));
-	public static final Block MOSSY_COBBLESTONE_STAIRS = register("mossy_cobblestone_stairs", stair(MOSSY_COBBLESTONE));
-	public static final Block END_STONE_BRICK_STAIRS = register("end_stone_brick_stairs", stair(END_STONE_BRICKS));
-	public static final Block STONE_STAIRS = register("stone_stairs", stair(STONE));
-	public static final Block SMOOTH_SANDSTONE_STAIRS = register("smooth_sandstone_stairs", stair(SMOOTH_SANDSTONE));
-	public static final Block SMOOTH_QUARTZ_STAIRS = register("smooth_quartz_stairs", stair(SMOOTH_QUARTZ));
-	public static final Block GRANITE_STAIRS = register("granite_stairs", stair(GRANITE));
-	public static final Block ANDESITE_STAIRS = register("andesite_stairs", stair(ANDESITE));
-	public static final Block RED_NETHER_BRICK_STAIRS = register("red_nether_brick_stairs", stair(RED_NETHER_BRICKS));
-	public static final Block POLISHED_ANDESITE_STAIRS = register("polished_andesite_stairs", stair(POLISHED_ANDESITE));
-	public static final Block DIORITE_STAIRS = register("diorite_stairs", stair(DIORITE));
-	public static final Block POLISHED_GRANITE_SLAB = register("polished_granite_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_GRANITE)));
+	public static final Block POLISHED_GRANITE_STAIRS = register("polished_granite_stairs", legacyStair(POLISHED_GRANITE));
+	public static final Block SMOOTH_RED_SANDSTONE_STAIRS = register("smooth_red_sandstone_stairs", legacyStair(SMOOTH_RED_SANDSTONE));
+	public static final Block MOSSY_STONE_BRICK_STAIRS = register("mossy_stone_brick_stairs", legacyStair(MOSSY_STONE_BRICKS));
+	public static final Block POLISHED_DIORITE_STAIRS = register("polished_diorite_stairs", legacyStair(POLISHED_DIORITE));
+	public static final Block MOSSY_COBBLESTONE_STAIRS = register("mossy_cobblestone_stairs", legacyStair(MOSSY_COBBLESTONE));
+	public static final Block END_STONE_BRICK_STAIRS = register("end_stone_brick_stairs", legacyStair(END_STONE_BRICKS));
+	public static final Block STONE_STAIRS = register("stone_stairs", legacyStair(STONE));
+	public static final Block SMOOTH_SANDSTONE_STAIRS = register("smooth_sandstone_stairs", legacyStair(SMOOTH_SANDSTONE));
+	public static final Block SMOOTH_QUARTZ_STAIRS = register("smooth_quartz_stairs", legacyStair(SMOOTH_QUARTZ));
+	public static final Block GRANITE_STAIRS = register("granite_stairs", legacyStair(GRANITE));
+	public static final Block ANDESITE_STAIRS = register("andesite_stairs", legacyStair(ANDESITE));
+	public static final Block RED_NETHER_BRICK_STAIRS = register("red_nether_brick_stairs", legacyStair(RED_NETHER_BRICKS));
+	public static final Block POLISHED_ANDESITE_STAIRS = register("polished_andesite_stairs", legacyStair(POLISHED_ANDESITE));
+	public static final Block DIORITE_STAIRS = register("diorite_stairs", legacyStair(DIORITE));
+	public static final Block POLISHED_GRANITE_SLAB = register("polished_granite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_GRANITE)));
 	public static final Block SMOOTH_RED_SANDSTONE_SLAB = register(
-		"smooth_red_sandstone_slab", new SlabBlock(BlockBehaviour.Properties.copy(SMOOTH_RED_SANDSTONE))
+		"smooth_red_sandstone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(SMOOTH_RED_SANDSTONE))
 	);
-	public static final Block MOSSY_STONE_BRICK_SLAB = register("mossy_stone_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(MOSSY_STONE_BRICKS)));
-	public static final Block POLISHED_DIORITE_SLAB = register("polished_diorite_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_DIORITE)));
-	public static final Block MOSSY_COBBLESTONE_SLAB = register("mossy_cobblestone_slab", new SlabBlock(BlockBehaviour.Properties.copy(MOSSY_COBBLESTONE)));
-	public static final Block END_STONE_BRICK_SLAB = register("end_stone_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(END_STONE_BRICKS)));
-	public static final Block SMOOTH_SANDSTONE_SLAB = register("smooth_sandstone_slab", new SlabBlock(BlockBehaviour.Properties.copy(SMOOTH_SANDSTONE)));
-	public static final Block SMOOTH_QUARTZ_SLAB = register("smooth_quartz_slab", new SlabBlock(BlockBehaviour.Properties.copy(SMOOTH_QUARTZ)));
-	public static final Block GRANITE_SLAB = register("granite_slab", new SlabBlock(BlockBehaviour.Properties.copy(GRANITE)));
-	public static final Block ANDESITE_SLAB = register("andesite_slab", new SlabBlock(BlockBehaviour.Properties.copy(ANDESITE)));
-	public static final Block RED_NETHER_BRICK_SLAB = register("red_nether_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(RED_NETHER_BRICKS)));
-	public static final Block POLISHED_ANDESITE_SLAB = register("polished_andesite_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_ANDESITE)));
-	public static final Block DIORITE_SLAB = register("diorite_slab", new SlabBlock(BlockBehaviour.Properties.copy(DIORITE)));
-	public static final Block BRICK_WALL = register("brick_wall", new WallBlock(BlockBehaviour.Properties.copy(BRICKS).forceSolidOn()));
-	public static final Block PRISMARINE_WALL = register("prismarine_wall", new WallBlock(BlockBehaviour.Properties.copy(PRISMARINE).forceSolidOn()));
-	public static final Block RED_SANDSTONE_WALL = register("red_sandstone_wall", new WallBlock(BlockBehaviour.Properties.copy(RED_SANDSTONE).forceSolidOn()));
+	public static final Block MOSSY_STONE_BRICK_SLAB = register(
+		"mossy_stone_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(MOSSY_STONE_BRICKS))
+	);
+	public static final Block POLISHED_DIORITE_SLAB = register("polished_diorite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_DIORITE)));
+	public static final Block MOSSY_COBBLESTONE_SLAB = register("mossy_cobblestone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(MOSSY_COBBLESTONE)));
+	public static final Block END_STONE_BRICK_SLAB = register("end_stone_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(END_STONE_BRICKS)));
+	public static final Block SMOOTH_SANDSTONE_SLAB = register("smooth_sandstone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(SMOOTH_SANDSTONE)));
+	public static final Block SMOOTH_QUARTZ_SLAB = register("smooth_quartz_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(SMOOTH_QUARTZ)));
+	public static final Block GRANITE_SLAB = register("granite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(GRANITE)));
+	public static final Block ANDESITE_SLAB = register("andesite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(ANDESITE)));
+	public static final Block RED_NETHER_BRICK_SLAB = register("red_nether_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(RED_NETHER_BRICKS)));
+	public static final Block POLISHED_ANDESITE_SLAB = register("polished_andesite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_ANDESITE)));
+	public static final Block DIORITE_SLAB = register("diorite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(DIORITE)));
+	public static final Block BRICK_WALL = register("brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(BRICKS).forceSolidOn()));
+	public static final Block PRISMARINE_WALL = register("prismarine_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(PRISMARINE).forceSolidOn()));
+	public static final Block RED_SANDSTONE_WALL = register(
+		"red_sandstone_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(RED_SANDSTONE).forceSolidOn())
+	);
 	public static final Block MOSSY_STONE_BRICK_WALL = register(
-		"mossy_stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(MOSSY_STONE_BRICKS).forceSolidOn())
+		"mossy_stone_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(MOSSY_STONE_BRICKS).forceSolidOn())
 	);
-	public static final Block GRANITE_WALL = register("granite_wall", new WallBlock(BlockBehaviour.Properties.copy(GRANITE).forceSolidOn()));
-	public static final Block STONE_BRICK_WALL = register("stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(STONE_BRICKS).forceSolidOn()));
-	public static final Block MUD_BRICK_WALL = register("mud_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(MUD_BRICKS).forceSolidOn()));
-	public static final Block NETHER_BRICK_WALL = register("nether_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(NETHER_BRICKS).forceSolidOn()));
-	public static final Block ANDESITE_WALL = register("andesite_wall", new WallBlock(BlockBehaviour.Properties.copy(ANDESITE).forceSolidOn()));
+	public static final Block GRANITE_WALL = register("granite_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(GRANITE).forceSolidOn()));
+	public static final Block STONE_BRICK_WALL = register("stone_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(STONE_BRICKS).forceSolidOn()));
+	public static final Block MUD_BRICK_WALL = register("mud_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(MUD_BRICKS).forceSolidOn()));
+	public static final Block NETHER_BRICK_WALL = register(
+		"nether_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(NETHER_BRICKS).forceSolidOn())
+	);
+	public static final Block ANDESITE_WALL = register("andesite_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(ANDESITE).forceSolidOn()));
 	public static final Block RED_NETHER_BRICK_WALL = register(
-		"red_nether_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(RED_NETHER_BRICKS).forceSolidOn())
+		"red_nether_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(RED_NETHER_BRICKS).forceSolidOn())
 	);
-	public static final Block SANDSTONE_WALL = register("sandstone_wall", new WallBlock(BlockBehaviour.Properties.copy(SANDSTONE).forceSolidOn()));
+	public static final Block SANDSTONE_WALL = register("sandstone_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(SANDSTONE).forceSolidOn()));
 	public static final Block END_STONE_BRICK_WALL = register(
-		"end_stone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(END_STONE_BRICKS).forceSolidOn())
+		"end_stone_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(END_STONE_BRICKS).forceSolidOn())
 	);
-	public static final Block DIORITE_WALL = register("diorite_wall", new WallBlock(BlockBehaviour.Properties.copy(DIORITE).forceSolidOn()));
+	public static final Block DIORITE_WALL = register("diorite_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(DIORITE).forceSolidOn()));
 	public static final Block SCAFFOLDING = register(
 		"scaffolding",
 		new ScaffoldingBlock(
@@ -5934,8 +5943,8 @@ public class Blocks {
 			BlockBehaviour.Properties.of().mapColor(WARPED_PLANKS.defaultMapColor()).forceSolidOn().instrument(NoteBlockInstrument.BASS).strength(2.0F, 3.0F)
 		)
 	);
-	public static final Block CRIMSON_STAIRS = register("crimson_stairs", stair(CRIMSON_PLANKS));
-	public static final Block WARPED_STAIRS = register("warped_stairs", stair(WARPED_PLANKS));
+	public static final Block CRIMSON_STAIRS = register("crimson_stairs", legacyStair(CRIMSON_PLANKS));
+	public static final Block WARPED_STAIRS = register("warped_stairs", legacyStair(WARPED_PLANKS));
 	public static final Block CRIMSON_BUTTON = register("crimson_button", woodenButton(BlockSetType.CRIMSON));
 	public static final Block WARPED_BUTTON = register("warped_button", woodenButton(BlockSetType.WARPED));
 	public static final Block CRIMSON_DOOR = register(
@@ -6093,31 +6102,35 @@ public class Blocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
 		)
 	);
-	public static final Block BLACKSTONE_STAIRS = register("blackstone_stairs", stair(BLACKSTONE));
-	public static final Block BLACKSTONE_WALL = register("blackstone_wall", new WallBlock(BlockBehaviour.Properties.copy(BLACKSTONE).forceSolidOn()));
-	public static final Block BLACKSTONE_SLAB = register("blackstone_slab", new SlabBlock(BlockBehaviour.Properties.copy(BLACKSTONE).strength(2.0F, 6.0F)));
-	public static final Block POLISHED_BLACKSTONE = register("polished_blackstone", new Block(BlockBehaviour.Properties.copy(BLACKSTONE).strength(2.0F, 6.0F)));
+	public static final Block BLACKSTONE_STAIRS = register("blackstone_stairs", legacyStair(BLACKSTONE));
+	public static final Block BLACKSTONE_WALL = register("blackstone_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(BLACKSTONE).forceSolidOn()));
+	public static final Block BLACKSTONE_SLAB = register("blackstone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(BLACKSTONE).strength(2.0F, 6.0F)));
+	public static final Block POLISHED_BLACKSTONE = register(
+		"polished_blackstone", new Block(BlockBehaviour.Properties.ofLegacyCopy(BLACKSTONE).strength(2.0F, 6.0F))
+	);
 	public static final Block POLISHED_BLACKSTONE_BRICKS = register(
-		"polished_blackstone_bricks", new Block(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE).strength(1.5F, 6.0F))
+		"polished_blackstone_bricks", new Block(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_BLACKSTONE).strength(1.5F, 6.0F))
 	);
 	public static final Block CRACKED_POLISHED_BLACKSTONE_BRICKS = register(
-		"cracked_polished_blackstone_bricks", new Block(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE_BRICKS))
+		"cracked_polished_blackstone_bricks", new Block(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_BLACKSTONE_BRICKS))
 	);
 	public static final Block CHISELED_POLISHED_BLACKSTONE = register(
-		"chiseled_polished_blackstone", new Block(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE).strength(1.5F, 6.0F))
+		"chiseled_polished_blackstone", new Block(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_BLACKSTONE).strength(1.5F, 6.0F))
 	);
 	public static final Block POLISHED_BLACKSTONE_BRICK_SLAB = register(
-		"polished_blackstone_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE_BRICKS).strength(2.0F, 6.0F))
+		"polished_blackstone_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_BLACKSTONE_BRICKS).strength(2.0F, 6.0F))
 	);
-	public static final Block POLISHED_BLACKSTONE_BRICK_STAIRS = register("polished_blackstone_brick_stairs", stair(POLISHED_BLACKSTONE_BRICKS));
+	public static final Block POLISHED_BLACKSTONE_BRICK_STAIRS = register("polished_blackstone_brick_stairs", legacyStair(POLISHED_BLACKSTONE_BRICKS));
 	public static final Block POLISHED_BLACKSTONE_BRICK_WALL = register(
-		"polished_blackstone_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE_BRICKS).forceSolidOn())
+		"polished_blackstone_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_BLACKSTONE_BRICKS).forceSolidOn())
 	);
 	public static final Block GILDED_BLACKSTONE = register(
-		"gilded_blackstone", new Block(BlockBehaviour.Properties.copy(BLACKSTONE).sound(SoundType.GILDED_BLACKSTONE))
+		"gilded_blackstone", new Block(BlockBehaviour.Properties.ofLegacyCopy(BLACKSTONE).sound(SoundType.GILDED_BLACKSTONE))
 	);
-	public static final Block POLISHED_BLACKSTONE_STAIRS = register("polished_blackstone_stairs", stair(POLISHED_BLACKSTONE));
-	public static final Block POLISHED_BLACKSTONE_SLAB = register("polished_blackstone_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE)));
+	public static final Block POLISHED_BLACKSTONE_STAIRS = register("polished_blackstone_stairs", legacyStair(POLISHED_BLACKSTONE));
+	public static final Block POLISHED_BLACKSTONE_SLAB = register(
+		"polished_blackstone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_BLACKSTONE))
+	);
 	public static final Block POLISHED_BLACKSTONE_PRESSURE_PLATE = register(
 		"polished_blackstone_pressure_plate",
 		new PressurePlateBlock(
@@ -6134,7 +6147,7 @@ public class Blocks {
 	);
 	public static final Block POLISHED_BLACKSTONE_BUTTON = register("polished_blackstone_button", stoneButton());
 	public static final Block POLISHED_BLACKSTONE_WALL = register(
-		"polished_blackstone_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_BLACKSTONE).forceSolidOn())
+		"polished_blackstone_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_BLACKSTONE).forceSolidOn())
 	);
 	public static final Block CHISELED_NETHER_BRICKS = register(
 		"chiseled_nether_bricks",
@@ -6158,7 +6171,7 @@ public class Blocks {
 				.sound(SoundType.NETHER_BRICKS)
 		)
 	);
-	public static final Block QUARTZ_BRICKS = register("quartz_bricks", new Block(BlockBehaviour.Properties.copy(QUARTZ_BLOCK)));
+	public static final Block QUARTZ_BRICKS = register("quartz_bricks", new Block(BlockBehaviour.Properties.ofLegacyCopy(QUARTZ_BLOCK)));
 	public static final Block CANDLE = register("candle", candle(MapColor.SAND));
 	public static final Block WHITE_CANDLE = register("white_candle", candle(MapColor.WOOL));
 	public static final Block ORANGE_CANDLE = register("orange_candle", candle(MapColor.COLOR_ORANGE));
@@ -6177,30 +6190,54 @@ public class Blocks {
 	public static final Block RED_CANDLE = register("red_candle", candle(MapColor.COLOR_RED));
 	public static final Block BLACK_CANDLE = register("black_candle", candle(MapColor.COLOR_BLACK));
 	public static final Block CANDLE_CAKE = register(
-		"candle_cake", new CandleCakeBlock(CANDLE, BlockBehaviour.Properties.copy(CAKE).lightLevel(litBlockEmission(3)))
+		"candle_cake", new CandleCakeBlock(CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CAKE).lightLevel(litBlockEmission(3)))
 	);
-	public static final Block WHITE_CANDLE_CAKE = register("white_candle_cake", new CandleCakeBlock(WHITE_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block ORANGE_CANDLE_CAKE = register("orange_candle_cake", new CandleCakeBlock(ORANGE_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
+	public static final Block WHITE_CANDLE_CAKE = register(
+		"white_candle_cake", new CandleCakeBlock(WHITE_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block ORANGE_CANDLE_CAKE = register(
+		"orange_candle_cake", new CandleCakeBlock(ORANGE_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
 	public static final Block MAGENTA_CANDLE_CAKE = register(
-		"magenta_candle_cake", new CandleCakeBlock(MAGENTA_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE))
+		"magenta_candle_cake", new CandleCakeBlock(MAGENTA_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
 	);
 	public static final Block LIGHT_BLUE_CANDLE_CAKE = register(
-		"light_blue_candle_cake", new CandleCakeBlock(LIGHT_BLUE_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE))
+		"light_blue_candle_cake", new CandleCakeBlock(LIGHT_BLUE_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
 	);
-	public static final Block YELLOW_CANDLE_CAKE = register("yellow_candle_cake", new CandleCakeBlock(YELLOW_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block LIME_CANDLE_CAKE = register("lime_candle_cake", new CandleCakeBlock(LIME_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block PINK_CANDLE_CAKE = register("pink_candle_cake", new CandleCakeBlock(PINK_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block GRAY_CANDLE_CAKE = register("gray_candle_cake", new CandleCakeBlock(GRAY_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
+	public static final Block YELLOW_CANDLE_CAKE = register(
+		"yellow_candle_cake", new CandleCakeBlock(YELLOW_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block LIME_CANDLE_CAKE = register(
+		"lime_candle_cake", new CandleCakeBlock(LIME_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block PINK_CANDLE_CAKE = register(
+		"pink_candle_cake", new CandleCakeBlock(PINK_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block GRAY_CANDLE_CAKE = register(
+		"gray_candle_cake", new CandleCakeBlock(GRAY_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
 	public static final Block LIGHT_GRAY_CANDLE_CAKE = register(
-		"light_gray_candle_cake", new CandleCakeBlock(LIGHT_GRAY_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE))
+		"light_gray_candle_cake", new CandleCakeBlock(LIGHT_GRAY_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
 	);
-	public static final Block CYAN_CANDLE_CAKE = register("cyan_candle_cake", new CandleCakeBlock(CYAN_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block PURPLE_CANDLE_CAKE = register("purple_candle_cake", new CandleCakeBlock(PURPLE_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block BLUE_CANDLE_CAKE = register("blue_candle_cake", new CandleCakeBlock(BLUE_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block BROWN_CANDLE_CAKE = register("brown_candle_cake", new CandleCakeBlock(BROWN_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block GREEN_CANDLE_CAKE = register("green_candle_cake", new CandleCakeBlock(GREEN_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block RED_CANDLE_CAKE = register("red_candle_cake", new CandleCakeBlock(RED_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
-	public static final Block BLACK_CANDLE_CAKE = register("black_candle_cake", new CandleCakeBlock(BLACK_CANDLE, BlockBehaviour.Properties.copy(CANDLE_CAKE)));
+	public static final Block CYAN_CANDLE_CAKE = register(
+		"cyan_candle_cake", new CandleCakeBlock(CYAN_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block PURPLE_CANDLE_CAKE = register(
+		"purple_candle_cake", new CandleCakeBlock(PURPLE_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block BLUE_CANDLE_CAKE = register(
+		"blue_candle_cake", new CandleCakeBlock(BLUE_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block BROWN_CANDLE_CAKE = register(
+		"brown_candle_cake", new CandleCakeBlock(BROWN_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block GREEN_CANDLE_CAKE = register(
+		"green_candle_cake", new CandleCakeBlock(GREEN_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
+	public static final Block RED_CANDLE_CAKE = register("red_candle_cake", new CandleCakeBlock(RED_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE)));
+	public static final Block BLACK_CANDLE_CAKE = register(
+		"black_candle_cake", new CandleCakeBlock(BLACK_CANDLE, BlockBehaviour.Properties.ofLegacyCopy(CANDLE_CAKE))
+	);
 	public static final Block AMETHYST_BLOCK = register(
 		"amethyst_block",
 		new AmethystBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(1.5F).sound(SoundType.AMETHYST).requiresCorrectToolForDrops())
@@ -6234,15 +6271,21 @@ public class Blocks {
 	);
 	public static final Block LARGE_AMETHYST_BUD = register(
 		"large_amethyst_bud",
-		new AmethystClusterBlock(5.0F, 3.0F, BlockBehaviour.Properties.copy(AMETHYST_CLUSTER).sound(SoundType.MEDIUM_AMETHYST_BUD).lightLevel(blockStatex -> 4))
+		new AmethystClusterBlock(
+			5.0F, 3.0F, BlockBehaviour.Properties.ofLegacyCopy(AMETHYST_CLUSTER).sound(SoundType.MEDIUM_AMETHYST_BUD).lightLevel(blockStatex -> 4)
+		)
 	);
 	public static final Block MEDIUM_AMETHYST_BUD = register(
 		"medium_amethyst_bud",
-		new AmethystClusterBlock(4.0F, 3.0F, BlockBehaviour.Properties.copy(AMETHYST_CLUSTER).sound(SoundType.LARGE_AMETHYST_BUD).lightLevel(blockStatex -> 2))
+		new AmethystClusterBlock(
+			4.0F, 3.0F, BlockBehaviour.Properties.ofLegacyCopy(AMETHYST_CLUSTER).sound(SoundType.LARGE_AMETHYST_BUD).lightLevel(blockStatex -> 2)
+		)
 	);
 	public static final Block SMALL_AMETHYST_BUD = register(
 		"small_amethyst_bud",
-		new AmethystClusterBlock(3.0F, 4.0F, BlockBehaviour.Properties.copy(AMETHYST_CLUSTER).sound(SoundType.SMALL_AMETHYST_BUD).lightLevel(blockStatex -> 1))
+		new AmethystClusterBlock(
+			3.0F, 4.0F, BlockBehaviour.Properties.ofLegacyCopy(AMETHYST_CLUSTER).sound(SoundType.SMALL_AMETHYST_BUD).lightLevel(blockStatex -> 1)
+		)
 	);
 	public static final Block TUFF = register(
 		"tuff",
@@ -6255,31 +6298,37 @@ public class Blocks {
 				.strength(1.5F, 6.0F)
 		)
 	);
-	public static final Block TUFF_SLAB = register("tuff_slab", new SlabBlock(BlockBehaviour.Properties.copy(TUFF).requiredFeatures(FeatureFlags.UPDATE_1_21)));
+	public static final Block TUFF_SLAB = register(
+		"tuff_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(TUFF).requiredFeatures(FeatureFlags.UPDATE_1_21))
+	);
 	public static final Block TUFF_STAIRS = register(
-		"tuff_stairs", new StairBlock(TUFF.defaultBlockState(), BlockBehaviour.Properties.copy(TUFF).requiredFeatures(FeatureFlags.UPDATE_1_21))
+		"tuff_stairs", new StairBlock(TUFF.defaultBlockState(), BlockBehaviour.Properties.ofLegacyCopy(TUFF).requiredFeatures(FeatureFlags.UPDATE_1_21))
 	);
 	public static final Block TUFF_WALL = register(
-		"tuff_wall", new WallBlock(BlockBehaviour.Properties.copy(TUFF).forceSolidOn().requiredFeatures(FeatureFlags.UPDATE_1_21))
+		"tuff_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(TUFF).forceSolidOn().requiredFeatures(FeatureFlags.UPDATE_1_21))
 	);
 	public static final Block POLISHED_TUFF = register(
-		"polished_tuff", new Block(BlockBehaviour.Properties.copy(TUFF).sound(SoundType.POLISHED_TUFF).requiredFeatures(FeatureFlags.UPDATE_1_21))
+		"polished_tuff", new Block(BlockBehaviour.Properties.ofLegacyCopy(TUFF).sound(SoundType.POLISHED_TUFF).requiredFeatures(FeatureFlags.UPDATE_1_21))
 	);
-	public static final Block POLISHED_TUFF_SLAB = register("polished_tuff_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_TUFF)));
+	public static final Block POLISHED_TUFF_SLAB = register("polished_tuff_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_TUFF)));
 	public static final Block POLISHED_TUFF_STAIRS = register(
-		"polished_tuff_stairs", new StairBlock(POLISHED_TUFF.defaultBlockState(), BlockBehaviour.Properties.copy(POLISHED_TUFF))
+		"polished_tuff_stairs", new StairBlock(POLISHED_TUFF.defaultBlockState(), BlockBehaviour.Properties.ofLegacyCopy(POLISHED_TUFF))
 	);
-	public static final Block POLISHED_TUFF_WALL = register("polished_tuff_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_TUFF).forceSolidOn()));
-	public static final Block CHISELED_TUFF = register("chiseled_tuff", new Block(BlockBehaviour.Properties.copy(TUFF).requiredFeatures(FeatureFlags.UPDATE_1_21)));
+	public static final Block POLISHED_TUFF_WALL = register(
+		"polished_tuff_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_TUFF).forceSolidOn())
+	);
+	public static final Block CHISELED_TUFF = register(
+		"chiseled_tuff", new Block(BlockBehaviour.Properties.ofLegacyCopy(TUFF).requiredFeatures(FeatureFlags.UPDATE_1_21))
+	);
 	public static final Block TUFF_BRICKS = register(
-		"tuff_bricks", new Block(BlockBehaviour.Properties.copy(TUFF).sound(SoundType.TUFF_BRICKS).requiredFeatures(FeatureFlags.UPDATE_1_21))
+		"tuff_bricks", new Block(BlockBehaviour.Properties.ofLegacyCopy(TUFF).sound(SoundType.TUFF_BRICKS).requiredFeatures(FeatureFlags.UPDATE_1_21))
 	);
-	public static final Block TUFF_BRICK_SLAB = register("tuff_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(TUFF_BRICKS)));
+	public static final Block TUFF_BRICK_SLAB = register("tuff_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(TUFF_BRICKS)));
 	public static final Block TUFF_BRICK_STAIRS = register(
-		"tuff_brick_stairs", new StairBlock(TUFF_BRICKS.defaultBlockState(), BlockBehaviour.Properties.copy(TUFF_BRICKS))
+		"tuff_brick_stairs", new StairBlock(TUFF_BRICKS.defaultBlockState(), BlockBehaviour.Properties.ofLegacyCopy(TUFF_BRICKS))
 	);
-	public static final Block TUFF_BRICK_WALL = register("tuff_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(TUFF_BRICKS).forceSolidOn()));
-	public static final Block CHISELED_TUFF_BRICKS = register("chiseled_tuff_bricks", new Block(BlockBehaviour.Properties.copy(TUFF_BRICKS)));
+	public static final Block TUFF_BRICK_WALL = register("tuff_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(TUFF_BRICKS).forceSolidOn()));
+	public static final Block CHISELED_TUFF_BRICKS = register("chiseled_tuff_bricks", new Block(BlockBehaviour.Properties.ofLegacyCopy(TUFF_BRICKS)));
 	public static final Block CALCITE = register(
 		"calcite",
 		new Block(
@@ -6294,7 +6343,7 @@ public class Blocks {
 	public static final Block TINTED_GLASS = register(
 		"tinted_glass",
 		new TintedGlassBlock(
-			BlockBehaviour.Properties.copy(GLASS)
+			BlockBehaviour.Properties.ofLegacyCopy(GLASS)
 				.mapColor(MapColor.COLOR_GRAY)
 				.noOcclusion()
 				.isValidSpawn(Blocks::never)
@@ -6321,7 +6370,7 @@ public class Blocks {
 		)
 	);
 	public static final Block CALIBRATED_SCULK_SENSOR = register(
-		"calibrated_sculk_sensor", new CalibratedSculkSensorBlock(BlockBehaviour.Properties.copy(SCULK_SENSOR))
+		"calibrated_sculk_sensor", new CalibratedSculkSensorBlock(BlockBehaviour.Properties.ofLegacyCopy(SCULK_SENSOR))
 	);
 	public static final Block SCULK = register(
 		"sculk", new SculkBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(0.2F).sound(SoundType.SCULK))
@@ -6347,27 +6396,6 @@ public class Blocks {
 	public static final Block SCULK_SHRIEKER = register(
 		"sculk_shrieker", new SculkShriekerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).strength(3.0F, 3.0F).sound(SoundType.SCULK_SHRIEKER))
 	);
-	public static final Block OXIDIZED_COPPER = register(
-		"oxidized_copper",
-		new WeatheringCopperFullBlock(
-			WeatheringCopper.WeatherState.OXIDIZED,
-			BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_NYLIUM).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER)
-		)
-	);
-	public static final Block WEATHERED_COPPER = register(
-		"weathered_copper",
-		new WeatheringCopperFullBlock(
-			WeatheringCopper.WeatherState.WEATHERED,
-			BlockBehaviour.Properties.of().mapColor(MapColor.WARPED_STEM).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER)
-		)
-	);
-	public static final Block EXPOSED_COPPER = register(
-		"exposed_copper",
-		new WeatheringCopperFullBlock(
-			WeatheringCopper.WeatherState.EXPOSED,
-			BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER)
-		)
-	);
 	public static final Block COPPER_BLOCK = register(
 		"copper_block",
 		new WeatheringCopperFullBlock(
@@ -6375,118 +6403,133 @@ public class Blocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).requiresCorrectToolForDrops().strength(3.0F, 6.0F).sound(SoundType.COPPER)
 		)
 	);
-	public static final Block COPPER_ORE = register("copper_ore", new DropExperienceBlock(ConstantInt.of(0), BlockBehaviour.Properties.copy(IRON_ORE)));
+	public static final Block EXPOSED_COPPER = register(
+		"exposed_copper",
+		new WeatheringCopperFullBlock(
+			WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.ofFullCopy(COPPER_BLOCK).mapColor(MapColor.TERRACOTTA_LIGHT_GRAY)
+		)
+	);
+	public static final Block WEATHERED_COPPER = register(
+		"weathered_copper",
+		new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.ofFullCopy(COPPER_BLOCK).mapColor(MapColor.WARPED_STEM))
+	);
+	public static final Block OXIDIZED_COPPER = register(
+		"oxidized_copper",
+		new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.ofFullCopy(COPPER_BLOCK).mapColor(MapColor.WARPED_NYLIUM))
+	);
+	public static final Block COPPER_ORE = register("copper_ore", new DropExperienceBlock(ConstantInt.of(0), BlockBehaviour.Properties.ofLegacyCopy(IRON_ORE)));
 	public static final Block DEEPSLATE_COPPER_ORE = register(
 		"deepslate_copper_ore",
 		new DropExperienceBlock(
-			ConstantInt.of(0), BlockBehaviour.Properties.copy(COPPER_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
+			ConstantInt.of(0), BlockBehaviour.Properties.ofLegacyCopy(COPPER_ORE).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE)
 		)
 	);
 	public static final Block OXIDIZED_CUT_COPPER = register(
-		"oxidized_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.copy(OXIDIZED_COPPER))
+		"oxidized_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER))
 	);
 	public static final Block WEATHERED_CUT_COPPER = register(
-		"weathered_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.copy(WEATHERED_COPPER))
+		"weathered_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER))
 	);
 	public static final Block EXPOSED_CUT_COPPER = register(
-		"exposed_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.copy(EXPOSED_COPPER))
+		"exposed_cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER))
 	);
 	public static final Block CUT_COPPER = register(
-		"cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.UNAFFECTED, BlockBehaviour.Properties.copy(COPPER_BLOCK))
+		"cut_copper", new WeatheringCopperFullBlock(WeatheringCopper.WeatherState.UNAFFECTED, BlockBehaviour.Properties.ofFullCopy(COPPER_BLOCK))
 	);
 	public static final Block OXIDIZED_CHISELED_COPPER = register(
 		"oxidized_chiseled_copper",
 		new WeatheringCopperFullBlock(
-			WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.copy(OXIDIZED_COPPER).requiredFeatures(FeatureFlags.UPDATE_1_21)
+			WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER).requiredFeatures(FeatureFlags.UPDATE_1_21)
 		)
 	);
 	public static final Block WEATHERED_CHISELED_COPPER = register(
 		"weathered_chiseled_copper",
 		new WeatheringCopperFullBlock(
-			WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.copy(WEATHERED_COPPER).requiredFeatures(FeatureFlags.UPDATE_1_21)
+			WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER).requiredFeatures(FeatureFlags.UPDATE_1_21)
 		)
 	);
 	public static final Block EXPOSED_CHISELED_COPPER = register(
 		"exposed_chiseled_copper",
 		new WeatheringCopperFullBlock(
-			WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.copy(EXPOSED_COPPER).requiredFeatures(FeatureFlags.UPDATE_1_21)
+			WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER).requiredFeatures(FeatureFlags.UPDATE_1_21)
 		)
 	);
 	public static final Block CHISELED_COPPER = register(
 		"chiseled_copper",
 		new WeatheringCopperFullBlock(
-			WeatheringCopper.WeatherState.UNAFFECTED, BlockBehaviour.Properties.copy(COPPER_BLOCK).requiredFeatures(FeatureFlags.UPDATE_1_21)
+			WeatheringCopper.WeatherState.UNAFFECTED, BlockBehaviour.Properties.ofFullCopy(COPPER_BLOCK).requiredFeatures(FeatureFlags.UPDATE_1_21)
 		)
 	);
 	public static final Block WAXED_OXIDIZED_CHISELED_COPPER = register(
-		"waxed_oxidized_chiseled_copper", new Block(BlockBehaviour.Properties.copy(OXIDIZED_CHISELED_COPPER))
+		"waxed_oxidized_chiseled_copper", new Block(BlockBehaviour.Properties.ofFullCopy(OXIDIZED_CHISELED_COPPER))
 	);
 	public static final Block WAXED_WEATHERED_CHISELED_COPPER = register(
-		"waxed_weathered_chiseled_copper", new Block(BlockBehaviour.Properties.copy(WEATHERED_CHISELED_COPPER))
+		"waxed_weathered_chiseled_copper", new Block(BlockBehaviour.Properties.ofFullCopy(WEATHERED_CHISELED_COPPER))
 	);
 	public static final Block WAXED_EXPOSED_CHISELED_COPPER = register(
-		"waxed_exposed_chiseled_copper", new Block(BlockBehaviour.Properties.copy(EXPOSED_CHISELED_COPPER))
+		"waxed_exposed_chiseled_copper", new Block(BlockBehaviour.Properties.ofFullCopy(EXPOSED_CHISELED_COPPER))
 	);
-	public static final Block WAXED_CHISELED_COPPER = register("waxed_chiseled_copper", new Block(BlockBehaviour.Properties.copy(CHISELED_COPPER)));
+	public static final Block WAXED_CHISELED_COPPER = register("waxed_chiseled_copper", new Block(BlockBehaviour.Properties.ofFullCopy(CHISELED_COPPER)));
 	public static final Block OXIDIZED_CUT_COPPER_STAIRS = register(
 		"oxidized_cut_copper_stairs",
 		new WeatheringCopperStairBlock(
-			WeatheringCopper.WeatherState.OXIDIZED, OXIDIZED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(OXIDIZED_CUT_COPPER)
+			WeatheringCopper.WeatherState.OXIDIZED, OXIDIZED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(OXIDIZED_CUT_COPPER)
 		)
 	);
 	public static final Block WEATHERED_CUT_COPPER_STAIRS = register(
 		"weathered_cut_copper_stairs",
 		new WeatheringCopperStairBlock(
-			WeatheringCopper.WeatherState.WEATHERED, WEATHERED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(WEATHERED_COPPER)
+			WeatheringCopper.WeatherState.WEATHERED, WEATHERED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER)
 		)
 	);
 	public static final Block EXPOSED_CUT_COPPER_STAIRS = register(
 		"exposed_cut_copper_stairs",
-		new WeatheringCopperStairBlock(WeatheringCopper.WeatherState.EXPOSED, EXPOSED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(EXPOSED_COPPER))
+		new WeatheringCopperStairBlock(
+			WeatheringCopper.WeatherState.EXPOSED, EXPOSED_CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER)
+		)
 	);
 	public static final Block CUT_COPPER_STAIRS = register(
 		"cut_copper_stairs",
-		new WeatheringCopperStairBlock(WeatheringCopper.WeatherState.UNAFFECTED, CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.copy(COPPER_BLOCK))
+		new WeatheringCopperStairBlock(WeatheringCopper.WeatherState.UNAFFECTED, CUT_COPPER.defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(COPPER_BLOCK))
 	);
 	public static final Block OXIDIZED_CUT_COPPER_SLAB = register(
-		"oxidized_cut_copper_slab",
-		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.copy(OXIDIZED_CUT_COPPER).requiresCorrectToolForDrops())
+		"oxidized_cut_copper_slab", new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.ofFullCopy(OXIDIZED_CUT_COPPER))
 	);
 	public static final Block WEATHERED_CUT_COPPER_SLAB = register(
 		"weathered_cut_copper_slab",
-		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.copy(WEATHERED_CUT_COPPER).requiresCorrectToolForDrops())
+		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.ofFullCopy(WEATHERED_CUT_COPPER))
 	);
 	public static final Block EXPOSED_CUT_COPPER_SLAB = register(
-		"exposed_cut_copper_slab",
-		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.copy(EXPOSED_CUT_COPPER).requiresCorrectToolForDrops())
+		"exposed_cut_copper_slab", new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.ofFullCopy(EXPOSED_CUT_COPPER))
 	);
 	public static final Block CUT_COPPER_SLAB = register(
-		"cut_copper_slab",
-		new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.UNAFFECTED, BlockBehaviour.Properties.copy(CUT_COPPER).requiresCorrectToolForDrops())
+		"cut_copper_slab", new WeatheringCopperSlabBlock(WeatheringCopper.WeatherState.UNAFFECTED, BlockBehaviour.Properties.ofFullCopy(CUT_COPPER))
 	);
-	public static final Block WAXED_COPPER_BLOCK = register("waxed_copper_block", new Block(BlockBehaviour.Properties.copy(COPPER_BLOCK)));
-	public static final Block WAXED_WEATHERED_COPPER = register("waxed_weathered_copper", new Block(BlockBehaviour.Properties.copy(WEATHERED_COPPER)));
-	public static final Block WAXED_EXPOSED_COPPER = register("waxed_exposed_copper", new Block(BlockBehaviour.Properties.copy(EXPOSED_COPPER)));
-	public static final Block WAXED_OXIDIZED_COPPER = register("waxed_oxidized_copper", new Block(BlockBehaviour.Properties.copy(OXIDIZED_COPPER)));
-	public static final Block WAXED_OXIDIZED_CUT_COPPER = register("waxed_oxidized_cut_copper", new Block(BlockBehaviour.Properties.copy(OXIDIZED_COPPER)));
-	public static final Block WAXED_WEATHERED_CUT_COPPER = register("waxed_weathered_cut_copper", new Block(BlockBehaviour.Properties.copy(WEATHERED_COPPER)));
-	public static final Block WAXED_EXPOSED_CUT_COPPER = register("waxed_exposed_cut_copper", new Block(BlockBehaviour.Properties.copy(EXPOSED_COPPER)));
-	public static final Block WAXED_CUT_COPPER = register("waxed_cut_copper", new Block(BlockBehaviour.Properties.copy(COPPER_BLOCK)));
+	public static final Block WAXED_COPPER_BLOCK = register("waxed_copper_block", new Block(BlockBehaviour.Properties.ofFullCopy(COPPER_BLOCK)));
+	public static final Block WAXED_WEATHERED_COPPER = register("waxed_weathered_copper", new Block(BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER)));
+	public static final Block WAXED_EXPOSED_COPPER = register("waxed_exposed_copper", new Block(BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER)));
+	public static final Block WAXED_OXIDIZED_COPPER = register("waxed_oxidized_copper", new Block(BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER)));
+	public static final Block WAXED_OXIDIZED_CUT_COPPER = register("waxed_oxidized_cut_copper", new Block(BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER)));
+	public static final Block WAXED_WEATHERED_CUT_COPPER = register(
+		"waxed_weathered_cut_copper", new Block(BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER))
+	);
+	public static final Block WAXED_EXPOSED_CUT_COPPER = register("waxed_exposed_cut_copper", new Block(BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER)));
+	public static final Block WAXED_CUT_COPPER = register("waxed_cut_copper", new Block(BlockBehaviour.Properties.ofFullCopy(COPPER_BLOCK)));
 	public static final Block WAXED_OXIDIZED_CUT_COPPER_STAIRS = register("waxed_oxidized_cut_copper_stairs", stair(WAXED_OXIDIZED_CUT_COPPER));
 	public static final Block WAXED_WEATHERED_CUT_COPPER_STAIRS = register("waxed_weathered_cut_copper_stairs", stair(WAXED_WEATHERED_CUT_COPPER));
 	public static final Block WAXED_EXPOSED_CUT_COPPER_STAIRS = register("waxed_exposed_cut_copper_stairs", stair(WAXED_EXPOSED_CUT_COPPER));
 	public static final Block WAXED_CUT_COPPER_STAIRS = register("waxed_cut_copper_stairs", stair(WAXED_CUT_COPPER));
 	public static final Block WAXED_OXIDIZED_CUT_COPPER_SLAB = register(
-		"waxed_oxidized_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.copy(WAXED_OXIDIZED_CUT_COPPER).requiresCorrectToolForDrops())
+		"waxed_oxidized_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.ofFullCopy(WAXED_OXIDIZED_CUT_COPPER).requiresCorrectToolForDrops())
 	);
 	public static final Block WAXED_WEATHERED_CUT_COPPER_SLAB = register(
-		"waxed_weathered_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.copy(WAXED_WEATHERED_CUT_COPPER).requiresCorrectToolForDrops())
+		"waxed_weathered_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.ofFullCopy(WAXED_WEATHERED_CUT_COPPER).requiresCorrectToolForDrops())
 	);
 	public static final Block WAXED_EXPOSED_CUT_COPPER_SLAB = register(
-		"waxed_exposed_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.copy(WAXED_EXPOSED_CUT_COPPER).requiresCorrectToolForDrops())
+		"waxed_exposed_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.ofFullCopy(WAXED_EXPOSED_CUT_COPPER).requiresCorrectToolForDrops())
 	);
 	public static final Block WAXED_CUT_COPPER_SLAB = register(
-		"waxed_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.copy(WAXED_CUT_COPPER).requiresCorrectToolForDrops())
+		"waxed_cut_copper_slab", new SlabBlock(BlockBehaviour.Properties.ofFullCopy(WAXED_CUT_COPPER).requiresCorrectToolForDrops())
 	);
 	public static final Block COPPER_DOOR = register(
 		"copper_door",
@@ -6505,30 +6548,32 @@ public class Blocks {
 	public static final Block EXPOSED_COPPER_DOOR = register(
 		"exposed_copper_door",
 		new WeatheringCopperDoorBlock(
-			BlockSetType.COPPER, WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.copy(COPPER_DOOR).mapColor(EXPOSED_COPPER.defaultMapColor())
+			BlockSetType.COPPER, WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.ofFullCopy(COPPER_DOOR).mapColor(EXPOSED_COPPER.defaultMapColor())
 		)
 	);
 	public static final Block OXIDIZED_COPPER_DOOR = register(
 		"oxidized_copper_door",
 		new WeatheringCopperDoorBlock(
-			BlockSetType.COPPER, WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.copy(COPPER_DOOR).mapColor(OXIDIZED_COPPER.defaultMapColor())
+			BlockSetType.COPPER, WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.ofFullCopy(COPPER_DOOR).mapColor(OXIDIZED_COPPER.defaultMapColor())
 		)
 	);
 	public static final Block WEATHERED_COPPER_DOOR = register(
 		"weathered_copper_door",
 		new WeatheringCopperDoorBlock(
-			BlockSetType.COPPER, WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.copy(COPPER_DOOR).mapColor(WEATHERED_COPPER.defaultMapColor())
+			BlockSetType.COPPER, WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.ofFullCopy(COPPER_DOOR).mapColor(WEATHERED_COPPER.defaultMapColor())
 		)
 	);
-	public static final Block WAXED_COPPER_DOOR = register("waxed_copper_door", new DoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.copy(COPPER_DOOR)));
+	public static final Block WAXED_COPPER_DOOR = register(
+		"waxed_copper_door", new DoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.ofFullCopy(COPPER_DOOR))
+	);
 	public static final Block WAXED_EXPOSED_COPPER_DOOR = register(
-		"waxed_exposed_copper_door", new DoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.copy(EXPOSED_COPPER_DOOR))
+		"waxed_exposed_copper_door", new DoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER_DOOR))
 	);
 	public static final Block WAXED_OXIDIZED_COPPER_DOOR = register(
-		"waxed_oxidized_copper_door", new DoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.copy(OXIDIZED_COPPER_DOOR))
+		"waxed_oxidized_copper_door", new DoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER_DOOR))
 	);
 	public static final Block WAXED_WEATHERED_COPPER_DOOR = register(
-		"waxed_weathered_copper_door", new DoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.copy(WEATHERED_COPPER_DOOR))
+		"waxed_weathered_copper_door", new DoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER_DOOR))
 	);
 	public static final Block COPPER_TRAPDOOR = register(
 		"copper_trapdoor",
@@ -6547,9 +6592,7 @@ public class Blocks {
 	public static final Block EXPOSED_COPPER_TRAPDOOR = register(
 		"exposed_copper_trapdoor",
 		new WeatheringCopperTrapDoorBlock(
-			BlockSetType.COPPER,
-			WeatheringCopper.WeatherState.EXPOSED,
-			BlockBehaviour.Properties.copy(COPPER_TRAPDOOR).mapColor(EXPOSED_COPPER.defaultMapColor()).isValidSpawn(Blocks::never)
+			BlockSetType.COPPER, WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.ofFullCopy(COPPER_TRAPDOOR).mapColor(EXPOSED_COPPER.defaultMapColor())
 		)
 	);
 	public static final Block OXIDIZED_COPPER_TRAPDOOR = register(
@@ -6557,7 +6600,7 @@ public class Blocks {
 		new WeatheringCopperTrapDoorBlock(
 			BlockSetType.COPPER,
 			WeatheringCopper.WeatherState.OXIDIZED,
-			BlockBehaviour.Properties.copy(COPPER_TRAPDOOR).mapColor(OXIDIZED_COPPER.defaultMapColor()).isValidSpawn(Blocks::never)
+			BlockBehaviour.Properties.ofFullCopy(COPPER_TRAPDOOR).mapColor(OXIDIZED_COPPER.defaultMapColor())
 		)
 	);
 	public static final Block WEATHERED_COPPER_TRAPDOOR = register(
@@ -6565,22 +6608,20 @@ public class Blocks {
 		new WeatheringCopperTrapDoorBlock(
 			BlockSetType.COPPER,
 			WeatheringCopper.WeatherState.WEATHERED,
-			BlockBehaviour.Properties.copy(COPPER_TRAPDOOR).mapColor(WEATHERED_COPPER.defaultMapColor()).isValidSpawn(Blocks::never)
+			BlockBehaviour.Properties.ofFullCopy(COPPER_TRAPDOOR).mapColor(WEATHERED_COPPER.defaultMapColor())
 		)
 	);
 	public static final Block WAXED_COPPER_TRAPDOOR = register(
-		"waxed_copper_trapdoor", new TrapDoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.copy(COPPER_TRAPDOOR).isValidSpawn(Blocks::never))
+		"waxed_copper_trapdoor", new TrapDoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.ofFullCopy(COPPER_TRAPDOOR))
 	);
 	public static final Block WAXED_EXPOSED_COPPER_TRAPDOOR = register(
-		"waxed_exposed_copper_trapdoor", new TrapDoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.copy(EXPOSED_COPPER_TRAPDOOR).isValidSpawn(Blocks::never))
+		"waxed_exposed_copper_trapdoor", new TrapDoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER_TRAPDOOR))
 	);
 	public static final Block WAXED_OXIDIZED_COPPER_TRAPDOOR = register(
-		"waxed_oxidized_copper_trapdoor",
-		new TrapDoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.copy(OXIDIZED_COPPER_TRAPDOOR).isValidSpawn(Blocks::never))
+		"waxed_oxidized_copper_trapdoor", new TrapDoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER_TRAPDOOR))
 	);
 	public static final Block WAXED_WEATHERED_COPPER_TRAPDOOR = register(
-		"waxed_weathered_copper_trapdoor",
-		new TrapDoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.copy(WEATHERED_COPPER_TRAPDOOR).isValidSpawn(Blocks::never))
+		"waxed_weathered_copper_trapdoor", new TrapDoorBlock(BlockSetType.COPPER, BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER_TRAPDOOR))
 	);
 	public static final Block COPPER_GRATE = register(
 		"copper_grate",
@@ -6602,33 +6643,26 @@ public class Blocks {
 	public static final Block EXPOSED_COPPER_GRATE = register(
 		"exposed_copper_grate",
 		new WeatheringCopperGrateBlock(
-			WeatheringCopper.WeatherState.EXPOSED,
-			BlockBehaviour.Properties.copy(COPPER_GRATE).mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).isRedstoneConductor(Blocks::never)
+			WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.ofFullCopy(COPPER_GRATE).mapColor(MapColor.TERRACOTTA_LIGHT_GRAY)
 		)
 	);
 	public static final Block WEATHERED_COPPER_GRATE = register(
 		"weathered_copper_grate",
-		new WeatheringCopperGrateBlock(
-			WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.copy(COPPER_GRATE).mapColor(MapColor.WARPED_STEM).isRedstoneConductor(Blocks::never)
-		)
+		new WeatheringCopperGrateBlock(WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.ofFullCopy(COPPER_GRATE).mapColor(MapColor.WARPED_STEM))
 	);
 	public static final Block OXIDIZED_COPPER_GRATE = register(
 		"oxidized_copper_grate",
-		new WeatheringCopperGrateBlock(
-			WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.copy(COPPER_GRATE).mapColor(MapColor.WARPED_NYLIUM).isRedstoneConductor(Blocks::never)
-		)
+		new WeatheringCopperGrateBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.ofFullCopy(COPPER_GRATE).mapColor(MapColor.WARPED_NYLIUM))
 	);
-	public static final Block WAXED_COPPER_GRATE = register(
-		"waxed_copper_grate", new TransparentBlock(BlockBehaviour.Properties.copy(COPPER_GRATE).isRedstoneConductor(Blocks::never))
-	);
+	public static final Block WAXED_COPPER_GRATE = register("waxed_copper_grate", new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(COPPER_GRATE)));
 	public static final Block WAXED_EXPOSED_COPPER_GRATE = register(
-		"waxed_exposed_copper_grate", new TransparentBlock(BlockBehaviour.Properties.copy(EXPOSED_COPPER_GRATE).isRedstoneConductor(Blocks::never))
+		"waxed_exposed_copper_grate", new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER_GRATE))
 	);
 	public static final Block WAXED_WEATHERED_COPPER_GRATE = register(
-		"waxed_weathered_copper_grate", new TransparentBlock(BlockBehaviour.Properties.copy(WEATHERED_COPPER_GRATE).isRedstoneConductor(Blocks::never))
+		"waxed_weathered_copper_grate", new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER_GRATE))
 	);
 	public static final Block WAXED_OXIDIZED_COPPER_GRATE = register(
-		"waxed_oxidized_copper_grate", new TransparentBlock(BlockBehaviour.Properties.copy(OXIDIZED_COPPER_GRATE).isRedstoneConductor(Blocks::never))
+		"waxed_oxidized_copper_grate", new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER_GRATE))
 	);
 	public static final Block COPPER_BULB = register(
 		"copper_bulb",
@@ -6638,7 +6672,6 @@ public class Blocks {
 				.mapColor(COPPER_BLOCK.defaultMapColor())
 				.strength(3.0F, 6.0F)
 				.sound(SoundType.COPPER_BULB)
-				.noOcclusion()
 				.requiresCorrectToolForDrops()
 				.isRedstoneConductor(Blocks::never)
 				.lightLevel(litBlockEmission(15))
@@ -6649,34 +6682,30 @@ public class Blocks {
 		"exposed_copper_bulb",
 		new WeatheringCopperBulbBlock(
 			WeatheringCopper.WeatherState.EXPOSED,
-			BlockBehaviour.Properties.copy(COPPER_BULB).mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).isRedstoneConductor(Blocks::never).lightLevel(litBlockEmission(12))
+			BlockBehaviour.Properties.ofFullCopy(COPPER_BULB).mapColor(MapColor.TERRACOTTA_LIGHT_GRAY).lightLevel(litBlockEmission(12))
 		)
 	);
 	public static final Block WEATHERED_COPPER_BULB = register(
 		"weathered_copper_bulb",
 		new WeatheringCopperBulbBlock(
-			WeatheringCopper.WeatherState.WEATHERED,
-			BlockBehaviour.Properties.copy(COPPER_BULB).mapColor(MapColor.WARPED_STEM).isRedstoneConductor(Blocks::never).lightLevel(litBlockEmission(8))
+			WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.ofFullCopy(COPPER_BULB).mapColor(MapColor.WARPED_STEM).lightLevel(litBlockEmission(8))
 		)
 	);
 	public static final Block OXIDIZED_COPPER_BULB = register(
 		"oxidized_copper_bulb",
 		new WeatheringCopperBulbBlock(
-			WeatheringCopper.WeatherState.OXIDIZED,
-			BlockBehaviour.Properties.copy(COPPER_BULB).mapColor(MapColor.WARPED_NYLIUM).isRedstoneConductor(Blocks::never).lightLevel(litBlockEmission(4))
+			WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.ofFullCopy(COPPER_BULB).mapColor(MapColor.WARPED_NYLIUM).lightLevel(litBlockEmission(4))
 		)
 	);
-	public static final Block WAXED_COPPER_BULB = register(
-		"waxed_copper_bulb", new CopperBulbBlock(BlockBehaviour.Properties.copy(COPPER_BULB).isRedstoneConductor(Blocks::never))
-	);
+	public static final Block WAXED_COPPER_BULB = register("waxed_copper_bulb", new CopperBulbBlock(BlockBehaviour.Properties.ofFullCopy(COPPER_BULB)));
 	public static final Block WAXED_EXPOSED_COPPER_BULB = register(
-		"waxed_exposed_copper_bulb", new CopperBulbBlock(BlockBehaviour.Properties.copy(EXPOSED_COPPER_BULB).isRedstoneConductor(Blocks::never))
+		"waxed_exposed_copper_bulb", new CopperBulbBlock(BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER_BULB))
 	);
 	public static final Block WAXED_WEATHERED_COPPER_BULB = register(
-		"waxed_weathered_copper_bulb", new CopperBulbBlock(BlockBehaviour.Properties.copy(WEATHERED_COPPER_BULB).isRedstoneConductor(Blocks::never))
+		"waxed_weathered_copper_bulb", new CopperBulbBlock(BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER_BULB))
 	);
 	public static final Block WAXED_OXIDIZED_COPPER_BULB = register(
-		"waxed_oxidized_copper_bulb", new CopperBulbBlock(BlockBehaviour.Properties.copy(OXIDIZED_COPPER_BULB).isRedstoneConductor(Blocks::never))
+		"waxed_oxidized_copper_bulb", new CopperBulbBlock(BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER_BULB))
 	);
 	public static final Block LIGHTNING_ROD = register(
 		"lightning_rod",
@@ -6829,7 +6858,7 @@ public class Blocks {
 	public static final Block MUD = register(
 		"mud",
 		new MudBlock(
-			BlockBehaviour.Properties.copy(DIRT)
+			BlockBehaviour.Properties.ofLegacyCopy(DIRT)
 				.mapColor(MapColor.TERRACOTTA_CYAN)
 				.isValidSpawn(Blocks::always)
 				.isRedstoneConductor(Blocks::always)
@@ -6849,43 +6878,47 @@ public class Blocks {
 				.sound(SoundType.DEEPSLATE)
 		)
 	);
-	public static final Block COBBLED_DEEPSLATE = register("cobbled_deepslate", new Block(BlockBehaviour.Properties.copy(DEEPSLATE).strength(3.5F, 6.0F)));
-	public static final Block COBBLED_DEEPSLATE_STAIRS = register("cobbled_deepslate_stairs", stair(COBBLED_DEEPSLATE));
-	public static final Block COBBLED_DEEPSLATE_SLAB = register("cobbled_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE)));
+	public static final Block COBBLED_DEEPSLATE = register("cobbled_deepslate", new Block(BlockBehaviour.Properties.ofLegacyCopy(DEEPSLATE).strength(3.5F, 6.0F)));
+	public static final Block COBBLED_DEEPSLATE_STAIRS = register("cobbled_deepslate_stairs", legacyStair(COBBLED_DEEPSLATE));
+	public static final Block COBBLED_DEEPSLATE_SLAB = register("cobbled_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE)));
 	public static final Block COBBLED_DEEPSLATE_WALL = register(
-		"cobbled_deepslate_wall", new WallBlock(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).forceSolidOn())
+		"cobbled_deepslate_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE).forceSolidOn())
 	);
 	public static final Block POLISHED_DEEPSLATE = register(
-		"polished_deepslate", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).sound(SoundType.POLISHED_DEEPSLATE))
+		"polished_deepslate", new Block(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE).sound(SoundType.POLISHED_DEEPSLATE))
 	);
-	public static final Block POLISHED_DEEPSLATE_STAIRS = register("polished_deepslate_stairs", stair(POLISHED_DEEPSLATE));
-	public static final Block POLISHED_DEEPSLATE_SLAB = register("polished_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE)));
+	public static final Block POLISHED_DEEPSLATE_STAIRS = register("polished_deepslate_stairs", legacyStair(POLISHED_DEEPSLATE));
+	public static final Block POLISHED_DEEPSLATE_SLAB = register(
+		"polished_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_DEEPSLATE))
+	);
 	public static final Block POLISHED_DEEPSLATE_WALL = register(
-		"polished_deepslate_wall", new WallBlock(BlockBehaviour.Properties.copy(POLISHED_DEEPSLATE).forceSolidOn())
+		"polished_deepslate_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_DEEPSLATE).forceSolidOn())
 	);
 	public static final Block DEEPSLATE_TILES = register(
-		"deepslate_tiles", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_TILES))
+		"deepslate_tiles", new Block(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_TILES))
 	);
-	public static final Block DEEPSLATE_TILE_STAIRS = register("deepslate_tile_stairs", stair(DEEPSLATE_TILES));
-	public static final Block DEEPSLATE_TILE_SLAB = register("deepslate_tile_slab", new SlabBlock(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
-	public static final Block DEEPSLATE_TILE_WALL = register("deepslate_tile_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_TILES).forceSolidOn()));
+	public static final Block DEEPSLATE_TILE_STAIRS = register("deepslate_tile_stairs", legacyStair(DEEPSLATE_TILES));
+	public static final Block DEEPSLATE_TILE_SLAB = register("deepslate_tile_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(DEEPSLATE_TILES)));
+	public static final Block DEEPSLATE_TILE_WALL = register(
+		"deepslate_tile_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(DEEPSLATE_TILES).forceSolidOn())
+	);
 	public static final Block DEEPSLATE_BRICKS = register(
-		"deepslate_bricks", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_BRICKS))
+		"deepslate_bricks", new Block(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_BRICKS))
 	);
-	public static final Block DEEPSLATE_BRICK_STAIRS = register("deepslate_brick_stairs", stair(DEEPSLATE_BRICKS));
-	public static final Block DEEPSLATE_BRICK_SLAB = register("deepslate_brick_slab", new SlabBlock(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS)));
+	public static final Block DEEPSLATE_BRICK_STAIRS = register("deepslate_brick_stairs", legacyStair(DEEPSLATE_BRICKS));
+	public static final Block DEEPSLATE_BRICK_SLAB = register("deepslate_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(DEEPSLATE_BRICKS)));
 	public static final Block DEEPSLATE_BRICK_WALL = register(
-		"deepslate_brick_wall", new WallBlock(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS).forceSolidOn())
+		"deepslate_brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(DEEPSLATE_BRICKS).forceSolidOn())
 	);
 	public static final Block CHISELED_DEEPSLATE = register(
-		"chiseled_deepslate", new Block(BlockBehaviour.Properties.copy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_BRICKS))
+		"chiseled_deepslate", new Block(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE).sound(SoundType.DEEPSLATE_BRICKS))
 	);
-	public static final Block CRACKED_DEEPSLATE_BRICKS = register("cracked_deepslate_bricks", new Block(BlockBehaviour.Properties.copy(DEEPSLATE_BRICKS)));
-	public static final Block CRACKED_DEEPSLATE_TILES = register("cracked_deepslate_tiles", new Block(BlockBehaviour.Properties.copy(DEEPSLATE_TILES)));
+	public static final Block CRACKED_DEEPSLATE_BRICKS = register("cracked_deepslate_bricks", new Block(BlockBehaviour.Properties.ofLegacyCopy(DEEPSLATE_BRICKS)));
+	public static final Block CRACKED_DEEPSLATE_TILES = register("cracked_deepslate_tiles", new Block(BlockBehaviour.Properties.ofLegacyCopy(DEEPSLATE_TILES)));
 	public static final Block INFESTED_DEEPSLATE = register(
 		"infested_deepslate", new InfestedRotatedPillarBlock(DEEPSLATE, BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE).sound(SoundType.DEEPSLATE))
 	);
-	public static final Block SMOOTH_BASALT = register("smooth_basalt", new Block(BlockBehaviour.Properties.copy(BASALT)));
+	public static final Block SMOOTH_BASALT = register("smooth_basalt", new Block(BlockBehaviour.Properties.ofLegacyCopy(BASALT)));
 	public static final Block RAW_IRON_BLOCK = register(
 		"raw_iron_block",
 		new Block(
@@ -6940,6 +6973,21 @@ public class Blocks {
 	);
 	public static final Block CRAFTER = register(
 		"crafter", new CrafterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(1.5F, 3.5F).requiredFeatures(FeatureFlags.UPDATE_1_21))
+	);
+	public static final Block TRIAL_SPAWNER = register(
+		"trial_spawner",
+		new TrialSpawnerBlock(
+			BlockBehaviour.Properties.of()
+				.mapColor(MapColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.requiresCorrectToolForDrops()
+				.lightLevel(blockStatex -> ((TrialSpawnerState)blockStatex.getValue(TrialSpawnerBlock.STATE)).lightLevel())
+				.strength(50.0F)
+				.sound(SoundType.TRIAL_SPAWNER)
+				.isViewBlocking(Blocks::never)
+				.noOcclusion()
+				.requiredFeatures(FeatureFlags.UPDATE_1_21)
+		)
 	);
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {
@@ -7093,8 +7141,13 @@ public class Blocks {
 		);
 	}
 
+	@Deprecated
+	private static Block legacyStair(Block block) {
+		return new StairBlock(block.defaultBlockState(), BlockBehaviour.Properties.ofLegacyCopy(block));
+	}
+
 	private static Block stair(Block block) {
-		return new StairBlock(block.defaultBlockState(), BlockBehaviour.Properties.copy(block));
+		return new StairBlock(block.defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(block));
 	}
 
 	public static Block register(String string, Block block) {

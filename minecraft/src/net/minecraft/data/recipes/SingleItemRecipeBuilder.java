@@ -1,20 +1,20 @@
 package net.minecraft.data.recipes;
 
-import com.google.gson.JsonObject;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SingleItemRecipe;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.ItemLike;
 
 public class SingleItemRecipeBuilder implements RecipeBuilder {
@@ -25,22 +25,22 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 	private final Map<String, Criterion<?>> criteria = new LinkedHashMap();
 	@Nullable
 	private String group;
-	private final RecipeSerializer<?> type;
+	private final SingleItemRecipe.Factory<?> factory;
 
-	public SingleItemRecipeBuilder(RecipeCategory recipeCategory, RecipeSerializer<?> recipeSerializer, Ingredient ingredient, ItemLike itemLike, int i) {
+	public SingleItemRecipeBuilder(RecipeCategory recipeCategory, SingleItemRecipe.Factory<?> factory, Ingredient ingredient, ItemLike itemLike, int i) {
 		this.category = recipeCategory;
-		this.type = recipeSerializer;
+		this.factory = factory;
 		this.result = itemLike.asItem();
 		this.ingredient = ingredient;
 		this.count = i;
 	}
 
 	public static SingleItemRecipeBuilder stonecutting(Ingredient ingredient, RecipeCategory recipeCategory, ItemLike itemLike) {
-		return new SingleItemRecipeBuilder(recipeCategory, RecipeSerializer.STONECUTTER, ingredient, itemLike, 1);
+		return new SingleItemRecipeBuilder(recipeCategory, StonecutterRecipe::new, ingredient, itemLike, 1);
 	}
 
 	public static SingleItemRecipeBuilder stonecutting(Ingredient ingredient, RecipeCategory recipeCategory, ItemLike itemLike, int i) {
-		return new SingleItemRecipeBuilder(recipeCategory, RecipeSerializer.STONECUTTER, ingredient, itemLike, i);
+		return new SingleItemRecipeBuilder(recipeCategory, StonecutterRecipe::new, ingredient, itemLike, i);
 	}
 
 	public SingleItemRecipeBuilder unlockedBy(String string, Criterion<?> criterion) {
@@ -66,37 +66,14 @@ public class SingleItemRecipeBuilder implements RecipeBuilder {
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
 			.requirements(AdvancementRequirements.Strategy.OR);
 		this.criteria.forEach(builder::addCriterion);
-		recipeOutput.accept(
-			new SingleItemRecipeBuilder.Result(
-				resourceLocation,
-				this.type,
-				this.group == null ? "" : this.group,
-				this.ingredient,
-				this.result,
-				this.count,
-				builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/"))
-			)
-		);
+		SingleItemRecipe singleItemRecipe = this.factory
+			.create((String)Objects.requireNonNullElse(this.group, ""), this.ingredient, new ItemStack(this.result, this.count));
+		recipeOutput.accept(resourceLocation, singleItemRecipe, builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
 	}
 
 	private void ensureValid(ResourceLocation resourceLocation) {
 		if (this.criteria.isEmpty()) {
 			throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
-		}
-	}
-
-	public static record Result(
-		ResourceLocation id, RecipeSerializer<?> type, String group, Ingredient ingredient, Item result, int count, AdvancementHolder advancement
-	) implements FinishedRecipe {
-		@Override
-		public void serializeRecipeData(JsonObject jsonObject) {
-			if (!this.group.isEmpty()) {
-				jsonObject.addProperty("group", this.group);
-			}
-
-			jsonObject.add("ingredient", this.ingredient.toJson(false));
-			jsonObject.addProperty("result", BuiltInRegistries.ITEM.getKey(this.result).toString());
-			jsonObject.addProperty("count", this.count);
 		}
 	}
 }

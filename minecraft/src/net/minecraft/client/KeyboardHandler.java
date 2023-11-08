@@ -386,6 +386,7 @@ public class KeyboardHandler {
 				if (k != 0 && i == 66 && Screen.hasControlDown() && bl2) {
 					boolean bl3 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
 					this.minecraft.options.narrator().set(NarratorStatus.byId(this.minecraft.options.narrator().get().getId() + 1));
+					this.minecraft.options.save();
 					if (screen instanceof SimpleOptionsSubScreen) {
 						((SimpleOptionsSubScreen)screen).updateNarratorButton();
 					}

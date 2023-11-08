@@ -22,13 +22,14 @@ import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
 
 public final class JigsawStructure extends Structure {
 	public static final int MAX_TOTAL_STRUCTURE_RANGE = 128;
+	public static final int MAX_DEPTH = 20;
 	public static final Codec<JigsawStructure> CODEC = ExtraCodecs.validate(
 			RecordCodecBuilder.mapCodec(
 				instance -> instance.group(
 							settingsCodec(instance),
 							StructureTemplatePool.CODEC.fieldOf("start_pool").forGetter(jigsawStructure -> jigsawStructure.startPool),
 							ResourceLocation.CODEC.optionalFieldOf("start_jigsaw_name").forGetter(jigsawStructure -> jigsawStructure.startJigsawName),
-							Codec.intRange(0, 7).fieldOf("size").forGetter(jigsawStructure -> jigsawStructure.maxDepth),
+							Codec.intRange(0, 20).fieldOf("size").forGetter(jigsawStructure -> jigsawStructure.maxDepth),
 							HeightProvider.CODEC.fieldOf("start_height").forGetter(jigsawStructure -> jigsawStructure.startHeight),
 							Codec.BOOL.fieldOf("use_expansion_hack").forGetter(jigsawStructure -> jigsawStructure.useExpansionHack),
 							Heightmap.Types.CODEC.optionalFieldOf("project_start_to_heightmap").forGetter(jigsawStructure -> jigsawStructure.projectStartToHeightmap),

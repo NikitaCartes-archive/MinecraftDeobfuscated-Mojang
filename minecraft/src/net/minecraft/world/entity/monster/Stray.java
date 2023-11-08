@@ -31,7 +31,7 @@ public class Stray extends AbstractSkeleton {
 		} while (serverLevelAccessor.getBlockState(blockPos2).is(Blocks.POWDER_SNOW));
 
 		return checkMonsterSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, randomSource)
-			&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.canSeeSky(blockPos2.below()));
+			&& (MobSpawnType.isSpawner(mobSpawnType) || serverLevelAccessor.canSeeSky(blockPos2.below()));
 	}
 
 	@Override

@@ -1,32 +1,33 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.TriggerInstance> {
-	public UsedTotemTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
-	) {
-		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new UsedTotemTrigger.TriggerInstance(optional, optional2);
+	@Override
+	public Codec<UsedTotemTrigger.TriggerInstance> codec() {
+		return UsedTotemTrigger.TriggerInstance.CODEC;
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack) {
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(itemStack));
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final Optional<ItemPredicate> item;
-
-		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2) {
-			super(optional);
-			this.item = optional2;
-		}
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item) implements SimpleCriterionTrigger.SimpleInstance {
+		public static final Codec<UsedTotemTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(UsedTotemTrigger.TriggerInstance::player),
+						ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(UsedTotemTrigger.TriggerInstance::item)
+					)
+					.apply(instance, UsedTotemTrigger.TriggerInstance::new)
+		);
 
 		public static Criterion<UsedTotemTrigger.TriggerInstance> usedTotem(ItemPredicate itemPredicate) {
 			return CriteriaTriggers.USED_TOTEM.createCriterion(new UsedTotemTrigger.TriggerInstance(Optional.empty(), Optional.of(itemPredicate)));
@@ -39,13 +40,6 @@ public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.Tr
 
 		public boolean matches(ItemStack itemStack) {
 			return this.item.isEmpty() || ((ItemPredicate)this.item.get()).matches(itemStack);
-		}
-
-		@Override
-		public JsonObject serializeToJson() {
-			JsonObject jsonObject = super.serializeToJson();
-			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
-			return jsonObject;
 		}
 	}
 }

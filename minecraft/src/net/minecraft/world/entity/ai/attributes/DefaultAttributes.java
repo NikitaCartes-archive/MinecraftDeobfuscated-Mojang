@@ -70,6 +70,7 @@ import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.monster.breeze.Breeze;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
@@ -102,6 +103,7 @@ public class DefaultAttributes {
 		.put(EntityType.ENDERMITE, Endermite.createAttributes().build())
 		.put(EntityType.ENDER_DRAGON, EnderDragon.createAttributes().build())
 		.put(EntityType.EVOKER, Evoker.createAttributes().build())
+		.put(EntityType.BREEZE, Breeze.createAttributes().build())
 		.put(EntityType.FOX, Fox.createAttributes().build())
 		.put(EntityType.FROG, Frog.createAttributes().build())
 		.put(EntityType.GHAST, Ghast.createAttributes().build())

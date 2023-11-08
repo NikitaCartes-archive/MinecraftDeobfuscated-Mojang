@@ -3,6 +3,9 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +15,6 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.AdvancementTree;
-import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -22,6 +24,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public class AdvancementCommands {
+	private static final DynamicCommandExceptionType ERROR_NO_ACTION_PERFORMED = new DynamicCommandExceptionType(object -> (Component)object);
+	private static final Dynamic2CommandExceptionType ERROR_CRITERION_NOT_FOUND = new Dynamic2CommandExceptionType(
+		(object, object2) -> Component.translatable("commands.advancement.criterionNotFound", object, object2)
+	);
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_ADVANCEMENTS = (commandContext, suggestionsBuilder) -> {
 		Collection<AdvancementHolder> collection = commandContext.getSource().getServer().getAdvancements().getAllAdvancements();
 		return SharedSuggestionProvider.suggestResource(collection.stream().map(AdvancementHolder::id), suggestionsBuilder);
@@ -224,7 +230,7 @@ public class AdvancementCommands {
 
 	private static int perform(
 		CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, AdvancementCommands.Action action, Collection<AdvancementHolder> collection2
-	) {
+	) throws CommandSyntaxException {
 		int i = 0;
 
 		for (ServerPlayer serverPlayer : collection) {
@@ -234,7 +240,7 @@ public class AdvancementCommands {
 		if (i == 0) {
 			if (collection2.size() == 1) {
 				if (collection.size() == 1) {
-					throw new CommandRuntimeException(
+					throw ERROR_NO_ACTION_PERFORMED.create(
 						Component.translatable(
 							action.getKey() + ".one.to.one.failure",
 							Advancement.name((AdvancementHolder)collection2.iterator().next()),
@@ -242,16 +248,16 @@ public class AdvancementCommands {
 						)
 					);
 				} else {
-					throw new CommandRuntimeException(
+					throw ERROR_NO_ACTION_PERFORMED.create(
 						Component.translatable(action.getKey() + ".one.to.many.failure", Advancement.name((AdvancementHolder)collection2.iterator().next()), collection.size())
 					);
 				}
 			} else if (collection.size() == 1) {
-				throw new CommandRuntimeException(
+				throw ERROR_NO_ACTION_PERFORMED.create(
 					Component.translatable(action.getKey() + ".many.to.one.failure", collection2.size(), ((ServerPlayer)collection.iterator().next()).getDisplayName())
 				);
 			} else {
-				throw new CommandRuntimeException(Component.translatable(action.getKey() + ".many.to.many.failure", collection2.size(), collection.size()));
+				throw ERROR_NO_ACTION_PERFORMED.create(Component.translatable(action.getKey() + ".many.to.many.failure", collection2.size(), collection.size()));
 			}
 		} else {
 			if (collection2.size() == 1) {
@@ -291,11 +297,11 @@ public class AdvancementCommands {
 		AdvancementCommands.Action action,
 		AdvancementHolder advancementHolder,
 		String string
-	) {
+	) throws CommandSyntaxException {
 		int i = 0;
 		Advancement advancement = advancementHolder.value();
 		if (!advancement.criteria().containsKey(string)) {
-			throw new CommandRuntimeException(Component.translatable("commands.advancement.criterionNotFound", Advancement.name(advancementHolder), string));
+			throw ERROR_CRITERION_NOT_FOUND.create(Advancement.name(advancementHolder), string);
 		} else {
 			for (ServerPlayer serverPlayer : collection) {
 				if (action.performCriterion(serverPlayer, advancementHolder, string)) {
@@ -305,7 +311,7 @@ public class AdvancementCommands {
 
 			if (i == 0) {
 				if (collection.size() == 1) {
-					throw new CommandRuntimeException(
+					throw ERROR_NO_ACTION_PERFORMED.create(
 						Component.translatable(
 							action.getKey() + ".criterion.to.one.failure",
 							string,
@@ -314,7 +320,7 @@ public class AdvancementCommands {
 						)
 					);
 				} else {
-					throw new CommandRuntimeException(
+					throw ERROR_NO_ACTION_PERFORMED.create(
 						Component.translatable(action.getKey() + ".criterion.to.many.failure", string, Advancement.name(advancementHolder), collection.size())
 					);
 				}

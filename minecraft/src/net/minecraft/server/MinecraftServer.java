@@ -955,7 +955,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.getConnection().tick();
 		this.profiler.popPush("players");
 		this.playerList.tick();
-		if (SharedConstants.IS_RUNNING_IN_IDE) {
+		if (SharedConstants.IS_RUNNING_IN_IDE && this.tickRateManager.runsNormally()) {
 			GameTestTicker.SINGLETON.tick();
 		}
 

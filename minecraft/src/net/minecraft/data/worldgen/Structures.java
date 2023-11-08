@@ -44,7 +44,7 @@ import net.minecraft.world.level.levelgen.structure.structures.SwampHutStructure
 import net.minecraft.world.level.levelgen.structure.structures.WoodlandMansionStructure;
 
 public class Structures {
-	private static Structure.StructureSettings structure(
+	public static Structure.StructureSettings structure(
 		HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, TerrainAdjustment terrainAdjustment
 	) {
 		return new Structure.StructureSettings(holderSet, map, decoration, terrainAdjustment);

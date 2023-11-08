@@ -677,6 +677,15 @@ public class SoundType {
 		SoundEvents.DECORATED_POT_HIT,
 		SoundEvents.DECORATED_POT_FALL
 	);
+	public static final SoundType TRIAL_SPAWNER = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.TRIAL_SPAWNER_BREAK,
+		SoundEvents.TRIAL_SPAWNER_STEP,
+		SoundEvents.TRIAL_SPAWNER_PLACE,
+		SoundEvents.TRIAL_SPAWNER_HIT,
+		SoundEvents.TRIAL_SPAWNER_FALL
+	);
 	public static final SoundType SPONGE = new SoundType(
 		1.0F, 1.0F, SoundEvents.SPONGE_BREAK, SoundEvents.SPONGE_STEP, SoundEvents.SPONGE_PLACE, SoundEvents.SPONGE_HIT, SoundEvents.SPONGE_FALL
 	);

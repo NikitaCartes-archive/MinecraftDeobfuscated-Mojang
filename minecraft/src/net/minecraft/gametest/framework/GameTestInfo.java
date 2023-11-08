@@ -243,9 +243,8 @@ public class GameTestInfo {
 	}
 
 	public void prepareTestStructure(BlockPos blockPos) {
-		this.structureBlockEntity = StructureUtils.prepareTestStructure(this.getStructureName(), blockPos, this.getRotation(), this.level);
+		this.structureBlockEntity = StructureUtils.prepareTestStructure(this, blockPos, this.getRotation(), this.level);
 		this.structureBlockPos = this.structureBlockEntity.getBlockPos();
-		this.structureBlockEntity.setStructureName(this.getStructureName());
 		StructureUtils.addCommandBlockAndButtonToStartTest(this.structureBlockPos, new BlockPos(1, 0, -1), this.getRotation(), this.level);
 		this.listeners.forEach(gameTestListener -> gameTestListener.testStructureLoaded(this));
 	}

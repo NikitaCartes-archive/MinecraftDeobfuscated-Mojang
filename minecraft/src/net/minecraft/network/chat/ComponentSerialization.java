@@ -24,7 +24,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 
 public class ComponentSerialization {
-	public static final Codec<Component> CODEC = ExtraCodecs.recursive(ComponentSerialization::createCodec);
+	public static final Codec<Component> CODEC = ExtraCodecs.recursive("Component", ComponentSerialization::createCodec);
 	public static final Codec<Component> FLAT_CODEC = ExtraCodecs.FLAT_JSON
 		.flatXmap(jsonElement -> CODEC.parse(JsonOps.INSTANCE, jsonElement), component -> CODEC.encodeStart(JsonOps.INSTANCE, component));
 

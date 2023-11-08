@@ -1,19 +1,13 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,20 +56,6 @@ public record StatePropertiesPredicate(List<StatePropertiesPredicate.PropertyMat
 		}
 
 		return Optional.empty();
-	}
-
-	public void checkState(StateDefinition<?, ?> stateDefinition, Consumer<String> consumer) {
-		this.properties.forEach(propertyMatcher -> propertyMatcher.checkState(stateDefinition).ifPresent(consumer));
-	}
-
-	public static Optional<StatePropertiesPredicate> fromJson(@Nullable JsonElement jsonElement) {
-		return jsonElement != null && !jsonElement.isJsonNull()
-			? Optional.of(Util.getOrThrow(CODEC.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new))
-			: Optional.empty();
-	}
-
-	public JsonElement serializeToJson() {
-		return Util.getOrThrow(CODEC.encodeStart(JsonOps.INSTANCE, this), IllegalStateException::new);
 	}
 
 	public static class Builder {

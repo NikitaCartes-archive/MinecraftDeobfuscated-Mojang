@@ -12,6 +12,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.Util;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class ItemSpawnEggFix extends DataFix {
@@ -99,42 +100,34 @@ public class ItemSpawnEggFix extends DataFix {
 		OpticFinder<?> opticFinder4 = opticFinder3.type().findField("EntityTag");
 		OpticFinder<?> opticFinder5 = DSL.typeFinder(schema.getTypeRaw(References.ENTITY));
 		Type<?> type2 = this.getOutputSchema().getTypeRaw(References.ENTITY);
-		return this.fixTypeEverywhereTyped(
-			"ItemSpawnEggFix",
-			type,
-			typed -> {
-				Optional<Pair<String, String>> optional = typed.getOptional(opticFinder);
-				if (optional.isPresent() && Objects.equals(((Pair)optional.get()).getSecond(), "minecraft:spawn_egg")) {
-					Dynamic<?> dynamic = typed.get(DSL.remainderFinder());
-					short s = dynamic.get("Damage").asShort((short)0);
-					Optional<? extends Typed<?>> optional2 = typed.getOptionalTyped(opticFinder3);
-					Optional<? extends Typed<?>> optional3 = optional2.flatMap(typedx -> typedx.getOptionalTyped(opticFinder4));
-					Optional<? extends Typed<?>> optional4 = optional3.flatMap(typedx -> typedx.getOptionalTyped(opticFinder5));
-					Optional<String> optional5 = optional4.flatMap(typedx -> typedx.getOptional(opticFinder2));
-					Typed<?> typed2 = typed;
-					String string = ID_TO_ENTITY[s & 255];
-					if (string != null && (optional5.isEmpty() || !Objects.equals(optional5.get(), string))) {
-						Typed<?> typed3 = typed.getOrCreateTyped(opticFinder3);
-						Typed<?> typed4 = typed3.getOrCreateTyped(opticFinder4);
-						Typed<?> typed5 = typed4.getOrCreateTyped(opticFinder5);
-						Typed<?> typed6 = (Typed<?>)((Pair)typed5.write()
-								.flatMap(dynamic2 -> type2.readTyped(dynamic2.set("id", dynamic.createString(string))))
-								.result()
-								.orElseThrow(() -> new IllegalStateException("Could not parse new entity")))
-							.getFirst();
-						typed2 = typed.set(opticFinder3, typed3.set(opticFinder4, typed4.set(opticFinder5, typed6)));
-					}
-
-					if (s != 0) {
-						dynamic = dynamic.set("Damage", dynamic.createShort((short)0));
-						typed2 = typed2.set(DSL.remainderFinder(), dynamic);
-					}
-
-					return typed2;
-				} else {
-					return typed;
+		return this.fixTypeEverywhereTyped("ItemSpawnEggFix", type, typed -> {
+			Optional<Pair<String, String>> optional = typed.getOptional(opticFinder);
+			if (optional.isPresent() && Objects.equals(((Pair)optional.get()).getSecond(), "minecraft:spawn_egg")) {
+				Dynamic<?> dynamic = typed.get(DSL.remainderFinder());
+				short s = dynamic.get("Damage").asShort((short)0);
+				Optional<? extends Typed<?>> optional2 = typed.getOptionalTyped(opticFinder3);
+				Optional<? extends Typed<?>> optional3 = optional2.flatMap(typedx -> typedx.getOptionalTyped(opticFinder4));
+				Optional<? extends Typed<?>> optional4 = optional3.flatMap(typedx -> typedx.getOptionalTyped(opticFinder5));
+				Optional<String> optional5 = optional4.flatMap(typedx -> typedx.getOptional(opticFinder2));
+				Typed<?> typed2 = typed;
+				String string = ID_TO_ENTITY[s & 255];
+				if (string != null && (optional5.isEmpty() || !Objects.equals(optional5.get(), string))) {
+					Typed<?> typed3 = typed.getOrCreateTyped(opticFinder3);
+					Typed<?> typed4 = typed3.getOrCreateTyped(opticFinder4);
+					Typed<?> typed5 = typed4.getOrCreateTyped(opticFinder5);
+					Typed<?> typed6 = Util.writeAndReadTypedOrThrow(typed5, type2, dynamic2 -> dynamic2.set("id", dynamic.createString(string)));
+					typed2 = typed.set(opticFinder3, typed3.set(opticFinder4, typed4.set(opticFinder5, typed6)));
 				}
+
+				if (s != 0) {
+					dynamic = dynamic.set("Damage", dynamic.createShort((short)0));
+					typed2 = typed2.set(DSL.remainderFinder(), dynamic);
+				}
+
+				return typed2;
+			} else {
+				return typed;
 			}
-		);
+		});
 	}
 }

@@ -12,6 +12,7 @@ public class ModelTemplates {
 		"cube_directional", TextureSlot.PARTICLE, TextureSlot.NORTH, TextureSlot.SOUTH, TextureSlot.EAST, TextureSlot.WEST, TextureSlot.UP, TextureSlot.DOWN
 	);
 	public static final ModelTemplate CUBE_ALL = create("cube_all", TextureSlot.ALL);
+	public static final ModelTemplate CUBE_ALL_INNER_FACES = create("cube_all_inner_faces", TextureSlot.ALL);
 	public static final ModelTemplate CUBE_MIRRORED_ALL = create("cube_mirrored_all", "_mirrored", TextureSlot.ALL);
 	public static final ModelTemplate CUBE_NORTH_WEST_MIRRORED_ALL = create("cube_north_west_mirrored_all", "_north_west_mirrored", TextureSlot.ALL);
 	public static final ModelTemplate CUBE_COLUMN_UV_LOCKED_X = create("cube_column_uv_locked_x", "_x", TextureSlot.END, TextureSlot.SIDE);
@@ -22,6 +23,7 @@ public class ModelTemplates {
 	public static final ModelTemplate CUBE_COLUMN_MIRRORED = create("cube_column_mirrored", "_mirrored", TextureSlot.END, TextureSlot.SIDE);
 	public static final ModelTemplate CUBE_TOP = create("cube_top", TextureSlot.TOP, TextureSlot.SIDE);
 	public static final ModelTemplate CUBE_BOTTOM_TOP = create("cube_bottom_top", TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
+	public static final ModelTemplate CUBE_BOTTOM_TOP_INNER_FACES = create("cube_bottom_top_inner_faces", TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
 	public static final ModelTemplate CUBE_ORIENTABLE = create("orientable", TextureSlot.TOP, TextureSlot.FRONT, TextureSlot.SIDE);
 	public static final ModelTemplate CUBE_ORIENTABLE_TOP_BOTTOM = create(
 		"orientable_with_bottom", TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.FRONT

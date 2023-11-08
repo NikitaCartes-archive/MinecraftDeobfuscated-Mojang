@@ -97,10 +97,10 @@ public class StructureUtils {
 		structureBlockEntity.setShowBoundingBox(true);
 	}
 
-	public static StructureBlockEntity prepareTestStructure(String string, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
+	public static StructureBlockEntity prepareTestStructure(GameTestInfo gameTestInfo, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
 		Vec3i vec3i = ((StructureTemplate)serverLevel.getStructureManager()
-				.get(new ResourceLocation(string))
-				.orElseThrow(() -> new IllegalStateException("Missing test structure: " + string)))
+				.get(new ResourceLocation(gameTestInfo.getStructureName()))
+				.orElseThrow(() -> new IllegalStateException("Missing test structure: " + gameTestInfo.getStructureName())))
 			.getSize();
 		BoundingBox boundingBox = getStructureBoundingBox(blockPos, vec3i, rotation);
 		BlockPos blockPos2;
@@ -120,7 +120,7 @@ public class StructureUtils {
 
 		forceLoadChunks(boundingBox, serverLevel);
 		clearSpaceForStructure(boundingBox, serverLevel);
-		return createStructureBlock(string, blockPos2.below(), rotation, serverLevel);
+		return createStructureBlock(gameTestInfo, blockPos2.below(), rotation, serverLevel);
 	}
 
 	private static void forceLoadChunks(BoundingBox boundingBox, ServerLevel serverLevel) {
@@ -183,15 +183,16 @@ public class StructureUtils {
 		return collection;
 	}
 
-	private static StructureBlockEntity createStructureBlock(String string, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
+	private static StructureBlockEntity createStructureBlock(GameTestInfo gameTestInfo, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
 		serverLevel.setBlockAndUpdate(blockPos, Blocks.STRUCTURE_BLOCK.defaultBlockState());
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
 		structureBlockEntity.setMode(StructureMode.LOAD);
 		structureBlockEntity.setRotation(rotation);
 		structureBlockEntity.setIgnoreEntities(false);
-		structureBlockEntity.setStructureName(new ResourceLocation(string));
+		structureBlockEntity.setStructureName(new ResourceLocation(gameTestInfo.getStructureName()));
+		structureBlockEntity.setMetaData(gameTestInfo.getTestName());
 		if (!structureBlockEntity.loadStructureInfo(serverLevel)) {
-			throw new RuntimeException("Failed to load structure info " + string);
+			throw new RuntimeException("Failed to load structure info for test: " + gameTestInfo.getTestName() + ". Structure name: " + gameTestInfo.getStructureName());
 		} else {
 			return structureBlockEntity;
 		}

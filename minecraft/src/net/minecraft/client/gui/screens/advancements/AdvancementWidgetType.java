@@ -2,7 +2,7 @@ package net.minecraft.client.gui.screens.advancements;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
@@ -38,8 +38,8 @@ public enum AdvancementWidgetType {
 		return this.boxSprite;
 	}
 
-	public ResourceLocation frameSprite(FrameType frameType) {
-		return switch (frameType) {
+	public ResourceLocation frameSprite(AdvancementType advancementType) {
+		return switch (advancementType) {
 			case TASK -> this.taskFrameSprite;
 			case CHALLENGE -> this.challengeFrameSprite;
 			case GOAL -> this.goalFrameSprite;

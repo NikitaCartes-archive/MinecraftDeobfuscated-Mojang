@@ -1,28 +1,30 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 public class PlayerTrigger extends SimpleCriterionTrigger<PlayerTrigger.TriggerInstance> {
-	public PlayerTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
-	) {
-		return new PlayerTrigger.TriggerInstance(optional);
+	@Override
+	public Codec<PlayerTrigger.TriggerInstance> codec() {
+		return PlayerTrigger.TriggerInstance.CODEC;
 	}
 
 	public void trigger(ServerPlayer serverPlayer) {
 		this.trigger(serverPlayer, triggerInstance -> true);
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		public TriggerInstance(Optional<ContextAwarePredicate> optional) {
-			super(optional);
-		}
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance {
+		public static final Codec<PlayerTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(PlayerTrigger.TriggerInstance::player))
+					.apply(instance, PlayerTrigger.TriggerInstance::new)
+		);
 
 		public static Criterion<PlayerTrigger.TriggerInstance> located(LocationPredicate.Builder builder) {
 			return CriteriaTriggers.LOCATION

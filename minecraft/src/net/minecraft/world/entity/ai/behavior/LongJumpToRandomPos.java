@@ -17,9 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -183,81 +181,13 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 		Collections.shuffle(list);
 
 		for (int i : list) {
-			Vec3 vec32 = this.calculateJumpVectorForAngle(mob, vec3, i);
-			if (vec32 != null) {
-				return vec32;
+			Optional<Vec3> optional = LongJumpUtil.calculateJumpVectorForAngle(mob, vec3, this.maxJumpVelocity, i, true);
+			if (optional.isPresent()) {
+				return (Vec3)optional.get();
 			}
 		}
 
 		return null;
-	}
-
-	@Nullable
-	private Vec3 calculateJumpVectorForAngle(Mob mob, Vec3 vec3, int i) {
-		Vec3 vec32 = mob.position();
-		Vec3 vec33 = new Vec3(vec3.x - vec32.x, 0.0, vec3.z - vec32.z).normalize().scale(0.5);
-		vec3 = vec3.subtract(vec33);
-		Vec3 vec34 = vec3.subtract(vec32);
-		float f = (float)i * (float) Math.PI / 180.0F;
-		double d = Math.atan2(vec34.z, vec34.x);
-		double e = vec34.subtract(0.0, vec34.y, 0.0).lengthSqr();
-		double g = Math.sqrt(e);
-		double h = vec34.y;
-		double j = Math.sin((double)(2.0F * f));
-		double k = 0.08;
-		double l = Math.pow(Math.cos((double)f), 2.0);
-		double m = Math.sin((double)f);
-		double n = Math.cos((double)f);
-		double o = Math.sin(d);
-		double p = Math.cos(d);
-		double q = e * 0.08 / (g * j - 2.0 * h * l);
-		if (q < 0.0) {
-			return null;
-		} else {
-			double r = Math.sqrt(q);
-			if (r > (double)this.maxJumpVelocity) {
-				return null;
-			} else {
-				double s = r * n;
-				double t = r * m;
-				int u = Mth.ceil(g / s) * 2;
-				double v = 0.0;
-				Vec3 vec35 = null;
-				EntityDimensions entityDimensions = mob.getDimensions(Pose.LONG_JUMPING);
-
-				for (int w = 0; w < u - 1; w++) {
-					v += g / (double)u;
-					double x = m / n * v - Math.pow(v, 2.0) * 0.08 / (2.0 * q * Math.pow(n, 2.0));
-					double y = v * p;
-					double z = v * o;
-					Vec3 vec36 = new Vec3(vec32.x + y, vec32.y + x, vec32.z + z);
-					if (vec35 != null && !this.isClearTransition(mob, entityDimensions, vec35, vec36)) {
-						return null;
-					}
-
-					vec35 = vec36;
-				}
-
-				return new Vec3(s * p, t, s * o).scale(0.95F);
-			}
-		}
-	}
-
-	private boolean isClearTransition(Mob mob, EntityDimensions entityDimensions, Vec3 vec3, Vec3 vec32) {
-		Vec3 vec33 = vec32.subtract(vec3);
-		double d = (double)Math.min(entityDimensions.width, entityDimensions.height);
-		int i = Mth.ceil(vec33.length() / d);
-		Vec3 vec34 = vec33.normalize();
-		Vec3 vec35 = vec3;
-
-		for (int j = 0; j < i; j++) {
-			vec35 = j == i - 1 ? vec32 : vec35.add(vec34.scale(d * 0.9F));
-			if (!mob.level().noCollision(mob, entityDimensions.makeBoundingBox(vec35))) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	public static class PossibleJump extends WeightedEntry.IntrusiveBase {

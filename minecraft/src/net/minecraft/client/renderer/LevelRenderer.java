@@ -116,6 +116,7 @@ import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.block.SculkShriekerBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawner;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
@@ -2962,6 +2963,33 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 3009:
 				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.EGG_CRACK, UniformInt.of(3, 6));
+				break;
+			case 3010:
+				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.GUST_DUST, UniformInt.of(3, 6));
+				break;
+			case 3011:
+				TrialSpawner.addSpawnParticles(this.level, blockPos, randomSource);
+				break;
+			case 3012:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.TRIAL_SPAWNER_SPAWN_MOB, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
+					);
+				TrialSpawner.addSpawnParticles(this.level, blockPos, randomSource);
+				break;
+			case 3013:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.TRIAL_SPAWNER_DETECT_PLAYER, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
+					);
+				TrialSpawner.addDetectPlayerParticles(this.level, blockPos, randomSource, j);
+				break;
+			case 3014:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.TRIAL_SPAWNER_EJECT_ITEM, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
+					);
+				TrialSpawner.addEjectItemParticles(this.level, blockPos, randomSource);
 		}
 	}
 

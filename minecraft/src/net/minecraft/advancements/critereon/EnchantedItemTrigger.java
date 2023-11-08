@@ -1,34 +1,34 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
 public class EnchantedItemTrigger extends SimpleCriterionTrigger<EnchantedItemTrigger.TriggerInstance> {
-	public EnchantedItemTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
-	) {
-		Optional<ItemPredicate> optional2 = ItemPredicate.fromJson(jsonObject.get("item"));
-		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("levels"));
-		return new EnchantedItemTrigger.TriggerInstance(optional, optional2, ints);
+	@Override
+	public Codec<EnchantedItemTrigger.TriggerInstance> codec() {
+		return EnchantedItemTrigger.TriggerInstance.CODEC;
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, int i) {
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(itemStack, i));
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final Optional<ItemPredicate> item;
-		private final MinMaxBounds.Ints levels;
-
-		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, MinMaxBounds.Ints ints) {
-			super(optional);
-			this.item = optional2;
-			this.levels = ints;
-		}
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item, MinMaxBounds.Ints levels)
+		implements SimpleCriterionTrigger.SimpleInstance {
+		public static final Codec<EnchantedItemTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(EnchantedItemTrigger.TriggerInstance::player),
+						ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(EnchantedItemTrigger.TriggerInstance::item),
+						ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "levels", MinMaxBounds.Ints.ANY).forGetter(EnchantedItemTrigger.TriggerInstance::levels)
+					)
+					.apply(instance, EnchantedItemTrigger.TriggerInstance::new)
+		);
 
 		public static Criterion<EnchantedItemTrigger.TriggerInstance> enchantedItem() {
 			return CriteriaTriggers.ENCHANTED_ITEM.createCriterion(new EnchantedItemTrigger.TriggerInstance(Optional.empty(), Optional.empty(), MinMaxBounds.Ints.ANY));
@@ -36,14 +36,6 @@ public class EnchantedItemTrigger extends SimpleCriterionTrigger<EnchantedItemTr
 
 		public boolean matches(ItemStack itemStack, int i) {
 			return this.item.isPresent() && !((ItemPredicate)this.item.get()).matches(itemStack) ? false : this.levels.matches(i);
-		}
-
-		@Override
-		public JsonObject serializeToJson() {
-			JsonObject jsonObject = super.serializeToJson();
-			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
-			jsonObject.add("levels", this.levels.serializeToJson());
-			return jsonObject;
 		}
 	}
 }

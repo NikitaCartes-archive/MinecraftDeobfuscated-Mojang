@@ -265,6 +265,7 @@ import net.minecraft.util.datafix.schemas.V3448;
 import net.minecraft.util.datafix.schemas.V3682;
 import net.minecraft.util.datafix.schemas.V3683;
 import net.minecraft.util.datafix.schemas.V3685;
+import net.minecraft.util.datafix.schemas.V3689;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1180,6 +1181,9 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new PrimedTntBlockStateFixer(schema195));
 		Schema schema196 = dataFixerBuilder.addSchema(3685, V3685::new);
 		dataFixerBuilder.addFixer(new FixProjectileStoredItem(schema196));
+		Schema schema197 = dataFixerBuilder.addSchema(3689, V3689::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema197, "Added Breeze", References.ENTITY));
+		dataFixerBuilder.addFixer(new AddNewChoices(schema197, "Added Trial Spawner", References.BLOCK_ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

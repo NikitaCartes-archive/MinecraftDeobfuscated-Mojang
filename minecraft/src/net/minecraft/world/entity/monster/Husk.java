@@ -26,7 +26,7 @@ public class Husk extends Zombie {
 		EntityType<Husk> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		return checkMonsterSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, randomSource)
-			&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.canSeeSky(blockPos));
+			&& (MobSpawnType.isSpawner(mobSpawnType) || serverLevelAccessor.canSeeSky(blockPos));
 	}
 
 	@Override

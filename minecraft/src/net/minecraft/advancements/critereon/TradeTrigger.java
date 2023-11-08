@@ -1,21 +1,20 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerInstance> {
-	public TradeTrigger.TriggerInstance createInstance(
-		JsonObject jsonObject, Optional<ContextAwarePredicate> optional, DeserializationContext deserializationContext
-	) {
-		Optional<ContextAwarePredicate> optional2 = EntityPredicate.fromJson(jsonObject, "villager", deserializationContext);
-		Optional<ItemPredicate> optional3 = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new TradeTrigger.TriggerInstance(optional, optional2, optional3);
+	@Override
+	public Codec<TradeTrigger.TriggerInstance> codec() {
+		return TradeTrigger.TriggerInstance.CODEC;
 	}
 
 	public void trigger(ServerPlayer serverPlayer, AbstractVillager abstractVillager, ItemStack itemStack) {
@@ -23,15 +22,16 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(lootContext, itemStack));
 	}
 
-	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final Optional<ContextAwarePredicate> villager;
-		private final Optional<ItemPredicate> item;
-
-		public TriggerInstance(Optional<ContextAwarePredicate> optional, Optional<ContextAwarePredicate> optional2, Optional<ItemPredicate> optional3) {
-			super(optional);
-			this.villager = optional2;
-			this.item = optional3;
-		}
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<ContextAwarePredicate> villager, Optional<ItemPredicate> item)
+		implements SimpleCriterionTrigger.SimpleInstance {
+		public static final Codec<TradeTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(TradeTrigger.TriggerInstance::player),
+						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "villager").forGetter(TradeTrigger.TriggerInstance::villager),
+						ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(TradeTrigger.TriggerInstance::item)
+					)
+					.apply(instance, TradeTrigger.TriggerInstance::new)
+		);
 
 		public static Criterion<TradeTrigger.TriggerInstance> tradedWithVillager() {
 			return CriteriaTriggers.TRADE.createCriterion(new TradeTrigger.TriggerInstance(Optional.empty(), Optional.empty(), Optional.empty()));
@@ -49,11 +49,9 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 		}
 
 		@Override
-		public JsonObject serializeToJson() {
-			JsonObject jsonObject = super.serializeToJson();
-			this.item.ifPresent(itemPredicate -> jsonObject.add("item", itemPredicate.serializeToJson()));
-			this.villager.ifPresent(contextAwarePredicate -> jsonObject.add("villager", contextAwarePredicate.toJson()));
-			return jsonObject;
+		public void validate(CriterionValidator criterionValidator) {
+			SimpleCriterionTrigger.SimpleInstance.super.validate(criterionValidator);
+			criterionValidator.validateEntity(this.villager, ".villager");
 		}
 	}
 }

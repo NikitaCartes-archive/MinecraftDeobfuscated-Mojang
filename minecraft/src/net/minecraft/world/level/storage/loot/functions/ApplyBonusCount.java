@@ -1,17 +1,12 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.MapLike;
-import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -19,6 +14,7 @@ import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -33,45 +29,13 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 			ApplyBonusCount.BinomialWithBonusCount.TYPE, ApplyBonusCount.OreDrops.TYPE, ApplyBonusCount.UniformBonusCount.TYPE
 		)
 		.collect(Collectors.toMap(ApplyBonusCount.FormulaType::id, Function.identity()));
-	static final Codec<ApplyBonusCount.FormulaType> FORMULA_TYPE_CODEC = ResourceLocation.CODEC.comapFlatMap(resourceLocation -> {
+	private static final Codec<ApplyBonusCount.FormulaType> FORMULA_TYPE_CODEC = ResourceLocation.CODEC.comapFlatMap(resourceLocation -> {
 		ApplyBonusCount.FormulaType formulaType = (ApplyBonusCount.FormulaType)FORMULAS.get(resourceLocation);
 		return formulaType != null ? DataResult.success(formulaType) : DataResult.error(() -> "No formula type with id: '" + resourceLocation + "'");
 	}, ApplyBonusCount.FormulaType::id);
-	private static final MapCodec<ApplyBonusCount.Formula> FORMULA_CODEC = new MapCodec<ApplyBonusCount.Formula>() {
-		private static final String TYPE_KEY = "formula";
-		private static final String VALUE_KEY = "parameters";
-
-		@Override
-		public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
-			return Stream.of(dynamicOps.createString("formula"), dynamicOps.createString("parameters"));
-		}
-
-		@Override
-		public <T> DataResult<ApplyBonusCount.Formula> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
-			T object = mapLike.get("formula");
-			return object == null
-				? DataResult.error(() -> "Missing type for formula in: " + mapLike)
-				: ApplyBonusCount.FORMULA_TYPE_CODEC.decode(dynamicOps, object).flatMap(pair -> {
-					T objectx = (T)Objects.requireNonNullElseGet(mapLike.get("parameters"), dynamicOps::emptyMap);
-					return ((ApplyBonusCount.FormulaType)pair.getFirst()).codec().decode(dynamicOps, objectx).map(Pair::getFirst);
-				});
-		}
-
-		public <T> RecordBuilder<T> encode(ApplyBonusCount.Formula formula, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
-			ApplyBonusCount.FormulaType formulaType = formula.getType();
-			recordBuilder.add("formula", ApplyBonusCount.FORMULA_TYPE_CODEC.encodeStart(dynamicOps, formulaType));
-			DataResult<T> dataResult = this.encode(formulaType.codec(), formula, dynamicOps);
-			if (dataResult.result().isEmpty() || !Objects.equals(dataResult.result().get(), dynamicOps.emptyMap())) {
-				recordBuilder.add("parameters", dataResult);
-			}
-
-			return recordBuilder;
-		}
-
-		private <T, F extends ApplyBonusCount.Formula> DataResult<T> encode(Codec<F> codec, ApplyBonusCount.Formula formula, DynamicOps<T> dynamicOps) {
-			return codec.encodeStart(dynamicOps, (F)formula);
-		}
-	};
+	private static final MapCodec<ApplyBonusCount.Formula> FORMULA_CODEC = ExtraCodecs.dispatchOptionalValue(
+		"formula", "parameters", FORMULA_TYPE_CODEC, ApplyBonusCount.Formula::getType, ApplyBonusCount.FormulaType::codec
+	);
 	public static final Codec<ApplyBonusCount> CODEC = RecordCodecBuilder.create(
 		instance -> commonFields(instance)
 				.<Holder<Enchantment>, ApplyBonusCount.Formula>and(

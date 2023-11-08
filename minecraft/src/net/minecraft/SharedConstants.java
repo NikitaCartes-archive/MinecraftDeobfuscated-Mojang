@@ -15,22 +15,22 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3688;
+	public static final int WORLD_VERSION = 3690;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "23w44a";
+	public static final String VERSION_STRING = "23w45a";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 765;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 161;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 162;
 	public static final int SNBT_NAG_VERSION = 3678;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 20;
+	public static final int RESOURCE_PACK_FORMAT = 21;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 23;
+	public static final int DATA_PACK_FORMAT = 24;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -85,6 +85,9 @@ public class SharedConstants {
 	public static final boolean DEBUG_SOCIAL_INTERACTIONS = false;
 	public static final boolean DEBUG_VALIDATE_RESOURCE_PATH_CASE = false;
 	public static final boolean DEBUG_UNLOCK_ALL_TRADES = false;
+	public static final boolean DEBUG_BREEZE_MOB = false;
+	public static final boolean DEBUG_TRIAL_SPAWNER_DETECTS_SHEEP_AS_PLAYERS = false;
+	public static final boolean DEBUG_FORCE_ONBOARDING_SCREEN = false;
 	public static final boolean DEBUG_IGNORE_LOCAL_MOB_CAP = false;
 	public static final boolean DEBUG_SMALL_SPAWN = false;
 	public static final boolean DEBUG_DISABLE_LIQUID_SPREADING = false;
@@ -183,7 +186,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741985;
+		return 1073741986;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {
