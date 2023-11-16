@@ -146,7 +146,8 @@ import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ScoreAccess;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.slf4j.Logger;
@@ -585,7 +586,7 @@ public class ServerPlayer extends Player {
 	}
 
 	private void updateScoreForCriteria(ObjectiveCriteria objectiveCriteria, int i) {
-		this.getScoreboard().forAllObjectives(objectiveCriteria, this.getScoreboardName(), score -> score.setScore(i));
+		this.getScoreboard().forAllObjectives(objectiveCriteria, this, scoreAccess -> scoreAccess.set(i));
 	}
 
 	@Override
@@ -629,7 +630,7 @@ public class ServerPlayer extends Player {
 			this.dropAllDeathLoot(damageSource);
 		}
 
-		this.getScoreboard().forAllObjectives(ObjectiveCriteria.DEATH_COUNT, this.getScoreboardName(), Score::increment);
+		this.getScoreboard().forAllObjectives(ObjectiveCriteria.DEATH_COUNT, this, ScoreAccess::increment);
 		LivingEntity livingEntity = this.getKillCredit();
 		if (livingEntity != null) {
 			this.awardStat(Stats.ENTITY_KILLED_BY.get(livingEntity.getType()));
@@ -662,28 +663,26 @@ public class ServerPlayer extends Player {
 		if (entity != this) {
 			super.awardKillScore(entity, i, damageSource);
 			this.increaseScore(i);
-			String string = this.getScoreboardName();
-			String string2 = entity.getScoreboardName();
-			this.getScoreboard().forAllObjectives(ObjectiveCriteria.KILL_COUNT_ALL, string, Score::increment);
+			this.getScoreboard().forAllObjectives(ObjectiveCriteria.KILL_COUNT_ALL, this, ScoreAccess::increment);
 			if (entity instanceof Player) {
 				this.awardStat(Stats.PLAYER_KILLS);
-				this.getScoreboard().forAllObjectives(ObjectiveCriteria.KILL_COUNT_PLAYERS, string, Score::increment);
+				this.getScoreboard().forAllObjectives(ObjectiveCriteria.KILL_COUNT_PLAYERS, this, ScoreAccess::increment);
 			} else {
 				this.awardStat(Stats.MOB_KILLS);
 			}
 
-			this.handleTeamKill(string, string2, ObjectiveCriteria.TEAM_KILL);
-			this.handleTeamKill(string2, string, ObjectiveCriteria.KILLED_BY_TEAM);
+			this.handleTeamKill(this, entity, ObjectiveCriteria.TEAM_KILL);
+			this.handleTeamKill(entity, this, ObjectiveCriteria.KILLED_BY_TEAM);
 			CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(this, entity, damageSource);
 		}
 	}
 
-	private void handleTeamKill(String string, String string2, ObjectiveCriteria[] objectiveCriterias) {
-		PlayerTeam playerTeam = this.getScoreboard().getPlayersTeam(string2);
+	private void handleTeamKill(ScoreHolder scoreHolder, ScoreHolder scoreHolder2, ObjectiveCriteria[] objectiveCriterias) {
+		PlayerTeam playerTeam = this.getScoreboard().getPlayersTeam(scoreHolder2.getScoreboardName());
 		if (playerTeam != null) {
 			int i = playerTeam.getColor().getId();
 			if (i >= 0 && i < objectiveCriterias.length) {
-				this.getScoreboard().forAllObjectives(objectiveCriterias[i], string, Score::increment);
+				this.getScoreboard().forAllObjectives(objectiveCriterias[i], scoreHolder, ScoreAccess::increment);
 			}
 		}
 	}
@@ -1152,13 +1151,13 @@ public class ServerPlayer extends Player {
 	@Override
 	public void awardStat(Stat<?> stat, int i) {
 		this.stats.increment(this, stat, i);
-		this.getScoreboard().forAllObjectives(stat, this.getScoreboardName(), score -> score.add(i));
+		this.getScoreboard().forAllObjectives(stat, this, scoreAccess -> scoreAccess.add(i));
 	}
 
 	@Override
 	public void resetStat(Stat<?> stat) {
 		this.stats.setValue(this, stat, 0);
-		this.getScoreboard().forAllObjectives(stat, this.getScoreboardName(), Score::reset);
+		this.getScoreboard().forAllObjectives(stat, this, ScoreAccess::reset);
 	}
 
 	@Override

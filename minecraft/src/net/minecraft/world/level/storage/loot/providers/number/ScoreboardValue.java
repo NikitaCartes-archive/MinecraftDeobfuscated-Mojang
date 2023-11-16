@@ -9,6 +9,8 @@ import net.minecraft.world.level.storage.loot.providers.score.ContextScoreboardN
 import net.minecraft.world.level.storage.loot.providers.score.ScoreboardNameProvider;
 import net.minecraft.world.level.storage.loot.providers.score.ScoreboardNameProviders;
 import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.ReadOnlyScoreInfo;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 
 public record ScoreboardValue(ScoreboardNameProvider target, String score, float scale) implements NumberProvider {
@@ -41,8 +43,8 @@ public record ScoreboardValue(ScoreboardNameProvider target, String score, float
 
 	@Override
 	public float getFloat(LootContext lootContext) {
-		String string = this.target.getScoreboardName(lootContext);
-		if (string == null) {
+		ScoreHolder scoreHolder = this.target.getScoreHolder(lootContext);
+		if (scoreHolder == null) {
 			return 0.0F;
 		} else {
 			Scoreboard scoreboard = lootContext.getLevel().getScoreboard();
@@ -50,7 +52,8 @@ public record ScoreboardValue(ScoreboardNameProvider target, String score, float
 			if (objective == null) {
 				return 0.0F;
 			} else {
-				return !scoreboard.hasPlayerScore(string, objective) ? 0.0F : (float)scoreboard.getOrCreatePlayerScore(string, objective).getScore() * this.scale;
+				ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(scoreHolder, objective);
+				return readOnlyScoreInfo == null ? 0.0F : (float)readOnlyScoreInfo.value() * this.scale;
 			}
 		}
 	}

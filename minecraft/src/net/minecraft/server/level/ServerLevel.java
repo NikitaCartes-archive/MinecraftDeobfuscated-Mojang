@@ -484,7 +484,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		for (int l = 0; l < i; l++) {
 			if (this.random.nextInt(48) == 0) {
-				this.tickIceAndSnow(bl, this.getBlockRandomPos(j, 0, k, 15));
+				this.tickPrecipitation(this.getBlockRandomPos(j, 0, k, 15));
 			}
 		}
 
@@ -520,7 +520,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		profilerFiller.pop();
 	}
 
-	private void tickIceAndSnow(boolean bl, BlockPos blockPos) {
+	@VisibleForTesting
+	public void tickPrecipitation(BlockPos blockPos) {
 		BlockPos blockPos2 = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos);
 		BlockPos blockPos3 = blockPos2.below();
 		Biome biome = this.getBiome(blockPos2).value();
@@ -528,7 +529,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			this.setBlockAndUpdate(blockPos3, Blocks.ICE.defaultBlockState());
 		}
 
-		if (bl) {
+		if (this.isRaining()) {
 			int i = this.getGameRules().getInt(GameRules.RULE_SNOW_ACCUMULATION_HEIGHT);
 			if (i > 0 && biome.shouldSnow(this, blockPos2)) {
 				BlockState blockState = this.getBlockState(blockPos2);
@@ -706,7 +707,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 	}
 
-	private void resetWeatherCycle() {
+	@VisibleForTesting
+	public void resetWeatherCycle() {
 		this.serverLevelData.setRainTime(0);
 		this.serverLevelData.setRaining(false);
 		this.serverLevelData.setThunderTime(0);

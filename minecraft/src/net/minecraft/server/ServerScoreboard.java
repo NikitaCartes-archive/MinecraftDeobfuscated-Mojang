@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundResetScorePacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
@@ -16,8 +17,10 @@ import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.ScoreboardSaveData;
 
@@ -31,29 +34,35 @@ public class ServerScoreboard extends Scoreboard {
 	}
 
 	@Override
-	public void onScoreChanged(Score score) {
-		super.onScoreChanged(score);
-		if (this.trackedObjectives.contains(score.getObjective())) {
+	protected void onScoreChanged(ScoreHolder scoreHolder, Objective objective, Score score) {
+		super.onScoreChanged(scoreHolder, objective, score);
+		if (this.trackedObjectives.contains(objective)) {
 			this.server
 				.getPlayerList()
-				.broadcastAll(new ClientboundSetScorePacket(ServerScoreboard.Method.CHANGE, score.getObjective().getName(), score.getOwner(), score.getScore()));
+				.broadcastAll(new ClientboundSetScorePacket(scoreHolder.getScoreboardName(), objective.getName(), score.value(), score.display(), score.numberFormat()));
 		}
 
 		this.setDirty();
 	}
 
 	@Override
-	public void onPlayerRemoved(String string) {
-		super.onPlayerRemoved(string);
-		this.server.getPlayerList().broadcastAll(new ClientboundSetScorePacket(ServerScoreboard.Method.REMOVE, null, string, 0));
+	protected void onScoreLockChanged(ScoreHolder scoreHolder, Objective objective) {
+		super.onScoreLockChanged(scoreHolder, objective);
 		this.setDirty();
 	}
 
 	@Override
-	public void onPlayerScoreRemoved(String string, Objective objective) {
-		super.onPlayerScoreRemoved(string, objective);
+	public void onPlayerRemoved(ScoreHolder scoreHolder) {
+		super.onPlayerRemoved(scoreHolder);
+		this.server.getPlayerList().broadcastAll(new ClientboundResetScorePacket(scoreHolder.getScoreboardName(), null));
+		this.setDirty();
+	}
+
+	@Override
+	public void onPlayerScoreRemoved(ScoreHolder scoreHolder, Objective objective) {
+		super.onPlayerScoreRemoved(scoreHolder, objective);
 		if (this.trackedObjectives.contains(objective)) {
-			this.server.getPlayerList().broadcastAll(new ClientboundSetScorePacket(ServerScoreboard.Method.REMOVE, objective.getName(), string, 0));
+			this.server.getPlayerList().broadcastAll(new ClientboundResetScorePacket(scoreHolder.getScoreboardName(), objective.getName()));
 		}
 
 		this.setDirty();
@@ -167,8 +176,12 @@ public class ServerScoreboard extends Scoreboard {
 			}
 		}
 
-		for (Score score : this.getPlayerScores(objective)) {
-			list.add(new ClientboundSetScorePacket(ServerScoreboard.Method.CHANGE, score.getObjective().getName(), score.getOwner(), score.getScore()));
+		for (PlayerScoreEntry playerScoreEntry : this.listPlayerScores(objective)) {
+			list.add(
+				new ClientboundSetScorePacket(
+					playerScoreEntry.owner(), objective.getName(), playerScoreEntry.value(), playerScoreEntry.display(), playerScoreEntry.numberFormatOverride()
+				)
+			);
 		}
 
 		return list;

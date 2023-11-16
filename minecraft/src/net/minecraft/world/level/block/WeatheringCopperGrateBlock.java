@@ -8,7 +8,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class WeatheringCopperGrateBlock extends TransparentBlock implements WeatheringCopper {
+public class WeatheringCopperGrateBlock extends WaterloggedTransparentBlock implements WeatheringCopper {
 	public static final MapCodec<WeatheringCopperGrateBlock> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(WeatheringCopper.WeatherState.CODEC.fieldOf("weathering_state").forGetter(WeatheringCopperGrateBlock::getAge), propertiesCodec())
 				.apply(instance, WeatheringCopperGrateBlock::new)

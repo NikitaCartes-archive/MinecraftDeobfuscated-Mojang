@@ -3,26 +3,33 @@ package net.minecraft.world.scores;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.numbers.NumberFormat;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 
 public class Scoreboard {
+	public static final String HIDDEN_SCORE_PREFIX = "#";
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Map<String, Objective> objectivesByName = Maps.<String, Objective>newHashMap();
 	private final Map<ObjectiveCriteria, List<Objective>> objectivesByCriteria = Maps.<ObjectiveCriteria, List<Objective>>newHashMap();
-	private final Map<String, Map<Objective, Score>> playerScores = Maps.<String, Map<Objective, Score>>newHashMap();
+	private final Map<String, PlayerScores> playerScores = Maps.<String, PlayerScores>newHashMap();
 	private final Map<DisplaySlot, Objective> displayObjectives = new EnumMap(DisplaySlot.class);
 	private final Map<String, PlayerTeam> teamsByName = Maps.<String, PlayerTeam>newHashMap();
 	private final Map<String, PlayerTeam> teamsByPlayer = Maps.<String, PlayerTeam>newHashMap();
@@ -32,11 +39,18 @@ public class Scoreboard {
 		return (Objective)this.objectivesByName.get(string);
 	}
 
-	public Objective addObjective(String string, ObjectiveCriteria objectiveCriteria, Component component, ObjectiveCriteria.RenderType renderType) {
+	public Objective addObjective(
+		String string,
+		ObjectiveCriteria objectiveCriteria,
+		Component component,
+		ObjectiveCriteria.RenderType renderType,
+		boolean bl,
+		@Nullable NumberFormat numberFormat
+	) {
 		if (this.objectivesByName.containsKey(string)) {
 			throw new IllegalArgumentException("An objective with the name '" + string + "' already exists!");
 		} else {
-			Objective objective = new Objective(this, string, objectiveCriteria, component, renderType);
+			Objective objective = new Objective(this, string, objectiveCriteria, component, renderType, bl, numberFormat);
 			((List)this.objectivesByCriteria.computeIfAbsent(objectiveCriteria, objectiveCriteriax -> Lists.newArrayList())).add(objective);
 			this.objectivesByName.put(string, objective);
 			this.onObjectiveAdded(objective);
@@ -44,41 +58,120 @@ public class Scoreboard {
 		}
 	}
 
-	public final void forAllObjectives(ObjectiveCriteria objectiveCriteria, String string, Consumer<Score> consumer) {
+	public final void forAllObjectives(ObjectiveCriteria objectiveCriteria, ScoreHolder scoreHolder, Consumer<ScoreAccess> consumer) {
 		((List)this.objectivesByCriteria.getOrDefault(objectiveCriteria, Collections.emptyList()))
-			.forEach(objective -> consumer.accept(this.getOrCreatePlayerScore(string, objective)));
+			.forEach(objective -> consumer.accept(this.getOrCreatePlayerScore(scoreHolder, objective, true)));
 	}
 
-	public boolean hasPlayerScore(String string, Objective objective) {
-		Map<Objective, Score> map = (Map<Objective, Score>)this.playerScores.get(string);
-		if (map == null) {
-			return false;
-		} else {
-			Score score = (Score)map.get(objective);
-			return score != null;
-		}
+	private PlayerScores getOrCreatePlayerInfo(String string) {
+		return (PlayerScores)this.playerScores.computeIfAbsent(string, stringx -> new PlayerScores());
 	}
 
-	public Score getOrCreatePlayerScore(String string, Objective objective) {
-		Map<Objective, Score> map = (Map<Objective, Score>)this.playerScores.computeIfAbsent(string, stringx -> Maps.newHashMap());
-		return (Score)map.computeIfAbsent(objective, objectivex -> {
-			Score score = new Score(this, objectivex, string);
-			score.setScore(0);
-			return score;
-		});
+	public ScoreAccess getOrCreatePlayerScore(ScoreHolder scoreHolder, Objective objective) {
+		return this.getOrCreatePlayerScore(scoreHolder, objective, false);
 	}
 
-	public Collection<Score> getPlayerScores(Objective objective) {
-		List<Score> list = Lists.<Score>newArrayList();
-
-		for (Map<Objective, Score> map : this.playerScores.values()) {
-			Score score = (Score)map.get(objective);
-			if (score != null) {
-				list.add(score);
+	public ScoreAccess getOrCreatePlayerScore(ScoreHolder scoreHolder, Objective objective, boolean bl) {
+		final boolean bl2 = bl || !objective.getCriteria().isReadOnly();
+		PlayerScores playerScores = this.getOrCreatePlayerInfo(scoreHolder.getScoreboardName());
+		final MutableBoolean mutableBoolean = new MutableBoolean();
+		final Score score = playerScores.getOrCreate(objective, scorex -> mutableBoolean.setTrue());
+		return new ScoreAccess() {
+			@Override
+			public int get() {
+				return score.value();
 			}
-		}
 
-		list.sort(Score.SCORE_COMPARATOR);
+			@Override
+			public void set(int i) {
+				if (!bl2) {
+					throw new IllegalStateException("Cannot modify read-only score");
+				} else {
+					boolean bl = mutableBoolean.isTrue();
+					if (objective.displayAutoUpdate()) {
+						Component component = scoreHolder.getDisplayName();
+						if (component != null && !component.equals(score.display())) {
+							score.display(component);
+							bl = true;
+						}
+					}
+
+					if (i != score.value()) {
+						score.value(i);
+						bl = true;
+					}
+
+					if (bl) {
+						this.sendScoreToPlayers();
+					}
+				}
+			}
+
+			@Nullable
+			@Override
+			public Component display() {
+				return score.display();
+			}
+
+			@Override
+			public void display(@Nullable Component component) {
+				if (mutableBoolean.isTrue() || !Objects.equals(component, score.display())) {
+					score.display(component);
+					this.sendScoreToPlayers();
+				}
+			}
+
+			@Override
+			public void numberFormatOverride(@Nullable NumberFormat numberFormat) {
+				score.numberFormat(numberFormat);
+				this.sendScoreToPlayers();
+			}
+
+			@Override
+			public boolean locked() {
+				return score.isLocked();
+			}
+
+			@Override
+			public void unlock() {
+				this.setLocked(false);
+			}
+
+			@Override
+			public void lock() {
+				this.setLocked(true);
+			}
+
+			private void setLocked(boolean bl) {
+				score.setLocked(bl);
+				if (mutableBoolean.isTrue()) {
+					this.sendScoreToPlayers();
+				}
+
+				Scoreboard.this.onScoreLockChanged(scoreHolder, objective);
+			}
+
+			private void sendScoreToPlayers() {
+				Scoreboard.this.onScoreChanged(scoreHolder, objective, score);
+				mutableBoolean.setFalse();
+			}
+		};
+	}
+
+	@Nullable
+	public ReadOnlyScoreInfo getPlayerScoreInfo(ScoreHolder scoreHolder, Objective objective) {
+		PlayerScores playerScores = (PlayerScores)this.playerScores.get(scoreHolder.getScoreboardName());
+		return playerScores != null ? playerScores.get(objective) : null;
+	}
+
+	public Collection<PlayerScoreEntry> listPlayerScores(Objective objective) {
+		List<PlayerScoreEntry> list = new ArrayList();
+		this.playerScores.forEach((string, playerScores) -> {
+			Score score = playerScores.get(objective);
+			if (score != null) {
+				list.add(new PlayerScoreEntry(string, score.value(), score.display(), score.numberFormat()));
+			}
+		});
 		return list;
 	}
 
@@ -90,39 +183,35 @@ public class Scoreboard {
 		return this.objectivesByName.keySet();
 	}
 
-	public Collection<String> getTrackedPlayers() {
-		return Lists.<String>newArrayList(this.playerScores.keySet());
+	public Collection<ScoreHolder> getTrackedPlayers() {
+		return this.playerScores.keySet().stream().map(ScoreHolder::forNameOnly).toList();
 	}
 
-	public void resetPlayerScore(String string, @Nullable Objective objective) {
-		if (objective == null) {
-			Map<Objective, Score> map = (Map<Objective, Score>)this.playerScores.remove(string);
-			if (map != null) {
-				this.onPlayerRemoved(string);
-			}
-		} else {
-			Map<Objective, Score> map = (Map<Objective, Score>)this.playerScores.get(string);
-			if (map != null) {
-				Score score = (Score)map.remove(objective);
-				if (map.size() < 1) {
-					Map<Objective, Score> map2 = (Map<Objective, Score>)this.playerScores.remove(string);
-					if (map2 != null) {
-						this.onPlayerRemoved(string);
-					}
-				} else if (score != null) {
-					this.onPlayerScoreRemoved(string, objective);
+	public void resetAllPlayerScores(ScoreHolder scoreHolder) {
+		PlayerScores playerScores = (PlayerScores)this.playerScores.remove(scoreHolder.getScoreboardName());
+		if (playerScores != null) {
+			this.onPlayerRemoved(scoreHolder);
+		}
+	}
+
+	public void resetSinglePlayerScore(ScoreHolder scoreHolder, Objective objective) {
+		PlayerScores playerScores = (PlayerScores)this.playerScores.get(scoreHolder.getScoreboardName());
+		if (playerScores != null) {
+			boolean bl = playerScores.remove(objective);
+			if (!playerScores.hasScores()) {
+				PlayerScores playerScores2 = (PlayerScores)this.playerScores.remove(scoreHolder.getScoreboardName());
+				if (playerScores2 != null) {
+					this.onPlayerRemoved(scoreHolder);
 				}
+			} else if (bl) {
+				this.onPlayerScoreRemoved(scoreHolder, objective);
 			}
 		}
 	}
 
-	public Map<Objective, Score> getPlayerScores(String string) {
-		Map<Objective, Score> map = (Map<Objective, Score>)this.playerScores.get(string);
-		if (map == null) {
-			map = Maps.<Objective, Score>newHashMap();
-		}
-
-		return map;
+	public Object2IntMap<Objective> listPlayerScores(ScoreHolder scoreHolder) {
+		PlayerScores playerScores = (PlayerScores)this.playerScores.get(scoreHolder.getScoreboardName());
+		return playerScores != null ? playerScores.listScores() : Object2IntMaps.emptyMap();
 	}
 
 	public void removeObjective(Objective objective) {
@@ -139,8 +228,8 @@ public class Scoreboard {
 			list.remove(objective);
 		}
 
-		for (Map<Objective, Score> map : this.playerScores.values()) {
-			map.remove(objective);
+		for (PlayerScores playerScores : this.playerScores.values()) {
+			playerScores.remove(objective);
 		}
 
 		this.onObjectiveRemoved(objective);
@@ -233,13 +322,16 @@ public class Scoreboard {
 	public void onObjectiveRemoved(Objective objective) {
 	}
 
-	public void onScoreChanged(Score score) {
+	protected void onScoreChanged(ScoreHolder scoreHolder, Objective objective, Score score) {
 	}
 
-	public void onPlayerRemoved(String string) {
+	protected void onScoreLockChanged(ScoreHolder scoreHolder, Objective objective) {
 	}
 
-	public void onPlayerScoreRemoved(String string, Objective objective) {
+	public void onPlayerRemoved(ScoreHolder scoreHolder) {
+	}
+
+	public void onPlayerScoreRemoved(ScoreHolder scoreHolder, Objective objective) {
 	}
 
 	public void onTeamAdded(PlayerTeam playerTeam) {
@@ -253,20 +345,17 @@ public class Scoreboard {
 
 	public void entityRemoved(Entity entity) {
 		if (!(entity instanceof Player) && !entity.isAlive()) {
-			String string = entity.getStringUUID();
-			this.resetPlayerScore(string, null);
-			this.removePlayerFromTeam(string);
+			this.resetAllPlayerScores(entity);
+			this.removePlayerFromTeam(entity.getScoreboardName());
 		}
 	}
 
 	protected ListTag savePlayerScores() {
 		ListTag listTag = new ListTag();
-		this.playerScores.values().stream().map(Map::values).forEach(collection -> collection.forEach(score -> {
-				CompoundTag compoundTag = new CompoundTag();
-				compoundTag.putString("Name", score.getOwner());
-				compoundTag.putString("Objective", score.getObjective().getName());
-				compoundTag.putInt("Score", score.getScore());
-				compoundTag.putBoolean("Locked", score.isLocked());
+		this.playerScores.forEach((string, playerScores) -> playerScores.listRawScores().forEach((objective, score) -> {
+				CompoundTag compoundTag = score.write();
+				compoundTag.putString("Name", string);
+				compoundTag.putString("Objective", objective.getName());
 				listTag.add(compoundTag);
 			}));
 		return listTag;
@@ -275,17 +364,14 @@ public class Scoreboard {
 	protected void loadPlayerScores(ListTag listTag) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
+			Score score = Score.read(compoundTag);
 			String string = compoundTag.getString("Name");
 			String string2 = compoundTag.getString("Objective");
 			Objective objective = this.getObjective(string2);
 			if (objective == null) {
 				LOGGER.error("Unknown objective {} for name {}, ignoring", string2, string);
 			} else {
-				Score score = this.getOrCreatePlayerScore(string, objective);
-				score.setScore(compoundTag.getInt("Score"));
-				if (compoundTag.contains("Locked")) {
-					score.setLocked(compoundTag.getBoolean("Locked"));
-				}
+				this.getOrCreatePlayerInfo(string).setScore(objective, score);
 			}
 		}
 	}

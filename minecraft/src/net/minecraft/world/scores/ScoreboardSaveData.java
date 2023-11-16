@@ -4,8 +4,11 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.numbers.NumberFormat;
+import net.minecraft.network.chat.numbers.NumberFormatTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.slf4j.Logger;
@@ -122,7 +125,9 @@ public class ScoreboardSaveData extends SavedData {
 			String string2 = compoundTag.getString("Name");
 			Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
 			ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.byId(compoundTag.getString("RenderType"));
-			this.scoreboard.addObjective(string2, objectiveCriteria, component, renderType);
+			boolean bl = compoundTag.getBoolean("display_auto_update");
+			NumberFormat numberFormat = (NumberFormat)NumberFormatTypes.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("format")).result().orElse(null);
+			this.scoreboard.addObjective(string2, objectiveCriteria, component, renderType, bl, numberFormat);
 		}
 	}
 
@@ -190,6 +195,12 @@ public class ScoreboardSaveData extends SavedData {
 			compoundTag.putString("CriteriaName", objective.getCriteria().getName());
 			compoundTag.putString("DisplayName", Component.Serializer.toJson(objective.getDisplayName()));
 			compoundTag.putString("RenderType", objective.getRenderType().getId());
+			compoundTag.putBoolean("display_auto_update", objective.displayAutoUpdate());
+			NumberFormat numberFormat = objective.numberFormat();
+			if (numberFormat != null) {
+				NumberFormatTypes.CODEC.encodeStart(NbtOps.INSTANCE, numberFormat).result().ifPresent(tag -> compoundTag.put("format", tag));
+			}
+
 			listTag.add(compoundTag);
 		}
 

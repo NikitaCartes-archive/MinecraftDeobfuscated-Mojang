@@ -13,6 +13,7 @@ import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import net.minecraft.world.scores.Scoreboard;
 
 public record EntityHasScoreCondition(Map<String, IntRange> scores, LootContext.EntityTarget entityTarget) implements LootItemCondition {
@@ -59,8 +60,8 @@ public record EntityHasScoreCondition(Map<String, IntRange> scores, LootContext.
 		if (objective == null) {
 			return false;
 		} else {
-			String string2 = entity.getScoreboardName();
-			return !scoreboard.hasPlayerScore(string2, objective) ? false : intRange.test(lootContext, scoreboard.getOrCreatePlayerScore(string2, objective).getScore());
+			ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(entity, objective);
+			return readOnlyScoreInfo == null ? false : intRange.test(lootContext, readOnlyScoreInfo.value());
 		}
 	}
 

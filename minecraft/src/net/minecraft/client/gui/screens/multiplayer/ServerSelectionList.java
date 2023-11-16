@@ -77,8 +77,8 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	private final ServerSelectionList.Entry lanHeader = new ServerSelectionList.LANHeader();
 	private final List<ServerSelectionList.NetworkServerEntry> networkServers = Lists.<ServerSelectionList.NetworkServerEntry>newArrayList();
 
-	public ServerSelectionList(JoinMultiplayerScreen joinMultiplayerScreen, Minecraft minecraft, int i, int j, int k, int l, int m) {
-		super(minecraft, i, j, k, l, m);
+	public ServerSelectionList(JoinMultiplayerScreen joinMultiplayerScreen, Minecraft minecraft, int i, int j, int k, int l) {
+		super(minecraft, i, j, k, l);
 		this.screen = joinMultiplayerScreen;
 	}
 
@@ -125,7 +125,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			int k = j - this.networkServers.size() + this.children().size();
 			int l = this.getRowTop(k);
 			int m = this.getRowBottom(k);
-			if (m >= this.y0 && l <= this.y1) {
+			if (m >= this.getY() && l <= this.getBottom()) {
 				this.minecraft.getNarrator().say(Component.translatable("multiplayer.lan.server_found", networkServerEntry.getServerNarration()));
 			}
 		}

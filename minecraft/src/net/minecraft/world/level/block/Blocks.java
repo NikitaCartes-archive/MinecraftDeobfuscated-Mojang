@@ -6654,15 +6654,17 @@ public class Blocks {
 		"oxidized_copper_grate",
 		new WeatheringCopperGrateBlock(WeatheringCopper.WeatherState.OXIDIZED, BlockBehaviour.Properties.ofFullCopy(COPPER_GRATE).mapColor(MapColor.WARPED_NYLIUM))
 	);
-	public static final Block WAXED_COPPER_GRATE = register("waxed_copper_grate", new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(COPPER_GRATE)));
+	public static final Block WAXED_COPPER_GRATE = register(
+		"waxed_copper_grate", new WaterloggedTransparentBlock(BlockBehaviour.Properties.ofFullCopy(COPPER_GRATE))
+	);
 	public static final Block WAXED_EXPOSED_COPPER_GRATE = register(
-		"waxed_exposed_copper_grate", new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER_GRATE))
+		"waxed_exposed_copper_grate", new WaterloggedTransparentBlock(BlockBehaviour.Properties.ofFullCopy(EXPOSED_COPPER_GRATE))
 	);
 	public static final Block WAXED_WEATHERED_COPPER_GRATE = register(
-		"waxed_weathered_copper_grate", new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER_GRATE))
+		"waxed_weathered_copper_grate", new WaterloggedTransparentBlock(BlockBehaviour.Properties.ofFullCopy(WEATHERED_COPPER_GRATE))
 	);
 	public static final Block WAXED_OXIDIZED_COPPER_GRATE = register(
-		"waxed_oxidized_copper_grate", new TransparentBlock(BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER_GRATE))
+		"waxed_oxidized_copper_grate", new WaterloggedTransparentBlock(BlockBehaviour.Properties.ofFullCopy(OXIDIZED_COPPER_GRATE))
 	);
 	public static final Block COPPER_BULB = register(
 		"copper_bulb",

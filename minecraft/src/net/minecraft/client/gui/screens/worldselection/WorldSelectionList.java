@@ -92,9 +92,9 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 	private final WorldSelectionList.LoadingHeader loadingHeader;
 
 	public WorldSelectionList(
-		SelectWorldScreen selectWorldScreen, Minecraft minecraft, int i, int j, int k, int l, int m, String string, @Nullable WorldSelectionList worldSelectionList
+		SelectWorldScreen selectWorldScreen, Minecraft minecraft, int i, int j, int k, int l, String string, @Nullable WorldSelectionList worldSelectionList
 	) {
-		super(minecraft, i, j, k, l, m);
+		super(minecraft, i, j, k, l);
 		this.screen = selectWorldScreen;
 		this.loadingHeader = new WorldSelectionList.LoadingHeader(minecraft);
 		this.filter = string;
@@ -144,13 +144,13 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		List<LevelSummary> list = this.pollLevelsIgnoreErrors();
 		if (list != this.currentlyDisplayedLevels) {
 			this.handleNewLevels(list);
 		}
 
-		super.render(guiGraphics, i, j, f);
+		super.renderWidget(guiGraphics, i, j, f);
 	}
 
 	private void handleNewLevels(@Nullable List<LevelSummary> list) {
@@ -249,11 +249,11 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 	}
 
 	@Override
-	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 		if (this.children().contains(this.loadingHeader)) {
 			this.loadingHeader.updateNarration(narrationElementOutput);
 		} else {
-			super.updateNarration(narrationElementOutput);
+			super.updateWidgetNarration(narrationElementOutput);
 		}
 	}
 

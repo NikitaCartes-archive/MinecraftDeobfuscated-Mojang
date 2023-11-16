@@ -108,9 +108,7 @@ public abstract class RecipeProvider implements DataProvider {
 	protected abstract void buildRecipes(RecipeOutput recipeOutput);
 
 	protected static void generateForEnabledBlockFamilies(RecipeOutput recipeOutput, FeatureFlagSet featureFlagSet) {
-		BlockFamilies.getAllFamilies()
-			.filter(blockFamily -> blockFamily.shouldGenerateRecipe(featureFlagSet))
-			.forEach(blockFamily -> generateRecipes(recipeOutput, blockFamily));
+		BlockFamilies.getAllFamilies().filter(BlockFamily::shouldGenerateRecipe).forEach(blockFamily -> generateRecipes(recipeOutput, blockFamily, featureFlagSet));
 	}
 
 	protected static void oneToOneConversionRecipe(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2, @Nullable String string) {
@@ -579,15 +577,19 @@ public abstract class RecipeProvider implements DataProvider {
 			.save(recipeOutput, getItemName(itemLike2) + "_from_" + string);
 	}
 
-	protected static void waxRecipes(RecipeOutput recipeOutput) {
+	protected static void waxRecipes(RecipeOutput recipeOutput, FeatureFlagSet featureFlagSet) {
 		((BiMap)HoneycombItem.WAXABLES.get())
 			.forEach(
-				(block, block2) -> ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, block2)
-						.requires(block)
-						.requires(Items.HONEYCOMB)
-						.group(getItemName(block2))
-						.unlockedBy(getHasName(block), has(block))
-						.save(recipeOutput, getConversionRecipeName(block2, Items.HONEYCOMB))
+				(block, block2) -> {
+					if (block2.requiredFeatures().isSubsetOf(featureFlagSet)) {
+						ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, block2)
+							.requires(block)
+							.requires(Items.HONEYCOMB)
+							.group(getItemName(block2))
+							.unlockedBy(getHasName(block), has(block))
+							.save(recipeOutput, getConversionRecipeName(block2, Items.HONEYCOMB));
+					}
+				}
 			);
 	}
 
@@ -613,22 +615,24 @@ public abstract class RecipeProvider implements DataProvider {
 			.save(recipeOutput);
 	}
 
-	protected static void generateRecipes(RecipeOutput recipeOutput, BlockFamily blockFamily) {
+	protected static void generateRecipes(RecipeOutput recipeOutput, BlockFamily blockFamily, FeatureFlagSet featureFlagSet) {
 		blockFamily.getVariants()
 			.forEach(
 				(variant, block) -> {
-					BiFunction<ItemLike, ItemLike, RecipeBuilder> biFunction = (BiFunction<ItemLike, ItemLike, RecipeBuilder>)SHAPE_BUILDERS.get(variant);
-					ItemLike itemLike = getBaseBlock(blockFamily, variant);
-					if (biFunction != null) {
-						RecipeBuilder recipeBuilder = (RecipeBuilder)biFunction.apply(block, itemLike);
-						blockFamily.getRecipeGroupPrefix()
-							.ifPresent(string -> recipeBuilder.group(string + (variant == BlockFamily.Variant.CUT ? "" : "_" + variant.getRecipeGroup())));
-						recipeBuilder.unlockedBy((String)blockFamily.getRecipeUnlockedBy().orElseGet(() -> getHasName(itemLike)), has(itemLike));
-						recipeBuilder.save(recipeOutput);
-					}
+					if (block.requiredFeatures().isSubsetOf(featureFlagSet)) {
+						BiFunction<ItemLike, ItemLike, RecipeBuilder> biFunction = (BiFunction<ItemLike, ItemLike, RecipeBuilder>)SHAPE_BUILDERS.get(variant);
+						ItemLike itemLike = getBaseBlock(blockFamily, variant);
+						if (biFunction != null) {
+							RecipeBuilder recipeBuilder = (RecipeBuilder)biFunction.apply(block, itemLike);
+							blockFamily.getRecipeGroupPrefix()
+								.ifPresent(string -> recipeBuilder.group(string + (variant == BlockFamily.Variant.CUT ? "" : "_" + variant.getRecipeGroup())));
+							recipeBuilder.unlockedBy((String)blockFamily.getRecipeUnlockedBy().orElseGet(() -> getHasName(itemLike)), has(itemLike));
+							recipeBuilder.save(recipeOutput);
+						}
 
-					if (variant == BlockFamily.Variant.CRACKED) {
-						smeltingResultFromBase(recipeOutput, block, itemLike);
+						if (variant == BlockFamily.Variant.CRACKED) {
+							smeltingResultFromBase(recipeOutput, block, itemLike);
+						}
 					}
 				}
 			);

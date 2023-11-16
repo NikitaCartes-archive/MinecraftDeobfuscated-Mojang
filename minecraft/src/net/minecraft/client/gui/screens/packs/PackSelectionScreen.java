@@ -95,12 +95,14 @@ public class PackSelectionScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.availablePackList = new TransferableSelectionList(this.minecraft, this, 200, this.height, Component.translatable("pack.available.title"));
-		this.availablePackList.setLeftPos(this.width / 2 - 4 - 200);
-		this.addWidget(this.availablePackList);
-		this.selectedPackList = new TransferableSelectionList(this.minecraft, this, 200, this.height, Component.translatable("pack.selected.title"));
-		this.selectedPackList.setLeftPos(this.width / 2 + 4);
-		this.addWidget(this.selectedPackList);
+		this.availablePackList = this.addRenderableWidget(
+			new TransferableSelectionList(this.minecraft, this, 200, this.height, Component.translatable("pack.available.title"))
+		);
+		this.availablePackList.setX(this.width / 2 - 4 - 200);
+		this.selectedPackList = this.addRenderableWidget(
+			new TransferableSelectionList(this.minecraft, this, 200, this.height, Component.translatable("pack.selected.title"))
+		);
+		this.selectedPackList.setX(this.width / 2 + 4);
 		this.addRenderableWidget(
 			Button.builder(Component.translatable("pack.openFolder"), button -> Util.getPlatform().openUri(this.packDir.toUri()))
 				.bounds(this.width / 2 - 154, this.height - 48, 150, 20)
@@ -171,8 +173,6 @@ public class PackSelectionScreen extends Screen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		this.availablePackList.render(guiGraphics, i, j, f);
-		this.selectedPackList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		guiGraphics.drawCenteredString(this.font, DRAG_AND_DROP, this.width / 2, 20, 16777215);
 	}

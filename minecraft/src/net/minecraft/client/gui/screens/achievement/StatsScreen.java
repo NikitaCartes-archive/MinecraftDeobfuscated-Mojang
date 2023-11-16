@@ -119,7 +119,6 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			);
 		} else {
 			super.render(guiGraphics, i, j, f);
-			this.getActiveList().render(guiGraphics, i, j, f);
 			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
 		}
 	}
@@ -144,18 +143,13 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		return !this.isLoading;
 	}
 
-	@Nullable
-	public ObjectSelectionList<?> getActiveList() {
-		return this.activeList;
-	}
-
 	public void setActiveList(@Nullable ObjectSelectionList<?> objectSelectionList) {
 		if (this.activeList != null) {
 			this.removeWidget(this.activeList);
 		}
 
 		if (objectSelectionList != null) {
-			this.addWidget(objectSelectionList);
+			this.addRenderableWidget(objectSelectionList);
 			this.activeList = objectSelectionList;
 		}
 	}
@@ -180,7 +174,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	@Environment(EnvType.CLIENT)
 	class GeneralStatisticsList extends ObjectSelectionList<StatsScreen.GeneralStatisticsList.Entry> {
 		public GeneralStatisticsList(Minecraft minecraft) {
-			super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 10);
+			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 96, 32, 10);
 			ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<>(Stats.CUSTOM.iterator());
 			objectArrayList.sort(Comparator.comparing(statx -> I18n.get(StatsScreen.getTranslationKey(statx))));
 
@@ -236,7 +230,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		protected int sortOrder;
 
 		public ItemStatisticsList(Minecraft minecraft) {
-			super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 20);
+			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 96, 32, 20);
 			this.blockColumns = Lists.<StatType<Block>>newArrayList();
 			this.blockColumns.add(Stats.BLOCK_MINED);
 			this.itemColumns = Lists.<StatType<Item>>newArrayList(Stats.ITEM_BROKEN, Stats.ITEM_CRAFTED, Stats.ITEM_USED, Stats.ITEM_PICKED_UP, Stats.ITEM_DROPPED);
@@ -348,7 +342,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
 		@Override
 		protected void renderDecorations(GuiGraphics guiGraphics, int i, int j) {
-			if (j >= this.y0 && j <= this.y1) {
+			if (j >= this.getY() && j <= this.getBottom()) {
 				StatsScreen.ItemStatisticsList.ItemRow itemRow = this.getHovered();
 				int k = (this.width - this.getRowWidth()) / 2;
 				if (itemRow != null) {
@@ -474,7 +468,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	@Environment(EnvType.CLIENT)
 	class MobsStatisticsList extends ObjectSelectionList<StatsScreen.MobsStatisticsList.MobRow> {
 		public MobsStatisticsList(Minecraft minecraft) {
-			super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 9 * 4);
+			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 96, 32, 9 * 4);
 
 			for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
 				if (StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType)) > 0 || StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType)) > 0

@@ -18,6 +18,7 @@ import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 
@@ -103,9 +104,7 @@ public class TeamCommand {
 							Commands.argument("team", TeamArgument.team())
 								.executes(
 									commandContext -> joinTeam(
-											commandContext.getSource(),
-											TeamArgument.getTeam(commandContext, "team"),
-											Collections.singleton(commandContext.getSource().getEntityOrException().getScoreboardName())
+											commandContext.getSource(), TeamArgument.getTeam(commandContext, "team"), Collections.singleton(commandContext.getSource().getEntityOrException())
 										)
 								)
 								.then(
@@ -283,15 +282,19 @@ public class TeamCommand {
 		);
 	}
 
-	private static int leaveTeam(CommandSourceStack commandSourceStack, Collection<String> collection) {
+	private static Component getFirstMemberName(Collection<ScoreHolder> collection) {
+		return ((ScoreHolder)collection.iterator().next()).getFeedbackDisplayName();
+	}
+
+	private static int leaveTeam(CommandSourceStack commandSourceStack, Collection<ScoreHolder> collection) {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
 
-		for (String string : collection) {
-			scoreboard.removePlayerFromTeam(string);
+		for (ScoreHolder scoreHolder : collection) {
+			scoreboard.removePlayerFromTeam(scoreHolder.getScoreboardName());
 		}
 
 		if (collection.size() == 1) {
-			commandSourceStack.sendSuccess(() -> Component.translatable("commands.team.leave.success.single", collection.iterator().next()), true);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.team.leave.success.single", getFirstMemberName(collection)), true);
 		} else {
 			commandSourceStack.sendSuccess(() -> Component.translatable("commands.team.leave.success.multiple", collection.size()), true);
 		}
@@ -299,16 +302,16 @@ public class TeamCommand {
 		return collection.size();
 	}
 
-	private static int joinTeam(CommandSourceStack commandSourceStack, PlayerTeam playerTeam, Collection<String> collection) {
+	private static int joinTeam(CommandSourceStack commandSourceStack, PlayerTeam playerTeam, Collection<ScoreHolder> collection) {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
 
-		for (String string : collection) {
-			scoreboard.addPlayerToTeam(string, playerTeam);
+		for (ScoreHolder scoreHolder : collection) {
+			scoreboard.addPlayerToTeam(scoreHolder.getScoreboardName(), playerTeam);
 		}
 
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.team.join.success.single", collection.iterator().next(), playerTeam.getFormattedDisplayName()), true
+				() -> Component.translatable("commands.team.join.success.single", getFirstMemberName(collection), playerTeam.getFormattedDisplayName()), true
 			);
 		} else {
 			commandSourceStack.sendSuccess(

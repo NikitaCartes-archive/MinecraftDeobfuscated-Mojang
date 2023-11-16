@@ -59,7 +59,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.backupObjectSelectionList = new RealmsBackupScreen.BackupObjectSelectionList();
 		(new Thread("Realms-fetch-backups") {
 			public void run() {
 				RealmsClient realmsClient = RealmsClient.create();
@@ -95,7 +94,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width - 100, this.height - 35, 85, 20).build()
 		);
-		this.addWidget(this.backupObjectSelectionList);
+		this.backupObjectSelectionList = this.addRenderableWidget(new RealmsBackupScreen.BackupObjectSelectionList());
 		this.magicalSpecialHackyFocus(this.backupObjectSelectionList);
 		this.updateButtonStates();
 	}
@@ -178,7 +177,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		this.backupObjectSelectionList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, -1);
 		if (this.noBackups) {
 			guiGraphics.drawString(this.font, NO_BACKUPS_LABEL, 20, this.height / 2 - 10, -1, false);
@@ -190,7 +188,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class BackupObjectSelectionList extends RealmsObjectSelectionList<RealmsBackupScreen.Entry> {
 		public BackupObjectSelectionList() {
-			super(RealmsBackupScreen.this.width - 150, RealmsBackupScreen.this.height, 32, RealmsBackupScreen.this.height - 15, 36);
+			super(RealmsBackupScreen.this.width - 150, RealmsBackupScreen.this.height - 47, 32, 36);
 		}
 
 		public void addEntry(Backup backup) {

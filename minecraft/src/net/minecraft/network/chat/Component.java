@@ -10,12 +10,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.Message;
 import com.mojang.serialization.JsonOps;
 import java.io.StringReader;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -219,26 +217,6 @@ public interface Component extends Message, FormattedText {
 
 	public static class Serializer {
 		private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
-		private static final Field JSON_READER_POS = Util.make(() -> {
-			try {
-				new JsonReader(new StringReader(""));
-				Field field = JsonReader.class.getDeclaredField("pos");
-				field.setAccessible(true);
-				return field;
-			} catch (NoSuchFieldException var1) {
-				throw new IllegalStateException("Couldn't get field 'pos' for JsonReader", var1);
-			}
-		});
-		private static final Field JSON_READER_LINESTART = Util.make(() -> {
-			try {
-				new JsonReader(new StringReader(""));
-				Field field = JsonReader.class.getDeclaredField("lineStart");
-				field.setAccessible(true);
-				return field;
-			} catch (NoSuchFieldException var1) {
-				throw new IllegalStateException("Couldn't get field 'lineStart' for JsonReader", var1);
-			}
-		});
 
 		private Serializer() {
 		}
@@ -276,32 +254,6 @@ public interface Component extends Message, FormattedText {
 			jsonReader.setLenient(true);
 			JsonElement jsonElement = JsonParser.parseReader(jsonReader);
 			return jsonElement == null ? null : deserialize(jsonElement);
-		}
-
-		@Nullable
-		public static MutableComponent fromJson(com.mojang.brigadier.StringReader stringReader) {
-			JsonReader jsonReader = new JsonReader(new StringReader(stringReader.getRemaining()));
-			jsonReader.setLenient(false);
-
-			MutableComponent var3;
-			try {
-				JsonElement jsonElement = Streams.parse(jsonReader);
-				var3 = jsonElement != null ? deserialize(jsonElement) : null;
-			} catch (StackOverflowError var7) {
-				throw new JsonParseException(var7);
-			} finally {
-				stringReader.setCursor(stringReader.getCursor() + getPos(jsonReader));
-			}
-
-			return var3;
-		}
-
-		private static int getPos(JsonReader jsonReader) {
-			try {
-				return JSON_READER_POS.getInt(jsonReader) - JSON_READER_LINESTART.getInt(jsonReader);
-			} catch (IllegalAccessException var2) {
-				throw new IllegalStateException("Couldn't read position of JsonReader", var2);
-			}
 		}
 	}
 

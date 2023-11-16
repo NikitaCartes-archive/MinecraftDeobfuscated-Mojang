@@ -114,6 +114,8 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 
 	void handleSetScore(ClientboundSetScorePacket clientboundSetScorePacket);
 
+	void handleResetScore(ClientboundResetScorePacket clientboundResetScorePacket);
+
 	void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket clientboundSetDefaultSpawnPositionPacket);
 
 	void handleSetTime(ClientboundSetTimePacket clientboundSetTimePacket);

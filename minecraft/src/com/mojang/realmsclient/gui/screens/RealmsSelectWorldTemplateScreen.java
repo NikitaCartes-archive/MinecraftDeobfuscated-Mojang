@@ -49,7 +49,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	private static final int BUTTON_SPACING = 10;
 	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 	final Consumer<WorldTemplate> callback;
-	RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
+	RealmsSelectWorldTemplateScreen.WorldTemplateList worldTemplateList;
 	private final RealmsServer.WorldType worldType;
 	private Button selectButton;
 	private Button trailerButton;
@@ -74,12 +74,10 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		this.callback = consumer;
 		this.worldType = worldType;
 		if (worldTemplatePaginatedList == null) {
-			this.worldTemplateObjectSelectionList = new RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList();
+			this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList();
 			this.fetchTemplatesAsync(new WorldTemplatePaginatedList(10));
 		} else {
-			this.worldTemplateObjectSelectionList = new RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList(
-				Lists.<WorldTemplate>newArrayList(worldTemplatePaginatedList.templates)
-			);
+			this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList(Lists.<WorldTemplate>newArrayList(worldTemplatePaginatedList.templates));
 			this.fetchTemplatesAsync(worldTemplatePaginatedList);
 		}
 	}
@@ -91,10 +89,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.layout.addToHeader(new StringWidget(this.title, this.font));
-		this.worldTemplateObjectSelectionList = new RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList(
-			this.worldTemplateObjectSelectionList.getTemplates()
-		);
-		this.addRenderableWidget(this.worldTemplateObjectSelectionList);
+		this.worldTemplateList = this.layout.addToContents(new RealmsSelectWorldTemplateScreen.WorldTemplateList(this.worldTemplateList.getTemplates()));
 		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(10));
 		linearLayout.defaultCellSetting().alignHorizontallyCenter();
 		this.trailerButton = linearLayout.addChild(Button.builder(TRAILER_BUTTON_NAME, button -> this.onTrailer()).width(100).build());
@@ -110,7 +105,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 	@Override
 	protected void repositionElements() {
-		this.worldTemplateObjectSelectionList.updateSize(this.width, this.height, this.getHeaderHeight(), this.height - this.layout.getFooterHeight());
+		this.worldTemplateList.setSize(this.width, this.height - this.layout.getFooterHeight() - this.getHeaderHeight());
 		this.layout.arrangeElements();
 	}
 
@@ -167,7 +162,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 								() -> {
 									if (either.right().isPresent()) {
 										RealmsSelectWorldTemplateScreen.LOGGER.error("Couldn't fetch templates", (Throwable)either.right().get());
-										if (RealmsSelectWorldTemplateScreen.this.worldTemplateObjectSelectionList.isEmpty()) {
+										if (RealmsSelectWorldTemplateScreen.this.worldTemplateList.isEmpty()) {
 											RealmsSelectWorldTemplateScreen.this.noTemplatesMessage = TextRenderingUtils.decompose(I18n.get("mco.template.select.failure"));
 										}
 
@@ -176,11 +171,11 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 										WorldTemplatePaginatedList worldTemplatePaginatedListxxx = (WorldTemplatePaginatedList)either.left().get();
 
 										for (WorldTemplate worldTemplate : worldTemplatePaginatedListxxx.templates) {
-											RealmsSelectWorldTemplateScreen.this.worldTemplateObjectSelectionList.addEntry(worldTemplate);
+											RealmsSelectWorldTemplateScreen.this.worldTemplateList.addEntry(worldTemplate);
 										}
 
 										if (worldTemplatePaginatedListxxx.templates.isEmpty()) {
-											if (RealmsSelectWorldTemplateScreen.this.worldTemplateObjectSelectionList.isEmpty()) {
+											if (RealmsSelectWorldTemplateScreen.this.worldTemplateList.isEmpty()) {
 												String string = I18n.get("mco.template.select.none", "%link");
 												TextRenderingUtils.LineSegment lineSegment = TextRenderingUtils.LineSegment.link(
 													I18n.get("mco.template.select.none.linkTitle"), "https://aka.ms/MinecraftRealmsContentCreator"
@@ -345,17 +340,16 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	}
 
 	@Environment(EnvType.CLIENT)
-	class WorldTemplateObjectSelectionList extends RealmsObjectSelectionList<RealmsSelectWorldTemplateScreen.Entry> {
-		public WorldTemplateObjectSelectionList() {
+	class WorldTemplateList extends RealmsObjectSelectionList<RealmsSelectWorldTemplateScreen.Entry> {
+		public WorldTemplateList() {
 			this(Collections.emptyList());
 		}
 
-		public WorldTemplateObjectSelectionList(Iterable<WorldTemplate> iterable) {
+		public WorldTemplateList(Iterable<WorldTemplate> iterable) {
 			super(
 				RealmsSelectWorldTemplateScreen.this.width,
-				RealmsSelectWorldTemplateScreen.this.height,
+				RealmsSelectWorldTemplateScreen.this.height - 36 - RealmsSelectWorldTemplateScreen.this.getHeaderHeight(),
 				RealmsSelectWorldTemplateScreen.this.getHeaderHeight(),
-				RealmsSelectWorldTemplateScreen.this.height - 36,
 				46
 			);
 			iterable.forEach(this::addEntry);

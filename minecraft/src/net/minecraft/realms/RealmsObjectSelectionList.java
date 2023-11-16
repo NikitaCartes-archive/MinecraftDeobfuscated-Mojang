@@ -8,8 +8,8 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 
 @Environment(EnvType.CLIENT)
 public abstract class RealmsObjectSelectionList<E extends ObjectSelectionList.Entry<E>> extends ObjectSelectionList<E> {
-	protected RealmsObjectSelectionList(int i, int j, int k, int l, int m) {
-		super(Minecraft.getInstance(), i, j, k, l, m);
+	protected RealmsObjectSelectionList(int i, int j, int k, int l) {
+		super(Minecraft.getInstance(), i, j, k, l);
 	}
 
 	public void setSelectedItem(int i) {

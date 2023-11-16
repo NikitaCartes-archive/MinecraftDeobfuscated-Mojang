@@ -17,8 +17,8 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 
 @Environment(EnvType.CLIENT)
 public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
-	public OptionsList(Minecraft minecraft, int i, int j, int k, int l, int m) {
-		super(minecraft, i, j, k, l, m);
+	public OptionsList(Minecraft minecraft, int i, int j, int k, int l) {
+		super(minecraft, i, j, k, l);
 		this.centerListVertically = false;
 	}
 

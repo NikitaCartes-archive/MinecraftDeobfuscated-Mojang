@@ -8,7 +8,9 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.ParserUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 
 public class ComponentArgument implements ArgumentType<Component> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("\"hello world\"", "\"\"", "\"{\"text\":\"hello world\"}", "[\"\"]");
@@ -29,12 +31,7 @@ public class ComponentArgument implements ArgumentType<Component> {
 
 	public Component parse(StringReader stringReader) throws CommandSyntaxException {
 		try {
-			Component component = Component.Serializer.fromJson(stringReader);
-			if (component == null) {
-				throw ERROR_INVALID_JSON.createWithContext(stringReader, "empty");
-			} else {
-				return component;
-			}
+			return ParserUtils.parseJson(stringReader, ComponentSerialization.CODEC);
 		} catch (Exception var4) {
 			String string = var4.getCause() != null ? var4.getCause().getMessage() : var4.getMessage();
 			throw ERROR_INVALID_JSON.createWithContext(stringReader, string);

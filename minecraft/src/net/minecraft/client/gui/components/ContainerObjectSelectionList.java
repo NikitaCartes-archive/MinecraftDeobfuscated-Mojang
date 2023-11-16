@@ -20,8 +20,8 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class ContainerObjectSelectionList<E extends ContainerObjectSelectionList.Entry<E>> extends AbstractSelectionList<E> {
-	public ContainerObjectSelectionList(Minecraft minecraft, int i, int j, int k, int l, int m) {
-		super(minecraft, i, j, k, l, m);
+	public ContainerObjectSelectionList(Minecraft minecraft, int i, int j, int k, int l) {
+		super(minecraft, i, j, k, l);
 	}
 
 	@Nullable
@@ -93,7 +93,7 @@ public abstract class ContainerObjectSelectionList<E extends ContainerObjectSele
 	}
 
 	@Override
-	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 		E entry = this.getHovered();
 		if (entry != null) {
 			entry.updateNarration(narrationElementOutput.nest());

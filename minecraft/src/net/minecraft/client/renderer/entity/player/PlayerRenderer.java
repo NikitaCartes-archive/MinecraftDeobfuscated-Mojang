@@ -27,6 +27,7 @@ import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -39,7 +40,7 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import net.minecraft.world.scores.Scoreboard;
 
 @Environment(EnvType.CLIENT)
@@ -163,10 +164,11 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			Scoreboard scoreboard = abstractClientPlayer.getScoreboard();
 			Objective objective = scoreboard.getDisplayObjective(DisplaySlot.BELOW_NAME);
 			if (objective != null) {
-				Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
+				ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(abstractClientPlayer, objective);
+				Component component2 = ReadOnlyScoreInfo.safeFormatValue(readOnlyScoreInfo, objective.numberFormatOrDefault(StyledFormat.NO_STYLE));
 				super.renderNameTag(
 					abstractClientPlayer,
-					Component.literal(Integer.toString(score.getScore())).append(CommonComponents.SPACE).append(objective.getDisplayName()),
+					Component.empty().append(component2).append(CommonComponents.SPACE).append(objective.getDisplayName()),
 					poseStack,
 					multiBufferSource,
 					i

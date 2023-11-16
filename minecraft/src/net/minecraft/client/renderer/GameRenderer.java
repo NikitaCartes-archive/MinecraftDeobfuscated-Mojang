@@ -1273,13 +1273,21 @@ public class GameRenderer implements AutoCloseable {
 		boolean bl = this.shouldRenderBlockOutline();
 		this.minecraft.getProfiler().popPush("camera");
 		Camera camera = this.mainCamera;
+		Entity entity = (Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
+		camera.setup(
+			this.minecraft.level,
+			entity,
+			!this.minecraft.options.getCameraType().isFirstPerson(),
+			this.minecraft.options.getCameraType().isMirrored(),
+			this.minecraft.level.tickRateManager().isEntityFrozen(entity) ? 1.0F : f
+		);
 		this.renderDistance = (float)(this.minecraft.options.getEffectiveRenderDistance() * 16);
 		PoseStack poseStack2 = new PoseStack();
 		double d = this.getFov(camera, f, true);
 		poseStack2.mulPoseMatrix(this.getProjectionMatrix(d));
-		this.bobHurt(poseStack2, f);
+		this.bobHurt(poseStack2, camera.getPartialTickTime());
 		if (this.minecraft.options.bobView().get()) {
-			this.bobView(poseStack2, f);
+			this.bobView(poseStack2, camera.getPartialTickTime());
 		}
 
 		float g = this.minecraft.options.screenEffectScale().get().floatValue();
@@ -1297,14 +1305,6 @@ public class GameRenderer implements AutoCloseable {
 
 		Matrix4f matrix4f = poseStack2.last().pose();
 		this.resetProjectionMatrix(matrix4f);
-		Entity entity = (Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
-		camera.setup(
-			this.minecraft.level,
-			entity,
-			!this.minecraft.options.getCameraType().isFirstPerson(),
-			this.minecraft.options.getCameraType().isMirrored(),
-			this.minecraft.level.tickRateManager().isEntityFrozen(entity) ? 1.0F : f
-		);
 		poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
 		poseStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
 		Matrix3f matrix3f = new Matrix3f(poseStack.last().normal()).invert();

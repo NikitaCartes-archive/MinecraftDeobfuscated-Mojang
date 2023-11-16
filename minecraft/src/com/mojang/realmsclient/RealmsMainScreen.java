@@ -162,7 +162,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.serverList = new RealmsServerList(this.minecraft);
-		this.realmSelectionList = this.addRenderableWidget(new RealmsMainScreen.RealmSelectionList());
+		this.realmSelectionList = new RealmsMainScreen.RealmSelectionList();
 		Component component = Component.translatable("mco.invites.title");
 		this.pendingInvitesButton = new RealmsMainScreen.NotificationButton(
 			component, INVITE_SPRITE, button -> this.minecraft.setScreen(new RealmsPendingInvitesScreen(this, component))
@@ -217,7 +217,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Override
 	protected void repositionElements() {
 		if (this.layout != null) {
-			this.realmSelectionList.updateSize(this.width, this.height, this.layout.getHeaderHeight(), this.height - this.layout.getFooterHeight());
+			this.realmSelectionList.setSize(this.width, this.height - this.layout.getFooterHeight() - this.layout.getHeaderHeight());
 			this.layout.arrangeElements();
 		}
 	}
@@ -259,6 +259,9 @@ public class RealmsMainScreen extends RealmsScreen {
 				break;
 			case NO_REALMS:
 				headerAndFooterLayout.addToContents(this.createNoRealmsContent());
+				break;
+			case LIST:
+				headerAndFooterLayout.addToContents(this.realmSelectionList);
 		}
 
 		return headerAndFooterLayout;
@@ -1097,7 +1100,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class RealmSelectionList extends RealmsObjectSelectionList<RealmsMainScreen.Entry> {
 		public RealmSelectionList() {
-			super(RealmsMainScreen.this.width, RealmsMainScreen.this.height, 0, RealmsMainScreen.this.height, 36);
+			super(RealmsMainScreen.this.width, RealmsMainScreen.this.height, 0, 36);
 		}
 
 		public void setSelected(@Nullable RealmsMainScreen.Entry entry) {

@@ -15,8 +15,8 @@ import net.minecraft.network.chat.Component;
 public abstract class ObjectSelectionList<E extends ObjectSelectionList.Entry<E>> extends AbstractSelectionList<E> {
 	private static final Component USAGE_NARRATION = Component.translatable("narration.selection.usage");
 
-	public ObjectSelectionList(Minecraft minecraft, int i, int j, int k, int l, int m) {
-		super(minecraft, i, j, k, l, m);
+	public ObjectSelectionList(Minecraft minecraft, int i, int j, int k, int l) {
+		super(minecraft, i, j, k, l);
 	}
 
 	@Nullable
@@ -40,7 +40,7 @@ public abstract class ObjectSelectionList<E extends ObjectSelectionList.Entry<E>
 	}
 
 	@Override
-	public void updateNarration(NarrationElementOutput narrationElementOutput) {
+	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 		E entry = this.getHovered();
 		if (entry != null) {
 			this.narrateListElementPosition(narrationElementOutput.nest(), entry);

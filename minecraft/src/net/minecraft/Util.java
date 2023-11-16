@@ -816,22 +816,41 @@ public class Util {
 		}
 	}
 
+	public static <T, E extends Throwable> T getPartialOrThrow(DataResult<T> dataResult, Function<String, E> function) throws E {
+		Optional<PartialResult<T>> optional = dataResult.error();
+		if (optional.isPresent()) {
+			Optional<T> optional2 = dataResult.resultOrPartial(string -> {
+			});
+			if (optional2.isPresent()) {
+				return (T)optional2.get();
+			} else {
+				throw (Throwable)function.apply(((PartialResult)optional.get()).message());
+			}
+		} else {
+			return (T)dataResult.result().orElseThrow();
+		}
+	}
+
 	public static <A, B> Typed<B> writeAndReadTypedOrThrow(Typed<A> typed, Type<B> type, UnaryOperator<Dynamic<?>> unaryOperator) {
 		Dynamic<?> dynamic = getOrThrow((DataResult<Dynamic<?>>)typed.write(), IllegalStateException::new);
-		return readTypedOrThrow(type, (Dynamic<?>)unaryOperator.apply(dynamic));
+		return readTypedOrThrow(type, (Dynamic<?>)unaryOperator.apply(dynamic), true);
 	}
 
 	public static <T> Typed<T> readTypedOrThrow(Type<T> type, Dynamic<?> dynamic) {
+		return readTypedOrThrow(type, dynamic, false);
+	}
+
+	public static <T> Typed<T> readTypedOrThrow(Type<T> type, Dynamic<?> dynamic, boolean bl) {
 		DataResult<Typed<T>> dataResult = type.readTyped(dynamic).map(Pair::getFirst);
-		Optional<PartialResult<Typed<T>>> optional = dataResult.error();
-		if (optional.isPresent()) {
-			CrashReport crashReport = CrashReport.forThrowable(new IllegalStateException(((PartialResult)optional.get()).message()), "Reading type");
+
+		try {
+			return bl ? getPartialOrThrow(dataResult, IllegalStateException::new) : getOrThrow(dataResult, IllegalStateException::new);
+		} catch (IllegalStateException var7) {
+			CrashReport crashReport = CrashReport.forThrowable(var7, "Reading type");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Info");
 			crashReportCategory.setDetail("Data", dynamic);
 			crashReportCategory.setDetail("Type", type);
 			throw new ReportedException(crashReport);
-		} else {
-			return (Typed<T>)dataResult.result().orElseThrow();
 		}
 	}
 

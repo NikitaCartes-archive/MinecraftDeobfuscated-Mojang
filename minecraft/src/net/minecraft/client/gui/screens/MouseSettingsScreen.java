@@ -29,7 +29,7 @@ public class MouseSettingsScreen extends OptionsSubScreen {
 
 	@Override
 	protected void init() {
-		this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
+		this.list = this.addRenderableWidget(new OptionsList(this.minecraft, this.width, this.height - 64, 32, 25));
 		if (InputConstants.isRawMouseInputSupported()) {
 			this.list
 				.addSmall((OptionInstance<?>[])Stream.concat(Arrays.stream(options(this.options)), Stream.of(this.options.rawMouseInput())).toArray(OptionInstance[]::new));
@@ -37,7 +37,6 @@ public class MouseSettingsScreen extends OptionsSubScreen {
 			this.list.addSmall(options(this.options));
 		}
 
-		this.addWidget(this.list);
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
 			this.options.save();
 			this.minecraft.setScreen(this.lastScreen);
@@ -47,7 +46,6 @@ public class MouseSettingsScreen extends OptionsSubScreen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		this.list.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 5, 16777215);
 	}
 

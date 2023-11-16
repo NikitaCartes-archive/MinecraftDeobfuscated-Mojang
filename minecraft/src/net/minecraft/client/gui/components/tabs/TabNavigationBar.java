@@ -28,7 +28,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class TabNavigationBar extends AbstractContainerEventHandler implements Renderable, GuiEventListener, NarratableEntry {
+public class TabNavigationBar extends AbstractContainerEventHandler implements Renderable, NarratableEntry {
 	private static final int NO_TAB = -1;
 	private static final int MAX_WIDTH = 400;
 	private static final int HEIGHT = 24;

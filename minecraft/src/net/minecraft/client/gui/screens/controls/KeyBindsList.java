@@ -30,7 +30,7 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 	int maxNameWidth;
 
 	public KeyBindsList(KeyBindsScreen keyBindsScreen, Minecraft minecraft) {
-		super(minecraft, keyBindsScreen.width + 45, keyBindsScreen.height, 20, keyBindsScreen.height - 32, 20);
+		super(minecraft, keyBindsScreen.width + 45, keyBindsScreen.height - 52, 20, 20);
 		this.keyBindsScreen = keyBindsScreen;
 		KeyMapping[] keyMappings = ArrayUtils.clone((KeyMapping[])minecraft.options.keyMappings);
 		Arrays.sort(keyMappings);

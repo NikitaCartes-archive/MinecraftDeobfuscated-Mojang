@@ -3,6 +3,7 @@ package net.minecraft.client.gui.components;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,8 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.numbers.NumberFormat;
+import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -30,6 +33,8 @@ import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ReadOnlyScoreInfo;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
@@ -94,119 +99,137 @@ public class PlayerTabOverlay {
 
 	public void render(GuiGraphics guiGraphics, int i, Scoreboard scoreboard, @Nullable Objective objective) {
 		List<PlayerInfo> list = this.getPlayerInfos();
-		int j = 0;
+		List<PlayerTabOverlay.ScoreDisplayEntry> list2 = new ArrayList(list.size());
+		int j = this.minecraft.font.width(" ");
 		int k = 0;
+		int l = 0;
 
 		for (PlayerInfo playerInfo : list) {
-			int l = this.minecraft.font.width(this.getNameForDisplay(playerInfo));
-			j = Math.max(j, l);
-			if (objective != null && objective.getRenderType() != ObjectiveCriteria.RenderType.HEARTS) {
-				l = this.minecraft.font.width(" " + scoreboard.getOrCreatePlayerScore(playerInfo.getProfile().getName(), objective).getScore());
-				k = Math.max(k, l);
+			Component component = this.getNameForDisplay(playerInfo);
+			k = Math.max(k, this.minecraft.font.width(component));
+			int m = 0;
+			Component component2 = null;
+			int n = 0;
+			if (objective != null) {
+				ScoreHolder scoreHolder = ScoreHolder.fromGameProfile(playerInfo.getProfile());
+				ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(scoreHolder, objective);
+				if (readOnlyScoreInfo != null) {
+					m = readOnlyScoreInfo.value();
+				}
+
+				if (objective.getRenderType() != ObjectiveCriteria.RenderType.HEARTS) {
+					NumberFormat numberFormat = objective.numberFormatOrDefault(StyledFormat.PLAYER_LIST_DEFAULT);
+					component2 = ReadOnlyScoreInfo.safeFormatValue(readOnlyScoreInfo, numberFormat);
+					n = this.minecraft.font.width(component2);
+					l = Math.max(l, n > 0 ? j + n : 0);
+				}
 			}
+
+			list2.add(new PlayerTabOverlay.ScoreDisplayEntry(component, m, component2, n));
 		}
 
 		if (!this.healthStates.isEmpty()) {
-			Set<UUID> set = (Set<UUID>)list.stream().map(playerInfox -> playerInfox.getProfile().getId()).collect(Collectors.toSet());
+			Set<UUID> set = (Set<UUID>)list.stream().map(playerInfo -> playerInfo.getProfile().getId()).collect(Collectors.toSet());
 			this.healthStates.keySet().removeIf(uUID -> !set.contains(uUID));
 		}
 
-		int m = list.size();
-		int n = m;
+		int o = list.size();
+		int p = o;
 
-		int l;
-		for (l = 1; n > 20; n = (m + l - 1) / l) {
-			l++;
+		int q;
+		for (q = 1; p > 20; p = (o + q - 1) / q) {
+			q++;
 		}
 
 		boolean bl = this.minecraft.isLocalServer() || this.minecraft.getConnection().getConnection().isEncrypted();
-		int o;
+		int r;
 		if (objective != null) {
 			if (objective.getRenderType() == ObjectiveCriteria.RenderType.HEARTS) {
-				o = 90;
+				r = 90;
 			} else {
-				o = k;
+				r = l;
 			}
 		} else {
-			o = 0;
+			r = 0;
 		}
 
-		int p = Math.min(l * ((bl ? 9 : 0) + j + o + 13), i - 50) / l;
-		int q = i / 2 - (p * l + (l - 1) * 5) / 2;
-		int r = 10;
-		int s = p * l + (l - 1) * 5;
-		List<FormattedCharSequence> list2 = null;
+		int n = Math.min(q * ((bl ? 9 : 0) + k + r + 13), i - 50) / q;
+		int s = i / 2 - (n * q + (q - 1) * 5) / 2;
+		int t = 10;
+		int u = n * q + (q - 1) * 5;
+		List<FormattedCharSequence> list3 = null;
 		if (this.header != null) {
-			list2 = this.minecraft.font.split(this.header, i - 50);
+			list3 = this.minecraft.font.split(this.header, i - 50);
 
-			for (FormattedCharSequence formattedCharSequence : list2) {
-				s = Math.max(s, this.minecraft.font.width(formattedCharSequence));
+			for (FormattedCharSequence formattedCharSequence : list3) {
+				u = Math.max(u, this.minecraft.font.width(formattedCharSequence));
 			}
 		}
 
-		List<FormattedCharSequence> list3 = null;
+		List<FormattedCharSequence> list4 = null;
 		if (this.footer != null) {
-			list3 = this.minecraft.font.split(this.footer, i - 50);
+			list4 = this.minecraft.font.split(this.footer, i - 50);
+
+			for (FormattedCharSequence formattedCharSequence2 : list4) {
+				u = Math.max(u, this.minecraft.font.width(formattedCharSequence2));
+			}
+		}
+
+		if (list3 != null) {
+			guiGraphics.fill(i / 2 - u / 2 - 1, t - 1, i / 2 + u / 2 + 1, t + list3.size() * 9, Integer.MIN_VALUE);
 
 			for (FormattedCharSequence formattedCharSequence2 : list3) {
-				s = Math.max(s, this.minecraft.font.width(formattedCharSequence2));
-			}
-		}
-
-		if (list2 != null) {
-			guiGraphics.fill(i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + list2.size() * 9, Integer.MIN_VALUE);
-
-			for (FormattedCharSequence formattedCharSequence2 : list2) {
-				int t = this.minecraft.font.width(formattedCharSequence2);
-				guiGraphics.drawString(this.minecraft.font, formattedCharSequence2, i / 2 - t / 2, r, -1);
-				r += 9;
+				int v = this.minecraft.font.width(formattedCharSequence2);
+				guiGraphics.drawString(this.minecraft.font, formattedCharSequence2, i / 2 - v / 2, t, -1);
+				t += 9;
 			}
 
-			r++;
+			t++;
 		}
 
-		guiGraphics.fill(i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + n * 9, Integer.MIN_VALUE);
-		int u = this.minecraft.options.getBackgroundColor(553648127);
+		guiGraphics.fill(i / 2 - u / 2 - 1, t - 1, i / 2 + u / 2 + 1, t + p * 9, Integer.MIN_VALUE);
+		int w = this.minecraft.options.getBackgroundColor(553648127);
 
-		for (int v = 0; v < m; v++) {
-			int t = v / n;
-			int w = v % n;
-			int x = q + t * p + t * 5;
-			int y = r + w * 9;
-			guiGraphics.fill(x, y, x + p, y + 8, u);
+		for (int x = 0; x < o; x++) {
+			int v = x / p;
+			int y = x % p;
+			int z = s + v * n + v * 5;
+			int aa = t + y * 9;
+			guiGraphics.fill(z, aa, z + n, aa + 8, w);
 			RenderSystem.enableBlend();
-			if (v < list.size()) {
-				PlayerInfo playerInfo2 = (PlayerInfo)list.get(v);
+			if (x < list.size()) {
+				PlayerInfo playerInfo2 = (PlayerInfo)list.get(x);
+				PlayerTabOverlay.ScoreDisplayEntry scoreDisplayEntry = (PlayerTabOverlay.ScoreDisplayEntry)list2.get(x);
 				GameProfile gameProfile = playerInfo2.getProfile();
 				if (bl) {
 					Player player = this.minecraft.level.getPlayerByUUID(gameProfile.getId());
 					boolean bl2 = player != null && LivingEntityRenderer.isEntityUpsideDown(player);
 					boolean bl3 = player != null && player.isModelPartShown(PlayerModelPart.HAT);
-					PlayerFaceRenderer.draw(guiGraphics, playerInfo2.getSkin().texture(), x, y, 8, bl3, bl2);
-					x += 9;
+					PlayerFaceRenderer.draw(guiGraphics, playerInfo2.getSkin().texture(), z, aa, 8, bl3, bl2);
+					z += 9;
 				}
 
-				guiGraphics.drawString(this.minecraft.font, this.getNameForDisplay(playerInfo2), x, y, playerInfo2.getGameMode() == GameType.SPECTATOR ? -1862270977 : -1);
+				guiGraphics.drawString(this.minecraft.font, scoreDisplayEntry.name, z, aa, playerInfo2.getGameMode() == GameType.SPECTATOR ? -1862270977 : -1);
 				if (objective != null && playerInfo2.getGameMode() != GameType.SPECTATOR) {
-					int z = x + j + 1;
-					int aa = z + o;
-					if (aa - z > 5) {
-						this.renderTablistScore(objective, y, gameProfile.getName(), z, aa, gameProfile.getId(), guiGraphics);
+					int ab = z + k + 1;
+					int ac = ab + r;
+					if (ac - ab > 5) {
+						this.renderTablistScore(objective, aa, scoreDisplayEntry, ab, ac, gameProfile.getId(), guiGraphics);
 					}
 				}
 
-				this.renderPingIcon(guiGraphics, p, x - (bl ? 9 : 0), y, playerInfo2);
+				this.renderPingIcon(guiGraphics, n, z - (bl ? 9 : 0), aa, playerInfo2);
 			}
 		}
 
-		if (list3 != null) {
-			r += n * 9 + 1;
-			guiGraphics.fill(i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + list3.size() * 9, Integer.MIN_VALUE);
+		if (list4 != null) {
+			t += p * 9 + 1;
+			guiGraphics.fill(i / 2 - u / 2 - 1, t - 1, i / 2 + u / 2 + 1, t + list4.size() * 9, Integer.MIN_VALUE);
 
-			for (FormattedCharSequence formattedCharSequence3 : list3) {
-				int w = this.minecraft.font.width(formattedCharSequence3);
-				guiGraphics.drawString(this.minecraft.font, formattedCharSequence3, i / 2 - w / 2, r, -1);
-				r += 9;
+			for (FormattedCharSequence formattedCharSequence3 : list4) {
+				int y = this.minecraft.font.width(formattedCharSequence3);
+				guiGraphics.drawString(this.minecraft.font, formattedCharSequence3, i / 2 - y / 2, t, -1);
+				t += 9;
 			}
 		}
 	}
@@ -233,13 +256,13 @@ public class PlayerTabOverlay {
 		guiGraphics.pose().popPose();
 	}
 
-	private void renderTablistScore(Objective objective, int i, String string, int j, int k, UUID uUID, GuiGraphics guiGraphics) {
-		int l = objective.getScoreboard().getOrCreatePlayerScore(string, objective).getScore();
+	private void renderTablistScore(
+		Objective objective, int i, PlayerTabOverlay.ScoreDisplayEntry scoreDisplayEntry, int j, int k, UUID uUID, GuiGraphics guiGraphics
+	) {
 		if (objective.getRenderType() == ObjectiveCriteria.RenderType.HEARTS) {
-			this.renderTablistHearts(i, j, k, uUID, guiGraphics, l);
-		} else {
-			String string2 = "" + ChatFormatting.YELLOW + l;
-			guiGraphics.drawString(this.minecraft.font, string2, k - this.minecraft.font.width(string2), i, 16777215);
+			this.renderTablistHearts(i, j, k, uUID, guiGraphics, scoreDisplayEntry.score);
+		} else if (scoreDisplayEntry.formattedScore != null) {
+			guiGraphics.drawString(this.minecraft.font, scoreDisplayEntry.formattedScore, k - scoreDisplayEntry.scoreWidth, i, 16777215);
 		}
 	}
 
@@ -261,7 +284,7 @@ public class PlayerTabOverlay {
 				if (k - this.minecraft.font.width(component) >= j) {
 					component2 = component;
 				} else {
-					component2 = Component.literal(g + "");
+					component2 = Component.literal(Float.toString(g));
 				}
 
 				guiGraphics.drawString(this.minecraft.font, component2, (k + j - this.minecraft.font.width(component2)) / 2, i, p);
@@ -344,5 +367,9 @@ public class PlayerTabOverlay {
 		public boolean isBlinking(long l) {
 			return this.blinkUntilTick > l && (this.blinkUntilTick - l) % 6L >= 3L;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static record ScoreDisplayEntry(Component name, int score, @Nullable Component formattedScore, int scoreWidth) {
 	}
 }

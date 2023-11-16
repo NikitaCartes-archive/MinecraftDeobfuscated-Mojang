@@ -15,9 +15,10 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ObjectiveArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ReadOnlyScoreInfo;
+import net.minecraft.world.scores.ScoreAccess;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
@@ -35,7 +36,7 @@ public class TriggerCommand {
 						.suggests((commandContext, suggestionsBuilder) -> suggestObjectives(commandContext.getSource(), suggestionsBuilder))
 						.executes(
 							commandContext -> simpleTrigger(
-									commandContext.getSource(), getScore(commandContext.getSource().getPlayerOrException(), ObjectiveArgument.getObjective(commandContext, "objective"))
+									commandContext.getSource(), commandContext.getSource().getPlayerOrException(), ObjectiveArgument.getObjective(commandContext, "objective")
 								)
 						)
 						.then(
@@ -45,7 +46,8 @@ public class TriggerCommand {
 										.executes(
 											commandContext -> addValue(
 													commandContext.getSource(),
-													getScore(commandContext.getSource().getPlayerOrException(), ObjectiveArgument.getObjective(commandContext, "objective")),
+													commandContext.getSource().getPlayerOrException(),
+													ObjectiveArgument.getObjective(commandContext, "objective"),
 													IntegerArgumentType.getInteger(commandContext, "value")
 												)
 										)
@@ -58,7 +60,8 @@ public class TriggerCommand {
 										.executes(
 											commandContext -> setValue(
 													commandContext.getSource(),
-													getScore(commandContext.getSource().getPlayerOrException(), ObjectiveArgument.getObjective(commandContext, "objective")),
+													commandContext.getSource().getPlayerOrException(),
+													ObjectiveArgument.getObjective(commandContext, "objective"),
 													IntegerArgumentType.getInteger(commandContext, "value")
 												)
 										)
@@ -69,16 +72,15 @@ public class TriggerCommand {
 	}
 
 	public static CompletableFuture<Suggestions> suggestObjectives(CommandSourceStack commandSourceStack, SuggestionsBuilder suggestionsBuilder) {
-		Entity entity = commandSourceStack.getEntity();
+		ScoreHolder scoreHolder = commandSourceStack.getEntity();
 		List<String> list = Lists.<String>newArrayList();
-		if (entity != null) {
+		if (scoreHolder != null) {
 			Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
-			String string = entity.getScoreboardName();
 
 			for (Objective objective : scoreboard.getObjectives()) {
-				if (objective.getCriteria() == ObjectiveCriteria.TRIGGER && scoreboard.hasPlayerScore(string, objective)) {
-					Score score = scoreboard.getOrCreatePlayerScore(string, objective);
-					if (!score.isLocked()) {
+				if (objective.getCriteria() == ObjectiveCriteria.TRIGGER) {
+					ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(scoreHolder, objective);
+					if (readOnlyScoreInfo != null && !readOnlyScoreInfo.isLocked()) {
 						list.add(objective.getName());
 					}
 				}
@@ -88,40 +90,38 @@ public class TriggerCommand {
 		return SharedSuggestionProvider.suggest(list, suggestionsBuilder);
 	}
 
-	private static int addValue(CommandSourceStack commandSourceStack, Score score, int i) {
-		score.add(i);
-		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.add.success", score.getObjective().getFormattedDisplayName(), i), true);
-		return score.getScore();
+	private static int addValue(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer, Objective objective, int i) throws CommandSyntaxException {
+		ScoreAccess scoreAccess = getScore(commandSourceStack.getServer().getScoreboard(), serverPlayer, objective);
+		int j = scoreAccess.add(i);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.add.success", objective.getFormattedDisplayName(), i), true);
+		return j;
 	}
 
-	private static int setValue(CommandSourceStack commandSourceStack, Score score, int i) {
-		score.setScore(i);
-		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.set.success", score.getObjective().getFormattedDisplayName(), i), true);
+	private static int setValue(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer, Objective objective, int i) throws CommandSyntaxException {
+		ScoreAccess scoreAccess = getScore(commandSourceStack.getServer().getScoreboard(), serverPlayer, objective);
+		scoreAccess.set(i);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.set.success", objective.getFormattedDisplayName(), i), true);
 		return i;
 	}
 
-	private static int simpleTrigger(CommandSourceStack commandSourceStack, Score score) {
-		score.add(1);
-		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.simple.success", score.getObjective().getFormattedDisplayName()), true);
-		return score.getScore();
+	private static int simpleTrigger(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer, Objective objective) throws CommandSyntaxException {
+		ScoreAccess scoreAccess = getScore(commandSourceStack.getServer().getScoreboard(), serverPlayer, objective);
+		int i = scoreAccess.add(1);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.trigger.simple.success", objective.getFormattedDisplayName()), true);
+		return i;
 	}
 
-	private static Score getScore(ServerPlayer serverPlayer, Objective objective) throws CommandSyntaxException {
+	private static ScoreAccess getScore(Scoreboard scoreboard, ScoreHolder scoreHolder, Objective objective) throws CommandSyntaxException {
 		if (objective.getCriteria() != ObjectiveCriteria.TRIGGER) {
 			throw ERROR_INVALID_OBJECTIVE.create();
 		} else {
-			Scoreboard scoreboard = serverPlayer.getScoreboard();
-			String string = serverPlayer.getScoreboardName();
-			if (!scoreboard.hasPlayerScore(string, objective)) {
-				throw ERROR_NOT_PRIMED.create();
+			ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(scoreHolder, objective);
+			if (readOnlyScoreInfo != null && !readOnlyScoreInfo.isLocked()) {
+				ScoreAccess scoreAccess = scoreboard.getOrCreatePlayerScore(scoreHolder, objective);
+				scoreAccess.lock();
+				return scoreAccess;
 			} else {
-				Score score = scoreboard.getOrCreatePlayerScore(string, objective);
-				if (score.isLocked()) {
-					throw ERROR_NOT_PRIMED.create();
-				} else {
-					score.setLocked(true);
-					return score;
-				}
+				throw ERROR_NOT_PRIMED.create();
 			}
 		}
 	}

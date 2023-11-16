@@ -27,9 +27,8 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 
 	@Override
 	protected void init() {
-		this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
+		this.list = this.addRenderableWidget(new OptionsList(this.minecraft, this.width, this.height - 64, 32, 25));
 		this.list.addSmall(this.smallOptions);
-		this.addWidget(this.list);
 		this.createFooter();
 		this.narratorButton = this.list.findOption(this.options.narrator());
 		if (this.narratorButton != null) {
@@ -47,7 +46,8 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.basicListRender(guiGraphics, this.list, i, j, f);
+		super.render(guiGraphics, i, j, f);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
 	}
 
 	@Override

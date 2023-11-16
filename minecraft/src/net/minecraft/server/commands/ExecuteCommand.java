@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
@@ -106,7 +105,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ReadOnlyScoreInfo;
+import net.minecraft.world.scores.ScoreAccess;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 
 public class ExecuteCommand {
@@ -421,13 +422,13 @@ public class ExecuteCommand {
 		return literalArgumentBuilder;
 	}
 
-	private static CommandSourceStack storeValue(CommandSourceStack commandSourceStack, Collection<String> collection, Objective objective, boolean bl) {
+	private static CommandSourceStack storeValue(CommandSourceStack commandSourceStack, Collection<ScoreHolder> collection, Objective objective, boolean bl) {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
 		return commandSourceStack.withCallback((bl2, i) -> {
-			for (String string : collection) {
-				Score score = scoreboard.getOrCreatePlayerScore(string, objective);
+			for (ScoreHolder scoreHolder : collection) {
+				ScoreAccess scoreAccess = scoreboard.getOrCreatePlayerScore(scoreHolder, objective);
 				int j = bl ? i : (bl2 ? 1 : 0);
-				score.setScore(j);
+				scoreAccess.set(j);
 			}
 		}, CommandResultCallback::chain);
 	}
@@ -538,7 +539,7 @@ public class ExecuteCommand {
 															commandNode,
 															Commands.argument("sourceObjective", ObjectiveArgument.objective()),
 															bl,
-															commandContext -> checkScore(commandContext, Integer::equals)
+															commandContext -> checkScore(commandContext, (i, j) -> i == j)
 														)
 													)
 											)
@@ -553,7 +554,7 @@ public class ExecuteCommand {
 															commandNode,
 															Commands.argument("sourceObjective", ObjectiveArgument.objective()),
 															bl,
-															commandContext -> checkScore(commandContext, (integer, integer2) -> integer < integer2)
+															commandContext -> checkScore(commandContext, (i, j) -> i < j)
 														)
 													)
 											)
@@ -568,7 +569,7 @@ public class ExecuteCommand {
 															commandNode,
 															Commands.argument("sourceObjective", ObjectiveArgument.objective()),
 															bl,
-															commandContext -> checkScore(commandContext, (integer, integer2) -> integer <= integer2)
+															commandContext -> checkScore(commandContext, (i, j) -> i <= j)
 														)
 													)
 											)
@@ -583,7 +584,7 @@ public class ExecuteCommand {
 															commandNode,
 															Commands.argument("sourceObjective", ObjectiveArgument.objective()),
 															bl,
-															commandContext -> checkScore(commandContext, (integer, integer2) -> integer > integer2)
+															commandContext -> checkScore(commandContext, (i, j) -> i > j)
 														)
 													)
 											)
@@ -598,7 +599,7 @@ public class ExecuteCommand {
 															commandNode,
 															Commands.argument("sourceObjective", ObjectiveArgument.objective()),
 															bl,
-															commandContext -> checkScore(commandContext, (integer, integer2) -> integer >= integer2)
+															commandContext -> checkScore(commandContext, (i, j) -> i >= j)
 														)
 													)
 											)
@@ -708,26 +709,23 @@ public class ExecuteCommand {
 		return nbtPath.countMatching(dataAccessor.getData());
 	}
 
-	private static boolean checkScore(CommandContext<CommandSourceStack> commandContext, BiPredicate<Integer, Integer> biPredicate) throws CommandSyntaxException {
-		String string = ScoreHolderArgument.getName(commandContext, "target");
+	private static boolean checkScore(CommandContext<CommandSourceStack> commandContext, ExecuteCommand.IntBiPredicate intBiPredicate) throws CommandSyntaxException {
+		ScoreHolder scoreHolder = ScoreHolderArgument.getName(commandContext, "target");
 		Objective objective = ObjectiveArgument.getObjective(commandContext, "targetObjective");
-		String string2 = ScoreHolderArgument.getName(commandContext, "source");
+		ScoreHolder scoreHolder2 = ScoreHolderArgument.getName(commandContext, "source");
 		Objective objective2 = ObjectiveArgument.getObjective(commandContext, "sourceObjective");
 		Scoreboard scoreboard = commandContext.getSource().getServer().getScoreboard();
-		if (scoreboard.hasPlayerScore(string, objective) && scoreboard.hasPlayerScore(string2, objective2)) {
-			Score score = scoreboard.getOrCreatePlayerScore(string, objective);
-			Score score2 = scoreboard.getOrCreatePlayerScore(string2, objective2);
-			return biPredicate.test(score.getScore(), score2.getScore());
-		} else {
-			return false;
-		}
+		ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(scoreHolder, objective);
+		ReadOnlyScoreInfo readOnlyScoreInfo2 = scoreboard.getPlayerScoreInfo(scoreHolder2, objective2);
+		return readOnlyScoreInfo != null && readOnlyScoreInfo2 != null ? intBiPredicate.test(readOnlyScoreInfo.value(), readOnlyScoreInfo2.value()) : false;
 	}
 
 	private static boolean checkScore(CommandContext<CommandSourceStack> commandContext, MinMaxBounds.Ints ints) throws CommandSyntaxException {
-		String string = ScoreHolderArgument.getName(commandContext, "target");
+		ScoreHolder scoreHolder = ScoreHolderArgument.getName(commandContext, "target");
 		Objective objective = ObjectiveArgument.getObjective(commandContext, "targetObjective");
 		Scoreboard scoreboard = commandContext.getSource().getServer().getScoreboard();
-		return !scoreboard.hasPlayerScore(string, objective) ? false : ints.matches(scoreboard.getOrCreatePlayerScore(string, objective).getScore());
+		ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(scoreHolder, objective);
+		return readOnlyScoreInfo == null ? false : ints.matches(readOnlyScoreInfo.value());
 	}
 
 	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, LootItemCondition lootItemCondition) {
@@ -1024,5 +1022,10 @@ public class ExecuteCommand {
 				chainModifiers
 			);
 		}
+	}
+
+	@FunctionalInterface
+	interface IntBiPredicate {
+		boolean test(int i, int j);
 	}
 }

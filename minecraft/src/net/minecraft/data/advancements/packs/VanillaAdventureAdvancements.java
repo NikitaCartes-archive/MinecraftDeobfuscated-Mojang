@@ -79,6 +79,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 	private static final int BEDROCK_THICKNESS = 5;
 	private static final EntityType<?>[] MOBS_TO_KILL = new EntityType[]{
 		EntityType.BLAZE,
+		EntityType.BREEZE,
 		EntityType.CAVE_SPIDER,
 		EntityType.CREEPER,
 		EntityType.DROWNED,

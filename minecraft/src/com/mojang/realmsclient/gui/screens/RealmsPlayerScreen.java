@@ -57,9 +57,8 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		this.column1X = this.width / 2 - 160;
 		this.columnWidth = 150;
 		int i = this.width / 2 + 12;
-		this.invitedObjectSelectionList = new RealmsPlayerScreen.InvitedObjectSelectionList();
-		this.invitedObjectSelectionList.setLeftPos(this.column1X);
-		this.addWidget(this.invitedObjectSelectionList);
+		this.invitedObjectSelectionList = this.addRenderableWidget(new RealmsPlayerScreen.InvitedObjectSelectionList());
+		this.invitedObjectSelectionList.setX(this.column1X);
 
 		for (PlayerInfo playerInfo : this.serverData.players) {
 			this.invitedObjectSelectionList.addEntry(playerInfo);
@@ -183,7 +182,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		this.invitedObjectSelectionList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 17, -1);
 		int k = row(12) + 20;
 		guiGraphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
@@ -275,7 +273,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class InvitedObjectSelectionList extends RealmsObjectSelectionList<RealmsPlayerScreen.Entry> {
 		public InvitedObjectSelectionList() {
-			super(RealmsPlayerScreen.this.columnWidth + 10, RealmsPlayerScreen.row(12) + 20, RealmsPlayerScreen.row(1), RealmsPlayerScreen.row(12) + 20, 13);
+			super(RealmsPlayerScreen.this.columnWidth + 10, RealmsPlayerScreen.row(12) + 20, RealmsPlayerScreen.row(1), 13);
 		}
 
 		public void updateButtons() {

@@ -28,8 +28,7 @@ public class KeyBindsScreen extends OptionsSubScreen {
 
 	@Override
 	protected void init() {
-		this.keyBindsList = new KeyBindsList(this, this.minecraft);
-		this.addWidget(this.keyBindsList);
+		this.keyBindsList = this.addRenderableWidget(new KeyBindsList(this, this.minecraft));
 		this.resetButton = this.addRenderableWidget(Button.builder(Component.translatable("controls.resetAll"), button -> {
 			for (KeyMapping keyMapping : this.options.keyMappings) {
 				keyMapping.setKey(keyMapping.getDefaultKey());
@@ -77,7 +76,6 @@ public class KeyBindsScreen extends OptionsSubScreen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		this.keyBindsList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		boolean bl = false;
 

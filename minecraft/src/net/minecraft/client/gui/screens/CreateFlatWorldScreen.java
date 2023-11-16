@@ -58,8 +58,7 @@ public class CreateFlatWorldScreen extends Screen {
 	protected void init() {
 		this.columnType = Component.translatable("createWorld.customize.flat.tile");
 		this.columnHeight = Component.translatable("createWorld.customize.flat.height");
-		this.list = new CreateFlatWorldScreen.DetailsList();
-		this.addWidget(this.list);
+		this.list = this.addRenderableWidget(new CreateFlatWorldScreen.DetailsList());
 		this.deleteLayerButton = this.addRenderableWidget(Button.builder(Component.translatable("createWorld.customize.flat.removeLayer"), button -> {
 			if (this.hasValidSelection()) {
 				List<FlatLayerInfo> list = this.generator.getLayersInfo();
@@ -106,7 +105,6 @@ public class CreateFlatWorldScreen extends Screen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		this.list.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		int k = this.width / 2 - 92 - 16;
 		guiGraphics.drawString(this.font, this.columnType, k, 32, 16777215);
@@ -115,12 +113,8 @@ public class CreateFlatWorldScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	class DetailsList extends ObjectSelectionList<CreateFlatWorldScreen.DetailsList.Entry> {
-		private static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
-
 		public DetailsList() {
-			super(
-				CreateFlatWorldScreen.this.minecraft, CreateFlatWorldScreen.this.width, CreateFlatWorldScreen.this.height, 43, CreateFlatWorldScreen.this.height - 60, 24
-			);
+			super(CreateFlatWorldScreen.this.minecraft, CreateFlatWorldScreen.this.width, CreateFlatWorldScreen.this.height - 103, 43, 24);
 
 			for (int i = 0; i < CreateFlatWorldScreen.this.generator.getLayersInfo().size(); i++) {
 				this.addEntry(new CreateFlatWorldScreen.DetailsList.Entry());

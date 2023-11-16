@@ -119,11 +119,12 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Team;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 
-public abstract class Entity implements Nameable, EntityAccess, CommandSource {
+public abstract class Entity implements Nameable, EntityAccess, CommandSource, ScoreHolder {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String ID_TAG = "id";
 	public static final String PASSENGERS_TAG = "Passengers";
@@ -2603,6 +2604,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource {
 		return this.stringUUID;
 	}
 
+	@Override
 	public String getScoreboardName() {
 		return this.stringUUID;
 	}

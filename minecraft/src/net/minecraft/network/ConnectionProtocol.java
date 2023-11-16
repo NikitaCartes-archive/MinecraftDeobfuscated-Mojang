@@ -94,6 +94,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
+import net.minecraft.network.protocol.game.ClientboundResetScorePacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
@@ -283,6 +284,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundRecipePacket.class, ClientboundRecipePacket::new)
 					.addPacket(ClientboundRemoveEntitiesPacket.class, ClientboundRemoveEntitiesPacket::new)
 					.addPacket(ClientboundRemoveMobEffectPacket.class, ClientboundRemoveMobEffectPacket::new)
+					.addPacket(ClientboundResetScorePacket.class, ClientboundResetScorePacket::new)
 					.addPacket(ClientboundResourcePackPacket.class, ClientboundResourcePackPacket::new)
 					.addPacket(ClientboundRespawnPacket.class, ClientboundRespawnPacket::new)
 					.addPacket(ClientboundRotateHeadPacket.class, ClientboundRotateHeadPacket::new)

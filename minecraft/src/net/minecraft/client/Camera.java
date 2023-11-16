@@ -36,6 +36,7 @@ public class Camera {
 	private boolean detached;
 	private float eyeHeight;
 	private float eyeHeightOld;
+	private float partialTickTime;
 	public static final float FOG_DISTANCE_SCALE = 0.083333336F;
 
 	public void setup(BlockGetter blockGetter, Entity entity, boolean bl, boolean bl2, float f) {
@@ -43,6 +44,7 @@ public class Camera {
 		this.level = blockGetter;
 		this.entity = entity;
 		this.detached = bl;
+		this.partialTickTime = f;
 		this.setRotation(entity.getViewYRot(f), entity.getViewXRot(f));
 		this.setPosition(
 			Mth.lerp((double)f, entity.xo, entity.getX()),
@@ -210,6 +212,10 @@ public class Camera {
 		this.level = null;
 		this.entity = null;
 		this.initialized = false;
+	}
+
+	public float getPartialTickTime() {
+		return this.partialTickTime;
 	}
 
 	@Environment(EnvType.CLIENT)

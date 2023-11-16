@@ -168,6 +168,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
+import net.minecraft.network.protocol.game.ClientboundResetScorePacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
@@ -295,7 +296,8 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ScoreAccess;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -2007,7 +2009,14 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		Scoreboard scoreboard = this.level.getScoreboard();
 		String string = clientboundSetObjectivePacket.getObjectiveName();
 		if (clientboundSetObjectivePacket.getMethod() == 0) {
-			scoreboard.addObjective(string, ObjectiveCriteria.DUMMY, clientboundSetObjectivePacket.getDisplayName(), clientboundSetObjectivePacket.getRenderType());
+			scoreboard.addObjective(
+				string,
+				ObjectiveCriteria.DUMMY,
+				clientboundSetObjectivePacket.getDisplayName(),
+				clientboundSetObjectivePacket.getRenderType(),
+				false,
+				clientboundSetObjectivePacket.getNumberFormat()
+			);
 		} else {
 			Objective objective = scoreboard.getObjective(string);
 			if (objective != null) {
@@ -2016,6 +2025,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				} else if (clientboundSetObjectivePacket.getMethod() == 2) {
 					objective.setRenderType(clientboundSetObjectivePacket.getRenderType());
 					objective.setDisplayName(clientboundSetObjectivePacket.getDisplayName());
+					objective.setNumberFormat(clientboundSetObjectivePacket.getNumberFormat());
 				}
 			}
 		}
@@ -2025,19 +2035,34 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleSetScore(ClientboundSetScorePacket clientboundSetScorePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetScorePacket, this, this.minecraft);
 		Scoreboard scoreboard = this.level.getScoreboard();
-		String string = clientboundSetScorePacket.getObjectiveName();
-		switch (clientboundSetScorePacket.getMethod()) {
-			case CHANGE:
-				Objective objective = scoreboard.getObjective(string);
-				if (objective != null) {
-					Score score = scoreboard.getOrCreatePlayerScore(clientboundSetScorePacket.getOwner(), objective);
-					score.setScore(clientboundSetScorePacket.getScore());
-				} else {
-					LOGGER.warn("Received packet for unknown scoreboard: {}", string);
-				}
-				break;
-			case REMOVE:
-				scoreboard.resetPlayerScore(clientboundSetScorePacket.getOwner(), scoreboard.getObjective(string));
+		String string = clientboundSetScorePacket.objectiveName();
+		ScoreHolder scoreHolder = ScoreHolder.forNameOnly(clientboundSetScorePacket.owner());
+		Objective objective = scoreboard.getObjective(string);
+		if (objective != null) {
+			ScoreAccess scoreAccess = scoreboard.getOrCreatePlayerScore(scoreHolder, objective, true);
+			scoreAccess.set(clientboundSetScorePacket.score());
+			scoreAccess.display(clientboundSetScorePacket.display());
+			scoreAccess.numberFormatOverride(clientboundSetScorePacket.numberFormat());
+		} else {
+			LOGGER.warn("Received packet for unknown scoreboard objective: {}", string);
+		}
+	}
+
+	@Override
+	public void handleResetScore(ClientboundResetScorePacket clientboundResetScorePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundResetScorePacket, this, this.minecraft);
+		Scoreboard scoreboard = this.level.getScoreboard();
+		String string = clientboundResetScorePacket.objectiveName();
+		ScoreHolder scoreHolder = ScoreHolder.forNameOnly(clientboundResetScorePacket.owner());
+		if (string == null) {
+			scoreboard.resetAllPlayerScores(scoreHolder);
+		} else {
+			Objective objective = scoreboard.getObjective(string);
+			if (objective != null) {
+				scoreboard.resetSinglePlayerScore(scoreHolder, objective);
+			} else {
+				LOGGER.warn("Received packet for unknown scoreboard objective: {}", string);
+			}
 		}
 	}
 

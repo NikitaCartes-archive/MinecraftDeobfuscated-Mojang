@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.monster.breeze;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
@@ -78,8 +79,9 @@ public class BreezeAi {
 		);
 	}
 
-	static class SlideToTargetSink extends MoveToTargetSink {
-		SlideToTargetSink(int i, int j) {
+	public static class SlideToTargetSink extends MoveToTargetSink {
+		@VisibleForTesting
+		public SlideToTargetSink(int i, int j) {
 			super(i, j);
 		}
 

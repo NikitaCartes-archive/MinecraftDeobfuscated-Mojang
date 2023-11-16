@@ -28,13 +28,11 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 
 	@Override
 	protected void init() {
-		this.packSelectionList = new LanguageSelectScreen.LanguageSelectionList(this.minecraft);
-		this.addWidget(this.packSelectionList);
+		this.packSelectionList = this.addRenderableWidget(new LanguageSelectScreen.LanguageSelectionList(this.minecraft));
 		this.addRenderableWidget(this.options.forceUnicodeFont().createButton(this.options, this.width / 2 - 155, this.height - 38, 150));
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 155 + 160, this.height - 38, 150, 20).build()
 		);
-		super.init();
 	}
 
 	void onDone() {
@@ -66,7 +64,6 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		this.packSelectionList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 16777215);
 		guiGraphics.drawCenteredString(this.font, WARNING_LABEL, this.width / 2, this.height - 56, -8355712);
 	}
@@ -79,7 +76,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 	@Environment(EnvType.CLIENT)
 	class LanguageSelectionList extends ObjectSelectionList<LanguageSelectScreen.LanguageSelectionList.Entry> {
 		public LanguageSelectionList(Minecraft minecraft) {
-			super(minecraft, LanguageSelectScreen.this.width, LanguageSelectScreen.this.height, 32, LanguageSelectScreen.this.height - 65 + 4, 18);
+			super(minecraft, LanguageSelectScreen.this.width, LanguageSelectScreen.this.height - 93, 32, 18);
 			String string = LanguageSelectScreen.this.languageManager.getSelected();
 			LanguageSelectScreen.this.languageManager.getLanguages().forEach((string2, languageInfo) -> {
 				LanguageSelectScreen.LanguageSelectionList.Entry entry = new LanguageSelectScreen.LanguageSelectionList.Entry(string2, languageInfo);

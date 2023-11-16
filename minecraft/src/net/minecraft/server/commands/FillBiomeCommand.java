@@ -4,9 +4,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.util.Either;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -99,25 +103,34 @@ public class FillBiomeCommand {
 		};
 	}
 
-	private static int fill(
-		CommandSourceStack commandSourceStack, BlockPos blockPos, BlockPos blockPos2, Holder.Reference<Biome> reference, Predicate<Holder<Biome>> predicate
-	) throws CommandSyntaxException {
+	public static Either<Integer, CommandSyntaxException> fill(ServerLevel serverLevel, BlockPos blockPos, BlockPos blockPos2, Holder<Biome> holder) {
+		return fill(serverLevel, blockPos, blockPos2, holder, holderx -> true, supplier -> {
+		});
+	}
+
+	public static Either<Integer, CommandSyntaxException> fill(
+		ServerLevel serverLevel,
+		BlockPos blockPos,
+		BlockPos blockPos2,
+		Holder<Biome> holder,
+		Predicate<Holder<Biome>> predicate,
+		Consumer<Supplier<Component>> consumer
+	) {
 		BlockPos blockPos3 = quantize(blockPos);
 		BlockPos blockPos4 = quantize(blockPos2);
 		BoundingBox boundingBox = BoundingBox.fromCorners(blockPos3, blockPos4);
 		int i = boundingBox.getXSpan() * boundingBox.getYSpan() * boundingBox.getZSpan();
-		int j = commandSourceStack.getLevel().getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
+		int j = serverLevel.getGameRules().getInt(GameRules.RULE_COMMAND_MODIFICATION_BLOCK_LIMIT);
 		if (i > j) {
-			throw ERROR_VOLUME_TOO_LARGE.create(j, i);
+			return Either.right(ERROR_VOLUME_TOO_LARGE.create(j, i));
 		} else {
-			ServerLevel serverLevel = commandSourceStack.getLevel();
 			List<ChunkAccess> list = new ArrayList();
 
 			for (int k = SectionPos.blockToSectionCoord(boundingBox.minZ()); k <= SectionPos.blockToSectionCoord(boundingBox.maxZ()); k++) {
 				for (int l = SectionPos.blockToSectionCoord(boundingBox.minX()); l <= SectionPos.blockToSectionCoord(boundingBox.maxX()); l++) {
 					ChunkAccess chunkAccess = serverLevel.getChunk(l, k, ChunkStatus.FULL, false);
 					if (chunkAccess == null) {
-						throw ERROR_NOT_LOADED.create();
+						return Either.right(ERROR_NOT_LOADED.create());
 					}
 
 					list.add(chunkAccess);
@@ -127,15 +140,13 @@ public class FillBiomeCommand {
 			MutableInt mutableInt = new MutableInt(0);
 
 			for (ChunkAccess chunkAccess : list) {
-				chunkAccess.fillBiomesFromNoise(
-					makeResolver(mutableInt, chunkAccess, boundingBox, reference, predicate), serverLevel.getChunkSource().randomState().sampler()
-				);
+				chunkAccess.fillBiomesFromNoise(makeResolver(mutableInt, chunkAccess, boundingBox, holder, predicate), serverLevel.getChunkSource().randomState().sampler());
 				chunkAccess.setUnsaved(true);
 			}
 
 			serverLevel.getChunkSource().chunkMap.resendBiomesForChunks(list);
-			commandSourceStack.sendSuccess(
-				() -> Component.translatable(
+			consumer.accept(
+				(Supplier)() -> Component.translatable(
 						"commands.fillbiome.success.count",
 						mutableInt.getValue(),
 						boundingBox.minX(),
@@ -144,10 +155,23 @@ public class FillBiomeCommand {
 						boundingBox.maxX(),
 						boundingBox.maxY(),
 						boundingBox.maxZ()
-					),
-				true
+					)
 			);
-			return mutableInt.getValue();
+			return Either.left(mutableInt.getValue());
+		}
+	}
+
+	private static int fill(
+		CommandSourceStack commandSourceStack, BlockPos blockPos, BlockPos blockPos2, Holder.Reference<Biome> reference, Predicate<Holder<Biome>> predicate
+	) throws CommandSyntaxException {
+		Either<Integer, CommandSyntaxException> either = fill(
+			commandSourceStack.getLevel(), blockPos, blockPos2, reference, predicate, supplier -> commandSourceStack.sendSuccess(supplier, true)
+		);
+		Optional<CommandSyntaxException> optional = either.right();
+		if (optional.isPresent()) {
+			throw (CommandSyntaxException)optional.get();
+		} else {
+			return (Integer)either.left().get();
 		}
 	}
 }

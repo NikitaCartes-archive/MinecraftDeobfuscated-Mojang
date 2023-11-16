@@ -37,6 +37,7 @@ import net.minecraft.commands.arguments.ResourceOrTagKeyArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.ScoreboardSlotArgument;
 import net.minecraft.commands.arguments.SlotArgument;
+import net.minecraft.commands.arguments.StyleArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.TemplateMirrorArgument;
 import net.minecraft.commands.arguments.TemplateRotationArgument;
@@ -91,6 +92,7 @@ public class ArgumentTypeInfos {
 		register(registry, "item_predicate", ItemPredicateArgument.class, SingletonArgumentInfo.contextAware(ItemPredicateArgument::itemPredicate));
 		register(registry, "color", ColorArgument.class, SingletonArgumentInfo.contextFree(ColorArgument::color));
 		register(registry, "component", ComponentArgument.class, SingletonArgumentInfo.contextFree(ComponentArgument::textComponent));
+		register(registry, "style", StyleArgument.class, SingletonArgumentInfo.contextFree(StyleArgument::style));
 		register(registry, "message", MessageArgument.class, SingletonArgumentInfo.contextFree(MessageArgument::message));
 		register(registry, "nbt_compound_tag", CompoundTagArgument.class, SingletonArgumentInfo.contextFree(CompoundTagArgument::compoundTag));
 		register(registry, "nbt_tag", NbtTagArgument.class, SingletonArgumentInfo.contextFree(NbtTagArgument::nbtTag));

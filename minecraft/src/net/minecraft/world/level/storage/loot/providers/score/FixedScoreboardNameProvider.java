@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Set;
-import javax.annotation.Nullable;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.scores.ScoreHolder;
 
 public record FixedScoreboardNameProvider(String name) implements ScoreboardNameProvider {
 	public static final Codec<FixedScoreboardNameProvider> CODEC = RecordCodecBuilder.create(
@@ -22,10 +22,9 @@ public record FixedScoreboardNameProvider(String name) implements ScoreboardName
 		return ScoreboardNameProviders.FIXED;
 	}
 
-	@Nullable
 	@Override
-	public String getScoreboardName(LootContext lootContext) {
-		return this.name;
+	public ScoreHolder getScoreHolder(LootContext lootContext) {
+		return ScoreHolder.forNameOnly(this.name);
 	}
 
 	@Override

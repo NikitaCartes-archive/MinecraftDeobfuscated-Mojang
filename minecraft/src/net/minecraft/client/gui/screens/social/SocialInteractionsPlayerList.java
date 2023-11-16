@@ -31,15 +31,15 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 	@Nullable
 	private String filter;
 
-	public SocialInteractionsPlayerList(SocialInteractionsScreen socialInteractionsScreen, Minecraft minecraft, int i, int j, int k, int l, int m) {
-		super(minecraft, i, j, k, l, m);
+	public SocialInteractionsPlayerList(SocialInteractionsScreen socialInteractionsScreen, Minecraft minecraft, int i, int j, int k, int l) {
+		super(minecraft, i, j, k, l);
 		this.socialInteractionsScreen = socialInteractionsScreen;
 		this.setRenderBackground(false);
 	}
 
 	@Override
 	protected void enableScissor(GuiGraphics guiGraphics) {
-		guiGraphics.enableScissor(this.x0, this.y0 + 4, this.x1, this.y1);
+		guiGraphics.enableScissor(this.getX(), this.getY() + 4, this.getRight(), this.getBottom());
 	}
 
 	public void updatePlayerList(Collection<UUID> collection, double d, boolean bl) {
