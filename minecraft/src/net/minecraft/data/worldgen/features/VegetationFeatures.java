@@ -166,11 +166,13 @@ public class VegetationFeatures {
 			PATCH_TAIGA_GRASS,
 			Feature.RANDOM_PATCH,
 			grassPatch(
-				new WeightedStateProvider(SimpleWeightedRandomList.<BlockState>builder().add(Blocks.GRASS.defaultBlockState(), 1).add(Blocks.FERN.defaultBlockState(), 4)),
+				new WeightedStateProvider(
+					SimpleWeightedRandomList.<BlockState>builder().add(Blocks.SHORT_GRASS.defaultBlockState(), 1).add(Blocks.FERN.defaultBlockState(), 4)
+				),
 				32
 			)
 		);
-		FeatureUtils.register(bootstapContext, PATCH_GRASS, Feature.RANDOM_PATCH, grassPatch(BlockStateProvider.simple(Blocks.GRASS), 32));
+		FeatureUtils.register(bootstapContext, PATCH_GRASS, Feature.RANDOM_PATCH, grassPatch(BlockStateProvider.simple(Blocks.SHORT_GRASS), 32));
 		FeatureUtils.register(
 			bootstapContext,
 			PATCH_GRASS_JUNGLE,
@@ -182,14 +184,19 @@ public class VegetationFeatures {
 				PlacementUtils.filtered(
 					Feature.SIMPLE_BLOCK,
 					new SimpleBlockConfiguration(
-						new WeightedStateProvider(SimpleWeightedRandomList.<BlockState>builder().add(Blocks.GRASS.defaultBlockState(), 3).add(Blocks.FERN.defaultBlockState(), 1))
+						new WeightedStateProvider(
+							SimpleWeightedRandomList.<BlockState>builder().add(Blocks.SHORT_GRASS.defaultBlockState(), 3).add(Blocks.FERN.defaultBlockState(), 1)
+						)
 					),
 					BlockPredicate.allOf(BlockPredicate.ONLY_IN_AIR_PREDICATE, BlockPredicate.not(BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.PODZOL)))
 				)
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext, SINGLE_PIECE_OF_GRASS, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.GRASS.defaultBlockState()))
+			bootstapContext,
+			SINGLE_PIECE_OF_GRASS,
+			Feature.SIMPLE_BLOCK,
+			new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SHORT_GRASS.defaultBlockState()))
 		);
 		FeatureUtils.register(bootstapContext, PATCH_DEAD_BUSH, Feature.RANDOM_PATCH, grassPatch(BlockStateProvider.simple(Blocks.DEAD_BUSH), 4));
 		FeatureUtils.register(
@@ -378,7 +385,7 @@ public class VegetationFeatures {
 								Blocks.DANDELION.defaultBlockState(),
 								Blocks.CORNFLOWER.defaultBlockState(),
 								Blocks.OXEYE_DAISY.defaultBlockState(),
-								Blocks.GRASS.defaultBlockState()
+								Blocks.SHORT_GRASS.defaultBlockState()
 							)
 						)
 					)

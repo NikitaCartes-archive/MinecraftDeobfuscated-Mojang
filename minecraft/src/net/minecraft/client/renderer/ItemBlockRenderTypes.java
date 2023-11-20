@@ -68,7 +68,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.POWERED_RAIL, renderType3);
 		hashMap.put(Blocks.DETECTOR_RAIL, renderType3);
 		hashMap.put(Blocks.COBWEB, renderType3);
-		hashMap.put(Blocks.GRASS, renderType3);
+		hashMap.put(Blocks.SHORT_GRASS, renderType3);
 		hashMap.put(Blocks.FERN, renderType3);
 		hashMap.put(Blocks.DEAD_BUSH, renderType3);
 		hashMap.put(Blocks.SEAGRASS, renderType3);

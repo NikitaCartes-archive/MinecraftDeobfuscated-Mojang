@@ -17,5 +17,6 @@ public class UpdateOneTwentyOneEntityTypeTagsProvider extends IntrinsicHolderTag
 		this.tag(EntityTypeTags.FALL_DAMAGE_IMMUNE).add(EntityType.BREEZE);
 		this.tag(EntityTypeTags.DEFLECTS_ARROWS).add(EntityType.BREEZE);
 		this.tag(EntityTypeTags.DEFLECTS_TRIDENTS).add(EntityType.BREEZE);
+		this.tag(EntityTypeTags.CAN_TURN_IN_BOATS).add(EntityType.BREEZE);
 	}
 }

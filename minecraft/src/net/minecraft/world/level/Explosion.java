@@ -50,7 +50,6 @@ public class Explosion {
 	@Nullable
 	private final Entity source;
 	private final float radius;
-	@Nullable
 	private final DamageSource damageSource;
 	private final ExplosionDamageCalculator damageCalculator;
 	private final ParticleOptions smallExplosionParticles;
@@ -128,7 +127,7 @@ public class Explosion {
 		this.z = f;
 		this.fire = bl;
 		this.blockInteraction = blockInteraction;
-		this.damageSource = damageSource;
+		this.damageSource = damageSource == null ? level.damageSources().explosion(this) : damageSource;
 		this.damageCalculator = explosionDamageCalculator == null ? this.makeDamageCalculator(entity) : explosionDamageCalculator;
 		this.smallExplosionParticles = particleOptions;
 		this.largeExplosionParticles = particleOptions2;
@@ -250,7 +249,7 @@ public class Explosion {
 						w /= z;
 						x /= z;
 						y /= z;
-						if (this.damageSource != null) {
+						if (this.damageCalculator.shouldDamageEntity(this, entity)) {
 							entity.hurt(this.damageSource, this.damageCalculator.getEntityDamageAmount(this, entity));
 						}
 
@@ -338,8 +337,10 @@ public class Explosion {
 			Pair<ItemStack, BlockPos> pair = (Pair<ItemStack, BlockPos>)list.get(i);
 			ItemStack itemStack2 = pair.getFirst();
 			if (ItemEntity.areMergable(itemStack2, itemStack)) {
-				list.set(i, Pair.of(ItemEntity.merge(itemStack, itemStack2, 16), pair.getSecond()));
-				return;
+				list.set(i, Pair.of(ItemEntity.merge(itemStack2, itemStack, 16), pair.getSecond()));
+				if (itemStack.isEmpty()) {
+					return;
+				}
 			}
 		}
 

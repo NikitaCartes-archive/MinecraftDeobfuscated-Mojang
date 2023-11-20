@@ -4729,7 +4729,7 @@ public class BlockModelGenerators {
 		this.createMushroomBlock(Blocks.BROWN_MUSHROOM_BLOCK);
 		this.createMushroomBlock(Blocks.RED_MUSHROOM_BLOCK);
 		this.createMushroomBlock(Blocks.MUSHROOM_STEM);
-		this.createCrossBlockWithDefaultItem(Blocks.GRASS, BlockModelGenerators.TintState.TINTED);
+		this.createCrossBlockWithDefaultItem(Blocks.SHORT_GRASS, BlockModelGenerators.TintState.TINTED);
 		this.createCrossBlock(Blocks.SUGAR_CANE, BlockModelGenerators.TintState.TINTED);
 		this.createSimpleFlatItemModel(Items.SUGAR_CANE);
 		this.createGrowingPlant(Blocks.KELP, Blocks.KELP_PLANT, BlockModelGenerators.TintState.NOT_TINTED);

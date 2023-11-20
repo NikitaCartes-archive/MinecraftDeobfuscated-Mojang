@@ -144,7 +144,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.ClientPackSource;
-import net.minecraft.client.resources.DownloadedPackSource;
 import net.minecraft.client.resources.FoliageColorReloadListener;
 import net.minecraft.client.resources.GrassColorReloadListener;
 import net.minecraft.client.resources.MobEffectTextureManager;
@@ -155,6 +154,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.client.searchtree.FullTextSearchTree;
 import net.minecraft.client.searchtree.IdSearchTree;
 import net.minecraft.client.searchtree.SearchRegistry;
@@ -414,11 +414,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		Path path = this.gameDirectory.toPath();
 		this.directoryValidator = LevelStorageSource.parseValidator(path.resolve("allowed_symlinks.txt"));
 		ClientPackSource clientPackSource = new ClientPackSource(gameConfig.location.getExternalAssetSource(), this.directoryValidator);
-		this.downloadedPackSource = new DownloadedPackSource(new File(this.gameDirectory, "server-resource-packs"));
+		this.downloadedPackSource = new DownloadedPackSource(this, path.resolve("downloads"), gameConfig.user);
 		RepositorySource repositorySource = new FolderRepositorySource(
 			this.resourcePackDirectory, PackType.CLIENT_RESOURCES, PackSource.DEFAULT, this.directoryValidator
 		);
-		this.resourcePackRepository = new PackRepository(clientPackSource, this.downloadedPackSource, repositorySource);
+		this.resourcePackRepository = new PackRepository(clientPackSource, this.downloadedPackSource.createRepositorySource(), repositorySource);
 		this.vanillaPackResources = clientPackSource.getVanillaPack();
 		this.proxy = gameConfig.user.proxy;
 		this.authenticationService = new YggdrasilAuthenticationService(this.proxy);
@@ -744,6 +744,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public void clearResourcePacksOnError(Throwable throwable, @Nullable Component component, @Nullable Minecraft.GameLoadCookie gameLoadCookie) {
 		LOGGER.info("Caught error loading resourcepacks, removing all selected resourcepacks", throwable);
 		this.reloadStateTracker.startRecovery(throwable);
+		this.downloadedPackSource.onRecovery();
 		this.resourcePackRepository.setSelected(Collections.emptyList());
 		this.options.resourcePacks.clear();
 		this.options.incompatibleResourcePacks.clear();
@@ -764,7 +765,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	private void addResourcePackLoadFailToast(@Nullable Component component) {
 		ToastComponent toastComponent = this.getToasts();
-		SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, Component.translatable("resourcePack.load_fail"), component);
+		SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.translatable("resourcePack.load_fail"), component);
 	}
 
 	public void run() {
@@ -950,6 +951,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 						this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list),
 						optional -> Util.ifElse(optional, throwable -> {
 								if (bl) {
+									this.downloadedPackSource.onRecoveryFailure();
 									this.abortResourcePackRecovery();
 								} else {
 									this.rollbackResourcePacks(throwable, gameLoadCookie);
@@ -957,6 +959,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 							}, () -> {
 								this.levelRenderer.allChanged();
 								this.reloadStateTracker.finishReload();
+								this.downloadedPackSource.onReloadSuccess();
 								completableFuture.complete(null);
 								this.onResourceLoadFinished(gameLoadCookie);
 							}),
@@ -1241,7 +1244,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			&& (this.screen != null && this.screen.isPauseScreen() || this.overlay != null && this.overlay.isPauseScreen())
 			&& !this.singleplayerServer.isPublished();
 		if (this.pause != bl3) {
-			if (this.pause) {
+			if (bl3) {
 				this.pausePartialTick = this.timer.partialTick;
 			} else {
 				this.timer.partialTick = this.pausePartialTick;
@@ -2083,7 +2086,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.setScreen(levelLoadingScreen);
 		this.profiler.push("waitForServer");
 
-		for (; !this.singleplayerServer.isReady(); this.handleDelayedCrash()) {
+		for (; !this.singleplayerServer.isReady() || this.overlay != null; this.handleDelayedCrash()) {
 			levelLoadingScreen.tick();
 			this.runTick(false);
 
@@ -2128,6 +2131,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		if (clientPacketListener != null) {
 			this.dropAllTasks();
 			clientPacketListener.close();
+			this.clearDownloadedResourcePacks();
 		}
 
 		this.playerSocialManager.stopOnlineMode();
@@ -2155,7 +2159,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					this.profiler.pop();
 				}
 
-				this.downloadedPackSource.clearServerPack();
 				this.gui.onDisconnected();
 				this.isLocalServer = false;
 			}
@@ -2168,6 +2171,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		SkullBlockEntity.clear();
+	}
+
+	public void clearDownloadedResourcePacks() {
+		this.downloadedPackSource.cleanupAfterDisconnect();
+		this.runAllTasks();
 	}
 
 	public void clearClientLevel(Screen screen) {
@@ -2188,7 +2196,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		try {
 			this.updateScreenAndTick(screen);
 			this.gui.onDisconnected();
-			this.downloadedPackSource.clearServerPack();
 			this.level = null;
 			this.updateLevelInEngines(null);
 			this.player = null;

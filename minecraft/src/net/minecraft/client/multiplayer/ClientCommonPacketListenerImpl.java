@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
+import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -24,6 +24,7 @@ import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -39,7 +40,8 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ClientboundPingPacket;
-import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ServerboundPongPacket;
@@ -107,45 +109,49 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	protected abstract RegistryAccess.Frozen registryAccess();
 
 	@Override
-	public void handleResourcePack(ClientboundResourcePackPacket clientboundResourcePackPacket) {
-		URL uRL = parseResourcePackUrl(clientboundResourcePackPacket.getUrl());
+	public void handleResourcePackPush(ClientboundResourcePackPushPacket clientboundResourcePackPushPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundResourcePackPushPacket, this, this.minecraft);
+		UUID uUID = clientboundResourcePackPushPacket.id();
+		URL uRL = parseResourcePackUrl(clientboundResourcePackPushPacket.url());
 		if (uRL == null) {
-			this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
+			this.connection.send(new ServerboundResourcePackPacket(uUID, ServerboundResourcePackPacket.Action.INVALID_URL));
 		} else {
-			String string = clientboundResourcePackPacket.getHash();
-			boolean bl = clientboundResourcePackPacket.isRequired();
-			if (this.serverData != null && this.serverData.getResourcePackStatus() == ServerData.ServerPackStatus.ENABLED) {
-				this.send(ServerboundResourcePackPacket.Action.ACCEPTED);
-				this.packApplicationCallback(this.minecraft.getDownloadedPackSource().downloadAndSelectResourcePack(uRL, string, true));
-			} else if (this.serverData != null
+			String string = clientboundResourcePackPushPacket.hash();
+			boolean bl = clientboundResourcePackPushPacket.required();
+			if (this.serverData != null
 				&& this.serverData.getResourcePackStatus() != ServerData.ServerPackStatus.PROMPT
 				&& (!bl || this.serverData.getResourcePackStatus() != ServerData.ServerPackStatus.DISABLED)) {
-				this.send(ServerboundResourcePackPacket.Action.DECLINED);
-				if (bl) {
-					this.connection.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
-				}
+				this.minecraft.getDownloadedPackSource().pushPack(uUID, uRL, string);
 			} else {
-				this.minecraft.execute(() -> this.showServerPackPrompt(uRL, string, bl, clientboundResourcePackPacket.getPrompt()));
+				this.showServerPackPrompt(uUID, uRL, string, bl, clientboundResourcePackPushPacket.prompt());
 			}
 		}
 	}
 
-	private void showServerPackPrompt(URL uRL, String string, boolean bl, @Nullable Component component) {
+	@Override
+	public void handleResourcePackPop(ClientboundResourcePackPopPacket clientboundResourcePackPopPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundResourcePackPopPacket, this, this.minecraft);
+		clientboundResourcePackPopPacket.id()
+			.ifPresentOrElse(uUID -> this.minecraft.getDownloadedPackSource().popPack(uUID), () -> this.minecraft.getDownloadedPackSource().popAll());
+	}
+
+	private void showServerPackPrompt(UUID uUID, URL uRL, String string, boolean bl, @Nullable Component component) {
 		Screen screen = this.minecraft.screen;
 		this.minecraft
 			.setScreen(
 				new ConfirmScreen(
 					bl2 -> {
 						this.minecraft.setScreen(screen);
+						DownloadedPackSource downloadedPackSource = this.minecraft.getDownloadedPackSource();
+						downloadedPackSource.pushPack(uUID, uRL, string);
 						if (bl2) {
 							if (this.serverData != null) {
 								this.serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
 							}
 
-							this.send(ServerboundResourcePackPacket.Action.ACCEPTED);
-							this.packApplicationCallback(this.minecraft.getDownloadedPackSource().downloadAndSelectResourcePack(uRL, string, true));
+							downloadedPackSource.allowServerPacks();
 						} else {
-							this.send(ServerboundResourcePackPacket.Action.DECLINED);
+							downloadedPackSource.rejectServerPacks();
 							if (bl) {
 								this.connection.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
 							} else if (this.serverData != null) {
@@ -185,13 +191,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 		}
 	}
 
-	private void packApplicationCallback(CompletableFuture<?> completableFuture) {
-		completableFuture.thenRun(() -> this.send(ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED)).exceptionally(throwable -> {
-			this.send(ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD);
-			return null;
-		});
-	}
-
 	@Override
 	public void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundUpdateTagsPacket, this, this.minecraft);
@@ -207,10 +206,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 			TagNetworkSerialization.deserializeTagsFromNetwork(resourceKey, registry, networkPayload, map::put);
 			registry.bindTags(map);
 		}
-	}
-
-	private void send(ServerboundResourcePackPacket.Action action) {
-		this.connection.send(new ServerboundResourcePackPacket(action));
 	}
 
 	@Override

@@ -419,7 +419,7 @@ public class FireBlock extends BaseFireBlock {
 		fireBlock.setFlammable(Blocks.MANGROVE_LEAVES, 30, 60);
 		fireBlock.setFlammable(Blocks.BOOKSHELF, 30, 20);
 		fireBlock.setFlammable(Blocks.TNT, 15, 100);
-		fireBlock.setFlammable(Blocks.GRASS, 60, 100);
+		fireBlock.setFlammable(Blocks.SHORT_GRASS, 60, 100);
 		fireBlock.setFlammable(Blocks.FERN, 60, 100);
 		fireBlock.setFlammable(Blocks.DEAD_BUSH, 60, 100);
 		fireBlock.setFlammable(Blocks.SUNFLOWER, 60, 100);

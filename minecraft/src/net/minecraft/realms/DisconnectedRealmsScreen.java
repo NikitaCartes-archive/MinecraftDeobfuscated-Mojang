@@ -25,7 +25,7 @@ public class DisconnectedRealmsScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.minecraft.getDownloadedPackSource().clearServerPack();
+		this.minecraft.getDownloadedPackSource().cleanupAfterDisconnect();
 		this.message = MultiLineLabel.create(this.font, this.reason, this.width - 50);
 		this.textHeight = this.message.getLineCount() * 9;
 		this.addRenderableWidget(

@@ -24,6 +24,7 @@ public final class EntityTypeTags {
 	public static final TagKey<EntityType<?>> NON_CONTROLLING_RIDER = create("non_controlling_rider");
 	public static final TagKey<EntityType<?>> DEFLECTS_ARROWS = create("deflects_arrows");
 	public static final TagKey<EntityType<?>> DEFLECTS_TRIDENTS = create("deflects_tridents");
+	public static final TagKey<EntityType<?>> CAN_TURN_IN_BOATS = create("can_turn_in_boats");
 
 	private EntityTypeTags() {
 	}

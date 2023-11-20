@@ -663,8 +663,8 @@ public class Blocks {
 				.pushReaction(PushReaction.DESTROY)
 		)
 	);
-	public static final Block GRASS = register(
-		"grass",
+	public static final Block SHORT_GRASS = register(
+		"short_grass",
 		new TallGrassBlock(
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)

@@ -30,7 +30,7 @@ public class ShearsItem extends Item {
 
 		return !blockState.is(BlockTags.LEAVES)
 				&& !blockState.is(Blocks.COBWEB)
-				&& !blockState.is(Blocks.GRASS)
+				&& !blockState.is(Blocks.SHORT_GRASS)
 				&& !blockState.is(Blocks.FERN)
 				&& !blockState.is(Blocks.DEAD_BUSH)
 				&& !blockState.is(Blocks.HANGING_ROOTS)

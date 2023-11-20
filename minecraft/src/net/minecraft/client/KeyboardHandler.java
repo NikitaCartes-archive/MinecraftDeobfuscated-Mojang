@@ -382,7 +382,7 @@ public class KeyboardHandler {
 			}
 
 			if (this.minecraft.getNarrator().isActive() && this.minecraft.options.narratorHotkey().get()) {
-				boolean bl2 = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
+				boolean bl2 = screen == null || !(screen.getFocused() instanceof EditBox editBox) || !editBox.canConsumeInput();
 				if (k != 0 && i == 66 && Screen.hasControlDown() && bl2) {
 					boolean bl3 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
 					this.minecraft.options.narrator().set(NarratorStatus.byId(this.minecraft.options.narrator().get().getId() + 1));

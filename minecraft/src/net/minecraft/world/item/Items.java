@@ -213,7 +213,7 @@ public class Items {
 	public static final Item CHISELED_SANDSTONE = registerBlock(Blocks.CHISELED_SANDSTONE);
 	public static final Item CUT_SANDSTONE = registerBlock(Blocks.CUT_SANDSTONE);
 	public static final Item COBWEB = registerBlock(Blocks.COBWEB);
-	public static final Item GRASS = registerBlock(Blocks.GRASS);
+	public static final Item SHORT_GRASS = registerBlock(Blocks.SHORT_GRASS);
 	public static final Item FERN = registerBlock(Blocks.FERN);
 	public static final Item AZALEA = registerBlock(Blocks.AZALEA);
 	public static final Item FLOWERING_AZALEA = registerBlock(Blocks.FLOWERING_AZALEA);

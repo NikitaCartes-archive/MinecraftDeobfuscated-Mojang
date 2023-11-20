@@ -61,7 +61,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 			this.minecraft.player.closeContainer();
 		}
 
-		return !this.name.keyPressed(i, j, k) && !this.name.canConsumeInput() ? super.keyPressed(i, j, k) : true;
+		return this.name.canConsumeInput() ? true : super.keyPressed(i, j, k);
 	}
 
 	private void onNameChanged(String string) {

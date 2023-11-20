@@ -89,7 +89,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.MANGROVE_PROPAGULE);
 		add(0.3F, Items.BEETROOT_SEEDS);
 		add(0.3F, Items.DRIED_KELP);
-		add(0.3F, Items.GRASS);
+		add(0.3F, Items.SHORT_GRASS);
 		add(0.3F, Items.KELP);
 		add(0.3F, Items.MELON_SEEDS);
 		add(0.3F, Items.PUMPKIN_SEEDS);

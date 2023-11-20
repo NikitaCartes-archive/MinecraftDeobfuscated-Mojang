@@ -151,12 +151,12 @@ public class EditWorldScreen extends Screen {
 		if (iOException != null) {
 			Component component = Component.translatable("selectWorld.edit.backupFailed");
 			Component component2 = Component.literal(iOException.getMessage());
-			Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.WORLD_BACKUP, component, component2));
+			Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.WORLD_BACKUP, component, component2));
 			return false;
 		} else {
 			Component component = Component.translatable("selectWorld.edit.backupCreated", levelStorageAccess.getLevelId());
 			Component component2 = Component.translatable("selectWorld.edit.backupSize", Mth.ceil((double)l / 1048576.0));
-			Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.WORLD_BACKUP, component, component2));
+			Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.WORLD_BACKUP, component, component2));
 			return true;
 		}
 	}

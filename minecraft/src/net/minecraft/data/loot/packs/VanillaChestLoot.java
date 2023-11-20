@@ -543,7 +543,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					LootPool.lootPool()
 						.setRolls(UniformGenerator.between(3.0F, 8.0F))
 						.add(LootItem.lootTableItem(Items.GOLD_NUGGET).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Items.GRASS).setWeight(5))
+						.add(LootItem.lootTableItem(Items.SHORT_GRASS).setWeight(5))
 						.add(LootItem.lootTableItem(Items.TALL_GRASS).setWeight(5))
 						.add(LootItem.lootTableItem(Items.BREAD).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
 						.add(LootItem.lootTableItem(Items.WHEAT_SEEDS).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 5.0F))))

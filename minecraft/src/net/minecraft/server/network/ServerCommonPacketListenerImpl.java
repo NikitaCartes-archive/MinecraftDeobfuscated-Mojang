@@ -74,8 +74,8 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 	@Override
 	public void handleResourcePackResponse(ServerboundResourcePackPacket serverboundResourcePackPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundResourcePackPacket, this, this.server);
-		if (serverboundResourcePackPacket.getAction() == ServerboundResourcePackPacket.Action.DECLINED && this.server.isResourcePackRequired()) {
-			LOGGER.info("Disconnecting {} due to resource pack rejection", this.playerProfile().getName());
+		if (serverboundResourcePackPacket.action() == ServerboundResourcePackPacket.Action.DECLINED && this.server.isResourcePackRequired()) {
+			LOGGER.info("Disconnecting {} due to resource pack {} rejection", this.playerProfile().getName(), serverboundResourcePackPacket.id());
 			this.disconnect(Component.translatable("multiplayer.requiredTexturePrompt.disconnect"));
 		}
 	}

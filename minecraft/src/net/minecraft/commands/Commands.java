@@ -104,6 +104,7 @@ import net.minecraft.server.commands.SayCommand;
 import net.minecraft.server.commands.ScheduleCommand;
 import net.minecraft.server.commands.ScoreboardCommand;
 import net.minecraft.server.commands.SeedCommand;
+import net.minecraft.server.commands.ServerPackCommand;
 import net.minecraft.server.commands.SetBlockCommand;
 import net.minecraft.server.commands.SetPlayerIdleTimeoutCommand;
 import net.minecraft.server.commands.SetSpawnCommand;
@@ -218,6 +219,7 @@ public class Commands {
 			DebugMobSpawningCommand.register(this.dispatcher);
 			WardenSpawnTrackerCommand.register(this.dispatcher);
 			SpawnArmorTrimsCommand.register(this.dispatcher);
+			ServerPackCommand.register(this.dispatcher);
 			if (commandSelection.includeDedicated) {
 				DebugConfigCommand.register(this.dispatcher);
 			}

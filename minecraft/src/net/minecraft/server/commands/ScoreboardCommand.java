@@ -435,7 +435,7 @@ public class ScoreboardCommand {
 		Scoreboard scoreboard = commandSourceStack.getServer().getScoreboard();
 		ReadOnlyScoreInfo readOnlyScoreInfo = scoreboard.getPlayerScoreInfo(scoreHolder, objective);
 		if (readOnlyScoreInfo == null) {
-			throw ERROR_NO_VALUE.create(objective.getName(), scoreHolder);
+			throw ERROR_NO_VALUE.create(objective.getName(), scoreHolder.getFeedbackDisplayName());
 		} else {
 			commandSourceStack.sendSuccess(
 				() -> Component.translatable(

@@ -50,15 +50,15 @@ public class Shoot extends Behavior<Breeze> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Breeze breeze) {
-		return breeze.onGround() && breeze.getPose() == Pose.STANDING
-			? (Boolean)breeze.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).map(livingEntity -> isTargetWithinRange(breeze, livingEntity)).map(boolean_ -> {
+		return breeze.getPose() != Pose.STANDING
+			? false
+			: (Boolean)breeze.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).map(livingEntity -> isTargetWithinRange(breeze, livingEntity)).map(boolean_ -> {
 				if (!boolean_) {
 					breeze.getBrain().eraseMemory(MemoryModuleType.BREEZE_SHOOT);
 				}
 
 				return boolean_;
-			}).orElse(false)
-			: false;
+			}).orElse(false);
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, Breeze breeze, long l) {
@@ -83,7 +83,7 @@ public class Shoot extends Behavior<Breeze> {
 	protected void tick(ServerLevel serverLevel, Breeze breeze, long l) {
 		Brain<Breeze> brain = breeze.getBrain();
 		LivingEntity livingEntity = (LivingEntity)brain.getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
-		if (livingEntity != null && breeze.onGround()) {
+		if (livingEntity != null) {
 			breeze.lookAt(EntityAnchorArgument.Anchor.EYES, livingEntity.position());
 			if (!brain.getMemory(MemoryModuleType.BREEZE_SHOOT_CHARGING).isPresent() && !brain.getMemory(MemoryModuleType.BREEZE_SHOOT_RECOVERING).isPresent()) {
 				brain.setMemoryWithExpiry(MemoryModuleType.BREEZE_SHOOT_RECOVERING, Unit.INSTANCE, (long)SHOOT_RECOVER_DELAY_TICKS);

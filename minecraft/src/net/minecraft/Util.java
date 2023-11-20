@@ -88,9 +88,9 @@ public class Util {
 	private static final int DEFAULT_MAX_THREADS = 255;
 	private static final int DEFAULT_SAFE_FILE_OPERATION_RETRIES = 10;
 	private static final String MAX_THREADS_SYSTEM_PROPERTY = "max.bg.threads";
-	private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
 	private static final ExecutorService BACKGROUND_EXECUTOR = makeExecutor("Main");
-	private static final ExecutorService IO_POOL = makeIoExecutor();
+	private static final ExecutorService IO_POOL = makeIoExecutor("IO-Worker-", false);
+	private static final ExecutorService DOWNLOAD_POOL = makeIoExecutor("Download-", true);
 	private static final DateTimeFormatter FILENAME_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
 	private static final int LINEAR_LOOKUP_THRESHOLD = 8;
 	public static final long NANOS_PER_MILLI = 1000000L;
@@ -146,6 +146,7 @@ public class Util {
 		if (i <= 0) {
 			executorService = MoreExecutors.newDirectExecutorService();
 		} else {
+			AtomicInteger atomicInteger = new AtomicInteger(1);
 			executorService = new ForkJoinPool(i, forkJoinPool -> {
 				ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
 					protected void onTermination(Throwable throwable) {
@@ -158,7 +159,7 @@ public class Util {
 						super.onTermination(throwable);
 					}
 				};
-				forkJoinWorkerThread.setName("Worker-" + string + "-" + WORKER_COUNT.getAndIncrement());
+				forkJoinWorkerThread.setName("Worker-" + string + "-" + atomicInteger.getAndIncrement());
 				return forkJoinWorkerThread;
 			}, Util::onThreadException, true);
 		}
@@ -192,6 +193,10 @@ public class Util {
 		return IO_POOL;
 	}
 
+	public static ExecutorService nonCriticalIoPool() {
+		return DOWNLOAD_POOL;
+	}
+
 	public static void shutdownExecutors() {
 		shutdownExecutor(BACKGROUND_EXECUTOR);
 		shutdownExecutor(IO_POOL);
@@ -212,10 +217,12 @@ public class Util {
 		}
 	}
 
-	private static ExecutorService makeIoExecutor() {
+	private static ExecutorService makeIoExecutor(String string, boolean bl) {
+		AtomicInteger atomicInteger = new AtomicInteger(1);
 		return Executors.newCachedThreadPool(runnable -> {
 			Thread thread = new Thread(runnable);
-			thread.setName("IO-Worker-" + WORKER_COUNT.getAndIncrement());
+			thread.setName(string + atomicInteger.getAndIncrement());
+			thread.setDaemon(bl);
 			thread.setUncaughtExceptionHandler(Util::onThreadException);
 			return thread;
 		});

@@ -25,7 +25,7 @@ class PlayerScores {
 	}
 
 	public boolean remove(Objective objective) {
-		return this.scores.get(objective) != null;
+		return this.scores.remove(objective) != null;
 	}
 
 	public boolean hasScores() {

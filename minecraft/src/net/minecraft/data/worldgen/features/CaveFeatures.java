@@ -317,7 +317,7 @@ public class CaveFeatures {
 						.add(Blocks.FLOWERING_AZALEA.defaultBlockState(), 4)
 						.add(Blocks.AZALEA.defaultBlockState(), 7)
 						.add(Blocks.MOSS_CARPET.defaultBlockState(), 25)
-						.add(Blocks.GRASS.defaultBlockState(), 50)
+						.add(Blocks.SHORT_GRASS.defaultBlockState(), 50)
 						.add(Blocks.TALL_GRASS.defaultBlockState(), 10)
 				)
 			)

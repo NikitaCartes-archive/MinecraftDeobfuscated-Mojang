@@ -70,16 +70,16 @@ public class GameNarrator {
 		ToastComponent toastComponent = Minecraft.getInstance().getToasts();
 		if (this.narrator.active()) {
 			if (narratorStatus == NarratorStatus.OFF) {
-				SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, Component.translatable("narrator.toast.disabled"), null);
+				SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.translatable("narrator.toast.disabled"), null);
 			} else {
 				SystemToast.addOrUpdate(
-					toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, Component.translatable("narrator.toast.enabled"), narratorStatus.getName()
+					toastComponent, SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.translatable("narrator.toast.enabled"), narratorStatus.getName()
 				);
 			}
 		} else {
 			SystemToast.addOrUpdate(
 				toastComponent,
-				SystemToast.SystemToastIds.NARRATOR_TOGGLE,
+				SystemToast.SystemToastId.NARRATOR_TOGGLE,
 				Component.translatable("narrator.toast.disabled"),
 				Component.translatable("options.narrator.notavailable")
 			);

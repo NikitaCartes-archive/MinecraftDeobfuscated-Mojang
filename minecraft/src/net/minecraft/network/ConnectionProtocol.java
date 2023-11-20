@@ -24,7 +24,8 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ClientboundPingPacket;
-import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
@@ -285,7 +286,8 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundRemoveEntitiesPacket.class, ClientboundRemoveEntitiesPacket::new)
 					.addPacket(ClientboundRemoveMobEffectPacket.class, ClientboundRemoveMobEffectPacket::new)
 					.addPacket(ClientboundResetScorePacket.class, ClientboundResetScorePacket::new)
-					.addPacket(ClientboundResourcePackPacket.class, ClientboundResourcePackPacket::new)
+					.addPacket(ClientboundResourcePackPopPacket.class, ClientboundResourcePackPopPacket::new)
+					.addPacket(ClientboundResourcePackPushPacket.class, ClientboundResourcePackPushPacket::new)
 					.addPacket(ClientboundRespawnPacket.class, ClientboundRespawnPacket::new)
 					.addPacket(ClientboundRotateHeadPacket.class, ClientboundRotateHeadPacket::new)
 					.addPacket(ClientboundSectionBlocksUpdatePacket.class, ClientboundSectionBlocksUpdatePacket::new)
@@ -444,7 +446,8 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundKeepAlivePacket.class, ClientboundKeepAlivePacket::new)
 					.addPacket(ClientboundPingPacket.class, ClientboundPingPacket::new)
 					.addPacket(ClientboundRegistryDataPacket.class, ClientboundRegistryDataPacket::new)
-					.addPacket(ClientboundResourcePackPacket.class, ClientboundResourcePackPacket::new)
+					.addPacket(ClientboundResourcePackPopPacket.class, ClientboundResourcePackPopPacket::new)
+					.addPacket(ClientboundResourcePackPushPacket.class, ClientboundResourcePackPushPacket::new)
 					.addPacket(ClientboundUpdateEnabledFeaturesPacket.class, ClientboundUpdateEnabledFeaturesPacket::new)
 					.addPacket(ClientboundUpdateTagsPacket.class, ClientboundUpdateTagsPacket::new)
 			)

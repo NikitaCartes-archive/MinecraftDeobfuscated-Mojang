@@ -6,6 +6,10 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -26,6 +30,7 @@ import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.NoticeWithLinkScreen;
 import net.minecraft.client.gui.screens.RecoverWorldDataScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.MappedRegistry;
@@ -51,6 +56,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.LevelDataAndDimensions;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -61,6 +67,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class WorldOpenFlows {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final UUID WORLD_PACK_ID = UUID.fromString("640a6a92-b6cb-48a0-b391-831586500359");
 	private final Minecraft minecraft;
 	private final LevelStorageSource levelSource;
 
@@ -312,6 +319,18 @@ public class WorldOpenFlows {
 		}
 	}
 
+	public CompletableFuture<Void> loadBundledResourcePack(DownloadedPackSource downloadedPackSource, LevelStorageSource.LevelStorageAccess levelStorageAccess) {
+		Path path = levelStorageAccess.getLevelPath(LevelResource.MAP_RESOURCE_FILE);
+		if (Files.exists(path, new LinkOption[0]) && !Files.isDirectory(path, new LinkOption[0])) {
+			downloadedPackSource.configureForLocalWorld();
+			CompletableFuture<Void> completableFuture = downloadedPackSource.waitForPackFeedback(WORLD_PACK_ID);
+			downloadedPackSource.pushLocalPack(WORLD_PACK_ID, path);
+			return completableFuture;
+		} else {
+			return CompletableFuture.completedFuture(null);
+		}
+	}
+
 	private void loadLevel(LevelStorageSource.LevelStorageAccess levelStorageAccess, Dynamic<?> dynamic, boolean bl, boolean bl2, Runnable runnable) {
 		this.minecraft.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("selectWorld.resource_load")));
 		PackRepository packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
@@ -319,8 +338,8 @@ public class WorldOpenFlows {
 		WorldStem worldStem;
 		try {
 			worldStem = this.loadWorldStem(dynamic, bl, packRepository);
-		} catch (Exception var11) {
-			LOGGER.warn("Failed to load level data or datapacks, can't proceed with server load", (Throwable)var11);
+		} catch (Exception var12) {
+			LOGGER.warn("Failed to load level data or datapacks, can't proceed with server load", (Throwable)var12);
 			if (!bl) {
 				this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> {
 					levelStorageAccess.safeClose();
@@ -347,7 +366,8 @@ public class WorldOpenFlows {
 		boolean bl3 = worldData.worldGenOptions().isOldCustomizedWorld();
 		boolean bl4 = worldData.worldGenSettingsLifecycle() != Lifecycle.stable();
 		if (!bl2 || !bl3 && !bl4) {
-			this.minecraft.getDownloadedPackSource().loadBundledResourcePack(levelStorageAccess).thenApply(void_ -> true).exceptionallyComposeAsync(throwable -> {
+			DownloadedPackSource downloadedPackSource = this.minecraft.getDownloadedPackSource();
+			this.loadBundledResourcePack(downloadedPackSource, levelStorageAccess).thenApply(void_ -> true).exceptionallyComposeAsync(throwable -> {
 				LOGGER.warn("Failed to load pack: ", throwable);
 				return this.promptBundledPackLoadFailure();
 			}, this.minecraft).thenAcceptAsync(boolean_ -> {
@@ -356,7 +376,8 @@ public class WorldOpenFlows {
 				} else {
 					worldStem.close();
 					levelStorageAccess.safeClose();
-					this.minecraft.getDownloadedPackSource().clearServerPack().thenRunAsync(runnable, this.minecraft);
+					downloadedPackSource.popAll();
+					runnable.run();
 				}
 			}, this.minecraft).exceptionally(throwable -> {
 				this.minecraft.delayCrash(CrashReport.forThrowable(throwable, "Load world"));

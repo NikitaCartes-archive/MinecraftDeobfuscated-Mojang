@@ -807,7 +807,7 @@ public class CreativeModeTabs {
 					output.accept(Items.RED_MUSHROOM);
 					output.accept(Items.CRIMSON_FUNGUS);
 					output.accept(Items.WARPED_FUNGUS);
-					output.accept(Items.GRASS);
+					output.accept(Items.SHORT_GRASS);
 					output.accept(Items.FERN);
 					output.accept(Items.DEAD_BUSH);
 					output.accept(Items.DANDELION);

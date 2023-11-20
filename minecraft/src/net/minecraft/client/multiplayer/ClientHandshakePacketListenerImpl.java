@@ -20,6 +20,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
@@ -42,7 +43,6 @@ import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.network.protocol.login.ServerboundLoginAcknowledgedPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.util.Crypt;
-import net.minecraft.util.HttpUtil;
 import net.minecraft.world.flag.FeatureFlags;
 import org.slf4j.Logger;
 
@@ -112,7 +112,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 			throw new IllegalStateException("Protocol error", var9);
 		}
 
-		HttpUtil.DOWNLOAD_EXECUTOR.submit((Runnable)(() -> {
+		Util.ioPool().submit(() -> {
 			Component component = this.authenticateServer(string);
 			if (component != null) {
 				if (this.serverData == null || !this.serverData.isLan()) {
@@ -125,7 +125,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 
 			this.switchState(ClientHandshakePacketListenerImpl.State.ENCRYPTING);
 			this.connection.send(serverboundKeyPacket, PacketSendListener.thenRun(() -> this.connection.setEncryptionKey(cipher, cipher2)));
-		}));
+		});
 	}
 
 	@Nullable

@@ -47,7 +47,7 @@ public class BlockColors {
 					: GrassColor.getDefaultColor(),
 			Blocks.GRASS_BLOCK,
 			Blocks.FERN,
-			Blocks.GRASS,
+			Blocks.SHORT_GRASS,
 			Blocks.POTTED_FERN
 		);
 		blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {

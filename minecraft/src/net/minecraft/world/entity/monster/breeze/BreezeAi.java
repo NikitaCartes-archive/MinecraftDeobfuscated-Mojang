@@ -71,9 +71,10 @@ public class BreezeAi {
 				Pair.of(0, StartAttacking.create(breeze -> breeze.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
 				Pair.of(1, StopAttackingIfTargetInvalid.create()),
 				Pair.of(2, new Shoot()),
-				Pair.of(3, new LongJump()),
-				Pair.of(4, new Slide()),
-				Pair.of(4, new RunOne<>(ImmutableList.of(Pair.of(new DoNothing(20, 100), 1), Pair.of(RandomStroll.stroll(0.6F), 2))))
+				Pair.of(3, new ShootWhenStuck()),
+				Pair.of(4, new LongJump()),
+				Pair.of(5, new Slide()),
+				Pair.of(6, new RunOne<>(ImmutableList.of(Pair.of(new DoNothing(20, 100), 1), Pair.of(RandomStroll.stroll(0.6F), 2))))
 			),
 			Set.of()
 		);
