@@ -7,7 +7,7 @@ import com.mojang.brigadier.context.ContextChain;
 import com.mojang.brigadier.context.ContextChain.Stage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import java.util.ArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
@@ -61,7 +61,7 @@ public class BuildContexts<T extends ExecutionCommandSource<T>> {
 					if (redirectModifier != null) {
 						executionContext.incrementCost();
 						boolean bl = chainModifiers2.isForked();
-						List<T> list3 = new ArrayList();
+						List<T> list3 = new ObjectArrayList<>();
 
 						for (T executionCommandSource2 : list2) {
 							try {

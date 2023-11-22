@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.mojang.blaze3d.audio.ListenerTransform;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.Reader;
@@ -145,6 +146,10 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 
 	public List<String> getAvailableSoundDevices() {
 		return this.soundEngine.getAvailableSoundDevices();
+	}
+
+	public ListenerTransform getListenerTransform() {
+		return this.soundEngine.getListenerTransform();
 	}
 
 	static boolean validateSoundResource(Sound sound, ResourceLocation resourceLocation, ResourceProvider resourceProvider) {

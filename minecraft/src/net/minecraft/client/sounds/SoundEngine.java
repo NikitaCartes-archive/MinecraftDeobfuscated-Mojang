@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.audio.Channel;
 import com.mojang.blaze3d.audio.Library;
 import com.mojang.blaze3d.audio.Listener;
+import com.mojang.blaze3d.audio.ListenerTransform;
 import com.mojang.logging.LogUtils;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +35,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
@@ -352,13 +352,10 @@ public class SoundEngine {
 							} else {
 								Vec3 vec3 = new Vec3(soundInstance.getX(), soundInstance.getY(), soundInstance.getZ());
 								if (!this.listeners.isEmpty()) {
-									boolean bl2 = bl || attenuation == SoundInstance.Attenuation.NONE || this.listener.getListenerPosition().distanceToSqr(vec3) < (double)(g * g);
-									if (bl2) {
-										for (SoundEventListener soundEventListener : this.listeners) {
-											soundEventListener.onPlaySound(soundInstance, weighedSoundEvents);
-										}
-									} else {
-										LOGGER.debug(MARKER, "Did not notify listeners of soundEvent: {}, it is too far away to hear", resourceLocation);
+									float j = !bl && attenuation != SoundInstance.Attenuation.NONE ? g : Float.POSITIVE_INFINITY;
+
+									for (SoundEventListener soundEventListener : this.listeners) {
+										soundEventListener.onPlaySound(soundInstance, weighedSoundEvents, j);
 									}
 								}
 
@@ -455,13 +452,8 @@ public class SoundEngine {
 
 	public void updateSource(Camera camera) {
 		if (this.loaded && camera.isInitialized()) {
-			Vec3 vec3 = camera.getPosition();
-			Vector3f vector3f = camera.getLookVector();
-			Vector3f vector3f2 = camera.getUpVector();
-			this.executor.execute(() -> {
-				this.listener.setListenerPosition(vec3);
-				this.listener.setListenerOrientation(vector3f, vector3f2);
-			});
+			ListenerTransform listenerTransform = new ListenerTransform(camera.getPosition(), new Vec3(camera.getLookVector()), new Vec3(camera.getUpVector()));
+			this.executor.execute(() -> this.listener.setTransform(listenerTransform));
 		}
 	}
 
@@ -489,6 +481,10 @@ public class SoundEngine {
 
 	public List<String> getAvailableSoundDevices() {
 		return this.library.getAvailableSoundDevices();
+	}
+
+	public ListenerTransform getListenerTransform() {
+		return this.listener.getTransform();
 	}
 
 	@Environment(EnvType.CLIENT)

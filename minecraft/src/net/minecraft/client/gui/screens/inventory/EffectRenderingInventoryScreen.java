@@ -69,7 +69,9 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 				}
 
 				if (mobEffectInstance != null) {
-					List<Component> list = List.of(this.getEffectName(mobEffectInstance), MobEffectUtil.formatDuration(mobEffectInstance, 1.0F));
+					List<Component> list = List.of(
+						this.getEffectName(mobEffectInstance), MobEffectUtil.formatDuration(mobEffectInstance, 1.0F, this.minecraft.level.tickRateManager().tickrate())
+					);
 					guiGraphics.renderTooltip(this.font, list, Optional.empty(), i, j);
 				}
 			}
@@ -108,7 +110,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			Component component = this.getEffectName(mobEffectInstance);
 			guiGraphics.drawString(this.font, component, i + 10 + 18, k + 6, 16777215);
-			Component component2 = MobEffectUtil.formatDuration(mobEffectInstance, 1.0F);
+			Component component2 = MobEffectUtil.formatDuration(mobEffectInstance, 1.0F, this.minecraft.level.tickRateManager().tickrate());
 			guiGraphics.drawString(this.font, component2, i + 10 + 18, k + 6 + 10, 8355711);
 			k += j;
 		}

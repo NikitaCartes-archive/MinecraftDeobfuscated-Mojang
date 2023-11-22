@@ -1,9 +1,9 @@
 package net.minecraft.commands.execution;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.mojang.brigadier.context.ContextChain;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Deque;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -26,7 +26,7 @@ public class ExecutionContext<T> implements AutoCloseable {
 	private int commandQuota;
 	private boolean queueOverflow;
 	private final Deque<CommandQueueEntry<T>> commandQueue = Queues.<CommandQueueEntry<T>>newArrayDeque();
-	private final List<CommandQueueEntry<T>> newTopCommands = Lists.<CommandQueueEntry<T>>newArrayList();
+	private final List<CommandQueueEntry<T>> newTopCommands = new ObjectArrayList<>();
 
 	public ExecutionContext(int i, int j, ProfilerFiller profilerFiller) {
 		this.commandLimit = i;
@@ -85,25 +85,35 @@ public class ExecutionContext<T> implements AutoCloseable {
 	}
 
 	public void runCommandQueue() {
-		Lists.reverse(this.newTopCommands).forEach(this.commandQueue::addFirst);
-		this.newTopCommands.clear();
+		this.pushNewCommands();
 
-		while (!this.commandQueue.isEmpty()) {
-			if (this.commandQuota == 0) {
+		while (true) {
+			if (this.commandQuota <= 0) {
 				LOGGER.info("Command execution stopped due to limit (executed {} commands)", this.commandLimit);
 				break;
 			}
 
-			CommandQueueEntry<T> commandQueueEntry = (CommandQueueEntry<T>)this.commandQueue.removeFirst();
+			CommandQueueEntry<T> commandQueueEntry = (CommandQueueEntry<T>)this.commandQueue.pollFirst();
+			if (commandQueueEntry == null) {
+				return;
+			}
+
 			commandQueueEntry.execute(this);
 			if (this.queueOverflow) {
 				LOGGER.error("Command execution stopped due to command queue overflow (max {})", 10000000);
 				break;
 			}
 
-			Lists.reverse(this.newTopCommands).forEach(this.commandQueue::addFirst);
-			this.newTopCommands.clear();
+			this.pushNewCommands();
 		}
+	}
+
+	private void pushNewCommands() {
+		for (int i = this.newTopCommands.size() - 1; i >= 0; i--) {
+			this.commandQueue.addFirst((CommandQueueEntry)this.newTopCommands.get(i));
+		}
+
+		this.newTopCommands.clear();
 	}
 
 	public void tracer(@Nullable TraceCallbacks traceCallbacks) {

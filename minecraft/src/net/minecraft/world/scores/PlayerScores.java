@@ -2,22 +2,22 @@ package net.minecraft.world.scores;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 class PlayerScores {
-	private final Map<Objective, Score> scores = new HashMap();
+	private final Reference2ObjectOpenHashMap<Objective, Score> scores = new Reference2ObjectOpenHashMap<>(16, 0.5F);
 
 	@Nullable
 	public Score get(Objective objective) {
-		return (Score)this.scores.get(objective);
+		return this.scores.get(objective);
 	}
 
 	public Score getOrCreate(Objective objective, Consumer<Score> consumer) {
-		return (Score)this.scores.computeIfAbsent(objective, objectivex -> {
+		return this.scores.computeIfAbsent(objective, object -> {
 			Score score = new Score();
 			consumer.accept(score);
 			return score;

@@ -29,15 +29,18 @@ public class ContinuationTask<T, P> implements EntryAction<T> {
 
 	public static <T, P> void schedule(ExecutionContext<T> executionContext, Frame frame, List<P> list, ContinuationTask.TaskProvider<T, P> taskProvider) {
 		int i = list.size();
-		if (i != 0) {
-			if (i == 1) {
+		switch (i) {
+			case 0:
+				break;
+			case 1:
 				executionContext.queueNext(taskProvider.create(frame, (P)list.get(0)));
-			} else if (i == 2) {
+				break;
+			case 2:
 				executionContext.queueNext(taskProvider.create(frame, (P)list.get(0)));
 				executionContext.queueNext(taskProvider.create(frame, (P)list.get(1)));
-			} else {
+				break;
+			default:
 				executionContext.queueNext((new ContinuationTask<>(taskProvider, list, frame)).selfEntry);
-			}
 		}
 	}
 

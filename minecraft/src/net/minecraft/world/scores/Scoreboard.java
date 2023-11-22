@@ -1,10 +1,13 @@
 package net.minecraft.world.scores;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,16 +30,16 @@ import org.slf4j.Logger;
 public class Scoreboard {
 	public static final String HIDDEN_SCORE_PREFIX = "#";
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private final Map<String, Objective> objectivesByName = Maps.<String, Objective>newHashMap();
-	private final Map<ObjectiveCriteria, List<Objective>> objectivesByCriteria = Maps.<ObjectiveCriteria, List<Objective>>newHashMap();
-	private final Map<String, PlayerScores> playerScores = Maps.<String, PlayerScores>newHashMap();
+	private final Object2ObjectMap<String, Objective> objectivesByName = new Object2ObjectOpenHashMap<>(16, 0.5F);
+	private final Reference2ObjectMap<ObjectiveCriteria, List<Objective>> objectivesByCriteria = new Reference2ObjectOpenHashMap<>();
+	private final Map<String, PlayerScores> playerScores = new Object2ObjectOpenHashMap<>(16, 0.5F);
 	private final Map<DisplaySlot, Objective> displayObjectives = new EnumMap(DisplaySlot.class);
-	private final Map<String, PlayerTeam> teamsByName = Maps.<String, PlayerTeam>newHashMap();
-	private final Map<String, PlayerTeam> teamsByPlayer = Maps.<String, PlayerTeam>newHashMap();
+	private final Object2ObjectMap<String, PlayerTeam> teamsByName = new Object2ObjectOpenHashMap<>();
+	private final Object2ObjectMap<String, PlayerTeam> teamsByPlayer = new Object2ObjectOpenHashMap<>();
 
 	@Nullable
 	public Objective getObjective(@Nullable String string) {
-		return (Objective)this.objectivesByName.get(string);
+		return this.objectivesByName.get(string);
 	}
 
 	public Objective addObjective(
@@ -51,7 +54,7 @@ public class Scoreboard {
 			throw new IllegalArgumentException("An objective with the name '" + string + "' already exists!");
 		} else {
 			Objective objective = new Objective(this, string, objectiveCriteria, component, renderType, bl, numberFormat);
-			((List)this.objectivesByCriteria.computeIfAbsent(objectiveCriteria, objectiveCriteriax -> Lists.newArrayList())).add(objective);
+			this.objectivesByCriteria.computeIfAbsent(objectiveCriteria, object -> Lists.<Objective>newArrayList()).add(objective);
 			this.objectivesByName.put(string, objective);
 			this.onObjectiveAdded(objective);
 			return objective;
@@ -59,7 +62,8 @@ public class Scoreboard {
 	}
 
 	public final void forAllObjectives(ObjectiveCriteria objectiveCriteria, ScoreHolder scoreHolder, Consumer<ScoreAccess> consumer) {
-		((List)this.objectivesByCriteria.getOrDefault(objectiveCriteria, Collections.emptyList()))
+		this.objectivesByCriteria
+			.getOrDefault(objectiveCriteria, Collections.emptyList())
 			.forEach(objective -> consumer.accept(this.getOrCreatePlayerScore(scoreHolder, objective, true)));
 	}
 
@@ -223,7 +227,7 @@ public class Scoreboard {
 			}
 		}
 
-		List<Objective> list = (List<Objective>)this.objectivesByCriteria.get(objective.getCriteria());
+		List<Objective> list = this.objectivesByCriteria.get(objective.getCriteria());
 		if (list != null) {
 			list.remove(objective);
 		}
@@ -246,7 +250,7 @@ public class Scoreboard {
 
 	@Nullable
 	public PlayerTeam getPlayerTeam(String string) {
-		return (PlayerTeam)this.teamsByName.get(string);
+		return this.teamsByName.get(string);
 	}
 
 	public PlayerTeam addPlayerTeam(String string) {
@@ -310,7 +314,7 @@ public class Scoreboard {
 
 	@Nullable
 	public PlayerTeam getPlayersTeam(String string) {
-		return (PlayerTeam)this.teamsByPlayer.get(string);
+		return this.teamsByPlayer.get(string);
 	}
 
 	public void onObjectiveAdded(Objective objective) {

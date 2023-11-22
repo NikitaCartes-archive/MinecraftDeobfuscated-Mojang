@@ -632,7 +632,10 @@ public abstract class PlayerList {
 
 	@Nullable
 	public ServerPlayer getPlayerByName(String string) {
-		for (ServerPlayer serverPlayer : this.players) {
+		int i = this.players.size();
+
+		for (int j = 0; j < i; j++) {
+			ServerPlayer serverPlayer = (ServerPlayer)this.players.get(j);
 			if (serverPlayer.getGameProfile().getName().equalsIgnoreCase(string)) {
 				return serverPlayer;
 			}

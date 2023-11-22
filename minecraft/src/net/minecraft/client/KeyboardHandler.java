@@ -412,43 +412,64 @@ public class KeyboardHandler {
 				}
 			}
 
-			if (this.minecraft.screen == null || this.minecraft.screen instanceof PauseScreen pauseScreen && !pauseScreen.showsPauseMenu()) {
-				InputConstants.Key key = InputConstants.getKey(i, j);
-				if (k == 0) {
-					KeyMapping.set(key, false);
-					if (i == 292) {
-						if (this.handledDebugKey) {
-							this.handledDebugKey = false;
-						} else {
-							this.minecraft.getDebugOverlay().toggleOverlay();
-						}
+			InputConstants.Key key;
+			boolean bl3x;
+			boolean var20;
+			label185: {
+				key = InputConstants.getKey(i, j);
+				bl3x = this.minecraft.screen == null;
+				label144:
+				if (!bl3x) {
+					if (this.minecraft.screen instanceof PauseScreen pauseScreen && !pauseScreen.showsPauseMenu()) {
+						break label144;
 					}
-				} else {
+
+					var20 = false;
+					break label185;
+				}
+
+				var20 = true;
+			}
+
+			boolean bl4 = var20;
+			if (k == 0) {
+				KeyMapping.set(key, false);
+				if (bl4 && i == 292) {
+					if (this.handledDebugKey) {
+						this.handledDebugKey = false;
+					} else {
+						this.minecraft.getDebugOverlay().toggleOverlay();
+					}
+				}
+			} else {
+				boolean bl5 = false;
+				if (bl4) {
 					if (i == 293 && this.minecraft.gameRenderer != null) {
 						this.minecraft.gameRenderer.togglePostEffect();
 					}
 
-					boolean bl4 = false;
 					if (i == 256) {
 						this.minecraft.pauseGame(bl);
-						bl4 |= bl;
+						bl5 |= bl;
 					}
 
-					bl4 |= bl && this.handleDebugKeys(i);
-					this.handledDebugKey |= bl4;
+					bl5 |= bl && this.handleDebugKeys(i);
+					this.handledDebugKey |= bl5;
 					if (i == 290) {
 						this.minecraft.options.hideGui = !this.minecraft.options.hideGui;
 					}
 
-					if (bl4) {
+					if (this.minecraft.getDebugOverlay().showProfilerChart() && !bl && i >= 48 && i <= 57) {
+						this.minecraft.debugFpsMeterKeyPress(i - 48);
+					}
+				}
+
+				if (bl3x) {
+					if (bl5) {
 						KeyMapping.set(key, false);
 					} else {
 						KeyMapping.set(key, true);
 						KeyMapping.click(key);
-					}
-
-					if (this.minecraft.getDebugOverlay().showProfilerChart() && !bl && i >= 48 && i <= 57) {
-						this.minecraft.debugFpsMeterKeyPress(i - 48);
 					}
 				}
 			}

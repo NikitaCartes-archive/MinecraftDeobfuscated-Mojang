@@ -526,6 +526,7 @@ public class CommandSuggestions {
 				return true;
 			} else if (i == 256) {
 				CommandSuggestions.this.hide();
+				CommandSuggestions.this.input.setSuggestion(null);
 				return true;
 			} else {
 				return false;

@@ -11,8 +11,8 @@ public class StringUtil {
 	private static final Pattern LINE_PATTERN = Pattern.compile("\\r\\n|\\v");
 	private static final Pattern LINE_END_PATTERN = Pattern.compile("(?:\\r\\n|\\v)$");
 
-	public static String formatTickDuration(int i) {
-		int j = i / 20;
+	public static String formatTickDuration(int i, float f) {
+		int j = Mth.floor((float)i / f);
 		int k = j / 60;
 		j %= 60;
 		int l = k / 60;

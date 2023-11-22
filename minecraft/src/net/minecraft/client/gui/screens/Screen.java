@@ -168,7 +168,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 		}
 	}
 
-	private void clearFocus() {
+	public void clearFocus() {
 		ComponentPath componentPath = this.getCurrentFocusPath();
 		if (componentPath != null) {
 			componentPath.applyFocus(false);

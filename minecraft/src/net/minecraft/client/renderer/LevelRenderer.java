@@ -314,33 +314,36 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 									bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 								}
 
-								int x = this.ticks + p * p * 3121 + p * 45238971 + o * o * 418711 + o * 13761 & 31;
-								float y = -((float)x + f) / 32.0F * (3.0F + randomSource.nextFloat());
-								double z = (double)p + 0.5 - d;
-								double aa = (double)o + 0.5 - g;
-								float ab = (float)Math.sqrt(z * z + aa * aa) / (float)l;
-								float ac = ((1.0F - ab * ab) * 0.5F + 0.5F) * h;
+								int x = this.ticks & 131071;
+								int y = p * p * 3121 + p * 45238971 + o * o * 418711 + o * 13761 & 0xFF;
+								float z = 3.0F + randomSource.nextFloat();
+								float aa = -((float)(x + y) + f) / 32.0F * z;
+								float ab = aa % 32.0F;
+								double ac = (double)p + 0.5 - d;
+								double ad = (double)o + 0.5 - g;
+								float ae = (float)Math.sqrt(ac * ac + ad * ad) / (float)l;
+								float af = ((1.0F - ae * ae) * 0.5F + 0.5F) * h;
 								mutableBlockPos.set(p, w, o);
-								int ad = getLightColor(level, mutableBlockPos);
+								int ag = getLightColor(level, mutableBlockPos);
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5)
-									.uv(0.0F, (float)u * 0.25F + y)
-									.color(1.0F, 1.0F, 1.0F, ac)
-									.uv2(ad)
+									.uv(0.0F, (float)u * 0.25F + ab)
+									.color(1.0F, 1.0F, 1.0F, af)
+									.uv2(ag)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5)
-									.uv(1.0F, (float)u * 0.25F + y)
-									.color(1.0F, 1.0F, 1.0F, ac)
-									.uv2(ad)
+									.uv(1.0F, (float)u * 0.25F + ab)
+									.color(1.0F, 1.0F, 1.0F, af)
+									.uv2(ag)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5)
-									.uv(1.0F, (float)v * 0.25F + y)
-									.color(1.0F, 1.0F, 1.0F, ac)
-									.uv2(ad)
+									.uv(1.0F, (float)v * 0.25F + ab)
+									.color(1.0F, 1.0F, 1.0F, af)
+									.uv2(ag)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5)
-									.uv(0.0F, (float)v * 0.25F + y)
-									.color(1.0F, 1.0F, 1.0F, ac)
-									.uv2(ad)
+									.uv(0.0F, (float)v * 0.25F + ab)
+									.color(1.0F, 1.0F, 1.0F, af)
+									.uv2(ag)
 									.endVertex();
 							} else if (precipitation == Biome.Precipitation.SNOW) {
 								if (m != 1) {
@@ -353,38 +356,38 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 									bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 								}
 
-								float ae = -((float)(this.ticks & 511) + f) / 512.0F;
-								float y = (float)(randomSource.nextDouble() + (double)n * 0.01 * (double)((float)randomSource.nextGaussian()));
-								float af = (float)(randomSource.nextDouble() + (double)(n * (float)randomSource.nextGaussian()) * 0.001);
-								double ag = (double)p + 0.5 - d;
-								double ah = (double)o + 0.5 - g;
-								float ac = (float)Math.sqrt(ag * ag + ah * ah) / (float)l;
-								float ai = ((1.0F - ac * ac) * 0.3F + 0.5F) * h;
+								float ah = -((float)(this.ticks & 511) + f) / 512.0F;
+								float ai = (float)(randomSource.nextDouble() + (double)n * 0.01 * (double)((float)randomSource.nextGaussian()));
+								float z = (float)(randomSource.nextDouble() + (double)(n * (float)randomSource.nextGaussian()) * 0.001);
+								double aj = (double)p + 0.5 - d;
+								double ac = (double)o + 0.5 - g;
+								float ak = (float)Math.sqrt(aj * aj + ac * ac) / (float)l;
+								float al = ((1.0F - ak * ak) * 0.3F + 0.5F) * h;
 								mutableBlockPos.set(p, w, o);
-								int aj = getLightColor(level, mutableBlockPos);
-								int ak = aj >> 16 & 65535;
-								int al = aj & 65535;
-								int am = (ak * 3 + 240) / 4;
-								int an = (al * 3 + 240) / 4;
+								int am = getLightColor(level, mutableBlockPos);
+								int an = am >> 16 & 65535;
+								int ag = am & 65535;
+								int ao = (an * 3 + 240) / 4;
+								int ap = (ag * 3 + 240) / 4;
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5)
-									.uv(0.0F + y, (float)u * 0.25F + ae + af)
-									.color(1.0F, 1.0F, 1.0F, ai)
-									.uv2(an, am)
+									.uv(0.0F + ai, (float)u * 0.25F + ah + z)
+									.color(1.0F, 1.0F, 1.0F, al)
+									.uv2(ap, ao)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5)
-									.uv(1.0F + y, (float)u * 0.25F + ae + af)
-									.color(1.0F, 1.0F, 1.0F, ai)
-									.uv2(an, am)
+									.uv(1.0F + ai, (float)u * 0.25F + ah + z)
+									.color(1.0F, 1.0F, 1.0F, al)
+									.uv2(ap, ao)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5)
-									.uv(1.0F + y, (float)v * 0.25F + ae + af)
-									.color(1.0F, 1.0F, 1.0F, ai)
-									.uv2(an, am)
+									.uv(1.0F + ai, (float)v * 0.25F + ah + z)
+									.color(1.0F, 1.0F, 1.0F, al)
+									.uv2(ap, ao)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5)
-									.uv(0.0F + y, (float)v * 0.25F + ae + af)
-									.color(1.0F, 1.0F, 1.0F, ai)
-									.uv2(an, am)
+									.uv(0.0F + ai, (float)v * 0.25F + ah + z)
+									.color(1.0F, 1.0F, 1.0F, al)
+									.uv2(ap, ao)
 									.endVertex();
 							}
 						}

@@ -44,6 +44,11 @@ public class FunctionArgument implements ArgumentType<FunctionArgument.Result> {
 				) throws CommandSyntaxException {
 					return Pair.of(resourceLocation, Either.right(FunctionArgument.getFunctionTag(commandContext, resourceLocation)));
 				}
+
+				@Override
+				public Pair<ResourceLocation, Collection<CommandFunction<CommandSourceStack>>> unwrapToCollection(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+					return Pair.of(resourceLocation, FunctionArgument.getFunctionTag(commandContext, resourceLocation));
+				}
 			};
 		} else {
 			final ResourceLocation resourceLocation = ResourceLocation.read(stringReader);
@@ -58,6 +63,11 @@ public class FunctionArgument implements ArgumentType<FunctionArgument.Result> {
 					CommandContext<CommandSourceStack> commandContext
 				) throws CommandSyntaxException {
 					return Pair.of(resourceLocation, Either.left(FunctionArgument.getFunction(commandContext, resourceLocation)));
+				}
+
+				@Override
+				public Pair<ResourceLocation, Collection<CommandFunction<CommandSourceStack>>> unwrapToCollection(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+					return Pair.of(resourceLocation, Collections.singleton(FunctionArgument.getFunction(commandContext, resourceLocation)));
 				}
 			};
 		}
@@ -90,6 +100,12 @@ public class FunctionArgument implements ArgumentType<FunctionArgument.Result> {
 		return commandContext.<FunctionArgument.Result>getArgument(string, FunctionArgument.Result.class).unwrap(commandContext);
 	}
 
+	public static Pair<ResourceLocation, Collection<CommandFunction<CommandSourceStack>>> getFunctionCollection(
+		CommandContext<CommandSourceStack> commandContext, String string
+	) throws CommandSyntaxException {
+		return commandContext.<FunctionArgument.Result>getArgument(string, FunctionArgument.Result.class).unwrapToCollection(commandContext);
+	}
+
 	@Override
 	public Collection<String> getExamples() {
 		return EXAMPLES;
@@ -101,5 +117,7 @@ public class FunctionArgument implements ArgumentType<FunctionArgument.Result> {
 		Pair<ResourceLocation, Either<CommandFunction<CommandSourceStack>, Collection<CommandFunction<CommandSourceStack>>>> unwrap(
 			CommandContext<CommandSourceStack> commandContext
 		) throws CommandSyntaxException;
+
+		Pair<ResourceLocation, Collection<CommandFunction<CommandSourceStack>>> unwrapToCollection(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException;
 	}
 }

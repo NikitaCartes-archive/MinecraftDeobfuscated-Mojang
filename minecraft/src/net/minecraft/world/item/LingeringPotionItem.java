@@ -18,7 +18,7 @@ public class LingeringPotionItem extends ThrowablePotionItem {
 
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		PotionUtils.addPotionTooltip(itemStack, list, 0.25F);
+		PotionUtils.addPotionTooltip(itemStack, list, 0.25F, level == null ? 20.0F : level.tickRateManager().tickrate());
 	}
 
 	@Override

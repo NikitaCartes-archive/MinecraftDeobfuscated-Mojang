@@ -12,12 +12,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public final class MobEffectUtil {
-	public static Component formatDuration(MobEffectInstance mobEffectInstance, float f) {
+	public static Component formatDuration(MobEffectInstance mobEffectInstance, float f, float g) {
 		if (mobEffectInstance.isInfiniteDuration()) {
 			return Component.translatable("effect.duration.infinite");
 		} else {
 			int i = Mth.floor((float)mobEffectInstance.getDuration() * f);
-			return Component.literal(StringUtil.formatTickDuration(i));
+			return Component.literal(StringUtil.formatTickDuration(i, g));
 		}
 	}
 

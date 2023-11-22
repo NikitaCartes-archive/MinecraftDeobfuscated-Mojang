@@ -636,7 +636,9 @@ public class Gui {
 		if (this.minecraft.level.getGameTime() >= 120500L) {
 			component = DEMO_EXPIRED_TEXT;
 		} else {
-			component = Component.translatable("demo.remainingTime", StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime())));
+			component = Component.translatable(
+				"demo.remainingTime", StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime()), this.minecraft.level.tickRateManager().tickrate())
+			);
 		}
 
 		int i = this.getFont().width(component);

@@ -1185,7 +1185,9 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema197, "Added Breeze", References.ENTITY));
 		dataFixerBuilder.addFixer(new AddNewChoices(schema197, "Added Trial Spawner", References.BLOCK_ENTITY));
 		Schema schema198 = dataFixerBuilder.addSchema(3692, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(BlockRenameFix.create(schema198, "Rename grass to short_grass", createRenamer(Map.of("minecraft:grass", "minecraft:short_grass"))));
+		UnaryOperator<String> unaryOperator2 = createRenamer(Map.of("minecraft:grass", "minecraft:short_grass"));
+		dataFixerBuilder.addFixer(BlockRenameFixWithJigsaw.create(schema198, "Rename grass block to short_grass", unaryOperator2));
+		dataFixerBuilder.addFixer(ItemRenameFix.create(schema198, "Rename grass item to short_grass", unaryOperator2));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

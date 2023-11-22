@@ -71,6 +71,9 @@ public abstract class AbstractArrow extends Projectile {
 	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level, ItemStack itemStack) {
 		super(entityType, level);
 		this.pickupItemStack = itemStack.copy();
+		if (itemStack.hasCustomHoverName()) {
+			this.setCustomName(itemStack.getHoverName());
+		}
 	}
 
 	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, double d, double e, double f, Level level, ItemStack itemStack) {
@@ -333,7 +336,8 @@ public abstract class AbstractArrow extends Projectile {
 
 		boolean bl = entity.getType() == EntityType.ENDERMAN;
 		int j = entity.getRemainingFireTicks();
-		if (this.isOnFire() && !bl) {
+		boolean bl2 = entity.getType().is(EntityTypeTags.DEFLECTS_ARROWS);
+		if (this.isOnFire() && !bl && !bl2) {
 			entity.setSecondsOnFire(5);
 		}
 
@@ -382,7 +386,7 @@ public abstract class AbstractArrow extends Projectile {
 			if (this.getPierceLevel() <= 0) {
 				this.discard();
 			}
-		} else if (entity.getType().is(EntityTypeTags.DEFLECTS_ARROWS)) {
+		} else if (bl2) {
 			this.deflect();
 		} else {
 			entity.setRemainingFireTicks(j);

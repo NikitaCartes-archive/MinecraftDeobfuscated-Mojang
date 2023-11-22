@@ -107,36 +107,48 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 						return collection;
 					}
 				};
-			} else if (string.startsWith("#")) {
-				List<ScoreHolder> list = List.of(ScoreHolder.forNameOnly(string));
-				return (commandSourceStack, supplier) -> list;
 			} else {
-				return (commandSourceStack, supplier) -> {
-					MinecraftServer minecraftServer = commandSourceStack.getServer();
-					ServerPlayer serverPlayer = minecraftServer.getPlayerList().getPlayerByName(string);
-					if (serverPlayer != null) {
-						return List.of(serverPlayer);
-					} else {
-						try {
-							UUID uUID = UUID.fromString(string);
-							List<ScoreHolder> listx = new ArrayList();
+				List<ScoreHolder> list = List.of(ScoreHolder.forNameOnly(string));
+				if (string.startsWith("#")) {
+					return (commandSourceStack, supplier) -> list;
+				} else {
+					try {
+						UUID uUID = UUID.fromString(string);
+						return (commandSourceStack, supplier) -> {
+							MinecraftServer minecraftServer = commandSourceStack.getServer();
+							ScoreHolder scoreHolder = null;
+							List<ScoreHolder> list2 = null;
 
 							for (ServerLevel serverLevel : minecraftServer.getAllLevels()) {
 								Entity entity = serverLevel.getEntity(uUID);
 								if (entity != null) {
-									listx.add(entity);
+									if (scoreHolder == null) {
+										scoreHolder = entity;
+									} else {
+										if (list2 == null) {
+											list2 = new ArrayList();
+											list2.add(scoreHolder);
+										}
+
+										list2.add(entity);
+									}
 								}
 							}
 
-							if (!listx.isEmpty()) {
-								return listx;
+							if (list2 != null) {
+								return list2;
+							} else {
+								return scoreHolder != null ? List.of(scoreHolder) : list;
 							}
-						} catch (IllegalArgumentException var10) {
-						}
-
-						return List.of(ScoreHolder.forNameOnly(string));
+						};
+					} catch (IllegalArgumentException var6) {
+						return (commandSourceStack, supplier) -> {
+							MinecraftServer minecraftServer = commandSourceStack.getServer();
+							ServerPlayer serverPlayer = minecraftServer.getPlayerList().getPlayerByName(string);
+							return serverPlayer != null ? List.of(serverPlayer) : list;
+						};
 					}
-				};
+				}
 			}
 		}
 	}

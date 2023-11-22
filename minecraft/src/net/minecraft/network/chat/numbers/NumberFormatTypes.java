@@ -14,7 +14,7 @@ public class NumberFormatTypes {
 
 	public static NumberFormatType<?> bootstrap(Registry<NumberFormatType<?>> registry) {
 		NumberFormatType<?> numberFormatType = Registry.register(registry, "blank", BlankFormat.TYPE);
-		Registry.register(registry, "result", StyledFormat.TYPE);
+		Registry.register(registry, "styled", StyledFormat.TYPE);
 		Registry.register(registry, "fixed", FixedFormat.TYPE);
 		return numberFormatType;
 	}

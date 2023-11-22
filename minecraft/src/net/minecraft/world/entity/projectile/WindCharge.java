@@ -119,6 +119,11 @@ public class WindCharge extends AbstractHurtingProjectile implements ItemSupplie
 		return 1.0F;
 	}
 
+	@Override
+	protected float getLiquidInertia() {
+		return this.getInertia();
+	}
+
 	@Nullable
 	@Override
 	protected ParticleOptions getTrailParticle() {

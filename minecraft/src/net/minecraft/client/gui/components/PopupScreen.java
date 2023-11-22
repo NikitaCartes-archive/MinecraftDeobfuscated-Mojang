@@ -55,6 +55,12 @@ public class PopupScreen extends Screen {
 	}
 
 	@Override
+	public void added() {
+		super.added();
+		this.backgroundScreen.clearFocus();
+	}
+
+	@Override
 	protected void init() {
 		this.layout.spacing(12).defaultCellSetting().alignHorizontallyCenter();
 		this.layout.addChild(new MultiLineTextWidget(this.title.copy().withStyle(ChatFormatting.BOLD), this.font).setMaxWidth(this.contentWidth).setCentered(true));

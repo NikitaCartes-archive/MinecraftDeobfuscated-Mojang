@@ -13,7 +13,6 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
@@ -26,7 +25,6 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +40,6 @@ import java.util.zip.ZipOutputStream;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.CrashReportDetail;
 import net.minecraft.FileUtil;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
@@ -105,7 +102,6 @@ public class LevelStorageSource {
 	private final Path backupDir;
 	final DataFixer fixerUpper;
 	private final DirectoryValidator worldDirValidator;
-	boolean crashedWhileSaving;
 
 	public LevelStorageSource(Path path, Path path2, DirectoryValidator directoryValidator, DataFixer dataFixer) {
 		this.fixerUpper = dataFixer;
@@ -546,7 +542,6 @@ public class LevelStorageSource {
 
 		private void saveLevelData(CompoundTag compoundTag) {
 			Path path = this.levelDirectory.path();
-			Exception exception = null;
 
 			try {
 				Path path2 = Files.createTempFile(path, "level", ".dat");
@@ -554,45 +549,8 @@ public class LevelStorageSource {
 				Path path3 = this.levelDirectory.oldDataFile();
 				Path path4 = this.levelDirectory.dataFile();
 				Util.safeReplaceFile(path4, path2, path3);
-			} catch (Exception var9) {
-				LevelStorageSource.LOGGER.error("Failed to save level {}", path, var9);
-				exception = var9;
-			}
-
-			Path path2 = this.levelDirectory.dataFile();
-			if (Files.exists(path2, new LinkOption[0])) {
-				try {
-					NbtIo.readCompressed(path2, NbtAccounter.create(104857600L));
-				} catch (Exception var10) {
-					if (LevelStorageSource.this.crashedWhileSaving) {
-						LevelStorageSource.LOGGER.error("Failed to save level {}. Skipping further handling, reported errors earlier already.", path, var10);
-					} else {
-						LevelStorageSource.this.crashedWhileSaving = true;
-						CrashReport crashReport = new CrashReport("Won the zlib-lottery?", new IllegalStateException("Failed to read back written world data", exception));
-						CrashReportCategory crashReportCategory = crashReport.addCategory("level.dat");
-						crashReportCategory.setDetail("World folder", this.levelDirectory.directoryName());
-						crashReportCategory.setDetail(
-							"Reading Exception", (var10 instanceof ReportedException reportedException ? reportedException.getCause() : var10).toString()
-						);
-						crashReportCategory.setDetail("Uncompressed", (CrashReportDetail<String>)(() -> Base64.getEncoder().encodeToString(NbtIo.writeToByteArray(compoundTag))));
-						crashReportCategory.setDetail("Compressed saved", (CrashReportDetail<String>)(() -> Base64.getEncoder().encodeToString(Files.readAllBytes(path2))));
-						crashReportCategory.setDetail(
-							"Compressed array", (CrashReportDetail<String>)(() -> Base64.getEncoder().encodeToString(NbtIo.writeToByteArrayCompressed(compoundTag)))
-						);
-						LocalDateTime localDateTime = LocalDateTime.now();
-						crashReportCategory.setDetail("Corrupted file", (CrashReportDetail<String>)(() -> {
-							Path path2x = this.levelDirectory.corruptedDataFile(localDateTime);
-							Files.move(path2, path2x);
-							return path2x.getFileName().toString();
-						}));
-						crashReportCategory.setDetail("Raw file", (CrashReportDetail<String>)(() -> {
-							Path pathx = this.levelDirectory.rawDataFile(localDateTime);
-							Files.write(pathx, NbtIo.writeToByteArray(compoundTag), new OpenOption[0]);
-							return pathx.getFileName().toString();
-						}));
-						throw new ReportedException(crashReport);
-					}
-				}
+			} catch (Exception var6) {
+				LevelStorageSource.LOGGER.error("Failed to save level {}", path, var6);
 			}
 		}
 

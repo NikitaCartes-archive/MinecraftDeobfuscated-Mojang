@@ -152,11 +152,11 @@ public class PotionUtils {
 		}
 	}
 
-	public static void addPotionTooltip(ItemStack itemStack, List<Component> list, float f) {
-		addPotionTooltip(getMobEffects(itemStack), list, f);
+	public static void addPotionTooltip(ItemStack itemStack, List<Component> list, float f, float g) {
+		addPotionTooltip(getMobEffects(itemStack), list, f, g);
 	}
 
-	public static void addPotionTooltip(List<MobEffectInstance> list, List<Component> list2, float f) {
+	public static void addPotionTooltip(List<MobEffectInstance> list, List<Component> list2, float f, float g) {
 		List<Pair<Attribute, AttributeModifier>> list3 = Lists.<Pair<Attribute, AttributeModifier>>newArrayList();
 		if (list.isEmpty()) {
 			list2.add(NO_EFFECT);
@@ -178,7 +178,7 @@ public class PotionUtils {
 				}
 
 				if (!mobEffectInstance.endsWithin(20)) {
-					mutableComponent = Component.translatable("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
+					mutableComponent = Component.translatable("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f, g));
 				}
 
 				list2.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));

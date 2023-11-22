@@ -1,7 +1,6 @@
 package net.minecraft.nbt;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -129,51 +128,6 @@ public class NbtIo {
 		if (dataInputStream != null) {
 			dataInputStream.close();
 		}
-	}
-
-	public static byte[] writeToByteArrayCompressed(CompoundTag compoundTag) throws IOException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		DataOutputStream dataOutputStream = createCompressorStream(byteArrayOutputStream);
-
-		try {
-			write(compoundTag, dataOutputStream);
-		} catch (Throwable var6) {
-			if (dataOutputStream != null) {
-				try {
-					dataOutputStream.close();
-				} catch (Throwable var5) {
-					var6.addSuppressed(var5);
-				}
-			}
-
-			throw var6;
-		}
-
-		if (dataOutputStream != null) {
-			dataOutputStream.close();
-		}
-
-		return byteArrayOutputStream.toByteArray();
-	}
-
-	public static byte[] writeToByteArray(CompoundTag compoundTag) throws IOException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-
-		try {
-			write(compoundTag, dataOutputStream);
-		} catch (Throwable var6) {
-			try {
-				dataOutputStream.close();
-			} catch (Throwable var5) {
-				var6.addSuppressed(var5);
-			}
-
-			throw var6;
-		}
-
-		dataOutputStream.close();
-		return byteArrayOutputStream.toByteArray();
 	}
 
 	public static void writeCompressed(CompoundTag compoundTag, Path path) throws IOException {

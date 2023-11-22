@@ -92,17 +92,19 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 			double e = this.getY() + vec3.y;
 			double f = this.getZ() + vec3.z;
 			ProjectileUtil.rotateTowardsMovement(this, 0.2F);
-			float g = this.getInertia();
+			float h;
 			if (this.isInWater()) {
 				for (int i = 0; i < 4; i++) {
-					float h = 0.25F;
+					float g = 0.25F;
 					this.level().addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
 				}
 
-				g = 0.8F;
+				h = this.getLiquidInertia();
+			} else {
+				h = this.getInertia();
 			}
 
-			this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale((double)g));
+			this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale((double)h));
 			ParticleOptions particleOptions = this.getTrailParticle();
 			if (particleOptions != null) {
 				this.level().addParticle(particleOptions, d, e + 0.5, f, 0.0, 0.0, 0.0);
@@ -130,6 +132,10 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 
 	protected float getInertia() {
 		return 0.95F;
+	}
+
+	protected float getLiquidInertia() {
+		return 0.8F;
 	}
 
 	@Override
