@@ -505,7 +505,12 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"warden", EntityType.Builder.of(Warden::new, MobCategory.MONSTER).sized(0.9F, 2.9F).clientTrackingRange(16).fireImmune()
 	);
 	public static final EntityType<WindCharge> WIND_CHARGE = register(
-		"wind_charge", EntityType.Builder.<WindCharge>of(WindCharge::new, MobCategory.MISC).sized(0.3125F, 0.3125F).clientTrackingRange(4).updateInterval(10)
+		"wind_charge",
+		EntityType.Builder.<WindCharge>of(WindCharge::new, MobCategory.MISC)
+			.sized(0.3125F, 0.3125F)
+			.clientTrackingRange(4)
+			.updateInterval(10)
+			.requiredFeatures(FeatureFlags.UPDATE_1_21)
 	);
 	public static final EntityType<Witch> WITCH = register(
 		"witch", EntityType.Builder.of(Witch::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8)

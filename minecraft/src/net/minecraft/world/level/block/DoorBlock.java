@@ -121,8 +121,8 @@ public class DoorBlock extends Block {
 
 	@Override
 	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-		if (!level.isClientSide && player.isCreative()) {
-			DoublePlantBlock.preventCreativeDropFromBottomPart(level, blockPos, blockState, player);
+		if (!level.isClientSide && (player.isCreative() || !player.hasCorrectToolForDrops(blockState))) {
+			DoublePlantBlock.preventDropFromBottomPart(level, blockPos, blockState, player);
 		}
 
 		return super.playerWillDestroy(level, blockPos, blockState, player);

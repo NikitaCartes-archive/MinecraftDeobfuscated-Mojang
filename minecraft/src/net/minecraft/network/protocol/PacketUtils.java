@@ -1,6 +1,7 @@
 package net.minecraft.network.protocol;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.network.PacketListener;
 import net.minecraft.server.RunningOnDifferentThreadException;
@@ -22,13 +23,20 @@ public class PacketUtils {
 					if (packetListener.shouldHandleMessage(packet)) {
 						try {
 							packet.handle(packetListener);
-						} catch (Exception var4) {
-							if (var4 instanceof ReportedException reportedException && reportedException.getCause() instanceof OutOfMemoryError
+						} catch (Exception var6) {
+							if (var6 instanceof ReportedException reportedException && reportedException.getCause() instanceof OutOfMemoryError
 								|| packetListener.shouldPropagateHandlingExceptions()) {
-								throw var4;
+								if (var6 instanceof ReportedException reportedException2) {
+									packetListener.fillCrashReport(reportedException2.getReport());
+									throw var6;
+								}
+
+								CrashReport crashReport = CrashReport.forThrowable(var6, "Main thread packet handler");
+								packetListener.fillCrashReport(crashReport);
+								throw new ReportedException(crashReport);
 							}
 
-							LOGGER.error("Failed to handle packet {}, suppressing error", packet, var4);
+							LOGGER.error("Failed to handle packet {}, suppressing error", packet, var6);
 						}
 					} else {
 						LOGGER.debug("Ignoring packet due to disconnection: {}", packet);

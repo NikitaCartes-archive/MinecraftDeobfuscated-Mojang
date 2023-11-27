@@ -96,7 +96,7 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 	@Override
 	public void handleResourcePackResponse(ServerboundResourcePackPacket serverboundResourcePackPacket) {
 		super.handleResourcePackResponse(serverboundResourcePackPacket);
-		if (serverboundResourcePackPacket.action() != ServerboundResourcePackPacket.Action.ACCEPTED) {
+		if (serverboundResourcePackPacket.action().isTerminal()) {
 			this.finishCurrentTask(ServerResourcePackConfigurationTask.TYPE);
 		}
 	}

@@ -26,4 +26,8 @@ public record Services(
 	public SignatureValidator profileKeySignatureValidator() {
 		return SignatureValidator.from(this.servicesKeySet, ServicesKeyType.PROFILE_KEY);
 	}
+
+	public boolean canValidateProfileKeys() {
+		return !this.servicesKeySet.keys(ServicesKeyType.PROFILE_KEY).isEmpty();
+	}
 }

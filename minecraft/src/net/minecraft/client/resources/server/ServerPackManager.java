@@ -52,7 +52,7 @@ public class ServerPackManager {
 
 	public void pushPack(UUID uUID, URL uRL, @Nullable HashCode hashCode) {
 		if (this.packPromptStatus == ServerPackManager.PackPromptStatus.DECLINED) {
-			this.packLoadFeedback.sendResponse(uUID, PackLoadFeedback.Result.DECLINED);
+			this.packLoadFeedback.reportFinalResult(uUID, PackLoadFeedback.FinalResult.DECLINED);
 		} else {
 			this.pushNewPack(uUID, new ServerPackManager.ServerPackData(uUID, uRL, hashCode));
 		}
@@ -60,7 +60,7 @@ public class ServerPackManager {
 
 	public void pushLocalPack(UUID uUID, Path path) {
 		if (this.packPromptStatus == ServerPackManager.PackPromptStatus.DECLINED) {
-			this.packLoadFeedback.sendResponse(uUID, PackLoadFeedback.Result.DECLINED);
+			this.packLoadFeedback.reportFinalResult(uUID, PackLoadFeedback.FinalResult.DECLINED);
 		} else {
 			URL uRL;
 			try {
@@ -87,7 +87,7 @@ public class ServerPackManager {
 	}
 
 	private void acceptPack(ServerPackManager.ServerPackData serverPackData) {
-		this.packLoadFeedback.sendResponse(serverPackData.id, PackLoadFeedback.Result.ACCEPTED);
+		this.packLoadFeedback.reportUpdate(serverPackData.id, PackLoadFeedback.Update.ACCEPTED);
 		serverPackData.promptAccepted = true;
 	}
 
@@ -160,9 +160,9 @@ public class ServerPackManager {
 			if (serverPackData.activationStatus != ServerPackManager.ActivationStatus.INACTIVE) {
 				return false;
 			} else if (serverPackData.removalReason != null) {
-				PackLoadFeedback.Result result = serverPackData.removalReason.serverResponse;
-				if (result != null) {
-					this.packLoadFeedback.sendResponse(serverPackData.id, result);
+				PackLoadFeedback.FinalResult finalResult = serverPackData.removalReason.serverResponse;
+				if (finalResult != null) {
+					this.packLoadFeedback.reportFinalResult(serverPackData.id, finalResult);
 				}
 
 				return true;
@@ -190,6 +190,9 @@ public class ServerPackManager {
 			if (path != null) {
 				serverPackDatax.downloadStatus = ServerPackManager.PackDownloadStatus.DONE;
 				serverPackDatax.path = path;
+				if (!serverPackDatax.isRemoved()) {
+					this.packLoadFeedback.reportUpdate(serverPackDatax.id, PackLoadFeedback.Update.DOWNLOADED);
+				}
 			}
 		}
 
@@ -269,7 +272,7 @@ public class ServerPackManager {
 					for (ServerPackManager.ServerPackData serverPackData : list) {
 						serverPackData.activationStatus = ServerPackManager.ActivationStatus.ACTIVE;
 						if (serverPackData.removalReason == null) {
-							ServerPackManager.this.packLoadFeedback.sendResponse(serverPackData.id, PackLoadFeedback.Result.APPLIED);
+							ServerPackManager.this.packLoadFeedback.reportFinalResult(serverPackData.id, PackLoadFeedback.FinalResult.APPLIED);
 						}
 					}
 
@@ -340,18 +343,18 @@ public class ServerPackManager {
 
 	@Environment(EnvType.CLIENT)
 	static enum RemovalReason {
-		DOWNLOAD_FAILED(PackLoadFeedback.Result.DOWNLOAD_FAILED),
-		ACTIVATION_FAILED(PackLoadFeedback.Result.ACTIVATION_FAILED),
-		DECLINED(PackLoadFeedback.Result.DECLINED),
-		DISCARDED(PackLoadFeedback.Result.DISCARDED),
+		DOWNLOAD_FAILED(PackLoadFeedback.FinalResult.DOWNLOAD_FAILED),
+		ACTIVATION_FAILED(PackLoadFeedback.FinalResult.ACTIVATION_FAILED),
+		DECLINED(PackLoadFeedback.FinalResult.DECLINED),
+		DISCARDED(PackLoadFeedback.FinalResult.DISCARDED),
 		SERVER_REMOVED(null),
 		SERVER_REPLACED(null);
 
 		@Nullable
-		final PackLoadFeedback.Result serverResponse;
+		final PackLoadFeedback.FinalResult serverResponse;
 
-		private RemovalReason(@Nullable PackLoadFeedback.Result result) {
-			this.serverResponse = result;
+		private RemovalReason(@Nullable PackLoadFeedback.FinalResult finalResult) {
+			this.serverResponse = finalResult;
 		}
 	}
 

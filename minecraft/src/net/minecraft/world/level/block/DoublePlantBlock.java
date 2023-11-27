@@ -93,7 +93,7 @@ public class DoublePlantBlock extends BushBlock {
 	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide) {
 			if (player.isCreative()) {
-				preventCreativeDropFromBottomPart(level, blockPos, blockState, player);
+				preventDropFromBottomPart(level, blockPos, blockState, player);
 			} else {
 				dropResources(blockState, level, blockPos, null, player, player.getMainHandItem());
 			}
@@ -107,7 +107,7 @@ public class DoublePlantBlock extends BushBlock {
 		super.playerDestroy(level, player, blockPos, Blocks.AIR.defaultBlockState(), blockEntity, itemStack);
 	}
 
-	protected static void preventCreativeDropFromBottomPart(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+	protected static void preventDropFromBottomPart(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
 		if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
 			BlockPos blockPos2 = blockPos.below();

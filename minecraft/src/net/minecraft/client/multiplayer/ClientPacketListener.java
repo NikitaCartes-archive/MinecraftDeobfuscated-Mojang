@@ -862,6 +862,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		Optional<SignedMessageBody> optional = clientboundPlayerChatPacket.body().unpack(this.messageSignatureCache);
 		Optional<ChatType.Bound> optional2 = clientboundPlayerChatPacket.chatType().resolve(this.registryAccess);
 		if (!optional.isEmpty() && !optional2.isEmpty()) {
+			this.messageSignatureCache.push((SignedMessageBody)optional.get(), clientboundPlayerChatPacket.signature());
 			UUID uUID = clientboundPlayerChatPacket.sender();
 			PlayerInfo playerInfo = this.getPlayerInfo(uUID);
 			if (playerInfo == null) {
@@ -883,11 +884,11 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 					clientboundPlayerChatPacket.unsignedContent(),
 					clientboundPlayerChatPacket.filterMask()
 				);
-				if (!playerInfo.getMessageValidator().updateAndValidate(playerChatMessage)) {
-					this.minecraft.getChatListener().handleChatMessageError(uUID, (ChatType.Bound)optional2.get());
-				} else {
+				playerChatMessage = playerInfo.getMessageValidator().updateAndValidate(playerChatMessage);
+				if (playerChatMessage != null) {
 					this.minecraft.getChatListener().handlePlayerChatMessage(playerChatMessage, playerInfo.getProfile(), (ChatType.Bound)optional2.get());
-					this.messageSignatureCache.push(playerChatMessage);
+				} else {
+					this.minecraft.getChatListener().handleChatMessageError(uUID, (ChatType.Bound)optional2.get());
 				}
 			}
 		} else {
@@ -1688,7 +1689,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			clientboundServerDataPacket.getIconBytes().map(ServerData::validateIcon).ifPresent(this.serverData::setIconBytes);
 			this.serverData.setEnforcesSecureChat(clientboundServerDataPacket.enforcesSecureChat());
 			ServerList.saveSingleServer(this.serverData);
-			if (!this.seenInsecureChatWarning && !clientboundServerDataPacket.enforcesSecureChat()) {
+			if (!this.seenInsecureChatWarning && !this.enforcesSecureChat()) {
 				SystemToast systemToast = SystemToast.multiline(
 					this.minecraft, SystemToast.SystemToastId.UNSECURE_SERVER_WARNING, UNSECURE_SERVER_TOAST_TITLE, UNSERURE_SERVER_TOAST
 				);
@@ -1773,7 +1774,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		for (ClientboundPlayerInfoUpdatePacket.Entry entryx : clientboundPlayerInfoUpdatePacket.entries()) {
 			PlayerInfo playerInfo = (PlayerInfo)this.playerInfoMap.get(entryx.profileId());
 			if (playerInfo == null) {
-				LOGGER.warn("Ignoring player info update for unknown player {}", entryx.profileId());
+				LOGGER.warn("Ignoring player info update for unknown player {} ({})", entryx.profileId(), clientboundPlayerInfoUpdatePacket.actions());
 			} else {
 				for (ClientboundPlayerInfoUpdatePacket.Action action : clientboundPlayerInfoUpdatePacket.actions()) {
 					this.applyPlayerInfoUpdate(action, entryx, playerInfo);
@@ -1832,7 +1833,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	}
 
 	private boolean enforcesSecureChat() {
-		return this.serverData != null && this.serverData.enforcesSecureChat();
+		return !this.minecraft.canValidateProfileKeys() ? false : this.serverData != null && this.serverData.enforcesSecureChat();
 	}
 
 	@Override

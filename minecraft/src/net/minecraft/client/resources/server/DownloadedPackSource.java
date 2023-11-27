@@ -1,5 +1,6 @@
 package net.minecraft.client.resources.server;
 
+import com.google.common.collect.Lists;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -49,7 +50,17 @@ public class DownloadedPackSource implements AutoCloseable {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final RepositorySource EMPTY_SOURCE = consumer -> {
 	};
-	private static final PackLoadFeedback LOG_ONLY_FEEDBACK = (uUID, result) -> LOGGER.debug("Downloaded pack {} changed state to {}", uUID, result);
+	private static final PackLoadFeedback LOG_ONLY_FEEDBACK = new PackLoadFeedback() {
+		@Override
+		public void reportUpdate(UUID uUID, PackLoadFeedback.Update update) {
+			DownloadedPackSource.LOGGER.debug("Downloaded pack {} changed state to {}", uUID, update);
+		}
+
+		@Override
+		public void reportFinalResult(UUID uUID, PackLoadFeedback.FinalResult finalResult) {
+			DownloadedPackSource.LOGGER.debug("Downloaded pack {} finished with state {}", uUID, finalResult);
+		}
+	};
 	final Minecraft minecraft;
 	private RepositorySource packSource = EMPTY_SOURCE;
 	@Nullable
@@ -57,7 +68,8 @@ public class DownloadedPackSource implements AutoCloseable {
 	final ServerPackManager manager;
 	private final DownloadQueue downloadQueue;
 	private PackSource packType = PackSource.SERVER;
-	private PackLoadFeedback packFeedback = LOG_ONLY_FEEDBACK;
+	PackLoadFeedback packFeedback = LOG_ONLY_FEEDBACK;
+	private int packIdSerialNumber;
 
 	public DownloadedPackSource(Minecraft minecraft, Path path, GameConfig.UserData userData) {
 		this.minecraft = minecraft;
@@ -69,22 +81,27 @@ public class DownloadedPackSource implements AutoCloseable {
 		}
 
 		Executor executor = minecraft::tell;
-		this.manager = new ServerPackManager(
-			this.createDownloader(this.downloadQueue, executor, userData.user, userData.proxy),
-			(uUID, result) -> this.packFeedback.sendResponse(uUID, result),
-			this.createReloadConfig(),
-			this.createUpdateScheduler(executor),
-			ServerPackManager.PackPromptStatus.PENDING
-		);
+		this.manager = new ServerPackManager(this.createDownloader(this.downloadQueue, executor, userData.user, userData.proxy), new PackLoadFeedback() {
+			@Override
+			public void reportUpdate(UUID uUID, PackLoadFeedback.Update update) {
+				DownloadedPackSource.this.packFeedback.reportUpdate(uUID, update);
+			}
+
+			@Override
+			public void reportFinalResult(UUID uUID, PackLoadFeedback.FinalResult finalResult) {
+				DownloadedPackSource.this.packFeedback.reportFinalResult(uUID, finalResult);
+			}
+		}, this.createReloadConfig(), this.createUpdateScheduler(executor), ServerPackManager.PackPromptStatus.PENDING);
 	}
 
 	HttpUtil.DownloadProgressListener createDownloadNotifier(int i) {
 		return new HttpUtil.DownloadProgressListener() {
-			private final SystemToast.SystemToastId toastId = new SystemToast.SystemToastId(10000L);
+			private final SystemToast.SystemToastId toastId = new SystemToast.SystemToastId();
 			private Component title = Component.empty();
 			@Nullable
 			private Component message = null;
 			private int count;
+			private int failCount;
 			private OptionalLong totalBytes = OptionalLong.empty();
 
 			private void updateToast() {
@@ -123,10 +140,22 @@ public class DownloadedPackSource implements AutoCloseable {
 			}
 
 			@Override
-			public void requestFinished() {
-				DownloadedPackSource.LOGGER.debug("Download ended for pack {}", this.count);
+			public void requestFinished(boolean bl) {
+				if (!bl) {
+					DownloadedPackSource.LOGGER.info("Pack {} failed to download", this.count);
+					this.failCount++;
+				} else {
+					DownloadedPackSource.LOGGER.debug("Download ended for pack {}", this.count);
+				}
+
 				if (this.count == i) {
-					SystemToast.forceHide(DownloadedPackSource.this.minecraft.getToasts(), this.toastId);
+					if (this.failCount > 0) {
+						this.title = Component.translatable("download.pack.failed", this.failCount, i);
+						this.message = null;
+						this.updateToast();
+					} else {
+						SystemToast.forceHide(DownloadedPackSource.this.minecraft.getToasts(), this.toastId);
+					}
 				}
 			}
 		};
@@ -200,8 +229,8 @@ public class DownloadedPackSource implements AutoCloseable {
 	private List<Pack> loadRequestedPacks(List<PackReloadConfig.IdAndPath> list) {
 		List<Pack> list2 = new ArrayList(list.size());
 
-		for (PackReloadConfig.IdAndPath idAndPath : list) {
-			String string = "server/" + idAndPath.id();
+		for (PackReloadConfig.IdAndPath idAndPath : Lists.reverse(list)) {
+			String string = String.format(Locale.ROOT, "server/%08X/%s", this.packIdSerialNumber++, idAndPath.id());
 			Path path = idAndPath.path();
 			Pack.ResourcesSupplier resourcesSupplier = new FilePackResources.FileResourcesSupplier(path, false);
 			int i = SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES);
@@ -294,18 +323,31 @@ public class DownloadedPackSource implements AutoCloseable {
 	}
 
 	private static PackLoadFeedback createPackResponseSender(Connection connection) {
-		return (uUID, result) -> {
-			LOGGER.debug("Pack {} changed status to {}", uUID, result);
+		return new PackLoadFeedback() {
+			@Override
+			public void reportUpdate(UUID uUID, PackLoadFeedback.Update update) {
+				DownloadedPackSource.LOGGER.debug("Pack {} changed status to {}", uUID, update);
 
-			ServerboundResourcePackPacket.Action action = switch (result) {
-				case ACCEPTED -> ServerboundResourcePackPacket.Action.ACCEPTED;
-				case APPLIED -> ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED;
-				case DOWNLOAD_FAILED -> ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD;
-				case DECLINED -> ServerboundResourcePackPacket.Action.DECLINED;
-				case DISCARDED -> ServerboundResourcePackPacket.Action.DISCARDED;
-				case ACTIVATION_FAILED -> ServerboundResourcePackPacket.Action.FAILED_RELOAD;
-			};
-			connection.send(new ServerboundResourcePackPacket(uUID, action));
+				ServerboundResourcePackPacket.Action action = switch (update) {
+					case ACCEPTED -> ServerboundResourcePackPacket.Action.ACCEPTED;
+					case DOWNLOADED -> ServerboundResourcePackPacket.Action.DOWNLOADED;
+				};
+				connection.send(new ServerboundResourcePackPacket(uUID, action));
+			}
+
+			@Override
+			public void reportFinalResult(UUID uUID, PackLoadFeedback.FinalResult finalResult) {
+				DownloadedPackSource.LOGGER.debug("Pack {} changed status to {}", uUID, finalResult);
+
+				ServerboundResourcePackPacket.Action action = switch (finalResult) {
+					case APPLIED -> ServerboundResourcePackPacket.Action.SUCCESSFULLY_LOADED;
+					case DOWNLOAD_FAILED -> ServerboundResourcePackPacket.Action.FAILED_DOWNLOAD;
+					case DECLINED -> ServerboundResourcePackPacket.Action.DECLINED;
+					case DISCARDED -> ServerboundResourcePackPacket.Action.DISCARDED;
+					case ACTIVATION_FAILED -> ServerboundResourcePackPacket.Action.FAILED_RELOAD;
+				};
+				connection.send(new ServerboundResourcePackPacket(uUID, action));
+			}
 		};
 	}
 
@@ -339,23 +381,26 @@ public class DownloadedPackSource implements AutoCloseable {
 	}
 
 	public CompletableFuture<Void> waitForPackFeedback(UUID uUID) {
-		CompletableFuture<Void> completableFuture = new CompletableFuture();
-		PackLoadFeedback packLoadFeedback = this.packFeedback;
-		this.packFeedback = (uUID2, result) -> {
-			if (uUID.equals(uUID2)) {
-				if (result == PackLoadFeedback.Result.ACCEPTED) {
-					packLoadFeedback.sendResponse(uUID2, result);
-					return;
+		final CompletableFuture<Void> completableFuture = new CompletableFuture();
+		final PackLoadFeedback packLoadFeedback = this.packFeedback;
+		this.packFeedback = new PackLoadFeedback() {
+			@Override
+			public void reportUpdate(UUID uUID, PackLoadFeedback.Update update) {
+				packLoadFeedback.reportUpdate(uUID, update);
+			}
+
+			@Override
+			public void reportFinalResult(UUID uUID, PackLoadFeedback.FinalResult finalResult) {
+				if (uUID.equals(uUID)) {
+					DownloadedPackSource.this.packFeedback = packLoadFeedback;
+					if (finalResult == PackLoadFeedback.FinalResult.APPLIED) {
+						completableFuture.complete(null);
+					} else {
+						completableFuture.completeExceptionally(new IllegalStateException("Failed to apply pack " + uUID + ", reason: " + finalResult));
+					}
 				}
 
-				this.packFeedback = packLoadFeedback;
-				if (result == PackLoadFeedback.Result.APPLIED) {
-					completableFuture.complete(null);
-				} else {
-					completableFuture.completeExceptionally(new IllegalStateException("Failed to apply pack " + uUID2 + ", reason: " + result));
-				}
-
-				packLoadFeedback.sendResponse(uUID2, result);
+				packLoadFeedback.reportFinalResult(uUID, finalResult);
 			}
 		};
 		return completableFuture;

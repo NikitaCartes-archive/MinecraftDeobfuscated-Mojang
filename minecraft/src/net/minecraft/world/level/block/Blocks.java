@@ -6538,7 +6538,7 @@ public class Blocks {
 			WeatheringCopper.WeatherState.UNAFFECTED,
 			BlockBehaviour.Properties.of()
 				.mapColor(COPPER_BLOCK.defaultMapColor())
-				.strength(3.0F)
+				.strength(3.0F, 6.0F)
 				.noOcclusion()
 				.requiresCorrectToolForDrops()
 				.pushReaction(PushReaction.DESTROY)
@@ -6582,7 +6582,7 @@ public class Blocks {
 			WeatheringCopper.WeatherState.UNAFFECTED,
 			BlockBehaviour.Properties.of()
 				.mapColor(COPPER_BLOCK.defaultMapColor())
-				.strength(3.0F)
+				.strength(3.0F, 6.0F)
 				.requiresCorrectToolForDrops()
 				.noOcclusion()
 				.isValidSpawn(Blocks::never)

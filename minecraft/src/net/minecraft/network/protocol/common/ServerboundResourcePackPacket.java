@@ -24,8 +24,13 @@ public record ServerboundResourcePackPacket(UUID id, ServerboundResourcePackPack
 		DECLINED,
 		FAILED_DOWNLOAD,
 		ACCEPTED,
+		DOWNLOADED,
 		INVALID_URL,
 		FAILED_RELOAD,
 		DISCARDED;
+
+		public boolean isTerminal() {
+			return this != ACCEPTED && this != DOWNLOADED;
+		}
 	}
 }

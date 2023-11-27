@@ -369,7 +369,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		if (bl2 || this.emptyTime++ < 300) {
 			profilerFiller.push("entities");
-			if (this.dragonFight != null) {
+			if (this.dragonFight != null && bl) {
 				profilerFiller.push("dragonFight");
 				this.dragonFight.tick();
 				profilerFiller.pop();

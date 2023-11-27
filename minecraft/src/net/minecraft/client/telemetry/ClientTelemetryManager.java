@@ -30,6 +30,7 @@ public class ClientTelemetryManager implements AutoCloseable {
 		thread.setName("Telemetry-Sender-#" + THREAD_COUNT.getAndIncrement());
 		return thread;
 	});
+	private final Minecraft minecraft;
 	private final UserApiService userApiService;
 	private final TelemetryPropertyMap deviceSessionProperties;
 	private final Path logDirectory;
@@ -37,6 +38,7 @@ public class ClientTelemetryManager implements AutoCloseable {
 	private final Supplier<TelemetryEventSender> outsideSessionSender = Suppliers.memoize(this::createEventSender);
 
 	public ClientTelemetryManager(Minecraft minecraft, UserApiService userApiService, User user) {
+		this.minecraft = minecraft;
 		this.userApiService = userApiService;
 		TelemetryPropertyMap.Builder builder = TelemetryPropertyMap.builder();
 		user.getXuid().ifPresent(string -> builder.put(TelemetryProperty.USER_ID, string));
@@ -61,7 +63,7 @@ public class ClientTelemetryManager implements AutoCloseable {
 	}
 
 	private TelemetryEventSender createEventSender() {
-		if (SharedConstants.IS_RUNNING_IN_IDE) {
+		if (!this.minecraft.allowsTelemetry()) {
 			return TelemetryEventSender.DISABLED;
 		} else {
 			TelemetrySession telemetrySession = this.userApiService.newTelemetrySession(EXECUTOR);

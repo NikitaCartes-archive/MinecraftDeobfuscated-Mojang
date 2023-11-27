@@ -517,7 +517,7 @@ public class TestCommand {
 		Path path = Paths.get(StructureUtils.testStructuresDir);
 		ResourceLocation resourceLocation = new ResourceLocation(string);
 		Path path2 = commandSourceStack.getLevel().getStructureManager().getPathToGeneratedStructure(resourceLocation, ".nbt");
-		Path path3 = NbtToSnbt.convertStructure(CachedOutput.NO_CACHE, path2, string, path);
+		Path path3 = NbtToSnbt.convertStructure(CachedOutput.NO_CACHE, path2, resourceLocation.getPath(), path);
 		if (path3 == null) {
 			say(commandSourceStack, "Failed to export " + path2);
 			return 1;

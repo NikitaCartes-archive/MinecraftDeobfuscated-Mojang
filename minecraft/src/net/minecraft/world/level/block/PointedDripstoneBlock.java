@@ -129,13 +129,14 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-		BlockPos blockPos = blockHitResult.getBlockPos();
-		if (!level.isClientSide
-			&& projectile.mayInteract(level, blockPos)
-			&& projectile.mayBreak(level)
-			&& projectile instanceof ThrownTrident
-			&& projectile.getDeltaMovement().length() > 0.6) {
-			level.destroyBlock(blockPos, true);
+		if (!level.isClientSide) {
+			BlockPos blockPos = blockHitResult.getBlockPos();
+			if (projectile.mayInteract(level, blockPos)
+				&& projectile.mayBreak(level)
+				&& projectile instanceof ThrownTrident
+				&& projectile.getDeltaMovement().length() > 0.6) {
+				level.destroyBlock(blockPos, true);
+			}
 		}
 	}
 

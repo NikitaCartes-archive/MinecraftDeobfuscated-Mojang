@@ -64,7 +64,9 @@ public class JigsawPlacement {
 		WorldgenRandom worldgenRandom = generationContext.random();
 		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registries.TEMPLATE_POOL);
 		Rotation rotation = Rotation.getRandom(worldgenRandom);
-		StructureTemplatePool structureTemplatePool = holder.value();
+		StructureTemplatePool structureTemplatePool = (StructureTemplatePool)holder.unwrapKey()
+			.flatMap(resourceKey -> registry.getOptional(poolAliasLookup.lookup(resourceKey)))
+			.orElse(holder.value());
 		StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(worldgenRandom);
 		if (structurePoolElement == EmptyPoolElement.INSTANCE) {
 			return Optional.empty();

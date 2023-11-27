@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 
 public class DownloadQueue implements AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final int MAX_KEPT_PACKS = 20;
 	private final Path cacheDir;
 	private final JsonEventLog<DownloadQueue.LogEntry> eventLog;
 	private final ProcessorMailbox<Runnable> tasks = ProcessorMailbox.create(Util.nonCriticalIoPool(), "download-queue");
@@ -39,6 +40,7 @@ public class DownloadQueue implements AutoCloseable {
 		this.cacheDir = path;
 		FileUtil.createDirectoriesSafe(path);
 		this.eventLog = JsonEventLog.open(DownloadQueue.LogEntry.CODEC, path.resolve("log.json"));
+		DownloadCacheCleaner.vacuumCacheDir(path, 20);
 	}
 
 	private DownloadQueue.BatchResult runDownload(DownloadQueue.BatchConfig batchConfig, Map<UUID, DownloadQueue.DownloadRequest> map) {

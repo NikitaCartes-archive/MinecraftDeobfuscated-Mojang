@@ -35,11 +35,10 @@ public class MessageSignatureCache {
 		return this.entries[i];
 	}
 
-	public void push(PlayerChatMessage playerChatMessage) {
-		List<MessageSignature> list = playerChatMessage.signedBody().lastSeen().entries();
+	public void push(SignedMessageBody signedMessageBody, @Nullable MessageSignature messageSignature) {
+		List<MessageSignature> list = signedMessageBody.lastSeen().entries();
 		ArrayDeque<MessageSignature> arrayDeque = new ArrayDeque(list.size() + 1);
 		arrayDeque.addAll(list);
-		MessageSignature messageSignature = playerChatMessage.signature();
 		if (messageSignature != null) {
 			arrayDeque.add(messageSignature);
 		}

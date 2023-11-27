@@ -76,6 +76,8 @@ public class TickCommand {
 		} else {
 			if (serverTickRateManager.isFrozen()) {
 				commandSourceStack.sendSuccess(() -> Component.translatable("commands.tick.status.frozen"), false);
+			} else if (serverTickRateManager.nanosecondsPerTick() < commandSourceStack.getServer().getAverageTickTimeNanos()) {
+				commandSourceStack.sendSuccess(() -> Component.translatable("commands.tick.status.lagging"), false);
 			} else {
 				commandSourceStack.sendSuccess(() -> Component.translatable("commands.tick.status.running"), false);
 			}

@@ -63,6 +63,12 @@ public record PlayerChatMessage(
 		return this.filter(bl ? this.filterMask : FilterMask.PASS_THROUGH);
 	}
 
+	public PlayerChatMessage removeSignature() {
+		SignedMessageBody signedMessageBody = SignedMessageBody.unsigned(this.signedContent());
+		SignedMessageLink signedMessageLink = SignedMessageLink.unsigned(this.sender());
+		return new PlayerChatMessage(signedMessageLink, null, signedMessageBody, this.unsignedContent, this.filterMask);
+	}
+
 	public static void updateSignature(SignatureUpdater.Output output, SignedMessageLink signedMessageLink, SignedMessageBody signedMessageBody) throws SignatureException {
 		output.update(Ints.toByteArray(1));
 		signedMessageLink.updateSignature(output);

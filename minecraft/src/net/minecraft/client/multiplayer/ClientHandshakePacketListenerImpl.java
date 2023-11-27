@@ -20,6 +20,8 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
 import net.minecraft.Util;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
@@ -209,6 +211,12 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 
 	public void setMinigameName(String string) {
 		this.minigameName = string;
+	}
+
+	@Override
+	public void fillListenerSpecificCrashDetails(CrashReportCategory crashReportCategory) {
+		crashReportCategory.setDetail("Server type", (CrashReportDetail<String>)(() -> this.serverData != null ? this.serverData.type().toString() : "<unknown>"));
+		crashReportCategory.setDetail("Login phase", (CrashReportDetail<String>)(() -> ((ClientHandshakePacketListenerImpl.State)this.state.get()).toString()));
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -19,6 +19,8 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.Map;
 import java.util.OptionalLong;
 import javax.annotation.Nullable;
@@ -52,19 +54,20 @@ public class HttpUtil {
 			try {
 				if (checkExistingFile(path2, hashFunction, hashCode)) {
 					LOGGER.info("Returning cached file since actual hash matches requested");
-					downloadProgressListener.requestFinished();
+					downloadProgressListener.requestFinished(true);
+					updateModificationTime(path2);
 					return path2;
 				}
-			} catch (IOException var34) {
-				LOGGER.warn("Failed to check cached file {}", path2, var34);
+			} catch (IOException var35) {
+				LOGGER.warn("Failed to check cached file {}", path2, var35);
 			}
 
 			try {
 				LOGGER.warn("Existing file {} not found or had mismatched hash", path2);
 				Files.deleteIfExists(path2);
-			} catch (IOException var33) {
-				downloadProgressListener.requestFinished();
-				throw new UncheckedIOException("Failed to remove existing file " + path2, var33);
+			} catch (IOException var34) {
+				downloadProgressListener.requestFinished(false);
+				throw new UncheckedIOException("Failed to remove existing file " + path2, var34);
 			}
 		} else {
 			path2 = null;
@@ -92,8 +95,11 @@ public class HttpUtil {
 					Path path4 = cachedFilePath(path, hashCode3x);
 					if (!checkExistingFile(path4, hashFunction, hashCode3x)) {
 						Files.move(path3, path4, StandardCopyOption.REPLACE_EXISTING);
+					} else {
+						updateModificationTime(path4);
 					}
 
+					downloadProgressListener.requestFinished(true);
 					return path4;
 				} finally {
 					Files.deleteIfExists(path3);
@@ -105,6 +111,7 @@ public class HttpUtil {
 				throw new IOException("Hash of downloaded file (" + hashCode2 + ") did not match requested (" + hashCode + ")");
 			}
 
+			downloadProgressListener.requestFinished(true);
 			hashCode3 = path2;
 		} catch (Throwable var36) {
 			if (httpURLConnection != null) {
@@ -118,13 +125,21 @@ public class HttpUtil {
 				}
 			}
 
+			downloadProgressListener.requestFinished(false);
 			throw new IllegalStateException("Failed to download file " + uRL, var36);
 		} finally {
-			downloadProgressListener.requestFinished();
 			IOUtils.closeQuietly(inputStream);
 		}
 
 		return hashCode3;
+	}
+
+	private static void updateModificationTime(Path path) {
+		try {
+			Files.setLastModifiedTime(path, FileTime.from(Instant.now()));
+		} catch (IOException var2) {
+			LOGGER.warn("Failed to update modification time of {}", path, var2);
+		}
 	}
 
 	private static HashCode hashFile(Path path, HashFunction hashFunction) throws IOException {
@@ -294,6 +309,6 @@ public class HttpUtil {
 
 		void downloadedBytes(long l);
 
-		void requestFinished();
+		void requestFinished(boolean bl);
 	}
 }

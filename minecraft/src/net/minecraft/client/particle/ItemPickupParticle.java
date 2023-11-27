@@ -22,6 +22,12 @@ public class ItemPickupParticle extends Particle {
 	private final Entity target;
 	private int life;
 	private final EntityRenderDispatcher entityRenderDispatcher;
+	private double targetX;
+	private double targetY;
+	private double targetZ;
+	private double targetXOld;
+	private double targetYOld;
+	private double targetZOld;
 
 	public ItemPickupParticle(EntityRenderDispatcher entityRenderDispatcher, RenderBuffers renderBuffers, ClientLevel clientLevel, Entity entity, Entity entity2) {
 		this(entityRenderDispatcher, renderBuffers, clientLevel, entity, entity2, entity.getDeltaMovement());
@@ -35,6 +41,8 @@ public class ItemPickupParticle extends Particle {
 		this.itemEntity = this.getSafeCopy(entity);
 		this.target = entity2;
 		this.entityRenderDispatcher = entityRenderDispatcher;
+		this.updatePosition();
+		this.saveOldPosition();
 	}
 
 	private Entity getSafeCopy(Entity entity) {
@@ -50,9 +58,9 @@ public class ItemPickupParticle extends Particle {
 	public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
 		float g = ((float)this.life + f) / 3.0F;
 		g *= g;
-		double d = Mth.lerp((double)f, this.target.xOld, this.target.getX());
-		double e = Mth.lerp((double)f, this.target.yOld, (this.target.getY() + this.target.getEyeY()) / 2.0);
-		double h = Mth.lerp((double)f, this.target.zOld, this.target.getZ());
+		double d = Mth.lerp((double)f, this.targetXOld, this.targetX);
+		double e = Mth.lerp((double)f, this.targetYOld, this.targetY);
+		double h = Mth.lerp((double)f, this.targetZOld, this.targetZ);
 		double i = Mth.lerp((double)g, this.itemEntity.getX(), d);
 		double j = Mth.lerp((double)g, this.itemEntity.getY(), e);
 		double k = Mth.lerp((double)g, this.itemEntity.getZ(), h);
@@ -79,5 +87,20 @@ public class ItemPickupParticle extends Particle {
 		if (this.life == 3) {
 			this.remove();
 		}
+
+		this.saveOldPosition();
+		this.updatePosition();
+	}
+
+	private void updatePosition() {
+		this.targetX = this.target.getX();
+		this.targetY = (this.target.getY() + this.target.getEyeY()) / 2.0;
+		this.targetZ = this.target.getZ();
+	}
+
+	private void saveOldPosition() {
+		this.targetXOld = this.targetX;
+		this.targetYOld = this.targetY;
+		this.targetZOld = this.targetZ;
 	}
 }

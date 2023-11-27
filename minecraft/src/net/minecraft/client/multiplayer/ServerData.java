@@ -108,6 +108,10 @@ public class ServerData {
 		return this.type == ServerData.Type.REALM;
 	}
 
+	public ServerData.Type type() {
+		return this.type;
+	}
+
 	public void setEnforcesSecureChat(boolean bl) {
 		this.enforcesSecureChat = bl;
 	}

@@ -14,6 +14,7 @@ import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTickTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -31,7 +32,6 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class GetServerDetailsTask extends LongRunningTask {
 	private static final Component APPLYING_PACK_TEXT = Component.translatable("multiplayer.applyingPack");
-	private static final UUID REALMS_PACK_UUID = UUID.fromString("08c3b151-90fb-4c09-b6cf-0548364671bb");
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component TITLE = Component.translatable("mco.connect.connecting");
 	private final RealmsServer server;
@@ -80,9 +80,15 @@ public class GetServerDetailsTask extends LongRunningTask {
 
 		boolean bl2 = realmsServerAddress.resourcePackUrl != null && realmsServerAddress.resourcePackHash != null;
 		Screen screen = (Screen)(bl2
-			? this.resourcePackDownloadConfirmationScreen(realmsServerAddress, this::connectScreen)
+			? this.resourcePackDownloadConfirmationScreen(realmsServerAddress, generatePackId(this.server), this::connectScreen)
 			: this.connectScreen(realmsServerAddress));
 		setScreen(screen);
+	}
+
+	private static UUID generatePackId(RealmsServer realmsServer) {
+		return realmsServer.minigameName != null
+			? UUID.nameUUIDFromBytes(("minigame:" + realmsServer.minigameName).getBytes(StandardCharsets.UTF_8))
+			: UUID.nameUUIDFromBytes(("realms:" + realmsServer.name + ":" + realmsServer.activeSlot).getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Override
@@ -113,19 +119,21 @@ public class GetServerDetailsTask extends LongRunningTask {
 	}
 
 	private RealmsLongConfirmationScreen resourcePackDownloadConfirmationScreen(
-		RealmsServerAddress realmsServerAddress, Function<RealmsServerAddress, Screen> function
+		RealmsServerAddress realmsServerAddress, UUID uUID, Function<RealmsServerAddress, Screen> function
 	) {
 		BooleanConsumer booleanConsumer = bl -> {
 			if (!bl) {
 				setScreen(this.lastScreen);
 			} else {
 				setScreen(new GenericDirtMessageScreen(APPLYING_PACK_TEXT));
-				this.scheduleResourcePackDownload(realmsServerAddress).thenRun(() -> setScreen((Screen)function.apply(realmsServerAddress))).exceptionally(throwable -> {
-					Minecraft.getInstance().getDownloadedPackSource().cleanupAfterDisconnect();
-					LOGGER.error("Failed to download resource pack from {}", realmsServerAddress, throwable);
-					setScreen(new RealmsGenericErrorScreen(Component.translatable("mco.download.resourcePack.fail"), this.lastScreen));
-					return null;
-				});
+				this.scheduleResourcePackDownload(realmsServerAddress, uUID)
+					.thenRun(() -> setScreen((Screen)function.apply(realmsServerAddress)))
+					.exceptionally(throwable -> {
+						Minecraft.getInstance().getDownloadedPackSource().cleanupAfterDisconnect();
+						LOGGER.error("Failed to download resource pack from {}", realmsServerAddress, throwable);
+						setScreen(new RealmsGenericErrorScreen(Component.translatable("mco.download.resourcePack.fail"), this.lastScreen));
+						return null;
+					});
 			}
 		};
 		return new RealmsLongConfirmationScreen(
@@ -137,16 +145,16 @@ public class GetServerDetailsTask extends LongRunningTask {
 		);
 	}
 
-	private CompletableFuture<?> scheduleResourcePackDownload(RealmsServerAddress realmsServerAddress) {
+	private CompletableFuture<?> scheduleResourcePackDownload(RealmsServerAddress realmsServerAddress, UUID uUID) {
 		try {
 			DownloadedPackSource downloadedPackSource = Minecraft.getInstance().getDownloadedPackSource();
-			CompletableFuture<Void> completableFuture = downloadedPackSource.waitForPackFeedback(REALMS_PACK_UUID);
+			CompletableFuture<Void> completableFuture = downloadedPackSource.waitForPackFeedback(uUID);
 			downloadedPackSource.allowServerPacks();
-			downloadedPackSource.pushPack(REALMS_PACK_UUID, new URL(realmsServerAddress.resourcePackUrl), realmsServerAddress.resourcePackHash);
+			downloadedPackSource.pushPack(uUID, new URL(realmsServerAddress.resourcePackUrl), realmsServerAddress.resourcePackHash);
 			return completableFuture;
-		} catch (Exception var4) {
+		} catch (Exception var5) {
 			CompletableFuture<Void> completableFuturex = new CompletableFuture();
-			completableFuturex.completeExceptionally(var4);
+			completableFuturex.completeExceptionally(var5);
 			return completableFuturex;
 		}
 	}

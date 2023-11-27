@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.Connection;
@@ -233,6 +235,11 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 		this.connection.setListener(serverConfigurationPacketListenerImpl);
 		serverConfigurationPacketListenerImpl.startConfiguration();
 		this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
+	}
+
+	@Override
+	public void fillListenerSpecificCrashDetails(CrashReportCategory crashReportCategory) {
+		crashReportCategory.setDetail("Login phase", (CrashReportDetail<String>)(() -> this.state.toString()));
 	}
 
 	static enum State {

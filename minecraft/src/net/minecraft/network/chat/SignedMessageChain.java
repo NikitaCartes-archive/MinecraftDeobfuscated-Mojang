@@ -3,6 +3,7 @@ package net.minecraft.network.chat;
 import com.mojang.logging.LogUtils;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.Signer;
@@ -13,6 +14,7 @@ public class SignedMessageChain {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	@Nullable
 	private SignedMessageLink nextLink;
+	private Instant lastTimeStamp = Instant.EPOCH;
 
 	public SignedMessageChain(UUID uUID, UUID uUID2) {
 		this.nextLink = SignedMessageLink.root(uUID, uUID2);
@@ -35,7 +37,10 @@ public class SignedMessageChain {
 				throw new SignedMessageChain.DecodeException(Component.translatable("chat.disabled.chain_broken"), false);
 			} else if (profilePublicKey.data().hasExpired()) {
 				throw new SignedMessageChain.DecodeException(Component.translatable("chat.disabled.expiredProfileKey"), false);
+			} else if (signedMessageBody.timeStamp().isBefore(this.lastTimeStamp)) {
+				throw new SignedMessageChain.DecodeException(Component.translatable("multiplayer.disconnect.out_of_order_chat"), true);
 			} else {
+				this.lastTimeStamp = signedMessageBody.timeStamp();
 				PlayerChatMessage playerChatMessage = new PlayerChatMessage(signedMessageLink, messageSignature, signedMessageBody, null, FilterMask.PASS_THROUGH);
 				if (!playerChatMessage.verify(signatureValidator)) {
 					throw new SignedMessageChain.DecodeException(Component.translatable("multiplayer.disconnect.unsigned_chat"), true);
@@ -75,12 +80,14 @@ public class SignedMessageChain {
 
 	@FunctionalInterface
 	public interface Decoder {
-		SignedMessageChain.Decoder REJECT_ALL = (messageSignature, signedMessageBody) -> {
-			throw new SignedMessageChain.DecodeException(Component.translatable("chat.disabled.missingProfileKey"), false);
-		};
-
-		static SignedMessageChain.Decoder unsigned(UUID uUID) {
-			return (messageSignature, signedMessageBody) -> PlayerChatMessage.unsigned(uUID, signedMessageBody.content());
+		static SignedMessageChain.Decoder unsigned(UUID uUID, BooleanSupplier booleanSupplier) {
+			return (messageSignature, signedMessageBody) -> {
+				if (booleanSupplier.getAsBoolean()) {
+					throw new SignedMessageChain.DecodeException(Component.translatable("chat.disabled.missingProfileKey"), false);
+				} else {
+					return PlayerChatMessage.unsigned(uUID, signedMessageBody.content());
+				}
+			};
 		}
 
 		PlayerChatMessage unpack(@Nullable MessageSignature messageSignature, SignedMessageBody signedMessageBody) throws SignedMessageChain.DecodeException;
