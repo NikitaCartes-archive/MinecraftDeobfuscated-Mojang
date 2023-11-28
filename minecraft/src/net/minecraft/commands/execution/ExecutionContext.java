@@ -27,6 +27,7 @@ public class ExecutionContext<T> implements AutoCloseable {
 	private boolean queueOverflow;
 	private final Deque<CommandQueueEntry<T>> commandQueue = Queues.<CommandQueueEntry<T>>newArrayDeque();
 	private final List<CommandQueueEntry<T>> newTopCommands = new ObjectArrayList<>();
+	private int currentFrameDepth;
 
 	public ExecutionContext(int i, int j, ProfilerFiller profilerFiller) {
 		this.commandLimit = i;
@@ -36,7 +37,12 @@ public class ExecutionContext<T> implements AutoCloseable {
 	}
 
 	private static <T extends ExecutionCommandSource<T>> Frame createTopFrame(ExecutionContext<T> executionContext, CommandResultCallback commandResultCallback) {
-		return new Frame(0, commandResultCallback, executionContext.commandQueue::clear);
+		if (executionContext.currentFrameDepth == 0) {
+			return new Frame(0, commandResultCallback, executionContext.commandQueue::clear);
+		} else {
+			int i = executionContext.currentFrameDepth + 1;
+			return new Frame(i, commandResultCallback, executionContext.frameControlForDepth(i));
+		}
 	}
 
 	public static <T extends ExecutionCommandSource<T>> void queueInitialFunctionCall(
@@ -98,6 +104,7 @@ public class ExecutionContext<T> implements AutoCloseable {
 				return;
 			}
 
+			this.currentFrameDepth = commandQueueEntry.frame().depth();
 			commandQueueEntry.execute(this);
 			if (this.queueOverflow) {
 				LOGGER.error("Command execution stopped due to command queue overflow (max {})", 10000000);
@@ -106,6 +113,8 @@ public class ExecutionContext<T> implements AutoCloseable {
 
 			this.pushNewCommands();
 		}
+
+		this.currentFrameDepth = 0;
 	}
 
 	private void pushNewCommands() {

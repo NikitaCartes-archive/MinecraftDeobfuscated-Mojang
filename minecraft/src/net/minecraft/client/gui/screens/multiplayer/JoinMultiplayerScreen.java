@@ -76,7 +76,7 @@ public class JoinMultiplayerScreen extends Screen {
 			this.serverSelectionList.updateOnlineServers(this.servers);
 		}
 
-		this.addRenderableWidget(this.serverSelectionList);
+		this.addWidget(this.serverSelectionList);
 		this.selectButton = this.addRenderableWidget(
 			Button.builder(Component.translatable("selectServer.select"), buttonx -> this.joinSelectedServer()).width(100).build()
 		);
@@ -238,6 +238,7 @@ public class JoinMultiplayerScreen extends Screen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		this.toolTip = null;
+		this.serverSelectionList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
 		if (this.toolTip != null) {
 			guiGraphics.renderComponentTooltip(this.font, this.toolTip, i, j);

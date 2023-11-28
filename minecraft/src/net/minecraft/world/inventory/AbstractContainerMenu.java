@@ -438,40 +438,40 @@ public abstract class AbstractContainerMenu {
 
 				slot.setChanged();
 			}
-		} else if (clickType == ClickType.SWAP) {
-			Slot slot3 = this.slots.get(i);
-			ItemStack itemStack2 = inventory.getItem(j);
-			ItemStack itemStack = slot3.getItem();
-			if (!itemStack2.isEmpty() || !itemStack.isEmpty()) {
-				if (itemStack2.isEmpty()) {
-					if (slot3.mayPickup(player)) {
+		} else if (clickType == ClickType.SWAP && (j >= 0 && j < 9 || j == 40)) {
+			ItemStack itemStack5 = inventory.getItem(j);
+			Slot slot = this.slots.get(i);
+			ItemStack itemStack = slot.getItem();
+			if (!itemStack5.isEmpty() || !itemStack.isEmpty()) {
+				if (itemStack5.isEmpty()) {
+					if (slot.mayPickup(player)) {
 						inventory.setItem(j, itemStack);
-						slot3.onSwapCraft(itemStack.getCount());
-						slot3.setByPlayer(ItemStack.EMPTY);
-						slot3.onTake(player, itemStack);
+						slot.onSwapCraft(itemStack.getCount());
+						slot.setByPlayer(ItemStack.EMPTY);
+						slot.onTake(player, itemStack);
 					}
 				} else if (itemStack.isEmpty()) {
-					if (slot3.mayPlace(itemStack2)) {
-						int r = slot3.getMaxStackSize(itemStack2);
-						if (itemStack2.getCount() > r) {
-							slot3.setByPlayer(itemStack2.split(r));
+					if (slot.mayPlace(itemStack5)) {
+						int r = slot.getMaxStackSize(itemStack5);
+						if (itemStack5.getCount() > r) {
+							slot.setByPlayer(itemStack5.split(r));
 						} else {
 							inventory.setItem(j, ItemStack.EMPTY);
-							slot3.setByPlayer(itemStack2);
+							slot.setByPlayer(itemStack5);
 						}
 					}
-				} else if (slot3.mayPickup(player) && slot3.mayPlace(itemStack2)) {
-					int r = slot3.getMaxStackSize(itemStack2);
-					if (itemStack2.getCount() > r) {
-						slot3.setByPlayer(itemStack2.split(r));
-						slot3.onTake(player, itemStack);
+				} else if (slot.mayPickup(player) && slot.mayPlace(itemStack5)) {
+					int r = slot.getMaxStackSize(itemStack5);
+					if (itemStack5.getCount() > r) {
+						slot.setByPlayer(itemStack5.split(r));
+						slot.onTake(player, itemStack);
 						if (!inventory.add(itemStack)) {
 							player.drop(itemStack, true);
 						}
 					} else {
 						inventory.setItem(j, itemStack);
-						slot3.setByPlayer(itemStack2);
-						slot3.onTake(player, itemStack);
+						slot.setByPlayer(itemStack5);
+						slot.onTake(player, itemStack);
 					}
 				}
 			}
@@ -497,10 +497,10 @@ public abstract class AbstractContainerMenu {
 					for (int s = m; s >= 0 && s < this.slots.size() && itemStack2.getCount() < itemStack2.getMaxStackSize(); s += r) {
 						Slot slot4 = this.slots.get(s);
 						if (slot4.hasItem() && canItemQuickReplace(slot4, itemStack2, true) && slot4.mayPickup(player) && this.canTakeItemForPickAll(itemStack2, slot4)) {
-							ItemStack itemStack5 = slot4.getItem();
-							if (q != 0 || itemStack5.getCount() != itemStack5.getMaxStackSize()) {
-								ItemStack itemStack6 = slot4.safeTake(itemStack5.getCount(), itemStack2.getMaxStackSize() - itemStack2.getCount(), player);
-								itemStack2.grow(itemStack6.getCount());
+							ItemStack itemStack6 = slot4.getItem();
+							if (q != 0 || itemStack6.getCount() != itemStack6.getMaxStackSize()) {
+								ItemStack itemStack7 = slot4.safeTake(itemStack6.getCount(), itemStack2.getMaxStackSize() - itemStack2.getCount(), player);
+								itemStack2.grow(itemStack7.getCount());
 							}
 						}
 					}
