@@ -79,12 +79,17 @@ public class ClientboundExplodePacket implements Packet<ClientGamePacketListener
 		this.knockbackY = friendlyByteBuf.readFloat();
 		this.knockbackZ = friendlyByteBuf.readFloat();
 		this.blockInteraction = friendlyByteBuf.readEnum(Explosion.BlockInteraction.class);
-		this.smallExplosionParticles = readParticle(friendlyByteBuf, friendlyByteBuf.readById(BuiltInRegistries.PARTICLE_TYPE));
-		this.largeExplosionParticles = readParticle(friendlyByteBuf, friendlyByteBuf.readById(BuiltInRegistries.PARTICLE_TYPE));
+		this.smallExplosionParticles = this.readParticle(friendlyByteBuf, friendlyByteBuf.readById(BuiltInRegistries.PARTICLE_TYPE));
+		this.largeExplosionParticles = this.readParticle(friendlyByteBuf, friendlyByteBuf.readById(BuiltInRegistries.PARTICLE_TYPE));
 		this.explosionSound = SoundEvent.readFromNetwork(friendlyByteBuf);
 	}
 
-	private static <T extends ParticleOptions> T readParticle(FriendlyByteBuf friendlyByteBuf, ParticleType<T> particleType) {
+	public void writeParticle(FriendlyByteBuf friendlyByteBuf, ParticleOptions particleOptions) {
+		friendlyByteBuf.writeId(BuiltInRegistries.PARTICLE_TYPE, particleOptions.getType());
+		particleOptions.writeToNetwork(friendlyByteBuf);
+	}
+
+	private <T extends ParticleOptions> T readParticle(FriendlyByteBuf friendlyByteBuf, ParticleType<T> particleType) {
 		return particleType.getDeserializer().fromNetwork(particleType, friendlyByteBuf);
 	}
 
@@ -109,8 +114,8 @@ public class ClientboundExplodePacket implements Packet<ClientGamePacketListener
 		friendlyByteBuf.writeFloat(this.knockbackY);
 		friendlyByteBuf.writeFloat(this.knockbackZ);
 		friendlyByteBuf.writeEnum(this.blockInteraction);
-		friendlyByteBuf.writeId(BuiltInRegistries.PARTICLE_TYPE, this.smallExplosionParticles.getType());
-		friendlyByteBuf.writeId(BuiltInRegistries.PARTICLE_TYPE, this.largeExplosionParticles.getType());
+		this.writeParticle(friendlyByteBuf, this.smallExplosionParticles);
+		this.writeParticle(friendlyByteBuf, this.largeExplosionParticles);
 		this.explosionSound.writeToNetwork(friendlyByteBuf);
 	}
 
