@@ -127,7 +127,7 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 						);
 					}
 
-					level.updateNeighbourForOutputSignal(blockPos, this);
+					decoratedPotBlockEntity.setChanged();
 				} else {
 					level.playSound(null, blockPos, SoundEvents.DECORATED_POT_INSERT_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F);
 					decoratedPotBlockEntity.wobble(DecoratedPotBlockEntity.WobbleStyle.NEGATIVE);
