@@ -28,9 +28,9 @@ public class DetectedVersion implements WorldVersion {
 
 	private DetectedVersion() {
 		this.id = UUID.randomUUID().toString().replaceAll("-", "");
-		this.name = "23w51a";
+		this.name = "23w51b";
 		this.stable = false;
-		this.worldVersion = new DataVersion(3801, "main");
+		this.worldVersion = new DataVersion(3802, "main");
 		this.protocolVersion = SharedConstants.getProtocolVersion();
 		this.resourcePackVersion = 22;
 		this.dataPackVersion = 27;

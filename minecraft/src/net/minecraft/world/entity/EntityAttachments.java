@@ -10,11 +10,14 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public class EntityAttachments {
-	public static final EntityAttachments DEFAULTS = new EntityAttachments(Map.of());
 	private final Map<EntityAttachment, List<Vec3>> attachments;
 
 	EntityAttachments(Map<EntityAttachment, List<Vec3>> map) {
 		this.attachments = map;
+	}
+
+	public static EntityAttachments createDefault(float f, float g) {
+		return builder().build(f, g);
 	}
 
 	public static EntityAttachments.Builder builder() {

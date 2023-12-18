@@ -5,7 +5,7 @@ import net.minecraft.world.phys.Vec3;
 
 public record EntityDimensions(float width, float height, float eyeHeight, EntityAttachments attachments, boolean fixed) {
 	private EntityDimensions(float f, float g, boolean bl) {
-		this(f, g, defaultEyeHeight(g), EntityAttachments.DEFAULTS, bl);
+		this(f, g, defaultEyeHeight(g), EntityAttachments.createDefault(f, g), bl);
 	}
 
 	private static float defaultEyeHeight(float f) {
