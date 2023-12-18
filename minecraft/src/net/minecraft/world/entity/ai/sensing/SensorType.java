@@ -5,6 +5,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.animal.armadillo.Armadillo;
+import net.minecraft.world.entity.animal.armadillo.ArmadilloAi;
 import net.minecraft.world.entity.animal.axolotl.AxolotlAi;
 import net.minecraft.world.entity.animal.camel.CamelAi;
 import net.minecraft.world.entity.animal.frog.FrogAi;
@@ -24,6 +27,9 @@ public class SensorType<U extends Sensor<?>> {
 	public static final SensorType<VillagerBabiesSensor> VILLAGER_BABIES = register("villager_babies", VillagerBabiesSensor::new);
 	public static final SensorType<SecondaryPoiSensor> SECONDARY_POIS = register("secondary_pois", SecondaryPoiSensor::new);
 	public static final SensorType<GolemSensor> GOLEM_DETECTED = register("golem_detected", GolemSensor::new);
+	public static final SensorType<MobSensor<Armadillo>> ARMADILLO_SCARE_DETECTED = register(
+		"armadillo_scare_detected", () -> new MobSensor(5, Armadillo::isScaredBy, Armadillo::canStayRolledUp, MemoryModuleType.DANGER_DETECTED_RECENTLY, 60)
+	);
 	public static final SensorType<PiglinSpecificSensor> PIGLIN_SPECIFIC_SENSOR = register("piglin_specific_sensor", PiglinSpecificSensor::new);
 	public static final SensorType<PiglinBruteSpecificSensor> PIGLIN_BRUTE_SPECIFIC_SENSOR = register(
 		"piglin_brute_specific_sensor", PiglinBruteSpecificSensor::new
@@ -35,6 +41,9 @@ public class SensorType<U extends Sensor<?>> {
 	public static final SensorType<TemptingSensor> GOAT_TEMPTATIONS = register("goat_temptations", () -> new TemptingSensor(GoatAi.getTemptations()));
 	public static final SensorType<TemptingSensor> FROG_TEMPTATIONS = register("frog_temptations", () -> new TemptingSensor(FrogAi.getTemptations()));
 	public static final SensorType<TemptingSensor> CAMEL_TEMPTATIONS = register("camel_temptations", () -> new TemptingSensor(CamelAi.getTemptations()));
+	public static final SensorType<TemptingSensor> ARMADILLO_TEMPTATIONS = register(
+		"armadillo_temptations", () -> new TemptingSensor(ArmadilloAi.getTemptations())
+	);
 	public static final SensorType<FrogAttackablesSensor> FROG_ATTACKABLES = register("frog_attackables", FrogAttackablesSensor::new);
 	public static final SensorType<IsInWaterSensor> IS_IN_WATER = register("is_in_water", IsInWaterSensor::new);
 	public static final SensorType<WardenEntitySensor> WARDEN_ENTITY_SENSOR = register("warden_entity_sensor", WardenEntitySensor::new);

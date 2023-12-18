@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -16,12 +17,10 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -42,7 +41,6 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Spider extends Monster {
 	private static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(Spider.class, EntityDataSerializers.BYTE);
@@ -63,11 +61,6 @@ public class Spider extends Monster {
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new Spider.SpiderTargetGoal(this, Player.class));
 		this.targetSelector.addGoal(3, new Spider.SpiderTargetGoal(this, IronGolem.class));
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height * 0.85F, 0.0F);
 	}
 
 	@Override
@@ -132,7 +125,7 @@ public class Spider extends Monster {
 
 	@Override
 	public boolean canBeAffected(MobEffectInstance mobEffectInstance) {
-		return mobEffectInstance.getEffect() == MobEffects.POISON ? false : super.canBeAffected(mobEffectInstance);
+		return mobEffectInstance.is(MobEffects.POISON) ? false : super.canBeAffected(mobEffectInstance);
 	}
 
 	public boolean isClimbing() {
@@ -178,9 +171,9 @@ public class Spider extends Monster {
 		}
 
 		if (spawnGroupData instanceof Spider.SpiderEffectsGroupData spiderEffectsGroupData) {
-			MobEffect mobEffect = spiderEffectsGroupData.effect;
-			if (mobEffect != null) {
-				this.addEffect(new MobEffectInstance(mobEffect, -1));
+			Holder<MobEffect> holder = spiderEffectsGroupData.effect;
+			if (holder != null) {
+				this.addEffect(new MobEffectInstance(holder, -1));
 			}
 		}
 
@@ -188,13 +181,8 @@ public class Spider extends Monster {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.65F;
-	}
-
-	@Override
-	protected float ridingOffset(Entity entity) {
-		return entity.getBbWidth() <= this.getBbWidth() ? -0.3125F : 0.0F;
+	public Vec3 getVehicleAttachmentPoint(Entity entity) {
+		return entity.getBbWidth() <= this.getBbWidth() ? new Vec3(0.0, 0.3125 * (double)this.getScale(), 0.0) : super.getVehicleAttachmentPoint(entity);
 	}
 
 	static class SpiderAttackGoal extends MeleeAttackGoal {
@@ -221,7 +209,7 @@ public class Spider extends Monster {
 
 	public static class SpiderEffectsGroupData implements SpawnGroupData {
 		@Nullable
-		public MobEffect effect;
+		public Holder<MobEffect> effect;
 
 		public void setRandomEffect(RandomSource randomSource) {
 			int i = randomSource.nextInt(5);

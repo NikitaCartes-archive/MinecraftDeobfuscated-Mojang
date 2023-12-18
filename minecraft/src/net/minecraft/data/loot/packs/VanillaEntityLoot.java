@@ -43,6 +43,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 	@Override
 	public void generate() {
 		this.add(EntityType.ALLAY, LootTable.lootTable());
+		this.add(EntityType.ARMADILLO, LootTable.lootTable());
 		this.add(EntityType.ARMOR_STAND, LootTable.lootTable());
 		this.add(EntityType.AXOLOTL, LootTable.lootTable());
 		this.add(EntityType.BAT, LootTable.lootTable());

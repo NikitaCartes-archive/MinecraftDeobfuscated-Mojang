@@ -134,7 +134,7 @@ public class FunctionCommand {
 		boolean bl
 	) throws CommandSyntaxException {
 		try {
-			InstantiatedFunction<T> instantiatedFunction = commandFunction.instantiate(compoundTag, commandDispatcher, executionCommandSource);
+			InstantiatedFunction<T> instantiatedFunction = commandFunction.instantiate(compoundTag, commandDispatcher);
 			executionControl.queueNext(new CallFunction<>(instantiatedFunction, commandResultCallback, bl).bind(executionCommandSource));
 		} catch (FunctionInstantiationException var9) {
 			throw ERROR_FUNCTION_INSTANTATION_FAILURE.create(resourceLocation, var9.messageComponent());
@@ -146,7 +146,7 @@ public class FunctionCommand {
 	) {
 		return executionCommandSource.isSilent() ? commandResultCallback : (bl, i) -> {
 			callbacks.signalResult(executionCommandSource, resourceLocation, i);
-			commandResultCallback.onSuccess(i);
+			commandResultCallback.onResult(bl, i);
 		};
 	}
 
@@ -172,9 +172,7 @@ public class FunctionCommand {
 			);
 		}
 
-		if (commandResultCallback != CommandResultCallback.EMPTY) {
-			executionControl.queueNext(FallthroughTask.instance());
-		}
+		executionControl.queueNext(FallthroughTask.instance());
 	}
 
 	private static <T extends ExecutionCommandSource<T>> void queueFunctionsNoReturn(

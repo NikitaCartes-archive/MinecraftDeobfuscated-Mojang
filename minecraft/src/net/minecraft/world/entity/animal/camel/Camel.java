@@ -50,7 +50,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddleable {
 	public static final Ingredient TEMPTATION_ITEM = Ingredient.of(Items.CACTUS);
@@ -72,13 +71,13 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	public final AnimationState sitUpAnimationState = new AnimationState();
 	public final AnimationState idleAnimationState = new AnimationState();
 	public final AnimationState dashAnimationState = new AnimationState();
-	private static final EntityDimensions SITTING_DIMENSIONS = EntityDimensions.scalable(EntityType.CAMEL.getWidth(), EntityType.CAMEL.getHeight() - 1.43F);
+	private static final EntityDimensions SITTING_DIMENSIONS = EntityDimensions.scalable(EntityType.CAMEL.getWidth(), EntityType.CAMEL.getHeight() - 1.43F)
+		.withEyeHeight(0.845F);
 	private int dashCooldown = 0;
 	private int idleAnimationTimeout = 0;
 
 	public Camel(EntityType<? extends Camel> entityType, Level level) {
 		super(entityType, level);
-		this.setMaxUpStep(1.5F);
 		this.moveControl = new Camel.CamelMoveControl();
 		this.lookControl = new Camel.CamelLookControl();
 		GroundPathNavigation groundPathNavigation = (GroundPathNavigation)this.getNavigation();
@@ -104,7 +103,11 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return createBaseHorseAttributes().add(Attributes.MAX_HEALTH, 32.0).add(Attributes.MOVEMENT_SPEED, 0.09F).add(Attributes.JUMP_STRENGTH, 0.42F);
+		return createBaseHorseAttributes()
+			.add(Attributes.MAX_HEALTH, 32.0)
+			.add(Attributes.MOVEMENT_SPEED, 0.09F)
+			.add(Attributes.JUMP_STRENGTH, 0.42F)
+			.add(Attributes.STEP_HEIGHT, 1.5);
 	}
 
 	@Override
@@ -142,13 +145,8 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	}
 
 	@Override
-	public EntityDimensions getDimensions(Pose pose) {
-		return pose == Pose.SITTING ? SITTING_DIMENSIONS.scale(this.getScale()) : super.getDimensions(pose);
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height - 0.1F * this.getScale();
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return pose == Pose.SITTING ? SITTING_DIMENSIONS.scale(this.getAgeScale()) : super.getDefaultDimensions(pose);
 	}
 
 	@Override
@@ -458,7 +456,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	}
 
 	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
 		int i = Math.max(this.getPassengers().indexOf(entity), 0);
 		boolean bl = i == 0;
 		float g = 0.5F;
@@ -473,16 +471,16 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 			}
 		}
 
-		return new Vector3f(0.0F, h, g * f);
+		return new Vec3(0.0, (double)h, (double)(g * f)).yRot(-this.getYRot() * (float) (Math.PI / 180.0));
 	}
 
 	@Override
-	public float getScale() {
+	public float getAgeScale() {
 		return this.isBaby() ? 0.45F : 1.0F;
 	}
 
 	private double getBodyAnchorAnimationYOffset(boolean bl, float f, EntityDimensions entityDimensions, float g) {
-		double d = (double)(entityDimensions.height - 0.375F * g);
+		double d = (double)(entityDimensions.height() - 0.375F * g);
 		float h = g * 1.43F;
 		float i = h - g * 0.2F;
 		float j = h - i;
@@ -517,8 +515,8 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	@Override
 	public Vec3 getLeashOffset(float f) {
 		EntityDimensions entityDimensions = this.getDimensions(this.getPose());
-		float g = this.getScale();
-		return new Vec3(0.0, this.getBodyAnchorAnimationYOffset(true, f, entityDimensions, g) - (double)(0.2F * g), (double)(entityDimensions.width * 0.56F));
+		float g = this.getAgeScale();
+		return new Vec3(0.0, this.getBodyAnchorAnimationYOffset(true, f, entityDimensions, g) - (double)(0.2F * g), (double)(entityDimensions.width() * 0.56F));
 	}
 
 	private void clampHeadRotationToBody(Entity entity, float f) {

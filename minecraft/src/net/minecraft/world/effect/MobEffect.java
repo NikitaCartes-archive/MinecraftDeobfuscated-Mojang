@@ -1,11 +1,10 @@
 package net.minecraft.world.effect;
 
-import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.Map.Entry;
-import java.util.function.Supplier;
+import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -19,24 +18,24 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public class MobEffect {
-	private final Map<Attribute, AttributeModifierTemplate> attributeModifiers = Maps.<Attribute, AttributeModifierTemplate>newHashMap();
+	private final Map<Holder<Attribute>, MobEffect.AttributeTemplate> attributeModifiers = new Object2ObjectOpenHashMap<>();
 	private final MobEffectCategory category;
 	private final int color;
 	@Nullable
 	private String descriptionId;
-	private Supplier<MobEffectInstance.FactorData> factorDataFactory = () -> null;
-	private final Holder.Reference<MobEffect> builtInRegistryHolder = BuiltInRegistries.MOB_EFFECT.createIntrusiveHolder(this);
+	private int blendDurationTicks;
 
 	protected MobEffect(MobEffectCategory mobEffectCategory, int i) {
 		this.category = mobEffectCategory;
 		this.color = i;
 	}
 
-	public Optional<MobEffectInstance.FactorData> createFactorData() {
-		return Optional.ofNullable((MobEffectInstance.FactorData)this.factorDataFactory.get());
+	public int getBlendDurationTicks() {
+		return this.blendDurationTicks;
 	}
 
-	public void applyEffectTick(LivingEntity livingEntity, int i) {
+	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
+		return true;
 	}
 
 	public void applyInstantenousEffect(@Nullable Entity entity, @Nullable Entity entity2, LivingEntity livingEntity, int i, double d) {
@@ -78,35 +77,35 @@ public class MobEffect {
 		return this.color;
 	}
 
-	public MobEffect addAttributeModifier(Attribute attribute, String string, double d, AttributeModifier.Operation operation) {
-		this.attributeModifiers.put(attribute, new MobEffect.MobEffectAttributeModifierTemplate(UUID.fromString(string), d, operation));
+	public MobEffect addAttributeModifier(Holder<Attribute> holder, String string, double d, AttributeModifier.Operation operation) {
+		this.attributeModifiers.put(holder, new MobEffect.AttributeTemplate(UUID.fromString(string), d, operation));
 		return this;
 	}
 
-	public MobEffect setFactorDataFactory(Supplier<MobEffectInstance.FactorData> supplier) {
-		this.factorDataFactory = supplier;
+	public MobEffect setBlendDuration(int i) {
+		this.blendDurationTicks = i;
 		return this;
 	}
 
-	public Map<Attribute, AttributeModifierTemplate> getAttributeModifiers() {
-		return this.attributeModifiers;
+	public void createModifiers(int i, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
+		this.attributeModifiers.forEach((holder, attributeTemplate) -> biConsumer.accept(holder, attributeTemplate.create(this.getDescriptionId(), i)));
 	}
 
 	public void removeAttributeModifiers(AttributeMap attributeMap) {
-		for (Entry<Attribute, AttributeModifierTemplate> entry : this.attributeModifiers.entrySet()) {
-			AttributeInstance attributeInstance = attributeMap.getInstance((Attribute)entry.getKey());
+		for (Entry<Holder<Attribute>, MobEffect.AttributeTemplate> entry : this.attributeModifiers.entrySet()) {
+			AttributeInstance attributeInstance = attributeMap.getInstance((Holder<Attribute>)entry.getKey());
 			if (attributeInstance != null) {
-				attributeInstance.removeModifier(((AttributeModifierTemplate)entry.getValue()).getAttributeModifierId());
+				attributeInstance.removeModifier(((MobEffect.AttributeTemplate)entry.getValue()).id());
 			}
 		}
 	}
 
 	public void addAttributeModifiers(AttributeMap attributeMap, int i) {
-		for (Entry<Attribute, AttributeModifierTemplate> entry : this.attributeModifiers.entrySet()) {
-			AttributeInstance attributeInstance = attributeMap.getInstance((Attribute)entry.getKey());
+		for (Entry<Holder<Attribute>, MobEffect.AttributeTemplate> entry : this.attributeModifiers.entrySet()) {
+			AttributeInstance attributeInstance = attributeMap.getInstance((Holder<Attribute>)entry.getKey());
 			if (attributeInstance != null) {
-				attributeInstance.removeModifier(((AttributeModifierTemplate)entry.getValue()).getAttributeModifierId());
-				attributeInstance.addPermanentModifier(((AttributeModifierTemplate)entry.getValue()).create(i));
+				attributeInstance.removeModifier(((MobEffect.AttributeTemplate)entry.getValue()).id());
+				attributeInstance.addPermanentModifier(((MobEffect.AttributeTemplate)entry.getValue()).create(this.getDescriptionId(), i));
 			}
 		}
 	}
@@ -115,30 +114,9 @@ public class MobEffect {
 		return this.category == MobEffectCategory.BENEFICIAL;
 	}
 
-	@Deprecated
-	public Holder.Reference<MobEffect> builtInRegistryHolder() {
-		return this.builtInRegistryHolder;
-	}
-
-	class MobEffectAttributeModifierTemplate implements AttributeModifierTemplate {
-		private final UUID id;
-		private final double amount;
-		private final AttributeModifier.Operation operation;
-
-		public MobEffectAttributeModifierTemplate(UUID uUID, double d, AttributeModifier.Operation operation) {
-			this.id = uUID;
-			this.amount = d;
-			this.operation = operation;
-		}
-
-		@Override
-		public UUID getAttributeModifierId() {
-			return this.id;
-		}
-
-		@Override
-		public AttributeModifier create(int i) {
-			return new AttributeModifier(this.id, MobEffect.this.getDescriptionId() + " " + i, this.amount * (double)(i + 1), this.operation);
+	static record AttributeTemplate(UUID id, double amount, AttributeModifier.Operation operation) {
+		public AttributeModifier create(String string, int i) {
+			return new AttributeModifier(this.id, string + " " + i, this.amount * (double)(i + 1), this.operation);
 		}
 	}
 }

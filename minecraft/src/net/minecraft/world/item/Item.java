@@ -166,7 +166,7 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public int getBarWidth(ItemStack itemStack) {
-		return Math.round(13.0F - (float)itemStack.getDamageValue() * 13.0F / (float)this.maxDamage);
+		return Mth.clamp(Math.round(13.0F - (float)itemStack.getDamageValue() * 13.0F / (float)this.maxDamage), 0, 13);
 	}
 
 	public int getBarColor(ItemStack itemStack) {
@@ -323,7 +323,7 @@ public class Item implements FeatureElement, ItemLike {
 		return false;
 	}
 
-	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
 		return ImmutableMultimap.of();
 	}
 

@@ -26,7 +26,7 @@ public class WindChargeRenderer extends EntityRenderer<WindCharge> {
 		float h = (float)windCharge.tickCount + g;
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.breezeWind(TEXTURE_LOCATION, this.xOffset(h) % 1.0F, 0.0F));
 		this.model.setupAnim(windCharge, 0.0F, 0.0F, h, 0.0F, 0.0F);
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 0.5F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		super.render(windCharge, f, g, poseStack, multiBufferSource, i);
 	}
 

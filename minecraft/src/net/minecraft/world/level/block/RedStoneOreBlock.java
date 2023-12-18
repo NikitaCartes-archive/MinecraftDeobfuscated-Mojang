@@ -7,7 +7,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -52,8 +52,8 @@ public class RedStoneOreBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.isClientSide) {
 			spawnParticles(level, blockPos);
@@ -61,10 +61,9 @@ public class RedStoneOreBlock extends Block {
 			interact(blockState, level, blockPos);
 		}
 
-		ItemStack itemStack = player.getItemInHand(interactionHand);
 		return itemStack.getItem() instanceof BlockItem && new BlockPlaceContext(player, interactionHand, itemStack, blockHitResult).canPlace()
-			? InteractionResult.PASS
-			: InteractionResult.SUCCESS;
+			? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
+			: ItemInteractionResult.SUCCESS;
 	}
 
 	private static void interact(BlockState blockState, Level level, BlockPos blockPos) {

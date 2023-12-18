@@ -9,11 +9,12 @@ class HungerMobEffect extends MobEffect {
 	}
 
 	@Override
-	public void applyEffectTick(LivingEntity livingEntity, int i) {
-		super.applyEffectTick(livingEntity, i);
+	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
 		if (livingEntity instanceof Player player) {
 			player.causeFoodExhaustion(0.005F * (float)(i + 1));
 		}
+
+		return true;
 	}
 
 	@Override

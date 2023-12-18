@@ -31,11 +31,11 @@ public class SetPotionFunction extends LootItemConditionalFunction {
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		PotionUtils.setPotion(itemStack, this.potion.value());
+		PotionUtils.setPotion(itemStack, this.potion);
 		return itemStack;
 	}
 
-	public static LootItemConditionalFunction.Builder<?> setPotion(Potion potion) {
-		return simpleBuilder(list -> new SetPotionFunction(list, potion.builtInRegistryHolder()));
+	public static LootItemConditionalFunction.Builder<?> setPotion(Holder<Potion> holder) {
+		return simpleBuilder(list -> new SetPotionFunction(list, holder));
 	}
 }

@@ -206,13 +206,13 @@ public class PolarBear extends Animal implements NeutralMob {
 	}
 
 	@Override
-	public EntityDimensions getDimensions(Pose pose) {
+	public EntityDimensions getDefaultDimensions(Pose pose) {
 		if (this.clientSideStandAnimation > 0.0F) {
 			float f = this.clientSideStandAnimation / 6.0F;
 			float g = 1.0F + f;
-			return super.getDimensions(pose).scale(1.0F, g);
+			return super.getDefaultDimensions(pose).scale(1.0F, g);
 		} else {
-			return super.getDimensions(pose);
+			return super.getDefaultDimensions(pose);
 		}
 	}
 

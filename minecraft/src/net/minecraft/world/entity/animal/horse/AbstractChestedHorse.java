@@ -9,8 +9,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityAttachment;
+import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -23,10 +26,14 @@ import net.minecraft.world.level.block.Blocks;
 public abstract class AbstractChestedHorse extends AbstractHorse {
 	private static final EntityDataAccessor<Boolean> DATA_ID_CHEST = SynchedEntityData.defineId(AbstractChestedHorse.class, EntityDataSerializers.BOOLEAN);
 	public static final int INV_CHEST_COUNT = 15;
+	private final EntityDimensions babyDimensions;
 
 	protected AbstractChestedHorse(EntityType<? extends AbstractChestedHorse> entityType, Level level) {
 		super(entityType, level);
 		this.canGallop = false;
+		this.babyDimensions = entityType.getDimensions()
+			.withAttachments(EntityAttachments.builder().attach(EntityAttachment.PASSENGER, 0.0F, entityType.getHeight() - 0.15625F, 0.0F))
+			.scale(0.5F);
 	}
 
 	@Override
@@ -58,8 +65,8 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	}
 
 	@Override
-	protected float getPassengersRidingOffsetY(EntityDimensions entityDimensions, float f) {
-		return entityDimensions.height - (this.isBaby() ? 0.15625F : 0.3875F) * f;
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.isBaby() ? this.babyDimensions : super.getDefaultDimensions(pose);
 	}
 
 	@Override

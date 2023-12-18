@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public record PlainTextFunction<T>(ResourceLocation id, List<UnboundEntryAction<T>> entries) implements CommandFunction<T>, InstantiatedFunction<T> {
 	@Override
-	public InstantiatedFunction<T> instantiate(@Nullable CompoundTag compoundTag, CommandDispatcher<T> commandDispatcher, T object) throws FunctionInstantiationException {
+	public InstantiatedFunction<T> instantiate(@Nullable CompoundTag compoundTag, CommandDispatcher<T> commandDispatcher) throws FunctionInstantiationException {
 		return this;
 	}
 }

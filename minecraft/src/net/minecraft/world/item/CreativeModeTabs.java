@@ -1396,6 +1396,7 @@ public class CreativeModeTabs {
 						output.accept(Items.IRON_HORSE_ARMOR);
 						output.accept(Items.GOLDEN_HORSE_ARMOR);
 						output.accept(Items.DIAMOND_HORSE_ARMOR);
+						output.accept(Items.WOLF_ARMOR);
 						output.accept(Items.TOTEM_OF_UNDYING);
 						output.accept(Items.TNT);
 						output.accept(Items.END_CRYSTAL);
@@ -1509,7 +1510,8 @@ public class CreativeModeTabs {
 					output.accept(Items.HONEYCOMB);
 					output.accept(Items.INK_SAC);
 					output.accept(Items.GLOW_INK_SAC);
-					output.accept(Items.SCUTE);
+					output.accept(Items.TURTLE_SCUTE);
+					output.accept(Items.ARMADILLO_SCUTE);
 					output.accept(Items.SLIME_BALL);
 					output.accept(Items.CLAY_BALL);
 					output.accept(Items.PRISMARINE_SHARD);
@@ -1628,6 +1630,7 @@ public class CreativeModeTabs {
 					output.accept(Items.SPAWNER);
 					output.accept(Items.TRIAL_SPAWNER);
 					output.accept(Items.ALLAY_SPAWN_EGG);
+					output.accept(Items.ARMADILLO_SPAWN_EGG);
 					output.accept(Items.AXOLOTL_SPAWN_EGG);
 					output.accept(Items.BAT_SPAWN_EGG);
 					output.accept(Items.BEE_SPAWN_EGG);
@@ -1779,7 +1782,7 @@ public class CreativeModeTabs {
 	) {
 		holderLookup.listElements()
 			.filter(reference -> !reference.is(Potions.EMPTY_ID))
-			.map(reference -> PotionUtils.setPotion(new ItemStack(item), (Potion)reference.value()))
+			.map(reference -> PotionUtils.setPotion(new ItemStack(item), reference))
 			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}
 

@@ -55,6 +55,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityAttachment;
+import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -119,19 +121,29 @@ public abstract class Player extends LivingEntity {
 	public static final int SLEEP_DURATION = 100;
 	public static final int WAKE_UP_DURATION = 10;
 	public static final int ENDER_SLOT_OFFSET = 200;
+	public static final float DEFAULT_BLOCK_INTERACTION_RANGE = 4.5F;
+	public static final float DEFAULT_ENTITY_INTERACTION_RANGE = 3.0F;
 	public static final float CROUCH_BB_HEIGHT = 1.5F;
 	public static final float SWIMMING_BB_WIDTH = 0.6F;
 	public static final float SWIMMING_BB_HEIGHT = 0.6F;
 	public static final float DEFAULT_EYE_HEIGHT = 1.62F;
-	public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.scalable(0.6F, 1.8F);
+	public static final Vec3 DEFAULT_VEHICLE_ATTACHMENT = new Vec3(0.0, 0.6, 0.0);
+	public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.scalable(0.6F, 1.8F)
+		.withEyeHeight(1.62F)
+		.withAttachments(EntityAttachments.builder().attach(EntityAttachment.VEHICLE, DEFAULT_VEHICLE_ATTACHMENT));
 	private static final Map<Pose, EntityDimensions> POSES = ImmutableMap.<Pose, EntityDimensions>builder()
 		.put(Pose.STANDING, STANDING_DIMENSIONS)
 		.put(Pose.SLEEPING, SLEEPING_DIMENSIONS)
-		.put(Pose.FALL_FLYING, EntityDimensions.scalable(0.6F, 0.6F))
-		.put(Pose.SWIMMING, EntityDimensions.scalable(0.6F, 0.6F))
-		.put(Pose.SPIN_ATTACK, EntityDimensions.scalable(0.6F, 0.6F))
-		.put(Pose.CROUCHING, EntityDimensions.scalable(0.6F, 1.5F))
-		.put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F))
+		.put(Pose.FALL_FLYING, EntityDimensions.scalable(0.6F, 0.6F).withEyeHeight(0.4F))
+		.put(Pose.SWIMMING, EntityDimensions.scalable(0.6F, 0.6F).withEyeHeight(0.4F))
+		.put(Pose.SPIN_ATTACK, EntityDimensions.scalable(0.6F, 0.6F).withEyeHeight(0.4F))
+		.put(
+			Pose.CROUCHING,
+			EntityDimensions.scalable(0.6F, 1.5F)
+				.withEyeHeight(1.27F)
+				.withAttachments(EntityAttachments.builder().attach(EntityAttachment.VEHICLE, DEFAULT_VEHICLE_ATTACHMENT))
+		)
+		.put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(1.62F))
 		.build();
 	private static final EntityDataAccessor<Float> DATA_PLAYER_ABSORPTION_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> DATA_SCORE_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
@@ -202,7 +214,9 @@ public abstract class Player extends LivingEntity {
 			.add(Attributes.ATTACK_DAMAGE, 1.0)
 			.add(Attributes.MOVEMENT_SPEED, 0.1F)
 			.add(Attributes.ATTACK_SPEED)
-			.add(Attributes.LUCK);
+			.add(Attributes.LUCK)
+			.add(Attributes.BLOCK_INTERACTION_RANGE, 4.5)
+			.add(Attributes.ENTITY_INTERACTION_RANGE, 3.0);
 	}
 
 	@Override
@@ -1017,11 +1031,6 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	protected float ridingOffset(Entity entity) {
-		return -0.6F;
-	}
-
-	@Override
 	public void removeVehicle() {
 		super.removeVehicle();
 		this.boardingCooldown = 0;
@@ -1818,20 +1827,6 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		switch (pose) {
-			case SWIMMING:
-			case FALL_FLYING:
-			case SPIN_ATTACK:
-				return 0.4F;
-			case CROUCHING:
-				return 1.27F;
-			default:
-				return 1.62F;
-		}
-	}
-
-	@Override
 	protected void internalSetAbsorptionAmount(float f) {
 		this.getEntityData().set(DATA_PLAYER_ABSORPTION_ID, f);
 	}
@@ -1929,7 +1924,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public EntityDimensions getDimensions(Pose pose) {
+	public EntityDimensions getDefaultDimensions(Pose pose) {
 		return (EntityDimensions)POSES.getOrDefault(pose, STANDING_DIMENSIONS);
 	}
 
@@ -2059,8 +2054,12 @@ public abstract class Player extends LivingEntity {
 		return string.length() > 16 ? false : string.chars().filter(i -> i <= 32 || i >= 127).findAny().isEmpty();
 	}
 
-	public static float getPickRange(boolean bl) {
-		return bl ? 5.0F : 4.5F;
+	public double blockInteractionRange() {
+		return this.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE);
+	}
+
+	public double entityInteractionRange() {
+		return this.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE);
 	}
 
 	public static enum BedSleepingProblem {

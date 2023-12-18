@@ -62,7 +62,7 @@ public final class LongJumpUtil {
 
 	private static boolean isClearTransition(Mob mob, EntityDimensions entityDimensions, Vec3 vec3, Vec3 vec32) {
 		Vec3 vec33 = vec32.subtract(vec3);
-		double d = (double)Math.min(entityDimensions.width, entityDimensions.height);
+		double d = (double)Math.min(entityDimensions.width(), entityDimensions.height());
 		int i = Mth.ceil(vec33.length() / d);
 		Vec3 vec34 = vec33.normalize();
 		Vec3 vec35 = vec3;

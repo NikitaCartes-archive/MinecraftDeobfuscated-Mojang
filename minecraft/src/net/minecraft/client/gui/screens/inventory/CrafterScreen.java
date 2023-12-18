@@ -93,7 +93,8 @@ public class CrafterScreen extends AbstractContainerScreen<CrafterMenu> {
 		if (this.hoveredSlot instanceof CrafterSlot
 			&& !this.menu.isSlotDisabled(this.hoveredSlot.index)
 			&& this.menu.getCarried().isEmpty()
-			&& !this.hoveredSlot.hasItem()) {
+			&& !this.hoveredSlot.hasItem()
+			&& !this.player.isSpectator()) {
 			guiGraphics.renderTooltip(this.font, DISABLED_SLOT_TOOLTIP, i, j);
 		}
 	}

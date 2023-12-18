@@ -317,6 +317,7 @@ public class V1460 extends NamespacedSchema {
 		schema.registerType(false, References.BLOCK_NAME, () -> DSL.constType(namespacedString()));
 		schema.registerType(false, References.ITEM_NAME, () -> DSL.constType(namespacedString()));
 		schema.registerType(false, References.BLOCK_STATE, DSL::remainder);
+		schema.registerType(false, References.FLAT_BLOCK_STATE, DSL::remainder);
 		Supplier<TypeTemplate> supplier = () -> DSL.compoundList(References.ITEM_NAME.in(schema), DSL.constType(DSL.intType()));
 		schema.registerType(
 			false,

@@ -10,15 +10,12 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -217,16 +214,6 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 		if (!this.level().isClientSide) {
 			this.reassessWeaponGoal();
 		}
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 1.74F;
-	}
-
-	@Override
-	protected float ridingOffset(Entity entity) {
-		return -0.7F;
 	}
 
 	public boolean isShaking() {

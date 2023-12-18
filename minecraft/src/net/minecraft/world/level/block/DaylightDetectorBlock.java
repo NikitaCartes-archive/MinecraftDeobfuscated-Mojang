@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -76,9 +75,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
-	) {
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (player.mayBuild()) {
 			if (level.isClientSide) {
 				return InteractionResult.SUCCESS;
@@ -90,7 +87,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 				return InteractionResult.CONSUME;
 			}
 		} else {
-			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
+			return super.useWithoutItem(blockState, level, blockPos, player, blockHitResult);
 		}
 	}
 

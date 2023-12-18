@@ -22,14 +22,12 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -502,11 +500,6 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 
 	public float getClientPeekAmount(float f) {
 		return Mth.lerp(f, this.currentPeekAmountO, this.currentPeekAmount);
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.5F;
 	}
 
 	@Override

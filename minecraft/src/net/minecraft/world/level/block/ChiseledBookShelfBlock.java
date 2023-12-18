@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +15,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -67,31 +69,51 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.getBlockEntity(blockPos) instanceof ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity) {
-			Optional<Vec2> optional = getRelativeHitCoordinatesForBlockFace(blockHitResult, blockState.getValue(HorizontalDirectionalBlock.FACING));
-			if (optional.isEmpty()) {
-				return InteractionResult.PASS;
+			if (!itemStack.is(ItemTags.BOOKSHELF_BOOKS)) {
+				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 			} else {
-				int i = getHitSlot((Vec2)optional.get());
-				if ((Boolean)blockState.getValue((Property)SLOT_OCCUPIED_PROPERTIES.get(i))) {
-					removeBook(level, blockPos, player, chiseledBookShelfBlockEntity, i);
-					return InteractionResult.sidedSuccess(level.isClientSide);
+				OptionalInt optionalInt = this.getHitSlot(blockHitResult, blockState);
+				if (optionalInt.isEmpty()) {
+					return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+				} else if ((Boolean)blockState.getValue((Property)SLOT_OCCUPIED_PROPERTIES.get(optionalInt.getAsInt()))) {
+					return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 				} else {
-					ItemStack itemStack = player.getItemInHand(interactionHand);
-					if (itemStack.is(ItemTags.BOOKSHELF_BOOKS)) {
-						addBook(level, blockPos, player, chiseledBookShelfBlockEntity, itemStack, i);
-						return InteractionResult.sidedSuccess(level.isClientSide);
-					} else {
-						return InteractionResult.CONSUME;
-					}
+					addBook(level, blockPos, player, chiseledBookShelfBlockEntity, itemStack, optionalInt.getAsInt());
+					return ItemInteractionResult.sidedSuccess(level.isClientSide);
 				}
+			}
+		} else {
+			return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+		if (level.getBlockEntity(blockPos) instanceof ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity) {
+			OptionalInt optionalInt = this.getHitSlot(blockHitResult, blockState);
+			if (optionalInt.isEmpty()) {
+				return InteractionResult.PASS;
+			} else if (!(Boolean)blockState.getValue((Property)SLOT_OCCUPIED_PROPERTIES.get(optionalInt.getAsInt()))) {
+				return InteractionResult.CONSUME;
+			} else {
+				removeBook(level, blockPos, player, chiseledBookShelfBlockEntity, optionalInt.getAsInt());
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			}
 		} else {
 			return InteractionResult.PASS;
 		}
+	}
+
+	private OptionalInt getHitSlot(BlockHitResult blockHitResult, BlockState blockState) {
+		return (OptionalInt)getRelativeHitCoordinatesForBlockFace(blockHitResult, blockState.getValue(HorizontalDirectionalBlock.FACING)).map(vec2 -> {
+			int i = vec2.y >= 0.5F ? 0 : 1;
+			int j = getSection(vec2.x);
+			return OptionalInt.of(j + i * 3);
+		}).orElseGet(OptionalInt::empty);
 	}
 
 	private static Optional<Vec2> getRelativeHitCoordinatesForBlockFace(BlockHitResult blockHitResult, Direction direction) {
@@ -113,12 +135,6 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 				case DOWN, UP -> Optional.empty();
 			};
 		}
-	}
-
-	private static int getHitSlot(Vec2 vec2) {
-		int i = vec2.y >= 0.5F ? 0 : 1;
-		int j = getSection(vec2.x);
-		return j + i * 3;
 	}
 
 	private static int getSection(float f) {

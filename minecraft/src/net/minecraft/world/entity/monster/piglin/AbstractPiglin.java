@@ -9,11 +9,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
@@ -22,14 +19,12 @@ import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import org.joml.Vector3f;
 
 public abstract class AbstractPiglin extends Monster {
 	protected static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(
 		AbstractPiglin.class, EntityDataSerializers.BOOLEAN
 	);
 	protected static final int CONVERSION_TIME = 300;
-	protected static final float PIGLIN_EYE_HEIGHT = 1.79F;
 	protected int timeInOverworld;
 
 	public AbstractPiglin(EntityType<? extends AbstractPiglin> entityType, Level level) {
@@ -44,21 +39,6 @@ public abstract class AbstractPiglin extends Monster {
 		if (GoalUtils.hasGroundPathNavigation(this)) {
 			((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
 		}
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 1.79F;
-	}
-
-	@Override
-	protected float ridingOffset(Entity entity) {
-		return -0.7F;
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + 0.0625F * f, 0.0F);
 	}
 
 	protected abstract boolean canHunt();

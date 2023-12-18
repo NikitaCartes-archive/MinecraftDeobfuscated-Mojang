@@ -22,14 +22,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.NeutralMob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -57,6 +56,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.AnimalArmorItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
@@ -68,11 +68,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Wolf extends TamableAnimal implements NeutralMob {
+	private static final UUID ARMOR_MODIFIER_UUID = UUID.fromString("556E1665-8B10-40C8-8F9D-CF9B1667F296");
 	private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Boolean> DATA_HAS_ARMOR = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
 	public static final Predicate<LivingEntity> PREY_SELECTOR = livingEntity -> {
 		EntityType<?> entityType = livingEntity.getType();
@@ -130,6 +131,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		super.defineSynchedData();
 		this.entityData.define(DATA_INTERESTED_ID, false);
 		this.entityData.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
+		this.entityData.define(DATA_HAS_ARMOR, false);
 		this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
 	}
 
@@ -142,6 +144,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putByte("CollarColor", (byte)this.getCollarColor().getId());
+		compoundTag.putBoolean("armor", this.hasArmor());
 		this.addPersistentAngerSaveData(compoundTag);
 	}
 
@@ -150,6 +153,10 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("CollarColor", 99)) {
 			this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
+		}
+
+		if (compoundTag.contains("armor", 1)) {
+			this.setHasArmor(compoundTag.getBoolean("armor"));
 		}
 
 		this.readPersistentAngerSaveData(this.level(), compoundTag);
@@ -282,11 +289,6 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * 0.8F;
-	}
-
-	@Override
 	public int getMaxHeadXRot() {
 		return this.isInSittingPose() ? 20 : super.getMaxHeadXRot();
 	}
@@ -362,15 +364,36 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 					return super.mobInteract(player, interactionHand);
 				}
 
-				InteractionResult interactionResult = super.mobInteract(player, interactionHand);
-				if ((!interactionResult.consumesAction() || this.isBaby()) && this.isOwnedBy(player)) {
-					this.setOrderedToSit(!this.isOrderedToSit());
-					this.jumping = false;
-					this.navigation.stop();
-					this.setTarget(null);
+				if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && !this.hasArmor() && !this.isBaby()) {
+					if (!player.getAbilities().instabuild) {
+						itemStack.shrink(1);
+					}
+
+					this.setHasArmor(true);
+					this.level().playSound(null, this, SoundEvents.ARMOR_EQUIP_WOLF, this.getSoundSource(), 1.0F, 1.0F);
+					this.gameEvent(GameEvent.EQUIP, player);
+					return InteractionResult.SUCCESS;
+				} else if (itemStack.is(Items.SHEARS) && this.isOwnedBy(player) && this.hasArmor()) {
+					if (!player.getAbilities().instabuild) {
+						itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+					}
+
+					this.level().playSound(null, this, SoundEvents.ARMOR_UNEQUIP_WOLF, this.getSoundSource(), 1.0F, 1.0F);
+					this.setHasArmor(false);
+					this.spawnAtLocation(Items.WOLF_ARMOR);
+					this.gameEvent(GameEvent.UNEQUIP, player);
 					return InteractionResult.SUCCESS;
 				} else {
-					return interactionResult;
+					InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+					if ((!interactionResult.consumesAction() || this.isBaby()) && this.isOwnedBy(player)) {
+						this.setOrderedToSit(!this.isOrderedToSit());
+						this.jumping = false;
+						this.navigation.stop();
+						this.setTarget(null);
+						return InteractionResult.SUCCESS;
+					} else {
+						return interactionResult;
+					}
 				}
 			}
 		} else if (itemStack.is(Items.BONE) && !this.isAngry()) {
@@ -391,6 +414,14 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			return InteractionResult.SUCCESS;
 		} else {
 			return super.mobInteract(player, interactionHand);
+		}
+	}
+
+	@Override
+	protected void dropEquipment() {
+		super.dropEquipment();
+		if (this.hasArmor()) {
+			this.spawnAtLocation(Items.WOLF_ARMOR);
 		}
 	}
 
@@ -456,8 +487,26 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		return DyeColor.byId(this.entityData.get(DATA_COLLAR_COLOR));
 	}
 
+	public boolean hasArmor() {
+		return this.entityData.get(DATA_HAS_ARMOR);
+	}
+
 	public void setCollarColor(DyeColor dyeColor) {
 		this.entityData.set(DATA_COLLAR_COLOR, dyeColor.getId());
+	}
+
+	public void setHasArmor(boolean bl) {
+		if (!this.level().isClientSide && bl != this.hasArmor()) {
+			this.entityData.set(DATA_HAS_ARMOR, bl);
+			this.getAttribute(Attributes.ARMOR).removeModifier(ARMOR_MODIFIER_UUID);
+			if (bl) {
+				int i = ((AnimalArmorItem)Items.WOLF_ARMOR).getProtection();
+				if (i != 0) {
+					this.getAttribute(Attributes.ARMOR)
+						.addTransientModifier(new AttributeModifier(ARMOR_MODIFIER_UUID, "Wolf armor bonus", (double)i, AttributeModifier.Operation.ADDITION));
+				}
+			}
+		}
 	}
 
 	@Nullable
@@ -520,11 +569,6 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.6F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height - 0.03125F * f, -0.0625F * f);
 	}
 
 	public static boolean checkWolfSpawnRules(

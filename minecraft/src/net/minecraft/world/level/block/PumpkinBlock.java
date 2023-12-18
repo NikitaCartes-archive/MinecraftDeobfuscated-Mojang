@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -31,35 +31,33 @@ public class PumpkinBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.is(Items.SHEARS)) {
-			if (!level.isClientSide) {
-				Direction direction = blockHitResult.getDirection();
-				Direction direction2 = direction.getAxis() == Direction.Axis.Y ? player.getDirection().getOpposite() : direction;
-				level.playSound(null, blockPos, SoundEvents.PUMPKIN_CARVE, SoundSource.BLOCKS, 1.0F, 1.0F);
-				level.setBlock(blockPos, Blocks.CARVED_PUMPKIN.defaultBlockState().setValue(CarvedPumpkinBlock.FACING, direction2), 11);
-				ItemEntity itemEntity = new ItemEntity(
-					level,
-					(double)blockPos.getX() + 0.5 + (double)direction2.getStepX() * 0.65,
-					(double)blockPos.getY() + 0.1,
-					(double)blockPos.getZ() + 0.5 + (double)direction2.getStepZ() * 0.65,
-					new ItemStack(Items.PUMPKIN_SEEDS, 4)
-				);
-				itemEntity.setDeltaMovement(
-					0.05 * (double)direction2.getStepX() + level.random.nextDouble() * 0.02, 0.05, 0.05 * (double)direction2.getStepZ() + level.random.nextDouble() * 0.02
-				);
-				level.addFreshEntity(itemEntity);
-				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
-				level.gameEvent(player, GameEvent.SHEAR, blockPos);
-				player.awardStat(Stats.ITEM_USED.get(Items.SHEARS));
-			}
-
-			return InteractionResult.sidedSuccess(level.isClientSide);
+		if (!itemStack.is(Items.SHEARS)) {
+			return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
+		} else if (level.isClientSide) {
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		} else {
-			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
+			Direction direction = blockHitResult.getDirection();
+			Direction direction2 = direction.getAxis() == Direction.Axis.Y ? player.getDirection().getOpposite() : direction;
+			level.playSound(null, blockPos, SoundEvents.PUMPKIN_CARVE, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.setBlock(blockPos, Blocks.CARVED_PUMPKIN.defaultBlockState().setValue(CarvedPumpkinBlock.FACING, direction2), 11);
+			ItemEntity itemEntity = new ItemEntity(
+				level,
+				(double)blockPos.getX() + 0.5 + (double)direction2.getStepX() * 0.65,
+				(double)blockPos.getY() + 0.1,
+				(double)blockPos.getZ() + 0.5 + (double)direction2.getStepZ() * 0.65,
+				new ItemStack(Items.PUMPKIN_SEEDS, 4)
+			);
+			itemEntity.setDeltaMovement(
+				0.05 * (double)direction2.getStepX() + level.random.nextDouble() * 0.02, 0.05, 0.05 * (double)direction2.getStepZ() + level.random.nextDouble() * 0.02
+			);
+			level.addFreshEntity(itemEntity);
+			itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+			level.gameEvent(player, GameEvent.SHEAR, blockPos);
+			player.awardStat(Stats.ITEM_USED.get(Items.SHEARS));
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 }

@@ -29,7 +29,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -57,7 +56,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Sniffer extends Animal {
 	private static final int DIGGING_PARTICLES_DELAY_TICKS = 1700;
@@ -66,7 +64,8 @@ public class Sniffer extends Animal {
 	private static final int DIGGING_DROP_SEED_OFFSET_TICKS = 120;
 	private static final int SNIFFER_BABY_AGE_TICKS = 48000;
 	private static final float DIGGING_BB_HEIGHT_OFFSET = 0.4F;
-	private static final EntityDimensions DIGGING_DIMENSIONS = EntityDimensions.scalable(EntityType.SNIFFER.getWidth(), EntityType.SNIFFER.getHeight() - 0.4F);
+	private static final EntityDimensions DIGGING_DIMENSIONS = EntityDimensions.scalable(EntityType.SNIFFER.getWidth(), EntityType.SNIFFER.getHeight() - 0.4F)
+		.withEyeHeight(0.81F);
 	private static final EntityDataAccessor<Sniffer.State> DATA_STATE = SynchedEntityData.defineId(Sniffer.class, EntityDataSerializers.SNIFFER_STATE);
 	private static final EntityDataAccessor<Integer> DATA_DROP_SEED_AT_TICK = SynchedEntityData.defineId(Sniffer.class, EntityDataSerializers.INT);
 	public final AnimationState feelingHappyAnimationState = new AnimationState();
@@ -90,11 +89,6 @@ public class Sniffer extends Animal {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return this.getDimensions(pose).height * 0.6F;
-	}
-
-	@Override
 	public void onPathfindingStart() {
 		super.onPathfindingStart();
 		if (this.isOnFire() || this.isInWater()) {
@@ -108,10 +102,10 @@ public class Sniffer extends Animal {
 	}
 
 	@Override
-	public EntityDimensions getDimensions(Pose pose) {
+	public EntityDimensions getDefaultDimensions(Pose pose) {
 		return this.entityData.hasItem(DATA_STATE) && this.getState() == Sniffer.State.DIGGING
-			? DIGGING_DIMENSIONS.scale(this.getScale())
-			: super.getDimensions(pose);
+			? DIGGING_DIMENSIONS.scale(this.getAgeScale())
+			: super.getDefaultDimensions(pose);
 	}
 
 	public boolean isSearching() {
@@ -367,16 +361,6 @@ public class Sniffer extends Animal {
 		}
 
 		return interactionResult;
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + 0.34375F * f, 0.0F);
-	}
-
-	@Override
-	public float getNameTagOffsetY() {
-		return super.getNameTagOffsetY() + 0.3F;
 	}
 
 	private void playSearchingSound() {

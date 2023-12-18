@@ -9,10 +9,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 public class ServerPlayerGameMode {
@@ -126,7 +125,7 @@ public class ServerPlayerGameMode {
 	}
 
 	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i, int j) {
-		if (this.player.getEyePosition().distanceToSqr(Vec3.atCenterOf(blockPos)) > ServerGamePacketListenerImpl.MAX_INTERACTION_DISTANCE) {
+		if (!this.player.canInteractWithBlock(blockPos)) {
 			this.debugLogging(blockPos, false, j, "too far");
 		} else if (blockPos.getY() >= i) {
 			this.player.connection.send(new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
@@ -274,13 +273,6 @@ public class ServerPlayerGameMode {
 					serverPlayer.setItemInHand(interactionHand, itemStack2);
 				}
 
-				if (this.isCreative() && itemStack2 != ItemStack.EMPTY) {
-					itemStack2.setCount(i);
-					if (itemStack2.isDamageableItem() && itemStack2.getDamageValue() != j) {
-						itemStack2.setDamageValue(j);
-					}
-				}
-
 				if (itemStack2.isEmpty()) {
 					serverPlayer.setItemInHand(interactionHand, ItemStack.EMPTY);
 				}
@@ -312,29 +304,38 @@ public class ServerPlayerGameMode {
 			boolean bl2 = serverPlayer.isSecondaryUseActive() && bl;
 			ItemStack itemStack2 = itemStack.copy();
 			if (!bl2) {
-				InteractionResult interactionResult = blockState.use(level, serverPlayer, interactionHand, blockHitResult);
-				if (interactionResult.consumesAction()) {
+				ItemInteractionResult itemInteractionResult = blockState.useItemOn(
+					serverPlayer.getItemInHand(interactionHand), level, serverPlayer, interactionHand, blockHitResult
+				);
+				if (itemInteractionResult.consumesAction()) {
 					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
-					return interactionResult;
+					return itemInteractionResult.result();
+				}
+
+				if (itemInteractionResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && interactionHand == InteractionHand.MAIN_HAND) {
+					InteractionResult interactionResult = blockState.useWithoutItem(level, serverPlayer, blockHitResult);
+					if (interactionResult.consumesAction()) {
+						return interactionResult;
+					}
 				}
 			}
 
 			if (!itemStack.isEmpty() && !serverPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
 				UseOnContext useOnContext = new UseOnContext(serverPlayer, interactionHand, blockHitResult);
-				InteractionResult interactionResult2;
+				InteractionResult interactionResult;
 				if (this.isCreative()) {
 					int i = itemStack.getCount();
-					interactionResult2 = itemStack.useOn(useOnContext);
+					interactionResult = itemStack.useOn(useOnContext);
 					itemStack.setCount(i);
 				} else {
-					interactionResult2 = itemStack.useOn(useOnContext);
+					interactionResult = itemStack.useOn(useOnContext);
 				}
 
-				if (interactionResult2.consumesAction()) {
+				if (interactionResult.consumesAction()) {
 					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
 				}
 
-				return interactionResult2;
+				return interactionResult;
 			} else {
 				return InteractionResult.PASS;
 			}

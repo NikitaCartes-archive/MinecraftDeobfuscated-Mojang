@@ -172,7 +172,7 @@ public class EffectCommands {
 
 		for (Entity entity : collection) {
 			if (entity instanceof LivingEntity) {
-				MobEffectInstance mobEffectInstance = new MobEffectInstance(mobEffect, k, i, false, bl);
+				MobEffectInstance mobEffectInstance = new MobEffectInstance(holder, k, i, false, bl);
 				if (((LivingEntity)entity).addEffect(mobEffectInstance, commandSourceStack.getEntity())) {
 					j++;
 				}
@@ -228,7 +228,7 @@ public class EffectCommands {
 		int i = 0;
 
 		for (Entity entity : collection) {
-			if (entity instanceof LivingEntity && ((LivingEntity)entity).removeEffect(mobEffect)) {
+			if (entity instanceof LivingEntity && ((LivingEntity)entity).removeEffect(holder)) {
 				i++;
 			}
 		}

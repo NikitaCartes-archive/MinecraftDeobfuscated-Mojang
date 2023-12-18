@@ -70,7 +70,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	private static final float CHANCE_OF_WEARING_EACH_ARMOUR_ITEM = 0.1F;
 	private static final int MAX_PASSENGERS_ON_ONE_HOGLIN = 3;
 	private static final float PROBABILITY_OF_SPAWNING_AS_BABY = 0.2F;
-	private static final float BABY_EYE_HEIGHT_ADJUSTMENT = 0.82F;
+	private static final EntityDimensions BABY_DIMENSIONS = EntityType.PIGLIN.getDimensions().scale(0.5F).withEyeHeight(0.97F);
 	private static final double PROBABILITY_OF_SPAWNING_WITH_CROSSBOW_INSTEAD_OF_SWORD = 0.5;
 	private final SimpleContainer inventory = new SimpleContainer(8);
 	private boolean cannotHunt;
@@ -277,9 +277,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		float f = super.getStandingEyeHeight(pose, entityDimensions);
-		return this.isBaby() ? f - 0.82F : f;
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.isBaby() ? BABY_DIMENSIONS : super.getDefaultDimensions(pose);
 	}
 
 	@Override

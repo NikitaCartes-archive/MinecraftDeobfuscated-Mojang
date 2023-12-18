@@ -43,7 +43,7 @@ public record EntityHasScoreCondition(Map<String, IntRange> scores, LootContext.
 		if (entity == null) {
 			return false;
 		} else {
-			Scoreboard scoreboard = entity.level().getScoreboard();
+			Scoreboard scoreboard = lootContext.getLevel().getScoreboard();
 
 			for (Entry<String, IntRange> entry : this.scores.entrySet()) {
 				if (!this.hasScore(lootContext, entity, scoreboard, (String)entry.getKey(), (IntRange)entry.getValue())) {

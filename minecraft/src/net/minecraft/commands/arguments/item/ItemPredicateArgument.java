@@ -37,7 +37,8 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
 	public ItemPredicateArgument.Result parse(StringReader stringReader) throws CommandSyntaxException {
 		Either<ItemParser.ItemResult, ItemParser.TagResult> either = ItemParser.parseForTesting(this.items, stringReader);
 		return either.map(
-			itemResult -> createResult(holder -> holder == itemResult.item(), itemResult.nbt()), tagResult -> createResult(tagResult.tag()::contains, tagResult.nbt())
+			itemResult -> createResult(holder -> holder.equals(itemResult.item()), itemResult.nbt()),
+			tagResult -> createResult(tagResult.tag()::contains, tagResult.nbt())
 		);
 	}
 

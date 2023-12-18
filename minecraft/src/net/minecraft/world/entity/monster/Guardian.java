@@ -18,13 +18,11 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.LookControl;
@@ -45,7 +43,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Guardian extends Monster {
 	protected static final int ATTACK_TIME = 80;
@@ -185,11 +182,6 @@ public class Guardian extends Monster {
 	@Override
 	protected Entity.MovementEmission getMovementEmission() {
 		return Entity.MovementEmission.EVENTS;
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * 0.5F;
 	}
 
 	@Override
@@ -360,11 +352,6 @@ public class Guardian extends Monster {
 		} else {
 			super.travel(vec3);
 		}
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + 0.125F * f, 0.0F);
 	}
 
 	static class GuardianAttackGoal extends Goal {

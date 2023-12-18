@@ -28,12 +28,12 @@ public class ServerData {
 	public long ping;
 	public int protocol = SharedConstants.getCurrentVersion().getProtocolVersion();
 	public Component version = Component.literal(SharedConstants.getCurrentVersion().getName());
-	public boolean pinged;
 	public List<Component> playerList = Collections.emptyList();
 	private ServerData.ServerPackStatus packStatus = ServerData.ServerPackStatus.PROMPT;
 	@Nullable
 	private byte[] iconBytes;
 	private ServerData.Type type;
+	private ServerData.State state = ServerData.State.INITIAL;
 	private boolean enforcesSecureChat;
 
 	public ServerData(String string, String string2, ServerData.Type type) {
@@ -133,6 +133,14 @@ public class ServerData {
 		this.enforcesSecureChat = serverData.enforcesSecureChat;
 	}
 
+	public ServerData.State state() {
+		return this.state;
+	}
+
+	public void setState(ServerData.State state) {
+		this.state = state;
+	}
+
 	@Nullable
 	public static byte[] validateIcon(@Nullable byte[] bs) {
 		if (bs != null) {
@@ -164,6 +172,15 @@ public class ServerData {
 		public Component getName() {
 			return this.name;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum State {
+		INITIAL,
+		PINGING,
+		UNREACHABLE,
+		INCOMPATIBLE,
+		SUCCESSFUL;
 	}
 
 	@Environment(EnvType.CLIENT)

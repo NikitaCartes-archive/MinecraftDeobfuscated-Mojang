@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 public interface CommandFunction<T> {
 	ResourceLocation id();
 
-	InstantiatedFunction<T> instantiate(@Nullable CompoundTag compoundTag, CommandDispatcher<T> commandDispatcher, T object) throws FunctionInstantiationException;
+	InstantiatedFunction<T> instantiate(@Nullable CompoundTag compoundTag, CommandDispatcher<T> commandDispatcher) throws FunctionInstantiationException;
 
 	private static boolean shouldConcatenateNextLine(CharSequence charSequence) {
 		int i = charSequence.length();
@@ -68,7 +68,7 @@ public interface CommandFunction<T> {
 				}
 
 				if (stringReader.peek() == '$') {
-					functionBuilder.addMacro(string3.substring(1), j);
+					functionBuilder.addMacro(string3.substring(1), j, executionCommandSource);
 				} else {
 					try {
 						functionBuilder.addCommand(parseCommand(commandDispatcher, executionCommandSource, stringReader));

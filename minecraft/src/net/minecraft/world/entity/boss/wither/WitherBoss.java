@@ -545,7 +545,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 
 	@Override
 	public boolean canBeAffected(MobEffectInstance mobEffectInstance) {
-		return mobEffectInstance.getEffect() == MobEffects.WITHER ? false : super.canBeAffected(mobEffectInstance);
+		return mobEffectInstance.is(MobEffects.WITHER) ? false : super.canBeAffected(mobEffectInstance);
 	}
 
 	class WitherDoNothingGoal extends Goal {

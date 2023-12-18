@@ -21,9 +21,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.SignStyle;
-import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -81,19 +78,7 @@ import org.slf4j.Logger;
 
 public class LevelStorageSource {
 	static final Logger LOGGER = LogUtils.getLogger();
-	static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder()
-		.appendValue(ChronoField.YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-		.appendLiteral('-')
-		.appendValue(ChronoField.MONTH_OF_YEAR, 2)
-		.appendLiteral('-')
-		.appendValue(ChronoField.DAY_OF_MONTH, 2)
-		.appendLiteral('_')
-		.appendValue(ChronoField.HOUR_OF_DAY, 2)
-		.appendLiteral('-')
-		.appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-		.appendLiteral('-')
-		.appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-		.toFormatter();
+	static final DateTimeFormatter FORMATTER = FileNameDateFormatter.create();
 	private static final String TAG_DATA = "Data";
 	private static final PathMatcher NO_SYMLINKS_ALLOWED = path -> false;
 	public static final String ALLOWED_SYMLINKS_CONFIG_NAME = "allowed_symlinks.txt";

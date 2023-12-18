@@ -13,7 +13,6 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -40,9 +39,9 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
-import org.joml.Vector3f;
 
 public class ZombifiedPiglin extends Zombie implements NeutralMob {
+	private static final EntityDimensions BABY_DIMENSIONS = EntityType.ZOMBIFIED_PIGLIN.getDimensions().scale(0.5F).withEyeHeight(0.97F);
 	private static final UUID SPEED_MODIFIER_ATTACKING_UUID = UUID.fromString("49455A49-7EC5-45BA-B886-3B90B23A1718");
 	private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(
 		SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", 0.05, AttributeModifier.Operation.ADDITION
@@ -56,8 +55,6 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	private static final int ALERT_RANGE_Y = 10;
 	private static final UniformInt ALERT_INTERVAL = TimeUtil.rangeOfSeconds(4, 6);
 	private int ticksUntilNextAlert;
-	private static final float ZOMBIFIED_PIGLIN_EYE_HEIGHT = 1.79F;
-	private static final float ZOMBIFIED_PIGLIN_BABY_EYE_HEIGHT_ADJUSTMENT = 0.82F;
 
 	public ZombifiedPiglin(EntityType<? extends ZombifiedPiglin> entityType, Level level) {
 		super(entityType, level);
@@ -83,8 +80,8 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return this.isBaby() ? 0.96999997F : 1.79F;
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.isBaby() ? BABY_DIMENSIONS : super.getDefaultDimensions(pose);
 	}
 
 	@Override
@@ -250,10 +247,5 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	@Override
 	public boolean wantsToPickUp(ItemStack itemStack) {
 		return this.canHoldItem(itemStack);
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + 0.05F * f, 0.0F);
 	}
 }

@@ -121,17 +121,17 @@ public class BuiltInRegistries {
 	private static final WritableRegistry<WritableRegistry<?>> WRITABLE_REGISTRY = new MappedRegistry<>(
 		ResourceKey.createRegistryKey(Registries.ROOT_REGISTRY_NAME), Lifecycle.stable()
 	);
-	public static final DefaultedRegistry<GameEvent> GAME_EVENT = registerDefaultedWithIntrusiveHolders(Registries.GAME_EVENT, "step", registry -> GameEvent.STEP);
+	public static final DefaultedRegistry<GameEvent> GAME_EVENT = registerDefaulted(Registries.GAME_EVENT, "step", GameEvent::bootstrap);
 	public static final Registry<SoundEvent> SOUND_EVENT = registerSimple(Registries.SOUND_EVENT, registry -> SoundEvents.ITEM_PICKUP);
 	public static final DefaultedRegistry<Fluid> FLUID = registerDefaultedWithIntrusiveHolders(Registries.FLUID, "empty", registry -> Fluids.EMPTY);
-	public static final Registry<MobEffect> MOB_EFFECT = registerSimpleWithIntrusiveHolders(Registries.MOB_EFFECT, registry -> MobEffects.LUCK);
+	public static final Registry<MobEffect> MOB_EFFECT = registerSimple(Registries.MOB_EFFECT, MobEffects::bootstrap);
 	public static final DefaultedRegistry<Block> BLOCK = registerDefaultedWithIntrusiveHolders(Registries.BLOCK, "air", registry -> Blocks.AIR);
 	public static final Registry<Enchantment> ENCHANTMENT = registerSimpleWithIntrusiveHolders(Registries.ENCHANTMENT, registry -> Enchantments.BLOCK_FORTUNE);
 	public static final DefaultedRegistry<EntityType<?>> ENTITY_TYPE = registerDefaultedWithIntrusiveHolders(
 		Registries.ENTITY_TYPE, "pig", registry -> EntityType.PIG
 	);
 	public static final DefaultedRegistry<Item> ITEM = registerDefaultedWithIntrusiveHolders(Registries.ITEM, "air", registry -> Items.AIR);
-	public static final DefaultedRegistry<Potion> POTION = registerDefaultedWithIntrusiveHolders(Registries.POTION, "empty", registry -> Potions.EMPTY);
+	public static final DefaultedRegistry<Potion> POTION = registerDefaulted(Registries.POTION, "empty", Potions::bootstrap);
 	public static final Registry<ParticleType<?>> PARTICLE_TYPE = registerSimple(Registries.PARTICLE_TYPE, registry -> ParticleTypes.BLOCK);
 	public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = registerSimpleWithIntrusiveHolders(
 		Registries.BLOCK_ENTITY_TYPE, registry -> BlockEntityType.FURNACE
@@ -149,7 +149,7 @@ public class BuiltInRegistries {
 	public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZER = registerSimple(
 		Registries.RECIPE_SERIALIZER, registry -> RecipeSerializer.SHAPELESS_RECIPE
 	);
-	public static final Registry<Attribute> ATTRIBUTE = registerSimple(Registries.ATTRIBUTE, registry -> Attributes.LUCK);
+	public static final Registry<Attribute> ATTRIBUTE = registerSimple(Registries.ATTRIBUTE, Attributes::bootstrap);
 	public static final Registry<PositionSourceType<?>> POSITION_SOURCE_TYPE = registerSimple(
 		Registries.POSITION_SOURCE_TYPE, registry -> PositionSourceType.BLOCK
 	);
@@ -330,6 +330,6 @@ public class BuiltInRegistries {
 
 	@FunctionalInterface
 	interface RegistryBootstrap<T> {
-		T run(Registry<T> registry);
+		Object run(Registry<T> registry);
 	}
 }

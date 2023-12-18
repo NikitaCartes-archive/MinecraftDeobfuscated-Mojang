@@ -70,7 +70,6 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import org.joml.Vector3f;
 
 public class Strider extends Animal implements ItemSteerable, Saddleable {
 	private static final UUID SUFFOCATING_MODIFIER_UUID = UUID.fromString("9e362924-01de-4ddd-a2b2-d0f7a405a174");
@@ -174,9 +173,10 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		this.entityData.set(DATA_SUFFOCATING, bl);
 		AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
 		if (attributeInstance != null) {
-			attributeInstance.removeModifier(SUFFOCATING_MODIFIER_UUID);
 			if (bl) {
-				attributeInstance.addTransientModifier(SUFFOCATING_MODIFIER);
+				attributeInstance.addOrUpdateTransientModifier(SUFFOCATING_MODIFIER);
+			} else {
+				attributeInstance.removeModifier(SUFFOCATING_MODIFIER);
 			}
 		}
 	}
@@ -191,11 +191,11 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
 		float g = Math.min(0.25F, this.walkAnimation.speed());
 		float h = this.walkAnimation.position();
 		float i = 0.12F * Mth.cos(h * 1.5F) * 2.0F * g;
-		return new Vector3f(0.0F, entityDimensions.height + i * f, 0.0F);
+		return super.getPassengerAttachmentPoint(entity, entityDimensions, f).add(0.0, (double)(i * f), 0.0);
 	}
 
 	@Override

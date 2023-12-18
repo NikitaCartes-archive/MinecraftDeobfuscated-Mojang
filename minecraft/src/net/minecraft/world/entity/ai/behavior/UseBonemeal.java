@@ -108,7 +108,7 @@ public class UseBonemeal extends Behavior<Villager> {
 			}
 
 			if (!itemStack.isEmpty() && BoneMealItem.growCrop(itemStack, serverLevel, blockPos)) {
-				serverLevel.levelEvent(1505, blockPos, 0);
+				serverLevel.levelEvent(1505, blockPos, 15);
 				this.cropPos = this.pickNextTarget(serverLevel, villager);
 				this.setCurrentCropAsTarget(villager);
 				this.nextWorkCycleTime = l + 40L;

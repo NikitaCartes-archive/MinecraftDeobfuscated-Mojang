@@ -44,7 +44,7 @@ class FunctionBuilder<T extends ExecutionCommandSource<T>> {
 		return intArrayList;
 	}
 
-	public void addMacro(String string, int i) {
+	public void addMacro(String string, int i, T executionCommandSource) {
 		StringTemplate stringTemplate = StringTemplate.fromString(string, i);
 		if (this.plainEntries != null) {
 			this.macroEntries = new ArrayList(this.plainEntries.size() + 1);
@@ -56,7 +56,7 @@ class FunctionBuilder<T extends ExecutionCommandSource<T>> {
 			this.plainEntries = null;
 		}
 
-		this.macroEntries.add(new MacroFunction.MacroEntry(stringTemplate, this.convertToIndices(stringTemplate.variables())));
+		this.macroEntries.add(new MacroFunction.MacroEntry(stringTemplate, this.convertToIndices(stringTemplate.variables()), executionCommandSource));
 	}
 
 	public CommandFunction<T> build(ResourceLocation resourceLocation) {

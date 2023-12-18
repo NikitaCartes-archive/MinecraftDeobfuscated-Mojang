@@ -20,7 +20,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityAttachment;
+import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -60,7 +62,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Turtle extends Animal {
 	private static final EntityDataAccessor<BlockPos> HOME_POS = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BLOCK_POS);
@@ -70,6 +71,11 @@ public class Turtle extends Animal {
 	private static final EntityDataAccessor<Boolean> GOING_HOME = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> TRAVELLING = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BOOLEAN);
 	public static final Ingredient FOOD_ITEMS = Ingredient.of(Blocks.SEAGRASS.asItem());
+	private static final float BABY_SCALE = 0.3F;
+	private static final EntityDimensions BABY_DIMENSIONS = EntityType.TURTLE
+		.getDimensions()
+		.withAttachments(EntityAttachments.builder().attach(EntityAttachment.PASSENGER, 0.0F, EntityType.TURTLE.getHeight(), -0.25F))
+		.scale(0.3F);
 	int layEggCounter;
 	public static final Predicate<LivingEntity> BABY_ON_LAND_SELECTOR = livingEntity -> livingEntity.isBaby() && !livingEntity.isInWater();
 
@@ -80,7 +86,6 @@ public class Turtle extends Animal {
 		this.setPathfindingMalus(BlockPathTypes.DOOR_WOOD_CLOSED, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.DOOR_OPEN, -1.0F);
 		this.moveControl = new Turtle.TurtleMoveControl(this);
-		this.setMaxUpStep(1.0F);
 	}
 
 	public void setHomePos(BlockPos blockPos) {
@@ -203,7 +208,7 @@ public class Turtle extends Animal {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 30.0).add(Attributes.MOVEMENT_SPEED, 0.25);
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 30.0).add(Attributes.MOVEMENT_SPEED, 0.25).add(Attributes.STEP_HEIGHT, 1.0);
 	}
 
 	@Override
@@ -266,7 +271,7 @@ public class Turtle extends Animal {
 	}
 
 	@Override
-	public float getScale() {
+	public float getAgeScale() {
 		return this.isBaby() ? 0.3F : 1.0F;
 	}
 
@@ -311,7 +316,7 @@ public class Turtle extends Animal {
 	protected void ageBoundaryReached() {
 		super.ageBoundaryReached();
 		if (!this.isBaby() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.spawnAtLocation(Items.SCUTE, 1);
+			this.spawnAtLocation(Items.TURTLE_SCUTE, 1);
 		}
 	}
 
@@ -340,8 +345,8 @@ public class Turtle extends Animal {
 	}
 
 	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + (this.isBaby() ? 0.0F : 0.15625F) * f, -0.25F * f);
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.isBaby() ? BABY_DIMENSIONS : super.getDefaultDimensions(pose);
 	}
 
 	static class TurtleBreedGoal extends BreedGoal {

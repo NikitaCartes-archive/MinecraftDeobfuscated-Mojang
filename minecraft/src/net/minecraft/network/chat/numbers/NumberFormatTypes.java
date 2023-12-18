@@ -13,10 +13,9 @@ public class NumberFormatTypes {
 	public static final Codec<NumberFormat> CODEC = MAP_CODEC.codec();
 
 	public static NumberFormatType<?> bootstrap(Registry<NumberFormatType<?>> registry) {
-		NumberFormatType<?> numberFormatType = Registry.register(registry, "blank", BlankFormat.TYPE);
+		Registry.register(registry, "blank", BlankFormat.TYPE);
 		Registry.register(registry, "styled", StyledFormat.TYPE);
-		Registry.register(registry, "fixed", FixedFormat.TYPE);
-		return numberFormatType;
+		return Registry.register(registry, "fixed", FixedFormat.TYPE);
 	}
 
 	public static <T extends NumberFormat> void writeToStream(FriendlyByteBuf friendlyByteBuf, T numberFormat) {

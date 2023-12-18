@@ -95,7 +95,6 @@ public class MobEffectIdFix extends DataFix {
 		dynamic = renameField(dynamic, "Duration", "duration");
 		dynamic = renameField(dynamic, "ShowParticles", "show_particles");
 		dynamic = renameField(dynamic, "ShowIcon", "show_icon");
-		dynamic = renameField(dynamic, "FactorCalculationData", "factor_calculation_data");
 		Optional<Dynamic<T>> optional = dynamic.get("HiddenEffect").result().map(MobEffectIdFix::updateMobEffectInstance);
 		return replaceField(dynamic, "HiddenEffect", "hidden_effect", optional);
 	}

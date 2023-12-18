@@ -66,13 +66,13 @@ public class SetStewEffectFunction extends LootItemConditionalFunction {
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		if (itemStack.is(Items.SUSPICIOUS_STEW) && !this.effects.isEmpty()) {
 			SetStewEffectFunction.EffectEntry effectEntry = Util.getRandom(this.effects, lootContext.getRandom());
-			MobEffect mobEffect = effectEntry.effect().value();
+			Holder<MobEffect> holder = effectEntry.effect();
 			int i = effectEntry.duration().getInt(lootContext);
-			if (!mobEffect.isInstantenous()) {
+			if (!holder.value().isInstantenous()) {
 				i *= 20;
 			}
 
-			SuspiciousStewItem.appendMobEffects(itemStack, List.of(new SuspiciousEffectHolder.EffectEntry(mobEffect, i)));
+			SuspiciousStewItem.appendMobEffects(itemStack, List.of(new SuspiciousEffectHolder.EffectEntry(holder, i)));
 			return itemStack;
 		} else {
 			return itemStack;
@@ -90,8 +90,8 @@ public class SetStewEffectFunction extends LootItemConditionalFunction {
 			return this;
 		}
 
-		public SetStewEffectFunction.Builder withEffect(MobEffect mobEffect, NumberProvider numberProvider) {
-			this.effects.add(new SetStewEffectFunction.EffectEntry(mobEffect.builtInRegistryHolder(), numberProvider));
+		public SetStewEffectFunction.Builder withEffect(Holder<MobEffect> holder, NumberProvider numberProvider) {
+			this.effects.add(new SetStewEffectFunction.EffectEntry(holder, numberProvider));
 			return this;
 		}
 

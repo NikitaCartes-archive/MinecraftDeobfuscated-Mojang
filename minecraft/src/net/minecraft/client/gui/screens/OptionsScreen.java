@@ -73,14 +73,15 @@ public class OptionsScreen extends Screen {
 		rowHelper.addChild(this.openScreenButton(ACCESSIBILITY, () -> new AccessibilityOptionsScreen(this, this.options)));
 		rowHelper.addChild(this.openScreenButton(TELEMETRY, () -> new TelemetryInfoScreen(this, this.options)));
 		rowHelper.addChild(this.openScreenButton(CREDITS_AND_ATTRIBUTION, () -> new CreditsAndAttributionScreen(this)));
-		rowHelper.addChild(
-			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).width(200).build(),
-			2,
-			rowHelper.newCellSettings().paddingTop(6)
-		);
+		rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build(), 2, rowHelper.newCellSettings().paddingTop(6));
 		gridLayout.arrangeElements();
 		FrameLayout.alignInRectangle(gridLayout, 0, this.height / 6 - 12, this.width, this.height, 0.5F, 0.0F);
 		gridLayout.visitWidgets(this::addRenderableWidget);
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	private void applyPacks(PackRepository packRepository) {

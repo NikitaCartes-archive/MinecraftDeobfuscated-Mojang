@@ -10,10 +10,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityAttachment;
+import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
@@ -22,6 +25,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 
 public class ZombieHorse extends AbstractHorse {
+	private static final EntityDimensions BABY_DIMENSIONS = EntityType.ZOMBIE_HORSE
+		.getDimensions()
+		.withAttachments(EntityAttachments.builder().attach(EntityAttachment.PASSENGER, 0.0F, EntityType.ZOMBIE_HORSE.getHeight() - 0.03125F, 0.0F))
+		.scale(0.5F);
+
 	public ZombieHorse(EntityType<? extends ZombieHorse> entityType, Level level) {
 		super(entityType, level);
 	}
@@ -79,7 +87,7 @@ public class ZombieHorse extends AbstractHorse {
 	}
 
 	@Override
-	protected float getPassengersRidingOffsetY(EntityDimensions entityDimensions, float f) {
-		return entityDimensions.height - (this.isBaby() ? 0.03125F : 0.28125F) * f;
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.isBaby() ? BABY_DIMENSIONS : super.getDefaultDimensions(pose);
 	}
 }

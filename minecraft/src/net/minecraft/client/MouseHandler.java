@@ -32,7 +32,7 @@ public class MouseHandler {
 	private double accumulatedDY;
 	private double accumulatedScrollX;
 	private double accumulatedScrollY;
-	private double lastMouseEventTime = Double.MIN_VALUE;
+	private double lastHandleMovementTime = Double.MIN_VALUE;
 	private boolean mouseGrabbed;
 
 	public MouseHandler(Minecraft minecraft) {
@@ -191,76 +191,77 @@ public class MouseHandler {
 				this.xpos = d;
 				this.ypos = e;
 				this.ignoreFirstMove = false;
-			}
+			} else {
+				if (this.minecraft.isWindowActive()) {
+					this.accumulatedDX = this.accumulatedDX + (d - this.xpos);
+					this.accumulatedDY = this.accumulatedDY + (e - this.ypos);
+				}
 
+				this.xpos = d;
+				this.ypos = e;
+			}
+		}
+	}
+
+	public void handleAccumulatedMovement() {
+		double d = Blaze3D.getTime();
+		double e = d - this.lastHandleMovementTime;
+		this.lastHandleMovementTime = d;
+		if (this.minecraft.isWindowActive()) {
 			Screen screen = this.minecraft.screen;
 			if (screen != null && this.minecraft.getOverlay() == null) {
-				double f = d * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
-				double g = e * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();
+				double f = this.xpos * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
+				double g = this.ypos * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();
 				Screen.wrapScreenError(() -> screen.mouseMoved(f, g), "mouseMoved event handler", screen.getClass().getCanonicalName());
 				if (this.activeButton != -1 && this.mousePressedTime > 0.0) {
-					double h = (d - this.xpos) * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
-					double i = (e - this.ypos) * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();
+					double h = this.accumulatedDX * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
+					double i = this.accumulatedDY * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();
 					Screen.wrapScreenError(() -> screen.mouseDragged(f, g, this.activeButton, h, i), "mouseDragged event handler", screen.getClass().getCanonicalName());
 				}
 
 				screen.afterMouseMove();
 			}
 
-			this.minecraft.getProfiler().push("mouse");
-			if (this.isMouseGrabbed() && this.minecraft.isWindowActive()) {
-				this.accumulatedDX = this.accumulatedDX + (d - this.xpos);
-				this.accumulatedDY = this.accumulatedDY + (e - this.ypos);
+			if (this.isMouseGrabbed() && this.minecraft.player != null) {
+				this.turnPlayer(e);
 			}
-
-			this.turnPlayer();
-			this.xpos = d;
-			this.ypos = e;
-			this.minecraft.getProfiler().pop();
 		}
+
+		this.accumulatedDX = 0.0;
+		this.accumulatedDY = 0.0;
 	}
 
-	public void turnPlayer() {
-		double d = Blaze3D.getTime();
-		double e = d - this.lastMouseEventTime;
-		this.lastMouseEventTime = d;
-		if (this.isMouseGrabbed() && this.minecraft.isWindowActive()) {
-			double f = this.minecraft.options.sensitivity().get() * 0.6F + 0.2F;
-			double g = f * f * f;
-			double h = g * 8.0;
-			double k;
-			double l;
-			if (this.minecraft.options.smoothCamera) {
-				double i = this.smoothTurnX.getNewDeltaValue(this.accumulatedDX * h, e * h);
-				double j = this.smoothTurnY.getNewDeltaValue(this.accumulatedDY * h, e * h);
-				k = i;
-				l = j;
-			} else if (this.minecraft.options.getCameraType().isFirstPerson() && this.minecraft.player.isScoping()) {
-				this.smoothTurnX.reset();
-				this.smoothTurnY.reset();
-				k = this.accumulatedDX * g;
-				l = this.accumulatedDY * g;
-			} else {
-				this.smoothTurnX.reset();
-				this.smoothTurnY.reset();
-				k = this.accumulatedDX * h;
-				l = this.accumulatedDY * h;
-			}
-
-			this.accumulatedDX = 0.0;
-			this.accumulatedDY = 0.0;
-			int m = 1;
-			if (this.minecraft.options.invertYMouse().get()) {
-				m = -1;
-			}
-
-			this.minecraft.getTutorial().onMouse(k, l);
-			if (this.minecraft.player != null) {
-				this.minecraft.player.turn(k, l * (double)m);
-			}
+	private void turnPlayer(double d) {
+		double e = this.minecraft.options.sensitivity().get() * 0.6F + 0.2F;
+		double f = e * e * e;
+		double g = f * 8.0;
+		double j;
+		double k;
+		if (this.minecraft.options.smoothCamera) {
+			double h = this.smoothTurnX.getNewDeltaValue(this.accumulatedDX * g, d * g);
+			double i = this.smoothTurnY.getNewDeltaValue(this.accumulatedDY * g, d * g);
+			j = h;
+			k = i;
+		} else if (this.minecraft.options.getCameraType().isFirstPerson() && this.minecraft.player.isScoping()) {
+			this.smoothTurnX.reset();
+			this.smoothTurnY.reset();
+			j = this.accumulatedDX * f;
+			k = this.accumulatedDY * f;
 		} else {
-			this.accumulatedDX = 0.0;
-			this.accumulatedDY = 0.0;
+			this.smoothTurnX.reset();
+			this.smoothTurnY.reset();
+			j = this.accumulatedDX * g;
+			k = this.accumulatedDY * g;
+		}
+
+		int l = 1;
+		if (this.minecraft.options.invertYMouse().get()) {
+			l = -1;
+		}
+
+		this.minecraft.getTutorial().onMouse(j, k);
+		if (this.minecraft.player != null) {
+			this.minecraft.player.turn(j, k * (double)l);
 		}
 	}
 

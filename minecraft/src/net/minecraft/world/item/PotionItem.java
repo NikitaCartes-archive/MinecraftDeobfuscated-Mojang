@@ -19,6 +19,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.context.UseOnContext;
@@ -48,8 +49,8 @@ public class PotionItem extends Item {
 
 		if (!level.isClientSide) {
 			for (MobEffectInstance mobEffectInstance : PotionUtils.getMobEffects(itemStack)) {
-				if (mobEffectInstance.getEffect().isInstantenous()) {
-					mobEffectInstance.getEffect().applyInstantenousEffect(player, player, livingEntity, mobEffectInstance.getAmplifier(), 1.0);
+				if (mobEffectInstance.getEffect().value().isInstantenous()) {
+					mobEffectInstance.getEffect().value().applyInstantenousEffect(player, player, livingEntity, mobEffectInstance.getAmplifier(), 1.0);
 				} else {
 					livingEntity.addEffect(new MobEffectInstance(mobEffectInstance));
 				}
@@ -84,7 +85,7 @@ public class PotionItem extends Item {
 		Player player = useOnContext.getPlayer();
 		ItemStack itemStack = useOnContext.getItemInHand();
 		BlockState blockState = level.getBlockState(blockPos);
-		if (useOnContext.getClickedFace() != Direction.DOWN && blockState.is(BlockTags.CONVERTABLE_TO_MUD) && PotionUtils.getPotion(itemStack) == Potions.WATER) {
+		if (useOnContext.getClickedFace() != Direction.DOWN && blockState.is(BlockTags.CONVERTABLE_TO_MUD) && PotionUtils.getPotion(itemStack).is(Potions.WATER)) {
 			level.playSound(null, blockPos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 1.0F, 1.0F);
 			player.setItemInHand(useOnContext.getHand(), ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
 			player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
@@ -132,7 +133,7 @@ public class PotionItem extends Item {
 
 	@Override
 	public String getDescriptionId(ItemStack itemStack) {
-		return PotionUtils.getPotion(itemStack).getName(this.getDescriptionId() + ".effect.");
+		return Potion.getName(PotionUtils.getPotion(itemStack), this.getDescriptionId() + ".effect.");
 	}
 
 	@Override

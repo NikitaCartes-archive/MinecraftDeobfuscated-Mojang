@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
@@ -79,9 +78,7 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
-	) {
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		PlayerEnderChestContainer playerEnderChestContainer = player.getEnderChestInventory();
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (playerEnderChestContainer != null && blockEntity instanceof EnderChestBlockEntity) {

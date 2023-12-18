@@ -13,10 +13,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -57,11 +55,6 @@ public class LeashFenceKnotEntity extends HangingEntity {
 	@Override
 	public int getHeight() {
 		return 9;
-	}
-
-	@Override
-	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.0625F;
 	}
 
 	@Override

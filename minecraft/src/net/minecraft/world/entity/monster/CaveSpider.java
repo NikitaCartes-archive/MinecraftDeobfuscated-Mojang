@@ -7,17 +7,15 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import org.joml.Vector3f;
+import net.minecraft.world.phys.Vec3;
 
 public class CaveSpider extends Spider {
 	public CaveSpider(EntityType<? extends CaveSpider> entityType, Level level) {
@@ -63,17 +61,7 @@ public class CaveSpider extends Spider {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.45F;
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height, 0.0F);
-	}
-
-	@Override
-	protected float ridingOffset(Entity entity) {
-		return entity.getBbWidth() <= this.getBbWidth() ? -0.21875F : 0.0F;
+	public Vec3 getVehicleAttachmentPoint(Entity entity) {
+		return entity.getBbWidth() <= this.getBbWidth() ? new Vec3(0.0, 0.21875 * (double)this.getScale(), 0.0) : super.getVehicleAttachmentPoint(entity);
 	}
 }

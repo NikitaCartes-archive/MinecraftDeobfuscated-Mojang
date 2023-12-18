@@ -35,4 +35,9 @@ public class MangroveLeavesBlock extends LeavesBlock implements BonemealableBloc
 	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		serverLevel.setBlock(blockPos.below(), MangrovePropaguleBlock.createNewHangingPropagule(), 2);
 	}
+
+	@Override
+	public BlockPos getParticlePos(BlockPos blockPos) {
+		return blockPos.below();
+	}
 }

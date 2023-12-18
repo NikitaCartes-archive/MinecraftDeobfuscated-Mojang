@@ -38,6 +38,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.player.Player;
@@ -256,10 +257,6 @@ public class MultiPlayerGameMode {
 		}
 	}
 
-	public float getPickRange() {
-		return Player.getPickRange(this.localPlayerMode.isCreative());
-	}
-
 	public void tick() {
 		this.ensureHasSentCarriedItem();
 		if (this.connection.getConnection().isConnected()) {
@@ -310,9 +307,18 @@ public class MultiPlayerGameMode {
 					return InteractionResult.FAIL;
 				}
 
-				InteractionResult interactionResult = blockState.use(this.minecraft.level, localPlayer, interactionHand, blockHitResult);
-				if (interactionResult.consumesAction()) {
-					return interactionResult;
+				ItemInteractionResult itemInteractionResult = blockState.useItemOn(
+					localPlayer.getItemInHand(interactionHand), this.minecraft.level, localPlayer, interactionHand, blockHitResult
+				);
+				if (itemInteractionResult.consumesAction()) {
+					return itemInteractionResult.result();
+				}
+
+				if (itemInteractionResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && interactionHand == InteractionHand.MAIN_HAND) {
+					InteractionResult interactionResult = blockState.useWithoutItem(this.minecraft.level, localPlayer, blockHitResult);
+					if (interactionResult.consumesAction()) {
+						return interactionResult;
+					}
 				}
 			}
 
@@ -457,10 +463,6 @@ public class MultiPlayerGameMode {
 	}
 
 	public boolean hasInfiniteItems() {
-		return this.localPlayerMode.isCreative();
-	}
-
-	public boolean hasFarPickRange() {
 		return this.localPlayerMode.isCreative();
 	}
 

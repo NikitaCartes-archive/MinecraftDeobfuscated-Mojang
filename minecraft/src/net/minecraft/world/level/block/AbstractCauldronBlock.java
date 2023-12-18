@@ -6,7 +6,7 @@ import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -54,10 +54,9 @@ public abstract class AbstractCauldronBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
 		CauldronInteraction cauldronInteraction = (CauldronInteraction)this.interactions.map().get(itemStack.getItem());
 		return cauldronInteraction.interact(blockState, level, blockPos, player, interactionHand, itemStack);
 	}

@@ -23,5 +23,27 @@ public class UpdateOneTwentyOneItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.STAIRS).add(Items.TUFF_STAIRS, Items.POLISHED_TUFF_STAIRS, Items.TUFF_BRICK_STAIRS);
 		this.tag(ItemTags.SLABS).add(Items.TUFF_SLAB, Items.POLISHED_TUFF_SLAB, Items.TUFF_BRICK_SLAB);
 		this.tag(ItemTags.WALLS).add(Items.TUFF_WALL, Items.POLISHED_TUFF_WALL, Items.TUFF_BRICK_WALL);
+		this.tag(ItemTags.DOORS)
+			.add(
+				Items.COPPER_DOOR,
+				Items.EXPOSED_COPPER_DOOR,
+				Items.WEATHERED_COPPER_DOOR,
+				Items.OXIDIZED_COPPER_DOOR,
+				Items.WAXED_COPPER_DOOR,
+				Items.WAXED_EXPOSED_COPPER_DOOR,
+				Items.WAXED_WEATHERED_COPPER_DOOR,
+				Items.WAXED_OXIDIZED_COPPER_DOOR
+			);
+		this.tag(ItemTags.TRAPDOORS)
+			.add(
+				Items.COPPER_TRAPDOOR,
+				Items.EXPOSED_COPPER_TRAPDOOR,
+				Items.WEATHERED_COPPER_TRAPDOOR,
+				Items.OXIDIZED_COPPER_TRAPDOOR,
+				Items.WAXED_COPPER_TRAPDOOR,
+				Items.WAXED_EXPOSED_COPPER_TRAPDOOR,
+				Items.WAXED_WEATHERED_COPPER_TRAPDOOR,
+				Items.WAXED_OXIDIZED_COPPER_TRAPDOOR
+			);
 	}
 }

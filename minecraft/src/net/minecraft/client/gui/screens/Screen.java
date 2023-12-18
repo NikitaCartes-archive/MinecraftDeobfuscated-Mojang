@@ -565,7 +565,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 		}
 	}
 
-	protected void setTooltipForNextRenderPass(Component component) {
+	public void setTooltipForNextRenderPass(Component component) {
 		this.setTooltipForNextRenderPass(Tooltip.splitTooltip(this.minecraft, component));
 	}
 

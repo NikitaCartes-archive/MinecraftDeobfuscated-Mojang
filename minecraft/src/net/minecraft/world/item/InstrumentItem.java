@@ -8,7 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -89,7 +88,7 @@ public class InstrumentItem extends Item {
 		if (compoundTag != null && compoundTag.contains("instrument", 8)) {
 			ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("instrument"));
 			if (resourceLocation != null) {
-				return BuiltInRegistries.INSTRUMENT.getHolder(ResourceKey.create(Registries.INSTRUMENT, resourceLocation));
+				return BuiltInRegistries.INSTRUMENT.getHolder(resourceLocation);
 			}
 		}
 

@@ -186,7 +186,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		this.renewButton = Button.builder(SUBSCRIPTION_RENEW_TEXT, button -> this.onRenew(this.getSelectedServer())).width(100).build();
 		this.leaveButton = Button.builder(LEAVE_SERVER_TEXT, button -> this.leaveClicked(this.getSelectedServer())).width(100).build();
 		this.addRealmButton = Button.builder(Component.translatable("mco.selectServer.purchase"), button -> this.openTrialAvailablePopup()).size(100, 20).build();
-		this.backButton = Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).width(100).build();
+		this.backButton = Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).width(100).build();
 		if (RealmsClient.ENVIRONMENT == RealmsClient.Environment.STAGE) {
 			this.addRenderableWidget(
 				CycleButton.booleanBuilder(Component.literal("Snapshot"), Component.literal("Release"))
@@ -220,6 +220,11 @@ public class RealmsMainScreen extends RealmsScreen {
 			this.realmSelectionList.setSize(this.width, this.height - this.layout.getFooterHeight() - this.layout.getHeaderHeight());
 			this.layout.arrangeElements();
 		}
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	private void updateLayout() {

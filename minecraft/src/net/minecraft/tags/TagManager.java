@@ -70,9 +70,7 @@ public class TagManager implements PreparableReloadListener {
 	) {
 		ResourceKey<? extends Registry<T>> resourceKey = registryEntry.key();
 		Registry<T> registry = registryEntry.value();
-		TagLoader<Holder<T>> tagLoader = new TagLoader<>(
-			resourceLocation -> registry.getHolder(ResourceKey.create(resourceKey, resourceLocation)), getTagDir(resourceKey)
-		);
+		TagLoader<Holder<T>> tagLoader = new TagLoader<>(registry::getHolder, getTagDir(resourceKey));
 		return CompletableFuture.supplyAsync(() -> new TagManager.LoadResult<>(resourceKey, tagLoader.loadAndBuild(resourceManager)), executor);
 	}
 

@@ -17,6 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -72,20 +73,26 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (interactionHand == InteractionHand.MAIN_HAND && !isRespawnFuel(itemStack) && isRespawnFuel(player.getItemInHand(InteractionHand.OFF_HAND))) {
-			return InteractionResult.PASS;
-		} else if (isRespawnFuel(itemStack) && canBeCharged(blockState)) {
+		if (isRespawnFuel(itemStack) && canBeCharged(blockState)) {
 			charge(player, level, blockPos, blockState);
 			if (!player.getAbilities().instabuild) {
 				itemStack.shrink(1);
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
-		} else if ((Integer)blockState.getValue(CHARGE) == 0) {
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
+		} else {
+			return interactionHand == InteractionHand.MAIN_HAND && isRespawnFuel(player.getItemInHand(InteractionHand.OFF_HAND)) && canBeCharged(blockState)
+				? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
+				: ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+		if ((Integer)blockState.getValue(CHARGE) == 0) {
 			return InteractionResult.PASS;
 		} else if (!canSetSpawn(level)) {
 			if (!level.isClientSide) {
@@ -183,16 +190,7 @@ public class RespawnAnchorBlock extends Block {
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		if ((Integer)blockState.getValue(CHARGE) != 0) {
 			if (randomSource.nextInt(100) == 0) {
-				level.playSound(
-					null,
-					(double)blockPos.getX() + 0.5,
-					(double)blockPos.getY() + 0.5,
-					(double)blockPos.getZ() + 0.5,
-					SoundEvents.RESPAWN_ANCHOR_AMBIENT,
-					SoundSource.BLOCKS,
-					1.0F,
-					1.0F
-				);
+				level.playLocalSound(blockPos, SoundEvents.RESPAWN_ANCHOR_AMBIENT, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 			}
 
 			double d = (double)blockPos.getX() + 0.5 + (0.5 - randomSource.nextDouble());

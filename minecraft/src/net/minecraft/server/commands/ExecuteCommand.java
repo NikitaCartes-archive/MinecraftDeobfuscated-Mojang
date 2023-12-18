@@ -943,7 +943,7 @@ public class ExecuteCommand {
 			try {
 				for (CommandFunction<T> commandFunction : collection) {
 					try {
-						list3.add(commandFunction.instantiate(compoundTag, executionCommandSource.dispatcher(), executionCommandSource));
+						list3.add(commandFunction.instantiate(compoundTag, executionCommandSource.dispatcher()));
 					} catch (FunctionInstantiationException var17) {
 						throw ERROR_FUNCTION_CONDITION_INSTANTATION_FAILURE.create(commandFunction.id(), var17.messageComponent());
 					}

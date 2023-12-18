@@ -12,12 +12,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceKey;
 
 public class AttributeInstance {
-	private final Attribute attribute;
+	private final Holder<Attribute> attribute;
 	private final Map<AttributeModifier.Operation, Set<AttributeModifier>> modifiersByOperation = Maps.newEnumMap(AttributeModifier.Operation.class);
 	private final Map<UUID, AttributeModifier> modifierById = new Object2ObjectArrayMap<>();
 	private final Set<AttributeModifier> permanentModifiers = new ObjectArraySet<>();
@@ -26,13 +27,13 @@ public class AttributeInstance {
 	private double cachedValue;
 	private final Consumer<AttributeInstance> onDirty;
 
-	public AttributeInstance(Attribute attribute, Consumer<AttributeInstance> consumer) {
-		this.attribute = attribute;
+	public AttributeInstance(Holder<Attribute> holder, Consumer<AttributeInstance> consumer) {
+		this.attribute = holder;
 		this.onDirty = consumer;
-		this.baseValue = attribute.getDefaultValue();
+		this.baseValue = holder.value().getDefaultValue();
 	}
 
-	public Attribute getAttribute() {
+	public Holder<Attribute> getAttribute() {
 		return this.attribute;
 	}
 
@@ -74,6 +75,19 @@ public class AttributeInstance {
 		}
 	}
 
+	public void addOrUpdateTransientModifier(AttributeModifier attributeModifier) {
+		AttributeModifier attributeModifier2 = (AttributeModifier)this.modifierById.putIfAbsent(attributeModifier.getId(), attributeModifier);
+		if (attributeModifier != attributeModifier2) {
+			Set<AttributeModifier> set = this.getModifiers(attributeModifier.getOperation());
+			if (attributeModifier2 != null) {
+				set.remove(attributeModifier2);
+			}
+
+			set.add(attributeModifier);
+			this.setDirty();
+		}
+	}
+
 	public void addTransientModifier(AttributeModifier attributeModifier) {
 		this.addModifier(attributeModifier);
 	}
@@ -88,7 +102,7 @@ public class AttributeInstance {
 		this.onDirty.accept(this);
 	}
 
-	private void removeModifier(AttributeModifier attributeModifier) {
+	public void removeModifier(AttributeModifier attributeModifier) {
 		this.getModifiers(attributeModifier.getOperation()).remove(attributeModifier);
 		this.modifierById.remove(attributeModifier.getId());
 		this.permanentModifiers.remove(attributeModifier);
@@ -144,7 +158,7 @@ public class AttributeInstance {
 			e *= 1.0 + attributeModifier2.getAmount();
 		}
 
-		return this.attribute.sanitizeValue(e);
+		return this.attribute.value().sanitizeValue(e);
 	}
 
 	private Collection<AttributeModifier> getModifiersOrEmpty(AttributeModifier.Operation operation) {
@@ -164,7 +178,10 @@ public class AttributeInstance {
 
 	public CompoundTag save() {
 		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString("Name", BuiltInRegistries.ATTRIBUTE.getKey(this.attribute).toString());
+		ResourceKey<Attribute> resourceKey = (ResourceKey<Attribute>)this.attribute
+			.unwrapKey()
+			.orElseThrow(() -> new IllegalStateException("Tried to serialize unregistered attribute"));
+		compoundTag.putString("Name", resourceKey.location().toString());
 		compoundTag.putDouble("Base", this.baseValue);
 		if (!this.permanentModifiers.isEmpty()) {
 			ListTag listTag = new ListTag();

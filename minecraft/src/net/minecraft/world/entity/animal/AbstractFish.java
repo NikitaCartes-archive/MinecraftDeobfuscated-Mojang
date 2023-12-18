@@ -11,12 +11,10 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -37,11 +35,6 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
 	public AbstractFish(EntityType<? extends AbstractFish> entityType, Level level) {
 		super(entityType, level);
 		this.moveControl = new AbstractFish.FishMoveControl(this);
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * 0.65F;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

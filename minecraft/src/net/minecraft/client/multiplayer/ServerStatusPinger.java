@@ -43,7 +43,7 @@ public class ServerStatusPinger {
 	private static final Component CANT_CONNECT_MESSAGE = Component.translatable("multiplayer.status.cannot_connect").withColor(-65536);
 	private final List<Connection> connections = Collections.synchronizedList(Lists.newArrayList());
 
-	public void pingServer(ServerData serverData, Runnable runnable) throws UnknownHostException {
+	public void pingServer(ServerData serverData, Runnable runnable, Runnable runnable2) throws UnknownHostException {
 		final ServerAddress serverAddress = ServerAddress.parseString(serverData.ip);
 		Optional<InetSocketAddress> optional = ServerNameResolver.DEFAULT.resolveAddress(serverAddress).map(ResolvedServerAddress::asInetSocketAddress);
 		if (optional.isEmpty()) {
@@ -53,7 +53,6 @@ public class ServerStatusPinger {
 			final Connection connection = Connection.connectToServer(inetSocketAddress, false, null);
 			this.connections.add(connection);
 			serverData.motd = Component.translatable("multiplayer.status.pinging");
-			serverData.ping = -1L;
 			serverData.playerList = Collections.emptyList();
 			ClientStatusPacketListener clientStatusPacketListener = new ClientStatusPacketListener() {
 				private boolean success;
@@ -112,6 +111,7 @@ public class ServerStatusPinger {
 					long m = Util.getMillis();
 					serverData.ping = m - l;
 					connection.disconnect(Component.translatable("multiplayer.status.finished"));
+					runnable2.run();
 				}
 
 				@Override
@@ -131,8 +131,8 @@ public class ServerStatusPinger {
 			try {
 				connection.initiateServerboundStatusConnection(serverAddress.getHost(), serverAddress.getPort(), clientStatusPacketListener);
 				connection.send(new ServerboundStatusRequestPacket());
-			} catch (Throwable var9) {
-				LOGGER.error("Failed to ping server {}", serverAddress, var9);
+			} catch (Throwable var10) {
+				LOGGER.error("Failed to ping server {}", serverAddress, var10);
 			}
 		}
 	}
@@ -153,7 +153,7 @@ public class ServerStatusPinger {
 				}
 
 				channel.pipeline().addLast(new LegacyServerPinger(serverAddress, (i, string, string2, j, k) -> {
-					serverData.protocol = -1;
+					serverData.setState(ServerData.State.INCOMPATIBLE);
 					serverData.version = Component.literal(string);
 					serverData.motd = Component.literal(string2);
 					serverData.status = ServerStatusPinger.formatPlayerCount(j, k);

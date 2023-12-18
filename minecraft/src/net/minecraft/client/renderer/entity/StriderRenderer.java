@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.StriderModel;
@@ -13,6 +12,7 @@ import net.minecraft.world.entity.monster.Strider;
 public class StriderRenderer extends MobRenderer<Strider, StriderModel<Strider>> {
 	private static final ResourceLocation STRIDER_LOCATION = new ResourceLocation("textures/entity/strider/strider.png");
 	private static final ResourceLocation COLD_LOCATION = new ResourceLocation("textures/entity/strider/strider_cold.png");
+	private static final float SHADOW_RADIUS = 0.5F;
 
 	public StriderRenderer(EntityRendererProvider.Context context) {
 		super(context, new StriderModel<>(context.bakeLayer(ModelLayers.STRIDER)), 0.5F);
@@ -27,13 +27,9 @@ public class StriderRenderer extends MobRenderer<Strider, StriderModel<Strider>>
 		return strider.isSuffocating() ? COLD_LOCATION : STRIDER_LOCATION;
 	}
 
-	protected void scale(Strider strider, PoseStack poseStack, float f) {
-		if (strider.isBaby()) {
-			poseStack.scale(0.5F, 0.5F, 0.5F);
-			this.shadowRadius = 0.25F;
-		} else {
-			this.shadowRadius = 0.5F;
-		}
+	protected float getShadowRadius(Strider strider) {
+		float f = super.getShadowRadius(strider);
+		return strider.isBaby() ? f * 0.5F : f;
 	}
 
 	protected boolean isShaking(Strider strider) {

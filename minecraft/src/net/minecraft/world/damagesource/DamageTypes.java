@@ -37,6 +37,8 @@ public interface DamageTypes {
 	ResourceKey<DamageType> ARROW = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("arrow"));
 	ResourceKey<DamageType> TRIDENT = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("trident"));
 	ResourceKey<DamageType> MOB_PROJECTILE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("mob_projectile"));
+	ResourceKey<DamageType> SPIT = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("spit"));
+	ResourceKey<DamageType> WIND_CHARGE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("wind_charge"));
 	ResourceKey<DamageType> FIREWORKS = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("fireworks"));
 	ResourceKey<DamageType> FIREBALL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("fireball"));
 	ResourceKey<DamageType> UNATTRIBUTED_FIREBALL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("unattributed_fireball"));
@@ -85,6 +87,7 @@ public interface DamageTypes {
 		bootstapContext.register(ARROW, new DamageType("arrow", 0.1F));
 		bootstapContext.register(TRIDENT, new DamageType("trident", 0.1F));
 		bootstapContext.register(MOB_PROJECTILE, new DamageType("mob", 0.1F));
+		bootstapContext.register(SPIT, new DamageType("mob", 0.1F));
 		bootstapContext.register(FIREWORKS, new DamageType("fireworks", 0.1F));
 		bootstapContext.register(UNATTRIBUTED_FIREBALL, new DamageType("onFire", 0.1F, DamageEffects.BURNING));
 		bootstapContext.register(FIREBALL, new DamageType("fireball", 0.1F, DamageEffects.BURNING));

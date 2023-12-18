@@ -146,12 +146,11 @@ public abstract class PlayerList {
 			string = gameProfile.getName();
 		}
 
-		CompoundTag compoundTag = this.load(serverPlayer);
-		ResourceKey<Level> resourceKey = compoundTag != null
-			? (ResourceKey)DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Dimension")))
-				.resultOrPartial(LOGGER::error)
-				.orElse(Level.OVERWORLD)
-			: Level.OVERWORLD;
+		Optional<CompoundTag> optional = this.load(serverPlayer);
+		ResourceKey<Level> resourceKey = (ResourceKey<Level>)optional.flatMap(
+				compoundTag -> DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Dimension"))).resultOrPartial(LOGGER::error)
+			)
+			.orElse(Level.OVERWORLD);
 		ServerLevel serverLevel = this.server.getLevel(resourceKey);
 		ServerLevel serverLevel2;
 		if (serverLevel == null) {
@@ -173,7 +172,7 @@ public abstract class PlayerList {
 			serverPlayer.getZ()
 		);
 		LevelData levelData = serverLevel2.getLevelData();
-		serverPlayer.loadGameTypes(compoundTag);
+		serverPlayer.loadGameTypes((CompoundTag)optional.orElse(null));
 		ServerGamePacketListenerImpl serverGamePacketListenerImpl = new ServerGamePacketListenerImpl(this.server, connection, serverPlayer, commonListenerCookie);
 		GameRules gameRules = serverLevel2.getGameRules();
 		boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
@@ -225,18 +224,18 @@ public abstract class PlayerList {
 		this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
 
 		for (MobEffectInstance mobEffectInstance : serverPlayer.getActiveEffects()) {
-			serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance));
+			serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance, false));
 		}
 
-		if (compoundTag != null && compoundTag.contains("RootVehicle", 10)) {
-			CompoundTag compoundTag2 = compoundTag.getCompound("RootVehicle");
+		if (optional.isPresent() && ((CompoundTag)optional.get()).contains("RootVehicle", 10)) {
+			CompoundTag compoundTag = ((CompoundTag)optional.get()).getCompound("RootVehicle");
 			Entity entity = EntityType.loadEntityRecursive(
-				compoundTag2.getCompound("Entity"), serverLevel2, entityx -> !serverLevel2.addWithUUID(entityx) ? null : entityx
+				compoundTag.getCompound("Entity"), serverLevel2, entityx -> !serverLevel2.addWithUUID(entityx) ? null : entityx
 			);
 			if (entity != null) {
 				UUID uUID;
-				if (compoundTag2.hasUUID("Attach")) {
-					uUID = compoundTag2.getUUID("Attach");
+				if (compoundTag.hasUUID("Attach")) {
+					uUID = compoundTag.getUUID("Attach");
 				} else {
 					uUID = null;
 				}
@@ -322,19 +321,18 @@ public abstract class PlayerList {
 		});
 	}
 
-	@Nullable
-	public CompoundTag load(ServerPlayer serverPlayer) {
+	public Optional<CompoundTag> load(ServerPlayer serverPlayer) {
 		CompoundTag compoundTag = this.server.getWorldData().getLoadedPlayerTag();
-		CompoundTag compoundTag2;
+		Optional<CompoundTag> optional;
 		if (this.server.isSingleplayerOwner(serverPlayer.getGameProfile()) && compoundTag != null) {
-			compoundTag2 = compoundTag;
+			optional = Optional.of(compoundTag);
 			serverPlayer.load(compoundTag);
 			LOGGER.debug("loading single player");
 		} else {
-			compoundTag2 = this.playerIo.load(serverPlayer);
+			optional = this.playerIo.load(serverPlayer);
 		}
 
-		return compoundTag2;
+		return optional;
 	}
 
 	protected void save(ServerPlayer serverPlayer) {

@@ -64,7 +64,6 @@ import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.joml.Vector3f;
 
 public class Zombie extends Monster {
 	private static final UUID SPEED_MODIFIER_BABY_UUID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
@@ -78,7 +77,7 @@ public class Zombie extends Monster {
 	public static final int REINFORCEMENT_ATTEMPTS = 50;
 	public static final int REINFORCEMENT_RANGE_MAX = 40;
 	public static final int REINFORCEMENT_RANGE_MIN = 7;
-	protected static final float BABY_EYE_HEIGHT_ADJUSTMENT = 0.81F;
+	private static final EntityDimensions BABY_DIMENSIONS = EntityType.ZOMBIE.getDimensions().scale(0.5F).withEyeHeight(0.93F);
 	private static final float BREAK_DOOR_CHANCE = 0.1F;
 	private static final Predicate<Difficulty> DOOR_BREAKING_PREDICATE = difficulty -> difficulty == Difficulty.HARD;
 	private final BreakDoorGoal breakDoorGoal = new BreakDoorGoal(this, DOOR_BREAKING_PREDICATE);
@@ -429,8 +428,8 @@ public class Zombie extends Monster {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return this.isBaby() ? 0.93F : 1.74F;
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.isBaby() ? BABY_DIMENSIONS : super.getDefaultDimensions(pose);
 	}
 
 	@Override
@@ -530,16 +529,6 @@ public class Zombie extends Monster {
 
 	protected void randomizeReinforcementsChance() {
 		this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).setBaseValue(this.random.nextDouble() * 0.1F);
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + 0.0625F * f, 0.0F);
-	}
-
-	@Override
-	protected float ridingOffset(Entity entity) {
-		return -0.7F;
 	}
 
 	@Override

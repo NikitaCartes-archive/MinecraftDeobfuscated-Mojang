@@ -9,11 +9,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -118,11 +116,6 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 		if (entity instanceof PrimedTnt primedTnt) {
 			this.owner = primedTnt.owner;
 		}
-	}
-
-	@Override
-	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.15F;
 	}
 
 	public void setFuse(int i) {

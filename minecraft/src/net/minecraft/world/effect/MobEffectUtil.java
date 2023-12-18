@@ -2,6 +2,7 @@ package net.minecraft.world.effect;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,15 +47,15 @@ public final class MobEffectUtil {
 	public static List<ServerPlayer> addEffectToPlayersAround(
 		ServerLevel serverLevel, @Nullable Entity entity, Vec3 vec3, double d, MobEffectInstance mobEffectInstance, int i
 	) {
-		MobEffect mobEffect = mobEffectInstance.getEffect();
+		Holder<MobEffect> holder = mobEffectInstance.getEffect();
 		List<ServerPlayer> list = serverLevel.getPlayers(
 			serverPlayer -> serverPlayer.gameMode.isSurvival()
 					&& (entity == null || !entity.isAlliedTo(serverPlayer))
 					&& vec3.closerThan(serverPlayer.position(), d)
 					&& (
-						!serverPlayer.hasEffect(mobEffect)
-							|| serverPlayer.getEffect(mobEffect).getAmplifier() < mobEffectInstance.getAmplifier()
-							|| serverPlayer.getEffect(mobEffect).endsWithin(i - 1)
+						!serverPlayer.hasEffect(holder)
+							|| serverPlayer.getEffect(holder).getAmplifier() < mobEffectInstance.getAmplifier()
+							|| serverPlayer.getEffect(holder).endsWithin(i - 1)
 					)
 		);
 		list.forEach(serverPlayer -> serverPlayer.addEffect(new MobEffectInstance(mobEffectInstance), entity));

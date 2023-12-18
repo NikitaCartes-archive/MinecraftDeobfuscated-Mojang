@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -28,11 +29,9 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.NeutralMob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -68,7 +67,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class EnderMan extends Monster implements NeutralMob {
 	private static final UUID SPEED_MODIFIER_ATTACKING_UUID = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
@@ -91,7 +89,6 @@ public class EnderMan extends Monster implements NeutralMob {
 
 	public EnderMan(EntityType<? extends EnderMan> entityType, Level level) {
 		super(entityType, level);
-		this.setMaxUpStep(1.0F);
 		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
 	}
 
@@ -116,7 +113,8 @@ public class EnderMan extends Monster implements NeutralMob {
 			.add(Attributes.MAX_HEALTH, 40.0)
 			.add(Attributes.MOVEMENT_SPEED, 0.3F)
 			.add(Attributes.ATTACK_DAMAGE, 7.0)
-			.add(Attributes.FOLLOW_RANGE, 64.0);
+			.add(Attributes.FOLLOW_RANGE, 64.0)
+			.add(Attributes.STEP_HEIGHT, 1.0);
 	}
 
 	@Override
@@ -227,16 +225,6 @@ public class EnderMan extends Monster implements NeutralMob {
 			double e = vec3.dot(vec32);
 			return e > 1.0 - 0.025 / d ? player.hasLineOfSight(this) : false;
 		}
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 2.55F;
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height - 0.09375F * f, 0.0F);
 	}
 
 	@Override
@@ -401,9 +389,9 @@ public class EnderMan extends Monster implements NeutralMob {
 
 	private boolean hurtWithCleanWater(DamageSource damageSource, ThrownPotion thrownPotion, float f) {
 		ItemStack itemStack = thrownPotion.getItem();
-		Potion potion = PotionUtils.getPotion(itemStack);
+		Holder<Potion> holder = PotionUtils.getPotion(itemStack);
 		List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-		boolean bl = potion == Potions.WATER && list.isEmpty();
+		boolean bl = holder.is(Potions.WATER) && list.isEmpty();
 		return bl ? super.hurt(damageSource, f) : false;
 	}
 

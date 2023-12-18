@@ -62,7 +62,7 @@ public class ArmorTrim {
 	}
 
 	public boolean hasPatternAndMaterial(Holder<TrimPattern> holder, Holder<TrimMaterial> holder2) {
-		return holder == this.pattern && holder2 == this.material;
+		return holder.equals(this.pattern) && holder2.equals(this.material);
 	}
 
 	public Holder<TrimPattern> pattern() {
@@ -82,7 +82,7 @@ public class ArmorTrim {
 	}
 
 	public boolean equals(Object object) {
-		return !(object instanceof ArmorTrim armorTrim) ? false : armorTrim.pattern == this.pattern && armorTrim.material == this.material;
+		return !(object instanceof ArmorTrim armorTrim) ? false : this.pattern.equals(armorTrim.pattern) && this.material.equals(armorTrim.material);
 	}
 
 	public static boolean setTrim(RegistryAccess registryAccess, ItemStack itemStack, ArmorTrim armorTrim) {

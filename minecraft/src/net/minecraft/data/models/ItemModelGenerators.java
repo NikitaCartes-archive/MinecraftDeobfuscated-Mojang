@@ -326,7 +326,9 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SADDLE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SALMON, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SALMON_BUCKET, ModelTemplates.FLAT_ITEM);
-		this.generateFlatItem(Items.SCUTE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.TURTLE_SCUTE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.ARMADILLO_SCUTE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.WOLF_ARMOR, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SHEARS, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SHULKER_SHELL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SKULL_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);

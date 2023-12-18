@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HangingSignItem;
 import net.minecraft.world.item.ItemStack;
@@ -61,17 +61,15 @@ public class WallHangingSignBlock extends SignBlock {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
-			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (this.shouldTryToChainAnotherHangingSign(blockState, player, blockHitResult, signBlockEntity, itemStack)) {
-				return InteractionResult.PASS;
-			}
+		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity
+			&& this.shouldTryToChainAnotherHangingSign(blockState, player, blockHitResult, signBlockEntity, itemStack)) {
+			return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
 		}
 
-		return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
+		return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
 	}
 
 	private boolean shouldTryToChainAnotherHangingSign(

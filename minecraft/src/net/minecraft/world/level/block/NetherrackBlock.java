@@ -70,4 +70,9 @@ public class NetherrackBlock extends Block implements BonemealableBlock {
 			serverLevel.setBlock(blockPos, Blocks.CRIMSON_NYLIUM.defaultBlockState(), 3);
 		}
 	}
+
+	@Override
+	public BonemealableBlock.Type getType() {
+		return BonemealableBlock.Type.NEIGHBOR_SPREADER;
+	}
 }

@@ -119,7 +119,7 @@ public class DebugCommand {
 					for (final CommandFunction<CommandSourceStack> commandFunction : collection) {
 						try {
 							CommandSourceStack commandSourceStack2 = commandSourceStack.withSource(tracer).withMaximumPermission(2);
-							InstantiatedFunction<CommandSourceStack> instantiatedFunction = commandFunction.instantiate(null, commandDispatcher, commandSourceStack2);
+							InstantiatedFunction<CommandSourceStack> instantiatedFunction = commandFunction.instantiate(null, commandDispatcher);
 							executionControl.queueNext((new CallFunction<CommandSourceStack>(instantiatedFunction, CommandResultCallback.EMPTY, false) {
 								public void execute(CommandSourceStack commandSourceStack, ExecutionContext<CommandSourceStack> executionContext, Frame frame) {
 									printWriter.println(commandFunction.id());

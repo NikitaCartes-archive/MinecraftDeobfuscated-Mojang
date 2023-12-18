@@ -36,14 +36,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -600,11 +598,6 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return this.isBaby() ? entityDimensions.height * 0.5F : entityDimensions.height * 0.5F;
-	}
-
-	@Override
 	protected void checkFallDamage(double d, boolean bl, BlockState blockState, BlockPos blockPos) {
 	}
 
@@ -966,7 +959,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 						}
 
 						if (blockState2 != null) {
-							Bee.this.level().levelEvent(2005, blockPos, 0);
+							Bee.this.level().levelEvent(2011, blockPos, 15);
 							Bee.this.level().setBlockAndUpdate(blockPos, blockState2);
 							Bee.this.incrementNumCropsGrownSincePollination();
 						}

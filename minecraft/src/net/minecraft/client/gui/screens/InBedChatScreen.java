@@ -59,12 +59,9 @@ public class InBedChatScreen extends ChatScreen {
 		} else if (i != 257 && i != 335) {
 			return super.keyPressed(i, j, k);
 		} else {
-			if (this.handleChatInput(this.input.getValue(), true)) {
-				this.minecraft.setScreen(null);
-				this.input.setValue("");
-				this.minecraft.gui.getChat().resetChatScroll();
-			}
-
+			this.handleChatInput(this.input.getValue(), true);
+			this.input.setValue("");
+			this.minecraft.gui.getChat().resetChatScroll();
 			return true;
 		}
 	}

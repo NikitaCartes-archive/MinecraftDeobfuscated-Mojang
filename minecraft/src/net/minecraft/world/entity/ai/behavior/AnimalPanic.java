@@ -34,13 +34,15 @@ public class AnimalPanic extends Behavior<PathfinderMob> {
 	}
 
 	public AnimalPanic(float f, Predicate<PathfinderMob> predicate) {
-		super(ImmutableMap.of(MemoryModuleType.IS_PANICKING, MemoryStatus.REGISTERED, MemoryModuleType.HURT_BY, MemoryStatus.VALUE_PRESENT), 100, 120);
+		super(ImmutableMap.of(MemoryModuleType.IS_PANICKING, MemoryStatus.REGISTERED, MemoryModuleType.HURT_BY, MemoryStatus.REGISTERED), 100, 120);
 		this.speedMultiplier = f;
 		this.shouldPanic = predicate;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-		return this.shouldPanic.test(pathfinderMob);
+		return pathfinderMob.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY)
+			|| this.shouldPanic.test(pathfinderMob)
+			|| pathfinderMob.getBrain().hasMemoryValue(MemoryModuleType.IS_PANICKING);
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {

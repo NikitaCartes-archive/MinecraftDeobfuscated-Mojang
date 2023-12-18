@@ -513,6 +513,13 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		this.setZza(f);
 	}
 
+	public void stopInPlace() {
+		this.getNavigation().stop();
+		this.setXxa(0.0F);
+		this.setYya(0.0F);
+		this.setSpeed(0.0F);
+	}
+
 	@Override
 	public void aiStep() {
 		super.aiStep();

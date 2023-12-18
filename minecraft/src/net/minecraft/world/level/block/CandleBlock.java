@@ -12,8 +12,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -67,14 +68,14 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if (player.getAbilities().mayBuild && player.getItemInHand(interactionHand).isEmpty() && (Boolean)blockState.getValue(LIT)) {
+		if (itemStack.isEmpty() && player.getAbilities().mayBuild && (Boolean)blockState.getValue(LIT)) {
 			extinguish(player, blockState, level, blockPos);
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		} else {
-			return InteractionResult.PASS;
+			return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
 	}
 

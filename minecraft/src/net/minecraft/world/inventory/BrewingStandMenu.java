@@ -1,6 +1,7 @@
 package net.minecraft.world.inventory;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -176,9 +177,9 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 
 		@Override
 		public void onTake(Player player, ItemStack itemStack) {
-			Potion potion = PotionUtils.getPotion(itemStack);
+			Holder<Potion> holder = PotionUtils.getPotion(itemStack);
 			if (player instanceof ServerPlayer) {
-				CriteriaTriggers.BREWED_POTION.trigger((ServerPlayer)player, potion.builtInRegistryHolder());
+				CriteriaTriggers.BREWED_POTION.trigger((ServerPlayer)player, holder);
 			}
 
 			super.onTake(player, itemStack);

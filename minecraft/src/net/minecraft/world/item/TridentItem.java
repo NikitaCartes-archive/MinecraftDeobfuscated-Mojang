@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -29,11 +30,11 @@ public class TridentItem extends Item implements Vanishable {
 	public static final int THROW_THRESHOLD_TIME = 10;
 	public static final float BASE_DAMAGE = 8.0F;
 	public static final float SHOOT_POWER = 2.5F;
-	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
+	private final Multimap<Holder<Attribute>, AttributeModifier> defaultModifiers;
 
 	public TridentItem(Item.Properties properties) {
 		super(properties);
-		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
 		builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", 8.0, AttributeModifier.Operation.ADDITION));
 		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", -2.9F, AttributeModifier.Operation.ADDITION));
 		this.defaultModifiers = builder.build();
@@ -142,7 +143,7 @@ public class TridentItem extends Item implements Vanishable {
 	}
 
 	@Override
-	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
 		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 

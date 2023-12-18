@@ -10,12 +10,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -93,16 +91,6 @@ public class WitherSkeleton extends AbstractSkeleton {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 2.1F;
-	}
-
-	@Override
-	protected float ridingOffset(Entity entity) {
-		return -0.875F;
-	}
-
-	@Override
 	public boolean doHurtTarget(Entity entity) {
 		if (!super.doHurtTarget(entity)) {
 			return false;
@@ -124,6 +112,6 @@ public class WitherSkeleton extends AbstractSkeleton {
 
 	@Override
 	public boolean canBeAffected(MobEffectInstance mobEffectInstance) {
-		return mobEffectInstance.getEffect() == MobEffects.WITHER ? false : super.canBeAffected(mobEffectInstance);
+		return mobEffectInstance.is(MobEffects.WITHER) ? false : super.canBeAffected(mobEffectInstance);
 	}
 }

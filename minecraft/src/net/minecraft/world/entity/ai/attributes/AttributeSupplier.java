@@ -1,53 +1,52 @@
 package net.minecraft.world.entity.ai.attributes;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 
 public class AttributeSupplier {
-	private final Map<Attribute, AttributeInstance> instances;
+	private final Map<Holder<Attribute>, AttributeInstance> instances;
 
-	public AttributeSupplier(Map<Attribute, AttributeInstance> map) {
-		this.instances = ImmutableMap.copyOf(map);
+	AttributeSupplier(Map<Holder<Attribute>, AttributeInstance> map) {
+		this.instances = map;
 	}
 
-	private AttributeInstance getAttributeInstance(Attribute attribute) {
-		AttributeInstance attributeInstance = (AttributeInstance)this.instances.get(attribute);
+	private AttributeInstance getAttributeInstance(Holder<Attribute> holder) {
+		AttributeInstance attributeInstance = (AttributeInstance)this.instances.get(holder);
 		if (attributeInstance == null) {
-			throw new IllegalArgumentException("Can't find attribute " + BuiltInRegistries.ATTRIBUTE.getKey(attribute));
+			throw new IllegalArgumentException("Can't find attribute " + holder.getRegisteredName());
 		} else {
 			return attributeInstance;
 		}
 	}
 
-	public double getValue(Attribute attribute) {
-		return this.getAttributeInstance(attribute).getValue();
+	public double getValue(Holder<Attribute> holder) {
+		return this.getAttributeInstance(holder).getValue();
 	}
 
-	public double getBaseValue(Attribute attribute) {
-		return this.getAttributeInstance(attribute).getBaseValue();
+	public double getBaseValue(Holder<Attribute> holder) {
+		return this.getAttributeInstance(holder).getBaseValue();
 	}
 
-	public double getModifierValue(Attribute attribute, UUID uUID) {
-		AttributeModifier attributeModifier = this.getAttributeInstance(attribute).getModifier(uUID);
+	public double getModifierValue(Holder<Attribute> holder, UUID uUID) {
+		AttributeModifier attributeModifier = this.getAttributeInstance(holder).getModifier(uUID);
 		if (attributeModifier == null) {
-			throw new IllegalArgumentException("Can't find modifier " + uUID + " on attribute " + BuiltInRegistries.ATTRIBUTE.getKey(attribute));
+			throw new IllegalArgumentException("Can't find modifier " + uUID + " on attribute " + holder.getRegisteredName());
 		} else {
 			return attributeModifier.getAmount();
 		}
 	}
 
 	@Nullable
-	public AttributeInstance createInstance(Consumer<AttributeInstance> consumer, Attribute attribute) {
-		AttributeInstance attributeInstance = (AttributeInstance)this.instances.get(attribute);
+	public AttributeInstance createInstance(Consumer<AttributeInstance> consumer, Holder<Attribute> holder) {
+		AttributeInstance attributeInstance = (AttributeInstance)this.instances.get(holder);
 		if (attributeInstance == null) {
 			return null;
 		} else {
-			AttributeInstance attributeInstance2 = new AttributeInstance(attribute, consumer);
+			AttributeInstance attributeInstance2 = new AttributeInstance(holder, consumer);
 			attributeInstance2.replaceFrom(attributeInstance);
 			return attributeInstance2;
 		}
@@ -57,43 +56,43 @@ public class AttributeSupplier {
 		return new AttributeSupplier.Builder();
 	}
 
-	public boolean hasAttribute(Attribute attribute) {
-		return this.instances.containsKey(attribute);
+	public boolean hasAttribute(Holder<Attribute> holder) {
+		return this.instances.containsKey(holder);
 	}
 
-	public boolean hasModifier(Attribute attribute, UUID uUID) {
-		AttributeInstance attributeInstance = (AttributeInstance)this.instances.get(attribute);
+	public boolean hasModifier(Holder<Attribute> holder, UUID uUID) {
+		AttributeInstance attributeInstance = (AttributeInstance)this.instances.get(holder);
 		return attributeInstance != null && attributeInstance.getModifier(uUID) != null;
 	}
 
 	public static class Builder {
-		private final Map<Attribute, AttributeInstance> builder = Maps.<Attribute, AttributeInstance>newHashMap();
+		private final ImmutableMap.Builder<Holder<Attribute>, AttributeInstance> builder = ImmutableMap.builder();
 		private boolean instanceFrozen;
 
-		private AttributeInstance create(Attribute attribute) {
-			AttributeInstance attributeInstance = new AttributeInstance(attribute, attributeInstancex -> {
+		private AttributeInstance create(Holder<Attribute> holder) {
+			AttributeInstance attributeInstance = new AttributeInstance(holder, attributeInstancex -> {
 				if (this.instanceFrozen) {
-					throw new UnsupportedOperationException("Tried to change value for default attribute instance: " + BuiltInRegistries.ATTRIBUTE.getKey(attribute));
+					throw new UnsupportedOperationException("Tried to change value for default attribute instance: " + holder.getRegisteredName());
 				}
 			});
-			this.builder.put(attribute, attributeInstance);
+			this.builder.put(holder, attributeInstance);
 			return attributeInstance;
 		}
 
-		public AttributeSupplier.Builder add(Attribute attribute) {
-			this.create(attribute);
+		public AttributeSupplier.Builder add(Holder<Attribute> holder) {
+			this.create(holder);
 			return this;
 		}
 
-		public AttributeSupplier.Builder add(Attribute attribute, double d) {
-			AttributeInstance attributeInstance = this.create(attribute);
+		public AttributeSupplier.Builder add(Holder<Attribute> holder, double d) {
+			AttributeInstance attributeInstance = this.create(holder);
 			attributeInstance.setBaseValue(d);
 			return this;
 		}
 
 		public AttributeSupplier build() {
 			this.instanceFrozen = true;
-			return new AttributeSupplier(this.builder);
+			return new AttributeSupplier(this.builder.buildKeepingLast());
 		}
 	}
 }

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -387,7 +388,7 @@ public class VillagerTrades {
 						},
 						4,
 						new VillagerTrades.ItemListing[]{
-							new VillagerTrades.EmeraldForItems(Items.SCUTE, 4, 12, 30),
+							new VillagerTrades.EmeraldForItems(Items.TURTLE_SCUTE, 4, 12, 30),
 							new VillagerTrades.EmeraldForItems(Items.GLASS_BOTTLE, 9, 12, 30),
 							new VillagerTrades.ItemsForEmeralds(Items.ENDER_PEARL, 5, 1, 15)
 						},
@@ -546,7 +547,7 @@ public class VillagerTrades {
 						},
 						4,
 						new VillagerTrades.ItemListing[]{
-							new VillagerTrades.EmeraldForItems(Items.SCUTE, 4, 12, 30), new VillagerTrades.DyedArmorForEmeralds(Items.LEATHER_HORSE_ARMOR, 6, 12, 15)
+							new VillagerTrades.EmeraldForItems(Items.TURTLE_SCUTE, 4, 12, 30), new VillagerTrades.DyedArmorForEmeralds(Items.LEATHER_HORSE_ARMOR, 6, 12, 15)
 						},
 						5,
 						new VillagerTrades.ItemListing[]{
@@ -1194,8 +1195,8 @@ public class VillagerTrades {
 		return new Int2ObjectOpenHashMap<>(immutableMap);
 	}
 
-	private static ItemStack potion(Potion potion) {
-		return PotionUtils.setPotion(new ItemStack(Items.POTION), potion);
+	private static ItemStack potion(Holder<Potion> holder) {
+		return PotionUtils.setPotion(new ItemStack(Items.POTION), holder);
 	}
 
 	private static ItemStack enchant(Item item, Enchantment enchantment, int i) {
@@ -1463,8 +1464,8 @@ public class VillagerTrades {
 		private final int xp;
 		private final float priceMultiplier;
 
-		public SuspiciousStewForEmerald(MobEffect mobEffect, int i, int j) {
-			this(List.of(new SuspiciousEffectHolder.EffectEntry(mobEffect, i)), j, 0.05F);
+		public SuspiciousStewForEmerald(Holder<MobEffect> holder, int i, int j) {
+			this(List.of(new SuspiciousEffectHolder.EffectEntry(holder, i)), j, 0.05F);
 		}
 
 		public SuspiciousStewForEmerald(List<SuspiciousEffectHolder.EffectEntry> list, int i, float f) {
@@ -1506,12 +1507,12 @@ public class VillagerTrades {
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(Items.EMERALD, this.emeraldCost);
-			List<Potion> list = (List<Potion>)BuiltInRegistries.POTION
-				.stream()
-				.filter(potionx -> !potionx.getEffects().isEmpty() && PotionBrewing.isBrewablePotion(potionx))
+			List<Holder<Potion>> list = (List<Holder<Potion>>)BuiltInRegistries.POTION
+				.holders()
+				.filter(reference -> !((Potion)reference.value()).getEffects().isEmpty() && PotionBrewing.isBrewablePotion(reference))
 				.collect(Collectors.toList());
-			Potion potion = (Potion)list.get(randomSource.nextInt(list.size()));
-			ItemStack itemStack2 = PotionUtils.setPotion(new ItemStack(this.toItem.getItem(), this.toCount), potion);
+			Holder<Potion> holder = Util.getRandom(list, randomSource);
+			ItemStack itemStack2 = PotionUtils.setPotion(new ItemStack(this.toItem.getItem(), this.toCount), holder);
 			return new MerchantOffer(itemStack, new ItemStack(this.fromItem, this.fromCount), itemStack2, this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
 	}

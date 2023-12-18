@@ -46,7 +46,7 @@ public enum ArmorMaterials implements StringRepresentable, ArmorMaterial {
 		enumMap.put(ArmorItem.Type.LEGGINGS, 5);
 		enumMap.put(ArmorItem.Type.CHESTPLATE, 6);
 		enumMap.put(ArmorItem.Type.HELMET, 2);
-	}), 9, SoundEvents.ARMOR_EQUIP_TURTLE, 0.0F, 0.0F, () -> Ingredient.of(Items.SCUTE)),
+	}), 9, SoundEvents.ARMOR_EQUIP_TURTLE, 0.0F, 0.0F, () -> Ingredient.of(Items.TURTLE_SCUTE)),
 	NETHERITE("netherite", 37, Util.make(new EnumMap(ArmorItem.Type.class), enumMap -> {
 		enumMap.put(ArmorItem.Type.BOOTS, 3);
 		enumMap.put(ArmorItem.Type.LEGGINGS, 6);

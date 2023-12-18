@@ -7,6 +7,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 public class ParticleUtils {
@@ -69,5 +70,28 @@ public class ParticleUtils {
 		double e = (double)blockPos.getY() - 0.05;
 		double f = (double)blockPos.getZ() + randomSource.nextDouble();
 		level.addParticle(particleOptions, d, e, f, 0.0, 0.0, 0.0);
+	}
+
+	public static void spawnParticleInBlock(LevelAccessor levelAccessor, BlockPos blockPos, int i, ParticleOptions particleOptions) {
+		double d = 0.5;
+		double e = levelAccessor.getBlockState(blockPos).getShape(levelAccessor, blockPos).max(Direction.Axis.Y);
+		spawnParticles(levelAccessor, blockPos, i, 0.5, e, true, particleOptions);
+	}
+
+	public static void spawnParticles(LevelAccessor levelAccessor, BlockPos blockPos, int i, double d, double e, boolean bl, ParticleOptions particleOptions) {
+		RandomSource randomSource = levelAccessor.getRandom();
+
+		for (int j = 0; j < i; j++) {
+			double f = randomSource.nextGaussian() * 0.02;
+			double g = randomSource.nextGaussian() * 0.02;
+			double h = randomSource.nextGaussian() * 0.02;
+			double k = 0.5 - d;
+			double l = (double)blockPos.getX() + k + randomSource.nextDouble() * d * 2.0;
+			double m = (double)blockPos.getY() + randomSource.nextDouble() * e;
+			double n = (double)blockPos.getZ() + k + randomSource.nextDouble() * d * 2.0;
+			if (bl || !levelAccessor.getBlockState(BlockPos.containing(l, m, n).below()).isAir()) {
+				levelAccessor.addParticle(particleOptions, l, m, n, f, g, h);
+			}
+		}
 	}
 }

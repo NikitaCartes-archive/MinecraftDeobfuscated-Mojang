@@ -28,10 +28,10 @@ import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.numbers.NumberFormat;
@@ -121,7 +121,6 @@ public class Gui {
 	private static final float AUTOSAVE_FADE_SPEED_FACTOR = 0.2F;
 	private final RandomSource random = RandomSource.create();
 	private final Minecraft minecraft;
-	private final ItemRenderer itemRenderer;
 	private final ChatComponent chat;
 	private int tickCount;
 	@Nullable
@@ -149,15 +148,13 @@ public class Gui {
 	private int displayHealth;
 	private long lastHealthTime;
 	private long healthBlinkTime;
-	private int screenWidth;
-	private int screenHeight;
 	private float autosaveIndicatorValue;
 	private float lastAutosaveIndicatorValue;
+	private final LayeredDraw layers = new LayeredDraw();
 	private float scopeScale;
 
-	public Gui(Minecraft minecraft, ItemRenderer itemRenderer) {
+	public Gui(Minecraft minecraft) {
 		this.minecraft = minecraft;
-		this.itemRenderer = itemRenderer;
 		this.debugOverlay = new DebugScreenOverlay(minecraft);
 		this.spectatorGui = new SpectatorGui(minecraft);
 		this.chat = new ChatComponent(minecraft);
@@ -165,6 +162,27 @@ public class Gui {
 		this.bossOverlay = new BossHealthOverlay(minecraft);
 		this.subtitleOverlay = new SubtitleOverlay(minecraft);
 		this.resetTitleTimes();
+		LayeredDraw layeredDraw = new LayeredDraw()
+			.add(this::renderCameraOverlays)
+			.add(this::renderCrosshair)
+			.add(this::renderHotbarAndDecorations)
+			.add(this::renderEffects)
+			.add((guiGraphics, f) -> this.bossOverlay.render(guiGraphics));
+		LayeredDraw layeredDraw2 = new LayeredDraw()
+			.add(this::renderDemoOverlay)
+			.add((guiGraphics, f) -> {
+				if (this.debugOverlay.showDebugScreen()) {
+					this.debugOverlay.render(guiGraphics);
+				}
+			})
+			.add(this::renderScoreboardSidebar)
+			.add(this::renderOverlayMessage)
+			.add(this::renderTitle)
+			.add(this::renderChat)
+			.add(this::renderTabList)
+			.add((guiGraphics, f) -> this.subtitleOverlay.render(guiGraphics))
+			.add(this::renderSavingIndicator);
+		this.layers.add(layeredDraw, () -> !minecraft.options.hideGui).add(this::renderSleepOverlay).add(layeredDraw2, () -> !minecraft.options.hideGui);
 	}
 
 	public void resetTitleTimes() {
@@ -174,15 +192,14 @@ public class Gui {
 	}
 
 	public void render(GuiGraphics guiGraphics, float f) {
-		Window window = this.minecraft.getWindow();
-		this.screenWidth = guiGraphics.guiWidth();
-		this.screenHeight = guiGraphics.guiHeight();
-		Font font = this.getFont();
-		RenderSystem.enableBlend();
+		RenderSystem.enableDepthTest();
+		this.layers.render(guiGraphics, f);
+		RenderSystem.disableDepthTest();
+	}
+
+	private void renderCameraOverlays(GuiGraphics guiGraphics, float f) {
 		if (Minecraft.useFancyGraphics()) {
 			this.renderVignette(guiGraphics, this.minecraft.getCameraEntity());
-		} else {
-			RenderSystem.enableDepthTest();
 		}
 
 		float g = this.minecraft.getDeltaFrameTime();
@@ -207,162 +224,129 @@ public class Gui {
 		if (h > 0.0F && !this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
 			this.renderPortalOverlay(guiGraphics, h);
 		}
+	}
 
-		if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
-			this.spectatorGui.renderHotbar(guiGraphics);
-		} else if (!this.minecraft.options.hideGui) {
-			this.renderHotbar(f, guiGraphics);
-		}
-
-		if (!this.minecraft.options.hideGui) {
-			RenderSystem.enableBlend();
-			this.renderCrosshair(guiGraphics);
-			this.minecraft.getProfiler().push("bossHealth");
-			this.bossOverlay.render(guiGraphics);
-			this.minecraft.getProfiler().pop();
-			if (this.minecraft.gameMode.canHurtPlayer()) {
-				this.renderPlayerHealth(guiGraphics);
-			}
-
-			this.renderVehicleHealth(guiGraphics);
-			RenderSystem.disableBlend();
-			int i = this.screenWidth / 2 - 91;
-			PlayerRideableJumping playerRideableJumping = this.minecraft.player.jumpableVehicle();
-			if (playerRideableJumping != null) {
-				this.renderJumpMeter(playerRideableJumping, guiGraphics, i);
-			} else if (this.minecraft.gameMode.hasExperience()) {
-				this.renderExperienceBar(guiGraphics, i);
-			}
-
-			if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
-				this.renderSelectedItemName(guiGraphics);
-			} else if (this.minecraft.player.isSpectator()) {
-				this.spectatorGui.renderTooltip(guiGraphics);
-			}
-		}
-
+	private void renderSleepOverlay(GuiGraphics guiGraphics, float f) {
 		if (this.minecraft.player.getSleepTimer() > 0) {
 			this.minecraft.getProfiler().push("sleep");
-			float j = (float)this.minecraft.player.getSleepTimer();
-			float k = j / 100.0F;
-			if (k > 1.0F) {
-				k = 1.0F - (j - 100.0F) / 10.0F;
+			float g = (float)this.minecraft.player.getSleepTimer();
+			float h = g / 100.0F;
+			if (h > 1.0F) {
+				h = 1.0F - (g - 100.0F) / 10.0F;
 			}
 
-			int l = (int)(220.0F * k) << 24 | 1052704;
-			guiGraphics.fill(RenderType.guiOverlay(), 0, 0, this.screenWidth, this.screenHeight, l);
+			int i = (int)(220.0F * h) << 24 | 1052704;
+			guiGraphics.fill(RenderType.guiOverlay(), 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(), i);
 			this.minecraft.getProfiler().pop();
 		}
+	}
 
-		if (this.minecraft.isDemo()) {
-			this.renderDemoOverlay(guiGraphics);
-		}
-
-		this.renderEffects(guiGraphics);
-		if (this.debugOverlay.showDebugScreen()) {
-			this.debugOverlay.render(guiGraphics);
-		}
-
-		if (!this.minecraft.options.hideGui) {
-			if (this.overlayMessageString != null && this.overlayMessageTime > 0) {
-				this.minecraft.getProfiler().push("overlayMessage");
-				float j = (float)this.overlayMessageTime - f;
-				int m = (int)(j * 255.0F / 20.0F);
-				if (m > 255) {
-					m = 255;
-				}
-
-				if (m > 8) {
-					guiGraphics.pose().pushPose();
-					guiGraphics.pose().translate((float)(this.screenWidth / 2), (float)(this.screenHeight - 68), 0.0F);
-					int l = 16777215;
-					if (this.animateOverlayMessageColor) {
-						l = Mth.hsvToRgb(j / 50.0F, 0.7F, 0.6F) & 16777215;
-					}
-
-					int n = m << 24 & 0xFF000000;
-					int o = font.width(this.overlayMessageString);
-					this.drawBackdrop(guiGraphics, font, -4, o, 16777215 | n);
-					guiGraphics.drawString(font, this.overlayMessageString, -o / 2, -4, l | n);
-					guiGraphics.pose().popPose();
-				}
-
-				this.minecraft.getProfiler().pop();
+	private void renderOverlayMessage(GuiGraphics guiGraphics, float f) {
+		Font font = this.getFont();
+		if (this.overlayMessageString != null && this.overlayMessageTime > 0) {
+			this.minecraft.getProfiler().push("overlayMessage");
+			float g = (float)this.overlayMessageTime - f;
+			int i = (int)(g * 255.0F / 20.0F);
+			if (i > 255) {
+				i = 255;
 			}
 
-			if (this.title != null && this.titleTime > 0) {
-				this.minecraft.getProfiler().push("titleAndSubtitle");
-				float jx = (float)this.titleTime - f;
-				int mx = 255;
-				if (this.titleTime > this.titleFadeOutTime + this.titleStayTime) {
-					float p = (float)(this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime) - jx;
-					mx = (int)(p * 255.0F / (float)this.titleFadeInTime);
+			if (i > 8) {
+				guiGraphics.pose().pushPose();
+				guiGraphics.pose().translate((float)(guiGraphics.guiWidth() / 2), (float)(guiGraphics.guiHeight() - 68), 0.0F);
+				int j = 16777215;
+				if (this.animateOverlayMessageColor) {
+					j = Mth.hsvToRgb(g / 50.0F, 0.7F, 0.6F) & 16777215;
 				}
 
-				if (this.titleTime <= this.titleFadeOutTime) {
-					mx = (int)(jx * 255.0F / (float)this.titleFadeOutTime);
-				}
-
-				mx = Mth.clamp(mx, 0, 255);
-				if (mx > 8) {
-					guiGraphics.pose().pushPose();
-					guiGraphics.pose().translate((float)(this.screenWidth / 2), (float)(this.screenHeight / 2), 0.0F);
-					RenderSystem.enableBlend();
-					guiGraphics.pose().pushPose();
-					guiGraphics.pose().scale(4.0F, 4.0F, 4.0F);
-					int l = mx << 24 & 0xFF000000;
-					int n = font.width(this.title);
-					this.drawBackdrop(guiGraphics, font, -10, n, 16777215 | l);
-					guiGraphics.drawString(font, this.title, -n / 2, -10, 16777215 | l);
-					guiGraphics.pose().popPose();
-					if (this.subtitle != null) {
-						guiGraphics.pose().pushPose();
-						guiGraphics.pose().scale(2.0F, 2.0F, 2.0F);
-						int o = font.width(this.subtitle);
-						this.drawBackdrop(guiGraphics, font, 5, o, 16777215 | l);
-						guiGraphics.drawString(font, this.subtitle, -o / 2, 5, 16777215 | l);
-						guiGraphics.pose().popPose();
-					}
-
-					RenderSystem.disableBlend();
-					guiGraphics.pose().popPose();
-				}
-
-				this.minecraft.getProfiler().pop();
+				int k = i << 24 & 0xFF000000;
+				int l = font.width(this.overlayMessageString);
+				this.drawBackdrop(guiGraphics, font, -4, l, 16777215 | k);
+				guiGraphics.drawString(font, this.overlayMessageString, -l / 2, -4, j | k);
+				guiGraphics.pose().popPose();
 			}
 
-			this.subtitleOverlay.render(guiGraphics);
-			Scoreboard scoreboard = this.minecraft.level.getScoreboard();
-			Objective objective = null;
-			PlayerTeam playerTeam = scoreboard.getPlayersTeam(this.minecraft.player.getScoreboardName());
-			if (playerTeam != null) {
-				DisplaySlot displaySlot = DisplaySlot.teamColorToSlot(playerTeam.getColor());
-				if (displaySlot != null) {
-					objective = scoreboard.getDisplayObjective(displaySlot);
-				}
-			}
-
-			Objective objective2 = objective != null ? objective : scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
-			if (objective2 != null) {
-				this.displayScoreboardSidebar(guiGraphics, objective2);
-			}
-
-			RenderSystem.enableBlend();
-			int o = Mth.floor(this.minecraft.mouseHandler.xpos() * (double)window.getGuiScaledWidth() / (double)window.getScreenWidth());
-			int q = Mth.floor(this.minecraft.mouseHandler.ypos() * (double)window.getGuiScaledHeight() / (double)window.getScreenHeight());
-			this.minecraft.getProfiler().push("chat");
-			this.chat.render(guiGraphics, this.tickCount, o, q);
 			this.minecraft.getProfiler().pop();
-			objective2 = scoreboard.getDisplayObjective(DisplaySlot.LIST);
-			if (!this.minecraft.options.keyPlayerList.isDown()
-				|| this.minecraft.isLocalServer() && this.minecraft.player.connection.getListedOnlinePlayers().size() <= 1 && objective2 == null) {
-				this.tabList.setVisible(false);
-			} else {
-				this.tabList.setVisible(true);
-				this.tabList.render(guiGraphics, this.screenWidth, scoreboard, objective2);
+		}
+	}
+
+	private void renderTitle(GuiGraphics guiGraphics, float f) {
+		if (this.title != null && this.titleTime > 0) {
+			Font font = this.getFont();
+			this.minecraft.getProfiler().push("titleAndSubtitle");
+			float g = (float)this.titleTime - f;
+			int i = 255;
+			if (this.titleTime > this.titleFadeOutTime + this.titleStayTime) {
+				float h = (float)(this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime) - g;
+				i = (int)(h * 255.0F / (float)this.titleFadeInTime);
 			}
 
-			this.renderSavingIndicator(guiGraphics);
+			if (this.titleTime <= this.titleFadeOutTime) {
+				i = (int)(g * 255.0F / (float)this.titleFadeOutTime);
+			}
+
+			i = Mth.clamp(i, 0, 255);
+			if (i > 8) {
+				guiGraphics.pose().pushPose();
+				guiGraphics.pose().translate((float)(guiGraphics.guiWidth() / 2), (float)(guiGraphics.guiHeight() / 2), 0.0F);
+				guiGraphics.pose().pushPose();
+				guiGraphics.pose().scale(4.0F, 4.0F, 4.0F);
+				int j = i << 24 & 0xFF000000;
+				int k = font.width(this.title);
+				this.drawBackdrop(guiGraphics, font, -10, k, 16777215 | j);
+				guiGraphics.drawString(font, this.title, -k / 2, -10, 16777215 | j);
+				guiGraphics.pose().popPose();
+				if (this.subtitle != null) {
+					guiGraphics.pose().pushPose();
+					guiGraphics.pose().scale(2.0F, 2.0F, 2.0F);
+					int l = font.width(this.subtitle);
+					this.drawBackdrop(guiGraphics, font, 5, l, 16777215 | j);
+					guiGraphics.drawString(font, this.subtitle, -l / 2, 5, 16777215 | j);
+					guiGraphics.pose().popPose();
+				}
+
+				guiGraphics.pose().popPose();
+			}
+
+			this.minecraft.getProfiler().pop();
+		}
+	}
+
+	private void renderChat(GuiGraphics guiGraphics, float f) {
+		if (!this.chat.isChatFocused()) {
+			Window window = this.minecraft.getWindow();
+			int i = Mth.floor(this.minecraft.mouseHandler.xpos() * (double)window.getGuiScaledWidth() / (double)window.getScreenWidth());
+			int j = Mth.floor(this.minecraft.mouseHandler.ypos() * (double)window.getGuiScaledHeight() / (double)window.getScreenHeight());
+			this.chat.render(guiGraphics, this.tickCount, i, j, false);
+		}
+	}
+
+	private void renderScoreboardSidebar(GuiGraphics guiGraphics, float f) {
+		Scoreboard scoreboard = this.minecraft.level.getScoreboard();
+		Objective objective = null;
+		PlayerTeam playerTeam = scoreboard.getPlayersTeam(this.minecraft.player.getScoreboardName());
+		if (playerTeam != null) {
+			DisplaySlot displaySlot = DisplaySlot.teamColorToSlot(playerTeam.getColor());
+			if (displaySlot != null) {
+				objective = scoreboard.getDisplayObjective(displaySlot);
+			}
+		}
+
+		Objective objective2 = objective != null ? objective : scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
+		if (objective2 != null) {
+			this.displayScoreboardSidebar(guiGraphics, objective2);
+		}
+	}
+
+	private void renderTabList(GuiGraphics guiGraphics, float f) {
+		Scoreboard scoreboard = this.minecraft.level.getScoreboard();
+		Objective objective = scoreboard.getDisplayObjective(DisplaySlot.LIST);
+		if (!this.minecraft.options.keyPlayerList.isDown()
+			|| this.minecraft.isLocalServer() && this.minecraft.player.connection.getListedOnlinePlayers().size() <= 1 && objective == null) {
+			this.tabList.setVisible(false);
+		} else {
+			this.tabList.setVisible(true);
+			this.tabList.render(guiGraphics, guiGraphics.guiWidth(), scoreboard, objective);
 		}
 	}
 
@@ -374,16 +358,17 @@ public class Gui {
 		}
 	}
 
-	private void renderCrosshair(GuiGraphics guiGraphics) {
+	private void renderCrosshair(GuiGraphics guiGraphics, float f) {
 		Options options = this.minecraft.options;
 		if (options.getCameraType().isFirstPerson()) {
 			if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR || this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {
+				RenderSystem.enableBlend();
 				if (this.debugOverlay.showDebugScreen() && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo().get()) {
 					Camera camera = this.minecraft.gameRenderer.getMainCamera();
 					PoseStack poseStack = RenderSystem.getModelViewStack();
 					poseStack.pushPose();
 					poseStack.mulPoseMatrix(guiGraphics.pose().last().pose());
-					poseStack.translate((float)(this.screenWidth / 2), (float)(this.screenHeight / 2), 0.0F);
+					poseStack.translate((float)(guiGraphics.guiWidth() / 2), (float)(guiGraphics.guiHeight() / 2), 0.0F);
 					poseStack.mulPose(Axis.XN.rotationDegrees(camera.getXRot()));
 					poseStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot()));
 					poseStack.scale(-1.0F, -1.0F, -1.0F);
@@ -399,21 +384,21 @@ public class Gui {
 						GlStateManager.DestFactor.ZERO
 					);
 					int i = 15;
-					guiGraphics.blitSprite(CROSSHAIR_SPRITE, (this.screenWidth - 15) / 2, (this.screenHeight - 15) / 2, 15, 15);
+					guiGraphics.blitSprite(CROSSHAIR_SPRITE, (guiGraphics.guiWidth() - 15) / 2, (guiGraphics.guiHeight() - 15) / 2, 15, 15);
 					if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.CROSSHAIR) {
-						float f = this.minecraft.player.getAttackStrengthScale(0.0F);
+						float g = this.minecraft.player.getAttackStrengthScale(0.0F);
 						boolean bl = false;
-						if (this.minecraft.crosshairPickEntity != null && this.minecraft.crosshairPickEntity instanceof LivingEntity && f >= 1.0F) {
+						if (this.minecraft.crosshairPickEntity != null && this.minecraft.crosshairPickEntity instanceof LivingEntity && g >= 1.0F) {
 							bl = this.minecraft.player.getCurrentItemAttackStrengthDelay() > 5.0F;
 							bl &= this.minecraft.crosshairPickEntity.isAlive();
 						}
 
-						int j = this.screenHeight / 2 - 7 + 16;
-						int k = this.screenWidth / 2 - 8;
+						int j = guiGraphics.guiHeight() / 2 - 7 + 16;
+						int k = guiGraphics.guiWidth() / 2 - 8;
 						if (bl) {
 							guiGraphics.blitSprite(CROSSHAIR_ATTACK_INDICATOR_FULL_SPRITE, k, j, 16, 16);
-						} else if (f < 1.0F) {
-							int l = (int)(f * 17.0F);
+						} else if (g < 1.0F) {
+							int l = (int)(g * 17.0F);
 							guiGraphics.blitSprite(CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_SPRITE, k, j, 16, 4);
 							guiGraphics.blitSprite(CROSSHAIR_ATTACK_INDICATOR_PROGRESS_SPRITE, 16, 4, 0, 0, k, j, l, 4);
 						}
@@ -421,6 +406,8 @@ public class Gui {
 
 					RenderSystem.defaultBlendFunc();
 				}
+
+				RenderSystem.disableBlend();
 			}
 		}
 	}
@@ -439,7 +426,7 @@ public class Gui {
 		}
 	}
 
-	protected void renderEffects(GuiGraphics guiGraphics) {
+	private void renderEffects(GuiGraphics guiGraphics, float f) {
 		Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
 		if (!collection.isEmpty()) {
 			if (this.minecraft.screen instanceof EffectRenderingInventoryScreen effectRenderingInventoryScreen && effectRenderingInventoryScreen.canSeeEffects()) {
@@ -453,15 +440,15 @@ public class Gui {
 			List<Runnable> list = Lists.<Runnable>newArrayListWithExpectedSize(collection.size());
 
 			for (MobEffectInstance mobEffectInstance : Ordering.natural().reverse().sortedCopy(collection)) {
-				MobEffect mobEffect = mobEffectInstance.getEffect();
+				Holder<MobEffect> holder = mobEffectInstance.getEffect();
 				if (mobEffectInstance.showIcon()) {
-					int k = this.screenWidth;
+					int k = guiGraphics.guiWidth();
 					int l = 1;
 					if (this.minecraft.isDemo()) {
 						l += 15;
 					}
 
-					if (mobEffect.isBeneficial()) {
+					if (holder.value().isBeneficial()) {
 						i++;
 						k -= 25 * i;
 					} else {
@@ -470,7 +457,7 @@ public class Gui {
 						l += 26;
 					}
 
-					float f = 1.0F;
+					float g = 1.0F;
 					if (mobEffectInstance.isAmbient()) {
 						guiGraphics.blitSprite(EFFECT_BACKGROUND_AMBIENT_SPRITE, k, l, 24, 24);
 					} else {
@@ -478,17 +465,17 @@ public class Gui {
 						if (mobEffectInstance.endsWithin(200)) {
 							int m = mobEffectInstance.getDuration();
 							int n = 10 - m / 20;
-							f = Mth.clamp((float)m / 10.0F / 5.0F * 0.5F, 0.0F, 0.5F)
+							g = Mth.clamp((float)m / 10.0F / 5.0F * 0.5F, 0.0F, 0.5F)
 								+ Mth.cos((float)m * (float) Math.PI / 5.0F) * Mth.clamp((float)n / 10.0F * 0.25F, 0.0F, 0.25F);
 						}
 					}
 
-					TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(mobEffect);
+					TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(holder);
 					int n = k;
 					int o = l;
-					float g = f;
+					float h = g;
 					list.add((Runnable)() -> {
-						guiGraphics.setColor(1.0F, 1.0F, 1.0F, g);
+						guiGraphics.setColor(1.0F, 1.0F, 1.0F, h);
 						guiGraphics.blit(n + 3, o + 3, 0, 18, 18, textureAtlasSprite);
 						guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 					});
@@ -496,40 +483,70 @@ public class Gui {
 			}
 
 			list.forEach(Runnable::run);
+			RenderSystem.disableBlend();
 		}
 	}
 
-	private void renderHotbar(float f, GuiGraphics guiGraphics) {
+	private void renderHotbarAndDecorations(GuiGraphics guiGraphics, float f) {
+		if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
+			this.spectatorGui.renderHotbar(guiGraphics);
+		} else {
+			this.renderItemHotbar(guiGraphics, f);
+		}
+
+		int i = guiGraphics.guiWidth() / 2 - 91;
+		PlayerRideableJumping playerRideableJumping = this.minecraft.player.jumpableVehicle();
+		if (playerRideableJumping != null) {
+			this.renderJumpMeter(playerRideableJumping, guiGraphics, i);
+		} else if (this.minecraft.gameMode.hasExperience()) {
+			this.renderExperienceBar(guiGraphics, i);
+		}
+
+		if (this.minecraft.gameMode.canHurtPlayer()) {
+			this.renderPlayerHealth(guiGraphics);
+		}
+
+		this.renderVehicleHealth(guiGraphics);
+		if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
+			this.renderSelectedItemName(guiGraphics);
+		} else if (this.minecraft.player.isSpectator()) {
+			this.spectatorGui.renderTooltip(guiGraphics);
+		}
+	}
+
+	private void renderItemHotbar(GuiGraphics guiGraphics, float f) {
 		Player player = this.getCameraPlayer();
 		if (player != null) {
 			ItemStack itemStack = player.getOffhandItem();
 			HumanoidArm humanoidArm = player.getMainArm().getOpposite();
-			int i = this.screenWidth / 2;
+			int i = guiGraphics.guiWidth() / 2;
 			int j = 182;
 			int k = 91;
+			RenderSystem.enableBlend();
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0.0F, 0.0F, -90.0F);
-			guiGraphics.blitSprite(HOTBAR_SPRITE, i - 91, this.screenHeight - 22, 182, 22);
-			guiGraphics.blitSprite(HOTBAR_SELECTION_SPRITE, i - 91 - 1 + player.getInventory().selected * 20, this.screenHeight - 22 - 1, 24, 23);
+			guiGraphics.blitSprite(HOTBAR_SPRITE, i - 91, guiGraphics.guiHeight() - 22, 182, 22);
+			guiGraphics.blitSprite(HOTBAR_SELECTION_SPRITE, i - 91 - 1 + player.getInventory().selected * 20, guiGraphics.guiHeight() - 22 - 1, 24, 23);
 			if (!itemStack.isEmpty()) {
 				if (humanoidArm == HumanoidArm.LEFT) {
-					guiGraphics.blitSprite(HOTBAR_OFFHAND_LEFT_SPRITE, i - 91 - 29, this.screenHeight - 23, 29, 24);
+					guiGraphics.blitSprite(HOTBAR_OFFHAND_LEFT_SPRITE, i - 91 - 29, guiGraphics.guiHeight() - 23, 29, 24);
 				} else {
-					guiGraphics.blitSprite(HOTBAR_OFFHAND_RIGHT_SPRITE, i + 91, this.screenHeight - 23, 29, 24);
+					guiGraphics.blitSprite(HOTBAR_OFFHAND_RIGHT_SPRITE, i + 91, guiGraphics.guiHeight() - 23, 29, 24);
 				}
 			}
 
 			guiGraphics.pose().popPose();
+			RenderSystem.disableBlend();
 			int l = 1;
 
 			for (int m = 0; m < 9; m++) {
 				int n = i - 90 + m * 20 + 2;
-				int o = this.screenHeight - 16 - 3;
+				int o = guiGraphics.guiHeight() - 16 - 3;
 				this.renderSlot(guiGraphics, n, o, f, player, player.getInventory().items.get(m), l++);
 			}
 
 			if (!itemStack.isEmpty()) {
-				int m = this.screenHeight - 16 - 3;
+				int m = guiGraphics.guiHeight() - 16 - 3;
 				if (humanoidArm == HumanoidArm.LEFT) {
 					this.renderSlot(guiGraphics, i - 91 - 26, m, f, player, itemStack, l++);
 				} else {
@@ -537,11 +554,11 @@ public class Gui {
 				}
 			}
 
-			RenderSystem.enableBlend();
 			if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.HOTBAR) {
+				RenderSystem.enableBlend();
 				float g = this.minecraft.player.getAttackStrengthScale(0.0F);
 				if (g < 1.0F) {
-					int n = this.screenHeight - 20;
+					int n = guiGraphics.guiHeight() - 20;
 					int o = i + 91 + 6;
 					if (humanoidArm == HumanoidArm.RIGHT) {
 						o = i - 91 - 22;
@@ -551,18 +568,18 @@ public class Gui {
 					guiGraphics.blitSprite(HOTBAR_ATTACK_INDICATOR_BACKGROUND_SPRITE, o, n, 18, 18);
 					guiGraphics.blitSprite(HOTBAR_ATTACK_INDICATOR_PROGRESS_SPRITE, 18, 18, 0, 18 - p, o, n + 18 - p, 18, p);
 				}
-			}
 
-			RenderSystem.disableBlend();
+				RenderSystem.disableBlend();
+			}
 		}
 	}
 
-	public void renderJumpMeter(PlayerRideableJumping playerRideableJumping, GuiGraphics guiGraphics, int i) {
+	private void renderJumpMeter(PlayerRideableJumping playerRideableJumping, GuiGraphics guiGraphics, int i) {
 		this.minecraft.getProfiler().push("jumpBar");
 		float f = this.minecraft.player.getJumpRidingScale();
 		int j = 182;
 		int k = (int)(f * 183.0F);
-		int l = this.screenHeight - 32 + 3;
+		int l = guiGraphics.guiHeight() - 32 + 3;
 		guiGraphics.blitSprite(JUMP_BAR_BACKGROUND_SPRITE, i, l, 182, 5);
 		if (playerRideableJumping.getJumpCooldown() > 0) {
 			guiGraphics.blitSprite(JUMP_BAR_COOLDOWN_SPRITE, i, l, 182, 5);
@@ -573,13 +590,13 @@ public class Gui {
 		this.minecraft.getProfiler().pop();
 	}
 
-	public void renderExperienceBar(GuiGraphics guiGraphics, int i) {
+	private void renderExperienceBar(GuiGraphics guiGraphics, int i) {
 		this.minecraft.getProfiler().push("expBar");
 		int j = this.minecraft.player.getXpNeededForNextLevel();
 		if (j > 0) {
 			int k = 182;
 			int l = (int)(this.minecraft.player.experienceProgress * 183.0F);
-			int m = this.screenHeight - 32 + 3;
+			int m = guiGraphics.guiHeight() - 32 + 3;
 			guiGraphics.blitSprite(EXPERIENCE_BAR_BACKGROUND_SPRITE, i, m, 182, 5);
 			if (l > 0) {
 				guiGraphics.blitSprite(EXPERIENCE_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, i, m, l, 5);
@@ -590,8 +607,8 @@ public class Gui {
 		if (this.minecraft.player.experienceLevel > 0) {
 			this.minecraft.getProfiler().push("expLevel");
 			String string = this.minecraft.player.experienceLevel + "";
-			int l = (this.screenWidth - this.getFont().width(string)) / 2;
-			int m = this.screenHeight - 31 - 4;
+			int l = (guiGraphics.guiWidth() - this.getFont().width(string)) / 2;
+			int m = guiGraphics.guiHeight() - 31 - 4;
 			guiGraphics.drawString(this.getFont(), string, l + 1, m, 0, false);
 			guiGraphics.drawString(this.getFont(), string, l - 1, m, 0, false);
 			guiGraphics.drawString(this.getFont(), string, l, m + 1, 0, false);
@@ -601,7 +618,7 @@ public class Gui {
 		}
 	}
 
-	public void renderSelectedItemName(GuiGraphics guiGraphics) {
+	private void renderSelectedItemName(GuiGraphics guiGraphics) {
 		this.minecraft.getProfiler().push("selectedItemName");
 		if (this.toolHighlightTimer > 0 && !this.lastToolHighlight.isEmpty()) {
 			MutableComponent mutableComponent = Component.empty().append(this.lastToolHighlight.getHoverName()).withStyle(this.lastToolHighlight.getRarity().color);
@@ -610,8 +627,8 @@ public class Gui {
 			}
 
 			int i = this.getFont().width(mutableComponent);
-			int j = (this.screenWidth - i) / 2;
-			int k = this.screenHeight - 59;
+			int j = (guiGraphics.guiWidth() - i) / 2;
+			int k = guiGraphics.guiHeight() - 59;
 			if (!this.minecraft.gameMode.canHurtPlayer()) {
 				k += 14;
 			}
@@ -630,20 +647,23 @@ public class Gui {
 		this.minecraft.getProfiler().pop();
 	}
 
-	public void renderDemoOverlay(GuiGraphics guiGraphics) {
-		this.minecraft.getProfiler().push("demo");
-		Component component;
-		if (this.minecraft.level.getGameTime() >= 120500L) {
-			component = DEMO_EXPIRED_TEXT;
-		} else {
-			component = Component.translatable(
-				"demo.remainingTime", StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime()), this.minecraft.level.tickRateManager().tickrate())
-			);
-		}
+	private void renderDemoOverlay(GuiGraphics guiGraphics, float f) {
+		if (this.minecraft.isDemo()) {
+			this.minecraft.getProfiler().push("demo");
+			Component component;
+			if (this.minecraft.level.getGameTime() >= 120500L) {
+				component = DEMO_EXPIRED_TEXT;
+			} else {
+				component = Component.translatable(
+					"demo.remainingTime",
+					StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime()), this.minecraft.level.tickRateManager().tickrate())
+				);
+			}
 
-		int i = this.getFont().width(component);
-		guiGraphics.drawString(this.getFont(), component, this.screenWidth - i - 10, 5, 16777215);
-		this.minecraft.getProfiler().pop();
+			int i = this.getFont().width(component);
+			guiGraphics.drawString(this.getFont(), component, guiGraphics.guiWidth() - i - 10, 5, 16777215);
+			this.minecraft.getProfiler().pop();
+		}
 	}
 
 	private void displayScoreboardSidebar(GuiGraphics guiGraphics, Objective objective) {
@@ -681,10 +701,10 @@ public class Gui {
 		guiGraphics.drawManaged(() -> {
 			int kx = lvs.length;
 			int lx = kx * 9;
-			int m = this.screenHeight / 2 + lx / 3;
+			int m = guiGraphics.guiHeight() / 2 + lx / 3;
 			int n = 3;
-			int o = this.screenWidth - l - 3;
-			int p = this.screenWidth - 3 + 2;
+			int o = guiGraphics.guiWidth() - l - 3;
+			int p = guiGraphics.guiWidth() - 3 + 2;
 			int q = this.minecraft.options.getBackgroundColor(0.3F);
 			int r = this.minecraft.options.getBackgroundColor(0.4F);
 			int s = m - kx * 9;
@@ -766,9 +786,9 @@ public class Gui {
 			this.random.setSeed((long)(this.tickCount * 312871));
 			FoodData foodData = player.getFoodData();
 			int k = foodData.getFoodLevel();
-			int m = this.screenWidth / 2 - 91;
-			int n = this.screenWidth / 2 + 91;
-			int o = this.screenHeight - 39;
+			int m = guiGraphics.guiWidth() / 2 - 91;
+			int n = guiGraphics.guiWidth() / 2 + 91;
+			int o = guiGraphics.guiHeight() - 39;
 			float f = Math.max((float)player.getAttributeValue(Attributes.MAX_HEALTH), (float)Math.max(j, i));
 			int p = Mth.ceil(player.getAbsorptionAmount());
 			int q = Mth.ceil((f + (float)p) / 2.0F / 10.0F);
@@ -916,8 +936,8 @@ public class Gui {
 			if (i != 0) {
 				int j = (int)Math.ceil((double)livingEntity.getHealth());
 				this.minecraft.getProfiler().popPush("mountHealth");
-				int k = this.screenHeight - 39;
-				int l = this.screenWidth / 2 + 91;
+				int k = guiGraphics.guiHeight() - 39;
+				int l = guiGraphics.guiWidth() / 2 + 91;
 				int m = k;
 
 				for (int n = 0; i > 0; n += 20) {
@@ -945,27 +965,31 @@ public class Gui {
 	private void renderTextureOverlay(GuiGraphics guiGraphics, ResourceLocation resourceLocation, float f) {
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
+		RenderSystem.enableBlend();
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, f);
-		guiGraphics.blit(resourceLocation, 0, 0, -90, 0.0F, 0.0F, this.screenWidth, this.screenHeight, this.screenWidth, this.screenHeight);
+		guiGraphics.blit(resourceLocation, 0, 0, -90, 0.0F, 0.0F, guiGraphics.guiWidth(), guiGraphics.guiHeight(), guiGraphics.guiWidth(), guiGraphics.guiHeight());
+		RenderSystem.disableBlend();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
 	private void renderSpyglassOverlay(GuiGraphics guiGraphics, float f) {
-		float g = (float)Math.min(this.screenWidth, this.screenHeight);
-		float i = Math.min((float)this.screenWidth / g, (float)this.screenHeight / g) * f;
+		float g = (float)Math.min(guiGraphics.guiWidth(), guiGraphics.guiHeight());
+		float i = Math.min((float)guiGraphics.guiWidth() / g, (float)guiGraphics.guiHeight() / g) * f;
 		int j = Mth.floor(g * i);
 		int k = Mth.floor(g * i);
-		int l = (this.screenWidth - j) / 2;
-		int m = (this.screenHeight - k) / 2;
+		int l = (guiGraphics.guiWidth() - j) / 2;
+		int m = (guiGraphics.guiHeight() - k) / 2;
 		int n = l + j;
 		int o = m + k;
+		RenderSystem.enableBlend();
 		guiGraphics.blit(SPYGLASS_SCOPE_LOCATION, l, m, -90, 0.0F, 0.0F, j, k, j, k);
-		guiGraphics.fill(RenderType.guiOverlay(), 0, o, this.screenWidth, this.screenHeight, -90, -16777216);
-		guiGraphics.fill(RenderType.guiOverlay(), 0, 0, this.screenWidth, m, -90, -16777216);
+		RenderSystem.disableBlend();
+		guiGraphics.fill(RenderType.guiOverlay(), 0, o, guiGraphics.guiWidth(), guiGraphics.guiHeight(), -90, -16777216);
+		guiGraphics.fill(RenderType.guiOverlay(), 0, 0, guiGraphics.guiWidth(), m, -90, -16777216);
 		guiGraphics.fill(RenderType.guiOverlay(), 0, m, l, o, -90, -16777216);
-		guiGraphics.fill(RenderType.guiOverlay(), n, m, this.screenWidth, o, -90, -16777216);
+		guiGraphics.fill(RenderType.guiOverlay(), n, m, guiGraphics.guiWidth(), o, -90, -16777216);
 	}
 
 	private void updateVignetteBrightness(Entity entity) {
@@ -991,6 +1015,7 @@ public class Gui {
 
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
+		RenderSystem.enableBlend();
 		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
@@ -1003,11 +1028,12 @@ public class Gui {
 			guiGraphics.setColor(g, g, g, 1.0F);
 		}
 
-		guiGraphics.blit(VIGNETTE_LOCATION, 0, 0, -90, 0.0F, 0.0F, this.screenWidth, this.screenHeight, this.screenWidth, this.screenHeight);
+		guiGraphics.blit(VIGNETTE_LOCATION, 0, 0, -90, 0.0F, 0.0F, guiGraphics.guiWidth(), guiGraphics.guiHeight(), guiGraphics.guiWidth(), guiGraphics.guiHeight());
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.defaultBlendFunc();
+		RenderSystem.disableBlend();
 	}
 
 	private void renderPortalOverlay(GuiGraphics guiGraphics, float f) {
@@ -1019,9 +1045,11 @@ public class Gui {
 
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
+		RenderSystem.enableBlend();
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, f);
 		TextureAtlasSprite textureAtlasSprite = this.minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.NETHER_PORTAL.defaultBlockState());
-		guiGraphics.blit(0, 0, -90, this.screenWidth, this.screenHeight, textureAtlasSprite);
+		guiGraphics.blit(0, 0, -90, guiGraphics.guiWidth(), guiGraphics.guiHeight(), textureAtlasSprite);
+		RenderSystem.disableBlend();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -1192,14 +1220,14 @@ public class Gui {
 		this.debugOverlay.clearChunkCache();
 	}
 
-	private void renderSavingIndicator(GuiGraphics guiGraphics) {
+	private void renderSavingIndicator(GuiGraphics guiGraphics, float f) {
 		if (this.minecraft.options.showAutosaveIndicator().get() && (this.autosaveIndicatorValue > 0.0F || this.lastAutosaveIndicatorValue > 0.0F)) {
 			int i = Mth.floor(255.0F * Mth.clamp(Mth.lerp(this.minecraft.getFrameTime(), this.lastAutosaveIndicatorValue, this.autosaveIndicatorValue), 0.0F, 1.0F));
 			if (i > 8) {
 				Font font = this.getFont();
 				int j = font.width(SAVING_TEXT);
 				int k = 16777215 | i << 24 & 0xFF000000;
-				guiGraphics.drawString(font, SAVING_TEXT, this.screenWidth - j - 10, this.screenHeight - 15, k);
+				guiGraphics.drawString(font, SAVING_TEXT, guiGraphics.guiWidth() - j - 10, guiGraphics.guiHeight() - 15, k);
 			}
 		}
 	}

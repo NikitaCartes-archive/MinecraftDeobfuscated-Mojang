@@ -171,8 +171,8 @@ public class Pufferfish extends AbstractFish {
 	}
 
 	@Override
-	public EntityDimensions getDimensions(Pose pose) {
-		return super.getDimensions(pose).scale(getScale(this.getPuffState()));
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return super.getDefaultDimensions(pose).scale(getScale(this.getPuffState()));
 	}
 
 	private static float getScale(int i) {

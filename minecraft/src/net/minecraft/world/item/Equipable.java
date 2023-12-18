@@ -30,7 +30,7 @@ public interface Equipable extends Vanishable {
 			}
 
 			ItemStack itemStack3 = itemStack2.isEmpty() ? itemStack : itemStack2.copyAndClear();
-			ItemStack itemStack4 = itemStack.copyAndClear();
+			ItemStack itemStack4 = player.isCreative() ? itemStack.copy() : itemStack.copyAndClear();
 			player.setItemSlot(equipmentSlot, itemStack4);
 			return InteractionResultHolder.sidedSuccess(itemStack3, level.isClientSide());
 		} else {

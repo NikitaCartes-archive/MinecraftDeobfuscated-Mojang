@@ -35,4 +35,9 @@ public class RootedDirtBlock extends Block implements BonemealableBlock {
 	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		serverLevel.setBlockAndUpdate(blockPos.below(), Blocks.HANGING_ROOTS.defaultBlockState());
 	}
+
+	@Override
+	public BlockPos getParticlePos(BlockPos blockPos) {
+		return blockPos.below();
+	}
 }

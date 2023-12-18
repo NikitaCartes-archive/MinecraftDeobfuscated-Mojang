@@ -2,7 +2,8 @@ package net.minecraft.world.level.gameevent.vibrations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
@@ -10,7 +11,9 @@ import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.VibrationParticleOption;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -29,68 +32,69 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public interface VibrationSystem {
-	GameEvent[] RESONANCE_EVENTS = new GameEvent[]{
-		GameEvent.RESONATE_1,
-		GameEvent.RESONATE_2,
-		GameEvent.RESONATE_3,
-		GameEvent.RESONATE_4,
-		GameEvent.RESONATE_5,
-		GameEvent.RESONATE_6,
-		GameEvent.RESONATE_7,
-		GameEvent.RESONATE_8,
-		GameEvent.RESONATE_9,
-		GameEvent.RESONATE_10,
-		GameEvent.RESONATE_11,
-		GameEvent.RESONATE_12,
-		GameEvent.RESONATE_13,
-		GameEvent.RESONATE_14,
-		GameEvent.RESONATE_15
-	};
-	ToIntFunction<GameEvent> VIBRATION_FREQUENCY_FOR_EVENT = Util.make(new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> {
-		object2IntOpenHashMap.defaultReturnValue(0);
-		object2IntOpenHashMap.put(GameEvent.STEP, 1);
-		object2IntOpenHashMap.put(GameEvent.SWIM, 1);
-		object2IntOpenHashMap.put(GameEvent.FLAP, 1);
-		object2IntOpenHashMap.put(GameEvent.PROJECTILE_LAND, 2);
-		object2IntOpenHashMap.put(GameEvent.HIT_GROUND, 2);
-		object2IntOpenHashMap.put(GameEvent.SPLASH, 2);
-		object2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH, 3);
-		object2IntOpenHashMap.put(GameEvent.PROJECTILE_SHOOT, 3);
-		object2IntOpenHashMap.put(GameEvent.INSTRUMENT_PLAY, 3);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_ACTION, 4);
-		object2IntOpenHashMap.put(GameEvent.ELYTRA_GLIDE, 4);
-		object2IntOpenHashMap.put(GameEvent.UNEQUIP, 4);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_DISMOUNT, 5);
-		object2IntOpenHashMap.put(GameEvent.EQUIP, 5);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_INTERACT, 6);
-		object2IntOpenHashMap.put(GameEvent.SHEAR, 6);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_MOUNT, 6);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_DAMAGE, 7);
-		object2IntOpenHashMap.put(GameEvent.DRINK, 8);
-		object2IntOpenHashMap.put(GameEvent.EAT, 8);
-		object2IntOpenHashMap.put(GameEvent.CONTAINER_CLOSE, 9);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_CLOSE, 9);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_DEACTIVATE, 9);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_DETACH, 9);
-		object2IntOpenHashMap.put(GameEvent.CONTAINER_OPEN, 10);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_OPEN, 10);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_ACTIVATE, 10);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_ATTACH, 10);
-		object2IntOpenHashMap.put(GameEvent.PRIME_FUSE, 10);
-		object2IntOpenHashMap.put(GameEvent.NOTE_BLOCK_PLAY, 10);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_CHANGE, 11);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_DESTROY, 12);
-		object2IntOpenHashMap.put(GameEvent.FLUID_PICKUP, 12);
-		object2IntOpenHashMap.put(GameEvent.BLOCK_PLACE, 13);
-		object2IntOpenHashMap.put(GameEvent.FLUID_PLACE, 13);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_PLACE, 14);
-		object2IntOpenHashMap.put(GameEvent.LIGHTNING_STRIKE, 14);
-		object2IntOpenHashMap.put(GameEvent.TELEPORT, 14);
-		object2IntOpenHashMap.put(GameEvent.ENTITY_DIE, 15);
-		object2IntOpenHashMap.put(GameEvent.EXPLODE, 15);
+	List<ResourceKey<GameEvent>> RESONANCE_EVENTS = List.of(
+		GameEvent.RESONATE_1.key(),
+		GameEvent.RESONATE_2.key(),
+		GameEvent.RESONATE_3.key(),
+		GameEvent.RESONATE_4.key(),
+		GameEvent.RESONATE_5.key(),
+		GameEvent.RESONATE_6.key(),
+		GameEvent.RESONATE_7.key(),
+		GameEvent.RESONATE_8.key(),
+		GameEvent.RESONATE_9.key(),
+		GameEvent.RESONATE_10.key(),
+		GameEvent.RESONATE_11.key(),
+		GameEvent.RESONATE_12.key(),
+		GameEvent.RESONATE_13.key(),
+		GameEvent.RESONATE_14.key(),
+		GameEvent.RESONATE_15.key()
+	);
+	int DEFAULT_VIBRATION_FREQUENCY = 0;
+	ToIntFunction<ResourceKey<GameEvent>> VIBRATION_FREQUENCY_FOR_EVENT = Util.make(new Reference2IntOpenHashMap<>(), reference2IntOpenHashMap -> {
+		reference2IntOpenHashMap.defaultReturnValue(0);
+		reference2IntOpenHashMap.put(GameEvent.STEP.key(), 1);
+		reference2IntOpenHashMap.put(GameEvent.SWIM.key(), 1);
+		reference2IntOpenHashMap.put(GameEvent.FLAP.key(), 1);
+		reference2IntOpenHashMap.put(GameEvent.PROJECTILE_LAND.key(), 2);
+		reference2IntOpenHashMap.put(GameEvent.HIT_GROUND.key(), 2);
+		reference2IntOpenHashMap.put(GameEvent.SPLASH.key(), 2);
+		reference2IntOpenHashMap.put(GameEvent.ITEM_INTERACT_FINISH.key(), 3);
+		reference2IntOpenHashMap.put(GameEvent.PROJECTILE_SHOOT.key(), 3);
+		reference2IntOpenHashMap.put(GameEvent.INSTRUMENT_PLAY.key(), 3);
+		reference2IntOpenHashMap.put(GameEvent.ENTITY_ACTION.key(), 4);
+		reference2IntOpenHashMap.put(GameEvent.ELYTRA_GLIDE.key(), 4);
+		reference2IntOpenHashMap.put(GameEvent.UNEQUIP.key(), 4);
+		reference2IntOpenHashMap.put(GameEvent.ENTITY_DISMOUNT.key(), 5);
+		reference2IntOpenHashMap.put(GameEvent.EQUIP.key(), 5);
+		reference2IntOpenHashMap.put(GameEvent.ENTITY_INTERACT.key(), 6);
+		reference2IntOpenHashMap.put(GameEvent.SHEAR.key(), 6);
+		reference2IntOpenHashMap.put(GameEvent.ENTITY_MOUNT.key(), 6);
+		reference2IntOpenHashMap.put(GameEvent.ENTITY_DAMAGE.key(), 7);
+		reference2IntOpenHashMap.put(GameEvent.DRINK.key(), 8);
+		reference2IntOpenHashMap.put(GameEvent.EAT.key(), 8);
+		reference2IntOpenHashMap.put(GameEvent.CONTAINER_CLOSE.key(), 9);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_CLOSE.key(), 9);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_DEACTIVATE.key(), 9);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_DETACH.key(), 9);
+		reference2IntOpenHashMap.put(GameEvent.CONTAINER_OPEN.key(), 10);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_OPEN.key(), 10);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_ACTIVATE.key(), 10);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_ATTACH.key(), 10);
+		reference2IntOpenHashMap.put(GameEvent.PRIME_FUSE.key(), 10);
+		reference2IntOpenHashMap.put(GameEvent.NOTE_BLOCK_PLAY.key(), 10);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_CHANGE.key(), 11);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_DESTROY.key(), 12);
+		reference2IntOpenHashMap.put(GameEvent.FLUID_PICKUP.key(), 12);
+		reference2IntOpenHashMap.put(GameEvent.BLOCK_PLACE.key(), 13);
+		reference2IntOpenHashMap.put(GameEvent.FLUID_PLACE.key(), 13);
+		reference2IntOpenHashMap.put(GameEvent.ENTITY_PLACE.key(), 14);
+		reference2IntOpenHashMap.put(GameEvent.LIGHTNING_STRIKE.key(), 14);
+		reference2IntOpenHashMap.put(GameEvent.TELEPORT.key(), 14);
+		reference2IntOpenHashMap.put(GameEvent.ENTITY_DIE.key(), 15);
+		reference2IntOpenHashMap.put(GameEvent.EXPLODE.key(), 15);
 
 		for (int i = 1; i <= 15; i++) {
-			object2IntOpenHashMap.put(getResonanceEventByFrequency(i), i);
+			reference2IntOpenHashMap.put(getResonanceEventByFrequency(i), i);
 		}
 	});
 
@@ -98,12 +102,16 @@ public interface VibrationSystem {
 
 	VibrationSystem.User getVibrationUser();
 
-	static int getGameEventFrequency(GameEvent gameEvent) {
-		return VIBRATION_FREQUENCY_FOR_EVENT.applyAsInt(gameEvent);
+	static int getGameEventFrequency(Holder<GameEvent> holder) {
+		return (Integer)holder.unwrapKey().map(VibrationSystem::getGameEventFrequency).orElse(0);
 	}
 
-	static GameEvent getResonanceEventByFrequency(int i) {
-		return RESONANCE_EVENTS[i - 1];
+	static int getGameEventFrequency(ResourceKey<GameEvent> resourceKey) {
+		return VIBRATION_FREQUENCY_FOR_EVENT.applyAsInt(resourceKey);
+	}
+
+	static ResourceKey<GameEvent> getResonanceEventByFrequency(int i) {
+		return (ResourceKey<GameEvent>)RESONANCE_EVENTS.get(i - 1);
 	}
 
 	static int getRedstoneStrengthForDistance(float f, int i) {
@@ -192,12 +200,12 @@ public interface VibrationSystem {
 		}
 
 		@Override
-		public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+		public boolean handleGameEvent(ServerLevel serverLevel, Holder<GameEvent> holder, GameEvent.Context context, Vec3 vec3) {
 			VibrationSystem.Data data = this.system.getVibrationData();
 			VibrationSystem.User user = this.system.getVibrationUser();
 			if (data.getCurrentVibration() != null) {
 				return false;
-			} else if (!user.isValidVibration(gameEvent, context)) {
+			} else if (!user.isValidVibration(holder, context)) {
 				return false;
 			} else {
 				Optional<Vec3> optional = user.getPositionSource().getPosition(serverLevel);
@@ -205,28 +213,28 @@ public interface VibrationSystem {
 					return false;
 				} else {
 					Vec3 vec32 = (Vec3)optional.get();
-					if (!user.canReceiveVibration(serverLevel, BlockPos.containing(vec3), gameEvent, context)) {
+					if (!user.canReceiveVibration(serverLevel, BlockPos.containing(vec3), holder, context)) {
 						return false;
 					} else if (isOccluded(serverLevel, vec3, vec32)) {
 						return false;
 					} else {
-						this.scheduleVibration(serverLevel, data, gameEvent, context, vec3, vec32);
+						this.scheduleVibration(serverLevel, data, holder, context, vec3, vec32);
 						return true;
 					}
 				}
 			}
 		}
 
-		public void forceScheduleVibration(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
+		public void forceScheduleVibration(ServerLevel serverLevel, Holder<GameEvent> holder, GameEvent.Context context, Vec3 vec3) {
 			this.system
 				.getVibrationUser()
 				.getPositionSource()
 				.getPosition(serverLevel)
-				.ifPresent(vec32 -> this.scheduleVibration(serverLevel, this.system.getVibrationData(), gameEvent, context, vec3, vec32));
+				.ifPresent(vec32 -> this.scheduleVibration(serverLevel, this.system.getVibrationData(), holder, context, vec3, vec32));
 		}
 
-		private void scheduleVibration(ServerLevel serverLevel, VibrationSystem.Data data, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3, Vec3 vec32) {
-			data.selectionStrategy.addCandidate(new VibrationInfo(gameEvent, (float)vec3.distanceTo(vec32), vec3, context.sourceEntity()), serverLevel.getGameTime());
+		private void scheduleVibration(ServerLevel serverLevel, VibrationSystem.Data data, Holder<GameEvent> holder, GameEvent.Context context, Vec3 vec3, Vec3 vec32) {
+			data.selectionStrategy.addCandidate(new VibrationInfo(holder, (float)vec3.distanceTo(vec32), vec3, context.sourceEntity()), serverLevel.getGameTime());
 		}
 
 		public static float distanceBetweenInBlocks(BlockPos blockPos, BlockPos blockPos2) {
@@ -349,9 +357,9 @@ public interface VibrationSystem {
 
 		PositionSource getPositionSource();
 
-		boolean canReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context);
+		boolean canReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, Holder<GameEvent> holder, GameEvent.Context context);
 
-		void onReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f);
+		void onReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, Holder<GameEvent> holder, @Nullable Entity entity, @Nullable Entity entity2, float f);
 
 		default TagKey<GameEvent> getListenableEvents() {
 			return GameEventTags.VIBRATIONS;
@@ -369,8 +377,8 @@ public interface VibrationSystem {
 			return Mth.floor(f);
 		}
 
-		default boolean isValidVibration(GameEvent gameEvent, GameEvent.Context context) {
-			if (!gameEvent.is(this.getListenableEvents())) {
+		default boolean isValidVibration(Holder<GameEvent> holder, GameEvent.Context context) {
+			if (!holder.is(this.getListenableEvents())) {
 				return false;
 			} else {
 				Entity entity = context.sourceEntity();
@@ -379,7 +387,7 @@ public interface VibrationSystem {
 						return false;
 					}
 
-					if (entity.isSteppingCarefully() && gameEvent.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)) {
+					if (entity.isSteppingCarefully() && holder.is(GameEventTags.IGNORE_VIBRATIONS_SNEAKING)) {
 						if (this.canTriggerAvoidVibration() && entity instanceof ServerPlayer serverPlayer) {
 							CriteriaTriggers.AVOID_VIBRATION.trigger(serverPlayer);
 						}

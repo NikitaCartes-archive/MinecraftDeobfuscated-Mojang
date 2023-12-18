@@ -3,12 +3,15 @@ package net.minecraft.world.level.block.entity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -41,10 +44,15 @@ import net.minecraft.world.phys.AABB;
 
 public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Nameable {
 	private static final int MAX_LEVELS = 4;
-	public static final MobEffect[][] BEACON_EFFECTS = new MobEffect[][]{
-		{MobEffects.MOVEMENT_SPEED, MobEffects.DIG_SPEED}, {MobEffects.DAMAGE_RESISTANCE, MobEffects.JUMP}, {MobEffects.DAMAGE_BOOST}, {MobEffects.REGENERATION}
-	};
-	private static final Set<MobEffect> VALID_EFFECTS = (Set<MobEffect>)Arrays.stream(BEACON_EFFECTS).flatMap(Arrays::stream).collect(Collectors.toSet());
+	public static final List<List<Holder<MobEffect>>> BEACON_EFFECTS = List.of(
+		List.of(MobEffects.MOVEMENT_SPEED, MobEffects.DIG_SPEED),
+		List.of(MobEffects.DAMAGE_RESISTANCE, MobEffects.JUMP),
+		List.of(MobEffects.DAMAGE_BOOST),
+		List.of(MobEffects.REGENERATION)
+	);
+	private static final Set<Holder<MobEffect>> VALID_EFFECTS = (Set<Holder<MobEffect>>)BEACON_EFFECTS.stream()
+		.flatMap(Collection::stream)
+		.collect(Collectors.toSet());
 	public static final int DATA_LEVELS = 0;
 	public static final int DATA_PRIMARY = 1;
 	public static final int DATA_SECONDARY = 2;
@@ -58,9 +66,9 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	int levels;
 	private int lastCheckY;
 	@Nullable
-	MobEffect primaryPower;
+	Holder<MobEffect> primaryPower;
 	@Nullable
-	MobEffect secondaryPower;
+	Holder<MobEffect> secondaryPower;
 	@Nullable
 	private Component name;
 	private LockCode lockKey = LockCode.NO_LOCK;
@@ -100,8 +108,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	};
 
 	@Nullable
-	static MobEffect filterEffect(@Nullable MobEffect mobEffect) {
-		return VALID_EFFECTS.contains(mobEffect) ? mobEffect : null;
+	static Holder<MobEffect> filterEffect(@Nullable Holder<MobEffect> holder) {
+		return VALID_EFFECTS.contains(holder) ? holder : null;
 	}
 
 	public BeaconBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -225,11 +233,11 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 		super.setRemoved();
 	}
 
-	private static void applyEffects(Level level, BlockPos blockPos, int i, @Nullable MobEffect mobEffect, @Nullable MobEffect mobEffect2) {
-		if (!level.isClientSide && mobEffect != null) {
+	private static void applyEffects(Level level, BlockPos blockPos, int i, @Nullable Holder<MobEffect> holder, @Nullable Holder<MobEffect> holder2) {
+		if (!level.isClientSide && holder != null) {
 			double d = (double)(i * 10 + 10);
 			int j = 0;
-			if (i >= 4 && mobEffect == mobEffect2) {
+			if (i >= 4 && Objects.equals(holder, holder2)) {
 				j = 1;
 			}
 
@@ -238,12 +246,12 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 			List<Player> list = level.getEntitiesOfClass(Player.class, aABB);
 
 			for (Player player : list) {
-				player.addEffect(new MobEffectInstance(mobEffect, k, j, true, true));
+				player.addEffect(new MobEffectInstance(holder, k, j, true, true));
 			}
 
-			if (i >= 4 && mobEffect != mobEffect2 && mobEffect2 != null) {
+			if (i >= 4 && Objects.equals(holder, holder2) && holder2 != null) {
 				for (Player player : list) {
-					player.addEffect(new MobEffectInstance(mobEffect2, k, 0, true, true));
+					player.addEffect(new MobEffectInstance(holder2, k, 0, true, true));
 				}
 			}
 		}
@@ -266,20 +274,17 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 		return this.saveWithoutMetadata();
 	}
 
-	private static void storeEffect(CompoundTag compoundTag, String string, @Nullable MobEffect mobEffect) {
-		if (mobEffect != null) {
-			ResourceLocation resourceLocation = BuiltInRegistries.MOB_EFFECT.getKey(mobEffect);
-			if (resourceLocation != null) {
-				compoundTag.putString(string, resourceLocation.toString());
-			}
+	private static void storeEffect(CompoundTag compoundTag, String string, @Nullable Holder<MobEffect> holder) {
+		if (holder != null) {
+			holder.unwrapKey().ifPresent(resourceKey -> compoundTag.putString(string, resourceKey.location().toString()));
 		}
 	}
 
 	@Nullable
-	private static MobEffect loadEffect(CompoundTag compoundTag, String string) {
+	private static Holder<MobEffect> loadEffect(CompoundTag compoundTag, String string) {
 		if (compoundTag.contains(string, 8)) {
 			ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString(string));
-			return filterEffect(BuiltInRegistries.MOB_EFFECT.get(resourceLocation));
+			return resourceLocation == null ? null : (Holder)BuiltInRegistries.MOB_EFFECT.getHolder(resourceLocation).map(BeaconBlockEntity::filterEffect).orElse(null);
 		} else {
 			return null;
 		}

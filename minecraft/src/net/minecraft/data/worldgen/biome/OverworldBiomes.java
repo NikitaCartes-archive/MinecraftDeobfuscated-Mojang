@@ -302,7 +302,8 @@ public class OverworldBiomes {
 		MobSpawnSettings.Builder builder2 = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder2);
 		builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.HORSE, 1, 2, 6))
-			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.DONKEY, 1, 1, 1));
+			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.DONKEY, 1, 1, 1))
+			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.ARMADILLO, 10, 2, 3));
 		BiomeDefaultFeatures.commonSpawns(builder2);
 		if (bl2) {
 			builder2.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.LLAMA, 8, 4, 4));

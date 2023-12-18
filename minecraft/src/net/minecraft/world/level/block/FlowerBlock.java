@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -27,8 +28,8 @@ public class FlowerBlock extends BushBlock implements SuspiciousEffectHolder {
 		return CODEC;
 	}
 
-	public FlowerBlock(MobEffect mobEffect, int i, BlockBehaviour.Properties properties) {
-		this(makeEffectList(mobEffect, i), properties);
+	public FlowerBlock(Holder<MobEffect> holder, int i, BlockBehaviour.Properties properties) {
+		this(makeEffectList(holder, i), properties);
 	}
 
 	public FlowerBlock(List<SuspiciousEffectHolder.EffectEntry> list, BlockBehaviour.Properties properties) {
@@ -36,15 +37,8 @@ public class FlowerBlock extends BushBlock implements SuspiciousEffectHolder {
 		this.suspiciousStewEffects = list;
 	}
 
-	protected static List<SuspiciousEffectHolder.EffectEntry> makeEffectList(MobEffect mobEffect, int i) {
-		int j;
-		if (mobEffect.isInstantenous()) {
-			j = i;
-		} else {
-			j = i * 20;
-		}
-
-		return List.of(new SuspiciousEffectHolder.EffectEntry(mobEffect, j));
+	protected static List<SuspiciousEffectHolder.EffectEntry> makeEffectList(Holder<MobEffect> holder, int i) {
+		return List.of(new SuspiciousEffectHolder.EffectEntry(holder, i * 20));
 	}
 
 	@Override

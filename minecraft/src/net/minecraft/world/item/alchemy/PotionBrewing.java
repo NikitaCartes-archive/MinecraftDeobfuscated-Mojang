@@ -3,6 +3,7 @@ package net.minecraft.world.item.alchemy;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -49,9 +50,9 @@ public class PotionBrewing {
 		return false;
 	}
 
-	public static boolean isBrewablePotion(Potion potion) {
+	public static boolean isBrewablePotion(Holder<Potion> holder) {
 		for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
-			if (mix.to == potion) {
+			if (mix.to.is(holder)) {
 				return true;
 			}
 		}
@@ -64,10 +65,8 @@ public class PotionBrewing {
 	}
 
 	protected static boolean hasContainerMix(ItemStack itemStack, ItemStack itemStack2) {
-		Item item = itemStack.getItem();
-
 		for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
-			if (mix.from == item && mix.ingredient.test(itemStack2)) {
+			if (itemStack.is(mix.from) && mix.ingredient.test(itemStack2)) {
 				return true;
 			}
 		}
@@ -76,10 +75,10 @@ public class PotionBrewing {
 	}
 
 	protected static boolean hasPotionMix(ItemStack itemStack, ItemStack itemStack2) {
-		Potion potion = PotionUtils.getPotion(itemStack);
+		Holder<Potion> holder = PotionUtils.getPotion(itemStack);
 
 		for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
-			if (mix.from == potion && mix.ingredient.test(itemStack2)) {
+			if (mix.from.is(holder) && mix.ingredient.test(itemStack2)) {
 				return true;
 			}
 		}
@@ -88,24 +87,25 @@ public class PotionBrewing {
 	}
 
 	public static ItemStack mix(ItemStack itemStack, ItemStack itemStack2) {
-		if (!itemStack2.isEmpty()) {
-			Potion potion = PotionUtils.getPotion(itemStack2);
-			Item item = itemStack2.getItem();
+		if (itemStack2.isEmpty()) {
+			return itemStack2;
+		} else {
+			Holder<Potion> holder = PotionUtils.getPotion(itemStack2);
 
 			for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
-				if (mix.from == item && mix.ingredient.test(itemStack)) {
-					return PotionUtils.setPotion(new ItemStack(mix.to), potion);
+				if (itemStack2.is(mix.from) && mix.ingredient.test(itemStack)) {
+					return PotionUtils.setPotion(new ItemStack(mix.to), holder);
 				}
 			}
 
 			for (PotionBrewing.Mix<Potion> mixx : POTION_MIXES) {
-				if (mixx.from == potion && mixx.ingredient.test(itemStack)) {
-					return PotionUtils.setPotion(new ItemStack(item), mixx.to);
+				if (mixx.from.is(holder) && mixx.ingredient.test(itemStack)) {
+					return PotionUtils.setPotion(new ItemStack(itemStack2.getItem()), mixx.to);
 				}
 			}
-		}
 
-		return itemStack2;
+			return itemStack2;
+		}
 	}
 
 	public static void bootStrap() {
@@ -177,7 +177,7 @@ public class PotionBrewing {
 		} else if (!(item3 instanceof PotionItem)) {
 			throw new IllegalArgumentException("Expected a potion, got: " + BuiltInRegistries.ITEM.getKey(item3));
 		} else {
-			CONTAINER_MIXES.add(new PotionBrewing.Mix<>(item, Ingredient.of(item2), item3));
+			CONTAINER_MIXES.add(new PotionBrewing.Mix<>(item.builtInRegistryHolder(), Ingredient.of(item2), item3.builtInRegistryHolder()));
 		}
 	}
 
@@ -189,19 +189,10 @@ public class PotionBrewing {
 		}
 	}
 
-	private static void addMix(Potion potion, Item item, Potion potion2) {
-		POTION_MIXES.add(new PotionBrewing.Mix<>(potion, Ingredient.of(item), potion2));
+	private static void addMix(Holder<Potion> holder, Item item, Holder<Potion> holder2) {
+		POTION_MIXES.add(new PotionBrewing.Mix<>(holder, Ingredient.of(item), holder2));
 	}
 
-	static class Mix<T> {
-		final T from;
-		final Ingredient ingredient;
-		final T to;
-
-		public Mix(T object, Ingredient ingredient, T object2) {
-			this.from = object;
-			this.ingredient = ingredient;
-			this.to = object2;
-		}
+	static record Mix<T>(Holder<T> from, Ingredient ingredient, Holder<T> to) {
 	}
 }

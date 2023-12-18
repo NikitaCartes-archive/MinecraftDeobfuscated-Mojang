@@ -16,6 +16,7 @@ import java.util.stream.LongStream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.Connection;
@@ -28,7 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -184,10 +185,16 @@ public class GameTestHelper {
 	public void useBlock(BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		BlockPos blockPos2 = this.absolutePos(blockPos);
 		BlockState blockState = this.getLevel().getBlockState(blockPos2);
-		InteractionResult interactionResult = blockState.use(this.getLevel(), player, InteractionHand.MAIN_HAND, blockHitResult);
-		if (!interactionResult.consumesAction()) {
-			UseOnContext useOnContext = new UseOnContext(player, InteractionHand.MAIN_HAND, blockHitResult);
-			player.getItemInHand(InteractionHand.MAIN_HAND).useOn(useOnContext);
+		InteractionHand interactionHand = InteractionHand.MAIN_HAND;
+		ItemInteractionResult itemInteractionResult = blockState.useItemOn(
+			player.getItemInHand(interactionHand), this.getLevel(), player, interactionHand, blockHitResult
+		);
+		if (!itemInteractionResult.consumesAction()) {
+			if (itemInteractionResult != ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+				|| !blockState.useWithoutItem(this.getLevel(), player, blockHitResult).consumesAction()) {
+				UseOnContext useOnContext = new UseOnContext(player, interactionHand, blockHitResult);
+				player.getItemInHand(interactionHand).useOn(useOnContext);
+			}
 		}
 	}
 
@@ -661,11 +668,11 @@ public class GameTestHelper {
 		}
 	}
 
-	public void assertLivingEntityHasMobEffect(LivingEntity livingEntity, MobEffect mobEffect, int i) {
-		MobEffectInstance mobEffectInstance = livingEntity.getEffect(mobEffect);
+	public void assertLivingEntityHasMobEffect(LivingEntity livingEntity, Holder<MobEffect> holder, int i) {
+		MobEffectInstance mobEffectInstance = livingEntity.getEffect(holder);
 		if (mobEffectInstance == null || mobEffectInstance.getAmplifier() != i) {
 			int j = i + 1;
-			throw new GameTestAssertException("Entity " + livingEntity + " failed has " + mobEffect.getDescriptionId() + " x " + j + " test");
+			throw new GameTestAssertException("Entity " + livingEntity + " failed has " + holder.value().getDescriptionId() + " x " + j + " test");
 		}
 	}
 

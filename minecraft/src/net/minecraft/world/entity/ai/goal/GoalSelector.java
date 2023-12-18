@@ -1,22 +1,16 @@
 package net.minecraft.world.entity.ai.goal;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
-import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.slf4j.Logger;
 
 public class GoalSelector {
-	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final WrappedGoal NO_GOAL = new WrappedGoal(Integer.MAX_VALUE, new Goal() {
 		@Override
 		public boolean canUse() {
@@ -29,11 +23,9 @@ public class GoalSelector {
 		}
 	};
 	private final Map<Goal.Flag, WrappedGoal> lockedFlags = new EnumMap(Goal.Flag.class);
-	private final Set<WrappedGoal> availableGoals = Sets.<WrappedGoal>newLinkedHashSet();
+	private final Set<WrappedGoal> availableGoals = new ObjectLinkedOpenHashSet<>();
 	private final Supplier<ProfilerFiller> profiler;
 	private final EnumSet<Goal.Flag> disabledFlags = EnumSet.noneOf(Goal.Flag.class);
-	private int tickCount;
-	private int newGoalRate = 3;
 
 	public GoalSelector(Supplier<ProfilerFiller> supplier) {
 		this.profiler = supplier;
@@ -49,8 +41,13 @@ public class GoalSelector {
 	}
 
 	public void removeGoal(Goal goal) {
-		this.availableGoals.stream().filter(wrappedGoal -> wrappedGoal.getGoal() == goal).filter(WrappedGoal::isRunning).forEach(WrappedGoal::stop);
-		this.availableGoals.removeIf(wrappedGoal -> wrappedGoal.getGoal() == goal);
+		for (WrappedGoal wrappedGoal : this.availableGoals) {
+			if (wrappedGoal.getGoal() == goal && wrappedGoal.isRunning()) {
+				wrappedGoal.stop();
+			}
+		}
+
+		this.availableGoals.removeIf(wrappedGoalx -> wrappedGoalx.getGoal() == goal);
 	}
 
 	private static boolean goalContainsAnyFlags(WrappedGoal wrappedGoal, EnumSet<Goal.Flag> enumSet) {
@@ -83,15 +80,7 @@ public class GoalSelector {
 			}
 		}
 
-		Iterator<Entry<Goal.Flag, WrappedGoal>> iterator = this.lockedFlags.entrySet().iterator();
-
-		while (iterator.hasNext()) {
-			Entry<Goal.Flag, WrappedGoal> entry = (Entry<Goal.Flag, WrappedGoal>)iterator.next();
-			if (!((WrappedGoal)entry.getValue()).isRunning()) {
-				iterator.remove();
-			}
-		}
-
+		this.lockedFlags.entrySet().removeIf(entry -> !((WrappedGoal)entry.getValue()).isRunning());
 		profilerFiller.pop();
 		profilerFiller.push("goalUpdate");
 
@@ -129,14 +118,6 @@ public class GoalSelector {
 
 	public Set<WrappedGoal> getAvailableGoals() {
 		return this.availableGoals;
-	}
-
-	public Stream<WrappedGoal> getRunningGoals() {
-		return this.availableGoals.stream().filter(WrappedGoal::isRunning);
-	}
-
-	public void setNewGoalRate(int i) {
-		this.newGoalRate = i;
 	}
 
 	public void disableControlFlag(Goal.Flag flag) {

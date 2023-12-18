@@ -34,6 +34,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -75,6 +76,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -121,7 +123,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Team;
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 public abstract class Entity implements Nameable, EntityAccess, CommandSource, ScoreHolder {
@@ -185,7 +186,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	public double xOld;
 	public double yOld;
 	public double zOld;
-	private float maxUpStep;
 	public boolean noPhysics;
 	protected final RandomSource random = RandomSource.create();
 	public int tickCount;
@@ -240,7 +240,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	private int lastCrystalSoundPlayTick;
 	private boolean hasVisualFire;
 	@Nullable
-	private BlockState feetBlockState = null;
+	private BlockState inBlockState = null;
 
 	public Entity(EntityType<?> entityType, Level level) {
 		this.type = entityType;
@@ -260,7 +260,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		this.entityData.define(DATA_TICKS_FROZEN, 0);
 		this.defineSynchedData();
 		this.setPos(0.0, 0.0, 0.0);
-		this.eyeHeight = this.getEyeHeight(Pose.STANDING, this.dimensions);
+		this.eyeHeight = this.dimensions.eyeHeight();
 	}
 
 	public boolean isColliding(BlockPos blockPos, BlockState blockState) {
@@ -416,7 +416,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 	public void baseTick() {
 		this.level().getProfiler().push("entityBaseTick");
-		this.feetBlockState = null;
+		this.inBlockState = null;
 		if (this.isPassenger() && this.getVehicle().isRemoved()) {
 			this.stopRiding();
 		}
@@ -1001,12 +1001,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	protected void onInsideBlock(BlockState blockState) {
 	}
 
-	public void gameEvent(GameEvent gameEvent, @Nullable Entity entity) {
-		this.level().gameEvent(entity, gameEvent, this.position);
+	public void gameEvent(Holder<GameEvent> holder, @Nullable Entity entity) {
+		this.level().gameEvent(entity, holder, this.position);
 	}
 
-	public void gameEvent(GameEvent gameEvent) {
-		this.gameEvent(gameEvent, this);
+	public void gameEvent(Holder<GameEvent> holder) {
+		this.gameEvent(holder, this);
 	}
 
 	private void walkingStepSound(BlockPos blockPos, BlockState blockState) {
@@ -1240,16 +1240,16 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 		float h = (float)Mth.floor(this.getY());
 
-		for (int i = 0; (float)i < 1.0F + this.dimensions.width * 20.0F; i++) {
-			double d = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
-			double e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+		for (int i = 0; (float)i < 1.0F + this.dimensions.width() * 20.0F; i++) {
+			double d = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width();
+			double e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width();
 			this.level()
 				.addParticle(ParticleTypes.BUBBLE, this.getX() + d, (double)(h + 1.0F), this.getZ() + e, vec3.x, vec3.y - this.random.nextDouble() * 0.2F, vec3.z);
 		}
 
-		for (int i = 0; (float)i < 1.0F + this.dimensions.width * 20.0F; i++) {
-			double d = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
-			double e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+		for (int i = 0; (float)i < 1.0F + this.dimensions.width() * 20.0F; i++) {
+			double d = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width();
+			double e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width();
 			this.level().addParticle(ParticleTypes.SPLASH, this.getX() + d, (double)(h + 1.0F), this.getZ() + e, vec3.x, vec3.y, vec3.z);
 		}
 
@@ -1275,8 +1275,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
 			Vec3 vec3 = this.getDeltaMovement();
 			BlockPos blockPos2 = this.blockPosition();
-			double d = this.getX() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width;
-			double e = this.getZ() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width;
+			double d = this.getX() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width();
+			double e = this.getZ() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width();
 			if (blockPos2.getX() != blockPos.getX()) {
 				d = Mth.clamp(d, (double)blockPos.getX(), (double)blockPos.getX() + 1.0);
 			}
@@ -1798,7 +1798,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		if (this.noPhysics) {
 			return false;
 		} else {
-			float f = this.dimensions.width * 0.8F;
+			float f = this.dimensions.width() * 0.8F;
 			AABB aABB = AABB.ofSize(this.getEyePosition(), (double)f, 1.0E-6, (double)f);
 			return BlockPos.betweenClosedStream(aABB)
 				.anyMatch(
@@ -1844,26 +1844,28 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 	protected void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
 		Vec3 vec3 = this.getPassengerRidingPosition(entity);
-		moveFunction.accept(entity, vec3.x, vec3.y + (double)entity.getMyRidingOffset(this), vec3.z);
+		Vec3 vec32 = entity.getVehicleAttachmentPoint(this);
+		moveFunction.accept(entity, vec3.x - vec32.x, vec3.y - vec32.y, vec3.z - vec32.z);
 	}
 
 	public void onPassengerTurned(Entity entity) {
 	}
 
-	public float getMyRidingOffset(Entity entity) {
-		return this.ridingOffset(entity);
-	}
-
-	protected float ridingOffset(Entity entity) {
-		return 0.0F;
+	public Vec3 getVehicleAttachmentPoint(Entity entity) {
+		return this.dimensions.attachments().get(EntityAttachment.VEHICLE, 0, this.yRot);
 	}
 
 	public Vec3 getPassengerRidingPosition(Entity entity) {
-		return new Vec3(this.getPassengerAttachmentPoint(entity, this.dimensions, 1.0F).rotateY(-this.yRot * (float) (Math.PI / 180.0))).add(this.position());
+		return this.position().add(this.getPassengerAttachmentPoint(entity, this.dimensions, 1.0F));
 	}
 
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height, 0.0F);
+	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return getDefaultPassengerAttachmentPoint(this, entity, entityDimensions.attachments());
+	}
+
+	protected static Vec3 getDefaultPassengerAttachmentPoint(Entity entity, Entity entity2, EntityAttachments entityAttachments) {
+		int i = entity.getPassengers().indexOf(entity2);
+		return entityAttachments.getClamped(EntityAttachment.PASSENGER, i, entity.yRot);
 	}
 
 	public boolean startRiding(Entity entity) {
@@ -2723,7 +2725,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		Pose pose = this.getPose();
 		EntityDimensions entityDimensions = this.getDimensions(pose);
 		this.dimensions = entityDimensions;
-		this.eyeHeight = this.getEyeHeight(pose, entityDimensions);
+		this.eyeHeight = entityDimensions.eyeHeight();
 	}
 
 	public void refreshDimensions() {
@@ -2731,22 +2733,22 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		Pose pose = this.getPose();
 		EntityDimensions entityDimensions2 = this.getDimensions(pose);
 		this.dimensions = entityDimensions2;
-		this.eyeHeight = this.getEyeHeight(pose, entityDimensions2);
+		this.eyeHeight = entityDimensions2.eyeHeight();
 		this.reapplyPosition();
-		boolean bl = (double)entityDimensions2.width <= 4.0 && (double)entityDimensions2.height <= 4.0;
+		boolean bl = (double)entityDimensions2.width() <= 4.0 && (double)entityDimensions2.height() <= 4.0;
 		if (!this.level().isClientSide
 			&& !this.firstTick
 			&& !this.noPhysics
 			&& bl
-			&& (entityDimensions2.width > entityDimensions.width || entityDimensions2.height > entityDimensions.height)
+			&& (entityDimensions2.width() > entityDimensions.width() || entityDimensions2.height() > entityDimensions.height())
 			&& !(this instanceof Player)) {
-			Vec3 vec3 = this.position().add(0.0, (double)entityDimensions.height / 2.0, 0.0);
-			double d = (double)Math.max(0.0F, entityDimensions2.width - entityDimensions.width) + 1.0E-6;
-			double e = (double)Math.max(0.0F, entityDimensions2.height - entityDimensions.height) + 1.0E-6;
+			Vec3 vec3 = this.position().add(0.0, (double)entityDimensions.height() / 2.0, 0.0);
+			double d = (double)Math.max(0.0F, entityDimensions2.width() - entityDimensions.width()) + 1.0E-6;
+			double e = (double)Math.max(0.0F, entityDimensions2.height() - entityDimensions.height()) + 1.0E-6;
 			VoxelShape voxelShape = Shapes.create(AABB.ofSize(vec3, d, e, d));
 			this.level()
-				.findFreePosition(this, voxelShape, vec3, (double)entityDimensions2.width, (double)entityDimensions2.height, (double)entityDimensions2.width)
-				.ifPresent(vec3x -> this.setPos(vec3x.add(0.0, (double)(-entityDimensions2.height) / 2.0, 0.0)));
+				.findFreePosition(this, voxelShape, vec3, (double)entityDimensions2.width(), (double)entityDimensions2.height(), (double)entityDimensions2.width())
+				.ifPresent(vec3x -> this.setPos(vec3x.add(0.0, (double)(-entityDimensions2.height()) / 2.0, 0.0)));
 		}
 	}
 
@@ -2779,12 +2781,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		this.bb = aABB;
 	}
 
-	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * 0.85F;
-	}
-
-	public float getEyeHeight(Pose pose) {
-		return this.getEyeHeight(pose, this.getDimensions(pose));
+	public final float getEyeHeight(Pose pose) {
+		return this.getDimensions(pose).eyeHeight();
 	}
 
 	public final float getEyeHeight() {
@@ -2866,6 +2864,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 	public boolean onlyOpCanSetNbt() {
 		return false;
+	}
+
+	public void playProjectileDeflectionSound(Projectile projectile) {
 	}
 
 	@Nullable
@@ -3126,15 +3127,11 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	}
 
 	public final float getBbWidth() {
-		return this.dimensions.width;
+		return this.dimensions.width();
 	}
 
 	public final float getBbHeight() {
-		return this.dimensions.height;
-	}
-
-	public float getNameTagOffsetY() {
-		return this.getBbHeight() + 0.5F;
+		return this.dimensions.height();
 	}
 
 	public Packet<ClientGamePacketListener> getAddEntityPacket() {
@@ -3158,12 +3155,12 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		return this.blockPosition;
 	}
 
-	public BlockState getFeetBlockState() {
-		if (this.feetBlockState == null) {
-			this.feetBlockState = this.level().getBlockState(this.blockPosition());
+	public BlockState getInBlockState() {
+		if (this.inBlockState == null) {
+			this.inBlockState = this.level().getBlockState(this.blockPosition());
 		}
 
-		return this.feetBlockState;
+		return this.inBlockState;
 	}
 
 	public ChunkPos chunkPosition() {
@@ -3246,7 +3243,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 			int k = Mth.floor(f);
 			if (i != this.blockPosition.getX() || j != this.blockPosition.getY() || k != this.blockPosition.getZ()) {
 				this.blockPosition = new BlockPos(i, j, k);
-				this.feetBlockState = null;
+				this.inBlockState = null;
 				if (SectionPos.blockToSectionCoord(i) != this.chunkPosition.x || SectionPos.blockToSectionCoord(k) != this.chunkPosition.z) {
 					this.chunkPosition = new ChunkPos(this.blockPosition);
 				}
@@ -3326,11 +3323,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	}
 
 	public float maxUpStep() {
-		return this.maxUpStep;
-	}
-
-	public void setMaxUpStep(float f) {
-		this.maxUpStep = f;
+		return 0.0F;
 	}
 
 	public final boolean isRemoved() {

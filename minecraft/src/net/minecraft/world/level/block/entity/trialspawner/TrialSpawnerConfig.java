@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.level.SpawnData;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public record TrialSpawnerConfig(
 	int requiredPlayerRange,
@@ -20,7 +21,19 @@ public record TrialSpawnerConfig(
 	SimpleWeightedRandomList<ResourceLocation> lootTablesToEject
 ) {
 	public static TrialSpawnerConfig DEFAULT = new TrialSpawnerConfig(
-		14, 4, 6.0F, 2.0F, 2.0F, 1.0F, 40, 36000, SimpleWeightedRandomList.empty(), SimpleWeightedRandomList.empty()
+		14,
+		4,
+		6.0F,
+		2.0F,
+		2.0F,
+		1.0F,
+		40,
+		36000,
+		SimpleWeightedRandomList.empty(),
+		SimpleWeightedRandomList.<ResourceLocation>builder()
+			.add(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_CONSUMABLES)
+			.add(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_KEY)
+			.build()
 	);
 	public static MapCodec<TrialSpawnerConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
@@ -40,7 +53,7 @@ public record TrialSpawnerConfig(
 						.forGetter(TrialSpawnerConfig::targetCooldownLength),
 					SpawnData.LIST_CODEC.optionalFieldOf("spawn_potentials", SimpleWeightedRandomList.empty()).forGetter(TrialSpawnerConfig::spawnPotentialsDefinition),
 					SimpleWeightedRandomList.wrappedCodecAllowingEmpty(ResourceLocation.CODEC)
-						.optionalFieldOf("loot_tables_to_eject", SimpleWeightedRandomList.empty())
+						.optionalFieldOf("loot_tables_to_eject", DEFAULT.lootTablesToEject)
 						.forGetter(TrialSpawnerConfig::lootTablesToEject)
 				)
 				.apply(instance, TrialSpawnerConfig::new)

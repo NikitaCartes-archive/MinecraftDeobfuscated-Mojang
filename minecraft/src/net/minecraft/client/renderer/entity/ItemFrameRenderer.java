@@ -148,7 +148,7 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 		}
 	}
 
-	protected void renderNameTag(T itemFrame, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-		super.renderNameTag(itemFrame, itemFrame.getItem().getHoverName(), poseStack, multiBufferSource, i);
+	protected void renderNameTag(T itemFrame, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f) {
+		super.renderNameTag(itemFrame, itemFrame.getItem().getHoverName(), poseStack, multiBufferSource, i, f);
 	}
 }

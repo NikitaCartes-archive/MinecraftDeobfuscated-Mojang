@@ -115,4 +115,8 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		vertexConsumer.vertex(matrix4f, z - o, aa + n, ab + p).color(w, x, y, 1.0F).uv2(u).endVertex();
 		vertexConsumer.vertex(matrix4f, z + o, aa + m - n, ab - p).color(w, x, y, 1.0F).uv2(u).endVertex();
 	}
+
+	protected float getShadowRadius(T mob) {
+		return super.getShadowRadius(mob) * mob.getAgeScale();
+	}
 }

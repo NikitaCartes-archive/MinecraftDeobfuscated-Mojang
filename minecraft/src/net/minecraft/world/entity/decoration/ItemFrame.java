@@ -20,10 +20,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -60,11 +58,6 @@ public class ItemFrame extends HangingEntity {
 	public ItemFrame(EntityType<? extends ItemFrame> entityType, Level level, BlockPos blockPos, Direction direction) {
 		super(entityType, level, blockPos);
 		this.setDirection(direction);
-	}
-
-	@Override
-	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.0F;
 	}
 
 	@Override

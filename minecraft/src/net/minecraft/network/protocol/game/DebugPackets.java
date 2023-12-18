@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
@@ -98,7 +99,7 @@ public class DebugPackets {
 	public static void sendBreezeInfo(Breeze breeze) {
 	}
 
-	public static void sendGameEventInfo(Level level, GameEvent gameEvent, Vec3 vec3) {
+	public static void sendGameEventInfo(Level level, Holder<GameEvent> holder, Vec3 vec3) {
 	}
 
 	public static void sendGameEventListenerInfo(Level level, GameEventListener gameEventListener) {

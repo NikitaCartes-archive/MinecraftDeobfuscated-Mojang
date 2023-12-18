@@ -13,6 +13,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -96,13 +97,17 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.is(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS) && blockHitResult.getDirection() == Direction.UP) {
-			return InteractionResult.PASS;
-		} else if (level.isClientSide) {
+		return itemStack.is(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS) && blockHitResult.getDirection() == Direction.UP
+			? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
+			: super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else {
 			blockState = blockState.cycle(NOTE);

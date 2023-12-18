@@ -31,6 +31,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -198,10 +199,15 @@ public abstract class BlockBehaviour implements FeatureElement {
 	}
 
 	@Deprecated
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
-	) {
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		return InteractionResult.PASS;
+	}
+
+	@Deprecated
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
+		return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 	}
 
 	@Deprecated
@@ -750,8 +756,12 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.getBlock().getDrops(this.asState(), builder);
 		}
 
-		public InteractionResult use(Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-			return this.getBlock().use(this.asState(), level, blockHitResult.getBlockPos(), player, interactionHand, blockHitResult);
+		public ItemInteractionResult useItemOn(ItemStack itemStack, Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+			return this.getBlock().useItemOn(itemStack, this.asState(), level, blockHitResult.getBlockPos(), player, interactionHand, blockHitResult);
+		}
+
+		public InteractionResult useWithoutItem(Level level, Player player, BlockHitResult blockHitResult) {
+			return this.getBlock().useWithoutItem(this.asState(), level, blockHitResult.getBlockPos(), player, blockHitResult);
 		}
 
 		public void attack(Level level, BlockPos blockPos, Player player) {

@@ -7,7 +7,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -231,7 +230,9 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	public class OnlineServerEntry extends ServerSelectionList.Entry {
 		private static final int ICON_WIDTH = 32;
 		private static final int ICON_HEIGHT = 32;
-		private static final int ICON_OVERLAY_X_MOVE_LEFT = 32;
+		private static final int SPACING = 5;
+		private static final int STATUS_ICON_WIDTH = 10;
+		private static final int STATUS_ICON_HEIGHT = 8;
 		private final JoinMultiplayerScreen screen;
 		private final Minecraft minecraft;
 		private final ServerData serverData;
@@ -239,35 +240,55 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		@Nullable
 		private byte[] lastIconBytes;
 		private long lastClickTime;
+		@Nullable
+		private List<Component> onlinePlayersTooltip;
+		private ResourceLocation statusIcon;
+		private Component statusIconTooltip;
 
 		protected OnlineServerEntry(JoinMultiplayerScreen joinMultiplayerScreen, ServerData serverData) {
 			this.screen = joinMultiplayerScreen;
 			this.serverData = serverData;
 			this.minecraft = Minecraft.getInstance();
 			this.icon = FaviconTexture.forServer(this.minecraft.getTextureManager(), serverData.ip);
+			this.refreshStatus();
 		}
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			if (!this.serverData.pinged) {
-				this.serverData.pinged = true;
-				this.serverData.ping = -2L;
+			if (this.serverData.state() == ServerData.State.INITIAL) {
+				this.serverData.setState(ServerData.State.PINGING);
 				this.serverData.motd = CommonComponents.EMPTY;
 				this.serverData.status = CommonComponents.EMPTY;
-				ServerSelectionList.THREAD_POOL.submit(() -> {
-					try {
-						this.screen.getPinger().pingServer(this.serverData, () -> this.minecraft.execute(this::updateServerList));
-					} catch (UnknownHostException var2) {
-						this.serverData.ping = -1L;
-						this.serverData.motd = ServerSelectionList.CANT_RESOLVE_TEXT;
-					} catch (Exception var3) {
-						this.serverData.ping = -1L;
-						this.serverData.motd = ServerSelectionList.CANT_CONNECT_TEXT;
-					}
-				});
+				ServerSelectionList.THREAD_POOL
+					.submit(
+						() -> {
+							try {
+								this.screen
+									.getPinger()
+									.pingServer(
+										this.serverData,
+										() -> this.minecraft.execute(this::updateServerList),
+										() -> {
+											this.serverData
+												.setState(
+													this.serverData.protocol == SharedConstants.getCurrentVersion().getProtocolVersion() ? ServerData.State.SUCCESSFUL : ServerData.State.INCOMPATIBLE
+												);
+											this.minecraft.execute(this::refreshStatus);
+										}
+									);
+							} catch (UnknownHostException var2) {
+								this.serverData.setState(ServerData.State.UNREACHABLE);
+								this.serverData.motd = ServerSelectionList.CANT_RESOLVE_TEXT;
+								this.minecraft.execute(this::refreshStatus);
+							} catch (Exception var3) {
+								this.serverData.setState(ServerData.State.UNREACHABLE);
+								this.serverData.motd = ServerSelectionList.CANT_CONNECT_TEXT;
+								this.minecraft.execute(this::refreshStatus);
+							}
+						}
+					);
 			}
 
-			boolean bl2 = !this.isCompatible();
 			guiGraphics.drawString(this.minecraft.font, this.serverData.name, k + 32 + 3, j + 1, 16777215, false);
 			List<FormattedCharSequence> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
 
@@ -275,55 +296,23 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				guiGraphics.drawString(this.minecraft.font, (FormattedCharSequence)list.get(p), k + 32 + 3, j + 12 + 9 * p, -8355712, false);
 			}
 
-			Component component = (Component)(bl2 ? this.serverData.version.copy().withStyle(ChatFormatting.RED) : this.serverData.status);
-			int q = this.minecraft.font.width(component);
-			guiGraphics.drawString(this.minecraft.font, component, k + l - q - 15 - 2, j + 1, -8355712, false);
-			ResourceLocation resourceLocation;
-			List<Component> list2;
-			Component component2;
-			if (bl2) {
-				resourceLocation = ServerSelectionList.INCOMPATIBLE_SPRITE;
-				component2 = ServerSelectionList.INCOMPATIBLE_STATUS;
-				list2 = this.serverData.playerList;
-			} else if (this.pingCompleted()) {
-				if (this.serverData.ping < 0L) {
-					resourceLocation = ServerSelectionList.UNREACHABLE_SPRITE;
-				} else if (this.serverData.ping < 150L) {
-					resourceLocation = ServerSelectionList.PING_5_SPRITE;
-				} else if (this.serverData.ping < 300L) {
-					resourceLocation = ServerSelectionList.PING_4_SPRITE;
-				} else if (this.serverData.ping < 600L) {
-					resourceLocation = ServerSelectionList.PING_3_SPRITE;
-				} else if (this.serverData.ping < 1000L) {
-					resourceLocation = ServerSelectionList.PING_2_SPRITE;
-				} else {
-					resourceLocation = ServerSelectionList.PING_1_SPRITE;
+			this.drawIcon(guiGraphics, k, j, this.icon.textureLocation());
+			if (this.serverData.state() == ServerData.State.PINGING) {
+				int p = (int)(Util.getMillis() / 100L + (long)(i * 2) & 7L);
+				if (p > 4) {
+					p = 8 - p;
 				}
-
-				if (this.serverData.ping < 0L) {
-					component2 = ServerSelectionList.NO_CONNECTION_STATUS;
-					list2 = Collections.emptyList();
-				} else {
-					component2 = Component.translatable("multiplayer.status.ping", this.serverData.ping);
-					list2 = this.serverData.playerList;
-				}
-			} else {
-				int r = (int)(Util.getMillis() / 100L + (long)(i * 2) & 7L);
-				if (r > 4) {
-					r = 8 - r;
-				}
-				resourceLocation = switch (r) {
+				this.statusIcon = switch (p) {
 					case 1 -> ServerSelectionList.PINGING_2_SPRITE;
 					case 2 -> ServerSelectionList.PINGING_3_SPRITE;
 					case 3 -> ServerSelectionList.PINGING_4_SPRITE;
 					case 4 -> ServerSelectionList.PINGING_5_SPRITE;
 					default -> ServerSelectionList.PINGING_1_SPRITE;
 				};
-				component2 = ServerSelectionList.PINGING_STATUS;
-				list2 = Collections.emptyList();
 			}
 
-			guiGraphics.blitSprite(resourceLocation, k + l - 15, j, 10, 8);
+			int p = k + l - 10 - 5;
+			guiGraphics.blitSprite(this.statusIcon, p, j, 10, 8);
 			byte[] bs = this.serverData.getIconBytes();
 			if (!Arrays.equals(bs, this.lastIconBytes)) {
 				if (this.uploadServerIcon(bs)) {
@@ -334,21 +323,24 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				}
 			}
 
-			this.drawIcon(guiGraphics, k, j, this.icon.textureLocation());
-			int s = n - k;
-			int t = o - j;
-			if (s >= l - 15 && s <= l - 5 && t >= 0 && t <= 8) {
-				this.screen.setToolTip(Collections.singletonList(component2));
-			} else if (s >= l - q - 15 - 2 && s <= l - 15 - 2 && t >= 0 && t <= 8) {
-				this.screen.setToolTip(list2);
+			Component component = (Component)(this.serverData.state() == ServerData.State.INCOMPATIBLE
+				? this.serverData.version.copy().withStyle(ChatFormatting.RED)
+				: this.serverData.status);
+			int q = this.minecraft.font.width(component);
+			int r = p - q - 5;
+			guiGraphics.drawString(this.minecraft.font, component, r, j + 1, -8355712, false);
+			if (n >= p && n <= p + 10 && o >= j && o <= j + 8) {
+				this.screen.setTooltipForNextRenderPass(this.statusIconTooltip);
+			} else if (this.onlinePlayersTooltip != null && n >= r && n <= r + q && o >= j && o <= j - 1 + 9) {
+				this.screen.setTooltipForNextRenderPass(Lists.transform(this.onlinePlayersTooltip, Component::getVisualOrderText));
 			}
 
 			if (this.minecraft.options.touchscreen().get() || bl) {
 				guiGraphics.fill(k, j, k + 32, j + 32, -1601138544);
-				int u = n - k;
-				int v = o - j;
+				int s = n - k;
+				int t = o - j;
 				if (this.canJoin()) {
-					if (u < 32 && u > 16) {
+					if (s < 32 && s > 16) {
 						guiGraphics.blitSprite(ServerSelectionList.JOIN_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
 						guiGraphics.blitSprite(ServerSelectionList.JOIN_SPRITE, k, j, 32, 32);
@@ -356,7 +348,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				}
 
 				if (i > 0) {
-					if (u < 16 && v < 16) {
+					if (s < 16 && t < 16) {
 						guiGraphics.blitSprite(ServerSelectionList.MOVE_UP_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
 						guiGraphics.blitSprite(ServerSelectionList.MOVE_UP_SPRITE, k, j, 32, 32);
@@ -364,7 +356,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				}
 
 				if (i < this.screen.getServers().size() - 1) {
-					if (u < 16 && v > 16) {
+					if (s < 16 && t > 16) {
 						guiGraphics.blitSprite(ServerSelectionList.MOVE_DOWN_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
 						guiGraphics.blitSprite(ServerSelectionList.MOVE_DOWN_SPRITE, k, j, 32, 32);
@@ -373,12 +365,38 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 		}
 
-		private boolean pingCompleted() {
-			return this.serverData.pinged && this.serverData.ping != -2L;
-		}
+		private void refreshStatus() {
+			this.onlinePlayersTooltip = null;
+			switch (this.serverData.state()) {
+				case INITIAL:
+				case PINGING:
+					this.statusIconTooltip = ServerSelectionList.PINGING_STATUS;
+					break;
+				case INCOMPATIBLE:
+					this.statusIcon = ServerSelectionList.INCOMPATIBLE_SPRITE;
+					this.statusIconTooltip = ServerSelectionList.INCOMPATIBLE_STATUS;
+					this.onlinePlayersTooltip = this.serverData.playerList;
+					break;
+				case UNREACHABLE:
+					this.statusIcon = ServerSelectionList.UNREACHABLE_SPRITE;
+					this.statusIconTooltip = ServerSelectionList.NO_CONNECTION_STATUS;
+					break;
+				case SUCCESSFUL:
+					if (this.serverData.ping < 150L) {
+						this.statusIcon = ServerSelectionList.PING_5_SPRITE;
+					} else if (this.serverData.ping < 300L) {
+						this.statusIcon = ServerSelectionList.PING_4_SPRITE;
+					} else if (this.serverData.ping < 600L) {
+						this.statusIcon = ServerSelectionList.PING_3_SPRITE;
+					} else if (this.serverData.ping < 1000L) {
+						this.statusIcon = ServerSelectionList.PING_2_SPRITE;
+					} else {
+						this.statusIcon = ServerSelectionList.PING_1_SPRITE;
+					}
 
-		private boolean isCompatible() {
-			return this.serverData.protocol == SharedConstants.getCurrentVersion().getProtocolVersion();
+					this.statusIconTooltip = Component.translatable("multiplayer.status.ping", this.serverData.ping);
+					this.onlinePlayersTooltip = this.serverData.playerList;
+			}
 		}
 
 		public void updateServerList() {
@@ -477,30 +495,34 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			MutableComponent mutableComponent = Component.empty();
 			mutableComponent.append(Component.translatable("narrator.select", this.serverData.name));
 			mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
-			if (!this.isCompatible()) {
-				mutableComponent.append(ServerSelectionList.INCOMPATIBLE_STATUS);
-				mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
-				mutableComponent.append(Component.translatable("multiplayer.status.version.narration", this.serverData.version));
-				mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
-				mutableComponent.append(Component.translatable("multiplayer.status.motd.narration", this.serverData.motd));
-			} else if (this.serverData.ping < 0L) {
-				mutableComponent.append(ServerSelectionList.NO_CONNECTION_STATUS);
-			} else if (!this.pingCompleted()) {
-				mutableComponent.append(ServerSelectionList.PINGING_STATUS);
-			} else {
-				mutableComponent.append(ServerSelectionList.ONLINE_STATUS);
-				mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
-				mutableComponent.append(Component.translatable("multiplayer.status.ping.narration", this.serverData.ping));
-				mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
-				mutableComponent.append(Component.translatable("multiplayer.status.motd.narration", this.serverData.motd));
-				if (this.serverData.players != null) {
+			switch (this.serverData.state()) {
+				case PINGING:
+					mutableComponent.append(ServerSelectionList.PINGING_STATUS);
+					break;
+				case INCOMPATIBLE:
+					mutableComponent.append(ServerSelectionList.INCOMPATIBLE_STATUS);
 					mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
-					mutableComponent.append(
-						Component.translatable("multiplayer.status.player_count.narration", this.serverData.players.online(), this.serverData.players.max())
-					);
+					mutableComponent.append(Component.translatable("multiplayer.status.version.narration", this.serverData.version));
 					mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
-					mutableComponent.append(ComponentUtils.formatList(this.serverData.playerList, Component.literal(", ")));
-				}
+					mutableComponent.append(Component.translatable("multiplayer.status.motd.narration", this.serverData.motd));
+					break;
+				case UNREACHABLE:
+					mutableComponent.append(ServerSelectionList.NO_CONNECTION_STATUS);
+					break;
+				default:
+					mutableComponent.append(ServerSelectionList.ONLINE_STATUS);
+					mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
+					mutableComponent.append(Component.translatable("multiplayer.status.ping.narration", this.serverData.ping));
+					mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
+					mutableComponent.append(Component.translatable("multiplayer.status.motd.narration", this.serverData.motd));
+					if (this.serverData.players != null) {
+						mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
+						mutableComponent.append(
+							Component.translatable("multiplayer.status.player_count.narration", this.serverData.players.online(), this.serverData.players.max())
+						);
+						mutableComponent.append(CommonComponents.NARRATION_SEPARATOR);
+						mutableComponent.append(ComponentUtils.formatList(this.serverData.playerList, Component.literal(", ")));
+					}
 			}
 
 			return mutableComponent;

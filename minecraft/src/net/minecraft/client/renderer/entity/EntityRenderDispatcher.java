@@ -37,7 +37,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
@@ -153,11 +152,14 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			}
 
 			poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
-			if (this.options.entityShadows().get() && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0F && !entity.isInvisible()) {
-				double m = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
-				float n = (float)((1.0 - m / 256.0) * (double)entityRenderer.shadowStrength);
-				if (n > 0.0F) {
-					renderShadow(poseStack, multiBufferSource, entity, n, h, this.level, Math.min(entityRenderer.shadowRadius, 32.0F));
+			if (this.options.entityShadows().get() && this.shouldRenderShadow && !entity.isInvisible()) {
+				float m = entityRenderer.getShadowRadius(entity);
+				if (m > 0.0F) {
+					double n = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
+					float o = (float)((1.0 - n / 256.0) * (double)entityRenderer.shadowStrength);
+					if (o > 0.0F) {
+						renderShadow(poseStack, multiBufferSource, entity, o, h, this.level, Math.min(m, 32.0F));
+					}
 				}
 			}
 
@@ -166,8 +168,8 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			}
 
 			poseStack.popPose();
-		} catch (Throwable var24) {
-			CrashReport crashReport = CrashReport.forThrowable(var24, "Rendering entity in world");
+		} catch (Throwable var25) {
+			CrashReport crashReport = CrashReport.forThrowable(var25, "Rendering entity in world");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being rendered");
 			entity.fillCrashReportCategory(crashReportCategory);
 			CrashReportCategory crashReportCategory2 = crashReport.addCategory("Renderer details");
@@ -299,34 +301,29 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	}
 
 	private static void renderShadow(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, LevelReader levelReader, float h) {
-		float i = h;
-		if (entity instanceof Mob mob && mob.isBaby()) {
-			i = h * 0.5F;
-		}
-
 		double d = Mth.lerp((double)g, entity.xOld, entity.getX());
 		double e = Mth.lerp((double)g, entity.yOld, entity.getY());
-		double j = Mth.lerp((double)g, entity.zOld, entity.getZ());
-		float k = Math.min(f / 0.5F, i);
-		int l = Mth.floor(d - (double)i);
-		int m = Mth.floor(d + (double)i);
-		int n = Mth.floor(e - (double)k);
-		int o = Mth.floor(e);
-		int p = Mth.floor(j - (double)i);
-		int q = Mth.floor(j + (double)i);
+		double i = Mth.lerp((double)g, entity.zOld, entity.getZ());
+		float j = Math.min(f / 0.5F, h);
+		int k = Mth.floor(d - (double)h);
+		int l = Mth.floor(d + (double)h);
+		int m = Mth.floor(e - (double)j);
+		int n = Mth.floor(e);
+		int o = Mth.floor(i - (double)h);
+		int p = Mth.floor(i + (double)h);
 		PoseStack.Pose pose = poseStack.last();
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(SHADOW_RENDER_TYPE);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (int r = p; r <= q; r++) {
-			for (int s = l; s <= m; s++) {
-				mutableBlockPos.set(s, 0, r);
+		for (int q = o; q <= p; q++) {
+			for (int r = k; r <= l; r++) {
+				mutableBlockPos.set(r, 0, q);
 				ChunkAccess chunkAccess = levelReader.getChunk(mutableBlockPos);
 
-				for (int t = n; t <= o; t++) {
-					mutableBlockPos.setY(t);
-					float u = f - (float)(e - (double)mutableBlockPos.getY()) * 0.5F;
-					renderBlockShadow(pose, vertexConsumer, chunkAccess, levelReader, mutableBlockPos, d, e, j, i, u);
+				for (int s = m; s <= n; s++) {
+					mutableBlockPos.setY(s);
+					float t = f - (float)(e - (double)mutableBlockPos.getY()) * 0.5F;
+					renderBlockShadow(pose, vertexConsumer, chunkAccess, levelReader, mutableBlockPos, d, e, i, h, t);
 				}
 			}
 		}

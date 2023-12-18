@@ -104,7 +104,6 @@ public class ClientLevel extends Level {
 	private final TickRateManager tickRateManager;
 	private final Minecraft minecraft = Minecraft.getInstance();
 	final List<AbstractClientPlayer> players = Lists.<AbstractClientPlayer>newArrayList();
-	private Scoreboard scoreboard = new Scoreboard();
 	private final Map<String, MapItemSavedData> mapData = Maps.<String, MapItemSavedData>newHashMap();
 	private static final long CLOUD_COLOR = 16777215L;
 	private int skyFlashTime;
@@ -537,10 +536,6 @@ public class ClientLevel extends Level {
 		return this.tickRateManager;
 	}
 
-	public void setScoreboard(Scoreboard scoreboard) {
-		this.scoreboard = scoreboard;
-	}
-
 	@Override
 	public LevelTickAccess<Block> getBlockTicks() {
 		return BlackholeTickAccess.emptyLevelList();
@@ -576,7 +571,7 @@ public class ClientLevel extends Level {
 
 	@Override
 	public Scoreboard getScoreboard() {
-		return this.scoreboard;
+		return this.connection.scoreboard();
 	}
 
 	@Override
@@ -815,7 +810,7 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public void gameEvent(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context) {
+	public void gameEvent(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context) {
 	}
 
 	protected Map<String, MapItemSavedData> getAllMapData() {

@@ -32,7 +32,7 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>>
 	}
 
 	public Vec3 getRenderOffset(Shulker shulker, float f) {
-		return (Vec3)shulker.getRenderPosition(f).orElse(super.getRenderOffset(shulker, f));
+		return ((Vec3)shulker.getRenderPosition(f).orElse(super.getRenderOffset(shulker, f))).scale((double)shulker.getScale());
 	}
 
 	public boolean shouldRender(Shulker shulker, Frustum frustum, double d, double e, double f) {

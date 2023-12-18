@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
@@ -101,6 +102,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -157,6 +161,13 @@ public class ServerPlayer extends Player {
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_XZ = 32;
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_Y = 10;
 	private static final int FLY_STAT_RECORDING_SPEED = 25;
+	private static final double INTERACTION_DISTANCE_VERIFICATION_BUFFER = 1.0;
+	private static final AttributeModifier CREATIVE_BLOCK_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
+		UUID.fromString("736565d2-e1a7-403d-a3f8-1aeb3e302542"), "Creative block interaction range modifier", 0.5, AttributeModifier.Operation.ADDITION
+	);
+	private static final AttributeModifier CREATIVE_ENTITY_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
+		UUID.fromString("98491ef6-97b1-4584-ae82-71a8cc85cf73"), "Creative entity interaction range modifier", 2.0, AttributeModifier.Operation.ADDITION
+	);
 	public ServerGamePacketListenerImpl connection;
 	public final MinecraftServer server;
 	public final ServerPlayerGameMode gameMode;
@@ -262,7 +273,6 @@ public class ServerPlayer extends Player {
 		this.server = minecraftServer;
 		this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
 		this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
-		this.setMaxUpStep(1.0F);
 		this.fudgeSpawnLocation(serverLevel);
 		this.updateOptions(clientInformation);
 	}
@@ -481,7 +491,28 @@ public class ServerPlayer extends Player {
 
 		this.trackStartFallingPosition();
 		this.trackEnteredOrExitedLavaOnVehicle();
+		this.updatePlayerAttributes();
 		this.advancements.flushDirty(this);
+	}
+
+	private void updatePlayerAttributes() {
+		AttributeInstance attributeInstance = this.getAttribute(Attributes.BLOCK_INTERACTION_RANGE);
+		if (attributeInstance != null) {
+			if (this.isCreative()) {
+				attributeInstance.addOrUpdateTransientModifier(CREATIVE_BLOCK_INTERACTION_RANGE_MODIFIER);
+			} else {
+				attributeInstance.removeModifier(CREATIVE_BLOCK_INTERACTION_RANGE_MODIFIER);
+			}
+		}
+
+		AttributeInstance attributeInstance2 = this.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
+		if (attributeInstance2 != null) {
+			if (this.isCreative()) {
+				attributeInstance2.addOrUpdateTransientModifier(CREATIVE_ENTITY_INTERACTION_RANGE_MODIFIER);
+			} else {
+				attributeInstance2.removeModifier(CREATIVE_ENTITY_INTERACTION_RANGE_MODIFIER);
+			}
+		}
 	}
 
 	public void doTick() {
@@ -777,7 +808,7 @@ public class ServerPlayer extends Player {
 				playerList.sendAllPlayerInfo(this);
 
 				for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
-					this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance));
+					this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance, false));
 				}
 
 				this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
@@ -1270,8 +1301,8 @@ public class ServerPlayer extends Player {
 	@Override
 	protected void onEffectAdded(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
 		super.onEffectAdded(mobEffectInstance, entity);
-		this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance));
-		if (mobEffectInstance.getEffect() == MobEffects.LEVITATION) {
+		this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance, true));
+		if (mobEffectInstance.is(MobEffects.LEVITATION)) {
 			this.levitationStartTime = this.tickCount;
 			this.levitationStartPos = this.position();
 		}
@@ -1282,7 +1313,7 @@ public class ServerPlayer extends Player {
 	@Override
 	protected void onEffectUpdated(MobEffectInstance mobEffectInstance, boolean bl, @Nullable Entity entity) {
 		super.onEffectUpdated(mobEffectInstance, bl, entity);
-		this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance));
+		this.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance, false));
 		CriteriaTriggers.EFFECTS_CHANGED.trigger(this, entity);
 	}
 
@@ -1290,7 +1321,7 @@ public class ServerPlayer extends Player {
 	protected void onEffectRemoved(MobEffectInstance mobEffectInstance) {
 		super.onEffectRemoved(mobEffectInstance);
 		this.connection.send(new ClientboundRemoveMobEffectPacket(this.getId(), mobEffectInstance.getEffect()));
-		if (mobEffectInstance.getEffect() == MobEffects.LEVITATION) {
+		if (mobEffectInstance.is(MobEffects.LEVITATION)) {
 			this.levitationStartPos = null;
 		}
 
@@ -1763,7 +1794,7 @@ public class ServerPlayer extends Player {
 			this.connection.teleport(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
 			if (entity instanceof LivingEntity livingEntity) {
 				for (MobEffectInstance mobEffectInstance : livingEntity.getActiveEffects()) {
-					this.connection.send(new ClientboundUpdateMobEffectPacket(entity.getId(), mobEffectInstance));
+					this.connection.send(new ClientboundUpdateMobEffectPacket(entity.getId(), mobEffectInstance, false));
 				}
 			}
 
@@ -1794,5 +1825,15 @@ public class ServerPlayer extends Player {
 			this.getLastDeathLocation(),
 			this.getPortalCooldown()
 		);
+	}
+
+	public boolean canInteractWithEntity(AABB aABB) {
+		double d = this.entityInteractionRange() + 1.0;
+		return aABB.distanceToSqr(this.getEyePosition()) < d * d;
+	}
+
+	public boolean canInteractWithBlock(BlockPos blockPos) {
+		double d = this.blockInteractionRange() + 1.0;
+		return this.getEyePosition().closerThan(Vec3.atCenterOf(blockPos), d);
 	}
 }

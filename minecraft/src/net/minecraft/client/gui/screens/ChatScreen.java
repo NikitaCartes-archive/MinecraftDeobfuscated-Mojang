@@ -84,10 +84,8 @@ public class ChatScreen extends Screen {
 			this.minecraft.setScreen(null);
 			return true;
 		} else if (i == 257 || i == 335) {
-			if (this.handleChatInput(this.input.getValue(), true)) {
-				this.minecraft.setScreen(null);
-			}
-
+			this.handleChatInput(this.input.getValue(), true);
+			this.minecraft.setScreen(null);
 			return true;
 		} else if (i == 265) {
 			this.moveInHistory(-1);
@@ -174,10 +172,14 @@ public class ChatScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.minecraft.gui.getChat().render(guiGraphics, this.minecraft.gui.getGuiTicks(), i, j, true);
 		guiGraphics.fill(2, this.height - 14, this.width - 2, this.height - 2, this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
 		this.input.render(guiGraphics, i, j, f);
 		super.render(guiGraphics, i, j, f);
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
 		this.commandSuggestions.render(guiGraphics, i, j);
+		guiGraphics.pose().popPose();
 		GuiMessageTag guiMessageTag = this.minecraft.gui.getChat().getMessageTagAt((double)i, (double)j);
 		if (guiMessageTag != null && guiMessageTag.text() != null) {
 			guiGraphics.renderTooltip(this.font, this.font.split(guiMessageTag.text(), 210), i, j);
@@ -217,11 +219,9 @@ public class ChatScreen extends Screen {
 		return this.minecraft.gui.getChat().getClickedComponentStyleAt(d, e);
 	}
 
-	public boolean handleChatInput(String string, boolean bl) {
+	public void handleChatInput(String string, boolean bl) {
 		string = this.normalizeChatMessage(string);
-		if (string.isEmpty()) {
-			return true;
-		} else {
+		if (!string.isEmpty()) {
 			if (bl) {
 				this.minecraft.gui.getChat().addRecentChat(string);
 			}
@@ -231,8 +231,6 @@ public class ChatScreen extends Screen {
 			} else {
 				this.minecraft.player.connection.sendChat(string);
 			}
-
-			return true;
 		}
 	}
 

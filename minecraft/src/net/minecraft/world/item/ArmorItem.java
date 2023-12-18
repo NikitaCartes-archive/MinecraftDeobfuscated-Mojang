@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
@@ -44,7 +45,7 @@ public class ArmorItem extends Item implements Equipable {
 	private final float toughness;
 	protected final float knockbackResistance;
 	protected final ArmorMaterial material;
-	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
+	private final Multimap<Holder<Attribute>, AttributeModifier> defaultModifiers;
 
 	public static boolean dispenseArmor(BlockSource blockSource, ItemStack itemStack) {
 		BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
@@ -74,7 +75,7 @@ public class ArmorItem extends Item implements Equipable {
 		this.toughness = armorMaterial.getToughness();
 		this.knockbackResistance = armorMaterial.getKnockbackResistance();
 		DispenserBlock.registerBehavior(this, DISPENSE_ITEM_BEHAVIOR);
-		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
 		UUID uUID = (UUID)ARMOR_MODIFIER_UUID_PER_TYPE.get(type);
 		builder.put(Attributes.ARMOR, new AttributeModifier(uUID, "Armor modifier", (double)this.defense, AttributeModifier.Operation.ADDITION));
 		builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uUID, "Armor toughness", (double)this.toughness, AttributeModifier.Operation.ADDITION));
@@ -112,7 +113,7 @@ public class ArmorItem extends Item implements Equipable {
 	}
 
 	@Override
-	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
 		return equipmentSlot == this.type.getSlot() ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 

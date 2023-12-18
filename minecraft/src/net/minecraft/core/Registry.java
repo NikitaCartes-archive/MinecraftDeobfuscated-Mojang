@@ -43,7 +43,7 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	default Codec<Holder<T>> holderByNameCodec() {
 		Codec<Holder<T>> codec = ResourceLocation.CODEC
 			.flatXmap(
-				resourceLocation -> (DataResult)this.getHolder(ResourceKey.create(this.key(), resourceLocation))
+				resourceLocation -> (DataResult)this.getHolder(resourceLocation)
 						.map(DataResult::success)
 						.orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + this.key() + ": " + resourceLocation)),
 				holder -> (DataResult)holder.unwrapKey()
@@ -136,6 +136,8 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	Holder.Reference<T> createIntrusiveHolder(T object);
 
 	Optional<Holder.Reference<T>> getHolder(int i);
+
+	Optional<Holder.Reference<T>> getHolder(ResourceLocation resourceLocation);
 
 	Optional<Holder.Reference<T>> getHolder(ResourceKey<T> resourceKey);
 

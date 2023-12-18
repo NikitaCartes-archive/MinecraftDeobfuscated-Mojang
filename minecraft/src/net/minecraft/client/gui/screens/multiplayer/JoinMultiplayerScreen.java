@@ -42,8 +42,6 @@ public class JoinMultiplayerScreen extends Screen {
 	private Button editButton;
 	private Button selectButton;
 	private Button deleteButton;
-	@Nullable
-	private List<Component> toolTip;
 	private ServerData editingServer;
 	private LanServerDetection.LanServerList lanServerList;
 	@Nullable
@@ -76,7 +74,7 @@ public class JoinMultiplayerScreen extends Screen {
 			this.serverSelectionList.updateOnlineServers(this.servers);
 		}
 
-		this.addWidget(this.serverSelectionList);
+		this.addRenderableWidget(this.serverSelectionList);
 		this.selectButton = this.addRenderableWidget(
 			Button.builder(Component.translatable("selectServer.select"), buttonx -> this.joinSelectedServer()).width(100).build()
 		);
@@ -113,7 +111,7 @@ public class JoinMultiplayerScreen extends Screen {
 		Button button3 = this.addRenderableWidget(
 			Button.builder(Component.translatable("selectServer.refresh"), buttonx -> this.refreshServerList()).width(74).build()
 		);
-		Button button4 = this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, buttonx -> this.minecraft.setScreen(this.lastScreen)).width(74).build());
+		Button button4 = this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, buttonx -> this.onClose()).width(74).build());
 		LinearLayout linearLayout = LinearLayout.vertical();
 		EqualSpacingLayout equalSpacingLayout = linearLayout.addChild(new EqualSpacingLayout(308, 20, EqualSpacingLayout.Orientation.HORIZONTAL));
 		equalSpacingLayout.addChild(this.selectButton);
@@ -128,6 +126,11 @@ public class JoinMultiplayerScreen extends Screen {
 		linearLayout.arrangeElements();
 		FrameLayout.centerInRectangle(linearLayout, 0, this.height - 64, this.width, 64);
 		this.onSelectedChange();
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	@Override
@@ -237,12 +240,7 @@ public class JoinMultiplayerScreen extends Screen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		this.toolTip = null;
-		this.serverSelectionList.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
-		if (this.toolTip != null) {
-			guiGraphics.renderComponentTooltip(this.font, this.toolTip, i, j);
-		}
 	}
 
 	public void joinSelectedServer() {
@@ -280,10 +278,6 @@ public class JoinMultiplayerScreen extends Screen {
 
 	public ServerStatusPinger getPinger() {
 		return this.pinger;
-	}
-
-	public void setToolTip(List<Component> list) {
-		this.toolTip = list;
 	}
 
 	public ServerList getServers() {

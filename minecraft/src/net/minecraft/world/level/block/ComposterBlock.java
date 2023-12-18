@@ -15,6 +15,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.WorldlyContainerHolder;
@@ -229,11 +230,10 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		int i = (Integer)blockState.getValue(LEVEL);
-		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (i < 8 && COMPOSTABLES.containsKey(itemStack.getItem())) {
 			if (i < 7 && !level.isClientSide) {
 				BlockState blockState2 = addItem(player, blockState, level, blockPos, itemStack);
@@ -244,8 +244,16 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 				}
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
-		} else if (i == 8) {
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
+		} else {
+			return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
+		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+		int i = (Integer)blockState.getValue(LEVEL);
+		if (i == 8) {
 			extractProduce(player, blockState, level, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {

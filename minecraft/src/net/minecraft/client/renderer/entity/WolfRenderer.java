@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WolfModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.layers.WolfArmorLayer;
 import net.minecraft.client.renderer.entity.layers.WolfCollarLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Wolf;
@@ -18,6 +19,7 @@ public class WolfRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
 
 	public WolfRenderer(EntityRendererProvider.Context context) {
 		super(context, new WolfModel<>(context.bakeLayer(ModelLayers.WOLF)), 0.5F);
+		this.addLayer(new WolfArmorLayer(this, context.getModelSet()));
 		this.addLayer(new WolfCollarLayer(this));
 	}
 

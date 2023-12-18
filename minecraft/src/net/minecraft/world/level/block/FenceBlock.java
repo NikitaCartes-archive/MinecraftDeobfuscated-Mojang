@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -75,15 +76,19 @@ public class FenceBlock extends CrossCollisionBlock {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.isClientSide) {
-			ItemStack itemStack = player.getItemInHand(interactionHand);
-			return itemStack.is(Items.LEAD) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+			return itemStack.is(Items.LEAD) ? ItemInteractionResult.SUCCESS : ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
 		} else {
-			return LeadItem.bindPlayerMobs(player, level, blockPos);
+			return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+		return !level.isClientSide() ? LeadItem.bindPlayerMobs(player, level, blockPos) : InteractionResult.PASS;
 	}
 
 	@Override

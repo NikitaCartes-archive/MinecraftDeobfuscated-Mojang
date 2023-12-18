@@ -12,7 +12,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.Item;
@@ -61,7 +61,7 @@ public interface CauldronInteraction {
 	CauldronInteraction SHULKER_BOX = (blockState, level, blockPos, player, interactionHand, itemStack) -> {
 		Block block = Block.byItem(itemStack.getItem());
 		if (!(block instanceof ShulkerBoxBlock)) {
-			return InteractionResult.PASS;
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else {
 			if (!level.isClientSide) {
 				ItemStack itemStack2 = new ItemStack(Blocks.SHULKER_BOX);
@@ -74,12 +74,12 @@ public interface CauldronInteraction {
 				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		}
 	};
 	CauldronInteraction BANNER = (blockState, level, blockPos, player, interactionHand, itemStack) -> {
 		if (BannerBlockEntity.getPatternCount(itemStack) <= 0) {
-			return InteractionResult.PASS;
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else {
 			if (!level.isClientSide) {
 				ItemStack itemStack2 = itemStack.copyWithCount(1);
@@ -100,14 +100,14 @@ public interface CauldronInteraction {
 				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		}
 	};
 	CauldronInteraction DYED_ITEM = (blockState, level, blockPos, player, interactionHand, itemStack) -> {
 		if (!(itemStack.getItem() instanceof DyeableLeatherItem dyeableLeatherItem)) {
-			return InteractionResult.PASS;
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else if (!dyeableLeatherItem.hasCustomColor(itemStack)) {
-			return InteractionResult.PASS;
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else {
 			if (!level.isClientSide) {
 				dyeableLeatherItem.clearColor(itemStack);
@@ -115,26 +115,28 @@ public interface CauldronInteraction {
 				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		}
 	};
 
 	static CauldronInteraction.InteractionMap newInteractionMap(String string) {
 		Object2ObjectOpenHashMap<Item, CauldronInteraction> object2ObjectOpenHashMap = new Object2ObjectOpenHashMap<>();
-		object2ObjectOpenHashMap.defaultReturnValue((blockState, level, blockPos, player, interactionHand, itemStack) -> InteractionResult.PASS);
+		object2ObjectOpenHashMap.defaultReturnValue(
+			(blockState, level, blockPos, player, interactionHand, itemStack) -> ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+		);
 		CauldronInteraction.InteractionMap interactionMap = new CauldronInteraction.InteractionMap(string, object2ObjectOpenHashMap);
 		INTERACTIONS.put(string, interactionMap);
 		return interactionMap;
 	}
 
-	InteractionResult interact(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack);
+	ItemInteractionResult interact(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack);
 
 	static void bootStrap() {
 		Map<Item, CauldronInteraction> map = EMPTY.map();
 		addDefaultInteractions(map);
 		map.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
-			if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
-				return InteractionResult.PASS;
+			if (!PotionUtils.getPotion(itemStack).is(Potions.WATER)) {
+				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 			} else {
 				if (!level.isClientSide) {
 					Item item = itemStack.getItem();
@@ -146,7 +148,7 @@ public interface CauldronInteraction {
 					level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 				}
 
-				return InteractionResult.sidedSuccess(level.isClientSide);
+				return ItemInteractionResult.sidedSuccess(level.isClientSide);
 			}
 		});
 		Map<Item, CauldronInteraction> map2 = WATER.map();
@@ -176,10 +178,10 @@ public interface CauldronInteraction {
 				level.gameEvent(null, GameEvent.FLUID_PICKUP, blockPos);
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		});
 		map2.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
-			if ((Integer)blockState.getValue(LayeredCauldronBlock.LEVEL) != 3 && PotionUtils.getPotion(itemStack) == Potions.WATER) {
+			if ((Integer)blockState.getValue(LayeredCauldronBlock.LEVEL) != 3 && PotionUtils.getPotion(itemStack).is(Potions.WATER)) {
 				if (!level.isClientSide) {
 					player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
 					player.awardStat(Stats.USE_CAULDRON);
@@ -189,9 +191,9 @@ public interface CauldronInteraction {
 					level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 				}
 
-				return InteractionResult.sidedSuccess(level.isClientSide);
+				return ItemInteractionResult.sidedSuccess(level.isClientSide);
 			} else {
-				return InteractionResult.PASS;
+				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 			}
 		});
 		map2.put(Items.LEATHER_BOOTS, DYED_ITEM);
@@ -263,7 +265,7 @@ public interface CauldronInteraction {
 		map.put(Items.POWDER_SNOW_BUCKET, FILL_POWDER_SNOW);
 	}
 
-	static InteractionResult fillBucket(
+	static ItemInteractionResult fillBucket(
 		BlockState blockState,
 		Level level,
 		BlockPos blockPos,
@@ -275,7 +277,7 @@ public interface CauldronInteraction {
 		SoundEvent soundEvent
 	) {
 		if (!predicate.test(blockState)) {
-			return InteractionResult.PASS;
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else {
 			if (!level.isClientSide) {
 				Item item = itemStack.getItem();
@@ -287,11 +289,11 @@ public interface CauldronInteraction {
 				level.gameEvent(null, GameEvent.FLUID_PICKUP, blockPos);
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 
-	static InteractionResult emptyBucket(
+	static ItemInteractionResult emptyBucket(
 		Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack, BlockState blockState, SoundEvent soundEvent
 	) {
 		if (!level.isClientSide) {
@@ -304,7 +306,7 @@ public interface CauldronInteraction {
 			level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 		}
 
-		return InteractionResult.sidedSuccess(level.isClientSide);
+		return ItemInteractionResult.sidedSuccess(level.isClientSide);
 	}
 
 	public static record InteractionMap(String name, Map<Item, CauldronInteraction> map) {

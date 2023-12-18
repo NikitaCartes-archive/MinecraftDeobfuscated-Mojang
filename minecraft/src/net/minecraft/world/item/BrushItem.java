@@ -94,9 +94,7 @@ public class BrushItem extends Item {
 	}
 
 	private HitResult calculateHitResult(Player player) {
-		return ProjectileUtil.getHitResultOnViewVector(
-			player, entity -> !entity.isSpectator() && entity.isPickable(), (double)Player.getPickRange(player.isCreative())
-		);
+		return ProjectileUtil.getHitResultOnViewVector(player, entity -> !entity.isSpectator() && entity.isPickable(), player.blockInteractionRange());
 	}
 
 	private void spawnDustParticles(Level level, BlockHitResult blockHitResult, BlockState blockState, Vec3 vec3, HumanoidArm humanoidArm) {

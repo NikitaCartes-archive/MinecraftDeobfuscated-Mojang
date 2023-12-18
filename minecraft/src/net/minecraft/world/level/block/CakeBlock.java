@@ -9,6 +9,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -60,32 +61,33 @@ public class CakeBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (itemStack.is(ItemTags.CANDLES) && (Integer)blockState.getValue(BITES) == 0) {
-			Block block = Block.byItem(item);
-			if (block instanceof CandleBlock) {
-				if (!player.isCreative()) {
-					itemStack.shrink(1);
-				}
-
-				level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
-				level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(block));
-				level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
-				player.awardStat(Stats.ITEM_USED.get(item));
-				return InteractionResult.SUCCESS;
+		if (itemStack.is(ItemTags.CANDLES) && (Integer)blockState.getValue(BITES) == 0 && Block.byItem(item) instanceof CandleBlock candleBlock) {
+			if (!player.isCreative()) {
+				itemStack.shrink(1);
 			}
-		}
 
+			level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
+			level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(candleBlock));
+			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
+			player.awardStat(Stats.ITEM_USED.get(item));
+			return ItemInteractionResult.SUCCESS;
+		} else {
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (level.isClientSide) {
 			if (eat(level, blockPos, blockState, player).consumesAction()) {
 				return InteractionResult.SUCCESS;
 			}
 
-			if (itemStack.isEmpty()) {
+			if (player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
 				return InteractionResult.CONSUME;
 			}
 		}

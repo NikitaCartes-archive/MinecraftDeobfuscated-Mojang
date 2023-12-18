@@ -1,5 +1,6 @@
 package net.minecraft.world.level.gameevent;
 
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 
@@ -8,7 +9,7 @@ public interface GameEventListener {
 
 	int getListenerRadius();
 
-	boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3);
+	boolean handleGameEvent(ServerLevel serverLevel, Holder<GameEvent> holder, GameEvent.Context context, Vec3 vec3);
 
 	default GameEventListener.DeliveryMode getDeliveryMode() {
 		return GameEventListener.DeliveryMode.UNSPECIFIED;
@@ -19,7 +20,7 @@ public interface GameEventListener {
 		BY_DISTANCE;
 	}
 
-	public interface Holder<T extends GameEventListener> {
+	public interface Provider<T extends GameEventListener> {
 		T getListener();
 	}
 }

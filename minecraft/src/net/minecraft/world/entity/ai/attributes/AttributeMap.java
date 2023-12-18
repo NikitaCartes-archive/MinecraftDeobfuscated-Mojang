@@ -1,9 +1,9 @@
 package net.minecraft.world.entity.ai.attributes;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 
 public class AttributeMap {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private final Map<Attribute, AttributeInstance> attributes = Maps.<Attribute, AttributeInstance>newHashMap();
-	private final Set<AttributeInstance> dirtyAttributes = Sets.<AttributeInstance>newHashSet();
+	private final Map<Holder<Attribute>, AttributeInstance> attributes = new Object2ObjectOpenHashMap<>();
+	private final Set<AttributeInstance> dirtyAttributes = new ObjectOpenHashSet<>();
 	private final AttributeSupplier supplier;
 
 	public AttributeMap(AttributeSupplier attributeSupplier) {
@@ -29,7 +29,7 @@ public class AttributeMap {
 	}
 
 	private void onAttributeModified(AttributeInstance attributeInstance) {
-		if (attributeInstance.getAttribute().isClientSyncable()) {
+		if (attributeInstance.getAttribute().value().isClientSyncable()) {
 			this.dirtyAttributes.add(attributeInstance);
 		}
 	}
@@ -42,68 +42,51 @@ public class AttributeMap {
 		return (Collection<AttributeInstance>)this.attributes
 			.values()
 			.stream()
-			.filter(attributeInstance -> attributeInstance.getAttribute().isClientSyncable())
+			.filter(attributeInstance -> attributeInstance.getAttribute().value().isClientSyncable())
 			.collect(Collectors.toList());
 	}
 
 	@Nullable
-	public AttributeInstance getInstance(Attribute attribute) {
-		return (AttributeInstance)this.attributes.computeIfAbsent(attribute, attributex -> this.supplier.createInstance(this::onAttributeModified, attributex));
-	}
-
-	@Nullable
 	public AttributeInstance getInstance(Holder<Attribute> holder) {
-		return this.getInstance(holder.value());
-	}
-
-	public boolean hasAttribute(Attribute attribute) {
-		return this.attributes.get(attribute) != null || this.supplier.hasAttribute(attribute);
+		return (AttributeInstance)this.attributes.computeIfAbsent(holder, holderx -> this.supplier.createInstance(this::onAttributeModified, holderx));
 	}
 
 	public boolean hasAttribute(Holder<Attribute> holder) {
-		return this.hasAttribute(holder.value());
-	}
-
-	public boolean hasModifier(Attribute attribute, UUID uUID) {
-		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(attribute);
-		return attributeInstance != null ? attributeInstance.getModifier(uUID) != null : this.supplier.hasModifier(attribute, uUID);
+		return this.attributes.get(holder) != null || this.supplier.hasAttribute(holder);
 	}
 
 	public boolean hasModifier(Holder<Attribute> holder, UUID uUID) {
-		return this.hasModifier(holder.value(), uUID);
+		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(holder);
+		return attributeInstance != null ? attributeInstance.getModifier(uUID) != null : this.supplier.hasModifier(holder, uUID);
 	}
 
-	public double getValue(Attribute attribute) {
-		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(attribute);
-		return attributeInstance != null ? attributeInstance.getValue() : this.supplier.getValue(attribute);
+	public double getValue(Holder<Attribute> holder) {
+		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(holder);
+		return attributeInstance != null ? attributeInstance.getValue() : this.supplier.getValue(holder);
 	}
 
-	public double getBaseValue(Attribute attribute) {
-		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(attribute);
-		return attributeInstance != null ? attributeInstance.getBaseValue() : this.supplier.getBaseValue(attribute);
-	}
-
-	public double getModifierValue(Attribute attribute, UUID uUID) {
-		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(attribute);
-		return attributeInstance != null ? attributeInstance.getModifier(uUID).getAmount() : this.supplier.getModifierValue(attribute, uUID);
+	public double getBaseValue(Holder<Attribute> holder) {
+		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(holder);
+		return attributeInstance != null ? attributeInstance.getBaseValue() : this.supplier.getBaseValue(holder);
 	}
 
 	public double getModifierValue(Holder<Attribute> holder, UUID uUID) {
-		return this.getModifierValue(holder.value(), uUID);
+		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(holder);
+		return attributeInstance != null ? attributeInstance.getModifier(uUID).getAmount() : this.supplier.getModifierValue(holder, uUID);
 	}
 
-	public void removeAttributeModifiers(Multimap<Attribute, AttributeModifier> multimap) {
-		multimap.asMap().forEach((attribute, collection) -> {
-			AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(attribute);
+	public void removeAttributeModifiers(Multimap<Holder<Attribute>, AttributeModifier> multimap) {
+		multimap.asMap().forEach((holder, collection) -> {
+			AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(holder);
 			if (attributeInstance != null) {
 				collection.forEach(attributeModifier -> attributeInstance.removeModifier(attributeModifier.getId()));
 			}
 		});
 	}
 
-	public void addTransientAttributeModifiers(Multimap<Attribute, AttributeModifier> multimap) {
-		multimap.forEach((attribute, attributeModifier) -> {
-			AttributeInstance attributeInstance = this.getInstance(attribute);
+	public void addTransientAttributeModifiers(Multimap<Holder<Attribute>, AttributeModifier> multimap) {
+		multimap.forEach((holder, attributeModifier) -> {
+			AttributeInstance attributeInstance = this.getInstance(holder);
 			if (attributeInstance != null) {
 				attributeInstance.removeModifier(attributeModifier.getId());
 				attributeInstance.addTransientModifier(attributeModifier);
@@ -134,12 +117,17 @@ public class AttributeMap {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			String string = compoundTag.getString("Name");
-			Util.ifElse(BuiltInRegistries.ATTRIBUTE.getOptional(ResourceLocation.tryParse(string)), attribute -> {
-				AttributeInstance attributeInstance = this.getInstance(attribute);
-				if (attributeInstance != null) {
-					attributeInstance.load(compoundTag);
-				}
-			}, () -> LOGGER.warn("Ignoring unknown attribute '{}'", string));
+			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+			if (resourceLocation != null) {
+				Util.ifElse(BuiltInRegistries.ATTRIBUTE.getHolder(resourceLocation), reference -> {
+					AttributeInstance attributeInstance = this.getInstance(reference);
+					if (attributeInstance != null) {
+						attributeInstance.load(compoundTag);
+					}
+				}, () -> LOGGER.warn("Ignoring unknown attribute '{}'", resourceLocation));
+			} else {
+				LOGGER.warn("Ignoring malformed attribute '{}'", string);
+			}
 		}
 	}
 }

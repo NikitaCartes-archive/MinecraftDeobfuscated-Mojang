@@ -9,6 +9,7 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -30,13 +31,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -121,7 +120,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 		this.vibrationData = new VibrationSystem.Data();
 		this.dynamicVibrationListener = new DynamicGameEventListener<>(new VibrationSystem.Listener(this));
 		this.dynamicJukeboxListener = new DynamicGameEventListener<>(
-			new Allay.JukeboxListener(this.vibrationUser.getPositionSource(), GameEvent.JUKEBOX_PLAY.getNotificationRadius())
+			new Allay.JukeboxListener(this.vibrationUser.getPositionSource(), GameEvent.JUKEBOX_PLAY.value().notificationRadius())
 		);
 	}
 
@@ -184,11 +183,6 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 		}
 
 		this.calculateEntityAnimation(false);
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * 0.6F;
 	}
 
 	@Override
@@ -432,7 +426,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 
 	private boolean shouldStopDancing() {
 		return this.jukeboxPos == null
-			|| !this.jukeboxPos.closerToCenterThan(this.position(), (double)GameEvent.JUKEBOX_PLAY.getNotificationRadius())
+			|| !this.jukeboxPos.closerToCenterThan(this.position(), (double)GameEvent.JUKEBOX_PLAY.value().notificationRadius())
 			|| !this.level().getBlockState(this.jukeboxPos).is(Blocks.JUKEBOX);
 	}
 
@@ -545,11 +539,6 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	@Override
-	protected float ridingOffset(Entity entity) {
-		return 0.04F;
-	}
-
-	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 18) {
 			for (int i = 0; i < 3; i++) {
@@ -597,11 +586,11 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 		}
 
 		@Override
-		public boolean handleGameEvent(ServerLevel serverLevel, GameEvent gameEvent, GameEvent.Context context, Vec3 vec3) {
-			if (gameEvent == GameEvent.JUKEBOX_PLAY) {
+		public boolean handleGameEvent(ServerLevel serverLevel, Holder<GameEvent> holder, GameEvent.Context context, Vec3 vec3) {
+			if (holder.is(GameEvent.JUKEBOX_PLAY)) {
 				Allay.this.setJukeboxPlaying(BlockPos.containing(vec3), true);
 				return true;
-			} else if (gameEvent == GameEvent.JUKEBOX_STOP_PLAY) {
+			} else if (holder.is(GameEvent.JUKEBOX_STOP_PLAY)) {
 				Allay.this.setJukeboxPlaying(BlockPos.containing(vec3), false);
 				return true;
 			} else {
@@ -625,7 +614,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 		}
 
 		@Override
-		public boolean canReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
+		public boolean canReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, Holder<GameEvent> holder, GameEvent.Context context) {
 			if (Allay.this.isNoAi()) {
 				return false;
 			} else {
@@ -640,8 +629,10 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 		}
 
 		@Override
-		public void onReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
-			if (gameEvent == GameEvent.NOTE_BLOCK_PLAY) {
+		public void onReceiveVibration(
+			ServerLevel serverLevel, BlockPos blockPos, Holder<GameEvent> holder, @Nullable Entity entity, @Nullable Entity entity2, float f
+		) {
+			if (holder.is(GameEvent.NOTE_BLOCK_PLAY)) {
 				AllayAi.hearNoteblock(Allay.this, new BlockPos(blockPos));
 			}
 		}

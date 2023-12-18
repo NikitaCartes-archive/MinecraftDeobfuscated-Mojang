@@ -174,12 +174,12 @@ public class PortalShape {
 	}
 
 	public static Vec3 getRelativePosition(BlockUtil.FoundRectangle foundRectangle, Direction.Axis axis, Vec3 vec3, EntityDimensions entityDimensions) {
-		double d = (double)foundRectangle.axis1Size - (double)entityDimensions.width;
-		double e = (double)foundRectangle.axis2Size - (double)entityDimensions.height;
+		double d = (double)foundRectangle.axis1Size - (double)entityDimensions.width();
+		double e = (double)foundRectangle.axis2Size - (double)entityDimensions.height();
 		BlockPos blockPos = foundRectangle.minCorner;
 		double g;
 		if (d > 0.0) {
-			double f = (double)blockPos.get(axis) + (double)entityDimensions.width / 2.0;
+			double f = (double)blockPos.get(axis) + (double)entityDimensions.width() / 2.0;
 			g = Mth.clamp(Mth.inverseLerp(vec3.get(axis) - f, 0.0, d), 0.0, 1.0);
 		} else {
 			g = 0.5;
@@ -209,8 +209,8 @@ public class PortalShape {
 		EntityDimensions entityDimensions = entity.getDimensions(entity.getPose());
 		int i = axis == axis2 ? 0 : 90;
 		Vec3 vec33 = axis == axis2 ? vec32 : new Vec3(vec32.z, vec32.y, -vec32.x);
-		double h = (double)entityDimensions.width / 2.0 + (d - (double)entityDimensions.width) * vec3.x();
-		double j = (e - (double)entityDimensions.height) * vec3.y();
+		double h = (double)entityDimensions.width() / 2.0 + (d - (double)entityDimensions.width()) * vec3.x();
+		double j = (e - (double)entityDimensions.height()) * vec3.y();
 		double k = 0.5 + vec3.z();
 		boolean bl = axis2 == Direction.Axis.X;
 		Vec3 vec34 = new Vec3((double)blockPos.getX() + (bl ? h : k), (double)blockPos.getY() + j, (double)blockPos.getZ() + (bl ? k : h));
@@ -219,14 +219,14 @@ public class PortalShape {
 	}
 
 	private static Vec3 findCollisionFreePosition(Vec3 vec3, ServerLevel serverLevel, Entity entity, EntityDimensions entityDimensions) {
-		if (!(entityDimensions.width > 4.0F) && !(entityDimensions.height > 4.0F)) {
-			double d = (double)entityDimensions.height / 2.0;
+		if (!(entityDimensions.width() > 4.0F) && !(entityDimensions.height() > 4.0F)) {
+			double d = (double)entityDimensions.height() / 2.0;
 			Vec3 vec32 = vec3.add(0.0, d, 0.0);
 			VoxelShape voxelShape = Shapes.create(
-				AABB.ofSize(vec32, (double)entityDimensions.width, 0.0, (double)entityDimensions.width).expandTowards(0.0, 1.0, 0.0).inflate(1.0E-6)
+				AABB.ofSize(vec32, (double)entityDimensions.width(), 0.0, (double)entityDimensions.width()).expandTowards(0.0, 1.0, 0.0).inflate(1.0E-6)
 			);
 			Optional<Vec3> optional = serverLevel.findFreePosition(
-				entity, voxelShape, vec32, (double)entityDimensions.width, (double)entityDimensions.height, (double)entityDimensions.width
+				entity, voxelShape, vec32, (double)entityDimensions.width(), (double)entityDimensions.height(), (double)entityDimensions.width()
 			);
 			Optional<Vec3> optional2 = optional.map(vec3x -> vec3x.subtract(0.0, d, 0.0));
 			return (Vec3)optional2.orElse(vec3);

@@ -17,7 +17,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
@@ -118,10 +118,9 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
 		int i = (Integer)blockState.getValue(HONEY_LEVEL);
 		boolean bl = false;
 		if (i >= 5) {
@@ -161,9 +160,9 @@ public class BeehiveBlock extends BaseEntityBlock {
 				this.resetHoneyLevel(level, blockState, blockPos);
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		} else {
-			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
+			return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
 	}
 

@@ -72,7 +72,9 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 	}
 
 	public Vec3 getRenderOffset(AbstractClientPlayer abstractClientPlayer, float f) {
-		return abstractClientPlayer.isCrouching() ? new Vec3(0.0, -0.125, 0.0) : super.getRenderOffset(abstractClientPlayer, f);
+		return abstractClientPlayer.isCrouching()
+			? new Vec3(0.0, (double)(abstractClientPlayer.getScale() * -2.0F) / 16.0, 0.0)
+			: super.getRenderOffset(abstractClientPlayer, f);
 	}
 
 	private void setModelProperties(AbstractClientPlayer abstractClientPlayer) {
@@ -157,7 +159,9 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 	}
 
-	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	protected void renderNameTag(
+		AbstractClientPlayer abstractClientPlayer, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f
+	) {
 		double d = this.entityRenderDispatcher.distanceToSqr(abstractClientPlayer);
 		poseStack.pushPose();
 		if (d < 100.0) {
@@ -171,13 +175,14 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 					Component.empty().append(component2).append(CommonComponents.SPACE).append(objective.getDisplayName()),
 					poseStack,
 					multiBufferSource,
-					i
+					i,
+					f
 				);
 				poseStack.translate(0.0F, 9.0F * 1.15F * 0.025F, 0.0F);
 			}
 		}
 
-		super.renderNameTag(abstractClientPlayer, component, poseStack, multiBufferSource, i);
+		super.renderNameTag(abstractClientPlayer, component, poseStack, multiBufferSource, i, f);
 		poseStack.popPose();
 	}
 

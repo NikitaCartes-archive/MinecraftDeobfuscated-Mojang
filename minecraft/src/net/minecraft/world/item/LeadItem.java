@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
@@ -36,30 +37,27 @@ public class LeadItem extends Item {
 
 	public static InteractionResult bindPlayerMobs(Player player, Level level, BlockPos blockPos) {
 		LeashFenceKnotEntity leashFenceKnotEntity = null;
-		boolean bl = false;
 		double d = 7.0;
 		int i = blockPos.getX();
 		int j = blockPos.getY();
 		int k = blockPos.getZ();
+		AABB aABB = new AABB((double)i - 7.0, (double)j - 7.0, (double)k - 7.0, (double)i + 7.0, (double)j + 7.0, (double)k + 7.0);
+		List<Mob> list = level.getEntitiesOfClass(Mob.class, aABB, mobx -> mobx.getLeashHolder() == player);
 
-		for (Mob mob : level.getEntitiesOfClass(
-			Mob.class, new AABB((double)i - 7.0, (double)j - 7.0, (double)k - 7.0, (double)i + 7.0, (double)j + 7.0, (double)k + 7.0)
-		)) {
-			if (mob.getLeashHolder() == player) {
-				if (leashFenceKnotEntity == null) {
-					leashFenceKnotEntity = LeashFenceKnotEntity.getOrCreateKnot(level, blockPos);
-					leashFenceKnotEntity.playPlacementSound();
-				}
-
-				mob.setLeashedTo(leashFenceKnotEntity, true);
-				bl = true;
+		for (Mob mob : list) {
+			if (leashFenceKnotEntity == null) {
+				leashFenceKnotEntity = LeashFenceKnotEntity.getOrCreateKnot(level, blockPos);
+				leashFenceKnotEntity.playPlacementSound();
 			}
+
+			mob.setLeashedTo(leashFenceKnotEntity, true);
 		}
 
-		if (bl) {
+		if (!list.isEmpty()) {
 			level.gameEvent(GameEvent.BLOCK_ATTACH, blockPos, GameEvent.Context.of(player));
+			return InteractionResult.SUCCESS;
+		} else {
+			return InteractionResult.PASS;
 		}
-
-		return bl ? InteractionResult.SUCCESS : InteractionResult.PASS;
 	}
 }

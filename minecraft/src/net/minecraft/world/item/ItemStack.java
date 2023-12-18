@@ -42,6 +42,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -673,12 +674,12 @@ public final class ItemStack {
 
 		if (shouldShowInTooltip(i, ItemStack.TooltipPart.MODIFIERS)) {
 			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-				Multimap<Attribute, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
+				Multimap<Holder<Attribute>, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
 				if (!multimap.isEmpty()) {
 					list.add(CommonComponents.EMPTY);
 					list.add(Component.translatable("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
 
-					for (Entry<Attribute, AttributeModifier> entry : multimap.entries()) {
+					for (Entry<Holder<Attribute>, AttributeModifier> entry : multimap.entries()) {
 						AttributeModifier attributeModifier = (AttributeModifier)entry.getValue();
 						double d = attributeModifier.getAmount();
 						boolean bl = false;
@@ -697,7 +698,7 @@ public final class ItemStack {
 						if (attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE
 							|| attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL) {
 							e = d * 100.0;
-						} else if (((Attribute)entry.getKey()).equals(Attributes.KNOCKBACK_RESISTANCE)) {
+						} else if (((Holder)entry.getKey()).is(Attributes.KNOCKBACK_RESISTANCE)) {
 							e = d * 10.0;
 						} else {
 							e = d;
@@ -710,7 +711,7 @@ public final class ItemStack {
 										Component.translatable(
 											"attribute.modifier.equals." + attributeModifier.getOperation().toValue(),
 											ATTRIBUTE_MODIFIER_FORMAT.format(e),
-											Component.translatable(((Attribute)entry.getKey()).getDescriptionId())
+											Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
 										)
 									)
 									.withStyle(ChatFormatting.DARK_GREEN)
@@ -720,7 +721,7 @@ public final class ItemStack {
 								Component.translatable(
 										"attribute.modifier.plus." + attributeModifier.getOperation().toValue(),
 										ATTRIBUTE_MODIFIER_FORMAT.format(e),
-										Component.translatable(((Attribute)entry.getKey()).getDescriptionId())
+										Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
 									)
 									.withStyle(ChatFormatting.BLUE)
 							);
@@ -730,7 +731,7 @@ public final class ItemStack {
 								Component.translatable(
 										"attribute.modifier.take." + attributeModifier.getOperation().toValue(),
 										ATTRIBUTE_MODIFIER_FORMAT.format(e),
-										Component.translatable(((Attribute)entry.getKey()).getDescriptionId())
+										Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
 									)
 									.withStyle(ChatFormatting.RED)
 							);
@@ -885,8 +886,8 @@ public final class ItemStack {
 		}
 	}
 
-	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot) {
-		Multimap<Attribute, AttributeModifier> multimap;
+	public Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot) {
+		Multimap<Holder<Attribute>, AttributeModifier> multimap;
 		if (this.hasTag() && this.tag.contains("AttributeModifiers", 9)) {
 			multimap = HashMultimap.create();
 			ListTag listTag = this.tag.getList("AttributeModifiers", 10);
@@ -894,11 +895,14 @@ public final class ItemStack {
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag = listTag.getCompound(i);
 				if (!compoundTag.contains("Slot", 8) || compoundTag.getString("Slot").equals(equipmentSlot.getName())) {
-					Optional<Attribute> optional = BuiltInRegistries.ATTRIBUTE.getOptional(ResourceLocation.tryParse(compoundTag.getString("AttributeName")));
-					if (!optional.isEmpty()) {
-						AttributeModifier attributeModifier = AttributeModifier.load(compoundTag);
-						if (attributeModifier != null && attributeModifier.getId().getLeastSignificantBits() != 0L && attributeModifier.getId().getMostSignificantBits() != 0L) {
-							multimap.put((Attribute)optional.get(), attributeModifier);
+					ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("AttributeName"));
+					if (resourceLocation != null) {
+						Optional<Holder.Reference<Attribute>> optional = BuiltInRegistries.ATTRIBUTE.getHolder(resourceLocation);
+						if (!optional.isEmpty()) {
+							AttributeModifier attributeModifier = AttributeModifier.load(compoundTag);
+							if (attributeModifier != null && attributeModifier.getId().getLeastSignificantBits() != 0L && attributeModifier.getId().getMostSignificantBits() != 0L) {
+								multimap.put((Holder<Attribute>)optional.get(), attributeModifier);
+							}
 						}
 					}
 				}
@@ -910,7 +914,7 @@ public final class ItemStack {
 		return multimap;
 	}
 
-	public void addAttributeModifier(Attribute attribute, AttributeModifier attributeModifier, @Nullable EquipmentSlot equipmentSlot) {
+	public void addAttributeModifier(Holder<Attribute> holder, AttributeModifier attributeModifier, @Nullable EquipmentSlot equipmentSlot) {
 		this.getOrCreateTag();
 		if (!this.tag.contains("AttributeModifiers", 9)) {
 			this.tag.put("AttributeModifiers", new ListTag());
@@ -918,7 +922,10 @@ public final class ItemStack {
 
 		ListTag listTag = this.tag.getList("AttributeModifiers", 10);
 		CompoundTag compoundTag = attributeModifier.save();
-		compoundTag.putString("AttributeName", BuiltInRegistries.ATTRIBUTE.getKey(attribute).toString());
+		compoundTag.putString(
+			"AttributeName",
+			((ResourceKey)holder.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Cannot add unregistered attribute"))).location().toString()
+		);
 		if (equipmentSlot != null) {
 			compoundTag.putString("Slot", equipmentSlot.getName());
 		}

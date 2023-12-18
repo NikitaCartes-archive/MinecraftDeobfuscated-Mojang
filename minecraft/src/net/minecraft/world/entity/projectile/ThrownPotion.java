@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
@@ -61,9 +62,9 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		super.onHitBlock(blockHitResult);
 		if (!this.level().isClientSide) {
 			ItemStack itemStack = this.getItem();
-			Potion potion = PotionUtils.getPotion(itemStack);
+			Holder<Potion> holder = PotionUtils.getPotion(itemStack);
 			List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-			boolean bl = potion == Potions.WATER && list.isEmpty();
+			boolean bl = holder.is(Potions.WATER) && list.isEmpty();
 			Direction direction = blockHitResult.getDirection();
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			BlockPos blockPos2 = blockPos.relative(direction);
@@ -83,20 +84,20 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		super.onHit(hitResult);
 		if (!this.level().isClientSide) {
 			ItemStack itemStack = this.getItem();
-			Potion potion = PotionUtils.getPotion(itemStack);
+			Holder<Potion> holder = PotionUtils.getPotion(itemStack);
 			List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-			boolean bl = potion == Potions.WATER && list.isEmpty();
+			boolean bl = holder.is(Potions.WATER) && list.isEmpty();
 			if (bl) {
 				this.applyWater();
 			} else if (!list.isEmpty()) {
 				if (this.isLingering()) {
-					this.makeAreaOfEffectCloud(itemStack, potion);
+					this.makeAreaOfEffectCloud(itemStack, holder);
 				} else {
 					this.applySplash(list, hitResult.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)hitResult).getEntity() : null);
 				}
 			}
 
-			int i = potion.hasInstantEffects() ? 2007 : 2002;
+			int i = holder.value().hasInstantEffects() ? 2007 : 2002;
 			this.level().levelEvent(i, this.blockPosition(), PotionUtils.getColor(itemStack));
 			this.discard();
 		}
@@ -141,13 +142,13 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 						}
 
 						for (MobEffectInstance mobEffectInstance : list) {
-							MobEffect mobEffect = mobEffectInstance.getEffect();
-							if (mobEffect.isInstantenous()) {
-								mobEffect.applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance.getAmplifier(), e);
+							Holder<MobEffect> holder = mobEffectInstance.getEffect();
+							if (holder.value().isInstantenous()) {
+								holder.value().applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance.getAmplifier(), e);
 							} else {
 								int i = mobEffectInstance.mapDuration(ix -> (int)(e * (double)ix + 0.5));
 								MobEffectInstance mobEffectInstance2 = new MobEffectInstance(
-									mobEffect, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()
+									holder, i, mobEffectInstance.getAmplifier(), mobEffectInstance.isAmbient(), mobEffectInstance.isVisible()
 								);
 								if (!mobEffectInstance2.endsWithin(20)) {
 									livingEntity.addEffect(mobEffectInstance2, entity2);
@@ -160,18 +161,17 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		}
 	}
 
-	private void makeAreaOfEffectCloud(ItemStack itemStack, Potion potion) {
+	private void makeAreaOfEffectCloud(ItemStack itemStack, Holder<Potion> holder) {
 		AreaEffectCloud areaEffectCloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
-		Entity entity = this.getOwner();
-		if (entity instanceof LivingEntity) {
-			areaEffectCloud.setOwner((LivingEntity)entity);
+		if (this.getOwner() instanceof LivingEntity livingEntity) {
+			areaEffectCloud.setOwner(livingEntity);
 		}
 
 		areaEffectCloud.setRadius(3.0F);
 		areaEffectCloud.setRadiusOnUse(-0.5F);
 		areaEffectCloud.setWaitTime(10);
 		areaEffectCloud.setRadiusPerTick(-areaEffectCloud.getRadius() / (float)areaEffectCloud.getDuration());
-		areaEffectCloud.setPotion(potion);
+		areaEffectCloud.setPotion(holder);
 
 		for (MobEffectInstance mobEffectInstance : PotionUtils.getCustomEffects(itemStack)) {
 			areaEffectCloud.addEffect(new MobEffectInstance(mobEffectInstance));

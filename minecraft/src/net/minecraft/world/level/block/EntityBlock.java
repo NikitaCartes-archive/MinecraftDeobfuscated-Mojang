@@ -21,6 +21,6 @@ public interface EntityBlock {
 
 	@Nullable
 	default <T extends BlockEntity> GameEventListener getListener(ServerLevel serverLevel, T blockEntity) {
-		return blockEntity instanceof GameEventListener.Holder<?> holder ? holder.getListener() : null;
+		return blockEntity instanceof GameEventListener.Provider<?> provider ? provider.getListener() : null;
 	}
 }

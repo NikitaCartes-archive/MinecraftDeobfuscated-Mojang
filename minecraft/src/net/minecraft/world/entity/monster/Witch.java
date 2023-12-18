@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster;
 
 import java.util.List;
 import java.util.UUID;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -13,12 +14,9 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -42,7 +40,6 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Witch extends Raider implements RangedAttackMob {
 	private static final UUID SPEED_MODIFIER_DRINKING_UUID = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
@@ -136,24 +133,24 @@ public class Witch extends Raider implements RangedAttackMob {
 					this.getAttribute(Attributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_DRINKING.getId());
 				}
 			} else {
-				Potion potion = null;
+				Holder<Potion> holder = null;
 				if (this.random.nextFloat() < 0.15F && this.isEyeInFluid(FluidTags.WATER) && !this.hasEffect(MobEffects.WATER_BREATHING)) {
-					potion = Potions.WATER_BREATHING;
+					holder = Potions.WATER_BREATHING;
 				} else if (this.random.nextFloat() < 0.15F
 					&& (this.isOnFire() || this.getLastDamageSource() != null && this.getLastDamageSource().is(DamageTypeTags.IS_FIRE))
 					&& !this.hasEffect(MobEffects.FIRE_RESISTANCE)) {
-					potion = Potions.FIRE_RESISTANCE;
+					holder = Potions.FIRE_RESISTANCE;
 				} else if (this.random.nextFloat() < 0.05F && this.getHealth() < this.getMaxHealth()) {
-					potion = Potions.HEALING;
+					holder = Potions.HEALING;
 				} else if (this.random.nextFloat() < 0.5F
 					&& this.getTarget() != null
 					&& !this.hasEffect(MobEffects.MOVEMENT_SPEED)
 					&& this.getTarget().distanceToSqr(this) > 121.0) {
-					potion = Potions.SWIFTNESS;
+					holder = Potions.SWIFTNESS;
 				}
 
-				if (potion != null) {
-					this.setItemSlot(EquipmentSlot.MAINHAND, PotionUtils.setPotion(new ItemStack(Items.POTION), potion));
+				if (holder != null) {
+					this.setItemSlot(EquipmentSlot.MAINHAND, PotionUtils.setPotion(new ItemStack(Items.POTION), holder));
 					this.usingTime = this.getMainHandItem().getUseDuration();
 					this.setUsingItem(true);
 					if (!this.isSilent()) {
@@ -222,25 +219,25 @@ public class Witch extends Raider implements RangedAttackMob {
 			double e = livingEntity.getEyeY() - 1.1F - this.getY();
 			double g = livingEntity.getZ() + vec3.z - this.getZ();
 			double h = Math.sqrt(d * d + g * g);
-			Potion potion = Potions.HARMING;
+			Holder<Potion> holder = Potions.HARMING;
 			if (livingEntity instanceof Raider) {
 				if (livingEntity.getHealth() <= 4.0F) {
-					potion = Potions.HEALING;
+					holder = Potions.HEALING;
 				} else {
-					potion = Potions.REGENERATION;
+					holder = Potions.REGENERATION;
 				}
 
 				this.setTarget(null);
 			} else if (h >= 8.0 && !livingEntity.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)) {
-				potion = Potions.SLOWNESS;
+				holder = Potions.SLOWNESS;
 			} else if (livingEntity.getHealth() >= 8.0F && !livingEntity.hasEffect(MobEffects.POISON)) {
-				potion = Potions.POISON;
+				holder = Potions.POISON;
 			} else if (h <= 3.0 && !livingEntity.hasEffect(MobEffects.WEAKNESS) && this.random.nextFloat() < 0.25F) {
-				potion = Potions.WEAKNESS;
+				holder = Potions.WEAKNESS;
 			}
 
 			ThrownPotion thrownPotion = new ThrownPotion(this.level(), this);
-			thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
+			thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), holder));
 			thrownPotion.setXRot(thrownPotion.getXRot() - -20.0F);
 			thrownPotion.shoot(d, e + h * 0.2, g, 0.75F, 8.0F);
 			if (!this.isSilent()) {
@@ -250,16 +247,6 @@ public class Witch extends Raider implements RangedAttackMob {
 
 			this.level().addFreshEntity(thrownPotion);
 		}
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 1.62F;
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + 0.3125F * f, 0.0F);
 	}
 
 	@Override

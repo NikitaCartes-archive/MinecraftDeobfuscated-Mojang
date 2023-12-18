@@ -24,11 +24,9 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -387,7 +385,7 @@ public abstract class AbstractArrow extends Projectile {
 				this.discard();
 			}
 		} else if (bl2) {
-			this.deflect();
+			this.deflect(entity);
 		} else {
 			entity.setRemainingFireTicks(j);
 			this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
@@ -403,11 +401,12 @@ public abstract class AbstractArrow extends Projectile {
 		}
 	}
 
-	public void deflect() {
+	public void deflect(Entity entity) {
 		float f = this.random.nextFloat() * 360.0F;
 		this.setDeltaMovement(this.getDeltaMovement().yRot(f * (float) (Math.PI / 180.0)).scale(0.5));
 		this.setYRot(this.getYRot() + f);
 		this.yRotO += f;
+		entity.playProjectileDeflectionSound(this);
 	}
 
 	@Override
@@ -560,11 +559,6 @@ public abstract class AbstractArrow extends Projectile {
 	@Override
 	public boolean isAttackable() {
 		return false;
-	}
-
-	@Override
-	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.13F;
 	}
 
 	public void setCritArrow(boolean bl) {

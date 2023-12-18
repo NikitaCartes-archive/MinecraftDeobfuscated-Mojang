@@ -3,7 +3,10 @@ package net.minecraft.world.level;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -101,17 +104,21 @@ public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess {
 		this.levelEvent(null, i, blockPos, j);
 	}
 
-	void gameEvent(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context);
+	void gameEvent(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context);
 
-	default void gameEvent(@Nullable Entity entity, GameEvent gameEvent, Vec3 vec3) {
-		this.gameEvent(gameEvent, vec3, new GameEvent.Context(entity, null));
+	default void gameEvent(@Nullable Entity entity, Holder<GameEvent> holder, Vec3 vec3) {
+		this.gameEvent(holder, vec3, new GameEvent.Context(entity, null));
 	}
 
-	default void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
-		this.gameEvent(gameEvent, blockPos, new GameEvent.Context(entity, null));
+	default void gameEvent(@Nullable Entity entity, Holder<GameEvent> holder, BlockPos blockPos) {
+		this.gameEvent(holder, blockPos, new GameEvent.Context(entity, null));
 	}
 
-	default void gameEvent(GameEvent gameEvent, BlockPos blockPos, GameEvent.Context context) {
-		this.gameEvent(gameEvent, Vec3.atCenterOf(blockPos), context);
+	default void gameEvent(Holder<GameEvent> holder, BlockPos blockPos, GameEvent.Context context) {
+		this.gameEvent(holder, Vec3.atCenterOf(blockPos), context);
+	}
+
+	default void gameEvent(ResourceKey<GameEvent> resourceKey, BlockPos blockPos, GameEvent.Context context) {
+		this.gameEvent(this.registryAccess().registryOrThrow(Registries.GAME_EVENT).getHolderOrThrow(resourceKey), blockPos, context);
 	}
 }

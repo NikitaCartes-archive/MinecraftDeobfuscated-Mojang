@@ -11,6 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -41,9 +42,9 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 	protected static final VoxelShape CAKE_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 8.0, 15.0);
 	protected static final VoxelShape CANDLE_SHAPE = Block.box(7.0, 8.0, 7.0, 9.0, 14.0, 9.0);
 	protected static final VoxelShape SHAPE = Shapes.or(CAKE_SHAPE, CANDLE_SHAPE);
-	private static final Map<Block, CandleCakeBlock> BY_CANDLE = Maps.<Block, CandleCakeBlock>newHashMap();
+	private static final Map<CandleBlock, CandleCakeBlock> BY_CANDLE = Maps.<CandleBlock, CandleCakeBlock>newHashMap();
 	private static final Iterable<Vec3> PARTICLE_OFFSETS = ImmutableList.<Vec3>of(new Vec3(0.5, 1.0, 0.5));
-	private final Block candleBlock;
+	private final CandleBlock candleBlock;
 
 	@Override
 	public MapCodec<CandleCakeBlock> codec() {
@@ -53,8 +54,12 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 	protected CandleCakeBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(LIT, Boolean.valueOf(false)));
-		BY_CANDLE.put(block, this);
-		this.candleBlock = block;
+		if (block instanceof CandleBlock candleBlock) {
+			BY_CANDLE.put(candleBlock, this);
+			this.candleBlock = candleBlock;
+		} else {
+			throw new IllegalArgumentException("Expected block to be of " + CandleBlock.class + " was " + block.getClass());
+		}
 	}
 
 	@Override
@@ -68,23 +73,27 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.is(Items.FLINT_AND_STEEL) || itemStack.is(Items.FIRE_CHARGE)) {
-			return InteractionResult.PASS;
-		} else if (candleHit(blockHitResult) && player.getItemInHand(interactionHand).isEmpty() && (Boolean)blockState.getValue(LIT)) {
+			return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+		} else if (candleHit(blockHitResult) && itemStack.isEmpty() && (Boolean)blockState.getValue(LIT)) {
 			extinguish(player, blockState, level, blockPos);
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		} else {
-			InteractionResult interactionResult = CakeBlock.eat(level, blockPos, Blocks.CAKE.defaultBlockState(), player);
-			if (interactionResult.consumesAction()) {
-				dropResources(blockState, level, blockPos);
-			}
-
-			return interactionResult;
+			return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+		InteractionResult interactionResult = CakeBlock.eat(level, blockPos, Blocks.CAKE.defaultBlockState(), player);
+		if (interactionResult.consumesAction()) {
+			dropResources(blockState, level, blockPos);
+		}
+
+		return interactionResult;
 	}
 
 	private static boolean candleHit(BlockHitResult blockHitResult) {
@@ -130,8 +139,8 @@ public class CandleCakeBlock extends AbstractCandleBlock {
 		return false;
 	}
 
-	public static BlockState byCandle(Block block) {
-		return ((CandleCakeBlock)BY_CANDLE.get(block)).defaultBlockState();
+	public static BlockState byCandle(CandleBlock candleBlock) {
+		return ((CandleCakeBlock)BY_CANDLE.get(candleBlock)).defaultBlockState();
 	}
 
 	public static boolean canLight(BlockState blockState) {

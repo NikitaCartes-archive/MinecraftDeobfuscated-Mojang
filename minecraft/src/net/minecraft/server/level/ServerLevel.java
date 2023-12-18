@@ -985,8 +985,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Override
-	public void gameEvent(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context) {
-		this.gameEventDispatcher.post(gameEvent, vec3, context);
+	public void gameEvent(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context) {
+		this.gameEventDispatcher.post(holder, vec3, context);
 	}
 
 	@Override

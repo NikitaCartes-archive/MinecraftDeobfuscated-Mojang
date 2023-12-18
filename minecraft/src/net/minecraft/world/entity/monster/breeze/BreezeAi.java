@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster.breeze;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
@@ -46,6 +48,7 @@ public class BreezeAi {
 		MemoryModuleType.BREEZE_SHOOT_RECOVERING,
 		MemoryModuleType.BREEZE_SHOOT_COOLDOWN,
 		MemoryModuleType.BREEZE_JUMP_TARGET,
+		MemoryModuleType.BREEZE_LEAVING_WATER,
 		MemoryModuleType.HURT_BY,
 		MemoryModuleType.HURT_BY_ENTITY,
 		MemoryModuleType.PATH
@@ -53,6 +56,7 @@ public class BreezeAi {
 
 	protected static Brain<?> makeBrain(Brain<Breeze> brain) {
 		initCoreActivity(brain);
+		initIdleActivity(brain);
 		initFightActivity(brain);
 		brain.setCoreActivities(Set.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.FIGHT);
@@ -61,23 +65,36 @@ public class BreezeAi {
 	}
 
 	private static void initCoreActivity(Brain<Breeze> brain) {
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new LookAtTargetSink(45, 90), new BreezeAi.SlideToTargetSink(20, 100)));
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new LookAtTargetSink(45, 90)));
+	}
+
+	private static void initIdleActivity(Brain<Breeze> brain) {
+		brain.addActivity(
+			Activity.IDLE,
+			ImmutableList.of(
+				Pair.of(0, StartAttacking.create(breeze -> breeze.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
+				Pair.of(2, new BreezeAi.SlideToTargetSink(20, 40)),
+				Pair.of(3, new RunOne<>(ImmutableList.of(Pair.of(new DoNothing(20, 100), 1), Pair.of(RandomStroll.stroll(0.6F), 2))))
+			)
+		);
 	}
 
 	private static void initFightActivity(Brain<Breeze> brain) {
 		brain.addActivityWithConditions(
 			Activity.FIGHT,
 			ImmutableList.of(
-				Pair.of(0, StartAttacking.create(breeze -> breeze.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
-				Pair.of(1, StopAttackingIfTargetInvalid.create()),
-				Pair.of(2, new Shoot()),
+				Pair.of(0, StopAttackingIfTargetInvalid.create()),
+				Pair.of(1, new Shoot()),
+				Pair.of(2, new LongJump()),
 				Pair.of(3, new ShootWhenStuck()),
-				Pair.of(4, new LongJump()),
-				Pair.of(5, new Slide()),
-				Pair.of(6, new RunOne<>(ImmutableList.of(Pair.of(new DoNothing(20, 100), 1), Pair.of(RandomStroll.stroll(0.6F), 2))))
+				Pair.of(4, new Slide())
 			),
-			Set.of()
+			ImmutableSet.of(Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT), Pair.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT))
 		);
+	}
+
+	static void updateActivity(Breeze breeze) {
+		breeze.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
 	}
 
 	public static class SlideToTargetSink extends MoveToTargetSink {

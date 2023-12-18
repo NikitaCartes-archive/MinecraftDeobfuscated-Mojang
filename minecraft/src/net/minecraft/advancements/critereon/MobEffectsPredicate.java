@@ -33,9 +33,9 @@ public record MobEffectsPredicate(Map<Holder<MobEffect>, MobEffectsPredicate.Mob
 		return this.matches(livingEntity.getActiveEffectsMap());
 	}
 
-	public boolean matches(Map<MobEffect, MobEffectInstance> map) {
+	public boolean matches(Map<Holder<MobEffect>, MobEffectInstance> map) {
 		for (Entry<Holder<MobEffect>, MobEffectsPredicate.MobEffectInstancePredicate> entry : this.effectMap.entrySet()) {
-			MobEffectInstance mobEffectInstance = (MobEffectInstance)map.get(((Holder)entry.getKey()).value());
+			MobEffectInstance mobEffectInstance = (MobEffectInstance)map.get(entry.getKey());
 			if (!((MobEffectsPredicate.MobEffectInstancePredicate)entry.getValue()).matches(mobEffectInstance)) {
 				return false;
 			}
@@ -51,13 +51,13 @@ public record MobEffectsPredicate(Map<Holder<MobEffect>, MobEffectsPredicate.Mob
 			return new MobEffectsPredicate.Builder();
 		}
 
-		public MobEffectsPredicate.Builder and(MobEffect mobEffect) {
-			this.effectMap.put(mobEffect.builtInRegistryHolder(), new MobEffectsPredicate.MobEffectInstancePredicate());
+		public MobEffectsPredicate.Builder and(Holder<MobEffect> holder) {
+			this.effectMap.put(holder, new MobEffectsPredicate.MobEffectInstancePredicate());
 			return this;
 		}
 
-		public MobEffectsPredicate.Builder and(MobEffect mobEffect, MobEffectsPredicate.MobEffectInstancePredicate mobEffectInstancePredicate) {
-			this.effectMap.put(mobEffect.builtInRegistryHolder(), mobEffectInstancePredicate);
+		public MobEffectsPredicate.Builder and(Holder<MobEffect> holder, MobEffectsPredicate.MobEffectInstancePredicate mobEffectInstancePredicate) {
+			this.effectMap.put(holder, mobEffectInstancePredicate);
 			return this;
 		}
 

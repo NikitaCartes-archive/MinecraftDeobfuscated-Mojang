@@ -15,10 +15,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Saddleable;
+import net.minecraft.world.entity.animal.armadillo.Armadillo;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -451,7 +453,7 @@ public interface DispenseItemBehavior {
 				if (!BoneMealItem.growCrop(itemStack, level, blockPos) && !BoneMealItem.growWaterPlant(itemStack, level, blockPos, null)) {
 					this.setSuccess(false);
 				} else if (!level.isClientSide) {
-					level.levelEvent(1505, blockPos, 0);
+					level.levelEvent(1505, blockPos, 15);
 				}
 
 				return itemStack;
@@ -605,6 +607,26 @@ public interface DispenseItemBehavior {
 			}
 		});
 		DispenserBlock.registerBehavior(Items.SHEARS.asItem(), new ShearsDispenseItemBehavior());
+		DispenserBlock.registerBehavior(Items.BRUSH.asItem(), new OptionalDispenseItemBehavior() {
+			@Override
+			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				ServerLevel serverLevel = blockSource.level();
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
+				List<Armadillo> list = serverLevel.getEntitiesOfClass(Armadillo.class, new AABB(blockPos), EntitySelector.NO_SPECTATORS);
+				if (list.isEmpty()) {
+					this.setSuccess(false);
+					return itemStack;
+				} else {
+					((Armadillo)list.get(0)).brushOffScute();
+					if (itemStack.hurt(16, serverLevel.getRandom(), null)) {
+						itemStack.shrink(1);
+						itemStack.setDamageValue(0);
+					}
+
+					return itemStack;
+				}
+			}
+		});
 		DispenserBlock.registerBehavior(Items.HONEYCOMB, new OptionalDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
@@ -630,7 +652,7 @@ public interface DispenseItemBehavior {
 
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					if (PotionUtils.getPotion(itemStack) != Potions.WATER) {
+					if (!PotionUtils.getPotion(itemStack).is(Potions.WATER)) {
 						return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
 					} else {
 						ServerLevel serverLevel = blockSource.level();

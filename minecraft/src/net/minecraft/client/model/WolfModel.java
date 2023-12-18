@@ -5,8 +5,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
@@ -42,7 +42,7 @@ public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 		this.realTail = this.tail.getChild("real_tail");
 	}
 
-	public static LayerDefinition createBodyLayer() {
+	public static MeshDefinition createMeshDefinition(CubeDeformation cubeDeformation) {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		float f = 13.5F;
@@ -51,26 +51,26 @@ public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 			"real_head",
 			CubeListBuilder.create()
 				.texOffs(0, 0)
-				.addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F)
+				.addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F, cubeDeformation)
 				.texOffs(16, 14)
-				.addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F)
+				.addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F, cubeDeformation)
 				.texOffs(16, 14)
-				.addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F)
+				.addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F, cubeDeformation)
 				.texOffs(0, 10)
-				.addBox(-0.5F, -0.001F, -5.0F, 3.0F, 3.0F, 4.0F),
+				.addBox(-0.5F, -0.001F, -5.0F, 3.0F, 3.0F, 4.0F, cubeDeformation),
 			PartPose.ZERO
 		);
 		partDefinition.addOrReplaceChild(
 			"body",
-			CubeListBuilder.create().texOffs(18, 14).addBox(-3.0F, -2.0F, -3.0F, 6.0F, 9.0F, 6.0F),
+			CubeListBuilder.create().texOffs(18, 14).addBox(-3.0F, -2.0F, -3.0F, 6.0F, 9.0F, 6.0F, cubeDeformation),
 			PartPose.offsetAndRotation(0.0F, 14.0F, 2.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
 		);
 		partDefinition.addOrReplaceChild(
 			"upper_body",
-			CubeListBuilder.create().texOffs(21, 0).addBox(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F),
+			CubeListBuilder.create().texOffs(21, 0).addBox(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F, cubeDeformation),
 			PartPose.offsetAndRotation(-1.0F, 14.0F, -3.0F, (float) (Math.PI / 2), 0.0F, 0.0F)
 		);
-		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
+		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F, cubeDeformation);
 		partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-2.5F, 16.0F, 7.0F));
 		partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder, PartPose.offset(0.5F, 16.0F, 7.0F));
 		partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder, PartPose.offset(-2.5F, 16.0F, -4.0F));
@@ -78,8 +78,10 @@ public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 		PartDefinition partDefinition3 = partDefinition.addOrReplaceChild(
 			"tail", CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0F, 12.0F, 8.0F, (float) (Math.PI / 5), 0.0F, 0.0F)
 		);
-		partDefinition3.addOrReplaceChild("real_tail", CubeListBuilder.create().texOffs(9, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F), PartPose.ZERO);
-		return LayerDefinition.create(meshDefinition, 64, 32);
+		partDefinition3.addOrReplaceChild(
+			"real_tail", CubeListBuilder.create().texOffs(9, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F, cubeDeformation), PartPose.ZERO
+		);
+		return meshDefinition;
 	}
 
 	@Override

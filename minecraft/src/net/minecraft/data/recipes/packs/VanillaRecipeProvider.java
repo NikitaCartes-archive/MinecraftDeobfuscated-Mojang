@@ -1796,10 +1796,17 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_string", has(Items.STRING))
 			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.TURTLE_HELMET)
-			.define('X', Items.SCUTE)
+			.define('X', Items.TURTLE_SCUTE)
 			.pattern("XXX")
 			.pattern("X X")
-			.unlockedBy("has_scute", has(Items.SCUTE))
+			.unlockedBy("has_turtle_scute", has(Items.TURTLE_SCUTE))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.WOLF_ARMOR)
+			.define('X', Items.ARMADILLO_SCUTE)
+			.pattern("X  ")
+			.pattern("XXX")
+			.pattern("X X")
+			.unlockedBy("has_armadillo_scute", has(Items.ARMADILLO_SCUTE))
 			.save(recipeOutput);
 		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.WHEAT, 9)
 			.requires(Blocks.HAY_BLOCK)

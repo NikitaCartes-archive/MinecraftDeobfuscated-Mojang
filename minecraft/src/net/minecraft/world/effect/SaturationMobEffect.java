@@ -9,10 +9,11 @@ class SaturationMobEffect extends InstantenousMobEffect {
 	}
 
 	@Override
-	public void applyEffectTick(LivingEntity livingEntity, int i) {
-		super.applyEffectTick(livingEntity, i);
+	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
 		if (!livingEntity.level().isClientSide && livingEntity instanceof Player player) {
 			player.getFoodData().eat(i + 1, 1.0F);
 		}
+
+		return true;
 	}
 }

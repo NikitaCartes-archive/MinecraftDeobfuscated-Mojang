@@ -84,7 +84,7 @@ public record ItemPredicate(
 				}
 			}
 
-			return !this.potion.isPresent() || ((Holder)this.potion.get()).value() == PotionUtils.getPotion(itemStack);
+			return !this.potion.isPresent() || ((Holder)this.potion.get()).equals(PotionUtils.getPotion(itemStack));
 		}
 	}
 
@@ -125,8 +125,8 @@ public record ItemPredicate(
 			return this;
 		}
 
-		public ItemPredicate.Builder isPotion(Potion potion) {
-			this.potion = Optional.of(potion.builtInRegistryHolder());
+		public ItemPredicate.Builder isPotion(Holder<Potion> holder) {
+			this.potion = Optional.of(holder);
 			return this;
 		}
 

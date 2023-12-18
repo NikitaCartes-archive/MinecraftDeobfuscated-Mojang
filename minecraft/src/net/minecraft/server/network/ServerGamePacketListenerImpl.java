@@ -183,7 +183,6 @@ public class ServerGamePacketListenerImpl
 	ServerPlayerConnection,
 	TickablePacketListener {
 	static final Logger LOGGER = LogUtils.getLogger();
-	public static final double MAX_INTERACTION_DISTANCE = Mth.square(6.0);
 	private static final int NO_BLOCK_UPDATES_TO_ACK = -1;
 	private static final int TRACKED_MESSAGE_DISCONNECT_THRESHOLD = 4096;
 	private static final Component CHAT_VALIDATION_FAILED = Component.translatable("multiplayer.disconnect.chat_validation_failed");
@@ -638,7 +637,7 @@ public class ServerGamePacketListenerImpl
 				return;
 			}
 
-			beaconMenu.updateEffects(serverboundSetBeaconPacket.getPrimary(), serverboundSetBeaconPacket.getSecondary());
+			beaconMenu.updateEffects(serverboundSetBeaconPacket.primary(), serverboundSetBeaconPacket.secondary());
 		}
 	}
 
@@ -1076,18 +1075,15 @@ public class ServerGamePacketListenerImpl
 			BlockHitResult blockHitResult = serverboundUseItemOnPacket.getHitResult();
 			Vec3 vec3 = blockHitResult.getLocation();
 			BlockPos blockPos = blockHitResult.getBlockPos();
-			Vec3 vec32 = Vec3.atCenterOf(blockPos);
-			if (!(this.player.getEyePosition().distanceToSqr(vec32) > MAX_INTERACTION_DISTANCE)) {
-				Vec3 vec33 = vec3.subtract(vec32);
+			if (this.player.canInteractWithBlock(blockPos)) {
+				Vec3 vec32 = vec3.subtract(Vec3.atCenterOf(blockPos));
 				double d = 1.0000001;
-				if (Math.abs(vec33.x()) < 1.0000001 && Math.abs(vec33.y()) < 1.0000001 && Math.abs(vec33.z()) < 1.0000001) {
+				if (Math.abs(vec32.x()) < 1.0000001 && Math.abs(vec32.y()) < 1.0000001 && Math.abs(vec32.z()) < 1.0000001) {
 					Direction direction = blockHitResult.getDirection();
 					this.player.resetLastActionTime();
 					int i = this.player.level().getMaxBuildHeight();
 					if (blockPos.getY() < i) {
-						if (this.awaitingPositionFromClient == null
-							&& this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0
-							&& serverLevel.mayInteract(this.player, blockPos)) {
+						if (this.awaitingPositionFromClient == null && serverLevel.mayInteract(this.player, blockPos)) {
 							InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
 							if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
 								Component component = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
@@ -1460,7 +1456,7 @@ public class ServerGamePacketListenerImpl
 			}
 
 			AABB aABB = entity.getBoundingBox();
-			if (aABB.distanceToSqr(this.player.getEyePosition()) < MAX_INTERACTION_DISTANCE) {
+			if (this.player.canInteractWithEntity(aABB)) {
 				serverboundInteractPacket.dispatch(
 					new ServerboundInteractPacket.Handler() {
 						private void performInteraction(InteractionHand interactionHand, ServerGamePacketListenerImpl.EntityInteraction entityInteraction) {

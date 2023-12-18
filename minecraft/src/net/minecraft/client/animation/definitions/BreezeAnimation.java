@@ -216,7 +216,7 @@ public class BreezeAnimation {
 			)
 		)
 		.build();
-	public static final AnimationDefinition SLIDE = AnimationDefinition.Builder.withLength(1.0F)
+	public static final AnimationDefinition SLIDE = AnimationDefinition.Builder.withLength(0.2F)
 		.addAnimation(
 			"body",
 			new AnimationChannel(
@@ -239,6 +239,32 @@ public class BreezeAnimation {
 				AnimationChannel.Targets.POSITION,
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
 				new Keyframe(0.2F, KeyframeAnimations.posVec(0.0F, 0.0F, -2.0F), AnimationChannel.Interpolations.LINEAR)
+			)
+		)
+		.build();
+	public static final AnimationDefinition SLIDE_BACK = AnimationDefinition.Builder.withLength(0.1F)
+		.addAnimation(
+			"body",
+			new AnimationChannel(
+				AnimationChannel.Targets.POSITION,
+				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, -6.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.1F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+			)
+		)
+		.addAnimation(
+			"wind_mid",
+			new AnimationChannel(
+				AnimationChannel.Targets.POSITION,
+				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, -3.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.1F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+			)
+		)
+		.addAnimation(
+			"wind_top",
+			new AnimationChannel(
+				AnimationChannel.Targets.POSITION,
+				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, -2.0F), AnimationChannel.Interpolations.LINEAR),
+				new Keyframe(0.1F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 			)
 		)
 		.build();

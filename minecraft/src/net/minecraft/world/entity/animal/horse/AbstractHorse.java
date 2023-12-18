@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -75,7 +76,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public abstract class AbstractHorse extends Animal implements ContainerListener, HasCustomInventoryScreen, OwnableEntity, PlayerRideableJumping, Saddleable {
 	public static final int EQUIPMENT_SLOT_OFFSET = 400;
@@ -129,7 +129,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	protected AbstractHorse(EntityType<? extends AbstractHorse> entityType, Level level) {
 		super(entityType, level);
-		this.setMaxUpStep(1.0F);
 		this.createInventory();
 	}
 
@@ -408,7 +407,11 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	public static AttributeSupplier.Builder createBaseHorseAttributes() {
-		return Mob.createMobAttributes().add(Attributes.JUMP_STRENGTH).add(Attributes.MAX_HEALTH, 53.0).add(Attributes.MOVEMENT_SPEED, 0.225F);
+		return Mob.createMobAttributes()
+			.add(Attributes.JUMP_STRENGTH)
+			.add(Attributes.MAX_HEALTH, 53.0)
+			.add(Attributes.MOVEMENT_SPEED, 0.225F)
+			.add(Attributes.STEP_HEIGHT, 1.0);
 	}
 
 	@Override
@@ -870,9 +873,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		this.setOffspringAttribute(ageableMob, abstractHorse, Attributes.MOVEMENT_SPEED, (double)MIN_MOVEMENT_SPEED, (double)MAX_MOVEMENT_SPEED);
 	}
 
-	private void setOffspringAttribute(AgeableMob ageableMob, AbstractHorse abstractHorse, Attribute attribute, double d, double e) {
-		double f = createOffspringAttribute(this.getAttributeBaseValue(attribute), ageableMob.getAttributeBaseValue(attribute), d, e, this.random);
-		abstractHorse.getAttribute(attribute).setBaseValue(f);
+	private void setOffspringAttribute(AgeableMob ageableMob, AbstractHorse abstractHorse, Holder<Attribute> holder, double d, double e) {
+		double f = createOffspringAttribute(this.getAttributeBaseValue(holder), ageableMob.getAttributeBaseValue(holder), d, e, this.random);
+		abstractHorse.getAttribute(holder).setBaseValue(f);
 	}
 
 	static double createOffspringAttribute(double d, double e, double f, double g, RandomSource randomSource) {
@@ -989,11 +992,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	public boolean onClimbable() {
 		return false;
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * 0.95F;
 	}
 
 	public boolean canWearArmor() {
@@ -1141,11 +1139,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, this.getPassengersRidingOffsetY(entityDimensions, f) + 0.15F * this.standAnimO * f, -0.7F * this.standAnimO * f);
-	}
-
-	protected float getPassengersRidingOffsetY(EntityDimensions entityDimensions, float f) {
-		return entityDimensions.height + (this.isBaby() ? 0.125F : -0.15625F) * f;
+	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+		return super.getPassengerAttachmentPoint(entity, entityDimensions, f)
+			.add(new Vec3(0.0, 0.15 * (double)this.standAnimO * (double)f, -0.7 * (double)this.standAnimO * (double)f).yRot(-this.getYRot() * (float) (Math.PI / 180.0)));
 	}
 }

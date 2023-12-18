@@ -82,4 +82,9 @@ public class NyliumBlock extends Block implements BonemealableBlock {
 	) {
 		registry.getHolder(resourceKey).ifPresent(reference -> ((ConfiguredFeature)reference.value()).place(serverLevel, chunkGenerator, randomSource, blockPos));
 	}
+
+	@Override
+	public BonemealableBlock.Type getType() {
+		return BonemealableBlock.Type.NEIGHBOR_SPREADER;
+	}
 }

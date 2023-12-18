@@ -2,14 +2,16 @@ package net.minecraft.world.entity.projectile;
 
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -27,7 +29,7 @@ public class Arrow extends AbstractArrow {
 	private static final EntityDataAccessor<Integer> ID_EFFECT_COLOR = SynchedEntityData.defineId(Arrow.class, EntityDataSerializers.INT);
 	private static final byte EVENT_POTION_PUFF = 0;
 	private static final ItemStack DEFAULT_ARROW_STACK = new ItemStack(Items.ARROW);
-	private Potion potion = Potions.EMPTY;
+	private Holder<Potion> potion = Potions.EMPTY;
 	private final Set<MobEffectInstance> effects = Sets.<MobEffectInstance>newHashSet();
 	private boolean fixedColor;
 
@@ -73,7 +75,7 @@ public class Arrow extends AbstractArrow {
 
 	private void updateColor() {
 		this.fixedColor = false;
-		if (this.potion == Potions.EMPTY && this.effects.isEmpty()) {
+		if (this.potion.is(Potions.EMPTY) && this.effects.isEmpty()) {
 			this.entityData.set(ID_EFFECT_COLOR, -1);
 		} else {
 			this.entityData.set(ID_EFFECT_COLOR, PotionUtils.getColor(PotionUtils.getAllEffects(this.potion, this.effects)));
@@ -135,8 +137,9 @@ public class Arrow extends AbstractArrow {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		if (this.potion != Potions.EMPTY) {
-			compoundTag.putString("Potion", BuiltInRegistries.POTION.getKey(this.potion).toString());
+		Optional<ResourceKey<Potion>> optional = this.potion.unwrapKey();
+		if (optional.isPresent() && !this.potion.is(Potions.EMPTY)) {
+			compoundTag.putString("Potion", ((ResourceKey)optional.get()).location().toString());
 		}
 
 		if (this.fixedColor) {
@@ -177,7 +180,7 @@ public class Arrow extends AbstractArrow {
 		super.doPostHurtEffects(livingEntity);
 		Entity entity = this.getEffectSource();
 
-		for (MobEffectInstance mobEffectInstance : this.potion.getEffects()) {
+		for (MobEffectInstance mobEffectInstance : this.potion.value().getEffects()) {
 			livingEntity.addEffect(
 				new MobEffectInstance(
 					mobEffectInstance.getEffect(),
@@ -200,7 +203,7 @@ public class Arrow extends AbstractArrow {
 	@Override
 	protected ItemStack getPickupItem() {
 		ItemStack itemStack = super.getPickupItem();
-		if (this.effects.isEmpty() && this.potion == Potions.EMPTY) {
+		if (this.effects.isEmpty() && this.potion.is(Potions.EMPTY)) {
 			return itemStack;
 		} else {
 			PotionUtils.setPotion(itemStack, this.potion);

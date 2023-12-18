@@ -67,7 +67,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -340,6 +339,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private LevelLoadStatusManager levelLoadStatusManager;
 	private boolean seenInsecureChatWarning = false;
 	private volatile boolean closed;
+	private final Scoreboard scoreboard = new Scoreboard();
 
 	public ClientPacketListener(Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie) {
 		super(minecraft, connection, commonListenerCookie);
@@ -1079,7 +1079,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		Holder<DimensionType> holder = this.registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(commonPlayerSpawnInfo.dimensionType());
 		LocalPlayer localPlayer = this.minecraft.player;
 		if (resourceKey != localPlayer.level().dimension()) {
-			Scoreboard scoreboard = this.level.getScoreboard();
 			Map<String, MapItemSavedData> map = this.level.getAllMapData();
 			boolean bl = commonPlayerSpawnInfo.isDebug();
 			boolean bl2 = commonPlayerSpawnInfo.isFlat();
@@ -1097,7 +1096,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				bl,
 				commonPlayerSpawnInfo.seed()
 			);
-			this.level.setScoreboard(scoreboard);
 			this.level.addMapData(map);
 			this.minecraft.setLevel(this.level);
 		}
@@ -1553,20 +1551,21 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundUpdateMobEffectPacket, this, this.minecraft);
 		Entity entity = this.level.getEntity(clientboundUpdateMobEffectPacket.getEntityId());
 		if (entity instanceof LivingEntity) {
-			MobEffect mobEffect = clientboundUpdateMobEffectPacket.getEffect();
-			if (mobEffect != null) {
-				MobEffectInstance mobEffectInstance = new MobEffectInstance(
-					mobEffect,
-					clientboundUpdateMobEffectPacket.getEffectDurationTicks(),
-					clientboundUpdateMobEffectPacket.getEffectAmplifier(),
-					clientboundUpdateMobEffectPacket.isEffectAmbient(),
-					clientboundUpdateMobEffectPacket.isEffectVisible(),
-					clientboundUpdateMobEffectPacket.effectShowsIcon(),
-					null,
-					Optional.ofNullable(clientboundUpdateMobEffectPacket.getFactorData())
-				);
-				((LivingEntity)entity).forceAddEffect(mobEffectInstance, null);
+			Holder<MobEffect> holder = clientboundUpdateMobEffectPacket.getEffect();
+			MobEffectInstance mobEffectInstance = new MobEffectInstance(
+				holder,
+				clientboundUpdateMobEffectPacket.getEffectDurationTicks(),
+				clientboundUpdateMobEffectPacket.getEffectAmplifier(),
+				clientboundUpdateMobEffectPacket.isEffectAmbient(),
+				clientboundUpdateMobEffectPacket.isEffectVisible(),
+				clientboundUpdateMobEffectPacket.effectShowsIcon(),
+				null
+			);
+			if (!clientboundUpdateMobEffectPacket.shouldBlend()) {
+				mobEffectInstance.skipBlending();
 			}
+
+			((LivingEntity)entity).forceAddEffect(mobEffectInstance, null);
 		}
 	}
 
@@ -1741,9 +1740,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleRemoveMobEffect(ClientboundRemoveMobEffectPacket clientboundRemoveMobEffectPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRemoveMobEffectPacket, this, this.minecraft);
-		Entity entity = clientboundRemoveMobEffectPacket.getEntity(this.level);
-		if (entity instanceof LivingEntity) {
-			((LivingEntity)entity).removeEffectNoUpdate(clientboundRemoveMobEffectPacket.getEffect());
+		if (clientboundRemoveMobEffectPacket.getEntity(this.level) instanceof LivingEntity livingEntity) {
+			livingEntity.removeEffectNoUpdate(clientboundRemoveMobEffectPacket.effect());
 		}
 	}
 
@@ -2007,22 +2005,22 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleAddObjective(ClientboundSetObjectivePacket clientboundSetObjectivePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetObjectivePacket, this, this.minecraft);
-		Scoreboard scoreboard = this.level.getScoreboard();
 		String string = clientboundSetObjectivePacket.getObjectiveName();
 		if (clientboundSetObjectivePacket.getMethod() == 0) {
-			scoreboard.addObjective(
-				string,
-				ObjectiveCriteria.DUMMY,
-				clientboundSetObjectivePacket.getDisplayName(),
-				clientboundSetObjectivePacket.getRenderType(),
-				false,
-				clientboundSetObjectivePacket.getNumberFormat()
-			);
+			this.scoreboard
+				.addObjective(
+					string,
+					ObjectiveCriteria.DUMMY,
+					clientboundSetObjectivePacket.getDisplayName(),
+					clientboundSetObjectivePacket.getRenderType(),
+					false,
+					clientboundSetObjectivePacket.getNumberFormat()
+				);
 		} else {
-			Objective objective = scoreboard.getObjective(string);
+			Objective objective = this.scoreboard.getObjective(string);
 			if (objective != null) {
 				if (clientboundSetObjectivePacket.getMethod() == 1) {
-					scoreboard.removeObjective(objective);
+					this.scoreboard.removeObjective(objective);
 				} else if (clientboundSetObjectivePacket.getMethod() == 2) {
 					objective.setRenderType(clientboundSetObjectivePacket.getRenderType());
 					objective.setDisplayName(clientboundSetObjectivePacket.getDisplayName());
@@ -2035,12 +2033,11 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleSetScore(ClientboundSetScorePacket clientboundSetScorePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetScorePacket, this, this.minecraft);
-		Scoreboard scoreboard = this.level.getScoreboard();
 		String string = clientboundSetScorePacket.objectiveName();
 		ScoreHolder scoreHolder = ScoreHolder.forNameOnly(clientboundSetScorePacket.owner());
-		Objective objective = scoreboard.getObjective(string);
+		Objective objective = this.scoreboard.getObjective(string);
 		if (objective != null) {
-			ScoreAccess scoreAccess = scoreboard.getOrCreatePlayerScore(scoreHolder, objective, true);
+			ScoreAccess scoreAccess = this.scoreboard.getOrCreatePlayerScore(scoreHolder, objective, true);
 			scoreAccess.set(clientboundSetScorePacket.score());
 			scoreAccess.display(clientboundSetScorePacket.display());
 			scoreAccess.numberFormatOverride(clientboundSetScorePacket.numberFormat());
@@ -2052,15 +2049,14 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleResetScore(ClientboundResetScorePacket clientboundResetScorePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundResetScorePacket, this, this.minecraft);
-		Scoreboard scoreboard = this.level.getScoreboard();
 		String string = clientboundResetScorePacket.objectiveName();
 		ScoreHolder scoreHolder = ScoreHolder.forNameOnly(clientboundResetScorePacket.owner());
 		if (string == null) {
-			scoreboard.resetAllPlayerScores(scoreHolder);
+			this.scoreboard.resetAllPlayerScores(scoreHolder);
 		} else {
-			Objective objective = scoreboard.getObjective(string);
+			Objective objective = this.scoreboard.getObjective(string);
 			if (objective != null) {
-				scoreboard.resetSinglePlayerScore(scoreHolder, objective);
+				this.scoreboard.resetSinglePlayerScore(scoreHolder, objective);
 			} else {
 				LOGGER.warn("Received packet for unknown scoreboard objective: {}", string);
 			}
@@ -2070,22 +2066,20 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleSetDisplayObjective(ClientboundSetDisplayObjectivePacket clientboundSetDisplayObjectivePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetDisplayObjectivePacket, this, this.minecraft);
-		Scoreboard scoreboard = this.level.getScoreboard();
 		String string = clientboundSetDisplayObjectivePacket.getObjectiveName();
-		Objective objective = string == null ? null : scoreboard.getObjective(string);
-		scoreboard.setDisplayObjective(clientboundSetDisplayObjectivePacket.getSlot(), objective);
+		Objective objective = string == null ? null : this.scoreboard.getObjective(string);
+		this.scoreboard.setDisplayObjective(clientboundSetDisplayObjectivePacket.getSlot(), objective);
 	}
 
 	@Override
 	public void handleSetPlayerTeamPacket(ClientboundSetPlayerTeamPacket clientboundSetPlayerTeamPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetPlayerTeamPacket, this, this.minecraft);
-		Scoreboard scoreboard = this.level.getScoreboard();
 		ClientboundSetPlayerTeamPacket.Action action = clientboundSetPlayerTeamPacket.getTeamAction();
 		PlayerTeam playerTeam;
 		if (action == ClientboundSetPlayerTeamPacket.Action.ADD) {
-			playerTeam = scoreboard.addPlayerTeam(clientboundSetPlayerTeamPacket.getName());
+			playerTeam = this.scoreboard.addPlayerTeam(clientboundSetPlayerTeamPacket.getName());
 		} else {
-			playerTeam = scoreboard.getPlayerTeam(clientboundSetPlayerTeamPacket.getName());
+			playerTeam = this.scoreboard.getPlayerTeam(clientboundSetPlayerTeamPacket.getName());
 			if (playerTeam == null) {
 				LOGGER.warn(
 					"Received packet for unknown team {}: team action: {}, player action: {}",
@@ -2118,16 +2112,16 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		ClientboundSetPlayerTeamPacket.Action action2 = clientboundSetPlayerTeamPacket.getPlayerAction();
 		if (action2 == ClientboundSetPlayerTeamPacket.Action.ADD) {
 			for (String string : clientboundSetPlayerTeamPacket.getPlayers()) {
-				scoreboard.addPlayerToTeam(string, playerTeam);
+				this.scoreboard.addPlayerToTeam(string, playerTeam);
 			}
 		} else if (action2 == ClientboundSetPlayerTeamPacket.Action.REMOVE) {
 			for (String string : clientboundSetPlayerTeamPacket.getPlayers()) {
-				scoreboard.removePlayerFromTeam(string, playerTeam);
+				this.scoreboard.removePlayerFromTeam(string, playerTeam);
 			}
 		}
 
 		if (action == ClientboundSetPlayerTeamPacket.Action.REMOVE) {
-			scoreboard.removePlayerTeam(playerTeam);
+			this.scoreboard.removePlayerTeam(playerTeam);
 		}
 	}
 
@@ -2194,14 +2188,14 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				AttributeMap attributeMap = ((LivingEntity)entity).getAttributes();
 
 				for (ClientboundUpdateAttributesPacket.AttributeSnapshot attributeSnapshot : clientboundUpdateAttributesPacket.getValues()) {
-					AttributeInstance attributeInstance = attributeMap.getInstance(attributeSnapshot.getAttribute());
+					AttributeInstance attributeInstance = attributeMap.getInstance(attributeSnapshot.attribute());
 					if (attributeInstance == null) {
-						LOGGER.warn("Entity {} does not have attribute {}", entity, BuiltInRegistries.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
+						LOGGER.warn("Entity {} does not have attribute {}", entity, attributeSnapshot.attribute().getRegisteredName());
 					} else {
-						attributeInstance.setBaseValue(attributeSnapshot.getBase());
+						attributeInstance.setBaseValue(attributeSnapshot.base());
 						attributeInstance.removeModifiers();
 
-						for (AttributeModifier attributeModifier : attributeSnapshot.getModifiers()) {
+						for (AttributeModifier attributeModifier : attributeSnapshot.modifiers()) {
 							attributeInstance.addTransientModifier(attributeModifier);
 						}
 					}
@@ -2481,5 +2475,9 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 	public boolean isFeatureEnabled(FeatureFlagSet featureFlagSet) {
 		return featureFlagSet.isSubsetOf(this.enabledFeatures());
+	}
+
+	public Scoreboard scoreboard() {
+		return this.scoreboard;
 	}
 }

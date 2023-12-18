@@ -62,6 +62,16 @@ public class SoundEvents {
 	public static final SoundEvent ANVIL_PLACE = register("block.anvil.place");
 	public static final SoundEvent ANVIL_STEP = register("block.anvil.step");
 	public static final SoundEvent ANVIL_USE = register("block.anvil.use");
+	public static final SoundEvent ARMADILLO_EAT = register("entity.armadillo.eat");
+	public static final SoundEvent ARMADILLO_HURT = register("entity.armadillo.hurt");
+	public static final SoundEvent ARMADILLO_AMBIENT = register("entity.armadillo.ambient");
+	public static final SoundEvent ARMADILLO_STEP = register("entity.armadillo.step");
+	public static final SoundEvent ARMADILLO_DEATH = register("entity.armadillo.death");
+	public static final SoundEvent ARMADILLO_ROLL = register("entity.armadillo.roll");
+	public static final SoundEvent ARMADILLO_LAND = register("entity.armadillo.land");
+	public static final SoundEvent ARMADILLO_SCUTE_DROP = register("entity.armadillo.scute_drop");
+	public static final SoundEvent ARMADILLO_UNROLL = register("entity.armadillo.unroll");
+	public static final SoundEvent ARMADILLO_BRUSH = register("entity.armadillo.brush");
 	public static final SoundEvent ARMOR_EQUIP_CHAIN = register("item.armor.equip_chain");
 	public static final SoundEvent ARMOR_EQUIP_DIAMOND = register("item.armor.equip_diamond");
 	public static final SoundEvent ARMOR_EQUIP_ELYTRA = register("item.armor.equip_elytra");
@@ -71,6 +81,8 @@ public class SoundEvents {
 	public static final SoundEvent ARMOR_EQUIP_LEATHER = register("item.armor.equip_leather");
 	public static final SoundEvent ARMOR_EQUIP_NETHERITE = register("item.armor.equip_netherite");
 	public static final SoundEvent ARMOR_EQUIP_TURTLE = register("item.armor.equip_turtle");
+	public static final SoundEvent ARMOR_EQUIP_WOLF = register("item.armor.equip_wolf");
+	public static final SoundEvent ARMOR_UNEQUIP_WOLF = register("item.armor.unequip_wolf");
 	public static final SoundEvent ARMOR_STAND_BREAK = register("entity.armor_stand.break");
 	public static final SoundEvent ARMOR_STAND_FALL = register("entity.armor_stand.fall");
 	public static final SoundEvent ARMOR_STAND_HIT = register("entity.armor_stand.hit");
@@ -174,6 +186,8 @@ public class SoundEvents {
 	public static final SoundEvent BOTTLE_EMPTY = register("item.bottle.empty");
 	public static final SoundEvent BOTTLE_FILL = register("item.bottle.fill");
 	public static final SoundEvent BOTTLE_FILL_DRAGONBREATH = register("item.bottle.fill_dragonbreath");
+	public static final SoundEvent BREEZE_CHARGE = register("entity.breeze.charge");
+	public static final SoundEvent BREEZE_DEFLECT = register("entity.breeze.deflect");
 	public static final SoundEvent BREEZE_INHALE = register("entity.breeze.inhale");
 	public static final SoundEvent BREEZE_IDLE_GROUND = register("entity.breeze.idle_ground");
 	public static final SoundEvent BREEZE_IDLE_AIR = register("entity.breeze.idle_air");
@@ -183,6 +197,7 @@ public class SoundEvents {
 	public static final SoundEvent BREEZE_SLIDE = register("entity.breeze.slide");
 	public static final SoundEvent BREEZE_DEATH = register("entity.breeze.death");
 	public static final SoundEvent BREEZE_HURT = register("entity.breeze.hurt");
+	public static final SoundEvent BREEZE_WHIRL = register("entity.breeze.whirl");
 	public static final SoundEvent BREWING_STAND_BREW = register("block.brewing_stand.brew");
 	public static final SoundEvent BRUSH_GENERIC = register("item.brush.brushing.generic");
 	public static final SoundEvent BRUSH_SAND = register("item.brush.brushing.sand");

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AllayModel;
+import net.minecraft.client.model.ArmadilloModel;
 import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.ArmorStandModel;
 import net.minecraft.client.model.AxolotlModel;
@@ -136,6 +137,7 @@ public class LayerDefinitions {
 		LayerDefinition layerDefinition18 = LayerDefinition.create(VillagerModel.createBodyModel(), 64, 64);
 		LayerDefinition layerDefinition19 = SpiderModel.createSpiderBodyLayer();
 		builder.put(ModelLayers.ALLAY, AllayModel.createBodyLayer());
+		builder.put(ModelLayers.ARMADILLO, ArmadilloModel.createBodyLayer());
 		builder.put(ModelLayers.ARMOR_STAND, ArmorStandModel.createBodyLayer());
 		builder.put(ModelLayers.ARMOR_STAND_INNER_ARMOR, ArmorStandArmorModel.createBodyLayer(INNER_ARMOR_DEFORMATION));
 		builder.put(ModelLayers.ARMOR_STAND_OUTER_ARMOR, ArmorStandArmorModel.createBodyLayer(OUTER_ARMOR_DEFORMATION));
@@ -148,9 +150,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.BELL, BellRenderer.createBodyLayer());
 		builder.put(ModelLayers.BLAZE, BlazeModel.createBodyLayer());
 		builder.put(ModelLayers.BOOK, BookModel.createBodyLayer());
-		builder.put(ModelLayers.BREEZE, BreezeModel.createBodyLayer());
-		builder.put(ModelLayers.BREEZE_EYES, BreezeModel.createEyesLayer());
-		builder.put(ModelLayers.BREEZE_WIND, BreezeModel.createWindBodyLayer());
+		builder.put(ModelLayers.BREEZE, BreezeModel.createBodyLayer(32, 32));
 		builder.put(ModelLayers.CAT, layerDefinition10);
 		builder.put(ModelLayers.CAT_COLLAR, LayerDefinition.create(OcelotModel.createBodyMesh(new CubeDeformation(0.01F)), 64, 32));
 		builder.put(ModelLayers.CAMEL, CamelModel.createBodyLayer());
@@ -290,7 +290,8 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.WITHER_SKELETON_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.WITHER_SKELETON_OUTER_ARMOR, layerDefinition2);
 		builder.put(ModelLayers.WITHER_SKELETON_SKULL, layerDefinition6);
-		builder.put(ModelLayers.WOLF, WolfModel.createBodyLayer());
+		builder.put(ModelLayers.WOLF, LayerDefinition.create(WolfModel.createMeshDefinition(CubeDeformation.NONE), 64, 32));
+		builder.put(ModelLayers.WOLF_ARMOR, LayerDefinition.create(WolfModel.createMeshDefinition(new CubeDeformation(0.2F)), 64, 32));
 		builder.put(ModelLayers.ZOGLIN, layerDefinition16);
 		builder.put(ModelLayers.ZOMBIE, layerDefinition);
 		builder.put(ModelLayers.ZOMBIE_INNER_ARMOR, layerDefinition4);

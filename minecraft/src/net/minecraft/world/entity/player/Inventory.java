@@ -558,6 +558,18 @@ public class Inventory implements Container, Nameable {
 		return false;
 	}
 
+	public boolean contains(Predicate<ItemStack> predicate) {
+		for (List<ItemStack> list : this.compartments) {
+			for (ItemStack itemStack : list) {
+				if (predicate.test(itemStack)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	public void replaceWith(Inventory inventory) {
 		for (int i = 0; i < this.getContainerSize(); i++) {
 			this.setItem(i, inventory.getItem(i));

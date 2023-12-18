@@ -54,12 +54,12 @@ public class ChatComponent {
 		}
 	}
 
-	public void render(GuiGraphics guiGraphics, int i, int j, int k) {
+	public void render(GuiGraphics guiGraphics, int i, int j, int k, boolean bl) {
 		if (!this.isChatHidden()) {
 			int l = this.getLinesPerPage();
 			int m = this.trimmedMessages.size();
 			if (m > 0) {
-				boolean bl = this.isChatFocused();
+				this.minecraft.getProfiler().push("chat");
 				float f = (float)this.getScale();
 				int n = Mth.ceil((float)this.getWidth() / f);
 				int o = guiGraphics.guiHeight();
@@ -89,8 +89,6 @@ public class ChatComponent {
 								int z = 0;
 								int aa = p - u * r;
 								int ab = aa + s;
-								guiGraphics.pose().pushPose();
-								guiGraphics.pose().translate(0.0F, 0.0F, 50.0F);
 								guiGraphics.fill(-4, aa - r, 0 + n + 4 + 4, aa, y << 24);
 								GuiMessageTag guiMessageTag = line.tag();
 								if (guiMessageTag != null) {
@@ -103,6 +101,7 @@ public class ChatComponent {
 									}
 								}
 
+								guiGraphics.pose().pushPose();
 								guiGraphics.pose().translate(0.0F, 0.0F, 50.0F);
 								guiGraphics.drawString(this.minecraft.font, line.content(), 0, ab, 16777215 + (x << 24));
 								guiGraphics.pose().popPose();
@@ -116,7 +115,7 @@ public class ChatComponent {
 					int ag = (int)(128.0 * d);
 					int w = (int)(255.0 * e);
 					guiGraphics.pose().pushPose();
-					guiGraphics.pose().translate(0.0F, (float)p, 50.0F);
+					guiGraphics.pose().translate(0.0F, (float)p, 0.0F);
 					guiGraphics.fill(-2, 0, n + 4, 9, w << 24);
 					guiGraphics.pose().translate(0.0F, 0.0F, 50.0F);
 					guiGraphics.drawString(this.minecraft.font, Component.translatable("chat.queue", af), 0, 1, 16777215 + (ag << 24));
@@ -139,6 +138,7 @@ public class ChatComponent {
 				}
 
 				guiGraphics.pose().popPose();
+				this.minecraft.getProfiler().pop();
 			}
 		}
 	}
@@ -428,7 +428,7 @@ public class ChatComponent {
 		}
 	}
 
-	private boolean isChatFocused() {
+	public boolean isChatFocused() {
 		return this.minecraft.screen instanceof ChatScreen;
 	}
 

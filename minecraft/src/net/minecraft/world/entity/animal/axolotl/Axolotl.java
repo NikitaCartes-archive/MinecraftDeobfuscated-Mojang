@@ -33,7 +33,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LerpingModel;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,7 +40,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.Brain;
@@ -110,7 +108,6 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
 		this.moveControl = new Axolotl.AxolotlMoveControl(this);
 		this.lookControl = new Axolotl.AxolotlLookControl(this, 20);
-		this.setMaxUpStep(1.0F);
 	}
 
 	@Override
@@ -302,7 +299,11 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 14.0).add(Attributes.MOVEMENT_SPEED, 1.0).add(Attributes.ATTACK_DAMAGE, 2.0);
+		return Mob.createMobAttributes()
+			.add(Attributes.MAX_HEALTH, 14.0)
+			.add(Attributes.MOVEMENT_SPEED, 1.0)
+			.add(Attributes.ATTACK_DAMAGE, 2.0)
+			.add(Attributes.STEP_HEIGHT, 1.0);
 	}
 
 	@Override
@@ -336,11 +337,6 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 		}
 
 		return super.hurt(damageSource, f);
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * 0.655F;
 	}
 
 	@Override

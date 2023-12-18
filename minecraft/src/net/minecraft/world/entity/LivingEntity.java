@@ -117,6 +117,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 import org.slf4j.Logger;
 
 public abstract class LivingEntity extends Entity implements Attackable {
@@ -155,12 +156,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private static final EntityDataAccessor<Optional<BlockPos>> SLEEPING_POS_ID = SynchedEntityData.defineId(
 		LivingEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS
 	);
-	protected static final float DEFAULT_EYE_HEIGHT = 1.74F;
-	protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F);
+	protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
 	public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
+	public static final float DEFAULT_BABY_SCALE = 0.5F;
 	private final AttributeMap attributes;
 	private final CombatTracker combatTracker = new CombatTracker(this);
-	private final Map<MobEffect, MobEffectInstance> activeEffects = Maps.<MobEffect, MobEffectInstance>newHashMap();
+	private final Map<Holder<MobEffect>, MobEffectInstance> activeEffects = Maps.<Holder<MobEffect>, MobEffectInstance>newHashMap();
 	private final NonNullList<ItemStack> lastHandItemStacks = NonNullList.withSize(2, ItemStack.EMPTY);
 	private final NonNullList<ItemStack> lastArmorItemStacks = NonNullList.withSize(4, ItemStack.EMPTY);
 	public boolean swinging;
@@ -229,6 +230,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private float swimAmountO;
 	protected Brain<?> brain;
 	private boolean skipDropExperience;
+	protected float appliedScale = 1.0F;
 
 	protected LivingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
 		super(entityType, level);
@@ -240,7 +242,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.timeOffs = (float)Math.random() * 12398.0F;
 		this.setYRot((float)(Math.random() * (float) (Math.PI * 2)));
 		this.yHeadRot = this.getYRot();
-		this.setMaxUpStep(0.6F);
 		NbtOps nbtOps = NbtOps.INSTANCE;
 		this.brain = this.makeBrain(new Dynamic<>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), nbtOps.emptyMap()))));
 	}
@@ -284,7 +285,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			.add(Attributes.MOVEMENT_SPEED)
 			.add(Attributes.ARMOR)
 			.add(Attributes.ARMOR_TOUGHNESS)
-			.add(Attributes.MAX_ABSORPTION);
+			.add(Attributes.MAX_ABSORPTION)
+			.add(Attributes.STEP_HEIGHT)
+			.add(Attributes.SCALE);
 	}
 
 	@Override
@@ -555,8 +558,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return false;
 	}
 
-	public float getScale() {
+	public float getAgeScale() {
 		return this.isBaby() ? 0.5F : 1.0F;
+	}
+
+	public float getScale() {
+		AttributeMap attributeMap = this.getAttributes();
+		return attributeMap == null ? 1.0F : (float)attributeMap.getValue(Attributes.SCALE);
 	}
 
 	protected boolean isAffectedByFluids() {
@@ -741,8 +749,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.lastHurtByMobTimestamp = compoundTag.getInt("HurtByTimestamp");
 		if (compoundTag.contains("Team", 8)) {
 			String string = compoundTag.getString("Team");
-			PlayerTeam playerTeam = this.level().getScoreboard().getPlayerTeam(string);
-			boolean bl = playerTeam != null && this.level().getScoreboard().addPlayerToTeam(this.getStringUUID(), playerTeam);
+			Scoreboard scoreboard = this.level().getScoreboard();
+			PlayerTeam playerTeam = scoreboard.getPlayerTeam(string);
+			boolean bl = playerTeam != null && scoreboard.addPlayerToTeam(this.getStringUUID(), playerTeam);
 			if (!bl) {
 				LOGGER.warn("Unable to add mob to team \"{}\" (that team probably doesn't exist)", string);
 			}
@@ -767,12 +776,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void tickEffects() {
-		Iterator<MobEffect> iterator = this.activeEffects.keySet().iterator();
+		Iterator<Holder<MobEffect>> iterator = this.activeEffects.keySet().iterator();
 
 		try {
 			while (iterator.hasNext()) {
-				MobEffect mobEffect = (MobEffect)iterator.next();
-				MobEffectInstance mobEffectInstance = (MobEffectInstance)this.activeEffects.get(mobEffect);
+				Holder<MobEffect> holder = (Holder<MobEffect>)iterator.next();
+				MobEffectInstance mobEffectInstance = (MobEffectInstance)this.activeEffects.get(holder);
 				if (!mobEffectInstance.tick(this, () -> this.onEffectUpdated(mobEffectInstance, true, null))) {
 					if (!this.level().isClientSide) {
 						iterator.remove();
@@ -920,17 +929,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.activeEffects.values();
 	}
 
-	public Map<MobEffect, MobEffectInstance> getActiveEffectsMap() {
+	public Map<Holder<MobEffect>, MobEffectInstance> getActiveEffectsMap() {
 		return this.activeEffects;
 	}
 
-	public boolean hasEffect(MobEffect mobEffect) {
-		return this.activeEffects.containsKey(mobEffect);
+	public boolean hasEffect(Holder<MobEffect> holder) {
+		return this.activeEffects.containsKey(holder);
 	}
 
 	@Nullable
-	public MobEffectInstance getEffect(MobEffect mobEffect) {
-		return (MobEffectInstance)this.activeEffects.get(mobEffect);
+	public MobEffectInstance getEffect(Holder<MobEffect> holder) {
+		return (MobEffectInstance)this.activeEffects.get(holder);
 	}
 
 	public final boolean addEffect(MobEffectInstance mobEffectInstance) {
@@ -958,14 +967,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean canBeAffected(MobEffectInstance mobEffectInstance) {
-		if (this.getMobType() == MobType.UNDEAD) {
-			MobEffect mobEffect = mobEffectInstance.getEffect();
-			if (mobEffect == MobEffects.REGENERATION || mobEffect == MobEffects.POISON) {
-				return false;
-			}
-		}
-
-		return true;
+		return this.getMobType() != MobType.UNDEAD ? true : !mobEffectInstance.is(MobEffects.REGENERATION) && !mobEffectInstance.is(MobEffects.POISON);
 	}
 
 	public void forceAddEffect(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
@@ -974,6 +976,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			if (mobEffectInstance2 == null) {
 				this.onEffectAdded(mobEffectInstance, entity);
 			} else {
+				mobEffectInstance.copyBlendState(mobEffectInstance2);
 				this.onEffectUpdated(mobEffectInstance, true, entity);
 			}
 		}
@@ -984,12 +987,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Nullable
-	public MobEffectInstance removeEffectNoUpdate(@Nullable MobEffect mobEffect) {
-		return (MobEffectInstance)this.activeEffects.remove(mobEffect);
+	public MobEffectInstance removeEffectNoUpdate(Holder<MobEffect> holder) {
+		return (MobEffectInstance)this.activeEffects.remove(holder);
 	}
 
-	public boolean removeEffect(MobEffect mobEffect) {
-		MobEffectInstance mobEffectInstance = this.removeEffectNoUpdate(mobEffect);
+	public boolean removeEffect(Holder<MobEffect> holder) {
+		MobEffectInstance mobEffectInstance = this.removeEffectNoUpdate(holder);
 		if (mobEffectInstance != null) {
 			this.onEffectRemoved(mobEffectInstance);
 			return true;
@@ -1001,7 +1004,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void onEffectAdded(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
 		this.effectsDirty = true;
 		if (!this.level().isClientSide) {
-			mobEffectInstance.getEffect().addAttributeModifiers(this.getAttributes(), mobEffectInstance.getAmplifier());
+			mobEffectInstance.getEffect().value().addAttributeModifiers(this.getAttributes(), mobEffectInstance.getAmplifier());
 			this.sendEffectToPassengers(mobEffectInstance);
 		}
 	}
@@ -1009,7 +1012,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public void sendEffectToPassengers(MobEffectInstance mobEffectInstance) {
 		for (Entity entity : this.getPassengers()) {
 			if (entity instanceof ServerPlayer serverPlayer) {
-				serverPlayer.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance));
+				serverPlayer.connection.send(new ClientboundUpdateMobEffectPacket(this.getId(), mobEffectInstance, false));
 			}
 		}
 	}
@@ -1017,7 +1020,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void onEffectUpdated(MobEffectInstance mobEffectInstance, boolean bl, @Nullable Entity entity) {
 		this.effectsDirty = true;
 		if (bl && !this.level().isClientSide) {
-			MobEffect mobEffect = mobEffectInstance.getEffect();
+			MobEffect mobEffect = mobEffectInstance.getEffect().value();
 			mobEffect.removeAttributeModifiers(this.getAttributes());
 			mobEffect.addAttributeModifiers(this.getAttributes(), mobEffectInstance.getAmplifier());
 			this.refreshDirtyAttributes();
@@ -1031,7 +1034,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void onEffectRemoved(MobEffectInstance mobEffectInstance) {
 		this.effectsDirty = true;
 		if (!this.level().isClientSide) {
-			mobEffectInstance.getEffect().removeAttributeModifiers(this.getAttributes());
+			mobEffectInstance.getEffect().value().removeAttributeModifiers(this.getAttributes());
 			this.refreshDirtyAttributes();
 
 			for (Entity entity : this.getPassengers()) {
@@ -1048,13 +1051,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
-	private void onAttributeUpdated(Attribute attribute) {
-		if (attribute == Attributes.MAX_HEALTH) {
+	private void onAttributeUpdated(Holder<Attribute> holder) {
+		if (holder.is(Attributes.MAX_HEALTH)) {
 			float f = this.getMaxHealth();
 			if (this.getHealth() > f) {
 				this.setHealth(f);
 			}
-		} else if (attribute == Attributes.MAX_ABSORPTION) {
+		} else if (holder.is(Attributes.MAX_ABSORPTION)) {
 			float f = this.getMaxAbsorption();
 			if (this.getAbsorptionAmount() > f) {
 				this.setAbsorptionAmount(f);
@@ -1115,6 +1118,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				f *= 5.0F;
 			}
 
+			if (damageSource.is(DamageTypeTags.DAMAGES_HELMET) && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+				this.hurtHelmet(damageSource, f);
+				f *= 0.75F;
+			}
+
 			this.walkAnimation.setSpeed(1.5F);
 			boolean bl2 = true;
 			if ((float)this.invulnerableTime > 10.0F && !damageSource.is(DamageTypeTags.BYPASSES_COOLDOWN)) {
@@ -1131,11 +1139,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				this.actuallyHurt(damageSource, f);
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
-			}
-
-			if (damageSource.is(DamageTypeTags.DAMAGES_HELMET) && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-				this.hurtHelmet(damageSource, f);
-				f *= 0.75F;
 			}
 
 			Entity entity2 = damageSource.getEntity();
@@ -1493,7 +1496,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			return false;
 		} else {
 			BlockPos blockPos = this.blockPosition();
-			BlockState blockState = this.getFeetBlockState();
+			BlockState blockState = this.getInBlockState();
 			if (blockState.is(BlockTags.CLIMBABLE)) {
 				this.lastClimbablePos = Optional.of(blockPos);
 				return true;
@@ -1826,24 +1829,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Nullable
-	public AttributeInstance getAttribute(Attribute attribute) {
-		return this.getAttributes().getInstance(attribute);
+	public AttributeInstance getAttribute(Holder<Attribute> holder) {
+		return this.getAttributes().getInstance(holder);
 	}
 
 	public double getAttributeValue(Holder<Attribute> holder) {
-		return this.getAttributeValue(holder.value());
-	}
-
-	public double getAttributeValue(Attribute attribute) {
-		return this.getAttributes().getValue(attribute);
+		return this.getAttributes().getValue(holder);
 	}
 
 	public double getAttributeBaseValue(Holder<Attribute> holder) {
-		return this.getAttributeBaseValue(holder.value());
-	}
-
-	public double getAttributeBaseValue(Attribute attribute) {
-		return this.getAttributes().getBaseValue(attribute);
+		return this.getAttributes().getBaseValue(holder);
 	}
 
 	public AttributeMap getAttributes() {
@@ -2183,7 +2178,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		Vec3 vec32 = this.getDeltaMovement();
 		if ((this.horizontalCollision || this.jumping)
-			&& (this.onClimbable() || this.getFeetBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(this))) {
+			&& (this.onClimbable() || this.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(this))) {
 			vec32 = new Vec3(vec32.x, 0.2, vec32.z);
 		}
 
@@ -2212,7 +2207,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			double d = Mth.clamp(vec3.x, -0.15F, 0.15F);
 			double e = Mth.clamp(vec3.z, -0.15F, 0.15F);
 			double g = Math.max(vec3.y, -0.15F);
-			if (g < 0.0 && !this.getFeetBlockState().is(Blocks.SCAFFOLDING) && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
+			if (g < 0.0 && !this.getInBlockState().is(Blocks.SCAFFOLDING) && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
 				g = 0.0;
 			}
 
@@ -2365,6 +2360,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		this.refreshDirtyAttributes();
+		float l = this.getScale();
+		if (l != this.appliedScale) {
+			this.appliedScale = l;
+			this.refreshDimensions();
+		}
 	}
 
 	private void detectEquipmentUpdates() {
@@ -3141,8 +3141,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
-	public EntityDimensions getDimensions(Pose pose) {
-		return pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : super.getDimensions(pose).scale(this.getScale());
+	public final EntityDimensions getDimensions(Pose pose) {
+		return pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : this.getDefaultDimensions(pose).scale(this.getScale());
+	}
+
+	protected EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.getType().getDimensions().scale(this.getAgeScale());
 	}
 
 	public ImmutableList<Pose> getDismountPoses() {
@@ -3152,12 +3156,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public AABB getLocalBoundsForPose(Pose pose) {
 		EntityDimensions entityDimensions = this.getDimensions(pose);
 		return new AABB(
-			(double)(-entityDimensions.width / 2.0F),
+			(double)(-entityDimensions.width() / 2.0F),
 			0.0,
-			(double)(-entityDimensions.width / 2.0F),
-			(double)(entityDimensions.width / 2.0F),
-			(double)entityDimensions.height,
-			(double)(entityDimensions.width / 2.0F)
+			(double)(-entityDimensions.width() / 2.0F),
+			(double)(entityDimensions.width() / 2.0F),
+			(double)entityDimensions.height(),
+			(double)(entityDimensions.width() / 2.0F)
 		);
 	}
 
@@ -3244,15 +3248,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Override
 	public boolean isInWall() {
 		return !this.isSleeping() && super.isInWall();
-	}
-
-	@Override
-	protected final float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return pose == Pose.SLEEPING ? 0.2F : this.getStandingEyeHeight(pose, entityDimensions);
-	}
-
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return super.getEyeHeight(pose, entityDimensions);
 	}
 
 	public ItemStack getProjectile(ItemStack itemStack) {
@@ -3411,21 +3406,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public float maxUpStep() {
-		float f = super.maxUpStep();
+		float f = (float)this.getAttributeValue(Attributes.STEP_HEIGHT);
 		return this.getControllingPassenger() instanceof Player ? Math.max(f, 1.0F) : f;
 	}
 
 	@Override
 	public Vec3 getPassengerRidingPosition(Entity entity) {
-		return new Vec3(
-				this.getPassengerAttachmentPoint(entity, this.getDimensions(this.getPose()), this.getScale()).rotateY(-this.yBodyRot * (float) (Math.PI / 180.0))
-			)
-			.add(this.position());
-	}
-
-	@Override
-	public float getMyRidingOffset(Entity entity) {
-		return this.ridingOffset(entity) * this.getScale();
+		return this.position().add(this.getPassengerAttachmentPoint(entity, this.getDimensions(this.getPose()), this.getScale() * this.getAgeScale()));
 	}
 
 	protected void lerpHeadRotationStep(int i, double d) {

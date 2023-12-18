@@ -21,7 +21,8 @@ public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
 	private static final float WIND_BOTTOM_SPEED = 1.0F;
 	private final ModelPart root;
 	private final ModelPart head;
-	private final ModelPart windBody;
+	private final ModelPart eyes;
+	private final ModelPart wind;
 	private final ModelPart windTop;
 	private final ModelPart windMid;
 	private final ModelPart windBottom;
@@ -30,15 +31,16 @@ public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
 	public BreezeModel(ModelPart modelPart) {
 		super(RenderType::entityTranslucent);
 		this.root = modelPart;
-		this.windBody = modelPart.getChild("wind_body");
-		this.windBottom = this.windBody.getChild("wind_bottom");
+		this.wind = modelPart.getChild("wind_body");
+		this.windBottom = this.wind.getChild("wind_bottom");
 		this.windMid = this.windBottom.getChild("wind_mid");
 		this.windTop = this.windMid.getChild("wind_top");
 		this.head = modelPart.getChild("body").getChild("head");
+		this.eyes = this.head.getChild("eyes");
 		this.rods = modelPart.getChild("body").getChild("rods");
 	}
 
-	public static LayerDefinition createBodyLayer() {
+	public static LayerDefinition createBodyLayer(int i, int j) {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
@@ -59,50 +61,30 @@ public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
 			PartPose.offsetAndRotation(0.0F, -3.0F, -3.0F, 0.3927F, 0.0F, 0.0F)
 		);
 		PartDefinition partDefinition4 = partDefinition2.addOrReplaceChild(
-			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 4.0F, 0.0F)
+			"head",
+			CubeListBuilder.create()
+				.texOffs(4, 24)
+				.addBox(-5.0F, -5.0F, -4.2F, 10.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 0)
+				.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)),
+			PartPose.offset(0.0F, 4.0F, 0.0F)
 		);
-		PartDefinition partDefinition5 = partDefinition.addOrReplaceChild("wind_body", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
-		PartDefinition partDefinition6 = partDefinition5.addOrReplaceChild("wind_bottom", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
-		PartDefinition partDefinition7 = partDefinition6.addOrReplaceChild("wind_mid", CubeListBuilder.create(), PartPose.offset(0.0F, -7.0F, 0.0F));
-		partDefinition7.addOrReplaceChild("wind_top", CubeListBuilder.create(), PartPose.offset(0.0F, -6.0F, 0.0F));
-		return LayerDefinition.create(meshDefinition, 32, 32);
-	}
-
-	public static LayerDefinition createEyesLayer() {
-		MeshDefinition meshDefinition = new MeshDefinition();
-		PartDefinition partDefinition = meshDefinition.getRoot();
-		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
-		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("rods", CubeListBuilder.create(), PartPose.offset(0.0F, 8.0F, 0.0F));
-		PartDefinition partDefinition4 = partDefinition2.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(0.0F, 4.0F, 0.0F));
 		partDefinition4.addOrReplaceChild(
 			"eyes",
 			CubeListBuilder.create()
 				.texOffs(4, 24)
 				.addBox(-5.0F, -5.0F, -4.2F, 10.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
-				.texOffs(7, 16)
-				.addBox(-4.0F, -2.0F, -4.0F, 8.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+				.texOffs(0, 0)
+				.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)),
 			PartPose.offset(0.0F, 0.0F, 0.0F)
 		);
 		PartDefinition partDefinition5 = partDefinition.addOrReplaceChild("wind_body", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
-		PartDefinition partDefinition6 = partDefinition5.addOrReplaceChild("wind_bottom", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
-		PartDefinition partDefinition7 = partDefinition6.addOrReplaceChild("wind_mid", CubeListBuilder.create(), PartPose.offset(0.0F, -7.0F, 0.0F));
-		partDefinition7.addOrReplaceChild("wind_top", CubeListBuilder.create(), PartPose.offset(0.0F, -6.0F, 0.0F));
-		return LayerDefinition.create(meshDefinition, 32, 32);
-	}
-
-	public static LayerDefinition createWindBodyLayer() {
-		MeshDefinition meshDefinition = new MeshDefinition();
-		PartDefinition partDefinition = meshDefinition.getRoot();
-		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
-		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("rods", CubeListBuilder.create(), PartPose.offset(0.0F, 8.0F, 0.0F));
-		partDefinition2.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.offset(0.0F, 4.0F, 0.0F));
-		PartDefinition partDefinition4 = partDefinition.addOrReplaceChild("wind_body", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
-		PartDefinition partDefinition5 = partDefinition4.addOrReplaceChild(
+		PartDefinition partDefinition6 = partDefinition5.addOrReplaceChild(
 			"wind_bottom",
 			CubeListBuilder.create().texOffs(1, 83).addBox(-2.5F, -7.0F, -2.5F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.0F)),
 			PartPose.offset(0.0F, 24.0F, 0.0F)
 		);
-		PartDefinition partDefinition6 = partDefinition5.addOrReplaceChild(
+		PartDefinition partDefinition7 = partDefinition6.addOrReplaceChild(
 			"wind_mid",
 			CubeListBuilder.create()
 				.texOffs(74, 28)
@@ -113,7 +95,7 @@ public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
 				.addBox(-2.5F, -6.0F, -2.5F, 5.0F, 6.0F, 5.0F, new CubeDeformation(0.0F)),
 			PartPose.offset(0.0F, -7.0F, 0.0F)
 		);
-		partDefinition6.addOrReplaceChild(
+		partDefinition7.addOrReplaceChild(
 			"wind_top",
 			CubeListBuilder.create()
 				.texOffs(0, 0)
@@ -124,7 +106,7 @@ public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
 				.addBox(-2.5F, -8.0F, -2.5F, 5.0F, 8.0F, 5.0F, new CubeDeformation(0.0F)),
 			PartPose.offset(0.0F, -6.0F, 0.0F)
 		);
-		return LayerDefinition.create(meshDefinition, 128, 128);
+		return LayerDefinition.create(meshDefinition, i, j);
 	}
 
 	public void setupAnim(T breeze, float f, float g, float h, float i, float j) {
@@ -140,6 +122,7 @@ public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
 		this.rods.yRot = h * (float) Math.PI * 0.1F;
 		this.animate(breeze.shoot, BreezeAnimation.SHOOT, h);
 		this.animate(breeze.slide, BreezeAnimation.SLIDE, h);
+		this.animate(breeze.slideBack, BreezeAnimation.SLIDE_BACK, h);
 		this.animate(breeze.longJump, BreezeAnimation.JUMP, h);
 	}
 
@@ -148,15 +131,19 @@ public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
 		return this.root;
 	}
 
-	public ModelPart windTop() {
-		return this.windTop;
+	public ModelPart head() {
+		return this.head;
 	}
 
-	public ModelPart windMiddle() {
-		return this.windMid;
+	public ModelPart eyes() {
+		return this.eyes;
 	}
 
-	public ModelPart windBottom() {
-		return this.windBottom;
+	public ModelPart rods() {
+		return this.rods;
+	}
+
+	public ModelPart wind() {
+		return this.wind;
 	}
 }

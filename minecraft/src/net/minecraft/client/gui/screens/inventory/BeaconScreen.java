@@ -13,6 +13,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -40,9 +41,9 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	private static final Component SECONDARY_EFFECT_LABEL = Component.translatable("block.minecraft.beacon.secondary");
 	private final List<BeaconScreen.BeaconButton> beaconButtons = Lists.<BeaconScreen.BeaconButton>newArrayList();
 	@Nullable
-	MobEffect primary;
+	Holder<MobEffect> primary;
 	@Nullable
-	MobEffect secondary;
+	Holder<MobEffect> secondary;
 
 	public BeaconScreen(BeaconMenu beaconMenu, Inventory inventory, Component component) {
 		super(beaconMenu, inventory, component);
@@ -74,13 +75,13 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		this.addBeaconButton(new BeaconScreen.BeaconCancelButton(this.leftPos + 190, this.topPos + 107));
 
 		for (int i = 0; i <= 2; i++) {
-			int j = BeaconBlockEntity.BEACON_EFFECTS[i].length;
+			int j = ((List)BeaconBlockEntity.BEACON_EFFECTS.get(i)).size();
 			int k = j * 22 + (j - 1) * 2;
 
 			for (int l = 0; l < j; l++) {
-				MobEffect mobEffect = BeaconBlockEntity.BEACON_EFFECTS[i][l];
+				Holder<MobEffect> holder = (Holder<MobEffect>)((List)BeaconBlockEntity.BEACON_EFFECTS.get(i)).get(l);
 				BeaconScreen.BeaconPowerButton beaconPowerButton = new BeaconScreen.BeaconPowerButton(
-					this.leftPos + 76 + l * 24 - k / 2, this.topPos + 22 + i * 25, mobEffect, true, i
+					this.leftPos + 76 + l * 24 - k / 2, this.topPos + 22 + i * 25, holder, true, i
 				);
 				beaconPowerButton.active = false;
 				this.addBeaconButton(beaconPowerButton);
@@ -88,20 +89,21 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		int i = 3;
-		int j = BeaconBlockEntity.BEACON_EFFECTS[3].length + 1;
+		int j = ((List)BeaconBlockEntity.BEACON_EFFECTS.get(3)).size() + 1;
 		int k = j * 22 + (j - 1) * 2;
 
 		for (int l = 0; l < j - 1; l++) {
-			MobEffect mobEffect = BeaconBlockEntity.BEACON_EFFECTS[3][l];
+			Holder<MobEffect> holder = (Holder<MobEffect>)((List)BeaconBlockEntity.BEACON_EFFECTS.get(3)).get(l);
 			BeaconScreen.BeaconPowerButton beaconPowerButton = new BeaconScreen.BeaconPowerButton(
-				this.leftPos + 167 + l * 24 - k / 2, this.topPos + 47, mobEffect, false, 3
+				this.leftPos + 167 + l * 24 - k / 2, this.topPos + 47, holder, false, 3
 			);
 			beaconPowerButton.active = false;
 			this.addBeaconButton(beaconPowerButton);
 		}
 
+		Holder<MobEffect> holder2 = (Holder<MobEffect>)((List)BeaconBlockEntity.BEACON_EFFECTS.get(0)).get(0);
 		BeaconScreen.BeaconPowerButton beaconPowerButton2 = new BeaconScreen.BeaconUpgradePowerButton(
-			this.leftPos + 167 + (j - 1) * 24 - k / 2, this.topPos + 47, BeaconBlockEntity.BEACON_EFFECTS[0][0]
+			this.leftPos + 167 + (j - 1) * 24 - k / 2, this.topPos + 47, holder2
 		);
 		beaconPowerButton2.visible = false;
 		this.addBeaconButton(beaconPowerButton2);
@@ -190,24 +192,24 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	class BeaconPowerButton extends BeaconScreen.BeaconScreenButton {
 		private final boolean isPrimary;
 		protected final int tier;
-		private MobEffect effect;
+		private Holder<MobEffect> effect;
 		private TextureAtlasSprite sprite;
 
-		public BeaconPowerButton(int i, int j, MobEffect mobEffect, boolean bl, int k) {
+		public BeaconPowerButton(int i, int j, Holder<MobEffect> holder, boolean bl, int k) {
 			super(i, j);
 			this.isPrimary = bl;
 			this.tier = k;
-			this.setEffect(mobEffect);
+			this.setEffect(holder);
 		}
 
-		protected void setEffect(MobEffect mobEffect) {
-			this.effect = mobEffect;
-			this.sprite = Minecraft.getInstance().getMobEffectTextures().get(mobEffect);
-			this.setTooltip(Tooltip.create(this.createEffectDescription(mobEffect), null));
+		protected void setEffect(Holder<MobEffect> holder) {
+			this.effect = holder;
+			this.sprite = Minecraft.getInstance().getMobEffectTextures().get(holder);
+			this.setTooltip(Tooltip.create(this.createEffectDescription(holder), null));
 		}
 
-		protected MutableComponent createEffectDescription(MobEffect mobEffect) {
-			return Component.translatable(mobEffect.getDescriptionId());
+		protected MutableComponent createEffectDescription(Holder<MobEffect> holder) {
+			return Component.translatable(holder.value().getDescriptionId());
 		}
 
 		@Override
@@ -231,7 +233,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		@Override
 		public void updateStatus(int i) {
 			this.active = this.tier < i;
-			this.setSelected(this.effect == (this.isPrimary ? BeaconScreen.this.primary : BeaconScreen.this.secondary));
+			this.setSelected(this.effect.equals(this.isPrimary ? BeaconScreen.this.primary : BeaconScreen.this.secondary));
 		}
 
 		@Override
@@ -302,13 +304,13 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 	@Environment(EnvType.CLIENT)
 	class BeaconUpgradePowerButton extends BeaconScreen.BeaconPowerButton {
-		public BeaconUpgradePowerButton(int i, int j, MobEffect mobEffect) {
-			super(i, j, mobEffect, false, 3);
+		public BeaconUpgradePowerButton(int i, int j, Holder<MobEffect> holder) {
+			super(i, j, holder, false, 3);
 		}
 
 		@Override
-		protected MutableComponent createEffectDescription(MobEffect mobEffect) {
-			return Component.translatable(mobEffect.getDescriptionId()).append(" II");
+		protected MutableComponent createEffectDescription(Holder<MobEffect> holder) {
+			return Component.translatable(holder.value().getDescriptionId()).append(" II");
 		}
 
 		@Override

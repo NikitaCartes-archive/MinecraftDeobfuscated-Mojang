@@ -1,12 +1,13 @@
 package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
+import io.netty.handler.codec.DecoderException;
 import java.util.Collection;
 import java.util.List;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -33,18 +34,21 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 		this.entityId = friendlyByteBuf.readVarInt();
 		this.attributes = friendlyByteBuf.readList(
 			friendlyByteBufx -> {
-				ResourceLocation resourceLocation = friendlyByteBufx.readResourceLocation();
-				Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(resourceLocation);
-				double d = friendlyByteBufx.readDouble();
-				List<AttributeModifier> list = friendlyByteBufx.readList(
-					friendlyByteBufxx -> new AttributeModifier(
-							friendlyByteBufxx.readUUID(),
-							"Unknown synced attribute modifier",
-							friendlyByteBufxx.readDouble(),
-							AttributeModifier.Operation.fromValue(friendlyByteBufxx.readByte())
-						)
-				);
-				return new ClientboundUpdateAttributesPacket.AttributeSnapshot(attribute, d, list);
+				Holder<Attribute> holder = friendlyByteBufx.readById(BuiltInRegistries.ATTRIBUTE.asHolderIdMap());
+				if (holder == null) {
+					throw new DecoderException("Received unrecognized attribute id");
+				} else {
+					double d = friendlyByteBufx.readDouble();
+					List<AttributeModifier> list = friendlyByteBufx.readList(
+						friendlyByteBufxx -> new AttributeModifier(
+								friendlyByteBufxx.readUUID(),
+								"Unknown synced attribute modifier",
+								friendlyByteBufxx.readDouble(),
+								AttributeModifier.Operation.fromValue(friendlyByteBufxx.readByte())
+							)
+					);
+					return new ClientboundUpdateAttributesPacket.AttributeSnapshot(holder, d, list);
+				}
 			}
 		);
 	}
@@ -53,9 +57,9 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
 		friendlyByteBuf.writeCollection(this.attributes, (friendlyByteBufx, attributeSnapshot) -> {
-			friendlyByteBufx.writeResourceLocation(BuiltInRegistries.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
-			friendlyByteBufx.writeDouble(attributeSnapshot.getBase());
-			friendlyByteBufx.writeCollection(attributeSnapshot.getModifiers(), (friendlyByteBufxx, attributeModifier) -> {
+			friendlyByteBufx.writeId(BuiltInRegistries.ATTRIBUTE.asHolderIdMap(), attributeSnapshot.attribute());
+			friendlyByteBufx.writeDouble(attributeSnapshot.base());
+			friendlyByteBufx.writeCollection(attributeSnapshot.modifiers(), (friendlyByteBufxx, attributeModifier) -> {
 				friendlyByteBufxx.writeUUID(attributeModifier.getId());
 				friendlyByteBufxx.writeDouble(attributeModifier.getAmount());
 				friendlyByteBufxx.writeByte(attributeModifier.getOperation().toValue());
@@ -75,27 +79,6 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 		return this.attributes;
 	}
 
-	public static class AttributeSnapshot {
-		private final Attribute attribute;
-		private final double base;
-		private final Collection<AttributeModifier> modifiers;
-
-		public AttributeSnapshot(Attribute attribute, double d, Collection<AttributeModifier> collection) {
-			this.attribute = attribute;
-			this.base = d;
-			this.modifiers = collection;
-		}
-
-		public Attribute getAttribute() {
-			return this.attribute;
-		}
-
-		public double getBase() {
-			return this.base;
-		}
-
-		public Collection<AttributeModifier> getModifiers() {
-			return this.modifiers;
-		}
+	public static record AttributeSnapshot(Holder<Attribute> attribute, double base, Collection<AttributeModifier> modifiers) {
 	}
 }

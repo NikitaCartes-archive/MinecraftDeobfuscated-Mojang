@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -68,7 +69,6 @@ import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 public class Warden extends Monster implements VibrationSystem {
@@ -529,9 +529,9 @@ public class Warden extends Monster implements VibrationSystem {
 	}
 
 	@Override
-	public EntityDimensions getDimensions(Pose pose) {
-		EntityDimensions entityDimensions = super.getDimensions(pose);
-		return this.isDiggingOrEmerging() ? EntityDimensions.fixed(entityDimensions.width, 1.0F) : entityDimensions;
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		EntityDimensions entityDimensions = super.getDefaultDimensions(pose);
+		return this.isDiggingOrEmerging() ? EntityDimensions.fixed(entityDimensions.width(), 1.0F) : entityDimensions;
 	}
 
 	@Override
@@ -573,11 +573,6 @@ public class Warden extends Monster implements VibrationSystem {
 	}
 
 	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + 0.25F * f, 0.0F);
-	}
-
-	@Override
 	public VibrationSystem.Data getVibrationData() {
 		return this.vibrationData;
 	}
@@ -612,7 +607,7 @@ public class Warden extends Monster implements VibrationSystem {
 		}
 
 		@Override
-		public boolean canReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, GameEvent gameEvent, GameEvent.Context context) {
+		public boolean canReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, Holder<GameEvent> holder, GameEvent.Context context) {
 			if (!Warden.this.isNoAi()
 				&& !Warden.this.isDeadOrDying()
 				&& !Warden.this.getBrain().hasMemoryValue(MemoryModuleType.VIBRATION_COOLDOWN)
@@ -629,7 +624,9 @@ public class Warden extends Monster implements VibrationSystem {
 		}
 
 		@Override
-		public void onReceiveVibration(ServerLevel serverLevel, BlockPos blockPos, GameEvent gameEvent, @Nullable Entity entity, @Nullable Entity entity2, float f) {
+		public void onReceiveVibration(
+			ServerLevel serverLevel, BlockPos blockPos, Holder<GameEvent> holder, @Nullable Entity entity, @Nullable Entity entity2, float f
+		) {
 			if (!Warden.this.isDeadOrDying()) {
 				Warden.this.brain.setMemoryWithExpiry(MemoryModuleType.VIBRATION_COOLDOWN, Unit.INSTANCE, 40L);
 				serverLevel.broadcastEntityEvent(Warden.this, (byte)61);

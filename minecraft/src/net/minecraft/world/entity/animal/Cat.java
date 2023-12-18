@@ -23,7 +23,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -68,7 +67,6 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
-import org.joml.Vector3f;
 
 public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	public static final double TEMPT_SPEED_MOD = 0.6;
@@ -431,11 +429,6 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * 0.5F;
-	}
-
-	@Override
 	public boolean removeWhenFarAway(double d) {
 		return !this.isTame() && this.tickCount > 2400;
 	}
@@ -455,11 +448,6 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	@Override
 	public boolean isSteppingCarefully() {
 		return this.isCrouching() || super.isSteppingCarefully();
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height - 0.1875F * f, 0.0F);
 	}
 
 	static class CatAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {

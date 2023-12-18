@@ -14,7 +14,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,7 +21,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -42,7 +40,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Vex extends Monster implements TraceableEntity {
 	public static final float FLAP_DEGREES_PER_TICK = 45.836624F;
@@ -60,11 +57,6 @@ public class Vex extends Monster implements TraceableEntity {
 		super(entityType, level);
 		this.moveControl = new Vex.VexMoveControl(this);
 		this.xpReward = 3;
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height - 0.28125F;
 	}
 
 	@Override
@@ -233,16 +225,6 @@ public class Vex extends Monster implements TraceableEntity {
 	protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
 		this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
 		this.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
-	}
-
-	@Override
-	protected float ridingOffset(Entity entity) {
-		return 0.04F;
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height - 0.0625F * f, 0.0F);
 	}
 
 	class VexChargeAttackGoal extends Goal {

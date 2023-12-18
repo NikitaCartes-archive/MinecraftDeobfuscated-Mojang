@@ -8,11 +8,12 @@ class RegenerationMobEffect extends MobEffect {
 	}
 
 	@Override
-	public void applyEffectTick(LivingEntity livingEntity, int i) {
-		super.applyEffectTick(livingEntity, i);
+	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
 		if (livingEntity.getHealth() < livingEntity.getMaxHealth()) {
 			livingEntity.heal(1.0F);
 		}
+
+		return true;
 	}
 
 	@Override

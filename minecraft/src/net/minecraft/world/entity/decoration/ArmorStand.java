@@ -28,6 +28,8 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
@@ -51,8 +53,8 @@ public class ArmorStand extends LivingEntity {
 	private static final Rotations DEFAULT_RIGHT_ARM_POSE = new Rotations(-15.0F, 0.0F, 10.0F);
 	private static final Rotations DEFAULT_LEFT_LEG_POSE = new Rotations(-1.0F, 0.0F, -1.0F);
 	private static final Rotations DEFAULT_RIGHT_LEG_POSE = new Rotations(1.0F, 0.0F, 1.0F);
-	private static final EntityDimensions MARKER_DIMENSIONS = new EntityDimensions(0.0F, 0.0F, true);
-	private static final EntityDimensions BABY_DIMENSIONS = EntityType.ARMOR_STAND.getDimensions().scale(0.5F);
+	private static final EntityDimensions MARKER_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
+	private static final EntityDimensions BABY_DIMENSIONS = EntityType.ARMOR_STAND.getDimensions().scale(0.5F).withEyeHeight(0.9875F);
 	private static final double FEET_OFFSET = 0.1;
 	private static final double CHEST_OFFSET = 0.9;
 	private static final double LEGS_OFFSET = 0.4;
@@ -86,12 +88,15 @@ public class ArmorStand extends LivingEntity {
 
 	public ArmorStand(EntityType<? extends ArmorStand> entityType, Level level) {
 		super(entityType, level);
-		this.setMaxUpStep(0.0F);
 	}
 
 	public ArmorStand(Level level, double d, double e, double f) {
 		this(EntityType.ARMOR_STAND, level);
 		this.setPos(d, e, f);
+	}
+
+	public static AttributeSupplier.Builder createAttributes() {
+		return createLivingAttributes().add(Attributes.STEP_HEIGHT, 0.0);
 	}
 
 	@Override
@@ -527,11 +532,6 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height * (this.isBaby() ? 0.5F : 0.9F);
-	}
-
-	@Override
 	public void travel(Vec3 vec3) {
 		if (this.hasPhysics()) {
 			super.travel(vec3);
@@ -774,7 +774,7 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	public EntityDimensions getDimensions(Pose pose) {
+	public EntityDimensions getDefaultDimensions(Pose pose) {
 		return this.getDimensionsMarker(this.isMarker());
 	}
 

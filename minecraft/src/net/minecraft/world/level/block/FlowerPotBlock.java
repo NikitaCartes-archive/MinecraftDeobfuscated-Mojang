@@ -4,15 +4,16 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -58,37 +59,46 @@ public class FlowerPotBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		Item item = itemStack.getItem();
-		BlockState blockState2 = (item instanceof BlockItem ? (Block)POTTED_BY_CONTENT.getOrDefault(((BlockItem)item).getBlock(), Blocks.AIR) : Blocks.AIR)
+		BlockState blockState2 = (itemStack.getItem() instanceof BlockItem blockItem
+				? (Block)POTTED_BY_CONTENT.getOrDefault(blockItem.getBlock(), Blocks.AIR)
+				: Blocks.AIR)
 			.defaultBlockState();
-		boolean bl = blockState2.is(Blocks.AIR);
-		boolean bl2 = this.isEmpty();
-		if (bl != bl2) {
-			if (bl2) {
-				level.setBlock(blockPos, blockState2, 3);
-				player.awardStat(Stats.POT_FLOWER);
-				if (!player.getAbilities().instabuild) {
-					itemStack.shrink(1);
-				}
-			} else {
-				ItemStack itemStack2 = new ItemStack(this.potted);
-				if (itemStack.isEmpty()) {
-					player.setItemInHand(interactionHand, itemStack2);
-				} else if (!player.addItem(itemStack2)) {
-					player.drop(itemStack2, false);
-				}
-
-				level.setBlock(blockPos, Blocks.FLOWER_POT.defaultBlockState(), 3);
+		if (blockState2.isAir()) {
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		} else if (!this.isEmpty()) {
+			return ItemInteractionResult.CONSUME;
+		} else {
+			level.setBlock(blockPos, blockState2, 3);
+			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
+			player.awardStat(Stats.POT_FLOWER);
+			if (!player.getAbilities().instabuild) {
+				itemStack.shrink(1);
 			}
 
+			return ItemInteractionResult.sidedSuccess(level.isClientSide);
+		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+		if (this.isEmpty()) {
+			return InteractionResult.CONSUME;
+		} else {
+			ItemStack itemStack = new ItemStack(this.potted);
+			Stream.of(InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND)
+				.filter(interactionHand -> player.getItemInHand(interactionHand).isEmpty())
+				.findFirst()
+				.ifPresentOrElse(interactionHand -> player.setItemInHand(interactionHand, itemStack), () -> {
+					if (!player.addItem(itemStack)) {
+						player.drop(itemStack, false);
+					}
+				});
+			level.setBlock(blockPos, Blocks.FLOWER_POT.defaultBlockState(), 3);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);
-		} else {
-			return InteractionResult.CONSUME;
 		}
 	}
 

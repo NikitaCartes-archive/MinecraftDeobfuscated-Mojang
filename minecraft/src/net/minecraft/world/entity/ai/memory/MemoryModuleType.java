@@ -59,6 +59,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Long> HEARD_BELL_TIME = register("heard_bell_time");
 	public static final MemoryModuleType<Long> CANT_REACH_WALK_TARGET_SINCE = register("cant_reach_walk_target_since");
 	public static final MemoryModuleType<Boolean> GOLEM_DETECTED_RECENTLY = register("golem_detected_recently", Codec.BOOL);
+	public static final MemoryModuleType<Boolean> DANGER_DETECTED_RECENTLY = register("danger_detected_recently", Codec.BOOL);
 	public static final MemoryModuleType<Long> LAST_SLEPT = register("last_slept", Codec.LONG);
 	public static final MemoryModuleType<Long> LAST_WOKEN = register("last_woken", Codec.LONG);
 	public static final MemoryModuleType<Long> LAST_WORKED_AT_POI = register("last_worked_at_poi", Codec.LONG);
@@ -131,6 +132,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Unit> BREEZE_SHOOT_COOLDOWN = register("breeze_shoot_cooldown", Codec.unit(Unit.INSTANCE));
 	public static final MemoryModuleType<Unit> BREEZE_JUMP_INHALING = register("breeze_jump_inhaling", Codec.unit(Unit.INSTANCE));
 	public static final MemoryModuleType<BlockPos> BREEZE_JUMP_TARGET = register("breeze_jump_target", BlockPos.CODEC);
+	public static final MemoryModuleType<Unit> BREEZE_LEAVING_WATER = register("breeze_leaving_water", Codec.unit(Unit.INSTANCE));
 	private final Optional<Codec<ExpirableValue<U>>> codec;
 
 	@VisibleForTesting

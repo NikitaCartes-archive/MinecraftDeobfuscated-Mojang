@@ -2796,9 +2796,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					this.level.addParticle(ParticleTypes.FLAME, v, w, x, 0.0, 0.0, 0.0);
 				}
 				break;
-			case 2005:
-				BoneMealItem.addGrowthParticles(this.level, blockPos, j);
-				break;
 			case 2006:
 				for (int o = 0; o < 200; o++) {
 					float ad = randomSource.nextFloat() * 4.0F;
@@ -2837,6 +2834,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 2010:
 				this.shootParticles(j, blockPos, randomSource, ParticleTypes.WHITE_SMOKE);
+				break;
+			case 2011:
+				ParticleUtils.spawnParticleInBlock(this.level, blockPos, j, ParticleTypes.HAPPY_VILLAGER);
+				break;
+			case 2012:
+				ParticleUtils.spawnParticleInBlock(this.level, blockPos, j, ParticleTypes.HAPPY_VILLAGER);
 				break;
 			case 3000:
 				this.level

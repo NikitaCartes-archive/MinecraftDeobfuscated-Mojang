@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -97,8 +98,8 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		int k = this.topPos;
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
-			MobEffect mobEffect = mobEffectInstance.getEffect();
-			TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(mobEffect);
+			Holder<MobEffect> holder = mobEffectInstance.getEffect();
+			TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(holder);
 			guiGraphics.blit(i + (bl ? 6 : 7), k + 7, 0, 18, 18, textureAtlasSprite);
 			k += j;
 		}
@@ -117,7 +118,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 	}
 
 	private Component getEffectName(MobEffectInstance mobEffectInstance) {
-		MutableComponent mutableComponent = mobEffectInstance.getEffect().getDisplayName().copy();
+		MutableComponent mutableComponent = mobEffectInstance.getEffect().value().getDisplayName().copy();
 		if (mobEffectInstance.getAmplifier() >= 1 && mobEffectInstance.getAmplifier() <= 9) {
 			mutableComponent.append(CommonComponents.SPACE).append(Component.translatable("enchantment.level." + (mobEffectInstance.getAmplifier() + 1)));
 		}

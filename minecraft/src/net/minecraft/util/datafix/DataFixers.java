@@ -45,7 +45,6 @@ import net.minecraft.util.datafix.fixes.BlockEntitySignTextStrictJsonFix;
 import net.minecraft.util.datafix.fixes.BlockEntityUUIDFix;
 import net.minecraft.util.datafix.fixes.BlockNameFlatteningFix;
 import net.minecraft.util.datafix.fixes.BlockRenameFix;
-import net.minecraft.util.datafix.fixes.BlockRenameFixWithJigsaw;
 import net.minecraft.util.datafix.fixes.BlockStateStructureTemplateFix;
 import net.minecraft.util.datafix.fixes.CatTypeFix;
 import net.minecraft.util.datafix.fixes.CauldronRenameFix;
@@ -266,6 +265,7 @@ import net.minecraft.util.datafix.schemas.V3682;
 import net.minecraft.util.datafix.schemas.V3683;
 import net.minecraft.util.datafix.schemas.V3685;
 import net.minecraft.util.datafix.schemas.V3689;
+import net.minecraft.util.datafix.schemas.V3799;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -800,7 +800,7 @@ public class DataFixers {
 			ItemRenameFix.create(schema128, "Renamed grass path item to dirt path", createRenamer("minecraft:grass_path", "minecraft:dirt_path"))
 		);
 		dataFixerBuilder.addFixer(
-			BlockRenameFixWithJigsaw.create(schema128, "Renamed grass path block to dirt path", createRenamer("minecraft:grass_path", "minecraft:dirt_path"))
+			BlockRenameFix.create(schema128, "Renamed grass path block to dirt path", createRenamer("minecraft:grass_path", "minecraft:dirt_path"))
 		);
 		Schema schema129 = dataFixerBuilder.addSchema(2684, V2684::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema129, "Added Sculk Sensor", References.BLOCK_ENTITY));
@@ -833,7 +833,7 @@ public class DataFixers {
 			.put("minecraft:waxed_lightly_weathered_cut_copper_slab", "minecraft:waxed_exposed_cut_copper_slab")
 			.build();
 		dataFixerBuilder.addFixer(ItemRenameFix.create(schema132, "Renamed copper block items to new oxidized terms", createRenamer(immutableMap)));
-		dataFixerBuilder.addFixer(BlockRenameFixWithJigsaw.create(schema132, "Renamed copper blocks to new oxidized terms", createRenamer(immutableMap)));
+		dataFixerBuilder.addFixer(BlockRenameFix.create(schema132, "Renamed copper blocks to new oxidized terms", createRenamer(immutableMap)));
 		Schema schema133 = dataFixerBuilder.addSchema(2691, SAME_NAMESPACED);
 		ImmutableMap<String, String> immutableMap2 = ImmutableMap.<String, String>builder()
 			.put("minecraft:waxed_copper", "minecraft:waxed_copper_block")
@@ -842,7 +842,7 @@ public class DataFixers {
 			.put("minecraft:exposed_copper_block", "minecraft:exposed_copper")
 			.build();
 		dataFixerBuilder.addFixer(ItemRenameFix.create(schema133, "Rename copper item suffixes", createRenamer(immutableMap2)));
-		dataFixerBuilder.addFixer(BlockRenameFixWithJigsaw.create(schema133, "Rename copper blocks suffixes", createRenamer(immutableMap2)));
+		dataFixerBuilder.addFixer(BlockRenameFix.create(schema133, "Rename copper blocks suffixes", createRenamer(immutableMap2)));
 		Schema schema134 = dataFixerBuilder.addSchema(2693, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new AddFlagIfNotPresentFix(schema134, References.WORLD_GEN_SETTINGS, "has_increased_height_already", false));
 		Schema schema135 = dataFixerBuilder.addSchema(2696, SAME_NAMESPACED);
@@ -866,10 +866,10 @@ public class DataFixers {
 			.put("minecraft:chiseled_grimstone", "minecraft:chiseled_deepslate")
 			.build();
 		dataFixerBuilder.addFixer(ItemRenameFix.create(schema135, "Renamed grimstone block items to deepslate", createRenamer(immutableMap3)));
-		dataFixerBuilder.addFixer(BlockRenameFixWithJigsaw.create(schema135, "Renamed grimstone blocks to deepslate", createRenamer(immutableMap3)));
+		dataFixerBuilder.addFixer(BlockRenameFix.create(schema135, "Renamed grimstone blocks to deepslate", createRenamer(immutableMap3)));
 		Schema schema136 = dataFixerBuilder.addSchema(2700, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(
-			BlockRenameFixWithJigsaw.create(
+			BlockRenameFix.create(
 				schema136,
 				"Renamed cave vines blocks",
 				createRenamer(ImmutableMap.of("minecraft:cave_vines_head", "minecraft:cave_vines", "minecraft:cave_vines_body", "minecraft:cave_vines_plant"))
@@ -1186,8 +1186,13 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema197, "Added Trial Spawner", References.BLOCK_ENTITY));
 		Schema schema198 = dataFixerBuilder.addSchema(3692, SAME_NAMESPACED);
 		UnaryOperator<String> unaryOperator2 = createRenamer(Map.of("minecraft:grass", "minecraft:short_grass"));
-		dataFixerBuilder.addFixer(BlockRenameFixWithJigsaw.create(schema198, "Rename grass block to short_grass", unaryOperator2));
+		dataFixerBuilder.addFixer(BlockRenameFix.create(schema198, "Rename grass block to short_grass", unaryOperator2));
 		dataFixerBuilder.addFixer(ItemRenameFix.create(schema198, "Rename grass item to short_grass", unaryOperator2));
+		Schema schema199 = dataFixerBuilder.addSchema(3799, V3799::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema199, "Added Armadillo", References.ENTITY));
+		Schema schema200 = dataFixerBuilder.addSchema(3800, SAME_NAMESPACED);
+		UnaryOperator<String> unaryOperator3 = createRenamer(Map.of("minecraft:scute", "minecraft:turtle_scute"));
+		dataFixerBuilder.addFixer(ItemRenameFix.create(schema200, "Rename scute item to turtle_scute", unaryOperator3));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

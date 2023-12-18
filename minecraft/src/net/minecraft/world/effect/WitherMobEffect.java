@@ -8,9 +8,9 @@ class WitherMobEffect extends MobEffect {
 	}
 
 	@Override
-	public void applyEffectTick(LivingEntity livingEntity, int i) {
-		super.applyEffectTick(livingEntity, i);
+	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
 		livingEntity.hurt(livingEntity.damageSources().wither(), 1.0F);
+		return true;
 	}
 
 	@Override

@@ -8,11 +8,8 @@ class AbsorptionMobEffect extends MobEffect {
 	}
 
 	@Override
-	public void applyEffectTick(LivingEntity livingEntity, int i) {
-		super.applyEffectTick(livingEntity, i);
-		if (livingEntity.getAbsorptionAmount() <= 0.0F && !livingEntity.level().isClientSide) {
-			livingEntity.removeEffect(this);
-		}
+	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
+		return livingEntity.getAbsorptionAmount() > 0.0F || livingEntity.level().isClientSide;
 	}
 
 	@Override

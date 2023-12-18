@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -19,14 +20,14 @@ public class DiggerItem extends TieredItem implements Vanishable {
 	private final TagKey<Block> blocks;
 	protected final float speed;
 	private final float attackDamageBaseline;
-	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
+	private final Multimap<Holder<Attribute>, AttributeModifier> defaultModifiers;
 
 	protected DiggerItem(float f, float g, Tier tier, TagKey<Block> tagKey, Item.Properties properties) {
 		super(tier, properties);
 		this.blocks = tagKey;
 		this.speed = tier.getSpeed();
 		this.attackDamageBaseline = f + tier.getAttackDamageBonus();
-		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
 		builder.put(
 			Attributes.ATTACK_DAMAGE,
 			new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", (double)this.attackDamageBaseline, AttributeModifier.Operation.ADDITION)
@@ -56,7 +57,7 @@ public class DiggerItem extends TieredItem implements Vanishable {
 	}
 
 	@Override
-	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
 		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 

@@ -77,7 +77,7 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 
 	@Override
 	public Collection<String> getAllTeams() {
-		return this.connection.getLevel().getScoreboard().getTeamNames();
+		return this.connection.scoreboard().getTeamNames();
 	}
 
 	@Override

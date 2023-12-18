@@ -19,6 +19,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -97,14 +98,13 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.getBlockEntity(blockPos) instanceof DecoratedPotBlockEntity decoratedPotBlockEntity) {
 			if (level.isClientSide) {
-				return InteractionResult.CONSUME;
+				return ItemInteractionResult.CONSUME;
 			} else {
-				ItemStack itemStack = player.getItemInHand(interactionHand);
 				ItemStack itemStack2 = decoratedPotBlockEntity.getTheItem();
 				if (!itemStack.isEmpty()
 					&& (itemStack2.isEmpty() || ItemStack.isSameItemSameTags(itemStack2, itemStack) && itemStack2.getCount() < itemStack2.getMaxStackSize())) {
@@ -128,14 +128,24 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 					}
 
 					decoratedPotBlockEntity.setChanged();
+					level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
+					return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
 				} else {
-					level.playSound(null, blockPos, SoundEvents.DECORATED_POT_INSERT_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F);
-					decoratedPotBlockEntity.wobble(DecoratedPotBlockEntity.WobbleStyle.NEGATIVE);
+					return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
 				}
-
-				level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
-				return InteractionResult.SUCCESS;
 			}
+		} else {
+			return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+		if (level.getBlockEntity(blockPos) instanceof DecoratedPotBlockEntity decoratedPotBlockEntity) {
+			level.playSound(null, blockPos, SoundEvents.DECORATED_POT_INSERT_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F);
+			decoratedPotBlockEntity.wobble(DecoratedPotBlockEntity.WobbleStyle.NEGATIVE);
+			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
+			return InteractionResult.SUCCESS;
 		} else {
 			return InteractionResult.PASS;
 		}

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,12 +18,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class SwordItem extends TieredItem implements Vanishable {
 	private final float attackDamage;
-	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
+	private final Multimap<Holder<Attribute>, AttributeModifier> defaultModifiers;
 
 	public SwordItem(Tier tier, int i, float f, Item.Properties properties) {
 		super(tier, properties);
 		this.attackDamage = (float)i + tier.getAttackDamageBonus();
-		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
 		builder.put(
 			Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)this.attackDamage, AttributeModifier.Operation.ADDITION)
 		);
@@ -69,7 +70,7 @@ public class SwordItem extends TieredItem implements Vanishable {
 	}
 
 	@Override
-	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
 		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 }

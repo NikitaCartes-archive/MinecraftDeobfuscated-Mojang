@@ -106,5 +106,6 @@ public class V100 extends Schema {
 				)
 		);
 		schema.registerType(false, References.BLOCK_STATE, DSL::remainder);
+		schema.registerType(false, References.FLAT_BLOCK_STATE, DSL::remainder);
 	}
 }

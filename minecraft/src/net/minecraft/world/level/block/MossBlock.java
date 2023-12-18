@@ -43,4 +43,9 @@ public class MossBlock extends Block implements BonemealableBlock {
 				reference -> ((ConfiguredFeature)reference.value()).place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos.above())
 			);
 	}
+
+	@Override
+	public BonemealableBlock.Type getType() {
+		return BonemealableBlock.Type.NEIGHBOR_SPREADER;
+	}
 }

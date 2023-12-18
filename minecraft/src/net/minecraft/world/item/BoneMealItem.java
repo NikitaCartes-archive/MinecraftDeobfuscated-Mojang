@@ -9,6 +9,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.context.UseOnContext;
@@ -39,7 +40,7 @@ public class BoneMealItem extends Item {
 		if (growCrop(useOnContext.getItemInHand(), level, blockPos)) {
 			if (!level.isClientSide) {
 				useOnContext.getPlayer().gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-				level.levelEvent(1505, blockPos, 0);
+				level.levelEvent(1505, blockPos, 15);
 			}
 
 			return InteractionResult.sidedSuccess(level.isClientSide);
@@ -49,7 +50,7 @@ public class BoneMealItem extends Item {
 			if (bl && growWaterPlant(useOnContext.getItemInHand(), level, blockPos2, useOnContext.getClickedFace())) {
 				if (!level.isClientSide) {
 					useOnContext.getPlayer().gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-					level.levelEvent(1505, blockPos2, 0);
+					level.levelEvent(1505, blockPos2, 15);
 				}
 
 				return InteractionResult.sidedSuccess(level.isClientSide);
@@ -140,43 +141,14 @@ public class BoneMealItem extends Item {
 	}
 
 	public static void addGrowthParticles(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
-		if (i == 0) {
-			i = 15;
-		}
-
-		BlockState blockState = levelAccessor.getBlockState(blockPos);
-		if (!blockState.isAir()) {
-			double d = 0.5;
-			double e;
-			if (blockState.is(Blocks.WATER)) {
-				i *= 3;
-				e = 1.0;
-				d = 3.0;
-			} else if (blockState.isSolidRender(levelAccessor, blockPos)) {
-				blockPos = blockPos.above();
-				i *= 3;
-				d = 3.0;
-				e = 1.0;
-			} else {
-				e = blockState.getShape(levelAccessor, blockPos).max(Direction.Axis.Y);
-			}
-
-			levelAccessor.addParticle(
-				ParticleTypes.HAPPY_VILLAGER, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0
-			);
-			RandomSource randomSource = levelAccessor.getRandom();
-
-			for (int j = 0; j < i; j++) {
-				double f = randomSource.nextGaussian() * 0.02;
-				double g = randomSource.nextGaussian() * 0.02;
-				double h = randomSource.nextGaussian() * 0.02;
-				double k = 0.5 - d;
-				double l = (double)blockPos.getX() + k + randomSource.nextDouble() * d * 2.0;
-				double m = (double)blockPos.getY() + randomSource.nextDouble() * e;
-				double n = (double)blockPos.getZ() + k + randomSource.nextDouble() * d * 2.0;
-				if (!levelAccessor.getBlockState(BlockPos.containing(l, m, n).below()).isAir()) {
-					levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, l, m, n, f, g, h);
-				}
+		if (levelAccessor.getBlockState(blockPos).getBlock() instanceof BonemealableBlock bonemealableBlock) {
+			BlockPos blockPos2 = bonemealableBlock.getParticlePos(blockPos);
+			switch (bonemealableBlock.getType()) {
+				case NEIGHBOR_SPREADER:
+					ParticleUtils.spawnParticles(levelAccessor, blockPos2, i * 3, 3.0, 1.0, false, ParticleTypes.HAPPY_VILLAGER);
+					break;
+				case GROWER:
+					ParticleUtils.spawnParticleInBlock(levelAccessor, blockPos2, i, ParticleTypes.HAPPY_VILLAGER);
 			}
 		}
 	}

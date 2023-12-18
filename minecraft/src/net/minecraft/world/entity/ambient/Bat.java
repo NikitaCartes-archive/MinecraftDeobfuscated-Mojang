@@ -15,11 +15,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -241,11 +239,6 @@ public class Bat extends AmbientCreature {
 		int i = localDate.get(ChronoField.DAY_OF_MONTH);
 		int j = localDate.get(ChronoField.MONTH_OF_YEAR);
 		return j == 10 && i >= 20 || j == 11 && i <= 3;
-	}
-
-	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height / 2.0F;
 	}
 
 	private void setupAnimationStates() {

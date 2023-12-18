@@ -66,14 +66,8 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	private float getDarknessGamma(float f) {
-		if (this.minecraft.player.hasEffect(MobEffects.DARKNESS)) {
-			MobEffectInstance mobEffectInstance = this.minecraft.player.getEffect(MobEffects.DARKNESS);
-			if (mobEffectInstance != null && mobEffectInstance.getFactorData().isPresent()) {
-				return ((MobEffectInstance.FactorData)mobEffectInstance.getFactorData().get()).getFactor(this.minecraft.player, f);
-			}
-		}
-
-		return 0.0F;
+		MobEffectInstance mobEffectInstance = this.minecraft.player.getEffect(MobEffects.DARKNESS);
+		return mobEffectInstance != null ? mobEffectInstance.getBlendFactor(this.minecraft.player, f) : 0.0F;
 	}
 
 	private float calculateDarknessScale(LivingEntity livingEntity, float f, float g) {

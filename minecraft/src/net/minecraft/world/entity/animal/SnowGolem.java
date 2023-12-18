@@ -14,11 +14,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -43,7 +41,6 @@ import net.minecraft.world.phys.Vec3;
 public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackMob {
 	private static final EntityDataAccessor<Byte> DATA_PUMPKIN_ID = SynchedEntityData.defineId(SnowGolem.class, EntityDataSerializers.BYTE);
 	private static final byte PUMPKIN_FLAG = 16;
-	private static final float EYE_HEIGHT = 1.7F;
 
 	public SnowGolem(EntityType<? extends SnowGolem> entityType, Level level) {
 		super(entityType, level);
@@ -128,11 +125,6 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 1.7F;
-	}
-
-	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
@@ -153,7 +145,7 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 		this.level().playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
 		if (!this.level().isClientSide()) {
 			this.setPumpkin(false);
-			this.spawnAtLocation(new ItemStack(Items.CARVED_PUMPKIN), 1.7F);
+			this.spawnAtLocation(new ItemStack(Items.CARVED_PUMPKIN), this.getEyeHeight());
 		}
 	}
 

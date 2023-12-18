@@ -1,37 +1,17 @@
 package net.minecraft.world.item;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LecternBlock;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class WritableBookItem extends Item {
 	public WritableBookItem(Item.Properties properties) {
 		super(properties);
-	}
-
-	@Override
-	public InteractionResult useOn(UseOnContext useOnContext) {
-		Level level = useOnContext.getLevel();
-		BlockPos blockPos = useOnContext.getClickedPos();
-		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.is(Blocks.LECTERN)) {
-			return LecternBlock.tryPlaceBook(useOnContext.getPlayer(), level, blockPos, blockState, useOnContext.getItemInHand())
-				? InteractionResult.sidedSuccess(level.isClientSide)
-				: InteractionResult.PASS;
-		} else {
-			return InteractionResult.PASS;
-		}
 	}
 
 	@Override

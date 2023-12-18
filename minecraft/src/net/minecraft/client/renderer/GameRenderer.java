@@ -90,7 +90,6 @@ public class GameRenderer implements AutoCloseable {
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
 	public static final float PROJECTION_Z_NEAR = 0.05F;
 	private static final float GUI_Z_NEAR = 1000.0F;
-	private static final int ENTITY_INTERACTION_RANGE = 3;
 	final Minecraft minecraft;
 	private final ResourceManager resourceManager;
 	private final RandomSource random = RandomSource.create();
@@ -867,30 +866,33 @@ public class GameRenderer implements AutoCloseable {
 	public void pick(float f) {
 		Entity entity = this.minecraft.getCameraEntity();
 		if (entity != null) {
-			if (this.minecraft.level != null) {
+			if (this.minecraft.level != null && this.minecraft.player != null) {
 				this.minecraft.getProfiler().push("pick");
 				this.minecraft.crosshairPickEntity = null;
-				double d = (double)this.minecraft.gameMode.getPickRange();
+				double d = this.minecraft.player.blockInteractionRange();
+				double e = this.minecraft.player.entityInteractionRange();
+				double g = Math.max(d, e);
 				this.minecraft.hitResult = entity.pick(d, f, false);
 				Vec3 vec3 = entity.getEyePosition(f);
-				boolean bl = this.minecraft.gameMode.hasFarPickRange();
-				d = bl ? 6.0 : d;
-				boolean bl2 = !bl;
-				double e = this.minecraft.hitResult != null ? this.minecraft.hitResult.getLocation().distanceToSqr(vec3) : d * d;
+				double h = g;
+				double i = Mth.square(g);
+				if (this.minecraft.hitResult != null) {
+					i = this.minecraft.hitResult.getLocation().distanceToSqr(vec3);
+					h = Math.sqrt(i);
+				}
+
 				Vec3 vec32 = entity.getViewVector(1.0F);
-				Vec3 vec33 = vec3.add(vec32.x * d, vec32.y * d, vec32.z * d);
-				float g = 1.0F;
-				AABB aABB = entity.getBoundingBox().expandTowards(vec32.scale(d)).inflate(1.0, 1.0, 1.0);
-				EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable(), e);
+				Vec3 vec33 = vec3.add(vec32.x * g, vec32.y * g, vec32.z * g);
+				float j = 1.0F;
+				AABB aABB = entity.getBoundingBox().expandTowards(vec32.scale(h)).inflate(1.0, 1.0, 1.0);
+				EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable(), i);
 				if (entityHitResult != null) {
 					Vec3 vec34 = entityHitResult.getLocation();
-					double h = vec3.distanceToSqr(vec34);
-					if (bl2 && h > 9.0) {
-						this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), BlockPos.containing(vec34));
-					} else if (h < e || this.minecraft.hitResult == null) {
+					if (vec3.closerThan(vec34, e)) {
 						this.minecraft.hitResult = entityHitResult;
-						Entity entity2 = entityHitResult.getEntity();
-						this.minecraft.crosshairPickEntity = entity2;
+						this.minecraft.crosshairPickEntity = entityHitResult.getEntity();
+					} else {
+						this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), BlockPos.containing(vec34));
 					}
 				}
 
@@ -1118,12 +1120,12 @@ public class GameRenderer implements AutoCloseable {
 					}
 				}
 
-				if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
+				if (!this.minecraft.options.hideGui) {
 					this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), g);
-					this.minecraft.gui.render(guiGraphics, g);
-					RenderSystem.clear(256, Minecraft.ON_OSX);
 				}
 
+				this.minecraft.gui.render(guiGraphics, g);
+				RenderSystem.clear(256, Minecraft.ON_OSX);
 				this.minecraft.getProfiler().pop();
 			}
 

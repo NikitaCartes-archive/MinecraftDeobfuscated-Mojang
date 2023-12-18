@@ -54,12 +54,13 @@ public class LevelEvent {
 	public static final int PARTICLES_SPELL_POTION_SPLASH = 2002;
 	public static final int PARTICLES_EYE_OF_ENDER_DEATH = 2003;
 	public static final int PARTICLES_MOBBLOCK_SPAWN = 2004;
-	public static final int PARTICLES_PLANT_GROWTH = 2005;
 	public static final int PARTICLES_DRAGON_FIREBALL_SPLASH = 2006;
 	public static final int PARTICLES_INSTANT_POTION_SPLASH = 2007;
 	public static final int PARTICLES_DRAGON_BLOCK_BREAK = 2008;
 	public static final int PARTICLES_WATER_EVAPORATING = 2009;
 	public static final int PARTICLES_SHOOT_WHITE_SMOKE = 2010;
+	public static final int PARTICLES_BEE_GROWTH = 2011;
+	public static final int PARTICLES_TURTLE_EGG_PLACEMENT = 2012;
 	public static final int ANIMATION_END_GATEWAY_SPAWN = 3000;
 	public static final int ANIMATION_DRAGON_SUMMON_ROAR = 3001;
 	public static final int PARTICLES_ELECTRIC_SPARK = 3002;

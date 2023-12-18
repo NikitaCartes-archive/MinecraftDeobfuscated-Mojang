@@ -48,10 +48,11 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class TitleScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final String DEMO_LEVEL_ID = "Demo_World";
+	private static final Component TITLE = Component.translatable("narrator.screen.title");
 	public static final Component COPYRIGHT_TEXT = Component.translatable("title.credits");
 	public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
 	private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
+	private static final String DEMO_LEVEL_ID = "Demo_World";
 	@Nullable
 	private SplashRenderer splash;
 	private Button resetDemoButton;
@@ -73,7 +74,7 @@ public class TitleScreen extends Screen {
 	}
 
 	public TitleScreen(boolean bl, @Nullable LogoRenderer logoRenderer) {
-		super(Component.translatable("narrator.screen.title"));
+		super(TITLE);
 		this.fading = bl;
 		this.logoRenderer = (LogoRenderer)Objects.requireNonNullElseGet(logoRenderer, () -> new LogoRenderer(false));
 	}
@@ -176,7 +177,7 @@ public class TitleScreen extends Screen {
 			this.minecraft.setScreen(screen);
 		}).bounds(this.width / 2 - 100, i + j * 1, 200, 20).tooltip(tooltip).build()).active = bl;
 		this.addRenderableWidget(
-				Button.builder(Component.translatable("menu.online"), button -> this.realmsButtonClicked())
+				Button.builder(Component.translatable("menu.online"), button -> this.minecraft.setScreen(new RealmsMainScreen(this)))
 					.bounds(this.width / 2 - 100, i + j * 2, 200, 20)
 					.tooltip(tooltip)
 					.build()
@@ -264,10 +265,6 @@ public class TitleScreen extends Screen {
 			LOGGER.warn("Failed to read demo world data", (Throwable)var6);
 			return false;
 		}
-	}
-
-	private void realmsButtonClicked() {
-		this.minecraft.setScreen(new RealmsMainScreen(this));
 	}
 
 	@Override

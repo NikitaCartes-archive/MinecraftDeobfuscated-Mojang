@@ -57,6 +57,7 @@ public class BossHealthOverlay {
 
 	public void render(GuiGraphics guiGraphics) {
 		if (!this.events.isEmpty()) {
+			this.minecraft.getProfiler().push("bossHealth");
 			int i = guiGraphics.guiWidth();
 			int j = 12;
 
@@ -73,6 +74,8 @@ public class BossHealthOverlay {
 					break;
 				}
 			}
+
+			this.minecraft.getProfiler().pop();
 		}
 	}
 

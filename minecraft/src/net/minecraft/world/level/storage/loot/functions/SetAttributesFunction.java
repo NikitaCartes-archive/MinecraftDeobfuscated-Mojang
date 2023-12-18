@@ -65,7 +65,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 			UUID uUID = (UUID)modifier.id.orElseGet(UUID::randomUUID);
 			EquipmentSlot equipmentSlot = Util.getRandom(modifier.slots, randomSource);
 			itemStack.addAttributeModifier(
-				modifier.attribute.value(), new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlot
+				modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlot
 			);
 		}
 

@@ -91,7 +91,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Fox.class, EntityDataSerializers.INT);
@@ -112,6 +111,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	static final Predicate<Entity> STALKABLE_PREY = entity -> entity instanceof Chicken || entity instanceof Rabbit;
 	private static final Predicate<Entity> AVOID_PLAYERS = entity -> !entity.isDiscrete() && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity);
 	private static final int MIN_TICKS_BEFORE_EAT = 600;
+	private static final EntityDimensions BABY_DIMENSIONS = EntityType.FOX.getDimensions().scale(0.5F).withEyeHeight(0.2975F);
 	private Goal landTargetGoal;
 	private Goal turtleEggTargetGoal;
 	private Goal fishTargetGoal;
@@ -365,8 +365,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return this.isBaby() ? entityDimensions.height * 0.85F : 0.4F;
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.isBaby() ? BABY_DIMENSIONS : super.getDefaultDimensions(pose);
 	}
 
 	public Fox.Type getVariant() {
@@ -692,11 +692,6 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		}
 
 		super.dropAllDeathLoot(damageSource);
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height + -0.0625F * f, -0.25F * f);
 	}
 
 	public static boolean isPathClear(Fox fox, LivingEntity livingEntity) {

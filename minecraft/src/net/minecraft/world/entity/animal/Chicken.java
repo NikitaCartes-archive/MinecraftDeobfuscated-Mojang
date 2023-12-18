@@ -34,12 +34,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class Chicken extends Animal {
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(
 		Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD
 	);
+	private static final EntityDimensions BABY_DIMENSIONS = EntityType.CHICKEN.getDimensions().scale(0.5F).withEyeHeight(0.2975F);
 	public float flap;
 	public float flapSpeed;
 	public float oFlapSpeed;
@@ -67,8 +67,8 @@ public class Chicken extends Animal {
 	}
 
 	@Override
-	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return this.isBaby() ? entityDimensions.height * 0.85F : entityDimensions.height * 0.92F;
+	public EntityDimensions getDefaultDimensions(Pose pose) {
+		return this.isBaby() ? BABY_DIMENSIONS : super.getDefaultDimensions(pose);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -173,11 +173,6 @@ public class Chicken extends Animal {
 		if (entity instanceof LivingEntity) {
 			((LivingEntity)entity).yBodyRot = this.yBodyRot;
 		}
-	}
-
-	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
-		return new Vector3f(0.0F, entityDimensions.height, -0.1F * f);
 	}
 
 	public boolean isChickenJockey() {

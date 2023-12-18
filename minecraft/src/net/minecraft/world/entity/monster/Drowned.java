@@ -22,6 +22,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -60,11 +61,14 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 	public Drowned(EntityType<? extends Drowned> entityType, Level level) {
 		super(entityType, level);
-		this.setMaxUpStep(1.0F);
 		this.moveControl = new Drowned.DrownedMoveControl(this);
 		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
 		this.waterNavigation = new WaterBoundPathNavigation(this, level);
 		this.groundNavigation = new GroundPathNavigation(this, level);
+	}
+
+	public static AttributeSupplier.Builder createAttributes() {
+		return Zombie.createAttributes().add(Attributes.STEP_HEIGHT, 1.0);
 	}
 
 	@Override

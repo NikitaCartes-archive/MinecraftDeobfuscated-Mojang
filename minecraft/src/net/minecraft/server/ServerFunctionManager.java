@@ -64,7 +64,7 @@ public class ServerFunctionManager {
 		profilerFiller.push((Supplier<String>)(() -> "function " + commandFunction.id()));
 
 		try {
-			InstantiatedFunction<CommandSourceStack> instantiatedFunction = commandFunction.instantiate(null, this.getDispatcher(), commandSourceStack);
+			InstantiatedFunction<CommandSourceStack> instantiatedFunction = commandFunction.instantiate(null, this.getDispatcher());
 			Commands.executeCommandInContext(
 				commandSourceStack,
 				executionContext -> ExecutionContext.queueInitialFunctionCall(executionContext, instantiatedFunction, commandSourceStack, CommandResultCallback.EMPTY)

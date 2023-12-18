@@ -2,6 +2,7 @@ package net.minecraft.world.inventory;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
@@ -133,29 +134,29 @@ public class BeaconMenu extends AbstractContainerMenu {
 		return this.beaconData.get(0);
 	}
 
-	public static int encodeEffect(@Nullable MobEffect mobEffect) {
-		return mobEffect == null ? 0 : BuiltInRegistries.MOB_EFFECT.getId(mobEffect) + 1;
+	public static int encodeEffect(@Nullable Holder<MobEffect> holder) {
+		return holder == null ? 0 : BuiltInRegistries.MOB_EFFECT.asHolderIdMap().getId(holder) + 1;
 	}
 
 	@Nullable
-	public static MobEffect decodeEffect(int i) {
-		return i == 0 ? null : BuiltInRegistries.MOB_EFFECT.byId(i - 1);
+	public static Holder<MobEffect> decodeEffect(int i) {
+		return i == 0 ? null : BuiltInRegistries.MOB_EFFECT.asHolderIdMap().byId(i - 1);
 	}
 
 	@Nullable
-	public MobEffect getPrimaryEffect() {
+	public Holder<MobEffect> getPrimaryEffect() {
 		return decodeEffect(this.beaconData.get(1));
 	}
 
 	@Nullable
-	public MobEffect getSecondaryEffect() {
+	public Holder<MobEffect> getSecondaryEffect() {
 		return decodeEffect(this.beaconData.get(2));
 	}
 
-	public void updateEffects(Optional<MobEffect> optional, Optional<MobEffect> optional2) {
+	public void updateEffects(Optional<Holder<MobEffect>> optional, Optional<Holder<MobEffect>> optional2) {
 		if (this.paymentSlot.hasItem()) {
-			this.beaconData.set(1, encodeEffect((MobEffect)optional.orElse(null)));
-			this.beaconData.set(2, encodeEffect((MobEffect)optional2.orElse(null)));
+			this.beaconData.set(1, encodeEffect((Holder<MobEffect>)optional.orElse(null)));
+			this.beaconData.set(2, encodeEffect((Holder<MobEffect>)optional2.orElse(null)));
 			this.paymentSlot.remove(1);
 			this.access.execute(Level::blockEntityChanged);
 		}

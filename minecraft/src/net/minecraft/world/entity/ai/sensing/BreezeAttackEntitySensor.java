@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.breeze.Breeze;
 
@@ -23,6 +24,7 @@ public class BreezeAttackEntitySensor extends NearestLivingEntitySensor<Breeze> 
 			.getMemory(MemoryModuleType.NEAREST_LIVING_ENTITIES)
 			.stream()
 			.flatMap(Collection::stream)
+			.filter(EntitySelector.NO_CREATIVE_OR_SPECTATOR)
 			.filter(livingEntity -> Sensor.isEntityAttackable(breeze, livingEntity))
 			.findFirst()
 			.ifPresentOrElse(

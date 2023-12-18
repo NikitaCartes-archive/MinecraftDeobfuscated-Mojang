@@ -205,6 +205,11 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 	}
 
 	@Override
+	public Optional<Holder.Reference<T>> getHolder(ResourceLocation resourceLocation) {
+		return Optional.ofNullable((Holder.Reference)this.byLocation.get(resourceLocation));
+	}
+
+	@Override
 	public Optional<Holder.Reference<T>> getHolder(ResourceKey<T> resourceKey) {
 		return Optional.ofNullable((Holder.Reference)this.byKey.get(resourceKey));
 	}

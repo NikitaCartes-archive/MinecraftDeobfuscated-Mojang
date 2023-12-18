@@ -34,6 +34,7 @@ import net.minecraft.client.resources.sounds.UnderwaterAmbientSoundHandler;
 import net.minecraft.client.resources.sounds.UnderwaterAmbientSoundInstances;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
@@ -869,13 +870,13 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Nullable
 	@Override
-	public MobEffectInstance removeEffectNoUpdate(@Nullable MobEffect mobEffect) {
-		if (mobEffect == MobEffects.CONFUSION) {
+	public MobEffectInstance removeEffectNoUpdate(Holder<MobEffect> holder) {
+		if (holder.is(MobEffects.CONFUSION)) {
 			this.oSpinningEffectIntensity = 0.0F;
 			this.spinningEffectIntensity = 0.0F;
 		}
 
-		return super.removeEffectNoUpdate(mobEffect);
+		return super.removeEffectNoUpdate(holder);
 	}
 
 	@Override

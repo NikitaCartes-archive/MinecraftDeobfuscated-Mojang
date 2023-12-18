@@ -13,6 +13,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -267,9 +268,24 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public InteractionResult use(
-		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	public ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
+		if ((Boolean)blockState.getValue(HAS_BOOK)) {
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		} else if (itemStack.is(ItemTags.LECTERN_BOOKS)) {
+			return tryPlaceBook(player, level, blockPos, blockState, itemStack)
+				? ItemInteractionResult.sidedSuccess(level.isClientSide)
+				: ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+		} else {
+			return itemStack.isEmpty() && interactionHand == InteractionHand.MAIN_HAND
+				? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
+				: ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		}
+	}
+
+	@Override
+	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if ((Boolean)blockState.getValue(HAS_BOOK)) {
 			if (!level.isClientSide) {
 				this.openScreen(level, blockPos, player);
@@ -277,8 +293,7 @@ public class LecternBlock extends BaseEntityBlock {
 
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
-			ItemStack itemStack = player.getItemInHand(interactionHand);
-			return !itemStack.isEmpty() && !itemStack.is(ItemTags.LECTERN_BOOKS) ? InteractionResult.CONSUME : InteractionResult.PASS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

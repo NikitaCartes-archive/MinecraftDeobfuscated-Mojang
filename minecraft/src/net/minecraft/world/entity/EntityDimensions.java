@@ -3,15 +3,13 @@ package net.minecraft.world.entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class EntityDimensions {
-	public final float width;
-	public final float height;
-	public final boolean fixed;
+public record EntityDimensions(float width, float height, float eyeHeight, EntityAttachments attachments, boolean fixed) {
+	private EntityDimensions(float f, float g, boolean bl) {
+		this(f, g, defaultEyeHeight(g), EntityAttachments.DEFAULTS, bl);
+	}
 
-	public EntityDimensions(float f, float g, boolean bl) {
-		this.width = f;
-		this.height = g;
-		this.fixed = bl;
+	private static float defaultEyeHeight(float f) {
+		return f * 0.85F;
 	}
 
 	public AABB makeBoundingBox(Vec3 vec3) {
@@ -29,7 +27,9 @@ public class EntityDimensions {
 	}
 
 	public EntityDimensions scale(float f, float g) {
-		return !this.fixed && (f != 1.0F || g != 1.0F) ? scalable(this.width * f, this.height * g) : this;
+		return !this.fixed && (f != 1.0F || g != 1.0F)
+			? new EntityDimensions(this.width * f, this.height * g, this.eyeHeight * g, this.attachments.scale(f, g, f), false)
+			: this;
 	}
 
 	public static EntityDimensions scalable(float f, float g) {
@@ -40,7 +40,11 @@ public class EntityDimensions {
 		return new EntityDimensions(f, g, true);
 	}
 
-	public String toString() {
-		return "EntityDimensions w=" + this.width + ", h=" + this.height + ", fixed=" + this.fixed;
+	public EntityDimensions withEyeHeight(float f) {
+		return new EntityDimensions(this.width, this.height, f, this.attachments, this.fixed);
+	}
+
+	public EntityDimensions withAttachments(EntityAttachments.Builder builder) {
+		return new EntityDimensions(this.width, this.height, this.eyeHeight, builder.build(this.width, this.height), this.fixed);
 	}
 }

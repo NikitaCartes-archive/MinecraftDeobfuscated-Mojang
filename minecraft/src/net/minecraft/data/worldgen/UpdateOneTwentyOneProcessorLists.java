@@ -30,17 +30,17 @@ public class UpdateOneTwentyOneProcessorLists {
 						new ProcessorRule(
 							new RandomBlockMatchTest(Blocks.WAXED_COPPER_BULB, 0.1F),
 							AlwaysTrueTest.INSTANCE,
-							Blocks.OXIDIZED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, Boolean.valueOf(true))
+							Blocks.WAXED_OXIDIZED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, Boolean.valueOf(true))
 						),
 						new ProcessorRule(
 							new RandomBlockMatchTest(Blocks.WAXED_COPPER_BULB, 0.33333334F),
 							AlwaysTrueTest.INSTANCE,
-							Blocks.WEATHERED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, Boolean.valueOf(true))
+							Blocks.WAXED_WEATHERED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, Boolean.valueOf(true))
 						),
 						new ProcessorRule(
 							new RandomBlockMatchTest(Blocks.WAXED_COPPER_BULB, 0.5F),
 							AlwaysTrueTest.INSTANCE,
-							Blocks.EXPOSED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, Boolean.valueOf(true))
+							Blocks.WAXED_EXPOSED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, Boolean.valueOf(true))
 						)
 					)
 				),

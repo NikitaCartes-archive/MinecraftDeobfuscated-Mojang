@@ -125,7 +125,7 @@ public class ThrownTrident extends AbstractArrow {
 				this.doPostHurtEffects(livingEntity2);
 			}
 		} else if (entity.getType().is(EntityTypeTags.DEFLECTS_TRIDENTS)) {
-			this.deflect();
+			this.deflect(entity);
 			return;
 		}
 

@@ -50,7 +50,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Vector3f;
 
 public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 	private static final EntityDataAccessor<Integer> DATA_ID_TYPE = SynchedEntityData.defineId(Boat.class, EntityDataSerializers.INT);
@@ -102,11 +101,6 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 	}
 
 	@Override
-	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return entityDimensions.height;
-	}
-
-	@Override
 	protected Entity.MovementEmission getMovementEmission() {
 		return Entity.MovementEmission.EVENTS;
 	}
@@ -145,7 +139,7 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 	}
 
 	@Override
-	protected Vector3f getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
+	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
 		float g = this.getSinglePassengerXOffset();
 		if (this.getPassengers().size() > 1) {
 			int i = this.getPassengers().indexOf(entity);
@@ -160,7 +154,10 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 			}
 		}
 
-		return new Vector3f(0.0F, this.getVariant() == Boat.Type.BAMBOO ? entityDimensions.height * 0.8888889F : entityDimensions.height / 3.0F, g);
+		return new Vec3(
+				0.0, this.getVariant() == Boat.Type.BAMBOO ? (double)(entityDimensions.height() * 0.8888889F) : (double)(entityDimensions.height() / 3.0F), (double)g
+			)
+			.yRot(-this.getYRot() * (float) (Math.PI / 180.0));
 	}
 
 	@Override

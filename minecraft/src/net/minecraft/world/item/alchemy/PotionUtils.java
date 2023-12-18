@@ -2,20 +2,19 @@ package net.minecraft.world.item.alchemy;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.effect.AttributeModifierTemplate;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -34,16 +33,16 @@ public class PotionUtils {
 		return getAllEffects(itemStack.getTag());
 	}
 
-	public static List<MobEffectInstance> getAllEffects(Potion potion, Collection<MobEffectInstance> collection) {
-		List<MobEffectInstance> list = Lists.<MobEffectInstance>newArrayList();
-		list.addAll(potion.getEffects());
+	public static List<MobEffectInstance> getAllEffects(Holder<Potion> holder, Collection<MobEffectInstance> collection) {
+		List<MobEffectInstance> list = new ArrayList();
+		list.addAll(holder.value().getEffects());
 		list.addAll(collection);
 		return list;
 	}
 
 	public static List<MobEffectInstance> getAllEffects(@Nullable CompoundTag compoundTag) {
 		List<MobEffectInstance> list = Lists.<MobEffectInstance>newArrayList();
-		list.addAll(getPotion(compoundTag).getEffects());
+		list.addAll(getPotion(compoundTag).value().getEffects());
 		getCustomEffects(compoundTag, list);
 		return list;
 	}
@@ -77,12 +76,12 @@ public class PotionUtils {
 		if (compoundTag != null && compoundTag.contains("CustomPotionColor", 99)) {
 			return compoundTag.getInt("CustomPotionColor");
 		} else {
-			return getPotion(itemStack) == Potions.EMPTY ? 16253176 : getColor(getMobEffects(itemStack));
+			return getPotion(itemStack).is(Potions.EMPTY) ? 16253176 : getColor(getMobEffects(itemStack));
 		}
 	}
 
-	public static int getColor(Potion potion) {
-		return potion == Potions.EMPTY ? 16253176 : getColor(potion.getEffects());
+	public static int getColor(Holder<Potion> holder) {
+		return holder.is(Potions.EMPTY) ? 16253176 : getColor(holder.value().getEffects());
 	}
 
 	public static int getColor(Collection<MobEffectInstance> collection) {
@@ -97,7 +96,7 @@ public class PotionUtils {
 
 			for (MobEffectInstance mobEffectInstance : collection) {
 				if (mobEffectInstance.isVisible()) {
-					int k = mobEffectInstance.getEffect().getColor();
+					int k = mobEffectInstance.getEffect().value().getColor();
 					int l = mobEffectInstance.getAmplifier() + 1;
 					f += (float)(l * (k >> 16 & 0xFF)) / 255.0F;
 					g += (float)(l * (k >> 8 & 0xFF)) / 255.0F;
@@ -117,20 +116,20 @@ public class PotionUtils {
 		}
 	}
 
-	public static Potion getPotion(ItemStack itemStack) {
+	public static Holder<Potion> getPotion(ItemStack itemStack) {
 		return getPotion(itemStack.getTag());
 	}
 
-	public static Potion getPotion(@Nullable CompoundTag compoundTag) {
+	public static Holder<Potion> getPotion(@Nullable CompoundTag compoundTag) {
 		return compoundTag == null ? Potions.EMPTY : Potion.byName(compoundTag.getString("Potion"));
 	}
 
-	public static ItemStack setPotion(ItemStack itemStack, Potion potion) {
-		ResourceLocation resourceLocation = BuiltInRegistries.POTION.getKey(potion);
-		if (potion == Potions.EMPTY) {
-			itemStack.removeTagKey("Potion");
+	public static ItemStack setPotion(ItemStack itemStack, Holder<Potion> holder) {
+		Optional<ResourceKey<Potion>> optional = holder.unwrapKey();
+		if (!optional.isEmpty() && !holder.is(Potions.EMPTY)) {
+			itemStack.getOrCreateTag().putString("Potion", ((ResourceKey)optional.get()).location().toString());
 		} else {
-			itemStack.getOrCreateTag().putString("Potion", resourceLocation.toString());
+			itemStack.removeTagKey("Potion");
 		}
 
 		return itemStack;
@@ -157,20 +156,14 @@ public class PotionUtils {
 	}
 
 	public static void addPotionTooltip(List<MobEffectInstance> list, List<Component> list2, float f, float g) {
-		List<Pair<Attribute, AttributeModifier>> list3 = Lists.<Pair<Attribute, AttributeModifier>>newArrayList();
+		List<Pair<Holder<Attribute>, AttributeModifier>> list3 = Lists.<Pair<Holder<Attribute>, AttributeModifier>>newArrayList();
 		if (list.isEmpty()) {
 			list2.add(NO_EFFECT);
 		} else {
 			for (MobEffectInstance mobEffectInstance : list) {
 				MutableComponent mutableComponent = Component.translatable(mobEffectInstance.getDescriptionId());
-				MobEffect mobEffect = mobEffectInstance.getEffect();
-				Map<Attribute, AttributeModifierTemplate> map = mobEffect.getAttributeModifiers();
-				if (!map.isEmpty()) {
-					for (Entry<Attribute, AttributeModifierTemplate> entry : map.entrySet()) {
-						list3.add(new Pair<>((Attribute)entry.getKey(), ((AttributeModifierTemplate)entry.getValue()).create(mobEffectInstance.getAmplifier())));
-					}
-				}
-
+				Holder<MobEffect> holder = mobEffectInstance.getEffect();
+				holder.value().createModifiers(mobEffectInstance.getAmplifier(), (holderx, attributeModifierx) -> list3.add(new Pair<>(holderx, attributeModifierx)));
 				if (mobEffectInstance.getAmplifier() > 0) {
 					mutableComponent = Component.translatable(
 						"potion.withAmplifier", mutableComponent, Component.translatable("potion.potency." + mobEffectInstance.getAmplifier())
@@ -181,7 +174,7 @@ public class PotionUtils {
 					mutableComponent = Component.translatable("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f, g));
 				}
 
-				list2.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
+				list2.add(mutableComponent.withStyle(holder.value().getCategory().getTooltipFormatting()));
 			}
 		}
 
@@ -189,7 +182,7 @@ public class PotionUtils {
 			list2.add(CommonComponents.EMPTY);
 			list2.add(Component.translatable("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
 
-			for (Pair<Attribute, AttributeModifier> pair : list3) {
+			for (Pair<Holder<Attribute>, AttributeModifier> pair : list3) {
 				AttributeModifier attributeModifier = pair.getSecond();
 				double d = attributeModifier.getAmount();
 				double e;
@@ -205,7 +198,7 @@ public class PotionUtils {
 						Component.translatable(
 								"attribute.modifier.plus." + attributeModifier.getOperation().toValue(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
-								Component.translatable(pair.getFirst().getDescriptionId())
+								Component.translatable(pair.getFirst().value().getDescriptionId())
 							)
 							.withStyle(ChatFormatting.BLUE)
 					);
@@ -215,7 +208,7 @@ public class PotionUtils {
 						Component.translatable(
 								"attribute.modifier.take." + attributeModifier.getOperation().toValue(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
-								Component.translatable(pair.getFirst().getDescriptionId())
+								Component.translatable(pair.getFirst().value().getDescriptionId())
 							)
 							.withStyle(ChatFormatting.RED)
 					);

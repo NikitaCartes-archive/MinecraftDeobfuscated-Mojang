@@ -1,21 +1,22 @@
 package net.minecraft.world.item.alchemy;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 
 public class Potion {
 	@Nullable
 	private final String name;
-	private final ImmutableList<MobEffectInstance> effects;
-	private final Holder.Reference<Potion> builtInRegistryHolder = BuiltInRegistries.POTION.createIntrusiveHolder(this);
+	private final List<MobEffectInstance> effects;
 
-	public static Potion byName(String string) {
-		return BuiltInRegistries.POTION.get(ResourceLocation.tryParse(string));
+	public static Holder<Potion> byName(String string) {
+		ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+		return resourceLocation == null ? Potions.EMPTY : (Holder)BuiltInRegistries.POTION.getHolder(resourceLocation).map(Function.identity()).orElse(Potions.EMPTY);
 	}
 
 	public Potion(MobEffectInstance... mobEffectInstances) {
@@ -24,11 +25,17 @@ public class Potion {
 
 	public Potion(@Nullable String string, MobEffectInstance... mobEffectInstances) {
 		this.name = string;
-		this.effects = ImmutableList.copyOf(mobEffectInstances);
+		this.effects = List.of(mobEffectInstances);
 	}
 
-	public String getName(String string) {
-		return string + (this.name == null ? BuiltInRegistries.POTION.getKey(this).getPath() : this.name);
+	public static String getName(Holder<Potion> holder, String string) {
+		String string2 = holder.value().name;
+		if (string2 != null) {
+			return string + string2;
+		} else {
+			ResourceKey<Potion> resourceKey = (ResourceKey<Potion>)holder.unwrapKey().orElse(Potions.EMPTY_ID);
+			return string + resourceKey.location().getPath();
+		}
 	}
 
 	public List<MobEffectInstance> getEffects() {
@@ -38,17 +45,12 @@ public class Potion {
 	public boolean hasInstantEffects() {
 		if (!this.effects.isEmpty()) {
 			for (MobEffectInstance mobEffectInstance : this.effects) {
-				if (mobEffectInstance.getEffect().isInstantenous()) {
+				if (mobEffectInstance.getEffect().value().isInstantenous()) {
 					return true;
 				}
 			}
 		}
 
 		return false;
-	}
-
-	@Deprecated
-	public Holder.Reference<Potion> builtInRegistryHolder() {
-		return this.builtInRegistryHolder;
 	}
 }

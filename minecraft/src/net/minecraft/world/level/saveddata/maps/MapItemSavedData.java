@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -23,6 +25,7 @@ import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -174,6 +177,11 @@ public class MapItemSavedData extends SavedData {
 		);
 	}
 
+	private static Predicate<ItemStack> mapMatcher(ItemStack itemStack) {
+		Integer integer = MapItem.getMapId(itemStack);
+		return itemStack2 -> itemStack2 == itemStack ? true : itemStack2.is(itemStack.getItem()) && Objects.equals(integer, MapItem.getMapId(itemStack2));
+	}
+
 	public void tickCarriedBy(Player player, ItemStack itemStack) {
 		if (!this.carriedByPlayers.containsKey(player)) {
 			MapItemSavedData.HoldingPlayer holdingPlayer = new MapItemSavedData.HoldingPlayer(player);
@@ -181,14 +189,15 @@ public class MapItemSavedData extends SavedData {
 			this.carriedBy.add(holdingPlayer);
 		}
 
-		if (!player.getInventory().contains(itemStack)) {
+		Predicate<ItemStack> predicate = mapMatcher(itemStack);
+		if (!player.getInventory().contains(predicate)) {
 			this.removeDecoration(player.getName().getString());
 		}
 
 		for (int i = 0; i < this.carriedBy.size(); i++) {
 			MapItemSavedData.HoldingPlayer holdingPlayer2 = (MapItemSavedData.HoldingPlayer)this.carriedBy.get(i);
 			String string = holdingPlayer2.player.getName().getString();
-			if (!holdingPlayer2.player.isRemoved() && (holdingPlayer2.player.getInventory().contains(itemStack) || itemStack.isFramed())) {
+			if (!holdingPlayer2.player.isRemoved() && (holdingPlayer2.player.getInventory().contains(predicate) || itemStack.isFramed())) {
 				if (!itemStack.isFramed() && holdingPlayer2.player.level().dimension() == this.dimension && this.trackingPosition) {
 					this.addDecoration(
 						MapDecoration.Type.PLAYER,

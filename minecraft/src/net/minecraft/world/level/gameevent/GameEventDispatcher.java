@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
@@ -17,8 +18,8 @@ public class GameEventDispatcher {
 		this.level = serverLevel;
 	}
 
-	public void post(GameEvent gameEvent, Vec3 vec3, GameEvent.Context context) {
-		int i = gameEvent.getNotificationRadius();
+	public void post(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context) {
+		int i = holder.value().notificationRadius();
 		BlockPos blockPos = BlockPos.containing(vec3);
 		int j = SectionPos.blockToSectionCoord(blockPos.getX() - i);
 		int k = SectionPos.blockToSectionCoord(blockPos.getY() - i);
@@ -29,9 +30,9 @@ public class GameEventDispatcher {
 		List<GameEvent.ListenerInfo> list = new ArrayList();
 		GameEventListenerRegistry.ListenerVisitor listenerVisitor = (gameEventListener, vec32) -> {
 			if (gameEventListener.getDeliveryMode() == GameEventListener.DeliveryMode.BY_DISTANCE) {
-				list.add(new GameEvent.ListenerInfo(gameEvent, vec3, context, gameEventListener, vec32));
+				list.add(new GameEvent.ListenerInfo(holder, vec3, context, gameEventListener, vec32));
 			} else {
-				gameEventListener.handleGameEvent(this.level, gameEvent, context, vec3);
+				gameEventListener.handleGameEvent(this.level, holder, context, vec3);
 			}
 		};
 		boolean bl = false;
@@ -41,7 +42,7 @@ public class GameEventDispatcher {
 				ChunkAccess chunkAccess = this.level.getChunkSource().getChunkNow(p, q);
 				if (chunkAccess != null) {
 					for (int r = k; r <= n; r++) {
-						bl |= chunkAccess.getListenerRegistry(r).visitInRangeListeners(gameEvent, vec3, context, listenerVisitor);
+						bl |= chunkAccess.getListenerRegistry(r).visitInRangeListeners(holder, vec3, context, listenerVisitor);
 					}
 				}
 			}
@@ -52,7 +53,7 @@ public class GameEventDispatcher {
 		}
 
 		if (bl) {
-			DebugPackets.sendGameEventInfo(this.level, gameEvent, vec3);
+			DebugPackets.sendGameEventInfo(this.level, holder, vec3);
 		}
 	}
 

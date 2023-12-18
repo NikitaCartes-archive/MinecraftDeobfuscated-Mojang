@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
@@ -30,8 +31,8 @@ public class WitherRoseBlock extends FlowerBlock {
 		return CODEC;
 	}
 
-	public WitherRoseBlock(MobEffect mobEffect, int i, BlockBehaviour.Properties properties) {
-		this(makeEffectList(mobEffect, i), properties);
+	public WitherRoseBlock(Holder<MobEffect> holder, int i, BlockBehaviour.Properties properties) {
+		this(makeEffectList(holder, i), properties);
 	}
 
 	public WitherRoseBlock(List<SuspiciousEffectHolder.EffectEntry> list, BlockBehaviour.Properties properties) {

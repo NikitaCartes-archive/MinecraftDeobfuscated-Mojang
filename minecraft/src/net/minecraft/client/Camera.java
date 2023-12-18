@@ -22,6 +22,7 @@ import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class Camera {
+	private static final float DEFAULT_CAMERA_DISTANCE = 4.0F;
 	private boolean initialized;
 	private BlockGetter level;
 	private Entity entity;
@@ -56,7 +57,8 @@ public class Camera {
 				this.setRotation(this.yRot + 180.0F, -this.xRot);
 			}
 
-			this.move(-this.getMaxZoom(4.0), 0.0, 0.0);
+			float g = entity instanceof LivingEntity livingEntity ? livingEntity.getScale() : 1.0F;
+			this.move(-this.getMaxZoom((double)(4.0F * g)), 0.0, 0.0);
 		} else if (entity instanceof LivingEntity && ((LivingEntity)entity).isSleeping()) {
 			Direction direction = ((LivingEntity)entity).getBedOrientation();
 			this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);

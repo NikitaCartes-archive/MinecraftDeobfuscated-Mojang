@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.tags.UpdateOneTwentyOneDamageTypes;
 import net.minecraft.data.worldgen.UpdateOneTwentyOnePools;
 import net.minecraft.data.worldgen.UpdateOneTwentyOneProcessorLists;
 import net.minecraft.data.worldgen.UpdateOneTwentyOneStructureSets;
@@ -14,7 +15,8 @@ public class UpdateOneTwentyOneRegistries {
 		.add(Registries.TEMPLATE_POOL, UpdateOneTwentyOnePools::bootstrap)
 		.add(Registries.STRUCTURE, UpdateOneTwentyOneStructures::bootstrap)
 		.add(Registries.STRUCTURE_SET, UpdateOneTwentyOneStructureSets::bootstrap)
-		.add(Registries.PROCESSOR_LIST, UpdateOneTwentyOneProcessorLists::bootstrap);
+		.add(Registries.PROCESSOR_LIST, UpdateOneTwentyOneProcessorLists::bootstrap)
+		.add(Registries.DAMAGE_TYPE, UpdateOneTwentyOneDamageTypes::bootstrap);
 
 	public static CompletableFuture<RegistrySetBuilder.PatchedRegistries> createLookup(CompletableFuture<HolderLookup.Provider> completableFuture) {
 		return RegistryPatchGenerator.createLookup(completableFuture, BUILDER);

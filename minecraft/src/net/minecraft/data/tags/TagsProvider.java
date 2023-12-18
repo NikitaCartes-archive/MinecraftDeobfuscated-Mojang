@@ -151,6 +151,14 @@ public abstract class TagsProvider<T> implements DataProvider {
 			return this;
 		}
 
+		public final TagsProvider.TagAppender<T> addAll(List<ResourceKey<T>> list) {
+			for (ResourceKey<T> resourceKey : list) {
+				this.builder.addElement(resourceKey.location());
+			}
+
+			return this;
+		}
+
 		public TagsProvider.TagAppender<T> addOptional(ResourceLocation resourceLocation) {
 			this.builder.addOptionalElement(resourceLocation);
 			return this;

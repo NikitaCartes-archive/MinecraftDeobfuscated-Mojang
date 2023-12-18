@@ -49,7 +49,8 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
 		return this.id;
 	}
 
-	public InstantiatedFunction<T> instantiate(@Nullable CompoundTag compoundTag, CommandDispatcher<T> commandDispatcher, T executionCommandSource) throws FunctionInstantiationException {
+	@Override
+	public InstantiatedFunction<T> instantiate(@Nullable CompoundTag compoundTag, CommandDispatcher<T> commandDispatcher) throws FunctionInstantiationException {
 		if (compoundTag == null) {
 			throw new FunctionInstantiationException(Component.translatable("commands.function.error.missing_arguments", Component.translationArg(this.id())));
 		} else {
@@ -72,7 +73,7 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
 					this.cache.removeFirst();
 				}
 
-				InstantiatedFunction<T> instantiatedFunction2 = this.substituteAndParse(this.parameters, list, commandDispatcher, executionCommandSource);
+				InstantiatedFunction<T> instantiatedFunction2 = this.substituteAndParse(this.parameters, list, commandDispatcher);
 				this.cache.put(list, instantiatedFunction2);
 				return instantiatedFunction2;
 			}
@@ -98,13 +99,13 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
 		intList.forEach(i -> list2.add((String)list.get(i)));
 	}
 
-	private InstantiatedFunction<T> substituteAndParse(List<String> list, List<String> list2, CommandDispatcher<T> commandDispatcher, T executionCommandSource) throws FunctionInstantiationException {
+	private InstantiatedFunction<T> substituteAndParse(List<String> list, List<String> list2, CommandDispatcher<T> commandDispatcher) throws FunctionInstantiationException {
 		List<UnboundEntryAction<T>> list3 = new ArrayList(this.entries.size());
 		List<String> list4 = new ArrayList(list2.size());
 
 		for (MacroFunction.Entry<T> entry : this.entries) {
 			lookupValues(list2, entry.parameters(), list4);
-			list3.add(entry.instantiate(list4, commandDispatcher, executionCommandSource, this.id));
+			list3.add(entry.instantiate(list4, commandDispatcher, this.id));
 		}
 
 		return new PlainTextFunction<>(this.id().withPath((UnaryOperator<String>)(string -> string + "/" + list.hashCode())), list3);
@@ -113,16 +114,18 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
 	interface Entry<T> {
 		IntList parameters();
 
-		UnboundEntryAction<T> instantiate(List<String> list, CommandDispatcher<T> commandDispatcher, T object, ResourceLocation resourceLocation) throws FunctionInstantiationException;
+		UnboundEntryAction<T> instantiate(List<String> list, CommandDispatcher<T> commandDispatcher, ResourceLocation resourceLocation) throws FunctionInstantiationException;
 	}
 
 	static class MacroEntry<T extends ExecutionCommandSource<T>> implements MacroFunction.Entry<T> {
 		private final StringTemplate template;
 		private final IntList parameters;
+		private final T compilationContext;
 
-		public MacroEntry(StringTemplate stringTemplate, IntList intList) {
+		public MacroEntry(StringTemplate stringTemplate, IntList intList, T executionCommandSource) {
 			this.template = stringTemplate;
 			this.parameters = intList;
+			this.compilationContext = executionCommandSource;
 		}
 
 		@Override
@@ -130,16 +133,15 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
 			return this.parameters;
 		}
 
-		public UnboundEntryAction<T> instantiate(
-			List<String> list, CommandDispatcher<T> commandDispatcher, T executionCommandSource, ResourceLocation resourceLocation
-		) throws FunctionInstantiationException {
+		@Override
+		public UnboundEntryAction<T> instantiate(List<String> list, CommandDispatcher<T> commandDispatcher, ResourceLocation resourceLocation) throws FunctionInstantiationException {
 			String string = this.template.substitute(list);
 
 			try {
-				return CommandFunction.parseCommand(commandDispatcher, executionCommandSource, new StringReader(string));
-			} catch (CommandSyntaxException var7) {
+				return CommandFunction.parseCommand(commandDispatcher, this.compilationContext, new StringReader(string));
+			} catch (CommandSyntaxException var6) {
 				throw new FunctionInstantiationException(
-					Component.translatable("commands.function.error.parse", Component.translationArg(resourceLocation), string, var7.getMessage())
+					Component.translatable("commands.function.error.parse", Component.translationArg(resourceLocation), string, var6.getMessage())
 				);
 			}
 		}
@@ -158,7 +160,7 @@ public class MacroFunction<T extends ExecutionCommandSource<T>> implements Comma
 		}
 
 		@Override
-		public UnboundEntryAction<T> instantiate(List<String> list, CommandDispatcher<T> commandDispatcher, T object, ResourceLocation resourceLocation) {
+		public UnboundEntryAction<T> instantiate(List<String> list, CommandDispatcher<T> commandDispatcher, ResourceLocation resourceLocation) {
 			return this.compiledAction;
 		}
 	}
