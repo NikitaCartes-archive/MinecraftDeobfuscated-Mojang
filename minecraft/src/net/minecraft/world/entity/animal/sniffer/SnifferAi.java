@@ -128,7 +128,7 @@ public class SnifferAi {
 		brain.addActivityWithConditions(
 			Activity.IDLE,
 			ImmutableList.of(
-				Pair.of(0, new AnimalMakeLove(EntityType.SNIFFER, 1.0F) {
+				Pair.of(0, new AnimalMakeLove(EntityType.SNIFFER) {
 					@Override
 					protected void start(ServerLevel serverLevel, Animal animal, long l) {
 						SnifferAi.resetSniffing((Sniffer)animal);

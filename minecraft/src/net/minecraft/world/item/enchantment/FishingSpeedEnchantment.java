@@ -1,10 +1,12 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
 
 public class FishingSpeedEnchantment extends Enchantment {
-	protected FishingSpeedEnchantment(Enchantment.Rarity rarity, EnchantmentCategory enchantmentCategory, EquipmentSlot... equipmentSlots) {
-		super(rarity, enchantmentCategory, equipmentSlots);
+	protected FishingSpeedEnchantment(Enchantment.Rarity rarity, TagKey<Item> tagKey, EquipmentSlot... equipmentSlots) {
+		super(rarity, tagKey, equipmentSlots);
 	}
 
 	@Override

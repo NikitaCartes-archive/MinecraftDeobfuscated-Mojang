@@ -21,7 +21,7 @@ public class SetHiddenState {
 							long m = instance.get(memoryAccessor2);
 							boolean bl = m + 300L <= l;
 							if (mutableInt.getValue() <= k && !bl) {
-								BlockPos blockPos = instance.<GlobalPos>get(memoryAccessor).pos();
+								BlockPos blockPos = ((GlobalPos)instance.get(memoryAccessor)).pos();
 								if (blockPos.closerThan(livingEntity.blockPosition(), (double)j)) {
 									mutableInt.increment();
 								}

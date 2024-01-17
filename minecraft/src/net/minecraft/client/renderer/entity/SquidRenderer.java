@@ -21,13 +21,13 @@ public class SquidRenderer<T extends Squid> extends MobRenderer<T, SquidModel<T>
 		return SQUID_LOCATION;
 	}
 
-	protected void setupRotations(T squid, PoseStack poseStack, float f, float g, float h) {
-		float i = Mth.lerp(h, squid.xBodyRotO, squid.xBodyRot);
-		float j = Mth.lerp(h, squid.zBodyRotO, squid.zBodyRot);
+	protected void setupRotations(T squid, PoseStack poseStack, float f, float g, float h, float i) {
+		float j = Mth.lerp(h, squid.xBodyRotO, squid.xBodyRot);
+		float k = Mth.lerp(h, squid.zBodyRotO, squid.zBodyRot);
 		poseStack.translate(0.0F, 0.5F, 0.0F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - g));
-		poseStack.mulPose(Axis.XP.rotationDegrees(i));
-		poseStack.mulPose(Axis.YP.rotationDegrees(j));
+		poseStack.mulPose(Axis.XP.rotationDegrees(j));
+		poseStack.mulPose(Axis.YP.rotationDegrees(k));
 		poseStack.translate(0.0F, -1.2F, 0.0F);
 	}
 

@@ -131,7 +131,7 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 			this.shear(SoundSource.PLAYERS);
 			this.gameEvent(GameEvent.SHEAR, player);
 			if (!this.level().isClientSide) {
-				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+				itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 			}
 
 			return InteractionResult.sidedSuccess(this.level().isClientSide);

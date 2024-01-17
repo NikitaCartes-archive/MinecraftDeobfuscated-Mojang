@@ -300,7 +300,7 @@ public class PiglinAi {
 		brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.ADMIRE_ITEM, Activity.FIGHT, Activity.AVOID, Activity.CELEBRATE, Activity.RIDE, Activity.IDLE));
 		Activity activity2 = (Activity)brain.getActiveNonCoreActivity().orElse(null);
 		if (activity != activity2) {
-			getSoundForCurrentActivity(piglin).ifPresent(piglin::playSoundEvent);
+			getSoundForCurrentActivity(piglin).ifPresent(piglin::makeSound);
 		}
 
 		piglin.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));

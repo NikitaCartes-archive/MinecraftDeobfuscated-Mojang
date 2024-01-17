@@ -15,22 +15,22 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3802;
+	public static final int WORLD_VERSION = 3804;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "23w51b";
+	public static final String VERSION_STRING = "24w03a";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 766;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 170;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 171;
 	public static final int SNBT_NAG_VERSION = 3798;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 22;
+	public static final int RESOURCE_PACK_FORMAT = 24;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 27;
+	public static final int DATA_PACK_FORMAT = 28;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -77,7 +77,6 @@ public class SharedConstants {
 	public static final boolean DEBUG_KEEP_JIGSAW_BLOCKS_DURING_STRUCTURE_GEN = false;
 	public static final boolean DEBUG_DONT_SAVE_WORLD = false;
 	public static final boolean DEBUG_LARGE_DRIPSTONE = false;
-	public static final boolean DEBUG_PACKET_SERIALIZATION = false;
 	public static final boolean DEBUG_CARVERS = false;
 	public static final boolean DEBUG_ORE_VEINS = false;
 	public static final boolean DEBUG_SCULK_CATALYST = false;
@@ -89,7 +88,6 @@ public class SharedConstants {
 	public static final boolean DEBUG_TRIAL_SPAWNER_DETECTS_SHEEP_AS_PLAYERS = false;
 	public static final boolean DEBUG_FORCE_ONBOARDING_SCREEN = false;
 	public static final boolean DEBUG_IGNORE_LOCAL_MOB_CAP = false;
-	public static final boolean DEBUG_SMALL_SPAWN = false;
 	public static final boolean DEBUG_DISABLE_LIQUID_SPREADING = false;
 	public static final boolean DEBUG_AQUIFERS = false;
 	public static final boolean DEBUG_JFR_PROFILING_ENABLE_LEVEL_LOADING = false;
@@ -186,7 +184,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073741994;
+		return 1073741995;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

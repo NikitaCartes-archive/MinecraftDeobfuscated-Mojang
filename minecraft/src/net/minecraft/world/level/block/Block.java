@@ -201,10 +201,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 			|| blockState.is(BlockTags.SHULKER_BOXES);
 	}
 
-	public boolean isRandomlyTicking(BlockState blockState) {
-		return this.isRandomlyTicking;
-	}
-
 	public static boolean shouldRenderFace(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction, BlockPos blockPos2) {
 		BlockState blockState2 = blockGetter.getBlockState(blockPos2);
 		if (blockState.skipRendering(blockState2, direction)) {
@@ -253,10 +249,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 
 	public static boolean isShapeFullBlock(VoxelShape voxelShape) {
 		return SHAPE_FULL_BLOCK_CACHE.getUnchecked(voxelShape);
-	}
-
-	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return !isShapeFullBlock(blockState.getShape(blockGetter, blockPos)) && blockState.getFluidState().isEmpty();
 	}
 
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
@@ -458,10 +450,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 
 	private static <T extends Comparable<T>> BlockState copyProperty(BlockState blockState, BlockState blockState2, Property<T> property) {
 		return blockState2.setValue(property, blockState.getValue(property));
-	}
-
-	public SoundType getSoundType(BlockState blockState) {
-		return this.soundType;
 	}
 
 	@Override

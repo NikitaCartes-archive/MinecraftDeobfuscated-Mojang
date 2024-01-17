@@ -46,10 +46,10 @@ public class TropicalFishRenderer extends MobRenderer<TropicalFish, ColorableHie
 		colorableHierarchicalModel.setColor(1.0F, 1.0F, 1.0F);
 	}
 
-	protected void setupRotations(TropicalFish tropicalFish, PoseStack poseStack, float f, float g, float h) {
-		super.setupRotations(tropicalFish, poseStack, f, g, h);
-		float i = 4.3F * Mth.sin(0.6F * f);
-		poseStack.mulPose(Axis.YP.rotationDegrees(i));
+	protected void setupRotations(TropicalFish tropicalFish, PoseStack poseStack, float f, float g, float h, float i) {
+		super.setupRotations(tropicalFish, poseStack, f, g, h, i);
+		float j = 4.3F * Mth.sin(0.6F * f);
+		poseStack.mulPose(Axis.YP.rotationDegrees(j));
 		if (!tropicalFish.isInWater()) {
 			poseStack.translate(0.2F, 0.1F, 0.0F);
 			poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));

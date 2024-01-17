@@ -3,7 +3,9 @@ package net.minecraft.network.protocol.game;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -11,6 +13,9 @@ import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 
 public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundSetStructureBlockPacket> STREAM_CODEC = Packet.codec(
+		ServerboundSetStructureBlockPacket::write, ServerboundSetStructureBlockPacket::new
+	);
 	private static final int FLAG_IGNORE_ENTITIES = 1;
 	private static final int FLAG_SHOW_AIR = 2;
 	private static final int FLAG_SHOW_BOUNDING_BOX = 4;
@@ -61,7 +66,7 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 		this.seed = l;
 	}
 
-	public ServerboundSetStructureBlockPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ServerboundSetStructureBlockPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.updateType = friendlyByteBuf.readEnum(StructureBlockEntity.UpdateType.class);
 		this.mode = friendlyByteBuf.readEnum(StructureMode.class);
@@ -85,8 +90,7 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 		this.showBoundingBox = (k & 4) != 0;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeEnum(this.updateType);
 		friendlyByteBuf.writeEnum(this.mode);
@@ -116,6 +120,11 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 		}
 
 		friendlyByteBuf.writeByte(i);
+	}
+
+	@Override
+	public PacketType<ServerboundSetStructureBlockPacket> type() {
+		return GamePacketTypes.SERVERBOUND_SET_STRUCTURE_BLOCK;
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {

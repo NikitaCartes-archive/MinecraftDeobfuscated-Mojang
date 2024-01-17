@@ -5,7 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -14,7 +15,10 @@ public class BlockPositionSource implements PositionSource {
 		instance -> instance.group(BlockPos.CODEC.fieldOf("pos").forGetter(blockPositionSource -> blockPositionSource.pos))
 				.apply(instance, BlockPositionSource::new)
 	);
-	final BlockPos pos;
+	public static final StreamCodec<RegistryFriendlyByteBuf, BlockPositionSource> STREAM_CODEC = StreamCodec.composite(
+		BlockPos.STREAM_CODEC, blockPositionSource -> blockPositionSource.pos, BlockPositionSource::new
+	);
+	private final BlockPos pos;
 
 	public BlockPositionSource(BlockPos blockPos) {
 		this.pos = blockPos;
@@ -26,22 +30,19 @@ public class BlockPositionSource implements PositionSource {
 	}
 
 	@Override
-	public PositionSourceType<?> getType() {
+	public PositionSourceType<BlockPositionSource> getType() {
 		return PositionSourceType.BLOCK;
 	}
 
 	public static class Type implements PositionSourceType<BlockPositionSource> {
-		public BlockPositionSource read(FriendlyByteBuf friendlyByteBuf) {
-			return new BlockPositionSource(friendlyByteBuf.readBlockPos());
-		}
-
-		public void write(FriendlyByteBuf friendlyByteBuf, BlockPositionSource blockPositionSource) {
-			friendlyByteBuf.writeBlockPos(blockPositionSource.pos);
-		}
-
 		@Override
 		public Codec<BlockPositionSource> codec() {
 			return BlockPositionSource.CODEC;
+		}
+
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, BlockPositionSource> streamCodec() {
+			return BlockPositionSource.STREAM_CODEC;
 		}
 	}
 }

@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
+public class CrossbowItem extends ProjectileWeaponItem {
 	private static final String TAG_CHARGED = "Charged";
 	private static final String TAG_CHARGED_PROJECTILES = "ChargedProjectiles";
 	private static final int MAX_CHARGE_DURATION = 25;
@@ -234,7 +234,7 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 				projectile.shoot((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z(), g, h);
 			}
 
-			itemStack.hurtAndBreak(bl2 ? 3 : 1, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(interactionHand));
+			itemStack.hurtAndBreak(bl2 ? 3 : 1, livingEntity, LivingEntity.getSlotForHand(interactionHand));
 			level.addFreshEntity(projectile);
 			level.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, f);
 		}

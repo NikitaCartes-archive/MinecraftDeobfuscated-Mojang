@@ -8,6 +8,7 @@ import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class ParticleUtils {
@@ -74,7 +75,8 @@ public class ParticleUtils {
 
 	public static void spawnParticleInBlock(LevelAccessor levelAccessor, BlockPos blockPos, int i, ParticleOptions particleOptions) {
 		double d = 0.5;
-		double e = levelAccessor.getBlockState(blockPos).getShape(levelAccessor, blockPos).max(Direction.Axis.Y);
+		BlockState blockState = levelAccessor.getBlockState(blockPos);
+		double e = blockState.isAir() ? 1.0 : blockState.getShape(levelAccessor, blockPos).max(Direction.Axis.Y);
 		spawnParticles(levelAccessor, blockPos, i, 0.5, e, true, particleOptions);
 	}
 

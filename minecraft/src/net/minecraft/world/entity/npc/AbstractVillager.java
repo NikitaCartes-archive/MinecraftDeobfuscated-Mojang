@@ -137,7 +137,7 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 	public void notifyTradeUpdated(ItemStack itemStack) {
 		if (!this.level().isClientSide && this.ambientSoundTime > -this.getAmbientSoundInterval() + 20) {
 			this.ambientSoundTime = -this.getAmbientSoundInterval();
-			this.playSound(this.getTradeUpdatedSound(!itemStack.isEmpty()), this.getSoundVolume(), this.getVoicePitch());
+			this.makeSound(this.getTradeUpdatedSound(!itemStack.isEmpty()));
 		}
 	}
 
@@ -151,7 +151,7 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 	}
 
 	public void playCelebrateSound() {
-		this.playSound(SoundEvents.VILLAGER_CELEBRATE, this.getSoundVolume(), this.getVoicePitch());
+		this.makeSound(SoundEvents.VILLAGER_CELEBRATE);
 	}
 
 	@Override

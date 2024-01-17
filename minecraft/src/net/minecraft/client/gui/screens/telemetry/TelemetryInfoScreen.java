@@ -72,13 +72,17 @@ public class TelemetryInfoScreen extends Screen {
 		this.telemetryEventWidget = new TelemetryEventWidget(0, 0, this.width - 40, k, this.minecraft.font);
 		this.telemetryEventWidget.setScrollAmount(this.savedScroll);
 		this.telemetryEventWidget.setOnScrolledListener(d -> this.savedScroll = d);
-		this.setInitialFocus(this.telemetryEventWidget);
 		linearLayout.addChild(this.telemetryEventWidget);
 		linearLayout.addChild(layout);
 		frameLayout.arrangeElements();
 		FrameLayout.alignInRectangle(frameLayout, 0, 0, this.width, this.height, 0.5F, 0.0F);
 		frameLayout.visitWidgets(guiEventListener -> {
 		});
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.telemetryEventWidget);
 	}
 
 	private Layout createLowerSection() {

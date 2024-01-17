@@ -7,8 +7,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
-import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
+import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket;
+import net.minecraft.network.protocol.game.ServerboundEntityTagQueryPacket;
 
 @Environment(EnvType.CLIENT)
 public class DebugQueryHandler {
@@ -38,11 +38,11 @@ public class DebugQueryHandler {
 
 	public void queryEntityTag(int i, Consumer<CompoundTag> consumer) {
 		int j = this.startTransaction(consumer);
-		this.connection.send(new ServerboundEntityTagQuery(j, i));
+		this.connection.send(new ServerboundEntityTagQueryPacket(j, i));
 	}
 
 	public void queryBlockEntityTag(BlockPos blockPos, Consumer<CompoundTag> consumer) {
 		int i = this.startTransaction(consumer);
-		this.connection.send(new ServerboundBlockEntityTagQuery(i, blockPos));
+		this.connection.send(new ServerboundBlockEntityTagQueryPacket(i, blockPos));
 	}
 }

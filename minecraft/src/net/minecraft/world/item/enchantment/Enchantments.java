@@ -1,18 +1,21 @@
 package net.minecraft.world.item.enchantment;
 
+import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class Enchantments {
 	private static final EquipmentSlot[] ARMOR_SLOTS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-	public static final Enchantment ALL_DAMAGE_PROTECTION = register(
+	public static final Enchantment PROTECTION = register(
 		"protection", new ProtectionEnchantment(Enchantment.Rarity.COMMON, ProtectionEnchantment.Type.ALL, ARMOR_SLOTS)
 	);
 	public static final Enchantment FIRE_PROTECTION = register(
 		"fire_protection", new ProtectionEnchantment(Enchantment.Rarity.UNCOMMON, ProtectionEnchantment.Type.FIRE, ARMOR_SLOTS)
 	);
-	public static final Enchantment FALL_PROTECTION = register(
+	public static final Enchantment FEATHER_FALLING = register(
 		"feather_falling", new ProtectionEnchantment(Enchantment.Rarity.UNCOMMON, ProtectionEnchantment.Type.FALL, ARMOR_SLOTS)
 	);
 	public static final Enchantment BLAST_PROTECTION = register(
@@ -29,32 +32,36 @@ public class Enchantments {
 	public static final Enchantment BINDING_CURSE = register("binding_curse", new BindingCurseEnchantment(Enchantment.Rarity.VERY_RARE, ARMOR_SLOTS));
 	public static final Enchantment SOUL_SPEED = register("soul_speed", new SoulSpeedEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.FEET));
 	public static final Enchantment SWIFT_SNEAK = register("swift_sneak", new SwiftSneakEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.LEGS));
-	public static final Enchantment SHARPNESS = register("sharpness", new DamageEnchantment(Enchantment.Rarity.COMMON, 0, EquipmentSlot.MAINHAND));
-	public static final Enchantment SMITE = register("smite", new DamageEnchantment(Enchantment.Rarity.UNCOMMON, 1, EquipmentSlot.MAINHAND));
+	public static final Enchantment SHARPNESS = register(
+		"sharpness", new DamageEnchantment(Enchantment.Rarity.COMMON, 1, 11, 20, Optional.empty(), EquipmentSlot.MAINHAND)
+	);
+	public static final Enchantment SMITE = register(
+		"smite", new DamageEnchantment(Enchantment.Rarity.UNCOMMON, 5, 8, 20, Optional.of(EntityTypeTags.UNDEAD), EquipmentSlot.MAINHAND)
+	);
 	public static final Enchantment BANE_OF_ARTHROPODS = register(
-		"bane_of_arthropods", new DamageEnchantment(Enchantment.Rarity.UNCOMMON, 2, EquipmentSlot.MAINHAND)
+		"bane_of_arthropods", new DamageEnchantment(Enchantment.Rarity.UNCOMMON, 5, 8, 20, Optional.of(EntityTypeTags.ARTHROPOD), EquipmentSlot.MAINHAND)
 	);
 	public static final Enchantment KNOCKBACK = register("knockback", new KnockbackEnchantment(Enchantment.Rarity.UNCOMMON, EquipmentSlot.MAINHAND));
 	public static final Enchantment FIRE_ASPECT = register("fire_aspect", new FireAspectEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
-	public static final Enchantment MOB_LOOTING = register(
-		"looting", new LootBonusEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.WEAPON, EquipmentSlot.MAINHAND)
+	public static final Enchantment LOOTING = register(
+		"looting", new LootBonusEnchantment(Enchantment.Rarity.RARE, ItemTags.SWORD_ENCHANTABLE, EquipmentSlot.MAINHAND)
 	);
-	public static final Enchantment SWEEPING_EDGE = register("sweeping", new SweepingEdgeEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
-	public static final Enchantment BLOCK_EFFICIENCY = register("efficiency", new DiggingEnchantment(Enchantment.Rarity.COMMON, EquipmentSlot.MAINHAND));
+	public static final Enchantment SWEEPING_EDGE = register("sweeping_edge", new SweepingEdgeEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
+	public static final Enchantment EFFICIENCY = register("efficiency", new DiggingEnchantment(Enchantment.Rarity.COMMON, EquipmentSlot.MAINHAND));
 	public static final Enchantment SILK_TOUCH = register("silk_touch", new UntouchingEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.MAINHAND));
 	public static final Enchantment UNBREAKING = register("unbreaking", new DigDurabilityEnchantment(Enchantment.Rarity.UNCOMMON, EquipmentSlot.MAINHAND));
-	public static final Enchantment BLOCK_FORTUNE = register(
-		"fortune", new LootBonusEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.DIGGER, EquipmentSlot.MAINHAND)
+	public static final Enchantment FORTUNE = register(
+		"fortune", new LootBonusEnchantment(Enchantment.Rarity.RARE, ItemTags.MINING_LOOT_ENCHANTABLE, EquipmentSlot.MAINHAND)
 	);
-	public static final Enchantment POWER_ARROWS = register("power", new ArrowDamageEnchantment(Enchantment.Rarity.COMMON, EquipmentSlot.MAINHAND));
-	public static final Enchantment PUNCH_ARROWS = register("punch", new ArrowKnockbackEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
-	public static final Enchantment FLAMING_ARROWS = register("flame", new ArrowFireEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
-	public static final Enchantment INFINITY_ARROWS = register("infinity", new ArrowInfiniteEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.MAINHAND));
-	public static final Enchantment FISHING_LUCK = register(
-		"luck_of_the_sea", new LootBonusEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.FISHING_ROD, EquipmentSlot.MAINHAND)
+	public static final Enchantment POWER = register("power", new ArrowDamageEnchantment(Enchantment.Rarity.COMMON, EquipmentSlot.MAINHAND));
+	public static final Enchantment PUNCH = register("punch", new ArrowKnockbackEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
+	public static final Enchantment FLAME = register("flame", new ArrowFireEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
+	public static final Enchantment INFINITY = register("infinity", new ArrowInfiniteEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.MAINHAND));
+	public static final Enchantment LUCK_OF_THE_SEA = register(
+		"luck_of_the_sea", new LootBonusEnchantment(Enchantment.Rarity.RARE, ItemTags.FISHING_ENCHANTABLE, EquipmentSlot.MAINHAND)
 	);
-	public static final Enchantment FISHING_SPEED = register(
-		"lure", new FishingSpeedEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.FISHING_ROD, EquipmentSlot.MAINHAND)
+	public static final Enchantment LURE = register(
+		"lure", new FishingSpeedEnchantment(Enchantment.Rarity.RARE, ItemTags.FISHING_ENCHANTABLE, EquipmentSlot.MAINHAND)
 	);
 	public static final Enchantment LOYALTY = register("loyalty", new TridentLoyaltyEnchantment(Enchantment.Rarity.UNCOMMON, EquipmentSlot.MAINHAND));
 	public static final Enchantment IMPALING = register("impaling", new TridentImpalerEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));

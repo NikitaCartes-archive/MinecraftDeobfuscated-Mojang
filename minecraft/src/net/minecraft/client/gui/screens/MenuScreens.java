@@ -40,16 +40,12 @@ public class MenuScreens {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Map<MenuType<?>, MenuScreens.ScreenConstructor<?, ?>> SCREENS = Maps.<MenuType<?>, MenuScreens.ScreenConstructor<?, ?>>newHashMap();
 
-	public static <T extends AbstractContainerMenu> void create(@Nullable MenuType<T> menuType, Minecraft minecraft, int i, Component component) {
-		if (menuType == null) {
-			LOGGER.warn("Trying to open invalid screen with name: {}", component.getString());
+	public static <T extends AbstractContainerMenu> void create(MenuType<T> menuType, Minecraft minecraft, int i, Component component) {
+		MenuScreens.ScreenConstructor<T, ?> screenConstructor = getConstructor(menuType);
+		if (screenConstructor == null) {
+			LOGGER.warn("Failed to create screen for menu type: {}", BuiltInRegistries.MENU.getKey(menuType));
 		} else {
-			MenuScreens.ScreenConstructor<T, ?> screenConstructor = getConstructor(menuType);
-			if (screenConstructor == null) {
-				LOGGER.warn("Failed to create screen for menu type: {}", BuiltInRegistries.MENU.getKey(menuType));
-			} else {
-				screenConstructor.fromPacket(component, menuType, minecraft, i);
-			}
+			screenConstructor.fromPacket(component, menuType, minecraft, i);
 		}
 	}
 

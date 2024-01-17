@@ -36,7 +36,7 @@ public class DoublePlantBlock extends BushBlock {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
@@ -68,7 +68,7 @@ public class DoublePlantBlock extends BushBlock {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		if (blockState.getValue(HALF) != DoubleBlockHalf.UPPER) {
 			return super.canSurvive(blockState, levelReader, blockPos);
 		} else {
@@ -126,7 +126,7 @@ public class DoublePlantBlock extends BushBlock {
 	}
 
 	@Override
-	public long getSeed(BlockState blockState, BlockPos blockPos) {
+	protected long getSeed(BlockState blockState, BlockPos blockPos) {
 		return Mth.getSeed(blockPos.getX(), blockPos.below(blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? 0 : 1).getY(), blockPos.getZ());
 	}
 }

@@ -36,7 +36,7 @@ public abstract class BasePressurePlateBlock extends Block {
 	protected abstract MapCodec<? extends BasePressurePlateBlock> codec();
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.getSignalForState(blockState) > 0 ? PRESSED_AABB : AABB;
 	}
 
@@ -50,7 +50,7 @@ public abstract class BasePressurePlateBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)
@@ -59,13 +59,13 @@ public abstract class BasePressurePlateBlock extends Block {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		return canSupportRigidBlock(levelReader, blockPos2) || canSupportCenter(levelReader, blockPos2, Direction.UP);
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		int i = this.getSignalForState(blockState);
 		if (i > 0) {
 			this.checkPressed(null, serverLevel, blockPos, blockState, i);
@@ -73,7 +73,7 @@ public abstract class BasePressurePlateBlock extends Block {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!level.isClientSide) {
 			int i = this.getSignalForState(blockState);
 			if (i == 0) {
@@ -107,7 +107,7 @@ public abstract class BasePressurePlateBlock extends Block {
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl && !blockState.is(blockState2.getBlock())) {
 			if (this.getSignalForState(blockState) > 0) {
 				this.updateNeighbours(level, blockPos);
@@ -123,17 +123,17 @@ public abstract class BasePressurePlateBlock extends Block {
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return this.getSignalForState(blockState);
 	}
 
 	@Override
-	public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return direction == Direction.UP ? this.getSignalForState(blockState) : 0;
 	}
 
 	@Override
-	public boolean isSignalSource(BlockState blockState) {
+	protected boolean isSignalSource(BlockState blockState) {
 		return true;
 	}
 

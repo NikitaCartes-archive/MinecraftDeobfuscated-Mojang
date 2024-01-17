@@ -6,11 +6,16 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundMapItemDataPacket> STREAM_CODEC = Packet.codec(
+		ClientboundMapItemDataPacket::write, ClientboundMapItemDataPacket::new
+	);
 	private final int mapId;
 	private final byte scale;
 	private final boolean locked;
@@ -27,7 +32,7 @@ public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketList
 		this.colorPatch = mapPatch;
 	}
 
-	public ClientboundMapItemDataPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundMapItemDataPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.mapId = friendlyByteBuf.readVarInt();
 		this.scale = friendlyByteBuf.readByte();
 		this.locked = friendlyByteBuf.readBoolean();
@@ -51,8 +56,7 @@ public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketList
 		}
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.mapId);
 		friendlyByteBuf.writeByte(this.scale);
 		friendlyByteBuf.writeBoolean(this.locked);
@@ -72,6 +76,11 @@ public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketList
 		} else {
 			friendlyByteBuf.writeByte(0);
 		}
+	}
+
+	@Override
+	public PacketType<ClientboundMapItemDataPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_MAP_ITEM_DATA;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

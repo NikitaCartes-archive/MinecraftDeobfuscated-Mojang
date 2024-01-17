@@ -1,6 +1,7 @@
 package net.minecraft.world.item.enchantment;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,7 +13,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class FrostWalkerEnchantment extends Enchantment {
 	public FrostWalkerEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
-		super(rarity, EnchantmentCategory.ARMOR_FEET, equipmentSlots);
+		super(rarity, ItemTags.FOOT_ARMOR_ENCHANTABLE, equipmentSlots);
 	}
 
 	@Override

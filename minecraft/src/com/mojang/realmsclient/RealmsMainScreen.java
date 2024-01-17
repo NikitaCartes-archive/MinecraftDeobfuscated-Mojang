@@ -56,6 +56,7 @@ import net.minecraft.client.gui.components.PopupScreen;
 import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.components.WidgetTooltipHolder;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -507,7 +508,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			RealmsClient realmsClient = RealmsClient.create();
 			PingResult pingResult = new PingResult();
 			pingResult.pingResults = list;
-			pingResult.worldIds = this.getOwnedNonExpiredWorldIds();
+			pingResult.realmIds = this.getOwnedNonExpiredRealmIds();
 
 			try {
 				realmsClient.sendPingResults(pingResult);
@@ -517,7 +518,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		}).start();
 	}
 
-	private List<Long> getOwnedNonExpiredWorldIds() {
+	private List<Long> getOwnedNonExpiredRealmIds() {
 		List<Long> list = Lists.newArrayList();
 
 		for(RealmsServer realmsServer : this.serverList) {
@@ -721,12 +722,12 @@ public class RealmsMainScreen extends RealmsScreen {
 	class AvailableSnapshotEntry extends RealmsMainScreen.Entry {
 		private static final Component START_SNAPSHOT_REALM = Component.translatable("mco.snapshot.start");
 		private static final int TEXT_PADDING = 5;
-		private final Tooltip tooltip;
+		private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 		private final RealmsServer parent;
 
 		public AvailableSnapshotEntry(RealmsServer realmsServer) {
 			this.parent = realmsServer;
-			this.tooltip = Tooltip.create(Component.translatable("mco.snapshot.tooltip"));
+			this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.tooltip")));
 		}
 
 		@Override
@@ -1070,11 +1071,11 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	class ParentEntry extends RealmsMainScreen.Entry {
 		private final RealmsServer server;
-		private final Tooltip tooltip;
+		private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
 		public ParentEntry(RealmsServer realmsServer) {
 			this.server = realmsServer;
-			this.tooltip = Tooltip.create(Component.translatable("mco.snapshot.parent.tooltip"));
+			this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.parent.tooltip")));
 		}
 
 		@Override
@@ -1137,20 +1138,17 @@ public class RealmsMainScreen extends RealmsScreen {
 	class ServerEntry extends RealmsMainScreen.Entry {
 		private static final int SKIN_HEAD_LARGE_WIDTH = 36;
 		private final RealmsServer serverData;
-		@Nullable
-		private final Tooltip tooltip;
+		private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
 		public ServerEntry(RealmsServer realmsServer) {
 			this.serverData = realmsServer;
 			boolean bl = RealmsMainScreen.this.isSelfOwnedServer(realmsServer);
 			if (RealmsMainScreen.isSnapshot() && bl && realmsServer.isSnapshotRealm()) {
-				this.tooltip = Tooltip.create(Component.translatable("mco.snapshot.paired", realmsServer.parentWorldName));
+				this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.paired", realmsServer.parentWorldName)));
 			} else if (!bl && realmsServer.needsUpgrade()) {
-				this.tooltip = Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.upgrade", realmsServer.owner));
+				this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.upgrade", realmsServer.owner)));
 			} else if (!bl && realmsServer.needsDowngrade()) {
-				this.tooltip = Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.downgrade", realmsServer.activeVersion));
-			} else {
-				this.tooltip = null;
+				this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.downgrade", realmsServer.activeVersion)));
 			}
 		}
 
@@ -1166,9 +1164,7 @@ public class RealmsMainScreen extends RealmsScreen {
 				this.renderSecondLine(guiGraphics, j, k);
 				this.renderThirdLine(guiGraphics, j, k, this.serverData);
 				this.renderStatusLights(this.serverData, guiGraphics, k + l, j, n, o);
-				if (this.tooltip != null) {
-					this.tooltip.refreshTooltipForNextRenderPass(bl, this.isFocused(), new ScreenRectangle(k, j, l, m));
-				}
+				this.tooltip.refreshTooltipForNextRenderPass(bl, this.isFocused(), new ScreenRectangle(k, j, l, m));
 			}
 		}
 

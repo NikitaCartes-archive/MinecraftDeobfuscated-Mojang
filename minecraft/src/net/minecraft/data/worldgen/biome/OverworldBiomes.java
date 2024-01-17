@@ -315,6 +315,8 @@ public class OverworldBiomes {
 	public static Biome badlands(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2, boolean bl) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.commonSpawns(builder);
+		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.ARMADILLO, 1, 1, 2));
+		builder.creatureGenerationProbability(0.03F);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2);
 		globalOverworldGeneration(builder2);
 		BiomeDefaultFeatures.addDefaultOres(builder2);

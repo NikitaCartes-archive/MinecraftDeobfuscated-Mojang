@@ -39,7 +39,7 @@ public interface NeighborUpdater {
 
 	static void executeUpdate(Level level, BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		try {
-			blockState.neighborChanged(level, blockPos, block, blockPos2, bl);
+			blockState.handleNeighborChanged(level, blockPos, block, blockPos2, bl);
 		} catch (Throwable var9) {
 			CrashReport crashReport = CrashReport.forThrowable(var9, "Exception while updating neighbours");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block being updated");

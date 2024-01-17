@@ -40,9 +40,8 @@ public class AnimalPanic extends Behavior<PathfinderMob> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-		return pathfinderMob.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY)
-			|| this.shouldPanic.test(pathfinderMob)
-			|| pathfinderMob.getBrain().hasMemoryValue(MemoryModuleType.IS_PANICKING);
+		return this.shouldPanic.test(pathfinderMob)
+			&& (pathfinderMob.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY) || pathfinderMob.getBrain().hasMemoryValue(MemoryModuleType.IS_PANICKING));
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {

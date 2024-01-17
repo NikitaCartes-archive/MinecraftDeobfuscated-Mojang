@@ -3,13 +3,18 @@ package net.minecraft.network.protocol.game;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public class ServerboundInteractPacket implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundInteractPacket> STREAM_CODEC = Packet.codec(
+		ServerboundInteractPacket::write, ServerboundInteractPacket::new
+	);
 	private final int entityId;
 	private final ServerboundInteractPacket.Action action;
 	private final boolean usingSecondaryAction;
@@ -47,19 +52,23 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		return new ServerboundInteractPacket(entity.getId(), bl, new ServerboundInteractPacket.InteractionAtLocationAction(interactionHand, vec3));
 	}
 
-	public ServerboundInteractPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ServerboundInteractPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readVarInt();
 		ServerboundInteractPacket.ActionType actionType = friendlyByteBuf.readEnum(ServerboundInteractPacket.ActionType.class);
 		this.action = (ServerboundInteractPacket.Action)actionType.reader.apply(friendlyByteBuf);
 		this.usingSecondaryAction = friendlyByteBuf.readBoolean();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
 		friendlyByteBuf.writeEnum(this.action.getType());
 		this.action.write(friendlyByteBuf);
 		friendlyByteBuf.writeBoolean(this.usingSecondaryAction);
+	}
+
+	@Override
+	public PacketType<ServerboundInteractPacket> type() {
+		return GamePacketTypes.SERVERBOUND_INTERACT;
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {

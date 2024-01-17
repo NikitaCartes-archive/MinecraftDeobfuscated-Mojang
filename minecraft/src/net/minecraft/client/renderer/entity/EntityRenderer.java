@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAttachment;
-import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -83,8 +82,7 @@ public abstract class EntityRenderer<T extends Entity> {
 	protected void renderNameTag(T entity, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f) {
 		double d = this.entityRenderDispatcher.distanceToSqr(entity);
 		if (!(d > 4096.0)) {
-			EntityAttachments entityAttachments = entity.getDimensions(entity.getPose()).attachments();
-			Vec3 vec3 = entityAttachments.getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(f));
+			Vec3 vec3 = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(f));
 			if (vec3 != null) {
 				boolean bl = !entity.isDiscrete();
 				int j = "deadmau5".equals(component.getString()) ? -10 : 0;

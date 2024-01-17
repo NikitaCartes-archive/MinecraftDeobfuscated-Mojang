@@ -1,26 +1,35 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
-public class ServerboundEntityTagQuery implements Packet<ServerGamePacketListener> {
+public class ServerboundEntityTagQueryPacket implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundEntityTagQueryPacket> STREAM_CODEC = Packet.codec(
+		ServerboundEntityTagQueryPacket::write, ServerboundEntityTagQueryPacket::new
+	);
 	private final int transactionId;
 	private final int entityId;
 
-	public ServerboundEntityTagQuery(int i, int j) {
+	public ServerboundEntityTagQueryPacket(int i, int j) {
 		this.transactionId = i;
 		this.entityId = j;
 	}
 
-	public ServerboundEntityTagQuery(FriendlyByteBuf friendlyByteBuf) {
+	private ServerboundEntityTagQueryPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.transactionId = friendlyByteBuf.readVarInt();
 		this.entityId = friendlyByteBuf.readVarInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.transactionId);
 		friendlyByteBuf.writeVarInt(this.entityId);
+	}
+
+	@Override
+	public PacketType<ServerboundEntityTagQueryPacket> type() {
+		return GamePacketTypes.SERVERBOUND_ENTITY_TAG_QUERY;
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {

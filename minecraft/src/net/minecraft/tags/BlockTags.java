@@ -151,6 +151,7 @@ public final class BlockTags {
 	public static final TagKey<Block> ANCIENT_CITY_REPLACEABLE = create("ancient_city_replaceable");
 	public static final TagKey<Block> VIBRATION_RESONATORS = create("vibration_resonators");
 	public static final TagKey<Block> ANIMALS_SPAWNABLE_ON = create("animals_spawnable_on");
+	public static final TagKey<Block> ARMADILLO_SPAWNABLE_ON = create("armadillo_spawnable_on");
 	public static final TagKey<Block> AXOLOTLS_SPAWNABLE_ON = create("axolotls_spawnable_on");
 	public static final TagKey<Block> GOATS_SPAWNABLE_ON = create("goats_spawnable_on");
 	public static final TagKey<Block> MOOSHROOMS_SPAWNABLE_ON = create("mooshrooms_spawnable_on");

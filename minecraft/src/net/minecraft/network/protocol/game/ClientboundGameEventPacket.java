@@ -3,9 +3,14 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundGameEventPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundGameEventPacket> STREAM_CODEC = Packet.codec(
+		ClientboundGameEventPacket::write, ClientboundGameEventPacket::new
+	);
 	public static final ClientboundGameEventPacket.Type NO_RESPAWN_BLOCK_AVAILABLE = new ClientboundGameEventPacket.Type(0);
 	public static final ClientboundGameEventPacket.Type START_RAINING = new ClientboundGameEventPacket.Type(1);
 	public static final ClientboundGameEventPacket.Type STOP_RAINING = new ClientboundGameEventPacket.Type(2);
@@ -33,15 +38,19 @@ public class ClientboundGameEventPacket implements Packet<ClientGamePacketListen
 		this.param = f;
 	}
 
-	public ClientboundGameEventPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundGameEventPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.event = ClientboundGameEventPacket.Type.TYPES.get(friendlyByteBuf.readUnsignedByte());
 		this.param = friendlyByteBuf.readFloat();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.event.id);
 		friendlyByteBuf.writeFloat(this.param);
+	}
+
+	@Override
+	public PacketType<ClientboundGameEventPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_GAME_EVENT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

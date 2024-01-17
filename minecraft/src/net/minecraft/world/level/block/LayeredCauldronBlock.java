@@ -60,7 +60,7 @@ public class LayeredCauldronBlock extends AbstractCauldronBlock {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!level.isClientSide && entity.isOnFire() && this.isEntityInsideContent(blockState, blockPos, entity)) {
 			entity.clearFire();
 			if (entity.mayInteract(level, blockPos)) {
@@ -94,7 +94,7 @@ public class LayeredCauldronBlock extends AbstractCauldronBlock {
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		return blockState.getValue(LEVEL);
 	}
 

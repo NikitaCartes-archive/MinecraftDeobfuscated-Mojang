@@ -3,6 +3,7 @@ package net.minecraft.core;
 import com.google.common.collect.AbstractIterator;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.ArrayDeque;
@@ -16,6 +17,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.Util;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Rotation;
@@ -34,6 +37,15 @@ public class BlockPos extends Vec3i {
 			blockPos -> IntStream.of(new int[]{blockPos.getX(), blockPos.getY(), blockPos.getZ()})
 		)
 		.stable();
+	public static final StreamCodec<ByteBuf, BlockPos> STREAM_CODEC = new StreamCodec<ByteBuf, BlockPos>() {
+		public BlockPos decode(ByteBuf byteBuf) {
+			return FriendlyByteBuf.readBlockPos(byteBuf);
+		}
+
+		public void encode(ByteBuf byteBuf, BlockPos blockPos) {
+			FriendlyByteBuf.writeBlockPos(byteBuf, blockPos);
+		}
+	};
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final BlockPos ZERO = new BlockPos(0, 0, 0);
 	private static final int PACKED_X_LENGTH = 1 + Mth.log2(Mth.smallestEncompassingPowerOfTwo(30000000));

@@ -3,11 +3,16 @@ package net.minecraft.network.protocol.game;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 
 public class ClientboundSetDisplayObjectivePacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundSetDisplayObjectivePacket> STREAM_CODEC = Packet.codec(
+		ClientboundSetDisplayObjectivePacket::write, ClientboundSetDisplayObjectivePacket::new
+	);
 	private final DisplaySlot slot;
 	private final String objectiveName;
 
@@ -20,15 +25,19 @@ public class ClientboundSetDisplayObjectivePacket implements Packet<ClientGamePa
 		}
 	}
 
-	public ClientboundSetDisplayObjectivePacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundSetDisplayObjectivePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.slot = friendlyByteBuf.readById(DisplaySlot.BY_ID);
 		this.objectiveName = friendlyByteBuf.readUtf();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeById(DisplaySlot::id, this.slot);
 		friendlyByteBuf.writeUtf(this.objectiveName);
+	}
+
+	@Override
+	public PacketType<ClientboundSetDisplayObjectivePacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SET_DISPLAY_OBJECTIVE;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

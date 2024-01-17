@@ -41,10 +41,13 @@ public class WitherSkullBlock extends SkullBlock {
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
-		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof SkullBlockEntity) {
-			checkSpawn(level, blockPos, (SkullBlockEntity)blockEntity);
+		checkSpawn(level, blockPos);
+	}
+
+	public static void checkSpawn(Level level, BlockPos blockPos) {
+		BlockEntity var3 = level.getBlockEntity(blockPos);
+		if (var3 instanceof SkullBlockEntity skullBlockEntity) {
+			checkSpawn(level, blockPos, skullBlockEntity);
 		}
 	}
 

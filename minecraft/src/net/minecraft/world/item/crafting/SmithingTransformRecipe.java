@@ -6,7 +6,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.stream.Stream;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -80,25 +81,33 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 					)
 					.apply(instance, SmithingTransformRecipe::new)
 		);
+		public static final StreamCodec<RegistryFriendlyByteBuf, SmithingTransformRecipe> STREAM_CODEC = StreamCodec.of(
+			SmithingTransformRecipe.Serializer::toNetwork, SmithingTransformRecipe.Serializer::fromNetwork
+		);
 
 		@Override
 		public Codec<SmithingTransformRecipe> codec() {
 			return CODEC;
 		}
 
-		public SmithingTransformRecipe fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
-			Ingredient ingredient2 = Ingredient.fromNetwork(friendlyByteBuf);
-			Ingredient ingredient3 = Ingredient.fromNetwork(friendlyByteBuf);
-			ItemStack itemStack = friendlyByteBuf.readItem();
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, SmithingTransformRecipe> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		private static SmithingTransformRecipe fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			Ingredient ingredient = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
+			Ingredient ingredient2 = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
+			Ingredient ingredient3 = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
+			ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
 			return new SmithingTransformRecipe(ingredient, ingredient2, ingredient3, itemStack);
 		}
 
-		public void toNetwork(FriendlyByteBuf friendlyByteBuf, SmithingTransformRecipe smithingTransformRecipe) {
-			smithingTransformRecipe.template.toNetwork(friendlyByteBuf);
-			smithingTransformRecipe.base.toNetwork(friendlyByteBuf);
-			smithingTransformRecipe.addition.toNetwork(friendlyByteBuf);
-			friendlyByteBuf.writeItem(smithingTransformRecipe.result);
+		private static void toNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf, SmithingTransformRecipe smithingTransformRecipe) {
+			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTransformRecipe.template);
+			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTransformRecipe.base);
+			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTransformRecipe.addition);
+			ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTransformRecipe.result);
 		}
 	}
 }

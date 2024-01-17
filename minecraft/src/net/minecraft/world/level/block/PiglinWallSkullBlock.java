@@ -36,7 +36,7 @@ public class PiglinWallSkullBlock extends WallSkullBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return (VoxelShape)AABBS.get(blockState.getValue(FACING));
 	}
 }

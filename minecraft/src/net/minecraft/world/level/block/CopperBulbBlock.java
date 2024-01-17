@@ -28,14 +28,14 @@ public class CopperBulbBlock extends Block {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (blockState2.getBlock() != blockState.getBlock() && level instanceof ServerLevel serverLevel) {
 			this.checkAndFlip(blockState, serverLevel, blockPos);
 		}
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (level instanceof ServerLevel serverLevel) {
 			this.checkAndFlip(blockState, serverLevel, blockPos);
 		}
@@ -60,12 +60,12 @@ public class CopperBulbBlock extends Block {
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		return level.getBlockState(blockPos).getValue(LIT) ? 15 : 0;
 	}
 }

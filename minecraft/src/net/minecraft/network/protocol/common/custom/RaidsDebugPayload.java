@@ -3,22 +3,22 @@ package net.minecraft.network.protocol.common.custom;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.codec.StreamCodec;
 
 public record RaidsDebugPayload(List<BlockPos> raidCenters) implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/raids");
+	public static final StreamCodec<FriendlyByteBuf, RaidsDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(RaidsDebugPayload::write, RaidsDebugPayload::new);
+	public static final CustomPacketPayload.Type<RaidsDebugPayload> TYPE = CustomPacketPayload.createType("debug/raids");
 
-	public RaidsDebugPayload(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readList(FriendlyByteBuf::readBlockPos));
+	private RaidsDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+		this(friendlyByteBuf.readList(BlockPos.STREAM_CODEC));
+	}
+
+	private void write(FriendlyByteBuf friendlyByteBuf) {
+		friendlyByteBuf.writeCollection(this.raidCenters, BlockPos.STREAM_CODEC);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeCollection(this.raidCenters, FriendlyByteBuf::writeBlockPos);
-	}
-
-	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<RaidsDebugPayload> type() {
+		return TYPE;
 	}
 }

@@ -6,6 +6,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ItemSteerable;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -27,7 +28,7 @@ public class FoodOnAStickItem<T extends Entity & ItemSteerable> extends Item {
 		} else {
 			Entity entity = player.getControlledVehicle();
 			if (player.isPassenger() && entity instanceof ItemSteerable itemSteerable && entity.getType() == this.canInteractWith && itemSteerable.boost()) {
-				itemStack.hurtAndBreak(this.consumeItemDamage, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+				itemStack.hurtAndBreak(this.consumeItemDamage, player, LivingEntity.getSlotForHand(interactionHand));
 				if (itemStack.isEmpty()) {
 					ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
 					itemStack2.setTag(itemStack.getTag());

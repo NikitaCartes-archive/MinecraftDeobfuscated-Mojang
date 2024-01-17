@@ -165,20 +165,20 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		}
 
 		private void renderPendingInvitationItem(GuiGraphics guiGraphics, PendingInvite pendingInvite, int i, int j, int k, int l) {
-			guiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pendingInvite.worldName, i + 38, j + 1, -1, false);
-			guiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pendingInvite.worldOwnerName, i + 38, j + 12, 7105644, false);
+			guiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pendingInvite.realmName, i + 38, j + 1, -1, false);
+			guiGraphics.drawString(RealmsPendingInvitesScreen.this.font, pendingInvite.realmOwnerName, i + 38, j + 12, 7105644, false);
 			guiGraphics.drawString(
 				RealmsPendingInvitesScreen.this.font, RealmsUtil.convertToAgePresentationFromInstant(pendingInvite.date), i + 38, j + 24, 7105644, false
 			);
 			RowButton.drawButtonsInRow(guiGraphics, this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
-			RealmsUtil.renderPlayerFace(guiGraphics, i, j, 32, pendingInvite.worldOwnerUuid);
+			RealmsUtil.renderPlayerFace(guiGraphics, i, j, 32, pendingInvite.realmOwnerUuid);
 		}
 
 		@Override
 		public Component getNarration() {
 			Component component = CommonComponents.joinLines(
-				Component.literal(this.pendingInvite.worldName),
-				Component.literal(this.pendingInvite.worldOwnerName),
+				Component.literal(this.pendingInvite.realmName),
+				Component.literal(this.pendingInvite.realmOwnerName),
 				RealmsUtil.convertToAgePresentationFromInstant(this.pendingInvite.date)
 			);
 			return Component.translatable("narrator.select", component);

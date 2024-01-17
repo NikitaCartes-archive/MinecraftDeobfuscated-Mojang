@@ -2,17 +2,27 @@ package net.minecraft.network.protocol.common;
 
 import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public record ServerboundResourcePackPacket(UUID id, ServerboundResourcePackPacket.Action action) implements Packet<ServerCommonPacketListener> {
-	public ServerboundResourcePackPacket(FriendlyByteBuf friendlyByteBuf) {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundResourcePackPacket> STREAM_CODEC = Packet.codec(
+		ServerboundResourcePackPacket::write, ServerboundResourcePackPacket::new
+	);
+
+	private ServerboundResourcePackPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(friendlyByteBuf.readUUID(), friendlyByteBuf.readEnum(ServerboundResourcePackPacket.Action.class));
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUUID(this.id);
 		friendlyByteBuf.writeEnum(this.action);
+	}
+
+	@Override
+	public PacketType<ServerboundResourcePackPacket> type() {
+		return CommonPacketTypes.SERVERBOUND_RESOURCE_PACK;
 	}
 
 	public void handle(ServerCommonPacketListener serverCommonPacketListener) {

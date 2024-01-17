@@ -35,7 +35,7 @@ public class YieldJobSite {
 								} else if (villager.getVillagerData().getProfession() != VillagerProfession.NONE) {
 									return false;
 								} else {
-									BlockPos blockPos = instance.<GlobalPos>get(memoryAccessor).pos();
+									BlockPos blockPos = ((GlobalPos)instance.get(memoryAccessor)).pos();
 									Optional<Holder<PoiType>> optional = serverLevel.getPoiManager().getType(blockPos);
 									if (optional.isEmpty()) {
 										return true;

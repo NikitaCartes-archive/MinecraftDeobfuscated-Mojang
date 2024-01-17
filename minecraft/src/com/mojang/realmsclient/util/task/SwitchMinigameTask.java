@@ -14,12 +14,12 @@ import org.slf4j.Logger;
 public class SwitchMinigameTask extends LongRunningTask {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component TITLE = Component.translatable("mco.minigame.world.starting.screen.title");
-	private final long worldId;
+	private final long realmId;
 	private final WorldTemplate worldTemplate;
 	private final RealmsConfigureWorldScreen lastScreen;
 
 	public SwitchMinigameTask(long l, WorldTemplate worldTemplate, RealmsConfigureWorldScreen realmsConfigureWorldScreen) {
-		this.worldId = l;
+		this.realmId = l;
 		this.worldTemplate = worldTemplate;
 		this.lastScreen = realmsConfigureWorldScreen;
 	}
@@ -33,7 +33,7 @@ public class SwitchMinigameTask extends LongRunningTask {
 					return;
 				}
 
-				if (realmsClient.putIntoMinigameMode(this.worldId, this.worldTemplate.id)) {
+				if (realmsClient.putIntoMinigameMode(this.realmId, this.worldTemplate.id)) {
 					setScreen(this.lastScreen);
 					break;
 				}

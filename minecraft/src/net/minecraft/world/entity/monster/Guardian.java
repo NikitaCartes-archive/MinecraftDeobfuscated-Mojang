@@ -21,7 +21,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -102,11 +101,6 @@ public class Guardian extends Monster {
 		super.defineSynchedData();
 		this.entityData.define(DATA_ID_MOVING, false);
 		this.entityData.define(DATA_ID_ATTACK_TARGET, 0);
-	}
-
-	@Override
-	public MobType getMobType() {
-		return MobType.WATER;
 	}
 
 	public boolean isMoving() {

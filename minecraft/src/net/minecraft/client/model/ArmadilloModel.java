@@ -16,7 +16,6 @@ import net.minecraft.world.entity.animal.armadillo.Armadillo;
 @Environment(EnvType.CLIENT)
 public class ArmadilloModel extends AgeableHierarchicalModel<Armadillo> {
 	private static final float BABY_Y_OFFSET = 16.02F;
-	private static final float MAX_HEAD_ROTATION_EXTENT = 32.5F;
 	private static final float MAX_DOWN_HEAD_ROTATION_EXTENT = 25.0F;
 	private static final float MAX_UP_HEAD_ROTATION_EXTENT = 22.5F;
 	private static final float MAX_WALK_ANIMATION_SPEED = 16.5F;

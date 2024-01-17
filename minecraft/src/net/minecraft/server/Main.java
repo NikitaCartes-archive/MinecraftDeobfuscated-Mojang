@@ -233,7 +233,14 @@ public class Main {
 			final DedicatedServer dedicatedServer = MinecraftServer.spin(
 				threadx -> {
 					DedicatedServer dedicatedServerxx = new DedicatedServer(
-						threadx, levelStorageAccess, packRepository, worldStem, dedicatedServerSettings, DataFixers.getDataFixer(), services, LoggerChunkProgressListener::new
+						threadx,
+						levelStorageAccess,
+						packRepository,
+						worldStem,
+						dedicatedServerSettings,
+						DataFixers.getDataFixer(),
+						services,
+						LoggerChunkProgressListener::createFromGameruleRadius
 					);
 					dedicatedServerxx.setPort(optionSet.valueOf(optionSpec11));
 					dedicatedServerxx.setDemo(optionSet.has(optionSpec3));

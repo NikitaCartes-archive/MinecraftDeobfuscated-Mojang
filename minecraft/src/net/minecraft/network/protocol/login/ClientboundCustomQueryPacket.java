@@ -1,15 +1,20 @@
 package net.minecraft.network.protocol.login;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
 import net.minecraft.network.protocol.login.custom.DiscardedQueryPayload;
 import net.minecraft.resources.ResourceLocation;
 
 public record ClientboundCustomQueryPacket(int transactionId, CustomQueryPayload payload) implements Packet<ClientLoginPacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundCustomQueryPacket> STREAM_CODEC = Packet.codec(
+		ClientboundCustomQueryPacket::write, ClientboundCustomQueryPacket::new
+	);
 	private static final int MAX_PAYLOAD_SIZE = 1048576;
 
-	public ClientboundCustomQueryPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundCustomQueryPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(friendlyByteBuf.readVarInt(), readPayload(friendlyByteBuf.readResourceLocation(), friendlyByteBuf));
 	}
 
@@ -27,11 +32,15 @@ public record ClientboundCustomQueryPacket(int transactionId, CustomQueryPayload
 		}
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.transactionId);
 		friendlyByteBuf.writeResourceLocation(this.payload.id());
 		this.payload.write(friendlyByteBuf);
+	}
+
+	@Override
+	public PacketType<ClientboundCustomQueryPacket> type() {
+		return LoginPacketTypes.CLIENTBOUND_CUSTOM_QUERY;
 	}
 
 	public void handle(ClientLoginPacketListener clientLoginPacketListener) {

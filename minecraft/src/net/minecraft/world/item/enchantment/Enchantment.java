@@ -10,17 +10,19 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class Enchantment {
 	private final EquipmentSlot[] slots;
 	private final Enchantment.Rarity rarity;
-	public final EnchantmentCategory category;
+	private final TagKey<Item> match;
 	@Nullable
 	protected String descriptionId;
 	private final Holder.Reference<Enchantment> builtInRegistryHolder = BuiltInRegistries.ENCHANTMENT.createIntrusiveHolder(this);
@@ -30,9 +32,9 @@ public abstract class Enchantment {
 		return BuiltInRegistries.ENCHANTMENT.byId(i);
 	}
 
-	protected Enchantment(Enchantment.Rarity rarity, EnchantmentCategory enchantmentCategory, EquipmentSlot[] equipmentSlots) {
+	protected Enchantment(Enchantment.Rarity rarity, TagKey<Item> tagKey, EquipmentSlot[] equipmentSlots) {
 		this.rarity = rarity;
-		this.category = enchantmentCategory;
+		this.match = tagKey;
 		this.slots = equipmentSlots;
 	}
 
@@ -47,6 +49,10 @@ public abstract class Enchantment {
 		}
 
 		return map;
+	}
+
+	public TagKey<Item> getMatch() {
+		return this.match;
 	}
 
 	public Enchantment.Rarity getRarity() {
@@ -73,7 +79,7 @@ public abstract class Enchantment {
 		return 0;
 	}
 
-	public float getDamageBonus(int i, MobType mobType) {
+	public float getDamageBonus(int i, @Nullable EntityType<?> entityType) {
 		return 0.0F;
 	}
 
@@ -113,7 +119,7 @@ public abstract class Enchantment {
 	}
 
 	public boolean canEnchant(ItemStack itemStack) {
-		return this.category.canEnchant(itemStack.getItem());
+		return itemStack.getItem().builtInRegistryHolder().is(this.match);
 	}
 
 	public void doPostAttack(LivingEntity livingEntity, Entity entity, int i) {

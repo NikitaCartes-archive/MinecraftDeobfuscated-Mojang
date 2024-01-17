@@ -37,7 +37,7 @@ public class TabButton extends AbstractWidget {
 
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-		guiGraphics.blitSprite(SPRITES.get(this.isSelected(), this.isHovered()), this.getX(), this.getY(), this.width, this.height);
+		guiGraphics.blitSprite(SPRITES.get(this.isSelected(), this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
 		Font font = Minecraft.getInstance().font;
 		int k = this.active ? -1 : -6250336;
 		this.renderString(guiGraphics, font, k);

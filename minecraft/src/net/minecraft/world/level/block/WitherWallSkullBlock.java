@@ -23,6 +23,6 @@ public class WitherWallSkullBlock extends WallSkullBlock {
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
-		Blocks.WITHER_SKELETON_SKULL.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
+		WitherSkullBlock.checkSpawn(level, blockPos);
 	}
 }

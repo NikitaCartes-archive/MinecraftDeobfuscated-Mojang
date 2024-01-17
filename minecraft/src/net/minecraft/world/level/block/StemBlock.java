@@ -68,7 +68,7 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE_BY_AGE[blockState.getValue(AGE)];
 	}
 
@@ -78,7 +78,7 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (serverLevel.getRawBrightness(blockPos, 0) >= 9) {
 			float f = CropBlock.getGrowthSpeed(this, serverLevel, blockPos);
 			if (randomSource.nextInt((int)(25.0F / f) + 1) == 0) {

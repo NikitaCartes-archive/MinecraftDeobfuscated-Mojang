@@ -154,7 +154,7 @@ public class InteractWithDoor {
 			set.add(globalPos);
 			return set;
 		}).orElseGet(() -> {
-			Set<GlobalPos> set = Sets.<GlobalPos>newHashSet(globalPos);
+			Set<GlobalPos> set = Sets.newHashSet(globalPos);
 			memoryAccessor.set(set);
 			return set;
 		}));

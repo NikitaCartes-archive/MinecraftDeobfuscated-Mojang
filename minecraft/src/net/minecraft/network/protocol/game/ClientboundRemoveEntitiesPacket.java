@@ -3,9 +3,14 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundRemoveEntitiesPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundRemoveEntitiesPacket> STREAM_CODEC = Packet.codec(
+		ClientboundRemoveEntitiesPacket::write, ClientboundRemoveEntitiesPacket::new
+	);
 	private final IntList entityIds;
 
 	public ClientboundRemoveEntitiesPacket(IntList intList) {
@@ -16,13 +21,17 @@ public class ClientboundRemoveEntitiesPacket implements Packet<ClientGamePacketL
 		this.entityIds = new IntArrayList(is);
 	}
 
-	public ClientboundRemoveEntitiesPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundRemoveEntitiesPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityIds = friendlyByteBuf.readIntIdList();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeIntIdList(this.entityIds);
+	}
+
+	@Override
+	public PacketType<ClientboundRemoveEntitiesPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_REMOVE_ENTITIES;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

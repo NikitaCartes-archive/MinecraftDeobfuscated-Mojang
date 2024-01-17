@@ -17,13 +17,13 @@ import org.slf4j.Logger;
 public class DownloadTask extends LongRunningTask {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component TITLE = Component.translatable("mco.download.preparing");
-	private final long worldId;
+	private final long realmId;
 	private final int slot;
 	private final Screen lastScreen;
 	private final String downloadName;
 
 	public DownloadTask(long l, int i, String string, Screen screen) {
-		this.worldId = l;
+		this.realmId = l;
 		this.slot = i;
 		this.lastScreen = screen;
 		this.downloadName = string;
@@ -39,7 +39,7 @@ public class DownloadTask extends LongRunningTask {
 					return;
 				}
 
-				WorldDownload worldDownload = realmsClient.requestDownloadInfo(this.worldId, this.slot);
+				WorldDownload worldDownload = realmsClient.requestDownloadInfo(this.realmId, this.slot);
 				pause(1L);
 				if (this.aborted()) {
 					return;

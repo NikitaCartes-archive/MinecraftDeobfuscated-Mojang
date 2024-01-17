@@ -6,7 +6,8 @@ import net.minecraft.world.phys.Vec3;
 public enum EntityAttachment {
 	PASSENGER(EntityAttachment.Fallback.AT_HEIGHT),
 	VEHICLE(EntityAttachment.Fallback.AT_FEET),
-	NAME_TAG(EntityAttachment.Fallback.AT_HEIGHT);
+	NAME_TAG(EntityAttachment.Fallback.AT_HEIGHT),
+	WARDEN_CHEST(EntityAttachment.Fallback.AT_CENTER);
 
 	private final EntityAttachment.Fallback fallback;
 
@@ -22,6 +23,7 @@ public enum EntityAttachment {
 		List<Vec3> ZERO = List.of(Vec3.ZERO);
 		EntityAttachment.Fallback AT_FEET = (f, g) -> ZERO;
 		EntityAttachment.Fallback AT_HEIGHT = (f, g) -> List.of(new Vec3(0.0, (double)g, 0.0));
+		EntityAttachment.Fallback AT_CENTER = (f, g) -> List.of(new Vec3(0.0, (double)g / 2.0, 0.0));
 
 		List<Vec3> create(float f, float g);
 	}

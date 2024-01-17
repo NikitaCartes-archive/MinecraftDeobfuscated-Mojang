@@ -1,10 +1,11 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class SoulSpeedEnchantment extends Enchantment {
 	public SoulSpeedEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
-		super(rarity, EnchantmentCategory.ARMOR_FEET, equipmentSlots);
+		super(rarity, ItemTags.FOOT_ARMOR_ENCHANTABLE, equipmentSlots);
 	}
 
 	@Override

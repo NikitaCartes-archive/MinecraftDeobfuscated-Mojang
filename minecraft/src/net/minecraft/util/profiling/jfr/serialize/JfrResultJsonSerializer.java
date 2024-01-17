@@ -174,7 +174,6 @@ public class JfrResultJsonSerializer {
 			NetworkPacketSummary.PacketCountAndSize packetCountAndSize = (NetworkPacketSummary.PacketCountAndSize)pair.getSecond();
 			jsonObjectxx.addProperty("protocolId", packetIdentification.protocolId());
 			jsonObjectxx.addProperty("packetId", packetIdentification.packetId());
-			jsonObjectxx.addProperty("packetName", packetIdentification.packetName());
 			jsonObjectxx.addProperty("totalBytes", packetCountAndSize.totalSize());
 			jsonObjectxx.addProperty("count", packetCountAndSize.totalCount());
 		});

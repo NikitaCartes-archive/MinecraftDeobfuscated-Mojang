@@ -21,7 +21,7 @@ public class RingBell {
 						if (serverLevel.random.nextFloat() <= 0.95F) {
 							return false;
 						} else {
-							BlockPos blockPos = instance.<GlobalPos>get(memoryAccessor).pos();
+							BlockPos blockPos = ((GlobalPos)instance.get(memoryAccessor)).pos();
 							if (blockPos.closerThan(livingEntity.blockPosition(), 3.0)) {
 								BlockState blockState = serverLevel.getBlockState(blockPos);
 								if (blockState.is(Blocks.BELL)) {

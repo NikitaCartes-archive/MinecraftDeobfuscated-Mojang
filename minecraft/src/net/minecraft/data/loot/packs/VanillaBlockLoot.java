@@ -1054,7 +1054,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					.withPool(
 						LootPool.lootPool()
 							.when(builder3)
-							.add(LootItem.lootTableItem(Items.CARROT).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286F, 3)))
+							.add(LootItem.lootTableItem(Items.CARROT).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.FORTUNE, 0.5714286F, 3)))
 					)
 			)
 		);
@@ -1069,7 +1069,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					.withPool(
 						LootPool.lootPool()
 							.when(builder5)
-							.add(LootItem.lootTableItem(Items.POTATO).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286F, 3)))
+							.add(LootItem.lootTableItem(Items.POTATO).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.FORTUNE, 0.5714286F, 3)))
 					)
 					.withPool(LootPool.lootPool().when(builder5).add(LootItem.lootTableItem(Items.POISONOUS_POTATO).when(LootItemRandomChanceCondition.randomChance(0.02F))))
 			)
@@ -1087,7 +1087,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 								)
 								.add(LootItem.lootTableItem(Items.SWEET_BERRIES))
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 3.0F)))
-								.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))
+								.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
 						)
 						.withPool(
 							LootPool.lootPool()
@@ -1097,7 +1097,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 								)
 								.add(LootItem.lootTableItem(Items.SWEET_BERRIES))
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
-								.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))
+								.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
 						)
 				)
 		);
@@ -1124,7 +1124,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 						block,
 						LootItem.lootTableItem(Items.GOLD_NUGGET)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F)))
-							.apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+							.apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
 					)
 				)
 		);
@@ -1172,7 +1172,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 						block,
 						LootItem.lootTableItem(Items.GLOWSTONE_DUST)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F)))
-							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))
+							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
 							.apply(LimitCount.limitCount(IntRange.range(1, 4)))
 					)
 				)
@@ -1185,7 +1185,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 						block,
 						LootItem.lootTableItem(Items.MELON_SLICE)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 7.0F)))
-							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))
+							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
 							.apply(LimitCount.limitCount(IntRange.upperBound(9)))
 					)
 				)
@@ -1200,7 +1200,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 						block,
 						LootItem.lootTableItem(Items.PRISMARINE_CRYSTALS)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 3.0F)))
-							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))
+							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
 							.apply(LimitCount.limitCount(IntRange.range(1, 5)))
 					)
 				)
@@ -1223,7 +1223,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 												)
 										)
 										.apply(
-											ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE)
+											ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE)
 												.when(
 													LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
 														.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(NetherWartBlock.AGE, 3))
@@ -1273,7 +1273,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					this.applyExplosionCondition(
 						block,
 						((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.FLINT)
-								.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 0.1F, 0.14285715F, 0.25F, 1.0F)))
+								.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 0.1F, 0.14285715F, 0.25F, 1.0F)))
 							.otherwise(LootItem.lootTableItem(block))
 					)
 				)
@@ -1292,7 +1292,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 						block,
 						((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.GOLD_NUGGET)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
-								.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 0.1F, 0.14285715F, 0.25F, 1.0F)))
+								.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 0.1F, 0.14285715F, 0.25F, 1.0F)))
 							.otherwise(LootItem.lootTableItem(block))
 					)
 				)
@@ -1309,7 +1309,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					block,
 					((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.AMETHYST_SHARD)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0F)))
-							.apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+							.apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
 							.when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(ItemTags.CLUSTER_MAX_HARVESTABLES))))
 						.otherwise(
 							this.applyExplosionDecay(block, LootItem.lootTableItem(Items.AMETHYST_SHARD).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F))))

@@ -4,7 +4,9 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
@@ -18,9 +20,14 @@ public record ClientboundLoginPacket(
 	boolean reducedDebugInfo,
 	boolean showDeathScreen,
 	boolean doLimitedCrafting,
-	CommonPlayerSpawnInfo commonPlayerSpawnInfo
+	CommonPlayerSpawnInfo commonPlayerSpawnInfo,
+	boolean enforcesSecureChat
 ) implements Packet<ClientGamePacketListener> {
-	public ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf) {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundLoginPacket> STREAM_CODEC = Packet.codec(
+		ClientboundLoginPacket::write, ClientboundLoginPacket::new
+	);
+
+	private ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(
 			friendlyByteBuf.readInt(),
 			friendlyByteBuf.readBoolean(),
@@ -31,12 +38,12 @@ public record ClientboundLoginPacket(
 			friendlyByteBuf.readBoolean(),
 			friendlyByteBuf.readBoolean(),
 			friendlyByteBuf.readBoolean(),
-			new CommonPlayerSpawnInfo(friendlyByteBuf)
+			new CommonPlayerSpawnInfo(friendlyByteBuf),
+			friendlyByteBuf.readBoolean()
 		);
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeInt(this.playerId);
 		friendlyByteBuf.writeBoolean(this.hardcore);
 		friendlyByteBuf.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
@@ -47,6 +54,12 @@ public record ClientboundLoginPacket(
 		friendlyByteBuf.writeBoolean(this.showDeathScreen);
 		friendlyByteBuf.writeBoolean(this.doLimitedCrafting);
 		this.commonPlayerSpawnInfo.write(friendlyByteBuf);
+		friendlyByteBuf.writeBoolean(this.enforcesSecureChat);
+	}
+
+	@Override
+	public PacketType<ClientboundLoginPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_LOGIN;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

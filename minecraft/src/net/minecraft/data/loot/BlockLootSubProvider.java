@@ -246,7 +246,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 				block,
 				LootItem.lootTableItem(Items.RAW_COPPER)
 					.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
-					.apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+					.apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
 			)
 		);
 	}
@@ -258,7 +258,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 				block,
 				LootItem.lootTableItem(Items.LAPIS_LAZULI)
 					.apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 9.0F)))
-					.apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+					.apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
 			)
 		);
 	}
@@ -270,7 +270,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 				block,
 				LootItem.lootTableItem(Items.REDSTONE)
 					.apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 5.0F)))
-					.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE))
+					.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
 			)
 		);
 	}
@@ -333,7 +333,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 
 	protected LootTable.Builder createOreDrop(Block block, Item item) {
 		return createSilkTouchDispatchTable(
-			block, this.applyExplosionDecay(block, LootItem.lootTableItem(item).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE)))
+			block, this.applyExplosionDecay(block, LootItem.lootTableItem(item).apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE)))
 		);
 	}
 
@@ -355,7 +355,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 			this.applyExplosionDecay(
 				block,
 				((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.WHEAT_SEEDS).when(LootItemRandomChanceCondition.randomChance(0.125F)))
-					.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE, 2))
+					.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE, 2))
 			)
 		);
 	}
@@ -422,8 +422,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 
 	protected LootTable.Builder createLeavesDrops(Block block, Block block2, float... fs) {
 		return createSilkTouchOrShearsDispatchTable(
-				block,
-				this.applyExplosionCondition(block, LootItem.lootTableItem(block2)).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, fs))
+				block, this.applyExplosionCondition(block, LootItem.lootTableItem(block2)).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, fs))
 			)
 			.withPool(
 				LootPool.lootPool()
@@ -431,7 +430,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 					.when(HAS_NO_SHEARS_OR_SILK_TOUCH)
 					.add(
 						this.applyExplosionDecay(block, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
-							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, NORMAL_LEAVES_STICK_CHANCES))
+							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, NORMAL_LEAVES_STICK_CHANCES))
 					)
 			);
 	}
@@ -444,7 +443,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 					.when(HAS_NO_SHEARS_OR_SILK_TOUCH)
 					.add(
 						this.applyExplosionCondition(block, LootItem.lootTableItem(Items.APPLE))
-							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 0.005F, 0.0055555557F, 0.00625F, 0.008333334F, 0.025F))
+							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 0.005F, 0.0055555557F, 0.00625F, 0.008333334F, 0.025F))
 					)
 			);
 	}
@@ -455,7 +454,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 			this.applyExplosionDecay(
 					Blocks.MANGROVE_LEAVES, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
 				)
-				.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, NORMAL_LEAVES_STICK_CHANCES))
+				.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, NORMAL_LEAVES_STICK_CHANCES))
 		);
 	}
 
@@ -469,7 +468,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.when(builder)
-						.add(LootItem.lootTableItem(item2).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286F, 3)))
+						.add(LootItem.lootTableItem(item2).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.FORTUNE, 0.5714286F, 3)))
 				)
 		);
 	}
@@ -605,7 +604,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 
 	protected void addNetherVinesDropTable(Block block, Block block2) {
 		LootTable.Builder builder = createSilkTouchOrShearsDispatchTable(
-			block, LootItem.lootTableItem(block).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 0.33F, 0.55F, 0.77F, 1.0F))
+			block, LootItem.lootTableItem(block).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 0.33F, 0.55F, 0.77F, 1.0F))
 		);
 		this.add(block, builder);
 		this.add(block2, builder);

@@ -2,6 +2,7 @@ package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.common.ServerCommonPacketListener;
+import net.minecraft.network.protocol.ping.ServerPingPacketListener;
 
 public interface ServerGamePacketListener extends ServerPingPacketListener, ServerCommonPacketListener {
 	@Override
@@ -81,11 +82,11 @@ public interface ServerGamePacketListener extends ServerPingPacketListener, Serv
 
 	void handleEditBook(ServerboundEditBookPacket serverboundEditBookPacket);
 
-	void handleEntityTagQuery(ServerboundEntityTagQuery serverboundEntityTagQuery);
+	void handleEntityTagQuery(ServerboundEntityTagQueryPacket serverboundEntityTagQueryPacket);
 
 	void handleContainerSlotStateChanged(ServerboundContainerSlotStateChangedPacket serverboundContainerSlotStateChangedPacket);
 
-	void handleBlockEntityTagQuery(ServerboundBlockEntityTagQuery serverboundBlockEntityTagQuery);
+	void handleBlockEntityTagQuery(ServerboundBlockEntityTagQueryPacket serverboundBlockEntityTagQueryPacket);
 
 	void handleSetJigsawBlock(ServerboundSetJigsawBlockPacket serverboundSetJigsawBlockPacket);
 

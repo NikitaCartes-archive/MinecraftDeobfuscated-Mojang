@@ -87,17 +87,17 @@ public abstract class CrossCollisionBlock extends Block implements SimpleWaterlo
 	}
 
 	@Override
-	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return !blockState.getValue(WATERLOGGED);
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.shapeByIndex[this.getAABBIndex(blockState)];
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.collisionShapeByIndex[this.getAABBIndex(blockState)];
 	}
 
@@ -129,17 +129,17 @@ public abstract class CrossCollisionBlock extends Block implements SimpleWaterlo
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		switch(rotation) {
 			case CLOCKWISE_180:
 				return blockState.setValue(NORTH, (Boolean)blockState.getValue(SOUTH))
@@ -162,7 +162,7 @@ public abstract class CrossCollisionBlock extends Block implements SimpleWaterlo
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		switch(mirror) {
 			case LEFT_RIGHT:
 				return blockState.setValue(NORTH, (Boolean)blockState.getValue(SOUTH)).setValue(SOUTH, (Boolean)blockState.getValue(NORTH));

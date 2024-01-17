@@ -49,7 +49,7 @@ public class RealmsServer extends ValueObject {
 	public String minigameName;
 	public int minigameId;
 	public String minigameImage;
-	public long parentWorldId = -1L;
+	public long parentRealmId = -1L;
 	@Nullable
 	public String parentWorldName;
 	public String activeVersion = "";
@@ -132,7 +132,7 @@ public class RealmsServer extends ValueObject {
 			realmsServer.activeSlot = JsonUtils.getIntOr("activeSlot", jsonObject, -1);
 			realmsServer.minigameId = JsonUtils.getIntOr("minigameId", jsonObject, -1);
 			realmsServer.minigameImage = JsonUtils.getStringOr("minigameImage", jsonObject, null);
-			realmsServer.parentWorldId = JsonUtils.getLongOr("parentWorldId", jsonObject, -1L);
+			realmsServer.parentRealmId = JsonUtils.getLongOr("parentWorldId", jsonObject, -1L);
 			realmsServer.parentWorldName = JsonUtils.getStringOr("parentWorldName", jsonObject, null);
 			realmsServer.activeVersion = JsonUtils.getStringOr("activeVersion", jsonObject, "");
 			realmsServer.compatibility = getCompatibility(JsonUtils.getStringOr("compatibility", jsonObject, RealmsServer.Compatibility.UNVERIFIABLE.name()));
@@ -304,7 +304,7 @@ public class RealmsServer extends ValueObject {
 		realmsServer.minigameId = this.minigameId;
 		realmsServer.minigameImage = this.minigameImage;
 		realmsServer.parentWorldName = this.parentWorldName;
-		realmsServer.parentWorldId = this.parentWorldId;
+		realmsServer.parentRealmId = this.parentRealmId;
 		realmsServer.activeVersion = this.activeVersion;
 		realmsServer.compatibility = this.compatibility;
 		return realmsServer;
@@ -321,7 +321,7 @@ public class RealmsServer extends ValueObject {
 	}
 
 	public boolean isSnapshotRealm() {
-		return this.parentWorldId != -1L;
+		return this.parentRealmId != -1L;
 	}
 
 	public String getWorldName(int i) {

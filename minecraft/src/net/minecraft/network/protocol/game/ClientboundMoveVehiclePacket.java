@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.Entity;
 
 public class ClientboundMoveVehiclePacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundMoveVehiclePacket> STREAM_CODEC = Packet.codec(
+		ClientboundMoveVehiclePacket::write, ClientboundMoveVehiclePacket::new
+	);
 	private final double x;
 	private final double y;
 	private final double z;
@@ -19,7 +24,7 @@ public class ClientboundMoveVehiclePacket implements Packet<ClientGamePacketList
 		this.xRot = entity.getXRot();
 	}
 
-	public ClientboundMoveVehiclePacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundMoveVehiclePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.x = friendlyByteBuf.readDouble();
 		this.y = friendlyByteBuf.readDouble();
 		this.z = friendlyByteBuf.readDouble();
@@ -27,13 +32,17 @@ public class ClientboundMoveVehiclePacket implements Packet<ClientGamePacketList
 		this.xRot = friendlyByteBuf.readFloat();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);
 		friendlyByteBuf.writeDouble(this.z);
 		friendlyByteBuf.writeFloat(this.yRot);
 		friendlyByteBuf.writeFloat(this.xRot);
+	}
+
+	@Override
+	public PacketType<ClientboundMoveVehiclePacket> type() {
+		return GamePacketTypes.CLIENTBOUND_MOVE_VEHICLE;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

@@ -8,26 +8,26 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.DebugEntityNameGenerator;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public record BeeDebugPayload(BeeDebugPayload.BeeInfo beeInfo) implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/bee");
+	public static final StreamCodec<FriendlyByteBuf, BeeDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(BeeDebugPayload::write, BeeDebugPayload::new);
+	public static final CustomPacketPayload.Type<BeeDebugPayload> TYPE = CustomPacketPayload.createType("debug/bee");
 
-	public BeeDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+	private BeeDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this(new BeeDebugPayload.BeeInfo(friendlyByteBuf));
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		this.beeInfo.write(friendlyByteBuf);
 	}
 
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<BeeDebugPayload> type() {
+		return TYPE;
 	}
 
 	public static record BeeInfo(
@@ -47,11 +47,11 @@ public record BeeDebugPayload(BeeDebugPayload.BeeInfo beeInfo) implements Custom
 				friendlyByteBuf.readInt(),
 				friendlyByteBuf.readVec3(),
 				friendlyByteBuf.readNullable(Path::createFromStream),
-				friendlyByteBuf.readNullable(FriendlyByteBuf::readBlockPos),
-				friendlyByteBuf.readNullable(FriendlyByteBuf::readBlockPos),
+				friendlyByteBuf.readNullable(BlockPos.STREAM_CODEC),
+				friendlyByteBuf.readNullable(BlockPos.STREAM_CODEC),
 				friendlyByteBuf.readInt(),
 				friendlyByteBuf.readCollection(HashSet::new, FriendlyByteBuf::readUtf),
-				friendlyByteBuf.readList(FriendlyByteBuf::readBlockPos)
+				friendlyByteBuf.readList(BlockPos.STREAM_CODEC)
 			);
 		}
 
@@ -60,11 +60,11 @@ public record BeeDebugPayload(BeeDebugPayload.BeeInfo beeInfo) implements Custom
 			friendlyByteBuf.writeInt(this.id);
 			friendlyByteBuf.writeVec3(this.pos);
 			friendlyByteBuf.writeNullable(this.path, (friendlyByteBufx, path) -> path.writeToStream(friendlyByteBufx));
-			friendlyByteBuf.writeNullable(this.hivePos, FriendlyByteBuf::writeBlockPos);
-			friendlyByteBuf.writeNullable(this.flowerPos, FriendlyByteBuf::writeBlockPos);
+			friendlyByteBuf.writeNullable(this.hivePos, BlockPos.STREAM_CODEC);
+			friendlyByteBuf.writeNullable(this.flowerPos, BlockPos.STREAM_CODEC);
 			friendlyByteBuf.writeInt(this.travelTicks);
 			friendlyByteBuf.writeCollection(this.goals, FriendlyByteBuf::writeUtf);
-			friendlyByteBuf.writeCollection(this.blacklistedHives, FriendlyByteBuf::writeBlockPos);
+			friendlyByteBuf.writeCollection(this.blacklistedHives, BlockPos.STREAM_CODEC);
 		}
 
 		public boolean hasHive(BlockPos blockPos) {

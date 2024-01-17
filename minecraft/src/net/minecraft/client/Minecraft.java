@@ -89,6 +89,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.font.FontManager;
+import net.minecraft.client.gui.font.providers.FreeTypeUtil;
 import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.BanNoticeScreens;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -1148,6 +1149,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.guiSprites.close();
 			this.textureManager.close();
 			this.resourceManager.close();
+			FreeTypeUtil.destroy();
 			Util.shutdownExecutors();
 		} catch (Throwable var5) {
 			LOGGER.error("Shutdown failure!", var5);
@@ -1290,7 +1292,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				"%d fps T: %s%s%s%s B: %d%s",
 				fps,
 				k == 260 ? "inf" : k,
-				this.options.enableVsync().get() ? " vsync" : " ",
+				this.options.enableVsync().get() ? " vsync " : " ",
 				this.options.graphicsMode().get(),
 				this.options.cloudStatus().get() == CloudStatus.OFF ? "" : (this.options.cloudStatus().get() == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
 				this.options.biomeBlendRadius().get(),
@@ -2077,7 +2079,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			SkullBlockEntity.setup(services, this);
 			GameProfileCache.setUsesAuthentication(false);
 			this.singleplayerServer = MinecraftServer.spin(thread -> new IntegratedServer(thread, this, levelStorageAccess, packRepository, worldStem, services, i -> {
-					StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
+					StoringChunkProgressListener storingChunkProgressListener = StoringChunkProgressListener.createFromGameruleRadius(i + 0);
 					this.progressListener.set(storingChunkProgressListener);
 					return ProcessorChunkProgressListener.createStarted(storingChunkProgressListener, this.progressTasks::add);
 				}));
@@ -2116,7 +2118,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		Connection connection = Connection.connectToLocalServer(socketAddress);
 		connection.initiateServerboundPlayConnection(
 			socketAddress.toString(), 0, new ClientHandshakePacketListenerImpl(connection, this, null, null, bl, duration, component -> {
-			})
+			}, null)
 		);
 		connection.send(new ServerboundHelloPacket(this.getUser().getName(), this.getUser().getProfileId()));
 		this.pendingConnection = connection;
@@ -2137,15 +2139,21 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public void disconnect() {
-		this.disconnect(new ProgressScreen(true));
+		this.disconnect(new ProgressScreen(true), false);
 	}
 
 	public void disconnect(Screen screen) {
+		this.disconnect(screen, false);
+	}
+
+	public void disconnect(Screen screen, boolean bl) {
 		ClientPacketListener clientPacketListener = this.getConnection();
 		if (clientPacketListener != null) {
 			this.dropAllTasks();
 			clientPacketListener.close();
-			this.clearDownloadedResourcePacks();
+			if (!bl) {
+				this.clearDownloadedResourcePacks();
+			}
 		}
 
 		this.playerSocialManager.stopOnlineMode();

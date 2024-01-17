@@ -1,10 +1,23 @@
 package net.minecraft.core;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 
 public class Rotations {
+	public static final StreamCodec<ByteBuf, Rotations> STREAM_CODEC = new StreamCodec<ByteBuf, Rotations>() {
+		public Rotations decode(ByteBuf byteBuf) {
+			return new Rotations(byteBuf.readFloat(), byteBuf.readFloat(), byteBuf.readFloat());
+		}
+
+		public void encode(ByteBuf byteBuf, Rotations rotations) {
+			byteBuf.writeFloat(rotations.x);
+			byteBuf.writeFloat(rotations.y);
+			byteBuf.writeFloat(rotations.z);
+		}
+	};
 	protected final float x;
 	protected final float y;
 	protected final float z;

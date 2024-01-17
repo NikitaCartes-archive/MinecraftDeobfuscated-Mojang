@@ -31,13 +31,13 @@ public class DrownedRenderer extends AbstractZombieRenderer<Drowned, DrownedMode
 		return DROWNED_LOCATION;
 	}
 
-	protected void setupRotations(Drowned drowned, PoseStack poseStack, float f, float g, float h) {
-		super.setupRotations(drowned, poseStack, f, g, h);
-		float i = drowned.getSwimAmount(h);
-		if (i > 0.0F) {
-			float j = -10.0F - drowned.getXRot();
-			float k = Mth.lerp(i, 0.0F, j);
-			poseStack.rotateAround(Axis.XP.rotationDegrees(k), 0.0F, drowned.getBbHeight() / 2.0F, 0.0F);
+	protected void setupRotations(Drowned drowned, PoseStack poseStack, float f, float g, float h, float i) {
+		super.setupRotations(drowned, poseStack, f, g, h, i);
+		float j = drowned.getSwimAmount(h);
+		if (j > 0.0F) {
+			float k = -10.0F - drowned.getXRot();
+			float l = Mth.lerp(j, 0.0F, k);
+			poseStack.rotateAround(Axis.XP.rotationDegrees(l), 0.0F, drowned.getBbHeight() / 2.0F / i, 0.0F);
 		}
 	}
 }

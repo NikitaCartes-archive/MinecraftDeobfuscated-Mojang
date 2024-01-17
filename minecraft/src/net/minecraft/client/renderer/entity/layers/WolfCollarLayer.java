@@ -1,11 +1,14 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WolfModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Wolf;
 
@@ -20,7 +23,8 @@ public class WolfCollarLayer extends RenderLayer<Wolf, WolfModel<Wolf>> {
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Wolf wolf, float f, float g, float h, float j, float k, float l) {
 		if (wolf.isTame() && !wolf.isInvisible()) {
 			float[] fs = wolf.getCollarColor().getTextureDiffuseColors();
-			renderColoredCutoutModel(this.getParentModel(), WOLF_COLLAR_LOCATION, poseStack, multiBufferSource, i, wolf, fs[0], fs[1], fs[2]);
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(WOLF_COLLAR_LOCATION));
+			this.getParentModel().renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, fs[0], fs[1], fs[2], 1.0F);
 		}
 	}
 }

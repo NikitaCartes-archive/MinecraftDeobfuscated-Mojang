@@ -2,23 +2,25 @@ package net.minecraft.network.protocol.common.custom;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.codec.StreamCodec;
 
 public record PoiTicketCountDebugPayload(BlockPos pos, int freeTicketCount) implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/poi_ticket_count");
+	public static final StreamCodec<FriendlyByteBuf, PoiTicketCountDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(
+		PoiTicketCountDebugPayload::write, PoiTicketCountDebugPayload::new
+	);
+	public static final CustomPacketPayload.Type<PoiTicketCountDebugPayload> TYPE = CustomPacketPayload.createType("debug/poi_ticket_count");
 
-	public PoiTicketCountDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+	private PoiTicketCountDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this(friendlyByteBuf.readBlockPos(), friendlyByteBuf.readInt());
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeInt(this.freeTicketCount);
 	}
 
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<PoiTicketCountDebugPayload> type() {
+		return TYPE;
 	}
 }

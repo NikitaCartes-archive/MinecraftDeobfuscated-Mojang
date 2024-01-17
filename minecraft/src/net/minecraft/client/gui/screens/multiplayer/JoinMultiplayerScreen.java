@@ -254,7 +254,7 @@ public class JoinMultiplayerScreen extends Screen {
 	}
 
 	private void join(ServerData serverData) {
-		ConnectScreen.startConnecting(this, this.minecraft, ServerAddress.parseString(serverData.ip), serverData, false);
+		ConnectScreen.startConnecting(this, this.minecraft, ServerAddress.parseString(serverData.ip), serverData, false, null);
 	}
 
 	public void setSelected(ServerSelectionList.Entry entry) {

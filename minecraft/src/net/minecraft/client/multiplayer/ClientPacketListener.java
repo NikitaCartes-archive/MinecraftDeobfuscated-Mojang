@@ -9,6 +9,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.time.Instant;
 import java.util.BitSet;
 import java.util.Collection;
@@ -20,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -86,6 +86,7 @@ import net.minecraft.network.chat.SignableCommand;
 import net.minecraft.network.chat.SignedMessageBody;
 import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.chat.SignedMessageLink;
+import net.minecraft.network.chat.numbers.NumberFormat;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
@@ -108,6 +109,7 @@ import net.minecraft.network.protocol.common.custom.RaidsDebugPayload;
 import net.minecraft.network.protocol.common.custom.StructuresDebugPayload;
 import net.minecraft.network.protocol.common.custom.VillageSectionsDebugPayload;
 import net.minecraft.network.protocol.common.custom.WorldGenAttemptDebugPayload;
+import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
@@ -230,7 +232,7 @@ import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedP
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
-import net.minecraft.network.protocol.status.ClientboundPongResponsePacket;
+import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -286,6 +288,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -308,7 +311,7 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class ClientPacketListener extends ClientCommonPacketListenerImpl implements TickablePacketListener, ClientGamePacketListener {
+public class ClientPacketListener extends ClientCommonPacketListenerImpl implements ClientGamePacketListener, TickablePacketListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component UNSECURE_SERVER_TOAST_TITLE = Component.translatable("multiplayer.unsecureserver.toast.title");
 	private static final Component UNSERURE_SERVER_TOAST = Component.translatable("multiplayer.unsecureserver.toast");
@@ -342,6 +345,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private final PingDebugMonitor pingDebugMonitor;
 	@Nullable
 	private LevelLoadStatusManager levelLoadStatusManager;
+	private boolean serverEnforcesSecureChat;
 	private boolean seenInsecureChatWarning = false;
 	private volatile boolean closed;
 	private final Scoreboard scoreboard = new Scoreboard();
@@ -437,6 +441,14 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 		this.telemetryManager.onPlayerInfoReceived(commonPlayerSpawnInfo.gameType(), clientboundLoginPacket.hardcore());
 		this.minecraft.quickPlayLog().log(this.minecraft);
+		this.serverEnforcesSecureChat = clientboundLoginPacket.enforcesSecureChat();
+		if (this.serverData != null && !this.seenInsecureChatWarning && !this.enforcesSecureChat()) {
+			SystemToast systemToast = SystemToast.multiline(
+				this.minecraft, SystemToast.SystemToastId.UNSECURE_SERVER_WARNING, UNSECURE_SERVER_TOAST_TITLE, UNSERURE_SERVER_TOAST
+			);
+			this.minecraft.getToasts().addToast(systemToast);
+			this.seenInsecureChatWarning = true;
+		}
 	}
 
 	@Override
@@ -784,21 +796,28 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 	@Override
 	public void handleConfigurationStart(ClientboundStartConfigurationPacket clientboundStartConfigurationPacket) {
-		this.connection.suspendInboundAfterProtocolChange();
 		PacketUtils.ensureRunningOnSameThread(clientboundStartConfigurationPacket, this, this.minecraft);
 		this.minecraft.clearClientLevel(new ServerReconfigScreen(RECONFIGURE_SCREEN_MESSAGE, this.connection));
 		this.connection
-			.setListener(
+			.setupInboundProtocol(
+				ConfigurationProtocols.CLIENTBOUND,
 				new ClientConfigurationPacketListenerImpl(
 					this.minecraft,
 					this.connection,
 					new CommonListenerCookie(
-						this.localGameProfile, this.telemetryManager, this.registryAccess, this.enabledFeatures, this.serverBrand, this.serverData, this.postDisconnectScreen
+						this.localGameProfile,
+						this.telemetryManager,
+						this.registryAccess,
+						this.enabledFeatures,
+						this.serverBrand,
+						this.serverData,
+						this.postDisconnectScreen,
+						this.serverCookies
 					)
 				)
 			);
-		this.connection.resumeInboundAfterProtocolChange();
-		this.send(new ServerboundConfigurationAcknowledgedPacket());
+		this.send(ServerboundConfigurationAcknowledgedPacket.INSTANCE);
+		this.connection.setupOutboundProtocol(ConfigurationProtocols.SERVERBOUND);
 	}
 
 	@Override
@@ -1280,7 +1299,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		BlockPos blockPos = clientboundBlockEntityDataPacket.getPos();
 		this.minecraft.level.getBlockEntity(blockPos, clientboundBlockEntityDataPacket.getType()).ifPresent(blockEntity -> {
 			CompoundTag compoundTag = clientboundBlockEntityDataPacket.getTag();
-			if (compoundTag != null) {
+			if (!compoundTag.isEmpty()) {
 				blockEntity.load(compoundTag);
 			}
 
@@ -1506,9 +1525,9 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleAwardStats(ClientboundAwardStatsPacket clientboundAwardStatsPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundAwardStatsPacket, this, this.minecraft);
 
-		for(Entry<Stat<?>, Integer> entry : clientboundAwardStatsPacket.getStats().entrySet()) {
+		for(Entry<Stat<?>> entry : clientboundAwardStatsPacket.stats().object2IntEntrySet()) {
 			Stat<?> stat = (Stat)entry.getKey();
-			int i = entry.getValue();
+			int i = entry.getIntValue();
 			this.minecraft.player.getStats().setValue(this.minecraft.player, stat, i);
 		}
 
@@ -1587,6 +1606,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 	private void refreshTagDependentData() {
 		if (!this.connection.isMemoryConnection()) {
+			AbstractFurnaceBlockEntity.invalidateCache();
 			Blocks.rebuildCache();
 		}
 
@@ -1696,15 +1716,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		if (this.serverData != null) {
 			this.serverData.motd = clientboundServerDataPacket.getMotd();
 			clientboundServerDataPacket.getIconBytes().map(ServerData::validateIcon).ifPresent(this.serverData::setIconBytes);
-			this.serverData.setEnforcesSecureChat(clientboundServerDataPacket.enforcesSecureChat());
 			ServerList.saveSingleServer(this.serverData);
-			if (!this.seenInsecureChatWarning && !this.enforcesSecureChat()) {
-				SystemToast systemToast = SystemToast.multiline(
-					this.minecraft, SystemToast.SystemToastId.UNSECURE_SERVER_WARNING, UNSECURE_SERVER_TOAST_TITLE, UNSERURE_SERVER_TOAST
-				);
-				this.minecraft.getToasts().addToast(systemToast);
-				this.seenInsecureChatWarning = true;
-			}
 		}
 	}
 
@@ -1842,11 +1854,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	}
 
 	private boolean enforcesSecureChat() {
-		if (!this.minecraft.canValidateProfileKeys()) {
-			return false;
-		} else {
-			return this.serverData != null && this.serverData.enforcesSecureChat();
-		}
+		return this.minecraft.canValidateProfileKeys() && this.serverEnforcesSecureChat;
 	}
 
 	@Override
@@ -1907,10 +1915,10 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleItemCooldown(ClientboundCooldownPacket clientboundCooldownPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundCooldownPacket, this, this.minecraft);
-		if (clientboundCooldownPacket.getDuration() == 0) {
-			this.minecraft.player.getCooldowns().removeCooldown(clientboundCooldownPacket.getItem());
+		if (clientboundCooldownPacket.duration() == 0) {
+			this.minecraft.player.getCooldowns().removeCooldown(clientboundCooldownPacket.item());
 		} else {
-			this.minecraft.player.getCooldowns().addCooldown(clientboundCooldownPacket.getItem(), clientboundCooldownPacket.getDuration());
+			this.minecraft.player.getCooldowns().addCooldown(clientboundCooldownPacket.item(), clientboundCooldownPacket.duration());
 		}
 	}
 
@@ -1968,7 +1976,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			this.minecraft.debugRenderer.brainDebugRenderer.setFreeTicketCount(poiTicketCountDebugPayload.pos(), poiTicketCountDebugPayload.freeTicketCount());
 		} else if (customPacketPayload instanceof PoiAddedDebugPayload poiAddedDebugPayload) {
 			BrainDebugRenderer.PoiInfo poiInfo = new BrainDebugRenderer.PoiInfo(
-				poiAddedDebugPayload.pos(), poiAddedDebugPayload.type(), poiAddedDebugPayload.freeTicketCount()
+				poiAddedDebugPayload.pos(), poiAddedDebugPayload.poiType(), poiAddedDebugPayload.freeTicketCount()
 			);
 			this.minecraft.debugRenderer.brainDebugRenderer.addPoi(poiInfo);
 		} else if (customPacketPayload instanceof PoiRemovedDebugPayload poiRemovedDebugPayload) {
@@ -2000,7 +2008,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		} else if (customPacketPayload instanceof RaidsDebugPayload raidsDebugPayload) {
 			this.minecraft.debugRenderer.raidDebugRenderer.setRaidCenters(raidsDebugPayload.raidCenters());
 		} else if (customPacketPayload instanceof GameEventDebugPayload gameEventDebugPayload) {
-			this.minecraft.debugRenderer.gameEventListenerRenderer.trackGameEvent(gameEventDebugPayload.type(), gameEventDebugPayload.pos());
+			this.minecraft.debugRenderer.gameEventListenerRenderer.trackGameEvent(gameEventDebugPayload.gameEventType(), gameEventDebugPayload.pos());
 		} else if (customPacketPayload instanceof GameEventListenerDebugPayload gameEventListenerDebugPayload) {
 			this.minecraft
 				.debugRenderer
@@ -2014,7 +2022,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	}
 
 	private void handleUnknownCustomPayload(CustomPacketPayload customPacketPayload) {
-		LOGGER.warn("Unknown custom packet payload: {}", customPacketPayload.id());
+		LOGGER.warn("Unknown custom packet payload: {}", customPacketPayload.type().id());
 	}
 
 	@Override
@@ -2029,7 +2037,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 					clientboundSetObjectivePacket.getDisplayName(),
 					clientboundSetObjectivePacket.getRenderType(),
 					false,
-					clientboundSetObjectivePacket.getNumberFormat()
+					(NumberFormat)clientboundSetObjectivePacket.getNumberFormat().orElse(null)
 				);
 		} else {
 			Objective objective = this.scoreboard.getObjective(string);
@@ -2039,7 +2047,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				} else if (clientboundSetObjectivePacket.getMethod() == 2) {
 					objective.setRenderType(clientboundSetObjectivePacket.getRenderType());
 					objective.setDisplayName(clientboundSetObjectivePacket.getDisplayName());
-					objective.setNumberFormat(clientboundSetObjectivePacket.getNumberFormat());
+					objective.setNumberFormat((NumberFormat)clientboundSetObjectivePacket.getNumberFormat().orElse(null));
 				}
 			}
 		}
@@ -2055,7 +2063,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			ScoreAccess scoreAccess = this.scoreboard.getOrCreatePlayerScore(scoreHolder, objective, true);
 			scoreAccess.set(clientboundSetScorePacket.score());
 			scoreAccess.display(clientboundSetScorePacket.display());
-			scoreAccess.numberFormatOverride(clientboundSetScorePacket.numberFormat());
+			scoreAccess.numberFormatOverride((NumberFormat)clientboundSetScorePacket.numberFormat().orElse(null));
 		} else {
 			LOGGER.warn("Received packet for unknown scoreboard objective: {}", string);
 		}
@@ -2299,7 +2307,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleBundlePacket(ClientboundBundlePacket clientboundBundlePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundBundlePacket, this, this.minecraft);
 
-		for(Packet<ClientGamePacketListener> packet : clientboundBundlePacket.subPackets()) {
+		for(Packet<? super ClientGamePacketListener> packet : clientboundBundlePacket.subPackets()) {
 			packet.handle(this);
 		}
 	}

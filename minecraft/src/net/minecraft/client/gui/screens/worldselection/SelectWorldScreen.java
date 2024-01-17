@@ -72,6 +72,10 @@ public class SelectWorldScreen extends Screen {
 				.build()
 		);
 		this.updateButtonStatus(null);
+	}
+
+	@Override
+	protected void setInitialFocus() {
 		this.setInitialFocus(this.searchBox);
 	}
 

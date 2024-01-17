@@ -1,13 +1,25 @@
 package net.minecraft.network.protocol.game;
 
-import javax.annotation.Nullable;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.inventory.MenuType;
 
 public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundOpenScreenPacket> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.VAR_INT,
+		ClientboundOpenScreenPacket::getContainerId,
+		ByteBufCodecs.registry(Registries.MENU),
+		ClientboundOpenScreenPacket::getType,
+		ComponentSerialization.STREAM_CODEC,
+		ClientboundOpenScreenPacket::getTitle,
+		ClientboundOpenScreenPacket::new
+	);
 	private final int containerId;
 	private final MenuType<?> type;
 	private final Component title;
@@ -18,17 +30,9 @@ public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListe
 		this.title = component;
 	}
 
-	public ClientboundOpenScreenPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.containerId = friendlyByteBuf.readVarInt();
-		this.type = friendlyByteBuf.readById(BuiltInRegistries.MENU);
-		this.title = friendlyByteBuf.readComponentTrusted();
-	}
-
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.containerId);
-		friendlyByteBuf.writeId(BuiltInRegistries.MENU, this.type);
-		friendlyByteBuf.writeComponent(this.title);
+	public PacketType<ClientboundOpenScreenPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_OPEN_SCREEN;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -39,7 +43,6 @@ public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListe
 		return this.containerId;
 	}
 
-	@Nullable
 	public MenuType<?> getType() {
 		return this.type;
 	}

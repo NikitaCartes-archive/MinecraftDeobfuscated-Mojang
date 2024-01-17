@@ -569,7 +569,7 @@ public class SoundEvents {
 	public static final SoundEvent GENERIC_DEATH = register("entity.generic.death");
 	public static final SoundEvent GENERIC_DRINK = register("entity.generic.drink");
 	public static final SoundEvent GENERIC_EAT = register("entity.generic.eat");
-	public static final SoundEvent GENERIC_EXPLODE = register("entity.generic.explode");
+	public static final Holder.Reference<SoundEvent> GENERIC_EXPLODE = registerForHolder("entity.generic.explode");
 	public static final SoundEvent GENERIC_EXTINGUISH_FIRE = register("entity.generic.extinguish_fire");
 	public static final SoundEvent GENERIC_HURT = register("entity.generic.hurt");
 	public static final SoundEvent GENERIC_SMALL_FALL = register("entity.generic.small_fall");
@@ -1483,7 +1483,7 @@ public class SoundEvents {
 	public static final SoundEvent WET_SPONGE_HIT = register("block.wet_sponge.hit");
 	public static final SoundEvent WET_SPONGE_PLACE = register("block.wet_sponge.place");
 	public static final SoundEvent WET_SPONGE_STEP = register("block.wet_sponge.step");
-	public static final SoundEvent WIND_BURST = register("entity.generic.wind_burst");
+	public static final Holder.Reference<SoundEvent> WIND_BURST = registerForHolder("entity.generic.wind_burst");
 	public static final SoundEvent WITCH_AMBIENT = register("entity.witch.ambient");
 	public static final SoundEvent WITCH_CELEBRATE = register("entity.witch.celebrate");
 	public static final SoundEvent WITCH_DEATH = register("entity.witch.death");

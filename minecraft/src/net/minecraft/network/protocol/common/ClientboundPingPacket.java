@@ -1,22 +1,29 @@
 package net.minecraft.network.protocol.common;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundPingPacket implements Packet<ClientCommonPacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundPingPacket> STREAM_CODEC = Packet.codec(ClientboundPingPacket::write, ClientboundPingPacket::new);
 	private final int id;
 
 	public ClientboundPingPacket(int i) {
 		this.id = i;
 	}
 
-	public ClientboundPingPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundPingPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeInt(this.id);
+	}
+
+	@Override
+	public PacketType<ClientboundPingPacket> type() {
+		return CommonPacketTypes.CLIENTBOUND_PING;
 	}
 
 	public void handle(ClientCommonPacketListener clientCommonPacketListener) {

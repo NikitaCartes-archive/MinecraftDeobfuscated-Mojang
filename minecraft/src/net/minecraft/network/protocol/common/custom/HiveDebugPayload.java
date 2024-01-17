@@ -2,23 +2,23 @@ package net.minecraft.network.protocol.common.custom;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.codec.StreamCodec;
 
 public record HiveDebugPayload(HiveDebugPayload.HiveInfo hiveInfo) implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/hive");
+	public static final StreamCodec<FriendlyByteBuf, HiveDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(HiveDebugPayload::write, HiveDebugPayload::new);
+	public static final CustomPacketPayload.Type<HiveDebugPayload> TYPE = CustomPacketPayload.createType("debug/hive");
 
-	public HiveDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+	private HiveDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this(new HiveDebugPayload.HiveInfo(friendlyByteBuf));
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		this.hiveInfo.write(friendlyByteBuf);
 	}
 
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<HiveDebugPayload> type() {
+		return TYPE;
 	}
 
 	public static record HiveInfo(BlockPos pos, String hiveType, int occupantCount, int honeyLevel, boolean sedated) {

@@ -1,24 +1,32 @@
 package net.minecraft.network.protocol.login;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundGameProfilePacket implements Packet<ClientLoginPacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundGameProfilePacket> STREAM_CODEC = Packet.codec(
+		ClientboundGameProfilePacket::write, ClientboundGameProfilePacket::new
+	);
 	private final GameProfile gameProfile;
 
 	public ClientboundGameProfilePacket(GameProfile gameProfile) {
 		this.gameProfile = gameProfile;
 	}
 
-	public ClientboundGameProfilePacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundGameProfilePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.gameProfile = friendlyByteBuf.readGameProfile();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeGameProfile(this.gameProfile);
+	}
+
+	@Override
+	public PacketType<ClientboundGameProfilePacket> type() {
+		return LoginPacketTypes.CLIENTBOUND_GAME_PROFILE;
 	}
 
 	public void handle(ClientLoginPacketListener clientLoginPacketListener) {
@@ -30,7 +38,7 @@ public class ClientboundGameProfilePacket implements Packet<ClientLoginPacketLis
 	}
 
 	@Override
-	public ConnectionProtocol nextProtocol() {
-		return ConnectionProtocol.CONFIGURATION;
+	public boolean isTerminal() {
+		return true;
 	}
 }

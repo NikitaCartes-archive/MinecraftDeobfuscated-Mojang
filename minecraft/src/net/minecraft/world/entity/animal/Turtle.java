@@ -29,7 +29,6 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -214,11 +213,6 @@ public class Turtle extends Animal {
 	@Override
 	public boolean isPushedByFluid() {
 		return false;
-	}
-
-	@Override
-	public MobType getMobType() {
-		return MobType.WATER;
 	}
 
 	@Override

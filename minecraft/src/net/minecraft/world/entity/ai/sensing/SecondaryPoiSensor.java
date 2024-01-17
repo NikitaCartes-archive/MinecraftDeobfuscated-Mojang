@@ -23,7 +23,7 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
 	protected void doTick(ServerLevel serverLevel, Villager villager) {
 		ResourceKey<Level> resourceKey = serverLevel.dimension();
 		BlockPos blockPos = villager.blockPosition();
-		List<GlobalPos> list = Lists.<GlobalPos>newArrayList();
+		List<GlobalPos> list = Lists.newArrayList();
 		int i = 4;
 
 		for(int j = -4; j <= 4; ++j) {

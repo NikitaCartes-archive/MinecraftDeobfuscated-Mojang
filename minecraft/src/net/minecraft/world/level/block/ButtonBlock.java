@@ -81,7 +81,7 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		Direction direction = blockState.getValue(FACING);
 		boolean bl = blockState.getValue(POWERED);
 		switch((AttachFace)blockState.getValue(FACE)) {
@@ -109,7 +109,7 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (blockState.getValue(POWERED)) {
 			return InteractionResult.CONSUME;
 		} else {
@@ -121,7 +121,7 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
 		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK && !level.isClientSide() && !blockState.getValue(POWERED)) {
 			this.press(blockState, level, blockPos);
 		}
@@ -144,7 +144,7 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl && !blockState.is(blockState2.getBlock())) {
 			if (blockState.getValue(POWERED)) {
 				this.updateNeighbours(blockState, level, blockPos);
@@ -155,29 +155,29 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return blockState.getValue(POWERED) ? 15 : 0;
 	}
 
 	@Override
-	public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return blockState.getValue(POWERED) && getConnectedDirection(blockState) == direction ? 15 : 0;
 	}
 
 	@Override
-	public boolean isSignalSource(BlockState blockState) {
+	protected boolean isSignalSource(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (blockState.getValue(POWERED)) {
 			this.checkPressed(blockState, serverLevel, blockPos);
 		}
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!level.isClientSide && this.type.canButtonBeActivatedByArrows() && !blockState.getValue(POWERED)) {
 			this.checkPressed(blockState, level, blockPos);
 		}

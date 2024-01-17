@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.level.border.WorldBorder;
 
 public class ClientboundSetBorderLerpSizePacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundSetBorderLerpSizePacket> STREAM_CODEC = Packet.codec(
+		ClientboundSetBorderLerpSizePacket::write, ClientboundSetBorderLerpSizePacket::new
+	);
 	private final double oldSize;
 	private final double newSize;
 	private final long lerpTime;
@@ -15,17 +20,21 @@ public class ClientboundSetBorderLerpSizePacket implements Packet<ClientGamePack
 		this.lerpTime = worldBorder.getLerpRemainingTime();
 	}
 
-	public ClientboundSetBorderLerpSizePacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundSetBorderLerpSizePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.oldSize = friendlyByteBuf.readDouble();
 		this.newSize = friendlyByteBuf.readDouble();
 		this.lerpTime = friendlyByteBuf.readVarLong();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeDouble(this.oldSize);
 		friendlyByteBuf.writeDouble(this.newSize);
 		friendlyByteBuf.writeVarLong(this.lerpTime);
+	}
+
+	@Override
+	public PacketType<ClientboundSetBorderLerpSizePacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SET_BORDER_LERP_SIZE;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

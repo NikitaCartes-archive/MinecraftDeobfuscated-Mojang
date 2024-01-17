@@ -49,7 +49,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (blockState.getValue(HAS_RECORD)) {
 			BlockEntity var7 = level.getBlockEntity(blockPos);
 			if (var7 instanceof JukeboxBlockEntity jukeboxBlockEntity) {
@@ -62,7 +62,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity var7 = level.getBlockEntity(blockPos);
 			if (var7 instanceof JukeboxBlockEntity jukeboxBlockEntity) {
@@ -94,12 +94,12 @@ public class JukeboxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		BlockEntity var6 = level.getBlockEntity(blockPos);
 		if (var6 instanceof JukeboxBlockEntity jukeboxBlockEntity) {
 			Item var7 = jukeboxBlockEntity.getTheItem().getItem();
@@ -112,7 +112,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 

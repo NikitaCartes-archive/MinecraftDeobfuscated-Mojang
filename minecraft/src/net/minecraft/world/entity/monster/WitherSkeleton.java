@@ -107,7 +107,7 @@ public class WitherSkeleton extends AbstractSkeleton {
 	@Override
 	protected AbstractArrow getArrow(ItemStack itemStack, float f) {
 		AbstractArrow abstractArrow = super.getArrow(itemStack, f);
-		abstractArrow.setSecondsOnFire(100);
+		abstractArrow.igniteForSeconds(100);
 		return abstractArrow;
 	}
 

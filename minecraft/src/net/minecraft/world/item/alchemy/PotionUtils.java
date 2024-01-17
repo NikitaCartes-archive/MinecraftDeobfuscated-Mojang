@@ -196,7 +196,7 @@ public class PotionUtils {
 				if (d > 0.0) {
 					list2.add(
 						Component.translatable(
-								"attribute.modifier.plus." + attributeModifier.getOperation().toValue(),
+								"attribute.modifier.plus." + attributeModifier.getOperation().id(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 								Component.translatable(pair.getFirst().value().getDescriptionId())
 							)
@@ -206,7 +206,7 @@ public class PotionUtils {
 					e *= -1.0;
 					list2.add(
 						Component.translatable(
-								"attribute.modifier.take." + attributeModifier.getOperation().toValue(),
+								"attribute.modifier.take." + attributeModifier.getOperation().id(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 								Component.translatable(pair.getFirst().value().getDescriptionId())
 							)

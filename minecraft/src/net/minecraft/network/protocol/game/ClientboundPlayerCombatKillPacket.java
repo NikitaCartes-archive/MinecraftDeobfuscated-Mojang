@@ -2,9 +2,14 @@ package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundPlayerCombatKillPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerCombatKillPacket> STREAM_CODEC = Packet.codec(
+		ClientboundPlayerCombatKillPacket::write, ClientboundPlayerCombatKillPacket::new
+	);
 	private final int playerId;
 	private final Component message;
 
@@ -13,15 +18,19 @@ public class ClientboundPlayerCombatKillPacket implements Packet<ClientGamePacke
 		this.message = component;
 	}
 
-	public ClientboundPlayerCombatKillPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundPlayerCombatKillPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.playerId = friendlyByteBuf.readVarInt();
 		this.message = friendlyByteBuf.readComponentTrusted();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.playerId);
 		friendlyByteBuf.writeComponent(this.message);
+	}
+
+	@Override
+	public PacketType<ClientboundPlayerCombatKillPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_PLAYER_COMBAT_KILL;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

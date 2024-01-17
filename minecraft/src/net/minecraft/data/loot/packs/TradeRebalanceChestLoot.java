@@ -66,7 +66,7 @@ public class TradeRebalanceChestLoot implements LootTableSubProvider {
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(EmptyLootItem.emptyItem().setWeight(4))
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(1).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.BLOCK_EFFICIENCY)))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(1).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.EFFICIENCY)))
 				)
 		);
 		biConsumer.accept(BuiltInLootTables.ANCIENT_CITY, ancientCityLootTable());

@@ -51,7 +51,6 @@ public class RealmsSettingsScreen extends RealmsScreen {
 		this.nameEdit.setMaxLength(32);
 		this.nameEdit.setValue(this.serverData.getName());
 		this.addRenderableWidget(this.nameEdit);
-		this.setInitialFocus(this.nameEdit);
 		this.descEdit = new EditBox(this.minecraft.font, i, row(8), 212, 20, Component.translatable("mco.configure.world.description"));
 		this.descEdit.setMaxLength(32);
 		this.descEdit.setValue(this.serverData.getDescription());
@@ -61,6 +60,11 @@ public class RealmsSettingsScreen extends RealmsScreen {
 		);
 		this.nameEdit.setResponder(stringx -> button2.active = !Util.isBlank(stringx));
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.onClose()).bounds(this.width / 2 + 2, row(12), 106, 20).build());
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.nameEdit);
 	}
 
 	@Override

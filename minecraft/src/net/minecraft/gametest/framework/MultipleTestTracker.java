@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 public class MultipleTestTracker {
 	private static final char NOT_STARTED_TEST_CHAR = ' ';
@@ -13,7 +12,6 @@ public class MultipleTestTracker {
 	private static final char FAILED_OPTIONAL_TEST_CHAR = 'x';
 	private static final char FAILED_REQUIRED_TEST_CHAR = 'X';
 	private final Collection<GameTestInfo> tests = Lists.<GameTestInfo>newArrayList();
-	@Nullable
 	private final Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
 
 	public MultipleTestTracker() {
@@ -40,12 +38,16 @@ public class MultipleTestTracker {
 			}
 
 			@Override
-			public void testPassed(GameTestInfo gameTestInfo) {
+			public void testPassed(GameTestInfo gameTestInfo, GameTestRunner gameTestRunner) {
 			}
 
 			@Override
-			public void testFailed(GameTestInfo gameTestInfo) {
+			public void testFailed(GameTestInfo gameTestInfo, GameTestRunner gameTestRunner) {
 				consumer.accept(gameTestInfo);
+			}
+
+			@Override
+			public void testAddedForRerun(GameTestInfo gameTestInfo, GameTestInfo gameTestInfo2, GameTestRunner gameTestRunner) {
 			}
 		});
 	}
@@ -106,5 +108,9 @@ public class MultipleTestTracker {
 
 	public String toString() {
 		return this.getProgressBar();
+	}
+
+	public void remove(GameTestInfo gameTestInfo) {
+		this.tests.remove(gameTestInfo);
 	}
 }

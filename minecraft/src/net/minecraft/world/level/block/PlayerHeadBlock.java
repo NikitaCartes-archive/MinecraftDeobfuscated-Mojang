@@ -30,19 +30,23 @@ public class PlayerHeadBlock extends SkullBlock {
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
 		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof SkullBlockEntity skullBlockEntity) {
-			GameProfile gameProfile = null;
+		initializeSkullOwner(level, blockPos, itemStack);
+	}
+
+	public static void initializeSkullOwner(Level level, BlockPos blockPos, ItemStack itemStack) {
+		BlockEntity gameProfile = level.getBlockEntity(blockPos);
+		if (gameProfile instanceof SkullBlockEntity skullBlockEntity) {
+			GameProfile gameProfilex = null;
 			if (itemStack.hasTag()) {
 				CompoundTag compoundTag = itemStack.getTag();
 				if (compoundTag.contains("SkullOwner", 10)) {
-					gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
+					gameProfilex = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
 				} else if (compoundTag.contains("SkullOwner", 8) && !Util.isBlank(compoundTag.getString("SkullOwner"))) {
-					gameProfile = new GameProfile(Util.NIL_UUID, compoundTag.getString("SkullOwner"));
+					gameProfilex = new GameProfile(Util.NIL_UUID, compoundTag.getString("SkullOwner"));
 				}
 			}
 
-			skullBlockEntity.setOwner(gameProfile);
+			skullBlockEntity.setOwner(gameProfilex);
 		}
 	}
 }

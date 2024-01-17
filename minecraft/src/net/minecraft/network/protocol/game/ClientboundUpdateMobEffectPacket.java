@@ -1,13 +1,19 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 
 public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundUpdateMobEffectPacket> STREAM_CODEC = Packet.codec(
+		ClientboundUpdateMobEffectPacket::write, ClientboundUpdateMobEffectPacket::new
+	);
 	private static final int FLAG_AMBIENT = 1;
 	private static final int FLAG_VISIBLE = 2;
 	private static final int FLAG_SHOW_ICON = 4;
@@ -43,21 +49,25 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		this.flags = b;
 	}
 
-	public ClientboundUpdateMobEffectPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.entityId = friendlyByteBuf.readVarInt();
-		this.effect = friendlyByteBuf.readById(BuiltInRegistries.MOB_EFFECT.asHolderIdMap());
-		this.effectAmplifier = friendlyByteBuf.readByte();
-		this.effectDurationTicks = friendlyByteBuf.readVarInt();
-		this.flags = friendlyByteBuf.readByte();
+	private ClientboundUpdateMobEffectPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.entityId = registryFriendlyByteBuf.readVarInt();
+		this.effect = ByteBufCodecs.holderRegistry(Registries.MOB_EFFECT).decode(registryFriendlyByteBuf);
+		this.effectAmplifier = registryFriendlyByteBuf.readByte();
+		this.effectDurationTicks = registryFriendlyByteBuf.readVarInt();
+		this.flags = registryFriendlyByteBuf.readByte();
+	}
+
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeVarInt(this.entityId);
+		ByteBufCodecs.holderRegistry(Registries.MOB_EFFECT).encode(registryFriendlyByteBuf, this.effect);
+		registryFriendlyByteBuf.writeByte(this.effectAmplifier);
+		registryFriendlyByteBuf.writeVarInt(this.effectDurationTicks);
+		registryFriendlyByteBuf.writeByte(this.flags);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.entityId);
-		friendlyByteBuf.writeId(BuiltInRegistries.MOB_EFFECT.asHolderIdMap(), this.effect);
-		friendlyByteBuf.writeByte(this.effectAmplifier);
-		friendlyByteBuf.writeVarInt(this.effectDurationTicks);
-		friendlyByteBuf.writeByte(this.flags);
+	public PacketType<ClientboundUpdateMobEffectPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_UPDATE_MOB_EFFECT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

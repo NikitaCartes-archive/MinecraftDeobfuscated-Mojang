@@ -1,10 +1,11 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class ArrowKnockbackEnchantment extends Enchantment {
 	public ArrowKnockbackEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
-		super(rarity, EnchantmentCategory.BOW, equipmentSlots);
+		super(rarity, ItemTags.BOW_ENCHANTABLE, equipmentSlots);
 	}
 
 	@Override

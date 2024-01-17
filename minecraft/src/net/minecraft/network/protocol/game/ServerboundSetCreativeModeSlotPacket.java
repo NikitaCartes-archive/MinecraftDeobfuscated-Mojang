@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.item.ItemStack;
 
 public class ServerboundSetCreativeModeSlotPacket implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ServerboundSetCreativeModeSlotPacket> STREAM_CODEC = Packet.codec(
+		ServerboundSetCreativeModeSlotPacket::write, ServerboundSetCreativeModeSlotPacket::new
+	);
 	private final int slotNum;
 	private final ItemStack itemStack;
 
@@ -13,19 +18,23 @@ public class ServerboundSetCreativeModeSlotPacket implements Packet<ServerGamePa
 		this.itemStack = itemStack.copy();
 	}
 
-	public void handle(ServerGamePacketListener serverGamePacketListener) {
-		serverGamePacketListener.handleSetCreativeModeSlot(this);
+	private ServerboundSetCreativeModeSlotPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.slotNum = registryFriendlyByteBuf.readShort();
+		this.itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
 	}
 
-	public ServerboundSetCreativeModeSlotPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.slotNum = friendlyByteBuf.readShort();
-		this.itemStack = friendlyByteBuf.readItem();
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeShort(this.slotNum);
+		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.itemStack);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeShort(this.slotNum);
-		friendlyByteBuf.writeItem(this.itemStack);
+	public PacketType<ServerboundSetCreativeModeSlotPacket> type() {
+		return GamePacketTypes.SERVERBOUND_SET_CREATIVE_MODE_SLOT;
+	}
+
+	public void handle(ServerGamePacketListener serverGamePacketListener) {
+		serverGamePacketListener.handleSetCreativeModeSlot(this);
 	}
 
 	public int getSlotNum() {

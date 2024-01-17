@@ -725,10 +725,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	public void makeMad() {
 		if (!this.isStanding()) {
 			this.standIfPossible();
-			SoundEvent soundEvent = this.getAngrySound();
-			if (soundEvent != null) {
-				this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
-			}
+			this.makeSound(this.getAngrySound());
 		}
 	}
 

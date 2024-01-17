@@ -1,11 +1,16 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
 public class ClientboundRotateHeadPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundRotateHeadPacket> STREAM_CODEC = Packet.codec(
+		ClientboundRotateHeadPacket::write, ClientboundRotateHeadPacket::new
+	);
 	private final int entityId;
 	private final byte yHeadRot;
 
@@ -14,15 +19,19 @@ public class ClientboundRotateHeadPacket implements Packet<ClientGamePacketListe
 		this.yHeadRot = b;
 	}
 
-	public ClientboundRotateHeadPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundRotateHeadPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entityId = friendlyByteBuf.readVarInt();
 		this.yHeadRot = friendlyByteBuf.readByte();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
 		friendlyByteBuf.writeByte(this.yHeadRot);
+	}
+
+	@Override
+	public PacketType<ClientboundRotateHeadPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_ROTATE_HEAD;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

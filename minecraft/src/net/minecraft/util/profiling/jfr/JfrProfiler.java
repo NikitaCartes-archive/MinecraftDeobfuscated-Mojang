@@ -30,6 +30,7 @@ import net.minecraft.FileUtil;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.jfr.callback.ProfiledDuration;
 import net.minecraft.util.profiling.jfr.event.ChunkGenerationEvent;
@@ -193,24 +194,24 @@ public class JfrProfiler implements JvmProfiler {
 	}
 
 	@Override
-	public void onPacketReceived(ConnectionProtocol connectionProtocol, int i, SocketAddress socketAddress, int j) {
+	public void onPacketReceived(ConnectionProtocol connectionProtocol, PacketType<?> packetType, SocketAddress socketAddress, int i) {
 		if (PacketReceivedEvent.TYPE.isEnabled()) {
-			new PacketReceivedEvent(connectionProtocol.id(), i, socketAddress, j).commit();
+			new PacketReceivedEvent(connectionProtocol.id(), packetType.flow().id(), packetType.id().toString(), socketAddress, i).commit();
 		}
 
 		if (NetworkSummaryEvent.TYPE.isEnabled()) {
-			this.networkStatFor(socketAddress).trackReceivedPacket(j);
+			this.networkStatFor(socketAddress).trackReceivedPacket(i);
 		}
 	}
 
 	@Override
-	public void onPacketSent(ConnectionProtocol connectionProtocol, int i, SocketAddress socketAddress, int j) {
+	public void onPacketSent(ConnectionProtocol connectionProtocol, PacketType<?> packetType, SocketAddress socketAddress, int i) {
 		if (PacketSentEvent.TYPE.isEnabled()) {
-			new PacketSentEvent(connectionProtocol.id(), i, socketAddress, j).commit();
+			new PacketSentEvent(connectionProtocol.id(), packetType.flow().id(), packetType.id().toString(), socketAddress, i).commit();
 		}
 
 		if (NetworkSummaryEvent.TYPE.isEnabled()) {
-			this.networkStatFor(socketAddress).trackSentPacket(j);
+			this.networkStatFor(socketAddress).trackSentPacket(i);
 		}
 	}
 

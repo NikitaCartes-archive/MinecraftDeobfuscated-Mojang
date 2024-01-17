@@ -1,10 +1,11 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class UntouchingEnchantment extends Enchantment {
 	protected UntouchingEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
-		super(rarity, EnchantmentCategory.DIGGER, equipmentSlots);
+		super(rarity, ItemTags.MINING_LOOT_ENCHANTABLE, equipmentSlots);
 	}
 
 	@Override
@@ -19,6 +20,6 @@ public class UntouchingEnchantment extends Enchantment {
 
 	@Override
 	public boolean checkCompatibility(Enchantment enchantment) {
-		return super.checkCompatibility(enchantment) && enchantment != Enchantments.BLOCK_FORTUNE;
+		return super.checkCompatibility(enchantment) && enchantment != Enchantments.FORTUNE;
 	}
 }

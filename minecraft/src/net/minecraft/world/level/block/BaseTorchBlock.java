@@ -23,12 +23,12 @@ public abstract class BaseTorchBlock extends Block {
 	protected abstract MapCodec<? extends BaseTorchBlock> codec();
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return AABB;
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return direction == Direction.DOWN && !this.canSurvive(blockState, levelAccessor, blockPos)
@@ -37,7 +37,7 @@ public abstract class BaseTorchBlock extends Block {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return canSupportCenter(levelReader, blockPos.below(), Direction.UP);
 	}
 }

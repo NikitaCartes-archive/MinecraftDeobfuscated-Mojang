@@ -98,6 +98,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final boolean logIPs = this.get("log-ips", true);
 	private final DedicatedServerProperties.WorldDimensionData worldDimensionData;
 	public final WorldOptions worldOptions;
+	public boolean acceptsTransfers = this.get("accepts-transfers", false);
 
 	public DedicatedServerProperties(Properties properties) {
 		super(properties);

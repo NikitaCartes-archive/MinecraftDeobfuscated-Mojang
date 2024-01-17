@@ -70,7 +70,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if (!blockState.getValue(OPEN)) {
 			return blockState.getValue(HALF) == Half.TOP ? TOP_AABB : BOTTOM_AABB;
 		} else {
@@ -89,7 +89,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		switch(pathComputationType) {
 			case LAND:
 				return blockState.getValue(OPEN);
@@ -103,7 +103,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (!this.type.canOpenByHand()) {
 			return InteractionResult.PASS;
 		} else {
@@ -113,7 +113,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	@Override
-	public void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
 		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK
 			&& !level.isClientSide()
 			&& this.type.canOpenByWindCharge()
@@ -142,7 +142,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide) {
 			boolean bl2 = level.hasNeighborSignal(blockPos);
 			if (bl2 != blockState.getValue(POWERED)) {
@@ -185,12 +185,12 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (blockState.getValue(WATERLOGGED)) {

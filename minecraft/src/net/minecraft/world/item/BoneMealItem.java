@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -103,8 +102,7 @@ public class BoneMealItem extends Item {
 					if (holder.is(BiomeTags.PRODUCES_CORALS_FROM_BONEMEAL)) {
 						if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
 							blockState = (BlockState)BuiltInRegistries.BLOCK
-								.getTag(BlockTags.WALL_CORALS)
-								.flatMap(named -> named.getRandomElement(level.random))
+								.getRandomElementOf(BlockTags.WALL_CORALS, level.random)
 								.map(holderx -> ((Block)holderx.value()).defaultBlockState())
 								.orElse(blockState);
 							if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
@@ -112,8 +110,7 @@ public class BoneMealItem extends Item {
 							}
 						} else if (randomSource.nextInt(4) == 0) {
 							blockState = (BlockState)BuiltInRegistries.BLOCK
-								.getTag(BlockTags.UNDERWATER_BONEMEALS)
-								.flatMap(named -> named.getRandomElement(level.random))
+								.getRandomElementOf(BlockTags.UNDERWATER_BONEMEALS, level.random)
 								.map(holderx -> ((Block)holderx.value()).defaultBlockState())
 								.orElse(blockState);
 						}
@@ -144,7 +141,8 @@ public class BoneMealItem extends Item {
 	}
 
 	public static void addGrowthParticles(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
-		Block blockPos2 = levelAccessor.getBlockState(blockPos).getBlock();
+		BlockState blockState = levelAccessor.getBlockState(blockPos);
+		Block blockPos2 = blockState.getBlock();
 		if (blockPos2 instanceof BonemealableBlock bonemealableBlock) {
 			BlockPos blockPos2x = bonemealableBlock.getParticlePos(blockPos);
 			switch(bonemealableBlock.getType()) {
@@ -154,6 +152,8 @@ public class BoneMealItem extends Item {
 				case GROWER:
 					ParticleUtils.spawnParticleInBlock(levelAccessor, blockPos2x, i, ParticleTypes.HAPPY_VILLAGER);
 			}
+		} else if (blockState.is(Blocks.WATER)) {
+			ParticleUtils.spawnParticles(levelAccessor, blockPos, i * 3, 3.0, 1.0, false, ParticleTypes.HAPPY_VILLAGER);
 		}
 	}
 }

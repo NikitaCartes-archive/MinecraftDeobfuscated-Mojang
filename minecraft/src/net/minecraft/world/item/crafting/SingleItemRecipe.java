@@ -5,7 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -69,6 +71,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 	public static class Serializer<T extends SingleItemRecipe> implements RecipeSerializer<T> {
 		final SingleItemRecipe.Factory<T> factory;
 		private final Codec<T> codec;
+		private final StreamCodec<RegistryFriendlyByteBuf, T> streamCodec;
 
 		protected Serializer(SingleItemRecipe.Factory<T> factory) {
 			this.factory = factory;
@@ -80,6 +83,15 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 						)
 						.apply(instance, factory::create)
 			);
+			this.streamCodec = StreamCodec.composite(
+				ByteBufCodecs.STRING_UTF8,
+				singleItemRecipe -> singleItemRecipe.group,
+				Ingredient.CONTENTS_STREAM_CODEC,
+				singleItemRecipe -> singleItemRecipe.ingredient,
+				ItemStack.STREAM_CODEC,
+				singleItemRecipe -> singleItemRecipe.result,
+				factory::create
+			);
 		}
 
 		@Override
@@ -87,17 +99,9 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 			return this.codec;
 		}
 
-		public T fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			String string = friendlyByteBuf.readUtf();
-			Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
-			ItemStack itemStack = friendlyByteBuf.readItem();
-			return this.factory.create(string, ingredient, itemStack);
-		}
-
-		public void toNetwork(FriendlyByteBuf friendlyByteBuf, T singleItemRecipe) {
-			friendlyByteBuf.writeUtf(singleItemRecipe.group);
-			singleItemRecipe.ingredient.toNetwork(friendlyByteBuf);
-			friendlyByteBuf.writeItem(singleItemRecipe.result);
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, T> streamCodec() {
+			return this.streamCodec;
 		}
 	}
 }

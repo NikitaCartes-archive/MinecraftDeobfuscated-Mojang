@@ -33,8 +33,6 @@ public class RealmsWorldSlotButton extends Button {
 	private final int slotIndex;
 	@Nullable
 	private RealmsWorldSlotButton.State state;
-	@Nullable
-	private Tooltip tooltip;
 
 	public RealmsWorldSlotButton(int i, int j, int k, int l, int m, Button.OnPress onPress) {
 		super(i, j, k, l, CommonComponents.EMPTY, onPress, DEFAULT_NARRATION);
@@ -57,21 +55,16 @@ public class RealmsWorldSlotButton extends Button {
 			case SWITCH_SLOT -> state.minigame ? SWITCH_TO_MINIGAME_SLOT_TOOLTIP : SWITCH_TO_WORLD_SLOT_TOOLTIP;
 			default -> null;
 		};
-		if (component == null) {
-			this.setMessage(Component.literal(state.slotName));
-		} else {
-			this.tooltip = Tooltip.create(component);
-			if (state.empty) {
-				this.setMessage(component);
-			} else {
-				MutableComponent mutableComponent = component.copy().append(CommonComponents.space()).append(Component.literal(state.slotName));
-				if (state.minigame) {
-					mutableComponent = mutableComponent.append(CommonComponents.SPACE).append(string);
-				}
-
-				this.setMessage(mutableComponent);
-			}
+		if (component != null) {
+			this.setTooltip(Tooltip.create(component));
 		}
+
+		MutableComponent mutableComponent = Component.literal(state.slotName);
+		if (state.minigame) {
+			mutableComponent = mutableComponent.append(CommonComponents.SPACE).append(string);
+		}
+
+		this.setMessage(mutableComponent);
 	}
 
 	static RealmsWorldSlotButton.Action getAction(RealmsServer realmsServer, boolean bl, boolean bl2) {
@@ -88,10 +81,6 @@ public class RealmsWorldSlotButton extends Button {
 			int k = this.getX();
 			int l = this.getY();
 			boolean bl = this.isHoveredOrFocused();
-			if (this.tooltip != null) {
-				this.tooltip.refreshTooltipForNextRenderPass(this.isHovered(), this.isFocused(), this.getRectangle());
-			}
-
 			ResourceLocation resourceLocation;
 			if (this.state.minigame) {
 				resourceLocation = RealmsTextureManager.worldTemplate(String.valueOf(this.state.imageId), this.state.image);

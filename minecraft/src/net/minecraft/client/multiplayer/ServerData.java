@@ -34,7 +34,6 @@ public class ServerData {
 	private byte[] iconBytes;
 	private ServerData.Type type;
 	private ServerData.State state = ServerData.State.INITIAL;
-	private boolean enforcesSecureChat;
 
 	public ServerData(String string, String string2, ServerData.Type type) {
 		this.name = string;
@@ -112,14 +111,6 @@ public class ServerData {
 		return this.type;
 	}
 
-	public void setEnforcesSecureChat(boolean bl) {
-		this.enforcesSecureChat = bl;
-	}
-
-	public boolean enforcesSecureChat() {
-		return this.enforcesSecureChat;
-	}
-
 	public void copyNameIconFrom(ServerData serverData) {
 		this.ip = serverData.ip;
 		this.name = serverData.name;
@@ -130,7 +121,6 @@ public class ServerData {
 		this.copyNameIconFrom(serverData);
 		this.setResourcePackStatus(serverData.getResourcePackStatus());
 		this.type = serverData.type;
-		this.enforcesSecureChat = serverData.enforcesSecureChat;
 	}
 
 	public ServerData.State state() {

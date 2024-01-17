@@ -1,7 +1,9 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public abstract class ServerboundMovePlayerPacket implements Packet<ServerGamePacketListener> {
 	protected final double x;
@@ -23,6 +25,9 @@ public abstract class ServerboundMovePlayerPacket implements Packet<ServerGamePa
 		this.hasPos = bl2;
 		this.hasRot = bl3;
 	}
+
+	@Override
+	public abstract PacketType<? extends ServerboundMovePlayerPacket> type();
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
 		serverGamePacketListener.handleMovePlayer(this);
@@ -61,11 +66,15 @@ public abstract class ServerboundMovePlayerPacket implements Packet<ServerGamePa
 	}
 
 	public static class Pos extends ServerboundMovePlayerPacket {
+		public static final StreamCodec<FriendlyByteBuf, ServerboundMovePlayerPacket.Pos> STREAM_CODEC = Packet.codec(
+			ServerboundMovePlayerPacket.Pos::write, ServerboundMovePlayerPacket.Pos::read
+		);
+
 		public Pos(double d, double e, double f, boolean bl) {
 			super(d, e, f, 0.0F, 0.0F, bl, true, false);
 		}
 
-		public static ServerboundMovePlayerPacket.Pos read(FriendlyByteBuf friendlyByteBuf) {
+		private static ServerboundMovePlayerPacket.Pos read(FriendlyByteBuf friendlyByteBuf) {
 			double d = friendlyByteBuf.readDouble();
 			double e = friendlyByteBuf.readDouble();
 			double f = friendlyByteBuf.readDouble();
@@ -73,21 +82,29 @@ public abstract class ServerboundMovePlayerPacket implements Packet<ServerGamePa
 			return new ServerboundMovePlayerPacket.Pos(d, e, f, bl);
 		}
 
-		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
+		private void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeDouble(this.x);
 			friendlyByteBuf.writeDouble(this.y);
 			friendlyByteBuf.writeDouble(this.z);
 			friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
 		}
+
+		@Override
+		public PacketType<ServerboundMovePlayerPacket.Pos> type() {
+			return GamePacketTypes.SERVERBOUND_MOVE_PLAYER_POS;
+		}
 	}
 
 	public static class PosRot extends ServerboundMovePlayerPacket {
+		public static final StreamCodec<FriendlyByteBuf, ServerboundMovePlayerPacket.PosRot> STREAM_CODEC = Packet.codec(
+			ServerboundMovePlayerPacket.PosRot::write, ServerboundMovePlayerPacket.PosRot::read
+		);
+
 		public PosRot(double d, double e, double f, float g, float h, boolean bl) {
 			super(d, e, f, g, h, bl, true, true);
 		}
 
-		public static ServerboundMovePlayerPacket.PosRot read(FriendlyByteBuf friendlyByteBuf) {
+		private static ServerboundMovePlayerPacket.PosRot read(FriendlyByteBuf friendlyByteBuf) {
 			double d = friendlyByteBuf.readDouble();
 			double e = friendlyByteBuf.readDouble();
 			double f = friendlyByteBuf.readDouble();
@@ -97,8 +114,7 @@ public abstract class ServerboundMovePlayerPacket implements Packet<ServerGamePa
 			return new ServerboundMovePlayerPacket.PosRot(d, e, f, g, h, bl);
 		}
 
-		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
+		private void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeDouble(this.x);
 			friendlyByteBuf.writeDouble(this.y);
 			friendlyByteBuf.writeDouble(this.z);
@@ -106,41 +122,62 @@ public abstract class ServerboundMovePlayerPacket implements Packet<ServerGamePa
 			friendlyByteBuf.writeFloat(this.xRot);
 			friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
 		}
+
+		@Override
+		public PacketType<ServerboundMovePlayerPacket.PosRot> type() {
+			return GamePacketTypes.SERVERBOUND_MOVE_PLAYER_POS_ROT;
+		}
 	}
 
 	public static class Rot extends ServerboundMovePlayerPacket {
+		public static final StreamCodec<FriendlyByteBuf, ServerboundMovePlayerPacket.Rot> STREAM_CODEC = Packet.codec(
+			ServerboundMovePlayerPacket.Rot::write, ServerboundMovePlayerPacket.Rot::read
+		);
+
 		public Rot(float f, float g, boolean bl) {
 			super(0.0, 0.0, 0.0, f, g, bl, false, true);
 		}
 
-		public static ServerboundMovePlayerPacket.Rot read(FriendlyByteBuf friendlyByteBuf) {
+		private static ServerboundMovePlayerPacket.Rot read(FriendlyByteBuf friendlyByteBuf) {
 			float f = friendlyByteBuf.readFloat();
 			float g = friendlyByteBuf.readFloat();
 			boolean bl = friendlyByteBuf.readUnsignedByte() != 0;
 			return new ServerboundMovePlayerPacket.Rot(f, g, bl);
 		}
 
-		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
+		private void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeFloat(this.yRot);
 			friendlyByteBuf.writeFloat(this.xRot);
 			friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
 		}
+
+		@Override
+		public PacketType<ServerboundMovePlayerPacket.Rot> type() {
+			return GamePacketTypes.SERVERBOUND_MOVE_PLAYER_ROT;
+		}
 	}
 
 	public static class StatusOnly extends ServerboundMovePlayerPacket {
+		public static final StreamCodec<FriendlyByteBuf, ServerboundMovePlayerPacket.StatusOnly> STREAM_CODEC = Packet.codec(
+			ServerboundMovePlayerPacket.StatusOnly::write, ServerboundMovePlayerPacket.StatusOnly::read
+		);
+
 		public StatusOnly(boolean bl) {
 			super(0.0, 0.0, 0.0, 0.0F, 0.0F, bl, false, false);
 		}
 
-		public static ServerboundMovePlayerPacket.StatusOnly read(FriendlyByteBuf friendlyByteBuf) {
+		private static ServerboundMovePlayerPacket.StatusOnly read(FriendlyByteBuf friendlyByteBuf) {
 			boolean bl = friendlyByteBuf.readUnsignedByte() != 0;
 			return new ServerboundMovePlayerPacket.StatusOnly(bl);
 		}
 
-		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
+		private void write(FriendlyByteBuf friendlyByteBuf) {
 			friendlyByteBuf.writeByte(this.onGround ? 1 : 0);
+		}
+
+		@Override
+		public PacketType<ServerboundMovePlayerPacket.StatusOnly> type() {
+			return GamePacketTypes.SERVERBOUND_MOVE_PLAYER_STATUS_ONLY;
 		}
 	}
 }

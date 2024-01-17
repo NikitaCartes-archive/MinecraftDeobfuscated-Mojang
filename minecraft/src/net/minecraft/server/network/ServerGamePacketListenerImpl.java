@@ -42,6 +42,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
@@ -57,6 +58,7 @@ import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -70,9 +72,10 @@ import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
+import net.minecraft.network.protocol.game.GameProtocols;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
-import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
+import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
@@ -87,7 +90,7 @@ import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ServerboundContainerSlotStateChangedPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
-import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
+import net.minecraft.network.protocol.game.ServerboundEntityTagQueryPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundJigsawGeneratePacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
@@ -117,8 +120,8 @@ import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
-import net.minecraft.network.protocol.status.ClientboundPongResponsePacket;
-import net.minecraft.network.protocol.status.ServerboundPingRequestPacket;
+import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
+import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -233,7 +236,7 @@ public class ServerGamePacketListenerImpl
 	) {
 		super(minecraftServer, connection, commonListenerCookie);
 		this.chunkSender = new PlayerChunkSender(connection.isMemoryConnection());
-		connection.setListener(this);
+		connection.setupInboundProtocol(GameProtocols.SERVERBOUND.bind(RegistryFriendlyByteBuf.decorator(minecraftServer.registryAccess())), this);
 		this.player = serverPlayer;
 		serverPlayer.connection = this;
 		serverPlayer.getTextFilter().join();
@@ -821,13 +824,13 @@ public class ServerGamePacketListenerImpl
 	}
 
 	@Override
-	public void handleEntityTagQuery(ServerboundEntityTagQuery serverboundEntityTagQuery) {
-		PacketUtils.ensureRunningOnSameThread(serverboundEntityTagQuery, this, this.player.serverLevel());
+	public void handleEntityTagQuery(ServerboundEntityTagQueryPacket serverboundEntityTagQueryPacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundEntityTagQueryPacket, this, this.player.serverLevel());
 		if (this.player.hasPermissions(2)) {
-			Entity entity = this.player.level().getEntity(serverboundEntityTagQuery.getEntityId());
+			Entity entity = this.player.level().getEntity(serverboundEntityTagQueryPacket.getEntityId());
 			if (entity != null) {
 				CompoundTag compoundTag = entity.saveWithoutId(new CompoundTag());
-				this.player.connection.send(new ClientboundTagQueryPacket(serverboundEntityTagQuery.getTransactionId(), compoundTag));
+				this.player.connection.send(new ClientboundTagQueryPacket(serverboundEntityTagQueryPacket.getTransactionId(), compoundTag));
 			}
 		}
 	}
@@ -847,12 +850,12 @@ public class ServerGamePacketListenerImpl
 	}
 
 	@Override
-	public void handleBlockEntityTagQuery(ServerboundBlockEntityTagQuery serverboundBlockEntityTagQuery) {
-		PacketUtils.ensureRunningOnSameThread(serverboundBlockEntityTagQuery, this, this.player.serverLevel());
+	public void handleBlockEntityTagQuery(ServerboundBlockEntityTagQueryPacket serverboundBlockEntityTagQueryPacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundBlockEntityTagQueryPacket, this, this.player.serverLevel());
 		if (this.player.hasPermissions(2)) {
-			BlockEntity blockEntity = this.player.level().getBlockEntity(serverboundBlockEntityTagQuery.getPos());
+			BlockEntity blockEntity = this.player.level().getBlockEntity(serverboundBlockEntityTagQueryPacket.getPos());
 			CompoundTag compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata() : null;
-			this.player.connection.send(new ClientboundTagQueryPacket(serverboundBlockEntityTagQuery.getTransactionId(), compoundTag));
+			this.player.connection.send(new ClientboundTagQueryPacket(serverboundBlockEntityTagQueryPacket.getTransactionId(), compoundTag));
 		}
 	}
 
@@ -1091,7 +1094,7 @@ public class ServerGamePacketListenerImpl
 			BlockHitResult blockHitResult = serverboundUseItemOnPacket.getHitResult();
 			Vec3 vec3 = blockHitResult.getLocation();
 			BlockPos blockPos = blockHitResult.getBlockPos();
-			if (this.player.canInteractWithBlock(blockPos)) {
+			if (this.player.canInteractWithBlock(blockPos, 1.0)) {
 				Vec3 vec32 = vec3.subtract(Vec3.atCenterOf(blockPos));
 				double d = 1.0000001;
 				if (Math.abs(vec32.x()) < 1.0000001 && Math.abs(vec32.y()) < 1.0000001 && Math.abs(vec32.z()) < 1.0000001) {
@@ -1101,6 +1104,10 @@ public class ServerGamePacketListenerImpl
 					if (blockPos.getY() < i) {
 						if (this.awaitingPositionFromClient == null && serverLevel.mayInteract(this.player, blockPos)) {
 							InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
+							if (interactionResult.consumesAction()) {
+								CriteriaTriggers.ANY_BLOCK_USE.trigger(this.player, blockHitResult.getBlockPos(), itemStack.copy());
+							}
+
 							if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
 								Component component = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
 								this.player.sendSystemMessage(component, true);
@@ -1455,7 +1462,8 @@ public class ServerGamePacketListenerImpl
 	public void switchToConfig() {
 		this.waitingForSwitchToConfig = true;
 		this.removePlayerFromWorld();
-		this.send(new ClientboundStartConfigurationPacket());
+		this.send(ClientboundStartConfigurationPacket.INSTANCE);
+		this.connection.setupOutboundProtocol(ConfigurationProtocols.CLIENTBOUND);
 	}
 
 	@Override
@@ -1476,7 +1484,7 @@ public class ServerGamePacketListenerImpl
 			}
 
 			AABB aABB = entity.getBoundingBox();
-			if (this.player.canInteractWithEntity(aABB)) {
+			if (this.player.canInteractWithEntity(aABB, 1.0)) {
 				serverboundInteractPacket.dispatch(
 					new ServerboundInteractPacket.Handler() {
 						private void performInteraction(InteractionHand interactionHand, ServerGamePacketListenerImpl.EntityInteraction entityInteraction) {
@@ -1742,7 +1750,11 @@ public class ServerGamePacketListenerImpl
 		if (!this.waitingForSwitchToConfig) {
 			throw new IllegalStateException("Client acknowledged config, but none was requested");
 		} else {
-			this.connection.setListener(new ServerConfigurationPacketListenerImpl(this.server, this.connection, this.createCookie(this.player.clientInformation())));
+			this.connection
+				.setupInboundProtocol(
+					ConfigurationProtocols.SERVERBOUND,
+					new ServerConfigurationPacketListenerImpl(this.server, this.connection, this.createCookie(this.player.clientInformation()))
+				);
 		}
 	}
 

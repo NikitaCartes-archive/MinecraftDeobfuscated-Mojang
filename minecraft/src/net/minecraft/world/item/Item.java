@@ -301,17 +301,8 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	protected static BlockHitResult getPlayerPOVHitResult(Level level, Player player, ClipContext.Fluid fluid) {
-		float f = player.getXRot();
-		float g = player.getYRot();
 		Vec3 vec3 = player.getEyePosition();
-		float h = Mth.cos(-g * (float) (Math.PI / 180.0) - (float) Math.PI);
-		float i = Mth.sin(-g * (float) (Math.PI / 180.0) - (float) Math.PI);
-		float j = -Mth.cos(-f * (float) (Math.PI / 180.0));
-		float k = Mth.sin(-f * (float) (Math.PI / 180.0));
-		float l = i * j;
-		float n = h * j;
-		double d = 5.0;
-		Vec3 vec32 = vec3.add((double)l * 5.0, (double)k * 5.0, (double)n * 5.0);
+		Vec3 vec32 = vec3.add(player.getViewVector(1.0F).scale(player.blockInteractionRange()));
 		return level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, fluid, player));
 	}
 

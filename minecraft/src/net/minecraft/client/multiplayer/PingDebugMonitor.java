@@ -3,8 +3,8 @@ package net.minecraft.client.multiplayer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.network.protocol.status.ClientboundPongResponsePacket;
-import net.minecraft.network.protocol.status.ServerboundPingRequestPacket;
+import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
+import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
 import net.minecraft.util.SampleLogger;
 
 @Environment(EnvType.CLIENT)
@@ -22,6 +22,6 @@ public class PingDebugMonitor {
 	}
 
 	public void onPongReceived(ClientboundPongResponsePacket clientboundPongResponsePacket) {
-		this.delayTimer.logSample(Util.getMillis() - clientboundPongResponsePacket.getTime());
+		this.delayTimer.logSample(Util.getMillis() - clientboundPongResponsePacket.time());
 	}
 }

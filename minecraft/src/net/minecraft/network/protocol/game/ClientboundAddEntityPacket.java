@@ -2,15 +2,21 @@ package net.minecraft.network.protocol.game;
 
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundAddEntityPacket> STREAM_CODEC = Packet.codec(
+		ClientboundAddEntityPacket::write, ClientboundAddEntityPacket::new
+	);
 	private static final double MAGICAL_QUANTIZATION = 8000.0;
 	private static final double LIMIT = 3.9;
 	private final int id;
@@ -79,37 +85,41 @@ public class ClientboundAddEntityPacket implements Packet<ClientGamePacketListen
 		this.za = (int)(Mth.clamp(vec3.z, -3.9, 3.9) * 8000.0);
 	}
 
-	public ClientboundAddEntityPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.id = friendlyByteBuf.readVarInt();
-		this.uuid = friendlyByteBuf.readUUID();
-		this.type = friendlyByteBuf.readById(BuiltInRegistries.ENTITY_TYPE);
-		this.x = friendlyByteBuf.readDouble();
-		this.y = friendlyByteBuf.readDouble();
-		this.z = friendlyByteBuf.readDouble();
-		this.xRot = friendlyByteBuf.readByte();
-		this.yRot = friendlyByteBuf.readByte();
-		this.yHeadRot = friendlyByteBuf.readByte();
-		this.data = friendlyByteBuf.readVarInt();
-		this.xa = friendlyByteBuf.readShort();
-		this.ya = friendlyByteBuf.readShort();
-		this.za = friendlyByteBuf.readShort();
+	private ClientboundAddEntityPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.id = registryFriendlyByteBuf.readVarInt();
+		this.uuid = registryFriendlyByteBuf.readUUID();
+		this.type = ByteBufCodecs.registry(Registries.ENTITY_TYPE).decode(registryFriendlyByteBuf);
+		this.x = registryFriendlyByteBuf.readDouble();
+		this.y = registryFriendlyByteBuf.readDouble();
+		this.z = registryFriendlyByteBuf.readDouble();
+		this.xRot = registryFriendlyByteBuf.readByte();
+		this.yRot = registryFriendlyByteBuf.readByte();
+		this.yHeadRot = registryFriendlyByteBuf.readByte();
+		this.data = registryFriendlyByteBuf.readVarInt();
+		this.xa = registryFriendlyByteBuf.readShort();
+		this.ya = registryFriendlyByteBuf.readShort();
+		this.za = registryFriendlyByteBuf.readShort();
+	}
+
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeVarInt(this.id);
+		registryFriendlyByteBuf.writeUUID(this.uuid);
+		ByteBufCodecs.registry(Registries.ENTITY_TYPE).encode(registryFriendlyByteBuf, this.type);
+		registryFriendlyByteBuf.writeDouble(this.x);
+		registryFriendlyByteBuf.writeDouble(this.y);
+		registryFriendlyByteBuf.writeDouble(this.z);
+		registryFriendlyByteBuf.writeByte(this.xRot);
+		registryFriendlyByteBuf.writeByte(this.yRot);
+		registryFriendlyByteBuf.writeByte(this.yHeadRot);
+		registryFriendlyByteBuf.writeVarInt(this.data);
+		registryFriendlyByteBuf.writeShort(this.xa);
+		registryFriendlyByteBuf.writeShort(this.ya);
+		registryFriendlyByteBuf.writeShort(this.za);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.id);
-		friendlyByteBuf.writeUUID(this.uuid);
-		friendlyByteBuf.writeId(BuiltInRegistries.ENTITY_TYPE, this.type);
-		friendlyByteBuf.writeDouble(this.x);
-		friendlyByteBuf.writeDouble(this.y);
-		friendlyByteBuf.writeDouble(this.z);
-		friendlyByteBuf.writeByte(this.xRot);
-		friendlyByteBuf.writeByte(this.yRot);
-		friendlyByteBuf.writeByte(this.yHeadRot);
-		friendlyByteBuf.writeVarInt(this.data);
-		friendlyByteBuf.writeShort(this.xa);
-		friendlyByteBuf.writeShort(this.ya);
-		friendlyByteBuf.writeShort(this.za);
+	public PacketType<ClientboundAddEntityPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_ADD_ENTITY;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

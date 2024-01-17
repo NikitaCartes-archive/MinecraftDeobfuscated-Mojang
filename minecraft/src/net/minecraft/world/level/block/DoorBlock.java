@@ -77,7 +77,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		Direction direction = blockState.getValue(FACING);
 		boolean bl = !blockState.getValue(OPEN);
 		boolean bl2 = blockState.getValue(HINGE) == DoorHingeSide.RIGHT;
@@ -91,7 +91,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
@@ -107,7 +107,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
 		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK
 			&& blockState.getValue(HALF) == DoubleBlockHalf.LOWER
 			&& !level.isClientSide()
@@ -129,7 +129,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return switch(pathComputationType) {
 			case LAND, AIR -> blockState.getValue(OPEN);
 			case WATER -> false;
@@ -197,7 +197,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (!this.type.canOpenByHand()) {
 			return InteractionResult.PASS;
 		} else {
@@ -222,7 +222,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		boolean bl2 = level.hasNeighborSignal(blockPos)
 			|| level.hasNeighborSignal(blockPos.relative(blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN));
 		if (!this.defaultBlockState().is(block) && bl2 != blockState.getValue(POWERED)) {
@@ -236,7 +236,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
 		return blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP) : blockState2.is(this);
@@ -247,17 +247,17 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return mirror == Mirror.NONE ? blockState : blockState.rotate(mirror.getRotation(blockState.getValue(FACING))).cycle(HINGE);
 	}
 
 	@Override
-	public long getSeed(BlockState blockState, BlockPos blockPos) {
+	protected long getSeed(BlockState blockState, BlockPos blockPos) {
 		return Mth.getSeed(blockPos.getX(), blockPos.below(blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? 0 : 1).getY(), blockPos.getZ());
 	}
 

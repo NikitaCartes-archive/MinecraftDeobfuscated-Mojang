@@ -1,19 +1,29 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.function.Function;
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundBlockEntityDataPacket> STREAM_CODEC = StreamCodec.composite(
+		BlockPos.STREAM_CODEC,
+		ClientboundBlockEntityDataPacket::getPos,
+		ByteBufCodecs.registry(Registries.BLOCK_ENTITY_TYPE),
+		ClientboundBlockEntityDataPacket::getType,
+		ByteBufCodecs.COMPOUND_TAG,
+		ClientboundBlockEntityDataPacket::getTag,
+		ClientboundBlockEntityDataPacket::new
+	);
 	private final BlockPos pos;
 	private final BlockEntityType<?> type;
-	@Nullable
 	private final CompoundTag tag;
 
 	public static ClientboundBlockEntityDataPacket create(BlockEntity blockEntity, Function<BlockEntity, CompoundTag> function) {
@@ -27,20 +37,12 @@ public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacket
 	private ClientboundBlockEntityDataPacket(BlockPos blockPos, BlockEntityType<?> blockEntityType, CompoundTag compoundTag) {
 		this.pos = blockPos;
 		this.type = blockEntityType;
-		this.tag = compoundTag.isEmpty() ? null : compoundTag;
-	}
-
-	public ClientboundBlockEntityDataPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.pos = friendlyByteBuf.readBlockPos();
-		this.type = friendlyByteBuf.readById(BuiltInRegistries.BLOCK_ENTITY_TYPE);
-		this.tag = friendlyByteBuf.readNbt();
+		this.tag = compoundTag;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeBlockPos(this.pos);
-		friendlyByteBuf.writeId(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.type);
-		friendlyByteBuf.writeNbt(this.tag);
+	public PacketType<ClientboundBlockEntityDataPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_BLOCK_ENTITY_DATA;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -55,7 +57,6 @@ public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacket
 		return this.type;
 	}
 
-	@Nullable
 	public CompoundTag getTag() {
 		return this.tag;
 	}

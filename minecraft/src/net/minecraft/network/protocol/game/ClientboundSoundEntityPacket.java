@@ -1,14 +1,18 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 
 public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSoundEntityPacket> STREAM_CODEC = Packet.codec(
+		ClientboundSoundEntityPacket::write, ClientboundSoundEntityPacket::new
+	);
 	private final Holder<SoundEvent> sound;
 	private final SoundSource source;
 	private final int id;
@@ -25,25 +29,31 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 		this.seed = l;
 	}
 
-	public ClientboundSoundEntityPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.sound = friendlyByteBuf.readById(BuiltInRegistries.SOUND_EVENT.asHolderIdMap(), SoundEvent::readFromNetwork);
-		this.source = friendlyByteBuf.readEnum(SoundSource.class);
-		this.id = friendlyByteBuf.readVarInt();
-		this.volume = friendlyByteBuf.readFloat();
-		this.pitch = friendlyByteBuf.readFloat();
-		this.seed = friendlyByteBuf.readLong();
+	private ClientboundSoundEntityPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.sound = SoundEvent.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		this.source = registryFriendlyByteBuf.readEnum(SoundSource.class);
+		this.id = registryFriendlyByteBuf.readVarInt();
+		this.volume = registryFriendlyByteBuf.readFloat();
+		this.pitch = registryFriendlyByteBuf.readFloat();
+		this.seed = registryFriendlyByteBuf.readLong();
+	}
+
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		SoundEvent.STREAM_CODEC.encode(registryFriendlyByteBuf, this.sound);
+		registryFriendlyByteBuf.writeEnum(this.source);
+		registryFriendlyByteBuf.writeVarInt(this.id);
+		registryFriendlyByteBuf.writeFloat(this.volume);
+		registryFriendlyByteBuf.writeFloat(this.pitch);
+		registryFriendlyByteBuf.writeLong(this.seed);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeId(
-			BuiltInRegistries.SOUND_EVENT.asHolderIdMap(), this.sound, (friendlyByteBufx, soundEvent) -> soundEvent.writeToNetwork(friendlyByteBufx)
-		);
-		friendlyByteBuf.writeEnum(this.source);
-		friendlyByteBuf.writeVarInt(this.id);
-		friendlyByteBuf.writeFloat(this.volume);
-		friendlyByteBuf.writeFloat(this.pitch);
-		friendlyByteBuf.writeLong(this.seed);
+	public PacketType<ClientboundSoundEntityPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SOUND_ENTITY;
+	}
+
+	public void handle(ClientGamePacketListener clientGamePacketListener) {
+		clientGamePacketListener.handleSoundEntityEvent(this);
 	}
 
 	public Holder<SoundEvent> getSound() {
@@ -68,9 +78,5 @@ public class ClientboundSoundEntityPacket implements Packet<ClientGamePacketList
 
 	public long getSeed() {
 		return this.seed;
-	}
-
-	public void handle(ClientGamePacketListener clientGamePacketListener) {
-		clientGamePacketListener.handleSoundEntityEvent(this);
 	}
 }

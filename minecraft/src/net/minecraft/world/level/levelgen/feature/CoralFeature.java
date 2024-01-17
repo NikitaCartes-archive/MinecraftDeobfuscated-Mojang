@@ -5,7 +5,6 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -28,7 +27,7 @@ public abstract class CoralFeature extends Feature<NoneFeatureConfiguration> {
 		RandomSource randomSource = featurePlaceContext.random();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		BlockPos blockPos = featurePlaceContext.origin();
-		Optional<Block> optional = BuiltInRegistries.BLOCK.getTag(BlockTags.CORAL_BLOCKS).flatMap(named -> named.getRandomElement(randomSource)).map(Holder::value);
+		Optional<Block> optional = BuiltInRegistries.BLOCK.getRandomElementOf(BlockTags.CORAL_BLOCKS, randomSource).map(Holder::value);
 		return optional.isEmpty() ? false : this.placeFeature(worldGenLevel, randomSource, blockPos, ((Block)optional.get()).defaultBlockState());
 	}
 
@@ -41,8 +40,7 @@ public abstract class CoralFeature extends Feature<NoneFeatureConfiguration> {
 			levelAccessor.setBlock(blockPos, blockState, 3);
 			if (randomSource.nextFloat() < 0.25F) {
 				BuiltInRegistries.BLOCK
-					.getTag(BlockTags.CORALS)
-					.flatMap(named -> named.getRandomElement(randomSource))
+					.getRandomElementOf(BlockTags.CORALS, randomSource)
 					.map(Holder::value)
 					.ifPresent(block -> levelAccessor.setBlock(blockPos2, block.defaultBlockState(), 2));
 			} else if (randomSource.nextFloat() < 0.05F) {
@@ -53,7 +51,7 @@ public abstract class CoralFeature extends Feature<NoneFeatureConfiguration> {
 				if (randomSource.nextFloat() < 0.2F) {
 					BlockPos blockPos3 = blockPos.relative(direction);
 					if (levelAccessor.getBlockState(blockPos3).is(Blocks.WATER)) {
-						BuiltInRegistries.BLOCK.getTag(BlockTags.WALL_CORALS).flatMap(named -> named.getRandomElement(randomSource)).map(Holder::value).ifPresent(block -> {
+						BuiltInRegistries.BLOCK.getRandomElementOf(BlockTags.WALL_CORALS, randomSource).map(Holder::value).ifPresent(block -> {
 							BlockState blockStatexx = block.defaultBlockState();
 							if (blockStatexx.hasProperty(BaseCoralWallFanBlock.FACING)) {
 								blockStatexx = blockStatexx.setValue(BaseCoralWallFanBlock.FACING, direction);

@@ -12,4 +12,8 @@ public interface ChunkProgressListener {
 	void start();
 
 	void stop();
+
+	static int calculateDiameter(int i) {
+		return 2 * i + 1;
+	}
 }

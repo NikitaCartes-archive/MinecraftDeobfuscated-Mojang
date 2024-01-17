@@ -18,7 +18,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,6 +29,7 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -37,12 +37,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -57,7 +61,6 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -114,6 +117,41 @@ public final class ItemStack {
 					BuiltInRegistries.ITEM.byNameCodec().fieldOf("result").forGetter(ItemStack::getItem), Codec.INT.fieldOf("count").forGetter(ItemStack::getCount)
 				)
 				.apply(instance, ItemStack::new)
+	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, ItemStack> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ItemStack>() {
+		private static final StreamCodec<RegistryFriendlyByteBuf, Item> ITEM_STREAM_CODEC = ByteBufCodecs.registry(Registries.ITEM);
+
+		public ItemStack decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			if (!registryFriendlyByteBuf.readBoolean()) {
+				return ItemStack.EMPTY;
+			} else {
+				Item item = ITEM_STREAM_CODEC.decode(registryFriendlyByteBuf);
+				int i = registryFriendlyByteBuf.readByte();
+				ItemStack itemStack = new ItemStack(item, i);
+				itemStack.setTag(FriendlyByteBuf.readNbt(registryFriendlyByteBuf));
+				return itemStack;
+			}
+		}
+
+		public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, ItemStack itemStack) {
+			if (itemStack.isEmpty()) {
+				registryFriendlyByteBuf.writeBoolean(false);
+			} else {
+				registryFriendlyByteBuf.writeBoolean(true);
+				Item item = itemStack.getItem();
+				ITEM_STREAM_CODEC.encode(registryFriendlyByteBuf, item);
+				registryFriendlyByteBuf.writeByte(itemStack.getCount());
+				CompoundTag compoundTag = null;
+				if (item.canBeDepleted() || item.shouldOverrideMultiplayerNbt()) {
+					compoundTag = itemStack.getTag();
+				}
+
+				FriendlyByteBuf.writeNbt(registryFriendlyByteBuf, compoundTag);
+			}
+		}
+	};
+	public static final StreamCodec<RegistryFriendlyByteBuf, List<ItemStack>> LIST_STREAM_CODEC = STREAM_CODEC.apply(
+		ByteBufCodecs.collection(NonNullList::createWithCapacity)
 	);
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final ItemStack EMPTY = new ItemStack((Void)null);
@@ -312,11 +350,15 @@ public final class ItemStack {
 
 	public boolean isDamageableItem() {
 		if (!this.isEmpty() && this.getItem().getMaxDamage() > 0) {
-			CompoundTag compoundTag = this.getTag();
-			return compoundTag == null || !compoundTag.getBoolean("Unbreakable");
+			return !this.isUnbreakable();
 		} else {
 			return false;
 		}
+	}
+
+	public boolean isUnbreakable() {
+		CompoundTag compoundTag = this.getTag();
+		return compoundTag != null && compoundTag.getBoolean("Unbreakable");
 	}
 
 	public boolean isDamaged() {
@@ -335,10 +377,8 @@ public final class ItemStack {
 		return this.getItem().getMaxDamage();
 	}
 
-	public boolean hurt(int i, RandomSource randomSource, @Nullable ServerPlayer serverPlayer) {
-		if (!this.isDamageableItem()) {
-			return false;
-		} else {
+	public void hurtAndBreak(int i, RandomSource randomSource, @Nullable ServerPlayer serverPlayer, Runnable runnable) {
+		if (this.isDamageableItem()) {
 			if (i > 0) {
 				int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.UNBREAKING, this);
 				int k = 0;
@@ -351,7 +391,7 @@ public final class ItemStack {
 
 				i -= k;
 				if (i <= 0) {
-					return false;
+					return;
 				}
 			}
 
@@ -361,24 +401,24 @@ public final class ItemStack {
 
 			int j = this.getDamageValue() + i;
 			this.setDamageValue(j);
-			return j >= this.getMaxDamage();
+			if (j >= this.getMaxDamage()) {
+				runnable.run();
+			}
 		}
 	}
 
-	public <T extends LivingEntity> void hurtAndBreak(int i, T livingEntity, Consumer<T> consumer) {
+	public void hurtAndBreak(int i, LivingEntity livingEntity, EquipmentSlot equipmentSlot) {
 		if (!livingEntity.level().isClientSide && (!(livingEntity instanceof Player) || !((Player)livingEntity).getAbilities().instabuild)) {
-			if (this.isDamageableItem()) {
-				if (this.hurt(i, livingEntity.getRandom(), livingEntity instanceof ServerPlayer ? (ServerPlayer)livingEntity : null)) {
-					consumer.accept(livingEntity);
-					Item item = this.getItem();
-					this.shrink(1);
-					if (livingEntity instanceof Player) {
-						((Player)livingEntity).awardStat(Stats.ITEM_BROKEN.get(item));
-					}
-
-					this.setDamageValue(0);
+			this.hurtAndBreak(i, livingEntity.getRandom(), livingEntity instanceof ServerPlayer serverPlayer ? serverPlayer : null, () -> {
+				livingEntity.broadcastBreakEvent(equipmentSlot);
+				Item item = this.getItem();
+				this.shrink(1);
+				if (livingEntity instanceof Player) {
+					((Player)livingEntity).awardStat(Stats.ITEM_BROKEN.get(item));
 				}
-			}
+
+				this.setDamageValue(0);
+			});
 		}
 	}
 
@@ -687,7 +727,7 @@ public final class ItemStack {
 						if (player != null) {
 							if (attributeModifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
 								d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-								d += (double)EnchantmentHelper.getDamageBonus(this, MobType.UNDEFINED);
+								d += (double)EnchantmentHelper.getDamageBonus(this, null);
 								bl = true;
 							} else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
 								d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
@@ -710,7 +750,7 @@ public final class ItemStack {
 								CommonComponents.space()
 									.append(
 										Component.translatable(
-											"attribute.modifier.equals." + attributeModifier.getOperation().toValue(),
+											"attribute.modifier.equals." + attributeModifier.getOperation().id(),
 											ATTRIBUTE_MODIFIER_FORMAT.format(e),
 											Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
 										)
@@ -720,7 +760,7 @@ public final class ItemStack {
 						} else if (d > 0.0) {
 							list.add(
 								Component.translatable(
-										"attribute.modifier.plus." + attributeModifier.getOperation().toValue(),
+										"attribute.modifier.plus." + attributeModifier.getOperation().id(),
 										ATTRIBUTE_MODIFIER_FORMAT.format(e),
 										Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
 									)
@@ -730,7 +770,7 @@ public final class ItemStack {
 							e *= -1.0;
 							list.add(
 								Component.translatable(
-										"attribute.modifier.take." + attributeModifier.getOperation().toValue(),
+										"attribute.modifier.take." + attributeModifier.getOperation().id(),
 										ATTRIBUTE_MODIFIER_FORMAT.format(e),
 										Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
 									)
