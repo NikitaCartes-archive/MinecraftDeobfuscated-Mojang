@@ -41,12 +41,12 @@ public class SkullBlock extends AbstractSkullBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.getType() == SkullBlock.Types.PIGLIN ? PIGLIN_SHAPE : SHAPE;
 	}
 
 	@Override
-	public VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return Shapes.empty();
 	}
 
@@ -56,12 +56,12 @@ public class SkullBlock extends AbstractSkullBlock {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(ROTATION, Integer.valueOf(rotation.rotate((Integer)blockState.getValue(ROTATION), ROTATIONS)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.setValue(ROTATION, Integer.valueOf(mirror.mirror((Integer)blockState.getValue(ROTATION), ROTATIONS)));
 	}
 

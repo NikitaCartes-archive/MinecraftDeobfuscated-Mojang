@@ -32,14 +32,14 @@ public class WeatheringCopperDoorBlock extends DoorBlock implements WeatheringCo
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (blockState.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER) {
 			this.changeOverTime(blockState, serverLevel, blockPos, randomSource);
 		}
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
+	protected boolean isRandomlyTicking(BlockState blockState) {
 		return WeatheringCopper.getNext(blockState.getBlock()).isPresent();
 	}
 

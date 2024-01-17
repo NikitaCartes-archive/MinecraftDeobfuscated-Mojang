@@ -3,13 +3,15 @@ package net.minecraft.world.item.crafting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
 public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements RecipeSerializer<T> {
 	private final AbstractCookingRecipe.Factory<T> factory;
 	private final Codec<T> codec;
+	private final StreamCodec<RegistryFriendlyByteBuf, T> streamCodec;
 
 	public SimpleCookingSerializer(AbstractCookingRecipe.Factory<T> factory, int i) {
 		this.factory = factory;
@@ -28,6 +30,7 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 					)
 					.apply(instance, factory::create)
 		);
+		this.streamCodec = StreamCodec.of(this::toNetwork, this::fromNetwork);
 	}
 
 	@Override
@@ -35,23 +38,28 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 		return this.codec;
 	}
 
-	public T fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		String string = friendlyByteBuf.readUtf();
-		CookingBookCategory cookingBookCategory = friendlyByteBuf.readEnum(CookingBookCategory.class);
-		Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
-		ItemStack itemStack = friendlyByteBuf.readItem();
-		float f = friendlyByteBuf.readFloat();
-		int i = friendlyByteBuf.readVarInt();
+	@Override
+	public StreamCodec<RegistryFriendlyByteBuf, T> streamCodec() {
+		return this.streamCodec;
+	}
+
+	private T fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		String string = registryFriendlyByteBuf.readUtf();
+		CookingBookCategory cookingBookCategory = registryFriendlyByteBuf.readEnum(CookingBookCategory.class);
+		Ingredient ingredient = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
+		ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		float f = registryFriendlyByteBuf.readFloat();
+		int i = registryFriendlyByteBuf.readVarInt();
 		return this.factory.create(string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
-	public void toNetwork(FriendlyByteBuf friendlyByteBuf, T abstractCookingRecipe) {
-		friendlyByteBuf.writeUtf(abstractCookingRecipe.group);
-		friendlyByteBuf.writeEnum(abstractCookingRecipe.category());
-		abstractCookingRecipe.ingredient.toNetwork(friendlyByteBuf);
-		friendlyByteBuf.writeItem(abstractCookingRecipe.result);
-		friendlyByteBuf.writeFloat(abstractCookingRecipe.experience);
-		friendlyByteBuf.writeVarInt(abstractCookingRecipe.cookingTime);
+	private void toNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf, T abstractCookingRecipe) {
+		registryFriendlyByteBuf.writeUtf(abstractCookingRecipe.group);
+		registryFriendlyByteBuf.writeEnum(abstractCookingRecipe.category());
+		Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, abstractCookingRecipe.ingredient);
+		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, abstractCookingRecipe.result);
+		registryFriendlyByteBuf.writeFloat(abstractCookingRecipe.experience);
+		registryFriendlyByteBuf.writeVarInt(abstractCookingRecipe.cookingTime);
 	}
 
 	public AbstractCookingRecipe create(String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i) {

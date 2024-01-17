@@ -20,12 +20,12 @@ public abstract class BaseEntityBlock extends Block implements EntityBlock {
 	protected abstract MapCodec<? extends BaseEntityBlock> codec();
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.INVISIBLE;
 	}
 
 	@Override
-	public boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
+	protected boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
 		super.triggerEvent(blockState, level, blockPos, i, j);
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		return blockEntity == null ? false : blockEntity.triggerEvent(i, j);
@@ -33,7 +33,7 @@ public abstract class BaseEntityBlock extends Block implements EntityBlock {
 
 	@Nullable
 	@Override
-	public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
+	protected MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		return blockEntity instanceof MenuProvider ? (MenuProvider)blockEntity : null;
 	}

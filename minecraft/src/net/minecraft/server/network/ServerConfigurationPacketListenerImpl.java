@@ -9,6 +9,7 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.network.Connection;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketUtils;
@@ -22,6 +23,7 @@ import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacke
 import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket;
 import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+import net.minecraft.network.protocol.game.GameProtocols;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.level.ClientInformation;
@@ -103,9 +105,9 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 
 	@Override
 	public void handleConfigurationFinished(ServerboundFinishConfigurationPacket serverboundFinishConfigurationPacket) {
-		this.connection.suspendInboundAfterProtocolChange();
 		PacketUtils.ensureRunningOnSameThread(serverboundFinishConfigurationPacket, this, this.server);
 		this.finishCurrentTask(JoinWorldTask.TYPE);
+		this.connection.setupOutboundProtocol(GameProtocols.CLIENTBOUND.bind(RegistryFriendlyByteBuf.decorator(this.server.registryAccess())));
 
 		try {
 			PlayerList playerList = this.server.getPlayerList();
@@ -122,7 +124,6 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 
 			ServerPlayer serverPlayer = playerList.getPlayerForLogin(this.gameProfile, this.clientInformation);
 			playerList.placeNewPlayer(this.connection, serverPlayer, this.createCookie(this.clientInformation));
-			this.connection.resumeInboundAfterProtocolChange();
 		} catch (Exception var5) {
 			LOGGER.error("Couldn't place player in world", (Throwable)var5);
 			this.connection.send(new ClientboundDisconnectPacket(DISCONNECT_REASON_INVALID_DATA));

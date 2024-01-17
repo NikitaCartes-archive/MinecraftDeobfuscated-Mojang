@@ -180,7 +180,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 		}
 
 		if (this.refuseToMove()) {
-			this.clampHeadRotationToBody(this, 30.0F);
+			this.clampHeadRotationToBody();
 		}
 
 		if (this.isCamelSitting() && this.isInWater()) {
@@ -306,7 +306,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 
 	@Override
 	public void handleStartJump(int i) {
-		this.playSound(SoundEvents.CAMEL_DASH, 1.0F, this.getVoicePitch());
+		this.makeSound(SoundEvents.CAMEL_DASH);
 		this.gameEvent(GameEvent.ENTITY_ACTION);
 		this.setDashing(true);
 	}
@@ -519,14 +519,6 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 		return new Vec3(0.0, this.getBodyAnchorAnimationYOffset(true, f, entityDimensions, g) - (double)(0.2F * g), (double)(entityDimensions.width() * 0.56F));
 	}
 
-	private void clampHeadRotationToBody(Entity entity, float f) {
-		float g = entity.getYHeadRot();
-		float h = Mth.wrapDegrees(this.yBodyRot - g);
-		float i = Mth.clamp(Mth.wrapDegrees(this.yBodyRot - g), -f, f);
-		float j = g + h - i;
-		entity.setYHeadRot(j);
-	}
-
 	@Override
 	public int getMaxHeadYRot() {
 		return 30;
@@ -562,7 +554,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 
 	public void sitDown() {
 		if (!this.isCamelSitting()) {
-			this.playSound(SoundEvents.CAMEL_SIT, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.CAMEL_SIT);
 			this.setPose(Pose.SITTING);
 			this.gameEvent(GameEvent.ENTITY_ACTION);
 			this.resetLastPoseChangeTick(-this.level().getGameTime());
@@ -571,7 +563,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 
 	public void standUp() {
 		if (this.isCamelSitting()) {
-			this.playSound(SoundEvents.CAMEL_STAND, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.CAMEL_STAND);
 			this.setPose(Pose.STANDING);
 			this.gameEvent(GameEvent.ENTITY_ACTION);
 			this.resetLastPoseChangeTick(this.level().getGameTime());

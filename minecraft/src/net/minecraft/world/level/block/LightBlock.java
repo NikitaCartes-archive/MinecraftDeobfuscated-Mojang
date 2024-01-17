@@ -49,7 +49,7 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (!level.isClientSide && player.canUseGameMasterBlocks()) {
 			level.setBlock(blockPos, blockState.cycle(LEVEL), 2);
 			return InteractionResult.SUCCESS;
@@ -59,27 +59,27 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return collisionContext.isHoldingItem(Items.LIGHT) ? Shapes.block() : Shapes.empty();
 	}
 
 	@Override
-	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return true;
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.INVISIBLE;
 	}
 
 	@Override
-	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return 1.0F;
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -90,7 +90,7 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 

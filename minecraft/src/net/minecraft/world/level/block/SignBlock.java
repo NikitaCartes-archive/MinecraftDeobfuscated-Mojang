@@ -53,7 +53,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	protected abstract MapCodec<? extends SignBlock> codec();
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -64,7 +64,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
 	}
 
@@ -79,7 +79,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public ItemInteractionResult useItemOn(
+	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
@@ -112,7 +112,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
 			if (level.isClientSide) {
 				Util.pauseInIde(new IllegalStateException("Expected to only call this on server"));
@@ -149,7 +149,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 

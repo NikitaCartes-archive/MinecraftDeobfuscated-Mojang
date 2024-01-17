@@ -2,24 +2,26 @@ package net.minecraft.network.protocol.common.custom;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.codec.StreamCodec;
 
-public record PoiAddedDebugPayload(BlockPos pos, String type, int freeTicketCount) implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/poi_added");
+public record PoiAddedDebugPayload(BlockPos pos, String poiType, int freeTicketCount) implements CustomPacketPayload {
+	public static final StreamCodec<FriendlyByteBuf, PoiAddedDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(
+		PoiAddedDebugPayload::write, PoiAddedDebugPayload::new
+	);
+	public static final CustomPacketPayload.Type<PoiAddedDebugPayload> TYPE = CustomPacketPayload.createType("debug/poi_added");
 
-	public PoiAddedDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+	private PoiAddedDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this(friendlyByteBuf.readBlockPos(), friendlyByteBuf.readUtf(), friendlyByteBuf.readInt());
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
-		friendlyByteBuf.writeUtf(this.type);
+		friendlyByteBuf.writeUtf(this.poiType);
 		friendlyByteBuf.writeInt(this.freeTicketCount);
 	}
 
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<PoiAddedDebugPayload> type() {
+		return TYPE;
 	}
 }

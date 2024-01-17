@@ -3,24 +3,26 @@ package net.minecraft.network.protocol.common.custom;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.DebugEntityNameGenerator;
-import net.minecraft.resources.ResourceLocation;
 
 public record BreezeDebugPayload(BreezeDebugPayload.BreezeInfo breezeInfo) implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/breeze");
+	public static final StreamCodec<FriendlyByteBuf, BreezeDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(
+		BreezeDebugPayload::write, BreezeDebugPayload::new
+	);
+	public static final CustomPacketPayload.Type<BreezeDebugPayload> TYPE = CustomPacketPayload.createType("debug/breeze");
 
-	public BreezeDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+	private BreezeDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this(new BreezeDebugPayload.BreezeInfo(friendlyByteBuf));
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		this.breezeInfo.write(friendlyByteBuf);
 	}
 
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<BreezeDebugPayload> type() {
+		return TYPE;
 	}
 
 	public static record BreezeInfo(UUID uuid, int id, Integer attackTarget, BlockPos jumpTarget) {
@@ -29,7 +31,7 @@ public record BreezeDebugPayload(BreezeDebugPayload.BreezeInfo breezeInfo) imple
 				friendlyByteBuf.readUUID(),
 				friendlyByteBuf.readInt(),
 				friendlyByteBuf.readNullable(FriendlyByteBuf::readInt),
-				friendlyByteBuf.readNullable(FriendlyByteBuf::readBlockPos)
+				friendlyByteBuf.readNullable(BlockPos.STREAM_CODEC)
 			);
 		}
 
@@ -37,7 +39,7 @@ public record BreezeDebugPayload(BreezeDebugPayload.BreezeInfo breezeInfo) imple
 			friendlyByteBuf.writeUUID(this.uuid);
 			friendlyByteBuf.writeInt(this.id);
 			friendlyByteBuf.writeNullable(this.attackTarget, FriendlyByteBuf::writeInt);
-			friendlyByteBuf.writeNullable(this.jumpTarget, FriendlyByteBuf::writeBlockPos);
+			friendlyByteBuf.writeNullable(this.jumpTarget, BlockPos.STREAM_CODEC);
 		}
 
 		public String generateName() {

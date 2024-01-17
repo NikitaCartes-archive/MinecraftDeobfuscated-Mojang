@@ -1,17 +1,10 @@
 package net.minecraft.util.profiling.jfr.stats;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.datafixers.util.Pair;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import jdk.jfr.consumer.RecordedEvent;
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketFlow;
 
 public final class NetworkPacketSummary {
 	private final NetworkPacketSummary.PacketCountAndSize totalPacketCountAndSize;
@@ -60,34 +53,11 @@ public final class NetworkPacketSummary {
 		}
 	}
 
-	public static record PacketIdentification(PacketFlow direction, String protocolId, int packetId) {
-		private static final Map<NetworkPacketSummary.PacketIdentification, String> PACKET_NAME_BY_ID;
-
-		public String packetName() {
-			return (String)PACKET_NAME_BY_ID.getOrDefault(this, "unknown");
-		}
-
+	public static record PacketIdentification(String direction, String protocolId, String packetId) {
 		public static NetworkPacketSummary.PacketIdentification from(RecordedEvent recordedEvent) {
 			return new NetworkPacketSummary.PacketIdentification(
-				recordedEvent.getEventType().getName().equals("minecraft.PacketSent") ? PacketFlow.CLIENTBOUND : PacketFlow.SERVERBOUND,
-				recordedEvent.getString("protocolId"),
-				recordedEvent.getInt("packetId")
+				recordedEvent.getString("packetDirection"), recordedEvent.getString("protocolId"), recordedEvent.getString("packetId")
 			);
-		}
-
-		static {
-			Builder<NetworkPacketSummary.PacketIdentification, String> builder = ImmutableMap.builder();
-
-			for (ConnectionProtocol connectionProtocol : ConnectionProtocol.values()) {
-				for (PacketFlow packetFlow : PacketFlow.values()) {
-					Int2ObjectMap<Class<? extends Packet<?>>> int2ObjectMap = connectionProtocol.getPacketsByIds(packetFlow);
-					int2ObjectMap.forEach(
-						(integer, class_) -> builder.put(new NetworkPacketSummary.PacketIdentification(packetFlow, connectionProtocol.id(), integer), class_.getSimpleName())
-					);
-				}
-			}
-
-			PACKET_NAME_BY_ID = builder.build();
 		}
 	}
 }

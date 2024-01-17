@@ -11,5 +11,5 @@ public class PingResult extends ValueObject implements ReflectionBasedSerializat
 	@SerializedName("pingResults")
 	public List<RegionPingResult> pingResults = Lists.<RegionPingResult>newArrayList();
 	@SerializedName("worldIds")
-	public List<Long> worldIds = Lists.<Long>newArrayList();
+	public List<Long> realmIds = Lists.<Long>newArrayList();
 }

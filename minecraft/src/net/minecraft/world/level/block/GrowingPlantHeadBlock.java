@@ -36,12 +36,12 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
+	protected boolean isRandomlyTicking(BlockState blockState) {
 		return (Integer)blockState.getValue(AGE) < 25;
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Integer)blockState.getValue(AGE) < 25 && randomSource.nextDouble() < this.growPerTickProbability) {
 			BlockPos blockPos2 = blockPos.relative(this.growthDirection);
 			if (this.canGrowInto(serverLevel.getBlockState(blockPos2))) {
@@ -67,7 +67,7 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction == this.growthDirection.getOpposite() && !blockState.canSurvive(levelAccessor, blockPos)) {

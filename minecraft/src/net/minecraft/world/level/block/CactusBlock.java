@@ -40,14 +40,14 @@ public class CactusBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
 		}
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		BlockPos blockPos2 = blockPos.above();
 		if (serverLevel.isEmptyBlock(blockPos2)) {
 			int i = 1;
@@ -71,17 +71,17 @@ public class CactusBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return COLLISION_SHAPE;
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return OUTLINE_SHAPE;
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (!blockState.canSurvive(levelAccessor, blockPos)) {
@@ -92,7 +92,7 @@ public class CactusBlock extends Block {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
 			BlockState blockState2 = levelReader.getBlockState(blockPos.relative(direction));
 			if (blockState2.isSolid() || levelReader.getFluidState(blockPos.relative(direction)).is(FluidTags.LAVA)) {
@@ -105,7 +105,7 @@ public class CactusBlock extends Block {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		entity.hurt(level.damageSources().cactus(), 1.0F);
 	}
 
@@ -115,7 +115,7 @@ public class CactusBlock extends Block {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 }

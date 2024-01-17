@@ -11,10 +11,13 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.CriterionValidator;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.ProblemReporter;
@@ -52,6 +55,7 @@ public record Advancement(
 		),
 		Advancement::validate
 	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, Advancement> STREAM_CODEC = StreamCodec.ofMember(Advancement::write, Advancement::read);
 
 	public Advancement(
 		Optional<ResourceLocation> optional,
@@ -80,21 +84,21 @@ public record Advancement(
 		return (Component)advancementHolder.value().name().orElseGet(() -> Component.literal(advancementHolder.id().toString()));
 	}
 
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeOptional(this.parent, FriendlyByteBuf::writeResourceLocation);
-		friendlyByteBuf.writeOptional(this.display, (friendlyByteBufx, displayInfo) -> displayInfo.serializeToNetwork(friendlyByteBufx));
-		this.requirements.write(friendlyByteBuf);
-		friendlyByteBuf.writeBoolean(this.sendsTelemetryEvent);
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeOptional(this.parent, FriendlyByteBuf::writeResourceLocation);
+		DisplayInfo.STREAM_CODEC.apply(ByteBufCodecs::optional).encode(registryFriendlyByteBuf, this.display);
+		this.requirements.write(registryFriendlyByteBuf);
+		registryFriendlyByteBuf.writeBoolean(this.sendsTelemetryEvent);
 	}
 
-	public static Advancement read(FriendlyByteBuf friendlyByteBuf) {
+	private static Advancement read(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		return new Advancement(
-			friendlyByteBuf.readOptional(FriendlyByteBuf::readResourceLocation),
-			friendlyByteBuf.readOptional(DisplayInfo::fromNetwork),
+			registryFriendlyByteBuf.readOptional(FriendlyByteBuf::readResourceLocation),
+			(Optional<DisplayInfo>)DisplayInfo.STREAM_CODEC.apply(ByteBufCodecs::optional).decode(registryFriendlyByteBuf),
 			AdvancementRewards.EMPTY,
 			Map.of(),
-			new AdvancementRequirements(friendlyByteBuf),
-			friendlyByteBuf.readBoolean()
+			new AdvancementRequirements(registryFriendlyByteBuf),
+			registryFriendlyByteBuf.readBoolean()
 		);
 	}
 

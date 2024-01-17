@@ -36,7 +36,6 @@ public class GoatAi {
 	public static final int RAM_PREPARE_TIME = 20;
 	public static final int RAM_MAX_DISTANCE = 7;
 	private static final UniformInt ADULT_FOLLOW_RANGE = UniformInt.of(5, 16);
-	private static final float SPEED_MULTIPLIER_WHEN_MAKING_LOVE = 1.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_FOLLOWING_ADULT = 1.25F;
 	private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
@@ -94,7 +93,7 @@ public class GoatAi {
 			Activity.IDLE,
 			ImmutableList.of(
 				Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
-				Pair.of(0, new AnimalMakeLove(EntityType.GOAT, 1.0F)),
+				Pair.of(0, new AnimalMakeLove(EntityType.GOAT)),
 				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F)),
 				Pair.of(2, BabyFollowAdult.create(ADULT_FOLLOW_RANGE, 1.25F)),
 				Pair.of(

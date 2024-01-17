@@ -19,6 +19,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -72,12 +73,12 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		return (Integer)blockState.getValue(HONEY_LEVEL);
 	}
 
@@ -118,7 +119,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public ItemInteractionResult useItemOn(
+	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		int i = (Integer)blockState.getValue(HONEY_LEVEL);
@@ -128,7 +129,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 			if (itemStack.is(Items.SHEARS)) {
 				level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BEEHIVE_SHEAR, SoundSource.BLOCKS, 1.0F, 1.0F);
 				dropHoneycomb(level, blockPos);
-				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+				itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(interactionHand));
 				bl = true;
 				level.gameEvent(player, GameEvent.SHEAR, blockPos);
 			} else if (itemStack.is(Items.GLASS_BOTTLE)) {
@@ -239,7 +240,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 
@@ -284,7 +285,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
+	protected List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
 		Entity entity = builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
 		if (entity instanceof PrimedTnt
 			|| entity instanceof Creeper
@@ -301,7 +302,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (levelAccessor.getBlockState(blockPos2).getBlock() instanceof FireBlock

@@ -43,17 +43,17 @@ public class FrogspawnBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return mayPlaceOn(levelReader, blockPos.below());
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		level.scheduleTick(blockPos, this, getFrogspawnHatchDelay(level.getRandom()));
 	}
 
@@ -62,7 +62,7 @@ public class FrogspawnBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return !this.canSurvive(blockState, levelAccessor, blockPos)
@@ -71,7 +71,7 @@ public class FrogspawnBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!this.canSurvive(blockState, serverLevel, blockPos)) {
 			this.destroyBlock(serverLevel, blockPos);
 		} else {
@@ -80,7 +80,7 @@ public class FrogspawnBlock extends Block {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (entity.getType().equals(EntityType.FALLING_BLOCK)) {
 			this.destroyBlock(level, blockPos);
 		}

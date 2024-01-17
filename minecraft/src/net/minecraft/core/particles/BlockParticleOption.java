@@ -5,7 +5,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -15,10 +17,6 @@ public class BlockParticleOption implements ParticleOptions {
 			stringReader.expect(' ');
 			return new BlockParticleOption(particleType, BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), stringReader, false).blockState());
 		}
-
-		public BlockParticleOption fromNetwork(ParticleType<BlockParticleOption> particleType, FriendlyByteBuf friendlyByteBuf) {
-			return new BlockParticleOption(particleType, friendlyByteBuf.readById(Block.BLOCK_STATE_REGISTRY));
-		}
 	};
 	private final ParticleType<BlockParticleOption> type;
 	private final BlockState state;
@@ -27,14 +25,14 @@ public class BlockParticleOption implements ParticleOptions {
 		return BlockState.CODEC.xmap(blockState -> new BlockParticleOption(particleType, blockState), blockParticleOption -> blockParticleOption.state);
 	}
 
+	public static StreamCodec<? super RegistryFriendlyByteBuf, BlockParticleOption> streamCodec(ParticleType<BlockParticleOption> particleType) {
+		return ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY)
+			.map(blockState -> new BlockParticleOption(particleType, blockState), blockParticleOption -> blockParticleOption.state);
+	}
+
 	public BlockParticleOption(ParticleType<BlockParticleOption> particleType, BlockState blockState) {
 		this.type = particleType;
 		this.state = blockState;
-	}
-
-	@Override
-	public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeId(Block.BLOCK_STATE_REGISTRY, this.state);
 	}
 
 	@Override

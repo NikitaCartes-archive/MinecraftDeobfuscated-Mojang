@@ -137,12 +137,12 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.ENTITYBLOCK_ANIMATED;
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -165,7 +165,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if (blockState.getValue(TYPE) == ChestType.SINGLE) {
 			return AABB;
 		} else {
@@ -218,7 +218,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
@@ -239,13 +239,13 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		Containers.dropContentsOnDestroy(blockState, blockState2, level, blockPos);
 		super.onRemove(blockState, level, blockPos, blockState2, bl);
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else {
@@ -296,7 +296,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 
 	@Nullable
 	@Override
-	public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
+	protected MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
 		return (MenuProvider)this.combine(blockState, level, blockPos, false).apply(MENU_PROVIDER_COMBINER).orElse(null);
 	}
 
@@ -360,22 +360,22 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		return AbstractContainerMenu.getRedstoneSignalFromContainer(getContainer(this, blockState, level, blockPos, false));
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 
@@ -385,12 +385,12 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
 		if (blockEntity instanceof ChestBlockEntity) {
 			((ChestBlockEntity)blockEntity).recheckOpen();

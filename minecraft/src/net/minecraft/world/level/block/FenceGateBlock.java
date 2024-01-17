@@ -64,7 +64,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if ((Boolean)blockState.getValue(IN_WALL)) {
 			return ((Direction)blockState.getValue(FACING)).getAxis() == Direction.Axis.X ? X_SHAPE_LOW : Z_SHAPE_LOW;
 		} else {
@@ -73,7 +73,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		Direction.Axis axis = direction.getAxis();
@@ -86,7 +86,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		if ((Boolean)blockState.getValue(OPEN)) {
 			return Shapes.empty();
 		} else {
@@ -95,7 +95,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if ((Boolean)blockState.getValue(OPEN)) {
 			return Shapes.empty();
 		} else {
@@ -104,7 +104,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		if ((Boolean)blockState.getValue(IN_WALL)) {
 			return ((Direction)blockState.getValue(FACING)).getAxis() == Direction.Axis.X ? X_OCCLUSION_SHAPE_LOW : Z_OCCLUSION_SHAPE_LOW;
 		} else {
@@ -113,7 +113,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		switch (pathComputationType) {
 			case LAND:
 				return (Boolean)blockState.getValue(OPEN);
@@ -147,7 +147,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if ((Boolean)blockState.getValue(OPEN)) {
 			blockState = blockState.setValue(OPEN, Boolean.valueOf(false));
 			level.setBlock(blockPos, blockState, 10);
@@ -170,7 +170,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
 		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK && !level.isClientSide() && !(Boolean)blockState.getValue(POWERED)) {
 			boolean bl = (Boolean)blockState.getValue(OPEN);
 			level.setBlockAndUpdate(blockPos, blockState.setValue(OPEN, Boolean.valueOf(!bl)));
@@ -184,7 +184,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide) {
 			boolean bl2 = level.hasNeighborSignal(blockPos);
 			if ((Boolean)blockState.getValue(POWERED) != bl2) {

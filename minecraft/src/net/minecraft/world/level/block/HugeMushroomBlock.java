@@ -56,7 +56,7 @@ public class HugeMushroomBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return blockState2.is(this)
@@ -65,7 +65,7 @@ public class HugeMushroomBlock extends Block {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue((Property)PROPERTY_BY_DIRECTION.get(rotation.rotate(Direction.NORTH)), (Boolean)blockState.getValue(NORTH))
 			.setValue((Property)PROPERTY_BY_DIRECTION.get(rotation.rotate(Direction.SOUTH)), (Boolean)blockState.getValue(SOUTH))
 			.setValue((Property)PROPERTY_BY_DIRECTION.get(rotation.rotate(Direction.EAST)), (Boolean)blockState.getValue(EAST))
@@ -75,7 +75,7 @@ public class HugeMushroomBlock extends Block {
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.setValue((Property)PROPERTY_BY_DIRECTION.get(mirror.mirror(Direction.NORTH)), (Boolean)blockState.getValue(NORTH))
 			.setValue((Property)PROPERTY_BY_DIRECTION.get(mirror.mirror(Direction.SOUTH)), (Boolean)blockState.getValue(SOUTH))
 			.setValue((Property)PROPERTY_BY_DIRECTION.get(mirror.mirror(Direction.EAST)), (Boolean)blockState.getValue(EAST))

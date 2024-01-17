@@ -1,37 +1,39 @@
 package net.minecraft.world.item.enchantment;
 
+import java.util.Optional;
+import javax.annotation.Nullable;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.ItemStack;
 
 public class DamageEnchantment extends Enchantment {
-	public static final int ALL = 0;
-	public static final int UNDEAD = 1;
-	public static final int ARTHROPODS = 2;
-	private static final String[] NAMES = new String[]{"all", "undead", "arthropods"};
-	private static final int[] MIN_COST = new int[]{1, 5, 5};
-	private static final int[] LEVEL_COST = new int[]{11, 8, 8};
-	private static final int[] LEVEL_COST_SPAN = new int[]{20, 20, 20};
-	public final int type;
+	private final int minCost;
+	private final int levelCost;
+	private final int levelCostSpan;
+	private final Optional<TagKey<EntityType<?>>> targets;
 
-	public DamageEnchantment(Enchantment.Rarity rarity, int i, EquipmentSlot... equipmentSlots) {
-		super(rarity, EnchantmentCategory.WEAPON, equipmentSlots);
-		this.type = i;
+	public DamageEnchantment(Enchantment.Rarity rarity, int i, int j, int k, Optional<TagKey<EntityType<?>>> optional, EquipmentSlot... equipmentSlots) {
+		super(rarity, ItemTags.WEAPON_ENCHANTABLE, equipmentSlots);
+		this.minCost = i;
+		this.levelCost = j;
+		this.levelCostSpan = k;
+		this.targets = optional;
 	}
 
 	@Override
 	public int getMinCost(int i) {
-		return MIN_COST[this.type] + (i - 1) * LEVEL_COST[this.type];
+		return this.minCost + (i - 1) * this.levelCost;
 	}
 
 	@Override
 	public int getMaxCost(int i) {
-		return this.getMinCost(i) + LEVEL_COST_SPAN[this.type];
+		return this.getMinCost(i) + this.levelCostSpan;
 	}
 
 	@Override
@@ -40,13 +42,11 @@ public class DamageEnchantment extends Enchantment {
 	}
 
 	@Override
-	public float getDamageBonus(int i, MobType mobType) {
-		if (this.type == 0) {
+	public float getDamageBonus(int i, @Nullable EntityType<?> entityType) {
+		if (this.targets.isEmpty()) {
 			return 1.0F + (float)Math.max(0, i - 1) * 0.5F;
-		} else if (this.type == 1 && mobType == MobType.UNDEAD) {
-			return (float)i * 2.5F;
 		} else {
-			return this.type == 2 && mobType == MobType.ARTHROPOD ? (float)i * 2.5F : 0.0F;
+			return entityType != null && entityType.is((TagKey<EntityType<?>>)this.targets.get()) ? (float)i * 2.5F : 0.0F;
 		}
 	}
 
@@ -56,13 +56,12 @@ public class DamageEnchantment extends Enchantment {
 	}
 
 	@Override
-	public boolean canEnchant(ItemStack itemStack) {
-		return itemStack.getItem() instanceof AxeItem ? true : super.canEnchant(itemStack);
-	}
-
-	@Override
 	public void doPostAttack(LivingEntity livingEntity, Entity entity, int i) {
-		if (entity instanceof LivingEntity livingEntity2 && this.type == 2 && i > 0 && livingEntity2.getMobType() == MobType.ARTHROPOD) {
+		if (this.targets.isPresent()
+			&& entity instanceof LivingEntity livingEntity2
+			&& this.targets.get() == EntityTypeTags.ARTHROPOD
+			&& i > 0
+			&& livingEntity2.getType().is((TagKey<EntityType<?>>)this.targets.get())) {
 			int j = 20 + livingEntity.getRandom().nextInt(10 * i);
 			livingEntity2.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, j, 3));
 		}

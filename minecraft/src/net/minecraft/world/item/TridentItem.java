@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class TridentItem extends Item implements Vanishable {
+public class TridentItem extends Item {
 	public static final int THROW_THRESHOLD_TIME = 10;
 	public static final float BASE_DAMAGE = 8.0F;
 	public static final float SHOOT_POWER = 2.5F;
@@ -63,7 +63,7 @@ public class TridentItem extends Item implements Vanishable {
 				int k = EnchantmentHelper.getRiptide(itemStack);
 				if (k <= 0 || player.isInWaterOrRain()) {
 					if (!level.isClientSide) {
-						itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(livingEntity.getUsedItemHand()));
+						itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(livingEntity.getUsedItemHand()));
 						if (k == 0) {
 							ThrownTrident thrownTrident = new ThrownTrident(level, player, itemStack);
 							thrownTrident.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 2.5F + (float)k * 0.5F, 1.0F);
@@ -129,14 +129,14 @@ public class TridentItem extends Item implements Vanishable {
 
 	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
-		itemStack.hurtAndBreak(1, livingEntity2, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
 		return true;
 	}
 
 	@Override
 	public boolean mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity) {
 		if ((double)blockState.getDestroySpeed(level, blockPos) != 0.0) {
-			itemStack.hurtAndBreak(2, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+			itemStack.hurtAndBreak(2, livingEntity, EquipmentSlot.MAINHAND);
 		}
 
 		return true;

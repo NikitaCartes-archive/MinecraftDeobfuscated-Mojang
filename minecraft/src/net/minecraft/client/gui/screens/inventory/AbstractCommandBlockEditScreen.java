@@ -75,11 +75,15 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 		this.previousEdit.setEditable(false);
 		this.previousEdit.setValue("-");
 		this.addWidget(this.previousEdit);
-		this.setInitialFocus(this.commandEdit);
 		this.commandSuggestions = new CommandSuggestions(this.minecraft, this, this.commandEdit, this.font, true, true, 0, 7, false, Integer.MIN_VALUE);
 		this.commandSuggestions.setAllowSuggestions(true);
 		this.commandSuggestions.updateCommandInfo();
 		this.updatePreviousOutput(bl);
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.commandEdit);
 	}
 
 	@Override

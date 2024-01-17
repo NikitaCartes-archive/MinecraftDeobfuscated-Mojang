@@ -153,7 +153,7 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -170,12 +170,12 @@ public class SculkVeinBlock extends MultifaceBlock implements SculkBehaviour, Si
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		return !blockPlaceContext.getItemInHand().is(Items.SCULK_VEIN) || super.canBeReplaced(blockState, blockPlaceContext);
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 

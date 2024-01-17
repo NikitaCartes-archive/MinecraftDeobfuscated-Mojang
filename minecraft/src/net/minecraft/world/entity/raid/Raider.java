@@ -427,7 +427,7 @@ public abstract class Raider extends PatrollingMonster {
 		@Override
 		public void tick() {
 			if (!this.mob.isSilent() && this.mob.random.nextInt(this.adjustedTickDelay(100)) == 0) {
-				Raider.this.playSound(Raider.this.getCelebrateSound(), Raider.this.getSoundVolume(), Raider.this.getVoicePitch());
+				Raider.this.makeSound(Raider.this.getCelebrateSound());
 			}
 
 			if (!this.mob.isPassenger() && this.mob.random.nextInt(this.adjustedTickDelay(50)) == 0) {

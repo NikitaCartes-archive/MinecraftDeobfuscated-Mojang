@@ -21,66 +21,82 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 class ReportGameListener implements GameTestListener {
-	private final GameTestInfo originalTestInfo;
-	private final GameTestTicker testTicker;
-	private final BlockPos structurePos;
-	int attempts;
-	int successes;
+	private int attempts = 0;
+	private int successes = 0;
 
-	public ReportGameListener(GameTestInfo gameTestInfo, GameTestTicker gameTestTicker, BlockPos blockPos) {
-		this.originalTestInfo = gameTestInfo;
-		this.testTicker = gameTestTicker;
-		this.structurePos = blockPos;
-		this.attempts = 0;
-		this.successes = 0;
+	public ReportGameListener() {
 	}
 
 	@Override
 	public void testStructureLoaded(GameTestInfo gameTestInfo) {
-		spawnBeacon(this.originalTestInfo, Blocks.LIGHT_GRAY_STAINED_GLASS);
+		spawnBeacon(gameTestInfo, Blocks.LIGHT_GRAY_STAINED_GLASS);
 		this.attempts++;
 	}
 
+	private void handleRetry(GameTestInfo gameTestInfo, GameTestRunner gameTestRunner, boolean bl) {
+		RetryOptions retryOptions = gameTestInfo.retryOptions();
+		String string = String.format("[Run: %4d, Ok: %4d, Fail: %4d", this.attempts, this.successes, this.attempts - this.successes);
+		if (!retryOptions.unlimitedTries()) {
+			string = string + String.format(", Left: %4d", retryOptions.numberOfTries() - this.attempts);
+		}
+
+		string = string + "]";
+		String string2 = gameTestInfo.getTestName() + " " + (bl ? "passed" : "failed") + "! " + gameTestInfo.getRunTime() + "ms";
+		String string3 = String.format("%-53s%s", string, string2);
+		if (bl) {
+			reportPassed(gameTestInfo, string3);
+		} else {
+			say(gameTestInfo.getLevel(), ChatFormatting.RED, string3);
+		}
+
+		if (retryOptions.hasTriesLeft(this.attempts, this.successes)) {
+			gameTestRunner.rerunTest(gameTestInfo);
+		}
+	}
+
 	@Override
-	public void testPassed(GameTestInfo gameTestInfo) {
+	public void testPassed(GameTestInfo gameTestInfo, GameTestRunner gameTestRunner) {
 		this.successes++;
-		if (gameTestInfo.rerunUntilFailed()) {
-			reportPassed(gameTestInfo, gameTestInfo.getTestName() + " passed! (" + gameTestInfo.getRunTime() + "ms). Rerunning until failed.");
-			this.rerunTest();
+		if (gameTestInfo.retryOptions().hasRetries()) {
+			this.handleRetry(gameTestInfo, gameTestRunner, true);
 		} else if (!gameTestInfo.isFlaky()) {
 			reportPassed(gameTestInfo, gameTestInfo.getTestName() + " passed! (" + gameTestInfo.getRunTime() + "ms)");
 		} else {
 			if (this.successes >= gameTestInfo.requiredSuccesses()) {
 				reportPassed(gameTestInfo, gameTestInfo + " passed " + this.successes + " times of " + this.attempts + " attempts.");
 			} else {
-				say(
-					this.originalTestInfo.getLevel(),
-					ChatFormatting.GREEN,
-					"Flaky test " + this.originalTestInfo + " succeeded, attempt: " + this.attempts + " successes: " + this.successes
-				);
-				this.rerunTest();
+				say(gameTestInfo.getLevel(), ChatFormatting.GREEN, "Flaky test " + gameTestInfo + " succeeded, attempt: " + this.attempts + " successes: " + this.successes);
+				gameTestRunner.rerunTest(gameTestInfo);
 			}
 		}
 	}
 
 	@Override
-	public void testFailed(GameTestInfo gameTestInfo) {
+	public void testFailed(GameTestInfo gameTestInfo, GameTestRunner gameTestRunner) {
 		if (!gameTestInfo.isFlaky()) {
 			reportFailure(gameTestInfo, gameTestInfo.getError());
+			if (gameTestInfo.retryOptions().hasRetries()) {
+				this.handleRetry(gameTestInfo, gameTestRunner, false);
+			}
 		} else {
-			TestFunction testFunction = this.originalTestInfo.getTestFunction();
-			String string = "Flaky test " + this.originalTestInfo + " failed, attempt: " + this.attempts + "/" + testFunction.getMaxAttempts();
-			if (testFunction.getRequiredSuccesses() > 1) {
-				string = string + ", successes: " + this.successes + " (" + testFunction.getRequiredSuccesses() + " required)";
+			TestFunction testFunction = gameTestInfo.getTestFunction();
+			String string = "Flaky test " + gameTestInfo + " failed, attempt: " + this.attempts + "/" + testFunction.maxAttempts();
+			if (testFunction.requiredSuccesses() > 1) {
+				string = string + ", successes: " + this.successes + " (" + testFunction.requiredSuccesses() + " required)";
 			}
 
-			say(this.originalTestInfo.getLevel(), ChatFormatting.YELLOW, string);
+			say(gameTestInfo.getLevel(), ChatFormatting.YELLOW, string);
 			if (gameTestInfo.maxAttempts() - this.attempts + this.successes >= gameTestInfo.requiredSuccesses()) {
-				this.rerunTest();
+				gameTestRunner.rerunTest(gameTestInfo);
 			} else {
 				reportFailure(gameTestInfo, new ExhaustedAttemptsException(this.attempts, this.successes, gameTestInfo));
 			}
 		}
+	}
+
+	@Override
+	public void testAddedForRerun(GameTestInfo gameTestInfo, GameTestInfo gameTestInfo2, GameTestRunner gameTestRunner) {
+		gameTestInfo2.addListener(this);
 	}
 
 	public static void reportPassed(GameTestInfo gameTestInfo, String string) {
@@ -109,15 +125,6 @@ class ReportGameListener implements GameTestListener {
 		}
 
 		GlobalTestReporter.onTestFailed(gameTestInfo);
-	}
-
-	private void rerunTest() {
-		this.originalTestInfo.clearStructure();
-		GameTestInfo gameTestInfo = new GameTestInfo(this.originalTestInfo.getTestFunction(), this.originalTestInfo.getRotation(), this.originalTestInfo.getLevel());
-		gameTestInfo.setRerunUntilFailed(this.originalTestInfo.rerunUntilFailed());
-		this.testTicker.add(gameTestInfo);
-		gameTestInfo.addListener(this);
-		gameTestInfo.prepareTestStructure(this.structurePos);
 	}
 
 	protected static void spawnBeacon(GameTestInfo gameTestInfo, Block block) {

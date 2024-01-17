@@ -55,7 +55,7 @@ public class CompassItemPropertyFunction implements ClampedItemPropertyFunction 
 	private float getRotationTowardsCompassTarget(Entity entity, long l, BlockPos blockPos) {
 		double d = this.getAngleFromEntityToPos(entity, blockPos);
 		double e = this.getWrappedVisualRotationY(entity);
-		if (entity instanceof Player player && player.isLocalPlayer()) {
+		if (entity instanceof Player player && player.isLocalPlayer() && player.level().tickRateManager().runsNormally()) {
 			if (this.wobble.shouldUpdate(l)) {
 				this.wobble.update(l, 0.5 - (e - 0.25));
 			}

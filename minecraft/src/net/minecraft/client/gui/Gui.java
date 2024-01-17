@@ -166,6 +166,7 @@ public class Gui {
 			.add(this::renderCameraOverlays)
 			.add(this::renderCrosshair)
 			.add(this::renderHotbarAndDecorations)
+			.add(this::renderExperienceLevel)
 			.add(this::renderEffects)
 			.add((guiGraphics, f) -> this.bossOverlay.render(guiGraphics));
 		LayeredDraw layeredDraw2 = new LayeredDraw()
@@ -498,7 +499,7 @@ public class Gui {
 		PlayerRideableJumping playerRideableJumping = this.minecraft.player.jumpableVehicle();
 		if (playerRideableJumping != null) {
 			this.renderJumpMeter(playerRideableJumping, guiGraphics, i);
-		} else if (this.minecraft.gameMode.hasExperience()) {
+		} else if (this.isExperienceBarVisible()) {
 			this.renderExperienceBar(guiGraphics, i);
 		}
 
@@ -604,18 +605,26 @@ public class Gui {
 		}
 
 		this.minecraft.getProfiler().pop();
-		if (this.minecraft.player.experienceLevel > 0) {
+	}
+
+	private void renderExperienceLevel(GuiGraphics guiGraphics, float f) {
+		int i = this.minecraft.player.experienceLevel;
+		if (this.isExperienceBarVisible() && i > 0) {
 			this.minecraft.getProfiler().push("expLevel");
-			String string = this.minecraft.player.experienceLevel + "";
-			int l = (guiGraphics.guiWidth() - this.getFont().width(string)) / 2;
-			int m = guiGraphics.guiHeight() - 31 - 4;
-			guiGraphics.drawString(this.getFont(), string, l + 1, m, 0, false);
-			guiGraphics.drawString(this.getFont(), string, l - 1, m, 0, false);
-			guiGraphics.drawString(this.getFont(), string, l, m + 1, 0, false);
-			guiGraphics.drawString(this.getFont(), string, l, m - 1, 0, false);
-			guiGraphics.drawString(this.getFont(), string, l, m, 8453920, false);
+			String string = i + "";
+			int j = (guiGraphics.guiWidth() - this.getFont().width(string)) / 2;
+			int k = guiGraphics.guiHeight() - 31 - 4;
+			guiGraphics.drawString(this.getFont(), string, j + 1, k, 0, false);
+			guiGraphics.drawString(this.getFont(), string, j - 1, k, 0, false);
+			guiGraphics.drawString(this.getFont(), string, j, k + 1, 0, false);
+			guiGraphics.drawString(this.getFont(), string, j, k - 1, 0, false);
+			guiGraphics.drawString(this.getFont(), string, j, k, 8453920, false);
 			this.minecraft.getProfiler().pop();
 		}
+	}
+
+	private boolean isExperienceBarVisible() {
+		return this.minecraft.player.jumpableVehicle() == null && this.minecraft.gameMode.hasExperience();
 	}
 
 	private void renderSelectedItemName(GuiGraphics guiGraphics) {

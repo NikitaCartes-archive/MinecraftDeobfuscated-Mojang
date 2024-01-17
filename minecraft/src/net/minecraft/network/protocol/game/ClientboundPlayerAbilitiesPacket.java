@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.player.Abilities;
 
 public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerAbilitiesPacket> STREAM_CODEC = Packet.codec(
+		ClientboundPlayerAbilitiesPacket::write, ClientboundPlayerAbilitiesPacket::new
+	);
 	private static final int FLAG_INVULNERABLE = 1;
 	private static final int FLAG_FLYING = 2;
 	private static final int FLAG_CAN_FLY = 4;
@@ -25,7 +30,7 @@ public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacket
 		this.walkingSpeed = abilities.getWalkingSpeed();
 	}
 
-	public ClientboundPlayerAbilitiesPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundPlayerAbilitiesPacket(FriendlyByteBuf friendlyByteBuf) {
 		byte b = friendlyByteBuf.readByte();
 		this.invulnerable = (b & 1) != 0;
 		this.isFlying = (b & 2) != 0;
@@ -35,8 +40,7 @@ public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacket
 		this.walkingSpeed = friendlyByteBuf.readFloat();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		byte b = 0;
 		if (this.invulnerable) {
 			b = (byte)(b | 1);
@@ -57,6 +61,11 @@ public class ClientboundPlayerAbilitiesPacket implements Packet<ClientGamePacket
 		friendlyByteBuf.writeByte(b);
 		friendlyByteBuf.writeFloat(this.flyingSpeed);
 		friendlyByteBuf.writeFloat(this.walkingSpeed);
+	}
+
+	@Override
+	public PacketType<ClientboundPlayerAbilitiesPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_PLAYER_ABILITIES;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

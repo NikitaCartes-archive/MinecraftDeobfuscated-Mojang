@@ -1,82 +1,195 @@
 package net.minecraft.gametest.framework;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Streams;
+import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minecraft.core.BlockPos;
+import javax.annotation.Nullable;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.StructureBlockEntity;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.apache.commons.lang3.mutable.MutableInt;
+import net.minecraft.world.level.ChunkPos;
+import org.slf4j.Logger;
 
 public class GameTestRunner {
-	private static final int MAX_TESTS_PER_BATCH = 50;
-	public static final int SPACE_BETWEEN_COLUMNS = 5;
-	public static final int SPACE_BETWEEN_ROWS = 6;
 	public static final int DEFAULT_TESTS_PER_ROW = 8;
+	private static final Logger LOGGER = LogUtils.getLogger();
+	final ServerLevel level;
+	private final GameTestTicker testTicker;
+	private final List<GameTestInfo> allTestInfos;
+	private ImmutableList<GameTestBatch> batches;
+	final List<GameTestBatchListener> batchListeners = Lists.<GameTestBatchListener>newArrayList();
+	private final List<GameTestInfo> scheduledForRerun = Lists.<GameTestInfo>newArrayList();
+	private final GameTestRunner.GameTestBatcher testBatcher;
+	private boolean stopped = true;
+	@Nullable
+	GameTestBatch currentBatch;
+	private final GameTestRunner.StructureSpawner existingStructureSpawner;
+	private final GameTestRunner.StructureSpawner newStructureSpawner;
 
-	public static void runTest(GameTestInfo gameTestInfo, BlockPos blockPos, GameTestTicker gameTestTicker) {
-		gameTestTicker.add(gameTestInfo);
-		gameTestInfo.addListener(new ReportGameListener(gameTestInfo, gameTestTicker, blockPos));
-		gameTestInfo.prepareTestStructure(blockPos);
-	}
-
-	public static Collection<GameTestInfo> runTestBatches(
-		Collection<GameTestBatch> collection, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel, GameTestTicker gameTestTicker, int i
+	protected GameTestRunner(
+		GameTestRunner.GameTestBatcher gameTestBatcher,
+		Collection<GameTestBatch> collection,
+		ServerLevel serverLevel,
+		GameTestTicker gameTestTicker,
+		GameTestRunner.StructureSpawner structureSpawner,
+		GameTestRunner.StructureSpawner structureSpawner2
 	) {
-		GameTestBatchRunner gameTestBatchRunner = new GameTestBatchRunner(collection, blockPos, rotation, serverLevel, gameTestTicker, i);
-		gameTestBatchRunner.start();
-		return gameTestBatchRunner.getTestInfos();
+		this.level = serverLevel;
+		this.testTicker = gameTestTicker;
+		this.testBatcher = gameTestBatcher;
+		this.existingStructureSpawner = structureSpawner;
+		this.newStructureSpawner = structureSpawner2;
+		this.batches = ImmutableList.copyOf(collection);
+		this.allTestInfos = (List<GameTestInfo>)this.batches.stream().flatMap(gameTestBatch -> gameTestBatch.gameTestInfos().stream()).collect(Collectors.toList());
+		gameTestTicker.setRunner(this);
+		this.allTestInfos.forEach(gameTestInfo -> gameTestInfo.addListener(new ReportGameListener()));
 	}
 
-	public static Collection<GameTestInfo> runTests(
-		Collection<TestFunction> collection, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel, GameTestTicker gameTestTicker, int i
-	) {
-		return runTestBatches(groupTestsIntoBatches(collection), blockPos, rotation, serverLevel, gameTestTicker, i);
+	public List<GameTestInfo> getTestInfos() {
+		return this.allTestInfos;
 	}
 
-	public static Collection<GameTestBatch> groupTestsIntoBatches(Collection<TestFunction> collection) {
-		Map<String, List<TestFunction>> map = (Map<String, List<TestFunction>>)collection.stream()
-			.collect(Collectors.groupingBy(TestFunction::getBatchName, LinkedHashMap::new, Collectors.toList()));
-		return (Collection<GameTestBatch>)map.entrySet()
-			.stream()
-			.flatMap(
-				entry -> {
-					String string = (String)entry.getKey();
-					Consumer<ServerLevel> consumer = GameTestRegistry.getBeforeBatchFunction(string);
-					Consumer<ServerLevel> consumer2 = GameTestRegistry.getAfterBatchFunction(string);
-					MutableInt mutableInt = new MutableInt();
-					Collection<TestFunction> collectionx = (Collection<TestFunction>)entry.getValue();
-					return Streams.stream(Iterables.partition(collectionx, 50))
-						.map(list -> new GameTestBatch(string + ":" + mutableInt.incrementAndGet(), ImmutableList.<TestFunction>copyOf(list), consumer, consumer2));
+	public void start() {
+		this.stopped = false;
+		this.runBatch(0);
+	}
+
+	public void stop() {
+		this.stopped = true;
+		if (this.currentBatch != null) {
+			this.currentBatch.afterBatchFunction().accept(this.level);
+		}
+	}
+
+	public void rerunTest(GameTestInfo gameTestInfo) {
+		GameTestInfo gameTestInfo2 = gameTestInfo.copyReset();
+		gameTestInfo.getListeners().forEach(gameTestListener -> gameTestListener.testAddedForRerun(gameTestInfo, gameTestInfo2, this));
+		this.allTestInfos.add(gameTestInfo2);
+		this.scheduledForRerun.add(gameTestInfo2);
+		if (this.stopped) {
+			this.runScheduledRerunTests();
+		}
+	}
+
+	void runBatch(int i) {
+		if (i >= this.batches.size()) {
+			this.runScheduledRerunTests();
+		} else {
+			this.currentBatch = (GameTestBatch)this.batches.get(i);
+			Collection<GameTestInfo> collection = this.createStructuresForBatch(this.currentBatch.gameTestInfos());
+			String string = this.currentBatch.name();
+			LOGGER.info("Running test batch '{}' ({} tests)...", string, collection.size());
+			this.currentBatch.beforeBatchFunction().accept(this.level);
+			this.batchListeners.forEach(gameTestBatchListener -> gameTestBatchListener.testBatchStarting(this.currentBatch));
+			final MultipleTestTracker multipleTestTracker = new MultipleTestTracker();
+			collection.forEach(multipleTestTracker::addTestToTrack);
+			multipleTestTracker.addListener(new GameTestListener() {
+				private void testCompleted() {
+					if (multipleTestTracker.isDone()) {
+						GameTestRunner.this.currentBatch.afterBatchFunction().accept(GameTestRunner.this.level);
+						GameTestRunner.this.batchListeners.forEach(gameTestBatchListener -> gameTestBatchListener.testBatchFinished(GameTestRunner.this.currentBatch));
+						LongSet longSet = new LongArraySet(GameTestRunner.this.level.getForcedChunks());
+						longSet.forEach(l -> GameTestRunner.this.level.setChunkForced(ChunkPos.getX(l), ChunkPos.getZ(l), false));
+						GameTestRunner.this.runBatch(i + 1);
+					}
 				}
-			)
-			.collect(ImmutableList.toImmutableList());
+
+				@Override
+				public void testStructureLoaded(GameTestInfo gameTestInfo) {
+				}
+
+				@Override
+				public void testPassed(GameTestInfo gameTestInfo, GameTestRunner gameTestRunner) {
+					this.testCompleted();
+				}
+
+				@Override
+				public void testFailed(GameTestInfo gameTestInfo, GameTestRunner gameTestRunner) {
+					this.testCompleted();
+				}
+
+				@Override
+				public void testAddedForRerun(GameTestInfo gameTestInfo, GameTestInfo gameTestInfo2, GameTestRunner gameTestRunner) {
+				}
+			});
+			collection.forEach(this.testTicker::add);
+		}
 	}
 
-	public static void clearAllTests(ServerLevel serverLevel, BlockPos blockPos, GameTestTicker gameTestTicker, int i) {
-		gameTestTicker.clear();
-		BlockPos blockPos2 = blockPos.offset(-i, 0, -i);
-		BlockPos blockPos3 = blockPos.offset(i, 0, i);
-		BlockPos.betweenClosedStream(blockPos2, blockPos3)
-			.filter(blockPosx -> serverLevel.getBlockState(blockPosx).is(Blocks.STRUCTURE_BLOCK))
-			.forEach(blockPosx -> {
-				StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPosx);
-				BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(structureBlockEntity);
-				StructureUtils.clearSpaceForStructure(boundingBox, serverLevel);
-			});
+	private void runScheduledRerunTests() {
+		if (!this.scheduledForRerun.isEmpty()) {
+			this.batches = ImmutableList.copyOf(this.testBatcher.batch(this.scheduledForRerun));
+			this.scheduledForRerun.clear();
+			this.stopped = false;
+			this.runBatch(0);
+		} else {
+			this.batches = ImmutableList.of();
+			this.stopped = true;
+		}
+	}
+
+	public void addListener(GameTestBatchListener gameTestBatchListener) {
+		this.batchListeners.add(gameTestBatchListener);
+	}
+
+	private Collection<GameTestInfo> createStructuresForBatch(Collection<GameTestInfo> collection) {
+		return (Collection<GameTestInfo>)collection.stream().map(this::spawn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+	}
+
+	private Optional<GameTestInfo> spawn(GameTestInfo gameTestInfo) {
+		return gameTestInfo.getStructureBlockPos() == null
+			? this.newStructureSpawner.spawnStructure(gameTestInfo)
+			: this.existingStructureSpawner.spawnStructure(gameTestInfo);
 	}
 
 	public static void clearMarkers(ServerLevel serverLevel) {
 		DebugPackets.sendGameTestClearPacket(serverLevel);
+	}
+
+	public static class Builder {
+		private final ServerLevel level;
+		private final GameTestTicker testTicker = GameTestTicker.SINGLETON;
+		private final GameTestRunner.GameTestBatcher batcher = GameTestBatchFactory.fromGameTestInfo();
+		private final GameTestRunner.StructureSpawner existingStructureSpawner = GameTestRunner.StructureSpawner.IN_PLACE;
+		private GameTestRunner.StructureSpawner newStructureSpawner = GameTestRunner.StructureSpawner.NOT_SET;
+		private final Collection<GameTestBatch> batches;
+
+		private Builder(Collection<GameTestBatch> collection, ServerLevel serverLevel) {
+			this.batches = collection;
+			this.level = serverLevel;
+		}
+
+		public static GameTestRunner.Builder fromBatches(Collection<GameTestBatch> collection, ServerLevel serverLevel) {
+			return new GameTestRunner.Builder(collection, serverLevel);
+		}
+
+		public static GameTestRunner.Builder fromInfo(Collection<GameTestInfo> collection, ServerLevel serverLevel) {
+			return fromBatches(GameTestBatchFactory.fromGameTestInfo().batch(collection), serverLevel);
+		}
+
+		public GameTestRunner.Builder newStructureSpawner(GameTestRunner.StructureSpawner structureSpawner) {
+			this.newStructureSpawner = structureSpawner;
+			return this;
+		}
+
+		public GameTestRunner build() {
+			return new GameTestRunner(this.batcher, this.batches, this.level, this.testTicker, this.existingStructureSpawner, this.newStructureSpawner);
+		}
+	}
+
+	public interface GameTestBatcher {
+		Collection<GameTestBatch> batch(Collection<GameTestInfo> collection);
+	}
+
+	public interface StructureSpawner {
+		GameTestRunner.StructureSpawner IN_PLACE = gameTestInfo -> Optional.of(gameTestInfo.prepareTestStructure().placeStructure().startExecution(1));
+		GameTestRunner.StructureSpawner NOT_SET = gameTestInfo -> Optional.empty();
+
+		Optional<GameTestInfo> spawnStructure(GameTestInfo gameTestInfo);
 	}
 }

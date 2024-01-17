@@ -216,7 +216,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	}
 
 	public void hiss() {
-		this.playSound(SoundEvents.CAT_HISS, this.getSoundVolume(), this.getVoicePitch());
+		this.makeSound(SoundEvents.CAT_HISS);
 	}
 
 	@Override
@@ -348,10 +348,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		boolean bl = serverLevelAccessor.getMoonBrightness() > 0.9F;
 		TagKey<CatVariant> tagKey = bl ? CatVariantTags.FULL_MOON_SPAWNS : CatVariantTags.DEFAULT_SPAWNS;
-		BuiltInRegistries.CAT_VARIANT
-			.getTag(tagKey)
-			.flatMap(named -> named.getRandomElement(serverLevelAccessor.getRandom()))
-			.ifPresent(holder -> this.setVariant((CatVariant)holder.value()));
+		BuiltInRegistries.CAT_VARIANT.getRandomElementOf(tagKey, serverLevelAccessor.getRandom()).ifPresent(holder -> this.setVariant((CatVariant)holder.value()));
 		ServerLevel serverLevel = serverLevelAccessor.getLevel();
 		if (serverLevel.structureManager().getStructureWithPieceAt(this.blockPosition(), StructureTags.CATS_SPAWN_AS_BLACK).isValid()) {
 			this.setVariant(BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.ALL_BLACK));

@@ -38,7 +38,7 @@ public class RailBlock extends BaseRailBlock {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		RailShape railShape = blockState.getValue(SHAPE);
 
 		return blockState.setValue(SHAPE, switch (rotation) {
@@ -125,7 +125,7 @@ public class RailBlock extends BaseRailBlock {
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		RailShape railShape = blockState.getValue(SHAPE);
 		switch (mirror) {
 			case LEFT_RIGHT:

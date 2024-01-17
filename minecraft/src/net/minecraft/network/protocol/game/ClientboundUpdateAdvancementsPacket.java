@@ -8,10 +8,16 @@ import java.util.Set;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientboundUpdateAdvancementsPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundUpdateAdvancementsPacket> STREAM_CODEC = Packet.codec(
+		ClientboundUpdateAdvancementsPacket::write, ClientboundUpdateAdvancementsPacket::new
+	);
 	private final boolean reset;
 	private final List<AdvancementHolder> added;
 	private final Set<ResourceLocation> removed;
@@ -26,21 +32,25 @@ public class ClientboundUpdateAdvancementsPacket implements Packet<ClientGamePac
 		this.progress = Map.copyOf(map);
 	}
 
-	public ClientboundUpdateAdvancementsPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.reset = friendlyByteBuf.readBoolean();
-		this.added = friendlyByteBuf.readList(AdvancementHolder::read);
-		this.removed = friendlyByteBuf.readCollection(Sets::newLinkedHashSetWithExpectedSize, FriendlyByteBuf::readResourceLocation);
-		this.progress = friendlyByteBuf.readMap(FriendlyByteBuf::readResourceLocation, AdvancementProgress::fromNetwork);
+	private ClientboundUpdateAdvancementsPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.reset = registryFriendlyByteBuf.readBoolean();
+		this.added = AdvancementHolder.LIST_STREAM_CODEC.decode(registryFriendlyByteBuf);
+		this.removed = registryFriendlyByteBuf.readCollection(Sets::newLinkedHashSetWithExpectedSize, FriendlyByteBuf::readResourceLocation);
+		this.progress = registryFriendlyByteBuf.readMap(FriendlyByteBuf::readResourceLocation, AdvancementProgress::fromNetwork);
+	}
+
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeBoolean(this.reset);
+		AdvancementHolder.LIST_STREAM_CODEC.encode(registryFriendlyByteBuf, this.added);
+		registryFriendlyByteBuf.writeCollection(this.removed, FriendlyByteBuf::writeResourceLocation);
+		registryFriendlyByteBuf.writeMap(
+			this.progress, FriendlyByteBuf::writeResourceLocation, (friendlyByteBuf, advancementProgress) -> advancementProgress.serializeToNetwork(friendlyByteBuf)
+		);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeBoolean(this.reset);
-		friendlyByteBuf.writeCollection(this.added, (friendlyByteBufx, advancementHolder) -> advancementHolder.write(friendlyByteBufx));
-		friendlyByteBuf.writeCollection(this.removed, FriendlyByteBuf::writeResourceLocation);
-		friendlyByteBuf.writeMap(
-			this.progress, FriendlyByteBuf::writeResourceLocation, (friendlyByteBufx, advancementProgress) -> advancementProgress.serializeToNetwork(friendlyByteBufx)
-		);
+	public PacketType<ClientboundUpdateAdvancementsPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_UPDATE_ADVANCEMENTS;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

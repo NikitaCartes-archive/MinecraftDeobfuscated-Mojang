@@ -89,7 +89,7 @@ public class TurtleEggBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (this.shouldUpdateHatchLevel(serverLevel) && onSand(serverLevel, blockPos)) {
 			int i = (Integer)blockState.getValue(HATCH);
 			if (i < 2) {
@@ -124,7 +124,7 @@ public class TurtleEggBlock extends Block {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (onSand(level, blockPos) && !level.isClientSide) {
 			level.levelEvent(2012, blockPos, 15);
 		}
@@ -142,7 +142,7 @@ public class TurtleEggBlock extends Block {
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		return !blockPlaceContext.isSecondaryUseActive() && blockPlaceContext.getItemInHand().is(this.asItem()) && blockState.getValue(EGGS) < 4
 			? true
 			: super.canBeReplaced(blockState, blockPlaceContext);
@@ -158,7 +158,7 @@ public class TurtleEggBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return blockState.getValue(EGGS) > 1 ? MULTIPLE_EGGS_AABB : ONE_EGG_AABB;
 	}
 

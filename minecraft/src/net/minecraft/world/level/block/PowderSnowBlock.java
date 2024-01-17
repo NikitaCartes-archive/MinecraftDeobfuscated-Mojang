@@ -51,17 +51,17 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
+	protected boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
 		return blockState2.is(this) ? true : super.skipRendering(blockState, blockState2, direction);
 	}
 
 	@Override
-	public VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return Shapes.empty();
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!(entity instanceof LivingEntity) || entity.getInBlockState().is(this)) {
 			entity.makeStuckInBlock(blockState, new Vec3(0.9F, 1.5, 0.9F));
 			if (level.isClientSide) {
@@ -101,7 +101,7 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if (collisionContext instanceof EntityCollisionContext entityCollisionContext) {
 			Entity entity = entityCollisionContext.getEntity();
 			if (entity != null) {
@@ -120,7 +120,7 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return Shapes.empty();
 	}
 
@@ -148,7 +148,7 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return true;
 	}
 }

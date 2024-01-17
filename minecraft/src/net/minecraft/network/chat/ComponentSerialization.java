@@ -11,6 +11,7 @@ import com.mojang.serialization.MapEncoder;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -20,11 +21,14 @@ import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.ScoreContents;
 import net.minecraft.network.chat.contents.SelectorContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 
 public class ComponentSerialization {
 	public static final Codec<Component> CODEC = ExtraCodecs.recursive("Component", ComponentSerialization::createCodec);
+	public static final StreamCodec<ByteBuf, Component> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 	public static final Codec<Component> FLAT_CODEC = ExtraCodecs.FLAT_JSON
 		.flatXmap(jsonElement -> CODEC.parse(JsonOps.INSTANCE, jsonElement), component -> CODEC.encodeStart(JsonOps.INSTANCE, component));
 

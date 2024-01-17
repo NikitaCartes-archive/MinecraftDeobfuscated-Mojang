@@ -22,14 +22,14 @@ public class SoulFireBlock extends BaseFireBlock {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return this.canSurvive(blockState, levelAccessor, blockPos) ? this.defaultBlockState() : Blocks.AIR.defaultBlockState();
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return canSurviveOnBlock(levelReader.getBlockState(blockPos.below()));
 	}
 

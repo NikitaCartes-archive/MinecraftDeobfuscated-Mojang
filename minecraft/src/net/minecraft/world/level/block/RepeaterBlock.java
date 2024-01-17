@@ -42,7 +42,7 @@ public class RepeaterBlock extends DiodeBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (!player.getAbilities().mayBuild) {
 			return InteractionResult.PASS;
 		} else {
@@ -63,7 +63,7 @@ public class RepeaterBlock extends DiodeBlock {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction == Direction.DOWN && !this.canSurviveOn(levelAccessor, blockPos2, blockState2)) {

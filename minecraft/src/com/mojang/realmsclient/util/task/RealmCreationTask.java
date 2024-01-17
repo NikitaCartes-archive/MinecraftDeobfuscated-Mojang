@@ -9,15 +9,15 @@ import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class WorldCreationTask extends LongRunningTask {
+public class RealmCreationTask extends LongRunningTask {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component TITLE = Component.translatable("mco.create.world.wait");
 	private final String name;
 	private final String motd;
-	private final long worldId;
+	private final long realmId;
 
-	public WorldCreationTask(long l, String string, String string2) {
-		this.worldId = l;
+	public RealmCreationTask(long l, String string, String string2) {
+		this.realmId = l;
 		this.name = string;
 		this.motd = string2;
 	}
@@ -26,7 +26,7 @@ public class WorldCreationTask extends LongRunningTask {
 		RealmsClient realmsClient = RealmsClient.create();
 
 		try {
-			realmsClient.initializeWorld(this.worldId, this.name, this.motd);
+			realmsClient.initializeRealm(this.realmId, this.name, this.motd);
 		} catch (RealmsServiceException var3) {
 			LOGGER.error("Couldn't create world", (Throwable)var3);
 			this.error(var3);

@@ -7,7 +7,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -21,14 +23,21 @@ public class EntityPositionSource implements PositionSource {
 				)
 				.apply(instance, (uUID, float_) -> new EntityPositionSource(Either.right(Either.left(uUID)), float_))
 	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, EntityPositionSource> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.VAR_INT,
+		EntityPositionSource::getId,
+		ByteBufCodecs.FLOAT,
+		entityPositionSource -> entityPositionSource.yOffset,
+		(integer, float_) -> new EntityPositionSource(Either.right(Either.right(integer)), float_)
+	);
 	private Either<Entity, Either<UUID, Integer>> entityOrUuidOrId;
-	final float yOffset;
+	private final float yOffset;
 
 	public EntityPositionSource(Entity entity, float f) {
 		this(Either.left(entity), f);
 	}
 
-	EntityPositionSource(Either<Entity, Either<UUID, Integer>> either, float f) {
+	private EntityPositionSource(Either<Entity, Either<UUID, Integer>> either, float f) {
 		this.entityOrUuidOrId = either;
 		this.yOffset = f;
 	}
@@ -57,30 +66,26 @@ public class EntityPositionSource implements PositionSource {
 			}));
 	}
 
-	int getId() {
+	private int getId() {
 		return this.entityOrUuidOrId.<Integer>map(Entity::getId, either -> either.map(uUID -> {
 				throw new IllegalStateException("Unable to get entityId from uuid");
 			}, Function.identity()));
 	}
 
 	@Override
-	public PositionSourceType<?> getType() {
+	public PositionSourceType<EntityPositionSource> getType() {
 		return PositionSourceType.ENTITY;
 	}
 
 	public static class Type implements PositionSourceType<EntityPositionSource> {
-		public EntityPositionSource read(FriendlyByteBuf friendlyByteBuf) {
-			return new EntityPositionSource(Either.right(Either.right(friendlyByteBuf.readVarInt())), friendlyByteBuf.readFloat());
-		}
-
-		public void write(FriendlyByteBuf friendlyByteBuf, EntityPositionSource entityPositionSource) {
-			friendlyByteBuf.writeVarInt(entityPositionSource.getId());
-			friendlyByteBuf.writeFloat(entityPositionSource.yOffset);
-		}
-
 		@Override
 		public Codec<EntityPositionSource> codec() {
 			return EntityPositionSource.CODEC;
+		}
+
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, EntityPositionSource> streamCodec() {
+			return EntityPositionSource.STREAM_CODEC;
 		}
 	}
 }

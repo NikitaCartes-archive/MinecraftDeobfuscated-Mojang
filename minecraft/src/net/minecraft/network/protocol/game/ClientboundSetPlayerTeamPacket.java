@@ -7,10 +7,15 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.scores.PlayerTeam;
 
 public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundSetPlayerTeamPacket> STREAM_CODEC = Packet.codec(
+		ClientboundSetPlayerTeamPacket::write, ClientboundSetPlayerTeamPacket::new
+	);
 	private static final int METHOD_ADD = 0;
 	private static final int METHOD_REMOVE = 1;
 	private static final int METHOD_CHANGE = 2;
@@ -49,7 +54,7 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 		);
 	}
 
-	public ClientboundSetPlayerTeamPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundSetPlayerTeamPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.name = friendlyByteBuf.readUtf();
 		this.method = friendlyByteBuf.readByte();
 		if (shouldHaveParameters(this.method)) {
@@ -65,8 +70,7 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 		}
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUtf(this.name);
 		friendlyByteBuf.writeByte(this.method);
 		if (shouldHaveParameters(this.method)) {
@@ -113,6 +117,11 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 			default:
 				return null;
 		}
+	}
+
+	@Override
+	public PacketType<ClientboundSetPlayerTeamPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SET_PLAYER_TEAM;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

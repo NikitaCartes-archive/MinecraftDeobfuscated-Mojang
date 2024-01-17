@@ -1,10 +1,11 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class SweepingEdgeEnchantment extends Enchantment {
 	public SweepingEdgeEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
-		super(rarity, EnchantmentCategory.WEAPON, equipmentSlots);
+		super(rarity, ItemTags.SWORD_ENCHANTABLE, equipmentSlots);
 	}
 
 	@Override

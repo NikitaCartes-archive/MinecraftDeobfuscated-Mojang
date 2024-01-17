@@ -130,7 +130,7 @@ public class ComparatorBlock extends DiodeBlock implements EntityBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (!player.getAbilities().mayBuild) {
 			return InteractionResult.PASS;
 		} else {
@@ -179,12 +179,12 @@ public class ComparatorBlock extends DiodeBlock implements EntityBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		this.refreshOutputState(serverLevel, blockPos, blockState);
 	}
 
 	@Override
-	public boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
+	protected boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
 		super.triggerEvent(blockState, level, blockPos, i, j);
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		return blockEntity != null && blockEntity.triggerEvent(i, j);

@@ -1,12 +1,16 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundLevelParticlesPacket> STREAM_CODEC = Packet.codec(
+		ClientboundLevelParticlesPacket::write, ClientboundLevelParticlesPacket::new
+	);
 	private final double x;
 	private final double y;
 	private final double z;
@@ -33,37 +37,39 @@ public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketL
 		this.count = k;
 	}
 
-	public ClientboundLevelParticlesPacket(FriendlyByteBuf friendlyByteBuf) {
-		ParticleType<?> particleType = friendlyByteBuf.readById(BuiltInRegistries.PARTICLE_TYPE);
-		this.overrideLimiter = friendlyByteBuf.readBoolean();
-		this.x = friendlyByteBuf.readDouble();
-		this.y = friendlyByteBuf.readDouble();
-		this.z = friendlyByteBuf.readDouble();
-		this.xDist = friendlyByteBuf.readFloat();
-		this.yDist = friendlyByteBuf.readFloat();
-		this.zDist = friendlyByteBuf.readFloat();
-		this.maxSpeed = friendlyByteBuf.readFloat();
-		this.count = friendlyByteBuf.readInt();
-		this.particle = this.readParticle(friendlyByteBuf, (ParticleType<ParticleOptions>)particleType);
+	private ClientboundLevelParticlesPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.overrideLimiter = registryFriendlyByteBuf.readBoolean();
+		this.x = registryFriendlyByteBuf.readDouble();
+		this.y = registryFriendlyByteBuf.readDouble();
+		this.z = registryFriendlyByteBuf.readDouble();
+		this.xDist = registryFriendlyByteBuf.readFloat();
+		this.yDist = registryFriendlyByteBuf.readFloat();
+		this.zDist = registryFriendlyByteBuf.readFloat();
+		this.maxSpeed = registryFriendlyByteBuf.readFloat();
+		this.count = registryFriendlyByteBuf.readInt();
+		this.particle = ParticleTypes.STREAM_CODEC.decode(registryFriendlyByteBuf);
 	}
 
-	private <T extends ParticleOptions> T readParticle(FriendlyByteBuf friendlyByteBuf, ParticleType<T> particleType) {
-		return particleType.getDeserializer().fromNetwork(particleType, friendlyByteBuf);
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeBoolean(this.overrideLimiter);
+		registryFriendlyByteBuf.writeDouble(this.x);
+		registryFriendlyByteBuf.writeDouble(this.y);
+		registryFriendlyByteBuf.writeDouble(this.z);
+		registryFriendlyByteBuf.writeFloat(this.xDist);
+		registryFriendlyByteBuf.writeFloat(this.yDist);
+		registryFriendlyByteBuf.writeFloat(this.zDist);
+		registryFriendlyByteBuf.writeFloat(this.maxSpeed);
+		registryFriendlyByteBuf.writeInt(this.count);
+		ParticleTypes.STREAM_CODEC.encode(registryFriendlyByteBuf, this.particle);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeId(BuiltInRegistries.PARTICLE_TYPE, this.particle.getType());
-		friendlyByteBuf.writeBoolean(this.overrideLimiter);
-		friendlyByteBuf.writeDouble(this.x);
-		friendlyByteBuf.writeDouble(this.y);
-		friendlyByteBuf.writeDouble(this.z);
-		friendlyByteBuf.writeFloat(this.xDist);
-		friendlyByteBuf.writeFloat(this.yDist);
-		friendlyByteBuf.writeFloat(this.zDist);
-		friendlyByteBuf.writeFloat(this.maxSpeed);
-		friendlyByteBuf.writeInt(this.count);
-		this.particle.writeToNetwork(friendlyByteBuf);
+	public PacketType<ClientboundLevelParticlesPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_LEVEL_PARTICLES;
+	}
+
+	public void handle(ClientGamePacketListener clientGamePacketListener) {
+		clientGamePacketListener.handleParticleEvent(this);
 	}
 
 	public boolean isOverrideLimiter() {
@@ -104,9 +110,5 @@ public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketL
 
 	public ParticleOptions getParticle() {
 		return this.particle;
-	}
-
-	public void handle(ClientGamePacketListener clientGamePacketListener) {
-		clientGamePacketListener.handleParticleEvent(this);
 	}
 }

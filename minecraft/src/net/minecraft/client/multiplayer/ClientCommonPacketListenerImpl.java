@@ -23,10 +23,12 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.core.Holder;
@@ -45,6 +47,8 @@ import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ClientboundPingPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.protocol.common.ClientboundStoreCookiePacket;
+import net.minecraft.network.protocol.common.ClientboundTransferPacket;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ServerboundPongPacket;
@@ -52,8 +56,11 @@ import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.common.custom.BrandPayload;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.common.custom.DiscardedPayload;
+import net.minecraft.network.protocol.cookie.ClientboundCookieRequestPacket;
+import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagNetworkSerialization;
 import org.slf4j.Logger;
@@ -71,7 +78,9 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	protected final WorldSessionTelemetryManager telemetryManager;
 	@Nullable
 	protected final Screen postDisconnectScreen;
+	protected boolean keepResourcePacks;
 	private final List<ClientCommonPacketListenerImpl.DeferredPacket> deferredPackets = new ArrayList();
+	protected final Map<ResourceLocation, byte[]> serverCookies;
 
 	protected ClientCommonPacketListenerImpl(Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie) {
 		this.minecraft = minecraft;
@@ -80,6 +89,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 		this.serverBrand = commonListenerCookie.serverBrand();
 		this.telemetryManager = commonListenerCookie.telemetryManager();
 		this.postDisconnectScreen = commonListenerCookie.postDisconnectScreen();
+		this.serverCookies = commonListenerCookie.serverCookies();
 	}
 
 	@Override
@@ -153,6 +163,41 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	}
 
 	@Override
+	public void handleRequestCookie(ClientboundCookieRequestPacket clientboundCookieRequestPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundCookieRequestPacket, this, this.minecraft);
+		this.connection
+			.send(new ServerboundCookieResponsePacket(clientboundCookieRequestPacket.key(), (byte[])this.serverCookies.get(clientboundCookieRequestPacket.key())));
+	}
+
+	@Override
+	public void handleStoreCookie(ClientboundStoreCookiePacket clientboundStoreCookiePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundStoreCookiePacket, this, this.minecraft);
+		this.serverCookies.put(clientboundStoreCookiePacket.key(), clientboundStoreCookiePacket.payload());
+	}
+
+	@Override
+	public void handleTransfer(ClientboundTransferPacket clientboundTransferPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundTransferPacket, this, this.minecraft);
+		if (this.serverData == null) {
+			throw new IllegalStateException("Cannot transfer to server from singleplayer");
+		} else {
+			this.keepResourcePacks = true;
+			this.connection.disconnect(Component.translatable("disconnect.transfer"));
+			this.connection.setReadOnly();
+			this.connection.handleDisconnection();
+			ServerAddress serverAddress = new ServerAddress(clientboundTransferPacket.host(), clientboundTransferPacket.port());
+			ConnectScreen.startConnecting(
+				(Screen)Objects.requireNonNullElseGet(this.postDisconnectScreen, TitleScreen::new),
+				this.minecraft,
+				serverAddress,
+				this.serverData,
+				false,
+				new TransferState(this.serverCookies)
+			);
+		}
+	}
+
+	@Override
 	public void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundUpdateTagsPacket, this, this.minecraft);
 		clientboundUpdateTagsPacket.getTags().forEach(this::updateTagsForRegistry);
@@ -195,7 +240,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	@Override
 	public void onDisconnect(Component component) {
 		this.telemetryManager.onDisconnect();
-		this.minecraft.disconnect(this.createDisconnectScreen(component));
+		this.minecraft.disconnect(this.createDisconnectScreen(component), this.keepResourcePacks);
 		LOGGER.warn("Client disconnected with reason: {}", component.getString());
 	}
 

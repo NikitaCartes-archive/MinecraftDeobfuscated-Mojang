@@ -43,7 +43,7 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		switch ((Direction)blockState.getValue(FACING)) {
 			case SOUTH:
 				return SOUTH_SHAPE;
@@ -63,12 +63,12 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
 		BlockState blockState3 = levelReader.getBlockState(blockPos.above());
@@ -84,7 +84,7 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((direction == Direction.DOWN || direction == Direction.UP) && !blockState.canSurvive(levelAccessor, blockPos)) {
@@ -99,7 +99,7 @@ public class BigDripleafStemBlock extends HorizontalDirectionalBlock implements 
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
 		}

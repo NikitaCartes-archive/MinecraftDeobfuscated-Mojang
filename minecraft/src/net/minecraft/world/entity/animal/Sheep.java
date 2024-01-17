@@ -205,7 +205,7 @@ public class Sheep extends Animal implements Shearable {
 			if (!this.level().isClientSide && this.readyForShearing()) {
 				this.shear(SoundSource.PLAYERS);
 				this.gameEvent(GameEvent.SHEAR, player);
-				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+				itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 				return InteractionResult.SUCCESS;
 			} else {
 				return InteractionResult.CONSUME;

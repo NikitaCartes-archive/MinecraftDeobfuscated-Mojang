@@ -14,7 +14,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -90,11 +89,6 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 	abstract SoundEvent getStepSound();
 
 	@Override
-	public MobType getMobType() {
-		return MobType.UNDEAD;
-	}
-
-	@Override
 	public void aiStep() {
 		boolean bl = this.isSunBurnTick();
 		if (bl) {
@@ -112,7 +106,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 			}
 
 			if (bl) {
-				this.setSecondsOnFire(8);
+				this.igniteForSeconds(8);
 			}
 		}
 

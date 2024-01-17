@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.jfr.callback.ProfiledDuration;
 import net.minecraft.world.level.ChunkPos;
@@ -26,9 +27,9 @@ public interface JvmProfiler {
 
 	void onServerTick(float f);
 
-	void onPacketReceived(ConnectionProtocol connectionProtocol, int i, SocketAddress socketAddress, int j);
+	void onPacketReceived(ConnectionProtocol connectionProtocol, PacketType<?> packetType, SocketAddress socketAddress, int i);
 
-	void onPacketSent(ConnectionProtocol connectionProtocol, int i, SocketAddress socketAddress, int j);
+	void onPacketSent(ConnectionProtocol connectionProtocol, PacketType<?> packetType, SocketAddress socketAddress, int i);
 
 	@Nullable
 	ProfiledDuration onWorldLoadedStarted();
@@ -63,11 +64,11 @@ public interface JvmProfiler {
 		}
 
 		@Override
-		public void onPacketReceived(ConnectionProtocol connectionProtocol, int i, SocketAddress socketAddress, int j) {
+		public void onPacketReceived(ConnectionProtocol connectionProtocol, PacketType<?> packetType, SocketAddress socketAddress, int i) {
 		}
 
 		@Override
-		public void onPacketSent(ConnectionProtocol connectionProtocol, int i, SocketAddress socketAddress, int j) {
+		public void onPacketSent(ConnectionProtocol connectionProtocol, PacketType<?> packetType, SocketAddress socketAddress, int i) {
 		}
 
 		@Override

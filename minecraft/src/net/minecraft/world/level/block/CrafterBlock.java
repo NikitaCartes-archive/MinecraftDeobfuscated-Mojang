@@ -60,17 +60,17 @@ public class CrafterBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		return level.getBlockEntity(blockPos) instanceof CrafterBlockEntity crafterBlockEntity ? crafterBlockEntity.getRedstoneSignal() : 0;
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		boolean bl2 = level.hasNeighborSignal(blockPos);
 		boolean bl3 = (Boolean)blockState.getValue(TRIGGERED);
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
@@ -85,7 +85,7 @@ public class CrafterBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		this.dispenseFrom(blockState, serverLevel, blockPos);
 	}
 
@@ -134,13 +134,13 @@ public class CrafterBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		Containers.dropContentsOnDestroy(blockState, blockState2, level, blockPos);
 		super.onRemove(blockState, level, blockPos, blockState2, bl);
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else {
@@ -214,17 +214,17 @@ public class CrafterBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(ORIENTATION, rotation.rotation().rotate(blockState.getValue(ORIENTATION)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.setValue(ORIENTATION, mirror.rotation().rotate(blockState.getValue(ORIENTATION)));
 	}
 

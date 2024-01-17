@@ -1,11 +1,16 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundTeleportEntityPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundTeleportEntityPacket> STREAM_CODEC = Packet.codec(
+		ClientboundTeleportEntityPacket::write, ClientboundTeleportEntityPacket::new
+	);
 	private final int id;
 	private final double x;
 	private final double y;
@@ -25,7 +30,7 @@ public class ClientboundTeleportEntityPacket implements Packet<ClientGamePacketL
 		this.onGround = entity.onGround();
 	}
 
-	public ClientboundTeleportEntityPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundTeleportEntityPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.x = friendlyByteBuf.readDouble();
 		this.y = friendlyByteBuf.readDouble();
@@ -35,8 +40,7 @@ public class ClientboundTeleportEntityPacket implements Packet<ClientGamePacketL
 		this.onGround = friendlyByteBuf.readBoolean();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);
@@ -44,6 +48,11 @@ public class ClientboundTeleportEntityPacket implements Packet<ClientGamePacketL
 		friendlyByteBuf.writeByte(this.yRot);
 		friendlyByteBuf.writeByte(this.xRot);
 		friendlyByteBuf.writeBoolean(this.onGround);
+	}
+
+	@Override
+	public PacketType<ClientboundTeleportEntityPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_TELEPORT_ENTITY;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

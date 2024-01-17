@@ -3,7 +3,7 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.util.task.CreateSnapshotRealmTask;
-import com.mojang.realmsclient.util.task.WorldCreationTask;
+import com.mojang.realmsclient.util.task.RealmCreationTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -62,6 +62,10 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
 		});
 		this.repositionElements();
+	}
+
+	@Override
+	protected void setInitialFocus() {
 		this.setInitialFocus(this.nameBox);
 	}
 
@@ -71,9 +75,9 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 	}
 
 	private void createWorld(RealmsServer realmsServer) {
-		WorldCreationTask worldCreationTask = new WorldCreationTask(realmsServer.id, this.nameBox.getValue(), this.descriptionBox.getValue());
+		RealmCreationTask realmCreationTask = new RealmCreationTask(realmsServer.id, this.nameBox.getValue(), this.descriptionBox.getValue());
 		RealmsResetWorldScreen realmsResetWorldScreen = RealmsResetWorldScreen.forNewRealm(
-			this, realmsServer, worldCreationTask, () -> this.minecraft.execute(() -> {
+			this, realmsServer, realmCreationTask, () -> this.minecraft.execute(() -> {
 					RealmsMainScreen.refreshServerList();
 					this.minecraft.setScreen(this.lastScreen);
 				})

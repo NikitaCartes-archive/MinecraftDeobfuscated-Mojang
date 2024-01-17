@@ -70,7 +70,7 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		boolean bl2 = level.hasNeighborSignal(blockPos);
 		if (bl2 != (Boolean)blockState.getValue(POWERED)) {
 			if (bl2) {
@@ -82,14 +82,14 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+	protected void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		Entity entity = projectile.getOwner();
 		Player player = entity instanceof Player ? (Player)entity : null;
 		this.onHit(level, blockState, blockHitResult, player, true);
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		return this.onHit(level, blockState, blockHitResult, player, true) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
 	}
 
@@ -168,17 +168,17 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.getVoxelShape(blockState);
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.getVoxelShape(blockState);
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 
@@ -221,7 +221,7 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
 		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK && !level.isClientSide()) {
 			this.attemptToRing(level, blockPos, null);
 		}
@@ -230,7 +230,7 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		BellAttachType bellAttachType = blockState.getValue(ATTACHMENT);
@@ -255,7 +255,7 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		Direction direction = getConnectedDirection(blockState).getOpposite();
 		return direction == Direction.UP
 			? Block.canSupportCenter(levelReader, blockPos.above(), Direction.DOWN)
@@ -291,7 +291,7 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 

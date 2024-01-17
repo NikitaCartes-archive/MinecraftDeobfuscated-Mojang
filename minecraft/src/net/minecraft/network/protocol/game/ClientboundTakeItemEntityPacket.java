@@ -1,9 +1,14 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundTakeItemEntityPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundTakeItemEntityPacket> STREAM_CODEC = Packet.codec(
+		ClientboundTakeItemEntityPacket::write, ClientboundTakeItemEntityPacket::new
+	);
 	private final int itemId;
 	private final int playerId;
 	private final int amount;
@@ -14,17 +19,21 @@ public class ClientboundTakeItemEntityPacket implements Packet<ClientGamePacketL
 		this.amount = k;
 	}
 
-	public ClientboundTakeItemEntityPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundTakeItemEntityPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.itemId = friendlyByteBuf.readVarInt();
 		this.playerId = friendlyByteBuf.readVarInt();
 		this.amount = friendlyByteBuf.readVarInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.itemId);
 		friendlyByteBuf.writeVarInt(this.playerId);
 		friendlyByteBuf.writeVarInt(this.amount);
+	}
+
+	@Override
+	public PacketType<ClientboundTakeItemEntityPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_TAKE_ITEM_ENTITY;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

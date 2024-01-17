@@ -47,7 +47,7 @@ public class BeaconBlock extends BaseEntityBlock implements BeaconBeamBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else {
@@ -62,7 +62,7 @@ public class BeaconBlock extends BaseEntityBlock implements BeaconBeamBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 

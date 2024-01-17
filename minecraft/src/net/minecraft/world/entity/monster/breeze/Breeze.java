@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster.breeze;
 
 import com.mojang.serialization.Dynamic;
+import java.util.Optional;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,19 +48,24 @@ public class Breeze extends Monster {
 	public AnimationState inhale = new AnimationState();
 	private int jumpTrailStartedTick = 0;
 	private int soundTick = 0;
+	private static final ProjectileDeflection PROJECTILE_DEFLECTION = (projectile, entity, randomSource) -> {
+		entity.level().playLocalSound(entity, SoundEvents.BREEZE_DEFLECT, entity.getSoundSource(), 1.0F, 1.0F);
+		ProjectileDeflection.REVERSE.deflect(projectile, entity, randomSource);
+	};
 
 	public static AttributeSupplier.Builder createAttributes() {
 		return Mob.createMobAttributes()
-			.add(Attributes.MOVEMENT_SPEED, 0.6F)
+			.add(Attributes.MOVEMENT_SPEED, 0.63F)
 			.add(Attributes.MAX_HEALTH, 30.0)
 			.add(Attributes.FOLLOW_RANGE, 24.0)
-			.add(Attributes.ATTACK_DAMAGE, 2.0);
+			.add(Attributes.ATTACK_DAMAGE, 3.0);
 	}
 
 	public Breeze(EntityType<? extends Monster> entityType, Level level) {
 		super(entityType, level);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_TRAPDOOR, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+		this.xpReward = 10;
 	}
 
 	@Override
@@ -191,8 +198,11 @@ public class Breeze extends Monster {
 	}
 
 	@Override
-	public void playProjectileDeflectionSound(Projectile projectile) {
-		this.level().playLocalSound(this, SoundEvents.BREEZE_DEFLECT, this.getSoundSource(), 1.0F, 1.0F);
+	public ProjectileDeflection deflection(Projectile projectile) {
+		return projectile.getType() == EntityType.WIND_CHARGE
+				&& Optional.ofNullable(projectile.getOwner()).map(Entity::getType).map(entityType -> entityType == EntityType.PLAYER).orElse(false)
+			? ProjectileDeflection.NONE
+			: PROJECTILE_DEFLECTION;
 	}
 
 	@Override

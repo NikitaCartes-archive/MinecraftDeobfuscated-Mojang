@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.Entity;
 
 public class ServerboundPlayerCommandPacket implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundPlayerCommandPacket> STREAM_CODEC = Packet.codec(
+		ServerboundPlayerCommandPacket::write, ServerboundPlayerCommandPacket::new
+	);
 	private final int id;
 	private final ServerboundPlayerCommandPacket.Action action;
 	private final int data;
@@ -19,17 +24,21 @@ public class ServerboundPlayerCommandPacket implements Packet<ServerGamePacketLi
 		this.data = i;
 	}
 
-	public ServerboundPlayerCommandPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ServerboundPlayerCommandPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.action = friendlyByteBuf.readEnum(ServerboundPlayerCommandPacket.Action.class);
 		this.data = friendlyByteBuf.readVarInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeEnum(this.action);
 		friendlyByteBuf.writeVarInt(this.data);
+	}
+
+	@Override
+	public PacketType<ServerboundPlayerCommandPacket> type() {
+		return GamePacketTypes.SERVERBOUND_PLAYER_COMMAND;
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {

@@ -3,25 +3,25 @@ package net.minecraft.network.protocol.common.custom;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.codec.StreamCodec;
 
 public record GoalDebugPayload(int entityId, BlockPos pos, List<GoalDebugPayload.DebugGoal> goals) implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/goal_selector");
+	public static final StreamCodec<FriendlyByteBuf, GoalDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(GoalDebugPayload::write, GoalDebugPayload::new);
+	public static final CustomPacketPayload.Type<GoalDebugPayload> TYPE = CustomPacketPayload.createType("debug/goal_selector");
 
-	public GoalDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+	private GoalDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this(friendlyByteBuf.readInt(), friendlyByteBuf.readBlockPos(), friendlyByteBuf.readList(GoalDebugPayload.DebugGoal::new));
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeInt(this.entityId);
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeCollection(this.goals, (friendlyByteBufx, debugGoal) -> debugGoal.write(friendlyByteBufx));
 	}
 
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<GoalDebugPayload> type() {
+		return TYPE;
 	}
 
 	public static record DebugGoal(int priority, boolean isRunning, String name) {

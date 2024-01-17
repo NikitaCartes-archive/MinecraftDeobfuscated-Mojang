@@ -93,12 +93,12 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return isValidPointedDripstonePlacement(levelReader, blockPos, blockState.getValue(TIP_DIRECTION));
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -128,7 +128,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+	protected void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		if (!level.isClientSide) {
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			if (projectile.mayInteract(level, blockPos)
@@ -162,7 +162,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (isStalagmite(blockState) && !this.canSurvive(blockState, serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
 		} else {
@@ -171,7 +171,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		maybeTransferFluid(blockState, serverLevel, blockPos, randomSource.nextFloat());
 		if (randomSource.nextFloat() < 0.011377778F && isStalactiteStartPos(blockState, serverLevel, blockPos)) {
 			growStalactiteOrStalagmiteIfPossible(blockState, serverLevel, blockPos, randomSource);
@@ -246,17 +246,17 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	public VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return Shapes.empty();
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		DripstoneThickness dripstoneThickness = blockState.getValue(THICKNESS);
 		VoxelShape voxelShape;
 		if (dripstoneThickness == DripstoneThickness.TIP_MERGE) {
@@ -280,12 +280,12 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	public boolean isCollisionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean isCollisionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return false;
 	}
 
 	@Override
-	public float getMaxHorizontalOffset() {
+	protected float getMaxHorizontalOffset() {
 		return 0.125F;
 	}
 
@@ -516,7 +516,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 

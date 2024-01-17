@@ -26,10 +26,13 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public interface ContainerEntity extends Container, MenuProvider {
 	Vec3 position();
+
+	AABB getBoundingBox();
 
 	@Nullable
 	ResourceLocation getLootTable();
@@ -169,6 +172,6 @@ public interface ContainerEntity extends Container, MenuProvider {
 	}
 
 	default boolean isChestVehicleStillValid(Player player) {
-		return !this.isRemoved() && this.position().closerThan(player.position(), 8.0);
+		return !this.isRemoved() && player.canInteractWithEntity(this.getBoundingBox(), 4.0);
 	}
 }

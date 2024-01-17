@@ -189,7 +189,8 @@ public abstract class PlayerList {
 				bl2,
 				!bl,
 				bl3,
-				serverPlayer.createCommonSpawnInfo(serverLevel2)
+				serverPlayer.createCommonSpawnInfo(serverLevel2),
+				this.server.enforceSecureProfile()
 			)
 		);
 		serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
@@ -211,7 +212,7 @@ public abstract class PlayerList {
 		this.broadcastSystemMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), false);
 		serverGamePacketListenerImpl.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.getYRot(), serverPlayer.getXRot());
 		ServerStatus serverStatus = this.server.getStatus();
-		if (serverStatus != null) {
+		if (serverStatus != null && !commonListenerCookie.transferred()) {
 			serverPlayer.sendServerStatus(serverStatus);
 		}
 

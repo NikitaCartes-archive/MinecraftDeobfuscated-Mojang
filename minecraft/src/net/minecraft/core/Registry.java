@@ -155,6 +155,10 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 		return DataFixUtils.orElse(this.getTag(tagKey), List.of());
 	}
 
+	default Optional<Holder<T>> getRandomElementOf(TagKey<T> tagKey, RandomSource randomSource) {
+		return this.getTag(tagKey).flatMap(named -> named.getRandomElement(randomSource));
+	}
+
 	HolderSet.Named<T> getOrCreateTag(TagKey<T> tagKey);
 
 	Stream<Pair<TagKey<T>, HolderSet.Named<T>>> getTags();

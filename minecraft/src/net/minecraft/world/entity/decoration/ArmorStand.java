@@ -338,7 +338,7 @@ public class ArmorStand extends LivingEntity {
 	private EquipmentSlot getClickedSlot(Vec3 vec3) {
 		EquipmentSlot equipmentSlot = EquipmentSlot.MAINHAND;
 		boolean bl = this.isSmall();
-		double d = bl ? vec3.y * 2.0 : vec3.y;
+		double d = vec3.y / (double)(this.getScale() * this.getAgeScale());
 		EquipmentSlot equipmentSlot2 = EquipmentSlot.FEET;
 		if (d >= 0.1 && d < 0.1 + (bl ? 0.8 : 0.45) && this.hasItemInSlot(equipmentSlot2)) {
 			equipmentSlot = EquipmentSlot.FEET;
@@ -397,7 +397,7 @@ public class ArmorStand extends LivingEntity {
 			if (this.isOnFire()) {
 				this.causeDamage(damageSource, 0.15F);
 			} else {
-				this.setSecondsOnFire(5);
+				this.igniteForSeconds(5);
 			}
 
 			return false;

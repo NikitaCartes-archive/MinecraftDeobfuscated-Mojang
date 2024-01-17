@@ -1,13 +1,11 @@
 package net.minecraft.gametest.framework;
 
-import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -18,13 +16,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 public class StructureUtils {
@@ -80,7 +82,7 @@ public class StructureUtils {
 		BlockPos blockPos3 = StructureTemplate.transform(blockPos.offset(blockPos2), Mirror.NONE, rotation, blockPos);
 		serverLevel.setBlockAndUpdate(blockPos3, Blocks.COMMAND_BLOCK.defaultBlockState());
 		CommandBlockEntity commandBlockEntity = (CommandBlockEntity)serverLevel.getBlockEntity(blockPos3);
-		commandBlockEntity.getCommandBlock().setCommand("test runthis");
+		commandBlockEntity.getCommandBlock().setCommand("test runclosest");
 		BlockPos blockPos4 = StructureTemplate.transform(blockPos3.offset(0, 0, -1), Mirror.NONE, rotation, blockPos3);
 		serverLevel.setBlockAndUpdate(blockPos4, Blocks.STONE_BUTTON.defaultBlockState().rotate(rotation));
 	}
@@ -161,26 +163,19 @@ public class StructureUtils {
 	}
 
 	public static Optional<BlockPos> findStructureBlockContainingPos(BlockPos blockPos, int i, ServerLevel serverLevel) {
-		return findStructureBlocks(blockPos, i, serverLevel).stream().filter(blockPos2 -> doesStructureContain(blockPos2, blockPos, serverLevel)).findFirst();
+		return findStructureBlocks(blockPos, i, serverLevel).filter(blockPos2 -> doesStructureContain(blockPos2, blockPos, serverLevel)).findFirst();
 	}
 
-	@Nullable
-	public static BlockPos findNearestStructureBlock(BlockPos blockPos, int i, ServerLevel serverLevel) {
+	public static Optional<BlockPos> findNearestStructureBlock(BlockPos blockPos, int i, ServerLevel serverLevel) {
 		Comparator<BlockPos> comparator = Comparator.comparingInt(blockPos2 -> blockPos2.distManhattan(blockPos));
-		Collection<BlockPos> collection = findStructureBlocks(blockPos, i, serverLevel);
-		Optional<BlockPos> optional = collection.stream().min(comparator);
-		return (BlockPos)optional.orElse(null);
+		return findStructureBlocks(blockPos, i, serverLevel).min(comparator);
 	}
 
-	public static Collection<BlockPos> findStructureBlocks(BlockPos blockPos, int i, ServerLevel serverLevel) {
-		Collection<BlockPos> collection = Lists.<BlockPos>newArrayList();
+	public static Stream<BlockPos> findStructureBlocks(BlockPos blockPos, int i, ServerLevel serverLevel) {
 		BoundingBox boundingBox = new BoundingBox(blockPos).inflatedBy(i);
-		BlockPos.betweenClosedStream(boundingBox).forEach(blockPosx -> {
-			if (serverLevel.getBlockState(blockPosx).is(Blocks.STRUCTURE_BLOCK)) {
-				collection.add(blockPosx.immutable());
-			}
-		});
-		return collection;
+		return BlockPos.betweenClosedStream(boundingBox)
+			.filter(blockPosx -> serverLevel.getBlockState(blockPosx).is(Blocks.STRUCTURE_BLOCK))
+			.map(BlockPos::immutable);
 	}
 
 	private static StructureBlockEntity createStructureBlock(GameTestInfo gameTestInfo, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
@@ -196,6 +191,26 @@ public class StructureUtils {
 		} else {
 			return structureBlockEntity;
 		}
+	}
+
+	public static Stream<BlockPos> radiusStructureBlockPos(int i, Vec3 vec3, ServerLevel serverLevel) {
+		BlockPos blockPos = BlockPos.containing(vec3.x, (double)serverLevel.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, BlockPos.containing(vec3)).getY(), vec3.z);
+		BlockPos blockPos2 = blockPos.offset(-i, 0, -i);
+		BlockPos blockPos3 = blockPos.offset(i, 0, i);
+		return BlockPos.betweenClosedStream(blockPos2, blockPos3).filter(blockPosx -> serverLevel.getBlockState(blockPosx).is(Blocks.STRUCTURE_BLOCK));
+	}
+
+	public static Stream<BlockPos> lookedAtStructureBlockPos(BlockPos blockPos, Entity entity, ServerLevel serverLevel) {
+		int i = 200;
+		Vec3 vec3 = entity.getEyePosition();
+		Vec3 vec32 = vec3.add(entity.getLookAngle().scale(200.0));
+		return findStructureBlocks(blockPos, 200, serverLevel)
+			.map(blockPosx -> serverLevel.getBlockEntity(blockPosx, BlockEntityType.STRUCTURE_BLOCK))
+			.flatMap(Optional::stream)
+			.filter(structureBlockEntity -> getStructureBounds(structureBlockEntity).clip(vec3, vec32).isPresent())
+			.map(BlockEntity::getBlockPos)
+			.sorted(Comparator.comparing(blockPos::distSqr))
+			.limit(1L);
 	}
 
 	private static void clearBlock(int i, BlockPos blockPos, ServerLevel serverLevel) {

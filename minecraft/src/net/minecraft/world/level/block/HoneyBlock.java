@@ -42,7 +42,7 @@ public class HoneyBlock extends HalfTransparentBlock {
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
 	}
 
@@ -59,7 +59,7 @@ public class HoneyBlock extends HalfTransparentBlock {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (this.isSlidingDown(blockPos, entity)) {
 			this.maybeDoSlideAchievement(entity, blockPos);
 			this.doSlideMovement(entity);

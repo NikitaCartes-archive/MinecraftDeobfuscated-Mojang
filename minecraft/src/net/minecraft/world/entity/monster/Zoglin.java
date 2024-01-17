@@ -19,7 +19,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -175,7 +174,7 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 		} else {
 			this.attackAnimationRemainingTicks = 10;
 			this.level().broadcastEntityEvent(this, (byte)4);
-			this.playSound(SoundEvents.ZOGLIN_ATTACK, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.ZOGLIN_ATTACK);
 			return HoglinBase.hurtAndThrowTarget(this, (LivingEntity)entity);
 		}
 	}
@@ -264,7 +263,7 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 	public void handleEntityEvent(byte b) {
 		if (b == 4) {
 			this.attackAnimationRemainingTicks = 10;
-			this.playSound(SoundEvents.ZOGLIN_ATTACK, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.ZOGLIN_ATTACK);
 		} else {
 			super.handleEntityEvent(b);
 		}
@@ -300,18 +299,13 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 	}
 
 	protected void playAngrySound() {
-		this.playSound(SoundEvents.ZOGLIN_ANGRY, 1.0F, this.getVoicePitch());
+		this.makeSound(SoundEvents.ZOGLIN_ANGRY);
 	}
 
 	@Override
 	protected void sendDebugPackets() {
 		super.sendDebugPackets();
 		DebugPackets.sendEntityBrain(this);
-	}
-
-	@Override
-	public MobType getMobType() {
-		return MobType.UNDEAD;
 	}
 
 	@Override

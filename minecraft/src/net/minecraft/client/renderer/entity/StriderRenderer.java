@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.StriderModel;
@@ -30,6 +31,11 @@ public class StriderRenderer extends MobRenderer<Strider, StriderModel<Strider>>
 	protected float getShadowRadius(Strider strider) {
 		float f = super.getShadowRadius(strider);
 		return strider.isBaby() ? f * 0.5F : f;
+	}
+
+	protected void scale(Strider strider, PoseStack poseStack, float f) {
+		float g = strider.getAgeScale();
+		poseStack.scale(g, g, g);
 	}
 
 	protected boolean isShaking(Strider strider) {

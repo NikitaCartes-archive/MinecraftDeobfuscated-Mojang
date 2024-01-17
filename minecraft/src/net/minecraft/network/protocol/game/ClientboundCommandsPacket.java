@@ -28,10 +28,15 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClientboundCommandsPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundCommandsPacket> STREAM_CODEC = Packet.codec(
+		ClientboundCommandsPacket::write, ClientboundCommandsPacket::new
+	);
 	private static final byte MASK_TYPE = 3;
 	private static final byte FLAG_EXECUTABLE = 4;
 	private static final byte FLAG_REDIRECT = 8;
@@ -48,14 +53,13 @@ public class ClientboundCommandsPacket implements Packet<ClientGamePacketListene
 		this.rootIndex = object2IntMap.getInt(rootCommandNode);
 	}
 
-	public ClientboundCommandsPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundCommandsPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.entries = friendlyByteBuf.readList(ClientboundCommandsPacket::readNode);
 		this.rootIndex = friendlyByteBuf.readVarInt();
 		validateEntries(this.entries);
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeCollection(this.entries, (friendlyByteBufx, entry) -> entry.write(friendlyByteBufx));
 		friendlyByteBuf.writeVarInt(this.rootIndex);
 	}
@@ -174,6 +178,11 @@ public class ClientboundCommandsPacket implements Packet<ClientGamePacketListene
 
 		int[] is = commandNode.getChildren().stream().mapToInt(object2IntMap::getInt).toArray();
 		return new ClientboundCommandsPacket.Entry(nodeStub, i, j, is);
+	}
+
+	@Override
+	public PacketType<ClientboundCommandsPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_COMMANDS;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.Connection;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketUtils;
@@ -16,6 +17,7 @@ import net.minecraft.network.protocol.configuration.ClientboundFinishConfigurati
 import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
 import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+import net.minecraft.network.protocol.game.GameProtocols;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import org.slf4j.Logger;
@@ -50,7 +52,7 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 	}
 
 	private void handleUnknownCustomPayload(CustomPacketPayload customPacketPayload) {
-		LOGGER.warn("Unknown custom packet payload: {}", customPacketPayload.id());
+		LOGGER.warn("Unknown custom packet payload: {}", customPacketPayload.type().id());
 	}
 
 	@Override
@@ -73,20 +75,27 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 
 	@Override
 	public void handleConfigurationFinished(ClientboundFinishConfigurationPacket clientboundFinishConfigurationPacket) {
-		this.connection.suspendInboundAfterProtocolChange();
 		PacketUtils.ensureRunningOnSameThread(clientboundFinishConfigurationPacket, this, this.minecraft);
 		this.connection
-			.setListener(
+			.setupInboundProtocol(
+				GameProtocols.CLIENTBOUND.bind(RegistryFriendlyByteBuf.decorator(this.receivedRegistries)),
 				new ClientPacketListener(
 					this.minecraft,
 					this.connection,
 					new CommonListenerCookie(
-						this.localGameProfile, this.telemetryManager, this.receivedRegistries, this.enabledFeatures, this.serverBrand, this.serverData, this.postDisconnectScreen
+						this.localGameProfile,
+						this.telemetryManager,
+						this.receivedRegistries,
+						this.enabledFeatures,
+						this.serverBrand,
+						this.serverData,
+						this.postDisconnectScreen,
+						this.serverCookies
 					)
 				)
 			);
-		this.connection.resumeInboundAfterProtocolChange();
-		this.connection.send(new ServerboundFinishConfigurationPacket());
+		this.connection.send(ServerboundFinishConfigurationPacket.INSTANCE);
+		this.connection.setupOutboundProtocol(GameProtocols.SERVERBOUND.bind(RegistryFriendlyByteBuf.decorator(this.receivedRegistries)));
 	}
 
 	@Override

@@ -6,7 +6,8 @@ import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemParticleOption implements ParticleOptions {
@@ -17,10 +18,6 @@ public class ItemParticleOption implements ParticleOptions {
 			ItemStack itemStack = new ItemInput(itemResult.item(), itemResult.nbt()).createItemStack(1, false);
 			return new ItemParticleOption(particleType, itemStack);
 		}
-
-		public ItemParticleOption fromNetwork(ParticleType<ItemParticleOption> particleType, FriendlyByteBuf friendlyByteBuf) {
-			return new ItemParticleOption(particleType, friendlyByteBuf.readItem());
-		}
 	};
 	private final ParticleType<ItemParticleOption> type;
 	private final ItemStack itemStack;
@@ -29,14 +26,13 @@ public class ItemParticleOption implements ParticleOptions {
 		return ItemStack.CODEC.xmap(itemStack -> new ItemParticleOption(particleType, itemStack), itemParticleOption -> itemParticleOption.itemStack);
 	}
 
+	public static StreamCodec<? super RegistryFriendlyByteBuf, ItemParticleOption> streamCodec(ParticleType<ItemParticleOption> particleType) {
+		return ItemStack.STREAM_CODEC.map(itemStack -> new ItemParticleOption(particleType, itemStack), itemParticleOption -> itemParticleOption.itemStack);
+	}
+
 	public ItemParticleOption(ParticleType<ItemParticleOption> particleType, ItemStack itemStack) {
 		this.type = particleType;
 		this.itemStack = itemStack;
-	}
-
-	@Override
-	public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeItem(this.itemStack);
 	}
 
 	@Override

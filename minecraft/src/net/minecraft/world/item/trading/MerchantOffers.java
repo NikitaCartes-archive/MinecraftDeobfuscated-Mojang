@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 public class MerchantOffers extends ArrayList<MerchantOffer> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, MerchantOffers> STREAM_CODEC = MerchantOffer.STREAM_CODEC
+		.apply(ByteBufCodecs.collection(MerchantOffers::new));
+
 	public MerchantOffers() {
 	}
 
@@ -38,43 +43,6 @@ public class MerchantOffers extends ArrayList<MerchantOffer> {
 
 			return null;
 		}
-	}
-
-	public void writeToStream(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeCollection(this, (friendlyByteBufx, merchantOffer) -> {
-			friendlyByteBufx.writeItem(merchantOffer.getBaseCostA());
-			friendlyByteBufx.writeItem(merchantOffer.getResult());
-			friendlyByteBufx.writeItem(merchantOffer.getCostB());
-			friendlyByteBufx.writeBoolean(merchantOffer.isOutOfStock());
-			friendlyByteBufx.writeInt(merchantOffer.getUses());
-			friendlyByteBufx.writeInt(merchantOffer.getMaxUses());
-			friendlyByteBufx.writeInt(merchantOffer.getXp());
-			friendlyByteBufx.writeInt(merchantOffer.getSpecialPriceDiff());
-			friendlyByteBufx.writeFloat(merchantOffer.getPriceMultiplier());
-			friendlyByteBufx.writeInt(merchantOffer.getDemand());
-		});
-	}
-
-	public static MerchantOffers createFromStream(FriendlyByteBuf friendlyByteBuf) {
-		return friendlyByteBuf.readCollection(MerchantOffers::new, friendlyByteBufx -> {
-			ItemStack itemStack = friendlyByteBufx.readItem();
-			ItemStack itemStack2 = friendlyByteBufx.readItem();
-			ItemStack itemStack3 = friendlyByteBufx.readItem();
-			boolean bl = friendlyByteBufx.readBoolean();
-			int i = friendlyByteBufx.readInt();
-			int j = friendlyByteBufx.readInt();
-			int k = friendlyByteBufx.readInt();
-			int l = friendlyByteBufx.readInt();
-			float f = friendlyByteBufx.readFloat();
-			int m = friendlyByteBufx.readInt();
-			MerchantOffer merchantOffer = new MerchantOffer(itemStack, itemStack3, itemStack2, i, j, k, f, m);
-			if (bl) {
-				merchantOffer.setToOutOfStock();
-			}
-
-			merchantOffer.setSpecialPriceDiff(l);
-			return merchantOffer;
-		});
 	}
 
 	public CompoundTag createTag() {

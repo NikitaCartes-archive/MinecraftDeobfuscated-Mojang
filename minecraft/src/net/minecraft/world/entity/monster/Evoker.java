@@ -15,7 +15,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -104,10 +103,8 @@ public class Evoker extends SpellcasterIllager {
 			return true;
 		} else if (super.isAlliedTo(entity)) {
 			return true;
-		} else if (entity instanceof Vex) {
-			return this.isAlliedTo(((Vex)entity).getOwner());
 		} else {
-			return entity instanceof LivingEntity && ((LivingEntity)entity).getMobType() == MobType.ILLAGER ? this.getTeam() == null && entity.getTeam() == null : false;
+			return entity instanceof Vex vex ? this.isAlliedTo(vex.getOwner()) : false;
 		}
 	}
 

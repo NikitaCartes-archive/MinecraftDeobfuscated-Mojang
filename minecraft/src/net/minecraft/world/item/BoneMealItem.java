@@ -100,8 +100,7 @@ public class BoneMealItem extends Item {
 					if (holder.is(BiomeTags.PRODUCES_CORALS_FROM_BONEMEAL)) {
 						if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
 							blockState = (BlockState)BuiltInRegistries.BLOCK
-								.getTag(BlockTags.WALL_CORALS)
-								.flatMap(named -> named.getRandomElement(level.random))
+								.getRandomElementOf(BlockTags.WALL_CORALS, level.random)
 								.map(holderx -> ((Block)holderx.value()).defaultBlockState())
 								.orElse(blockState);
 							if (blockState.hasProperty(BaseCoralWallFanBlock.FACING)) {
@@ -109,8 +108,7 @@ public class BoneMealItem extends Item {
 							}
 						} else if (randomSource.nextInt(4) == 0) {
 							blockState = (BlockState)BuiltInRegistries.BLOCK
-								.getTag(BlockTags.UNDERWATER_BONEMEALS)
-								.flatMap(named -> named.getRandomElement(level.random))
+								.getRandomElementOf(BlockTags.UNDERWATER_BONEMEALS, level.random)
 								.map(holderx -> ((Block)holderx.value()).defaultBlockState())
 								.orElse(blockState);
 						}
@@ -141,7 +139,8 @@ public class BoneMealItem extends Item {
 	}
 
 	public static void addGrowthParticles(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
-		if (levelAccessor.getBlockState(blockPos).getBlock() instanceof BonemealableBlock bonemealableBlock) {
+		BlockState blockState = levelAccessor.getBlockState(blockPos);
+		if (blockState.getBlock() instanceof BonemealableBlock bonemealableBlock) {
 			BlockPos blockPos2 = bonemealableBlock.getParticlePos(blockPos);
 			switch (bonemealableBlock.getType()) {
 				case NEIGHBOR_SPREADER:
@@ -150,6 +149,8 @@ public class BoneMealItem extends Item {
 				case GROWER:
 					ParticleUtils.spawnParticleInBlock(levelAccessor, blockPos2, i, ParticleTypes.HAPPY_VILLAGER);
 			}
+		} else if (blockState.is(Blocks.WATER)) {
+			ParticleUtils.spawnParticles(levelAccessor, blockPos, i * 3, 3.0, 1.0, false, ParticleTypes.HAPPY_VILLAGER);
 		}
 	}
 }

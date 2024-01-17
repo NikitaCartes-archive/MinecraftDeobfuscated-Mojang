@@ -163,6 +163,41 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/3.3.2/lwjgl-3.3.2-natives-windows-x86.jar"
 	},
 	{
+		"sha1sum": "4432335260047128efe750f40c07514826cc4e48",
+		"name": "lwjgl-freetype-3.3.2.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-freetype/3.3.2/lwjgl-freetype-3.3.2.jar"
+	},
+	{
+		"sha1sum": "01372c56fc041a5e7bf4b71622640c295aeae2b2",
+		"name": "lwjgl-freetype-3.3.2-natives-linux.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-freetype/3.3.2/lwjgl-freetype-3.3.2-natives-linux.jar"
+	},
+	{
+		"sha1sum": "02d13a949aa526b58b1c46246c8d8c4efb845e5d",
+		"name": "lwjgl-freetype-3.3.2-natives-macos.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-freetype/3.3.2/lwjgl-freetype-3.3.2-natives-macos.jar"
+	},
+	{
+		"sha1sum": "71872f69ad2df2ba838e462c7a2bf09f1bdfc2c5",
+		"name": "lwjgl-freetype-3.3.2-natives-macos-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-freetype/3.3.2/lwjgl-freetype-3.3.2-natives-macos-arm64.jar"
+	},
+	{
+		"sha1sum": "1e4acf1331dded3b4386fb7c3505c49c587f4f42",
+		"name": "lwjgl-freetype-3.3.2-natives-windows.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-freetype/3.3.2/lwjgl-freetype-3.3.2-natives-windows.jar"
+	},
+	{
+		"sha1sum": "be03946a18955b5ed958b509cfec78140b10bc33",
+		"name": "lwjgl-freetype-3.3.2-natives-windows-arm64.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-freetype/3.3.2/lwjgl-freetype-3.3.2-natives-windows-arm64.jar"
+	},
+	{
+		"sha1sum": "54d9c63d42dea253b27ce981ce1a7c970eb0a071",
+		"name": "lwjgl-freetype-3.3.2-natives-windows-x86.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-freetype/3.3.2/lwjgl-freetype-3.3.2-natives-windows-x86.jar"
+	},
+	{
 		"sha1sum": "757920418805fb90bfebb3d46b1d9e7669fca2eb",
 		"name": "lwjgl-glfw-3.3.2.jar",
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-glfw/3.3.2/lwjgl-glfw-3.3.2.jar"

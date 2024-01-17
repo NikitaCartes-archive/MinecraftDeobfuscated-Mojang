@@ -43,7 +43,7 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public boolean useShapeForLightOcclusion(BlockState blockState) {
+	protected boolean useShapeForLightOcclusion(BlockState blockState) {
 		return blockState.getValue(TYPE) != SlabType.DOUBLE;
 	}
 
@@ -53,7 +53,7 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		SlabType slabType = blockState.getValue(TYPE);
 		switch (slabType) {
 			case DOUBLE:
@@ -85,7 +85,7 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		ItemStack itemStack = blockPlaceContext.getItemInHand();
 		SlabType slabType = blockState.getValue(TYPE);
 		if (slabType == SlabType.DOUBLE || !itemStack.is(this.asItem())) {
@@ -102,7 +102,7 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
@@ -117,7 +117,7 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -128,7 +128,7 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		switch (pathComputationType) {
 			case LAND:
 				return false;

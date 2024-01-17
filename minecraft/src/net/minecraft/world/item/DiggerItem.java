@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class DiggerItem extends TieredItem implements Vanishable {
+public class DiggerItem extends TieredItem {
 	private final TagKey<Block> blocks;
 	protected final float speed;
 	private final float attackDamageBaseline;
@@ -43,14 +43,14 @@ public class DiggerItem extends TieredItem implements Vanishable {
 
 	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
-		itemStack.hurtAndBreak(2, livingEntity2, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+		itemStack.hurtAndBreak(2, livingEntity2, EquipmentSlot.MAINHAND);
 		return true;
 	}
 
 	@Override
 	public boolean mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity) {
 		if (!level.isClientSide && blockState.getDestroySpeed(level, blockPos) != 0.0F) {
-			itemStack.hurtAndBreak(1, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+			itemStack.hurtAndBreak(1, livingEntity, EquipmentSlot.MAINHAND);
 		}
 
 		return true;

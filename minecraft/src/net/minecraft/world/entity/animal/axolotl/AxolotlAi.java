@@ -96,7 +96,7 @@ public class AxolotlAi {
 			Activity.IDLE,
 			ImmutableList.of(
 				Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
-				Pair.of(1, new AnimalMakeLove(EntityType.AXOLOTL, 0.2F)),
+				Pair.of(1, new AnimalMakeLove(EntityType.AXOLOTL, 0.2F, 2)),
 				Pair.of(
 					2,
 					new RunOne<>(

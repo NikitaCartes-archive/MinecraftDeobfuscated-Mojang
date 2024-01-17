@@ -78,7 +78,7 @@ public class MangrovePropaguleBlock extends SaplingBlock implements SimpleWaterl
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		Vec3 vec3 = blockState.getOffset(blockGetter, blockPos);
 		VoxelShape voxelShape;
 		if (!(Boolean)blockState.getValue(HANGING)) {
@@ -91,12 +91,12 @@ public class MangrovePropaguleBlock extends SaplingBlock implements SimpleWaterl
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return isHanging(blockState) ? levelReader.getBlockState(blockPos.above()).is(Blocks.MANGROVE_LEAVES) : super.canSurvive(blockState, levelReader, blockPos);
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -109,12 +109,12 @@ public class MangrovePropaguleBlock extends SaplingBlock implements SimpleWaterl
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!isHanging(blockState)) {
 			if (randomSource.nextInt(7) == 0) {
 				this.advanceTree(serverLevel, blockPos, blockState, randomSource);

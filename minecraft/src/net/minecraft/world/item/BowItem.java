@@ -13,7 +13,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
-public class BowItem extends ProjectileWeaponItem implements Vanishable {
+public class BowItem extends ProjectileWeaponItem {
 	public static final int MAX_DRAW_DURATION = 20;
 	public static final int DEFAULT_RANGE = 15;
 
@@ -24,7 +24,7 @@ public class BowItem extends ProjectileWeaponItem implements Vanishable {
 	@Override
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
 		if (livingEntity instanceof Player player) {
-			boolean bl = player.getAbilities().instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, itemStack) > 0;
+			boolean bl = player.getAbilities().instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY, itemStack) > 0;
 			ItemStack itemStack2 = player.getProjectile(itemStack);
 			if (!itemStack2.isEmpty() || bl) {
 				if (itemStack2.isEmpty()) {
@@ -43,21 +43,21 @@ public class BowItem extends ProjectileWeaponItem implements Vanishable {
 							abstractArrow.setCritArrow(true);
 						}
 
-						int k = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, itemStack);
+						int k = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER, itemStack);
 						if (k > 0) {
 							abstractArrow.setBaseDamage(abstractArrow.getBaseDamage() + (double)k * 0.5 + 0.5);
 						}
 
-						int l = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, itemStack);
+						int l = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH, itemStack);
 						if (l > 0) {
 							abstractArrow.setKnockback(l);
 						}
 
-						if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, itemStack) > 0) {
-							abstractArrow.setSecondsOnFire(100);
+						if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAME, itemStack) > 0) {
+							abstractArrow.igniteForSeconds(100);
 						}
 
-						itemStack.hurtAndBreak(1, player, player2 -> player2.broadcastBreakEvent(player.getUsedItemHand()));
+						itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(player.getUsedItemHand()));
 						if (bl2 || player.getAbilities().instabuild && (itemStack2.is(Items.SPECTRAL_ARROW) || itemStack2.is(Items.TIPPED_ARROW))) {
 							abstractArrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 						}

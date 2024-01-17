@@ -40,20 +40,22 @@ public class RedstoneWallTorchBlock extends RedstoneTorchBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return WallTorchBlock.getShape(blockState);
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return Blocks.WALL_TORCH.canSurvive(blockState, levelReader, blockPos);
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+		return WallTorchBlock.canSurvive(levelReader, blockPos, blockState.getValue(FACING));
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		return Blocks.WALL_TORCH.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		return direction.getOpposite() == blockState.getValue(FACING) && !blockState.canSurvive(levelAccessor, blockPos)
+			? Blocks.AIR.defaultBlockState()
+			: blockState;
 	}
 
 	@Nullable
@@ -82,18 +84,18 @@ public class RedstoneWallTorchBlock extends RedstoneTorchBlock {
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return blockState.getValue(LIT) && blockState.getValue(FACING) != direction ? 15 : 0;
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
-		return Blocks.WALL_TORCH.rotate(blockState, rotation);
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
+		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
-		return Blocks.WALL_TORCH.mirror(blockState, mirror);
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
+		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 
 	@Override

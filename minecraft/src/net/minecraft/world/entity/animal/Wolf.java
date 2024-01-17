@@ -375,7 +375,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 					return InteractionResult.SUCCESS;
 				} else if (itemStack.is(Items.SHEARS) && this.isOwnedBy(player) && this.hasArmor()) {
 					if (!player.getAbilities().instabuild) {
-						itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+						itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 					}
 
 					this.level().playSound(null, this, SoundEvents.ARMOR_UNEQUIP_WOLF, this.getSoundSource(), 1.0F, 1.0F);

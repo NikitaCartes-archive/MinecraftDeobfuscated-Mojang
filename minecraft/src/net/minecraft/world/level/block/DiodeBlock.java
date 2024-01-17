@@ -33,12 +33,12 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	protected abstract MapCodec<? extends DiodeBlock> codec();
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		return this.canSurviveOn(levelReader, blockPos2, levelReader.getBlockState(blockPos2));
 	}
@@ -48,7 +48,7 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!this.isLocked(serverLevel, blockPos, blockState)) {
 			boolean bl = (Boolean)blockState.getValue(POWERED);
 			boolean bl2 = this.shouldTurnOn(serverLevel, blockPos, blockState);
@@ -64,12 +64,12 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return blockState.getSignal(blockGetter, blockPos, direction);
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		if (!(Boolean)blockState.getValue(POWERED)) {
 			return 0;
 		} else {
@@ -78,7 +78,7 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (blockState.canSurvive(level, blockPos)) {
 			this.checkTickOnNeighbor(level, blockPos, blockState);
 		} else {
@@ -141,7 +141,7 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public boolean isSignalSource(BlockState blockState) {
+	protected boolean isSignalSource(BlockState blockState) {
 		return true;
 	}
 
@@ -158,12 +158,12 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		this.updateNeighborsInFront(level, blockPos, blockState);
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl && !blockState.is(blockState2.getBlock())) {
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
 			this.updateNeighborsInFront(level, blockPos, blockState);

@@ -13,7 +13,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 
-public interface Equipable extends Vanishable {
+public interface Equipable {
 	EquipmentSlot getEquipmentSlot();
 
 	default SoundEvent getEquipSound() {

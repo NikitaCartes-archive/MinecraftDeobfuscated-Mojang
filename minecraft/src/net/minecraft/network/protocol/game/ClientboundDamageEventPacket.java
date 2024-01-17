@@ -4,7 +4,9 @@ import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
@@ -13,6 +15,10 @@ import net.minecraft.world.phys.Vec3;
 
 public record ClientboundDamageEventPacket(int entityId, int sourceTypeId, int sourceCauseId, int sourceDirectId, Optional<Vec3> sourcePosition)
 	implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundDamageEventPacket> STREAM_CODEC = Packet.codec(
+		ClientboundDamageEventPacket::write, ClientboundDamageEventPacket::new
+	);
+
 	public ClientboundDamageEventPacket(Entity entity, DamageSource damageSource) {
 		this(
 			entity.getId(),
@@ -23,7 +29,7 @@ public record ClientboundDamageEventPacket(int entityId, int sourceTypeId, int s
 		);
 	}
 
-	public ClientboundDamageEventPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundDamageEventPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(
 			friendlyByteBuf.readVarInt(),
 			friendlyByteBuf.readVarInt(),
@@ -41,8 +47,7 @@ public record ClientboundDamageEventPacket(int entityId, int sourceTypeId, int s
 		return friendlyByteBuf.readVarInt() - 1;
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.entityId);
 		friendlyByteBuf.writeVarInt(this.sourceTypeId);
 		writeOptionalEntityId(friendlyByteBuf, this.sourceCauseId);
@@ -52,6 +57,11 @@ public record ClientboundDamageEventPacket(int entityId, int sourceTypeId, int s
 			friendlyByteBufx.writeDouble(vec3.y());
 			friendlyByteBufx.writeDouble(vec3.z());
 		});
+	}
+
+	@Override
+	public PacketType<ClientboundDamageEventPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_DAMAGE_EVENT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

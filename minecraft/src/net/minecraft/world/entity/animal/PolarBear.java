@@ -169,7 +169,7 @@ public class PolarBear extends Animal implements NeutralMob {
 
 	protected void playWarningSound() {
 		if (this.warningSoundTicks <= 0) {
-			this.playSound(SoundEvents.POLAR_BEAR_WARNING, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.POLAR_BEAR_WARNING);
 			this.warningSoundTicks = 40;
 		}
 	}

@@ -18,8 +18,6 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.level.pathfinder.Path;
 
 public class VillagerMakeLove extends Behavior<Villager> {
-	private static final int INTERACT_DIST_SQR = 5;
-	private static final float SPEED_MODIFIER = 0.5F;
 	private long birthTimestamp;
 
 	public VillagerMakeLove() {
@@ -40,7 +38,7 @@ public class VillagerMakeLove extends Behavior<Villager> {
 
 	protected void start(ServerLevel serverLevel, Villager villager, long l) {
 		AgeableMob ageableMob = (AgeableMob)villager.getBrain().getMemory(MemoryModuleType.BREED_TARGET).get();
-		BehaviorUtils.lockGazeAndWalkToEachOther(villager, ageableMob, 0.5F);
+		BehaviorUtils.lockGazeAndWalkToEachOther(villager, ageableMob, 0.5F, 2);
 		serverLevel.broadcastEntityEvent(ageableMob, (byte)18);
 		serverLevel.broadcastEntityEvent(villager, (byte)18);
 		int i = 275 + villager.getRandom().nextInt(50);
@@ -50,7 +48,7 @@ public class VillagerMakeLove extends Behavior<Villager> {
 	protected void tick(ServerLevel serverLevel, Villager villager, long l) {
 		Villager villager2 = (Villager)villager.getBrain().getMemory(MemoryModuleType.BREED_TARGET).get();
 		if (!(villager.distanceToSqr(villager2) > 5.0)) {
-			BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2, 0.5F);
+			BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2, 0.5F, 2);
 			if (l >= this.birthTimestamp) {
 				villager.eatAndDigestFood();
 				villager2.eatAndDigestFood();

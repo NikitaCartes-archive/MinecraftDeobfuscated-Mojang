@@ -207,6 +207,10 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	@Override
+	protected void setInitialFocus() {
+	}
+
+	@Override
 	public void repositionElements() {
 		if (this.tabNavigationBar != null && this.bottomButtons != null) {
 			this.tabNavigationBar.setWidth(this.width);

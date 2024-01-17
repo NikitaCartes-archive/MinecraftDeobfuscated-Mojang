@@ -4,7 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -97,27 +98,35 @@ public class ShapedRecipe implements CraftingRecipe {
 					)
 					.apply(instance, ShapedRecipe::new)
 		);
+		public static final StreamCodec<RegistryFriendlyByteBuf, ShapedRecipe> STREAM_CODEC = StreamCodec.of(
+			ShapedRecipe.Serializer::toNetwork, ShapedRecipe.Serializer::fromNetwork
+		);
 
 		@Override
 		public Codec<ShapedRecipe> codec() {
 			return CODEC;
 		}
 
-		public ShapedRecipe fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			String string = friendlyByteBuf.readUtf();
-			CraftingBookCategory craftingBookCategory = friendlyByteBuf.readEnum(CraftingBookCategory.class);
-			ShapedRecipePattern shapedRecipePattern = ShapedRecipePattern.fromNetwork(friendlyByteBuf);
-			ItemStack itemStack = friendlyByteBuf.readItem();
-			boolean bl = friendlyByteBuf.readBoolean();
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, ShapedRecipe> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		private static ShapedRecipe fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			String string = registryFriendlyByteBuf.readUtf();
+			CraftingBookCategory craftingBookCategory = registryFriendlyByteBuf.readEnum(CraftingBookCategory.class);
+			ShapedRecipePattern shapedRecipePattern = ShapedRecipePattern.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			boolean bl = registryFriendlyByteBuf.readBoolean();
 			return new ShapedRecipe(string, craftingBookCategory, shapedRecipePattern, itemStack, bl);
 		}
 
-		public void toNetwork(FriendlyByteBuf friendlyByteBuf, ShapedRecipe shapedRecipe) {
-			friendlyByteBuf.writeUtf(shapedRecipe.group);
-			friendlyByteBuf.writeEnum(shapedRecipe.category);
-			shapedRecipe.pattern.toNetwork(friendlyByteBuf);
-			friendlyByteBuf.writeItem(shapedRecipe.result);
-			friendlyByteBuf.writeBoolean(shapedRecipe.showNotification);
+		private static void toNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf, ShapedRecipe shapedRecipe) {
+			registryFriendlyByteBuf.writeUtf(shapedRecipe.group);
+			registryFriendlyByteBuf.writeEnum(shapedRecipe.category);
+			ShapedRecipePattern.STREAM_CODEC.encode(registryFriendlyByteBuf, shapedRecipe.pattern);
+			ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, shapedRecipe.result);
+			registryFriendlyByteBuf.writeBoolean(shapedRecipe.showNotification);
 		}
 	}
 }

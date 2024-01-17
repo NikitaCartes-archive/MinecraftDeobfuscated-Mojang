@@ -6,7 +6,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -24,19 +26,21 @@ public class DustColorTransitionOptions extends DustParticleOptionsBase {
 				)
 				.apply(instance, DustColorTransitionOptions::new)
 	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, DustColorTransitionOptions> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.VECTOR3F,
+		dustColorTransitionOptions -> dustColorTransitionOptions.color,
+		ByteBufCodecs.VECTOR3F,
+		dustColorTransitionOptions -> dustColorTransitionOptions.toColor,
+		ByteBufCodecs.FLOAT,
+		dustColorTransitionOptions -> dustColorTransitionOptions.scale,
+		DustColorTransitionOptions::new
+	);
 	public static final ParticleOptions.Deserializer<DustColorTransitionOptions> DESERIALIZER = new ParticleOptions.Deserializer<DustColorTransitionOptions>() {
 		public DustColorTransitionOptions fromCommand(ParticleType<DustColorTransitionOptions> particleType, StringReader stringReader) throws CommandSyntaxException {
 			Vector3f vector3f = DustParticleOptionsBase.readVector3f(stringReader);
 			stringReader.expect(' ');
 			float f = stringReader.readFloat();
 			Vector3f vector3f2 = DustParticleOptionsBase.readVector3f(stringReader);
-			return new DustColorTransitionOptions(vector3f, vector3f2, f);
-		}
-
-		public DustColorTransitionOptions fromNetwork(ParticleType<DustColorTransitionOptions> particleType, FriendlyByteBuf friendlyByteBuf) {
-			Vector3f vector3f = DustParticleOptionsBase.readVector3f(friendlyByteBuf);
-			float f = friendlyByteBuf.readFloat();
-			Vector3f vector3f2 = DustParticleOptionsBase.readVector3f(friendlyByteBuf);
 			return new DustColorTransitionOptions(vector3f, vector3f2, f);
 		}
 	};
@@ -53,14 +57,6 @@ public class DustColorTransitionOptions extends DustParticleOptionsBase {
 
 	public Vector3f getToColor() {
 		return this.toColor;
-	}
-
-	@Override
-	public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		super.writeToNetwork(friendlyByteBuf);
-		friendlyByteBuf.writeFloat(this.toColor.x());
-		friendlyByteBuf.writeFloat(this.toColor.y());
-		friendlyByteBuf.writeFloat(this.toColor.z());
 	}
 
 	@Override

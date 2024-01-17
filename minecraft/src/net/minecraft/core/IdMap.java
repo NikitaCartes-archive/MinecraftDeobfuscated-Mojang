@@ -19,5 +19,14 @@ public interface IdMap<T> extends Iterable<T> {
 		}
 	}
 
+	default int getIdOrThrow(T object) {
+		int i = this.getId(object);
+		if (i == -1) {
+			throw new IllegalArgumentException("Can't find id for '" + object + "' in map " + this);
+		} else {
+			return i;
+		}
+	}
+
 	int size();
 }

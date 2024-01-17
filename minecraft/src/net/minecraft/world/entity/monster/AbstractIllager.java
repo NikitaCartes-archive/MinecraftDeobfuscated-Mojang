@@ -1,8 +1,9 @@
 package net.minecraft.world.entity.monster;
 
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.goal.OpenDoorGoal;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.raid.Raider;
@@ -18,11 +19,6 @@ public abstract class AbstractIllager extends Raider {
 		super.registerGoals();
 	}
 
-	@Override
-	public MobType getMobType() {
-		return MobType.ILLAGER;
-	}
-
 	public AbstractIllager.IllagerArmPose getArmPose() {
 		return AbstractIllager.IllagerArmPose.CROSSED;
 	}
@@ -30,6 +26,15 @@ public abstract class AbstractIllager extends Raider {
 	@Override
 	public boolean canAttack(LivingEntity livingEntity) {
 		return livingEntity instanceof AbstractVillager && livingEntity.isBaby() ? false : super.canAttack(livingEntity);
+	}
+
+	@Override
+	public boolean isAlliedTo(Entity entity) {
+		if (super.isAlliedTo(entity)) {
+			return true;
+		} else {
+			return !entity.getType().is(EntityTypeTags.ILLAGER_FRIENDS) ? false : this.getTeam() == null && entity.getTeam() == null;
+		}
 	}
 
 	public static enum IllagerArmPose {

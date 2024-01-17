@@ -9,6 +9,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.util.UndashedUuid;
+import io.netty.buffer.ByteBuf;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +17,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.Util;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 public final class UUIDUtil {
 	public static final Codec<UUID> CODEC = Codec.INT_STREAM
@@ -36,6 +39,15 @@ public final class UUIDUtil {
 		}
 	}, UndashedUuid::toString)).xmap(either -> either.map(uUID -> uUID, uUID -> uUID), Either::right);
 	public static Codec<UUID> LENIENT_CODEC = Codec.either(CODEC, STRING_CODEC).xmap(either -> either.map(uUID -> uUID, uUID -> uUID), Either::left);
+	public static StreamCodec<ByteBuf, UUID> STREAM_CODEC = new StreamCodec<ByteBuf, UUID>() {
+		public UUID decode(ByteBuf byteBuf) {
+			return FriendlyByteBuf.readUUID(byteBuf);
+		}
+
+		public void encode(ByteBuf byteBuf, UUID uUID) {
+			FriendlyByteBuf.writeUUID(byteBuf, uUID);
+		}
+	};
 	public static final int UUID_BYTES = 16;
 	private static final String UUID_PREFIX_OFFLINE_PLAYER = "OfflinePlayer:";
 

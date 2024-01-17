@@ -3,12 +3,17 @@ package net.minecraft.network.protocol.game;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
 public class ClientboundSetEquipmentPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSetEquipmentPacket> STREAM_CODEC = Packet.codec(
+		ClientboundSetEquipmentPacket::write, ClientboundSetEquipmentPacket::new
+	);
 	private static final byte CONTINUE_MASK = -128;
 	private final int entity;
 	private final List<Pair<EquipmentSlot, ItemStack>> slots;
@@ -18,23 +23,22 @@ public class ClientboundSetEquipmentPacket implements Packet<ClientGamePacketLis
 		this.slots = list;
 	}
 
-	public ClientboundSetEquipmentPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.entity = friendlyByteBuf.readVarInt();
+	private ClientboundSetEquipmentPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.entity = registryFriendlyByteBuf.readVarInt();
 		EquipmentSlot[] equipmentSlots = EquipmentSlot.values();
 		this.slots = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
 
 		int i;
 		do {
-			i = friendlyByteBuf.readByte();
+			i = registryFriendlyByteBuf.readByte();
 			EquipmentSlot equipmentSlot = equipmentSlots[i & 127];
-			ItemStack itemStack = friendlyByteBuf.readItem();
+			ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
 			this.slots.add(Pair.of(equipmentSlot, itemStack));
 		} while ((i & -128) != 0);
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.entity);
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeVarInt(this.entity);
 		int i = this.slots.size();
 
 		for (int j = 0; j < i; j++) {
@@ -42,9 +46,14 @@ public class ClientboundSetEquipmentPacket implements Packet<ClientGamePacketLis
 			EquipmentSlot equipmentSlot = pair.getFirst();
 			boolean bl = j != i - 1;
 			int k = equipmentSlot.ordinal();
-			friendlyByteBuf.writeByte(bl ? k | -128 : k);
-			friendlyByteBuf.writeItem(pair.getSecond());
+			registryFriendlyByteBuf.writeByte(bl ? k | -128 : k);
+			ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, pair.getSecond());
 		}
+	}
+
+	@Override
+	public PacketType<ClientboundSetEquipmentPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SET_EQUIPMENT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

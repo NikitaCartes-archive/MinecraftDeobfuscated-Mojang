@@ -16,26 +16,26 @@ public interface SheetGlyphInfo {
 	float getOversample();
 
 	default float getLeft() {
-		return this.getBearingX();
+		return this.getBearingLeft();
 	}
 
 	default float getRight() {
 		return this.getLeft() + (float)this.getPixelWidth() / this.getOversample();
 	}
 
-	default float getUp() {
-		return this.getBearingY();
+	default float getTop() {
+		return 7.0F - this.getBearingTop();
 	}
 
-	default float getDown() {
-		return this.getUp() + (float)this.getPixelHeight() / this.getOversample();
+	default float getBottom() {
+		return this.getTop() + (float)this.getPixelHeight() / this.getOversample();
 	}
 
-	default float getBearingX() {
+	default float getBearingLeft() {
 		return 0.0F;
 	}
 
-	default float getBearingY() {
-		return 3.0F;
+	default float getBearingTop() {
+		return 7.0F;
 	}
 }

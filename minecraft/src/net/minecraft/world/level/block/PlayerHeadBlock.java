@@ -29,6 +29,10 @@ public class PlayerHeadBlock extends SkullBlock {
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
 		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
+		initializeSkullOwner(level, blockPos, itemStack);
+	}
+
+	public static void initializeSkullOwner(Level level, BlockPos blockPos, ItemStack itemStack) {
 		if (level.getBlockEntity(blockPos) instanceof SkullBlockEntity skullBlockEntity) {
 			GameProfile gameProfile = null;
 			if (itemStack.hasTag()) {

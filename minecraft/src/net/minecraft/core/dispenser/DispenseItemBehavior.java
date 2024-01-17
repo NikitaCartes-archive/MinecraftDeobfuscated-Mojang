@@ -437,8 +437,8 @@ public interface DispenseItemBehavior {
 					this.setSuccess(false);
 				}
 
-				if (this.isSuccess() && itemStack.hurt(1, level.random, null)) {
-					itemStack.setCount(0);
+				if (this.isSuccess()) {
+					itemStack.hurtAndBreak(1, level.getRandom(), null, () -> itemStack.setCount(0));
 				}
 
 				return itemStack;
@@ -618,11 +618,10 @@ public interface DispenseItemBehavior {
 					return itemStack;
 				} else {
 					((Armadillo)list.get(0)).brushOffScute();
-					if (itemStack.hurt(16, serverLevel.getRandom(), null)) {
+					itemStack.hurtAndBreak(16, serverLevel.getRandom(), null, () -> {
 						itemStack.shrink(1);
 						itemStack.setDamageValue(0);
-					}
-
+					});
 					return itemStack;
 				}
 			}

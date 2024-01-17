@@ -53,7 +53,7 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if (!collisionContext.isHoldingItem(blockState.getBlock().asItem())) {
 			return blockState.getValue(BOTTOM) ? UNSTABLE_SHAPE : STABLE_SHAPE;
 		} else {
@@ -62,12 +62,12 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return Shapes.block();
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		return blockPlaceContext.getItemInHand().is(this.asItem());
 	}
 
@@ -83,14 +83,14 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!level.isClientSide) {
 			level.scheduleTick(blockPos, this, 1);
 		}
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -105,7 +105,7 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		int i = getDistance(serverLevel, blockPos);
 		BlockState blockState2 = blockState.setValue(DISTANCE, Integer.valueOf(i)).setValue(BOTTOM, Boolean.valueOf(this.isBottom(serverLevel, blockPos, i)));
 		if ((Integer)blockState2.getValue(DISTANCE) == 7) {
@@ -120,12 +120,12 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return getDistance(levelReader, blockPos) < 7;
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if (collisionContext.isAbove(Shapes.block(), blockPos, true) && !collisionContext.isDescending()) {
 			return STABLE_SHAPE;
 		} else {
@@ -136,7 +136,7 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 

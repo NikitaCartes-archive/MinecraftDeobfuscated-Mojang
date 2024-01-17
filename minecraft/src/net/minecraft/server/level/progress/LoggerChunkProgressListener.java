@@ -16,9 +16,21 @@ public class LoggerChunkProgressListener implements ChunkProgressListener {
 	private long startTime;
 	private long nextTickTime = Long.MAX_VALUE;
 
-	public LoggerChunkProgressListener(int i) {
-		int j = i * 2 + 1;
-		this.maxCount = j * j;
+	private LoggerChunkProgressListener(int i) {
+		this.maxCount = i;
+	}
+
+	public static LoggerChunkProgressListener createFromGameruleRadius(int i) {
+		return i > 0 ? create(i + 1) : createCompleted();
+	}
+
+	public static LoggerChunkProgressListener create(int i) {
+		int j = ChunkProgressListener.calculateDiameter(i);
+		return new LoggerChunkProgressListener(j * j);
+	}
+
+	public static LoggerChunkProgressListener createCompleted() {
+		return new LoggerChunkProgressListener(0);
 	}
 
 	@Override
@@ -51,6 +63,6 @@ public class LoggerChunkProgressListener implements ChunkProgressListener {
 	}
 
 	public int getProgress() {
-		return Mth.floor((float)this.count * 100.0F / (float)this.maxCount);
+		return this.maxCount == 0 ? 100 : Mth.floor((float)this.count * 100.0F / (float)this.maxCount);
 	}
 }

@@ -20,7 +20,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.commands.FillBiomeCommand;
@@ -124,6 +123,41 @@ public class GameTestHelper {
 			serverLevel.addFreshEntity(entity);
 			return entity;
 		}
+	}
+
+	public <E extends Entity> E findOneEntity(EntityType<E> entityType) {
+		return this.findClosestEntity(entityType, 0, 0, 0, 2.147483647E9);
+	}
+
+	public <E extends Entity> E findClosestEntity(EntityType<E> entityType, int i, int j, int k, double d) {
+		List<E> list = this.findEntities(entityType, i, j, k, d);
+		if (list.isEmpty()) {
+			throw new GameTestAssertException("Expected " + entityType.toShortString() + " to exist around " + i + "," + j + "," + k);
+		} else if (list.size() > 1) {
+			throw new GameTestAssertException(
+				"Expected only one " + entityType.toShortString() + " to exist around " + i + "," + j + "," + k + ", but found " + list.size()
+			);
+		} else {
+			Vec3 vec3 = this.absoluteVec(new Vec3((double)i, (double)j, (double)k));
+			list.sort((entity, entity2) -> {
+				double dx = entity.position().distanceTo(vec3);
+				double e = entity2.position().distanceTo(vec3);
+				return Double.compare(dx, e);
+			});
+			return (E)list.get(0);
+		}
+	}
+
+	public <E extends Entity> List<E> findEntities(EntityType<E> entityType, int i, int j, int k, double d) {
+		return this.findEntities(entityType, Vec3.atBottomCenterOf(new BlockPos(i, j, k)), d);
+	}
+
+	public <E extends Entity> List<E> findEntities(EntityType<E> entityType, Vec3 vec3, double d) {
+		ServerLevel serverLevel = this.getLevel();
+		Vec3 vec32 = this.absoluteVec(vec3);
+		AABB aABB = this.testInfo.getStructureBounds();
+		AABB aABB2 = new AABB(vec32.add(-d, -d, -d), vec32.add(d, d, d));
+		return serverLevel.getEntities(entityType, aABB, entity -> entity.getBoundingBox().intersects(aABB2) && entity.isAlive());
 	}
 
 	public <E extends Entity> E spawn(EntityType<E> entityType, int i, int j, int k) {
@@ -246,7 +280,7 @@ public class GameTestHelper {
 		forRemoval = true
 	)
 	public ServerPlayer makeMockServerPlayerInLevel() {
-		CommonListenerCookie commonListenerCookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-player"));
+		CommonListenerCookie commonListenerCookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
 		ServerPlayer serverPlayer = new ServerPlayer(
 			this.getLevel().getServer(), this.getLevel(), commonListenerCookie.gameProfile(), commonListenerCookie.clientInformation()
 		) {
@@ -261,8 +295,7 @@ public class GameTestHelper {
 			}
 		};
 		Connection connection = new Connection(PacketFlow.SERVERBOUND);
-		EmbeddedChannel embeddedChannel = new EmbeddedChannel(connection);
-		embeddedChannel.attr(Connection.ATTRIBUTE_SERVERBOUND_PROTOCOL).set(ConnectionProtocol.PLAY.codec(PacketFlow.SERVERBOUND));
+		new EmbeddedChannel(connection);
 		this.getLevel().getServer().getPlayerList().placeNewPlayer(connection, serverPlayer, commonListenerCookie);
 		return serverPlayer;
 	}
@@ -442,6 +475,10 @@ public class GameTestHelper {
 	public <T extends Entity> List<T> getEntities(EntityType<T> entityType, BlockPos blockPos, double d) {
 		BlockPos blockPos2 = this.absolutePos(blockPos);
 		return this.getLevel().getEntities(entityType, new AABB(blockPos2).inflate(d), Entity::isAlive);
+	}
+
+	public <T extends Entity> List<T> getEntities(EntityType<T> entityType) {
+		return this.getLevel().getEntities(entityType, this.getBounds(), Entity::isAlive);
 	}
 
 	public void assertEntityInstancePresent(Entity entity, int i, int j, int k) {
@@ -810,6 +847,12 @@ public class GameTestHelper {
 		}
 	}
 
+	public <N extends Number> void assertValueEqual(N number, N number2, String string) {
+		if (!number.equals(number2)) {
+			throw new GameTestAssertException("Expected " + string + " to be " + number2 + ", but was " + number);
+		}
+	}
+
 	public void assertFalse(boolean bl, String string) {
 		if (bl) {
 			throw new GameTestAssertException(string);
@@ -830,8 +873,8 @@ public class GameTestHelper {
 	}
 
 	public void forEveryBlockInStructure(Consumer<BlockPos> consumer) {
-		AABB aABB = this.getRelativeBounds();
-		BlockPos.MutableBlockPos.betweenClosedStream(aABB.move(0.0, 1.0, 0.0)).forEach(consumer);
+		AABB aABB = this.getRelativeBounds().contract(1.0, 1.0, 1.0);
+		BlockPos.MutableBlockPos.betweenClosedStream(aABB).forEach(consumer);
 	}
 
 	public void onEachTick(Runnable runnable) {

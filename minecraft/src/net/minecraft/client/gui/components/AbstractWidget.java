@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.components;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -38,8 +39,7 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 	protected float alpha = 1.0F;
 	private int tabOrderGroup;
 	private boolean focused;
-	@Nullable
-	private Tooltip tooltip;
+	private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
 	public AbstractWidget(int i, int j, int k, int l, Component component) {
 		this.x = i;
@@ -59,25 +59,21 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 		if (this.visible) {
 			this.isHovered = i >= this.getX() && j >= this.getY() && i < this.getX() + this.width && j < this.getY() + this.height;
 			this.renderWidget(guiGraphics, i, j, f);
-			if (this.tooltip != null) {
-				this.tooltip.refreshTooltipForNextRenderPass(this.isHovered(), this.isFocused(), this.getRectangle());
-			}
+			this.tooltip.refreshTooltipForNextRenderPass(this.isHovered(), this.isFocused(), this.getRectangle());
 		}
 	}
 
 	public void setTooltip(@Nullable Tooltip tooltip) {
-		this.tooltip = tooltip;
+		this.tooltip.set(tooltip);
 	}
 
 	@Nullable
 	public Tooltip getTooltip() {
-		return this.tooltip;
+		return this.tooltip.get();
 	}
 
-	public void setTooltipDelay(int i) {
-		if (this.tooltip != null) {
-			this.tooltip.setDelay(i);
-		}
+	public void setTooltipDelay(Duration duration) {
+		this.tooltip.setDelay(duration);
 	}
 
 	protected MutableComponent createNarrationMessage() {
@@ -263,9 +259,7 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 	@Override
 	public final void updateNarration(NarrationElementOutput narrationElementOutput) {
 		this.updateWidgetNarration(narrationElementOutput);
-		if (this.tooltip != null) {
-			this.tooltip.updateNarration(narrationElementOutput);
-		}
+		this.tooltip.updateNarration(narrationElementOutput);
 	}
 
 	protected abstract void updateWidgetNarration(NarrationElementOutput narrationElementOutput);

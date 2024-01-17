@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmadilloModel;
@@ -18,9 +17,5 @@ public class ArmadilloRenderer extends MobRenderer<Armadillo, ArmadilloModel> {
 
 	public ResourceLocation getTextureLocation(Armadillo armadillo) {
 		return ARMADILLO_LOCATION;
-	}
-
-	protected void setupRotations(Armadillo armadillo, PoseStack poseStack, float f, float g, float h) {
-		super.setupRotations(armadillo, poseStack, f, g, h);
 	}
 }

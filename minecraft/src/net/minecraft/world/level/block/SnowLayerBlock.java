@@ -50,7 +50,7 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		switch (pathComputationType) {
 			case LAND:
 				return (Integer)blockState.getValue(LAYERS) < 5;
@@ -64,37 +64,37 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE_BY_LAYER[blockState.getValue(LAYERS)];
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE_BY_LAYER[blockState.getValue(LAYERS) - 1];
 	}
 
 	@Override
-	public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return SHAPE_BY_LAYER[blockState.getValue(LAYERS)];
 	}
 
 	@Override
-	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE_BY_LAYER[blockState.getValue(LAYERS)];
 	}
 
 	@Override
-	public boolean useShapeForLightOcclusion(BlockState blockState) {
+	protected boolean useShapeForLightOcclusion(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return blockState.getValue(LAYERS) == 8 ? 0.2F : 1.0F;
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
 		if (blockState2.is(BlockTags.SNOW_LAYER_CANNOT_SURVIVE_ON)) {
 			return false;
@@ -107,7 +107,7 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return !blockState.canSurvive(levelAccessor, blockPos)
@@ -116,7 +116,7 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (serverLevel.getBrightness(LightLayer.BLOCK, blockPos) > 11) {
 			dropResources(blockState, serverLevel, blockPos);
 			serverLevel.removeBlock(blockPos, false);
@@ -124,7 +124,7 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		int i = (Integer)blockState.getValue(LAYERS);
 		if (!blockPlaceContext.getItemInHand().is(this.asItem()) || i >= 8) {
 			return i == 1;

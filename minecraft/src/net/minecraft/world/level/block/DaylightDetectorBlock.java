@@ -42,17 +42,17 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
 	}
 
 	@Override
-	public boolean useShapeForLightOcclusion(BlockState blockState) {
+	protected boolean useShapeForLightOcclusion(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return (Integer)blockState.getValue(POWER);
 	}
 
@@ -75,7 +75,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (player.mayBuild()) {
 			if (level.isClientSide) {
 				return InteractionResult.SUCCESS;
@@ -92,12 +92,12 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 
 	@Override
-	public boolean isSignalSource(BlockState blockState) {
+	protected boolean isSignalSource(BlockState blockState) {
 		return true;
 	}
 

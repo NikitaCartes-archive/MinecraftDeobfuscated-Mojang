@@ -115,7 +115,7 @@ public class RealmsClient {
 		RealmsClientConfig.setProxy(minecraft.getProxy());
 	}
 
-	public RealmsServerList listWorlds() throws RealmsServiceException {
+	public RealmsServerList listRealms() throws RealmsServiceException {
 		String string = this.url("worlds");
 		if (RealmsMainScreen.isSnapshot()) {
 			string = string + "/listUserWorldsOfType/any";
@@ -165,7 +165,7 @@ public class RealmsClient {
 		this.execute(Request.post(string, GSON.toJson(uuidListToJsonArray(list))));
 	}
 
-	public RealmsServer getOwnWorld(long l) throws RealmsServiceException {
+	public RealmsServer getOwnRealm(long l) throws RealmsServiceException {
 		String string = this.url("worlds" + "/$ID".replace("$ID", String.valueOf(l)));
 		String string2 = this.execute(Request.get(string));
 		return RealmsServer.parse(string2);
@@ -189,7 +189,7 @@ public class RealmsClient {
 		return RealmsServerAddress.parse(string2);
 	}
 
-	public void initializeWorld(long l, String string, String string2) throws RealmsServiceException {
+	public void initializeRealm(long l, String string, String string2) throws RealmsServiceException {
 		RealmsDescriptionDto realmsDescriptionDto = new RealmsDescriptionDto(string, string2);
 		String string3 = this.url("worlds" + "/$WORLD_ID/initialize".replace("$WORLD_ID", String.valueOf(l)));
 		String string4 = GSON.toJson(realmsDescriptionDto);
@@ -333,7 +333,7 @@ public class RealmsClient {
 	}
 
 	private boolean isBlocked(PendingInvite pendingInvite) {
-		return this.minecraft.getPlayerSocialManager().isBlocked(pendingInvite.worldOwnerUuid);
+		return this.minecraft.getPlayerSocialManager().isBlocked(pendingInvite.realmOwnerUuid);
 	}
 
 	public void acceptInvitation(String string) throws RealmsServiceException {
@@ -380,7 +380,7 @@ public class RealmsClient {
 		return Boolean.valueOf(string2);
 	}
 
-	public void deleteWorld(long l) throws RealmsServiceException {
+	public void deleteRealm(long l) throws RealmsServiceException {
 		String string = this.url("worlds" + "/$WORLD_ID".replace("$WORLD_ID", String.valueOf(l)));
 		this.execute(Request.delete(string));
 	}

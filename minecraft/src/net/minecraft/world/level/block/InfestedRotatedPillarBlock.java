@@ -26,7 +26,7 @@ public class InfestedRotatedPillarBlock extends InfestedBlock {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return RotatedPillarBlock.rotatePillar(blockState, rotation);
 	}
 

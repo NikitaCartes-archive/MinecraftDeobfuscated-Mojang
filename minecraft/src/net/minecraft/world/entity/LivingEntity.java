@@ -94,6 +94,7 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.FrostWalkerEnchantment;
+import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -509,7 +510,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				);
 				if (this.getRandom().nextFloat() < 0.04F) {
 					ItemStack itemStack = this.getItemBySlot(EquipmentSlot.FEET);
-					itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.FEET));
+					itemStack.hurtAndBreak(1, this, EquipmentSlot.FEET);
 				}
 			}
 		}
@@ -564,7 +565,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public float getScale() {
 		AttributeMap attributeMap = this.getAttributes();
-		return attributeMap == null ? 1.0F : (float)attributeMap.getValue(Attributes.SCALE);
+		return attributeMap == null ? 1.0F : this.sanitizeScale((float)attributeMap.getValue(Attributes.SCALE));
+	}
+
+	protected float sanitizeScale(float f) {
+		return f;
 	}
 
 	protected boolean isAffectedByFluids() {
@@ -967,7 +972,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean canBeAffected(MobEffectInstance mobEffectInstance) {
-		return this.getMobType() != MobType.UNDEAD ? true : !mobEffectInstance.is(MobEffects.REGENERATION) && !mobEffectInstance.is(MobEffects.POISON);
+		return !this.getType().is(EntityTypeTags.IGNORES_POISON_AND_REGEN)
+			? true
+			: !mobEffectInstance.is(MobEffects.REGENERATION) && !mobEffectInstance.is(MobEffects.POISON);
 	}
 
 	public void forceAddEffect(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
@@ -983,7 +990,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean isInvertedHealAndHarm() {
-		return this.getMobType() == MobType.UNDEAD;
+		return this.getType().is(EntityTypeTags.INVERTED_HEALING_AND_HARM);
 	}
 
 	@Nullable
@@ -1188,9 +1195,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			if (this.isDeadOrDying()) {
 				if (!this.checkTotemDeathProtection(damageSource)) {
-					SoundEvent soundEvent = this.getDeathSound();
-					if (bl2 && soundEvent != null) {
-						this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
+					if (bl2) {
+						this.makeSound(this.getDeathSound());
 					}
 
 					this.die(damageSource);
@@ -1272,7 +1278,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void playHurtSound(DamageSource damageSource) {
-		SoundEvent soundEvent = this.getHurtSound(damageSource);
+		this.makeSound(this.getHurtSound(damageSource));
+	}
+
+	public void makeSound(@Nullable SoundEvent soundEvent) {
 		if (soundEvent != null) {
 			this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
 		}
@@ -1843,10 +1852,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public AttributeMap getAttributes() {
 		return this.attributes;
-	}
-
-	public MobType getMobType() {
-		return MobType.UNDEFINED;
 	}
 
 	public ItemStack getMainHandItem() {
@@ -2629,7 +2634,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				if (!this.level().isClientSide && i % 10 == 0) {
 					int j = i / 10;
 					if (j % 2 == 0) {
-						itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.CHEST));
+						itemStack.hurtAndBreak(1, this, EquipmentSlot.CHEST);
 					}
 
 					this.gameEvent(GameEvent.ELYTRA_GLIDE);
@@ -3311,8 +3316,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.level().broadcastEntityEvent(this, entityEventForEquipmentBreak(equipmentSlot));
 	}
 
-	public void broadcastBreakEvent(InteractionHand interactionHand) {
-		this.broadcastBreakEvent(interactionHand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+	public static EquipmentSlot getSlotForHand(InteractionHand interactionHand) {
+		return interactionHand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
 	}
 
 	@Override
@@ -3417,6 +3422,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	protected void lerpHeadRotationStep(int i, double d) {
 		this.yHeadRot = (float)Mth.rotLerp(1.0 / (double)i, (double)this.yHeadRot, d);
+	}
+
+	@Override
+	public void igniteForTicks(int i) {
+		super.igniteForTicks(ProtectionEnchantment.getFireAfterDampener(this, i));
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {

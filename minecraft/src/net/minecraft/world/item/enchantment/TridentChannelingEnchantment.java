@@ -1,10 +1,11 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class TridentChannelingEnchantment extends Enchantment {
 	public TridentChannelingEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
-		super(rarity, EnchantmentCategory.TRIDENT, equipmentSlots);
+		super(rarity, ItemTags.TRIDENT_ENCHANTABLE, equipmentSlots);
 	}
 
 	@Override

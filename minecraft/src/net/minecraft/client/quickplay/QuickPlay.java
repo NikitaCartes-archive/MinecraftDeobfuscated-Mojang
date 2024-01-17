@@ -67,7 +67,7 @@ public class QuickPlay {
 		}
 
 		ServerAddress serverAddress = ServerAddress.parseString(string);
-		ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), minecraft, serverAddress, serverData, true);
+		ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), minecraft, serverAddress, serverData, true, null);
 	}
 
 	private static void joinRealmsWorld(Minecraft minecraft, RealmsClient realmsClient, String string) {
@@ -75,7 +75,7 @@ public class QuickPlay {
 		RealmsServerList realmsServerList;
 		try {
 			l = Long.parseLong(string);
-			realmsServerList = realmsClient.listWorlds();
+			realmsServerList = realmsClient.listRealms();
 		} catch (NumberFormatException var9) {
 			Screen screen = new RealmsMainScreen(new TitleScreen());
 			minecraft.setScreen(new DisconnectedScreen(screen, ERROR_TITLE, INVALID_IDENTIFIER, TO_REALMS_LIST));

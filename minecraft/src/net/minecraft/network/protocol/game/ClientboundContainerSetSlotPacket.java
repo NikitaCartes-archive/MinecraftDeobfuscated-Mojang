@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.item.ItemStack;
 
 public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundContainerSetSlotPacket> STREAM_CODEC = Packet.codec(
+		ClientboundContainerSetSlotPacket::write, ClientboundContainerSetSlotPacket::new
+	);
 	public static final int CARRIED_ITEM = -1;
 	public static final int PLAYER_INVENTORY = -2;
 	private final int containerId;
@@ -19,19 +24,23 @@ public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacke
 		this.itemStack = itemStack.copy();
 	}
 
-	public ClientboundContainerSetSlotPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.containerId = friendlyByteBuf.readByte();
-		this.stateId = friendlyByteBuf.readVarInt();
-		this.slot = friendlyByteBuf.readShort();
-		this.itemStack = friendlyByteBuf.readItem();
+	private ClientboundContainerSetSlotPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.containerId = registryFriendlyByteBuf.readByte();
+		this.stateId = registryFriendlyByteBuf.readVarInt();
+		this.slot = registryFriendlyByteBuf.readShort();
+		this.itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+	}
+
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeByte(this.containerId);
+		registryFriendlyByteBuf.writeVarInt(this.stateId);
+		registryFriendlyByteBuf.writeShort(this.slot);
+		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.itemStack);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeByte(this.containerId);
-		friendlyByteBuf.writeVarInt(this.stateId);
-		friendlyByteBuf.writeShort(this.slot);
-		friendlyByteBuf.writeItem(this.itemStack);
+	public PacketType<ClientboundContainerSetSlotPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_CONTAINER_SET_SLOT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

@@ -87,17 +87,17 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 
 	@Override
-	public VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return SHAPE_COMMON;
 	}
 
 	@Override
-	public boolean useShapeForLightOcclusion(BlockState blockState) {
+	protected boolean useShapeForLightOcclusion(BlockState blockState) {
 		return true;
 	}
 
@@ -118,12 +118,12 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE_COLLISION;
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		switch ((Direction)blockState.getValue(FACING)) {
 			case NORTH:
 				return SHAPE_NORTH;
@@ -139,12 +139,12 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 
@@ -201,12 +201,12 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		changePowered(serverLevel, blockPos, blockState, false);
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState.is(blockState2.getBlock())) {
 			if ((Boolean)blockState.getValue(HAS_BOOK)) {
 				this.popBook(blockState, level, blockPos);
@@ -236,27 +236,27 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean isSignalSource(BlockState blockState) {
+	protected boolean isSignalSource(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return blockState.getValue(POWERED) ? 15 : 0;
 	}
 
 	@Override
-	public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return direction == Direction.UP && blockState.getValue(POWERED) ? 15 : 0;
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		if ((Boolean)blockState.getValue(HAS_BOOK)) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof LecternBlockEntity) {
@@ -268,7 +268,7 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public ItemInteractionResult useItemOn(
+	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if ((Boolean)blockState.getValue(HAS_BOOK)) {
@@ -285,7 +285,7 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if ((Boolean)blockState.getValue(HAS_BOOK)) {
 			if (!level.isClientSide) {
 				this.openScreen(level, blockPos, player);
@@ -299,7 +299,7 @@ public class LecternBlock extends BaseEntityBlock {
 
 	@Nullable
 	@Override
-	public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
+	protected MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
 		return !blockState.getValue(HAS_BOOK) ? null : super.getMenuProvider(blockState, level, blockPos);
 	}
 
@@ -312,7 +312,7 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 }

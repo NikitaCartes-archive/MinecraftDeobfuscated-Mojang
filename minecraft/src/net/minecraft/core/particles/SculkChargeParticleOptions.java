@@ -6,12 +6,17 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record SculkChargeParticleOptions(float roll) implements ParticleOptions {
 	public static final Codec<SculkChargeParticleOptions> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(Codec.FLOAT.fieldOf("roll").forGetter(sculkChargeParticleOptions -> sculkChargeParticleOptions.roll))
 				.apply(instance, SculkChargeParticleOptions::new)
+	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, SculkChargeParticleOptions> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.FLOAT, sculkChargeParticleOptions -> sculkChargeParticleOptions.roll, SculkChargeParticleOptions::new
 	);
 	public static final ParticleOptions.Deserializer<SculkChargeParticleOptions> DESERIALIZER = new ParticleOptions.Deserializer<SculkChargeParticleOptions>() {
 		public SculkChargeParticleOptions fromCommand(ParticleType<SculkChargeParticleOptions> particleType, StringReader stringReader) throws CommandSyntaxException {
@@ -19,20 +24,11 @@ public record SculkChargeParticleOptions(float roll) implements ParticleOptions 
 			float f = stringReader.readFloat();
 			return new SculkChargeParticleOptions(f);
 		}
-
-		public SculkChargeParticleOptions fromNetwork(ParticleType<SculkChargeParticleOptions> particleType, FriendlyByteBuf friendlyByteBuf) {
-			return new SculkChargeParticleOptions(friendlyByteBuf.readFloat());
-		}
 	};
 
 	@Override
 	public ParticleType<SculkChargeParticleOptions> getType() {
 		return ParticleTypes.SCULK_CHARGE;
-	}
-
-	@Override
-	public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeFloat(this.roll);
 	}
 
 	@Override

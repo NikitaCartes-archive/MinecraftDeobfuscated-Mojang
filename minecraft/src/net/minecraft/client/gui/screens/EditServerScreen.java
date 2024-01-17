@@ -61,8 +61,12 @@ public class EditServerScreen extends Screen {
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)).bounds(this.width / 2 - 100, this.height / 4 + 120 + 18, 200, 20).build()
 		);
-		this.setInitialFocus(this.nameEdit);
 		this.updateAddButtonStatus();
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.nameEdit);
 	}
 
 	@Override

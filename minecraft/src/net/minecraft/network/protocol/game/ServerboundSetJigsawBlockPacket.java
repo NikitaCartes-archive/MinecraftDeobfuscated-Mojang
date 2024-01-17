@@ -2,11 +2,16 @@ package net.minecraft.network.protocol.game;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 
 public class ServerboundSetJigsawBlockPacket implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundSetJigsawBlockPacket> STREAM_CODEC = Packet.codec(
+		ServerboundSetJigsawBlockPacket::write, ServerboundSetJigsawBlockPacket::new
+	);
 	private final BlockPos pos;
 	private final ResourceLocation name;
 	private final ResourceLocation target;
@@ -36,7 +41,7 @@ public class ServerboundSetJigsawBlockPacket implements Packet<ServerGamePacketL
 		this.placementPriority = j;
 	}
 
-	public ServerboundSetJigsawBlockPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ServerboundSetJigsawBlockPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.pos = friendlyByteBuf.readBlockPos();
 		this.name = friendlyByteBuf.readResourceLocation();
 		this.target = friendlyByteBuf.readResourceLocation();
@@ -47,8 +52,7 @@ public class ServerboundSetJigsawBlockPacket implements Packet<ServerGamePacketL
 		this.placementPriority = friendlyByteBuf.readVarInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeBlockPos(this.pos);
 		friendlyByteBuf.writeResourceLocation(this.name);
 		friendlyByteBuf.writeResourceLocation(this.target);
@@ -57,6 +61,11 @@ public class ServerboundSetJigsawBlockPacket implements Packet<ServerGamePacketL
 		friendlyByteBuf.writeUtf(this.joint.getSerializedName());
 		friendlyByteBuf.writeVarInt(this.selectionPriority);
 		friendlyByteBuf.writeVarInt(this.placementPriority);
+	}
+
+	@Override
+	public PacketType<ServerboundSetJigsawBlockPacket> type() {
+		return GamePacketTypes.SERVERBOUND_SET_JIGSAW_BLOCK;
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {

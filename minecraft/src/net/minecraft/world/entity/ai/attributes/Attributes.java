@@ -20,10 +20,10 @@ public class Attributes {
 		"generic.attack_speed", new RangedAttribute("attribute.name.generic.attack_speed", 4.0, 0.0, 1024.0).setSyncable(true)
 	);
 	public static final Holder<Attribute> BLOCK_INTERACTION_RANGE = register(
-		"generic.block_interaction_range", new RangedAttribute("attribute.name.generic.block_interaction_range", 4.5, 0.0, 64.0).setSyncable(true)
+		"player.block_interaction_range", new RangedAttribute("attribute.name.player.block_interaction_range", 4.5, 0.0, 64.0).setSyncable(true)
 	);
 	public static final Holder<Attribute> ENTITY_INTERACTION_RANGE = register(
-		"generic.entity_interaction_range", new RangedAttribute("attribute.name.generic.entity_interaction_range", 3.0, 0.0, 64.0).setSyncable(true)
+		"player.entity_interaction_range", new RangedAttribute("attribute.name.player.entity_interaction_range", 3.0, 0.0, 64.0).setSyncable(true)
 	);
 	public static final Holder<Attribute> FLYING_SPEED = register(
 		"generic.flying_speed", new RangedAttribute("attribute.name.generic.flying_speed", 0.4F, 0.0, 1024.0).setSyncable(true)

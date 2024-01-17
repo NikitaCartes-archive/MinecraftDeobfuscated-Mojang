@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -268,29 +268,29 @@ public class SynchedEntityData {
 			return new SynchedEntityData.DataValue<>(entityDataAccessor.getId(), entityDataSerializer, entityDataSerializer.copy(object));
 		}
 
-		public void write(FriendlyByteBuf friendlyByteBuf) {
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 			int i = EntityDataSerializers.getSerializedId(this.serializer);
 			if (i < 0) {
 				throw new EncoderException("Unknown serializer type " + this.serializer);
 			} else {
-				friendlyByteBuf.writeByte(this.id);
-				friendlyByteBuf.writeVarInt(i);
-				this.serializer.write(friendlyByteBuf, this.value);
+				registryFriendlyByteBuf.writeByte(this.id);
+				registryFriendlyByteBuf.writeVarInt(i);
+				this.serializer.codec().encode(registryFriendlyByteBuf, this.value);
 			}
 		}
 
-		public static SynchedEntityData.DataValue<?> read(FriendlyByteBuf friendlyByteBuf, int i) {
-			int j = friendlyByteBuf.readVarInt();
+		public static SynchedEntityData.DataValue<?> read(RegistryFriendlyByteBuf registryFriendlyByteBuf, int i) {
+			int j = registryFriendlyByteBuf.readVarInt();
 			EntityDataSerializer<?> entityDataSerializer = EntityDataSerializers.getSerializer(j);
 			if (entityDataSerializer == null) {
 				throw new DecoderException("Unknown serializer type " + j);
 			} else {
-				return read(friendlyByteBuf, i, entityDataSerializer);
+				return read(registryFriendlyByteBuf, i, entityDataSerializer);
 			}
 		}
 
-		private static <T> SynchedEntityData.DataValue<T> read(FriendlyByteBuf friendlyByteBuf, int i, EntityDataSerializer<T> entityDataSerializer) {
-			return new SynchedEntityData.DataValue<>(i, entityDataSerializer, entityDataSerializer.read(friendlyByteBuf));
+		private static <T> SynchedEntityData.DataValue<T> read(RegistryFriendlyByteBuf registryFriendlyByteBuf, int i, EntityDataSerializer<T> entityDataSerializer) {
+			return new SynchedEntityData.DataValue<>(i, entityDataSerializer, entityDataSerializer.codec().decode(registryFriendlyByteBuf));
 		}
 	}
 }

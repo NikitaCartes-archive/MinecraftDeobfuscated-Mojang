@@ -7,9 +7,14 @@ import java.util.List;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundCommandSuggestionsPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundCommandSuggestionsPacket> STREAM_CODEC = Packet.codec(
+		ClientboundCommandSuggestionsPacket::write, ClientboundCommandSuggestionsPacket::new
+	);
 	private final int id;
 	private final Suggestions suggestions;
 
@@ -18,7 +23,7 @@ public class ClientboundCommandSuggestionsPacket implements Packet<ClientGamePac
 		this.suggestions = suggestions;
 	}
 
-	public ClientboundCommandSuggestionsPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundCommandSuggestionsPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		int i = friendlyByteBuf.readVarInt();
 		int j = friendlyByteBuf.readVarInt();
@@ -31,8 +36,7 @@ public class ClientboundCommandSuggestionsPacket implements Packet<ClientGamePac
 		this.suggestions = new Suggestions(stringRange, list);
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeVarInt(this.suggestions.getRange().getStart());
 		friendlyByteBuf.writeVarInt(this.suggestions.getRange().getLength());
@@ -45,6 +49,11 @@ public class ClientboundCommandSuggestionsPacket implements Packet<ClientGamePac
 				);
 			}
 		);
+	}
+
+	@Override
+	public PacketType<ClientboundCommandSuggestionsPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_COMMAND_SUGGESTIONS;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

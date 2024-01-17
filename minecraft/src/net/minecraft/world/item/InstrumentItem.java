@@ -50,7 +50,7 @@ public class InstrumentItem extends Item {
 	}
 
 	public static void setRandom(ItemStack itemStack, TagKey<Instrument> tagKey, RandomSource randomSource) {
-		Optional<Holder<Instrument>> optional = BuiltInRegistries.INSTRUMENT.getTag(tagKey).flatMap(named -> named.getRandomElement(randomSource));
+		Optional<Holder<Instrument>> optional = BuiltInRegistries.INSTRUMENT.getRandomElementOf(tagKey, randomSource);
 		optional.ifPresent(holder -> setSoundVariantId(itemStack, holder));
 	}
 

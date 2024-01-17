@@ -2,11 +2,16 @@ package net.minecraft.network.protocol.game;
 
 import java.util.List;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.item.ItemStack;
 
 public class ClientboundContainerSetContentPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundContainerSetContentPacket> STREAM_CODEC = Packet.codec(
+		ClientboundContainerSetContentPacket::write, ClientboundContainerSetContentPacket::new
+	);
 	private final int containerId;
 	private final int stateId;
 	private final List<ItemStack> items;
@@ -24,19 +29,23 @@ public class ClientboundContainerSetContentPacket implements Packet<ClientGamePa
 		this.carriedItem = itemStack.copy();
 	}
 
-	public ClientboundContainerSetContentPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.containerId = friendlyByteBuf.readUnsignedByte();
-		this.stateId = friendlyByteBuf.readVarInt();
-		this.items = friendlyByteBuf.readCollection(NonNullList::createWithCapacity, FriendlyByteBuf::readItem);
-		this.carriedItem = friendlyByteBuf.readItem();
+	private ClientboundContainerSetContentPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.containerId = registryFriendlyByteBuf.readUnsignedByte();
+		this.stateId = registryFriendlyByteBuf.readVarInt();
+		this.items = ItemStack.LIST_STREAM_CODEC.decode(registryFriendlyByteBuf);
+		this.carriedItem = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+	}
+
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeByte(this.containerId);
+		registryFriendlyByteBuf.writeVarInt(this.stateId);
+		ItemStack.LIST_STREAM_CODEC.encode(registryFriendlyByteBuf, this.items);
+		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.carriedItem);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeByte(this.containerId);
-		friendlyByteBuf.writeVarInt(this.stateId);
-		friendlyByteBuf.writeCollection(this.items, FriendlyByteBuf::writeItem);
-		friendlyByteBuf.writeItem(this.carriedItem);
+	public PacketType<ClientboundContainerSetContentPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_CONTAINER_SET_CONTENT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

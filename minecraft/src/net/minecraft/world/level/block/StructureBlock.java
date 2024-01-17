@@ -39,7 +39,7 @@ public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof StructureBlockEntity) {
 			return ((StructureBlockEntity)blockEntity).usedBy(player) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
@@ -61,7 +61,7 @@ public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 
@@ -71,7 +71,7 @@ public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (level instanceof ServerLevel) {
 			if (level.getBlockEntity(blockPos) instanceof StructureBlockEntity structureBlockEntity) {
 				boolean bl2 = level.hasNeighborSignal(blockPos);

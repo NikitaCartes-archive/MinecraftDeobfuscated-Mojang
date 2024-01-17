@@ -149,7 +149,14 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	protected void onHit(HitResult hitResult) {
 		HitResult.Type type = hitResult.getType();
 		if (type == HitResult.Type.ENTITY) {
-			this.onHitEntity((EntityHitResult)hitResult);
+			EntityHitResult entityHitResult = (EntityHitResult)hitResult;
+			ProjectileDeflection projectileDeflection = entityHitResult.getEntity().deflection(this);
+			if (projectileDeflection != ProjectileDeflection.NONE) {
+				projectileDeflection.deflect(this, entityHitResult.getEntity(), this.random);
+				return;
+			}
+
+			this.onHitEntity(entityHitResult);
 			this.level().gameEvent(GameEvent.PROJECTILE_LAND, hitResult.getLocation(), GameEvent.Context.of(this, null));
 		} else if (type == HitResult.Type.BLOCK) {
 			BlockHitResult blockHitResult = (BlockHitResult)hitResult;

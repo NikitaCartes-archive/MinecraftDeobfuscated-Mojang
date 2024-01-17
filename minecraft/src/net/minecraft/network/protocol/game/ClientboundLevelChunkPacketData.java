@@ -9,10 +9,13 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -43,27 +46,27 @@ public class ClientboundLevelChunkPacketData {
 		}
 	}
 
-	public ClientboundLevelChunkPacketData(FriendlyByteBuf friendlyByteBuf, int i, int j) {
-		this.heightmaps = friendlyByteBuf.readNbt();
+	public ClientboundLevelChunkPacketData(RegistryFriendlyByteBuf registryFriendlyByteBuf, int i, int j) {
+		this.heightmaps = registryFriendlyByteBuf.readNbt();
 		if (this.heightmaps == null) {
 			throw new RuntimeException("Can't read heightmap in packet for [" + i + ", " + j + "]");
 		} else {
-			int k = friendlyByteBuf.readVarInt();
+			int k = registryFriendlyByteBuf.readVarInt();
 			if (k > 2097152) {
 				throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
 			} else {
 				this.buffer = new byte[k];
-				friendlyByteBuf.readBytes(this.buffer);
-				this.blockEntitiesData = friendlyByteBuf.readList(ClientboundLevelChunkPacketData.BlockEntityInfo::new);
+				registryFriendlyByteBuf.readBytes(this.buffer);
+				this.blockEntitiesData = ClientboundLevelChunkPacketData.BlockEntityInfo.LIST_STREAM_CODEC.decode(registryFriendlyByteBuf);
 			}
 		}
 	}
 
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeNbt(this.heightmaps);
-		friendlyByteBuf.writeVarInt(this.buffer.length);
-		friendlyByteBuf.writeBytes(this.buffer);
-		friendlyByteBuf.writeCollection(this.blockEntitiesData, (friendlyByteBufx, blockEntityInfo) -> blockEntityInfo.write(friendlyByteBufx));
+	public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeNbt(this.heightmaps);
+		registryFriendlyByteBuf.writeVarInt(this.buffer.length);
+		registryFriendlyByteBuf.writeBytes(this.buffer);
+		ClientboundLevelChunkPacketData.BlockEntityInfo.LIST_STREAM_CODEC.encode(registryFriendlyByteBuf, this.blockEntitiesData);
 	}
 
 	private static int calculateChunkSize(LevelChunk levelChunk) {
@@ -114,6 +117,12 @@ public class ClientboundLevelChunkPacketData {
 	}
 
 	static class BlockEntityInfo {
+		public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundLevelChunkPacketData.BlockEntityInfo> STREAM_CODEC = StreamCodec.ofMember(
+			ClientboundLevelChunkPacketData.BlockEntityInfo::write, ClientboundLevelChunkPacketData.BlockEntityInfo::new
+		);
+		public static final StreamCodec<RegistryFriendlyByteBuf, List<ClientboundLevelChunkPacketData.BlockEntityInfo>> LIST_STREAM_CODEC = STREAM_CODEC.apply(
+			ByteBufCodecs.list()
+		);
 		final int packedXZ;
 		final int y;
 		final BlockEntityType<?> type;
@@ -127,18 +136,18 @@ public class ClientboundLevelChunkPacketData {
 			this.tag = compoundTag;
 		}
 
-		private BlockEntityInfo(FriendlyByteBuf friendlyByteBuf) {
-			this.packedXZ = friendlyByteBuf.readByte();
-			this.y = friendlyByteBuf.readShort();
-			this.type = friendlyByteBuf.readById(BuiltInRegistries.BLOCK_ENTITY_TYPE);
-			this.tag = friendlyByteBuf.readNbt();
+		private BlockEntityInfo(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			this.packedXZ = registryFriendlyByteBuf.readByte();
+			this.y = registryFriendlyByteBuf.readShort();
+			this.type = ByteBufCodecs.registry(Registries.BLOCK_ENTITY_TYPE).decode(registryFriendlyByteBuf);
+			this.tag = registryFriendlyByteBuf.readNbt();
 		}
 
-		void write(FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeByte(this.packedXZ);
-			friendlyByteBuf.writeShort(this.y);
-			friendlyByteBuf.writeId(BuiltInRegistries.BLOCK_ENTITY_TYPE, this.type);
-			friendlyByteBuf.writeNbt(this.tag);
+		private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			registryFriendlyByteBuf.writeByte(this.packedXZ);
+			registryFriendlyByteBuf.writeShort(this.y);
+			ByteBufCodecs.registry(Registries.BLOCK_ENTITY_TYPE).encode(registryFriendlyByteBuf, this.type);
+			registryFriendlyByteBuf.writeNbt(this.tag);
 		}
 
 		static ClientboundLevelChunkPacketData.BlockEntityInfo create(BlockEntity blockEntity) {

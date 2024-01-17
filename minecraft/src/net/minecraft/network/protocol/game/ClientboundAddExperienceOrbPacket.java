@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.ExperienceOrb;
 
 public class ClientboundAddExperienceOrbPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundAddExperienceOrbPacket> STREAM_CODEC = Packet.codec(
+		ClientboundAddExperienceOrbPacket::write, ClientboundAddExperienceOrbPacket::new
+	);
 	private final int id;
 	private final double x;
 	private final double y;
@@ -19,7 +24,7 @@ public class ClientboundAddExperienceOrbPacket implements Packet<ClientGamePacke
 		this.value = experienceOrb.getValue();
 	}
 
-	public ClientboundAddExperienceOrbPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundAddExperienceOrbPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.x = friendlyByteBuf.readDouble();
 		this.y = friendlyByteBuf.readDouble();
@@ -27,13 +32,17 @@ public class ClientboundAddExperienceOrbPacket implements Packet<ClientGamePacke
 		this.value = friendlyByteBuf.readShort();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);
 		friendlyByteBuf.writeDouble(this.z);
 		friendlyByteBuf.writeShort(this.value);
+	}
+
+	@Override
+	public PacketType<ClientboundAddExperienceOrbPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_ADD_EXPERIENCE_ORB;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

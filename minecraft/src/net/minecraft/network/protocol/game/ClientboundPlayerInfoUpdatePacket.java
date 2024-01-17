@@ -12,11 +12,16 @@ import net.minecraft.Optionull;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.RemoteChatSession;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 
 public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerInfoUpdatePacket> STREAM_CODEC = Packet.codec(
+		ClientboundPlayerInfoUpdatePacket::write, ClientboundPlayerInfoUpdatePacket::new
+	);
 	private final EnumSet<ClientboundPlayerInfoUpdatePacket.Action> actions;
 	private final List<ClientboundPlayerInfoUpdatePacket.Entry> entries;
 
@@ -42,7 +47,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 		return new ClientboundPlayerInfoUpdatePacket(enumSet, collection);
 	}
 
-	public ClientboundPlayerInfoUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundPlayerInfoUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.actions = friendlyByteBuf.readEnumSet(ClientboundPlayerInfoUpdatePacket.Action.class);
 		this.entries = friendlyByteBuf.readList(friendlyByteBufx -> {
 			ClientboundPlayerInfoUpdatePacket.EntryBuilder entryBuilder = new ClientboundPlayerInfoUpdatePacket.EntryBuilder(friendlyByteBufx.readUUID());
@@ -55,8 +60,7 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 		});
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeEnumSet(this.actions, ClientboundPlayerInfoUpdatePacket.Action.class);
 		friendlyByteBuf.writeCollection(this.entries, (friendlyByteBufx, entry) -> {
 			friendlyByteBufx.writeUUID(entry.profileId());
@@ -65,6 +69,11 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 				action.writer.write(friendlyByteBufx, entry);
 			}
 		});
+	}
+
+	@Override
+	public PacketType<ClientboundPlayerInfoUpdatePacket> type() {
+		return GamePacketTypes.CLIENTBOUND_PLAYER_INFO_UPDATE;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

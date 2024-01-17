@@ -44,12 +44,12 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	@Override
-	public boolean isSignalSource(BlockState blockState) {
+	protected boolean isSignalSource(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!level.isClientSide) {
 			if (!(Boolean)blockState.getValue(POWERED)) {
 				this.checkPressed(level, blockPos, blockState);
@@ -58,19 +58,19 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(POWERED)) {
 			this.checkPressed(serverLevel, blockPos, blockState);
 		}
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return blockState.getValue(POWERED) ? 15 : 0;
 	}
 
 	@Override
-	public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		if (!(Boolean)blockState.getValue(POWERED)) {
 			return 0;
 		} else {
@@ -123,7 +123,7 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			BlockState blockState3 = this.updateState(blockState, level, blockPos, bl);
 			this.checkPressed(level, blockPos, blockState3);
@@ -136,12 +136,12 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		if ((Boolean)blockState.getValue(POWERED)) {
 			List<MinecartCommandBlock> list = this.getInteractingMinecartOfType(level, blockPos, MinecartCommandBlock.class, entity -> true);
 			if (!list.isEmpty()) {
@@ -174,7 +174,7 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		switch (rotation) {
 			case CLOCKWISE_180:
 				switch ((RailShape)blockState.getValue(SHAPE)) {
@@ -247,7 +247,7 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		RailShape railShape = blockState.getValue(SHAPE);
 		switch (mirror) {
 			case LEFT_RIGHT:

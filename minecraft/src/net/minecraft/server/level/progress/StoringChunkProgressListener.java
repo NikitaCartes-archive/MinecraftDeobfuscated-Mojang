@@ -7,19 +7,34 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 
 public class StoringChunkProgressListener implements ChunkProgressListener {
 	private final LoggerChunkProgressListener delegate;
-	private final Long2ObjectOpenHashMap<ChunkStatus> statuses;
+	private final Long2ObjectOpenHashMap<ChunkStatus> statuses = new Long2ObjectOpenHashMap<>();
 	private ChunkPos spawnPos = new ChunkPos(0, 0);
 	private final int fullDiameter;
 	private final int radius;
 	private final int diameter;
 	private boolean started;
 
-	public StoringChunkProgressListener(int i) {
-		this.delegate = new LoggerChunkProgressListener(i);
-		this.fullDiameter = i * 2 + 1;
-		this.radius = i + ChunkStatus.maxDistance();
-		this.diameter = this.radius * 2 + 1;
-		this.statuses = new Long2ObjectOpenHashMap<>();
+	private StoringChunkProgressListener(LoggerChunkProgressListener loggerChunkProgressListener, int i, int j, int k) {
+		this.delegate = loggerChunkProgressListener;
+		this.fullDiameter = i;
+		this.radius = j;
+		this.diameter = k;
+	}
+
+	public static StoringChunkProgressListener createFromGameruleRadius(int i) {
+		return i > 0 ? create(i + 1) : createCompleted();
+	}
+
+	public static StoringChunkProgressListener create(int i) {
+		LoggerChunkProgressListener loggerChunkProgressListener = LoggerChunkProgressListener.create(i);
+		int j = ChunkProgressListener.calculateDiameter(i);
+		int k = i + ChunkStatus.maxDistance();
+		int l = ChunkProgressListener.calculateDiameter(k);
+		return new StoringChunkProgressListener(loggerChunkProgressListener, j, k, l);
+	}
+
+	public static StoringChunkProgressListener createCompleted() {
+		return new StoringChunkProgressListener(LoggerChunkProgressListener.createCompleted(), 0, 0, 0);
 	}
 
 	@Override

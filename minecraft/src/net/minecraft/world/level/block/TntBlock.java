@@ -41,7 +41,7 @@ public class TntBlock extends Block {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			if (level.hasNeighborSignal(blockPos)) {
 				explode(level, blockPos);
@@ -51,7 +51,7 @@ public class TntBlock extends Block {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (level.hasNeighborSignal(blockPos)) {
 			explode(level, blockPos);
 			level.removeBlock(blockPos, false);
@@ -93,7 +93,7 @@ public class TntBlock extends Block {
 	}
 
 	@Override
-	public ItemInteractionResult useItemOn(
+	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (!itemStack.is(Items.FLINT_AND_STEEL) && !itemStack.is(Items.FIRE_CHARGE)) {
@@ -104,7 +104,7 @@ public class TntBlock extends Block {
 			Item item = itemStack.getItem();
 			if (!player.isCreative()) {
 				if (itemStack.is(Items.FLINT_AND_STEEL)) {
-					itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+					itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(interactionHand));
 				} else {
 					itemStack.shrink(1);
 				}
@@ -116,7 +116,7 @@ public class TntBlock extends Block {
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+	protected void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		if (!level.isClientSide) {
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			Entity entity = projectile.getOwner();

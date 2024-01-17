@@ -2,10 +2,15 @@ package net.minecraft.world.item.trading;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 public class MerchantOffer {
+	public static final StreamCodec<RegistryFriendlyByteBuf, MerchantOffer> STREAM_CODEC = StreamCodec.of(
+		MerchantOffer::writeToStream, MerchantOffer::createFromStream
+	);
 	private final ItemStack baseCostA;
 	private final ItemStack costB;
 	private final ItemStack result;
@@ -16,6 +21,7 @@ public class MerchantOffer {
 	private int demand;
 	private float priceMultiplier;
 	private int xp = 1;
+	private final boolean ignoreTags;
 
 	public MerchantOffer(CompoundTag compoundTag) {
 		this.baseCostA = ItemStack.of(compoundTag.getCompound("buy"));
@@ -42,6 +48,7 @@ public class MerchantOffer {
 
 		this.specialPriceDiff = compoundTag.getInt("specialPrice");
 		this.demand = compoundTag.getInt("demand");
+		this.ignoreTags = compoundTag.getBoolean("ignore_tags");
 	}
 
 	public MerchantOffer(ItemStack itemStack, ItemStack itemStack2, int i, int j, float f) {
@@ -57,6 +64,10 @@ public class MerchantOffer {
 	}
 
 	public MerchantOffer(ItemStack itemStack, ItemStack itemStack2, ItemStack itemStack3, int i, int j, int k, float f, int l) {
+		this(itemStack, itemStack2, itemStack3, i, j, k, f, l, false);
+	}
+
+	public MerchantOffer(ItemStack itemStack, ItemStack itemStack2, ItemStack itemStack3, int i, int j, int k, float f, int l, boolean bl) {
 		this.baseCostA = itemStack;
 		this.costB = itemStack2;
 		this.result = itemStack3;
@@ -65,6 +76,7 @@ public class MerchantOffer {
 		this.xp = k;
 		this.priceMultiplier = f;
 		this.demand = l;
+		this.ignoreTags = bl;
 	}
 
 	private MerchantOffer(MerchantOffer merchantOffer) {
@@ -78,6 +90,7 @@ public class MerchantOffer {
 		this.demand = merchantOffer.demand;
 		this.priceMultiplier = merchantOffer.priceMultiplier;
 		this.xp = merchantOffer.xp;
+		this.ignoreTags = merchantOffer.ignoreTags;
 	}
 
 	public ItemStack getBaseCostA() {
@@ -128,6 +141,10 @@ public class MerchantOffer {
 
 	public int getDemand() {
 		return this.demand;
+	}
+
+	public boolean getIgnoreTags() {
+		return this.ignoreTags;
 	}
 
 	public void addToSpecialPriceDiff(int i) {
@@ -182,27 +199,31 @@ public class MerchantOffer {
 		compoundTag.putFloat("priceMultiplier", this.priceMultiplier);
 		compoundTag.putInt("specialPrice", this.specialPriceDiff);
 		compoundTag.putInt("demand", this.demand);
+		compoundTag.putBoolean("ignore_tags", this.ignoreTags);
 		return compoundTag;
 	}
 
 	public boolean satisfiedBy(ItemStack itemStack, ItemStack itemStack2) {
-		return this.isRequiredItem(itemStack, this.getCostA())
+		return isRequiredItem(itemStack, this.getCostA(), this.ignoreTags)
 			&& itemStack.getCount() >= this.getCostA().getCount()
-			&& this.isRequiredItem(itemStack2, this.costB)
+			&& isRequiredItem(itemStack2, this.costB, this.ignoreTags)
 			&& itemStack2.getCount() >= this.costB.getCount();
 	}
 
-	private boolean isRequiredItem(ItemStack itemStack, ItemStack itemStack2) {
+	public static boolean isRequiredItem(ItemStack itemStack, ItemStack itemStack2, boolean bl) {
 		if (itemStack2.isEmpty() && itemStack.isEmpty()) {
 			return true;
 		} else {
 			ItemStack itemStack3 = itemStack.copy();
+			ItemStack itemStack4 = itemStack2.copy();
 			if (itemStack3.getItem().canBeDepleted()) {
 				itemStack3.setDamageValue(itemStack3.getDamageValue());
 			}
 
-			return ItemStack.isSameItem(itemStack3, itemStack2)
-				&& (!itemStack2.hasTag() || itemStack3.hasTag() && NbtUtils.compareNbt(itemStack2.getTag(), itemStack3.getTag(), false));
+			return bl
+				? ItemStack.isSameItem(itemStack3, itemStack4)
+				: ItemStack.isSameItem(itemStack3, itemStack4)
+					&& (!itemStack4.hasTag() || itemStack3.hasTag() && NbtUtils.compareNbt(itemStack4.getTag(), itemStack3.getTag(), false));
 		}
 	}
 
@@ -221,5 +242,40 @@ public class MerchantOffer {
 
 	public MerchantOffer copy() {
 		return new MerchantOffer(this);
+	}
+
+	private static void writeToStream(RegistryFriendlyByteBuf registryFriendlyByteBuf, MerchantOffer merchantOffer) {
+		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, merchantOffer.getBaseCostA());
+		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, merchantOffer.getResult());
+		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, merchantOffer.getCostB());
+		registryFriendlyByteBuf.writeBoolean(merchantOffer.isOutOfStock());
+		registryFriendlyByteBuf.writeInt(merchantOffer.getUses());
+		registryFriendlyByteBuf.writeInt(merchantOffer.getMaxUses());
+		registryFriendlyByteBuf.writeInt(merchantOffer.getXp());
+		registryFriendlyByteBuf.writeInt(merchantOffer.getSpecialPriceDiff());
+		registryFriendlyByteBuf.writeFloat(merchantOffer.getPriceMultiplier());
+		registryFriendlyByteBuf.writeInt(merchantOffer.getDemand());
+		registryFriendlyByteBuf.writeBoolean(merchantOffer.getIgnoreTags());
+	}
+
+	public static MerchantOffer createFromStream(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		ItemStack itemStack2 = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		ItemStack itemStack3 = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		boolean bl = registryFriendlyByteBuf.readBoolean();
+		int i = registryFriendlyByteBuf.readInt();
+		int j = registryFriendlyByteBuf.readInt();
+		int k = registryFriendlyByteBuf.readInt();
+		int l = registryFriendlyByteBuf.readInt();
+		float f = registryFriendlyByteBuf.readFloat();
+		int m = registryFriendlyByteBuf.readInt();
+		boolean bl2 = registryFriendlyByteBuf.readBoolean();
+		MerchantOffer merchantOffer = new MerchantOffer(itemStack, itemStack3, itemStack2, i, j, k, f, m, bl2);
+		if (bl) {
+			merchantOffer.setToOutOfStock();
+		}
+
+		merchantOffer.setSpecialPriceDiff(l);
+		return merchantOffer;
 	}
 }

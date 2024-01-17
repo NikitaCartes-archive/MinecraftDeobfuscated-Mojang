@@ -3,9 +3,10 @@ package net.minecraft.advancements;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +24,9 @@ public class DisplayInfo {
 					ExtraCodecs.strictOptionalField(Codec.BOOL, "hidden", false).forGetter(DisplayInfo::isHidden)
 				)
 				.apply(instance, DisplayInfo::new)
+	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, DisplayInfo> STREAM_CODEC = StreamCodec.ofMember(
+		DisplayInfo::serializeToNetwork, DisplayInfo::fromNetwork
 	);
 	private final Component title;
 	private final Component description;
@@ -100,11 +104,11 @@ public class DisplayInfo {
 		return this.hidden;
 	}
 
-	public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeComponent(this.title);
-		friendlyByteBuf.writeComponent(this.description);
-		friendlyByteBuf.writeItem(this.icon);
-		friendlyByteBuf.writeEnum(this.type);
+	private void serializeToNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeComponent(this.title);
+		registryFriendlyByteBuf.writeComponent(this.description);
+		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.icon);
+		registryFriendlyByteBuf.writeEnum(this.type);
 		int i = 0;
 		if (this.background.isPresent()) {
 			i |= 1;
@@ -118,23 +122,23 @@ public class DisplayInfo {
 			i |= 4;
 		}
 
-		friendlyByteBuf.writeInt(i);
-		this.background.ifPresent(friendlyByteBuf::writeResourceLocation);
-		friendlyByteBuf.writeFloat(this.x);
-		friendlyByteBuf.writeFloat(this.y);
+		registryFriendlyByteBuf.writeInt(i);
+		this.background.ifPresent(registryFriendlyByteBuf::writeResourceLocation);
+		registryFriendlyByteBuf.writeFloat(this.x);
+		registryFriendlyByteBuf.writeFloat(this.y);
 	}
 
-	public static DisplayInfo fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		Component component = friendlyByteBuf.readComponentTrusted();
-		Component component2 = friendlyByteBuf.readComponentTrusted();
-		ItemStack itemStack = friendlyByteBuf.readItem();
-		AdvancementType advancementType = friendlyByteBuf.readEnum(AdvancementType.class);
-		int i = friendlyByteBuf.readInt();
-		Optional<ResourceLocation> optional = (i & 1) != 0 ? Optional.of(friendlyByteBuf.readResourceLocation()) : Optional.empty();
+	private static DisplayInfo fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		Component component = registryFriendlyByteBuf.readComponentTrusted();
+		Component component2 = registryFriendlyByteBuf.readComponentTrusted();
+		ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		AdvancementType advancementType = registryFriendlyByteBuf.readEnum(AdvancementType.class);
+		int i = registryFriendlyByteBuf.readInt();
+		Optional<ResourceLocation> optional = (i & 1) != 0 ? Optional.of(registryFriendlyByteBuf.readResourceLocation()) : Optional.empty();
 		boolean bl = (i & 2) != 0;
 		boolean bl2 = (i & 4) != 0;
 		DisplayInfo displayInfo = new DisplayInfo(itemStack, component, component2, optional, advancementType, bl, false, bl2);
-		displayInfo.setLocation(friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat());
+		displayInfo.setLocation(registryFriendlyByteBuf.readFloat(), registryFriendlyByteBuf.readFloat());
 		return displayInfo;
 	}
 }

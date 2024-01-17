@@ -21,18 +21,8 @@ public class DerivedLevelData implements ServerLevelData {
 	}
 
 	@Override
-	public int getXSpawn() {
-		return this.wrapped.getXSpawn();
-	}
-
-	@Override
-	public int getYSpawn() {
-		return this.wrapped.getYSpawn();
-	}
-
-	@Override
-	public int getZSpawn() {
-		return this.wrapped.getZSpawn();
+	public BlockPos getSpawnPos() {
+		return this.wrapped.getSpawnPos();
 	}
 
 	@Override
@@ -87,22 +77,6 @@ public class DerivedLevelData implements ServerLevelData {
 	@Override
 	public GameType getGameType() {
 		return this.worldData.getGameType();
-	}
-
-	@Override
-	public void setXSpawn(int i) {
-	}
-
-	@Override
-	public void setYSpawn(int i) {
-	}
-
-	@Override
-	public void setZSpawn(int i) {
-	}
-
-	@Override
-	public void setSpawnAngle(float f) {
 	}
 
 	@Override

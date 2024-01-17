@@ -344,7 +344,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	private void setUnhappy() {
 		this.setUnhappyCounter(40);
 		if (!this.level().isClientSide()) {
-			this.playSound(SoundEvents.VILLAGER_NO, this.getSoundVolume(), this.getVoicePitch());
+			this.makeSound(SoundEvents.VILLAGER_NO);
 		}
 	}
 
@@ -564,10 +564,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	}
 
 	public void playWorkSound() {
-		SoundEvent soundEvent = this.getVillagerData().getProfession().workSound();
-		if (soundEvent != null) {
-			this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
-		}
+		this.makeSound(this.getVillagerData().getProfession().workSound());
 	}
 
 	@Override

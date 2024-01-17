@@ -7,6 +7,8 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public interface GlyphProvider extends AutoCloseable {
+	float BASELINE = 7.0F;
+
 	default void close() {
 	}
 

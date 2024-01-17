@@ -38,14 +38,14 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		for (Direction direction : Direction.values()) {
 			level.updateNeighborsAt(blockPos.relative(direction), this);
 		}
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl) {
 			for (Direction direction : Direction.values()) {
 				level.updateNeighborsAt(blockPos.relative(direction), this);
@@ -54,7 +54,7 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return blockState.getValue(LIT) && Direction.UP != direction ? 15 : 0;
 	}
 
@@ -63,7 +63,7 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		boolean bl = this.hasNeighborSignal(serverLevel, blockPos, blockState);
 		List<RedstoneTorchBlock.Toggle> list = (List<RedstoneTorchBlock.Toggle>)RECENT_TOGGLES.get(serverLevel);
 
@@ -85,19 +85,19 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if ((Boolean)blockState.getValue(LIT) == this.hasNeighborSignal(level, blockPos, blockState) && !level.getBlockTicks().willTickThisTick(blockPos, this)) {
 			level.scheduleTick(blockPos, this, 2);
 		}
 	}
 
 	@Override
-	public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return direction == Direction.DOWN ? blockState.getSignal(blockGetter, blockPos, direction) : 0;
 	}
 
 	@Override
-	public boolean isSignalSource(BlockState blockState) {
+	protected boolean isSignalSource(BlockState blockState) {
 		return true;
 	}
 

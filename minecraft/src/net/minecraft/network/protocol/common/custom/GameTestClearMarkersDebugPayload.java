@@ -1,21 +1,23 @@
 package net.minecraft.network.protocol.common.custom;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.codec.StreamCodec;
 
 public record GameTestClearMarkersDebugPayload() implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/game_test_clear");
+	public static final StreamCodec<FriendlyByteBuf, GameTestClearMarkersDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(
+		GameTestClearMarkersDebugPayload::write, GameTestClearMarkersDebugPayload::new
+	);
+	public static final CustomPacketPayload.Type<GameTestClearMarkersDebugPayload> TYPE = CustomPacketPayload.createType("debug/game_test_clear");
 
-	public GameTestClearMarkersDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+	private GameTestClearMarkersDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 	}
 
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<GameTestClearMarkersDebugPayload> type() {
+		return TYPE;
 	}
 }

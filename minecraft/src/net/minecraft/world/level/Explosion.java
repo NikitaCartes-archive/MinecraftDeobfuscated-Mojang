@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvent;
@@ -54,7 +55,7 @@ public class Explosion {
 	private final ExplosionDamageCalculator damageCalculator;
 	private final ParticleOptions smallExplosionParticles;
 	private final ParticleOptions largeExplosionParticles;
-	private final SoundEvent explosionSound;
+	private final Holder<SoundEvent> explosionSound;
 	private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList<>();
 	private final Map<Player, Vec3> hitPlayers = Maps.<Player, Vec3>newHashMap();
 
@@ -73,9 +74,9 @@ public class Explosion {
 		Explosion.BlockInteraction blockInteraction,
 		ParticleOptions particleOptions,
 		ParticleOptions particleOptions2,
-		SoundEvent soundEvent
+		Holder<SoundEvent> holder
 	) {
-		this(level, entity, getDefaultDamageSource(level, entity), null, d, e, f, g, false, blockInteraction, particleOptions, particleOptions2, soundEvent);
+		this(level, entity, getDefaultDamageSource(level, entity), null, d, e, f, g, false, blockInteraction, particleOptions, particleOptions2, holder);
 		this.toBlow.addAll(list);
 	}
 
@@ -117,7 +118,7 @@ public class Explosion {
 		Explosion.BlockInteraction blockInteraction,
 		ParticleOptions particleOptions,
 		ParticleOptions particleOptions2,
-		SoundEvent soundEvent
+		Holder<SoundEvent> holder
 	) {
 		this.level = level;
 		this.source = entity;
@@ -131,7 +132,7 @@ public class Explosion {
 		this.damageCalculator = explosionDamageCalculator == null ? this.makeDamageCalculator(entity) : explosionDamageCalculator;
 		this.smallExplosionParticles = particleOptions;
 		this.largeExplosionParticles = particleOptions2;
-		this.explosionSound = soundEvent;
+		this.explosionSound = holder;
 	}
 
 	private ExplosionDamageCalculator makeDamageCalculator(@Nullable Entity entity) {
@@ -285,7 +286,7 @@ public class Explosion {
 					this.x,
 					this.y,
 					this.z,
-					this.explosionSound,
+					this.explosionSound.value(),
 					SoundSource.BLOCKS,
 					4.0F,
 					(1.0F + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F) * 0.7F,
@@ -405,7 +406,7 @@ public class Explosion {
 		return this.largeExplosionParticles;
 	}
 
-	public SoundEvent getExplosionSound() {
+	public Holder<SoundEvent> getExplosionSound() {
 		return this.explosionSound;
 	}
 

@@ -40,7 +40,7 @@ public class SculkCatalystBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(PULSE)) {
 			serverLevel.setBlock(blockPos, blockState.setValue(PULSE, Boolean.valueOf(false)), 3);
 		}
@@ -59,12 +59,12 @@ public class SculkCatalystBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 
 	@Override
-	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+	protected void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
 		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
 		if (bl) {
 			this.tryDropExperience(serverLevel, blockPos, itemStack, this.xpRange);

@@ -70,7 +70,7 @@ public class WitherRoseBlock extends FlowerBlock {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!level.isClientSide && level.getDifficulty() != Difficulty.PEACEFUL) {
 			if (entity instanceof LivingEntity livingEntity && !livingEntity.isInvulnerableTo(level.damageSources().wither())) {
 				livingEntity.addEffect(new MobEffectInstance(MobEffects.WITHER, 40));

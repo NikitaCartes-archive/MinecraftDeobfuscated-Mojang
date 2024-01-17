@@ -28,7 +28,7 @@ public class WaterlilyBlock extends BushBlock {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		super.entityInside(blockState, level, blockPos, entity);
 		if (level instanceof ServerLevel && entity instanceof Boat) {
 			level.destroyBlock(new BlockPos(blockPos), true, entity);
@@ -36,7 +36,7 @@ public class WaterlilyBlock extends BushBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return AABB;
 	}
 

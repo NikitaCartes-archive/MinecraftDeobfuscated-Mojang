@@ -60,12 +60,12 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.ENTITYBLOCK_ANIMATED;
 	}
 
@@ -78,7 +78,7 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		PlayerEnderChestContainer playerEnderChestContainer = player.getEnderChestInventory();
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (playerEnderChestContainer != null && blockEntity instanceof EnderChestBlockEntity) {
@@ -127,12 +127,12 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 
@@ -142,12 +142,12 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -158,12 +158,12 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
 		if (blockEntity instanceof EnderChestBlockEntity) {
 			((EnderChestBlockEntity)blockEntity).recheckOpen();

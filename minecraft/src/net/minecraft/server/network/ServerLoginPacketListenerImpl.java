@@ -23,6 +23,8 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
+import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundHelloPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
@@ -45,7 +47,6 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int MAX_TICKS_BEFORE_LOGIN = 600;
-	private static final Component DISCONNECT_UNEXPECTED_QUERY = Component.translatable("multiplayer.disconnect.unexpected_query_response");
 	private final byte[] challenge;
 	final MinecraftServer server;
 	final Connection connection;
@@ -56,11 +57,13 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 	@Nullable
 	private GameProfile authenticatedProfile;
 	private final String serverId = "";
+	private final boolean transferred;
 
-	public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection) {
+	public ServerLoginPacketListenerImpl(MinecraftServer minecraftServer, Connection connection, boolean bl) {
 		this.server = minecraftServer;
 		this.connection = connection;
 		this.challenge = Ints.toByteArray(RandomSource.create().nextInt());
+		this.transferred = bl;
 	}
 
 	@Override
@@ -119,7 +122,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 		} else {
 			if (this.server.usesAuthentication() && !this.connection.isMemoryConnection()) {
 				this.state = ServerLoginPacketListenerImpl.State.KEY;
-				this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic().getEncoded(), this.challenge));
+				this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic().getEncoded(), this.challenge, true));
 			} else {
 				this.startClientVerification(UUIDUtil.createOfflineProfile(this.requestedUsername));
 			}
@@ -222,17 +225,20 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 
 	@Override
 	public void handleCustomQueryPacket(ServerboundCustomQueryAnswerPacket serverboundCustomQueryAnswerPacket) {
-		this.disconnect(DISCONNECT_UNEXPECTED_QUERY);
+		this.disconnect(ServerCommonPacketListenerImpl.DISCONNECT_UNEXPECTED_QUERY);
 	}
 
 	@Override
 	public void handleLoginAcknowledgement(ServerboundLoginAcknowledgedPacket serverboundLoginAcknowledgedPacket) {
 		Validate.validState(this.state == ServerLoginPacketListenerImpl.State.PROTOCOL_SWITCHING, "Unexpected login acknowledgement packet");
-		CommonListenerCookie commonListenerCookie = CommonListenerCookie.createInitial((GameProfile)Objects.requireNonNull(this.authenticatedProfile));
+		this.connection.setupOutboundProtocol(ConfigurationProtocols.CLIENTBOUND);
+		CommonListenerCookie commonListenerCookie = CommonListenerCookie.createInitial(
+			(GameProfile)Objects.requireNonNull(this.authenticatedProfile), this.transferred
+		);
 		ServerConfigurationPacketListenerImpl serverConfigurationPacketListenerImpl = new ServerConfigurationPacketListenerImpl(
 			this.server, this.connection, commonListenerCookie
 		);
-		this.connection.setListener(serverConfigurationPacketListenerImpl);
+		this.connection.setupInboundProtocol(ConfigurationProtocols.SERVERBOUND, serverConfigurationPacketListenerImpl);
 		serverConfigurationPacketListenerImpl.startConfiguration();
 		this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
 	}
@@ -240,6 +246,11 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 	@Override
 	public void fillListenerSpecificCrashDetails(CrashReportCategory crashReportCategory) {
 		crashReportCategory.setDetail("Login phase", (CrashReportDetail<String>)(() -> this.state.toString()));
+	}
+
+	@Override
+	public void handleCookieResponse(ServerboundCookieResponsePacket serverboundCookieResponsePacket) {
+		this.disconnect(ServerCommonPacketListenerImpl.DISCONNECT_UNEXPECTED_QUERY);
 	}
 
 	static enum State {

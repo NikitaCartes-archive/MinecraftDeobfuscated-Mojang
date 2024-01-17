@@ -43,14 +43,14 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
 		}
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
+	protected boolean isRandomlyTicking(BlockState blockState) {
 		return (Integer)blockState.getValue(AGE) < 5;
 	}
 
@@ -60,7 +60,7 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		BlockPos blockPos2 = blockPos.above();
 		if (serverLevel.isEmptyBlock(blockPos2) && blockPos2.getY() < serverLevel.getMaxBuildHeight()) {
 			int i = (Integer)blockState.getValue(AGE);
@@ -147,7 +147,7 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction != Direction.UP && !blockState.canSurvive(levelAccessor, blockPos)) {
@@ -158,7 +158,7 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
 		if (!blockState2.is(this.plant) && !blockState2.is(Blocks.END_STONE)) {
 			if (!blockState2.isAir()) {
@@ -246,7 +246,7 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+	protected void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		BlockPos blockPos = blockHitResult.getBlockPos();
 		if (!level.isClientSide && projectile.mayInteract(level, blockPos) && projectile.mayBreak(level)) {
 			level.destroyBlock(blockPos, true, projectile);

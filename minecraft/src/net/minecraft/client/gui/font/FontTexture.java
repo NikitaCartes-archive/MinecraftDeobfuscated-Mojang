@@ -56,8 +56,8 @@ public class FontTexture extends AbstractTexture implements Dumpable {
 					((float)node.y - 0.01F + (float)sheetGlyphInfo.getPixelHeight()) / 256.0F,
 					sheetGlyphInfo.getLeft(),
 					sheetGlyphInfo.getRight(),
-					sheetGlyphInfo.getUp(),
-					sheetGlyphInfo.getDown()
+					sheetGlyphInfo.getTop(),
+					sheetGlyphInfo.getBottom()
 				);
 			} else {
 				return null;

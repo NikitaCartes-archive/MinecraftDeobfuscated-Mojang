@@ -868,36 +868,45 @@ public class GameRenderer implements AutoCloseable {
 		if (entity != null) {
 			if (this.minecraft.level != null && this.minecraft.player != null) {
 				this.minecraft.getProfiler().push("pick");
-				this.minecraft.crosshairPickEntity = null;
 				double d = this.minecraft.player.blockInteractionRange();
 				double e = this.minecraft.player.entityInteractionRange();
-				double g = Math.max(d, e);
-				this.minecraft.hitResult = entity.pick(d, f, false);
-				Vec3 vec3 = entity.getEyePosition(f);
-				double h = g;
-				double i = Mth.square(g);
-				if (this.minecraft.hitResult != null) {
-					i = this.minecraft.hitResult.getLocation().distanceToSqr(vec3);
-					h = Math.sqrt(i);
-				}
-
-				Vec3 vec32 = entity.getViewVector(1.0F);
-				Vec3 vec33 = vec3.add(vec32.x * g, vec32.y * g, vec32.z * g);
-				float j = 1.0F;
-				AABB aABB = entity.getBoundingBox().expandTowards(vec32.scale(h)).inflate(1.0, 1.0, 1.0);
-				EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable(), i);
-				if (entityHitResult != null) {
-					Vec3 vec34 = entityHitResult.getLocation();
-					if (vec3.closerThan(vec34, e)) {
-						this.minecraft.hitResult = entityHitResult;
-						this.minecraft.crosshairPickEntity = entityHitResult.getEntity();
-					} else {
-						this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), BlockPos.containing(vec34));
-					}
-				}
-
+				HitResult hitResult = this.pick(entity, d, e, f);
+				this.minecraft.hitResult = hitResult;
+				this.minecraft.crosshairPickEntity = hitResult instanceof EntityHitResult entityHitResult ? entityHitResult.getEntity() : null;
 				this.minecraft.getProfiler().pop();
 			}
+		}
+	}
+
+	private HitResult pick(Entity entity, double d, double e, float f) {
+		double g = Math.max(d, e);
+		double h = Mth.square(g);
+		Vec3 vec3 = entity.getEyePosition(f);
+		HitResult hitResult = entity.pick(g, f, false);
+		double i = hitResult.getLocation().distanceToSqr(vec3);
+		if (hitResult.getType() != HitResult.Type.MISS) {
+			h = i;
+			g = Math.sqrt(i);
+		}
+
+		Vec3 vec32 = entity.getViewVector(f);
+		Vec3 vec33 = vec3.add(vec32.x * g, vec32.y * g, vec32.z * g);
+		float j = 1.0F;
+		AABB aABB = entity.getBoundingBox().expandTowards(vec32.scale(g)).inflate(1.0, 1.0, 1.0);
+		EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable(), h);
+		return entityHitResult != null && entityHitResult.getLocation().distanceToSqr(vec3) < i
+			? filterHitResult(entityHitResult, vec3, e)
+			: filterHitResult(hitResult, vec3, d);
+	}
+
+	private static HitResult filterHitResult(HitResult hitResult, Vec3 vec3, double d) {
+		Vec3 vec32 = hitResult.getLocation();
+		if (!vec32.closerThan(vec3, d)) {
+			Vec3 vec33 = hitResult.getLocation();
+			Direction direction = Direction.getNearest(vec33.x - vec3.x, vec33.y - vec3.y, vec33.z - vec3.z);
+			return BlockHitResult.miss(vec33, direction, BlockPos.containing(vec33));
+		} else {
+			return hitResult;
 		}
 	}
 

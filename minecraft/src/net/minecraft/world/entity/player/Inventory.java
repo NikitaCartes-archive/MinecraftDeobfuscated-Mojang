@@ -502,7 +502,7 @@ public class Inventory implements Container, Nameable {
 			for (int i : is) {
 				ItemStack itemStack = this.armor.get(i);
 				if ((!damageSource.is(DamageTypeTags.IS_FIRE) || !itemStack.getItem().isFireResistant()) && itemStack.getItem() instanceof ArmorItem) {
-					itemStack.hurtAndBreak((int)f, this.player, player -> player.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, i)));
+					itemStack.hurtAndBreak((int)f, this.player, EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, i));
 				}
 			}
 		}
@@ -531,7 +531,7 @@ public class Inventory implements Container, Nameable {
 
 	@Override
 	public boolean stillValid(Player player) {
-		return this.player.isRemoved() ? false : !(player.distanceToSqr(this.player) > 64.0);
+		return player.canInteractWithEntity(this.player, 4.0);
 	}
 
 	public boolean contains(ItemStack itemStack) {

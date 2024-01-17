@@ -37,7 +37,7 @@ public class RedStoneOreBlock extends Block {
 	}
 
 	@Override
-	public void attack(BlockState blockState, Level level, BlockPos blockPos, Player player) {
+	protected void attack(BlockState blockState, Level level, BlockPos blockPos, Player player) {
 		interact(blockState, level, blockPos);
 		super.attack(blockState, level, blockPos, player);
 	}
@@ -52,7 +52,7 @@ public class RedStoneOreBlock extends Block {
 	}
 
 	@Override
-	public ItemInteractionResult useItemOn(
+	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.isClientSide) {
@@ -74,19 +74,19 @@ public class RedStoneOreBlock extends Block {
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
+	protected boolean isRandomlyTicking(BlockState blockState) {
 		return (Boolean)blockState.getValue(LIT);
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(LIT)) {
 			serverLevel.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(false)), 3);
 		}
 	}
 
 	@Override
-	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+	protected void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
 		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
 		if (bl && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
 			int i = 1 + serverLevel.random.nextInt(5);

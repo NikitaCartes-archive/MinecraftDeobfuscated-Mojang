@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
 
-public class CompassItem extends Item implements Vanishable {
+public class CompassItem extends Item {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String TAG_LODESTONE_POS = "LodestonePos";
 	public static final String TAG_LODESTONE_DIMENSION = "LodestoneDimension";

@@ -1,18 +1,30 @@
 package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
-import io.netty.handler.codec.DecoderException;
+import io.netty.buffer.ByteBuf;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundUpdateAttributesPacket> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.VAR_INT,
+		ClientboundUpdateAttributesPacket::getEntityId,
+		ClientboundUpdateAttributesPacket.AttributeSnapshot.STREAM_CODEC.apply(ByteBufCodecs.list()),
+		ClientboundUpdateAttributesPacket::getValues,
+		ClientboundUpdateAttributesPacket::new
+	);
 	private final int entityId;
 	private final List<ClientboundUpdateAttributesPacket.AttributeSnapshot> attributes;
 
@@ -30,41 +42,14 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 		}
 	}
 
-	public ClientboundUpdateAttributesPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.entityId = friendlyByteBuf.readVarInt();
-		this.attributes = friendlyByteBuf.readList(
-			friendlyByteBufx -> {
-				Holder<Attribute> holder = friendlyByteBufx.readById(BuiltInRegistries.ATTRIBUTE.asHolderIdMap());
-				if (holder == null) {
-					throw new DecoderException("Received unrecognized attribute id");
-				} else {
-					double d = friendlyByteBufx.readDouble();
-					List<AttributeModifier> list = friendlyByteBufx.readList(
-						friendlyByteBufxx -> new AttributeModifier(
-								friendlyByteBufxx.readUUID(),
-								"Unknown synced attribute modifier",
-								friendlyByteBufxx.readDouble(),
-								AttributeModifier.Operation.fromValue(friendlyByteBufxx.readByte())
-							)
-					);
-					return new ClientboundUpdateAttributesPacket.AttributeSnapshot(holder, d, list);
-				}
-			}
-		);
+	private ClientboundUpdateAttributesPacket(int i, List<ClientboundUpdateAttributesPacket.AttributeSnapshot> list) {
+		this.entityId = i;
+		this.attributes = list;
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.entityId);
-		friendlyByteBuf.writeCollection(this.attributes, (friendlyByteBufx, attributeSnapshot) -> {
-			friendlyByteBufx.writeId(BuiltInRegistries.ATTRIBUTE.asHolderIdMap(), attributeSnapshot.attribute());
-			friendlyByteBufx.writeDouble(attributeSnapshot.base());
-			friendlyByteBufx.writeCollection(attributeSnapshot.modifiers(), (friendlyByteBufxx, attributeModifier) -> {
-				friendlyByteBufxx.writeUUID(attributeModifier.getId());
-				friendlyByteBufxx.writeDouble(attributeModifier.getAmount());
-				friendlyByteBufxx.writeByte(attributeModifier.getOperation().toValue());
-			});
-		});
+	public PacketType<ClientboundUpdateAttributesPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_UPDATE_ATTRIBUTES;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -80,5 +65,23 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 	}
 
 	public static record AttributeSnapshot(Holder<Attribute> attribute, double base, Collection<AttributeModifier> modifiers) {
+		public static final StreamCodec<ByteBuf, AttributeModifier> MODIFIER_STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC,
+			AttributeModifier::getId,
+			ByteBufCodecs.DOUBLE,
+			AttributeModifier::getAmount,
+			AttributeModifier.Operation.STREAM_CODEC,
+			AttributeModifier::getOperation,
+			(uUID, double_, operation) -> new AttributeModifier(uUID, "Unknown synced attribute modifier", double_, operation)
+		);
+		public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundUpdateAttributesPacket.AttributeSnapshot> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.holderRegistry(Registries.ATTRIBUTE),
+			ClientboundUpdateAttributesPacket.AttributeSnapshot::attribute,
+			ByteBufCodecs.DOUBLE,
+			ClientboundUpdateAttributesPacket.AttributeSnapshot::base,
+			MODIFIER_STREAM_CODEC.apply(ByteBufCodecs.collection(ArrayList::new)),
+			ClientboundUpdateAttributesPacket.AttributeSnapshot::modifiers,
+			ClientboundUpdateAttributesPacket.AttributeSnapshot::new
+		);
 	}
 }

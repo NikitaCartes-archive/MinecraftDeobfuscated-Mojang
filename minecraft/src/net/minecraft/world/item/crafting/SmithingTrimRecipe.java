@@ -7,7 +7,8 @@ import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -109,23 +110,31 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 					)
 					.apply(instance, SmithingTrimRecipe::new)
 		);
+		public static final StreamCodec<RegistryFriendlyByteBuf, SmithingTrimRecipe> STREAM_CODEC = StreamCodec.of(
+			SmithingTrimRecipe.Serializer::toNetwork, SmithingTrimRecipe.Serializer::fromNetwork
+		);
 
 		@Override
 		public Codec<SmithingTrimRecipe> codec() {
 			return CODEC;
 		}
 
-		public SmithingTrimRecipe fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			Ingredient ingredient = Ingredient.fromNetwork(friendlyByteBuf);
-			Ingredient ingredient2 = Ingredient.fromNetwork(friendlyByteBuf);
-			Ingredient ingredient3 = Ingredient.fromNetwork(friendlyByteBuf);
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, SmithingTrimRecipe> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		private static SmithingTrimRecipe fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			Ingredient ingredient = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
+			Ingredient ingredient2 = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
+			Ingredient ingredient3 = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
 			return new SmithingTrimRecipe(ingredient, ingredient2, ingredient3);
 		}
 
-		public void toNetwork(FriendlyByteBuf friendlyByteBuf, SmithingTrimRecipe smithingTrimRecipe) {
-			smithingTrimRecipe.template.toNetwork(friendlyByteBuf);
-			smithingTrimRecipe.base.toNetwork(friendlyByteBuf);
-			smithingTrimRecipe.addition.toNetwork(friendlyByteBuf);
+		private static void toNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf, SmithingTrimRecipe smithingTrimRecipe) {
+			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTrimRecipe.template);
+			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTrimRecipe.base);
+			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTrimRecipe.addition);
 		}
 	}
 }

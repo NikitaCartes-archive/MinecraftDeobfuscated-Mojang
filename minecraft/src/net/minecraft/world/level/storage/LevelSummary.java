@@ -172,6 +172,10 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		return !this.isDisabled();
 	}
 
+	public boolean canUpload() {
+		return !this.requiresManualConversion() && !this.isLocked();
+	}
+
 	public boolean canEdit() {
 		return !this.isDisabled();
 	}
@@ -253,6 +257,11 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		}
 
 		@Override
+		public boolean canUpload() {
+			return false;
+		}
+
+		@Override
 		public boolean canEdit() {
 			return false;
 		}
@@ -299,6 +308,11 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		@Override
 		public boolean primaryActionActive() {
 			return true;
+		}
+
+		@Override
+		public boolean canUpload() {
+			return false;
 		}
 
 		@Override

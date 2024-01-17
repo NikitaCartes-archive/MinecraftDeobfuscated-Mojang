@@ -59,7 +59,7 @@ public class WallTorchBlock extends TorchBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return getShape(blockState);
 	}
 
@@ -68,11 +68,14 @@ public class WallTorchBlock extends TorchBlock {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		Direction direction = blockState.getValue(FACING);
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+		return canSurvive(levelReader, blockPos, blockState.getValue(FACING));
+	}
+
+	public static boolean canSurvive(LevelReader levelReader, BlockPos blockPos, Direction direction) {
 		BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
-		BlockState blockState2 = levelReader.getBlockState(blockPos2);
-		return blockState2.isFaceSturdy(levelReader, blockPos2, direction);
+		BlockState blockState = levelReader.getBlockState(blockPos2);
+		return blockState.isFaceSturdy(levelReader, blockPos2, direction);
 	}
 
 	@Nullable
@@ -97,7 +100,7 @@ public class WallTorchBlock extends TorchBlock {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return direction.getOpposite() == blockState.getValue(FACING) && !blockState.canSurvive(levelAccessor, blockPos)
@@ -119,12 +122,12 @@ public class WallTorchBlock extends TorchBlock {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 

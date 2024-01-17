@@ -24,7 +24,7 @@ public abstract class FaceAttachedHorizontalDirectionalBlock extends HorizontalD
 	protected abstract MapCodec<? extends FaceAttachedHorizontalDirectionalBlock> codec();
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return canAttach(levelReader, blockPos, getConnectedDirection(blockState).getOpposite());
 	}
 
@@ -55,7 +55,7 @@ public abstract class FaceAttachedHorizontalDirectionalBlock extends HorizontalD
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return getConnectedDirection(blockState).getOpposite() == direction && !blockState.canSurvive(levelAccessor, blockPos)

@@ -34,14 +34,14 @@ public class CoralBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!this.scanForWater(serverLevel, blockPos)) {
 			serverLevel.setBlock(blockPos, this.deadBlock.defaultBlockState(), 2);
 		}
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (!this.scanForWater(levelAccessor, blockPos)) {

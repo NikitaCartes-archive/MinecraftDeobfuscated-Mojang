@@ -209,7 +209,7 @@ public class MouseHandler {
 		this.lastHandleMovementTime = d;
 		if (this.minecraft.isWindowActive()) {
 			Screen screen = this.minecraft.screen;
-			if (screen != null && this.minecraft.getOverlay() == null) {
+			if (screen != null && this.minecraft.getOverlay() == null && (this.accumulatedDX != 0.0 || this.accumulatedDY != 0.0)) {
 				double f = this.xpos * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
 				double g = this.ypos * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();
 				Screen.wrapScreenError(() -> screen.mouseMoved(f, g), "mouseMoved event handler", screen.getClass().getCanonicalName());

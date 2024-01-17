@@ -5,7 +5,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -100,36 +101,40 @@ public class ShapelessRecipe implements CraftingRecipe {
 					)
 					.apply(instance, ShapelessRecipe::new)
 		);
+		public static final StreamCodec<RegistryFriendlyByteBuf, ShapelessRecipe> STREAM_CODEC = StreamCodec.of(
+			ShapelessRecipe.Serializer::toNetwork, ShapelessRecipe.Serializer::fromNetwork
+		);
 
 		@Override
 		public Codec<ShapelessRecipe> codec() {
 			return CODEC;
 		}
 
-		public ShapelessRecipe fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-			String string = friendlyByteBuf.readUtf();
-			CraftingBookCategory craftingBookCategory = friendlyByteBuf.readEnum(CraftingBookCategory.class);
-			int i = friendlyByteBuf.readVarInt();
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, ShapelessRecipe> streamCodec() {
+			return STREAM_CODEC;
+		}
+
+		private static ShapelessRecipe fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			String string = registryFriendlyByteBuf.readUtf();
+			CraftingBookCategory craftingBookCategory = registryFriendlyByteBuf.readEnum(CraftingBookCategory.class);
+			int i = registryFriendlyByteBuf.readVarInt();
 			NonNullList<Ingredient> nonNullList = NonNullList.withSize(i, Ingredient.EMPTY);
-
-			for (int j = 0; j < nonNullList.size(); j++) {
-				nonNullList.set(j, Ingredient.fromNetwork(friendlyByteBuf));
-			}
-
-			ItemStack itemStack = friendlyByteBuf.readItem();
+			nonNullList.replaceAll(ingredient -> Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf));
+			ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
 			return new ShapelessRecipe(string, craftingBookCategory, itemStack, nonNullList);
 		}
 
-		public void toNetwork(FriendlyByteBuf friendlyByteBuf, ShapelessRecipe shapelessRecipe) {
-			friendlyByteBuf.writeUtf(shapelessRecipe.group);
-			friendlyByteBuf.writeEnum(shapelessRecipe.category);
-			friendlyByteBuf.writeVarInt(shapelessRecipe.ingredients.size());
+		private static void toNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf, ShapelessRecipe shapelessRecipe) {
+			registryFriendlyByteBuf.writeUtf(shapelessRecipe.group);
+			registryFriendlyByteBuf.writeEnum(shapelessRecipe.category);
+			registryFriendlyByteBuf.writeVarInt(shapelessRecipe.ingredients.size());
 
 			for (Ingredient ingredient : shapelessRecipe.ingredients) {
-				ingredient.toNetwork(friendlyByteBuf);
+				Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, ingredient);
 			}
 
-			friendlyByteBuf.writeItem(shapelessRecipe.result);
+			ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, shapelessRecipe.result);
 		}
 	}
 }

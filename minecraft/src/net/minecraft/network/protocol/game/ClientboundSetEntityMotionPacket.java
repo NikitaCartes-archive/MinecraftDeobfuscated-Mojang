@@ -1,12 +1,17 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundSetEntityMotionPacket> STREAM_CODEC = Packet.codec(
+		ClientboundSetEntityMotionPacket::write, ClientboundSetEntityMotionPacket::new
+	);
 	private final int id;
 	private final int xa;
 	private final int ya;
@@ -27,19 +32,23 @@ public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacket
 		this.za = (int)(g * 8000.0);
 	}
 
-	public ClientboundSetEntityMotionPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundSetEntityMotionPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
 		this.xa = friendlyByteBuf.readShort();
 		this.ya = friendlyByteBuf.readShort();
 		this.za = friendlyByteBuf.readShort();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
 		friendlyByteBuf.writeShort(this.xa);
 		friendlyByteBuf.writeShort(this.ya);
 		friendlyByteBuf.writeShort(this.za);
+	}
+
+	@Override
+	public PacketType<ClientboundSetEntityMotionPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SET_ENTITY_MOTION;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

@@ -58,7 +58,7 @@ public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equi
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 
@@ -78,7 +78,7 @@ public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equi
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide) {
 			boolean bl2 = level.hasNeighborSignal(blockPos);
 			if (bl2 != (Boolean)blockState.getValue(POWERED)) {

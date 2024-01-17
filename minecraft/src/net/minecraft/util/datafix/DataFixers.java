@@ -170,6 +170,7 @@ import net.minecraft.util.datafix.fixes.RedstoneWireConnectionsFix;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.fixes.RemapChunkStatusFix;
 import net.minecraft.util.datafix.fixes.RemoveGolemGossipFix;
+import net.minecraft.util.datafix.fixes.RenameEnchantmentsFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFansFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFix;
 import net.minecraft.util.datafix.fixes.ReorganizePoi;
@@ -1193,6 +1194,10 @@ public class DataFixers {
 		Schema schema200 = dataFixerBuilder.addSchema(3800, SAME_NAMESPACED);
 		UnaryOperator<String> unaryOperator3 = createRenamer(Map.of("minecraft:scute", "minecraft:turtle_scute"));
 		dataFixerBuilder.addFixer(ItemRenameFix.create(schema200, "Rename scute item to turtle_scute", unaryOperator3));
+		Schema schema201 = dataFixerBuilder.addSchema(3803, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(
+			new RenameEnchantmentsFix(schema201, "Rename sweeping enchant to sweeping_edge", Map.of("minecraft:sweeping", "minecraft:sweeping_edge"))
+		);
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

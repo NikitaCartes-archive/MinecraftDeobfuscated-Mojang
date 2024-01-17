@@ -93,7 +93,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 					public void run() {
 						try {
 							RealmsClient realmsClient = RealmsClient.create();
-							realmsClient.deleteWorld(RealmsSubscriptionInfoScreen.this.serverData.id);
+							realmsClient.deleteRealm(RealmsSubscriptionInfoScreen.this.serverData.id);
 						} catch (RealmsServiceException var2) {
 							RealmsSubscriptionInfoScreen.LOGGER.error("Couldn't delete world", (Throwable)var2);
 						}

@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.damagesource.CombatTracker;
 
 public class ClientboundPlayerCombatEndPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerCombatEndPacket> STREAM_CODEC = Packet.codec(
+		ClientboundPlayerCombatEndPacket::write, ClientboundPlayerCombatEndPacket::new
+	);
 	private final int duration;
 
 	public ClientboundPlayerCombatEndPacket(CombatTracker combatTracker) {
@@ -15,13 +20,17 @@ public class ClientboundPlayerCombatEndPacket implements Packet<ClientGamePacket
 		this.duration = i;
 	}
 
-	public ClientboundPlayerCombatEndPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundPlayerCombatEndPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.duration = friendlyByteBuf.readVarInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.duration);
+	}
+
+	@Override
+	public PacketType<ClientboundPlayerCombatEndPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_PLAYER_COMBAT_END;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

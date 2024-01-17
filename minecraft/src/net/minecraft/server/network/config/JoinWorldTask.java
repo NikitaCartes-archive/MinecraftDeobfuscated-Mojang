@@ -10,7 +10,7 @@ public class JoinWorldTask implements ConfigurationTask {
 
 	@Override
 	public void start(Consumer<Packet<?>> consumer) {
-		consumer.accept(new ClientboundFinishConfigurationPacket());
+		consumer.accept(ClientboundFinishConfigurationPacket.INSTANCE);
 	}
 
 	@Override

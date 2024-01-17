@@ -33,7 +33,7 @@ public class RedstoneLampBlock extends Block {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide) {
 			boolean bl2 = (Boolean)blockState.getValue(LIT);
 			if (bl2 != level.hasNeighborSignal(blockPos)) {
@@ -47,7 +47,7 @@ public class RedstoneLampBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)blockState.getValue(LIT) && !serverLevel.hasNeighborSignal(blockPos)) {
 			serverLevel.setBlock(blockPos, blockState.cycle(LIT), 2);
 		}

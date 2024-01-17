@@ -20,7 +20,7 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class PortalForcer {
-	private static final int TICKET_RADIUS = 3;
+	public static final int TICKET_RADIUS = 3;
 	private static final int SEARCH_RADIUS = 128;
 	private static final int CREATE_RADIUS = 16;
 	private static final int FRAME_HEIGHT = 5;

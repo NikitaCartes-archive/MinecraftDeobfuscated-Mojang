@@ -1,7 +1,6 @@
-package net.minecraft.network.protocol.game;
+package net.minecraft.network.protocol.ping;
 
 import net.minecraft.network.PacketListener;
-import net.minecraft.network.protocol.status.ServerboundPingRequestPacket;
 
 public interface ServerPingPacketListener extends PacketListener {
 	void handlePingRequest(ServerboundPingRequestPacket serverboundPingRequestPacket);

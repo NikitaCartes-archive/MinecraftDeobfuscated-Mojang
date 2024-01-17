@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.Difficulty;
@@ -27,7 +28,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PowerableMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -72,7 +72,8 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS
 		)
 		.setDarkenScreen(true);
-	private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = livingEntity -> livingEntity.getMobType() != MobType.UNDEAD && livingEntity.attackable();
+	private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = livingEntity -> !livingEntity.getType().is(EntityTypeTags.WITHER_FRIENDS)
+			&& livingEntity.attackable();
 	private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0).selector(LIVING_ENTITY_SELECTOR);
 
 	public WitherBoss(EntityType<? extends WitherBoss> entityType, Level level) {
@@ -210,17 +211,24 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			double p = this.getHeadX(jx);
 			double q = this.getHeadY(jx);
 			double r = this.getHeadZ(jx);
+			float s = 0.3F * this.getScale();
 			this.level()
 				.addParticle(
-					ParticleTypes.SMOKE, p + this.random.nextGaussian() * 0.3F, q + this.random.nextGaussian() * 0.3F, r + this.random.nextGaussian() * 0.3F, 0.0, 0.0, 0.0
+					ParticleTypes.SMOKE,
+					p + this.random.nextGaussian() * (double)s,
+					q + this.random.nextGaussian() * (double)s,
+					r + this.random.nextGaussian() * (double)s,
+					0.0,
+					0.0,
+					0.0
 				);
 			if (bl && this.level().random.nextInt(4) == 0) {
 				this.level()
 					.addParticle(
 						ParticleTypes.ENTITY_EFFECT,
-						p + this.random.nextGaussian() * 0.3F,
-						q + this.random.nextGaussian() * 0.3F,
-						r + this.random.nextGaussian() * 0.3F,
+						p + this.random.nextGaussian() * (double)s,
+						q + this.random.nextGaussian() * (double)s,
+						r + this.random.nextGaussian() * (double)s,
 						0.7F,
 						0.7F,
 						0.5
@@ -229,12 +237,14 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		}
 
 		if (this.getInvulnerableTicks() > 0) {
-			for (int jxx = 0; jxx < 3; jxx++) {
+			float t = 3.3F * this.getScale();
+
+			for (int u = 0; u < 3; u++) {
 				this.level()
 					.addParticle(
 						ParticleTypes.ENTITY_EFFECT,
 						this.getX() + this.random.nextGaussian(),
-						this.getY() + (double)(this.random.nextFloat() * 3.3F),
+						this.getY() + (double)(this.random.nextFloat() * t),
 						this.getZ() + this.random.nextGaussian(),
 						0.7F,
 						0.7F,
@@ -305,23 +315,16 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			if (this.destroyBlocksTick > 0) {
 				this.destroyBlocksTick--;
 				if (this.destroyBlocksTick == 0 && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-					int ixx = Mth.floor(this.getY());
-					int j = Mth.floor(this.getX());
-					int k = Mth.floor(this.getZ());
 					boolean bl = false;
+					int j = Mth.floor(this.getBbWidth() / 2.0F + 1.0F);
+					int k = Mth.floor(this.getBbHeight());
 
-					for (int l = -1; l <= 1; l++) {
-						for (int m = -1; m <= 1; m++) {
-							for (int n = 0; n <= 3; n++) {
-								int o = j + l;
-								int p = ixx + n;
-								int q = k + m;
-								BlockPos blockPos = new BlockPos(o, p, q);
-								BlockState blockState = this.level().getBlockState(blockPos);
-								if (canDestroy(blockState)) {
-									bl = this.level().destroyBlock(blockPos, true, this) || bl;
-								}
-							}
+					for (BlockPos blockPos : BlockPos.betweenClosed(
+						this.getBlockX() - j, this.getBlockY(), this.getBlockZ() - j, this.getBlockX() + j, this.getBlockY() + k, this.getBlockZ() + j
+					)) {
+						BlockState blockState = this.level().getBlockState(blockPos);
+						if (canDestroy(blockState)) {
+							bl = this.level().destroyBlock(blockPos, true, this) || bl;
 						}
 					}
 
@@ -371,12 +374,13 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		} else {
 			float f = (this.yBodyRot + (float)(180 * (i - 1))) * (float) (Math.PI / 180.0);
 			float g = Mth.cos(f);
-			return this.getX() + (double)g * 1.3;
+			return this.getX() + (double)g * 1.3 * (double)this.getScale();
 		}
 	}
 
 	private double getHeadY(int i) {
-		return i <= 0 ? this.getY() + 3.0 : this.getY() + 2.2;
+		float f = i <= 0 ? 3.0F : 2.2F;
+		return this.getY() + (double)(f * this.getScale());
 	}
 
 	private double getHeadZ(int i) {
@@ -385,7 +389,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		} else {
 			float f = (this.yBodyRot + (float)(180 * (i - 1))) * (float) (Math.PI / 180.0);
 			float g = Mth.sin(f);
-			return this.getZ() + (double)g * 1.3;
+			return this.getZ() + (double)g * 1.3 * (double)this.getScale();
 		}
 	}
 
@@ -451,7 +455,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			}
 
 			Entity entity = damageSource.getEntity();
-			if (entity != null && !(entity instanceof Player) && entity instanceof LivingEntity && ((LivingEntity)entity).getMobType() == this.getMobType()) {
+			if (entity != null && entity.getType().is(EntityTypeTags.WITHER_FRIENDS)) {
 				return false;
 			} else {
 				if (this.destroyBlocksTick <= 0) {
@@ -526,11 +530,6 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 	@Override
 	public boolean isPowered() {
 		return this.getHealth() <= this.getMaxHealth() / 2.0F;
-	}
-
-	@Override
-	public MobType getMobType() {
-		return MobType.UNDEAD;
 	}
 
 	@Override

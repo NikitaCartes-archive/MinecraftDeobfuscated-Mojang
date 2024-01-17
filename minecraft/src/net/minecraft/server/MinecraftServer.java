@@ -82,7 +82,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.network.ServerConnectionListener;
@@ -105,7 +104,6 @@ import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.TimeUtil;
-import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -174,8 +172,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private static final long STATUS_EXPIRE_TIME_NANOS = 5L * TimeUtil.NANOSECONDS_PER_SECOND;
 	private static final long PREPARE_LEVELS_DEFAULT_DELAY_NANOS = 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND;
 	private static final int MAX_STATUS_PLAYER_SAMPLE = 12;
-	public static final int START_CHUNK_RADIUS = 11;
-	private static final int START_TICKING_CHUNK_COUNT = 441;
+	private static final int SPAWN_POSITION_SEARCH_RADIUS = 5;
 	private static final int AUTOSAVE_INTERVAL = 6000;
 	private static final int MIMINUM_AUTOSAVE_TICKS = 100;
 	private static final int MAX_TICK_LATENCY = 3;
@@ -322,7 +319,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		boolean bl = false;
 		ProfiledDuration profiledDuration = JvmProfiler.INSTANCE.onWorldLoadedStarted();
 		this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().shouldReportAsModified());
-		ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
+		ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(this.worldData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS));
 		this.createLevels(chunkProgressListener);
 		this.forceDifficulty();
 		this.prepareLevels(chunkProgressListener);
@@ -433,9 +430,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			int k = 0;
 			int l = 0;
 			int m = -1;
-			int n = 5;
 
-			for (int o = 0; o < Mth.square(11); o++) {
+			for (int n = 0; n < Mth.square(11); n++) {
 				if (j >= -5 && j <= 5 && k >= -5 && k <= 5) {
 					BlockPos blockPos2 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + j, chunkPos.z + k));
 					if (blockPos2 != null) {
@@ -445,9 +441,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				}
 
 				if (j == k || j < 0 && j == -k || j > 0 && j == 1 - k) {
-					int p = l;
+					int o = l;
 					l = -m;
-					m = p;
+					m = o;
 				}
 
 				j += l;
@@ -460,12 +456,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					.flatMap(registry -> registry.getHolder(MiscOverworldFeatures.BONUS_CHEST))
 					.ifPresent(
 						reference -> ((ConfiguredFeature)reference.value())
-								.place(
-									serverLevel,
-									serverChunkCache.getGenerator(),
-									serverLevel.random,
-									new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())
-								)
+								.place(serverLevel, serverChunkCache.getGenerator(), serverLevel.random, serverLevelData.getSpawnPos())
 					);
 			}
 		}
@@ -489,9 +480,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		chunkProgressListener.updateSpawnPos(new ChunkPos(blockPos));
 		ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 		this.nextTickTimeNanos = Util.getNanos();
-		serverChunkCache.addRegionTicket(TicketType.START, new ChunkPos(blockPos), 11, Unit.INSTANCE);
+		serverLevel.setDefaultSpawnPos(blockPos, serverLevel.getSharedSpawnAngle());
+		int i = this.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS);
+		int j = i > 0 ? Mth.square(ChunkProgressListener.calculateDiameter(i)) : 0;
 
-		while (serverChunkCache.getTickingGenerated() != 441) {
+		while (serverChunkCache.getTickingGenerated() < j) {
 			this.nextTickTimeNanos = Util.getNanos() + PREPARE_LEVELS_DEFAULT_DELAY_NANOS;
 			this.waitUntilNextTick();
 		}
@@ -1946,6 +1939,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public boolean logIPs() {
 		return true;
+	}
+
+	public boolean acceptsTransfers() {
+		return false;
 	}
 
 	static record ReloadableResources(CloseableResourceManager resourceManager, ReloadableServerResources managers) implements AutoCloseable {

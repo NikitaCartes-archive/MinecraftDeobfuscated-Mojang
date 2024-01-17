@@ -30,12 +30,12 @@ public class WeatheringCopperStairBlock extends StairBlock implements Weathering
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		this.changeOverTime(blockState, serverLevel, blockPos, randomSource);
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
+	protected boolean isRandomlyTicking(BlockState blockState) {
 		return WeatheringCopper.getNext(blockState.getBlock()).isPresent();
 	}
 

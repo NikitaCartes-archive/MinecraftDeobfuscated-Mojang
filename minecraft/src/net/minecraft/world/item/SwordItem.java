@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class SwordItem extends TieredItem implements Vanishable {
+public class SwordItem extends TieredItem {
 	private final float attackDamage;
 	private final Multimap<Holder<Attribute>, AttributeModifier> defaultModifiers;
 
@@ -51,14 +51,14 @@ public class SwordItem extends TieredItem implements Vanishable {
 
 	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
-		itemStack.hurtAndBreak(1, livingEntity2, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
 		return true;
 	}
 
 	@Override
 	public boolean mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity) {
 		if (blockState.getDestroySpeed(level, blockPos) != 0.0F) {
-			itemStack.hurtAndBreak(2, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+			itemStack.hurtAndBreak(2, livingEntity, EquipmentSlot.MAINHAND);
 		}
 
 		return true;

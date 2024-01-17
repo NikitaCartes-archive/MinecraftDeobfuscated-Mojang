@@ -78,38 +78,27 @@ public class ServerConnectionListener {
 				LOGGER.info("Using default channel type");
 			}
 
-			this.channels
-				.add(
-					new ServerBootstrap()
-						.channel(class_)
-						.childHandler(
-							new ChannelInitializer<Channel>() {
-								@Override
-								protected void initChannel(Channel channel) {
-									Connection.setInitialProtocolAttributes(channel);
+			this.channels.add(new ServerBootstrap().channel(class_).childHandler(new ChannelInitializer<Channel>() {
+				@Override
+				protected void initChannel(Channel channel) {
+					try {
+						channel.config().setOption(ChannelOption.TCP_NODELAY, true);
+					} catch (ChannelException var5) {
+					}
 
-									try {
-										channel.config().setOption(ChannelOption.TCP_NODELAY, true);
-									} catch (ChannelException var5) {
-									}
+					ChannelPipeline channelPipeline = channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30));
+					if (ServerConnectionListener.this.server.repliesToStatus()) {
+						channelPipeline.addLast("legacy_query", new LegacyQueryHandler(ServerConnectionListener.this.getServer()));
+					}
 
-									ChannelPipeline channelPipeline = channel.pipeline()
-										.addLast("timeout", new ReadTimeoutHandler(30))
-										.addLast("legacy_query", new LegacyQueryHandler(ServerConnectionListener.this.getServer()));
-									Connection.configureSerialization(channelPipeline, PacketFlow.SERVERBOUND, null);
-									int i = ServerConnectionListener.this.server.getRateLimitPacketsPerSecond();
-									Connection connection = (Connection)(i > 0 ? new RateKickingConnection(i) : new Connection(PacketFlow.SERVERBOUND));
-									ServerConnectionListener.this.connections.add(connection);
-									connection.configurePacketHandler(channelPipeline);
-									connection.setListenerForServerboundHandshake(new ServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
-								}
-							}
-						)
-						.group(eventLoopGroup)
-						.localAddress(inetAddress, i)
-						.bind()
-						.syncUninterruptibly()
-				);
+					Connection.configureSerialization(channelPipeline, PacketFlow.SERVERBOUND, null);
+					int i = ServerConnectionListener.this.server.getRateLimitPacketsPerSecond();
+					Connection connection = (Connection)(i > 0 ? new RateKickingConnection(i) : new Connection(PacketFlow.SERVERBOUND));
+					ServerConnectionListener.this.connections.add(connection);
+					connection.configurePacketHandler(channelPipeline);
+					connection.setListenerForServerboundHandshake(new ServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
+				}
+			}).group(eventLoopGroup).localAddress(inetAddress, i).bind().syncUninterruptibly());
 		}
 	}
 
@@ -119,7 +108,6 @@ public class ServerConnectionListener {
 			channelFuture = new ServerBootstrap().channel(LocalServerChannel.class).childHandler(new ChannelInitializer<Channel>() {
 				@Override
 				protected void initChannel(Channel channel) {
-					Connection.setInitialProtocolAttributes(channel);
 					Connection connection = new Connection(PacketFlow.SERVERBOUND);
 					connection.setListenerForServerboundHandshake(new MemoryServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
 					ServerConnectionListener.this.connections.add(connection);

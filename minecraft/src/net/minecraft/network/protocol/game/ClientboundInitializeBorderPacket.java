@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.level.border.WorldBorder;
 
 public class ClientboundInitializeBorderPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundInitializeBorderPacket> STREAM_CODEC = Packet.codec(
+		ClientboundInitializeBorderPacket::write, ClientboundInitializeBorderPacket::new
+	);
 	private final double newCenterX;
 	private final double newCenterZ;
 	private final double oldSize;
@@ -14,7 +19,7 @@ public class ClientboundInitializeBorderPacket implements Packet<ClientGamePacke
 	private final int warningBlocks;
 	private final int warningTime;
 
-	public ClientboundInitializeBorderPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundInitializeBorderPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.newCenterX = friendlyByteBuf.readDouble();
 		this.newCenterZ = friendlyByteBuf.readDouble();
 		this.oldSize = friendlyByteBuf.readDouble();
@@ -36,8 +41,7 @@ public class ClientboundInitializeBorderPacket implements Packet<ClientGamePacke
 		this.warningTime = worldBorder.getWarningTime();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeDouble(this.newCenterX);
 		friendlyByteBuf.writeDouble(this.newCenterZ);
 		friendlyByteBuf.writeDouble(this.oldSize);
@@ -46,6 +50,11 @@ public class ClientboundInitializeBorderPacket implements Packet<ClientGamePacke
 		friendlyByteBuf.writeVarInt(this.newAbsoluteMaxSize);
 		friendlyByteBuf.writeVarInt(this.warningBlocks);
 		friendlyByteBuf.writeVarInt(this.warningTime);
+	}
+
+	@Override
+	public PacketType<ClientboundInitializeBorderPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_INITIALIZE_BORDER;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

@@ -7,19 +7,27 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.level.gameevent.PositionSource;
-import net.minecraft.world.level.gameevent.PositionSourceType;
 import net.minecraft.world.phys.Vec3;
 
 public class VibrationParticleOption implements ParticleOptions {
 	public static final Codec<VibrationParticleOption> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					PositionSource.CODEC.fieldOf("destination").forGetter(vibrationParticleOption -> vibrationParticleOption.destination),
-					Codec.INT.fieldOf("arrival_in_ticks").forGetter(vibrationParticleOption -> vibrationParticleOption.arrivalInTicks)
+					PositionSource.CODEC.fieldOf("destination").forGetter(VibrationParticleOption::getDestination),
+					Codec.INT.fieldOf("arrival_in_ticks").forGetter(VibrationParticleOption::getArrivalInTicks)
 				)
 				.apply(instance, VibrationParticleOption::new)
+	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, VibrationParticleOption> STREAM_CODEC = StreamCodec.composite(
+		PositionSource.STREAM_CODEC,
+		VibrationParticleOption::getDestination,
+		ByteBufCodecs.VAR_INT,
+		VibrationParticleOption::getArrivalInTicks,
+		VibrationParticleOption::new
 	);
 	public static final ParticleOptions.Deserializer<VibrationParticleOption> DESERIALIZER = new ParticleOptions.Deserializer<VibrationParticleOption>() {
 		public VibrationParticleOption fromCommand(ParticleType<VibrationParticleOption> particleType, StringReader stringReader) throws CommandSyntaxException {
@@ -34,12 +42,6 @@ public class VibrationParticleOption implements ParticleOptions {
 			BlockPos blockPos = BlockPos.containing((double)f, (double)g, (double)h);
 			return new VibrationParticleOption(new BlockPositionSource(blockPos), i);
 		}
-
-		public VibrationParticleOption fromNetwork(ParticleType<VibrationParticleOption> particleType, FriendlyByteBuf friendlyByteBuf) {
-			PositionSource positionSource = PositionSourceType.fromNetwork(friendlyByteBuf);
-			int i = friendlyByteBuf.readVarInt();
-			return new VibrationParticleOption(positionSource, i);
-		}
 	};
 	private final PositionSource destination;
 	private final int arrivalInTicks;
@@ -47,12 +49,6 @@ public class VibrationParticleOption implements ParticleOptions {
 	public VibrationParticleOption(PositionSource positionSource, int i) {
 		this.destination = positionSource;
 		this.arrivalInTicks = i;
-	}
-
-	@Override
-	public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		PositionSourceType.toNetwork(this.destination, friendlyByteBuf);
-		friendlyByteBuf.writeVarInt(this.arrivalInTicks);
 	}
 
 	@Override

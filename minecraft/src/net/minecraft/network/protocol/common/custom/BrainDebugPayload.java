@@ -7,25 +7,25 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public record BrainDebugPayload(BrainDebugPayload.BrainDump brainDump) implements CustomPacketPayload {
-	public static final ResourceLocation ID = new ResourceLocation("debug/brain");
+	public static final StreamCodec<FriendlyByteBuf, BrainDebugPayload> STREAM_CODEC = CustomPacketPayload.codec(BrainDebugPayload::write, BrainDebugPayload::new);
+	public static final CustomPacketPayload.Type<BrainDebugPayload> TYPE = CustomPacketPayload.createType("debug/brain");
 
-	public BrainDebugPayload(FriendlyByteBuf friendlyByteBuf) {
+	private BrainDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this(new BrainDebugPayload.BrainDump(friendlyByteBuf));
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		this.brainDump.write(friendlyByteBuf);
 	}
 
 	@Override
-	public ResourceLocation id() {
-		return ID;
+	public CustomPacketPayload.Type<BrainDebugPayload> type() {
+		return TYPE;
 	}
 
 	public static record BrainDump(
@@ -66,8 +66,8 @@ public record BrainDebugPayload(BrainDebugPayload.BrainDump brainDump) implement
 				friendlyByteBuf.readList(FriendlyByteBuf::readUtf),
 				friendlyByteBuf.readList(FriendlyByteBuf::readUtf),
 				friendlyByteBuf.readList(FriendlyByteBuf::readUtf),
-				friendlyByteBuf.readCollection(HashSet::new, FriendlyByteBuf::readBlockPos),
-				friendlyByteBuf.readCollection(HashSet::new, FriendlyByteBuf::readBlockPos)
+				friendlyByteBuf.readCollection(HashSet::new, BlockPos.STREAM_CODEC),
+				friendlyByteBuf.readCollection(HashSet::new, BlockPos.STREAM_CODEC)
 			);
 		}
 
@@ -88,8 +88,8 @@ public record BrainDebugPayload(BrainDebugPayload.BrainDump brainDump) implement
 			friendlyByteBuf.writeCollection(this.behaviors, FriendlyByteBuf::writeUtf);
 			friendlyByteBuf.writeCollection(this.memories, FriendlyByteBuf::writeUtf);
 			friendlyByteBuf.writeCollection(this.gossips, FriendlyByteBuf::writeUtf);
-			friendlyByteBuf.writeCollection(this.pois, FriendlyByteBuf::writeBlockPos);
-			friendlyByteBuf.writeCollection(this.potentialPois, FriendlyByteBuf::writeBlockPos);
+			friendlyByteBuf.writeCollection(this.pois, BlockPos.STREAM_CODEC);
+			friendlyByteBuf.writeCollection(this.potentialPois, BlockPos.STREAM_CODEC);
 		}
 
 		public boolean hasPoi(BlockPos blockPos) {

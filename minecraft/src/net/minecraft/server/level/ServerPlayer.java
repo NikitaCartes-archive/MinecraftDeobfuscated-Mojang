@@ -161,7 +161,7 @@ public class ServerPlayer extends Player {
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_XZ = 32;
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_Y = 10;
 	private static final int FLY_STAT_RECORDING_SPEED = 25;
-	private static final double INTERACTION_DISTANCE_VERIFICATION_BUFFER = 1.0;
+	public static final double INTERACTION_DISTANCE_VERIFICATION_BUFFER = 1.0;
 	private static final AttributeModifier CREATIVE_BLOCK_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
 		UUID.fromString("736565d2-e1a7-403d-a3f8-1aeb3e302542"), "Creative block interaction range modifier", 0.5, AttributeModifier.Operation.ADDITION
 	);
@@ -437,7 +437,7 @@ public class ServerPlayer extends Player {
 	@Override
 	public void onEnterCombat() {
 		super.onEnterCombat();
-		this.connection.send(new ClientboundPlayerCombatEnterPacket());
+		this.connection.send(ClientboundPlayerCombatEnterPacket.INSTANCE);
 	}
 
 	@Override
@@ -1485,10 +1485,7 @@ public class ServerPlayer extends Player {
 	}
 
 	public void sendServerStatus(ServerStatus serverStatus) {
-		this.connection
-			.send(
-				new ClientboundServerDataPacket(serverStatus.description(), serverStatus.favicon().map(ServerStatus.Favicon::iconBytes), serverStatus.enforcesSecureChat())
-			);
+		this.connection.send(new ClientboundServerDataPacket(serverStatus.description(), serverStatus.favicon().map(ServerStatus.Favicon::iconBytes)));
 	}
 
 	@Override
@@ -1825,15 +1822,5 @@ public class ServerPlayer extends Player {
 			this.getLastDeathLocation(),
 			this.getPortalCooldown()
 		);
-	}
-
-	public boolean canInteractWithEntity(AABB aABB) {
-		double d = this.entityInteractionRange() + 1.0;
-		return aABB.distanceToSqr(this.getEyePosition()) < d * d;
-	}
-
-	public boolean canInteractWithBlock(BlockPos blockPos) {
-		double d = this.blockInteractionRange() + 1.0;
-		return this.getEyePosition().closerThan(Vec3.atCenterOf(blockPos), d);
 	}
 }

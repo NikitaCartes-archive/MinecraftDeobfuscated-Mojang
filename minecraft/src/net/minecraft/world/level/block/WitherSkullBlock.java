@@ -14,7 +14,6 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,10 +40,12 @@ public class WitherSkullBlock extends SkullBlock {
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
-		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof SkullBlockEntity) {
-			checkSpawn(level, blockPos, (SkullBlockEntity)blockEntity);
+		checkSpawn(level, blockPos);
+	}
+
+	public static void checkSpawn(Level level, BlockPos blockPos) {
+		if (level.getBlockEntity(blockPos) instanceof SkullBlockEntity skullBlockEntity) {
+			checkSpawn(level, blockPos, skullBlockEntity);
 		}
 	}
 

@@ -1,11 +1,13 @@
 package net.minecraft.world.entity.animal.sniffer;
 
 import com.mojang.serialization.Dynamic;
+import io.netty.buffer.ByteBuf;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -13,6 +15,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -23,6 +27,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -461,12 +466,24 @@ public class Sniffer extends Animal {
 	}
 
 	public static enum State {
-		IDLING,
-		FEELING_HAPPY,
-		SCENTING,
-		SNIFFING,
-		SEARCHING,
-		DIGGING,
-		RISING;
+		IDLING(0),
+		FEELING_HAPPY(1),
+		SCENTING(2),
+		SNIFFING(3),
+		SEARCHING(4),
+		DIGGING(5),
+		RISING(6);
+
+		public static final IntFunction<Sniffer.State> BY_ID = ByIdMap.continuous(Sniffer.State::id, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+		public static final StreamCodec<ByteBuf, Sniffer.State> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Sniffer.State::id);
+		private final int id;
+
+		private State(int j) {
+			this.id = j;
+		}
+
+		public int id() {
+			return this.id;
+		}
 	}
 }

@@ -65,7 +65,6 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 				this.buttonClicked = true;
 			}));
 			this.addWidget(this.recipeBookComponent);
-			this.setInitialFocus(this.recipeBookComponent);
 		}
 	}
 
@@ -120,8 +119,10 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		livingEntity.setXRot(-q * 20.0F);
 		livingEntity.yHeadRot = livingEntity.getYRot();
 		livingEntity.yHeadRotO = livingEntity.getYRot();
-		Vector3f vector3f = new Vector3f(0.0F, livingEntity.getBbHeight() / 2.0F + f, 0.0F);
-		renderEntityInInventory(guiGraphics, n, o, m, vector3f, quaternionf, quaternionf2, livingEntity);
+		float w = livingEntity.getScale();
+		Vector3f vector3f = new Vector3f(0.0F, livingEntity.getBbHeight() / 2.0F + f * w, 0.0F);
+		float x = (float)m / w;
+		renderEntityInInventory(guiGraphics, n, o, x, vector3f, quaternionf, quaternionf2, livingEntity);
 		livingEntity.yBodyRot = r;
 		livingEntity.setYRot(s);
 		livingEntity.setXRot(t);
@@ -131,11 +132,11 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	}
 
 	public static void renderEntityInInventory(
-		GuiGraphics guiGraphics, float f, float g, int i, Vector3f vector3f, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity
+		GuiGraphics guiGraphics, float f, float g, float h, Vector3f vector3f, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity
 	) {
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate((double)f, (double)g, 50.0);
-		guiGraphics.pose().mulPoseMatrix(new Matrix4f().scaling((float)i, (float)i, (float)(-i)));
+		guiGraphics.pose().mulPoseMatrix(new Matrix4f().scaling(h, h, -h));
 		guiGraphics.pose().translate(vector3f.x, vector3f.y, vector3f.z);
 		guiGraphics.pose().mulPose(quaternionf);
 		Lighting.setupForEntityInInventory();
@@ -153,6 +154,16 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		entityRenderDispatcher.setRenderShadow(true);
 		guiGraphics.pose().popPose();
 		Lighting.setupFor3DItems();
+	}
+
+	@Override
+	public boolean keyPressed(int i, int j, int k) {
+		return this.recipeBookComponent.keyPressed(i, j, k) ? true : super.keyPressed(i, j, k);
+	}
+
+	@Override
+	public boolean charTyped(char c, int i) {
+		return this.recipeBookComponent.charTyped(c, i) ? true : super.charTyped(c, i);
 	}
 
 	@Override

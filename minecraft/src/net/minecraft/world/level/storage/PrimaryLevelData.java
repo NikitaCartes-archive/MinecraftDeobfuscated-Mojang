@@ -49,9 +49,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private final WorldOptions worldOptions;
 	private final PrimaryLevelData.SpecialWorldProperty specialWorldProperty;
 	private final Lifecycle worldGenSettingsLifecycle;
-	private int xSpawn;
-	private int ySpawn;
-	private int zSpawn;
+	private BlockPos spawnPos;
 	private float spawnAngle;
 	private long gameTime;
 	private long dayTime;
@@ -81,23 +79,21 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private PrimaryLevelData(
 		@Nullable CompoundTag compoundTag,
 		boolean bl,
-		int i,
-		int j,
-		int k,
+		BlockPos blockPos,
 		float f,
 		long l,
 		long m,
-		int n,
-		int o,
-		int p,
+		int i,
+		int j,
+		int k,
 		boolean bl2,
-		int q,
+		int n,
 		boolean bl3,
 		boolean bl4,
 		boolean bl5,
 		WorldBorder.Settings settings,
-		int r,
-		int s,
+		int o,
+		int p,
 		@Nullable UUID uUID,
 		Set<String> set,
 		Set<String> set2,
@@ -110,23 +106,21 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		Lifecycle lifecycle
 	) {
 		this.wasModded = bl;
-		this.xSpawn = i;
-		this.ySpawn = j;
-		this.zSpawn = k;
+		this.spawnPos = blockPos;
 		this.spawnAngle = f;
 		this.gameTime = l;
 		this.dayTime = m;
-		this.version = n;
-		this.clearWeatherTime = o;
-		this.rainTime = p;
+		this.version = i;
+		this.clearWeatherTime = j;
+		this.rainTime = k;
 		this.raining = bl2;
-		this.thunderTime = q;
+		this.thunderTime = n;
 		this.thundering = bl3;
 		this.initialized = bl4;
 		this.difficultyLocked = bl5;
 		this.worldBorder = settings;
-		this.wanderingTraderSpawnDelay = r;
-		this.wanderingTraderSpawnChance = s;
+		this.wanderingTraderSpawnDelay = o;
+		this.wanderingTraderSpawnChance = p;
 		this.wanderingTraderId = uUID;
 		this.knownServerBrands = set;
 		this.removedFeatureFlags = set2;
@@ -146,9 +140,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		this(
 			null,
 			false,
-			0,
-			0,
-			0,
+			BlockPos.ZERO,
 			0.0F,
 			0L,
 			0L,
@@ -183,9 +175,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		return new PrimaryLevelData(
 			(CompoundTag)CompoundTag.CODEC.parse(dynamic.get("Player").orElseEmptyMap()).result().orElse(null),
 			dynamic.get("WasModded").asBoolean(false),
-			dynamic.get("SpawnX").asInt(0),
-			dynamic.get("SpawnY").asInt(0),
-			dynamic.get("SpawnZ").asInt(0),
+			new BlockPos(dynamic.get("SpawnX").asInt(0), dynamic.get("SpawnY").asInt(0), dynamic.get("SpawnZ").asInt(0)),
 			dynamic.get("SpawnAngle").asFloat(0.0F),
 			l,
 			dynamic.get("DayTime").asLong(l),
@@ -246,9 +236,9 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error))
 			.ifPresent(tag -> compoundTag.put("WorldGenSettings", tag));
 		compoundTag.putInt("GameType", this.settings.gameType().getId());
-		compoundTag.putInt("SpawnX", this.xSpawn);
-		compoundTag.putInt("SpawnY", this.ySpawn);
-		compoundTag.putInt("SpawnZ", this.zSpawn);
+		compoundTag.putInt("SpawnX", this.spawnPos.getX());
+		compoundTag.putInt("SpawnY", this.spawnPos.getY());
+		compoundTag.putInt("SpawnZ", this.spawnPos.getZ());
 		compoundTag.putFloat("SpawnAngle", this.spawnAngle);
 		compoundTag.putLong("Time", this.gameTime);
 		compoundTag.putLong("DayTime", this.dayTime);
@@ -295,18 +285,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public int getXSpawn() {
-		return this.xSpawn;
-	}
-
-	@Override
-	public int getYSpawn() {
-		return this.ySpawn;
-	}
-
-	@Override
-	public int getZSpawn() {
-		return this.zSpawn;
+	public BlockPos getSpawnPos() {
+		return this.spawnPos;
 	}
 
 	@Override
@@ -331,26 +311,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public void setXSpawn(int i) {
-		this.xSpawn = i;
-	}
-
-	@Override
-	public void setYSpawn(int i) {
-		this.ySpawn = i;
-	}
-
-	@Override
-	public void setZSpawn(int i) {
-		this.zSpawn = i;
-	}
-
-	@Override
-	public void setSpawnAngle(float f) {
-		this.spawnAngle = f;
-	}
-
-	@Override
 	public void setGameTime(long l) {
 		this.gameTime = l;
 	}
@@ -362,9 +322,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 
 	@Override
 	public void setSpawn(BlockPos blockPos, float f) {
-		this.xSpawn = blockPos.getX();
-		this.ySpawn = blockPos.getY();
-		this.zSpawn = blockPos.getZ();
+		this.spawnPos = blockPos.immutable();
 		this.spawnAngle = f;
 	}
 

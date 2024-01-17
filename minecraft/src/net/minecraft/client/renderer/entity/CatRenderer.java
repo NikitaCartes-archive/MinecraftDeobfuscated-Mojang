@@ -30,17 +30,17 @@ public class CatRenderer extends MobRenderer<Cat, CatModel<Cat>> {
 		poseStack.scale(0.8F, 0.8F, 0.8F);
 	}
 
-	protected void setupRotations(Cat cat, PoseStack poseStack, float f, float g, float h) {
-		super.setupRotations(cat, poseStack, f, g, h);
-		float i = cat.getLieDownAmount(h);
-		if (i > 0.0F) {
-			poseStack.translate(0.4F * i, 0.15F * i, 0.1F * i);
-			poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.rotLerp(i, 0.0F, 90.0F)));
+	protected void setupRotations(Cat cat, PoseStack poseStack, float f, float g, float h, float i) {
+		super.setupRotations(cat, poseStack, f, g, h, i);
+		float j = cat.getLieDownAmount(h);
+		if (j > 0.0F) {
+			poseStack.translate(0.4F * j, 0.15F * j, 0.1F * j);
+			poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.rotLerp(j, 0.0F, 90.0F)));
 			BlockPos blockPos = cat.blockPosition();
 
 			for (Player player : cat.level().getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(2.0, 2.0, 2.0))) {
 				if (player.isSleeping()) {
-					poseStack.translate(0.15F * i, 0.0F, 0.0F);
+					poseStack.translate(0.15F * j, 0.0F, 0.0F);
 					break;
 				}
 			}

@@ -274,32 +274,19 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.SNORT_POTTERY_SHERD
 			);
 		this.tag(ItemTags.DECORATED_POT_INGREDIENTS).add(Items.BRICK).addTag(ItemTags.DECORATED_POT_SHERDS);
-		this.tag(ItemTags.TRIMMABLE_ARMOR)
-			.add(Items.NETHERITE_HELMET)
-			.add(Items.NETHERITE_CHESTPLATE)
-			.add(Items.NETHERITE_LEGGINGS)
-			.add(Items.NETHERITE_BOOTS)
-			.add(Items.DIAMOND_HELMET)
-			.add(Items.DIAMOND_CHESTPLATE)
-			.add(Items.DIAMOND_LEGGINGS)
-			.add(Items.DIAMOND_BOOTS)
-			.add(Items.GOLDEN_HELMET)
-			.add(Items.GOLDEN_CHESTPLATE)
-			.add(Items.GOLDEN_LEGGINGS)
-			.add(Items.GOLDEN_BOOTS)
-			.add(Items.IRON_HELMET)
-			.add(Items.IRON_CHESTPLATE)
-			.add(Items.IRON_LEGGINGS)
-			.add(Items.IRON_BOOTS)
-			.add(Items.CHAINMAIL_HELMET)
-			.add(Items.CHAINMAIL_CHESTPLATE)
-			.add(Items.CHAINMAIL_LEGGINGS)
-			.add(Items.CHAINMAIL_BOOTS)
-			.add(Items.LEATHER_HELMET)
-			.add(Items.LEATHER_CHESTPLATE)
-			.add(Items.LEATHER_LEGGINGS)
-			.add(Items.LEATHER_BOOTS)
-			.add(Items.TURTLE_HELMET);
+		this.tag(ItemTags.FOOT_ARMOR)
+			.add(Items.LEATHER_BOOTS, Items.CHAINMAIL_BOOTS, Items.GOLDEN_BOOTS, Items.IRON_BOOTS, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS);
+		this.tag(ItemTags.LEG_ARMOR)
+			.add(Items.LEATHER_LEGGINGS, Items.CHAINMAIL_LEGGINGS, Items.GOLDEN_LEGGINGS, Items.IRON_LEGGINGS, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS);
+		this.tag(ItemTags.CHEST_ARMOR)
+			.add(
+				Items.LEATHER_CHESTPLATE, Items.CHAINMAIL_CHESTPLATE, Items.GOLDEN_CHESTPLATE, Items.IRON_CHESTPLATE, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE
+			);
+		this.tag(ItemTags.HEAD_ARMOR)
+			.add(Items.LEATHER_HELMET, Items.CHAINMAIL_HELMET, Items.GOLDEN_HELMET, Items.IRON_HELMET, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET, Items.TURTLE_HELMET);
+		this.tag(ItemTags.SKULLS)
+			.add(Items.PLAYER_HEAD, Items.CREEPER_HEAD, Items.ZOMBIE_HEAD, Items.SKELETON_SKULL, Items.WITHER_SKELETON_SKULL, Items.DRAGON_HEAD, Items.PIGLIN_HEAD);
+		this.tag(ItemTags.TRIMMABLE_ARMOR).addTag(ItemTags.FOOT_ARMOR).addTag(ItemTags.LEG_ARMOR).addTag(ItemTags.CHEST_ARMOR).addTag(ItemTags.HEAD_ARMOR);
 		this.tag(ItemTags.TRIM_MATERIALS)
 			.add(Items.IRON_INGOT)
 			.add(Items.COPPER_INGOT)
@@ -334,5 +321,51 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.SNIFFER_FOOD).add(Items.TORCHFLOWER_SEEDS);
 		this.tag(ItemTags.VILLAGER_PLANTABLE_SEEDS)
 			.add(Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
+		this.tag(ItemTags.FOOT_ARMOR_ENCHANTABLE).addTag(ItemTags.FOOT_ARMOR);
+		this.tag(ItemTags.LEG_ARMOR_ENCHANTABLE).addTag(ItemTags.LEG_ARMOR);
+		this.tag(ItemTags.CHEST_ARMOR_ENCHANTABLE).addTag(ItemTags.CHEST_ARMOR);
+		this.tag(ItemTags.HEAD_ARMOR_ENCHANTABLE).addTag(ItemTags.HEAD_ARMOR);
+		this.tag(ItemTags.ARMOR_ENCHANTABLE)
+			.addTag(ItemTags.FOOT_ARMOR_ENCHANTABLE)
+			.addTag(ItemTags.LEG_ARMOR_ENCHANTABLE)
+			.addTag(ItemTags.CHEST_ARMOR_ENCHANTABLE)
+			.addTag(ItemTags.HEAD_ARMOR_ENCHANTABLE);
+		this.tag(ItemTags.SWORD_ENCHANTABLE).addTag(ItemTags.SWORDS);
+		this.tag(ItemTags.WEAPON_ENCHANTABLE).addTag(ItemTags.SWORDS).addTag(ItemTags.AXES);
+		this.tag(ItemTags.MINING_ENCHANTABLE).addTag(ItemTags.AXES).addTag(ItemTags.PICKAXES).addTag(ItemTags.SHOVELS).addTag(ItemTags.HOES).add(Items.SHEARS);
+		this.tag(ItemTags.MINING_LOOT_ENCHANTABLE).addTag(ItemTags.AXES).addTag(ItemTags.PICKAXES).addTag(ItemTags.SHOVELS).addTag(ItemTags.HOES);
+		this.tag(ItemTags.FISHING_ENCHANTABLE).add(Items.FISHING_ROD);
+		this.tag(ItemTags.TRIDENT_ENCHANTABLE).add(Items.TRIDENT);
+		this.tag(ItemTags.DURABILITY_ENCHANTABLE)
+			.addTag(ItemTags.FOOT_ARMOR)
+			.addTag(ItemTags.LEG_ARMOR)
+			.addTag(ItemTags.CHEST_ARMOR)
+			.addTag(ItemTags.HEAD_ARMOR)
+			.add(Items.ELYTRA)
+			.add(Items.SHIELD)
+			.addTag(ItemTags.SWORDS)
+			.addTag(ItemTags.AXES)
+			.addTag(ItemTags.PICKAXES)
+			.addTag(ItemTags.SHOVELS)
+			.addTag(ItemTags.HOES)
+			.add(Items.BOW)
+			.add(Items.CROSSBOW)
+			.add(Items.TRIDENT)
+			.add(Items.FLINT_AND_STEEL)
+			.add(Items.SHEARS)
+			.add(Items.BRUSH)
+			.add(Items.FISHING_ROD)
+			.add(Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK);
+		this.tag(ItemTags.BOW_ENCHANTABLE).add(Items.BOW);
+		this.tag(ItemTags.EQUIPPABLE_ENCHANTABLE)
+			.addTag(ItemTags.FOOT_ARMOR)
+			.addTag(ItemTags.LEG_ARMOR)
+			.addTag(ItemTags.CHEST_ARMOR)
+			.addTag(ItemTags.HEAD_ARMOR)
+			.add(Items.ELYTRA)
+			.addTag(ItemTags.SKULLS)
+			.add(Items.CARVED_PUMPKIN);
+		this.tag(ItemTags.CROSSBOW_ENCHANTABLE).add(Items.CROSSBOW);
+		this.tag(ItemTags.VANISHING_ENCHANTABLE).addTag(ItemTags.DURABILITY_ENCHANTABLE).add(Items.COMPASS).add(Items.CARVED_PUMPKIN).addTag(ItemTags.SKULLS);
 	}
 }

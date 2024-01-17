@@ -38,7 +38,6 @@ import net.minecraft.world.entity.LerpingModel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.VariantHolder;
@@ -230,11 +229,6 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	@Override
 	public boolean isPushedByFluid() {
 		return false;
-	}
-
-	@Override
-	public MobType getMobType() {
-		return MobType.WATER;
 	}
 
 	public void setPlayingDead(boolean bl) {

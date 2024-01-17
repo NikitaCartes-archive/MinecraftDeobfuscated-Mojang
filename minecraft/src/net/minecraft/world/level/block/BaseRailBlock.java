@@ -47,18 +47,18 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		RailShape railShape = blockState.is(this) ? blockState.getValue(this.getShapeProperty()) : null;
 		return railShape != null && railShape.isAscending() ? HALF_BLOCK_AABB : FLAT_AABB;
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return canSupportRigidBlock(levelReader, blockPos.below());
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			this.updateState(blockState, level, blockPos, bl);
 		}
@@ -74,7 +74,7 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide && level.getBlockState(blockPos).is(this)) {
 			RailShape railShape = blockState.getValue(this.getShapeProperty());
 			if (shouldBeRemoved(blockPos, level, railShape)) {
@@ -118,7 +118,7 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl) {
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
 			if (((RailShape)blockState.getValue(this.getShapeProperty())).isAscending()) {
@@ -145,7 +145,7 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
 	public abstract Property<RailShape> getShapeProperty();
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -156,7 +156,7 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 }

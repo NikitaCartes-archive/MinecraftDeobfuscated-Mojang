@@ -48,7 +48,7 @@ public class CarvedPumpkinBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			this.trySpawnGolem(level, blockPos);
 		}

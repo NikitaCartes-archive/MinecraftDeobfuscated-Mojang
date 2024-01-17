@@ -1,22 +1,31 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundSetChunkCacheRadiusPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundSetChunkCacheRadiusPacket> STREAM_CODEC = Packet.codec(
+		ClientboundSetChunkCacheRadiusPacket::write, ClientboundSetChunkCacheRadiusPacket::new
+	);
 	private final int radius;
 
 	public ClientboundSetChunkCacheRadiusPacket(int i) {
 		this.radius = i;
 	}
 
-	public ClientboundSetChunkCacheRadiusPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundSetChunkCacheRadiusPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.radius = friendlyByteBuf.readVarInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.radius);
+	}
+
+	@Override
+	public PacketType<ClientboundSetChunkCacheRadiusPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SET_CHUNK_CACHE_RADIUS;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

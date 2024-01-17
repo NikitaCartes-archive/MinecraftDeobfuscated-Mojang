@@ -47,7 +47,6 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 
 public class FrogAi {
 	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.0F;
-	private static final float SPEED_MULTIPLIER_WHEN_MAKING_LOVE = 1.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
 	private static final float SPEED_MULTIPLIER_ON_LAND = 1.0F;
 	private static final float SPEED_MULTIPLIER_IN_WATER = 0.75F;
@@ -93,7 +92,7 @@ public class FrogAi {
 			Activity.IDLE,
 			ImmutableList.of(
 				Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
-				Pair.of(0, new AnimalMakeLove(EntityType.FROG, 1.0F)),
+				Pair.of(0, new AnimalMakeLove(EntityType.FROG)),
 				Pair.of(1, new FollowTemptation(livingEntity -> 1.25F)),
 				Pair.of(2, StartAttacking.create(FrogAi::canAttack, frog -> frog.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE))),
 				Pair.of(3, TryFindLand.create(6, 1.0F)),

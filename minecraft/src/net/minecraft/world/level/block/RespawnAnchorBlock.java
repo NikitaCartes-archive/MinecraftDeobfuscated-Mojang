@@ -73,7 +73,7 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	@Override
-	public ItemInteractionResult useItemOn(
+	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (isRespawnFuel(itemStack) && canBeCharged(blockState)) {
@@ -91,7 +91,7 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if ((Integer)blockState.getValue(CHARGE) == 0) {
 			return InteractionResult.PASS;
 		} else if (!canSetSpawn(level)) {
@@ -207,7 +207,7 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	@Override
-	public boolean hasAnalogOutputSignal(BlockState blockState) {
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
@@ -216,7 +216,7 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		return getScaledChargeLevel(blockState, 15);
 	}
 
@@ -240,7 +240,7 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 }

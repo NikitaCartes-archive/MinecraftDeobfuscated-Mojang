@@ -116,7 +116,7 @@ public abstract class MultifaceBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (!hasAnyFace(blockState)) {
@@ -129,12 +129,12 @@ public abstract class MultifaceBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return this.shapesCache.get(blockState);
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		boolean bl = false;
 
 		for (Direction direction : DIRECTIONS) {
@@ -152,7 +152,7 @@ public abstract class MultifaceBlock extends Block {
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		return hasAnyVacantFace(blockState);
 	}
 
@@ -197,12 +197,12 @@ public abstract class MultifaceBlock extends Block {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return !this.canRotate ? blockState : this.mapDirections(blockState, rotation::rotate);
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		if (mirror == Mirror.FRONT_BACK && !this.canMirrorX) {
 			return blockState;
 		} else {

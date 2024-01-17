@@ -77,11 +77,11 @@ import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
@@ -137,7 +137,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	public static final float DELTA_AFFECTED_BY_BLOCKS_BELOW_0_2 = 0.2F;
 	public static final double DELTA_AFFECTED_BY_BLOCKS_BELOW_0_5 = 0.500001;
 	public static final double DELTA_AFFECTED_BY_BLOCKS_BELOW_1_0 = 0.999999;
-	public static final float BREATHING_DISTANCE_BELOW_EYES = 0.11111111F;
 	public static final int BASE_TICKS_REQUIRED_TO_FREEZE = 140;
 	public static final int FREEZE_HURT_FREQUENCY = 40;
 	private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -512,21 +511,20 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 	public void lavaHurt() {
 		if (!this.fireImmune()) {
-			this.setSecondsOnFire(15);
+			this.igniteForSeconds(15);
 			if (this.hurt(this.damageSources().lava(), 4.0F)) {
 				this.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
 			}
 		}
 	}
 
-	public void setSecondsOnFire(int i) {
-		int j = i * 20;
-		if (this instanceof LivingEntity) {
-			j = ProtectionEnchantment.getFireAfterDampener((LivingEntity)this, j);
-		}
+	public final void igniteForSeconds(int i) {
+		this.igniteForTicks(i * 20);
+	}
 
-		if (this.remainingFireTicks < j) {
-			this.setRemainingFireTicks(j);
+	public void igniteForTicks(int i) {
+		if (this.remainingFireTicks < i) {
+			this.setRemainingFireTicks(i);
 		}
 	}
 
@@ -1214,7 +1212,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	private void updateFluidOnEyes() {
 		this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
 		this.fluidOnEyes.clear();
-		double d = this.getEyeY() - 0.11111111F;
+		double d = this.getEyeY();
 		if (this.getVehicle() instanceof Boat boat && !boat.isUnderWater() && boat.getBoundingBox().maxY >= d && boat.getBoundingBox().minY <= d) {
 			return;
 		}
@@ -1852,7 +1850,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	}
 
 	public Vec3 getVehicleAttachmentPoint(Entity entity) {
-		return this.dimensions.attachments().get(EntityAttachment.VEHICLE, 0, this.yRot);
+		return this.getAttachments().get(EntityAttachment.VEHICLE, 0, this.yRot);
 	}
 
 	public Vec3 getPassengerRidingPosition(Entity entity) {
@@ -2278,7 +2276,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		this.setRemainingFireTicks(this.remainingFireTicks + 1);
 		if (this.remainingFireTicks == 0) {
-			this.setSecondsOnFire(8);
+			this.igniteForSeconds(8);
 		}
 
 		this.hurt(this.damageSources().lightningBolt(), 5.0F);
@@ -2536,6 +2534,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 				blockPos = serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel.getSharedSpawnPos());
 			}
 
+			serverLevel.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos), 3, blockPos);
 			return new PortalInfo(
 				new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
 			);
@@ -2866,7 +2865,8 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		return false;
 	}
 
-	public void playProjectileDeflectionSound(Projectile projectile) {
+	public ProjectileDeflection deflection(Projectile projectile) {
+		return this.getType().is(EntityTypeTags.DEFLECTS_PROJECTILES) ? ProjectileDeflection.REVERSE : ProjectileDeflection.NONE;
 	}
 
 	@Nullable
@@ -3140,6 +3140,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 	public EntityDimensions getDimensions(Pose pose) {
 		return this.type.getDimensions();
+	}
+
+	public final EntityAttachments getAttachments() {
+		return this.dimensions.attachments();
 	}
 
 	public Vec3 position() {

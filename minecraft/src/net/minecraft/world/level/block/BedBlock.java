@@ -78,7 +78,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (level.isClientSide) {
 			return InteractionResult.CONSUME;
 		} else {
@@ -154,7 +154,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction == getNeighbourDirection(blockState.getValue(PART), blockState.getValue(FACING))) {
@@ -200,7 +200,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		Direction direction = getConnectedDirection(blockState).getOpposite();
 		switch (direction) {
 			case NORTH:
@@ -285,7 +285,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.ENTITYBLOCK_ANIMATED;
 	}
 
@@ -315,13 +315,13 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Override
-	public long getSeed(BlockState blockState, BlockPos blockPos) {
+	protected long getSeed(BlockState blockState, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.relative(blockState.getValue(FACING), blockState.getValue(PART) == BedPart.HEAD ? 0 : 1);
 		return Mth.getSeed(blockPos2.getX(), blockPos.getY(), blockPos2.getZ());
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 

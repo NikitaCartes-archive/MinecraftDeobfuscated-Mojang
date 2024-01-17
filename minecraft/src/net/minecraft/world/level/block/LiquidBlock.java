@@ -73,7 +73,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return collisionContext.isAbove(STABLE_SHAPE, blockPos, true)
 				&& blockState.getValue(LEVEL) == 0
 				&& collisionContext.canStandOnFluid(blockGetter.getFluidState(blockPos.above()), blockState.getFluidState())
@@ -82,60 +82,60 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
+	protected boolean isRandomlyTicking(BlockState blockState) {
 		return blockState.getFluidState().isRandomlyTicking();
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		blockState.getFluidState().randomTick(serverLevel, blockPos, randomSource);
 	}
 
 	@Override
-	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return false;
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return !this.fluid.is(FluidTags.LAVA);
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		int i = (Integer)blockState.getValue(LEVEL);
 		return (FluidState)this.stateCache.get(Math.min(i, 8));
 	}
 
 	@Override
-	public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
+	protected boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
 		return blockState2.getFluidState().getType().isSame(this.fluid);
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.INVISIBLE;
 	}
 
 	@Override
-	public List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
+	protected List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return Shapes.empty();
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (this.shouldSpreadLiquid(level, blockPos, blockState)) {
 			level.scheduleTick(blockPos, blockState.getFluidState().getType(), this.fluid.getTickDelay(level));
 		}
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (blockState.getFluidState().isSource() || blockState2.getFluidState().isSource()) {
@@ -146,7 +146,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (this.shouldSpreadLiquid(level, blockPos, blockState)) {
 			level.scheduleTick(blockPos, blockState.getFluidState().getType(), this.fluid.getTickDelay(level));
 		}

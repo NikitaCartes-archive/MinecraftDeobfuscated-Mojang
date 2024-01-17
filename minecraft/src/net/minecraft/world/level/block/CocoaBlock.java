@@ -58,12 +58,12 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
+	protected boolean isRandomlyTicking(BlockState blockState) {
 		return (Integer)blockState.getValue(AGE) < 2;
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (serverLevel.random.nextInt(5) == 0) {
 			int i = (Integer)blockState.getValue(AGE);
 			if (i < 2) {
@@ -73,13 +73,13 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.relative(blockState.getValue(FACING)));
 		return blockState2.is(BlockTags.JUNGLE_LOGS);
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		int i = (Integer)blockState.getValue(AGE);
 		switch ((Direction)blockState.getValue(FACING)) {
 			case SOUTH:
@@ -114,7 +114,7 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return direction == blockState.getValue(FACING) && !blockState.canSurvive(levelAccessor, blockPos)
@@ -143,7 +143,7 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 }

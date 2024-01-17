@@ -3,30 +3,35 @@ package net.minecraft.network.protocol.game;
 import java.util.Optional;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundServerDataPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundServerDataPacket> STREAM_CODEC = Packet.codec(
+		ClientboundServerDataPacket::write, ClientboundServerDataPacket::new
+	);
 	private final Component motd;
 	private final Optional<byte[]> iconBytes;
-	private final boolean enforcesSecureChat;
 
-	public ClientboundServerDataPacket(Component component, Optional<byte[]> optional, boolean bl) {
+	public ClientboundServerDataPacket(Component component, Optional<byte[]> optional) {
 		this.motd = component;
 		this.iconBytes = optional;
-		this.enforcesSecureChat = bl;
 	}
 
-	public ClientboundServerDataPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundServerDataPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.motd = friendlyByteBuf.readComponentTrusted();
 		this.iconBytes = friendlyByteBuf.readOptional(FriendlyByteBuf::readByteArray);
-		this.enforcesSecureChat = friendlyByteBuf.readBoolean();
+	}
+
+	private void write(FriendlyByteBuf friendlyByteBuf) {
+		friendlyByteBuf.writeComponent(this.motd);
+		friendlyByteBuf.writeOptional(this.iconBytes, FriendlyByteBuf::writeByteArray);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeComponent(this.motd);
-		friendlyByteBuf.writeOptional(this.iconBytes, FriendlyByteBuf::writeByteArray);
-		friendlyByteBuf.writeBoolean(this.enforcesSecureChat);
+	public PacketType<ClientboundServerDataPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SERVER_DATA;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -39,9 +44,5 @@ public class ClientboundServerDataPacket implements Packet<ClientGamePacketListe
 
 	public Optional<byte[]> getIconBytes() {
 		return this.iconBytes;
-	}
-
-	public boolean enforcesSecureChat() {
-		return this.enforcesSecureChat;
 	}
 }

@@ -5,7 +5,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -18,11 +17,6 @@ public abstract class WaterAnimal extends PathfinderMob {
 	protected WaterAnimal(EntityType<? extends WaterAnimal> entityType, Level level) {
 		super(entityType, level);
 		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
-	}
-
-	@Override
-	public MobType getMobType() {
-		return MobType.WATER;
 	}
 
 	@Override

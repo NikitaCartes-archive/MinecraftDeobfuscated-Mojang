@@ -119,7 +119,7 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
 			);
 			this.setOnGround(false);
 			this.hasImpulse = true;
-			this.playSound(this.getFlopSound(), this.getSoundVolume(), this.getVoicePitch());
+			this.makeSound(this.getFlopSound());
 		}
 
 		super.aiStep();

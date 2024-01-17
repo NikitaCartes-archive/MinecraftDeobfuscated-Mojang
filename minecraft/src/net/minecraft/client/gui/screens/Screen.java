@@ -161,6 +161,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 		return new FocusNavigationEvent.ArrowNavigation(screenDirection);
 	}
 
+	protected void setInitialFocus() {
+		if (this.minecraft.getLastInputType().isKeyboard()) {
+			FocusNavigationEvent.TabNavigation tabNavigation = new FocusNavigationEvent.TabNavigation(true);
+			ComponentPath componentPath = super.nextFocusPath(tabNavigation);
+			if (componentPath != null) {
+				this.changeFocus(componentPath);
+			}
+		}
+	}
+
 	protected void setInitialFocus(GuiEventListener guiEventListener) {
 		ComponentPath componentPath = ComponentPath.path(this, guiEventListener.nextFocusPath(new FocusNavigationEvent.InitialFocus()));
 		if (componentPath != null) {
@@ -299,6 +309,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 		this.height = j;
 		if (!this.initialized) {
 			this.init();
+			this.setInitialFocus();
 		} else {
 			this.repositionElements();
 		}
@@ -312,6 +323,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 		this.clearWidgets();
 		this.clearFocus();
 		this.init();
+		this.setInitialFocus();
 	}
 
 	@Override

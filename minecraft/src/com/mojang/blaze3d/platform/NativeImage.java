@@ -15,11 +15,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.IntUnaryOperator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.font.providers.FreeTypeUtil;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.PngInfo;
 import org.apache.commons.io.IOUtils;
@@ -27,10 +29,12 @@ import org.lwjgl.stb.STBIWriteCallback;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBImageResize;
 import org.lwjgl.stb.STBImageWrite;
-import org.lwjgl.stb.STBTTFontinfo;
-import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.util.freetype.FT_Bitmap;
+import org.lwjgl.util.freetype.FT_Face;
+import org.lwjgl.util.freetype.FT_GlyphSlot;
+import org.lwjgl.util.freetype.FreeType;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -467,17 +471,26 @@ public final class NativeImage implements AutoCloseable {
 		this.writeToFile(file.toPath());
 	}
 
-	public void copyFromFont(STBTTFontinfo sTBTTFontinfo, int i, int j, int k, float f, float g, float h, float l, int m, int n) {
-		if (m < 0 || m + j > this.getWidth() || n < 0 || n + k > this.getHeight()) {
-			throw new IllegalArgumentException(
-				String.format(Locale.ROOT, "Out of bounds: start: (%s, %s) (size: %sx%s); size: %sx%s", m, n, j, k, this.getWidth(), this.getHeight())
-			);
-		} else if (this.format.components() != 1) {
+	public void copyFromFont(FT_Face fT_Face, int i) {
+		if (this.format.components() != 1) {
 			throw new IllegalArgumentException("Can only write fonts into 1-component images.");
 		} else {
-			STBTruetype.nstbtt_MakeGlyphBitmapSubpixel(
-				sTBTTFontinfo.address(), this.pixels + (long)m + (long)(n * this.getWidth()), j, k, this.getWidth(), f, g, h, l, i
-			);
+			FreeTypeUtil.checkError(FreeType.FT_Load_Glyph(fT_Face, i, 4), "Loading glyph");
+			FT_GlyphSlot fT_GlyphSlot = (FT_GlyphSlot)Objects.requireNonNull(fT_Face.glyph(), "Glyph not initialized");
+			FT_Bitmap fT_Bitmap = fT_GlyphSlot.bitmap();
+			if (fT_Bitmap.pixel_mode() != 2) {
+				throw new IllegalStateException("Rendered glyph was not 8-bit grayscale");
+			} else if (fT_Bitmap.width() == this.getWidth() && fT_Bitmap.rows() == this.getHeight()) {
+				int j = fT_Bitmap.width() * fT_Bitmap.rows();
+				ByteBuffer byteBuffer = (ByteBuffer)Objects.requireNonNull(fT_Bitmap.buffer(j), "Glyph has no bitmap");
+				MemoryUtil.memCopy(MemoryUtil.memAddress(byteBuffer), this.pixels, (long)j);
+			} else {
+				throw new IllegalArgumentException(
+					String.format(
+						Locale.ROOT, "Glyph bitmap of size %sx%s does not match image of size: %sx%s", fT_Bitmap.width(), fT_Bitmap.rows(), this.getWidth(), this.getHeight()
+					)
+				);
+			}
 		}
 	}
 

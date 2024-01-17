@@ -41,7 +41,11 @@ public class TestFunctionArgument implements ArgumentType<TestFunction> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		Stream<String> stream = GameTestRegistry.getAllTestFunctions().stream().map(TestFunction::getTestName);
+		return suggestTestFunction(commandContext, suggestionsBuilder);
+	}
+
+	public static <S> CompletableFuture<Suggestions> suggestTestFunction(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
+		Stream<String> stream = GameTestRegistry.getAllTestFunctions().stream().map(TestFunction::testName);
 		return SharedSuggestionProvider.suggest(stream, suggestionsBuilder);
 	}
 

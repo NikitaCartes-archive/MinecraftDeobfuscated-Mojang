@@ -29,11 +29,11 @@ import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
+import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
 import net.minecraft.network.protocol.status.ClientStatusPacketListener;
-import net.minecraft.network.protocol.status.ClientboundPongResponsePacket;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.network.protocol.status.ServerboundPingRequestPacket;
 import net.minecraft.network.protocol.status.ServerboundStatusRequestPacket;
 import org.slf4j.Logger;
 
@@ -130,7 +130,7 @@ public class ServerStatusPinger {
 
 			try {
 				connection.initiateServerboundStatusConnection(serverAddress.getHost(), serverAddress.getPort(), clientStatusPacketListener);
-				connection.send(new ServerboundStatusRequestPacket());
+				connection.send(ServerboundStatusRequestPacket.INSTANCE);
 			} catch (Throwable var10) {
 				LOGGER.error("Failed to ping server {}", serverAddress, var10);
 			}

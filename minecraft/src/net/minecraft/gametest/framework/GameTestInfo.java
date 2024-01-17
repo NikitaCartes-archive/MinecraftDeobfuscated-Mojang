@@ -9,9 +9,9 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +24,8 @@ public class GameTestInfo {
 	private final TestFunction testFunction;
 	@Nullable
 	private BlockPos structureBlockPos;
+	@Nullable
+	private BlockPos northWestCorner;
 	private final ServerLevel level;
 	private final Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
 	private final int timeoutTicks;
@@ -35,7 +37,7 @@ public class GameTestInfo {
 	private boolean chunksLoaded;
 	private long tickCount;
 	private boolean started;
-	private boolean rerunUntilFailed;
+	private final RetryOptions retryOptions;
 	private final Stopwatch timer = Stopwatch.createUnstarted();
 	private boolean done;
 	private final Rotation rotation;
@@ -44,23 +46,52 @@ public class GameTestInfo {
 	@Nullable
 	private StructureBlockEntity structureBlockEntity;
 
-	public GameTestInfo(TestFunction testFunction, Rotation rotation, ServerLevel serverLevel) {
+	public GameTestInfo(TestFunction testFunction, Rotation rotation, ServerLevel serverLevel, RetryOptions retryOptions) {
 		this.testFunction = testFunction;
 		this.level = serverLevel;
-		this.timeoutTicks = testFunction.getMaxTicks();
-		this.rotation = testFunction.getRotation().getRotated(rotation);
+		this.retryOptions = retryOptions;
+		this.timeoutTicks = testFunction.maxTicks();
+		this.rotation = testFunction.rotation().getRotated(rotation);
 	}
 
 	void setStructureBlockPos(BlockPos blockPos) {
 		this.structureBlockPos = blockPos;
 	}
 
-	void startExecution() {
-		this.startTick = this.level.getGameTime() + this.testFunction.getSetupTicks();
+	public GameTestInfo startExecution(int i) {
+		this.startTick = this.level.getGameTime() + this.testFunction.setupTicks() + (long)i;
 		this.timer.start();
+		return this;
 	}
 
-	public void tick() {
+	public GameTestInfo placeStructure() {
+		if (this.placedStructure) {
+			return this;
+		} else {
+			this.ticksToWaitForChunkLoading = 0;
+			this.placedStructure = true;
+			StructureBlockEntity structureBlockEntity = this.getStructureBlockEntity();
+			structureBlockEntity.placeStructure(this.level);
+			BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(structureBlockEntity);
+			this.level.getBlockTicks().clearArea(boundingBox);
+			this.level.clearBlockEvents(boundingBox);
+			return this;
+		}
+	}
+
+	private boolean ensureStructureIsPlaced() {
+		if (this.placedStructure) {
+			return true;
+		} else if (this.ticksToWaitForChunkLoading > 0) {
+			this.ticksToWaitForChunkLoading--;
+			return false;
+		} else {
+			this.placeStructure().startExecution(0);
+			return true;
+		}
+	}
+
+	public void tick(GameTestRunner gameTestRunner) {
 		if (!this.isDone()) {
 			if (this.structureBlockEntity == null) {
 				this.fail(new IllegalStateException("Running test without structure block entity"));
@@ -71,24 +102,13 @@ public class GameTestInfo {
 					.intersectingChunks()
 					.allMatch(chunkPos -> this.level.isPositionEntityTicking(chunkPos.getWorldPosition()))) {
 				this.chunksLoaded = true;
-				if (this.ticksToWaitForChunkLoading > 0) {
-					this.ticksToWaitForChunkLoading--;
-				} else {
-					if (!this.placedStructure) {
-						this.placedStructure = true;
-						this.structureBlockEntity.placeStructure(this.level);
-						BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(this.structureBlockEntity);
-						this.level.getBlockTicks().clearArea(boundingBox);
-						this.level.clearBlockEvents(boundingBox);
-						this.startExecution();
-					}
-
+				if (this.ensureStructureIsPlaced()) {
 					this.tickInternal();
 					if (this.isDone()) {
 						if (this.error != null) {
-							this.listeners.forEach(gameTestListener -> gameTestListener.testFailed(this));
+							this.listeners.forEach(gameTestListener -> gameTestListener.testFailed(this, gameTestRunner));
 						} else {
-							this.listeners.forEach(gameTestListener -> gameTestListener.testPassed(this));
+							this.listeners.forEach(gameTestListener -> gameTestListener.testPassed(this, gameTestRunner));
 						}
 					}
 				}
@@ -99,7 +119,7 @@ public class GameTestInfo {
 	private void tickInternal() {
 		this.tickCount = this.level.getGameTime() - this.startTick;
 		if (this.tickCount >= 0L) {
-			if (this.tickCount == 0L) {
+			if (!this.started) {
 				this.startTest();
 			}
 
@@ -120,7 +140,7 @@ public class GameTestInfo {
 
 			if (this.tickCount > (long)this.timeoutTicks) {
 				if (this.sequences.isEmpty()) {
-					this.fail(new GameTestTimeoutException("Didn't succeed or fail within " + this.testFunction.getMaxTicks() + " ticks"));
+					this.fail(new GameTestTimeoutException("Didn't succeed or fail within " + this.testFunction.maxTicks() + " ticks"));
 				} else {
 					this.sequences.forEach(gameTestSequence -> gameTestSequence.tickAndFailIfNotComplete(this.tickCount));
 					if (this.error == null) {
@@ -134,9 +154,7 @@ public class GameTestInfo {
 	}
 
 	private void startTest() {
-		if (this.started) {
-			throw new IllegalStateException("Test already started");
-		} else {
+		if (!this.started) {
 			this.started = true;
 
 			try {
@@ -152,34 +170,32 @@ public class GameTestInfo {
 	}
 
 	public String getTestName() {
-		return this.testFunction.getTestName();
+		return this.testFunction.testName();
 	}
 
+	@Nullable
 	public BlockPos getStructureBlockPos() {
 		return this.structureBlockPos;
 	}
 
-	@Nullable
-	public BlockPos getStructureOrigin() {
-		StructureBlockEntity structureBlockEntity = this.getStructureBlockEntity();
-		return structureBlockEntity == null ? null : StructureUtils.getStructureOrigin(structureBlockEntity);
-	}
-
-	@Nullable
-	public Vec3i getStructureSize() {
-		StructureBlockEntity structureBlockEntity = this.getStructureBlockEntity();
-		return structureBlockEntity == null ? null : structureBlockEntity.getStructureSize();
-	}
-
-	@Nullable
 	public AABB getStructureBounds() {
 		StructureBlockEntity structureBlockEntity = this.getStructureBlockEntity();
-		return structureBlockEntity == null ? null : StructureUtils.getStructureBounds(structureBlockEntity);
+		return StructureUtils.getStructureBounds(structureBlockEntity);
 	}
 
-	@Nullable
-	private StructureBlockEntity getStructureBlockEntity() {
-		return (StructureBlockEntity)this.level.getBlockEntity(this.structureBlockPos);
+	public StructureBlockEntity getStructureBlockEntity() {
+		if (this.structureBlockEntity == null) {
+			if (this.structureBlockPos == null) {
+				throw new IllegalStateException("Could not find a structureBlockEntity for this GameTestInfo");
+			}
+
+			this.structureBlockEntity = (StructureBlockEntity)this.level.getBlockEntity(this.structureBlockPos);
+			if (this.structureBlockEntity == null) {
+				throw new IllegalStateException("Could not find a structureBlockEntity at the given coordinate " + this.structureBlockPos);
+			}
+		}
+
+		return this.structureBlockEntity;
 	}
 
 	public ServerLevel getLevel() {
@@ -242,20 +258,13 @@ public class GameTestInfo {
 		this.listeners.add(gameTestListener);
 	}
 
-	public void prepareTestStructure(BlockPos blockPos) {
+	public GameTestInfo prepareTestStructure() {
+		BlockPos blockPos = this.getOrCalculateNorthwestCorner();
 		this.structureBlockEntity = StructureUtils.prepareTestStructure(this, blockPos, this.getRotation(), this.level);
 		this.structureBlockPos = this.structureBlockEntity.getBlockPos();
 		StructureUtils.addCommandBlockAndButtonToStartTest(this.structureBlockPos, new BlockPos(1, 0, -1), this.getRotation(), this.level);
 		this.listeners.forEach(gameTestListener -> gameTestListener.testStructureLoaded(this));
-	}
-
-	public void clearStructure() {
-		if (this.structureBlockEntity == null) {
-			throw new IllegalStateException("Expected structure to be initialized, but it was null");
-		} else {
-			BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(this.structureBlockEntity);
-			StructureUtils.clearSpaceForStructure(boundingBox, this.level);
-		}
+		return this;
 	}
 
 	long getTick() {
@@ -269,15 +278,15 @@ public class GameTestInfo {
 	}
 
 	public boolean isRequired() {
-		return this.testFunction.isRequired();
+		return this.testFunction.required();
 	}
 
 	public boolean isOptional() {
-		return !this.testFunction.isRequired();
+		return !this.testFunction.required();
 	}
 
 	public String getStructureName() {
-		return this.testFunction.getStructureName();
+		return this.testFunction.structureName();
 	}
 
 	public Rotation getRotation() {
@@ -297,18 +306,44 @@ public class GameTestInfo {
 	}
 
 	public int maxAttempts() {
-		return this.testFunction.getMaxAttempts();
+		return this.testFunction.maxAttempts();
 	}
 
 	public int requiredSuccesses() {
-		return this.testFunction.getRequiredSuccesses();
+		return this.testFunction.requiredSuccesses();
 	}
 
-	public void setRerunUntilFailed(boolean bl) {
-		this.rerunUntilFailed = bl;
+	public RetryOptions retryOptions() {
+		return this.retryOptions;
 	}
 
-	public boolean rerunUntilFailed() {
-		return this.rerunUntilFailed;
+	public Stream<GameTestListener> getListeners() {
+		return this.listeners.stream();
+	}
+
+	public GameTestInfo copyReset() {
+		GameTestInfo gameTestInfo = new GameTestInfo(this.testFunction, this.rotation, this.level, this.retryOptions());
+		if (this.northWestCorner != null) {
+			gameTestInfo.setNorthWestCorner(this.northWestCorner);
+		}
+
+		if (this.structureBlockPos != null) {
+			gameTestInfo.setStructureBlockPos(this.structureBlockPos);
+		}
+
+		return gameTestInfo;
+	}
+
+	private BlockPos getOrCalculateNorthwestCorner() {
+		if (this.northWestCorner == null) {
+			BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(this.getStructureBlockEntity());
+			this.northWestCorner = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
+		}
+
+		return this.northWestCorner;
+	}
+
+	public void setNorthWestCorner(BlockPos blockPos) {
+		this.northWestCorner = blockPos;
 	}
 }

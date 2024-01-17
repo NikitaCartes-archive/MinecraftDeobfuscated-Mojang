@@ -16,9 +16,12 @@ public abstract class PacketEvent extends Event {
 	@Name("protocolId")
 	@Label("Protocol Id")
 	public final String protocolId;
+	@Name("packetDirection")
+	@Label("Packet Direction")
+	public final String packetDirection;
 	@Name("packetId")
 	@Label("Packet Id")
-	public final int packetId;
+	public final String packetId;
 	@Name("remoteAddress")
 	@Label("Remote Address")
 	public final String remoteAddress;
@@ -27,16 +30,18 @@ public abstract class PacketEvent extends Event {
 	@DataAmount
 	public final int bytes;
 
-	public PacketEvent(String string, int i, SocketAddress socketAddress, int j) {
+	public PacketEvent(String string, String string2, String string3, SocketAddress socketAddress, int i) {
 		this.protocolId = string;
-		this.packetId = i;
+		this.packetDirection = string2;
+		this.packetId = string3;
 		this.remoteAddress = socketAddress.toString();
-		this.bytes = j;
+		this.bytes = i;
 	}
 
 	public static final class Fields {
 		public static final String REMOTE_ADDRESS = "remoteAddress";
 		public static final String PROTOCOL_ID = "protocolId";
+		public static final String PACKET_DIRECTION = "packetDirection";
 		public static final String PACKET_ID = "packetId";
 		public static final String BYTES = "bytes";
 

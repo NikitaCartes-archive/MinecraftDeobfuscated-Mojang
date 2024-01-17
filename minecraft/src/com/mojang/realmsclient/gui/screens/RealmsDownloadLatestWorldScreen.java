@@ -148,8 +148,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.downloadTitle, this.width / 2, 20, 16777215);
-		guiGraphics.drawCenteredString(this.font, this.status, this.width / 2, 50, 16777215);
+		guiGraphics.drawCenteredString(this.font, this.downloadTitle, this.width / 2, 20, -1);
+		guiGraphics.drawCenteredString(this.font, this.status, this.width / 2, 50, -1);
 		if (this.showDots) {
 			this.drawDots(guiGraphics);
 		}
@@ -160,7 +160,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		}
 
 		if (this.errorMessage != null) {
-			guiGraphics.drawCenteredString(this.font, this.errorMessage, this.width / 2, 110, 16711680);
+			guiGraphics.drawCenteredString(this.font, this.errorMessage, this.width / 2, 110, -65536);
 		}
 	}
 
@@ -170,7 +170,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 			this.dotIndex++;
 		}
 
-		guiGraphics.drawString(this.font, DOTS[this.dotIndex % DOTS.length], this.width / 2 + i / 2 + 5, 50, 16777215, false);
+		guiGraphics.drawString(this.font, DOTS[this.dotIndex % DOTS.length], this.width / 2 + i / 2 + 5, 50, -1, false);
 	}
 
 	private void drawProgressBar(GuiGraphics guiGraphics) {
@@ -178,9 +178,9 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 		this.progress = String.format(Locale.ROOT, "%.1f", d * 100.0);
 		int i = (this.width - 200) / 2;
 		int j = i + (int)Math.round(200.0 * d);
-		guiGraphics.fill(i - 1, 79, j + 1, 96, -2501934);
+		guiGraphics.fill(i - 1, 79, j + 1, 96, -1);
 		guiGraphics.fill(i, 80, j, 95, -8355712);
-		guiGraphics.drawCenteredString(this.font, Component.translatable("mco.download.percent", this.progress), this.width / 2, 84, 16777215);
+		guiGraphics.drawCenteredString(this.font, Component.translatable("mco.download.percent", this.progress), this.width / 2, 84, -1);
 	}
 
 	private void drawDownloadSpeed(GuiGraphics guiGraphics) {
@@ -205,7 +205,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	private void drawDownloadSpeed0(GuiGraphics guiGraphics, long l) {
 		if (l > 0L) {
 			int i = this.font.width(this.progress);
-			guiGraphics.drawString(this.font, Component.translatable("mco.download.speed", Unit.humanReadable(l)), this.width / 2 + i / 2 + 15, 84, 16777215, false);
+			guiGraphics.drawString(this.font, Component.translatable("mco.download.speed", Unit.humanReadable(l)), this.width / 2 + i / 2 + 15, 84, -1, false);
 		}
 	}
 

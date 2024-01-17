@@ -249,7 +249,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 				player.addEffect(new MobEffectInstance(holder, k, j, true, true));
 			}
 
-			if (i >= 4 && Objects.equals(holder, holder2) && holder2 != null) {
+			if (i >= 4 && !Objects.equals(holder, holder2) && holder2 != null) {
 				for (Player player : list) {
 					player.addEffect(new MobEffectInstance(holder2, k, 0, true, true));
 				}

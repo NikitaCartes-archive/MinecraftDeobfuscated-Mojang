@@ -125,7 +125,7 @@ public class ServerPlayerGameMode {
 	}
 
 	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i, int j) {
-		if (!this.player.canInteractWithBlock(blockPos)) {
+		if (!this.player.canInteractWithBlock(blockPos, 1.0)) {
 			this.debugLogging(blockPos, false, j, "too far");
 		} else if (blockPos.getY() >= i) {
 			this.player.connection.send(new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
@@ -315,6 +315,7 @@ public class ServerPlayerGameMode {
 				if (itemInteractionResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && interactionHand == InteractionHand.MAIN_HAND) {
 					InteractionResult interactionResult = blockState.useWithoutItem(level, serverPlayer, blockHitResult);
 					if (interactionResult.consumesAction()) {
+						CriteriaTriggers.DEFAULT_BLOCK_USE.trigger(serverPlayer, blockPos);
 						return interactionResult;
 					}
 				}

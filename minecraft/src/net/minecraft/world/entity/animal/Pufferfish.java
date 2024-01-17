@@ -10,6 +10,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -17,7 +18,6 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -30,9 +30,13 @@ public class Pufferfish extends AbstractFish {
 	private static final EntityDataAccessor<Integer> PUFF_STATE = SynchedEntityData.defineId(Pufferfish.class, EntityDataSerializers.INT);
 	int inflateCounter;
 	int deflateTimer;
-	private static final Predicate<LivingEntity> SCARY_MOB = livingEntity -> livingEntity instanceof Player && ((Player)livingEntity).isCreative()
-			? false
-			: livingEntity.getType() == EntityType.AXOLOTL || livingEntity.getMobType() != MobType.WATER;
+	private static final Predicate<LivingEntity> SCARY_MOB = livingEntity -> {
+		if (livingEntity instanceof Player player && player.isCreative()) {
+			return false;
+		}
+
+		return !livingEntity.getType().is(EntityTypeTags.NOT_SCARY_FOR_PUFFERFISH);
+	};
 	static final TargetingConditions targetingConditions = TargetingConditions.forNonCombat().ignoreInvisibilityTesting().ignoreLineOfSight().selector(SCARY_MOB);
 	public static final int STATE_SMALL = 0;
 	public static final int STATE_MID = 1;
@@ -94,20 +98,20 @@ public class Pufferfish extends AbstractFish {
 		if (!this.level().isClientSide && this.isAlive() && this.isEffectiveAi()) {
 			if (this.inflateCounter > 0) {
 				if (this.getPuffState() == 0) {
-					this.playSound(SoundEvents.PUFFER_FISH_BLOW_UP, this.getSoundVolume(), this.getVoicePitch());
+					this.makeSound(SoundEvents.PUFFER_FISH_BLOW_UP);
 					this.setPuffState(1);
 				} else if (this.inflateCounter > 40 && this.getPuffState() == 1) {
-					this.playSound(SoundEvents.PUFFER_FISH_BLOW_UP, this.getSoundVolume(), this.getVoicePitch());
+					this.makeSound(SoundEvents.PUFFER_FISH_BLOW_UP);
 					this.setPuffState(2);
 				}
 
 				this.inflateCounter++;
 			} else if (this.getPuffState() != 0) {
 				if (this.deflateTimer > 60 && this.getPuffState() == 2) {
-					this.playSound(SoundEvents.PUFFER_FISH_BLOW_OUT, this.getSoundVolume(), this.getVoicePitch());
+					this.makeSound(SoundEvents.PUFFER_FISH_BLOW_OUT);
 					this.setPuffState(1);
 				} else if (this.deflateTimer > 100 && this.getPuffState() == 1) {
-					this.playSound(SoundEvents.PUFFER_FISH_BLOW_OUT, this.getSoundVolume(), this.getVoicePitch());
+					this.makeSound(SoundEvents.PUFFER_FISH_BLOW_OUT);
 					this.setPuffState(0);
 				}
 

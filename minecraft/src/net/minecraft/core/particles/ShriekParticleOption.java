@@ -6,12 +6,17 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public class ShriekParticleOption implements ParticleOptions {
 	public static final Codec<ShriekParticleOption> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(Codec.INT.fieldOf("delay").forGetter(shriekParticleOption -> shriekParticleOption.delay))
 				.apply(instance, ShriekParticleOption::new)
+	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, ShriekParticleOption> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.VAR_INT, shriekParticleOption -> shriekParticleOption.delay, ShriekParticleOption::new
 	);
 	public static final ParticleOptions.Deserializer<ShriekParticleOption> DESERIALIZER = new ParticleOptions.Deserializer<ShriekParticleOption>() {
 		public ShriekParticleOption fromCommand(ParticleType<ShriekParticleOption> particleType, StringReader stringReader) throws CommandSyntaxException {
@@ -19,20 +24,11 @@ public class ShriekParticleOption implements ParticleOptions {
 			int i = stringReader.readInt();
 			return new ShriekParticleOption(i);
 		}
-
-		public ShriekParticleOption fromNetwork(ParticleType<ShriekParticleOption> particleType, FriendlyByteBuf friendlyByteBuf) {
-			return new ShriekParticleOption(friendlyByteBuf.readVarInt());
-		}
 	};
 	private final int delay;
 
 	public ShriekParticleOption(int i) {
 		this.delay = i;
-	}
-
-	@Override
-	public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.delay);
 	}
 
 	@Override

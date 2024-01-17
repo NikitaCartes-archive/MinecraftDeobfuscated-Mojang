@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.entity;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -11,6 +12,7 @@ import net.minecraft.world.phys.AABB;
 public abstract class ContainerOpenersCounter {
 	private static final int CHECK_TICK_DELAY = 5;
 	private int openCount;
+	private double maxInteractionRange;
 
 	protected abstract void onOpen(Level level, BlockPos blockPos, BlockState blockState);
 
@@ -29,6 +31,7 @@ public abstract class ContainerOpenersCounter {
 		}
 
 		this.openerCountChanged(level, blockPos, blockState, i, this.openCount);
+		this.maxInteractionRange = Math.max(player.blockInteractionRange(), this.maxInteractionRange);
 	}
 
 	public void decrementOpeners(Player player, Level level, BlockPos blockPos, BlockState blockState) {
@@ -36,29 +39,27 @@ public abstract class ContainerOpenersCounter {
 		if (this.openCount == 0) {
 			this.onClose(level, blockPos, blockState);
 			level.gameEvent(player, GameEvent.CONTAINER_CLOSE, blockPos);
+			this.maxInteractionRange = 0.0;
 		}
 
 		this.openerCountChanged(level, blockPos, blockState, i, this.openCount);
 	}
 
-	private int getOpenCount(Level level, BlockPos blockPos) {
-		int i = blockPos.getX();
-		int j = blockPos.getY();
-		int k = blockPos.getZ();
-		float f = 5.0F;
-		AABB aABB = new AABB(
-			(double)((float)i - 5.0F),
-			(double)((float)j - 5.0F),
-			(double)((float)k - 5.0F),
-			(double)((float)(i + 1) + 5.0F),
-			(double)((float)(j + 1) + 5.0F),
-			(double)((float)(k + 1) + 5.0F)
-		);
-		return level.getEntities(EntityTypeTest.forClass(Player.class), aABB, this::isOwnContainer).size();
+	private List<Player> getPlayersWithContainerOpen(Level level, BlockPos blockPos) {
+		double d = this.maxInteractionRange + 4.0;
+		AABB aABB = new AABB(blockPos).inflate(d);
+		return level.getEntities(EntityTypeTest.forClass(Player.class), aABB, this::isOwnContainer);
 	}
 
 	public void recheckOpeners(Level level, BlockPos blockPos, BlockState blockState) {
-		int i = this.getOpenCount(level, blockPos);
+		List<Player> list = this.getPlayersWithContainerOpen(level, blockPos);
+		this.maxInteractionRange = 0.0;
+
+		for (Player player : list) {
+			this.maxInteractionRange = Math.max(player.blockInteractionRange(), this.maxInteractionRange);
+		}
+
+		int i = list.size();
 		int j = this.openCount;
 		if (j != i) {
 			boolean bl = i != 0;

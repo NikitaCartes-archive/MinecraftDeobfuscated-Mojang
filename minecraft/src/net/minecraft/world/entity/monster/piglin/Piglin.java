@@ -479,12 +479,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		this.playSound(SoundEvents.PIGLIN_STEP, 0.15F, 1.0F);
 	}
 
-	protected void playSoundEvent(SoundEvent soundEvent) {
-		this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
-	}
-
 	@Override
 	protected void playConvertedSound() {
-		this.playSoundEvent(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED);
+		this.makeSound(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED);
 	}
 }

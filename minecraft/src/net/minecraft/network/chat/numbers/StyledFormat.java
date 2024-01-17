@@ -2,28 +2,27 @@ package net.minecraft.network.chat.numbers;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.codec.StreamCodec;
 
 public class StyledFormat implements NumberFormat {
 	public static final NumberFormatType<StyledFormat> TYPE = new NumberFormatType<StyledFormat>() {
 		private static final MapCodec<StyledFormat> CODEC = Style.Serializer.MAP_CODEC.xmap(StyledFormat::new, styledFormat -> styledFormat.style);
+		private static final StreamCodec<RegistryFriendlyByteBuf, StyledFormat> STREAM_CODEC = StreamCodec.composite(
+			Style.Serializer.STREAM_CODEC, styledFormat -> styledFormat.style, StyledFormat::new
+		);
 
 		@Override
 		public MapCodec<StyledFormat> mapCodec() {
 			return CODEC;
 		}
 
-		public void writeToStream(FriendlyByteBuf friendlyByteBuf, StyledFormat styledFormat) {
-			friendlyByteBuf.writeWithCodec(NbtOps.INSTANCE, Style.Serializer.CODEC, styledFormat.style);
-		}
-
-		public StyledFormat readFromStream(FriendlyByteBuf friendlyByteBuf) {
-			Style style = friendlyByteBuf.readWithCodecTrusted(NbtOps.INSTANCE, Style.Serializer.CODEC);
-			return new StyledFormat(style);
+		@Override
+		public StreamCodec<RegistryFriendlyByteBuf, StyledFormat> streamCodec() {
+			return STREAM_CODEC;
 		}
 	};
 	public static final StyledFormat NO_STYLE = new StyledFormat(Style.EMPTY);

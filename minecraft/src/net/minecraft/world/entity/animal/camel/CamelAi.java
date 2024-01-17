@@ -97,7 +97,7 @@ public class CamelAi {
 			Activity.IDLE,
 			ImmutableList.of(
 				Pair.of(0, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(30, 60))),
-				Pair.of(1, new AnimalMakeLove(EntityType.CAMEL, 1.0F)),
+				Pair.of(1, new AnimalMakeLove(EntityType.CAMEL)),
 				Pair.of(
 					2,
 					new RunOne<>(

@@ -300,9 +300,9 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	@Override
 	public void tick() {
 		if (this.isBeingTempted() && this.random.nextInt(140) == 0) {
-			this.playSound(SoundEvents.STRIDER_HAPPY, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.STRIDER_HAPPY);
 		} else if (this.isPanicking() && this.random.nextInt(60) == 0) {
-			this.playSound(SoundEvents.STRIDER_RETREAT, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.STRIDER_RETREAT);
 		}
 
 		if (!this.isNoAi()) {

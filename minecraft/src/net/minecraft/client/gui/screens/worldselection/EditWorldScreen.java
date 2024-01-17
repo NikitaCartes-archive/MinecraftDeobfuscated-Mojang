@@ -53,6 +53,7 @@ public class EditWorldScreen extends Screen {
 	private final LinearLayout layout = LinearLayout.vertical().spacing(5);
 	private final BooleanConsumer callback;
 	private final LevelStorageSource.LevelStorageAccess levelAccess;
+	private final EditBox nameEdit;
 
 	public static EditWorldScreen create(Minecraft minecraft, LevelStorageSource.LevelStorageAccess levelStorageAccess, BooleanConsumer booleanConsumer) throws IOException {
 		LevelSummary levelSummary = levelStorageAccess.getSummary(levelStorageAccess.getDataTag());
@@ -66,12 +67,12 @@ public class EditWorldScreen extends Screen {
 		Font font = minecraft.font;
 		this.layout.addChild(new SpacerElement(200, 20));
 		this.layout.addChild(new StringWidget(NAME_LABEL, font));
-		EditBox editBox = this.layout.addChild(new EditBox(font, 200, 20, NAME_LABEL));
-		editBox.setValue(string);
+		this.nameEdit = this.layout.addChild(new EditBox(font, 200, 20, NAME_LABEL));
+		this.nameEdit.setValue(string);
 		LinearLayout linearLayout = LinearLayout.horizontal().spacing(4);
-		Button button = linearLayout.addChild(Button.builder(SAVE_BUTTON, buttonx -> this.onRename(editBox.getValue())).width(98).build());
+		Button button = linearLayout.addChild(Button.builder(SAVE_BUTTON, buttonx -> this.onRename(this.nameEdit.getValue())).width(98).build());
 		linearLayout.addChild(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.onClose()).width(98).build());
-		editBox.setResponder(stringx -> button.active = !Util.isBlank(stringx));
+		this.nameEdit.setResponder(stringx -> button.active = !Util.isBlank(stringx));
 		this.layout.addChild(Button.builder(RESET_ICON_BUTTON, buttonx -> {
 			levelStorageAccess.getIconFile().ifPresent(path -> FileUtils.deleteQuietly(path.toFile()));
 			buttonx.active = false;
@@ -105,10 +106,14 @@ public class EditWorldScreen extends Screen {
 			}, OPTIMIZE_TITLE, OPTIMIIZE_DESCRIPTION, true))).width(200).build());
 		this.layout.addChild(new SpacerElement(200, 20));
 		this.layout.addChild(linearLayout);
-		this.setInitialFocus(editBox);
 		this.layout.visitWidgets(guiEventListener -> {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
 		});
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.nameEdit);
 	}
 
 	@Override

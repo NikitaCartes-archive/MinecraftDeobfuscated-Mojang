@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
@@ -70,7 +71,7 @@ public abstract class TagsProvider<T> implements DataProvider {
 				this.contentsDone.complete(null);
 				return provider;
 			})
-			.thenCombineAsync(this.parentProvider, (provider, tagLookup) -> new CombinedData(provider, tagLookup))
+			.thenCombineAsync(this.parentProvider, (provider, tagLookup) -> new CombinedData(provider, tagLookup), Util.backgroundExecutor())
 			.thenCompose(
 				arg -> {
 					HolderLookup.RegistryLookup<T> registryLookup = arg.contents.lookupOrThrow(this.registryKey);

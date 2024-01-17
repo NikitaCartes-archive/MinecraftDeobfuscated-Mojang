@@ -73,6 +73,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 		Vec3i vec3i = Direction.SOUTH.getNormal();
 		return new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
 	});
+	private static final float MAX_SCALE = 3.0F;
 	private float currentPeekAmountO;
 	private float currentPeekAmount;
 	@Nullable
@@ -197,8 +198,8 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 	protected AABB makeBoundingBox() {
 		float f = getPhysicalPeek(this.currentPeekAmount);
 		Direction direction = this.getAttachFace().getOpposite();
-		float g = this.getType().getWidth() / 2.0F;
-		return getProgressAabb(direction, f).move(this.getX() - (double)g, this.getY(), this.getZ() - (double)g);
+		float g = this.getBbWidth() / 2.0F;
+		return getProgressAabb(this.getScale(), direction, f).move(this.getX() - (double)g, this.getY(), this.getZ() - (double)g);
 	}
 
 	private static float getPhysicalPeek(float f) {
@@ -226,12 +227,12 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 		float f = getPhysicalPeek(this.currentPeekAmount);
 		float g = getPhysicalPeek(this.currentPeekAmountO);
 		Direction direction = this.getAttachFace().getOpposite();
-		float h = f - g;
+		float h = (f - g) * this.getScale();
 		if (!(h <= 0.0F)) {
 			for (Entity entity : this.level()
 				.getEntities(
 					this,
-					getProgressDeltaAabb(direction, g, f).move(this.getX() - 0.5, this.getY(), this.getZ() - 0.5),
+					getProgressDeltaAabb(this.getScale(), direction, g, f).move(this.getX() - 0.5, this.getY(), this.getZ() - 0.5),
 					EntitySelector.NO_SPECTATORS.and(entityx -> !entityx.isPassengerOfSameVehicle(this))
 				)) {
 				if (!(entity instanceof Shulker) && !entity.noPhysics) {
@@ -244,16 +245,22 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 		}
 	}
 
-	public static AABB getProgressAabb(Direction direction, float f) {
-		return getProgressDeltaAabb(direction, -1.0F, f);
+	public static AABB getProgressAabb(float f, Direction direction, float g) {
+		return getProgressDeltaAabb(f, direction, -1.0F, g);
 	}
 
-	public static AABB getProgressDeltaAabb(Direction direction, float f, float g) {
-		double d = (double)Math.max(f, g);
-		double e = (double)Math.min(f, g);
-		return new AABB(BlockPos.ZERO)
-			.expandTowards((double)direction.getStepX() * d, (double)direction.getStepY() * d, (double)direction.getStepZ() * d)
-			.contract((double)(-direction.getStepX()) * (1.0 + e), (double)(-direction.getStepY()) * (1.0 + e), (double)(-direction.getStepZ()) * (1.0 + e));
+	public static AABB getProgressDeltaAabb(float f, Direction direction, float g, float h) {
+		AABB aABB = new AABB(0.0, 0.0, 0.0, (double)f, (double)f, (double)f);
+		double d = (double)Math.max(g, h);
+		double e = (double)Math.min(g, h);
+		return aABB.expandTowards(
+				(double)direction.getStepX() * d * (double)f, (double)direction.getStepY() * d * (double)f, (double)direction.getStepZ() * d * (double)f
+			)
+			.contract(
+				(double)(-direction.getStepX()) * (1.0 + e) * (double)f,
+				(double)(-direction.getStepY()) * (1.0 + e) * (double)f,
+				(double)(-direction.getStepZ()) * (1.0 + e) * (double)f
+			);
 	}
 
 	@Override
@@ -355,7 +362,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 			if (!this.level().loadedAndEntityCanStandOnFace(blockPos.relative(direction), this, direction2)) {
 				return false;
 			} else {
-				AABB aABB = getProgressAabb(direction2, 1.0F).move(blockPos).deflate(1.0E-6);
+				AABB aABB = getProgressAabb(this.getScale(), direction2, 1.0F).move(blockPos).deflate(1.0E-6);
 				return this.level().noCollision(this, aABB);
 			}
 		}
@@ -535,6 +542,11 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 		} else {
 			return Optional.empty();
 		}
+	}
+
+	@Override
+	protected float sanitizeScale(float f) {
+		return Math.min(f, 3.0F);
 	}
 
 	public void setVariant(Optional<DyeColor> optional) {

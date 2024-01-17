@@ -15,8 +15,7 @@ public class UpdateOneTwentyOneEntityTypeTagsProvider extends IntrinsicHolderTag
 	@Override
 	protected void addTags(HolderLookup.Provider provider) {
 		this.tag(EntityTypeTags.FALL_DAMAGE_IMMUNE).add(EntityType.BREEZE);
-		this.tag(EntityTypeTags.DEFLECTS_ARROWS).add(EntityType.BREEZE);
-		this.tag(EntityTypeTags.DEFLECTS_TRIDENTS).add(EntityType.BREEZE);
+		this.tag(EntityTypeTags.DEFLECTS_PROJECTILES).add(EntityType.BREEZE);
 		this.tag(EntityTypeTags.CAN_TURN_IN_BOATS).add(EntityType.BREEZE);
 		this.tag(EntityTypeTags.IMPACT_PROJECTILES).add(EntityType.WIND_CHARGE);
 	}

@@ -19,9 +19,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
@@ -141,9 +141,9 @@ public class EnchantmentHelper {
 		return mutableInt.intValue();
 	}
 
-	public static float getDamageBonus(ItemStack itemStack, MobType mobType) {
+	public static float getDamageBonus(ItemStack itemStack, @Nullable EntityType<?> entityType) {
 		MutableFloat mutableFloat = new MutableFloat();
-		runIterationOnItem((enchantment, i) -> mutableFloat.add(enchantment.getDamageBonus(i, mobType)), itemStack);
+		runIterationOnItem((enchantment, i) -> mutableFloat.add(enchantment.getDamageBonus(i, entityType)), itemStack);
 		return mutableFloat.floatValue();
 	}
 
@@ -213,19 +213,19 @@ public class EnchantmentHelper {
 	}
 
 	public static int getBlockEfficiency(LivingEntity livingEntity) {
-		return getEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, livingEntity);
+		return getEnchantmentLevel(Enchantments.EFFICIENCY, livingEntity);
 	}
 
 	public static int getFishingLuckBonus(ItemStack itemStack) {
-		return getItemEnchantmentLevel(Enchantments.FISHING_LUCK, itemStack);
+		return getItemEnchantmentLevel(Enchantments.LUCK_OF_THE_SEA, itemStack);
 	}
 
 	public static int getFishingSpeedBonus(ItemStack itemStack) {
-		return getItemEnchantmentLevel(Enchantments.FISHING_SPEED, itemStack);
+		return getItemEnchantmentLevel(Enchantments.LURE, itemStack);
 	}
 
 	public static int getMobLooting(LivingEntity livingEntity) {
-		return getEnchantmentLevel(Enchantments.MOB_LOOTING, livingEntity);
+		return getEnchantmentLevel(Enchantments.LOOTING, livingEntity);
 	}
 
 	public static boolean hasAquaAffinity(LivingEntity livingEntity) {
@@ -379,11 +379,10 @@ public class EnchantmentHelper {
 
 	public static List<EnchantmentInstance> getAvailableEnchantmentResults(int i, ItemStack itemStack, boolean bl) {
 		List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
-		Item item = itemStack.getItem();
 		boolean bl2 = itemStack.is(Items.BOOK);
 
 		for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
-			if ((!enchantment.isTreasureOnly() || bl) && enchantment.isDiscoverable() && (enchantment.category.canEnchant(item) || bl2)) {
+			if ((!enchantment.isTreasureOnly() || bl) && enchantment.isDiscoverable() && (enchantment.canEnchant(itemStack) || bl2)) {
 				for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; j--) {
 					if (i >= enchantment.getMinCost(j) && i <= enchantment.getMaxCost(j)) {
 						list.add(new EnchantmentInstance(enchantment, j));

@@ -133,7 +133,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return (VoxelShape)SHAPES_CACHE.get(blockState.setValue(POWER, Integer.valueOf(0)));
 	}
 
@@ -188,7 +188,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction == Direction.DOWN) {
@@ -223,7 +223,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public void updateIndirectNeighbourShapes(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, int i, int j) {
+	protected void updateIndirectNeighbourShapes(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, int i, int j) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
@@ -271,7 +271,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
 		return this.canSurviveOn(levelReader, blockPos2, blockState2);
@@ -338,7 +338,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock()) && !level.isClientSide) {
 			this.updatePowerStrength(level, blockPos, blockState);
 
@@ -351,7 +351,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl && !blockState.is(blockState2.getBlock())) {
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
 			if (!level.isClientSide) {
@@ -381,7 +381,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide) {
 			if (blockState.canSurvive(level, blockPos)) {
 				this.updatePowerStrength(level, blockPos, blockState);
@@ -393,12 +393,12 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return !this.shouldSignal ? 0 : blockState.getSignal(blockGetter, blockPos, direction);
 	}
 
 	@Override
-	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+	protected int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		if (this.shouldSignal && direction != Direction.DOWN) {
 			int i = (Integer)blockState.getValue(POWER);
 			if (i == 0) {
@@ -431,7 +431,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public boolean isSignalSource(BlockState blockState) {
+	protected boolean isSignalSource(BlockState blockState) {
 		return this.shouldSignal;
 	}
 
@@ -477,7 +477,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		switch (rotation) {
 			case CLOCKWISE_180:
 				return blockState.setValue(NORTH, (RedstoneSide)blockState.getValue(SOUTH))
@@ -500,7 +500,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		switch (mirror) {
 			case LEFT_RIGHT:
 				return blockState.setValue(NORTH, (RedstoneSide)blockState.getValue(SOUTH)).setValue(SOUTH, (RedstoneSide)blockState.getValue(NORTH));
@@ -517,7 +517,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (!player.getAbilities().mayBuild) {
 			return InteractionResult.PASS;
 		} else {

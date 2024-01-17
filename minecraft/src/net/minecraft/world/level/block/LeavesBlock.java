@@ -45,17 +45,17 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return Shapes.empty();
 	}
 
 	@Override
-	public boolean isRandomlyTicking(BlockState blockState) {
+	protected boolean isRandomlyTicking(BlockState blockState) {
 		return (Integer)blockState.getValue(DISTANCE) == 7 && !(Boolean)blockState.getValue(PERSISTENT);
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (this.decaying(blockState)) {
 			dropResources(blockState, serverLevel, blockPos);
 			serverLevel.removeBlock(blockPos, false);
@@ -67,17 +67,17 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		serverLevel.setBlock(blockPos, updateDistance(blockState, serverLevel, blockPos), 3);
 	}
 
 	@Override
-	public int getLightBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected int getLightBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return 1;
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -120,7 +120,7 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 

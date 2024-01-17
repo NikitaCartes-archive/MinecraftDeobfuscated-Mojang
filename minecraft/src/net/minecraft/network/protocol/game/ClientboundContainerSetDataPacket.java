@@ -1,9 +1,14 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundContainerSetDataPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundContainerSetDataPacket> STREAM_CODEC = Packet.codec(
+		ClientboundContainerSetDataPacket::write, ClientboundContainerSetDataPacket::new
+	);
 	private final int containerId;
 	private final int id;
 	private final int value;
@@ -14,17 +19,21 @@ public class ClientboundContainerSetDataPacket implements Packet<ClientGamePacke
 		this.value = k;
 	}
 
-	public ClientboundContainerSetDataPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundContainerSetDataPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readUnsignedByte();
 		this.id = friendlyByteBuf.readShort();
 		this.value = friendlyByteBuf.readShort();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.containerId);
 		friendlyByteBuf.writeShort(this.id);
 		friendlyByteBuf.writeShort(this.value);
+	}
+
+	@Override
+	public PacketType<ClientboundContainerSetDataPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_CONTAINER_SET_DATA;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

@@ -1,39 +1,28 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.item.Item;
 
-public class ClientboundCooldownPacket implements Packet<ClientGamePacketListener> {
-	private final Item item;
-	private final int duration;
-
-	public ClientboundCooldownPacket(Item item, int i) {
-		this.item = item;
-		this.duration = i;
-	}
-
-	public ClientboundCooldownPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.item = friendlyByteBuf.readById(BuiltInRegistries.ITEM);
-		this.duration = friendlyByteBuf.readVarInt();
-	}
+public record ClientboundCooldownPacket(Item item, int duration) implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundCooldownPacket> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.registry(Registries.ITEM),
+		ClientboundCooldownPacket::item,
+		ByteBufCodecs.VAR_INT,
+		ClientboundCooldownPacket::duration,
+		ClientboundCooldownPacket::new
+	);
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeId(BuiltInRegistries.ITEM, this.item);
-		friendlyByteBuf.writeVarInt(this.duration);
+	public PacketType<ClientboundCooldownPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_COOLDOWN;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
 		clientGamePacketListener.handleItemCooldown(this);
-	}
-
-	public Item getItem() {
-		return this.item;
-	}
-
-	public int getDuration() {
-		return this.duration;
 	}
 }

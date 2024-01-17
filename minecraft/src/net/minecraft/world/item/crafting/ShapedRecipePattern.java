@@ -13,7 +13,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 
@@ -26,6 +27,9 @@ public record ShapedRecipePattern(int width, int height, NonNullList<Ingredient>
 					.map(DataResult::success)
 					.orElseGet(() -> DataResult.error(() -> "Cannot encode unpacked recipe"))
 		);
+	public static final StreamCodec<RegistryFriendlyByteBuf, ShapedRecipePattern> STREAM_CODEC = StreamCodec.ofMember(
+		ShapedRecipePattern::toNetwork, ShapedRecipePattern::fromNetwork
+	);
 
 	public static ShapedRecipePattern of(Map<Character, Ingredient> map, String... strings) {
 		return of(map, List.of(strings));
@@ -158,20 +162,20 @@ public record ShapedRecipePattern(int width, int height, NonNullList<Ingredient>
 		return true;
 	}
 
-	public void toNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.width);
-		friendlyByteBuf.writeVarInt(this.height);
+	private void toNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeVarInt(this.width);
+		registryFriendlyByteBuf.writeVarInt(this.height);
 
 		for (Ingredient ingredient : this.ingredients) {
-			ingredient.toNetwork(friendlyByteBuf);
+			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, ingredient);
 		}
 	}
 
-	public static ShapedRecipePattern fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		int i = friendlyByteBuf.readVarInt();
-		int j = friendlyByteBuf.readVarInt();
+	private static ShapedRecipePattern fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		int i = registryFriendlyByteBuf.readVarInt();
+		int j = registryFriendlyByteBuf.readVarInt();
 		NonNullList<Ingredient> nonNullList = NonNullList.withSize(i * j, Ingredient.EMPTY);
-		nonNullList.replaceAll(ingredient -> Ingredient.fromNetwork(friendlyByteBuf));
+		nonNullList.replaceAll(ingredient -> Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf));
 		return new ShapedRecipePattern(i, j, nonNullList, Optional.empty());
 	}
 

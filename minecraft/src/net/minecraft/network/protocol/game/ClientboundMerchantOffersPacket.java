@@ -1,10 +1,15 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 public class ClientboundMerchantOffersPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundMerchantOffersPacket> STREAM_CODEC = Packet.codec(
+		ClientboundMerchantOffersPacket::write, ClientboundMerchantOffersPacket::new
+	);
 	private final int containerId;
 	private final MerchantOffers offers;
 	private final int villagerLevel;
@@ -21,23 +26,27 @@ public class ClientboundMerchantOffersPacket implements Packet<ClientGamePacketL
 		this.canRestock = bl2;
 	}
 
-	public ClientboundMerchantOffersPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.containerId = friendlyByteBuf.readVarInt();
-		this.offers = MerchantOffers.createFromStream(friendlyByteBuf);
-		this.villagerLevel = friendlyByteBuf.readVarInt();
-		this.villagerXp = friendlyByteBuf.readVarInt();
-		this.showProgress = friendlyByteBuf.readBoolean();
-		this.canRestock = friendlyByteBuf.readBoolean();
+	private ClientboundMerchantOffersPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.containerId = registryFriendlyByteBuf.readVarInt();
+		this.offers = MerchantOffers.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		this.villagerLevel = registryFriendlyByteBuf.readVarInt();
+		this.villagerXp = registryFriendlyByteBuf.readVarInt();
+		this.showProgress = registryFriendlyByteBuf.readBoolean();
+		this.canRestock = registryFriendlyByteBuf.readBoolean();
+	}
+
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeVarInt(this.containerId);
+		MerchantOffers.STREAM_CODEC.encode(registryFriendlyByteBuf, this.offers);
+		registryFriendlyByteBuf.writeVarInt(this.villagerLevel);
+		registryFriendlyByteBuf.writeVarInt(this.villagerXp);
+		registryFriendlyByteBuf.writeBoolean(this.showProgress);
+		registryFriendlyByteBuf.writeBoolean(this.canRestock);
 	}
 
 	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.containerId);
-		this.offers.writeToStream(friendlyByteBuf);
-		friendlyByteBuf.writeVarInt(this.villagerLevel);
-		friendlyByteBuf.writeVarInt(this.villagerXp);
-		friendlyByteBuf.writeBoolean(this.showProgress);
-		friendlyByteBuf.writeBoolean(this.canRestock);
+	public PacketType<ClientboundMerchantOffersPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_MERCHANT_OFFERS;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

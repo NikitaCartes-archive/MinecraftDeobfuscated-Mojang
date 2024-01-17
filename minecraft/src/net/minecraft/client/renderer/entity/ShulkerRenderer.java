@@ -53,10 +53,8 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>>
 		return dyeColor == null ? DEFAULT_TEXTURE_LOCATION : TEXTURE_LOCATION[dyeColor.getId()];
 	}
 
-	protected void setupRotations(Shulker shulker, PoseStack poseStack, float f, float g, float h) {
-		super.setupRotations(shulker, poseStack, f, g + 180.0F, h);
-		poseStack.translate(0.0, 0.5, 0.0);
-		poseStack.mulPose(shulker.getAttachFace().getOpposite().getRotation());
-		poseStack.translate(0.0, -0.5, 0.0);
+	protected void setupRotations(Shulker shulker, PoseStack poseStack, float f, float g, float h, float i) {
+		super.setupRotations(shulker, poseStack, f, g + 180.0F, h, i);
+		poseStack.rotateAround(shulker.getAttachFace().getOpposite().getRotation(), 0.0F, 0.5F, 0.0F);
 	}
 }

@@ -63,7 +63,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SlotAccess;
@@ -875,7 +874,7 @@ public abstract class Player extends LivingEntity {
 	protected void blockUsingShield(LivingEntity livingEntity) {
 		super.blockUsingShield(livingEntity);
 		if (livingEntity.canDisableShield()) {
-			this.disableShield(true);
+			this.disableShield();
 		}
 	}
 
@@ -914,7 +913,7 @@ public abstract class Player extends LivingEntity {
 			if (f >= 3.0F) {
 				int i = 1 + Mth.floor(f);
 				InteractionHand interactionHand = this.getUsedItemHand();
-				this.useItem.hurtAndBreak(i, this, player -> player.broadcastBreakEvent(interactionHand));
+				this.useItem.hurtAndBreak(i, this, getSlotForHand(interactionHand));
 				if (this.useItem.isEmpty()) {
 					if (interactionHand == InteractionHand.MAIN_HAND) {
 						this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
@@ -1111,13 +1110,7 @@ public abstract class Player extends LivingEntity {
 		if (entity.isAttackable()) {
 			if (!entity.skipAttackInteraction(this)) {
 				float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-				float g;
-				if (entity instanceof LivingEntity) {
-					g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
-				} else {
-					g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), MobType.UNDEFINED);
-				}
-
+				float g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), entity.getType());
 				float h = this.getAttackStrengthScale(0.5F);
 				f *= 0.2F + h * h * 0.8F;
 				g *= h;
@@ -1163,7 +1156,7 @@ public abstract class Player extends LivingEntity {
 						j = ((LivingEntity)entity).getHealth();
 						if (k > 0 && !entity.isOnFire()) {
 							bl5 = true;
-							entity.setSecondsOnFire(1);
+							entity.igniteForSeconds(1);
 						}
 					}
 
@@ -1256,7 +1249,7 @@ public abstract class Player extends LivingEntity {
 							float m = j - ((LivingEntity)entity).getHealth();
 							this.awardStat(Stats.DAMAGE_DEALT, Math.round(m * 10.0F));
 							if (k > 0) {
-								entity.setSecondsOnFire(k * 4);
+								entity.igniteForSeconds(k * 4);
 							}
 
 							if (this.level() instanceof ServerLevel && m > 2.0F) {
@@ -1282,17 +1275,10 @@ public abstract class Player extends LivingEntity {
 		this.attack(livingEntity);
 	}
 
-	public void disableShield(boolean bl) {
-		float f = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
-		if (bl) {
-			f += 0.75F;
-		}
-
-		if (this.random.nextFloat() < f) {
-			this.getCooldowns().addCooldown(Items.SHIELD, 100);
-			this.stopUsingItem();
-			this.level().broadcastEntityEvent(this, (byte)30);
-		}
+	public void disableShield() {
+		this.getCooldowns().addCooldown(Items.SHIELD, 100);
+		this.stopUsingItem();
+		this.level().broadcastEntityEvent(this, (byte)30);
 	}
 
 	public void crit(Entity entity) {
@@ -2060,6 +2046,20 @@ public abstract class Player extends LivingEntity {
 
 	public double entityInteractionRange() {
 		return this.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE);
+	}
+
+	public boolean canInteractWithEntity(Entity entity, double d) {
+		return entity.isRemoved() ? false : this.canInteractWithEntity(entity.getBoundingBox(), d);
+	}
+
+	public boolean canInteractWithEntity(AABB aABB, double d) {
+		double e = this.entityInteractionRange() + d;
+		return aABB.distanceToSqr(this.getEyePosition()) < e * e;
+	}
+
+	public boolean canInteractWithBlock(BlockPos blockPos, double d) {
+		double e = this.blockInteractionRange() + d;
+		return new AABB(blockPos).distanceToSqr(this.getEyePosition()) < e * e;
 	}
 
 	public static enum BedSleepingProblem {

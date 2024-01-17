@@ -41,7 +41,7 @@ public abstract class AbstractCandleBlock extends Block {
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+	protected void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		if (!level.isClientSide && projectile.isOnFire() && this.canBeLit(blockState)) {
 			setLit(level, blockState, blockHitResult.getBlockPos(), true);
 		}
@@ -101,7 +101,7 @@ public abstract class AbstractCandleBlock extends Block {
 	}
 
 	@Override
-	public void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
 		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK && !level.isClientSide() && (Boolean)blockState.getValue(LIT)) {
 			extinguish(null, blockState, level, blockPos);
 		}

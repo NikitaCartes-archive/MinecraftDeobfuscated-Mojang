@@ -161,11 +161,11 @@ public class PiglinBrute extends AbstractPiglin {
 	}
 
 	protected void playAngrySound() {
-		this.playSound(SoundEvents.PIGLIN_BRUTE_ANGRY, 1.0F, this.getVoicePitch());
+		this.makeSound(SoundEvents.PIGLIN_BRUTE_ANGRY);
 	}
 
 	@Override
 	protected void playConvertedSound() {
-		this.playSound(SoundEvents.PIGLIN_BRUTE_CONVERTED_TO_ZOMBIFIED, 1.0F, this.getVoicePitch());
+		this.makeSound(SoundEvents.PIGLIN_BRUTE_CONVERTED_TO_ZOMBIFIED);
 	}
 }

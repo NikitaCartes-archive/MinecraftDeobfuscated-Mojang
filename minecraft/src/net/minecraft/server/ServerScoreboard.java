@@ -3,6 +3,7 @@ package net.minecraft.server;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -39,7 +40,11 @@ public class ServerScoreboard extends Scoreboard {
 		if (this.trackedObjectives.contains(objective)) {
 			this.server
 				.getPlayerList()
-				.broadcastAll(new ClientboundSetScorePacket(scoreHolder.getScoreboardName(), objective.getName(), score.value(), score.display(), score.numberFormat()));
+				.broadcastAll(
+					new ClientboundSetScorePacket(
+						scoreHolder.getScoreboardName(), objective.getName(), score.value(), score.display(), Optional.ofNullable(score.numberFormat())
+					)
+				);
 		}
 
 		this.setDirty();
@@ -179,7 +184,11 @@ public class ServerScoreboard extends Scoreboard {
 		for (PlayerScoreEntry playerScoreEntry : this.listPlayerScores(objective)) {
 			list.add(
 				new ClientboundSetScorePacket(
-					playerScoreEntry.owner(), objective.getName(), playerScoreEntry.value(), playerScoreEntry.display(), playerScoreEntry.numberFormatOverride()
+					playerScoreEntry.owner(),
+					objective.getName(),
+					playerScoreEntry.value(),
+					playerScoreEntry.display(),
+					Optional.ofNullable(playerScoreEntry.numberFormatOverride())
 				)
 			);
 		}

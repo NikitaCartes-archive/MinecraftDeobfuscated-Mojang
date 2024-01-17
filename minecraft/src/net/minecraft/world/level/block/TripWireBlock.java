@@ -66,7 +66,7 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return blockState.getValue(ATTACHED) ? AABB : NOT_ATTACHED_AABB;
 	}
 
@@ -82,7 +82,7 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return direction.getAxis().isHorizontal()
@@ -91,14 +91,14 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			this.updateSource(level, blockPos, blockState);
 		}
 	}
 
 	@Override
-	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl && !blockState.is(blockState2.getBlock())) {
 			this.updateSource(level, blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)));
 		}
@@ -134,7 +134,7 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!level.isClientSide) {
 			if (!(Boolean)blockState.getValue(POWERED)) {
 				this.checkPressed(level, blockPos);
@@ -143,7 +143,7 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((Boolean)serverLevel.getBlockState(blockPos).getValue(POWERED)) {
 			this.checkPressed(serverLevel, blockPos);
 		}
@@ -179,7 +179,7 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		switch (rotation) {
 			case CLOCKWISE_180:
 				return blockState.setValue(NORTH, (Boolean)blockState.getValue(SOUTH))
@@ -202,7 +202,7 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		switch (mirror) {
 			case LEFT_RIGHT:
 				return blockState.setValue(NORTH, (Boolean)blockState.getValue(SOUTH)).setValue(SOUTH, (Boolean)blockState.getValue(NORTH));

@@ -17,9 +17,15 @@ public class AnimalMakeLove extends Behavior<Animal> {
 	private static final int MAX_DURATION = 110;
 	private final EntityType<? extends Animal> partnerType;
 	private final float speedModifier;
+	private final int closeEnoughDistance;
+	private static final int DEFAULT_CLOSE_ENOUGH_DISTANCE = 2;
 	private long spawnChildAtTime;
 
-	public AnimalMakeLove(EntityType<? extends Animal> entityType, float f) {
+	public AnimalMakeLove(EntityType<? extends Animal> entityType) {
+		this(entityType, 1.0F, 2);
+	}
+
+	public AnimalMakeLove(EntityType<? extends Animal> entityType, float f, int i) {
 		super(
 			ImmutableMap.of(
 				MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
@@ -37,6 +43,7 @@ public class AnimalMakeLove extends Behavior<Animal> {
 		);
 		this.partnerType = entityType;
 		this.speedModifier = f;
+		this.closeEnoughDistance = i;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Animal animal) {
@@ -47,7 +54,7 @@ public class AnimalMakeLove extends Behavior<Animal> {
 		Animal animal2 = (Animal)this.findValidBreedPartner(animal).get();
 		animal.getBrain().setMemory(MemoryModuleType.BREED_TARGET, animal2);
 		animal2.getBrain().setMemory(MemoryModuleType.BREED_TARGET, animal);
-		BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2, this.speedModifier);
+		BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2, this.speedModifier, this.closeEnoughDistance);
 		int i = 60 + animal.getRandom().nextInt(50);
 		this.spawnChildAtTime = l + (long)i;
 	}
@@ -68,7 +75,7 @@ public class AnimalMakeLove extends Behavior<Animal> {
 
 	protected void tick(ServerLevel serverLevel, Animal animal, long l) {
 		Animal animal2 = this.getBreedTarget(animal);
-		BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2, this.speedModifier);
+		BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2, this.speedModifier, this.closeEnoughDistance);
 		if (animal.closerThan(animal2, 3.0)) {
 			if (l >= this.spawnChildAtTime) {
 				animal.spawnChildFromBreeding(serverLevel, animal2);

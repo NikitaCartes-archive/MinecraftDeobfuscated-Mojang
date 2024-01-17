@@ -40,7 +40,7 @@ public abstract class SpreadingSnowyDirtBlock extends SnowyDirtBlock {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!canBeGrass(blockState, serverLevel, blockPos)) {
 			serverLevel.setBlockAndUpdate(blockPos, Blocks.DIRT.defaultBlockState());
 		} else {

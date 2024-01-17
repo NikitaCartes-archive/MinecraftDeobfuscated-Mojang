@@ -9,10 +9,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -26,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.WorldVersion;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -40,7 +42,7 @@ public class HashCache {
 	private final String versionId;
 	private final Map<String, HashCache.ProviderCache> caches;
 	private final Set<String> cachesToWrite = new HashSet();
-	private final Set<Path> cachePaths = new HashSet();
+	final Set<Path> cachePaths = new HashSet();
 	private final int initialCount;
 	private int writes;
 
@@ -102,7 +104,7 @@ public class HashCache {
 	}
 
 	public void purgeStaleAndWrite() throws IOException {
-		Set<Path> set = new HashSet();
+		final Set<Path> set = new HashSet();
 		this.caches.forEach((string, providerCache) -> {
 			if (this.cachesToWrite.contains(string)) {
 				Path path = this.getProviderCachePath(string);
@@ -112,43 +114,29 @@ public class HashCache {
 			set.addAll(providerCache.data().keySet());
 		});
 		set.add(this.rootDir.resolve("version.json"));
-		MutableInt mutableInt = new MutableInt();
-		MutableInt mutableInt2 = new MutableInt();
-		Stream<Path> stream = Files.walk(this.rootDir);
-
-		try {
-			stream.forEach(path -> {
-				if (!Files.isDirectory(path, new LinkOption[0])) {
-					if (!this.cachePaths.contains(path)) {
-						mutableInt.increment();
-						if (!set.contains(path)) {
-							try {
-								Files.delete(path);
-							} catch (IOException var6) {
-								LOGGER.warn("Failed to delete file {}", path, var6);
-							}
-
-							mutableInt2.increment();
+		final MutableInt mutableInt = new MutableInt();
+		final MutableInt mutableInt2 = new MutableInt();
+		Files.walkFileTree(this.rootDir, new SimpleFileVisitor<Path>() {
+			public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) {
+				if (HashCache.this.cachePaths.contains(path)) {
+					return FileVisitResult.CONTINUE;
+				} else {
+					mutableInt.increment();
+					if (set.contains(path)) {
+						return FileVisitResult.CONTINUE;
+					} else {
+						try {
+							Files.delete(path);
+						} catch (IOException var4) {
+							HashCache.LOGGER.warn("Failed to delete file {}", path, var4);
 						}
+
+						mutableInt2.increment();
+						return FileVisitResult.CONTINUE;
 					}
 				}
-			});
-		} catch (Throwable var8) {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (Throwable var7) {
-					var8.addSuppressed(var7);
-				}
 			}
-
-			throw var8;
-		}
-
-		if (stream != null) {
-			stream.close();
-		}
-
+		});
 		LOGGER.info(
 			"Caching: total files: {}, old count: {}, new count: {}, removed stale: {}, written: {}",
 			mutableInt,

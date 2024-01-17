@@ -44,7 +44,7 @@ public class NetherPortalBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		switch ((Direction.Axis)blockState.getValue(AXIS)) {
 			case Z:
 				return Z_AXIS_AABB;
@@ -55,7 +55,7 @@ public class NetherPortalBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (serverLevel.dimensionType().natural()
 			&& serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)
 			&& randomSource.nextInt(2000) < serverLevel.getDifficulty().getId()) {
@@ -73,7 +73,7 @@ public class NetherPortalBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		Direction.Axis axis = direction.getAxis();
@@ -85,7 +85,7 @@ public class NetherPortalBlock extends Block {
 	}
 
 	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
+	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (entity.canChangeDimensions()) {
 			entity.handleInsidePortal(blockPos);
 		}
@@ -132,7 +132,7 @@ public class NetherPortalBlock extends Block {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		switch (rotation) {
 			case COUNTERCLOCKWISE_90:
 			case CLOCKWISE_90:

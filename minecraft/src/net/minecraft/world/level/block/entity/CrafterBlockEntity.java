@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -175,9 +176,7 @@ public class CrafterBlockEntity extends RandomizableContainerBlockEntity impleme
 
 	@Override
 	public boolean stillValid(Player player) {
-		return this.level != null && this.level.getBlockEntity(this.worldPosition) == this
-			? !(player.distanceToSqr((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5) > 64.0)
-			: false;
+		return Container.stillValidBlockEntity(this, player);
 	}
 
 	@Override

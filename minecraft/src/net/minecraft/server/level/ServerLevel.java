@@ -174,6 +174,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final ServerChunkCache chunkSource;
 	private final MinecraftServer server;
 	private final ServerLevelData serverLevelData;
+	private int lastSpawnChunkRadius;
 	final EntityTickList entityTickList = new EntityTickList();
 	private final PersistentEntitySectionManager<Entity> entityManager;
 	private final GameEventDispatcher gameEventDispatcher;
@@ -1068,10 +1069,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		Level.ExplosionInteraction explosionInteraction,
 		ParticleOptions particleOptions,
 		ParticleOptions particleOptions2,
-		SoundEvent soundEvent
+		Holder<SoundEvent> holder
 	) {
 		Explosion explosion = this.explode(
-			entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, explosionInteraction, false, particleOptions, particleOptions2, soundEvent
+			entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, explosionInteraction, false, particleOptions, particleOptions2, holder
 		);
 		if (!explosion.interactsWithBlocks()) {
 			explosion.clearToBlow();
@@ -1275,11 +1276,23 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public void setDefaultSpawnPos(BlockPos blockPos, float f) {
-		ChunkPos chunkPos = new ChunkPos(new BlockPos(this.levelData.getXSpawn(), 0, this.levelData.getZSpawn()));
-		this.levelData.setSpawn(blockPos, f);
-		this.getChunkSource().removeRegionTicket(TicketType.START, chunkPos, 11, Unit.INSTANCE);
-		this.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(blockPos), 11, Unit.INSTANCE);
-		this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(blockPos, f));
+		BlockPos blockPos2 = this.levelData.getSpawnPos();
+		float g = this.levelData.getSpawnAngle();
+		if (!blockPos2.equals(blockPos) || g != f) {
+			this.levelData.setSpawn(blockPos, f);
+			this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(blockPos, f));
+		}
+
+		if (this.lastSpawnChunkRadius > 1) {
+			this.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(blockPos2), this.lastSpawnChunkRadius, Unit.INSTANCE);
+		}
+
+		int i = this.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS) + 1;
+		if (i > 1) {
+			this.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(blockPos), i, Unit.INSTANCE);
+		}
+
+		this.lastSpawnChunkRadius = i;
 	}
 
 	public LongSet getForcedChunks() {

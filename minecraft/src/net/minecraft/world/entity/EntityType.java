@@ -210,7 +210,12 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"boat", EntityType.Builder.<Boat>of(Boat::new, MobCategory.MISC).sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
 	);
 	public static final EntityType<Breeze> BREEZE = register(
-		"breeze", EntityType.Builder.of(Breeze::new, MobCategory.MONSTER).sized(0.6F, 1.7F).clientTrackingRange(10).requiredFeatures(FeatureFlags.UPDATE_1_21)
+		"breeze",
+		EntityType.Builder.of(Breeze::new, MobCategory.MONSTER)
+			.sized(0.6F, 1.77F)
+			.eyeHeight(1.3452F)
+			.clientTrackingRange(10)
+			.requiredFeatures(FeatureFlags.UPDATE_1_21)
 	);
 	public static final EntityType<Camel> CAMEL = register(
 		"camel", EntityType.Builder.of(Camel::new, MobCategory.CREATURE).sized(1.7F, 2.375F).eyeHeight(2.275F).clientTrackingRange(10)
@@ -403,7 +408,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"iron_golem", EntityType.Builder.of(IronGolem::new, MobCategory.MISC).sized(1.4F, 2.7F).clientTrackingRange(10)
 	);
 	public static final EntityType<ItemEntity> ITEM = register(
-		"item", EntityType.Builder.<ItemEntity>of(ItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20)
+		"item", EntityType.Builder.<ItemEntity>of(ItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).eyeHeight(0.1F).clientTrackingRange(6).updateInterval(20)
 	);
 	public static final EntityType<Display.ItemDisplay> ITEM_DISPLAY = register(
 		"item_display", EntityType.Builder.of(Display.ItemDisplay::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(10).updateInterval(1)
@@ -555,7 +560,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.clientTrackingRange(10)
 	);
 	public static final EntityType<Slime> SLIME = register(
-		"slime", EntityType.Builder.of(Slime::new, MobCategory.MONSTER).sized(2.04F, 2.04F).eyeHeight(1.275F).clientTrackingRange(10)
+		"slime", EntityType.Builder.of(Slime::new, MobCategory.MONSTER).sized(0.52F, 0.52F).eyeHeight(0.325F).clientTrackingRange(10)
 	);
 	public static final EntityType<SmallFireball> SMALL_FIREBALL = register(
 		"small_fireball",
@@ -665,7 +670,13 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"wandering_trader", EntityType.Builder.of(WanderingTrader::new, MobCategory.CREATURE).sized(0.6F, 1.95F).eyeHeight(1.62F).clientTrackingRange(10)
 	);
 	public static final EntityType<Warden> WARDEN = register(
-		"warden", EntityType.Builder.of(Warden::new, MobCategory.MONSTER).sized(0.9F, 2.9F).passengerAttachments(3.15F).clientTrackingRange(16).fireImmune()
+		"warden",
+		EntityType.Builder.of(Warden::new, MobCategory.MONSTER)
+			.sized(0.9F, 2.9F)
+			.passengerAttachments(3.15F)
+			.attach(EntityAttachment.WARDEN_CHEST, 0.0F, 1.6F, 0.0F)
+			.clientTrackingRange(16)
+			.fireImmune()
 	);
 	public static final EntityType<WindCharge> WIND_CHARGE = register(
 		"wind_charge",
@@ -1190,16 +1201,24 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		}
 
 		public EntityType.Builder<T> vehicleAttachment(Vec3 vec3) {
-			this.attachments = this.attachments.attach(EntityAttachment.VEHICLE, vec3);
-			return this;
+			return this.attach(EntityAttachment.VEHICLE, vec3);
 		}
 
 		public EntityType.Builder<T> ridingOffset(float f) {
-			return this.vehicleAttachment(new Vec3(0.0, (double)(-f), 0.0));
+			return this.attach(EntityAttachment.VEHICLE, 0.0F, -f, 0.0F);
 		}
 
 		public EntityType.Builder<T> nameTagOffset(float f) {
-			this.attachments = this.attachments.attach(EntityAttachment.NAME_TAG, 0.0F, f, 0.0F);
+			return this.attach(EntityAttachment.NAME_TAG, 0.0F, f, 0.0F);
+		}
+
+		public EntityType.Builder<T> attach(EntityAttachment entityAttachment, float f, float g, float h) {
+			this.attachments = this.attachments.attach(entityAttachment, f, g, h);
+			return this;
+		}
+
+		public EntityType.Builder<T> attach(EntityAttachment entityAttachment, Vec3 vec3) {
+			this.attachments = this.attachments.attach(entityAttachment, vec3);
 			return this;
 		}
 

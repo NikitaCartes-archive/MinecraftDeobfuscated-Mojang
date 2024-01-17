@@ -1,9 +1,14 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundHorseScreenOpenPacket> STREAM_CODEC = Packet.codec(
+		ClientboundHorseScreenOpenPacket::write, ClientboundHorseScreenOpenPacket::new
+	);
 	private final int containerId;
 	private final int size;
 	private final int entityId;
@@ -14,17 +19,21 @@ public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacket
 		this.entityId = k;
 	}
 
-	public ClientboundHorseScreenOpenPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundHorseScreenOpenPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readUnsignedByte();
 		this.size = friendlyByteBuf.readVarInt();
 		this.entityId = friendlyByteBuf.readInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.containerId);
 		friendlyByteBuf.writeVarInt(this.size);
 		friendlyByteBuf.writeInt(this.entityId);
+	}
+
+	@Override
+	public PacketType<ClientboundHorseScreenOpenPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_HORSE_SCREEN_OPEN;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

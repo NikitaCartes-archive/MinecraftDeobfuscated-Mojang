@@ -214,7 +214,7 @@ public class ServerEntity {
 	}
 
 	public void addPairing(ServerPlayer serverPlayer) {
-		List<Packet<ClientGamePacketListener>> list = new ArrayList();
+		List<Packet<? super ClientGamePacketListener>> list = new ArrayList();
 		this.sendPairingData(serverPlayer, list::add);
 		serverPlayer.connection.send(new ClientboundBundlePacket(list));
 		this.entity.startSeenByPlayer(serverPlayer);

@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.TransferState;
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
@@ -27,6 +28,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.login.LoginProtocols;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import org.slf4j.Logger;
 
@@ -53,21 +55,36 @@ public class ConnectScreen extends Screen {
 		this.connectFailedTitle = component;
 	}
 
-	public static void startConnecting(Screen screen, Minecraft minecraft, ServerAddress serverAddress, ServerData serverData, boolean bl) {
+	public static void startConnecting(
+		Screen screen, Minecraft minecraft, ServerAddress serverAddress, ServerData serverData, boolean bl, @Nullable TransferState transferState
+	) {
 		if (minecraft.screen instanceof ConnectScreen) {
 			LOGGER.error("Attempt to connect while already connecting");
 		} else {
-			ConnectScreen connectScreen = new ConnectScreen(screen, bl ? QuickPlay.ERROR_TITLE : CommonComponents.CONNECT_FAILED);
+			Component component;
+			if (transferState != null) {
+				component = CommonComponents.TRANSFER_CONNECT_FAILED;
+			} else if (bl) {
+				component = QuickPlay.ERROR_TITLE;
+			} else {
+				component = CommonComponents.CONNECT_FAILED;
+			}
+
+			ConnectScreen connectScreen = new ConnectScreen(screen, component);
+			if (transferState != null) {
+				connectScreen.updateStatus(Component.translatable("connect.transferring"));
+			}
+
 			minecraft.disconnect();
 			minecraft.prepareForMultiplayer();
-			minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(serverData != null ? serverData.ip : serverAddress.getHost()));
+			minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(serverData.ip));
 			minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.MULTIPLAYER, serverData.ip, serverData.name);
 			minecraft.setScreen(connectScreen);
-			connectScreen.connect(minecraft, serverAddress, serverData);
+			connectScreen.connect(minecraft, serverAddress, serverData, transferState);
 		}
 	}
 
-	private void connect(Minecraft minecraft, ServerAddress serverAddress, @Nullable ServerData serverData) {
+	private void connect(Minecraft minecraft, ServerAddress serverAddress, ServerData serverData, @Nullable TransferState transferState) {
 		LOGGER.info("Connecting to {}, {}", serverAddress.getHost(), serverAddress.getPort());
 		Thread thread = new Thread("Server Connector #" + UNIQUE_THREAD_ID.incrementAndGet()) {
 			public void run() {
@@ -110,19 +127,19 @@ public class ConnectScreen extends Screen {
 						}
 
 						ConnectScreen.this.connection = connection;
-						minecraft.getDownloadedPackSource()
-							.configureForServerControl(
-								connection, serverData != null ? convertPackStatus(serverData.getResourcePackStatus()) : ServerPackManager.PackPromptStatus.PENDING
-							);
+						minecraft.getDownloadedPackSource().configureForServerControl(connection, convertPackStatus(serverData.getResourcePackStatus()));
 					}
 
 					ConnectScreen.this.connection
 						.initiateServerboundPlayConnection(
 							inetSocketAddress.getHostName(),
 							inetSocketAddress.getPort(),
+							LoginProtocols.SERVERBOUND,
+							LoginProtocols.CLIENTBOUND,
 							new ClientHandshakePacketListenerImpl(
-								ConnectScreen.this.connection, minecraft, serverData, ConnectScreen.this.parent, false, null, ConnectScreen.this::updateStatus
-							)
+								ConnectScreen.this.connection, minecraft, serverData, ConnectScreen.this.parent, false, null, ConnectScreen.this::updateStatus, transferState
+							),
+							transferState != null
 						);
 					ConnectScreen.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getUser().getProfileId()));
 				} catch (Exception var9) {

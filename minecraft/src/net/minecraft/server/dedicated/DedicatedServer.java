@@ -586,4 +586,9 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	public Optional<MinecraftServer.ServerResourcePackInfo> getServerResourcePack() {
 		return this.settings.getProperties().serverResourcePackInfo;
 	}
+
+	@Override
+	public boolean acceptsTransfers() {
+		return this.settings.getProperties().acceptsTransfers;
+	}
 }

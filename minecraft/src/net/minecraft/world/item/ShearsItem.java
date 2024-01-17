@@ -25,7 +25,7 @@ public class ShearsItem extends Item {
 	@Override
 	public boolean mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity) {
 		if (!level.isClientSide && !blockState.is(BlockTags.FIRE)) {
-			itemStack.hurtAndBreak(1, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+			itemStack.hurtAndBreak(1, livingEntity, EquipmentSlot.MAINHAND);
 		}
 
 		return !blockState.is(BlockTags.LEAVES)
@@ -74,7 +74,7 @@ public class ShearsItem extends Item {
 			level.setBlockAndUpdate(blockPos, blockState2);
 			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(useOnContext.getPlayer(), blockState2));
 			if (player != null) {
-				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
+				itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(useOnContext.getHand()));
 			}
 
 			return InteractionResult.sidedSuccess(level.isClientSide);

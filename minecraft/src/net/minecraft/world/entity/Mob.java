@@ -51,7 +51,6 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
@@ -245,10 +244,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	public void playAmbientSound() {
-		SoundEvent soundEvent = this.getAmbientSound();
-		if (soundEvent != null) {
-			this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
-		}
+		this.makeSound(this.getAmbientSound());
 	}
 
 	@Override
@@ -762,6 +758,15 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 	public int getMaxHeadYRot() {
 		return 75;
+	}
+
+	protected void clampHeadRotationToBody() {
+		float f = (float)this.getMaxHeadYRot();
+		float g = this.getYHeadRot();
+		float h = Mth.wrapDegrees(this.yBodyRot - g);
+		float i = Mth.clamp(Mth.wrapDegrees(this.yBodyRot - g), -f, f);
+		float j = g + h - i;
+		this.setYHeadRot(j);
 	}
 
 	public int getHeadRotSpeed() {
@@ -1368,13 +1373,13 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		float g = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
 		if (entity instanceof LivingEntity) {
-			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
+			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), entity.getType());
 			g += (float)EnchantmentHelper.getKnockbackBonus(this);
 		}
 
 		int i = EnchantmentHelper.getFireAspect(this);
 		if (i > 0) {
-			entity.setSecondsOnFire(i * 4);
+			entity.igniteForSeconds(i * 4);
 		}
 
 		boolean bl = entity.hurt(this.damageSources().mobAttack(this), f);
@@ -1385,25 +1390,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 				this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
 			}
 
-			if (entity instanceof Player player) {
-				this.maybeDisableShield(player, this.getMainHandItem(), player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY);
-			}
-
 			this.doEnchantDamageEffects(this, entity);
 			this.setLastHurtMob(entity);
 		}
 
 		return bl;
-	}
-
-	private void maybeDisableShield(Player player, ItemStack itemStack, ItemStack itemStack2) {
-		if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.is(Items.SHIELD)) {
-			float f = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
-			if (this.random.nextFloat() < f) {
-				player.getCooldowns().addCooldown(Items.SHIELD, 100);
-				this.level().broadcastEntityEvent(player, (byte)30);
-			}
-		}
 	}
 
 	protected boolean isSunBurnTick() {

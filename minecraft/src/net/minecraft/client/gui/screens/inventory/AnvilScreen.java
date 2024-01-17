@@ -44,8 +44,12 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 		this.name.setResponder(this::onNameChanged);
 		this.name.setValue("");
 		this.addWidget(this.name);
-		this.setInitialFocus(this.name);
 		this.name.setEditable(this.menu.getSlot(0).hasItem());
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.name);
 	}
 
 	@Override

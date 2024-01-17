@@ -64,6 +64,8 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	int litDuration;
 	int cookingProgress;
 	int cookingTotalTime;
+	@Nullable
+	private static volatile Map<Item, Integer> fuelCache;
 	protected final ContainerData dataAccess = new ContainerData() {
 		@Override
 		public int get(int i) {
@@ -113,68 +115,78 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		this.quickCheck = RecipeManager.createCheck(recipeType);
 	}
 
+	public static void invalidateCache() {
+		fuelCache = null;
+	}
+
 	public static Map<Item, Integer> getFuel() {
-		Map<Item, Integer> map = Maps.<Item, Integer>newLinkedHashMap();
-		add(map, Items.LAVA_BUCKET, 20000);
-		add(map, Blocks.COAL_BLOCK, 16000);
-		add(map, Items.BLAZE_ROD, 2400);
-		add(map, Items.COAL, 1600);
-		add(map, Items.CHARCOAL, 1600);
-		add(map, ItemTags.LOGS, 300);
-		add(map, ItemTags.BAMBOO_BLOCKS, 300);
-		add(map, ItemTags.PLANKS, 300);
-		add(map, Blocks.BAMBOO_MOSAIC, 300);
-		add(map, ItemTags.WOODEN_STAIRS, 300);
-		add(map, Blocks.BAMBOO_MOSAIC_STAIRS, 300);
-		add(map, ItemTags.WOODEN_SLABS, 150);
-		add(map, Blocks.BAMBOO_MOSAIC_SLAB, 150);
-		add(map, ItemTags.WOODEN_TRAPDOORS, 300);
-		add(map, ItemTags.WOODEN_PRESSURE_PLATES, 300);
-		add(map, ItemTags.WOODEN_FENCES, 300);
-		add(map, ItemTags.FENCE_GATES, 300);
-		add(map, Blocks.NOTE_BLOCK, 300);
-		add(map, Blocks.BOOKSHELF, 300);
-		add(map, Blocks.CHISELED_BOOKSHELF, 300);
-		add(map, Blocks.LECTERN, 300);
-		add(map, Blocks.JUKEBOX, 300);
-		add(map, Blocks.CHEST, 300);
-		add(map, Blocks.TRAPPED_CHEST, 300);
-		add(map, Blocks.CRAFTING_TABLE, 300);
-		add(map, Blocks.DAYLIGHT_DETECTOR, 300);
-		add(map, ItemTags.BANNERS, 300);
-		add(map, Items.BOW, 300);
-		add(map, Items.FISHING_ROD, 300);
-		add(map, Blocks.LADDER, 300);
-		add(map, ItemTags.SIGNS, 200);
-		add(map, ItemTags.HANGING_SIGNS, 800);
-		add(map, Items.WOODEN_SHOVEL, 200);
-		add(map, Items.WOODEN_SWORD, 200);
-		add(map, Items.WOODEN_HOE, 200);
-		add(map, Items.WOODEN_AXE, 200);
-		add(map, Items.WOODEN_PICKAXE, 200);
-		add(map, ItemTags.WOODEN_DOORS, 200);
-		add(map, ItemTags.BOATS, 1200);
-		add(map, ItemTags.WOOL, 100);
-		add(map, ItemTags.WOODEN_BUTTONS, 100);
-		add(map, Items.STICK, 100);
-		add(map, ItemTags.SAPLINGS, 100);
-		add(map, Items.BOWL, 100);
-		add(map, ItemTags.WOOL_CARPETS, 67);
-		add(map, Blocks.DRIED_KELP_BLOCK, 4001);
-		add(map, Items.CROSSBOW, 300);
-		add(map, Blocks.BAMBOO, 50);
-		add(map, Blocks.DEAD_BUSH, 100);
-		add(map, Blocks.SCAFFOLDING, 50);
-		add(map, Blocks.LOOM, 300);
-		add(map, Blocks.BARREL, 300);
-		add(map, Blocks.CARTOGRAPHY_TABLE, 300);
-		add(map, Blocks.FLETCHING_TABLE, 300);
-		add(map, Blocks.SMITHING_TABLE, 300);
-		add(map, Blocks.COMPOSTER, 300);
-		add(map, Blocks.AZALEA, 100);
-		add(map, Blocks.FLOWERING_AZALEA, 100);
-		add(map, Blocks.MANGROVE_ROOTS, 300);
-		return map;
+		Map<Item, Integer> map = fuelCache;
+		if (map != null) {
+			return map;
+		} else {
+			Map<Item, Integer> map2 = Maps.<Item, Integer>newLinkedHashMap();
+			add(map2, Items.LAVA_BUCKET, 20000);
+			add(map2, Blocks.COAL_BLOCK, 16000);
+			add(map2, Items.BLAZE_ROD, 2400);
+			add(map2, Items.COAL, 1600);
+			add(map2, Items.CHARCOAL, 1600);
+			add(map2, ItemTags.LOGS, 300);
+			add(map2, ItemTags.BAMBOO_BLOCKS, 300);
+			add(map2, ItemTags.PLANKS, 300);
+			add(map2, Blocks.BAMBOO_MOSAIC, 300);
+			add(map2, ItemTags.WOODEN_STAIRS, 300);
+			add(map2, Blocks.BAMBOO_MOSAIC_STAIRS, 300);
+			add(map2, ItemTags.WOODEN_SLABS, 150);
+			add(map2, Blocks.BAMBOO_MOSAIC_SLAB, 150);
+			add(map2, ItemTags.WOODEN_TRAPDOORS, 300);
+			add(map2, ItemTags.WOODEN_PRESSURE_PLATES, 300);
+			add(map2, ItemTags.WOODEN_FENCES, 300);
+			add(map2, ItemTags.FENCE_GATES, 300);
+			add(map2, Blocks.NOTE_BLOCK, 300);
+			add(map2, Blocks.BOOKSHELF, 300);
+			add(map2, Blocks.CHISELED_BOOKSHELF, 300);
+			add(map2, Blocks.LECTERN, 300);
+			add(map2, Blocks.JUKEBOX, 300);
+			add(map2, Blocks.CHEST, 300);
+			add(map2, Blocks.TRAPPED_CHEST, 300);
+			add(map2, Blocks.CRAFTING_TABLE, 300);
+			add(map2, Blocks.DAYLIGHT_DETECTOR, 300);
+			add(map2, ItemTags.BANNERS, 300);
+			add(map2, Items.BOW, 300);
+			add(map2, Items.FISHING_ROD, 300);
+			add(map2, Blocks.LADDER, 300);
+			add(map2, ItemTags.SIGNS, 200);
+			add(map2, ItemTags.HANGING_SIGNS, 800);
+			add(map2, Items.WOODEN_SHOVEL, 200);
+			add(map2, Items.WOODEN_SWORD, 200);
+			add(map2, Items.WOODEN_HOE, 200);
+			add(map2, Items.WOODEN_AXE, 200);
+			add(map2, Items.WOODEN_PICKAXE, 200);
+			add(map2, ItemTags.WOODEN_DOORS, 200);
+			add(map2, ItemTags.BOATS, 1200);
+			add(map2, ItemTags.WOOL, 100);
+			add(map2, ItemTags.WOODEN_BUTTONS, 100);
+			add(map2, Items.STICK, 100);
+			add(map2, ItemTags.SAPLINGS, 100);
+			add(map2, Items.BOWL, 100);
+			add(map2, ItemTags.WOOL_CARPETS, 67);
+			add(map2, Blocks.DRIED_KELP_BLOCK, 4001);
+			add(map2, Items.CROSSBOW, 300);
+			add(map2, Blocks.BAMBOO, 50);
+			add(map2, Blocks.DEAD_BUSH, 100);
+			add(map2, Blocks.SCAFFOLDING, 50);
+			add(map2, Blocks.LOOM, 300);
+			add(map2, Blocks.BARREL, 300);
+			add(map2, Blocks.CARTOGRAPHY_TABLE, 300);
+			add(map2, Blocks.FLETCHING_TABLE, 300);
+			add(map2, Blocks.SMITHING_TABLE, 300);
+			add(map2, Blocks.COMPOSTER, 300);
+			add(map2, Blocks.AZALEA, 100);
+			add(map2, Blocks.FLOWERING_AZALEA, 100);
+			add(map2, Blocks.MANGROVE_ROOTS, 300);
+			fuelCache = map2;
+			return map2;
+		}
 	}
 
 	private static boolean isNeverAFurnaceFuel(Item item) {

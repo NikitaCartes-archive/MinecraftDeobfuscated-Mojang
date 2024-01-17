@@ -20,7 +20,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -334,9 +333,8 @@ public abstract class AbstractArrow extends Projectile {
 
 		boolean bl = entity.getType() == EntityType.ENDERMAN;
 		int j = entity.getRemainingFireTicks();
-		boolean bl2 = entity.getType().is(EntityTypeTags.DEFLECTS_ARROWS);
-		if (this.isOnFire() && !bl && !bl2) {
-			entity.setSecondsOnFire(5);
+		if (this.isOnFire() && !bl) {
+			entity.igniteForSeconds(5);
 		}
 
 		if (entity.hurt(damageSource, (float)i)) {
@@ -384,8 +382,6 @@ public abstract class AbstractArrow extends Projectile {
 			if (this.getPierceLevel() <= 0) {
 				this.discard();
 			}
-		} else if (bl2) {
-			this.deflect(entity);
 		} else {
 			entity.setRemainingFireTicks(j);
 			this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
@@ -399,14 +395,6 @@ public abstract class AbstractArrow extends Projectile {
 				this.discard();
 			}
 		}
-	}
-
-	public void deflect(Entity entity) {
-		float f = this.random.nextFloat() * 360.0F;
-		this.setDeltaMovement(this.getDeltaMovement().yRot(f * (float) (Math.PI / 180.0)).scale(0.5));
-		this.setYRot(this.getYRot() + f);
-		this.yRotO += f;
-		entity.playProjectileDeflectionSound(this);
 	}
 
 	@Override
@@ -593,8 +581,8 @@ public abstract class AbstractArrow extends Projectile {
 	}
 
 	public void setEnchantmentEffectsFromEntity(LivingEntity livingEntity, float f) {
-		int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.POWER_ARROWS, livingEntity);
-		int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH_ARROWS, livingEntity);
+		int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.POWER, livingEntity);
+		int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH, livingEntity);
 		this.setBaseDamage((double)(f * 2.0F) + this.random.triangle((double)this.level().getDifficulty().getId() * 0.11, 0.57425));
 		if (i > 0) {
 			this.setBaseDamage(this.getBaseDamage() + (double)i * 0.5 + 0.5);
@@ -604,8 +592,8 @@ public abstract class AbstractArrow extends Projectile {
 			this.setKnockback(j);
 		}
 
-		if (EnchantmentHelper.getEnchantmentLevel(Enchantments.FLAMING_ARROWS, livingEntity) > 0) {
-			this.setSecondsOnFire(100);
+		if (EnchantmentHelper.getEnchantmentLevel(Enchantments.FLAME, livingEntity) > 0) {
+			this.igniteForSeconds(100);
 		}
 	}
 

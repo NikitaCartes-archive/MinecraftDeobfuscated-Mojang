@@ -35,7 +35,6 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 			button.setPosition(this.leftPos + 5, this.height / 2 - 49);
 		}));
 		this.addWidget(this.recipeBookComponent);
-		this.setInitialFocus(this.recipeBookComponent);
 		this.titleLabelX = 29;
 	}
 
@@ -65,6 +64,16 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 		int k = this.leftPos;
 		int l = (this.height - this.imageHeight) / 2;
 		guiGraphics.blit(CRAFTING_TABLE_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+	}
+
+	@Override
+	public boolean keyPressed(int i, int j, int k) {
+		return this.recipeBookComponent.keyPressed(i, j, k) ? true : super.keyPressed(i, j, k);
+	}
+
+	@Override
+	public boolean charTyped(char c, int i) {
+		return this.recipeBookComponent.charTyped(c, i) ? true : super.charTyped(c, i);
 	}
 
 	@Override

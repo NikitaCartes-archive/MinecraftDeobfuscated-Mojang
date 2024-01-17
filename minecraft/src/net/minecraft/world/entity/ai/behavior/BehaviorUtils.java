@@ -28,9 +28,9 @@ public class BehaviorUtils {
 	private BehaviorUtils() {
 	}
 
-	public static void lockGazeAndWalkToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f) {
+	public static void lockGazeAndWalkToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f, int i) {
 		lookAtEachOther(livingEntity, livingEntity2);
-		setWalkAndLookTargetMemoriesToEachOther(livingEntity, livingEntity2, f);
+		setWalkAndLookTargetMemoriesToEachOther(livingEntity, livingEntity2, f, i);
 	}
 
 	public static boolean entityIsVisible(Brain<?> brain, LivingEntity livingEntity) {
@@ -59,10 +59,9 @@ public class BehaviorUtils {
 		livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity2, true));
 	}
 
-	private static void setWalkAndLookTargetMemoriesToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f) {
-		int i = 2;
-		setWalkAndLookTargetMemories(livingEntity, livingEntity2, f, 2);
-		setWalkAndLookTargetMemories(livingEntity2, livingEntity, f, 2);
+	private static void setWalkAndLookTargetMemoriesToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f, int i) {
+		setWalkAndLookTargetMemories(livingEntity, livingEntity2, f, i);
+		setWalkAndLookTargetMemories(livingEntity2, livingEntity, f, i);
 	}
 
 	public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, Entity entity, float f, int i) {

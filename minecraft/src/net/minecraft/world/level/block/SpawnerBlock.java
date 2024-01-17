@@ -42,7 +42,7 @@ public class SpawnerBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+	protected void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
 		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
 		if (bl) {
 			int i = 15 + serverLevel.random.nextInt(15) + serverLevel.random.nextInt(15);
@@ -51,7 +51,7 @@ public class SpawnerBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public RenderShape getRenderShape(BlockState blockState) {
+	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
 	}
 

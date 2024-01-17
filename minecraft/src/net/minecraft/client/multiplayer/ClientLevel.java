@@ -854,9 +854,7 @@ public class ClientLevel extends Level {
 		private final boolean hardcore;
 		private final GameRules gameRules;
 		private final boolean isFlat;
-		private int xSpawn;
-		private int ySpawn;
-		private int zSpawn;
+		private BlockPos spawnPos;
 		private float spawnAngle;
 		private long gameTime;
 		private long dayTime;
@@ -872,18 +870,8 @@ public class ClientLevel extends Level {
 		}
 
 		@Override
-		public int getXSpawn() {
-			return this.xSpawn;
-		}
-
-		@Override
-		public int getYSpawn() {
-			return this.ySpawn;
-		}
-
-		@Override
-		public int getZSpawn() {
-			return this.zSpawn;
+		public BlockPos getSpawnPos() {
+			return this.spawnPos;
 		}
 
 		@Override
@@ -901,26 +889,6 @@ public class ClientLevel extends Level {
 			return this.dayTime;
 		}
 
-		@Override
-		public void setXSpawn(int i) {
-			this.xSpawn = i;
-		}
-
-		@Override
-		public void setYSpawn(int i) {
-			this.ySpawn = i;
-		}
-
-		@Override
-		public void setZSpawn(int i) {
-			this.zSpawn = i;
-		}
-
-		@Override
-		public void setSpawnAngle(float f) {
-			this.spawnAngle = f;
-		}
-
 		public void setGameTime(long l) {
 			this.gameTime = l;
 		}
@@ -931,9 +899,7 @@ public class ClientLevel extends Level {
 
 		@Override
 		public void setSpawn(BlockPos blockPos, float f) {
-			this.xSpawn = blockPos.getX();
-			this.ySpawn = blockPos.getY();
-			this.zSpawn = blockPos.getZ();
+			this.spawnPos = blockPos.immutable();
 			this.spawnAngle = f;
 		}
 

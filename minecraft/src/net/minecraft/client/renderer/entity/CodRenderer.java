@@ -22,10 +22,10 @@ public class CodRenderer extends MobRenderer<Cod, CodModel<Cod>> {
 		return COD_LOCATION;
 	}
 
-	protected void setupRotations(Cod cod, PoseStack poseStack, float f, float g, float h) {
-		super.setupRotations(cod, poseStack, f, g, h);
-		float i = 4.3F * Mth.sin(0.6F * f);
-		poseStack.mulPose(Axis.YP.rotationDegrees(i));
+	protected void setupRotations(Cod cod, PoseStack poseStack, float f, float g, float h, float i) {
+		super.setupRotations(cod, poseStack, f, g, h, i);
+		float j = 4.3F * Mth.sin(0.6F * f);
+		poseStack.mulPose(Axis.YP.rotationDegrees(j));
 		if (!cod.isInWater()) {
 			poseStack.translate(0.1F, 0.1F, -0.1F);
 			poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));

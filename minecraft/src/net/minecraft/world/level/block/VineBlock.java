@@ -94,17 +94,17 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return (VoxelShape)this.shapesCache.get(blockState);
 	}
 
 	@Override
-	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return true;
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return this.hasFaces(this.getUpdatedState(blockState, levelReader, blockPos));
 	}
 
@@ -173,7 +173,7 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction == Direction.DOWN) {
@@ -185,7 +185,7 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DO_VINES_SPREAD)) {
 			if (randomSource.nextInt(4) == 0) {
 				Direction direction = Direction.getRandom(randomSource);
@@ -299,7 +299,7 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		BlockState blockState2 = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
 		return blockState2.is(this) ? this.countFaces(blockState2) < PROPERTY_BY_DIRECTION.size() : super.canBeReplaced(blockState, blockPlaceContext);
 	}
@@ -330,7 +330,7 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		switch (rotation) {
 			case CLOCKWISE_180:
 				return blockState.setValue(NORTH, (Boolean)blockState.getValue(SOUTH))
@@ -353,7 +353,7 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		switch (mirror) {
 			case LEFT_RIGHT:
 				return blockState.setValue(NORTH, (Boolean)blockState.getValue(SOUTH)).setValue(SOUTH, (Boolean)blockState.getValue(NORTH));

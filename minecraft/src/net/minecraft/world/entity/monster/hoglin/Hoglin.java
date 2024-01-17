@@ -111,7 +111,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		} else {
 			this.attackAnimationRemainingTicks = 10;
 			this.level().broadcastEntityEvent(this, (byte)4);
-			this.playSound(SoundEvents.HOGLIN_ATTACK, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.HOGLIN_ATTACK);
 			HoglinAi.onHitTarget(this, (LivingEntity)entity);
 			return HoglinBase.hurtAndThrowTarget(this, (LivingEntity)entity);
 		}
@@ -162,7 +162,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		if (this.isConverting()) {
 			this.timeInOverworld++;
 			if (this.timeInOverworld > 300) {
-				this.playSoundEvent(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED);
+				this.makeSound(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED);
 				this.finishConversion((ServerLevel)this.level());
 			}
 		} else {
@@ -240,7 +240,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	public void handleEntityEvent(byte b) {
 		if (b == 4) {
 			this.attackAnimationRemainingTicks = 10;
-			this.playSound(SoundEvents.HOGLIN_ATTACK, 1.0F, this.getVoicePitch());
+			this.makeSound(SoundEvents.HOGLIN_ATTACK);
 		} else {
 			super.handleEntityEvent(b);
 		}
@@ -373,10 +373,6 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	@Override
 	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
 		this.playSound(SoundEvents.HOGLIN_STEP, 0.15F, 1.0F);
-	}
-
-	protected void playSoundEvent(SoundEvent soundEvent) {
-		this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
 	}
 
 	@Override

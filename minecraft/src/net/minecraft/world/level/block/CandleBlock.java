@@ -68,7 +68,7 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	public ItemInteractionResult useItemOn(
+	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (itemStack.isEmpty() && player.getAbilities().mayBuild && (Boolean)blockState.getValue(LIT)) {
@@ -80,7 +80,7 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		return !blockPlaceContext.isSecondaryUseActive() && blockPlaceContext.getItemInHand().getItem() == this.asItem() && blockState.getValue(CANDLES) < 4
 			? true
 			: super.canBeReplaced(blockState, blockPlaceContext);
@@ -99,7 +99,7 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -110,12 +110,12 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		switch (blockState.getValue(CANDLES)) {
 			case 1:
 			default:
@@ -168,7 +168,7 @@ public class CandleBlock extends AbstractCandleBlock implements SimpleWaterlogge
 	}
 
 	@Override
-	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
+	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return Block.canSupportCenter(levelReader, blockPos.below(), Direction.UP);
 	}
 }

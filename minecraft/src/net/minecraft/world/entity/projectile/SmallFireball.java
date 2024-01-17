@@ -33,7 +33,7 @@ public class SmallFireball extends Fireball {
 			Entity entity = entityHitResult.getEntity();
 			Entity entity2 = this.getOwner();
 			int i = entity.getRemainingFireTicks();
-			entity.setSecondsOnFire(5);
+			entity.igniteForSeconds(5);
 			if (!entity.hurt(this.damageSources().fireball(this, entity2), 5.0F)) {
 				entity.setRemainingFireTicks(i);
 			} else if (entity2 instanceof LivingEntity) {

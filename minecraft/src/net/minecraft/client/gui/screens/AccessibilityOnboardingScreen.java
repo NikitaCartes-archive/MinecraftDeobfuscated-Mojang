@@ -32,6 +32,8 @@ public class AccessibilityOnboardingScreen extends Screen {
 	private final Runnable onClose;
 	@Nullable
 	private FocusableTextWidget textWidget;
+	@Nullable
+	private AbstractWidget narrationButton;
 
 	public AccessibilityOnboardingScreen(Options options, Runnable runnable) {
 		super(Component.translatable("accessibility.onboarding.screen.title"));
@@ -50,13 +52,9 @@ public class AccessibilityOnboardingScreen extends Screen {
 		linearLayout.defaultCellSetting().alignHorizontallyCenter().padding(2);
 		this.textWidget = new FocusableTextWidget(this.width - 16, this.title, this.font);
 		linearLayout.addChild(this.textWidget, layoutSettings -> layoutSettings.paddingBottom(16));
-		AbstractWidget abstractWidget = this.options.narrator().createButton(this.options, 0, 0, 150);
-		abstractWidget.active = this.narratorAvailable;
-		linearLayout.addChild(abstractWidget);
-		if (this.narratorAvailable) {
-			this.setInitialFocus(abstractWidget);
-		}
-
+		this.narrationButton = this.options.narrator().createButton(this.options, 0, 0, 150);
+		this.narrationButton.active = this.narratorAvailable;
+		linearLayout.addChild(this.narrationButton);
 		linearLayout.addChild(CommonButtons.accessibility(150, button -> this.closeAndSetScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), false));
 		linearLayout.addChild(
 			CommonButtons.language(
@@ -69,6 +67,15 @@ public class AccessibilityOnboardingScreen extends Screen {
 		frameLayout.arrangeElements();
 		FrameLayout.alignInRectangle(frameLayout, 0, i, this.width, this.height, 0.5F, 0.0F);
 		frameLayout.visitWidgets(this::addRenderableWidget);
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		if (this.narratorAvailable && this.narrationButton != null) {
+			this.setInitialFocus(this.narrationButton);
+		} else {
+			super.setInitialFocus();
+		}
 	}
 
 	private int initTitleYPos() {

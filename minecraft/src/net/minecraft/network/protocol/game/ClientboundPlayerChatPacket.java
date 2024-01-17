@@ -8,7 +8,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FilterMask;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.SignedMessageBody;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public record ClientboundPlayerChatPacket(
 	UUID sender,
@@ -19,7 +21,11 @@ public record ClientboundPlayerChatPacket(
 	FilterMask filterMask,
 	ChatType.BoundNetwork chatType
 ) implements Packet<ClientGamePacketListener> {
-	public ClientboundPlayerChatPacket(FriendlyByteBuf friendlyByteBuf) {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerChatPacket> STREAM_CODEC = Packet.codec(
+		ClientboundPlayerChatPacket::write, ClientboundPlayerChatPacket::new
+	);
+
+	private ClientboundPlayerChatPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(
 			friendlyByteBuf.readUUID(),
 			friendlyByteBuf.readVarInt(),
@@ -31,8 +37,7 @@ public record ClientboundPlayerChatPacket(
 		);
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUUID(this.sender);
 		friendlyByteBuf.writeVarInt(this.index);
 		friendlyByteBuf.writeNullable(this.signature, MessageSignature::write);
@@ -40,6 +45,11 @@ public record ClientboundPlayerChatPacket(
 		friendlyByteBuf.writeNullable(this.unsignedContent, FriendlyByteBuf::writeComponent);
 		FilterMask.write(friendlyByteBuf, this.filterMask);
 		this.chatType.write(friendlyByteBuf);
+	}
+
+	@Override
+	public PacketType<ClientboundPlayerChatPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_PLAYER_CHAT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

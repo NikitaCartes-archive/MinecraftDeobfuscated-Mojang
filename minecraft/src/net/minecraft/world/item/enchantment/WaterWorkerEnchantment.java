@@ -1,10 +1,11 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class WaterWorkerEnchantment extends Enchantment {
 	public WaterWorkerEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
-		super(rarity, EnchantmentCategory.ARMOR_HEAD, equipmentSlots);
+		super(rarity, ItemTags.HEAD_ARMOR_ENCHANTABLE, equipmentSlots);
 	}
 
 	@Override

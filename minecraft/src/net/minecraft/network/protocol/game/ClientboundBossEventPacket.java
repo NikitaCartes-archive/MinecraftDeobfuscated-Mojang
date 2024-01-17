@@ -4,10 +4,15 @@ import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.BossEvent;
 
 public class ClientboundBossEventPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundBossEventPacket> STREAM_CODEC = Packet.codec(
+		ClientboundBossEventPacket::write, ClientboundBossEventPacket::new
+	);
 	private static final int FLAG_DARKEN = 1;
 	private static final int FLAG_MUSIC = 2;
 	private static final int FLAG_FOG = 4;
@@ -34,7 +39,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		this.operation = operation;
 	}
 
-	public ClientboundBossEventPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundBossEventPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readUUID();
 		ClientboundBossEventPacket.OperationType operationType = friendlyByteBuf.readEnum(ClientboundBossEventPacket.OperationType.class);
 		this.operation = (ClientboundBossEventPacket.Operation)operationType.reader.apply(friendlyByteBuf);
@@ -67,8 +72,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		);
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeUUID(this.id);
 		friendlyByteBuf.writeEnum(this.operation.getType());
 		this.operation.write(friendlyByteBuf);
@@ -89,6 +93,11 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		return i;
+	}
+
+	@Override
+	public PacketType<ClientboundBossEventPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_BOSS_EVENT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

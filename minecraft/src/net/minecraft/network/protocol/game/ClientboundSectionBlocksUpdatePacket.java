@@ -6,12 +6,17 @@ import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 
 public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundSectionBlocksUpdatePacket> STREAM_CODEC = Packet.codec(
+		ClientboundSectionBlocksUpdatePacket::write, ClientboundSectionBlocksUpdatePacket::new
+	);
 	private static final int POS_IN_SECTION_BITS = 12;
 	private final SectionPos sectionPos;
 	private final short[] positions;
@@ -31,7 +36,7 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 		}
 	}
 
-	public ClientboundSectionBlocksUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundSectionBlocksUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
 		this.sectionPos = SectionPos.of(friendlyByteBuf.readLong());
 		int i = friendlyByteBuf.readVarInt();
 		this.positions = new short[i];
@@ -44,14 +49,18 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 		}
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeLong(this.sectionPos.asLong());
 		friendlyByteBuf.writeVarInt(this.positions.length);
 
 		for (int i = 0; i < this.positions.length; i++) {
 			friendlyByteBuf.writeVarLong((long)Block.getId(this.states[i]) << 12 | (long)this.positions[i]);
 		}
+	}
+
+	@Override
+	public PacketType<ClientboundSectionBlocksUpdatePacket> type() {
+		return GamePacketTypes.CLIENTBOUND_SECTION_BLOCKS_UPDATE;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

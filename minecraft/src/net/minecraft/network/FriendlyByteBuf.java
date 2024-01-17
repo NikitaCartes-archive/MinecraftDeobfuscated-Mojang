@@ -41,9 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
@@ -51,11 +49,8 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.EndTag;
@@ -65,14 +60,14 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.StreamDecoder;
+import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -123,51 +118,6 @@ public class FriendlyByteBuf extends ByteBuf {
 		this.writeUtf(GSON.toJson(Util.getOrThrow(dataResult, string -> new EncoderException("Failed to encode: " + string + " " + object))));
 	}
 
-	public <T> void writeId(IdMap<T> idMap, T object) {
-		int i = idMap.getId(object);
-		if (i == -1) {
-			throw new IllegalArgumentException("Can't find id for '" + object + "' in map " + idMap);
-		} else {
-			this.writeVarInt(i);
-		}
-	}
-
-	public <T> void writeId(IdMap<Holder<T>> idMap, Holder<T> holder, FriendlyByteBuf.Writer<T> writer) {
-		switch (holder.kind()) {
-			case REFERENCE:
-				int i = idMap.getId(holder);
-				if (i == -1) {
-					throw new IllegalArgumentException("Can't find id for '" + holder.value() + "' in map " + idMap);
-				}
-
-				this.writeVarInt(i + 1);
-				break;
-			case DIRECT:
-				this.writeVarInt(0);
-				writer.accept(this, holder.value());
-		}
-	}
-
-	@Nullable
-	public <T> T readById(IdMap<T> idMap) {
-		int i = this.readVarInt();
-		return idMap.byId(i);
-	}
-
-	public <T> Holder<T> readById(IdMap<Holder<T>> idMap, FriendlyByteBuf.Reader<T> reader) {
-		int i = this.readVarInt();
-		if (i == 0) {
-			return Holder.direct((T)reader.apply(this));
-		} else {
-			Holder<T> holder = idMap.byId(i - 1);
-			if (holder == null) {
-				throw new IllegalArgumentException("Can't find element with id " + i);
-			} else {
-				return holder;
-			}
-		}
-	}
-
 	public static <T> IntFunction<T> limitValue(IntFunction<T> intFunction, int i) {
 		return j -> {
 			if (j > i) {
@@ -178,27 +128,27 @@ public class FriendlyByteBuf extends ByteBuf {
 		};
 	}
 
-	public <T, C extends Collection<T>> C readCollection(IntFunction<C> intFunction, FriendlyByteBuf.Reader<T> reader) {
+	public <T, C extends Collection<T>> C readCollection(IntFunction<C> intFunction, StreamDecoder<? super FriendlyByteBuf, T> streamDecoder) {
 		int i = this.readVarInt();
 		C collection = (C)intFunction.apply(i);
 
 		for (int j = 0; j < i; j++) {
-			collection.add(reader.apply(this));
+			collection.add(streamDecoder.decode(this));
 		}
 
 		return collection;
 	}
 
-	public <T> void writeCollection(Collection<T> collection, FriendlyByteBuf.Writer<T> writer) {
+	public <T> void writeCollection(Collection<T> collection, StreamEncoder<? super FriendlyByteBuf, T> streamEncoder) {
 		this.writeVarInt(collection.size());
 
 		for (T object : collection) {
-			writer.accept(this, object);
+			streamEncoder.encode(this, object);
 		}
 	}
 
-	public <T> List<T> readList(FriendlyByteBuf.Reader<T> reader) {
-		return this.readCollection(Lists::newArrayListWithCapacity, reader);
+	public <T> List<T> readList(StreamDecoder<? super FriendlyByteBuf, T> streamDecoder) {
+		return this.readCollection(Lists::newArrayListWithCapacity, streamDecoder);
 	}
 
 	public IntList readIntIdList() {
@@ -217,28 +167,30 @@ public class FriendlyByteBuf extends ByteBuf {
 		intList.forEach(this::writeVarInt);
 	}
 
-	public <K, V, M extends Map<K, V>> M readMap(IntFunction<M> intFunction, FriendlyByteBuf.Reader<K> reader, FriendlyByteBuf.Reader<V> reader2) {
+	public <K, V, M extends Map<K, V>> M readMap(
+		IntFunction<M> intFunction, StreamDecoder<? super FriendlyByteBuf, K> streamDecoder, StreamDecoder<? super FriendlyByteBuf, V> streamDecoder2
+	) {
 		int i = this.readVarInt();
 		M map = (M)intFunction.apply(i);
 
 		for (int j = 0; j < i; j++) {
-			K object = (K)reader.apply(this);
-			V object2 = (V)reader2.apply(this);
+			K object = streamDecoder.decode(this);
+			V object2 = streamDecoder2.decode(this);
 			map.put(object, object2);
 		}
 
 		return map;
 	}
 
-	public <K, V> Map<K, V> readMap(FriendlyByteBuf.Reader<K> reader, FriendlyByteBuf.Reader<V> reader2) {
-		return this.readMap(Maps::newHashMapWithExpectedSize, reader, reader2);
+	public <K, V> Map<K, V> readMap(StreamDecoder<? super FriendlyByteBuf, K> streamDecoder, StreamDecoder<? super FriendlyByteBuf, V> streamDecoder2) {
+		return this.readMap(Maps::newHashMapWithExpectedSize, streamDecoder, streamDecoder2);
 	}
 
-	public <K, V> void writeMap(Map<K, V> map, FriendlyByteBuf.Writer<K> writer, FriendlyByteBuf.Writer<V> writer2) {
+	public <K, V> void writeMap(Map<K, V> map, StreamEncoder<? super FriendlyByteBuf, K> streamEncoder, StreamEncoder<? super FriendlyByteBuf, V> streamEncoder2) {
 		this.writeVarInt(map.size());
 		map.forEach((object, object2) -> {
-			writer.accept(this, object);
-			writer2.accept(this, object2);
+			streamEncoder.encode(this, (K)object);
+			streamEncoder2.encode(this, (V)object2);
 		});
 	}
 
@@ -275,45 +227,47 @@ public class FriendlyByteBuf extends ByteBuf {
 		return enumSet;
 	}
 
-	public <T> void writeOptional(Optional<T> optional, FriendlyByteBuf.Writer<T> writer) {
+	public <T> void writeOptional(Optional<T> optional, StreamEncoder<? super FriendlyByteBuf, T> streamEncoder) {
 		if (optional.isPresent()) {
 			this.writeBoolean(true);
-			writer.accept(this, optional.get());
+			streamEncoder.encode(this, (T)optional.get());
 		} else {
 			this.writeBoolean(false);
 		}
 	}
 
-	public <T> Optional<T> readOptional(FriendlyByteBuf.Reader<T> reader) {
-		return this.readBoolean() ? Optional.of(reader.apply(this)) : Optional.empty();
+	public <T> Optional<T> readOptional(StreamDecoder<? super FriendlyByteBuf, T> streamDecoder) {
+		return this.readBoolean() ? Optional.of(streamDecoder.decode(this)) : Optional.empty();
 	}
 
 	@Nullable
-	public <T> T readNullable(FriendlyByteBuf.Reader<T> reader) {
-		return (T)(this.readBoolean() ? reader.apply(this) : null);
+	public <T> T readNullable(StreamDecoder<? super FriendlyByteBuf, T> streamDecoder) {
+		return this.readBoolean() ? streamDecoder.decode(this) : null;
 	}
 
-	public <T> void writeNullable(@Nullable T object, FriendlyByteBuf.Writer<T> writer) {
+	public <T> void writeNullable(@Nullable T object, StreamEncoder<? super FriendlyByteBuf, T> streamEncoder) {
 		if (object != null) {
 			this.writeBoolean(true);
-			writer.accept(this, object);
+			streamEncoder.encode(this, object);
 		} else {
 			this.writeBoolean(false);
 		}
 	}
 
-	public <L, R> void writeEither(Either<L, R> either, FriendlyByteBuf.Writer<L> writer, FriendlyByteBuf.Writer<R> writer2) {
+	public <L, R> void writeEither(
+		Either<L, R> either, StreamEncoder<? super FriendlyByteBuf, L> streamEncoder, StreamEncoder<? super FriendlyByteBuf, R> streamEncoder2
+	) {
 		either.ifLeft(object -> {
 			this.writeBoolean(true);
-			writer.accept(this, object);
+			streamEncoder.encode(this, (L)object);
 		}).ifRight(object -> {
 			this.writeBoolean(false);
-			writer2.accept(this, object);
+			streamEncoder2.encode(this, (R)object);
 		});
 	}
 
-	public <L, R> Either<L, R> readEither(FriendlyByteBuf.Reader<L> reader, FriendlyByteBuf.Reader<R> reader2) {
-		return this.readBoolean() ? Either.left((L)reader.apply(this)) : Either.right((R)reader2.apply(this));
+	public <L, R> Either<L, R> readEither(StreamDecoder<? super FriendlyByteBuf, L> streamDecoder, StreamDecoder<? super FriendlyByteBuf, R> streamDecoder2) {
+		return this.readBoolean() ? Either.left(streamDecoder.decode(this)) : Either.right(streamDecoder2.decode(this));
 	}
 
 	public byte[] readByteArray() {
@@ -402,12 +356,20 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public BlockPos readBlockPos() {
-		return BlockPos.of(this.readLong());
+		return readBlockPos(this);
+	}
+
+	public static BlockPos readBlockPos(ByteBuf byteBuf) {
+		return BlockPos.of(byteBuf.readLong());
 	}
 
 	public FriendlyByteBuf writeBlockPos(BlockPos blockPos) {
-		this.writeLong(blockPos.asLong());
+		writeBlockPos(this, blockPos);
 		return this;
+	}
+
+	public static void writeBlockPos(ByteBuf byteBuf, BlockPos blockPos) {
+		byteBuf.writeLong(blockPos.asLong());
 	}
 
 	public ChunkPos readChunkPos() {
@@ -440,24 +402,40 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public Vector3f readVector3f() {
-		return new Vector3f(this.readFloat(), this.readFloat(), this.readFloat());
+		return readVector3f(this);
+	}
+
+	public static Vector3f readVector3f(ByteBuf byteBuf) {
+		return new Vector3f(byteBuf.readFloat(), byteBuf.readFloat(), byteBuf.readFloat());
 	}
 
 	public void writeVector3f(Vector3f vector3f) {
-		this.writeFloat(vector3f.x());
-		this.writeFloat(vector3f.y());
-		this.writeFloat(vector3f.z());
+		writeVector3f(this, vector3f);
+	}
+
+	public static void writeVector3f(ByteBuf byteBuf, Vector3f vector3f) {
+		byteBuf.writeFloat(vector3f.x());
+		byteBuf.writeFloat(vector3f.y());
+		byteBuf.writeFloat(vector3f.z());
 	}
 
 	public Quaternionf readQuaternion() {
-		return new Quaternionf(this.readFloat(), this.readFloat(), this.readFloat(), this.readFloat());
+		return readQuaternion(this);
+	}
+
+	public static Quaternionf readQuaternion(ByteBuf byteBuf) {
+		return new Quaternionf(byteBuf.readFloat(), byteBuf.readFloat(), byteBuf.readFloat(), byteBuf.readFloat());
 	}
 
 	public void writeQuaternion(Quaternionf quaternionf) {
-		this.writeFloat(quaternionf.x);
-		this.writeFloat(quaternionf.y);
-		this.writeFloat(quaternionf.z);
-		this.writeFloat(quaternionf.w);
+		writeQuaternion(this, quaternionf);
+	}
+
+	public static void writeQuaternion(ByteBuf byteBuf, Quaternionf quaternionf) {
+		byteBuf.writeFloat(quaternionf.x);
+		byteBuf.writeFloat(quaternionf.y);
+		byteBuf.writeFloat(quaternionf.z);
+		byteBuf.writeFloat(quaternionf.w);
 	}
 
 	public Vec3 readVec3() {
@@ -509,13 +487,21 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public FriendlyByteBuf writeUUID(UUID uUID) {
-		this.writeLong(uUID.getMostSignificantBits());
-		this.writeLong(uUID.getLeastSignificantBits());
+		writeUUID(this, uUID);
 		return this;
 	}
 
+	public static void writeUUID(ByteBuf byteBuf, UUID uUID) {
+		byteBuf.writeLong(uUID.getMostSignificantBits());
+		byteBuf.writeLong(uUID.getLeastSignificantBits());
+	}
+
 	public UUID readUUID() {
-		return new UUID(this.readLong(), this.readLong());
+		return readUUID(this);
+	}
+
+	public static UUID readUUID(ByteBuf byteBuf) {
+		return new UUID(byteBuf.readLong(), byteBuf.readLong());
 	}
 
 	public FriendlyByteBuf writeVarInt(int i) {
@@ -529,13 +515,17 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public FriendlyByteBuf writeNbt(@Nullable Tag tag) {
+		writeNbt(this, tag);
+		return this;
+	}
+
+	public static void writeNbt(ByteBuf byteBuf, @Nullable Tag tag) {
 		if (tag == null) {
 			tag = EndTag.INSTANCE;
 		}
 
 		try {
-			NbtIo.writeAnyTag(tag, new ByteBufOutputStream(this));
-			return this;
+			NbtIo.writeAnyTag(tag, new ByteBufOutputStream(byteBuf));
 		} catch (IOException var3) {
 			throw new EncoderException(var3);
 		}
@@ -543,7 +533,12 @@ public class FriendlyByteBuf extends ByteBuf {
 
 	@Nullable
 	public CompoundTag readNbt() {
-		Tag tag = this.readNbt(NbtAccounter.create(2097152L));
+		return readNbt(this);
+	}
+
+	@Nullable
+	public static CompoundTag readNbt(ByteBuf byteBuf) {
+		Tag tag = readNbt(byteBuf, NbtAccounter.create(2097152L));
 		if (tag != null && !(tag instanceof CompoundTag)) {
 			throw new DecoderException("Not a compound tag: " + tag);
 		} else {
@@ -552,44 +547,18 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	@Nullable
-	public Tag readNbt(NbtAccounter nbtAccounter) {
+	public static Tag readNbt(ByteBuf byteBuf, NbtAccounter nbtAccounter) {
 		try {
-			Tag tag = NbtIo.readAnyTag(new ByteBufInputStream(this), nbtAccounter);
+			Tag tag = NbtIo.readAnyTag(new ByteBufInputStream(byteBuf), nbtAccounter);
 			return tag.getId() == 0 ? null : tag;
 		} catch (IOException var3) {
 			throw new EncoderException(var3);
 		}
 	}
 
-	public FriendlyByteBuf writeItem(ItemStack itemStack) {
-		if (itemStack.isEmpty()) {
-			this.writeBoolean(false);
-		} else {
-			this.writeBoolean(true);
-			Item item = itemStack.getItem();
-			this.writeId(BuiltInRegistries.ITEM, item);
-			this.writeByte(itemStack.getCount());
-			CompoundTag compoundTag = null;
-			if (item.canBeDepleted() || item.shouldOverrideMultiplayerNbt()) {
-				compoundTag = itemStack.getTag();
-			}
-
-			this.writeNbt(compoundTag);
-		}
-
-		return this;
-	}
-
-	public ItemStack readItem() {
-		if (!this.readBoolean()) {
-			return ItemStack.EMPTY;
-		} else {
-			Item item = this.readById(BuiltInRegistries.ITEM);
-			int i = this.readByte();
-			ItemStack itemStack = new ItemStack(item, i);
-			itemStack.setTag(this.readNbt());
-			return itemStack;
-		}
+	@Nullable
+	public Tag readNbt(NbtAccounter nbtAccounter) {
+		return readNbt(this, nbtAccounter);
 	}
 
 	public String readUtf() {
@@ -1671,19 +1640,5 @@ public class FriendlyByteBuf extends ByteBuf {
 	@Override
 	public boolean release(int i) {
 		return this.source.release(i);
-	}
-
-	@FunctionalInterface
-	public interface Reader<T> extends Function<FriendlyByteBuf, T> {
-		default FriendlyByteBuf.Reader<Optional<T>> asOptional() {
-			return friendlyByteBuf -> friendlyByteBuf.readOptional(this);
-		}
-	}
-
-	@FunctionalInterface
-	public interface Writer<T> extends BiConsumer<FriendlyByteBuf, T> {
-		default FriendlyByteBuf.Writer<Optional<T>> asOptional() {
-			return (friendlyByteBuf, optional) -> friendlyByteBuf.writeOptional(optional, this);
-		}
 	}
 }

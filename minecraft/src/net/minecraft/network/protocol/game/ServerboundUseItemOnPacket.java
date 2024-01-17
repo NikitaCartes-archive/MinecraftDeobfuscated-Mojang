@@ -1,11 +1,16 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class ServerboundUseItemOnPacket implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundUseItemOnPacket> STREAM_CODEC = Packet.codec(
+		ServerboundUseItemOnPacket::write, ServerboundUseItemOnPacket::new
+	);
 	private final BlockHitResult blockHit;
 	private final InteractionHand hand;
 	private final int sequence;
@@ -16,17 +21,21 @@ public class ServerboundUseItemOnPacket implements Packet<ServerGamePacketListen
 		this.sequence = i;
 	}
 
-	public ServerboundUseItemOnPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ServerboundUseItemOnPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
 		this.blockHit = friendlyByteBuf.readBlockHitResult();
 		this.sequence = friendlyByteBuf.readVarInt();
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeEnum(this.hand);
 		friendlyByteBuf.writeBlockHitResult(this.blockHit);
 		friendlyByteBuf.writeVarInt(this.sequence);
+	}
+
+	@Override
+	public PacketType<ServerboundUseItemOnPacket> type() {
+		return GamePacketTypes.SERVERBOUND_USE_ITEM_ON;
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {

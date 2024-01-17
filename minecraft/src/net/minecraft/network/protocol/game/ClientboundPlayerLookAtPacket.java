@@ -3,12 +3,17 @@ package net.minecraft.network.protocol.game;
 import javax.annotation.Nullable;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class ClientboundPlayerLookAtPacket implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerLookAtPacket> STREAM_CODEC = Packet.codec(
+		ClientboundPlayerLookAtPacket::write, ClientboundPlayerLookAtPacket::new
+	);
 	private final double x;
 	private final double y;
 	private final double z;
@@ -38,7 +43,7 @@ public class ClientboundPlayerLookAtPacket implements Packet<ClientGamePacketLis
 		this.atEntity = true;
 	}
 
-	public ClientboundPlayerLookAtPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundPlayerLookAtPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.fromAnchor = friendlyByteBuf.readEnum(EntityAnchorArgument.Anchor.class);
 		this.x = friendlyByteBuf.readDouble();
 		this.y = friendlyByteBuf.readDouble();
@@ -53,8 +58,7 @@ public class ClientboundPlayerLookAtPacket implements Packet<ClientGamePacketLis
 		}
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeEnum(this.fromAnchor);
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);
@@ -64,6 +68,11 @@ public class ClientboundPlayerLookAtPacket implements Packet<ClientGamePacketLis
 			friendlyByteBuf.writeVarInt(this.entity);
 			friendlyByteBuf.writeEnum(this.toAnchor);
 		}
+	}
+
+	@Override
+	public PacketType<ClientboundPlayerLookAtPacket> type() {
+		return GamePacketTypes.CLIENTBOUND_PLAYER_LOOK_AT;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {

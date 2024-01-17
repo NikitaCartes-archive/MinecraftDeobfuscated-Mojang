@@ -68,7 +68,7 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		boolean bl = direction.getAxis() == Direction.Axis.Y;
@@ -78,7 +78,7 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		boolean bl2 = level.hasNeighborSignal(blockPos);
 		if (bl2 != (Boolean)blockState.getValue(POWERED)) {
 			if (bl2) {
@@ -97,7 +97,7 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	public ItemInteractionResult useItemOn(
+	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		return itemStack.is(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS) && blockHitResult.getDirection() == Direction.UP
@@ -106,7 +106,7 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else {
@@ -119,7 +119,7 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	public void attack(BlockState blockState, Level level, BlockPos blockPos, Player player) {
+	protected void attack(BlockState blockState, Level level, BlockPos blockPos, Player player) {
 		if (!level.isClientSide) {
 			this.playNote(player, blockState, level, blockPos);
 			player.awardStat(Stats.PLAY_NOTEBLOCK);
@@ -131,7 +131,7 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	public boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
+	protected boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
 		NoteBlockInstrument noteBlockInstrument = blockState.getValue(INSTRUMENT);
 		float f;
 		if (noteBlockInstrument.isTunable()) {

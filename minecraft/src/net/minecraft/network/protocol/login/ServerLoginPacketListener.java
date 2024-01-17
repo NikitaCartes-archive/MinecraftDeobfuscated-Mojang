@@ -1,9 +1,10 @@
 package net.minecraft.network.protocol.login;
 
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.protocol.cookie.ServerCookiePacketListener;
 import net.minecraft.network.protocol.game.ServerPacketListener;
 
-public interface ServerLoginPacketListener extends ServerPacketListener {
+public interface ServerLoginPacketListener extends ServerCookiePacketListener, ServerPacketListener {
 	@Override
 	default ConnectionProtocol protocol() {
 		return ConnectionProtocol.LOGIN;

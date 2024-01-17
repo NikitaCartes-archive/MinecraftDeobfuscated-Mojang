@@ -210,15 +210,15 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		modelPart2.render(poseStack, multiBufferSource.getBuffer(RenderType.entityTranslucent(resourceLocation)), i, OverlayTexture.NO_OVERLAY);
 	}
 
-	protected void setupRotations(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, float f, float g, float h) {
-		float i = abstractClientPlayer.getSwimAmount(h);
-		float j = abstractClientPlayer.getViewXRot(h);
+	protected void setupRotations(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, float f, float g, float h, float i) {
+		float j = abstractClientPlayer.getSwimAmount(h);
+		float k = abstractClientPlayer.getViewXRot(h);
 		if (abstractClientPlayer.isFallFlying()) {
-			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
-			float k = (float)abstractClientPlayer.getFallFlyingTicks() + h;
-			float l = Mth.clamp(k * k / 100.0F, 0.0F, 1.0F);
+			super.setupRotations(abstractClientPlayer, poseStack, f, g, h, i);
+			float l = (float)abstractClientPlayer.getFallFlyingTicks() + h;
+			float m = Mth.clamp(l * l / 100.0F, 0.0F, 1.0F);
 			if (!abstractClientPlayer.isAutoSpinAttack()) {
-				poseStack.mulPose(Axis.XP.rotationDegrees(l * (-90.0F - j)));
+				poseStack.mulPose(Axis.XP.rotationDegrees(m * (-90.0F - k)));
 			}
 
 			Vec3 vec3 = abstractClientPlayer.getViewVector(h);
@@ -226,20 +226,20 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			double d = vec32.horizontalDistanceSqr();
 			double e = vec3.horizontalDistanceSqr();
 			if (d > 0.0 && e > 0.0) {
-				double m = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(d * e);
-				double n = vec32.x * vec3.z - vec32.z * vec3.x;
-				poseStack.mulPose(Axis.YP.rotation((float)(Math.signum(n) * Math.acos(m))));
+				double n = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(d * e);
+				double o = vec32.x * vec3.z - vec32.z * vec3.x;
+				poseStack.mulPose(Axis.YP.rotation((float)(Math.signum(o) * Math.acos(n))));
 			}
-		} else if (i > 0.0F) {
-			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
-			float kx = abstractClientPlayer.isInWater() ? -90.0F - j : -90.0F;
-			float lx = Mth.lerp(i, 0.0F, kx);
-			poseStack.mulPose(Axis.XP.rotationDegrees(lx));
+		} else if (j > 0.0F) {
+			super.setupRotations(abstractClientPlayer, poseStack, f, g, h, i);
+			float lx = abstractClientPlayer.isInWater() ? -90.0F - k : -90.0F;
+			float mx = Mth.lerp(j, 0.0F, lx);
+			poseStack.mulPose(Axis.XP.rotationDegrees(mx));
 			if (abstractClientPlayer.isVisuallySwimming()) {
 				poseStack.translate(0.0F, -1.0F, 0.3F);
 			}
 		} else {
-			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
+			super.setupRotations(abstractClientPlayer, poseStack, f, g, h, i);
 		}
 	}
 }

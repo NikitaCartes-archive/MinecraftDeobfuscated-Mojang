@@ -4,7 +4,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 import org.joml.Vector3f;
 
@@ -27,18 +26,6 @@ public abstract class DustParticleOptionsBase implements ParticleOptions {
 		stringReader.expect(' ');
 		float h = stringReader.readFloat();
 		return new Vector3f(f, g, h);
-	}
-
-	public static Vector3f readVector3f(FriendlyByteBuf friendlyByteBuf) {
-		return new Vector3f(friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat(), friendlyByteBuf.readFloat());
-	}
-
-	@Override
-	public void writeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeFloat(this.color.x());
-		friendlyByteBuf.writeFloat(this.color.y());
-		friendlyByteBuf.writeFloat(this.color.z());
-		friendlyByteBuf.writeFloat(this.scale);
 	}
 
 	@Override

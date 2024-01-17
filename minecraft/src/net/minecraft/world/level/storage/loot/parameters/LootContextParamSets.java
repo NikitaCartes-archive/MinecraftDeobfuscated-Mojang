@@ -58,6 +58,9 @@ public class LootContextParamSets {
 				.required(LootContextParams.TOOL)
 				.required(LootContextParams.BLOCK_STATE)
 	);
+	public static final LootContextParamSet BLOCK_USE = register(
+		"block_use", builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.ORIGIN).required(LootContextParams.BLOCK_STATE)
+	);
 	public static final LootContextParamSet ALL_PARAMS = register(
 		"generic",
 		builder -> builder.required(LootContextParams.THIS_ENTITY)

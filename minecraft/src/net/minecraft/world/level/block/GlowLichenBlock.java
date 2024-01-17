@@ -46,7 +46,7 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 	}
 
 	@Override
-	public BlockState updateShape(
+	protected BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
@@ -57,7 +57,7 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
+	protected boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		return !blockPlaceContext.getItemInHand().is(Items.GLOW_LICHEN) || super.canBeReplaced(blockState, blockPlaceContext);
 	}
 
@@ -77,12 +77,12 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState blockState) {
+	protected FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return blockState.getFluidState().isEmpty();
 	}
 

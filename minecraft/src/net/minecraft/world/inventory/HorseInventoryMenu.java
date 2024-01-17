@@ -70,7 +70,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 		return !this.horse.hasInventoryChanged(this.horseContainer)
 			&& this.horseContainer.stillValid(player)
 			&& this.horse.isAlive()
-			&& this.horse.distanceTo(player) < 8.0F;
+			&& player.canInteractWithEntity(this.horse, 4.0);
 	}
 
 	private boolean hasChest(AbstractHorse abstractHorse) {

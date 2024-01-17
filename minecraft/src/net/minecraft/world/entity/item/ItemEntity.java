@@ -120,7 +120,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 			this.yo = this.getY();
 			this.zo = this.getZ();
 			Vec3 vec3 = this.getDeltaMovement();
-			float f = this.getEyeHeight() - 0.11111111F;
+			float f = this.getEyeHeight();
 			if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > (double)f) {
 				this.setUnderwaterMovement();
 			} else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > (double)f) {

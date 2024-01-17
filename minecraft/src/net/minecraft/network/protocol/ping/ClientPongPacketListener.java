@@ -1,6 +1,6 @@
-package net.minecraft.network;
+package net.minecraft.network.protocol.ping;
 
-import net.minecraft.network.protocol.status.ClientboundPongResponsePacket;
+import net.minecraft.network.PacketListener;
 
 public interface ClientPongPacketListener extends PacketListener {
 	void handlePongResponse(ClientboundPongResponsePacket clientboundPongResponsePacket);

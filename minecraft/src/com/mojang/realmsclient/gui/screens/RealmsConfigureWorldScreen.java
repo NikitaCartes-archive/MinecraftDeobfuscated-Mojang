@@ -250,7 +250,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			RealmsClient realmsClient = RealmsClient.create();
 
 			try {
-				RealmsServer realmsServer = realmsClient.getOwnWorld(l);
+				RealmsServer realmsServer = realmsClient.getOwnRealm(l);
 				this.minecraft.execute(() -> {
 					this.serverData = realmsServer;
 					this.disableButtons();

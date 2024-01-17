@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -65,12 +66,13 @@ public class SonicBoom extends Behavior<Warden> {
 				.filter(warden::canTargetEntity)
 				.filter(livingEntity -> warden.closerThan(livingEntity, 15.0, 20.0))
 				.ifPresent(livingEntity -> {
-					Vec3 vec3 = warden.position().add(0.0, 1.6F, 0.0);
+					Vec3 vec3 = warden.position().add(warden.getAttachments().get(EntityAttachment.WARDEN_CHEST, 0, warden.getYRot()));
 					Vec3 vec32 = livingEntity.getEyePosition().subtract(vec3);
 					Vec3 vec33 = vec32.normalize();
+					int i = Mth.floor(vec32.length()) + 7;
 
-					for (int i = 1; i < Mth.floor(vec32.length()) + 7; i++) {
-						Vec3 vec34 = vec3.add(vec33.scale((double)i));
+					for (int j = 1; j < i; j++) {
+						Vec3 vec34 = vec3.add(vec33.scale((double)j));
 						serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, vec34.x, vec34.y, vec34.z, 1, 0.0, 0.0, 0.0, 0.0);
 					}
 

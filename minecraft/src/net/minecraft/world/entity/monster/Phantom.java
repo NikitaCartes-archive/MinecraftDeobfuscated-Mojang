@@ -24,7 +24,6 @@ import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -130,19 +129,19 @@ public class Phantom extends FlyingMob implements Enemy {
 					);
 			}
 
-			int i = this.getPhantomSize();
-			float h = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * (1.3F + 0.21F * (float)i);
-			float j = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)) * (1.3F + 0.21F * (float)i);
-			float k = (0.3F + f * 0.45F) * ((float)i * 0.2F + 1.0F);
-			this.level().addParticle(ParticleTypes.MYCELIUM, this.getX() + (double)h, this.getY() + (double)k, this.getZ() + (double)j, 0.0, 0.0, 0.0);
-			this.level().addParticle(ParticleTypes.MYCELIUM, this.getX() - (double)h, this.getY() + (double)k, this.getZ() - (double)j, 0.0, 0.0, 0.0);
+			float h = this.getBbWidth() * 1.48F;
+			float i = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * h;
+			float j = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)) * h;
+			float k = (0.3F + f * 0.45F) * this.getBbHeight() * 2.5F;
+			this.level().addParticle(ParticleTypes.MYCELIUM, this.getX() + (double)i, this.getY() + (double)k, this.getZ() + (double)j, 0.0, 0.0, 0.0);
+			this.level().addParticle(ParticleTypes.MYCELIUM, this.getX() - (double)i, this.getY() + (double)k, this.getZ() - (double)j, 0.0, 0.0, 0.0);
 		}
 	}
 
 	@Override
 	public void aiStep() {
 		if (this.isAlive() && this.isSunBurnTick()) {
-			this.setSecondsOnFire(8);
+			this.igniteForSeconds(8);
 		}
 
 		super.aiStep();
@@ -208,11 +207,6 @@ public class Phantom extends FlyingMob implements Enemy {
 	@Override
 	protected SoundEvent getDeathSound() {
 		return SoundEvents.PHANTOM_DEATH;
-	}
-
-	@Override
-	public MobType getMobType() {
-		return MobType.UNDEAD;
 	}
 
 	@Override

@@ -29,7 +29,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -239,7 +238,7 @@ public class Zombie extends Monster {
 				}
 
 				if (bl) {
-					this.setSecondsOnFire(8);
+					this.igniteForSeconds(8);
 				}
 			}
 		}
@@ -330,7 +329,7 @@ public class Zombie extends Monster {
 		if (bl) {
 			float f = this.level().getCurrentDifficultyAt(this.blockPosition()).getEffectiveDifficulty();
 			if (this.getMainHandItem().isEmpty() && this.isOnFire() && this.random.nextFloat() < f * 0.3F) {
-				entity.setSecondsOnFire(2 * (int)f);
+				entity.igniteForSeconds(2 * (int)f);
 			}
 		}
 
@@ -359,11 +358,6 @@ public class Zombie extends Monster {
 	@Override
 	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
 		this.playSound(this.getStepSound(), 0.15F, 1.0F);
-	}
-
-	@Override
-	public MobType getMobType() {
-		return MobType.UNDEAD;
 	}
 
 	@Override

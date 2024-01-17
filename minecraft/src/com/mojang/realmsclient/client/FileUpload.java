@@ -38,7 +38,7 @@ public class FileUpload {
 	private static final int MAX_RETRIES = 5;
 	private static final String UPLOAD_PATH = "/upload";
 	private final File file;
-	private final long worldId;
+	private final long realmId;
 	private final int slotId;
 	private final UploadInfo uploadInfo;
 	private final String sessionId;
@@ -55,7 +55,7 @@ public class FileUpload {
 
 	public FileUpload(File file, long l, int i, UploadInfo uploadInfo, User user, String string, UploadStatus uploadStatus) {
 		this.file = file;
-		this.worldId = l;
+		this.realmId = l;
 		this.slotId = i;
 		this.uploadInfo = uploadInfo;
 		this.sessionId = user.getSessionId();
@@ -85,7 +85,7 @@ public class FileUpload {
 			return builder.build();
 		} else {
 			this.uploadStatus.totalBytes = this.file.length();
-			HttpPost httpPost = new HttpPost(this.uploadInfo.getUploadEndpoint().resolve("/upload/" + this.worldId + "/" + this.slotId));
+			HttpPost httpPost = new HttpPost(this.uploadInfo.getUploadEndpoint().resolve("/upload/" + this.realmId + "/" + this.slotId));
 			CloseableHttpClient closeableHttpClient = HttpClientBuilder.create().setDefaultRequestConfig(this.requestConfig).build();
 
 			UploadResult var8;

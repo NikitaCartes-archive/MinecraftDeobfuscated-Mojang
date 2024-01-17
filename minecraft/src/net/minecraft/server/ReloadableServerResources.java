@@ -23,6 +23,7 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.storage.loot.LootDataManager;
 import org.slf4j.Logger;
 
@@ -89,6 +90,7 @@ public class ReloadableServerResources {
 
 	public void updateRegistryTags(RegistryAccess registryAccess) {
 		this.tagManager.getResult().forEach(loadResult -> updateRegistryTags(registryAccess, loadResult));
+		AbstractFurnaceBlockEntity.invalidateCache();
 		Blocks.rebuildCache();
 	}
 

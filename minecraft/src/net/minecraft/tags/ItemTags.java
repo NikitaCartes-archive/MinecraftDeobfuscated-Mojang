@@ -90,6 +90,11 @@ public final class ItemTags {
 	public static final TagKey<Item> HANGING_SIGNS = bind("hanging_signs");
 	public static final TagKey<Item> CREEPER_IGNITERS = bind("creeper_igniters");
 	public static final TagKey<Item> NOTE_BLOCK_TOP_INSTRUMENTS = bind("noteblock_top_instruments");
+	public static final TagKey<Item> FOOT_ARMOR = bind("foot_armor");
+	public static final TagKey<Item> LEG_ARMOR = bind("leg_armor");
+	public static final TagKey<Item> CHEST_ARMOR = bind("chest_armor");
+	public static final TagKey<Item> HEAD_ARMOR = bind("head_armor");
+	public static final TagKey<Item> SKULLS = bind("skulls");
 	public static final TagKey<Item> TRIMMABLE_ARMOR = bind("trimmable_armor");
 	public static final TagKey<Item> TRIM_MATERIALS = bind("trim_materials");
 	public static final TagKey<Item> TRIM_TEMPLATES = bind("trim_templates");
@@ -104,6 +109,22 @@ public final class ItemTags {
 	public static final TagKey<Item> TOOLS = bind("tools");
 	public static final TagKey<Item> BREAKS_DECORATED_POTS = bind("breaks_decorated_pots");
 	public static final TagKey<Item> VILLAGER_PLANTABLE_SEEDS = bind("villager_plantable_seeds");
+	public static final TagKey<Item> FOOT_ARMOR_ENCHANTABLE = bind("enchantable/foot_armor");
+	public static final TagKey<Item> LEG_ARMOR_ENCHANTABLE = bind("enchantable/leg_armor");
+	public static final TagKey<Item> CHEST_ARMOR_ENCHANTABLE = bind("enchantable/chest_armor");
+	public static final TagKey<Item> HEAD_ARMOR_ENCHANTABLE = bind("enchantable/head_armor");
+	public static final TagKey<Item> ARMOR_ENCHANTABLE = bind("enchantable/armor");
+	public static final TagKey<Item> SWORD_ENCHANTABLE = bind("enchantable/sword");
+	public static final TagKey<Item> WEAPON_ENCHANTABLE = bind("enchantable/weapon");
+	public static final TagKey<Item> MINING_ENCHANTABLE = bind("enchantable/mining");
+	public static final TagKey<Item> MINING_LOOT_ENCHANTABLE = bind("enchantable/mining_loot");
+	public static final TagKey<Item> FISHING_ENCHANTABLE = bind("enchantable/fishing");
+	public static final TagKey<Item> TRIDENT_ENCHANTABLE = bind("enchantable/trident");
+	public static final TagKey<Item> DURABILITY_ENCHANTABLE = bind("enchantable/durability");
+	public static final TagKey<Item> BOW_ENCHANTABLE = bind("enchantable/bow");
+	public static final TagKey<Item> EQUIPPABLE_ENCHANTABLE = bind("enchantable/equippable");
+	public static final TagKey<Item> CROSSBOW_ENCHANTABLE = bind("enchantable/crossbow");
+	public static final TagKey<Item> VANISHING_ENCHANTABLE = bind("enchantable/vanishing");
 
 	private ItemTags() {
 	}

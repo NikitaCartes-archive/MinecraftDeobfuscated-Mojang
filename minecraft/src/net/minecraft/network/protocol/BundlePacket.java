@@ -1,20 +1,18 @@
 package net.minecraft.network.protocol;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketListener;
 
 public abstract class BundlePacket<T extends PacketListener> implements Packet<T> {
-	private final Iterable<Packet<T>> packets;
+	private final Iterable<Packet<? super T>> packets;
 
-	protected BundlePacket(Iterable<Packet<T>> iterable) {
+	protected BundlePacket(Iterable<Packet<? super T>> iterable) {
 		this.packets = iterable;
 	}
 
-	public final Iterable<Packet<T>> subPackets() {
+	public final Iterable<Packet<? super T>> subPackets() {
 		return this.packets;
 	}
 
 	@Override
-	public final void write(FriendlyByteBuf friendlyByteBuf) {
-	}
+	public abstract PacketType<? extends BundlePacket<T>> type();
 }

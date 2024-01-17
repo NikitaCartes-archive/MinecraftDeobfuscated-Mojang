@@ -48,7 +48,6 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	public void init() {
 		this.seedEdit = new EditBox(this.font, 210, 20, Component.translatable("mco.reset.world.seed"));
 		this.seedEdit.setMaxLength(32);
-		this.setInitialFocus(this.seedEdit);
 		this.layout.addToHeader(new StringWidget(this.title, this.font));
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical()).spacing(10);
 		linearLayout.addChild(CommonLayouts.labeledElement(this.font, this.seedEdit, SEED_LABEL));
@@ -70,6 +69,11 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
 		});
 		this.repositionElements();
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.seedEdit);
 	}
 
 	private void createExperimentsButton(LinearLayout linearLayout) {

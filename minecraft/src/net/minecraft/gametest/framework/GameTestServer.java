@@ -39,7 +39,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldOptions;
@@ -53,8 +52,10 @@ public class GameTestServer extends MinecraftServer {
 	private static final int PROGRESS_REPORT_INTERVAL = 20;
 	private static final int TEST_POSITION_RANGE = 14999992;
 	private static final Services NO_SERVICES = new Services(null, ServicesKeySet.EMPTY, null, null);
-	private final List<GameTestBatch> testBatches;
+	private List<GameTestBatch> testBatches = new ArrayList();
+	private final List<TestFunction> testFunctions;
 	private final BlockPos spawnPos;
+	private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 	private static final GameRules TEST_GAME_RULES = Util.make(new GameRules(), gameRules -> {
 		gameRules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
 		gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
@@ -67,11 +68,11 @@ public class GameTestServer extends MinecraftServer {
 		Thread thread,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		PackRepository packRepository,
-		Collection<GameTestBatch> collection,
+		Collection<TestFunction> collection,
 		BlockPos blockPos
 	) {
 		if (collection.isEmpty()) {
-			throw new IllegalArgumentException("No test batches were given!");
+			throw new IllegalArgumentException("No test functions were given!");
 		} else {
 			packRepository.reload();
 			WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(
@@ -121,11 +122,20 @@ public class GameTestServer extends MinecraftServer {
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		PackRepository packRepository,
 		WorldStem worldStem,
-		Collection<GameTestBatch> collection,
+		Collection<TestFunction> collection,
 		BlockPos blockPos
 	) {
-		super(thread, levelStorageAccess, packRepository, worldStem, Proxy.NO_PROXY, DataFixers.getDataFixer(), NO_SERVICES, LoggerChunkProgressListener::new);
-		this.testBatches = Lists.<GameTestBatch>newArrayList(collection);
+		super(
+			thread,
+			levelStorageAccess,
+			packRepository,
+			worldStem,
+			Proxy.NO_PROXY,
+			DataFixers.getDataFixer(),
+			NO_SERVICES,
+			LoggerChunkProgressListener::createFromGameruleRadius
+		);
+		this.testFunctions = Lists.<TestFunction>newArrayList(collection);
 		this.spawnPos = blockPos;
 	}
 
@@ -135,6 +145,7 @@ public class GameTestServer extends MinecraftServer {
 		});
 		this.loadLevel();
 		ServerLevel serverLevel = this.overworld();
+		this.testBatches = Lists.<GameTestBatch>newArrayList(GameTestBatchFactory.fromTestFunction(this.testFunctions, serverLevel));
 		serverLevel.setDefaultSpawnPos(this.spawnPos, 0.0F);
 		int i = 20000000;
 		serverLevel.setWeatherParameters(20000000, 20000000, false, false);
@@ -158,7 +169,7 @@ public class GameTestServer extends MinecraftServer {
 			this.halt(false);
 			LOGGER.info(this.testTracker.getProgressBar());
 			GlobalTestReporter.finish();
-			LOGGER.info("========= {} GAME TESTS COMPLETE ======================", this.testTracker.getTotalCount());
+			LOGGER.info("========= {} GAME TESTS COMPLETE IN {} ======================", this.testTracker.getTotalCount(), this.stopwatch.stop());
 			if (this.testTracker.hasFailedRequired()) {
 				LOGGER.info("{} required tests failed :(", this.testTracker.getFailedRequiredCount());
 				this.testTracker.getFailedRequired().forEach(gameTestInfo -> LOGGER.info("   - {}", gameTestInfo.getTestName()));
@@ -204,9 +215,15 @@ public class GameTestServer extends MinecraftServer {
 		BlockPos blockPos = new BlockPos(
 			serverLevel.random.nextIntBetweenInclusive(-14999992, 14999992), -59, serverLevel.random.nextIntBetweenInclusive(-14999992, 14999992)
 		);
-		Collection<GameTestInfo> collection = GameTestRunner.runTestBatches(this.testBatches, blockPos, Rotation.NONE, serverLevel, GameTestTicker.SINGLETON, 8);
+		GameTestRunner gameTestRunner = GameTestRunner.Builder.fromBatches(this.testBatches, serverLevel)
+			.newStructureSpawner(new StructureGridSpawner(blockPos, 8))
+			.build();
+		Collection<GameTestInfo> collection = gameTestRunner.getTestInfos();
 		this.testTracker = new MultipleTestTracker(collection);
 		LOGGER.info("{} tests are now running at position {}!", this.testTracker.getTotalCount(), blockPos.toShortString());
+		this.stopwatch.reset();
+		this.stopwatch.start();
+		gameTestRunner.start();
 	}
 
 	private boolean haveTestsStarted() {

@@ -30,18 +30,18 @@ public class DragonEggBlock extends FallingBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
 	}
 
 	@Override
-	public InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
+	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		this.teleport(blockState, level, blockPos);
 		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
 	@Override
-	public void attack(BlockState blockState, Level level, BlockPos blockPos, Player player) {
+	protected void attack(BlockState blockState, Level level, BlockPos blockPos, Player player) {
 		this.teleport(blockState, level, blockPos);
 	}
 
@@ -80,7 +80,7 @@ public class DragonEggBlock extends FallingBlock {
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 }

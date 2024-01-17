@@ -18,7 +18,8 @@ import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.StackedContents;
@@ -28,6 +29,8 @@ import net.minecraft.world.level.ItemLike;
 
 public final class Ingredient implements Predicate<ItemStack> {
 	public static final Ingredient EMPTY = new Ingredient(Stream.empty());
+	public static final StreamCodec<RegistryFriendlyByteBuf, Ingredient> CONTENTS_STREAM_CODEC = ItemStack.LIST_STREAM_CODEC
+		.map(list -> fromValues(list.stream().map(Ingredient.ItemValue::new)), ingredient -> Arrays.asList(ingredient.getItems()));
 	private final Ingredient.Value[] values;
 	@Nullable
 	private ItemStack[] itemStacks;
@@ -83,10 +86,6 @@ public final class Ingredient implements Predicate<ItemStack> {
 		return this.stackingIds;
 	}
 
-	public void toNetwork(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeCollection(Arrays.asList(this.getItems()), FriendlyByteBuf::writeItem);
-	}
-
 	public boolean isEmpty() {
 		return this.values.length == 0;
 	}
@@ -118,10 +117,6 @@ public final class Ingredient implements Predicate<ItemStack> {
 
 	public static Ingredient of(TagKey<Item> tagKey) {
 		return fromValues(Stream.of(new Ingredient.TagValue(tagKey)));
-	}
-
-	public static Ingredient fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		return fromValues(friendlyByteBuf.readList(FriendlyByteBuf::readItem).stream().map(Ingredient.ItemValue::new));
 	}
 
 	private static Codec<Ingredient> codec(boolean bl) {

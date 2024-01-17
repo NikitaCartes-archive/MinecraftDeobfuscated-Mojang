@@ -70,6 +70,10 @@ public class SelectWorldScreen extends Screen {
 			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 82, this.height - 28, 72, 20).build()
 		);
 		this.updateButtonStatus(null);
+	}
+
+	@Override
+	protected void setInitialFocus() {
 		this.setInitialFocus(this.searchBox);
 	}
 

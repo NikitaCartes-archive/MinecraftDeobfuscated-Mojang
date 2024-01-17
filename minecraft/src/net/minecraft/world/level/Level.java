@@ -576,11 +576,9 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		Level.ExplosionInteraction explosionInteraction,
 		ParticleOptions particleOptions,
 		ParticleOptions particleOptions2,
-		SoundEvent soundEvent
+		Holder<SoundEvent> holder
 	) {
-		return this.explode(
-			entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, explosionInteraction, true, particleOptions, particleOptions2, soundEvent
-		);
+		return this.explode(entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, explosionInteraction, true, particleOptions, particleOptions2, holder);
 	}
 
 	public Explosion explode(
@@ -596,7 +594,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		boolean bl2,
 		ParticleOptions particleOptions,
 		ParticleOptions particleOptions2,
-		SoundEvent soundEvent
+		Holder<SoundEvent> holder
 	) {
 		Explosion.BlockInteraction blockInteraction = switch (explosionInteraction) {
 			case NONE -> Explosion.BlockInteraction.KEEP;
@@ -608,7 +606,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			case BLOW -> Explosion.BlockInteraction.TRIGGER_BLOCK;
 		};
 		Explosion explosion = new Explosion(
-			this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction, particleOptions, particleOptions2, soundEvent
+			this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction, particleOptions, particleOptions2, holder
 		);
 		explosion.explode();
 		explosion.finalizeExplosion(bl2);
@@ -679,7 +677,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public BlockPos getSharedSpawnPos() {
-		BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
+		BlockPos blockPos = this.levelData.getSpawnPos();
 		if (!this.getWorldBorder().isWithinBounds(blockPos)) {
 			blockPos = this.getHeightmapPos(
 				Heightmap.Types.MOTION_BLOCKING, BlockPos.containing(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ())

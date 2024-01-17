@@ -3,11 +3,16 @@ package net.minecraft.world.entity.ai.attributes;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -75,7 +80,7 @@ public class AttributeModifier {
 		CompoundTag compoundTag = new CompoundTag();
 		compoundTag.putString("Name", this.name);
 		compoundTag.putDouble("Amount", this.amount);
-		compoundTag.putInt("Operation", this.operation.toValue());
+		compoundTag.putInt("Operation", this.operation.id());
 		compoundTag.putUUID("UUID", this.id);
 		return compoundTag;
 	}
@@ -84,7 +89,7 @@ public class AttributeModifier {
 	public static AttributeModifier load(CompoundTag compoundTag) {
 		try {
 			UUID uUID = compoundTag.getUUID("UUID");
-			AttributeModifier.Operation operation = AttributeModifier.Operation.fromValue(compoundTag.getInt("Operation"));
+			AttributeModifier.Operation operation = (AttributeModifier.Operation)AttributeModifier.Operation.BY_ID.apply(compoundTag.getInt("Operation"));
 			return new AttributeModifier(uUID, compoundTag.getString("Name"), compoundTag.getDouble("Amount"), operation);
 		} catch (Exception var3) {
 			LOGGER.warn("Unable to create attribute: {}", var3.getMessage());
@@ -97,26 +102,21 @@ public class AttributeModifier {
 		MULTIPLY_BASE("multiply_base", 1),
 		MULTIPLY_TOTAL("multiply_total", 2);
 
-		private static final AttributeModifier.Operation[] OPERATIONS = new AttributeModifier.Operation[]{ADDITION, MULTIPLY_BASE, MULTIPLY_TOTAL};
+		public static final IntFunction<AttributeModifier.Operation> BY_ID = ByIdMap.continuous(
+			AttributeModifier.Operation::id, values(), ByIdMap.OutOfBoundsStrategy.ZERO
+		);
+		public static final StreamCodec<ByteBuf, AttributeModifier.Operation> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, AttributeModifier.Operation::id);
 		public static final Codec<AttributeModifier.Operation> CODEC = StringRepresentable.fromEnum(AttributeModifier.Operation::values);
 		private final String name;
-		private final int value;
+		private final int id;
 
 		private Operation(String string2, int j) {
 			this.name = string2;
-			this.value = j;
+			this.id = j;
 		}
 
-		public int toValue() {
-			return this.value;
-		}
-
-		public static AttributeModifier.Operation fromValue(int i) {
-			if (i >= 0 && i < OPERATIONS.length) {
-				return OPERATIONS[i];
-			} else {
-				throw new IllegalArgumentException("No operation with value " + i);
-			}
+		public int id() {
+			return this.id;
 		}
 
 		@Override

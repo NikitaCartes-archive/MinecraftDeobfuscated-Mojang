@@ -5,9 +5,14 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
 
 public class ServerboundEditBookPacket implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundEditBookPacket> STREAM_CODEC = Packet.codec(
+		ServerboundEditBookPacket::write, ServerboundEditBookPacket::new
+	);
 	public static final int MAX_BYTES_PER_CHAR = 4;
 	private static final int TITLE_MAX_CHARS = 128;
 	private static final int PAGE_MAX_CHARS = 8192;
@@ -22,7 +27,7 @@ public class ServerboundEditBookPacket implements Packet<ServerGamePacketListene
 		this.title = optional;
 	}
 
-	public ServerboundEditBookPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ServerboundEditBookPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.slot = friendlyByteBuf.readVarInt();
 		this.pages = friendlyByteBuf.readCollection(
 			FriendlyByteBuf.limitValue(Lists::newArrayListWithCapacity, 200), friendlyByteBufx -> friendlyByteBufx.readUtf(8192)
@@ -30,11 +35,15 @@ public class ServerboundEditBookPacket implements Packet<ServerGamePacketListene
 		this.title = friendlyByteBuf.readOptional(friendlyByteBufx -> friendlyByteBufx.readUtf(128));
 	}
 
-	@Override
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.slot);
 		friendlyByteBuf.writeCollection(this.pages, (friendlyByteBufx, string) -> friendlyByteBufx.writeUtf(string, 8192));
 		friendlyByteBuf.writeOptional(this.title, (friendlyByteBufx, string) -> friendlyByteBufx.writeUtf(string, 128));
+	}
+
+	@Override
+	public PacketType<ServerboundEditBookPacket> type() {
+		return GamePacketTypes.SERVERBOUND_EDIT_BOOK;
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {

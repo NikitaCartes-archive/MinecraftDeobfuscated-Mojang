@@ -1433,6 +1433,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 		this.tag(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE).addTag(BlockTags.FEATURES_CANNOT_REPLACE).addTag(BlockTags.LEAVES).addTag(BlockTags.LOGS);
 		this.tag(BlockTags.GEODE_INVALID_BLOCKS).add(Blocks.BEDROCK, Blocks.WATER, Blocks.LAVA, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);
 		this.tag(BlockTags.ANIMALS_SPAWNABLE_ON).add(Blocks.GRASS_BLOCK);
+		this.tag(BlockTags.ARMADILLO_SPAWNABLE_ON).addTag(BlockTags.ANIMALS_SPAWNABLE_ON).addTag(BlockTags.TERRACOTTA).add(Blocks.RED_SAND, Blocks.COARSE_DIRT);
 		this.tag(BlockTags.AXOLOTLS_SPAWNABLE_ON).add(Blocks.CLAY);
 		this.tag(BlockTags.GOATS_SPAWNABLE_ON)
 			.addTag(BlockTags.ANIMALS_SPAWNABLE_ON)

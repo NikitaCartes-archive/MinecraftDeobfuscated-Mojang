@@ -69,7 +69,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if ((Boolean)blockState.getValue(EXTENDED)) {
 			switch ((Direction)blockState.getValue(FACING)) {
 				case DOWN:
@@ -99,14 +99,14 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide) {
 			this.checkIfExtend(level, blockPos, blockState);
 		}
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			if (!level.isClientSide && level.getBlockEntity(blockPos) == null) {
 				this.checkIfExtend(level, blockPos, blockState);
@@ -169,7 +169,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	@Override
-	public boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
+	protected boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
 		Direction direction = blockState.getValue(FACING);
 		BlockState blockState2 = blockState.setValue(EXTENDED, Boolean.valueOf(true));
 		if (!level.isClientSide) {
@@ -377,12 +377,12 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	@Override
-	public BlockState rotate(BlockState blockState, Rotation rotation) {
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
 		return blockState.setValue(FACING, rotation.rotate(blockState.getValue(FACING)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState blockState, Mirror mirror) {
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
 	}
 
@@ -392,12 +392,12 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	@Override
-	public boolean useShapeForLightOcclusion(BlockState blockState) {
+	protected boolean useShapeForLightOcclusion(BlockState blockState) {
 		return (Boolean)blockState.getValue(EXTENDED);
 	}
 
 	@Override
-	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 }

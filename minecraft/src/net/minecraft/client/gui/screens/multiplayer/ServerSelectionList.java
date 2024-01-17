@@ -63,7 +63,6 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER))
 			.build()
 	);
-	private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
 	static final Component SCANNING_LABEL = Component.translatable("lanServer.scanning");
 	static final Component CANT_RESOLVE_TEXT = Component.translatable("multiplayer.status.cannot_resolve").withColor(-65536);
 	static final Component CANT_CONNECT_TEXT = Component.translatable("multiplayer.status.cannot_connect").withColor(-65536);
@@ -242,7 +241,9 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		private long lastClickTime;
 		@Nullable
 		private List<Component> onlinePlayersTooltip;
+		@Nullable
 		private ResourceLocation statusIcon;
+		@Nullable
 		private Component statusIconTooltip;
 
 		protected OnlineServerEntry(JoinMultiplayerScreen joinMultiplayerScreen, ServerData serverData) {
@@ -312,7 +313,10 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			int p = k + l - 10 - 5;
-			guiGraphics.blitSprite(this.statusIcon, p, j, 10, 8);
+			if (this.statusIcon != null) {
+				guiGraphics.blitSprite(this.statusIcon, p, j, 10, 8);
+			}
+
 			byte[] bs = this.serverData.getIconBytes();
 			if (!Arrays.equals(bs, this.lastIconBytes)) {
 				if (this.uploadServerIcon(bs)) {
@@ -329,7 +333,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			int q = this.minecraft.font.width(component);
 			int r = p - q - 5;
 			guiGraphics.drawString(this.minecraft.font, component, r, j + 1, -8355712, false);
-			if (n >= p && n <= p + 10 && o >= j && o <= j + 8) {
+			if (this.statusIconTooltip != null && n >= p && n <= p + 10 && o >= j && o <= j + 8) {
 				this.screen.setTooltipForNextRenderPass(this.statusIconTooltip);
 			} else if (this.onlinePlayersTooltip != null && n >= r && n <= r + q && o >= j && o <= j - 1 + 9) {
 				this.screen.setTooltipForNextRenderPass(Lists.transform(this.onlinePlayersTooltip, Component::getVisualOrderText));
@@ -370,6 +374,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			switch (this.serverData.state()) {
 				case INITIAL:
 				case PINGING:
+					this.statusIcon = ServerSelectionList.PING_1_SPRITE;
 					this.statusIconTooltip = ServerSelectionList.PINGING_STATUS;
 					break;
 				case INCOMPATIBLE:

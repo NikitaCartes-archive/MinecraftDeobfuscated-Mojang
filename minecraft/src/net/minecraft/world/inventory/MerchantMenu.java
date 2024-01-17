@@ -197,19 +197,21 @@ public class MerchantMenu extends AbstractContainerMenu {
 			}
 
 			if (this.tradeContainer.getItem(0).isEmpty() && this.tradeContainer.getItem(1).isEmpty()) {
-				ItemStack itemStack3 = ((MerchantOffer)this.getOffers().get(i)).getCostA();
-				this.moveFromInventoryToPaymentSlot(0, itemStack3);
-				ItemStack itemStack4 = ((MerchantOffer)this.getOffers().get(i)).getCostB();
-				this.moveFromInventoryToPaymentSlot(1, itemStack4);
+				MerchantOffer merchantOffer = (MerchantOffer)this.getOffers().get(i);
+				boolean bl = merchantOffer.getIgnoreTags();
+				ItemStack itemStack3 = merchantOffer.getCostA();
+				this.moveFromInventoryToPaymentSlot(0, itemStack3, bl);
+				ItemStack itemStack4 = merchantOffer.getCostB();
+				this.moveFromInventoryToPaymentSlot(1, itemStack4, bl);
 			}
 		}
 	}
 
-	private void moveFromInventoryToPaymentSlot(int i, ItemStack itemStack) {
+	private void moveFromInventoryToPaymentSlot(int i, ItemStack itemStack, boolean bl) {
 		if (!itemStack.isEmpty()) {
 			for (int j = 3; j < 39; j++) {
 				ItemStack itemStack2 = this.slots.get(j).getItem();
-				if (!itemStack2.isEmpty() && ItemStack.isSameItemSameTags(itemStack, itemStack2)) {
+				if (!itemStack2.isEmpty() && MerchantOffer.isRequiredItem(itemStack, itemStack2, bl)) {
 					ItemStack itemStack3 = this.tradeContainer.getItem(i);
 					int k = itemStack3.isEmpty() ? 0 : itemStack3.getCount();
 					int l = Math.min(itemStack.getMaxStackSize() - k, itemStack2.getCount());

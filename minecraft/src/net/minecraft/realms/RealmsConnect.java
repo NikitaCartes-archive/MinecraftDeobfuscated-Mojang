@@ -56,7 +56,7 @@ public class RealmsConnect {
 
 						ClientHandshakePacketListenerImpl clientHandshakePacketListenerImpl = new ClientHandshakePacketListenerImpl(
 							RealmsConnect.this.connection, minecraft, realmsServer.toServerData(string), RealmsConnect.this.onlineScreen, false, null, component -> {
-							}
+							}, null
 						);
 						if (realmsServer.worldType == RealmsServer.WorldType.MINIGAME) {
 							clientHandshakePacketListenerImpl.setMinigameName(realmsServer.minigameName);
