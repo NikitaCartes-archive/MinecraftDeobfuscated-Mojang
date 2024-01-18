@@ -31,6 +31,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class ItemEntity extends Entity implements TraceableEntity {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(ItemEntity.class, EntityDataSerializers.ITEM_STACK);
+	private static final float FLOAT_HEIGHT = 0.1F;
+	public static final float EYE_HEIGHT = 0.2125F;
 	private static final int LIFETIME = 6000;
 	private static final int INFINITE_PICKUP_DELAY = 32767;
 	private static final int INFINITE_LIFETIME = -32768;
@@ -120,10 +122,9 @@ public class ItemEntity extends Entity implements TraceableEntity {
 			this.yo = this.getY();
 			this.zo = this.getZ();
 			Vec3 vec3 = this.getDeltaMovement();
-			float f = this.getEyeHeight();
-			if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > (double)f) {
+			if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > 0.1F) {
 				this.setUnderwaterMovement();
-			} else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > (double)f) {
+			} else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > 0.1F) {
 				this.setUnderLavaMovement();
 			} else if (!this.isNoGravity()) {
 				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
@@ -140,12 +141,12 @@ public class ItemEntity extends Entity implements TraceableEntity {
 
 			if (!this.onGround() || this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-5F || (this.tickCount + this.getId()) % 4 == 0) {
 				this.move(MoverType.SELF, this.getDeltaMovement());
-				float g = 0.98F;
+				float f = 0.98F;
 				if (this.onGround()) {
-					g = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;
+					f = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;
 				}
 
-				this.setDeltaMovement(this.getDeltaMovement().multiply((double)g, 0.98, (double)g));
+				this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.98, (double)f));
 				if (this.onGround()) {
 					Vec3 vec32 = this.getDeltaMovement();
 					if (vec32.y < 0.0) {

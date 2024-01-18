@@ -49,7 +49,7 @@ public class RealmsWorldSlotButton extends Button {
 		this.setTooltipAndNarration(this.state, realmsServer.minigameName);
 	}
 
-	private void setTooltipAndNarration(RealmsWorldSlotButton.State state, String string) {
+	private void setTooltipAndNarration(RealmsWorldSlotButton.State state, @Nullable String string) {
 		Component component = switch (state.action) {
 			case JOIN -> SLOT_ACTIVE_TOOLTIP;
 			case SWITCH_SLOT -> state.minigame ? SWITCH_TO_MINIGAME_SLOT_TOOLTIP : SWITCH_TO_WORLD_SLOT_TOOLTIP;
@@ -60,7 +60,7 @@ public class RealmsWorldSlotButton extends Button {
 		}
 
 		MutableComponent mutableComponent = Component.literal(state.slotName);
-		if (state.minigame) {
+		if (state.minigame && string != null) {
 			mutableComponent = mutableComponent.append(CommonComponents.SPACE).append(string);
 		}
 

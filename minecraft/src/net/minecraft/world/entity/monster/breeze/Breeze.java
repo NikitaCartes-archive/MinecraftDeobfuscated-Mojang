@@ -149,16 +149,6 @@ public class Breeze extends Monster {
 		return this;
 	}
 
-	public Breeze emitJumpDustParticles() {
-		Vec3 vec3 = this.position().add(0.0, 0.1F, 0.0);
-
-		for (int i = 0; i < 20; i++) {
-			this.level().addParticle(ParticleTypes.GUST_DUST, vec3.x, vec3.y, vec3.z, 0.0, 0.0, 0.0);
-		}
-
-		return this;
-	}
-
 	public void emitJumpTrailParticles() {
 		if (++this.jumpTrailStartedTick <= 5) {
 			BlockState blockState = !this.getInBlockState().isAir() ? this.getInBlockState() : this.getBlockStateOn();

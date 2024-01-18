@@ -1179,8 +1179,9 @@ public class RealmsMainScreen extends RealmsScreen {
 			int k = this.textX(j);
 			int l = this.firstLineY(i);
 			int m = this.secondLineY(l);
-			if (this.serverData.worldType == RealmsServer.WorldType.MINIGAME) {
-				Component component = Component.literal(this.serverData.getMinigameName()).withStyle(ChatFormatting.GRAY);
+			String string = this.serverData.getMinigameName();
+			if (this.serverData.worldType == RealmsServer.WorldType.MINIGAME && string != null) {
+				Component component = Component.literal(string).withStyle(ChatFormatting.GRAY);
 				guiGraphics.drawString(RealmsMainScreen.this.font, Component.translatable("mco.selectServer.minigameName", component).withColor(-171), k, m, -1, false);
 			} else {
 				guiGraphics.drawString(RealmsMainScreen.this.font, this.serverData.getDescription(), k, this.secondLineY(l), -8355712, false);

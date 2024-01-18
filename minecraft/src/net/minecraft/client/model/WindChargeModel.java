@@ -14,46 +14,42 @@ import net.minecraft.world.entity.projectile.WindCharge;
 
 @Environment(EnvType.CLIENT)
 public class WindChargeModel extends HierarchicalModel<WindCharge> {
+	private static final int ROTATION_SPEED = 16;
 	private final ModelPart bone;
+	private final ModelPart windCharge;
+	private final ModelPart wind;
 
 	public WindChargeModel(ModelPart modelPart) {
 		super(RenderType::entityTranslucent);
 		this.bone = modelPart.getChild("bone");
+		this.wind = this.bone.getChild("wind");
+		this.windCharge = this.bone.getChild("wind_charge");
 	}
 
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
-		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("projectile", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
-		PartDefinition partDefinition4 = partDefinition3.addOrReplaceChild(
+		partDefinition2.addOrReplaceChild(
 			"wind",
 			CubeListBuilder.create()
-				.texOffs(20, 112)
-				.addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F))
-				.texOffs(0, 8)
-				.addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)),
-			PartPose.offset(0.0F, 0.0F, 0.0F)
+				.texOffs(15, 20)
+				.addBox(-4.0F, -1.0F, -4.0F, 8.0F, 2.0F, 8.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 9)
+				.addBox(-3.0F, -2.0F, -3.0F, 6.0F, 4.0F, 6.0F, new CubeDeformation(0.0F)),
+			PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -0.7854F, 0.0F)
 		);
-		partDefinition4.addOrReplaceChild(
-			"cube_r1",
-			CubeListBuilder.create().texOffs(32, 24).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(-0.6F)),
-			PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, -1.5708F, 0.0F, 1.5708F)
-		);
-		partDefinition4.addOrReplaceChild(
-			"cube_r2",
-			CubeListBuilder.create().texOffs(16, 40).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(-0.3F)),
-			PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.5708F)
-		);
-		partDefinition3.addOrReplaceChild(
+		partDefinition2.addOrReplaceChild(
 			"wind_charge",
 			CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)),
 			PartPose.offset(0.0F, 0.0F, 0.0F)
 		);
-		return LayerDefinition.create(meshDefinition, 64, 64);
+		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
 	public void setupAnim(WindCharge windCharge, float f, float g, float h, float i, float j) {
+		this.windCharge.yRot = -h * 16.0F * (float) (Math.PI / 180.0);
+		this.wind.yRot = h * 16.0F * (float) (Math.PI / 180.0);
 	}
 
 	@Override

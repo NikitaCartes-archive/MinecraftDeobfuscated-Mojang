@@ -2970,9 +2970,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 3009:
 				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.EGG_CRACK, UniformInt.of(3, 6));
 				break;
-			case 3010:
-				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.GUST_DUST, UniformInt.of(3, 6));
-				break;
 			case 3011:
 				TrialSpawner.addSpawnParticles(this.level, blockPos, randomSource);
 				break;

@@ -159,20 +159,29 @@ public class CrafterBlock extends BaseEntityBlock {
 			if (optional.isEmpty()) {
 				serverLevel.levelEvent(1050, blockPos, 0);
 			} else {
-				crafterBlockEntity.setCraftingTicksRemaining(6);
-				serverLevel.setBlock(blockPos, blockState.setValue(CRAFTING, Boolean.valueOf(true)), 2);
 				CraftingRecipe craftingRecipe = (CraftingRecipe)optional.get();
 				ItemStack itemStack = craftingRecipe.assemble(crafterBlockEntity, serverLevel.registryAccess());
-				itemStack.onCraftedBySystem(serverLevel);
-				this.dispenseItem(serverLevel, blockPos, crafterBlockEntity, itemStack, blockState);
-				craftingRecipe.getRemainingItems(crafterBlockEntity)
-					.forEach(itemStackx -> this.dispenseItem(serverLevel, blockPos, crafterBlockEntity, itemStackx, blockState));
-				crafterBlockEntity.getItems().forEach(itemStackx -> {
-					if (!itemStackx.isEmpty()) {
-						itemStackx.shrink(1);
+				if (itemStack.isEmpty()) {
+					serverLevel.levelEvent(1050, blockPos, 0);
+				} else {
+					crafterBlockEntity.setCraftingTicksRemaining(6);
+					serverLevel.setBlock(blockPos, blockState.setValue(CRAFTING, Boolean.valueOf(true)), 2);
+					itemStack.onCraftedBySystem(serverLevel);
+					this.dispenseItem(serverLevel, blockPos, crafterBlockEntity, itemStack, blockState);
+
+					for (ItemStack itemStack2 : craftingRecipe.getRemainingItems(crafterBlockEntity)) {
+						if (!itemStack2.isEmpty()) {
+							this.dispenseItem(serverLevel, blockPos, crafterBlockEntity, itemStack2, blockState);
+						}
 					}
-				});
-				crafterBlockEntity.setChanged();
+
+					crafterBlockEntity.getItems().forEach(itemStackx -> {
+						if (!itemStackx.isEmpty()) {
+							itemStackx.shrink(1);
+						}
+					});
+					crafterBlockEntity.setChanged();
+				}
 			}
 		}
 	}

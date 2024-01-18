@@ -200,7 +200,6 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.SHRIEK, ShriekParticle.Provider::new);
 		this.register(ParticleTypes.EGG_CRACK, SuspendedTownParticle.EggCrackProvider::new);
 		this.register(ParticleTypes.DUST_PLUME, DustPlumeParticle.Provider::new);
-		this.register(ParticleTypes.GUST_DUST, GustDustParticle.GustDustParticleProvider::new);
 		this.register(ParticleTypes.TRIAL_SPAWNER_DETECTION, TrialSpawnerDetectionParticle.Provider::new);
 	}
 

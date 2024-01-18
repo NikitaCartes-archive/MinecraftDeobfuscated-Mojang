@@ -226,9 +226,10 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 			int n = Math.min(this.centerButton(2, 3) + 80 - 11, this.width / 2 + k / 2 + m / 2 + 10);
 			this.drawServerStatus(guiGraphics, n, 7, i, j);
 			if (this.isMinigame()) {
-				guiGraphics.drawString(
-					this.font, Component.translatable("mco.configure.world.minigame", this.serverData.getMinigameName()), this.leftX + 80 + 20 + 10, row(13), -1, false
-				);
+				String string2 = this.serverData.getMinigameName();
+				if (string2 != null) {
+					guiGraphics.drawString(this.font, Component.translatable("mco.configure.world.minigame", string2), this.leftX + 80 + 20 + 10, row(13), -1, false);
+				}
 			}
 		}
 	}

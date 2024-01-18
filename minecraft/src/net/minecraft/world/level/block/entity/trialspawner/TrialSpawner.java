@@ -142,10 +142,12 @@ public final class TrialSpawner {
 									return Optional.empty();
 								}
 
-								if (spawnData.getEntityToSpawn().size() == 1 && spawnData.getEntityToSpawn().contains("id", 8)) {
+								boolean bl = spawnData.getEntityToSpawn().size() == 1 && spawnData.getEntityToSpawn().contains("id", 8);
+								if (bl) {
 									mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.TRIAL_SPAWNER, null, null);
-									mob.setPersistenceRequired();
 								}
+
+								mob.setPersistenceRequired();
 							}
 
 							if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {
