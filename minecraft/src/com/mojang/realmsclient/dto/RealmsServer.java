@@ -46,6 +46,7 @@ public class RealmsServer extends ValueObject {
 	public int daysLeft;
 	public RealmsServer.WorldType worldType;
 	public int activeSlot;
+	@Nullable
 	public String minigameName;
 	public int minigameId;
 	public String minigameImage;
@@ -64,6 +65,7 @@ public class RealmsServer extends ValueObject {
 		return this.name;
 	}
 
+	@Nullable
 	public String getMinigameName() {
 		return this.minigameName;
 	}

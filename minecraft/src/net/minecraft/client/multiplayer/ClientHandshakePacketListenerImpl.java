@@ -232,7 +232,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 		this.connection.send(new ServerboundCustomQueryAnswerPacket(clientboundCustomQueryPacket.transactionId(), null));
 	}
 
-	public void setMinigameName(String string) {
+	public void setMinigameName(@Nullable String string) {
 		this.minigameName = string;
 	}
 

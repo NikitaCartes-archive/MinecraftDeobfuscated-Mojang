@@ -438,7 +438,8 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"iron_golem", EntityType.Builder.<IronGolem>of(IronGolem::new, MobCategory.MISC).sized(1.4F, 2.7F).clientTrackingRange(10)
 	);
 	public static final EntityType<ItemEntity> ITEM = register(
-		"item", EntityType.Builder.<ItemEntity>of(ItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).eyeHeight(0.1F).clientTrackingRange(6).updateInterval(20)
+		"item",
+		EntityType.Builder.<ItemEntity>of(ItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).eyeHeight(0.2125F).clientTrackingRange(6).updateInterval(20)
 	);
 	public static final EntityType<Display.ItemDisplay> ITEM_DISPLAY = register(
 		"item_display",
@@ -485,7 +486,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<MagmaCube> MAGMA_CUBE = register(
 		"magma_cube",
-		EntityType.Builder.<MagmaCube>of(MagmaCube::new, MobCategory.MONSTER).fireImmune().sized(2.04F, 2.04F).eyeHeight(1.275F).clientTrackingRange(8)
+		EntityType.Builder.<MagmaCube>of(MagmaCube::new, MobCategory.MONSTER).fireImmune().sized(0.52F, 0.52F).eyeHeight(0.325F).clientTrackingRange(8)
 	);
 	public static final EntityType<Marker> MARKER = register(
 		"marker", EntityType.Builder.<Marker>of(Marker::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(0)

@@ -135,7 +135,6 @@ public class ParticleTypes {
 	);
 	public static final SimpleParticleType EGG_CRACK = register("egg_crack", false);
 	public static final SimpleParticleType DUST_PLUME = register("dust_plume", false);
-	public static final SimpleParticleType GUST_DUST = register("gust_dust", false);
 	public static final SimpleParticleType TRIAL_SPAWNER_DETECTION = register("trial_spawner_detection", true);
 	public static final Codec<ParticleOptions> CODEC = BuiltInRegistries.PARTICLE_TYPE
 		.byNameCodec()
