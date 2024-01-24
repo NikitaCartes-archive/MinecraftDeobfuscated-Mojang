@@ -1,25 +1,21 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 
-public record ClientboundDisguisedChatPacket(Component message, ChatType.BoundNetwork chatType) implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundDisguisedChatPacket> STREAM_CODEC = Packet.codec(
-		ClientboundDisguisedChatPacket::write, ClientboundDisguisedChatPacket::new
+public record ClientboundDisguisedChatPacket(Component message, ChatType.Bound chatType) implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundDisguisedChatPacket> STREAM_CODEC = StreamCodec.composite(
+		ComponentSerialization.STREAM_CODEC,
+		ClientboundDisguisedChatPacket::message,
+		ChatType.Bound.STREAM_CODEC,
+		ClientboundDisguisedChatPacket::chatType,
+		ClientboundDisguisedChatPacket::new
 	);
-
-	private ClientboundDisguisedChatPacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readComponentTrusted(), new ChatType.BoundNetwork(friendlyByteBuf));
-	}
-
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeComponent(this.message);
-		this.chatType.write(friendlyByteBuf);
-	}
 
 	@Override
 	public PacketType<ClientboundDisguisedChatPacket> type() {

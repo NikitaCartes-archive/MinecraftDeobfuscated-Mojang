@@ -81,9 +81,9 @@ public class LevelLoadingScreen extends Screen {
 
 		int k = this.width / 2;
 		int m = this.height / 2;
-		int n = 30;
-		renderChunks(guiGraphics, this.progressListener, k, m + 30, 2, 0);
-		guiGraphics.drawCenteredString(this.font, this.getFormattedProgress(), k, m - 9 / 2 - 30, 16777215);
+		renderChunks(guiGraphics, this.progressListener, k, m, 2, 0);
+		int n = this.progressListener.getDiameter() + 9 + 2;
+		guiGraphics.drawCenteredString(this.font, this.getFormattedProgress(), k, m - n, 16777215);
 	}
 
 	public static void renderChunks(GuiGraphics guiGraphics, StoringChunkProgressListener storingChunkProgressListener, int i, int j, int k, int l) {

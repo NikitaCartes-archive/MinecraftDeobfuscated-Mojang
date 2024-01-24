@@ -13,12 +13,12 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 public class AncientCityStructurePieces {
 	public static final ResourceKey<StructureTemplatePool> START = Pools.createKey("ancient_city/city_center");
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<StructureProcessorList> holderGetter = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder = holderGetter.getOrThrow(ProcessorLists.ANCIENT_CITY_START_DEGRADATION);
-		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+		HolderGetter<StructureTemplatePool> holderGetter2 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder2 = holderGetter2.getOrThrow(Pools.EMPTY);
-		bootstapContext.register(
+		bootstrapContext.register(
 			START,
 			new StructureTemplatePool(
 				holder2,
@@ -30,6 +30,6 @@ public class AncientCityStructurePieces {
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		AncientCityStructurePools.bootstrap(bootstapContext);
+		AncientCityStructurePools.bootstrap(bootstrapContext);
 	}
 }

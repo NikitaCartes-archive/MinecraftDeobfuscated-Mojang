@@ -102,7 +102,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public final RandomSource random = RandomSource.create();
 	@Deprecated
 	private final RandomSource threadSafeRandom = RandomSource.createThreadSafe();
-	private final ResourceKey<DimensionType> dimensionTypeId;
 	private final Holder<DimensionType> dimensionTypeRegistration;
 	protected final WritableLevelData levelData;
 	private final Supplier<ProfilerFiller> profiler;
@@ -128,7 +127,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.profiler = supplier;
 		this.levelData = writableLevelData;
 		this.dimensionTypeRegistration = holder;
-		this.dimensionTypeId = (ResourceKey)holder.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Dimension must be registered, got " + holder));
 		final DimensionType dimensionType = (DimensionType)holder.value();
 		this.dimension = resourceKey;
 		this.isClientSide = bl;
@@ -943,10 +941,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	@Override
 	public DimensionType dimensionType() {
 		return (DimensionType)this.dimensionTypeRegistration.value();
-	}
-
-	public ResourceKey<DimensionType> dimensionTypeId() {
-		return this.dimensionTypeId;
 	}
 
 	public Holder<DimensionType> dimensionTypeRegistration() {

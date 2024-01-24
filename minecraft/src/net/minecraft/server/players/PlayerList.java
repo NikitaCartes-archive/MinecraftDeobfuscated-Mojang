@@ -125,7 +125,7 @@ public abstract class PlayerList {
 	protected final int maxPlayers;
 	private int viewDistance;
 	private int simulationDistance;
-	private boolean allowCheatsForAllPlayers;
+	private boolean allowCommandsForAllPlayers;
 	private static final boolean ALLOW_LOGOUTIVATOR = false;
 	private int sendAllPlayerInfoIn;
 
@@ -630,8 +630,8 @@ public abstract class PlayerList {
 
 	public boolean isOp(GameProfile gameProfile) {
 		return this.ops.contains(gameProfile)
-			|| this.server.isSingleplayerOwner(gameProfile) && this.server.getWorldData().getAllowCommands()
-			|| this.allowCheatsForAllPlayers;
+			|| this.server.isSingleplayerOwner(gameProfile) && this.server.getWorldData().isAllowCommands()
+			|| this.allowCommandsForAllPlayers;
 	}
 
 	@Nullable
@@ -754,8 +754,8 @@ public abstract class PlayerList {
 		return null;
 	}
 
-	public void setAllowCheatsForAllPlayers(boolean bl) {
-		this.allowCheatsForAllPlayers = bl;
+	public void setAllowCommandsForAllPlayers(boolean bl) {
+		this.allowCommandsForAllPlayers = bl;
 	}
 
 	public void removeAll() {
@@ -893,7 +893,7 @@ public abstract class PlayerList {
 		}
 	}
 
-	public boolean isAllowCheatsForAllPlayers() {
-		return this.allowCheatsForAllPlayers;
+	public boolean isAllowCommandsForAllPlayers() {
+		return this.allowCommandsForAllPlayers;
 	}
 }

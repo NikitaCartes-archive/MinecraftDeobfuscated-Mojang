@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -31,8 +31,8 @@ public class FlatLevelGeneratorPresets {
 	public static final ResourceKey<FlatLevelGeneratorPreset> REDSTONE_READY = register("redstone_ready");
 	public static final ResourceKey<FlatLevelGeneratorPreset> THE_VOID = register("the_void");
 
-	public static void bootstrap(BootstapContext<FlatLevelGeneratorPreset> bootstapContext) {
-		new FlatLevelGeneratorPresets.Bootstrap(bootstapContext).run();
+	public static void bootstrap(BootstrapContext<FlatLevelGeneratorPreset> bootstrapContext) {
+		new FlatLevelGeneratorPresets.Bootstrap(bootstrapContext).run();
 	}
 
 	private static ResourceKey<FlatLevelGeneratorPreset> register(String string) {
@@ -40,10 +40,10 @@ public class FlatLevelGeneratorPresets {
 	}
 
 	static class Bootstrap {
-		private final BootstapContext<FlatLevelGeneratorPreset> context;
+		private final BootstrapContext<FlatLevelGeneratorPreset> context;
 
-		Bootstrap(BootstapContext<FlatLevelGeneratorPreset> bootstapContext) {
-			this.context = bootstapContext;
+		Bootstrap(BootstrapContext<FlatLevelGeneratorPreset> bootstrapContext) {
+			this.context = bootstrapContext;
 		}
 
 		private void register(

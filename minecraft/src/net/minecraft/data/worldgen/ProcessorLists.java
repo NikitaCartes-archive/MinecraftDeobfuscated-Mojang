@@ -76,22 +76,22 @@ public class ProcessorLists {
 	}
 
 	private static void register(
-		BootstapContext<StructureProcessorList> bootstapContext, ResourceKey<StructureProcessorList> resourceKey, List<StructureProcessor> list
+		BootstrapContext<StructureProcessorList> bootstrapContext, ResourceKey<StructureProcessorList> resourceKey, List<StructureProcessor> list
 	) {
-		bootstapContext.register(resourceKey, new StructureProcessorList(list));
+		bootstrapContext.register(resourceKey, new StructureProcessorList(list));
 	}
 
-	public static void bootstrap(BootstapContext<StructureProcessorList> bootstapContext) {
-		HolderGetter<Block> holderGetter = bootstapContext.lookup(Registries.BLOCK);
+	public static void bootstrap(BootstrapContext<StructureProcessorList> bootstrapContext) {
+		HolderGetter<Block> holderGetter = bootstrapContext.lookup(Registries.BLOCK);
 		ProcessorRule processorRule = new ProcessorRule(
 			new RandomBlockMatchTest(Blocks.BLACKSTONE, 0.01F), AlwaysTrueTest.INSTANCE, Blocks.GILDED_BLACKSTONE.defaultBlockState()
 		);
 		ProcessorRule processorRule2 = new ProcessorRule(
 			new RandomBlockMatchTest(Blocks.GILDED_BLACKSTONE, 0.5F), AlwaysTrueTest.INSTANCE, Blocks.BLACKSTONE.defaultBlockState()
 		);
-		register(bootstapContext, EMPTY, ImmutableList.of());
+		register(bootstrapContext, EMPTY, ImmutableList.of());
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ZOMBIE_PLAINS,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -136,7 +136,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ZOMBIE_SAVANNA,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -178,7 +178,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ZOMBIE_SNOWY,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -219,7 +219,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ZOMBIE_TAIGA,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -261,7 +261,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ZOMBIE_DESERT,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -281,7 +281,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			MOSSIFY_10_PERCENT,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -292,7 +292,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			MOSSIFY_20_PERCENT,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -303,7 +303,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			MOSSIFY_70_PERCENT,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -314,7 +314,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			STREET_PLAINS,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -328,7 +328,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			STREET_SAVANNA,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -342,7 +342,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			STREET_SNOWY_OR_TAIGA,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -357,7 +357,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			FARM_PLAINS,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -370,7 +370,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			FARM_SAVANNA,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -379,7 +379,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			FARM_SNOWY,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -391,7 +391,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			FARM_TAIGA,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -403,7 +403,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			FARM_DESERT,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -414,9 +414,9 @@ public class ProcessorLists {
 				)
 			)
 		);
-		register(bootstapContext, OUTPOST_ROT, ImmutableList.of(new BlockRotProcessor(0.05F)));
+		register(bootstrapContext, OUTPOST_ROT, ImmutableList.of(new BlockRotProcessor(0.05F)));
 		register(
-			bootstapContext,
+			bootstrapContext,
 			BOTTOM_RAMPART,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -436,7 +436,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			TREASURE_ROOMS,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -458,7 +458,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			HOUSING,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -476,7 +476,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			SIDE_WALL_DEGRADATION,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -492,7 +492,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			STABLE_DEGRADATION,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -510,7 +510,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			BASTION_GENERIC_DEGRADATION,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -531,7 +531,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			RAMPART_DEGRADATION,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -556,7 +556,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ENTRANCE_REPLACEMENT,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -572,7 +572,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			BRIDGE,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -588,7 +588,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ROOF,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -605,7 +605,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			HIGH_WALL,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -623,7 +623,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			HIGH_RAMPART,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -639,10 +639,10 @@ public class ProcessorLists {
 				)
 			)
 		);
-		register(bootstapContext, FOSSIL_ROT, ImmutableList.of(new BlockRotProcessor(0.9F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
-		register(bootstapContext, FOSSIL_COAL, ImmutableList.of(new BlockRotProcessor(0.1F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
+		register(bootstrapContext, FOSSIL_ROT, ImmutableList.of(new BlockRotProcessor(0.9F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
+		register(bootstrapContext, FOSSIL_COAL, ImmutableList.of(new BlockRotProcessor(0.1F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
 		register(
-			bootstapContext,
+			bootstrapContext,
 			FOSSIL_DIAMONDS,
 			ImmutableList.of(
 				new BlockRotProcessor(0.1F),
@@ -653,7 +653,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ANCIENT_CITY_START_DEGRADATION,
 			ImmutableList.of(
 				new RuleProcessor(
@@ -667,7 +667,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ANCIENT_CITY_GENERIC_DEGRADATION,
 			ImmutableList.of(
 				new BlockRotProcessor(holderGetter.getOrThrow(BlockTags.ANCIENT_CITY_REPLACEABLE), 0.95F),
@@ -682,7 +682,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			ANCIENT_CITY_WALLS_DEGRADATION,
 			ImmutableList.of(
 				new BlockRotProcessor(holderGetter.getOrThrow(BlockTags.ANCIENT_CITY_REPLACEABLE), 0.95F),
@@ -698,7 +698,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			TRAIL_RUINS_HOUSES_ARCHAEOLOGY,
 			List.of(
 				new RuleProcessor(
@@ -713,7 +713,7 @@ public class ProcessorLists {
 			)
 		);
 		register(
-			bootstapContext,
+			bootstrapContext,
 			TRAIL_RUINS_ROADS_ARCHAEOLOGY,
 			List.of(
 				new RuleProcessor(
@@ -726,7 +726,7 @@ public class ProcessorLists {
 				trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 2)
 			)
 		);
-		register(bootstapContext, TRAIL_RUINS_TOWER_TOP_ARCHAEOLOGY, List.of(trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 2)));
+		register(bootstrapContext, TRAIL_RUINS_TOWER_TOP_ARCHAEOLOGY, List.of(trailsArchyLootProcessor(BuiltInLootTables.TRAIL_RUINS_ARCHAEOLOGY_COMMON, 2)));
 	}
 
 	private static CappedProcessor trailsArchyLootProcessor(ResourceLocation resourceLocation, int i) {

@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
@@ -23,38 +24,38 @@ public record ClientboundLoginPacket(
 	CommonPlayerSpawnInfo commonPlayerSpawnInfo,
 	boolean enforcesSecureChat
 ) implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundLoginPacket> STREAM_CODEC = Packet.codec(
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundLoginPacket> STREAM_CODEC = Packet.codec(
 		ClientboundLoginPacket::write, ClientboundLoginPacket::new
 	);
 
-	private ClientboundLoginPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundLoginPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		this(
-			friendlyByteBuf.readInt(),
-			friendlyByteBuf.readBoolean(),
-			friendlyByteBuf.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBufx -> friendlyByteBufx.readResourceKey(Registries.DIMENSION)),
-			friendlyByteBuf.readVarInt(),
-			friendlyByteBuf.readVarInt(),
-			friendlyByteBuf.readVarInt(),
-			friendlyByteBuf.readBoolean(),
-			friendlyByteBuf.readBoolean(),
-			friendlyByteBuf.readBoolean(),
-			new CommonPlayerSpawnInfo(friendlyByteBuf),
-			friendlyByteBuf.readBoolean()
+			registryFriendlyByteBuf.readInt(),
+			registryFriendlyByteBuf.readBoolean(),
+			registryFriendlyByteBuf.readCollection(Sets::newHashSetWithExpectedSize, friendlyByteBuf -> friendlyByteBuf.readResourceKey(Registries.DIMENSION)),
+			registryFriendlyByteBuf.readVarInt(),
+			registryFriendlyByteBuf.readVarInt(),
+			registryFriendlyByteBuf.readVarInt(),
+			registryFriendlyByteBuf.readBoolean(),
+			registryFriendlyByteBuf.readBoolean(),
+			registryFriendlyByteBuf.readBoolean(),
+			new CommonPlayerSpawnInfo(registryFriendlyByteBuf),
+			registryFriendlyByteBuf.readBoolean()
 		);
 	}
 
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeInt(this.playerId);
-		friendlyByteBuf.writeBoolean(this.hardcore);
-		friendlyByteBuf.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
-		friendlyByteBuf.writeVarInt(this.maxPlayers);
-		friendlyByteBuf.writeVarInt(this.chunkRadius);
-		friendlyByteBuf.writeVarInt(this.simulationDistance);
-		friendlyByteBuf.writeBoolean(this.reducedDebugInfo);
-		friendlyByteBuf.writeBoolean(this.showDeathScreen);
-		friendlyByteBuf.writeBoolean(this.doLimitedCrafting);
-		this.commonPlayerSpawnInfo.write(friendlyByteBuf);
-		friendlyByteBuf.writeBoolean(this.enforcesSecureChat);
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeInt(this.playerId);
+		registryFriendlyByteBuf.writeBoolean(this.hardcore);
+		registryFriendlyByteBuf.writeCollection(this.levels, FriendlyByteBuf::writeResourceKey);
+		registryFriendlyByteBuf.writeVarInt(this.maxPlayers);
+		registryFriendlyByteBuf.writeVarInt(this.chunkRadius);
+		registryFriendlyByteBuf.writeVarInt(this.simulationDistance);
+		registryFriendlyByteBuf.writeBoolean(this.reducedDebugInfo);
+		registryFriendlyByteBuf.writeBoolean(this.showDeathScreen);
+		registryFriendlyByteBuf.writeBoolean(this.doLimitedCrafting);
+		this.commonPlayerSpawnInfo.write(registryFriendlyByteBuf);
+		registryFriendlyByteBuf.writeBoolean(this.enforcesSecureChat);
 	}
 
 	@Override

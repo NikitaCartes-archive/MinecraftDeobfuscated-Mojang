@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.Pools;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -19,14 +19,14 @@ public class PoolAliasBindings {
 	}
 
 	public static void registerTargetsAsPools(
-		BootstapContext<StructureTemplatePool> bootstapContext, Holder<StructureTemplatePool> holder, List<PoolAliasBinding> list
+		BootstrapContext<StructureTemplatePool> bootstrapContext, Holder<StructureTemplatePool> holder, List<PoolAliasBinding> list
 	) {
 		list.stream()
 			.flatMap(PoolAliasBinding::allTargets)
 			.map(resourceKey -> resourceKey.location().getPath())
 			.forEach(
 				string -> Pools.register(
-						bootstapContext,
+						bootstrapContext,
 						string,
 						new StructureTemplatePool(holder, List.of(Pair.of(StructurePoolElement.single(string), 1)), StructureTemplatePool.Projection.RIGID)
 					)

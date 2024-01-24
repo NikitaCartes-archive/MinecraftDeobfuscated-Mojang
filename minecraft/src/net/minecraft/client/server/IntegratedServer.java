@@ -26,6 +26,7 @@ import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ModCheck;
+import net.minecraft.util.debugchart.SampleLogger;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.level.GameType;
@@ -118,9 +119,10 @@ public class IntegratedServer extends MinecraftServer {
 		}
 	}
 
+	@Nullable
 	@Override
-	public void logTickTime(long l) {
-		this.minecraft.getDebugOverlay().logTickDuration(l);
+	public SampleLogger getTickTimeLogger() {
+		return this.minecraft.getDebugOverlay().getTickTimeLogger();
 	}
 
 	private void tickPaused() {
@@ -193,7 +195,7 @@ public class IntegratedServer extends MinecraftServer {
 			this.lanPinger = new LanServerPinger(this.getMotd(), i + "");
 			this.lanPinger.start();
 			this.publishedGameType = gameType;
-			this.getPlayerList().setAllowCheatsForAllPlayers(bl);
+			this.getPlayerList().setAllowCommandsForAllPlayers(bl);
 			int j = this.getProfilePermissions(this.minecraft.player.getGameProfile());
 			this.minecraft.player.setPermissionLevel(j);
 

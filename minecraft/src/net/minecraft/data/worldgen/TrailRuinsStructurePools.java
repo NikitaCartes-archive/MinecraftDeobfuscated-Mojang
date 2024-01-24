@@ -13,14 +13,14 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 public class TrailRuinsStructurePools {
 	public static final ResourceKey<StructureTemplatePool> START = Pools.createKey("trail_ruins/tower");
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<StructureTemplatePool> holderGetter = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<StructureTemplatePool> holderGetter = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder = holderGetter.getOrThrow(Pools.EMPTY);
-		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder2 = holderGetter2.getOrThrow(ProcessorLists.TRAIL_RUINS_HOUSES_ARCHAEOLOGY);
 		Holder<StructureProcessorList> holder3 = holderGetter2.getOrThrow(ProcessorLists.TRAIL_RUINS_ROADS_ARCHAEOLOGY);
 		Holder<StructureProcessorList> holder4 = holderGetter2.getOrThrow(ProcessorLists.TRAIL_RUINS_TOWER_TOP_ARCHAEOLOGY);
-		bootstapContext.register(
+		bootstrapContext.register(
 			START,
 			new StructureTemplatePool(
 				holder,
@@ -35,7 +35,7 @@ public class TrailRuinsStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trail_ruins/tower/tower_top",
 			new StructureTemplatePool(
 				holder,
@@ -50,7 +50,7 @@ public class TrailRuinsStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trail_ruins/tower/additions",
 			new StructureTemplatePool(
 				holder,
@@ -85,7 +85,7 @@ public class TrailRuinsStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trail_ruins/roads",
 			new StructureTemplatePool(
 				holder,
@@ -102,7 +102,7 @@ public class TrailRuinsStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trail_ruins/buildings",
 			new StructureTemplatePool(
 				holder,
@@ -127,7 +127,7 @@ public class TrailRuinsStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trail_ruins/buildings/grouped",
 			new StructureTemplatePool(
 				holder,
@@ -157,7 +157,7 @@ public class TrailRuinsStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trail_ruins/decor",
 			new StructureTemplatePool(
 				holder,

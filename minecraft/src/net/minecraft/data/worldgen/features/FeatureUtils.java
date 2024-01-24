@@ -4,7 +4,7 @@ import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -18,16 +18,16 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConf
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class FeatureUtils {
-	public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
-		AquaticFeatures.bootstrap(bootstapContext);
-		CaveFeatures.bootstrap(bootstapContext);
-		EndFeatures.bootstrap(bootstapContext);
-		MiscOverworldFeatures.bootstrap(bootstapContext);
-		NetherFeatures.bootstrap(bootstapContext);
-		OreFeatures.bootstrap(bootstapContext);
-		PileFeatures.bootstrap(bootstapContext);
-		TreeFeatures.bootstrap(bootstapContext);
-		VegetationFeatures.bootstrap(bootstapContext);
+	public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> bootstrapContext) {
+		AquaticFeatures.bootstrap(bootstrapContext);
+		CaveFeatures.bootstrap(bootstrapContext);
+		EndFeatures.bootstrap(bootstrapContext);
+		MiscOverworldFeatures.bootstrap(bootstrapContext);
+		NetherFeatures.bootstrap(bootstrapContext);
+		OreFeatures.bootstrap(bootstrapContext);
+		PileFeatures.bootstrap(bootstrapContext);
+		TreeFeatures.bootstrap(bootstrapContext);
+		VegetationFeatures.bootstrap(bootstrapContext);
 	}
 
 	private static BlockPredicate simplePatchPredicate(List<Block> list) {
@@ -66,14 +66,14 @@ public class FeatureUtils {
 	}
 
 	public static void register(
-		BootstapContext<ConfiguredFeature<?, ?>> bootstapContext, ResourceKey<ConfiguredFeature<?, ?>> resourceKey, Feature<NoneFeatureConfiguration> feature
+		BootstrapContext<ConfiguredFeature<?, ?>> bootstrapContext, ResourceKey<ConfiguredFeature<?, ?>> resourceKey, Feature<NoneFeatureConfiguration> feature
 	) {
-		register(bootstapContext, resourceKey, feature, FeatureConfiguration.NONE);
+		register(bootstrapContext, resourceKey, feature, FeatureConfiguration.NONE);
 	}
 
 	public static <FC extends FeatureConfiguration, F extends Feature<FC>> void register(
-		BootstapContext<ConfiguredFeature<?, ?>> bootstapContext, ResourceKey<ConfiguredFeature<?, ?>> resourceKey, F feature, FC featureConfiguration
+		BootstrapContext<ConfiguredFeature<?, ?>> bootstrapContext, ResourceKey<ConfiguredFeature<?, ?>> resourceKey, F feature, FC featureConfiguration
 	) {
-		bootstapContext.register(resourceKey, new ConfiguredFeature(feature, featureConfiguration));
+		bootstrapContext.register(resourceKey, new ConfiguredFeature(feature, featureConfiguration));
 	}
 }

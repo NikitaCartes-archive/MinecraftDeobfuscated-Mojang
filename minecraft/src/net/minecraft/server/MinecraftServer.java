@@ -105,6 +105,8 @@ import net.minecraft.util.NativeModuleLister;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.TpsDebugDimensions;
 import net.minecraft.util.profiling.EmptyProfileResults;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -231,6 +233,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	protected final Services services;
 	private long lastServerStatus;
 	private final Thread serverThread;
+	private long lastTickNanos = Util.getNanos();
+	private long taskExecutionStartNanos = Util.getNanos();
+	private long idleTimeNanos;
 	private long nextTickTimeNanos = Util.getNanos();
 	private long delayedTasksMaxNextTickTimeNanos;
 	private boolean mayHaveDelayedTasks;
@@ -690,7 +695,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				this.profiler.popPush("nextTickWait");
 				this.mayHaveDelayedTasks = true;
 				this.delayedTasksMaxNextTickTimeNanos = Math.max(Util.getNanos() + l, this.nextTickTimeNanos);
+				this.startMeasuringTaskExecutionTime();
 				this.waitUntilNextTick();
+				this.finishMeasuringTaskExecutionTime();
 				if (bl) {
 					this.tickRateManager.endTickWork();
 				}
@@ -699,6 +706,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				this.endMetricsRecordingTick();
 				this.isReady = true;
 				JvmProfiler.INSTANCE.onServerTick(this.smoothedTickTimeMillis);
+				this.logFullTickTime();
 			}
 		} catch (Throwable var46) {
 			LOGGER.error("Encountered an unexpected exception", var46);
@@ -725,6 +733,30 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 				this.onServerExit();
 			}
+		}
+	}
+
+	private void logFullTickTime() {
+		SampleLogger sampleLogger = this.getTickTimeLogger();
+		if (sampleLogger != null) {
+			long l = Util.getNanos();
+			sampleLogger.logSample(l - this.lastTickNanos);
+			this.lastTickNanos = l;
+		}
+	}
+
+	private void startMeasuringTaskExecutionTime() {
+		if (this.getTickTimeLogger() != null) {
+			this.taskExecutionStartNanos = Util.getNanos();
+			this.idleTimeNanos = 0L;
+		}
+	}
+
+	private void finishMeasuringTaskExecutionTime() {
+		SampleLogger sampleLogger = this.getTickTimeLogger();
+		if (sampleLogger != null) {
+			sampleLogger.logPartialSample(Util.getNanos() - this.taskExecutionStartNanos - this.idleTimeNanos, TpsDebugDimensions.SCHEDULED_TASKS.ordinal());
+			sampleLogger.logPartialSample(this.idleTimeNanos, TpsDebugDimensions.IDLE.ordinal());
 		}
 	}
 
@@ -757,6 +789,16 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	protected void waitUntilNextTick() {
 		this.runAllTasks();
 		this.managedBlock(() -> !this.haveTime());
+	}
+
+	@Override
+	public void waitForTasks() {
+		boolean bl = this.getTickTimeLogger() != null;
+		long l = bl ? Util.getNanos() : 0L;
+		super.waitForTasks();
+		if (bl) {
+			this.idleTimeNanos += Util.getNanos() - l;
+		}
 	}
 
 	protected TickTask wrapRunnable(Runnable runnable) {
@@ -859,9 +901,15 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.aggregatedTickTimesNanos += m;
 		this.tickTimesNanos[i] = m;
 		this.smoothedTickTimeMillis = this.smoothedTickTimeMillis * 0.8F + (float)m / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND * 0.19999999F;
-		long n = Util.getNanos();
-		this.logTickTime(n - l);
+		this.logTickMethodTime(l);
 		this.profiler.pop();
+	}
+
+	private void logTickMethodTime(long l) {
+		SampleLogger sampleLogger = this.getTickTimeLogger();
+		if (sampleLogger != null) {
+			sampleLogger.logPartialSample(Util.getNanos() - l, TpsDebugDimensions.TICK_SERVER_METHOD.ordinal());
+		}
 	}
 
 	private int computeNextAutosaveInterval() {
@@ -884,7 +932,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	protected void logTickTime(long l) {
+	@Nullable
+	protected SampleLogger getTickTimeLogger() {
+		return null;
 	}
 
 	private ServerStatus buildServerStatus() {
@@ -1598,7 +1648,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			} else if (this.isSingleplayerOwner(gameProfile)) {
 				return 4;
 			} else if (this.isSingleplayer()) {
-				return this.getPlayerList().isAllowCheatsForAllPlayers() ? 4 : 0;
+				return this.getPlayerList().isAllowCommandsForAllPlayers() ? 4 : 0;
 			} else {
 				return this.getOperatorUserPermissionLevel();
 			}

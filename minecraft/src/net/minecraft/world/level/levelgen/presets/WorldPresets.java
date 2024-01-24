@@ -7,7 +7,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -39,8 +39,8 @@ public class WorldPresets {
 	public static final ResourceKey<WorldPreset> SINGLE_BIOME_SURFACE = register("single_biome_surface");
 	public static final ResourceKey<WorldPreset> DEBUG = register("debug_all_block_states");
 
-	public static void bootstrap(BootstapContext<WorldPreset> bootstapContext) {
-		new WorldPresets.Bootstrap(bootstapContext).bootstrap();
+	public static void bootstrap(BootstrapContext<WorldPreset> bootstrapContext) {
+		new WorldPresets.Bootstrap(bootstrapContext).bootstrap();
 	}
 
 	private static ResourceKey<WorldPreset> register(String string) {
@@ -67,7 +67,7 @@ public class WorldPresets {
 	}
 
 	static class Bootstrap {
-		private final BootstapContext<WorldPreset> context;
+		private final BootstrapContext<WorldPreset> context;
 		private final HolderGetter<NoiseGeneratorSettings> noiseSettings;
 		private final HolderGetter<Biome> biomes;
 		private final HolderGetter<PlacedFeature> placedFeatures;
@@ -77,14 +77,14 @@ public class WorldPresets {
 		private final LevelStem netherStem;
 		private final LevelStem endStem;
 
-		Bootstrap(BootstapContext<WorldPreset> bootstapContext) {
-			this.context = bootstapContext;
-			HolderGetter<DimensionType> holderGetter = bootstapContext.lookup(Registries.DIMENSION_TYPE);
-			this.noiseSettings = bootstapContext.lookup(Registries.NOISE_SETTINGS);
-			this.biomes = bootstapContext.lookup(Registries.BIOME);
-			this.placedFeatures = bootstapContext.lookup(Registries.PLACED_FEATURE);
-			this.structureSets = bootstapContext.lookup(Registries.STRUCTURE_SET);
-			this.multiNoiseBiomeSourceParameterLists = bootstapContext.lookup(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+		Bootstrap(BootstrapContext<WorldPreset> bootstrapContext) {
+			this.context = bootstrapContext;
+			HolderGetter<DimensionType> holderGetter = bootstrapContext.lookup(Registries.DIMENSION_TYPE);
+			this.noiseSettings = bootstrapContext.lookup(Registries.NOISE_SETTINGS);
+			this.biomes = bootstrapContext.lookup(Registries.BIOME);
+			this.placedFeatures = bootstrapContext.lookup(Registries.PLACED_FEATURE);
+			this.structureSets = bootstrapContext.lookup(Registries.STRUCTURE_SET);
+			this.multiNoiseBiomeSourceParameterLists = bootstrapContext.lookup(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
 			this.overworldDimensionType = holderGetter.getOrThrow(BuiltinDimensionTypes.OVERWORLD);
 			Holder<DimensionType> holder = holderGetter.getOrThrow(BuiltinDimensionTypes.NETHER);
 			Holder<NoiseGeneratorSettings> holder2 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.NETHER);

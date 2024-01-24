@@ -10,16 +10,16 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
 public class BastionBridgePools {
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<StructureProcessorList> holderGetter = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder = holderGetter.getOrThrow(ProcessorLists.ENTRANCE_REPLACEMENT);
 		Holder<StructureProcessorList> holder2 = holderGetter.getOrThrow(ProcessorLists.BASTION_GENERIC_DEGRADATION);
 		Holder<StructureProcessorList> holder3 = holderGetter.getOrThrow(ProcessorLists.BRIDGE);
 		Holder<StructureProcessorList> holder4 = holderGetter.getOrThrow(ProcessorLists.RAMPART_DEGRADATION);
-		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+		HolderGetter<StructureTemplatePool> holderGetter2 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder5 = holderGetter2.getOrThrow(Pools.EMPTY);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/bridge/starting_pieces",
 			new StructureTemplatePool(
 				holder5,
@@ -31,14 +31,14 @@ public class BastionBridgePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/bridge/bridge_pieces",
 			new StructureTemplatePool(
 				holder5, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/bridge/bridge_pieces/bridge", holder3), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/bridge/legs",
 			new StructureTemplatePool(
 				holder5,
@@ -50,7 +50,7 @@ public class BastionBridgePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/bridge/walls",
 			new StructureTemplatePool(
 				holder5,
@@ -62,7 +62,7 @@ public class BastionBridgePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/bridge/ramparts",
 			new StructureTemplatePool(
 				holder5,
@@ -74,7 +74,7 @@ public class BastionBridgePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/bridge/rampart_plates",
 			new StructureTemplatePool(
 				holder5,
@@ -83,7 +83,7 @@ public class BastionBridgePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/bridge/connectors",
 			new StructureTemplatePool(
 				holder5,

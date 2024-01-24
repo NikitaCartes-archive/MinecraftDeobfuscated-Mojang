@@ -130,7 +130,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 		}
 	}
 
-	protected void waitForTasks() {
+	public void waitForTasks() {
 		Thread.yield();
 		LockSupport.parkNanos("waiting for tasks", 100000L);
 	}

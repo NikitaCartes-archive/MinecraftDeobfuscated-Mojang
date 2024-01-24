@@ -33,6 +33,7 @@ public class RegionFile implements AutoCloseable {
 	private static final int EXTERNAL_STREAM_FLAG = 128;
 	private static final int EXTERNAL_CHUNK_THRESHOLD = 256;
 	private static final int CHUNK_NOT_PRESENT = 0;
+	private final Path path;
 	private final FileChannel file;
 	private final Path externalFileDir;
 	final RegionFileVersion version;
@@ -43,10 +44,11 @@ public class RegionFile implements AutoCloseable {
 	protected final RegionBitmap usedSectors = new RegionBitmap();
 
 	public RegionFile(Path path, Path path2, boolean bl) throws IOException {
-		this(path, path2, RegionFileVersion.VERSION_DEFLATE, bl);
+		this(path, path2, RegionFileVersion.getSelected(), bl);
 	}
 
 	public RegionFile(Path path, Path path2, RegionFileVersion regionFileVersion, boolean bl) throws IOException {
+		this.path = path;
 		this.version = regionFileVersion;
 		if (!Files.isDirectory(path2, new LinkOption[0])) {
 			throw new IllegalArgumentException("Expected directory, got " + path2.toAbsolutePath());
@@ -93,6 +95,10 @@ public class RegionFile implements AutoCloseable {
 				}
 			}
 		}
+	}
+
+	public Path getPath() {
+		return this.path;
 	}
 
 	private Path getExternalChunkPath(ChunkPos chunkPos) {

@@ -33,7 +33,7 @@ public class PacketEncoder<T extends PacketListener> extends MessageToByteEncode
 
 			JvmProfiler.INSTANCE.onPacketSent(this.protocolInfo.id(), packetType, channelHandlerContext.channel().remoteAddress(), j);
 		} catch (Throwable var10) {
-			LOGGER.error("Error receiving packet {}", packetType, var10);
+			LOGGER.error("Error sending packet {}", packetType, var10);
 			if (packet.isSkippable()) {
 				throw new SkipPacketException(var10);
 			}

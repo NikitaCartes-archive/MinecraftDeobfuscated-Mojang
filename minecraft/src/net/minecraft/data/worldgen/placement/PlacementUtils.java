@@ -4,7 +4,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.SimpleWeightedRandomList;
@@ -37,16 +37,16 @@ public class PlacementUtils {
 	public static final PlacementModifier RANGE_4_4 = HeightRangePlacement.uniform(VerticalAnchor.aboveBottom(4), VerticalAnchor.belowTop(4));
 	public static final PlacementModifier RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT = HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(256));
 
-	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-		AquaticPlacements.bootstrap(bootstapContext);
-		CavePlacements.bootstrap(bootstapContext);
-		EndPlacements.bootstrap(bootstapContext);
-		MiscOverworldPlacements.bootstrap(bootstapContext);
-		NetherPlacements.bootstrap(bootstapContext);
-		OrePlacements.bootstrap(bootstapContext);
-		TreePlacements.bootstrap(bootstapContext);
-		VegetationPlacements.bootstrap(bootstapContext);
-		VillagePlacements.bootstrap(bootstapContext);
+	public static void bootstrap(BootstrapContext<PlacedFeature> bootstrapContext) {
+		AquaticPlacements.bootstrap(bootstrapContext);
+		CavePlacements.bootstrap(bootstrapContext);
+		EndPlacements.bootstrap(bootstrapContext);
+		MiscOverworldPlacements.bootstrap(bootstrapContext);
+		NetherPlacements.bootstrap(bootstrapContext);
+		OrePlacements.bootstrap(bootstrapContext);
+		TreePlacements.bootstrap(bootstrapContext);
+		VegetationPlacements.bootstrap(bootstrapContext);
+		VillagePlacements.bootstrap(bootstrapContext);
 	}
 
 	public static ResourceKey<PlacedFeature> createKey(String string) {
@@ -54,18 +54,21 @@ public class PlacementUtils {
 	}
 
 	public static void register(
-		BootstapContext<PlacedFeature> bootstapContext, ResourceKey<PlacedFeature> resourceKey, Holder<ConfiguredFeature<?, ?>> holder, List<PlacementModifier> list
+		BootstrapContext<PlacedFeature> bootstrapContext,
+		ResourceKey<PlacedFeature> resourceKey,
+		Holder<ConfiguredFeature<?, ?>> holder,
+		List<PlacementModifier> list
 	) {
-		bootstapContext.register(resourceKey, new PlacedFeature(holder, List.copyOf(list)));
+		bootstrapContext.register(resourceKey, new PlacedFeature(holder, List.copyOf(list)));
 	}
 
 	public static void register(
-		BootstapContext<PlacedFeature> bootstapContext,
+		BootstrapContext<PlacedFeature> bootstrapContext,
 		ResourceKey<PlacedFeature> resourceKey,
 		Holder<ConfiguredFeature<?, ?>> holder,
 		PlacementModifier... placementModifiers
 	) {
-		register(bootstapContext, resourceKey, holder, List.of(placementModifiers));
+		register(bootstrapContext, resourceKey, holder, List.of(placementModifiers));
 	}
 
 	public static PlacementModifier countExtra(int i, float f, int j) {

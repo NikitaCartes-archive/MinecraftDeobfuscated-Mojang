@@ -5,7 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.ConstantInt;
@@ -49,8 +49,8 @@ public class MiscOverworldPlacements {
 	public static final ResourceKey<PlacedFeature> SPRING_LAVA_FROZEN = PlacementUtils.createKey("spring_lava_frozen");
 	public static final ResourceKey<PlacedFeature> SPRING_WATER = PlacementUtils.createKey("spring_water");
 
-	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
+	public static void bootstrap(BootstrapContext<PlacedFeature> bootstrapContext) {
+		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstrapContext.lookup(Registries.CONFIGURED_FEATURE);
 		Holder<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(MiscOverworldFeatures.ICE_SPIKE);
 		Holder<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(MiscOverworldFeatures.ICE_PATCH);
 		Holder<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(MiscOverworldFeatures.FOREST_ROCK);
@@ -68,9 +68,9 @@ public class MiscOverworldPlacements {
 		Holder<ConfiguredFeature<?, ?>> holder15 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_LAVA_OVERWORLD);
 		Holder<ConfiguredFeature<?, ?>> holder16 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_LAVA_FROZEN);
 		Holder<ConfiguredFeature<?, ?>> holder17 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_WATER);
-		PlacementUtils.register(bootstapContext, ICE_SPIKE, holder, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, ICE_SPIKE, holder, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ICE_PATCH,
 			holder2,
 			CountPlacement.of(2),
@@ -81,12 +81,12 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext, FOREST_ROCK, holder3, CountPlacement.of(2), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, FOREST_ROCK, holder3, CountPlacement.of(2), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstapContext, ICEBERG_BLUE, holder5, RarityFilter.onAverageOnceEvery(200), InSquarePlacement.spread(), BiomeFilter.biome());
-		PlacementUtils.register(bootstapContext, ICEBERG_PACKED, holder4, RarityFilter.onAverageOnceEvery(16), InSquarePlacement.spread(), BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, ICEBERG_BLUE, holder5, RarityFilter.onAverageOnceEvery(200), InSquarePlacement.spread(), BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, ICEBERG_PACKED, holder4, RarityFilter.onAverageOnceEvery(16), InSquarePlacement.spread(), BiomeFilter.biome());
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			BLUE_ICE,
 			holder6,
 			CountPlacement.of(UniformInt.of(0, 19)),
@@ -95,7 +95,7 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			LAKE_LAVA_UNDERGROUND,
 			holder7,
 			RarityFilter.onAverageOnceEvery(9),
@@ -108,7 +108,7 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			LAKE_LAVA_SURFACE,
 			holder7,
 			RarityFilter.onAverageOnceEvery(200),
@@ -117,7 +117,7 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			DISK_CLAY,
 			holder8,
 			InSquarePlacement.spread(),
@@ -126,7 +126,7 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			DISK_GRAVEL,
 			holder9,
 			InSquarePlacement.spread(),
@@ -135,7 +135,7 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			DISK_SAND,
 			holder10,
 			CountPlacement.of(3),
@@ -145,7 +145,7 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			DISK_GRASS,
 			holder11,
 			CountPlacement.of(1),
@@ -155,13 +155,13 @@ public class MiscOverworldPlacements {
 			BlockPredicateFilter.forPredicate(BlockPredicate.matchesBlocks(Blocks.MUD)),
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstapContext, FREEZE_TOP_LAYER, holder12, BiomeFilter.biome());
-		PlacementUtils.register(bootstapContext, VOID_START_PLATFORM, holder13, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, FREEZE_TOP_LAYER, holder12, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, VOID_START_PLATFORM, holder13, BiomeFilter.biome());
 		PlacementUtils.register(
-			bootstapContext, DESERT_WELL, holder14, RarityFilter.onAverageOnceEvery(1000), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, DESERT_WELL, holder14, RarityFilter.onAverageOnceEvery(1000), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SPRING_LAVA,
 			holder15,
 			CountPlacement.of(20),
@@ -170,7 +170,7 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SPRING_LAVA_FROZEN,
 			holder16,
 			CountPlacement.of(20),
@@ -179,7 +179,7 @@ public class MiscOverworldPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SPRING_WATER,
 			holder17,
 			CountPlacement.of(25),

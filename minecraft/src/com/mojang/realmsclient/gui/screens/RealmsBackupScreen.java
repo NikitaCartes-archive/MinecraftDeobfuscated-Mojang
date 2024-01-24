@@ -95,7 +95,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width - 100, this.height - 35, 85, 20).build()
 		);
 		this.backupObjectSelectionList = this.addRenderableWidget(new RealmsBackupScreen.BackupObjectSelectionList());
-		this.magicalSpecialHackyFocus(this.backupObjectSelectionList);
 		this.updateButtonStates();
 	}
 

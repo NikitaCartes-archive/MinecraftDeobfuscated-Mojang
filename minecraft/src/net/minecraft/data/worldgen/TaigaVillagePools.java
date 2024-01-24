@@ -16,22 +16,22 @@ public class TaigaVillagePools {
 	public static final ResourceKey<StructureTemplatePool> START = Pools.createKey("village/taiga/town_centers");
 	private static final ResourceKey<StructureTemplatePool> TERMINATORS_KEY = Pools.createKey("village/taiga/terminators");
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<PlacedFeature> holderGetter = bootstrapContext.lookup(Registries.PLACED_FEATURE);
 		Holder<PlacedFeature> holder = holderGetter.getOrThrow(VillagePlacements.SPRUCE_VILLAGE);
 		Holder<PlacedFeature> holder2 = holderGetter.getOrThrow(VillagePlacements.PINE_VILLAGE);
 		Holder<PlacedFeature> holder3 = holderGetter.getOrThrow(VillagePlacements.PILE_PUMPKIN_VILLAGE);
 		Holder<PlacedFeature> holder4 = holderGetter.getOrThrow(VillagePlacements.PATCH_TAIGA_GRASS_VILLAGE);
 		Holder<PlacedFeature> holder5 = holderGetter.getOrThrow(VillagePlacements.PATCH_BERRY_BUSH_VILLAGE);
-		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder6 = holderGetter2.getOrThrow(ProcessorLists.MOSSIFY_10_PERCENT);
 		Holder<StructureProcessorList> holder7 = holderGetter2.getOrThrow(ProcessorLists.ZOMBIE_TAIGA);
 		Holder<StructureProcessorList> holder8 = holderGetter2.getOrThrow(ProcessorLists.STREET_SNOWY_OR_TAIGA);
 		Holder<StructureProcessorList> holder9 = holderGetter2.getOrThrow(ProcessorLists.FARM_TAIGA);
-		HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+		HolderGetter<StructureTemplatePool> holderGetter3 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder10 = holderGetter3.getOrThrow(Pools.EMPTY);
 		Holder<StructureTemplatePool> holder11 = holderGetter3.getOrThrow(TERMINATORS_KEY);
-		bootstapContext.register(
+		bootstrapContext.register(
 			START,
 			new StructureTemplatePool(
 				holder10,
@@ -45,7 +45,7 @@ public class TaigaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/taiga/streets",
 			new StructureTemplatePool(
 				holder11,
@@ -71,7 +71,7 @@ public class TaigaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/taiga/zombie/streets",
 			new StructureTemplatePool(
 				holder11,
@@ -97,7 +97,7 @@ public class TaigaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/taiga/houses",
 			new StructureTemplatePool(
 				holder11,
@@ -135,7 +135,7 @@ public class TaigaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/taiga/zombie/houses",
 			new StructureTemplatePool(
 				holder11,
@@ -171,7 +171,7 @@ public class TaigaVillagePools {
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			TERMINATORS_KEY,
 			new StructureTemplatePool(
 				holder10,
@@ -185,7 +185,7 @@ public class TaigaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/taiga/decor",
 			new StructureTemplatePool(
 				holder10,
@@ -208,7 +208,7 @@ public class TaigaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/taiga/zombie/decor",
 			new StructureTemplatePool(
 				holder10,
@@ -228,7 +228,7 @@ public class TaigaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/taiga/villagers",
 			new StructureTemplatePool(
 				holder10,
@@ -241,7 +241,7 @@ public class TaigaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/taiga/zombie/villagers",
 			new StructureTemplatePool(
 				holder10,
